@@ -1,5 +1,3 @@
-#Checked
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -48,7 +46,6 @@
     function = 'u_source'
   [../]
 
-#Potential Equations
   [./v_diffusion]
     type = FVDiffusion
     variable = v

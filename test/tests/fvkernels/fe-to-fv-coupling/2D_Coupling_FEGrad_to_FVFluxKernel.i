@@ -1,5 +1,3 @@
-#Checked
-
 [GlobalParams]
   advected_interp_method = average
 []
@@ -42,7 +40,6 @@
     type = FVCoupledAdvection
     variable = u
     v = v
-    #advected_interp_method = average
   []
   [u_source]
     type = FVBodyForce
@@ -52,7 +49,6 @@
 []
 
 [Kernels]
-  #Potential Equations
   [u_diffusion]
     type = Diffusion
     variable = v
