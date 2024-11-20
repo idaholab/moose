@@ -34,7 +34,7 @@ FVCoupledAdvection::FVCoupledAdvection(const InputParameters & params)
 
     // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
     // is liable to change upon wind-direction change. Consequently we need to tell our problem that
-    // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memoryß
+    // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
     getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
         ->setErrorOnJacobianNonzeroReallocation(false);
   }
