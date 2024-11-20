@@ -1,16 +1,16 @@
 #!/bin/bash
 set -eux
 
-function do_build(){
-    # shellcheck disable=SC1072  # shellcheck can't parse things we plan on templating
-    # shellcheck disable=SC1073  # shellcheck can't parse things we plan on templating
-    # shellcheck disable=SC1009  # shellcheck can't parse things we plan on templating
-    export APPLICATION=<APPLICATION>
-    export MOOSE_JOBS=<MOOSE_JOBS>
-    export SKIP_DOCS=<SKIP_DOCS>
-    export MOOSE_OPTIONS=<MOOSE_OPTIONS>
-    export INSTALL_DIR="${PREFIX:?}/${APPLICATION:?}"
+# shellcheck disable=SC1073
+# shellcheck disable=SC1009
+# shellcheck disable=SC1072  # these values are templated
+export APPLICATION=<APPLICATION>
+export MOOSE_JOBS=<MOOSE_JOBS>
+export SKIP_DOCS=<SKIP_DOCS>
+export MOOSE_OPTIONS=<MOOSE_OPTIONS>
+export INSTALL_DIR="${PREFIX:?}/${APPLICATION:?}"
 
+function do_build(){
     rm -rf "${INSTALL_DIR:?}"
 
     export EXTERNAL_FLAGS="-Wl,-headerpad_max_install_names"
