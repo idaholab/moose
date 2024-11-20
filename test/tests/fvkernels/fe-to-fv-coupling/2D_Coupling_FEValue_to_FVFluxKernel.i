@@ -1,5 +1,3 @@
-#Checked
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -47,7 +45,6 @@
 []
 
 [Kernels]
-  #Potential Equations
   [u_diffusion]
     type = Diffusion
     variable = v

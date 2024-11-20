@@ -1,5 +1,3 @@
-#Checked
-
 [GlobalParams]
   advected_interp_method = average
 []
@@ -45,7 +43,6 @@
     type = FVCoupledAdvection
     variable = u
     v = v
-    #advected_interp_method = average
   []
   [u_source]
     type = FVBodyForce
@@ -62,34 +59,6 @@
     type = FVBodyForce
     variable = v
     function = 'v_source'
-  []
-[]
-
-[AuxVariables]
-  [u_sol]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
-  []
-
-  [v_sol]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
-  []
-[]
-
-[AuxKernels]
-  [u_sol]
-    type = FunctionAux
-    variable = u_sol
-    function = u_fun
-  []
-
-  [v_sol]
-    type = FunctionAux
-    variable = v_sol
-    function = v_fun
   []
 []
 

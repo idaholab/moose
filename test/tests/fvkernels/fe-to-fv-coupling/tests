@@ -1,26 +1,105 @@
 [Tests]
+  design = 'fv_design.md'
+  issues = '#15062'
   [Coupling-FE-Value-to-FVElementKernel]
     type = Exodiff
     input = '2D_Coupling_FEValue_to_FVElementKernel.i'
     exodiff = '2D_Coupling_FEValue_to_FVElementKernel_out.e'
-    requirement = 'The system shall be able to solve a diffusion problem with a FE value coupled to a FVElementKernel and display second order convergence.'
+    requirement = 'The system shall be able to solve a diffusion problem with a FE value coupled to a FVElementKernel.'
   []
+  [Coupling-FE-Value-to-FVElementKernel-Convergence-CSV]
+    type = CSVDiff
+    command = FEValue_to_FVElementKernel_Converg.py
+    csvdiff = 'FEValue-to-FVElementKernel.csv'
+    requirement = 'The system shall be able to display second order convergence when a FE value is coupled to a FVElementKernel.'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+  []
+
   [Coupling-FE-Gradient-to-FVElementKernel]
     type = Exodiff
     input = '2D_Coupling_FEGrad_to_FVElementKernel.i'
     exodiff = '2D_Coupling_FEGrad_to_FVElementKernel_out.e'
-    requirement = 'The system shall be able to solve a diffusion problem with a FE gradient coupled to a FVElementKernel and display second order convergence.'
+    requirement = 'The system shall be able to solve a diffusion problem with a FE gradient coupled to a FVElementKernel.'
   []
+  [Coupling-FE-Gradient-to-FVElementKernel-Convergence-CSV]
+    type = CSVDiff
+    command = FEGrad_to_FVElementKernel_Converg.py
+    csvdiff = 'FEGrad-to-FVElementKernel.csv'
+    requirement = 'The system shall be able to display second order convergence when a FE gradient is coupled to a FVElementKernel.'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+  []
+
   [Coupling-FE-Value-to-FVFluxKernel]
     type = Exodiff
     input = '2D_Coupling_FEValue_to_FVFluxKernel.i'
     exodiff = '2D_Coupling_FEValue_to_FVFluxKernel_out.e'
-    requirement = 'The system shall be able to solve a modifed-diffusion problem with a FE value coupled to a FVFluxKernel and display second order convergence.'
+    requirement = 'The system shall be able to solve a modifed-diffusion problem with a FE value coupled to a FVFluxKernel.'
   []
+  [Coupling-FE-Value-to-FVFluxKernel-Convergence-CSV]
+    type = CSVDiff
+    command = FEValue_to_FVFluxKernel_Converg.py
+    csvdiff = 'FEValue-to-FVFluxKernel.csv'
+    requirement = 'The system shall be able to display second order convergence when a FE value is coupled to a FVFluxKernel.'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+  []
+
   [Coupling-FE-Gradient-to-FVFluxKernel]
     type = Exodiff
     input = '2D_Coupling_FEGrad_to_FVFluxKernel.i'
     exodiff = '2D_Coupling_FEGrad_to_FVFluxKernel_out.e'
-    requirement = 'The system shall be able to solve an advection-diffusion problem with a FE gradient coupled to a FVFluxKernel and display second order convergence.'
+    requirement = 'The system shall be able to solve an advection-diffusion problem with a FE gradient coupled to a FVFluxKernel.'
+  []
+  [Coupling-FE-Gradient-to-FVFluxKernel-Convergence-CSV]
+    type = CSVDiff
+    command = FEGrad_to_FVFluxKernel_Converg.py
+    csvdiff = 'FEGrad-to-FVFluxKernel.csv'
+    requirement = 'The system shall be able to display second order convergence when a FE gradient is coupled to a FVFluxKernel.'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+  []
+
+  [Coupling-FV-Gradient-to-FVElementKernel]
+    type = Exodiff
+    input = '2D_Coupling_FVGrad_to_FVElementKernel.i'
+    exodiff = '2D_Coupling_FVGrad_to_FVElementKernel_out.e'
+    requirement = 'The system shall be able to solve a diffusion problem with a FV gradient coupled to a FVElementKernel.'
+  []
+  [Coupling-FV-Gradient-to-FVElementKernel-Convergence-CSV]
+    type = CSVDiff
+    command = FVGrad_to_FVElementKernel_Converg.py
+    csvdiff = 'FVGrad-to-FVElementKernel.csv'
+    requirement = 'The system shall be able to display second order convergence when a FV gradient is coupled to a FVElementKernel.'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+  []
+
+  [Coupling-FV-Gradient-to-FVFluxKernel]
+    type = Exodiff
+    input = '2D_Coupling_FVGrad_to_FVFluxKernel.i'
+    exodiff = '2D_Coupling_FVGrad_to_FVFluxKernel_out.e'
+    requirement = 'The system shall be able to solve an advection-diffusion problem with a FV gradient coupled to a FVFluxKernel.'
+  []
+  [Coupling-FV-Gradient-to-FVFluxKernel-Convergence-CSV]
+    type = CSVDiff
+    command = FVGrad_to_FVFluxKernel_Converg.py
+    csvdiff = 'FVGrad-to-FVFluxKernel.csv'
+    requirement = 'The system shall be able to display second order convergence when a FV gradient is coupled to a FVFluxKernel.'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
   []
 []
