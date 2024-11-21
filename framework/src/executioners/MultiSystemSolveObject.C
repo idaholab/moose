@@ -31,9 +31,9 @@ MultiSystemSolveObject::MultiSystemSolveObject(Executioner & ex) : SolveObject(e
   if (!isParamValid("system_names"))
   {
     for (const auto & sys_name : nl_sys_names)
-      _systems.push_back(&_problem.getSolverSystem(_problem.nlSysNum(sys_name)));
+      _systems.push_back(&_problem.getSolverSystem(_problem.solverSysNum(sys_name)));
     for (const auto & sys_name : linear_sys_names)
-      _systems.push_back(&_problem.getSolverSystem(_problem.nlSysNum(sys_name)));
+      _systems.push_back(&_problem.getSolverSystem(_problem.solverSysNum(sys_name)));
     _num_nl_systems = nl_sys_names.size();
   }
   else
@@ -44,12 +44,12 @@ MultiSystemSolveObject::MultiSystemSolveObject(Executioner & ex) : SolveObject(e
     {
       if (std::find(nl_sys_names.begin(), nl_sys_names.end(), sys_name) != nl_sys_names.end())
       {
-        _systems.push_back(&_problem.getSolverSystem(_problem.nlSysNum(sys_name)));
+        _systems.push_back(&_problem.getSolverSystem(_problem.solverSysNum(sys_name)));
         _num_nl_systems++;
       }
       else if (std::find(linear_sys_names.begin(), linear_sys_names.end(), sys_name) !=
                linear_sys_names.end())
-        _systems.push_back(&_problem.getSolverSystem(_problem.nlSysNum(sys_name)));
+        _systems.push_back(&_problem.getSolverSystem(_problem.solverSysNum(sys_name)));
       else
         paramError("system_names",
                    "System '" + sys_name +

@@ -404,7 +404,7 @@ FEProblemSolve::solve()
         if (is_nonlinear)
           _problem.solve(sys->number());
         else
-          _problem.solveLinearSystem(sys->number());
+          _problem.solveLinearSystem(sys->number() - _problem.numNonlinearSystems());
 
         // Check convergence
         const auto solve_name =

@@ -14,7 +14,7 @@ such as [Steady](executioners/Steady.md) and [Transient](executioners/Transient.
 If using multiple nonlinear systems, the default behavior of the `FEProblemSolve` will be to solve them one by one,
 in the order that they were specified, without iterating between systems.
 
-If the [!param](/Executioner/Steady/multi_system_fixed_point) parameter is set to true, this solve will iterated.
+If the [!param](/Executioner/Steady/multi_system_fixed_point) parameter is set to true, this solve will be iterated.
 The user must pass a convergence object to the [!param](/Executioner/Steady/multi_system_fixed_point_convergence)
 to let the `FEProblemSolve` know when to terminate the fixed point loop.
 
