@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADMatWaveEquation.h"
+#include "ADMatWaveReaction.h"
 #include "ElectromagneticEnums.h"
 #include "ElectromagneticConstants.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", ADMatWaveEquation);
+registerMooseObject("ElectromagneticsApp", ADMatWaveReaction);
 
 InputParameters
-ADMatWaveEquation::validParams()
+ADMatWaveReaction::validParams()
 {
   InputParameters params = ADVectorKernel::validParams();
   params.addClassDescription(
@@ -39,7 +39,7 @@ ADMatWaveEquation::validParams()
   return params;
 }
 
-ADMatWaveEquation::ADMatWaveEquation(const InputParameters & parameters)
+ADMatWaveReaction::ADMatWaveReaction(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _E_real(adCoupledVectorValue("E_real")),
     _E_imag(adCoupledVectorValue("E_imag")),
@@ -52,7 +52,7 @@ ADMatWaveEquation::ADMatWaveEquation(const InputParameters & parameters)
 }
 
 ADReal
-ADMatWaveEquation::computeQpResidual()
+ADMatWaveReaction::computeQpResidual()
 {
   // TODO: In the future, need to add an AD capability to std::complex
   if (_component == EM::REAL)

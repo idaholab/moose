@@ -1,11 +1,11 @@
-# ADMatWaveEquation
+# ADMatWaveReaction
 
-!syntax description /Kernels/ADMatWaveEquation
+!syntax description /Kernels/ADMatWaveReaction
 
 ## Overview
 
 !style halign=left
-The ADMatWaveEquation object implements a displacement current source term to the electric field Helmholtz wave equation. The term is defined as:
+The ADMatWaveReaction object implements a displacement current source term to the electric field Helmholtz wave equation. The term is defined as:
 
 \begin{equation}
   -\omega^{2} \; \mu \; \varepsilon \; \vec{E}
@@ -25,8 +25,8 @@ Note that $\omega^{2} \; \mu \; \varepsilon$ is provided via the Materials block
 
 !listing vector_ADmaterial_wave_equation.i block=Kernels/coeff_real
 
-!syntax parameters /Kernels/ADMatWaveEquation
+!syntax parameters /Kernels/ADMatWaveReaction
 
-!syntax inputs /Kernels/ADMatWaveEquation
+!syntax inputs /Kernels/ADMatWaveReaction
 
-!syntax children /Kernels/ADMatWaveEquation
+!syntax children /Kernels/ADMatWaveReaction

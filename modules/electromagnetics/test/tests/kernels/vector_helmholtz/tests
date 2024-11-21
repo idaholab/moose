@@ -16,20 +16,20 @@
     issues = '#21080'
   []
 
-  [vector_ADmaterial_wave_equation]
+  [vector_ADmaterial_wave_reaction]
     type = 'Exodiff'
-    input = 'vector_ADmaterial_wave_equation.i'
-    exodiff = 'vector_ADmaterial_wave_equation_out.e'
+    input = 'vector_ADmaterial_wave_reaction.i'
+    exodiff = 'vector_ADmaterial_wave_reaction_out.e'
     requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
-    design = 'ADMatWaveEquation.md'
+    design = 'ADMatWaveReaction.md'
     issues = '#28758'
   []
-  [vector_ADmaterial_wave_equation_csv]
+  [vector_ADmaterial_wave_reaction_csv]
     type = CSVDiff
-    command = 'vector_ADmaterial_wave_equation_convergence.py'
-    csvdiff = 'vector_ADmaterial_wave_equation_convergence.csv'
+    command = 'vector_ADmaterial_wave_reaction_convergence.py'
+    csvdiff = 'vector_ADmaterial_wave_reaction_convergence.csv'
     requirement = 'The system shall be able to perform a convergence analysis for modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
-    design = 'ADMatWaveEquation.md'
+    design = 'ADMatWaveReaction.md'
     issues = '#28758'
     heavy = True
     recover = false
