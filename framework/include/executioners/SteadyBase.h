@@ -58,7 +58,6 @@ public:
   }
 
 protected:
-
   /// Just an alias for now
   FEProblemBase & _problem;
 

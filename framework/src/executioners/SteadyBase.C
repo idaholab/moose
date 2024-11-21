@@ -40,7 +40,9 @@ SteadyBase::execute()
 {
   if (_app.isRecovering())
   {
-    _console << "\nCannot recover steady-state solves of type: " << this->type() << "!\nExiting...\n" << std::endl;
+    _console << "\nCannot recover steady-state solves of type: " << this->type()
+             << "!\nExiting...\n"
+             << std::endl;
     return;
   }
 

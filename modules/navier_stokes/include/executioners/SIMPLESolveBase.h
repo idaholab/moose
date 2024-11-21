@@ -50,7 +50,8 @@ public:
     mooseError("Cannot set inner solve object for solves that inherit from SIMPLESolveBase");
   }
 
-  /// Fetch the Rhie Chow user object that
+  /// Fetch the Rhie Chow user object that is reponsible for determining face
+  /// velocities and mass flux
   virtual void linkRhieChowUserObject() = 0;
 
   /// Setup pressure pin if there is need for one

@@ -25,9 +25,7 @@ Steady::validParams()
   return params;
 }
 
-Steady::Steady(const InputParameters & parameters)
-  : SteadyBase(parameters),
-    _feproblem_solve(*this)
+Steady::Steady(const InputParameters & parameters) : SteadyBase(parameters), _feproblem_solve(*this)
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 }

@@ -9,26 +9,14 @@
 
 #pragma once
 
-#include "SegregatedSolverBase.h"
-#include "RhieChowMassFlux.h"
-#include "PetscSupport.h"
-#include "SolverParams.h"
+#include "SteadyBase.h"
 #include "SIMPLESolve.h"
-
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/solver_configuration.h"
-
-// Forward declarations
-class InputParameters;
-class FEProblemBase;
 
 /**
  * Executioner set up to solve a thermal-hydraulics problem using the SIMPLE algorithm.
  * It utilizes segregated linear systems which are solved using a fixed-point iteration.
  */
-class SIMPLE : public SegregatedSolverBase
+class SIMPLE : public SteadyBase
 {
 public:
   static InputParameters validParams();
@@ -36,8 +24,6 @@ public:
   SIMPLE(const InputParameters & parameters);
 
   virtual void init() override;
-  virtual void execute() override;
-  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
   SIMPLESolve _simple_solve;

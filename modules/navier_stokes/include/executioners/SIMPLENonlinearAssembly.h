@@ -9,19 +9,15 @@
 
 #pragma once
 
-#include "SegregatedSolverBase.h"
+#include "SteadyBase.h"
 #include "SIMPLESolveNonlinearAssembly.h"
-
-// Forward declarations
-class InputParameters;
-class FEProblemBase;
 
 /**
  * Executioner set up to solve a thermal-hydraulics problem using the
  * SIMPLENonlinearAssembly algorithm. It utilizes segregated linearized systems
  * which are solved using a fixed-point iteration.
  */
-class SIMPLENonlinearAssembly : public SegregatedSolverBase
+class SIMPLENonlinearAssembly : public SteadyBase
 {
 public:
   static InputParameters validParams();
@@ -29,18 +25,8 @@ public:
   SIMPLENonlinearAssembly(const InputParameters & parameters);
 
   virtual void init() override;
-  virtual void execute() override;
-  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
-  /// Solve a momentum predictor step with a fixed pressure field
-  /// @return A vector for the normalized residual norms of the momentum equations.
-  ///         The length of the vector equals the dimensionality of the domain.
-  std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor();
-
-  /// Solve a pressure corrector step.
-  /// @return The normalized residual norm of the pressure equation.
-  std::pair<unsigned int, Real> solvePressureCorrector();
-
+  /// The SIMPLE solve object that relies on nonlinear assembly routines
   SIMPLESolveNonlinearAssembly _simple_solve;
 };

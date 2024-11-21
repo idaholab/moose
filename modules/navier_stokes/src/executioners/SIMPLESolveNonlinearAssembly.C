@@ -16,6 +16,11 @@ SIMPLESolveNonlinearAssembly::validParams()
 {
   InputParameters params = SIMPLESolveBase::validParams();
 
+  params.addParam<TagName>("pressure_gradient_tag",
+                           "pressure_momentum_kernels",
+                           "The name of the tags associated with the kernels in the momentum "
+                           "equations which are not related to the pressure gradient.");
+
   /*
    * The names of the different systems in the segregated solver
    */
