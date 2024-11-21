@@ -33,6 +33,8 @@ private:
   void checkSidesetsOrientation(const std::unique_ptr<MeshBase> & mesh) const;
   //// Routine to check is mesh is fully covered in sidesets
   void checkWaterTightSidesets(const std::unique_ptr<MeshBase> & mesh) const;
+  //// Routine to check is mesh is fully covered in nodesets
+  void checkWatertightNodesets(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check the element volumes
   void checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check the element types in each subdomain
@@ -62,6 +64,8 @@ private:
   const MooseEnum _check_sidesets_orientation;
   //// whether to check that each external side is assigned to a sideset
   const MooseEnum _check_watertight_sidesets;
+  //// whether to check that each external node is assigned to a nodeset
+  const MooseEnum _check_watertight_nodesets;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// minimum size for element volume to be counted as a tiny element

@@ -46,6 +46,10 @@ MeshDiagnosticsGenerator::validParams()
       chk_option,
       "whether to check for external sides that are not assigned to any sidesets");
   params.addParam<MooseEnum>(
+      "check_for_watertight_nodesets",
+      chk_option,
+      "whether to check for external nodes that are not assigned to any nodeset");
+  params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
   params.addParam<Real>("maximum_element_volumes", 1e16, "Maximum size for element volume");
@@ -80,6 +84,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _input(getMesh("input")),
     _check_sidesets_orientation(getParam<MooseEnum>("examine_sidesets_orientation")),
     _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
+    _check_watertight_nodesets(getParam<MooseEnum>("check_for_watertight_nodesets")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -103,10 +108,10 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
   if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
-      _check_element_volumes == "NO_CHECK" && _check_element_types == "NO_CHECK" &&
-      _check_element_overlap == "NO_CHECK" && _check_non_planar_sides == "NO_CHECK" &&
-      _check_non_conformal_mesh == "NO_CHECK" && _check_adaptivity_non_conformality == "NO_CHECK" &&
-      _check_local_jacobian == "NO_CHECK")
+      _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
+      _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
+      _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
+      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -128,6 +133,9 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_watertight_sidesets != "NO_CHECK")
     checkWaterTightSidesets(mesh);
+
+  if (_check_watertight_nodesets != "NO_CHECK")
+    checkWatertightNodesets(mesh);
 
   if (_check_element_volumes != "NO_CHECK")
     checkElementVolumes(mesh);
@@ -333,6 +341,64 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
     message = "Number of external element edges that have not been assigned to a sideset: " +
               std::to_string(num_faces_without_sideset);
   diagnosticsLog(message, _check_watertight_sidesets, num_faces_without_sideset);
+}
+
+void
+MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*
+  Diagnostic Overview:
+  1) Mesh precheck
+  2) Loop through all elements
+  3) Loop through all sides of that element
+  4) If side is external loop through its nodes
+  5) If node is not associated with any nodeset add to list
+  6) Print out node id
+  */
+  if (mesh->mesh_dimension() < 2)
+    mooseError("The nodeset check only works for 2D and 3D meshes");
+  auto & boundary_info = mesh->get_boundary_info();
+  unsigned int num_nodes_without_nodeset = 0;
+  std::set<dof_id_type> checked_nodes_id;
+
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    for (const auto i : elem->side_index_range())
+    {
+      // Check if side is external
+      if (elem->neighbor_ptr(i) == nullptr)
+      {
+        // Side is external, now check nodes
+        auto side = elem->side_ptr(i);
+        const auto & node_list = side->get_nodes();
+        for (unsigned int j = 0; j < side->n_nodes(); j++)
+        {
+          const auto node = node_list[j];
+          if (checked_nodes_id.count(node->id()))
+            continue;
+          // if node has no nodeset, add it to list of bad nodes
+          if (boundary_info.n_boundary_ids(node) == 0)
+          {
+            // This node does not have a nodeset!!!
+            num_nodes_without_nodeset++;
+            checked_nodes_id.insert(node->id());
+            std::string message;
+            if (num_nodes_without_nodeset < _num_outputs)
+            {
+              message =
+                  "Node " + std::to_string(node->id()) +
+                  " is on an external boundary of the mesh, but has not been assigned to a nodeset";
+              _console << message << std::endl;
+            }
+          }
+        }
+      }
+    }
+  }
+  std::string message;
+  message = "Number of external nodes that have not been assigned to a nodeset: " +
+            std::to_string(num_nodes_without_nodeset);
+  diagnosticsLog(message, _check_watertight_nodesets, num_nodes_without_nodeset);
 }
 
 void

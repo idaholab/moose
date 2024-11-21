@@ -36,7 +36,8 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve(const ExecFlagType & exec_flag) = 0;
+  virtual void stopSolve(const ExecFlagType & exec_flag,
+                         const std::set<TagID> & vector_tags_to_close) = 0;
 
   /**
    * Set the solution to a given vector.

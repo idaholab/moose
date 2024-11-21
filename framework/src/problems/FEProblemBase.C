@@ -6265,10 +6265,10 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // SNESSetFunctionDomainError() or directly inserting NaNs in the
       // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
       if (_current_nl_sys)
-        _current_nl_sys->stopSolve(_current_execute_on_flag);
+        _current_nl_sys->stopSolve(_current_execute_on_flag, _fe_vector_tags);
 
       if (_current_linear_sys)
-        _current_nl_sys->stopSolve(_current_execute_on_flag);
+        _current_linear_sys->stopSolve(_current_execute_on_flag, _fe_vector_tags);
 
       // and close Aux system (we MUST do this here; see #11525)
       _aux->solution().close();
@@ -6300,8 +6300,9 @@ FEProblemBase::resetState()
   ADReal::do_derivatives = true;
   _current_execute_on_flag = EXEC_NONE;
 
+  // Clear the VectorTags and MatrixTags
   clearCurrentResidualVectorTags();
-  clearCurrentJacobianVectorTags();
+  clearCurrentJacobianMatrixTags();
 
   _safe_access_tagged_vectors = true;
   _safe_access_tagged_matrices = true;
@@ -6639,11 +6640,13 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
   _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
+  mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
   // We filter out tags which do not have associated vectors in the current nonlinear
   // system. This is essential to be able to use system-dependent residual tags.
   selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
+  _fe_vector_tags.clear();
 }
 
 void
@@ -6651,42 +6654,21 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
                                           NumericVector<Number> & residual,
                                           SparseMatrix<Number> & jacobian)
 {
-  // vector tags
-  {
-    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
-    const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
-
-    // We filter out tags which do not have associated vectors in the current nonlinear
-    // system. This is essential to be able to use system-dependent residual tags.
-    selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
-
-    setCurrentResidualVectorTags(_fe_vector_tags);
-  }
-
-  // matrix tags
-  {
-    _fe_matrix_tags.clear();
-
-    auto & tags = getMatrixTags();
-    for (auto & tag : tags)
-      _fe_matrix_tags.insert(tag.second);
-  }
-
   try
   {
     try
     {
       // vector tags
-      {
-        _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
-        const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+      _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+      const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
-        // We filter out tags which do not have associated vectors in the current nonlinear
-        // system. This is essential to be able to use system-dependent residual tags.
-        selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
+      mooseAssert(_fe_vector_tags.empty(),
+                  "This should be empty indicating a clean starting state");
+      // We filter out tags which do not have associated vectors in the current nonlinear
+      // system. This is essential to be able to use system-dependent residual tags.
+      selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
 
-        setCurrentResidualVectorTags(_fe_vector_tags);
-      }
+      setCurrentResidualVectorTags(_fe_vector_tags);
 
       // matrix tags
       {
@@ -6793,6 +6775,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
   }
 
   resetState();
+  _fe_vector_tags.clear();
+  _fe_matrix_tags.clear();
 }
 
 void

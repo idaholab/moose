@@ -41,7 +41,8 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve(const ExecFlagType & exec_flag) override;
+  virtual void stopSolve(const ExecFlagType & exec_flag,
+                         const std::set<TagID> & vector_tags_to_close) override;
 
   /**
    * Returns the current nonlinear iteration number.  In libmesh, this is
