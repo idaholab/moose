@@ -115,7 +115,6 @@ public:
    * Compute the residual of Ax - \lambda Bx. If there is no \lambda yet, "1" will
    * be used.
    */
-  using FEProblemBase::computeResidualL2Norm;
   virtual Real computeResidualL2Norm() override;
 
   /**

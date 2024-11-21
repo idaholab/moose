@@ -1304,13 +1304,13 @@ public:
    * Computes the residual of a nonlinear system using whatever is sitting in the current
    * solution vector then returns the L2 norm.
    */
-  virtual Real computeResidualL2Norm(NonlinearSystemBase & sys);
+  Real computeResidualL2Norm(NonlinearSystemBase & sys);
 
   /**
    * Computes the residual of a linear system using whatever is sitting in the current
    * solution vector then returns the L2 norm.
    */
-  virtual Real computeResidualL2Norm(LinearSystem & sys);
+  Real computeResidualL2Norm(LinearSystem & sys);
 
   /**
    * Computes the residual using whatever is sitting in the current solution vector then returns the

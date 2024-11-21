@@ -35,7 +35,6 @@ public:
 
   virtual void advanceState() override;
 
-  using FEProblemBase::computeResidualL2Norm;
   virtual Real computeResidualL2Norm() override;
 
   Vec & solutionOld() { return _petsc_sol_old; }
