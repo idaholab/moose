@@ -1,5 +1,5 @@
 # This test is exactly the same as 'evanescent_wave/evanescent_wave.i'
-# expect it uses ADMatWaveEquation and WaveEquationCoefficient instead of VectorFunctionReaction
+# expect it uses ADMatWaveReaction and WaveEquationCoefficient instead of VectorFunctionReaction
 
 [Mesh]
   [fmg]
@@ -82,7 +82,7 @@
     variable = E_real
   []
   [coeff_real]
-    type = ADMatWaveEquation
+    type = ADMatWaveReaction
     variable = E_real
     E_real = E_real
     E_imag = E_imag
@@ -104,7 +104,7 @@
     variable = E_imag
   []
   [coeff_imag]
-    type = ADMatWaveEquation
+    type = ADMatWaveReaction
     variable = E_imag
     E_real = E_real
     E_imag = E_imag

@@ -148,7 +148,7 @@
     variable = E_real
   []
   [coeff_real]
-    type = ADMatWaveEquation
+    type = ADMatWaveReaction
     variable = E_real
     E_real = E_real
     E_imag = E_imag
@@ -181,7 +181,7 @@
     variable = E_imag
   []
   [coeff_imag]
-    type = ADMatWaveEquation
+    type = ADMatWaveReaction
     variable = E_imag
     E_real = E_real
     E_imag = E_imag

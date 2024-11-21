@@ -15,12 +15,12 @@
  *  Calculates the current source term in the Helmholtz wave equation using
  *  the dielectric formulation of the current.
  */
-class ADMatWaveEquation : public ADVectorKernel
+class ADMatWaveReaction : public ADVectorKernel
 {
 public:
   static InputParameters validParams();
 
-  ADMatWaveEquation(const InputParameters & parameters);
+  ADMatWaveReaction(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
