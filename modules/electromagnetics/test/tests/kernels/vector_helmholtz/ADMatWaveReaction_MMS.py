@@ -1,4 +1,4 @@
-# Script to generate source term for vector_ADmaterial_wave_equation.i
+# Script to generate source term for vector_ADmaterial_wave_reaction.i
 
 import mms
 from sympy import *
