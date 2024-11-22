@@ -148,7 +148,7 @@ FunctionParserUtils<is_ad>::addFParserConstants(
   unsigned int nconst = constant_expressions.size();
   if (nconst != constant_names.size())
     mooseError("The parameter vectors constant_names (size " +
-               std::to_string(constant_names.size()) + ") and constant_values (size " +
+               std::to_string(constant_names.size()) + ") and constant_expressions (size " +
                std::to_string(nconst) + ") must have equal length.");
 
   // previously evaluated constant_expressions may be used in following constant_expressions
