@@ -9,47 +9,47 @@
 []
 
 [Functions]
-  [./u_fn]
+  [u_fn]
     type = ParsedFunction
     expression = '2 * x + 3 * y'
-  [../]
-  [./v_fn]
+  []
+  [v_fn]
     type = ParsedFunction
     expression = 'x + y'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./v]
+  []
+  [v]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = u
     function = u_fn
-  [../]
-  [./v_ic]
+  []
+  [v_ic]
     type = FunctionIC
     variable = v
     function = v_fn
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./element_value_sampler]
+  [element_value_sampler]
     type = ElementValueSampler
     variable = 'u v'
     sort_by = id
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]
