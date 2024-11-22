@@ -40,6 +40,9 @@ AbaqusUELMeshUserElement::validParams()
   params.addParam<bool>(
       "use_energy", false, "Set to true of the UEL plugin makes use of the ENERGY parameter");
 
+  params.addRelationshipManager("AbaqusUELRelationshipManager", Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC |
+                                    Moose::RelationshipManagerType::COUPLING);
   return params;
 }
 
@@ -57,7 +60,7 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
             mooseError("AbaqusUELMeshUserElement requires an AbaqusUELMesh to be used.");
           return uel_mesh;
         }()),
-        _uel_definition(_uel_mesh->getUEL(_uel_type)),
+    _uel_definition(_uel_mesh->getUEL(_uel_type)),
     _use_energy(getParam<bool>("use_energy"))
 {
   // get coupled variables from UEL type
