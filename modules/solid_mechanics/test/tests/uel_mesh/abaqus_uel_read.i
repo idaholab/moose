@@ -34,6 +34,14 @@
   kernel_coverage_check = false
 []
 
+[UserObjects]
+  [uel]
+    type = AbaqusUELMeshUserElement
+    uel_type = U1
+    plugin = elasticity_uel/uel
+  []
+[]
+
 [Executioner]
   type = Steady
 []
