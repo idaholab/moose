@@ -23,7 +23,7 @@ Note that $\omega^{2} \; \mu \; \varepsilon$ is provided via the Materials block
 
 ## Example Input File Syntax
 
-!listing vector_ADmaterial_wave_equation.i block=Kernels/coeff_real
+!listing vector_ADmaterial_wave_reaction.i block=Kernels/coeff_real
 
 !syntax parameters /Kernels/ADMatWaveReaction
 
