@@ -6388,10 +6388,10 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 }
 
 bool
-FEProblemBase::nlConverged(const unsigned int nl_sys_num)
+FEProblemBase::solverSystemConverged(const unsigned int sys_num)
 {
   if (_solve)
-    return _nl[nl_sys_num]->converged();
+    return _solver_systems[sys_num]->converged();
   else
     return true;
 }

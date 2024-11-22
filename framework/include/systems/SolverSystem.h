@@ -39,6 +39,18 @@ public:
   virtual void stopSolve(const ExecFlagType & exec_flag,
                          const std::set<TagID> & vector_tags_to_close) = 0;
 
+
+  /**
+   * Returns the convergence state
+   * @return true if converged, otherwise false
+   */
+  virtual bool converged() = 0;
+
+  /**
+   * If the system has a kernel that corresponds to a time derivative
+   */
+  virtual bool containsTimeKernel() = 0;
+
   /**
    * Set the solution to a given vector.
    * @param soln The vector which should be treated as the solution.

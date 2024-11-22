@@ -1143,9 +1143,9 @@ DisplacedProblem::refMesh()
 }
 
 bool
-DisplacedProblem::nlConverged(const unsigned int nl_sys_num)
+DisplacedProblem::solverSystemConverged(const unsigned int sys_num)
 {
-  return _mproblem.converged(nl_sys_num);
+  return _mproblem.converged(sys_num);
 }
 
 bool

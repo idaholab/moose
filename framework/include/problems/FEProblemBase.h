@@ -488,7 +488,7 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
-  virtual bool nlConverged(const unsigned int nl_sys_num) override;
+  virtual bool solverSystemConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
   virtual Real finalNonlinearResidual(const unsigned int nl_sys_num) const override;

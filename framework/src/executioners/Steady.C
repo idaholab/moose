@@ -41,7 +41,8 @@ Steady::init()
 void
 Steady::checkIntegrity()
 {
-  // check to make sure that we don't have any time kernels in this simulation (SteadyBase State)
-  if (_problem.getNonlinearSystemBase(/*nl_sys=*/0).containsTimeKernel())
-    mooseError("You have specified time kernels in your SteadyBase state simulation");
+  // check to make sure that we don't have any time kernels in this simulation (Steady State)
+  for (const auto & system : _feproblem_solve.systemsToSolve())
+    if (system->containsTimeKernel())
+      mooseError("You have specified time kernels in your Steady state simulation in system ", system->name());
 }
