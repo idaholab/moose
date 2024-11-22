@@ -142,7 +142,7 @@ SubProblem::addNotZeroedVectorTag(const TagID tag)
 }
 
 bool
-SubProblem::vectorTagNotZeroed(const TagID tag)
+SubProblem::vectorTagNotZeroed(const TagID tag) const
 {
   return _not_zeroed_tagged_vectors.count(tag);
 }
