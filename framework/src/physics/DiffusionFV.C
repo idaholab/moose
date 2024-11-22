@@ -183,6 +183,7 @@ DiffusionFV::addNonlinearVariables()
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
   assignBlocks(params, _blocks);
+  params.set<SolverSystemName>("solver_sys") = getSolverSystem(_var_name);
 
   // TODO: Do we need to use a different variable name maybe?
   // Or add API to extend block definition of a boundary

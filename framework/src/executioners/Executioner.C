@@ -70,7 +70,7 @@ Executioner::Executioner(const InputParameters & parameters)
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
 
-  // Instantiate the SolveObject for the fixed point iteration algorithm
+  // Instantiate the SolveObject for the MultiApp fixed point iteration algorithm
   if (_iteration_method == "picard")
     _fixed_point_solve = std::make_unique<PicardSolve>(*this);
   else if (_iteration_method == "secant")

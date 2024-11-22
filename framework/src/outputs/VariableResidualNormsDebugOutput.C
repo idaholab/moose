@@ -46,6 +46,10 @@ VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(
 void
 VariableResidualNormsDebugOutput::output()
 {
+  // Only output if the problem is solving for the relevant nonlinear system
+  if (_nl.number() != _problem_ptr->currentNonlinearSystem().number())
+    return;
+
   // Stream for outputting
   std::ostringstream oss;
 

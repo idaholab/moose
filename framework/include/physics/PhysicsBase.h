@@ -94,8 +94,8 @@ public:
   /// restriction of the Physics. More complex behavior should be implemented by overriding
   virtual void addComponent(const ActionComponent & component);
 
-  /// Return the list of nonlinear variables in this physics
-  const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
+  /// Return the list of solver (nonlinear + linear) variables in this physics
+  const std::vector<VariableName> & solverVariableNames() const { return _solver_var_names; };
   /// Return the list of aux variables in this physics
   const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
 
@@ -134,13 +134,22 @@ protected:
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
 
-  /// Keep track of the name of a nonlinear variable defined in the Physics
-  void saveSolverVariableName(const VariableName & var_name) { _nl_var_names.push_back(var_name); }
+  /// Keep track of the name of the solver variable defined in the Physics
+  void saveSolverVariableName(const VariableName & var_name)
+  {
+    _solver_var_names.push_back(var_name);
+  }
   /// Keep track of the name of an aux variable defined in the Physics
   void saveAuxVariableName(const VariableName & var_name) { _aux_var_names.push_back(var_name); }
 
   /// Check whether a variable already exists
   bool variableExists(const VariableName & var_name, bool error_if_aux) const;
+
+  /// Get the solver system for this variable index. The index should be the index of the variable in solver
+  /// var_names (currently _solver_var_names) vector
+  const SolverSystemName & getSolverSystem(unsigned int variable_index) const;
+  /// Get the solver system for this variable name
+  const SolverSystemName & getSolverSystem(const VariableName & variable_name) const;
 
   /// Add a new required task for all physics deriving from this class
   /// NOTE: This does not register the task, you still need to call registerMooseAction
@@ -158,8 +167,11 @@ protected:
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
 
-  /// System number for the system owning the variables
-  const unsigned int _sys_number;
+  /// System names for the system(s) owning the solver variables
+  std::vector<SolverSystemName> _system_names;
+
+  /// System numbers for the system(s) owning the solver variables
+  std::vector<unsigned int> _system_numbers;
 
   /// Whether to output additional information
   const bool _verbose;
@@ -224,8 +236,8 @@ private:
   /// some physics directly to steady state
   MooseEnum _is_transient;
 
-  /// Vector of the nonlinear variables in the Physics
-  std::vector<VariableName> _nl_var_names;
+  /// Vector of the solver variables (nonlinear and linear) in the Physics
+  std::vector<VariableName> _solver_var_names;
   /// Vector of the aux variables in the Physics
   std::vector<VariableName> _aux_var_names;
 

@@ -11,19 +11,22 @@
 
 #include "SolveObject.h"
 
-class NonlinearSystemBase;
+class SolverSystem;
 
 /**
- * A solve object for use with a single nonlinear system to solve
+ * A solve object for use when wanting to solve multiple systems
  */
-class NonlinearSolveObject : public SolveObject
+class MultiSystemSolveObject : public SolveObject
 {
 public:
-  NonlinearSolveObject(Executioner & ex);
+  MultiSystemSolveObject(Executioner & ex);
 
   static InputParameters validParams();
 
 protected:
-  /// Reference to nonlinear system base for faster access
-  NonlinearSystemBase & _nl;
+  /// Vector of pointers to the systems
+  std::vector<SolverSystem *> _systems;
+
+  /// Number of nonlinear systems
+  unsigned int _num_nl_systems;
 };

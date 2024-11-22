@@ -2205,16 +2205,12 @@ public:
   /**
    * Sets the nonlinear convergence object name if there is one
    */
-  void setNonlinearConvergenceName(const ConvergenceName & convergence_name)
-  {
-    _nonlinear_convergence_name = convergence_name;
-    _set_nonlinear_convergence_name = true;
-  }
+  void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
 
   /**
-   * Gets the nonlinear convergence object name if there is one
+   * Gets the nonlinear convergence object name(s).
    */
-  ConvergenceName getNonlinearConvergenceName() const;
+  std::vector<ConvergenceName> getNonlinearConvergenceNames() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian
@@ -2272,6 +2268,12 @@ public:
    * @return the solver system number corresponding to the provided \p solver_sys_name
    */
   unsigned int solverSysNum(const SolverSystemName & solver_sys_name) const override;
+
+  /**
+   * @return the system number for the provided \p variable_name
+   * Can be nonlinear or auxiliary
+   */
+  unsigned int systemNumForVariable(const VariableName & variable_name) const;
 
   /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
@@ -2358,6 +2360,10 @@ public:
    * @returns the nolinear system names in the problem
    */
   const std::vector<NonlinearSystemName> & getNonlinearSystemNames() const { return _nl_sys_names; }
+  /**
+   * @returns the linear system names in the problem
+   */
+  const std::vector<LinearSystemName> & getLinearSystemNames() const { return _linear_sys_names; }
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -2398,8 +2404,8 @@ private:
 protected:
   bool _initialized;
 
-  /// Nonlinear convergence name
-  ConvergenceName _nonlinear_convergence_name;
+  /// Nonlinear system(s) convergence name(s)
+  std::vector<ConvergenceName> _nonlinear_convergence_names;
 
   std::set<TagID> _fe_vector_tags;
 
@@ -2422,7 +2428,7 @@ protected:
   Real & _dt_old;
 
   /// Flag that the nonlinear convergence name has been set
-  bool _set_nonlinear_convergence_name;
+  bool _set_nonlinear_convergence_names;
   /// Flag that the problem needs to add the default nonlinear convergence
   bool _need_to_add_default_nonlinear_convergence;
 
