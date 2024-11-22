@@ -14,6 +14,7 @@
 #include "NSFVUtils.h"
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "Limiter.h"
+#include "Steady.h"
 
 InputParameters
 INSFVAdvectionKernel::validParams()
