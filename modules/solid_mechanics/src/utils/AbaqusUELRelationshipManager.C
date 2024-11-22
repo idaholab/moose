@@ -20,6 +20,8 @@
 // C++ Includes
 #include <unordered_set>
 
+registerMooseObject("MooseApp", AbaqusUELRelationshipManager);
+
 InputParameters
 AbaqusUELRelationshipManager::validParams()
 {
