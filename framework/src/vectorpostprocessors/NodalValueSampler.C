@@ -32,10 +32,28 @@ NodalValueSampler::validParams()
 NodalValueSampler::NodalValueSampler(const InputParameters & parameters)
   : NodalVariableVectorPostprocessor(parameters), SamplerBase(parameters, this, _communicator)
 {
-  // ensure that variables are nodal, i.e., not scalar and and not elemental
+  // ensure that variables are 'nodal' (they have DoFs at nodes)
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-    if (_coupled_moose_vars[i]->feType().family == SCALAR || !_coupled_moose_vars[i]->isNodal())
+  {
+    mooseAssert(_coupled_moose_vars[i]->feType().family != SCALAR,
+                "Scalar variable '" + _coupled_moose_vars[i]->name() + "' cannot be sampled.");
+    if (!_coupled_moose_vars[i]->isNodal())
       paramError("variable", "The variable '", _coupled_moose_vars[i]->name(), "' is not nodal.");
+    if (FEInterface::field_type(_coupled_moose_vars[i]->feType()) == TYPE_VECTOR)
+      paramError("variable",
+                 "The variable '",
+                 _coupled_moose_vars[i]->name(),
+                 "' is a vector variable. Sampling those is not currently supported. Use "
+                 "'VectorVariableComponentAux' auxkernel to copy the desired component values into "
+                 "a regular nodal field variable");
+    if (_coupled_moose_vars[i]->isArray())
+      paramError("variable",
+                 "The variable '",
+                 _coupled_moose_vars[i]->name(),
+                 "' is an array variable. Sampling those is not currently supported. Use "
+                 "'ArrayVariableComponent' auxkernel to copy the desired component values into a "
+                 "regular nodal field variable");
+  }
 
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());

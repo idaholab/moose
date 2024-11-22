@@ -38,12 +38,8 @@ ElementValueSampler::ElementValueSampler(const InputParameters & parameters)
   // ensure that variables are 'elemental'
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
   {
-    if (_coupled_moose_vars[i]->feType().family == SCALAR)
-      paramError(
-          "variable",
-          "The variable '",
-          _coupled_moose_vars[i]->name(),
-          "' is a scalar variable. It can be sampled using the 'ScalarVariable' postprocessor");
+    mooseAssert(_coupled_moose_vars[i]->feType().family != SCALAR,
+                "Scalar variable '" + _coupled_moose_vars[i]->name() + "' cannot be sampled.");
     if (_coupled_moose_vars[i]->isNodal())
       paramError("variable",
                  "The variable '",
@@ -65,7 +61,6 @@ ElementValueSampler::ElementValueSampler(const InputParameters & parameters)
           "' is an array variable. Sampling those is not currently supported. Use "
           "'ArrayVariableComponent' auxkernel to copy those values into a regular field variable");
   }
-
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
 
