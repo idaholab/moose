@@ -71,12 +71,20 @@
   []
 []
 
+[Convergence]
+  [linear]
+    type = IterationCountConvergence
+    max_iterations = 1
+    converge_at_max_iterations = true
+  []
+[]
+
 [Executioner]
-  type = LinearFixedPointSteady
-  linear_systems_to_solve = u_sys
-  number_of_iterations = 1
-  continue_on_max_its = true
-  absolute_tolerance = 1e-10
+  type = Steady
+  system_names = u_sys
+  l_abs_tol = 1e-10
+  multi_system_fixed_point=true
+  multi_system_fixed_point_convergence=linear
 []
 
 [Outputs]
