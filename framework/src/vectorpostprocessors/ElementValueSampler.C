@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "MooseVariableFE.h"
 
+// libMesh includes
+#include "libmesh/fe_interface.h"
+
 // C++ includes
 #include <numeric>
 
@@ -22,7 +25,7 @@ ElementValueSampler::validParams()
 {
   InputParameters params = ElementVariableVectorPostprocessor::validParams();
 
-  params.addClassDescription("Samples values of elemental variable(s).");
+  params.addClassDescription("Samples values of variables on elements.");
 
   params += SamplerBase::validParams();
 
@@ -32,11 +35,36 @@ ElementValueSampler::validParams()
 ElementValueSampler::ElementValueSampler(const InputParameters & parameters)
   : ElementVariableVectorPostprocessor(parameters), SamplerBase(parameters, this, _communicator)
 {
-  // ensure that variables are elemental, i.e., not scalar and and not nodal
+  // ensure that variables are 'elemental'
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-    if (_coupled_moose_vars[i]->feType().family == SCALAR || _coupled_moose_vars[i]->isNodal())
+  {
+    if (_coupled_moose_vars[i]->feType().family == SCALAR)
       paramError(
-          "variable", "The variable '", _coupled_moose_vars[i]->name(), "' is not elemental.");
+          "variable",
+          "The variable '",
+          _coupled_moose_vars[i]->name(),
+          "' is a scalar variable. It can be sampled using the 'ScalarVariable' postprocessor");
+    if (_coupled_moose_vars[i]->isNodal())
+      paramError("variable",
+                 "The variable '",
+                 _coupled_moose_vars[i]->name(),
+                 "' is a nodal variable. Nodal variables can be sampled using a "
+                 "'NodalValueSampler'.");
+    if (FEInterface::field_type(_coupled_moose_vars[i]->feType()) == TYPE_VECTOR)
+      paramError("variable",
+                 "The variable '",
+                 _coupled_moose_vars[i]->name(),
+                 "' is a vector variable. Sampling those is not currently supported. Use "
+                 "'VectorVariableComponentAux' auxkernel to copy those values into a regular field "
+                 "variable");
+    if (_coupled_moose_vars[i]->isArray())
+      paramError(
+          "variable",
+          "The variable '",
+          _coupled_moose_vars[i]->name(),
+          "' is an array variable. Sampling those is not currently supported. Use "
+          "'ArrayVariableComponent' auxkernel to copy those values into a regular field variable");
+  }
 
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
