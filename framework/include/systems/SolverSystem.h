@@ -39,7 +39,6 @@ public:
   virtual void stopSolve(const ExecFlagType & exec_flag,
                          const std::set<TagID> & vector_tags_to_close) = 0;
 
-
   /**
    * Returns the convergence state
    * @return true if converged, otherwise false

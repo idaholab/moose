@@ -44,5 +44,6 @@ Steady::checkIntegrity()
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   for (const auto & system : _feproblem_solve.systemsToSolve())
     if (system->containsTimeKernel())
-      mooseError("You have specified time kernels in your Steady state simulation in system ", system->name());
+      mooseError("You have specified time kernels in your Steady state simulation in system ",
+                 system->name());
 }

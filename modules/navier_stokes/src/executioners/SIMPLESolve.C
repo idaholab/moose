@@ -362,7 +362,7 @@ SIMPLESolve::solve()
                << ns_residuals[momentum_residual.size() + 1].second << COLOR_DEFAULT
                << " Linear its: " << ns_residuals[momentum_residual.size() + 1].first << std::endl;
 
-    converged = MooseUtils::converged(ns_residuals, ns_abs_tols);
+    converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
 
   converged = _continue_on_max_its ? true : converged;

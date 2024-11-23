@@ -1234,14 +1234,6 @@ isFloat(const std::string & str)
   return (*ptr) == '\0';
 }
 
-/**
- * Based on the residuals, determine if the iterative process converged or not
- * @param residuals The current (number of iterations, residual) pairs
- * @param abs_tolerances The corresponding absolute tolerances.
- */
-bool converged(const std::vector<std::pair<unsigned int, Real>> & residuals,
-               const std::vector<Real> & abs_tolerances);
-
 } // MooseUtils namespace
 
 namespace Moose

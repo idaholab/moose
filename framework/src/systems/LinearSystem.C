@@ -286,8 +286,8 @@ LinearSystem::solve()
   _converged = linear_solver.get_converged_reason() > 0;
 
   _console << "System: " << this->name() << " Initial residual: " << _initial_linear_residual
-           << " Final residual: " << _final_linear_residual << " Num. of Iter. "
-           << _n_linear_iters << std::endl;
+           << " Final residual: " << _final_linear_residual << " Num. of Iter. " << _n_linear_iters
+           << std::endl;
 
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();

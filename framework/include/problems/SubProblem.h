@@ -94,9 +94,9 @@ public:
 
   /**
    * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
-   * We will have to first convert apps to use solverSystemConverged, and then once that is done, we can
-   * change this signature. Then we can go through the apps again and convert back to this changed
-   * API
+   * We will have to first convert apps to use solverSystemConverged, and then once that is done, we
+   * can change this signature. Then we can go through the apps again and convert back to this
+   * changed API
    */
   virtual bool converged(const unsigned int sys_num) { return solverSystemConverged(sys_num); }
 
