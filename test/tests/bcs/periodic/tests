@@ -182,14 +182,14 @@
       expect_err = "Boundary 'abs' does not exist in the mesh"
       input = 'all_periodic_trans.i'
       cli_args = "BCs/Periodic/x/primary='abs'"
-      detail = 'the primary boundary of a periodic boundary condition does not exist on the mesh,'
+      detail = 'the primary boundary of a periodic boundary condition does not exist on the mesh, or'
     []
     [bad_secondary]
       type = RunException
       expect_err = "Boundary 'abs' does not exist in the mesh"
       input = 'all_periodic_trans.i'
       cli_args = "BCs/Periodic/x/secondary='abs'"
-      detail = 'the secondary boundary of a periodic boundary condition does not exist on the mesh,'
+      detail = 'the secondary boundary of a periodic boundary condition does not exist on the mesh.'
     []
   []
 []
