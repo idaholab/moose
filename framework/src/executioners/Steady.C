@@ -20,7 +20,7 @@ InputParameters
 Steady::validParams()
 {
   InputParameters params = SteadyBase::validParams();
-  params.addClassDescription("Executioner for SteadyBase-state simulations.");
+  params.addClassDescription("Executioner for steady-state simulations.");
   params += FEProblemSolve::validParams();
   return params;
 }
@@ -44,6 +44,8 @@ Steady::checkIntegrity()
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   for (const auto & system : _feproblem_solve.systemsToSolve())
     if (system->containsTimeKernel())
-      mooseError("You have specified time kernels in your Steady state simulation in system ",
-                 system->name());
+      mooseError("You have specified time kernels in your steady-state simulation in system ",
+                 system->name(),
+                 " on the following variables: ",
+                 Moose::stringify(system->timeKernelVariableNames()));
 }

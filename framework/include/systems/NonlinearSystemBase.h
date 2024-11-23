@@ -519,6 +519,7 @@ public:
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
   virtual bool containsTimeKernel() override;
+  virtual std::vector<std::string> timeKernelVariableNames() override;
   ///@}
 
   /**

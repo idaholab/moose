@@ -181,7 +181,7 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 {
   TIME_SECTION("computeLinearSystemInternal", 3);
 
-  // Before we assemble we clear up the mmatrix and the vector
+  // Before we assemble we clear up the matrix and the vector
   _linear_implicit_system.matrix->zero();
   _linear_implicit_system.rhs->zero();
 

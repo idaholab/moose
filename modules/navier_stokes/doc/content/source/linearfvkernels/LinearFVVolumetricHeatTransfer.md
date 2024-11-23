@@ -16,7 +16,7 @@ where
 - $T_\mathrm{solid}$ is the solid temperature.
 
 The sign ($\pm$) depends on if the kernel is added to the fluid or
-solid energy equation. This can be cpntrolled by the
+solid energy equation. This can be controlled by the
 [!param](/LinearFVKernels/LinearFVVolumetricHeatTransfer/is_solid) parameter.
 
 

@@ -66,6 +66,7 @@ public:
    * systems at the moment, this is false.
    */
   virtual bool containsTimeKernel() override { return false; }
+  virtual std::vector<std::string> timeKernelVariableNames() override { return {}; }
 
   /**
    * Compute the right hand side and the system matrix of the system for given tags.

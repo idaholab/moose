@@ -36,7 +36,7 @@ protected:
   /// Routine used to throw an error if the provided variable is not an
   /// MooseLinearVariableFV
   const MooseLinearVariableFV<Real> & getTemperatureVariable(const std::string & vname);
-  /// MOSE functor describing the heat transfer coefficient
+  /// MOOSE functor describing the heat transfer coefficient
   const Moose::Functor<Real> & _h_solid_fluid;
   /// Reference to the linear finite volume fluid temperature variable
   const MooseLinearVariableFV<Real> & _temp_fluid;

@@ -1190,7 +1190,7 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 label: Eigenvalue         text: Eigenvalue                       desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: regular
 label: InversePowerMethod text: InversePowerMethod\nbx_norm = \n desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: regular
 label: NonlinearEigen     text: NonlinearEigen\nbx_norm = \n     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: regular
-label: Steady             text: Steady                           desc: Executioner for S... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Steady             text: Steady                           desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: regular
 label: Transient          text: Transient                        desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: regular
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);

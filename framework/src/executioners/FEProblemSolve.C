@@ -410,7 +410,8 @@ FEProblemSolve::solve()
           _problem.solveLinearSystem(linear_sys_number, &_problem.getPetscOptions());
 
           // This is for postprocessing purposes in case none of the objects
-          // request the gradients. TODO: Somehow collect information if the postprocessors
+          // request the gradients.
+          // TODO: Somehow collect information if the postprocessors
           // need gradients and if nothing needs this, just skip it
           _problem.getLinearSystem(linear_sys_number).computeGradients();
         }

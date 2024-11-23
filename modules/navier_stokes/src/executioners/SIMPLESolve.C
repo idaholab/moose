@@ -52,7 +52,7 @@ SIMPLESolve::linkRhieChowUserObject()
 std::vector<std::pair<unsigned int, Real>>
 SIMPLESolve::solveMomentumPredictor()
 {
-  // Temporary storage for the (flux-normalized) residuals form
+  // Temporary storage for the (flux-normalized) residuals from
   // different momentum components
   std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
 

@@ -51,6 +51,11 @@ public:
   virtual bool containsTimeKernel() = 0;
 
   /**
+   * If the system has a kernel that corresponds to a time derivative
+   */
+  virtual std::vector<std::string> timeKernelVariableNames() = 0;
+
+  /**
    * Set the solution to a given vector.
    * @param soln The vector which should be treated as the solution.
    */
