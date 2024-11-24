@@ -23,6 +23,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  std::unique_ptr<CSG::CSGBase> generateCSG() override;
+
   /**
    * Helper for deducing a checkpoint file given the path.
    *

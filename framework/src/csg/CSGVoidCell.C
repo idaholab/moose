@@ -7,19 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "CSGVoidCell.h"
 
-#include "Action.h"
-
-class CSGOnlyAction : public Action
+namespace CSG
 {
-public:
-  static InputParameters validParams();
 
-  CSGOnlyAction(const InputParameters & params);
-
-  virtual void act() override;
-
-protected:
-  std::unique_ptr<CSG::CSGBase> _csg_mesh;
-};
+CSGVoidCell::CSGVoidCell(const std::string name) : CSGCell(name, FillType::empty) {}
+} // namespace CSG
