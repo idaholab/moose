@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "MeshMetaDataInterface.h"
 #include "MooseApp.h"
+#include "CSGBase.h"
 
 // Included so mesh generators don't need to include this when constructing MeshBase objects
 #include "MooseMesh.h"
@@ -82,11 +83,9 @@ public:
   virtual std::unique_ptr<MeshBase> generate() = 0;
 
   /**
-   * Internal generation method - this is what is actually called
-   * within MooseApp to execute the MeshGenerator.
+   * Internal generation method for CSG mesh generation
    */
-  // TODO return type of this method should be updated to CSGBase type
-  void generateInternalCSG();
+  std::unique_ptr<CSG::CSGBase> generateInternalCSG();
 
   /**
    * Internal generation method - this is what is actually called
@@ -223,7 +222,7 @@ protected:
   /**
    * Generate the CSG mesh
    */
-  virtual void generateCSG();
+  virtual std::unique_ptr<CSG::CSGBase> generateCSG();
 
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from

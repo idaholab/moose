@@ -9,7 +9,7 @@
 
 #include "MooseApp.h"
 #include "CSGOnlyAction.h"
-#include "MeshGenerator.h"
+#include "CSGBase.h"
 
 registerMooseAction("MooseApp", CSGOnlyAction, "csg_only");
 registerMooseAction("MooseApp", CSGOnlyAction, "setup_mesh");
@@ -37,11 +37,11 @@ CSGOnlyAction::act()
     const auto ordered_mg = _app.getMeshGeneratorSystem().getOrderedMeshGenerators();
     for (const auto & generator_set : ordered_mg)
       for (const auto & generator : generator_set)
-        generator->generateInternalCSG();
+        _csg_mesh = generator->generateInternalCSG();
   }
   else if (_current_task == "csg_only")
   {
-    // TODO fill out this logic to output CSGBase object to file
     Moose::out << "Outputting CSGBase object at this step\n";
+    _csg_mesh->generateOutput();
   }
 }
