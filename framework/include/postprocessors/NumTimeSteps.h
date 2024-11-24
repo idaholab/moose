@@ -11,6 +11,9 @@
 
 #include "GeneralPostprocessor.h"
 
+/**
+ * Reports on the number of time steps already taken in the transient
+ */
 class NumTimeSteps : public GeneralPostprocessor
 {
 public:

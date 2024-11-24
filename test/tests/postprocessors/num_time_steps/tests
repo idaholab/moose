@@ -3,7 +3,7 @@
     type = 'CSVDiff'
     input = 'numtimesteps.i'
     csvdiff = 'numtimesteps_out.csv'
-    requirement = 'The postprocessor `NumTimeSteps` shall count the number of time-steps accurately'
-                   'over the course of a transient solve'
+    requirement = 'The postprocessor shall be able to count the number of time-steps that have been taken '
+                   'over the course of the simulation of a transient.'
   []
 []
