@@ -95,6 +95,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
     _has_flow_equations(getParam<bool>("add_flow_equations")),
     _compressibility(getParam<MooseEnum>("compressibility")),
+    _solve_for_dynamic_pressure(getParam<bool>("solve_for_dynamic_pressure")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
     _porosity_name(getParam<MooseFunctorName>("porosity")),
     _flow_porosity_functor_name(_porosity_name),
@@ -132,6 +133,11 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
 
   // Boussinesq parameters checks
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
+
+  // Dynamic pressure parameter checks
+  if (_compressibility != "incompressible" && _solve_for_dynamic_pressure)
+    paramError("compressibility",
+               "Solving for dynamic pressure is only implemented for incompressible flow");
 
   // Boundary parameters checking
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "momentum_inlet_types");

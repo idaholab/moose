@@ -382,7 +382,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _set_nonlinear_convergence_name(false),
+    _set_nonlinear_convergence_names(false),
     _need_to_add_default_nonlinear_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
@@ -2416,7 +2416,8 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  addConvergence(class_name, getNonlinearConvergenceName(), params);
+  for (const auto & conv_name : getNonlinearConvergenceNames())
+    addConvergence(class_name, conv_name, params);
 }
 
 bool
@@ -6053,7 +6054,7 @@ FEProblemBase::init()
     _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
 
     if (!_skip_nl_system_check && _solve && n_vars == 0)
-      mooseError("No variables specified in the FEProblemBase '", name(), "'.");
+      mooseError("No variables specified in nonlinear system '", nl->name(), "'.");
   }
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
@@ -6150,9 +6151,32 @@ FEProblemBase::solverSysNum(const SolverSystemName & solver_sys_name) const
   std::istringstream ss(solver_sys_name);
   unsigned int solver_sys_num;
   if (!(ss >> solver_sys_num) || !ss.eof())
-    solver_sys_num = libmesh_map_find(_solver_sys_name_to_num, solver_sys_name);
+  {
+    const auto & search = _solver_sys_name_to_num.find(solver_sys_name);
+    if (search == _solver_sys_name_to_num.end())
+      mooseError("The solver system number was requested for system '" + solver_sys_name,
+                 "' but this system does not exist in the Problem. Systems can be added to the "
+                 "problem using the 'nl_sys_names' parameter.\nSystems in the Problem: " +
+                     Moose::stringify(_solver_sys_names));
+    solver_sys_num = search->second;
+  }
 
   return solver_sys_num;
+}
+
+unsigned int
+FEProblemBase::systemNumForVariable(const VariableName & variable_name) const
+{
+  for (const auto & solver_sys : _solver_systems)
+    if (solver_sys->hasVariable(variable_name))
+      return solver_sys->number();
+  mooseAssert(_aux, "Should have an auxiliary system");
+  if (_aux->hasVariable(variable_name))
+    return _aux->number();
+
+  mooseError("Variable '",
+             variable_name,
+             "' was not found in any solver (nonlinear/linear) or auxiliary system");
 }
 
 void
@@ -8748,13 +8772,23 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
   getMaterialData(data_type, tid).resize(nqp);
 }
 
-ConvergenceName
-FEProblemBase::getNonlinearConvergenceName() const
+void
+FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
 {
-  if (_set_nonlinear_convergence_name)
-    return _nonlinear_convergence_name;
+  if (convergence_names.size() != numNonlinearSystems())
+    paramError("nonlinear_convergence",
+               "There must be one convergence object per nonlinear system");
+  _nonlinear_convergence_names = convergence_names;
+  _set_nonlinear_convergence_names = true;
+}
+
+std::vector<ConvergenceName>
+FEProblemBase::getNonlinearConvergenceNames() const
+{
+  if (_set_nonlinear_convergence_names)
+    return _nonlinear_convergence_names;
   else
-    mooseError("The nonlinear convergence name has not been set.");
+    mooseError("The nonlinear convergence name(s) have not been set.");
 }
 
 void

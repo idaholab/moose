@@ -310,7 +310,8 @@ petscNonlinearConverged(SNES /*snes*/,
   }
   else
   {
-    auto & convergence = problem.getConvergence(problem.getNonlinearConvergenceName());
+    auto & convergence = problem.getConvergence(
+        problem.getNonlinearConvergenceNames()[problem.currentNonlinearSystem().number()]);
     status = convergence.checkConvergence(it);
   }
 

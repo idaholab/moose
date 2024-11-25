@@ -135,6 +135,8 @@ protected:
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
+  /// Whether we are solving for the total or dynamic pressure
+  const bool _solve_for_dynamic_pressure;
 
   /// Whether to use the porous medium treatment
   const bool _porous_medium_treatment;

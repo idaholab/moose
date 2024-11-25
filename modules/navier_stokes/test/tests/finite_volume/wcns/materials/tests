@@ -29,4 +29,25 @@
     recover = false
     prereq = 'fluidprops'
   []
+  [fluidprops_dynamic_pressure]
+    type = 'Exodiff'
+    input = functorfluidprops.i
+    cli_args = "outlet_pressure=0 FunctorMaterials/fluid_props_to_mat_props/solving_for_dynamic_pressure=true FunctorMaterials/fluid_props_to_mat_props/reference_pressure=1e5"
+    exodiff = functorfluidprops_out.e
+    requirement = 'The system shall be able to output grandeurs, derivatives and non-dimensional quantities from realistic functor fluid properties when solving for the dynamic pressure rather than the total pressure.'
+    recover = false
+    custom_cmp = 'dynamic_pressure.cmp'
+    prereq = 'neglect_drho_dt_derivatives'
+  []
+
+  [exceptions]
+    requirement = "The system shall throw an error if"
+    [setting_ref_pressure]
+      type = RunException
+      input = 'functorfluidprops.i'
+      cli_args = "FunctorMaterials/fluid_props_to_mat_props/reference_pressure=1e5"
+      expect_err = "'reference_pressure_point' and 'reference_pressure' should not be set unless solving for the dynamic pressure"
+      detail = "the reference pressure is set when not solving for the dynamic pressure"
+    []
+  []
 []

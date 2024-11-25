@@ -134,6 +134,7 @@ WCNSFVFluidHeatTransferPhysics::addNonlinearVariables()
     params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
     params.set<bool>("two_term_boundary_expansion") =
         getParam<bool>("energy_two_term_bc_expansion");
+    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_fluid_temperature_name);
     getProblem().addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
   }
   else

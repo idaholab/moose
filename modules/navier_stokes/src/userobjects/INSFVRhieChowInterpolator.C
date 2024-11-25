@@ -47,11 +47,7 @@ INSFVRhieChowInterpolator::uniqueParams()
       "means elements that we have access to (this may not be all the elements in the mesh if the "
       "mesh is distributed) but that we do not own.");
   params.addParamNamesToGroup("pull_all_nonlocal_a", "Parallel Execution Tuning");
-  params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "nl0",
-                                       "The nonlinear system in which the monolithic momentum and "
-                                       "continuity equations are located.");
-  params.addParamNamesToGroup("mass_momentum_system", "Nonlinear Solver");
+
   params.addParam<bool>(
       "correct_volumetric_force", false, "Flag to activate volume force corrections.");
   MooseEnum volume_force_correction_method("force-consistent pressure-consistent",
@@ -69,7 +65,6 @@ std::vector<std::string>
 INSFVRhieChowInterpolator::listOfCommonParams()
 {
   return {"pull_all_nonlocal_a",
-          "mass_momentum_system",
           "correct_volumetric_force",
           "volume_force_correction_method",
           "volumetric_force_functors"};
@@ -117,7 +112,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
-    _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
+    _momentum_sys_number(_fe_problem.systemNumForVariable(getParam<VariableName>("u"))),
     _example(0),
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a")),
@@ -355,7 +350,7 @@ INSFVRhieChowInterpolator::initialize()
   // The keys should not have changed unless the mesh has changed
   // Dont reset if not in current system
   // IDEA: clear them derivatives
-  if (_u->sys().number() == _fe_problem.currentNlSysNum())
+  if (_momentum_sys_number == _fe_problem.currentNlSysNum())
     for (auto & pair : _a)
       pair.second = 0;
   else
@@ -369,14 +364,10 @@ INSFVRhieChowInterpolator::initialize()
 void
 INSFVRhieChowInterpolator::execute()
 {
-  if (_sys.number() != _u->sys().number())
-  {
-    mooseAssert(!needAComputation(),
-                "The velocity variables are in the auxiliary system. In this case we will not run "
-                "kernels to compute a-coefficients. Consequently the a-coefficient data must be "
-                "provided, approximated, or we should be using an average velocity interpolation");
+  // Either we provided the RC coefficients using aux-variable, or we are solving for another
+  // system than the momentum equations are in, in a multi-system setup for example
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     return;
-  }
 
   mooseAssert(!_a_data_provided,
               "a-coefficient data should not be provided if the velocity variables are in the "
@@ -398,7 +389,7 @@ INSFVRhieChowInterpolator::execute()
 
   PARALLEL_TRY
   {
-    GatherRCDataElementThread et(_fe_problem, _nl_sys_number, _var_numbers);
+    GatherRCDataElementThread et(_fe_problem, _momentum_sys_number, _var_numbers);
     Threads::parallel_reduce(*_elem_range, et);
   }
   PARALLEL_CATCH;
@@ -406,7 +397,8 @@ INSFVRhieChowInterpolator::execute()
   PARALLEL_TRY
   {
     using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _nl_sys_number, _var_numbers, _displaced);
+    GatherRCDataFaceThread<FVRange> fvr(
+        _fe_problem, _momentum_sys_number, _var_numbers, _displaced);
     FVRange faces(_moose_mesh.ownedFaceInfoBegin(), _moose_mesh.ownedFaceInfoEnd());
     Threads::parallel_reduce(faces, fvr);
   }
@@ -421,8 +413,9 @@ INSFVRhieChowInterpolator::finalize()
   if (!needAComputation() || this->n_processors() == 1)
     return;
 
-  // If advecting with auxiliary variables, no need to try to run those kernels
-  if (_fe_problem.currentNlSysNum() != _u->sys().number())
+  // If advecting with auxiliary variables, no need to synchronize data
+  // Same if not solving for the velocity variables at the moment
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     return;
 
   using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
@@ -557,7 +550,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     incorporate_mesh_velocity(boundary_face, velocity);
 
     // If not solving for velocity, clear derivatives
-    if (_fe_problem.currentNlSysNum() != _u->sys().number())
+    if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
       return MetaPhysicL::raw_value(velocity);
     else
       return velocity;
@@ -577,7 +570,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   incorporate_mesh_velocity(face, velocity);
 
   // If not solving for velocity, clear derivatives
-  if (_fe_problem.currentNlSysNum() != _u->sys().number())
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     velocity = MetaPhysicL::raw_value(velocity);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
@@ -824,7 +817,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   }
 
   // If not solving for velocity, clear derivatives
-  if (_fe_problem.currentNlSysNum() != _u->sys().number())
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     return MetaPhysicL::raw_value(velocity);
   else
     return velocity;

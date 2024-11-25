@@ -67,7 +67,10 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonl
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  this->addConvergence(class_name, this->getNonlinearConvergenceName(), params);
+  // TODO: Add multi-nonlinear system support
+  if (this->numNonlinearSystems() > 1)
+    mooseError("Multi-system not currently implemented");
+  this->addConvergence(class_name, this->getNonlinearConvergenceNames()[0], params);
 }
 
 template <>
@@ -80,7 +83,10 @@ AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergenc
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  this->addConvergence(class_name, this->getNonlinearConvergenceName(), params);
+  // TODO: Add multi-nonlinear system support
+  if (this->numNonlinearSystems() > 1)
+    mooseError("Multi-system not currently implemented");
+  this->addConvergence(class_name, this->getNonlinearConvergenceNames()[0], params);
 }
 
 template class AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>;

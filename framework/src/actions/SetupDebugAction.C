@@ -94,7 +94,12 @@ SetupDebugAction::act()
   {
     const std::string type = "VariableResidualNormsDebugOutput";
     auto params = _factory.getValidParams(type);
-    _problem->addOutput(type, "_moose_variable_residual_norms_debug_output", params);
+    // Add one for every nonlinear system
+    for (const auto & sys_name : _problem->getNonlinearSystemNames())
+    {
+      params.set<NonlinearSystemName>("nl_sys") = sys_name;
+      _problem->addOutput(type, "_moose_variable_residual_norms_debug_output_" + sys_name, params);
+    }
   }
 
   // Top residuals

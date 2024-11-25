@@ -23,8 +23,10 @@ InputParameters
 AdjointSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addRequiredParam<NonlinearSystemName>(
-      "forward_system", "Name of the system representing the forward problem.");
+  params.addRequiredParam<std::vector<SolverSystemName>>(
+      "forward_system",
+      "Name of the nonlinear system representing the forward problem. Multiple and linear solver "
+      "systems are not currently supported.");
   params.addRequiredParam<NonlinearSystemName>(
       "adjoint_system", "Name of the system representing the adjoint problem.");
   return params;
@@ -32,11 +34,17 @@ AdjointSolve::validParams()
 
 AdjointSolve::AdjointSolve(Executioner & ex)
   : SolveObject(ex),
-    _forward_sys_num(_problem.nlSysNum(getParam<NonlinearSystemName>("forward_system"))),
+    _forward_sys_num(
+        _problem.nlSysNum(getParam<std::vector<SolverSystemName>>("forward_system")[0])),
     _adjoint_sys_num(_problem.nlSysNum(getParam<NonlinearSystemName>("adjoint_system"))),
     _nl_forward(_problem.getNonlinearSystemBase(_forward_sys_num)),
     _nl_adjoint(_problem.getNonlinearSystemBase(_adjoint_sys_num))
 {
+  // Disallow vectors of systems
+  if (getParam<std::vector<SolverSystemName>>("forward_system").size() != 1)
+    paramError("forward_system",
+               "Multiple nonlinear forward systems is not supported at the moment");
+
   // These should never be hit, but just in case
   if (!dynamic_cast<NonlinearSystem *>(&_nl_forward))
     paramError("forward_system", "Forward system does not appear to be a 'NonlinearSystem'.");

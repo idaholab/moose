@@ -1,0 +1,27 @@
+[Tests]
+  design = 'Physics/index.md'
+  issues = '#29019'
+  [cg]
+    type = CSVDiff
+    input = 'diffusion_multisys.i'
+    csvdiff = 'diffusion_multisys_out_sample_0010.csv'
+    requirement = 'The system shall be able to set up multi-system problems using a Physics syntax.'
+  []
+  [errors]
+    requirement = 'The system shall return an error'
+    [wrong_systems]
+      type = RunException
+      input = 'diffusion_multisys.i'
+      cli_args = "Physics/Diffusion/ContinuousGalerkin/diff_1/system_names='abc'"
+      expect_err = "System 'abc' is not found in the Problem"
+      detail = 'if the system specified to the Physics does not exist'
+    []
+    [too_many_systems]
+      type = RunException
+      input = 'diffusion_multisys.i'
+      cli_args = "Physics/Diffusion/ContinuousGalerkin/diff_1/system_names='sys1 sys2'"
+      expect_err = "There should be one system name per solver variable \(potentially repeated\), or a single system name for all variables"
+      detail = 'if more systems than needed are specified to a Physics action.'
+    []
+  []
+[]

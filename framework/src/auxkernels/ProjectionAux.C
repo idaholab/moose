@@ -93,8 +93,8 @@ ProjectionAux::computeValue()
       const auto & elem = _mesh.elemPtr(id);
       const auto block_id = elem->subdomain_id();
       // Only use higher D elements
-      if (_source_variable.hasBlocks(block_id) &&
-          (!_mesh.isLowerD(block_id) && elem->dim() == _mesh.dimension()) &&
+      // We allow full-dimensional elements in a higher dimension mesh
+      if (_source_variable.hasBlocks(block_id) && (!_mesh.isLowerD(block_id)) &&
           (!_use_block_restriction_for_source || hasBlocks(block_id)))
       {
         const auto elem_volume = elem->volume();
@@ -103,7 +103,8 @@ ProjectionAux::computeValue()
         sum_volumes += elem_volume;
       }
     }
-    mooseAssert(sum_volumes != 0, "Should have found a valid source variable value");
+    if (sum_volumes == 0)
+      mooseError("Did not find a valid source variable value for node: ", *_current_node);
     return sum_weighted_values / sum_volumes;
   }
 }

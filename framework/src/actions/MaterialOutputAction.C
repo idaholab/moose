@@ -31,6 +31,10 @@ InputParameters
 MaterialOutputAction::validParams()
 {
   InputParameters params = Action::validParams();
+  /// A flag to tell this action whether or not to print the unsupported properties
+  /// Note: A derived class can set this to false, override materialOutput and output
+  ///       a particular property that is not supported by this class.
+  params.addPrivateParam("print_unsupported_prop_names", true);
   return params;
 }
 
@@ -151,7 +155,8 @@ MaterialOutputAction::act()
                                                            _material_variable_names.end());
     }
   }
-  if (unsupported_names.size() > 0 && get_names_only)
+  if (unsupported_names.size() > 0 && get_names_only &&
+      getParam<bool>("print_unsupported_prop_names"))
   {
     std::ostringstream oss;
     for (const auto & name : unsupported_names)

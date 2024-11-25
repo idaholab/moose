@@ -341,12 +341,12 @@ addActionTypes(Syntax & syntax)
                            "(read_executor)"
                            "(add_executor)"
                            "(check_integrity_early)"
-                           "(check_integrity_early_physics)"
                            "(setup_predictor)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"
                            " add_external_aux_variables)"
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
+                           "(check_integrity_early_physics)"  // checks that systems and variables are consistent
                            "(setup_quadrature)"
                            "(add_convergence)"
                            "(add_default_convergence)"

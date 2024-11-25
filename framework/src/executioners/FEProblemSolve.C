@@ -11,8 +11,7 @@
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
-#include "DefaultNonlinearConvergence.h"
-#include "ReferenceResidualConvergence.h"
+#include "Convergence.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -58,14 +57,15 @@ FEProblemSolve::feProblemDefaultConvergenceParams()
 InputParameters
 FEProblemSolve::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = MultiSystemSolveObject::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
-  params.addParam<std::vector<std::string>>("splitting",
-                                            {},
-                                            "Top-level splitting defining a "
-                                            "hierarchical decomposition into "
-                                            "subsystems to help the solver.");
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "splitting",
+      {},
+      "Top-level splitting defining a hierarchical decomposition into "
+      "subsystems to help the solver. Outer-vector of this vector-of-vector parameter correspond "
+      "to each nonlinear system.");
 
   std::set<std::string> line_searches = mooseLineSearches();
 
@@ -97,10 +97,11 @@ FEProblemSolve::validParams()
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
-  params.addParam<ConvergenceName>("nonlinear_convergence",
-                                   "Name of Convergence object to use to assess convergence of the "
-                                   "nonlinear solve. If not provided, the default Convergence "
-                                   "associated with the Problem will be constructed internally.");
+  params.addParam<std::vector<ConvergenceName>>(
+      "nonlinear_convergence",
+      "Name of the Convergence object(s) to use to assess convergence of the "
+      "nonlinear system(s) solve. If not provided, the default Convergence "
+      "associated with the Problem will be constructed internally.");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -121,39 +122,45 @@ FEProblemSolve::validParams()
       "objects are executed. Solution-modifying objects include preset BCs, constraints, "
       "predictors, etc.");
   params.addParam<bool>("automatic_scaling", "Whether to use automatic scaling for the variables.");
-  params.addParam<bool>(
+  params.addParam<std::vector<bool>>(
       "compute_scaling_once",
-      true,
+      {true},
       "Whether the scaling factors should only be computed once at the beginning of the simulation "
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
-      "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
-  params.addParam<bool>(
+      "will be computed during an extra Jacobian evaluation at the beginning of every time step. "
+      "Vector entries correspond to each nonlinear system.");
+  params.addParam<std::vector<bool>>(
       "off_diagonals_in_auto_scaling",
-      false,
-      "Whether to consider off-diagonals when determining automatic scaling factors.");
-  params.addRangeCheckedParam<Real>(
+      {false},
+      "Whether to consider off-diagonals when determining automatic scaling factors. Vector "
+      "entries correspond to each nonlinear system.");
+  params.addRangeCheckedParam<std::vector<Real>>(
       "resid_vs_jac_scaling_param",
-      0,
+      {0},
       "0<=resid_vs_jac_scaling_param<=1",
       "A parameter that indicates the weighting of the residual vs the Jacobian in determining "
       "variable scaling parameters. A value of 1 indicates pure residual-based scaling. A value of "
-      "0 indicates pure Jacobian-based scaling");
-  params.addParam<std::vector<std::vector<std::string>>>(
+      "0 indicates pure Jacobian-based scaling. Vector entries correspond to each nonlinear "
+      "system.");
+  params.addParam<std::vector<std::vector<std::vector<std::string>>>>(
       "scaling_group_variables",
       "Name of variables that are grouped together for determining scale factors. (Multiple "
-      "groups can be provided, separated by semicolon)");
-  params.addParam<std::vector<std::string>>(
+      "groups can be provided, separated by semicolon). Vector entries correspond to each "
+      "nonlinear system.");
+  params.addParam<std::vector<std::vector<std::string>>>(
       "ignore_variables_for_autoscaling",
-      "List of variables that do not participate in autoscaling.");
+      "List of variables that do not participate in autoscaling. Vector entries correspond to each "
+      "nonlinear system.");
   params.addRangeCheckedParam<unsigned int>(
       "num_grids",
       1,
       "num_grids>0",
       "The number of grids to use for a grid sequencing algorithm. This includes the final grid, "
       "so num_grids = 1 indicates just one solve in a time-step");
-  params.addParam<bool>("residual_and_jacobian_together",
-                        false,
-                        "Whether to compute the residual and Jacobian together.");
+  params.addParam<std::vector<bool>>("residual_and_jacobian_together",
+                                     {false},
+                                     "Whether to compute the residual and Jacobian together. "
+                                     "Vector entries correspond to each nonlinear system.");
 
   params.addParam<bool>("reuse_preconditioner",
                         false,
@@ -170,12 +177,26 @@ FEProblemSolve::validParams()
                                 "until the number of linear iterations "
                                 "exceeds this number");
 
+  // Multi-system fixed point
+  // Defaults to false because of the difficulty of defining a good multi-system convergence
+  // criterion, unless we add a default one to the simulation?
+  params.addParam<bool>(
+      "multi_system_fixed_point",
+      false,
+      "Whether to perform fixed point (Picard) iterations between the nonlinear systems.");
+  params.addParam<ConvergenceName>(
+      "multi_system_fixed_point_convergence",
+      "Convergence object to determine the convergence of the multi-system fixed point iteration. "
+      "If unspecified, defaults to checking that every system is converged (based on their own "
+      "convergence criterion)");
+
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
-  params.addParamNamesToGroup("solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
-                              "num_grids residual_and_jacobian_together splitting",
-                              "Nonlinear Solver");
+  params.addParamNamesToGroup(
+      "solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
+      "num_grids residual_and_jacobian_together splitting nonlinear_convergence",
+      "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
@@ -183,15 +204,18 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
+  params.addParamNamesToGroup("multi_system_fixed_point multi_system_fixed_point_convergence",
+                              "Multiple solver system");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
   return params;
 }
 
 FEProblemSolve::FEProblemSolve(Executioner & ex)
-  : NonlinearSolveObject(ex),
-    _splitting(getParam<std::vector<std::string>>("splitting")),
-    _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
+  : MultiSystemSolveObject(ex),
+    _num_grid_steps(getParam<unsigned int>("num_grids") - 1),
+    _using_multi_sys_fp_iterations(getParam<bool>("multi_system_fixed_point")),
+    _multi_sys_fp_convergence(nullptr) // has not been created yet
 {
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
       _moose_line_searches.end())
@@ -204,37 +228,27 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
   EquationSystems & es = _problem.es();
   es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
-
   es.parameters.set<Real>("linear solver absolute tolerance") = getParam<Real>("l_abs_tol");
-
   es.parameters.set<unsigned int>("linear solver maximum iterations") =
       getParam<unsigned int>("l_max_its");
-
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
-
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");
 
+  // Transfer to the Problem misc nonlinear solve optimization parameters
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));
-
   _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
 
   if (isParamValid("nonlinear_convergence"))
   {
-    _problem.setNonlinearConvergenceName(getParam<ConvergenceName>("nonlinear_convergence"));
     if (_problem.onlyAllowDefaultNonlinearConvergence())
       mooseError("The selected problem does not allow 'nonlinear_convergence' to be set.");
+    _problem.setNonlinearConvergenceNames(
+        getParam<std::vector<ConvergenceName>>("nonlinear_convergence"));
   }
   else
     _problem.setNeedToAddDefaultNonlinearConvergence();
-
-  _nl.setDecomposition(_splitting);
-
-  _nl.setPreSMOResidual(getParam<bool>("use_pre_SMO_residual"));
-
-  if (getParam<bool>("residual_and_jacobian_together"))
-    _nl.residualAndJacobianTogether();
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them
@@ -254,60 +268,174 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
                                    : getMooseApp().defaultAutomaticScaling()) &&
                               (_problem.solverParams()._type != Moose::ST_JFNK));
 
-  _nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
-  _nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
-  _nl.offDiagonalsInAutoScaling(getParam<bool>("off_diagonals_in_auto_scaling"));
-  if (isParamValid("scaling_group_variables"))
-    _nl.scalingGroupVariables(
-        getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
-  if (isParamValid("ignore_variables_for_autoscaling"))
+  if (!_using_multi_sys_fp_iterations && isParamValid("multi_system_fixed_point_convergence"))
+    paramError("multi_system_fixed_point_convergence",
+               "Cannot set a convergence object for multi-system fixed point iterations if "
+               "'multi_system_fixed_point' is set to false");
+  if (_using_multi_sys_fp_iterations && !isParamValid("multi_system_fixed_point_convergence"))
+    paramError("multi_system_fixed_point_convergence",
+               "Must set a convergence object for multi-system fixed point iterations if using "
+               "multi-system fixed point iterations");
+
+  // Set the same parameters to every nonlinear system by default
+  int i_nl_sys = -1;
+  for (const auto i_sys : index_range(_systems))
   {
-    // Before setting ignore_variables_for_autoscaling, check that they are not present in
-    // scaling_group_variables
+    auto nl_ptr = dynamic_cast<NonlinearSystemBase *>(_systems[i_sys]);
+    // Linear systems have very different parameters at the moment
+    if (!nl_ptr)
+      continue;
+    auto & nl = *nl_ptr;
+    i_nl_sys++;
+
+    nl.setPreSMOResidual(getParam<bool>("use_pre_SMO_residual"));
+
+    const auto & all_splittings = getParam<std::vector<std::vector<std::string>>>("splitting");
+    if (all_splittings.size())
+      nl.setDecomposition(
+          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>("splitting", i_nl_sys));
+    else
+      nl.setDecomposition({});
+
+    const auto res_and_jac =
+        getParamFromNonlinearSystemVectorParam<bool>("residual_and_jacobian_together", i_nl_sys);
+    if (res_and_jac)
+      nl.residualAndJacobianTogether();
+
+    // Automatic scaling parameters
+    nl.computeScalingOnce(
+        getParamFromNonlinearSystemVectorParam<bool>("compute_scaling_once", i_nl_sys));
+    nl.autoScalingParam(
+        getParamFromNonlinearSystemVectorParam<Real>("resid_vs_jac_scaling_param", i_nl_sys));
+    nl.offDiagonalsInAutoScaling(
+        getParamFromNonlinearSystemVectorParam<bool>("off_diagonals_in_auto_scaling", i_nl_sys));
     if (isParamValid("scaling_group_variables"))
+      nl.scalingGroupVariables(
+          getParamFromNonlinearSystemVectorParam<std::vector<std::vector<std::string>>>(
+              "scaling_group_variables", i_nl_sys));
+    if (isParamValid("ignore_variables_for_autoscaling"))
     {
-      const auto & ignore_variables_for_autoscaling =
-          getParam<std::vector<std::string>>("ignore_variables_for_autoscaling");
-      const auto & scaling_group_variables =
-          getParam<std::vector<std::vector<std::string>>>("scaling_group_variables");
-      for (const auto & group : scaling_group_variables)
-        for (const auto & var_name : group)
-          if (std::find(ignore_variables_for_autoscaling.begin(),
-                        ignore_variables_for_autoscaling.end(),
-                        var_name) != ignore_variables_for_autoscaling.end())
-            paramError("ignore_variables_for_autoscaling",
-                       "Variables cannot be in a scaling grouping and also be ignored");
+      // Before setting ignore_variables_for_autoscaling, check that they are not present in
+      // scaling_group_variables
+      if (isParamValid("scaling_group_variables"))
+      {
+        const auto & ignore_variables_for_autoscaling =
+            getParamFromNonlinearSystemVectorParam<std::vector<std::string>>(
+                "ignore_variables_for_autoscaling", i_nl_sys);
+        const auto & scaling_group_variables =
+            getParamFromNonlinearSystemVectorParam<std::vector<std::vector<std::string>>>(
+                "scaling_group_variables", i_nl_sys);
+        for (const auto & group : scaling_group_variables)
+          for (const auto & var_name : group)
+            if (std::find(ignore_variables_for_autoscaling.begin(),
+                          ignore_variables_for_autoscaling.end(),
+                          var_name) != ignore_variables_for_autoscaling.end())
+              paramError("ignore_variables_for_autoscaling",
+                         "Variables cannot be in a scaling grouping and also be ignored");
+      }
+      nl.ignoreVariablesForAutoscaling(
+          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>(
+              "ignore_variables_for_autoscaling", i_nl_sys));
     }
-    _nl.ignoreVariablesForAutoscaling(
-        getParam<std::vector<std::string>>("ignore_variables_for_autoscaling"));
   }
 
+  // Multi-grid options
   _problem.numGridSteps(_num_grid_steps);
+}
+
+template <typename T>
+T
+FEProblemSolve::getParamFromNonlinearSystemVectorParam(const std::string & param_name,
+                                                       unsigned int index) const
+{
+  const auto & param_vec = getParam<std::vector<T>>(param_name);
+  if (index > _num_nl_systems)
+    paramError(param_name,
+               "Vector parameter is requested at index (" + std::to_string(index) +
+                   ") which is larger than number of nonlinear systems (" +
+                   std::to_string(_num_nl_systems) + ").");
+  if (param_vec.size() == 0)
+    paramError(
+        param_name,
+        "This parameter was passed to a routine which cannot handle empty vector parameters");
+  if (param_vec.size() != 1 && param_vec.size() != _num_nl_systems)
+    paramError(param_name,
+               "Vector parameter size (" + std::to_string(param_vec.size()) +
+                   ") is different than the number of nonlinear systems (" +
+                   std::to_string(_num_nl_systems) + ").");
+
+  // User passed only one parameter, assume it applies to all nonlinear systems
+  if (param_vec.size() == 1)
+    return param_vec[0];
+  else
+    return param_vec[index];
 }
 
 bool
 FEProblemSolve::solve()
 {
-  // This loop is for nonlinear multigrids (developed by Alex)
+  // This should be late enough to retrieve the convergence object.
+  // TODO: Move this to a setup phase, which does not exist for SolveObjects
+  if (isParamValid("multi_system_fixed_point_convergence"))
+    _multi_sys_fp_convergence =
+        &_problem.getConvergence(getParam<ConvergenceName>("multi_system_fixed_point_convergence"));
+
+  // Outer loop for multi-grid convergence
+  bool converged = false;
+  unsigned int num_fp_multisys_iters = 0;
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
-    _problem.solve(_nl.number());
-
-    if (_problem.shouldSolve())
+    // Multi-system fixed point loop
+    // Use a convergence object if provided, if not, use a reasonable default of every nested system
+    // being converged
+    num_fp_multisys_iters = 0;
+    converged = false;
+    while (_multi_sys_fp_convergence
+               ? (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
+                  Convergence::MooseConvergenceStatus::ITERATING)
+               : !converged)
     {
-      if (_problem.converged(_nl.number()))
-        _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
-      else
+      // Loop over each system
+      for (const auto sys : _systems)
       {
-        _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
-        return false;
+        const bool is_nonlinear = (dynamic_cast<NonlinearSystemBase *>(sys) != nullptr);
+
+        // Call solve on the problem for that system
+        if (is_nonlinear)
+          _problem.solve(sys->number());
+        else
+          _problem.solveLinearSystem(sys->number() - _problem.numNonlinearSystems());
+
+        // Check convergence
+        const auto solve_name =
+            _systems.size() == 1 ? " Solve" : "System " + sys->name() + ": Solve";
+        if (_problem.shouldSolve())
+        {
+          if (_problem.converged(sys->number()))
+            _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << std::endl;
+          else
+          {
+            _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT
+                     << std::endl;
+            return false;
+          }
+        }
+        else
+          _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << std::endl;
       }
+
+      if (!_using_multi_sys_fp_iterations)
+        converged = true;
+      num_fp_multisys_iters++;
     }
-    else
-      _console << COLOR_GREEN << " Solve Skipped!" << COLOR_DEFAULT << std::endl;
 
     if (grid_step != _num_grid_steps)
       _problem.uniformRefine();
   }
-  return _problem.converged(_nl.number());
+
+  if (_multi_sys_fp_convergence)
+    return (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
+            Convergence::MooseConvergenceStatus::CONVERGED);
+  else
+    return converged;
 }

@@ -37,6 +37,15 @@ protected:
    */
   const Moose::Functor<Real> & _d;
 
+  /// Whether the input pressure is the dynamic pressure
+  const bool _pressure_is_dynamic;
+  /// Where the static pressure rho*g*(z-z0) term is 0
+  const Point _reference_pressure_point;
+  /// The value of pressure at that point
+  const Real _reference_pressure_value;
+  /// The gravity vector
+  const Point _gravity_vec;
+
   /// variables
   const Moose::Functor<ADReal> & _pressure;
   const Moose::Functor<ADReal> & _T_fluid;
