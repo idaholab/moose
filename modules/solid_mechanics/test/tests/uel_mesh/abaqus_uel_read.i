@@ -1,9 +1,23 @@
 [Mesh]
   type = AbaqusUELMesh
-  file = CUBE_UEL.inp
+  file = BIG_CUBE_UEL.inp
+  debug = true
 []
 
 [Variables/AddUELVariables]
+[]
+
+[AuxVariables]
+  [pid]
+  []
+[]
+
+[AuxKernels]
+  [pid]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'INITIAL'
+  []
 []
 
 [ICs]

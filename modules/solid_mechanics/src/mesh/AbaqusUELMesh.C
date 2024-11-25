@@ -22,11 +22,19 @@ AbaqusUELMesh::validParams()
       "cannot generally be represented by libMesh meshes. This mesh manages the custom "
       "connectivity and DOF assignment.");
   params.addRequiredParam<FileName>("file", "The path to the Abaqus input to read.");
+  params.addParam<bool>("debug", false, "Enable additional debug output.");
   return params;
 }
 
-AbaqusUELMesh::AbaqusUELMesh(const InputParameters & parameters) : MooseMesh(parameters) {}
-AbaqusUELMesh::AbaqusUELMesh(const AbaqusUELMesh & other_mesh) : MooseMesh(other_mesh) {}
+AbaqusUELMesh::AbaqusUELMesh(const InputParameters & parameters)
+  : MooseMesh(parameters), _debug(getParam<bool>("debug"))
+{
+}
+
+AbaqusUELMesh::AbaqusUELMesh(const AbaqusUELMesh & other_mesh)
+  : MooseMesh(other_mesh), _debug(other_mesh._debug)
+{
+}
 
 std::unique_ptr<MooseMesh>
 AbaqusUELMesh::safeClone() const
@@ -223,20 +231,48 @@ AbaqusUELMesh::readUserElement(const std::string & header)
 
   // We will read nodes until the next line begins with *
   std::string s;
+  int line = 0;
+  std::set<std::size_t> seen_node;
   while (readDataLine(s))
   {
     // split line
     std::vector<std::size_t> col;
     MooseUtils::tokenizeAndConvert(s, col, ",");
-    const auto node_number = col[0] - 1;
+
+    // number of the current node (0-based)
+    const auto node_number = line ? (col[0] - 1) : 0;
     if (node_number >= n_nodes)
       paramError("file", "Invalid node number in Abaqus input.");
+
+    // mark off node as seen and check for duplicates
+    if (seen_node.count(node_number))
+      mooseError("Duplicate node in '*user element' section.");
+    seen_node.insert(node_number);
 
     // copy in var numbers (converting from 1-base to 0-base)
     auto & var = uel.vars[node_number];
     for (const auto i : index_range(col))
-      if (i > 0)
+      // note how abaqus treats the first data line differnetly from the following lines!
+      if (i > 0 || !line)
         var.push_back(col[i] - 1);
+
+    line++;
+  }
+
+  // check if any node numbers were omitted, and if so, set them to the preceeding node's variables
+  for (const auto i : make_range(n_nodes - 1))
+    if (!seen_node.count(i + 1))
+      for (const auto v : uel.vars[i])
+        uel.vars[i + 1].push_back(v);
+
+  // debug output
+  if (_debug)
+  {
+    std::stringstream ss;
+    ss << "UEL '" << type << "':\n";
+    for (const auto i : make_range(n_nodes))
+      ss << i << ": " << Moose::stringify(uel.vars[i]) << '\n';
+    mooseInfoRepeated(ss.str());
   }
 
   // insert custom element into map
@@ -310,14 +346,10 @@ AbaqusUELMesh::setupNodeSets()
 
       // add node element to variable-specific block
       auto * elem = _mesh->elem_ptr(nodes[i]);
-      for (const auto & var : uel.vars[nodes[i]])
-      {
-        auto id = elem->subdomain_id();
-        id = id | (1 << var);
-        elem->subdomain_id() = id;
-      }
-      // for (const auto & var : uel.vars[nodes[i]])
-      //   elem->subdomain_id() |= (1 << var);
+      if (!elem)
+        mooseError("Element not found. Internal error.");
+      for (const auto & var : uel.vars[i])
+        elem->subdomain_id() |= (1 << var);
     }
   }
 }
