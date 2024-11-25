@@ -6,6 +6,7 @@ plugin_SOURCES := constants.f90 gauss_quadrature.f90 matrix_operations.f90 physi
 plugin_NAME := uel
 
 # build the plugin (MOOSE_DIR must point to the root of the MOOSE installation)
+MOOSE_DIR ?= ../../../../../..
 -include $(MOOSE_DIR)/framework/plugin.mk
 
 fail:

@@ -89,6 +89,9 @@ protected:
   /// all subdomain IDs used for UEL variable restriction
   std::set<SubdomainID> _uel_block_ids;
 
+  /// enable additional debugging output
+  const bool _debug;
+
 private:
   class EndOfAbaqusInput : public std::exception
   {
