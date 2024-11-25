@@ -75,21 +75,11 @@
   []
 []
 
-[Convergence]
-  [linear]
-    type = IterationCountConvergence
-    max_iterations = 1
-    converge_at_max_iterations = true
-  []
-[]
-
 [Executioner]
   type = Steady
   system_names = u_sys
   l_abs_tol = 1e-12
   l_tol = 1e-10
-  multi_system_fixed_point=true
-  multi_system_fixed_point_convergence=linear
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   fixed_point_rel_tol = 1e-10
