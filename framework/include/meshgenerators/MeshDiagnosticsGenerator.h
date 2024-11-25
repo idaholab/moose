@@ -36,7 +36,9 @@ private:
   //// Routine to check is mesh is fully covered in nodesets
   void checkWatertightNodesets(const std::unique_ptr<MeshBase> & mesh) const;
   /// Helper function that finds the intersection of the _watertight_boundaries vector and the provided one
-  std::vector<boundary_id_type> findBoundaryOverlap(std::vector<boundary_id_type>, std::vector<boundary_id_type> boundary_ids) const;
+  std::vector<boundary_id_type>
+  findBoundaryOverlap(std::vector<boundary_id_type>,
+                      std::vector<boundary_id_type> boundary_ids) const;
   /// Routine to check the element volumes
   void checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check the element types in each subdomain
