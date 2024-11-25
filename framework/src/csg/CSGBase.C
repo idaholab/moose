@@ -29,22 +29,26 @@ CSGBase::~CSGBase() {}
 void
 CSGBase::generateOutput() const
 {
+  std::ofstream os_out;
+  // TODO update file that will be outputted to
+  os_out.open("csg_file.out", std::ofstream::out | std::ofstream::trunc);
+
   const auto all_surfs = getAllSurfaces();
   for (auto it = all_surfs.begin(); it != all_surfs.end(); it++)
   {
     const auto surf_ptr = it->second;
     const auto surf_name = surf_ptr->getName();
     const auto coeffs = surf_ptr->getCoeffs();
-    Moose::out << surf_name << " = openmc.Plane(name='" << surf_name << "', ";
+    os_out << surf_name << " = openmc.Plane(name='" << surf_name << "', ";
     for (auto it = coeffs.begin(); it != coeffs.end(); ++it)
     {
       if (it != coeffs.begin())
-        Moose::out << ", ";
-      Moose::out << it->first << "=" << it->second;
+        os_out << ", ";
+      os_out << it->first << "=" << it->second;
     }
     if (surf_ptr->getBoundaryType() != CSG::CSGSurface::BoundaryType::transmission)
-      Moose::out << ", boundary_type='vacuum'";
-    Moose::out << ")" << std::endl;
+      os_out << ", boundary_type='vacuum'";
+    os_out << ")" << std::endl;
   }
 
   const auto all_cells = _root_universe->getAllCells();
@@ -64,9 +68,9 @@ CSGBase::generateOutput() const
     }
     else
       fill = "None";
-    Moose::out << cell_name << " = openmc.Cell(name='" << cell_name << "', fill=" << fill
+    os_out << cell_name << " = openmc.Cell(name='" << cell_name << "', fill=" << fill
                << ", region=" << region << ")" << std::endl;
   }
-  Moose::out << "geometry = openmc.Geometry([" << Moose::stringify(cell_names) << "])" << std::endl;
+  os_out << "geometry = openmc.Geometry([" << Moose::stringify(cell_names) << "])" << std::endl;
 }
 } // namespace CSG

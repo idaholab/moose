@@ -233,6 +233,7 @@ FileMeshGenerator::generateCSG()
     // This logic assumes (n_sides == n_neighbors), which is valid according to libMesh
     // documentation
     const auto elem_id = elem->id();
+    const auto elem_dim = elem->dim();
     const auto centroid = elem->vertex_average();
     const auto cell_name = "cell" + std::to_string(elem_id);
     const auto subdomain_id = elem->subdomain_id();
@@ -258,7 +259,7 @@ FileMeshGenerator::generateCSG()
       // points that belong to the plane
       const auto node_ids_on_side = elem->nodes_on_side(side_index);
       Point p1, p2, p3;
-      if (elem->dim() == 2)
+      if (elem_dim == 2)
       {
         // In two dimensions, each side consists of 2 nodes that are on the surface plane
         // we are trying to generate. The third point on the plane is defined as the midpoint
@@ -267,14 +268,18 @@ FileMeshGenerator::generateCSG()
         p2 = Point(*(elem->node_ptr(node_ids_on_side[1])));
         p3 = (p1 + p2) / 2. + Point(0, 0, 1);
       }
-      else
+      else if (elem_dim == 3)
       {
-        // TODO implement for dim == 3
         // In three dimensions, each side consists of faces that are defined by three or
         // more nodes. Pick the first three nodes as the ones that define the plane we want to
         // generate
-        mooseError("Algorithm has not been implemented for elements with dimension != 2");
+        mooseAssert(node_ids_on_side.size() >= 3, "3-D face contains less than 3 nodes");
+        p1 = Point(*(elem->node_ptr(node_ids_on_side[0])));
+        p2 = Point(*(elem->node_ptr(node_ids_on_side[1])));
+        p3 = Point(*(elem->node_ptr(node_ids_on_side[2])));
       }
+      else
+        mooseError("Algorithm has only been implemented for 2-D and 3-D element types");
 
       // Define CSGPlane for element side
       const auto surf_name = "surf" + std::to_string(surface_id++);
