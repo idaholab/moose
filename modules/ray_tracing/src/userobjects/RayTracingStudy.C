@@ -92,6 +92,12 @@ RayTracingStudy::validParams()
                         "Trace intersections are not verified regardless of this parameter in "
                         "optimized modes (opt, oprof).");
 
+  params.addParam<bool>("allow_other_flags_with_prekernels",
+                        false,
+                        "Whether or not to allow the list of execution flags to have PRE_KERNELS "
+                        "mixed with other flags. If this parameter is not set then if PRE_KERNELS "
+                        "is provided it must be the only execution flag.");
+
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
 
@@ -195,7 +201,7 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
   // Evaluating on residual and Jacobian evaluation
   if (_execute_enum.isValueSet(EXEC_PRE_KERNELS))
   {
-    if (_execute_enum.size() > 1)
+    if (!getParam<bool>("allow_other_flags_with_prekernels") && _execute_enum.size() > 1)
       paramError("execute_on",
                  "PRE_KERNELS cannot be mixed with any other execution flag.\nThat is, you cannot "
                  "currently "
