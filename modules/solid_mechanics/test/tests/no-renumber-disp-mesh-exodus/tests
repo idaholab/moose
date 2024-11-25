@@ -1,0 +1,9 @@
+[Tests]
+  design = 'Exodus.md'
+  issues = '#29137'
+  [test]
+    type = RunApp
+    input = test.i
+    requirement = 'The system shall be able to initially disallow renumbering when building the mesh, later have exodus output which triggers renumbering, and keep the numbering between reference and displaced meshes in sync.'
+  []
+[]
