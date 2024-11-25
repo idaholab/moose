@@ -71,7 +71,9 @@ MFEMSteady::execute()
   _mfem_problem.timestepSetup();
 
   // Solve equation system.
+   if (_mfem_problem.shouldSolve()) {
   _problem_operator->Solve(_problem_data._f);
+	}
 
   // Displace mesh, if required
   _mfem_problem.displaceMesh();

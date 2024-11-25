@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = mug.e
+  file = gold/mug.e
   dim = 3
 []
 
@@ -16,19 +16,6 @@
   []
 []
 
-[Variables]
-  [diffused0]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
-[]
-[AuxVariables]
-  [sub0]
-    type = MFEMVariable
-    fespace = H1FESpace
-    ic = -100.0
-  []
-[]
 
 [Functions]
   [value_bottom]
@@ -44,13 +31,13 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = diffused0
+    variable = send
     boundary = '1'
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = diffused0
+    variable = send
     boundary = '2'
     coefficient = TopValue
   []
@@ -78,7 +65,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = diffused0
+    variable = send
     coefficient = diffusivity
   []
 []
@@ -104,8 +91,15 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffuseon
+    file_base = OutputData/Diffusion
     vtk_format = ASCII
+  []
+[]
+
+[Variables]
+  [send]
+    type = MFEMVariable
+    fespace = H1FESpace
   []
 []
 
@@ -120,20 +114,10 @@
 [Transfers]
     [./to_sub]
         type = MFEMCopyTransfer
-        source_variable = diffused0
-        variable = sub1 
-        #execute_on = FINAL
+        source_variable = send
+        variable = recv
         to_multi_app = subapp
-        #skip_coordinate_collapsing = true
     [../]
 []
 
-#[Transfers]
-#  [./to_sub]
-#    type = MultiAppCopyTransfer
-#    source_variable = u
-#    variable = u
-#    to_multi_app = sub
-#  [../]
-#[]
 

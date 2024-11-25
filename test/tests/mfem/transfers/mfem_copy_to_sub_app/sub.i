@@ -1,11 +1,12 @@
 [Mesh]
   type = MFEMMesh
-  file = mug.e
+  file = gold/mug.e
   dim = 3
 []
 
 [Problem]
   type = MFEMProblem
+  solve = false
 []
 
 [FESpaces]
@@ -16,89 +17,12 @@
   []
 []
 
-[Variables]
-  [diffused1]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
-[]
 [AuxVariables]
-  [sub1]
+  [recv]
     type = MFEMVariable
     fespace = H1FESpace
-    ic = 10.0
   []
 []
-
-[Functions]
-  [value_bottom]
-    type = ParsedFunction
-    expression = 1.0
-  []
-  [value_top]
-    type = ParsedFunction
-    expression = 0.0
-  []
-[]
-
-[Coefficients]
-  [TopValue]
-    type = MFEMFunctionCoefficient
-    function = value_top
-  []
-  [BottomValue]
-    type = MFEMFunctionCoefficient
-    function = value_bottom
-  []
-[]
-
-[BCs]
-  [bottom]
-    type = MFEMScalarDirichletBC
-    variable = diffused1
-    boundary = '1'
-    coefficient = BottomValue
-  []
-  [low_terminal]
-    type = MFEMScalarDirichletBC
-    variable = diffused1
-    boundary = '2'
-    coefficient = TopValue
-  []
-[]
-
-
-
-[Materials]
-  [Substance]
-    type = MFEMGenericConstantMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
-[]
-[]
-
-
-[Kernels]
-  [diff]
-    type = MFEMDiffusionKernel
-    variable = diffused1
-    coefficient = diffusivity
-  []
-[]
-
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-  []
-[]
-
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-16
-  l_max_its = 1000  
-[]
-
 
 [Executioner]
   type = MFEMSteady
@@ -108,7 +32,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion_sub
+    file_base = OutputData/DiffusionSubApp
     vtk_format = ASCII
   []
 []

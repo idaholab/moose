@@ -27,6 +27,17 @@ MFEMCopyTransfer::MFEMCopyTransfer(InputParameters const & params)
 }
 
 void
+mfem_transfer(MFEMProblem& to_problem,
+              std::string const & to_name,
+              MFEMProblem& from_problem,
+              std::string const & from_name)
+{
+  auto & to_var = to_problem.getProblemData()._gridfunctions.GetRef(to_name);
+  auto & from_var = from_problem.getProblemData()._gridfunctions.GetRef(from_name);
+  to_var = from_var; 
+}
+
+void
 MFEMCopyTransfer::execute()
 {
   TIME_SECTION("MFEMCopyTransfer::execute", 5, "Copies variables");
@@ -74,10 +85,21 @@ MFEMCopyTransfer::execute()
   }
   else if (_current_direction == BETWEEN_MULTIAPP)
   {
-    printf("BETWEEN\n");
-    //	if (!transfers_done)
-    //    mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
-    //             "per multiapp involved on each rank");
+    int transfers_done = 0;
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+    {
+      if (getFromMultiApp()->hasLocalApp(i))
+      {
+        if (getToMultiApp()->hasLocalApp(i))
+        {
+		    mfem_transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),_to_var_names[0],
+						  static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)),_from_var_names[0]);
+        }
+      }
+    }
+    if (!transfers_done)
+      mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
+                 "per multiapp involved on each rank");	
   }
 }
 
