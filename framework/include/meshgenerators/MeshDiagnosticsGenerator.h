@@ -32,9 +32,11 @@ private:
   /// Routine to check sideset orientation near subdomains
   void checkSidesetsOrientation(const std::unique_ptr<MeshBase> & mesh) const;
   //// Routine to check is mesh is fully covered in sidesets
-  void checkWaterTightSidesets(const std::unique_ptr<MeshBase> & mesh) const;
+  void checkWatertightSidesets(const std::unique_ptr<MeshBase> & mesh) const;
   //// Routine to check is mesh is fully covered in nodesets
   void checkWatertightNodesets(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Helper function that finds the intersection of the _watertight_boundaries vector and the provided one
+  std::vector<boundary_id_type> findBoundaryOverlap(std::vector<boundary_id_type>, std::vector<boundary_id_type> boundary_ids) const;
   /// Routine to check the element volumes
   void checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check the element types in each subdomain
@@ -64,10 +66,12 @@ private:
 
   /// whether to check that sidesets are consistently oriented using neighbor subdomains
   const MooseEnum _check_sidesets_orientation;
-  //// whether to check that each external side is assigned to a sideset
+  /// whether to check that each external side is assigned to a sideset
   const MooseEnum _check_watertight_sidesets;
-  //// whether to check that each external node is assigned to a nodeset
+  /// whether to check that each external node is assigned to a nodeset
   const MooseEnum _check_watertight_nodesets;
+  /// boundaries to be checked in watertight checks
+  const std::vector<BoundaryID> _watertight_boundaries;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// minimum size for element volume to be counted as a tiny element
