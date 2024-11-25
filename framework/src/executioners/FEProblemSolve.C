@@ -406,7 +406,8 @@ FEProblemSolve::solve()
           _problem.solve(sys->number());
         else
         {
-          const unsigned int linear_sys_number = sys->number() - _problem.numNonlinearSystems();
+          const auto linear_sys_number =
+              cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
           _problem.solveLinearSystem(linear_sys_number, &_problem.getPetscOptions());
 
           // This is for postprocessing purposes in case none of the objects

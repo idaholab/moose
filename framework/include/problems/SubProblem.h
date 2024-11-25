@@ -88,12 +88,17 @@ public:
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
   /**
-   * @return whether the given \p nl_sys_num is converged
+   * @return whether the given solver system \p sys_num is converged
    */
   virtual bool solverSystemConverged(const unsigned int sys_num) { return converged(sys_num); }
 
   /**
-   * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
+   * @return whether the given nonlinear system \p nl_sys_num is converged.
+   */
+  virtual bool nlConverged(const unsigned int nl_sys_num);
+
+  /**
+   * Eventually we want to convert this virtual over to taking a solver system number argument.
    * We will have to first convert apps to use solverSystemConverged, and then once that is done, we
    * can change this signature. Then we can go through the apps again and convert back to this
    * changed API

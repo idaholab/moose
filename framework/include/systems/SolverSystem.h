@@ -51,7 +51,8 @@ public:
   virtual bool containsTimeKernel() = 0;
 
   /**
-   * If the system has a kernel that corresponds to a time derivative
+   * Returns the names of the variables that have time derivative kernels
+   * in the system.
    */
   virtual std::vector<std::string> timeKernelVariableNames() = 0;
 

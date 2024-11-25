@@ -18,9 +18,6 @@
 class InputParameters;
 class FEProblemBase;
 
-template <typename T>
-InputParameters validParams();
-
 /**
  * A base class that can be used for executioners solving for steady state problems.
  */
