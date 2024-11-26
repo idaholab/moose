@@ -1365,6 +1365,15 @@ public:
    */
   bool hasLowerD() const { return _has_lower_d; }
 
+  /**
+   * @return The set of lower-dimensional blocks for interior sides
+   */
+  const std::set<SubdomainID> & interiorLowerDBlocks() const { return _lower_d_interior_blocks; }
+  /**
+   * @return The set of lower-dimensional blocks for boundary sides
+   */
+  const std::set<SubdomainID> & boundaryLowerDBlocks() const { return _lower_d_boundary_blocks; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1752,6 +1761,10 @@ private:
   /// Holds a map from neighbor subomdain ids to the boundary ids that are attached to it
   std::unordered_map<SubdomainID, std::set<BoundaryID>> _neighbor_subdomain_boundary_ids;
 
+  /// Mesh blocks for interior lower-d elements in different types
+  std::set<SubdomainID> _lower_d_interior_blocks;
+  /// Mesh blocks for boundary lower-d elements in different types
+  std::set<SubdomainID> _lower_d_boundary_blocks;
   /// Holds a map from a high-order element side to its corresponding lower-d element
   std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
       _higher_d_elem_side_to_lower_d_elem;

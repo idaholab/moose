@@ -34,15 +34,21 @@ LowerDIntegratedBC::LowerDIntegratedBC(const InputParameters & parameters)
     _test_lambda(_lowerd_var.phiLower())
 {
   const auto & lower_domains = _lowerd_var.activeSubdomains();
-  if (!lower_domains.count(Moose::BOUNDARY_SIDE_LOWERD_ID) && lower_domains.size() != 1)
-    paramError(
-        "lowerd_variable",
-        "Must be only defined on the subdomain BOUNDARY_SIDE_LOWERD_SUBDOMAIN subdomain that is "
-        "added by Mesh/build_all_side_lowerd_mesh=true");
+  for (const auto & id : _mesh.boundaryLowerDBlocks())
+    if (lower_domains.count(id) == 0)
+      mooseDocumentedError(
+          "moose",
+          29151,
+          "'lowerd_variable' must be defined on the boundary lower-dimensional subdomain '" +
+              _mesh.getSubdomainName(id) +
+              "' that is added by Mesh/build_all_side_lowerd_mesh=true.\nThe check could be overly "
+              "restrictive.");
 
-  if (_var.activeSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
-    paramError("variable",
-               "Must not be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain");
+  for (const auto & id : _var.activeSubdomains())
+    if (_mesh.boundaryLowerDBlocks().count(id) > 0)
+      paramError("variable",
+                 "Must not be defined on the boundary lower-dimensional subdomain '" +
+                     _mesh.getSubdomainName(id) + "'");
 
   // Note: the above two conditions also ensure that the variable and lower-d variable are
   // different.

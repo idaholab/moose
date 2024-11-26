@@ -51,7 +51,7 @@
   [lambda]
     order = CONSTANT
     family = MONOMIAL
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
   []
 []
 

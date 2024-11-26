@@ -60,6 +60,7 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/ghost_point_neighbors.h"
 #include "libmesh/fe_type.h"
+#include "libmesh/enum_to_string.h"
 
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
@@ -297,6 +298,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
     _is_split(other_mesh._is_split),
+    _lower_d_interior_blocks(other_mesh._lower_d_interior_blocks),
+    _lower_d_boundary_blocks(other_mesh._lower_d_boundary_blocks),
     _has_lower_d(other_mesh._has_lower_d),
     _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
@@ -632,18 +635,68 @@ MooseMesh::buildLowerDMesh()
   // remove existing lower-d element first
   std::set<Elem *> deleteable_elems;
   for (auto & elem : mesh.element_ptr_range())
-    if (elem->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID ||
-        elem->subdomain_id() == Moose::BOUNDARY_SIDE_LOWERD_ID)
+    if (_lower_d_interior_blocks.count(elem->subdomain_id()) ||
+        _lower_d_boundary_blocks.count(elem->subdomain_id()))
       deleteable_elems.insert(elem);
     else if (elem->n_sides() > max_n_sides)
       max_n_sides = elem->n_sides();
 
   for (auto & elem : deleteable_elems)
     mesh.delete_elem(elem);
+  for (const auto & id : _lower_d_interior_blocks)
+    _mesh_subdomains.erase(id);
+  for (const auto & id : _lower_d_boundary_blocks)
+    _mesh_subdomains.erase(id);
+  _lower_d_interior_blocks.clear();
+  _lower_d_boundary_blocks.clear();
 
   mesh.comm().max(max_n_sides);
 
   deleteable_elems.clear();
+
+  // get all side types
+  std::set<int> interior_side_types;
+  std::set<int> boundary_side_types;
+  for (const auto & elem : mesh.active_element_ptr_range())
+    for (const auto side : elem->side_index_range())
+    {
+      Elem * neig = elem->neighbor_ptr(side);
+      std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side));
+      if (neig)
+        interior_side_types.insert(side_elem->type());
+      else
+        boundary_side_types.insert(side_elem->type());
+    }
+  mesh.comm().set_union(interior_side_types);
+  mesh.comm().set_union(boundary_side_types);
+
+  // assign block ids for different side types
+  std::map<ElemType, SubdomainID> interior_block_ids;
+  std::map<ElemType, SubdomainID> boundary_block_ids;
+  // we assume this id is not used by the mesh
+  auto id = libMesh::Elem::invalid_subdomain_id - 2;
+  for (const auto & tpid : interior_side_types)
+  {
+    const auto type = ElemType(tpid);
+    mesh.subdomain_name(id) = "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    interior_block_ids[type] = id;
+    _lower_d_interior_blocks.insert(id);
+    if (_mesh_subdomains.count(id) > 0)
+      mooseError("Trying to add a mesh block with id ", id, " that has existed in the mesh");
+    _mesh_subdomains.insert(id);
+    --id;
+  }
+  for (const auto & tpid : boundary_side_types)
+  {
+    const auto type = ElemType(tpid);
+    mesh.subdomain_name(id) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    boundary_block_ids[type] = id;
+    _lower_d_boundary_blocks.insert(id);
+    if (_mesh_subdomains.count(id) > 0)
+      mooseError("Trying to add a mesh block with id ", id, " that has existed in the mesh");
+    _mesh_subdomains.insert(id);
+    --id;
+  }
 
   dof_id_type max_elem_id = mesh.max_elem_id();
   unique_id_type max_unique_id = mesh.parallel_max_unique_id();
@@ -681,9 +734,9 @@ MooseMesh::buildLowerDMesh()
 
         // Add subdomain ID
         if (neig)
-          side_elem->subdomain_id() = Moose::INTERNAL_SIDE_LOWERD_ID;
+          side_elem->subdomain_id() = interior_block_ids.at(side_elem->type());
         else
-          side_elem->subdomain_id() = Moose::BOUNDARY_SIDE_LOWERD_ID;
+          side_elem->subdomain_id() = boundary_block_ids.at(side_elem->type());
 
         // set ids consistently across processors (these ids will be temporary)
         side_elem->set_id(max_elem_id + elem->id() * max_n_sides + side);
@@ -712,11 +765,6 @@ MooseMesh::buildLowerDMesh()
   //       get its interior parent's processor id.
   for (auto & elem : side_elems)
     mesh.add_elem(elem);
-
-  _mesh_subdomains.insert(Moose::INTERNAL_SIDE_LOWERD_ID);
-  mesh.subdomain_name(Moose::INTERNAL_SIDE_LOWERD_ID) = "INTERNAL_SIDE_LOWERD_SUBDOMAIN";
-  _mesh_subdomains.insert(Moose::BOUNDARY_SIDE_LOWERD_ID);
-  mesh.subdomain_name(Moose::BOUNDARY_SIDE_LOWERD_ID) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN";
 
   // we do all the stuff in prepare_for_use such as renumber_nodes_and_elements(),
   // update_parallel_id_counts(), cache_elem_dims(), etc. except partitioning here.
@@ -1326,9 +1374,13 @@ MooseMesh::cacheInfo()
   _block_node_list.clear();
   _higher_d_elem_side_to_lower_d_elem.clear();
   _lower_d_elem_to_higher_d_elem_side.clear();
+  _lower_d_interior_blocks.clear();
+  _lower_d_boundary_blocks.clear();
+
+  auto & mesh = getMesh();
 
   // TODO: Thread this!
-  for (const auto & elem : getMesh().element_ptr_range())
+  for (const auto & elem : mesh.element_ptr_range())
   {
     const Elem * ip_elem = elem->interior_parent();
 
@@ -1346,6 +1398,18 @@ MooseMesh::cacheInfo()
             std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
         _lower_d_elem_to_higher_d_elem_side.insert(
             std::pair<const Elem *, unsigned short int>(elem, ip_side));
+
+        auto id = elem->subdomain_id();
+        if (ip_elem->neighbor_ptr(ip_side))
+        {
+          if (mesh.subdomain_name(id).find("INTERNAL_SIDE_LOWERD_SUBDOMAIN_") != std::string::npos)
+            _lower_d_interior_blocks.insert(id);
+        }
+        else
+        {
+          if (mesh.subdomain_name(id).find("BOUNDARY_SIDE_LOWERD_SUBDOMAIN_") != std::string::npos)
+            _lower_d_boundary_blocks.insert(id);
+        }
       }
     }
 
@@ -1356,7 +1420,7 @@ MooseMesh::cacheInfo()
     }
   }
 
-  for (const auto & elem : getMesh().active_local_element_ptr_range())
+  for (const auto & elem : mesh.active_local_element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
     auto & sub_data = _sub_to_data[subdomain_id];
