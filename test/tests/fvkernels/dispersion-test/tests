@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INSFVScalarFieldAdvection.md'
+  design = 'FVAdvection.md'
   issues = '#28891'
   [bottom_left_limited_scalar_advection]
     requirement = 'The system shall be able to perform a variety of limiting schemes when solving scalar transport equations in cartesian meshes with bottom-left advection. These schemes include'
