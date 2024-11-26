@@ -29,7 +29,7 @@ FVFunctionDirichletBC::FVFunctionDirichletBC(const InputParameters & parameters)
 }
 
 ADReal
-FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi) const
+FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & /*state*/) const
 {
   return _function.value(_t, fi.faceCentroid());
 }

@@ -52,17 +52,18 @@ FVFunctorDirichletBCTempl<is_ad>::FVFunctorDirichletBCTempl(const InputParameter
 
 template <bool is_ad>
 ADReal
-FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
+FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi,
+                                                const Moose::StateArg & state) const
 {
   auto sfa = singleSidedFaceArg(&fi);
   if (!_use_other_side)
-    return _functor(sfa, determineState());
+    return _functor(sfa, state);
   else if (fi.elemPtr() == sfa.face_side)
     return _functor({&fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()},
-                    determineState());
+                    state);
   else
     return _functor({&fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr()},
-                    determineState());
+                    state);
 }
 
 template class FVFunctorDirichletBCTempl<false>;

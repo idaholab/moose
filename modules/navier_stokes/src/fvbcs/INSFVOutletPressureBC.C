@@ -50,10 +50,11 @@ INSFVOutletPressureBCTempl<T>::INSFVOutletPressureBCTempl(const InputParameters 
 
 template <class T>
 ADReal
-INSFVOutletPressureBCTempl<T>::boundaryValue(const FaceInfo & fi) const
+INSFVOutletPressureBCTempl<T>::boundaryValue(const FaceInfo & fi,
+                                             const Moose::StateArg & state) const
 {
   if (_functor)
-    return (*_functor)(singleSidedFaceArg(&fi), determineState());
+    return (*_functor)(singleSidedFaceArg(&fi), state);
   else if (_function)
     return _function->value(_t, fi.faceCentroid());
   else

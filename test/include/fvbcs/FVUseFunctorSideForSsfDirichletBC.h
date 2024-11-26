@@ -19,7 +19,7 @@ public:
 
   static InputParameters validParams();
 
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
