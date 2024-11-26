@@ -15,7 +15,7 @@ The increment of inelastic strain is computed from the creep rate in this class.
   \dot{\epsilon} = \sum_{i=1}^N h_i \left[ A_i \left( \sigma^{trial}_{effective} - 3 G \Delta p \right)^{n_i} \exp \left( \frac{-Q_i}{RT} \right) \right] \left(t - t_o \right)^m
 \end{equation}
 
-where subscript $i$ denotes phase specific material property, $h$ is material properties to interpolate different phases, $A_i$ is the power law creep coefficient, also known as Dorn's Constant, $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress, $G$ is
+where subscript $i$ denotes phase specific material property, $h_i$ is the phase interpolation function, $A_i$ is the power law creep coefficient, also known as Dorn's Constant, $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress, $G$ is
 the isotropic shear modulus, $Q$ is the activation energy, $R$ is the universal
 gas constant, $T$ is the temperature, $t$ and $t_o$ are the current and initial
 times, respectively, and $n$ and $m$ are exponent values.
@@ -36,7 +36,7 @@ strain return mapping stress calculator such as
 
 ## Example Input File Syntax
 
-!listing modules/combined/test/tests/power_law_creep/composite_power_law_creep.i block=Materials/power_law_creep
+!listing modules/solid_mechanics/test/tests/power_law_creep/composite_power_law_creep.i block=Materials/power_law_creep
 
 !syntax parameters /Materials/CompositePowerLawCreepStressUpdate
 

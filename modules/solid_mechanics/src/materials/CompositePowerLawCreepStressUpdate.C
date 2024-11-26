@@ -56,11 +56,11 @@ CompositePowerLawCreepStressUpdateTempl<is_ad>::CompositePowerLawCreepStressUpda
     _activation_energy(this->template getParam<std::vector<Real>>("activation_energy")),
     _gas_constant(this->template getParam<Real>("gas_constant")),
     _start_time(this->template getParam<Real>("start_time")),
-    _switchingFuncNames(
+    _switching_func_names(
         this->template getParam<std::vector<MaterialPropertyName>>("switching_functions"))
 
 {
-  _num_materials = _switchingFuncNames.size();
+  _num_materials = _switching_func_names.size();
   if (_n_exponent.size() != _num_materials)
     this->paramError("n_exponent", "n exponent must be equal to the number of switching functions");
 
@@ -81,7 +81,7 @@ CompositePowerLawCreepStressUpdateTempl<is_ad>::CompositePowerLawCreepStressUpda
   for (unsigned int i = 0; i < _num_materials; ++i)
   {
     _switchingFunc[i] =
-        &this->template getGenericMaterialProperty<Real, is_ad>(_switchingFuncNames[i]);
+        &this->template getGenericMaterialProperty<Real, is_ad>(_switching_func_names[i]);
   }
 }
 
@@ -103,10 +103,8 @@ CompositePowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(
     const GenericReal<is_ad> & effective_trial_stress, const ScalarType & scalar)
 {
   const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
-  ScalarType creep_rate =
-      _coefficient[0] * std::pow(stress_delta, _n_exponent[0]) * (*_switchingFunc[0])[_qp] *
-      std::exp(-_activation_energy[0] / (_gas_constant * (*_temperature)[_qp])) * _exp_time;
-  for (unsigned int n = 1; n < _num_materials; ++n)
+  ScalarType creep_rate = 0.0;
+  for (const auto n : make_range(_num_materials))
   {
     creep_rate +=
         _coefficient[n] * std::pow(stress_delta, _n_exponent[n]) * (*_switchingFunc[n])[_qp] *
@@ -121,12 +119,8 @@ CompositePowerLawCreepStressUpdateTempl<is_ad>::computeDerivative(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
   const GenericReal<is_ad> stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
-  GenericReal<is_ad> creep_rate_derivative =
-      -_coefficient[0] * _three_shear_modulus * _n_exponent[0] *
-      std::pow(stress_delta, _n_exponent[0] - 1.0) * (*_switchingFunc[0])[_qp] *
-      std::exp(-_activation_energy[0] / (_gas_constant * (*_temperature)[_qp])) * _exp_time;
-
-  for (unsigned int n = 1; n < _num_materials; ++n)
+  GenericReal<is_ad> creep_rate_derivative = 0.0;
+  for (const auto n : make_range(_num_materials))
   {
     creep_rate_derivative +=
         -_coefficient[n] * _three_shear_modulus * _n_exponent[n] *

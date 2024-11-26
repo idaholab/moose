@@ -84,7 +84,7 @@ protected:
   Real _exp_time;
 
   /// vector to keep the material property name for switching function material
-  const std::vector<MaterialPropertyName> _switchingFuncNames;
+  const std::vector<MaterialPropertyName> _switching_func_names;
   unsigned int _num_materials;
 
   /// switching functions for each phase
