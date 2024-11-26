@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <filesystem>
+#include <regex>
 
 Registry &
 Registry::getRegistry()
@@ -131,6 +132,16 @@ Registry::addAppDataFilePath(const std::string & app_name, const std::string & a
   addDataFilePath(app_name, MooseUtils::pathjoin(dir, "../../data"));
 }
 
+void
+Registry::addDeprecatedAppDataFilePath(const std::string & app_path)
+{
+  const auto app_name = appNameFromAppPath(app_path);
+  mooseDeprecated("registerDataFilePath() is deprecated. Use registerAppDataFilePath(\"",
+                  app_name,
+                  "\") instead.");
+  addAppDataFilePath(app_name, app_path);
+}
+
 std::string
 Registry::getDataFilePath(const std::string & name)
 {
@@ -184,4 +195,21 @@ Registry::determineDataFilePath(const std::string & name, const std::string & in
              abs_installed_path,
              "\n  in-tree: ",
              abs_in_tree_path);
+}
+
+std::string
+Registry::appNameFromAppPath(const std::string & app_path)
+{
+  // Convert /path/to/FooBarBazApp.C -> foo_bar_baz
+  std::smatch match;
+  if (std::regex_search(app_path, match, std::regex("\\/([a-zA-Z0-9_]+)App\\.C$")))
+  {
+    std::string name = match[1];                                        // FooBarBaz
+    name = std::regex_replace(name, std::regex("(?!^)([A-Z])"), "_$1"); // Foo_Bar_Baz
+    name = MooseUtils::toLower(name);                                   // foo_bar_baz
+    return name;
+  }
+
+  mooseError(
+      "Registry::appNameFromAppPath(): Failed to parse application name from '", app_path, "'");
 }

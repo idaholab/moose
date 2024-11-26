@@ -32,6 +32,31 @@ TEST(RegistryTest, getClassName)
   EXPECT_EQ(Registry::getClassName<CheckOutputAction>(), "CheckOutputAction");
 }
 
+TEST(RegistryTest, appNameFromAppPath)
+{
+  EXPECT_EQ(Registry::appNameFromAppPath("/path/to/FooBarBazApp.C"), "foo_bar_baz");
+}
+
+TEST(RegistryTest, appNameFromAppPathFailed)
+{
+  const std::string app_path = "/path/to/FooBarBazApp.h";
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::appNameFromAppPath(app_path);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Registry::appNameFromAppPath(): Failed to parse application name from '" +
+                        app_path + "'");
+          throw;
+        }
+      },
+      std::exception);
+}
+
 TEST(RegistryTest, addDataFilePathNonDataFolder)
 {
   const std::string name = "non_data_folder";
