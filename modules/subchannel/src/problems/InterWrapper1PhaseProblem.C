@@ -305,7 +305,7 @@ InterWrapper1PhaseProblem::cleanUp()
 }
 
 bool
-InterWrapper1PhaseProblem::nlConverged(unsigned int)
+InterWrapper1PhaseProblem::solverSystemConverged(const unsigned int)
 {
   return _converged;
 }

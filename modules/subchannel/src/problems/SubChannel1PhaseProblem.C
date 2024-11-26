@@ -338,7 +338,7 @@ SubChannel1PhaseProblem::cleanUp()
 }
 
 bool
-SubChannel1PhaseProblem::nlConverged(unsigned int)
+SubChannel1PhaseProblem::solverSystemConverged(const unsigned int)
 {
   return _converged;
 }
