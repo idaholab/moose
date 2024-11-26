@@ -19,8 +19,13 @@ If the provided path is absolute, no searching will take place and the absolute
 path will be used. Otherwise, `getDataFileName` will search (in this order)
 
 - relative to the input file
-- relative to the running binary in the shared directory (assuming the application is installed)
-- relative to all registered data file directories (which are determined by the source file locations when compiling and registered using the `registerDataFilePath` macro in `Registry.h`)
+- relative to all installed and registered data file directories (for an installed application)
+- relative to all in-tree registered data file directories (for an in-tree build)
+
+The "registered" data file directories are directories that are registered via:
+
+- the `registerAppDataFilePath` macro in `Registry.h`, where an applications data in its root `data` directory is registered
+- the `registerDataFilePath` macro in `Registry.h`, where a general data directory is registered
 
 ## `getDataFileNameByName`
 

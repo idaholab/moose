@@ -191,7 +191,7 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerObjectsTo(f, {"SolidMechanicsApp"});
   Registry::registerActionsTo(af, {"SolidMechanicsApp"});
   associateSyntaxInner(s, af);
-  registerDataFilePath();
+  registerAppDataFilePath("solid_mechanics");
 }
 
 void

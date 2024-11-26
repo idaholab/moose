@@ -15,6 +15,8 @@
 #include "MaterialRealAux.h"
 #include "CheckOutputAction.h"
 
+#include <filesystem>
+
 TEST(RegistryTest, getClassName)
 {
   // This is a simple non-templated case
@@ -27,6 +29,100 @@ TEST(RegistryTest, getClassName)
 
   // This tests the lookup of an action class name
   EXPECT_EQ(Registry::getClassName<CheckOutputAction>(), "CheckOutputAction");
+}
+
+TEST(RegistryTest, addDataFilePathMismatch)
+{
+  const std::string name = "data_mismatch";
+  const std::string path = "data";
+  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+
+  Registry::addDataFilePath(name, path);
+
+  const std::string other_path = "other_data/data";
+  const std::string other_abs_path = std::filesystem::weakly_canonical(other_path).c_str();
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::addDataFilePath(name, other_path);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "While registering data file path '" + other_abs_path + "' for '" + name +
+                        "': the path '" + abs_path + "' is already registered");
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST(RegistryTest, getDataPath)
+{
+  const std::string name = "data_working";
+  const std::string path = "data";
+  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+
+  Registry::addDataFilePath(name, path);
+  EXPECT_EQ(Registry::getDataFilePath(name), abs_path);
+
+  Registry::addDataFilePath(name, path);
+  EXPECT_EQ(Registry::getDataFilePath(name), abs_path);
+}
+
+TEST(RegistryTest, getDataPathUnregistered)
+{
+  const std::string name = "unregistered";
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::getDataFilePath(name);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Registry::getDataFilePath(): A data file path for '" + name +
+                        "' is not registered");
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST(RegistryTest, determineFilePath)
+{
+  const std::string path = "data";
+  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+  EXPECT_EQ(Registry::determineDataFilePath("unused", path), abs_path);
+}
+
+TEST(RegistryTest, determineFilePathFailed)
+{
+  const std::string name = "unused";
+  const std::string path = "foo";
+  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+  const std::string installed_path = "../share/" + name + "/data";
+  const std::string installed_abs_path = std::filesystem::weakly_canonical(installed_path).c_str();
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::determineDataFilePath(name, path);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Failed to determine data file path for '" + name +
+                        "'. Paths searched:\n\n  installed: " + installed_abs_path +
+                        "\n  in-tree: " + abs_path);
+          throw;
+        }
+      },
+      std::exception);
 }
 
 TEST(RegistryTest, repositoryURL)

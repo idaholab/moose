@@ -16,6 +16,7 @@
 #include "libmesh/libmesh_common.h"
 
 #include <memory>
+#include <filesystem>
 
 Registry &
 Registry::getRegistry()
@@ -86,21 +87,48 @@ Registry::addKnownLabel(const std::string & label)
 }
 
 void
-Registry::addDataFilePath(const std::string & fullpath)
+Registry::addDataFilePath(const std::string & name, const std::string & in_tree_path)
 {
+  mooseAssert(std::filesystem::path(in_tree_path).parent_path().filename() == "data",
+              "Must end with data");
+
+  // Find either the installed or in-tree path
+  const auto path = determineDataFilePath(name, in_tree_path);
+
   auto & dfp = getRegistry()._data_file_paths;
+  const auto it = dfp.find(name);
+  // Not registered yet
+  if (it == dfp.end())
+    dfp.emplace(name, path);
+  // Registered, but with a different value
+  else if (it->second != path)
+    mooseError("While registering data file path '",
+               path,
+               "' for '",
+               name,
+               "': the path '",
+               it->second,
+               "' is already registered");
+}
 
+void
+Registry::addAppDataFilePath(const std::string & app_name, const std::string & app_path)
+{
   // split the *App.C filename from its containing directory
-  const auto path = MooseUtils::splitFileName(fullpath).first;
-
+  const auto dir = MooseUtils::splitFileName(app_path).first;
   // This works for both build/unity_src/ and src/base/ as the *App.C file location,
   // in case __FILE__ doesn't get overriden in unity build
-  const auto data_dir = MooseUtils::pathjoin(path, "../../data");
+  addDataFilePath(app_name, MooseUtils::pathjoin(dir, "../../data"));
+}
 
-  // if the data directory exists and hasn't been added before, add it
-  if (MooseUtils::pathIsDirectory(data_dir) &&
-      std::find(dfp.begin(), dfp.end(), data_dir) == dfp.end())
-    dfp.push_back(data_dir);
+std::string
+Registry::getDataFilePath(const std::string & name)
+{
+  const auto & dfps = getRegistry()._data_file_paths;
+  const auto it = dfps.find(name);
+  if (it == dfps.end())
+    mooseError("Registry::getDataFilePath(): A data file path for '", name, "' is not registered");
+  return it->second;
 }
 
 void
@@ -123,4 +151,27 @@ Registry::getRepositoryURL(const std::string & repo_name)
   if (const auto it = repos.find(repo_name); it != repos.end())
     return it->second;
   mooseError("Registry::getRepositoryURL(): The repository '", repo_name, "' is not registered.");
+}
+
+std::string
+Registry::determineDataFilePath(const std::string & name, const std::string & in_tree_path)
+{
+  // Installed data
+  const auto installed_path =
+      MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share", name, "data");
+  const std::string abs_installed_path = std::filesystem::weakly_canonical(installed_path).c_str();
+  if (MooseUtils::checkFileReadable(abs_installed_path, false, false, false))
+    return installed_path;
+
+  // In tree data
+  const std::string abs_in_tree_path = std::filesystem::weakly_canonical(in_tree_path).c_str();
+  if (MooseUtils::checkFileReadable(abs_in_tree_path, false, false, false))
+    return abs_in_tree_path;
+
+  mooseError("Failed to determine data file path for '",
+             name,
+             "'. Paths searched:\n\n  installed: ",
+             abs_installed_path,
+             "\n  in-tree: ",
+             abs_in_tree_path);
 }
