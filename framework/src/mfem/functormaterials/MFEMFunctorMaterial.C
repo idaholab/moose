@@ -36,13 +36,31 @@ std::vector<std::string>
 MFEMFunctorMaterial::subdomainsToStrings(const std::vector<SubdomainName> & blocks)
 {
   std::vector<std::string> result(blocks.size());
+  auto & mesh = getMFEMProblem().mesh().getMFEMParMesh();
   // FIXME: Is there really no better way to do this conversion? It doesn't seem like it should be
   // necessary to do the various copies etc. for this.
-  std::transform(blocks.begin(),
-                 blocks.end(),
-                 result.begin(),
-                 // FIXME: How do I pass the string constructor directly?
-                 [](const SubdomainName & x) -> std::string { return std::string(x); });
+  std::transform(
+      blocks.begin(),
+      blocks.end(),
+      result.begin(),
+      // FIXME: How do I pass the string constructor directly?
+      [this, &mesh](const SubdomainName & x) -> std::string
+      {
+        try
+        {
+          // Is this a block ID?
+          std::stoi(x);
+          return std::string(x);
+        }
+        catch (...)
+        {
+          // It was not
+          auto & block_ids = mesh.attribute_sets.GetAttributeSet(x);
+          if (block_ids.Size() != 1)
+            this->mooseError("There should be a 1-to-1 correspondence between block name and block ID");
+          return std::to_string(block_ids[0]);
+        }
+      });
   return result;
 }
 
