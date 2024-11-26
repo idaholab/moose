@@ -14,6 +14,7 @@
 #include "Diffusion.h"
 #include "MaterialRealAux.h"
 #include "CheckOutputAction.h"
+#include "MooseUtils.h"
 
 #include <filesystem>
 
@@ -31,16 +32,39 @@ TEST(RegistryTest, getClassName)
   EXPECT_EQ(Registry::getClassName<CheckOutputAction>(), "CheckOutputAction");
 }
 
+TEST(RegistryTest, addDataFilePathNonDataFolder)
+{
+  const std::string name = "non_data_folder";
+  const std::string path = "foo";
+  const std::string abs_path = MooseUtils::absolutePath(path);
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::addDataFilePath(name, path);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "While registering data file path '" + abs_path + "' for '" + name +
+                        "': The folder must be named 'data' and it is named '" + path + "'");
+          throw;
+        }
+      },
+      std::exception);
+}
+
 TEST(RegistryTest, addDataFilePathMismatch)
 {
   const std::string name = "data_mismatch";
   const std::string path = "data";
-  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+  const std::string abs_path = MooseUtils::absolutePath(path);
 
   Registry::addDataFilePath(name, path);
 
   const std::string other_path = "other_data/data";
-  const std::string other_abs_path = std::filesystem::weakly_canonical(other_path).c_str();
+  const std::string other_abs_path = MooseUtils::absolutePath(other_path);
 
   EXPECT_THROW(
       {
@@ -63,7 +87,7 @@ TEST(RegistryTest, getDataPath)
 {
   const std::string name = "data_working";
   const std::string path = "data";
-  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+  const std::string abs_path = MooseUtils::absolutePath(path);
 
   Registry::addDataFilePath(name, path);
   EXPECT_EQ(Registry::getDataFilePath(name), abs_path);
@@ -95,7 +119,7 @@ TEST(RegistryTest, getDataPathUnregistered)
 TEST(RegistryTest, determineFilePath)
 {
   const std::string path = "data";
-  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+  const std::string abs_path = MooseUtils::absolutePath(path);
   EXPECT_EQ(Registry::determineDataFilePath("unused", path), abs_path);
 }
 
@@ -103,9 +127,9 @@ TEST(RegistryTest, determineFilePathFailed)
 {
   const std::string name = "unused";
   const std::string path = "foo";
-  const std::string abs_path = std::filesystem::weakly_canonical(path).c_str();
+  const std::string abs_path = MooseUtils::absolutePath(path);
   const std::string installed_path = "../share/" + name + "/data";
-  const std::string installed_abs_path = std::filesystem::weakly_canonical(installed_path).c_str();
+  const std::string installed_abs_path = MooseUtils::absolutePath(installed_path);
 
   EXPECT_THROW(
       {

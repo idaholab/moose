@@ -1234,6 +1234,10 @@ isFloat(const std::string & str)
   return (*ptr) == '\0';
 }
 
+/**
+ * Gets the absolute path of the given path
+ */
+std::string absolutePath(const std::string & path);
 } // MooseUtils namespace
 
 namespace Moose

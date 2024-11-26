@@ -89,8 +89,18 @@ Registry::addKnownLabel(const std::string & label)
 void
 Registry::addDataFilePath(const std::string & name, const std::string & in_tree_path)
 {
-  mooseAssert(std::filesystem::path(in_tree_path).parent_path().filename() == "data",
-              "Must end with data");
+  // Enforce that the folder is called "data", because we rely on the installed path
+  // to be within PREFIX/share/<name>/data (see determineDataFilePath())
+  const auto abs_in_tree_path = MooseUtils::absolutePath(in_tree_path);
+  const std::string folder = std::filesystem::path(abs_in_tree_path).filename();
+  if (folder != "data")
+    mooseError("While registering data file path '",
+               abs_in_tree_path,
+               "' for '",
+               name,
+               "': The folder must be named 'data' and it is named '",
+               folder,
+               "'");
 
   // Find either the installed or in-tree path
   const auto path = determineDataFilePath(name, in_tree_path);
@@ -159,12 +169,12 @@ Registry::determineDataFilePath(const std::string & name, const std::string & in
   // Installed data
   const auto installed_path =
       MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share", name, "data");
-  const std::string abs_installed_path = std::filesystem::weakly_canonical(installed_path).c_str();
+  const auto abs_installed_path = MooseUtils::absolutePath(installed_path);
   if (MooseUtils::checkFileReadable(abs_installed_path, false, false, false))
     return installed_path;
 
   // In tree data
-  const std::string abs_in_tree_path = std::filesystem::weakly_canonical(in_tree_path).c_str();
+  const auto abs_in_tree_path = MooseUtils::absolutePath(in_tree_path);
   if (MooseUtils::checkFileReadable(abs_in_tree_path, false, false, false))
     return abs_in_tree_path;
 

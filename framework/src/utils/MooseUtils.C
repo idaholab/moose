@@ -1273,6 +1273,12 @@ prettyCppType(const std::string & cpp_type)
   return s;
 }
 
+std::string
+absolutePath(const std::string & path)
+{
+  return std::filesystem::weakly_canonical(path).c_str();
+}
+
 } // MooseUtils namespace
 
 void

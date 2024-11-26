@@ -11,6 +11,7 @@
 #include "MooseError.h"
 #include "ParallelParamObject.h"
 #include "Registry.h"
+#include "MooseUtils.h"
 
 #include <filesystem>
 
@@ -33,8 +34,7 @@ DataFileInterface::getDataFileName(const std::string & param) const
 
   // Look relative to the input file
   const auto base = _parent.parameters().getParamFileBase(param);
-  const std::string relative_to_context =
-      std::filesystem::weakly_canonical(base / value_path).c_str();
+  const auto relative_to_context = MooseUtils::absolutePath(base / value_path);
   if (MooseUtils::checkFileReadable(relative_to_context, false, false, false))
   {
     _parent.paramInfo(param, "Data file '", value, "' found relative to the input file.");
@@ -55,7 +55,7 @@ DataFileInterface::getDataFileNameByName(const std::string & relative_path,
   for (const auto & [name, path] : Registry::getRegistry().getDataFilePaths())
   {
     const auto file_path = MooseUtils::pathjoin(path, relative_path);
-    const std::string abs_file_path = std::filesystem::weakly_canonical(file_path).c_str();
+    const std::string abs_file_path = MooseUtils::absolutePath(file_path);
     if (MooseUtils::checkFileReadable(abs_file_path, false, false, false))
       found.emplace(name, abs_file_path);
     else
