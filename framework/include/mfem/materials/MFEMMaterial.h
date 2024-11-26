@@ -12,7 +12,6 @@ class MFEMMaterial : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
-  static std::vector<std::string> subdomainsToStrings(std::vector<SubdomainName> blocks);
   static libMesh::Point pointFromMFEMVector(const mfem::Vector & vec);
 
   MFEMMaterial(const InputParameters & parameters);
@@ -21,6 +20,8 @@ public:
   const std::vector<SubdomainName> & getBlocks() const { return _block_ids; }
 
 protected:
+  std::vector<std::string> subdomainsToStrings(std::vector<SubdomainName> blocks);
+
   std::vector<SubdomainName> _block_ids;
   platypus::PropertyManager & _properties;
 };

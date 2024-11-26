@@ -23,6 +23,21 @@
   []
 []
 
+[ICs]
+  [diffused_ic]
+    type = MFEMScalarIC
+    coefficient = one
+    variable = diffused
+  []
+[]
+
+[Functions]
+  [one]
+    type = ParsedFunction
+    expression = 1.0
+  []
+[]
+
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
@@ -43,6 +58,7 @@
     type = MFEMGenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1.0
+    block = 'the_domain'
   []
 []
 
