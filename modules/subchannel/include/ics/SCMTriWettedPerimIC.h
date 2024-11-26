@@ -20,10 +20,10 @@
  * Sets the wetted perimeter of the triangular, edge, and corner subchannels for hexagonal fuel
  * assemblies
  */
-class TriWettedPerimIC : public TriSubChannelBaseIC
+class SCMTriWettedPerimIC : public TriSubChannelBaseIC
 {
 public:
-  TriWettedPerimIC(const InputParameters & params);
+  SCMTriWettedPerimIC(const InputParameters & params);
   Real value(const Point & p) override;
 
 public:

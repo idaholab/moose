@@ -21,7 +21,7 @@
 
 [ICs]
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 []

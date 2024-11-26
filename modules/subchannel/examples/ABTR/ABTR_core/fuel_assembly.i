@@ -167,7 +167,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 
