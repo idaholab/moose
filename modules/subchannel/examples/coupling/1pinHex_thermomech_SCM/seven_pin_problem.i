@@ -117,7 +117,7 @@ pitch = 7.26e-3
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 

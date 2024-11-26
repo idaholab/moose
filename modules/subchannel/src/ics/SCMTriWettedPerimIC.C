@@ -12,13 +12,13 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "TriWettedPerimIC.h"
+#include "SCMTriWettedPerimIC.h"
 #include "TriSubChannelMesh.h"
 
-registerMooseObject("SubChannelApp", TriWettedPerimIC);
+registerMooseObject("SubChannelApp", SCMTriWettedPerimIC);
 
 InputParameters
-TriWettedPerimIC::validParams()
+SCMTriWettedPerimIC::validParams()
 
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
@@ -27,10 +27,13 @@ TriWettedPerimIC::validParams()
   return params;
 }
 
-TriWettedPerimIC::TriWettedPerimIC(const InputParameters & params) : TriSubChannelBaseIC(params) {}
+SCMTriWettedPerimIC::SCMTriWettedPerimIC(const InputParameters & params)
+  : TriSubChannelBaseIC(params)
+{
+}
 
 Real
-TriWettedPerimIC::value(const Point & p)
+SCMTriWettedPerimIC::value(const Point & p)
 {
   // Define geometry parameters.
   auto pitch = _mesh.getPitch();

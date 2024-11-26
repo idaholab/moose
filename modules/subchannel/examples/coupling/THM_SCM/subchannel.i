@@ -118,7 +118,7 @@ heated_length = 1.0
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 
