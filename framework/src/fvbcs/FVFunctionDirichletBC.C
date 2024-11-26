@@ -29,14 +29,14 @@ FVFunctionDirichletBC::FVFunctionDirichletBC(const InputParameters & parameters)
 }
 
 ADReal
-FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & /*state*/) const
+FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const
 {
 
   if (state.state != 0 && state.iteration_type == Moose::SolutionIterationType::Time)
   {
     mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");
-    _function.value(_t_old, fi.faceCentroid());
+    return _function.value(_t_old, fi.faceCentroid());
   }
   else
-    _function.value(_t, fi.faceCentroid());
+    return _function.value(_t, fi.faceCentroid());
 }
