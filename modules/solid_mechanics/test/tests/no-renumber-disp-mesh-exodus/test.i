@@ -10,66 +10,34 @@
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic]
-  [all]
-    add_variables = true
-    strain = finite
-    planar_formulation = PLANE_STRAIN
+[Variables]
+  [disp_x]
+    order = SECOND
+  []
+  [disp_y]
+    order = SECOND
   []
 []
 
-[BCs]
-  [x_bot]
-    type = DirichletBC
+[Kernels]
+  [disp_x]
+    type = Diffusion
     variable = disp_x
-    boundary = bottom
-    value = 0.0
+    use_displaced_mesh = true # Need a kernel to trigger a displaced element reinit
   []
-  [y_bot]
-    type = DirichletBC
+  [disp_y]
+    type = Diffusion
     variable = disp_y
-    boundary = bottom
-    value = 0.0
-  []
-[]
-
-[Materials]
-  [elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e3
-    poissons_ratio = 0.3
-  []
-  [stress]
-    type = ComputeFiniteStrainElasticStress
   []
 []
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '101'
-
-  line_search = 'none'
-
-  l_max_its = 100
-  nl_max_its = 100
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-10
-  l_tol = 1e-9
   start_time = 0.0
-  num_steps = 5
-  dt = 1.0
-  dtmin = 1.0
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
+  num_steps = 1
+  dt = 1
+  dtmin = 1
 []
 
 [Outputs]
