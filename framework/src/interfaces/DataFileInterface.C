@@ -49,17 +49,17 @@ std::string
 DataFileInterface::getDataFileNameByName(const std::string & relative_path,
                                          const std::string * param) const
 {
-  std::map<std::string, std::string> found;
+  std::map<std::string, std::string> not_found, found;
 
   // Search each registered data path for the relative path
   for (const auto & [name, path] : Registry::getRegistry().getDataFilePaths())
   {
     const auto file_path = MooseUtils::pathjoin(path, relative_path);
-    if (MooseUtils::checkFileReadable(file_path, false, false, false))
-    {
-      const std::string abs_file_path = std::filesystem::weakly_canonical(file_path).c_str();
+    const std::string abs_file_path = std::filesystem::weakly_canonical(file_path).c_str();
+    if (MooseUtils::checkFileReadable(abs_file_path, false, false, false))
       found.emplace(name, abs_file_path);
-    }
+    else
+      not_found.emplace(name, abs_file_path);
   }
 
   // Found exactly one
@@ -80,11 +80,19 @@ DataFileInterface::getDataFileNameByName(const std::string & relative_path,
     oss << "Multiple files were found when searching for the data file '" << relative_path
         << "':\n\n";
     for (const auto & [name, path] : found)
-      oss << " - " << name << ": " << path << "\n";
+      oss << "  " << name << ": " << path << "\n";
   }
   // Found none
   else
-    oss << "Unable to find the data file '" << relative_path << "' anywhere";
+  {
+    oss << "Unable to find the data file '" << relative_path << "' anywhere.";
+    if (not_found.size())
+    {
+      oss << " Paths searched:\n";
+      for (const auto & [name, path] : not_found)
+        oss << "  " << name << ": " << path << "\n";
+    }
+  }
 
   if (param)
     _parent.paramError(*param, oss.str());
