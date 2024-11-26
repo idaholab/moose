@@ -59,7 +59,7 @@ DataFileInterface::getDataFileNameByName(const std::string & relative_path,
     if (MooseUtils::checkFileReadable(abs_file_path, false, false, false))
       found.emplace(name, abs_file_path);
     else
-      not_found.emplace(name, abs_file_path);
+      not_found.emplace(name, path);
   }
 
   // Found exactly one
