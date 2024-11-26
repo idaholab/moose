@@ -2,6 +2,11 @@
   type = AbaqusUELMesh
   file = BIG_CUBE_UEL.inp
   debug = true
+
+  [Partitioner]
+    type = LibmeshPartitioner
+    partitioner = hilbert_sfc
+  []
 []
 
 [Variables/AddUELVariables]
