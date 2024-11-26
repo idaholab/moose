@@ -52,7 +52,7 @@ AbaqusUELRelationshipManager::getInfo() const
 void
 AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator & range_begin,
                                          const MeshBase::const_element_iterator & range_end,
-                                         processor_id_type /*p*/,
+                                         processor_id_type p,
                                          map_type & coupled_elements)
 {
   LOG_SCOPE("operator()", "AbaqusUELRelationshipManager");
@@ -72,7 +72,12 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
     for (const auto uel_elem_id : it->second)
       // iterate over the NodeElements
       for (const auto nodeelem_id : elements[uel_elem_id].nodes)
-        coupled_elements.emplace(_mesh->elem_ptr(nodeelem_id), nullptr);
+      {
+        const auto elem = _mesh->elem_ptr(nodeelem_id);
+        mooseAssert(elem, "Element not found. Internal error");
+        if (elem->processor_id() != p)
+          coupled_elements.emplace(elem, nullptr);
+      }
   }
 }
 
