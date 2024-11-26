@@ -50,6 +50,10 @@ ChainControlSetupAction::act()
       chain_control->init();
   }
 
+  // Copy initial current values back into old values.
+  // Note that if an "older" state value is ever added, this will need to be called twice.
+  getMooseApp().getChainControlDataSystem().copyValuesBack();
+
   // Add ChainControl dependencies based on ChainControlData dependencies
   for (auto & control_shared_ptr : control_warehouse.getObjects())
   {

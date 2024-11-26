@@ -6463,6 +6463,8 @@ FEProblemBase::advanceState()
 
   _reporter_data.copyValuesBack();
 
+  getMooseApp().getChainControlDataSystem().copyValuesBack();
+
   if (_material_props.hasStatefulProperties())
     _material_props.shift();
 

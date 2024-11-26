@@ -71,6 +71,11 @@ public:
                                                 ChainControl & chain_control);
 
   /**
+   * Copies current chain control data values into old values
+   */
+  void copyValuesBack();
+
+  /**
    * Gets the map of ChainControlData names to the relevant ChainControlDataBase
    */
   const std::map<std::string, std::unique_ptr<ChainControlDataBase>> &
