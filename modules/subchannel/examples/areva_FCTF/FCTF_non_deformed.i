@@ -150,7 +150,7 @@ unheated_length_exit = 0.855 #m
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 

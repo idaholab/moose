@@ -147,7 +147,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 

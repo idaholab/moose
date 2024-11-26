@@ -107,7 +107,7 @@ P_out = 2.0e5 # Pa
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 
