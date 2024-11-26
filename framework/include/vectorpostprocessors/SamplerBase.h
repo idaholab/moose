@@ -58,6 +58,12 @@ protected:
    */
   void setupVariables(const std::vector<std::string> & variable_names);
 
+  /// Checks whether the passed variable pointer corresponds to a regular single-valued field variable
+  /// @param var_param_name name of the variable parameter in which the variables were passed
+  /// @param var_ptr pointer to the field variable
+  void checkSampleStandardFieldVariableType(const MooseVariableFieldBase * const var_ptr,
+                                            const std::string & var_param_name = "variable") const;
+
   /**
    * Call this with the value of every variable at each point you want to sample at.
    * @param p The point where you took the sample
