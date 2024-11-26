@@ -34,7 +34,7 @@ FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg 
 
   if (state.state != 0 && state.iteration_type == Moose::SolutionIterationType::Time)
   {
-    mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");   
+    mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");
     _function.value(_t_old, fi.faceCentroid());
   }
   else

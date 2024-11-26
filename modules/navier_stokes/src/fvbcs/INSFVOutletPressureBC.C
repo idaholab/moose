@@ -58,12 +58,12 @@ INSFVOutletPressureBCTempl<T>::boundaryValue(const FaceInfo & fi,
   else if (_function)
   {
     if (state.state != 0 && state.iteration_type == Moose::SolutionIterationType::Time)
-  {
-    mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");   
-    _function->value(_t_old, fi.faceCentroid());
-  }
-  else
-    _function->value(_t, fi.faceCentroid());
+    {
+      mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");
+      _function->value(_t_old, fi.faceCentroid());
+    }
+    else
+      _function->value(_t, fi.faceCentroid());
   }
   else
     return *_pp_value;
