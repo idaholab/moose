@@ -53,7 +53,8 @@ FEProblem::FEProblem(const InputParameters & parameters)
     for (const auto i : index_range(_linear_sys_names))
     {
       _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
-      _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
+      _solver_systems[_num_nl_sys + i] =
+          std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
     }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");

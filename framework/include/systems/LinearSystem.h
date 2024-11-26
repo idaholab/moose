@@ -40,6 +40,13 @@ public:
 
   virtual void solve() override;
 
+  /**
+   * At the moment, this is only used for the multi-system fixed point
+   * iteration. We return true here since ther is no way to specify
+   * separate linear residuals in FEProblemSolve yet.
+   */
+  virtual bool converged() override { return _converged; }
+
   virtual void initialSetup() override;
 
   // Overriding these to make sure the linear systems don't do anything during
@@ -52,6 +59,14 @@ public:
    */
   virtual void stopSolve(const ExecFlagType & exec_flag,
                          const std::set<TagID> & vector_tags_to_close) override;
+
+  /**
+   * If the system has a kernel that corresponds to a time derivative.
+   * Considering that we don't have transient capabilities for linear
+   * systems at the moment, this is false.
+   */
+  virtual bool containsTimeKernel() override { return false; }
+  virtual std::vector<std::string> timeKernelVariableNames() override { return {}; }
 
   /**
    * Compute the right hand side and the system matrix of the system for given tags.
@@ -161,8 +176,14 @@ protected:
   /// Number of linear iterations
   unsigned int _n_linear_iters;
 
+  /// The initial linear residual
+  Real _initial_linear_residual;
+
   /// The final linear residual
   Real _final_linear_residual;
+
+  /// If the solve on the linear system converged
+  bool _converged;
 
   /// Base class reference to the linear implicit system in libmesh
   LinearImplicitSystem & _linear_implicit_system;

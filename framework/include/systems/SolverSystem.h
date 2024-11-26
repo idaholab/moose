@@ -40,6 +40,23 @@ public:
                          const std::set<TagID> & vector_tags_to_close) = 0;
 
   /**
+   * Returns the convergence state
+   * @return true if converged, otherwise false
+   */
+  virtual bool converged() = 0;
+
+  /**
+   * If the system has a kernel that corresponds to a time derivative
+   */
+  virtual bool containsTimeKernel() = 0;
+
+  /**
+   * Returns the names of the variables that have time derivative kernels
+   * in the system.
+   */
+  virtual std::vector<std::string> timeKernelVariableNames() = 0;
+
+  /**
    * Set the solution to a given vector.
    * @param soln The vector which should be treated as the solution.
    */

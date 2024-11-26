@@ -488,7 +488,7 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
-  virtual bool nlConverged(const unsigned int nl_sys_num) override;
+  virtual bool solverSystemConverged(const unsigned int solver_sys_num) override;
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const override;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
   virtual Real finalNonlinearResidual(const unsigned int nl_sys_num) const override;
@@ -1299,6 +1299,18 @@ public:
    * Those are executed automatically when MultiApps are executed.
    */
   void execTransfers(ExecFlagType type);
+
+  /**
+   * Computes the residual of a nonlinear system using whatever is sitting in the current
+   * solution vector then returns the L2 norm.
+   */
+  Real computeResidualL2Norm(NonlinearSystemBase & sys);
+
+  /**
+   * Computes the residual of a linear system using whatever is sitting in the current
+   * solution vector then returns the L2 norm.
+   */
+  Real computeResidualL2Norm(LinearSystem & sys);
 
   /**
    * Computes the residual using whatever is sitting in the current solution vector then returns the

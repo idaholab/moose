@@ -702,6 +702,14 @@ SubProblem::checkBoundaryMatProps()
     mooseError(errors.str());
 }
 
+bool
+SubProblem::nlConverged(const unsigned int nl_sys_num)
+{
+  mooseAssert(nl_sys_num < numNonlinearSystems(),
+              "The nonlinear system number is higher than the number of systems we have!");
+  return solverSystemConverged(nl_sys_num);
+}
+
 void
 SubProblem::markMatPropRequested(const std::string & prop_name)
 {

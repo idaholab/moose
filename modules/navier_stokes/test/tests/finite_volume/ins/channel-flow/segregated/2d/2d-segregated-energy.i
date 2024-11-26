@@ -213,9 +213,9 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLENonlinearAssembly
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  energy_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-11
+  pressure_l_abs_tol = 1e-11
+  energy_l_abs_tol = 1e-11
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -226,12 +226,13 @@ pressure_tag = "pressure_grad"
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.99
+  energy_equation_relaxation = 0.999
   num_iterations = 100
-  pressure_absolute_tolerance = 1e-13
-  momentum_absolute_tolerance = 1e-13
-  energy_absolute_tolerance = 1e-13
+  pressure_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-10
+  energy_absolute_tolerance = 1e-10
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Materials]

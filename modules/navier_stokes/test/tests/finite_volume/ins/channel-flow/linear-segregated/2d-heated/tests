@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#28819'
+  design = 'SIMPLE.md LinearFVVolumetricHeatTransfer.md'
+  [multiapp]
+    requirement = "The system shall be able to solve a volumetric heat transfer problem using multiapp coupling between SIMPLE-based fluid flow solvers and nonlinear solvers for the solid temperature "
+    [simple-main]
+      type = 'Exodiff'
+      input = fluid.i
+      exodiff = 'fluid_out.e fluid_out_solid0.e'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "with the fluid flow problem as the main application, "
+      cli_args = "Executioner/fixed_point_max_its=10 Executioner/fixed_point_rel_tol=1e-12 MultiApps/inactive='' Transfers/inactive=''"
+    []
+    [solid-main]
+      type = 'Exodiff'
+      input = solid.i
+      exodiff = 'solid_out.e solid_out_fluid0.e'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "with the solid temperature problem as the main application."
+      cli_args = "Executioner/fixed_point_max_its=10 Executioner/fixed_point_rel_tol=1e-12 MultiApps/inactive='' Transfers/inactive=''"
+    []
+  []
+[]
