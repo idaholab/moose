@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYDelaunayGenerator.md'
-  issues = '#20192 #26776 #27545 #27828'
+  issues = '#20192 #26776 #27545 #27828 #27722'
   [xydelaunay]
     requirement = "The system shall have the capability of triangulating a polyline boundary"
     [basic]
@@ -161,7 +161,15 @@
                   --mesh-only xydelaunay_stitching_tri7.e'
       exodiff = 'xydelaunay_stitching_tri7.e'
       recover = false
-      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order" 
+      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order"
+    []
+    [interior_points]
+      type = 'Exodiff'
+      input = 'xydelaunay_interior_pts.i'
+      cli_args = '--mesh-only xydelaunay_interior_pts.e'
+      exodiff = 'xydelaunay_interior_pts.e'
+      recover = false
+      detail = "with the ability to specify interior nodes."
     []
   []
   [errors]
@@ -198,6 +206,13 @@
                   Mesh/xyd/tri_element_type=TRI3'
       expect_err = "Cannot use first order elements with stitched quadratic element holes."
       detail = "if the input hole meshes"
+    []
+    [err_interior_points]
+      type = RunException
+      input = 'xydelaunay_interior_pts.i'
+      cli_args = "Mesh/triangulate/interior_points='0.25 0.25 0.0' --mesh-only"
+      expect_err = "Duplicate points were found in the provided interior points."
+      detail = "with duplicate interior points"
     []
   []
 []
