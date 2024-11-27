@@ -78,9 +78,6 @@ protected:
   /// Boolean for easy check if a solid energy system shall be solved or not
   const bool _has_solid_energy_system;
 
-  /// Boolean for easy check if a passive scalar systems shall be solved or not
-  const bool _has_passive_scalar_systems;
-
   /// Boolean for easy check if turbulence systems shall be solved or not
   const bool _has_turbulence_systems;
 
@@ -110,29 +107,10 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _solid_energy_l_abs_tol;
 
-  // ******************* Passive scalar Eq Variables *********************** //
-
-  /// The names of the passive scalar systems
-  const std::vector<SolverSystemName> & _passive_scalar_system_names;
-
-  // The number(s) of the system(s) corresponding to the passive scalar equation(s)
-  std::vector<unsigned int> _passive_scalar_system_numbers;
+  // ********************* Passive Scalar Eq. Variables *********************** //
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<NonlinearSystemBase *> _passive_scalar_systems;
-
-  /// The user-defined relaxation parameter(s) for the passive scalar equation(s)
-  const std::vector<Real> _passive_scalar_equation_relaxation;
-
-  /// Options which hold the petsc settings for the passive scalar equation(s)
-  Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
-
-  /// Options for the linear solver of the passive scalar equation(s)
-  SIMPLESolverConfiguration _passive_scalar_linear_control;
-
-  /// Absolute linear tolerance for the passive scalar equation(s). We need to store this, because
-  /// it needs to be scaled with a representative flux.
-  const Real _passive_scalar_l_abs_tol;
 
   // ********************* Turbulence Eq Variables ************************* //
 
@@ -165,9 +143,6 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in solid energy
   const Real _solid_energy_absolute_tolerance;
-
-  /// The user-defined absolute tolerance for determining the convergence in passive scalars
-  const std::vector<Real> _passive_scalar_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in turbulence equations
   const std::vector<Real> _turbulence_absolute_tolerance;
