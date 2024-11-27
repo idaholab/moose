@@ -107,7 +107,7 @@ void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & param
  * @param petsc_flags Container holding the flags of the petsc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
+void AddPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
 
 /**
  * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
@@ -115,10 +115,10 @@ void processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_
  * @param mesh_dimension The mesh dimension, needed for multigrid settings
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void
-processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
-                  const unsigned int mesh_dimension,
-                  PetscOptions & petsc_options);
+void AddPetscPairsToPetscOptions(
+    const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+    const unsigned int mesh_dimension,
+    PetscOptions & petsc_options);
 
 /**
  * Returns the valid petsc line search options as a set of strings

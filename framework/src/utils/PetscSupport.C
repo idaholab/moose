@@ -511,14 +511,14 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
 
   // First process the single petsc options/flags
-  processPetscFlags(petsc_options, po);
+  AddPetscFlagsToPetscOptions(petsc_options, po);
 
   // Then process the option-value pairs
-  processPetscPairs(petsc_pair_options, fe_problem.mesh().dimension(), po);
+  AddPetscPairsToPetscOptions(petsc_pair_options, mesh_dimension, po);
 }
 
 void
-processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
+AddPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & po)
 {
   // Update the PETSc single flags
   for (const auto & option : petsc_flags)
@@ -558,9 +558,10 @@ processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
 }
 
 void
-processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
-                  const unsigned int mesh_dimension,
-                  PetscOptions & po)
+AddPetscPairsToPetscOptions(
+    const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+    const unsigned int mesh_dimension,
+    PetscOptions & po)
 {
   // the boolean in these pairs denote whether the user has specified any of the reason flags in the
   // input file
