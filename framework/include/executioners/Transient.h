@@ -36,7 +36,7 @@ public:
   virtual Real relativeSolutionDifferenceNorm() override;
 
 protected:
-  virtual std::vector<TimeIntegrator *> getTimeIntegrators() const override;
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override;
 
   /// inner-most solve object to perform Newton solve with PETSc on every time step
   FEProblemSolve _feproblem_solve;

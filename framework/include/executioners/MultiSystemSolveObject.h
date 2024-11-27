@@ -27,7 +27,7 @@ public:
    * Returns a reference to the vector of solver systems that this object is
    * supposed to solve
    */
-  const std::vector<SolverSystem *> & systemsToSolve() { return _systems; }
+  const std::vector<SolverSystem *> & systemsToSolve() const { return _systems; }
 
 protected:
   /// Vector of pointers to the systems

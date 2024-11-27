@@ -37,9 +37,18 @@ Real
 Transient::relativeSolutionDifferenceNorm()
 {
   // TODO: add multi-system support
-  const NumericVector<Number> & current_solution =
-      _check_aux ? _aux.solution() : *_nl.currentSolution();
-  const NumericVector<Number> & old_solution = _check_aux ? _aux.solutionOld() : _nl.solutionOld();
+  if (_check_aux)
+    return _aux.solution().l2_norm_diff(_aux.solutionOld()) / _aux.solution().l2_norm();
+}
 
-  return current_solution.l2_norm_diff(old_solution) / current_solution.l2_norm();
+std::set<TimeIntegrator *>
+Transient::getTimeIntegrators() const
+{
+  // We use a set because time integrators were added to every system, and we want a unique
+  std::set<TimeIntegrator *> tis;
+  // Get all time integrators from the systems in the FEProblemSolve
+  for (const auto sys : _feproblem_solve.systemsToSolve())
+    for (const auto & ti : sys->getTimeIntegrators())
+      tis.insert(ti.get());
+  return tis;
 }

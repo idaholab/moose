@@ -140,7 +140,7 @@ public:
    * time integrators than systems
    * @return string with the time integration scheme name
    */
-  virtual std::vector<TimeIntegrator *> getTimeIntegrators() const = 0;
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const = 0;
 
   /**
    * Get the name of the time integrator (time integration scheme) used
