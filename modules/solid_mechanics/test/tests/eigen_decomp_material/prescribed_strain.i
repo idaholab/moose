@@ -1,0 +1,136 @@
+[Problem]
+  kernel_coverage_check = false
+  solve = false
+[]
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[AuxVariables]
+  [disp_y]
+    initial_condition = 0
+  []
+  [disp_x]
+    initial_condition = 0
+  []
+  [disp_z]
+    initial_condition = 0
+  []
+[]
+
+[AuxKernels]
+  [disp_x]
+    execute_on = 'TIMESTEP_BEGIN'
+    type = ParsedAux
+    variable = disp_x
+    use_xyzt = true
+    expression = "4e-1*x*t"
+  []
+  [disp_y]
+    execute_on = 'TIMESTEP_BEGIN'
+    type = ParsedAux
+    variable = disp_y
+    use_xyzt = true
+    expression = "3e-1*y*t^2"
+  []
+  [disp_z]
+    execute_on = 'TIMESTEP_BEGIN'
+    type = ParsedAux
+    variable = disp_z
+    use_xyzt = true
+    expression = "1e-1*z*t^3"
+  []
+[]
+
+[Materials]
+  [strain]
+    type = ADComputeFiniteStrain
+    displacements = 'disp_x disp_y disp_z'
+  []
+  [nonAD_strain]
+    type = RankTwoTensorMaterialADConverter
+    ad_props_in = mechanical_strain
+    reg_props_out = nonAD_mechanical_strain
+  []
+  [eig_decomp]
+    type = ADEigenDecompMaterial
+    rank_two_tensor = mechanical_strain
+    outputs = exodus
+    output_properties = "max_eigen_vector mid_eigen_vector min_eigen_vector max_eigen_value "
+                        "mid_eigen_value min_eigen_value"
+  []
+  [nonADeig_decomp]
+    type = EigenDecompMaterial
+    rank_two_tensor = nonAD_mechanical_strain
+    base_name = nonAD
+    outputs = exodus
+    output_properties = "nonAD_max_eigen_vector nonAD_mid_eigen_vector nonAD_min_eigen_vector "
+                        "nonAD_max_eigen_value nonAD_mid_eigen_value nonAD_min_eigen_value"
+  []
+[]
+
+[BCs]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = LINEAR
+  dt = 1
+  end_time = 5
+[]
+
+[Postprocessors]
+  [sxx]
+    type = ADMaterialTensorAverage
+    rank_two_tensor = mechanical_strain
+    index_i = 0
+    index_j = 0
+    execute_on = 'TIMESTEP_END'
+  []
+  [syy]
+    type = ADMaterialTensorAverage
+    rank_two_tensor = mechanical_strain
+    index_i = 1
+    index_j = 1
+  []
+  [szz]
+    type = ADMaterialTensorAverage
+    rank_two_tensor = mechanical_strain
+    index_i = 2
+    index_j = 2
+  []
+  [AD_eigval_max]
+    type = ADElementAverageMaterialProperty
+    mat_prop = max_eigen_value
+  []
+  [AD_eigval_mid]
+    type = ADElementAverageMaterialProperty
+    mat_prop = mid_eigen_value
+  []
+  [AD_eigval_min]
+    type = ADElementAverageMaterialProperty
+    mat_prop = min_eigen_value
+  []
+  [nonAD_eigval_max]
+    type = ElementAverageMaterialProperty
+    mat_prop = nonAD_max_eigen_value
+  []
+  [nonAD_eigval_mid]
+    type = ElementAverageMaterialProperty
+    mat_prop = nonAD_mid_eigen_value
+  []
+  [nonAD_eigval_min]
+    type = ElementAverageMaterialProperty
+    mat_prop = nonAD_min_eigen_value
+  []
+[]
+
+[Outputs]
+  exodus = true
+[]
