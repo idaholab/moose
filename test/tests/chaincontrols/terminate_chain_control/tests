@@ -1,0 +1,27 @@
+[Tests]
+  design = 'TerminateChainControl.md'
+  issues = '#28948'
+  [tests]
+    requirement = 'The system shall be able to use a chain control to terminate a simulation'
+    [throw_error]
+      type = RunException
+      input = 'terminate_chain_control.i'
+      expect_err = 'Hasta la vista, baby'
+      detail = 'by throwing an error.'
+    []
+    [no_throw_error]
+      type = RunApp
+      input = 'terminate_chain_control.i'
+      cli_args = "ChainControls/terminate_ctrl/throw_error=false"
+      expect_out = 'Hasta la vista, baby'
+      detail = 'gracefully.'
+    []
+    [terminate_on_false]
+      type = RunException
+      input = 'terminate_chain_control.i'
+      cli_args = "ChainControls/terminate_ctrl/terminate_on_true=false"
+      expect_err = 'Hasta la vista, baby'
+      detail = 'when the data has a value of false.'
+    []
+  []
+[]
