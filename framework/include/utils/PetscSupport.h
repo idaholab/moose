@@ -159,8 +159,20 @@ InputParameters getPetscValidParams();
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc single options (flags)
 MultiMooseEnum getCommonPetscFlags();
 
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc snes single options (flags)
+MultiMooseEnum getCommonSNESFlags();
+
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc ksp single options (flags)
+MultiMooseEnum getCommonKSPFlags();
+
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc iname options (keys in key-value pairs)
 MultiMooseEnum getCommonPetscKeys();
+
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc snes option names (keys)
+MultiMooseEnum getCommonSNESKeys();
+
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc ksp option names (keys)
+MultiMooseEnum getCommonKSPKeys();
 
 /// check if SNES type is variational inequalities (VI) solver
 bool isSNESVI(FEProblemBase & fe_problem);

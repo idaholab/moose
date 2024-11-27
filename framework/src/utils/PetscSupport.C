@@ -802,31 +802,63 @@ getPetscValidParams()
 }
 
 MultiMooseEnum
-getCommonPetscFlags()
+getCommonSNESFlags()
 {
   return MultiMooseEnum(
-      "-dm_moose_print_embedding -dm_view -ksp_converged_reason -ksp_gmres_modifiedgramschmidt "
-      "-ksp_monitor -ksp_monitor_snes_lg-snes_ksp_ew -ksp_snes_ew -snes_converged_reason "
-      "-snes_ksp -snes_ksp_ew -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor "
-      "-snes_test_display -snes_view",
+      "-ksp_monitor_snes_lg -snes_ksp_ew -ksp_snes_ew -snes_converged_reason "
+      "-snes_ksp -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor "
+      "-snes_test_display -snes_view -snes_monitor_cancel",
       "",
       true);
 }
 
 MultiMooseEnum
-getCommonPetscKeys()
+getCommonKSPFlags()
 {
-  return MultiMooseEnum("-ksp_atol -ksp_gmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
-                        "-ksp_type -mat_fd_coloring_err -mat_fd_type -mat_mffd_type "
-                        "-pc_asm_overlap -pc_factor_levels "
-                        "-pc_factor_mat_ordering_type -pc_hypre_boomeramg_grid_sweeps_all "
-                        "-pc_hypre_boomeramg_max_iter "
-                        "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol "
-                        "-snes_linesearch_type "
-                        "-snes_ls -snes_max_it -snes_rtol -snes_divergence_tolerance -snes_type "
-                        "-sub_ksp_type -sub_pc_type",
+  return MultiMooseEnum(
+      "-ksp_converged_reason -ksp_gmres_modifiedgramschmidt -ksp_monitor", "", true);
+}
+
+MultiMooseEnum
+getCommonPetscFlags()
+{
+  auto options = MultiMooseEnum("-dm_moose_print_embedding -dm_view", "", true);
+  options.addValidName(getCommonKSPFlags());
+  options.addValidName(getCommonSNESFlags());
+  return options;
+}
+
+MultiMooseEnum
+getCommonSNESKeys()
+{
+  return MultiMooseEnum("-snes_atol -snes_linesearch_type -snes_ls -snes_max_it -snes_rtol "
+                        "-snes_divergence_tolerance -snes_type",
                         "",
                         true);
+}
+
+MultiMooseEnum
+getCommonKSPKeys()
+{
+  return MultiMooseEnum("-ksp_atol -ksp_gmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
+                        "-ksp_type -sub_ksp_type",
+                        "",
+                        true);
+}
+MultiMooseEnum
+getCommonPetscKeys()
+{
+  auto options = MultiMooseEnum("-mat_fd_coloring_err -mat_fd_type -mat_mffd_type "
+                                "-pc_asm_overlap -pc_factor_levels "
+                                "-pc_factor_mat_ordering_type -pc_hypre_boomeramg_grid_sweeps_all "
+                                "-pc_hypre_boomeramg_max_iter "
+                                "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type "
+                                "-sub_pc_type",
+                                "",
+                                true);
+  options.addValidName(getCommonKSPKeys());
+  options.addValidName(getCommonSNESKeys());
+  return options;
 }
 
 bool
