@@ -243,6 +243,9 @@ petscSetOptions(const PetscOptions & po,
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsClear(LIBMESH_PETSC_NULLPTR));
 #endif
 
+  // Turn off any flags requested to be ignored
+  // disableIgnoredPetscFlags(po.ignored_flags, po);
+
   setSolverOptions(solver_params);
 
   // Add any additional options specified in the input file
@@ -1025,29 +1028,47 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 }
 
 void
-disableNonlinearConvergedReason(FEProblemBase & fe_problem)
+disablePetscFlag(const std::string & flag, PetscOptions & petsc_options)
 {
-  auto & petsc_options = fe_problem.getPetscOptions();
-
-  petsc_options.flags.eraseSetValue("-snes_converged_reason");
+  petsc_options.flags.eraseSetValue(flag);
 
   auto & pairs = petsc_options.pairs;
-  auto it = MooseUtils::findPair(pairs, "-snes_converged_reason", MooseUtils::Any);
+  auto it = MooseUtils::findPair(pairs, flag, MooseUtils::Any);
   if (it != pairs.end())
     pairs.erase(it);
 }
 
 void
+disableIgnoredPetscFlags(const MultiMooseEnum & ignored_petsc_flags, PetscOptions & petsc_options)
+{
+  for (const auto & flag : ignored_petsc_flags)
+    disablePetscFlag(flag.rawName(), petsc_options);
+}
+
+void
+disableNonlinearConvergedReason(FEProblemBase & fe_problem)
+{
+  disablePetscFlag("-snes_converged_reason", fe_problem.getPetscOptions());
+}
+
+void
 disableLinearConvergedReason(FEProblemBase & fe_problem)
 {
-  auto & petsc_options = fe_problem.getPetscOptions();
+  disablePetscFlag("-ksp_converged_reason", fe_problem.getPetscOptions());
+}
 
-  petsc_options.flags.eraseSetValue("-ksp_converged_reason");
+void
+disableCommonKSPFlags(FEProblemBase & fe_problem)
+{
+  for (const auto & flag : getCommonKSPFlags().getNames())
+    disablePetscFlag(flag, fe_problem.getPetscOptions());
+}
 
-  auto & pairs = petsc_options.pairs;
-  auto it = MooseUtils::findPair(pairs, "-ksp_converged_reason", MooseUtils::Any);
-  if (it != pairs.end())
-    pairs.erase(it);
+void
+disableCommonSNESFlags(FEProblemBase & fe_problem)
+{
+  for (const auto & flag : getCommonSNESFlags().getNames())
+    disablePetscFlag(flag, fe_problem.getPetscOptions());
 }
 
 } // Namespace PetscSupport
