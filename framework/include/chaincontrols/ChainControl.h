@@ -12,6 +12,7 @@
 #include "Control.h"
 #include "ChainControlData.h"
 #include "ChainControlDataSystem.h"
+#include "MooseUtils.h"
 
 /**
  * Control that additionally provides the capability to produce/consume data values,
@@ -138,7 +139,18 @@ template <typename T>
 const T &
 ChainControl::getChainControlDataByName(const std::string & data_name)
 {
-  auto & data = getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
+  auto & system = getMooseApp().getChainControlDataSystem();
+
+  if (system.hasChainControlData(data_name) && !system.hasChainControlDataOfType<T>(data_name))
+    mooseError("The chain control data '",
+               data_name,
+               "' has the type '",
+               system.getChainControlDataMap().at(data_name)->type(),
+               "', but this chain control requires its type to be '",
+               MooseUtils::prettyCppType<T>(),
+               "'.");
+
+  auto & data = system.getChainControlData<T>(data_name);
 
   addChainControlDataDependency(data_name);
 

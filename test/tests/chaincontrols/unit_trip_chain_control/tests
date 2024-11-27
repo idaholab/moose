@@ -1,0 +1,17 @@
+[Tests]
+  design = 'UnitTripChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'unit_trip_chain_control.i'
+    csvdiff = 'unit_trip_chain_control_out.csv'
+    requirement = 'The system shall provide a unit trip chain control that stays in a tripped state after the trip occurs.'
+  []
+  [wrong_type]
+    type = RunException
+    input = 'unit_trip_chain_control.i'
+    cli_args = "ChainControls/true_trip_ctrl/input=true_trip_fn_ctrl:value"
+    expect_err = "The chain control data 'true_trip_fn_ctrl:value' has the type 'double', but this chain control requires its type to be 'bool'"
+    requirement = 'The system shall report an error if the wrong type of input data is provided to a unit trip chain control.'
+  []
+[]
