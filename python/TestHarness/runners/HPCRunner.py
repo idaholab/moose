@@ -98,8 +98,11 @@ class HPCRunner(Runner):
                 if self.fileIsReady(file):
                     # Store the result
                     if file == result_file:
-                        with open(file, 'r') as f:
-                            result = yaml.safe_load(f)
+                        try:
+                            with open(file, 'r') as f:
+                                result = yaml.safe_load(f)
+                        except:
+                            continue
                         self.exit_code = result['exit_code']
                         walltime = result['walltime']
 
