@@ -146,6 +146,13 @@ As a last step, we add the SIMPLE executioner:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i block=Executioner
 
+## Passive scalar advection
+
+The `SIMPLE` executioner can be used to solve coupled problems involving both flow and passive scalar advection.
+Advected passive scalars do not affect the flow distribution, and therefore can be solved after the velocity and
+pressure fields have been computed using the `SIMPLE` algorithm.
+Several systems may be used, for each passive scalar.
+
 !syntax parameters /Executioner/SIMPLE
 
 !syntax inputs /Executioner/SIMPLE

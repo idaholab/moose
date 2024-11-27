@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#28819'
+  design = 'SIMPLE.md LinearFVScalarAdvection.md'
+  [channel]
+    requirement = "The system shall be able to solve a  "
+    [simple]
+      type = 'Exodiff'
+      input = channel.i
+      exodiff = 'channel_out.e'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "scalar advection problem."
+    []
+  []
+[]
