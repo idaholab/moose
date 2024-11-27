@@ -157,6 +157,21 @@ AbaqusUELMesh::buildMesh()
         readElements(upper);
         continue;
       }
+      if (startsWith(upper, "*NSET"))
+      {
+        readNodeSet(upper);
+        continue;
+      }
+      if (startsWith(upper, "*ELSET"))
+      {
+        readElementSet(upper);
+        continue;
+      }
+      if (startsWith(upper, "*INITIAL CONDITIONS"))
+      {
+        _abaqus_ics.push_back(readInputBlock(upper));
+        continue;
+      }
     }
     catch (EndOfAbaqusInput &)
     {
@@ -165,6 +180,9 @@ AbaqusUELMesh::buildMesh()
   }
 
   // create blocks to restrict each variable
+  setupLibmeshSubdomains();
+
+  // setup libmesh node sets for abaqus node sets
   setupNodeSets();
 
   _mesh->prepare_for_use();
@@ -324,7 +342,61 @@ AbaqusUELMesh::readElements(const std::string & header)
 }
 
 void
-AbaqusUELMesh::setupNodeSets()
+AbaqusUELMesh::readNodeSet(const std::string & header)
+{
+  readSetHelper(_node_set, header, "nset");
+}
+
+void
+AbaqusUELMesh::readElementSet(const std::string & header)
+{
+  readSetHelper(_element_set, header, "elset");
+}
+
+void
+AbaqusUELMesh::readSetHelper(std::map<std::string, std::vector<std::size_t>> & set_map,
+                             const std::string & header,
+                             const std::string & name_key)
+{
+  // parse the header line
+  HeaderMap map(header);
+  const auto name = map.get<std::string>(name_key);
+  if (set_map.count(name))
+    paramError("file", "Repeated ", name_key, " declaration for '", name, "' in Abaqus input.");
+
+  // We will read data lines until the next line begins with *
+  std::string s;
+  auto & set = set_map[name];
+  while (readDataLine(s))
+  {
+    // split line
+    std::vector<std::size_t> col;
+    MooseUtils::tokenizeAndConvert(s, col, ",");
+    for (const auto item : col)
+      if (item > 0)
+        set.push_back(item - 1);
+      else
+        paramError("file", "Invalid ID in ", name_key, " '", name, "' in Abaqus input.");
+  }
+
+  if (_debug)
+    mooseInfoRepeated(name_key, " '", name, "': ", Moose::stringify(set));
+}
+
+AbaqusUELMesh::AbaqusInputBlock
+AbaqusUELMesh::readInputBlock(const std::string & header)
+{
+  AbaqusInputBlock block(header);
+  std::string s;
+  while (readDataLine(s))
+    block._data_lines.push_back(s);
+  if (_debug)
+    mooseInfoRepeated("Block: ", header, "\n", Moose::stringify(block._data_lines));
+  return block;
+}
+
+void
+AbaqusUELMesh::setupLibmeshSubdomains()
 {
   // verify variable numbers are below number of bits in BoundaryID
   const auto bits = sizeof(SubdomainID) * 8;
@@ -351,6 +423,30 @@ AbaqusUELMesh::setupNodeSets()
       for (const auto & var : uel.vars[i])
         elem->subdomain_id() |= (1 << var);
     }
+  }
+}
+
+void
+AbaqusUELMesh::setupNodeSets()
+{
+  BoundaryInfo & boundary_info = _mesh->get_boundary_info();
+
+  // Get the BoundaryIDs from the mesh
+  std::vector<BoundaryName> nodeset_names;
+  for (const auto & pair : _node_set)
+    nodeset_names.push_back(pair.first);
+  std::vector<boundary_id_type> nodeset_ids =
+      MooseMeshUtils::getBoundaryIDs(*_mesh, nodeset_names, true);
+
+  for (const auto & i : index_range(nodeset_names))
+  {
+    // add nodes
+    const auto & set = _node_set[nodeset_names[i]];
+    for (const auto node_id : set)
+      boundary_info.add_node(_mesh->query_node_ptr(node_id), nodeset_ids[i]);
+
+    // set names
+    boundary_info.nodeset_name(nodeset_ids[i]) = nodeset_names[i];
   }
 }
 
