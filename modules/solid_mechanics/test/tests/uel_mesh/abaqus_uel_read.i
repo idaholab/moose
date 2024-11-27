@@ -12,6 +12,9 @@
 [Variables/AddUELVariables]
 []
 
+[ICs/AddUELICs]
+[]
+
 [AuxVariables]
   [pid]
   []
@@ -22,29 +25,6 @@
     type = ProcessorIDAux
     variable = pid
     execute_on = 'INITIAL'
-  []
-[]
-
-[ICs]
-  [var_1]
-    type = ConstantIC
-    value = 1
-    variable = var_1
-  []
-  [var_2]
-    type = ConstantIC
-    value = 2
-    variable = var_2
-  []
-  [var_4]
-    type = ConstantIC
-    value = 4
-    variable = var_4
-  []
-  [var_8]
-    type = ConstantIC
-    value = 8
-    variable = var_8
   []
 []
 
