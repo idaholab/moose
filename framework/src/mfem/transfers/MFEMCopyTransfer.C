@@ -94,6 +94,7 @@ MFEMCopyTransfer::execute()
         {
 		    mfem_transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),_to_var_names[0],
 						  static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)),_from_var_names[0]);
+			transfers_done++;
         }
       }
     }
@@ -103,4 +104,19 @@ MFEMCopyTransfer::execute()
   }
 }
 
+void
+MFEMCopyTransfer::checkSiblingsTransferSupported() const
+{
+  // Check that we are in the supported configuration: same number of source and target apps
+  // The allocation of the child apps on the processors must be the same
+  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
+  {
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
+        mooseError("Child application allocation on parallel processes must be the same to support "
+                   "siblings variable field copy transfer");
+  }
+  else
+    mooseError("Number of source and target child apps must match for siblings transfer");
+}
 

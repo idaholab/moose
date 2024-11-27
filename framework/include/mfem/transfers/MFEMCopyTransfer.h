@@ -15,6 +15,7 @@ public:
 	//void initialSetup() override;
 	//virtual getAppInfo();
 	void execute() override;
+    void checkSiblingsTransferSupported() const override;
 protected:
 	std::vector<VariableName> _from_var_names;
 	std::vector<AuxVariableName> _to_var_names;

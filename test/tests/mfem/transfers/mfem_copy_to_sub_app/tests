@@ -1,0 +1,17 @@
+[Tests]
+  [test]
+    [run]
+      type = RunApp
+      input = parent.i
+    []
+    [verify]
+      type = RunCommand
+      command = './gold/check.sh
+                send
+                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                recv
+                OutputData/DiffusionSubApp/Run0/Cycle000001/proc000000.vtu'
+	  prereq = test/run
+    []
+  []
+[]
