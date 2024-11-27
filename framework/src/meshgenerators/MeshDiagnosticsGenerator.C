@@ -115,18 +115,11 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
   if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
-<<<<<<< HEAD
       _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
-      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
-=======
-      _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" && 
-      _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" && 
-      _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" && 
-      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" && 
+      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" &&
       _check_non_matching_edges == "NO_CHECK")
->>>>>>> a759b2e1ae (Basic outline for checkNonMatchingEdges)
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
