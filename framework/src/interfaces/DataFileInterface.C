@@ -53,7 +53,7 @@ DataFileInterface::getDataFileNameInternal(const std::string & path,
 
   if (found_path.context == Moose::DataFileUtils::Context::RELATIVE)
   {
-    mooseAssert(!info.data_name, "Should not be set");
+    mooseAssert(!found_path.data_name, "Should not be set");
     mooseAssert(param, "Should only hit when param is set");
     _parent.paramInfo(*param, "Data file '", path, "' found relative to the input file.");
   }
@@ -68,7 +68,10 @@ DataFileInterface::getDataFileNameInternal(const std::string & path,
       _parent.mooseInfo(msg);
   }
   else
+  {
     mooseAssert(found_path.context == Moose::DataFileUtils::Context::ABSOLUTE, "Missing branch");
+    mooseAssert(!found_path.data_name, "Should not be set");
+  }
 
   return found_path.path;
 }
