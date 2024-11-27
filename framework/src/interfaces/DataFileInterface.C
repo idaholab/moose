@@ -34,11 +34,11 @@ DataFileInterface::getDataFileName(const std::string & param) const
 
   // Look relative to the input file
   const auto base = _parent.parameters().getParamFileBase(param);
-  const auto relative_to_context = MooseUtils::absolutePath(base / value_path);
+  const auto relative_to_context = base / value_path;
   if (MooseUtils::checkFileReadable(relative_to_context, false, false, false))
   {
     _parent.paramInfo(param, "Data file '", value, "' found relative to the input file.");
-    return relative_to_context;
+    return MooseUtils::absolutePath(relative_to_context);
   }
 
   // Isn't absolute and couldn't find relative to the input file, so search the data
@@ -55,9 +55,8 @@ DataFileInterface::getDataFileNameByName(const std::string & relative_path,
   for (const auto & [name, path] : Registry::getRegistry().getDataFilePaths())
   {
     const auto file_path = MooseUtils::pathjoin(path, relative_path);
-    const std::string abs_file_path = MooseUtils::absolutePath(file_path);
-    if (MooseUtils::checkFileReadable(abs_file_path, false, false, false))
-      found.emplace(name, abs_file_path);
+    if (MooseUtils::checkFileReadable(file_path, false, false, false))
+      found.emplace(name, MooseUtils::absolutePath(file_path));
     else
       not_found.emplace(name, path);
   }

@@ -152,9 +152,8 @@ TEST(RegistryTest, determineFilePathFailed)
 {
   const std::string name = "unused";
   const std::string path = "foo";
-  const std::string abs_path = MooseUtils::absolutePath(path);
-  const std::string installed_path = "../share/" + name + "/data";
-  const std::string installed_abs_path = MooseUtils::absolutePath(installed_path);
+  const std::string installed_path =
+      MooseUtils::pathjoin(Moose::getExecutablePath(), "../share/" + name + "/data");
 
   EXPECT_THROW(
       {
@@ -166,8 +165,8 @@ TEST(RegistryTest, determineFilePathFailed)
         {
           EXPECT_EQ(std::string(e.what()),
                     "Failed to determine data file path for '" + name +
-                        "'. Paths searched:\n\n  installed: " + installed_abs_path +
-                        "\n  in-tree: " + abs_path);
+                        "'. Paths searched:\n\n  installed: \"" + installed_path +
+                        "\"\n  in-tree: " + path);
           throw;
         }
       },

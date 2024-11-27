@@ -92,11 +92,10 @@ Registry::addDataFilePath(const std::string & name, const std::string & in_tree_
 {
   // Enforce that the folder is called "data", because we rely on the installed path
   // to be within PREFIX/share/<name>/data (see determineDataFilePath())
-  const auto abs_in_tree_path = MooseUtils::absolutePath(in_tree_path);
-  const std::string folder = std::filesystem::path(abs_in_tree_path).filename();
+  const auto folder = MooseUtils::shortName(in_tree_path);
   if (folder != "data")
     mooseError("While registering data file path '",
-               abs_in_tree_path,
+               in_tree_path,
                "' for '",
                name,
                "': The folder must be named 'data' and it is named '",
@@ -177,30 +176,39 @@ Registry::getRepositoryURL(const std::string & repo_name)
 std::string
 Registry::determineDataFilePath(const std::string & name, const std::string & in_tree_path)
 {
+  // TODO: Track whether or not the application is installed in a better way
+  // than this, which will enable us to pick one or the other based on
+  // the install state. This probably also won't work with dynamic loading, where
+  // we can't necessarily get this information from the binary (as there could be
+  // multiple binary paths)
+
   // Installed data
   const auto installed_path =
       MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share", name, "data");
-  const auto abs_installed_path = MooseUtils::absolutePath(installed_path);
-  if (MooseUtils::checkFileReadable(abs_installed_path, false, false, false))
-    return installed_path;
+  if (MooseUtils::checkFileReadable(installed_path, false, false, false))
+    return MooseUtils::absolutePath(installed_path);
 
   // In tree data
-  const auto abs_in_tree_path = MooseUtils::absolutePath(in_tree_path);
-  if (MooseUtils::checkFileReadable(abs_in_tree_path, false, false, false))
-    return abs_in_tree_path;
+  if (MooseUtils::checkFileReadable(in_tree_path, false, false, false))
+    return MooseUtils::absolutePath(in_tree_path);
 
   mooseError("Failed to determine data file path for '",
              name,
              "'. Paths searched:\n\n  installed: ",
-             abs_installed_path,
+             installed_path,
              "\n  in-tree: ",
-             abs_in_tree_path);
+             in_tree_path);
 }
 
 std::string
 Registry::appNameFromAppPath(const std::string & app_path)
 {
-  // Convert /path/to/FooBarBazApp.C -> foo_bar_baz
+  // This is for deprecated use only. It assumes that the application name
+  // (binary name) in the build follows our normal naming of FooBarApp -> foo_bar.
+  // We need to convert the application source file to the above, for example:
+  //   /path/to/FooBarBazApp.C -> foo_bar_baz
+  // Ideally, we would instead have the user specify this manually so that
+  // there is no ambiguity.
   std::smatch match;
   if (std::regex_search(app_path, match, std::regex("\\/([a-zA-Z0-9_]+)App\\.C$")))
   {
