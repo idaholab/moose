@@ -528,7 +528,11 @@ class Scheduler(MooseObject):
                     job.setStatus(StatusSystem().finished)
 
                 with self.activity_lock:
-                    self.__active_jobs.remove(job)
+                    if job in self.__active_jobs:
+                        self.__active_jobs.remove(job)
+                    else:
+                        job.setStatus(StatusSystem().error, 'SCHEDULER ERROR')
+                        job.appendOutput(f'Failed to remove job from active jobs in Scheduler; did not exist')
 
             # Not enough slots to run the job...
             else:
