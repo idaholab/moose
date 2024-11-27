@@ -74,6 +74,9 @@ DataFileInterface::getDataFileNameByName(const std::string & relative_path,
 
   std::stringstream oss;
   // Found multiple
+  // TODO: Eventually, we could support a special syntax here that will allow a user
+  // to specify where to get data from to resolve ambiguity. For example, something like
+  // solid_mechancs:path/to/data
   if (found.size() > 1)
   {
     oss << "Multiple files were found when searching for the data file '" << relative_path
