@@ -39,7 +39,7 @@ AbaqusUserElement::validParams()
   params.addParam<std::vector<AuxVariableName>>(
       "external_fields",
       {},
-      "Auxiliary field variables (or 'predifined field variables') passed to the UEL plugin. Some "
+      "Auxiliary field variables (or 'predefined field variables') passed to the UEL plugin. Some "
       "plugins may assume that the first field is temperature when there are multiple external "
       "fields.");
 

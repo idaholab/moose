@@ -18,7 +18,7 @@
 /**
  * This user-object is a testbed for implementing a custom element.
  */
-class AbaqusUELMeshUserElement : public GeneralUserObject
+class AbaqusUELMeshUserElement : public GeneralUserObject, public TaggingInterface
 {
 public:
   /// function type for the external UMAT function
@@ -85,21 +85,11 @@ public:
   virtual void execute() override;
   virtual void finalize() override final {}
 
-  /// getters for the loop class
-  const std::vector<const MooseVariableFieldBase *> & getVariables() const { return _variables; }
-  const std::vector<const MooseVariableFieldBase *> & getAuxVariables() const
-  {
-    return _aux_variables;
-  }
-
-  const uel_t & getPlugin() const { return _uel; }
-
   const std::array<Real, 8> * getUELEnergy(dof_id_type element_id) const;
-  const Real & getPNewDt() const {return _pnewdt; }
 
 protected:
   /// setup the range of elements this object operates on
-  void setupElemRange();
+  void setupElementSet();
 
   std::string _uel_type;
 
@@ -113,19 +103,25 @@ protected:
   const uel_t _uel;
 
   /// The \p MooseMesh that this user object operates on
-  AbaqusUELMesh * _uel_mesh;
+  const AbaqusUELMesh & _uel_mesh;
 
   /// definition of the UEL this object is operating on
   const AbaqusUELMesh::UELDefinition & _uel_definition;
 
-  /// coupled variables to provide the DOF values
-  std::vector<NonlinearVariableName> _variable_names;
+  /// all elements in the UEL mesh
+  const std::vector<AbaqusUELMesh::UserElement> & _uel_elements;
+
+  /// selected set names
+  const std::vector<std::string> & _element_set_names;
+
+  /// active elements for each element set
+  std::vector<std::size_t> _active_elements;
 
   /// Auxiliary variable names
   std::vector<AuxVariableName> _aux_variable_names;
 
   /// pointers to the variable objects
-  std::vector<const MooseVariableFieldBase *> _variables;
+  std::vector<std::vector<const MooseVariableFieldBase *>> _variables;
 
   /// pointers to the auxiliary variable objects
   std::vector<const MooseVariableFieldBase *> _aux_variables;
@@ -133,16 +129,12 @@ protected:
   /// The subdomain ids this object operates on
   const std::set<SubdomainID> _sub_ids;
 
-  /// All the active and elements local to this process that exist on this object's subdomains
-  std::unique_ptr<ConstElemRange> _elem_range;
-
-  /// props
-  std::vector<Real> _props;
-  int _nprops;
+  /// properties for each element set
+  std::vector<std::pair<std::vector<Real> *, std::vector<int> *>> _properties;
 
   /// stateful data
   int _nstatev;
-  std::array<std::map<dof_id_type, std::vector<Real>>, 2> _statev;
+  std::array<std::map<std::size_t, std::vector<Real>>, 2> _statev;
   std::size_t _statev_index_current;
   std::size_t _statev_index_old;
 

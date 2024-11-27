@@ -60,7 +60,7 @@ AddUELVariables::act()
         block.push_back(Moose::stringify(b));
 
     var_params.set<std::vector<SubdomainName>>("block") = block;
-    const auto var_name = "var_" + Moose::stringify(var + 1);
+    const auto var_name = uel_mesh->getVarName(var);
     _problem->addVariable(type, var_name, var_params);
   }
 }
