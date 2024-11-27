@@ -36,9 +36,17 @@ Transient::Transient(const InputParameters & parameters)
 Real
 Transient::relativeSolutionDifferenceNorm()
 {
-  // TODO: add multi-system support
   if (_check_aux)
     return _aux.solution().l2_norm_diff(_aux.solutionOld()) / _aux.solution().l2_norm();
+  else
+  {
+    // Default criterion for now until we add a "steady-state-convergence-object" option
+    Real residual = 0;
+    for (const auto sys : _feproblem_solve.systemsToSolve())
+      residual +=
+          std::pow(sys->solution().l2_norm_diff(sys->solutionOld()) / sys->solution().l2_norm(), 2);
+    return std::sqrt(residual);
+  }
 }
 
 std::set<TimeIntegrator *>
