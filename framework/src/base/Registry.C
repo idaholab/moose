@@ -135,7 +135,9 @@ void
 Registry::addDeprecatedAppDataFilePath(const std::string & app_path)
 {
   const auto app_name = appNameFromAppPath(app_path);
-  mooseDeprecated("registerDataFilePath() is deprecated. Use registerAppDataFilePath(\"",
+  mooseDeprecated("In ",
+                  app_path,
+                  ":\nregisterDataFilePath() is deprecated. Use registerAppDataFilePath(\"",
                   app_name,
                   "\") instead.");
   addAppDataFilePath(app_name, app_path);
