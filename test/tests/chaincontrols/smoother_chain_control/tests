@@ -1,0 +1,10 @@
+[Tests]
+  design = 'SmootherChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'smoother_chain_control.i'
+    csvdiff = 'smoother_chain_control_out.csv'
+    requirement = 'The system shall be able to smooth an input chain control data using a moving average.'
+  []
+[]
