@@ -83,12 +83,12 @@ TEST(RegistryTest, addDataFilePathNonDataFolder)
 TEST(RegistryTest, addDataFilePathMismatch)
 {
   const std::string name = "data_mismatch";
-  const std::string path = "data";
+  const std::string path = "files/data_file_tests/data0/data";
   const std::string abs_path = MooseUtils::absolutePath(path);
 
   Registry::addDataFilePath(name, path);
 
-  const std::string other_path = "other_data/data";
+  const std::string other_path = "files/data_file_tests/data1/data";
   const std::string other_abs_path = MooseUtils::absolutePath(other_path);
 
   EXPECT_THROW(
@@ -111,7 +111,7 @@ TEST(RegistryTest, addDataFilePathMismatch)
 TEST(RegistryTest, getDataPath)
 {
   const std::string name = "data_working";
-  const std::string path = "data";
+  const std::string path = "files/data_file_tests/data0/data";
   const std::string abs_path = MooseUtils::absolutePath(path);
 
   Registry::addDataFilePath(name, path);
@@ -143,7 +143,7 @@ TEST(RegistryTest, getDataPathUnregistered)
 
 TEST(RegistryTest, determineFilePath)
 {
-  const std::string path = "data";
+  const std::string path = "files/data_file_tests/data0/data";
   const std::string abs_path = MooseUtils::absolutePath(path);
   EXPECT_EQ(Registry::determineDataFilePath("unused", path), abs_path);
 }

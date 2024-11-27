@@ -10,10 +10,7 @@
 #include "DataFileInterface.h"
 #include "MooseError.h"
 #include "ParallelParamObject.h"
-#include "Registry.h"
-#include "MooseUtils.h"
-
-#include <filesystem>
+#include "DataFileUtils.h"
 
 DataFileInterface::DataFileInterface(const ParallelParamObject & parent) : _parent(parent) {}
 
@@ -21,83 +18,57 @@ std::string
 DataFileInterface::getDataFileName(const std::string & param) const
 {
   // The path from the parameters, which has not been modified because it is a DataFileName
-  const auto & value = _parent.template getParam<DataFileParameterType>(param);
-  if (value.empty())
+  const auto & path = _parent.template getParam<DataFileParameterType>(param);
+  if (path.empty())
     _parent.paramInfo(param, "Data file name is empty");
 
-  const std::filesystem::path value_path = std::filesystem::path(std::string(value));
-
-  // If the file is absolute, we should reference that directly and don't need to add
-  // any info beacuse this is not ambiguous
-  if (value_path.is_absolute() && MooseUtils::checkFileReadable(value, false, false, false))
-    return value;
-
-  // Look relative to the input file
-  const auto base = _parent.parameters().getParamFileBase(param);
-  const auto relative_to_context = base / value_path;
-  if (MooseUtils::checkFileReadable(relative_to_context, false, false, false))
-  {
-    _parent.paramInfo(param, "Data file '", value, "' found relative to the input file.");
-    return MooseUtils::absolutePath(relative_to_context);
-  }
-
-  // Isn't absolute and couldn't find relative to the input file, so search the data
-  return getDataFileNameByName(value, &param);
+  return getDataFileNameInternal(path, &param);
 }
 
 std::string
-DataFileInterface::getDataFileNameByName(const std::string & relative_path,
-                                         const std::string * param) const
+DataFileInterface::getDataFileNameByPath(const std::string & path) const
 {
-  std::map<std::string, std::string> not_found, found;
+  return getDataFileNameInternal(path, nullptr);
+}
 
-  // Search each registered data path for the relative path
-  for (const auto & [name, path] : Registry::getRegistry().getDataFilePaths())
+std::string
+DataFileInterface::getDataFileNameInternal(const std::string & path,
+                                           const std::string * param) const
+{
+  const std::string base =
+      param ? _parent.parameters().getFileBase(*param) : _parent.parameters().getFileBase();
+
+  Moose::DataFileUtils::Path found_path;
+  try
   {
-    const auto file_path = MooseUtils::pathjoin(path, relative_path);
-    if (MooseUtils::checkFileReadable(file_path, false, false, false))
-      found.emplace(name, MooseUtils::absolutePath(file_path));
-    else
-      not_found.emplace(name, path);
+    found_path = Moose::DataFileUtils::getPath(path, base);
   }
-
-  // Found exactly one
-  if (found.size() == 1)
+  catch (MooseException & e)
   {
-    const auto & [name, path] = *(found.begin());
     if (param)
-      _parent.paramInfo(*param, "Using data file '", path, "' from ", name);
+      _parent.paramError(*param, e.what());
     else
-      _parent.mooseInfo("Using data file '", path, "' from ", name);
-    return path;
+      _parent.mooseError(e.what());
   }
 
-  std::stringstream oss;
-  // Found multiple
-  // TODO: Eventually, we could support a special syntax here that will allow a user
-  // to specify where to get data from to resolve ambiguity. For example, something like
-  // solid_mechancs:path/to/data
-  if (found.size() > 1)
+  if (found_path.context == Moose::DataFileUtils::Context::RELATIVE)
   {
-    oss << "Multiple files were found when searching for the data file '" << relative_path
-        << "':\n\n";
-    for (const auto & [name, path] : found)
-      oss << "  " << name << ": " << path << "\n";
+    mooseAssert(!info.data_name, "Should not be set");
+    mooseAssert(param, "Should only hit when param is set");
+    _parent.paramInfo(*param, "Data file '", path, "' found relative to the input file.");
   }
-  // Found none
+  else if (found_path.context == Moose::DataFileUtils::Context::DATA)
+  {
+    mooseAssert(found_path.data_name, "Should be set");
+    const std::string msg =
+        "Using data file '" + found_path.path + "' from " + *found_path.data_name + " data";
+    if (param)
+      _parent.paramInfo(*param, msg);
+    else
+      _parent.mooseInfo(msg);
+  }
   else
-  {
-    oss << "Unable to find the data file '" << relative_path << "' anywhere.";
-    if (not_found.size())
-    {
-      oss << " Paths searched:\n";
-      for (const auto & [name, path] : not_found)
-        oss << "  " << name << ": " << path << "\n";
-    }
-  }
+    mooseAssert(found_path.context == Moose::DataFileUtils::Context::ABSOLUTE, "Missing branch");
 
-  if (param)
-    _parent.paramError(*param, oss.str());
-  else
-    _parent.mooseError(oss.str());
+  return found_path.path;
 }

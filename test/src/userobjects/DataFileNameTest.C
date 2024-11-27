@@ -26,5 +26,5 @@ DataFileNameTest::DataFileNameTest(const InputParameters & parameters)
   mooseInfo(getDataFileName("data_file"));
 
   // a hard coded data file name
-  mooseInfo(getDataFileNameByName("README.md"));
+  mooseInfo(getDataFileNameByPath("README.md"));
 }

@@ -663,7 +663,7 @@ InputParameters::finalize(const std::string & parsing_syntax)
       return;
 
     // The base by which to make things relative to
-    const auto file_base = getParamFileBase(param_name);
+    const auto file_base = getFileBase(param_name);
     value = std::filesystem::absolute(file_base / value_path).c_str();
   };
 
@@ -692,13 +692,16 @@ InputParameters::finalize(const std::string & parsing_syntax)
 }
 
 std::filesystem::path
-InputParameters::getParamFileBase(const std::string & param_name) const
+InputParameters::getFileBase(const std::optional<std::string> & param_name) const
 {
   mooseAssert(!have_parameter<std::string>("_app_name"),
               "Not currently setup to work with app FileName parameters");
 
+  const hit::Node * hit_node = nullptr;
+
   // Context from the individual parameter
-  const hit::Node * hit_node = getHitNode(param_name);
+  if (param_name)
+    hit_node = getHitNode(*param_name);
   // Context from the parameters
   if (!hit_node)
     hit_node = getHitNode();
@@ -712,10 +715,15 @@ InputParameters::getParamFileBase(const std::string & param_name) const
 
   // Failed to find a node up the tree that isn't a command line argument
   if (!hit_node)
-    mooseError(
-        errorPrefix(param_name),
-        " Parameter was set via a command-line argument and does not have sufficient context for "
-        "determining a file path.");
+  {
+    std::string prefix = "";
+    if (param_name)
+      prefix = errorPrefix(*param_name) + " ";
+    mooseError(prefix,
+               "Input context was set via a command-line argument and does not have sufficient "
+               "context for "
+               "determining a file path.");
+  }
 
   return std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
 }

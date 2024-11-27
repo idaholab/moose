@@ -27,9 +27,9 @@ The "registered" data file directories are directories that are registered via:
 - the `registerAppDataFilePath` macro in `Registry.h`, where an applications data in its root `data` directory is registered
 - the `registerNonAppDataFilePath` macro in `Registry.h`, where a general data directory is registered
 
-## `getDataFileNameByName`
+## `getDataFileNameByPath`
 
-The `getDataFileNameByName` can be used for hard coded data file names. e.g.
+The `getDataFileNameByPath` can be used for hard coded data file names. e.g.
 data files that are tied to a specific model and are not meant to be user
 replaceable. This method will not search relative to the input file location and
 will only find data files in source repositories and installed binary

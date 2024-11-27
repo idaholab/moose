@@ -708,9 +708,11 @@ public:
   void finalize(const std::string & parsing_syntax);
 
   /**
-   * @return A file base to associate with the parameter with name \p param_name.
+   * @return A file base to associate with these parameters.
    *
-   * We have the following cases:
+   * Optionally, an input parameter can be provided via \p param_name.
+   *
+   * If the parameter is provided, we have the following options:
    * - The parameter itself has a hit node set (context for that parameter)
    * - The InputParameters object has a hit node set (context for all parameters)
    * - Neither of the above and we die
@@ -718,7 +720,8 @@ public:
    * In the event that a the parameter is set via command line, this will
    * attempt to look at the parameter's parents to find a suitable context.
    */
-  std::filesystem::path getParamFileBase(const std::string & param_name) const;
+  std::filesystem::path
+  getFileBase(const std::optional<std::string> & param_name = std::optional<std::string>()) const;
 
   /**
    * Methods returning iterators to the coupled variables names stored in this

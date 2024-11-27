@@ -44,12 +44,15 @@ public:
   /**
    * Returns the path of a data file for a given relative file path.
    * This can be used for hardcoded datafile names and will search the same locations
-   * as getDataFileName. The optional param pointer can be used to turn the mooseErrors this
-   * function emits into paramErrors
+   * as getDataFileName
    */
-  std::string getDataFileNameByName(const std::string & name,
-                                    const std::string * param = nullptr) const;
+  std::string getDataFileNameByPath(const std::string & path) const;
 
 private:
+  /**
+   * Internal helper for getting a data file name.
+   */
+  std::string getDataFileNameInternal(const std::string & path, const std::string * param) const;
+
   const ParallelParamObject & _parent;
 };
