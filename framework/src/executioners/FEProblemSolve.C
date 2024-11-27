@@ -391,10 +391,7 @@ FEProblemSolve::solve()
     // being converged
     num_fp_multisys_iters = 0;
     converged = false;
-    while (_multi_sys_fp_convergence
-               ? (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-                  Convergence::MooseConvergenceStatus::ITERATING)
-               : !converged)
+    while (!converged)
     {
       // Loop over each system
       for (const auto sys : _systems)
@@ -435,8 +432,17 @@ FEProblemSolve::solve()
           _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << std::endl;
       }
 
+      // Assess convergence of the multi-system fixed point iteration
       if (!_using_multi_sys_fp_iterations)
         converged = true;
+      else
+      {
+        converged = _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
+                    Convergence::MooseConvergenceStatus::CONVERGED;
+        if (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
+            Convergence::MooseConvergenceStatus::DIVERGED)
+          break;
+      }
       num_fp_multisys_iters++;
     }
 
