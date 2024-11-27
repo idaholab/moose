@@ -25,7 +25,7 @@ path will be used. Otherwise, `getDataFileName` will search (in this order)
 The "registered" data file directories are directories that are registered via:
 
 - the `registerAppDataFilePath` macro in `Registry.h`, where an applications data in its root `data` directory is registered
-- the `registerDataFilePath` macro in `Registry.h`, where a general data directory is registered
+- the `registerNonAppDataFilePath` macro in `Registry.h`, where a general data directory is registered
 
 ## `getDataFileNameByName`
 
