@@ -37,7 +37,7 @@ NodalValueSampler::NodalValueSampler(const InputParameters & parameters)
   {
     if (!_coupled_moose_vars[i]->isNodal())
       paramError("variable", "The variable '", _coupled_moose_vars[i]->name(), "' is not nodal.");
-    SamplerBase::checkSampleStandardFieldVariableType(_coupled_moose_vars[i]);
+    SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
   }
 
   std::vector<std::string> var_names(_coupled_moose_vars.size());

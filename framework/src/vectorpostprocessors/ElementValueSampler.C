@@ -41,7 +41,7 @@ ElementValueSampler::ElementValueSampler(const InputParameters & parameters)
                  _coupled_moose_vars[i]->name(),
                  "' is a nodal variable. Nodal variables can be sampled using a "
                  "'NodalValueSampler'.");
-    SamplerBase::checkSampleStandardFieldVariableType(_coupled_moose_vars[i]);
+    SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
   }
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());

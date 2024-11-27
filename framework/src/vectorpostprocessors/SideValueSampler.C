@@ -37,7 +37,7 @@ SideValueSampler::SideValueSampler(const InputParameters & parameters)
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
   {
     var_names[i] = _coupled_moose_vars[i]->name();
-    SamplerBase::checkSampleStandardFieldVariableType(_coupled_moose_vars[i]);
+    SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
   }
 
   // Initialize the data structures in SamplerBase

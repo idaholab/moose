@@ -90,10 +90,10 @@ SamplerBase::initialize()
 }
 
 void
-SamplerBase::checkSampleStandardFieldVariableType(const MooseVariableFieldBase * const var_ptr,
-                                                  const std::string & var_param_name) const
+SamplerBase::checkForStandardFieldVariableType(const MooseVariableFieldBase * const var_ptr,
+                                               const std::string & var_param_name) const
 {
-  // A pointer to a MooseVariableFieldBase will likely never be SCALAR
+  // A pointer to a MooseVariableFieldBase should never be SCALAR
   mooseAssert(var_ptr->feType().family != SCALAR,
               "Scalar variable '" + var_ptr->name() + "' cannot be sampled.");
   mooseAssert(dynamic_cast<const MooseObject *>(_vpp), "Should have succeeded");
