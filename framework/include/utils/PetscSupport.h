@@ -103,6 +103,28 @@ PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, vo
 void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
+ * Sets the FE problem's solve type from the input params.
+ */
+void setSolveTypeFromParams(SolveType & fe_problem_solve_type, const InputParameters & params);
+
+/**
+ * Sets the FE problem's line search from the input params.
+ */
+void setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
+ *  Sets the FE problem's MFFD type from the input params.
+ */
+void setMFFDTypeFromParams(MffdType & fe_problem_mffd_type, const InputParameters & params);
+
+/**
+ * Stores the Petsc flags and pair options fron the input params in the given PetscOptions object.
+ */
+void storePetscOptionsFromParams(PetscOptions & po,
+                                 const unsigned int mesh_dimension,
+                                 const InputParameters & params);
+
+/**
  * Populate flags in a given PetscOptions object using a vector of input arguments
  * @param petsc_flags Container holding the flags of the petsc options
  * @param petsc_options Data structure which handles petsc options within moose

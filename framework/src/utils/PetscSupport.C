@@ -460,17 +460,30 @@ petscSetDefaults(FEProblemBase & problem)
 void
 storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
+  setSolveTypeFromParams(fe_problem.solverParams()._type, params);
+  setLineSearchFromParams(fe_problem, params);
+  setMFFDTypeFromParams(fe_problem.solverParams()._mffd_type, params);
+  storePetscOptionsFromParams(fe_problem.getPetscOptions(), fe_problem.mesh().dimension(), params);
+}
+
+void
+setSolveTypeFromParams(SolveType & fe_problem_solve_type, const InputParameters & params)
+{
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type") && !params.isParamValid("_use_eigen_value"))
   {
     // Extract the solve type
     const std::string & solve_type = params.get<MooseEnum>("solve_type");
-    fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
+    fe_problem_solve_type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
+}
 
+void
+setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & params)
+{
   if (params.isParamValid("line_search"))
   {
-    MooseEnum line_search = params.get<MooseEnum>("line_search");
+    const MooseEnum line_search = params.get<MooseEnum>("line_search");
     if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
     {
       Moose::LineSearchType enum_line_search =
@@ -494,21 +507,27 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         }
     }
   }
+}
 
+void
+setMFFDTypeFromParams(MffdType & fe_problem_mffd_type, const InputParameters & params)
+{
   if (params.isParamValid("mffd_type"))
   {
     MooseEnum mffd_type = params.get<MooseEnum>("mffd_type");
-    fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
+    fe_problem_mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
+}
 
+void
+storePetscOptionsFromParams(PetscOptions & po,
+                            const unsigned int mesh_dimension,
+                            const InputParameters & params)
+{
   // The parameters contained in the Action
   const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
   const auto & petsc_pair_options =
       params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
-
-  // A reference to the PetscOptions object that contains the settings that will be used in the
-  // solve
-  Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
 
   // First process the single petsc options/flags
   AddPetscFlagsToPetscOptions(petsc_options, po);
