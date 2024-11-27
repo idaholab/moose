@@ -42,3 +42,32 @@ for n in nodes:
 print("*Element, Type=U1, Elset=CUBE")
 for e in elems:
   print(", ".join([str(v) for v in e]))
+
+def divide_chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+print("\n*Nset, nset=ALL, instance=Cube-1")
+for line in divide_chunks([str(i+1) for i in range(node_id - 1)], 7):
+  print(','.join(line))
+
+
+xsymm=[]
+ysymm=[]
+for n, n_id in node_map.items():
+  if n[0] == -1:
+    xsymm.append(n_id)
+  if n[1] == -1:
+    ysymm.append(n_id)
+
+print("*Nset, nset=XSYMM, instance=Cube-1")
+for line in divide_chunks([str(i) for i in xsymm], 7):
+  print(','.join(line))
+
+print("*Nset, nset=YSYMM, instance=Cube-1")
+for line in divide_chunks([str(i) for i in ysymm], 7):
+  print(','.join(line))
+
+print("*Elset, elset=SURF, instance=Cube-1")
+for line in divide_chunks([str(i+1) for i in range(elem_id - 1)], 7):
+  print(','.join(line))
