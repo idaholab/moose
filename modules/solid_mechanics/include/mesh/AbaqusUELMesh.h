@@ -14,6 +14,22 @@
 #include <stdexcept>
 
 /**
+ * Helper class to get a map of header fields
+ */
+class HeaderMap
+{
+public:
+  HeaderMap(const std::string & header);
+  bool has(const std::string & key);
+  template <typename T>
+  T get(const std::string & key);
+
+private:
+  std::map<std::string, std::string> _map;
+  const std::string _header;
+};
+
+/**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
 class AbaqusUELMesh : public MooseMesh
@@ -47,10 +63,17 @@ public:
     std::vector<int> nodes;
   };
 
+  struct AbaqusInputBlock
+  {
+    AbaqusInputBlock(const std::string & header) : _header(header) {}
+    HeaderMap _header;
+    std::vector<std::string> _data_lines;
+  };
+
   const std::set<SubdomainID> & getVarBlocks() const { return _uel_block_ids; }
   const std::vector<UELDefinition> & getUELs() const { return _element_definition; }
   const std::vector<UserElement> & getElements() const { return _elements; }
-  const std::unordered_map<int, std::vector<int>> & getNodeToUELMap() { return  _node_to_uel_map;}
+  const std::unordered_map<int, std::vector<int>> & getNodeToUELMap() { return _node_to_uel_map; }
   const UELDefinition & getUEL(const std::string & type);
 
 protected:
@@ -66,7 +89,11 @@ protected:
   void readNodes();
   void readUserElement(const std::string & header);
   void readElements(const std::string & header);
+  void readNodeSet(const std::string & header);
+  void readElementSet(const std::string & header);
+  AbaqusInputBlock readInputBlock(const std::string & header);
 
+  void setupLibmeshSubdomains();
   void setupNodeSets();
 
   /// Stream object used to interact with the file
@@ -89,29 +116,26 @@ protected:
   /// all subdomain IDs used for UEL variable restriction
   std::set<SubdomainID> _uel_block_ids;
 
+  /// UEL node sets
+  std::map<std::string, std::vector<std::size_t>> _node_set;
+
+  /// UEL element sets
+  std::map<std::string, std::vector<std::size_t>> _element_set;
+
+  /// initial condition data
+  std::vector<AbaqusInputBlock> _abaqus_ics;
+
   /// enable additional debugging output
   const bool _debug;
 
 private:
+  void readSetHelper(std::map<std::string, std::vector<std::size_t>> & set,
+                     const std::string & header,
+                     const std::string & name_key);
+
   class EndOfAbaqusInput : public std::exception
   {
   };
-};
-
-/**
- * Helper class to get a map of header fields
- */
-class HeaderMap
-{
-public:
-  HeaderMap(const std::string & header);
-  bool has(const std::string & key);
-  template <typename T>
-  T get(const std::string & key);
-
-private:
-  std::map<std::string, std::string> _map;
-  const std::string _header;
 };
 
 template <typename T>
