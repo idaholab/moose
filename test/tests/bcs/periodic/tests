@@ -1,14 +1,14 @@
 [Tests]
   issues = '#935 #1530'
   design = 'syntax/BCs/Periodic/index.md'
-  [./all_periodic_trans_test]
+  [all_periodic_trans_test]
     type = 'Exodiff'
     input = 'all_periodic_trans.i'
     exodiff = 'all_periodic_trans_out.e'
     requirement = "The system shall support periodic boundary conditions with transforms defined as functions."
-  [../]
+  []
 
-  [./auto_wrap_2d_test]
+  [auto_wrap_2d_test]
     type = 'Exodiff'
     input =  'auto_periodic_bc_test.i'
     exodiff = 'out_auto.e'
@@ -16,25 +16,25 @@
     abs_zero = 1e-6
     rel_err = 1e-5
     requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x' and 'y' directions."
-  [../]
+  []
 
-  [./auto_wrap_2d_test_non_generated]
+  [auto_wrap_2d_test_non_generated]
     type = 'Exodiff'
     input =  'auto_periodic_bc_non_generated.i'
     exodiff = 'out_auto_non_generated.e'
     requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x' and 'y' directions using a non-generated mesh."
-  [../]
+  []
 
-  [./auto_wrap_2d_test_error_check]
+  [auto_wrap_2d_test_error_check]
     type = 'RunException'
     input = 'auto_periodic_bc_test.i'
     expect_err = '"point" is outside of the domain'
     cli_args = 'AuxKernels/periodic_dist/point="0 99999 0"'
     prereq = 'auto_wrap_2d_test'
     requirement = "The system shall produce an error within the PeriodicDistanceAux object when a point is provided that is outside the mesh domain."
-  [../]
+  []
 
-  [./auto_wrap_3d_test]
+  [auto_wrap_3d_test]
     type = 'Exodiff'
     input = ' auto_periodic_bc_test_3d.i '
     exodiff = 'out_auto_3d.e'
@@ -45,33 +45,33 @@
     # GridPartitioner is robust and beautiful
     cli_args = 'Mesh/Partitioner/type=GridPartitioner'
     requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x', 'y', and 'z' directions."
-  [../]
+  []
 
-  [./orthogonal_pbc_on_square_test]
+  [orthogonal_pbc_on_square_test]
     type = 'Exodiff'
     input = 'orthogonal_pbc_on_square.i'
     exodiff = 'orthogonal_pbc_on_square_out.e'
     use_old_floor = true
     requirement = "The system shall support periodic boundary conditions on orthogonal boundaries with transforms defined as functions."
-  [../]
+  []
 
-  [./parallel_pbc_using_trans_test]
+  [parallel_pbc_using_trans_test]
     type = 'Exodiff'
     input = ' parallel_pbc_using_trans.i '
     exodiff = 'parallel_pbc_using_trans_out.e'
     requirement = "The system shall support periodic boundary conditions on parallel boundaries with transforms defined as functions."
-  [../]
+  []
 
-  [./subdomain_restricted_vars_test]
+  [subdomain_restricted_vars_test]
     type = 'Exodiff'
     input = 'periodic_subdomain_restricted_test.i'
     exodiff = 'out_restrict.e'
     group = 'periodic'
     deleted = 'Libmesh Bug #1410'
     requirement = "The system shall support periodic boundary conditions on subdomain restricted variables."
-  [../]
+  []
 
-  [./testlevel1]
+  [testlevel1]
     type = 'Exodiff'
     input = 'periodic_level_1_test.i'
     exodiff = 'periodic_level_1_test_out.e periodic_level_1_test_out.e-s004 periodic_level_1_test_out.e-s007'
@@ -79,9 +79,9 @@
     valgrind = 'HEAVY'
     abs_zero = 1e-6
     requirement = "The system shall support periodic boundary conditions with mesh adaptivity."
-  [../]
+  []
 
-  [./testperiodic]
+  [testperiodic]
     type = 'Exodiff'
     input = 'periodic_bc_test.i'
     exodiff = 'out.e'
@@ -89,9 +89,9 @@
     abs_zero = 1e-6
     rel_err = 1e-5
     requirement = "The system shall support periodic boundary conditions with transforms prescribed as a translation."
-  [../]
+  []
 
-  [./testperiodic_vector]
+  [testperiodic_vector]
     type = 'Exodiff'
     input = 'periodic_vector_bc_test.i'
     exodiff = 'vector_out.e'
@@ -99,9 +99,9 @@
     abs_zero = 1e-6
     rel_err = 1e-5
     requirement = "The system shall support periodic boundary conditions on vector variables with transforms prescribed as a translation."
-  [../]
+  []
 
-  [./testperiodic_dp]
+  [testperiodic_dp]
     type = 'Exodiff'
     input = 'periodic_bc_displaced_problem.i'
     exodiff = 'out_displaced_problem.e'
@@ -110,47 +110,47 @@
     max_parallel = 2
     min_parallel = 2
     requirement = "The system shall support periodic boundary conditions with displacements."
-  [../]
+  []
 
-  [./testtrapezoid]
+  [testtrapezoid]
     type = 'Exodiff'
     input = 'trapezoid.i'
     exodiff = 'out_trapezoid.e'
     requirement = "The system shall support periodic boundary conditions on a trapezoid domain with transforms prescribed as functions."
-  [../]
+  []
 
-  [./trapezoid_non_periodic]
+  [trapezoid_non_periodic]
     type = 'Exodiff'
     input = 'trapezoid_non_periodic.i'
     exodiff = 'trapezoid_non_periodic_out.e'
     design = 'mesh/MooseMesh.md'
     issues = '#11939'
     requirement = "The system shall support calls to periodic distance and bounds methods on the mesh when periodic boundary conditions are not used."
-  [../]
+  []
 
-  [./testwedge]
+  [testwedge]
     type = 'Exodiff'
     input = 'wedge.i'
     exodiff = 'out_wedge.e'
     requirement = "The system shall support periodic boundary conditions on a wedge domain with transforms prescribed as functions."
-  [../]
+  []
 
-  [./testwedgesys]
+  [testwedgesys]
     type = 'Exodiff'
     input = ' wedge_sys.i '
     exodiff = 'out_wedge_sys.e'
     max_parallel = 1
     requirement = "The system shall support periodic boundary conditions for a single variable on a wedge domain with transforms prescribed as functions."
-  [../]
+  []
 
-  [./auto_dir_repeated_id]
+  [auto_dir_repeated_id]
     type = 'Exodiff'
     input = 'auto_dir_repeated_id.i'
     exodiff = 'auto_dir_repeated_id_out.e'
     requirement = "The system shall support periodic boundary conditions for input meshes that have repeated element ids."
-  [../]
+  []
 
-  [./no_add_scalar]
+  [no_add_scalar]
     type = 'Exodiff'
     input = 'no_add_scalar.i'
     exodiff = 'no_add_scalar_out.e'
@@ -158,5 +158,38 @@
     requirement = "When using periodic boundary detection, the system shall not attempt to add periodic boundary conditions to scalar variables."
     design = 'source/actions/AddPeriodicBCAction.md'
     issues = '#11417'
-  [../]
+  []
+
+  [exceptions]
+    requirement = 'The system shall throw an error if'
+    issues = '#22496'
+    [multi_sys]
+      type = RunException
+      expect_err = 'Multiple solver systems currently not supported'
+      input = 'all_periodic_trans.i'
+      cli_args = "Problem/nl_sys_names='nl0 nl1'"
+      detail = 'multiple solver systems are being used as it is currently unsupported,'
+    []
+    [bad_params]
+      type = RunException
+      expect_err = 'Using the automatic periodic boundary detection does not require additional parameters'
+      input = 'all_periodic_trans.i'
+      cli_args = "BCs/Periodic/x/auto_direction=x"
+      detail = 'additional parameters are passed when using the automatic periodic boundary detection option,'
+    []
+    [bad_primary]
+      type = RunException
+      expect_err = "Boundary 'abs' does not exist in the mesh"
+      input = 'all_periodic_trans.i'
+      cli_args = "BCs/Periodic/x/primary='abs'"
+      detail = 'the primary boundary of a periodic boundary condition does not exist on the mesh, or'
+    []
+    [bad_secondary]
+      type = RunException
+      expect_err = "Boundary 'abs' does not exist in the mesh"
+      input = 'all_periodic_trans.i'
+      cli_args = "BCs/Periodic/x/secondary='abs'"
+      detail = 'the secondary boundary of a periodic boundary condition does not exist on the mesh.'
+    []
+  []
 []

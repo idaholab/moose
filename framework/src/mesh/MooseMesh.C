@@ -2047,14 +2047,32 @@ MooseMesh::detectPairedSidesets()
     if (minus_x_ids[side_dim].size() == 1 && plus_x_ids[side_dim].size() == 1)
       _paired_boundary.emplace_back(
           std::make_pair(*(minus_x_ids[side_dim].begin()), *(plus_x_ids[side_dim].begin())));
+    else
+      mooseInfoRepeated(
+          "For side dimension " + std::to_string(side_dim) +
+          " we did not find paired boundaries (sidesets) in X due to the presence of " +
+          std::to_string(minus_x_ids[side_dim].size()) + " -X normal and " +
+          std::to_string(plus_x_ids[side_dim].size()) + " +X normal boundaries.");
 
     if (minus_y_ids[side_dim].size() == 1 && plus_y_ids[side_dim].size() == 1)
       _paired_boundary.emplace_back(
           std::make_pair(*(minus_y_ids[side_dim].begin()), *(plus_y_ids[side_dim].begin())));
+    else
+      mooseInfoRepeated(
+          "For side dimension " + std::to_string(side_dim) +
+          " we did not find paired boundaries (sidesets) in Y due to the presence of " +
+          std::to_string(minus_y_ids[side_dim].size()) + " -Y normal and " +
+          std::to_string(plus_y_ids[side_dim].size()) + " +Y normal boundaries.");
 
     if (minus_z_ids[side_dim].size() == 1 && plus_z_ids[side_dim].size() == 1)
       _paired_boundary.emplace_back(
           std::make_pair(*(minus_z_ids[side_dim].begin()), *(plus_z_ids[side_dim].begin())));
+    else
+      mooseInfoRepeated(
+          "For side dimension " + std::to_string(side_dim) +
+          " we did not find paired boundaries (sidesets) in Z due to the presence of " +
+          std::to_string(minus_z_ids[side_dim].size()) + " -Z normal and " +
+          std::to_string(plus_z_ids[side_dim].size()) + " +Z normal boundaries.");
   }
 }
 
