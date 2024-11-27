@@ -315,6 +315,7 @@ pressure_tag = "pressure_grad"
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
+  continue_on_max_its = true
 
   momentum_l_abs_tol = 1e-14
   pressure_l_abs_tol = 1e-14

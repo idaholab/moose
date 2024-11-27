@@ -79,7 +79,7 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool nlConverged(const unsigned int nl_sys_num) override;
+  virtual bool solverSystemConverged(const unsigned int solver_sys_num) override;
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
   virtual unsigned int linearSysNum(const LinearSystemName & sys_name) const override;
   virtual unsigned int solverSysNum(const SolverSystemName & sys_name) const override;

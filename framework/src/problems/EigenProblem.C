@@ -659,7 +659,7 @@ EigenProblem::init()
 }
 
 bool
-EigenProblem::nlConverged(unsigned int)
+EigenProblem::solverSystemConverged(unsigned int)
 {
   if (_solve)
     return _nl_eigen->converged();

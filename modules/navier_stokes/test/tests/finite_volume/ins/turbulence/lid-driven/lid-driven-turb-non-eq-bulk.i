@@ -322,6 +322,7 @@ pressure_tag = "pressure_grad"
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
   print_fields = false
+  continue_on_max_its = true
 
   pin_pressure = true
   pressure_pin_value = 0.0

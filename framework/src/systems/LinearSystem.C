@@ -78,6 +78,7 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
     _rhs_non_time_tag(-1),
     _rhs_non_time(NULL),
     _n_linear_iters(0),
+    _converged(false),
     _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name))
 {
   getRightHandSideNonTimeVector();
@@ -180,6 +181,10 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 {
   TIME_SECTION("computeLinearSystemInternal", 3);
 
+  // Before we assemble we clear up the matrix and the vector
+  _linear_implicit_system.matrix->zero();
+  _linear_implicit_system.rhs->zero();
+
   // Make matrix ready to use
   activeAllMatrixTags();
 
@@ -271,10 +276,18 @@ LinearSystem::solve()
 
   system().solve();
 
+  // store info about the solve
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
-  // store info about the solve
+  auto & linear_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+  _initial_linear_residual = linear_solver.get_initial_residual();
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
+  _converged = linear_solver.get_converged_reason() > 0;
+
+  _console << "System: " << this->name() << " Initial residual: " << _initial_linear_residual
+           << " Final residual: " << _final_linear_residual << " Num. of Iter. " << _n_linear_iters
+           << std::endl;
 
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();

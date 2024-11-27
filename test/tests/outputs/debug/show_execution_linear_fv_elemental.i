@@ -53,8 +53,9 @@
 []
 
 [Executioner]
-  type = LinearPicardSteady
-  linear_systems_to_solve = u_sys
+  type = Steady
+  system_names = u_sys
+  l_tol = 1e-10
 []
 
 [Debug]

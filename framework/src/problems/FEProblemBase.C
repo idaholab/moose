@@ -6403,10 +6403,10 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 }
 
 bool
-FEProblemBase::nlConverged(const unsigned int nl_sys_num)
+FEProblemBase::solverSystemConverged(const unsigned int sys_num)
 {
   if (_solve)
-    return _nl[nl_sys_num]->converged();
+    return _solver_systems[sys_num]->converged();
   else
     return true;
 }
@@ -6631,18 +6631,51 @@ FEProblemBase::addPredictor(const std::string & type,
 }
 
 Real
+FEProblemBase::computeResidualL2Norm(NonlinearSystemBase & sys)
+{
+  _current_nl_sys = &sys;
+  computeResidual(*sys.currentSolution(), sys.RHS(), sys.number());
+  return sys.RHS().l2_norm();
+}
+
+Real
+FEProblemBase::computeResidualL2Norm(LinearSystem & sys)
+{
+  _current_linear_sys = &sys;
+
+  // We assemble the current system to check the current residual
+  computeLinearSystemSys(sys.linearImplicitSystem(),
+                         *sys.linearImplicitSystem().matrix,
+                         *sys.linearImplicitSystem().rhs,
+                         /*compute fresh gradients*/ true);
+
+  // Unfortunate, but we have to allocate a new vector for the residual
+  auto residual = sys.linearImplicitSystem().rhs->clone();
+  residual->scale(-1.0);
+  residual->add_vector(*sys.currentSolution(), *sys.linearImplicitSystem().matrix);
+  return residual->l2_norm();
+}
+
+Real
 FEProblemBase::computeResidualL2Norm()
 {
   TIME_SECTION("computeResidualL2Norm", 2, "Computing L2 Norm of Residual");
 
-  if (_nl.size() > 1)
-    mooseError("Multiple nonlinear systems in the same input are not currently supported when "
-               "performing fixed point iterations in multi-app contexts");
+  // We use sum the squared norms of the individual systems and then take the square root of it
+  Real l2_norm = 0.0;
+  for (auto sys : _nl)
+  {
+    const auto norm = computeResidualL2Norm(*sys);
+    l2_norm += norm * norm;
+  }
 
-  _current_nl_sys = _nl[0].get();
-  computeResidual(*_nl[0]->currentSolution(), _nl[0]->RHS(), /*nl_sys=*/0);
+  for (auto sys : _linear_systems)
+  {
+    const auto norm = computeResidualL2Norm(*sys);
+    l2_norm += norm * norm;
+  }
 
-  return _nl[0]->RHS().l2_norm();
+  return std::sqrt(l2_norm);
 }
 
 void
@@ -8843,13 +8876,23 @@ FEProblemBase::coordTransform()
 unsigned int
 FEProblemBase::currentNlSysNum() const
 {
-  return currentNonlinearSystem().number();
+  // If we don't have nonlinear systems this should be an invalid number
+  unsigned int current_nl_sys_num = libMesh::invalid_uint;
+  if (_nl.size())
+    current_nl_sys_num = currentNonlinearSystem().number();
+
+  return current_nl_sys_num;
 }
 
 unsigned int
 FEProblemBase::currentLinearSysNum() const
 {
-  return currentLinearSystem().number();
+  // If we don't have linear systems this should be an invalid number
+  unsigned int current_linear_sys_num = libMesh::invalid_uint;
+  if (_linear_systems.size())
+    current_linear_sys_num = currentLinearSystem().number();
+
+  return current_linear_sys_num;
 }
 
 bool

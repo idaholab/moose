@@ -42,7 +42,7 @@ class TestDiffusion2DOrthogonal(unittest.TestCase):
 
 class TestDiffusion2DNonorthogonal(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('diffusion-2d.i', 5, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/diffusion/use_nonorthogonal_correction=true Executioner/number_of_iterations=10", file_base="diffusion-2d_csv")
+        df1 = run_spatial('diffusion-2d.i', 5, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/diffusion/use_nonorthogonal_correction=true Convergence/linear/max_iterations=10", file_base="diffusion-2d_csv")
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

@@ -1233,6 +1233,7 @@ isFloat(const std::string & str)
   strtof(str.c_str(), &ptr);
   return (*ptr) == '\0';
 }
+
 } // MooseUtils namespace
 
 namespace Moose

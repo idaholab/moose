@@ -110,12 +110,6 @@ public:
   bool haveFieldSplitPreconditioner() const { return _use_field_split_preconditioner; }
 
   /**
-   * Returns the convergence state
-   * @return true if converged, otherwise false
-   */
-  virtual bool converged() = 0;
-
-  /**
    * Adds a kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
@@ -524,7 +518,8 @@ public:
   ///@{
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
-  bool containsTimeKernel();
+  virtual bool containsTimeKernel() override;
+  virtual std::vector<std::string> timeKernelVariableNames() override;
   ///@}
 
   /**

@@ -23,6 +23,12 @@ public:
 
   static InputParameters validParams();
 
+  /**
+   * Returns a reference to the vector of solver systems that this object is
+   * supposed to solve
+   */
+  const std::vector<SolverSystem *> & systemsToSolve() { return _systems; }
+
 protected:
   /// Vector of pointers to the systems
   std::vector<SolverSystem *> _systems;

@@ -3705,6 +3705,18 @@ NonlinearSystemBase::containsTimeKernel()
   return time_kernels.hasActiveObjects();
 }
 
+std::vector<std::string>
+NonlinearSystemBase::timeKernelVariableNames()
+{
+  std::vector<std::string> variable_names;
+  const auto & time_kernels = _kernels.getVectorTagObjectWarehouse(timeVectorTag(), 0);
+  if (time_kernels.hasActiveObjects())
+    for (const auto & kernel : time_kernels.getObjects())
+      variable_names.push_back(kernel->variable().name());
+
+  return variable_names;
+}
+
 bool
 NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
