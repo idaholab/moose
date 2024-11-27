@@ -23,7 +23,8 @@ public:
   static InputParameters validParams();
   INSFVOutletPressureBCTempl(const InputParameters & params);
 
-  ADReal boundaryValue(const FaceInfo & /* fi */) const override;
+  ADReal boundaryValue(const FaceInfo & /* fi */,
+                       const Moose::StateArg & /* state */) const override;
 
 protected:
   /// AD Functor that gives the distribution of pressure on the boundary

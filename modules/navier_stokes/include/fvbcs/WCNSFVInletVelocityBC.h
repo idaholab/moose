@@ -23,7 +23,7 @@ public:
   WCNSFVInletVelocityBC(const InputParameters & params);
 
 protected:
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
   /// Scaling factor
   const Real _scaling_factor;

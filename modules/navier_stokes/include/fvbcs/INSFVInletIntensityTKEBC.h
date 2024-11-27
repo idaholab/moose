@@ -19,7 +19,7 @@ class INSFVInletIntensityTKEBC : public FVDirichletBCBase
 public:
   static InputParameters validParams();
   INSFVInletIntensityTKEBC(const InputParameters & params);
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
 protected:
   /// x-velocity

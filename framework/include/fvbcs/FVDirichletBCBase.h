@@ -23,5 +23,5 @@ public:
 
   static InputParameters validParams();
 
-  virtual ADReal boundaryValue(const FaceInfo & fi) const = 0;
+  virtual ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const = 0;
 };
