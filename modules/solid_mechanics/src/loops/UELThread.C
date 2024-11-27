@@ -80,9 +80,9 @@ UELThread::onElement(const Elem * elem)
 
   // Get solution values
   _all_dof_values.resize(ndofel);
+  _all_dof_increments.resize(ndofel);
 
   _sys.currentSolution()->get(_all_dof_indices, _all_dof_increments);
-  _all_dof_increments.resize(ndofel);
   _sys.solutionOld().get(_all_dof_indices, _all_dof_values);
 
   mooseAssert(_all_dof_values.size() == _all_dof_increments.size(), "Inconsistent solution size.");
@@ -213,7 +213,7 @@ UELThread::onElement(const Elem * elem)
        nullptr /* ADLMAG[] */,
        _aux_var_values_to_uel.data() /* PREDEF[] */,
        &npredf /* NPREDF */,
-       nullptr /* LFLAGS[] */,
+       _lflags.data() /* LFLAGS[] */,
        &ndofel /* MLVARX */,
        nullptr /* DDLMAG[] */,
        &idummy /* MDLOAD */,
