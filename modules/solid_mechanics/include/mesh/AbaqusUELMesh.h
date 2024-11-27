@@ -20,9 +20,9 @@ class HeaderMap
 {
 public:
   HeaderMap(const std::string & header);
-  bool has(const std::string & key);
+  bool has(const std::string & key) const;
   template <typename T>
-  T get(const std::string & key);
+  T get(const std::string & key) const;
 
 private:
   std::map<std::string, std::string> _map;
@@ -48,19 +48,22 @@ public:
   {
     int coords;
     std::size_t nodes;
-    int nvars;
-    int properties;
+    int n_statev;
+    int n_properties;
+    int n_iproperties;
     bool symmetric;
     std::string type;
+    std::size_t type_id;
     std::vector<std::vector<std::size_t>> vars;
   };
 
   struct UserElement
   {
     std::size_t type_id;
-    std::size_t elem_id;
+    processor_id_type pid;
     /// nodes uses 0-based indexing
     std::vector<int> nodes;
+    std::pair<Real *, int *> properties;
   };
 
   struct AbaqusInputBlock
@@ -70,11 +73,17 @@ public:
     std::vector<std::string> _data_lines;
   };
 
-  const std::set<SubdomainID> & getVarBlocks() const { return _uel_block_ids; }
-  const std::vector<UELDefinition> & getUELs() const { return _element_definition; }
-  const std::vector<UserElement> & getElements() const { return _elements; }
-  const std::unordered_map<int, std::vector<int>> & getNodeToUELMap() { return _node_to_uel_map; }
-  const UELDefinition & getUEL(const std::string & type);
+  const auto & getVarBlocks() const { return _uel_block_ids; }
+  const auto & getUELs() const { return _element_definition; }
+  const auto & getElements() const { return _elements; }
+  const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
+  const auto & getElementSets() const { return _element_set; }
+  const auto & getNodeToUELMap() const { return _node_to_uel_map; }
+  const auto & getICBlocks() const { return _abaqus_ics; }
+  const auto & getProperties() const { return _properties; }
+
+  std::string getVarName(std::size_t id) const;
+  const UELDefinition & getUEL(const std::string & type) const;
 
 protected:
   /// read a single line from the input
@@ -91,6 +100,7 @@ protected:
   void readElements(const std::string & header);
   void readNodeSet(const std::string & header);
   void readElementSet(const std::string & header);
+  void readProperties(const std::string & header);
   AbaqusInputBlock readInputBlock(const std::string & header);
 
   void setupLibmeshSubdomains();
@@ -122,15 +132,21 @@ protected:
   /// UEL element sets
   std::map<std::string, std::vector<std::size_t>> _element_set;
 
+  /// float and int property storage. elements will point to their respective entries in this vector
+  std::vector<std::pair<std::vector<Real>, std::vector<int>>> _properties;
+
   /// initial condition data
   std::vector<AbaqusInputBlock> _abaqus_ics;
+
+  /// variable names (zero based indexing)
+  std::vector<std::string> _var_names;
 
   /// enable additional debugging output
   const bool _debug;
 
 private:
   void readSetHelper(std::map<std::string, std::vector<std::size_t>> & set,
-                     const std::string & header,
+                     const HeaderMap & map,
                      const std::string & name_key);
 
   class EndOfAbaqusInput : public std::exception
@@ -140,7 +156,7 @@ private:
 
 template <typename T>
 T
-HeaderMap::get(const std::string & key)
+HeaderMap::get(const std::string & key) const
 {
   const auto it = _map.find(MooseUtils::toUpper(key));
   if (it == _map.end())
@@ -149,4 +165,4 @@ HeaderMap::get(const std::string & key)
 }
 
 template <>
-bool HeaderMap::get(const std::string & key);
+bool HeaderMap::get(const std::string & key) const;
