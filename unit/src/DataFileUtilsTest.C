@@ -111,7 +111,7 @@ TEST_F(DataFileUtilsTest, getDataRelative)
         catch (const std::exception & e)
         {
           std::string err =
-              "Unable to find the data file '" + relative_path + "' anywhere. Paths searched:\n";
+              "Unable to find the data file '" + relative_path + "' anywhere.\n\nPaths searched:\n";
           for (const auto & [name, data_path] : Registry::getRegistry().getDataFilePaths())
             err += "  " + name + ": " + data_path + "\n";
           EXPECT_EQ(std::string(e.what()), err);
