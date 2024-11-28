@@ -21,14 +21,18 @@ Once a data path is registered, it can be searched using this interface and via 
 parameters. This search is consistent between both in-tree and installed builds of an application.
 
 When a parameter is specified as `DataFileName` type, the corresponding value that you get
-via `getParam<DataFileName>` is the searched value (the user's input is used for the search).
-You may also utilize the `getDataFilePath()` method within this interface to manually
-search for a relative path in the data without the use of a parameter (for hard-coded data). The search order for these path is the following:
+via `getParam<DataFileName>` is the searched value (the user's input is used for the search). The
+search order for these paths is the following:
 
-- if the path is absolute, use the absolute path (only for `DataFileName` parameters)
-- relative to the input file (only for `DataFileName` parameters)
-- relative to all installed and registered data file directories (for an installed application)
-- relative to all in-tree registered data file directories (for an in-tree build)
+- if the path is absolute, use the absolute path
+- relative to the input file
+- if the relative path begins with `./`, break and do not search data
+- if the relative path resolves behind `.`, break and do not search data
+- relative to the installed or in-tree registered data file directories
+
+You may also utilize the `getDataFilePath()` method within this interface to manually
+search for a relative path in the data without the use of a parameter (for hard-coded data). This
+search only searches relative to the installed or in-tree registered data file directories.
 
 You can see the file paths that were found in the search for all `DataFileName` parameters
 via the `--show-data-files` command line option.

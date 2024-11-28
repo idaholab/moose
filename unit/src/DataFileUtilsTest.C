@@ -87,6 +87,57 @@ TEST_F(DataFileUtilsTest, getPathExplicit)
   testData(Moose::DataFileUtils::getPathExplicit(_names[1], "testdata"), 1, "testdata");
 }
 
+TEST_F(DataFileUtilsTest, getPathStartsWithDotSlash)
+{
+  const std::string path = "./testdata";
+
+  // If the path starts with a dot, don't search the data directories. testdata
+  // exists in both data directories.
+  EXPECT_THROW(
+      {
+        try
+        {
+          Moose::DataFileUtils::getPath(path);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Unable to find the data file '" + path +
+                        "' anywhere.\n\nData path(s) were not searched because search path begins "
+                        "with './'.\n");
+          throw;
+        }
+      },
+      std::exception);
+
+  // Path starts with a path, but base also contains testdata. data should
+  // not be searched
+  testRelative(Moose::DataFileUtils::getPath("./testdata", "files/data_file_tests"),
+               "files/data_file_tests/testdata");
+}
+
+TEST_F(DataFileUtilsTest, getPathResolvesOutsideDot)
+{
+  // No base, path resolves outside . so nothing to search
+  const std::string path = "../testdata";
+  EXPECT_THROW(
+      {
+        try
+        {
+          Moose::DataFileUtils::getPath(path);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Unable to find the data file '" + path +
+                        "' anywhere.\n\nData path(s) were not searched because search path "
+                        "resolves behind '.'.\n");
+          throw;
+        }
+      },
+      std::exception);
+}
+
 TEST_F(DataFileUtilsTest, getPathMissing)
 {
   const std::string file = "missingdata";

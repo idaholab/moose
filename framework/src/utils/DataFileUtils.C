@@ -54,8 +54,8 @@ getPath(std::string path, const std::optional<std::string> & base)
     mooseError("The absolute path '", path, "' does not exist or is not readable.");
   }
 
-  // Keep track of what was found and what is not
-  std::map<std::string, std::string> not_found, found;
+  // Keep track of what was was searched for error context
+  std::map<std::string, std::string> not_found;
 
   // Relative to the base, if provided
   if (base)
@@ -66,17 +66,37 @@ getPath(std::string path, const std::optional<std::string> & base)
     not_found.emplace("working directory", MooseUtils::absolutePath(*base));
   }
 
-  // Search each registered data path for the relative path
-  for (const auto & [name, data_path] : data_paths)
+  // See if we should skip searching data
+  std::optional<std::string> skip_data_reason;
+  // Path starts with ./ so don't search data
+  if (path.size() > 1 && path.substr(0, 2) == "./")
   {
-    if (data_name && name != *data_name) // explicit search
-      continue;
-    const auto file_path = MooseUtils::pathjoin(data_path, path);
-    if (MooseUtils::checkFileReadable(file_path, false, false, false))
-      found.emplace(name, MooseUtils::absolutePath(file_path));
-    else
-      not_found.emplace(name + " data", data_path);
+    skip_data_reason = "begins with './'";
   }
+  else
+  {
+    // Path resolves outside of . so don't search data
+    const std::string proximate = std::filesystem::proximate(path).c_str();
+    if (proximate.size() > 1 && proximate.substr(0, 2) == "..")
+    {
+      skip_data_reason = "resolves behind '.'";
+    }
+  }
+
+  // Search data if we don't have a reason not to
+  std::map<std::string, std::string> found;
+  if (!skip_data_reason)
+    for (const auto & [name, data_path] : data_paths)
+    {
+      // Explicit search, name doesn't match requested name
+      if (data_name && name != *data_name) // explicit search
+        continue;
+      const auto file_path = MooseUtils::pathjoin(data_path, path);
+      if (MooseUtils::checkFileReadable(file_path, false, false, false))
+        found.emplace(name, MooseUtils::absolutePath(file_path));
+      else
+        not_found.emplace(name + " data", data_path);
+    }
 
   // Found exactly one
   if (found.size() == 1)
@@ -100,13 +120,15 @@ getPath(std::string path, const std::optional<std::string> & base)
   // Found none
   else
   {
-    oss << "Unable to find the data file '" << path << "' anywhere.\n\n";
+    oss << "Unable to find the data file '" << path << "' anywhere.\n";
     if (not_found.size())
     {
-      oss << "Paths searched:\n";
+      oss << "\nPaths searched:\n";
       for (const auto & [name, data_path] : not_found)
         oss << "  " << name << ": " << data_path << "\n";
     }
+    if (skip_data_reason)
+      oss << "\nData path(s) were not searched because search path " << *skip_data_reason << ".\n";
   }
 
   mooseError(oss.str());
