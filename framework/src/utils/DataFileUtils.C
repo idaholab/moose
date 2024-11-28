@@ -76,10 +76,10 @@ getPath(const std::string & path,
   // Found none
   else
   {
-    oss << "Unable to find the data file '" << path << "' anywhere.";
+    oss << "Unable to find the data file '" << path << "' anywhere.\n\n";
     if (not_found.size())
     {
-      oss << " Paths searched:\n";
+      oss << "Paths searched:\n";
       for (const auto & [name, data_path] : not_found)
         oss << "  " << name << ": " << data_path << "\n";
     }

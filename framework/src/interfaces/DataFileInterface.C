@@ -12,64 +12,54 @@
 #include "ParallelParamObject.h"
 #include "DataFileUtils.h"
 
+#include <optional>
+
 DataFileInterface::DataFileInterface(const ParallelParamObject & parent) : _parent(parent) {}
 
 std::string
 DataFileInterface::getDataFileName(const std::string & param) const
 {
-  // The path from the parameters, which has not been modified because it is a DataFileName
-  const auto & path = _parent.template getParam<DataFileParameterType>(param);
-  if (path.empty())
-    _parent.paramInfo(param, "Data file name is empty");
-
-  return getDataFileNameInternal(path, &param);
+  _parent.mooseDeprecated("getDataFileName() is deprecated. The file path is now directly set "
+                          "within the InputParameters.\nUse getParam<DataFileName>(\"",
+                          param,
+                          "\") instead.");
+  return _parent.parameters().get<DataFileName>(param);
 }
 
 std::string
 DataFileInterface::getDataFileNameByPath(const std::string & path) const
 {
-  return getDataFileNameInternal(path, nullptr);
-}
-
-std::string
-DataFileInterface::getDataFileNameInternal(const std::string & path,
-                                           const std::string * param) const
-{
-  const std::string base =
-      param ? _parent.parameters().getFileBase(*param) : _parent.parameters().getFileBase();
+  // Throw on error so that if getPath() fails, we can throw an error
+  // with the context of _parent.mooseError()
+  const auto throw_on_error_before = Moose::_throw_on_error;
+  Moose::_throw_on_error = true;
+  std::optional<std::string> error;
 
   Moose::DataFileUtils::Path found_path;
   try
   {
-    found_path = Moose::DataFileUtils::getPath(path, base);
+    found_path = Moose::DataFileUtils::getPath(path);
   }
   catch (MooseException & e)
   {
-    if (param)
-      _parent.paramError(*param, e.what());
-    else
-      _parent.mooseError(e.what());
+    error = e.what();
   }
 
-  if (found_path.context == Moose::DataFileUtils::Context::RELATIVE)
-  {
-    mooseAssert(!found_path.data_name, "Should not be set");
-    mooseAssert(param, "Should only hit when param is set");
-    _parent.paramInfo(*param, "Data file '", path, "' found relative to the input file.");
-  }
-  else if (found_path.context == Moose::DataFileUtils::Context::DATA)
+  Moose::_throw_on_error = throw_on_error_before;
+  if (error)
+    _parent.mooseError(*error);
+
+  if (found_path.context == Moose::DataFileUtils::Context::DATA)
   {
     mooseAssert(found_path.data_name, "Should be set");
     const std::string msg =
         "Using data file '" + found_path.path + "' from " + *found_path.data_name + " data";
-    if (param)
-      _parent.paramInfo(*param, msg);
-    else
-      _parent.mooseInfo(msg);
+    _parent.mooseInfo(msg);
   }
   else
   {
-    mooseAssert(found_path.context == Moose::DataFileUtils::Context::ABSOLUTE, "Missing branch");
+    mooseAssert(found_path.context == Moose::DataFileUtils::Context::ABSOLUTE,
+                "Missing branch and relative should not be hit");
     mooseAssert(!found_path.data_name, "Should not be set");
   }
 

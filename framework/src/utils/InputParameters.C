@@ -686,6 +686,34 @@ InputParameters::finalize(const std::string & parsing_syntax)
     set_if_filename(MeshFileName);
     set_if_filename(MatrixFileName);
 #undef set_if_filename
+    // Set paths for data files
+    else if (auto data_file_name =
+                 dynamic_cast<Parameters::Parameter<DataFileName> *>(param_value.get()))
+    {
+      Moose::DataFileUtils::Path found_path;
+      std::optional<std::string> error;
+
+      // Catch this so that we can add additional error context if it fails (the param path)
+      const auto throw_on_error_before = Moose::_throw_on_error;
+      Moose::_throw_on_error = true;
+      try
+      {
+        found_path = Moose::DataFileUtils::getPath(data_file_name->get(), getFileBase(param_name));
+      }
+      catch (std::exception & e)
+      {
+        error = errorPrefix(param_name) + " " + e.what();
+      }
+      Moose::_throw_on_error = throw_on_error_before;
+
+      if (error)
+        mooseError(*error);
+
+      // Set the value to the absolute searched path
+      data_file_name->set() = found_path.path;
+      // And store the path in metadata so that we can dump it later
+      at(param_name)._data_file_name_path = found_path;
+    }
   }
 
   _finalized = true;
@@ -1686,6 +1714,12 @@ InputParameters::paramAliases(const std::string & param_name) const
     aliases.push_back(pr.second);
 
   return aliases;
+}
+
+std::optional<Moose::DataFileUtils::Path>
+InputParameters::queryDataFileNamePath(const std::string & name) const
+{
+  return at(checkForRename(name))._data_file_name_path;
 }
 
 void

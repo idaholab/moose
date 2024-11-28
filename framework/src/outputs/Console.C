@@ -736,6 +736,9 @@ Console::outputSystemInformation()
   if (_system_info_flags.isValueSet("execution"))
     _console << ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr);
 
+  if (_app.getParam<bool>("show_data_files"))
+    _console << ConsoleUtils::outputDataFileParams(_app);
+
   if (_system_info_flags.isValueSet("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
 

@@ -16,6 +16,7 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "Conversion.h"
+#include "DataFileUtils.h"
 
 #include "libmesh/parameters.h"
 
@@ -1112,6 +1113,11 @@ public:
    */
   bool isFinalized() const { return _finalized; }
 
+  /**
+   * @return The DataFileName path for the parameter \p name (if any).
+   */
+  std::optional<Moose::DataFileUtils::Path> queryDataFileNamePath(const std::string & name) const;
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1152,6 +1158,8 @@ private:
     std::string _custom_type;
     /// The data pertaining to a command line parameter (empty if not a command line param)
     std::optional<CommandLineMetadata> _cl_data;
+    /// The searched path information pertaining to a DataFileName parameter
+    std::optional<Moose::DataFileUtils::Path> _data_file_name_path;
     /// The names of the parameters organized into groups
     std::string _group;
     /// The map of functions used for range checked parameters

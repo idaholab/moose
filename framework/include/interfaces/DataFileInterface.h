@@ -33,11 +33,10 @@ public:
   DataFileInterface(const ParallelParamObject & parent);
 
   /**
-   * Returns the path of a data file for a given FileName type parameter, searching
-   * (in the following order)
-   * - relative to the input file directory
-   * - relative to the running binary (assuming the application is installed)
-   * - relative to all registered data file directories
+   * Deprecated method.
+   *
+   * The data file paths are now automatically set within the InputParameters
+   * object, so using getParam<DataFileName>("param_name") is now sufficient.
    */
   std::string getDataFileName(const std::string & param) const;
 
@@ -49,10 +48,5 @@ public:
   std::string getDataFileNameByPath(const std::string & path) const;
 
 private:
-  /**
-   * Internal helper for getting a data file name.
-   */
-  std::string getDataFileNameInternal(const std::string & path, const std::string * param) const;
-
   const ParallelParamObject & _parent;
 };

@@ -88,6 +88,11 @@ std::string outputSystemInformationHelper(System & system);
 std::string outputLegacyInformation(MooseApp & app);
 
 /**
+ * Output the (param path = value) pairs for each DataFileName parameter
+ */
+std::string outputDataFileParams(MooseApp & app);
+
+/**
  * Helper function function for stringstream formatting
  */
 void insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr);

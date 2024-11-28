@@ -8,7 +8,6 @@
 [UserObjects]
   [data_file]
     type = DataFileNameTest
-    data_file = README.md
   []
 []
 

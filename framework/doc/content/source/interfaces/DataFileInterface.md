@@ -1,36 +1,34 @@
 # DataFileInterface
 
-This class provides API for resolving paths to data files distributed alongside
+This class provides an API for resolving paths to data files distributed alongside
 MOOSE based apps and modules.
 
 | Method | Description |
 | - | - |
-getDataFileName | Finds a data file given a `FileName` input parameter
-getDataFileNameByName | Finds a data file given a relative path
+getDataFileNameByPath | Finds a data file given a relative path
 
-## `getDataFileName`
+Files located in `<your_app>/data` can be registered as data paths for use in installed and in-tree
+builds of applications. The MOOSE framework and MOOSE module data directories
+of `moose/framework/data` and `moose/modules/*/data` are already registered. These
+data directories (located at the root of an application) are installed automatically using the standard `make install`.
 
-Files located in `moose/framework/data`, the `moose/modules/*/data`, or
-`<your_app>/data` directories can be retrieved using the `getDataFileName(const
-std::string & param)` function, where `param` is an input parameter of type
-`DataFileName`
+To make your data available for searching with this interface, register it with the following:
 
-If the provided path is absolute, no searching will take place and the absolute
-path will be used. Otherwise, `getDataFileName` will search (in this order)
+- the `registerAppDataFilePath` macro in `Registry.h`, where an applications data in its root `data` directory is registered (ex: `registerAppDataFilePath("foo_bar")` for `FooBarApp`)
+- the `registerNonAppDataFilePath` macro in `Registry.h`, where a general data directory is registered
 
-- relative to the input file
+Once a data path is registered, it can be searched using this interface and via `DataFileName`
+parameters. This search is consistent between both in-tree and installed builds of an application.
+
+When a parameter is specified as `DataFileName` type, the corresponding value that you get
+via `getParam<DataFileName>` is the searched value (the user's input is used for the search).
+You may also utilize the `getDataFileNameByPath()` method within this interface to manually
+search for a relative path in the data without the use of a parameter (for hard-coded data). The search order for these path is the following:
+
+- if the path is absolute, use the absolute path
+- relative to the input file (only for `DataFileName` parameters, not `getDataFileNameByPath()`)
 - relative to all installed and registered data file directories (for an installed application)
 - relative to all in-tree registered data file directories (for an in-tree build)
 
-The "registered" data file directories are directories that are registered via:
-
-- the `registerAppDataFilePath` macro in `Registry.h`, where an applications data in its root `data` directory is registered
-- the `registerNonAppDataFilePath` macro in `Registry.h`, where a general data directory is registered
-
-## `getDataFileNameByPath`
-
-The `getDataFileNameByPath` can be used for hard coded data file names. e.g.
-data files that are tied to a specific model and are not meant to be user
-replaceable. This method will not search relative to the input file location and
-will only find data files in source repositories and installed binary
-distributions.
+You can see the file paths that were found in the search for all `DataFileName` parameters
+via the `--show-data-files` command line option.

@@ -22,6 +22,7 @@
 #include "OutputWarehouse.h"
 #include "SystemInfo.h"
 #include "Checkpoint.h"
+#include "InputParameterWarehouse.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -429,6 +430,29 @@ outputLegacyInformation(MooseApp & app)
   }
 
   return oss.str();
+}
+
+std::string
+outputDataFileParams(MooseApp & app)
+{
+  std::map<std::string, std::string> values; // for A-Z sort
+  for (const auto & object_name_params_pair : app.getInputParameterWarehouse().getInputParameters())
+  {
+    const auto & params = object_name_params_pair.second;
+    for (const auto & name_value_pair : *params)
+    {
+      const auto & name = name_value_pair.first;
+      if (const auto path = params->queryDataFileNamePath(name))
+        if (params->getHitNode(name))
+          values.emplace(params->paramFullpath(name), path->path);
+    }
+  }
+
+  std::stringstream oss;
+  oss << "Data File Parameters:\n";
+  for (const auto & [param, value] : values)
+    oss << "  " << param << " = " << value << "\n";
+  return oss.str() + '\n';
 }
 
 void
