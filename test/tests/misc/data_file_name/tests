@@ -43,7 +43,7 @@
       type = RunApp
       input = test.i
       cli_args = 'UserObjects/data_file/data_file_by_path=README.md'
-      expect_out = 'Using data file \'(.*)/framework/data/README.md\' from moose data(.*)data_file_by_path_relative_to_binary="../share/moose/data/README.md"'
+      expect_out = 'Using data file \'(.*)/share/moose/data/README.md\' from moose data(.*)data_file_by_path_relative_to_binary="../share/moose/data/README.md"'
       detail = 'and in installed builds builds'
       installation_type = relocated
     []
