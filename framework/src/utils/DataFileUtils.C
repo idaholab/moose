@@ -32,16 +32,17 @@ getPath(const std::string & path,
     mooseError("The absolute path '", path, "' does not exist or is not readable.");
   }
 
+  // Keep track of what was found and what is not
+  std::map<std::string, std::string> not_found, found;
+
   // Relative to the base, if provided
   if (base)
   {
     const auto relative_to_base = MooseUtils::pathjoin(*base, path);
     if (MooseUtils::checkFileReadable(relative_to_base, false, false, false))
       return {MooseUtils::absolutePath(relative_to_base), Context::RELATIVE};
+    not_found.emplace("working directory", MooseUtils::absolutePath(*base));
   }
-
-  // Keep track of what was found and what is not
-  std::map<std::string, std::string> not_found, found;
 
   // Search each registered data path for the relative path
   for (const auto & [name, data_path] : Registry::getRegistry().getDataFilePaths())
@@ -52,7 +53,7 @@ getPath(const std::string & path,
     if (MooseUtils::checkFileReadable(file_path, false, false, false))
       found.emplace(name, MooseUtils::absolutePath(file_path));
     else
-      not_found.emplace(name, data_path);
+      not_found.emplace(name + " data", data_path);
   }
 
   // Found exactly one

@@ -67,9 +67,36 @@ TEST_F(DataFileUtilsTest, getDataUnique)
 
 TEST_F(DataFileUtilsTest, getDataNotUnique)
 {
-
   testData(Moose::DataFileUtils::getPath("testdata", {}, _names[0]), 0, "testdata");
   testData(Moose::DataFileUtils::getPath("testdata", {}, _names[1]), 1, "testdata");
+}
+
+TEST_F(DataFileUtilsTest, getDataMissing)
+{
+  const std::string file = "missingdata";
+  const std::string cwd = std::filesystem::current_path().c_str();
+  EXPECT_THROW(
+      {
+        try
+        {
+          Moose::DataFileUtils::getPath(file, cwd);
+        }
+        catch (const std::exception & e)
+        {
+          std::string err =
+              "Unable to find the data file '" + file + "' anywhere.\n\nPaths searched:\n";
+          auto paths = Registry::getRegistry().getDataFilePaths();
+          paths.emplace("working directory", cwd);
+          for (const auto & [name, data_path] : paths)
+          {
+            const std::string suffix = name == "working directory" ? "" : " data";
+            err += "  " + name + suffix + ": " + data_path + "\n";
+          }
+          EXPECT_EQ(std::string(e.what()), err);
+          throw;
+        }
+      },
+      std::exception);
 }
 
 TEST_F(DataFileUtilsTest, getDataAmbiguous)
@@ -113,7 +140,7 @@ TEST_F(DataFileUtilsTest, getDataRelative)
           std::string err =
               "Unable to find the data file '" + relative_path + "' anywhere.\n\nPaths searched:\n";
           for (const auto & [name, data_path] : Registry::getRegistry().getDataFilePaths())
-            err += "  " + name + ": " + data_path + "\n";
+            err += "  " + name + " data: " + data_path + "\n";
           EXPECT_EQ(std::string(e.what()), err);
           throw;
         }
