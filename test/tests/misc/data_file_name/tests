@@ -75,10 +75,10 @@
     expect_out = 'data_file_name_by_name_relative="(.*)/data/README.md"'
     requirement = 'The system shall be to find data files in designated directories by relative path using the deprecated interface'
   []
-  [show_data_files]
+  [show_data_params]
     type = RunApp
     input = test.i
-    cli_args = 'UserObjects/data_file/data_file=README.md --show-data-files'
+    cli_args = 'UserObjects/data_file/data_file=README.md --show-data-params'
     expect_out = 'UserObjects/data_file/data_file = (.*)framework/data/README.md'
     installation_type = in_tree
     requirement = 'The system shall support the output of all consumed data files via a parameter in designated data directories'

@@ -739,7 +739,7 @@ Console::outputSystemInformation()
   if (_app.getParam<bool>("show_data_paths"))
     _console << ConsoleUtils::outputDataFilePaths();
 
-  if (_app.getParam<bool>("show_data_files"))
+  if (_app.getParam<bool>("show_data_params"))
     _console << ConsoleUtils::outputDataFileParams(_app);
 
   if (_system_info_flags.isValueSet("output"))

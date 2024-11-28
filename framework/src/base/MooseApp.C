@@ -335,8 +335,8 @@ MooseApp::validParams()
 #endif
 
   params.addCommandLineParam<bool>(
-      "show_data_files",
-      "--show-data-files",
+      "show_data_params",
+      "--show-data-params",
       false,
       "Show found paths for all DataFileName parameters in the header");
   params.addCommandLineParam<bool>("show_data_paths",

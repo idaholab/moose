@@ -36,5 +36,5 @@ search only searches relative to the installed or in-tree registered data file d
 
 You can output additional information about the data files with the following comamnd line arguments:
 
-- `--show-data-files`: Output the file paths that were found in the search for all `DataFileName` parameters in the header
+- `--show-data-params`: Output the paths found for all DataFileName parameters in the header
 - `--show-data-paths`: Output the registered file paths for searching in the header
