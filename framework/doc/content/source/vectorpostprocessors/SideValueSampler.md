@@ -11,6 +11,10 @@ names.
 
 - the X, Y, Z coordinates of the quadrature points on the side
 
+!alert note title=General sampling
+The `SideValueSampler` samples variables on the specified boundary on element side quadrature points. For more flexible sampling,
+use the [PositionsFunctorValueSampler.md].
+
 ## Example input syntax
 
 In this example, variable `u` and `v` are the solutions of two boundary value diffusion problems. Their value along the `top` boundary and along the `center` internal sidesets are reported using two `SideValueSampler`. The rows in the CSV output are sorted according the `x` coordinate along the boundary for the former, and the element `id` for the latter.

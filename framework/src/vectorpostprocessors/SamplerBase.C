@@ -15,6 +15,8 @@
 #include "MooseEnum.h"
 #include "MooseError.h"
 #include "VectorPostprocessor.h"
+#include "MooseVariableFieldBase.h"
+#include "MooseBaseParameterInterface.h"
 
 #include "libmesh/point.h"
 
@@ -85,6 +87,33 @@ SamplerBase::initialize()
 
   std::for_each(
       _values.begin(), _values.end(), [](VectorPostprocessorValue * vec) { vec->clear(); });
+}
+
+void
+SamplerBase::checkForStandardFieldVariableType(const MooseVariableFieldBase * const var_ptr,
+                                               const std::string & var_param_name) const
+{
+  // A pointer to a MooseVariableFieldBase should never be SCALAR
+  mooseAssert(var_ptr->feType().family != SCALAR,
+              "Scalar variable '" + var_ptr->name() + "' cannot be sampled.");
+  mooseAssert(dynamic_cast<const MooseObject *>(_vpp), "Should have succeeded");
+  if (var_ptr->isVector())
+    dynamic_cast<const MooseObject *>(_vpp)->paramError(
+        var_param_name,
+        "The variable '",
+        var_ptr->name(),
+        "' is a vector variable. Sampling those is not currently supported in the "
+        "framework. It may be supported using a dedicated object in your application. Use "
+        "'VectorVariableComponentAux' auxkernel to copy those values into a regular field "
+        "variable");
+  if (var_ptr->isArray())
+    dynamic_cast<const MooseObject *>(_vpp)->paramError(
+        var_param_name,
+        "The variable '",
+        var_ptr->name(),
+        "' is an array variable. Sampling those is not currently supported in the "
+        "framework. It may be supported using a dedicated object in your application. Use "
+        "'ArrayVariableComponent' auxkernel to copy those values into a regular field variable");
 }
 
 void
