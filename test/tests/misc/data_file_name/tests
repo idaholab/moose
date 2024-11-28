@@ -60,7 +60,7 @@
     input = test.i
     cli_args = 'UserObjects/data_file/data_file_by_path=/path/to/README.md'
     expect_err = 'While using getDataFilePath\("/path/to/README.md"\): This API should not be used for absolute paths.'
-    requirement = 'The system shall show an exception when searching data files in designated directories by path with an absolute path'
+    requirement = 'The system shall warn when searching data files in designated directories by path with an absolute path'
   []
   [param_deprecated]
     type = RunApp
