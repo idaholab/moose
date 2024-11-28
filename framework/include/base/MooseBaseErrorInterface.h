@@ -96,7 +96,8 @@ public:
   template <typename... Args>
   void mooseInfo(Args &&... args) const
   {
-    moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...);
+    moose::internal::mooseInfoStream(
+        _console, _moose_base.errorPrefix("information"), std::forward<Args>(args)...);
   }
 
 private:
