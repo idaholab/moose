@@ -53,12 +53,23 @@ struct Path
 /**
  * Get the data path for a given path, searching the registered data
  *
+ * @param path - The path; can be prefixed with <name>: to search only data from <name>
+ * @param base - The base by which to search for the file relative to (optional)
+ */
+Path getPath(std::string path,
+             const std::optional<std::string> & base = std::optional<std::string>());
+
+/**
+ * Get the data path for a given path, searching the registered data given an explicit
+ * data search path.
+ *
+ * This exists primarily so that you don't need to call getPath("moose:file").
+ *
+ * @param data_name - The registered data name
  * @param path - The path
  * @param base - The base by which to search for the file relative to (optional)
- * @param data_name - The specific registered data name to seach for (optional,
- * otherwise search all)
  */
-Path getPath(const std::string & path,
-             const std::optional<std::string> & base = std::optional<std::string>(),
-             const std::optional<std::string> & data_name = std::optional<std::string>());
+Path getPathExplicit(const std::string & data_name,
+                     const std::string & path,
+                     const std::optional<std::string> & base = std::optional<std::string>());
 }

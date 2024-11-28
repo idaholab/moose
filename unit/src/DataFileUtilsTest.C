@@ -58,20 +58,22 @@ DataFileUtilsTest::testAbsolute(const Moose::DataFileUtils::Path & path,
   EXPECT_FALSE(path.data_name);
 }
 
-TEST_F(DataFileUtilsTest, getDataUnique)
+TEST_F(DataFileUtilsTest, getPathUnique)
 {
   // Files that are unique to each data path
   testData(Moose::DataFileUtils::getPath("testdata0"), 0, "testdata0");
   testData(Moose::DataFileUtils::getPath("testdata1"), 1, "testdata1");
 }
 
-TEST_F(DataFileUtilsTest, getDataNotUnique)
+TEST_F(DataFileUtilsTest, getPathExplicit)
 {
-  testData(Moose::DataFileUtils::getPath("testdata", {}, _names[0]), 0, "testdata");
-  testData(Moose::DataFileUtils::getPath("testdata", {}, _names[1]), 1, "testdata");
+  testData(Moose::DataFileUtils::getPath(_names[0] + ":testdata"), 0, "testdata");
+  testData(Moose::DataFileUtils::getPath(_names[1] + ":testdata"), 1, "testdata");
+  testData(Moose::DataFileUtils::getPathExplicit(_names[0], "testdata"), 0, "testdata");
+  testData(Moose::DataFileUtils::getPathExplicit(_names[1], "testdata"), 1, "testdata");
 }
 
-TEST_F(DataFileUtilsTest, getDataMissing)
+TEST_F(DataFileUtilsTest, getPathMissing)
 {
   const std::string file = "missingdata";
   const std::string cwd = std::filesystem::current_path().c_str();
@@ -99,7 +101,7 @@ TEST_F(DataFileUtilsTest, getDataMissing)
       std::exception);
 }
 
-TEST_F(DataFileUtilsTest, getDataAmbiguous)
+TEST_F(DataFileUtilsTest, getPathAmbiguous)
 {
   const std::string file = "testdata";
   // testdata exists in both registered data
@@ -114,14 +116,17 @@ TEST_F(DataFileUtilsTest, getDataAmbiguous)
           EXPECT_EQ(std::string(e.what()),
                     "Multiple files were found when searching for the data file 'testdata':\n\n  " +
                         _names[0] + ": " + _abs_paths[0] + "/" + file + "\n  " + _names[1] + ": " +
-                        _abs_paths[1] + "/" + file + "\n");
+                        _abs_paths[1] + "/" + file +
+                        "\n\nYou can resolve this ambiguity by appending a prefix with the desired "
+                        "data name, for example:\n\n  " +
+                        _names[0] + ":" + file);
           throw;
         }
       },
       std::exception);
 }
 
-TEST_F(DataFileUtilsTest, getDataRelative)
+TEST_F(DataFileUtilsTest, getPathRelative)
 {
   const std::string relative_path = "files/data_file_tests/unregistered_data";
 
@@ -148,7 +153,7 @@ TEST_F(DataFileUtilsTest, getDataRelative)
       std::exception);
 }
 
-TEST_F(DataFileUtilsTest, getDataAbsolute)
+TEST_F(DataFileUtilsTest, getPathAbsolute)
 {
   const auto absolute_path = MooseUtils::absolutePath("files/data_file_tests/unregistered_data");
 
@@ -157,7 +162,28 @@ TEST_F(DataFileUtilsTest, getDataAbsolute)
   testAbsolute(Moose::DataFileUtils::getPath(absolute_path, _cwd), absolute_path);
 }
 
-TEST_F(DataFileUtilsTest, getDataAbsoluteMissing)
+TEST_F(DataFileUtilsTest, getPathAbsoluteExplicit)
+{
+  // Warning when specifying a data name with an absolute path
+  EXPECT_THROW(
+      {
+        try
+        {
+          Moose::DataFileUtils::getPath(_names[0] + ":" + "/absolute/path");
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Should not specify an absolute path along with a data name to search "
+                    "(requested to search in '" +
+                        _names[0] + "')");
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST_F(DataFileUtilsTest, getPathAbsoluteMissing)
 {
   const auto absolute_path = MooseUtils::absolutePath("files/data_file_tests/foo");
 
@@ -172,6 +198,26 @@ TEST_F(DataFileUtilsTest, getDataAbsoluteMissing)
         {
           EXPECT_EQ(std::string(e.what()),
                     "The absolute path '" + absolute_path + "' does not exist or is not readable.");
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST_F(DataFileUtilsTest, getPathNameUnregistered)
+{
+  const std::string name = "unregistered_name";
+  // Absolute and just doesn't exist
+  EXPECT_THROW(
+      {
+        try
+        {
+          Moose::DataFileUtils::getPath(name + ":file");
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Data from '" + name + "' is not registered to be searched");
           throw;
         }
       },

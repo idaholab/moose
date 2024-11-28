@@ -14,19 +14,41 @@
 #include "Registry.h"
 
 #include <filesystem>
+#include <regex>
 
 namespace Moose::DataFileUtils
 {
 Moose::DataFileUtils::Path
-getPath(const std::string & path,
-        const std::optional<std::string> & base,
-        const std::optional<std::string> & data_name)
+getPath(std::string path, const std::optional<std::string> & base)
 {
+  const auto & data_paths = Registry::getRegistry().getDataFilePaths();
+
+  // Search for "<name>:" prefix which is a data name to limit the search to
+  std::optional<std::string> data_name;
+  std::smatch match;
+  if (std::regex_search(path, match, std::regex("(?:(\\w+):)?(.*)")))
+  {
+    if (match[1].matched)
+    {
+      data_name = match[1];
+      if (!data_paths.count(*data_name))
+        mooseError("Data from '", *data_name, "' is not registered to be searched");
+    }
+    path = match[2];
+  }
+  else
+    mooseError("Failed to parse path '", path, "'");
+
   const std::filesystem::path value_path = std::filesystem::path(path);
 
   // File is absolute, no need to search
   if (std::filesystem::path(path).is_absolute())
   {
+    if (data_name)
+      mooseError("Should not specify an absolute path along with a data name to search (requested "
+                 "to search in '",
+                 *data_name,
+                 "')");
     if (MooseUtils::checkFileReadable(path, false, false, false))
       return {MooseUtils::absolutePath(path), Context::ABSOLUTE};
     mooseError("The absolute path '", path, "' does not exist or is not readable.");
@@ -45,9 +67,9 @@ getPath(const std::string & path,
   }
 
   // Search each registered data path for the relative path
-  for (const auto & [name, data_path] : Registry::getRegistry().getDataFilePaths())
+  for (const auto & [name, data_path] : data_paths)
   {
-    if (data_name && name != *data_name)
+    if (data_name && name != *data_name) // explicit search
       continue;
     const auto file_path = MooseUtils::pathjoin(data_path, path);
     if (MooseUtils::checkFileReadable(file_path, false, false, false))
@@ -65,14 +87,15 @@ getPath(const std::string & path,
 
   std::stringstream oss;
   // Found multiple
-  // TODO: Eventually, we could support a special syntax here that will allow a user
-  // to specify where to get data from to resolve ambiguity. For example, something like
-  // solid_mechancs:path/to/data
   if (found.size() > 1)
   {
     oss << "Multiple files were found when searching for the data file '" << path << "':\n\n";
     for (const auto & [name, data_path] : found)
       oss << "  " << name << ": " << data_path << "\n";
+    const auto & first_name = found.begin()->first;
+    oss << "\nYou can resolve this ambiguity by appending a prefix with the desired data name, for "
+           "example:\n\n  "
+        << first_name << ":" << path;
   }
   // Found none
   else
@@ -87,5 +110,13 @@ getPath(const std::string & path,
   }
 
   mooseError(oss.str());
+}
+
+Moose::DataFileUtils::Path
+getPathExplicit(const std::string & data_name,
+                const std::string & path,
+                const std::optional<std::string> & base)
+{
+  return getPath(data_name + ":" + path, base);
 }
 }

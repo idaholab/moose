@@ -90,6 +90,9 @@ Registry::addKnownLabel(const std::string & label)
 void
 Registry::addDataFilePath(const std::string & name, const std::string & in_tree_path)
 {
+  if (!std::regex_search(name, std::regex("\\w+")))
+    mooseError("Unallowed characters in '", name, "'");
+
   // Enforce that the folder is called "data", because we rely on the installed path
   // to be within PREFIX/share/<name>/data (see determineDataFilePath())
   const auto folder = MooseUtils::shortName(in_tree_path);

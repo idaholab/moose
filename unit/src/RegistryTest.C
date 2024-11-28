@@ -108,6 +108,23 @@ TEST(RegistryTest, addDataFilePathMismatch)
       std::exception);
 }
 
+TEST(RegistryTest, addDataFilePathUnallowedName)
+{
+  EXPECT_THROW(
+      {
+        try
+        {
+          Registry::addDataFilePath("!", "unused");
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()), "Unallowed characters in '!'");
+          throw;
+        }
+      },
+      std::exception);
+}
+
 TEST(RegistryTest, getDataPath)
 {
   const std::string name = "data_working";
