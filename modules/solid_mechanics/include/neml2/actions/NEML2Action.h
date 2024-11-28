@@ -31,7 +31,7 @@ public:
 
 protected:
   /// Name of the NEML2 input file
-  FileName _fname;
+  DataFileName _fname;
 
   /// Name of the NEML2 material model to import from the NEML2 input file
   std::string _mname;

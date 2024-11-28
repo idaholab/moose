@@ -78,7 +78,7 @@ NEML2Action::act()
 
 NEML2Action::NEML2Action(const InputParameters & parameters)
   : Action(parameters),
-    _fname(getDataFileName("input")),
+    _fname(getParam<DataFileName>("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
     _mode(getParam<MooseEnum>("mode")),
