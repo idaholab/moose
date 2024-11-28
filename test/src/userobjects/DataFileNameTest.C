@@ -24,6 +24,8 @@ DataFileNameTest::validParams()
   params.addParam<std::string>("data_file_by_path", "Data file to look up by path (not param)");
   params.addParam<DataFileName>("data_file_deprecated",
                                 "Data file to look up that is loaded from the deprecated method");
+  params.addParam<std::string>("data_file_name_by_name",
+                               "Data file to look up using the deprecated getDataFileNameByName");
   return params;
 }
 
@@ -41,8 +43,9 @@ DataFileNameTest::DataFileNameTest(const InputParameters & parameters)
   if (isParamSetByUser("data_file"))
     print_path("data_file", getParam<DataFileName>("data_file"));
   if (isParamSetByUser("data_file_by_path"))
-    print_path("data_file_by_path",
-               getDataFileNameByPath(getParam<std::string>("data_file_by_path")));
+    print_path("data_file_by_path", getDataFilePath(getParam<std::string>("data_file_by_path")));
   if (isParamSetByUser("data_file_deprecated"))
     print_path("data_file_deprecated", getDataFileName("data_file_deprecated"));
+  if (isParamSetByUser("data_file_name_by_name"))
+    print_path("data_file_name_by_name", getDataFileNameByName(getParam<std::string>("data_file_name_by_name")));
 }

@@ -5,7 +5,7 @@ MOOSE based apps and modules.
 
 | Method | Description |
 | - | - |
-getDataFileNameByPath | Finds a data file given a relative path
+getDataFilePath | Finds a data file given a relative path
 
 Files located in `<your_app>/data` can be registered as data paths for use in installed and in-tree
 builds of applications. The MOOSE framework and MOOSE module data directories
@@ -22,11 +22,11 @@ parameters. This search is consistent between both in-tree and installed builds 
 
 When a parameter is specified as `DataFileName` type, the corresponding value that you get
 via `getParam<DataFileName>` is the searched value (the user's input is used for the search).
-You may also utilize the `getDataFileNameByPath()` method within this interface to manually
+You may also utilize the `getDataFilePath()` method within this interface to manually
 search for a relative path in the data without the use of a parameter (for hard-coded data). The search order for these path is the following:
 
-- if the path is absolute, use the absolute path
-- relative to the input file (only for `DataFileName` parameters, not `getDataFileNameByPath()`)
+- if the path is absolute, use the absolute path (only for `DataFileName` parameters)
+- relative to the input file (only for `DataFileName` parameters)
 - relative to all installed and registered data file directories (for an installed application)
 - relative to all in-tree registered data file directories (for an in-tree build)
 

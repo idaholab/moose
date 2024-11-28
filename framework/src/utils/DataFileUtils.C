@@ -22,7 +22,7 @@ getPath(const std::string & path,
         const std::optional<std::string> & base,
         const std::optional<std::string> & data_name)
 {
-  const std::filesystem::path value_path = std::filesystem::path(std::string(path));
+  const std::filesystem::path value_path = std::filesystem::path(path);
 
   // File is absolute, no need to search
   if (std::filesystem::path(path).is_absolute())

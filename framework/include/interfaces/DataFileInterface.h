@@ -41,11 +41,18 @@ public:
   std::string getDataFileName(const std::string & param) const;
 
   /**
+   * Deprecated method.
+   *
+   * Use getDataFilePath() instead.
+   */
+  std::string getDataFileNameByName(const std::string & relative_path) const;
+
+  /**
    * Returns the path of a data file for a given relative file path.
    * This can be used for hardcoded datafile names and will search the same locations
    * as getDataFileName
    */
-  std::string getDataFileNameByPath(const std::string & path) const;
+  std::string getDataFilePath(const std::string & relative_path) const;
 
 private:
   const ParallelParamObject & _parent;
