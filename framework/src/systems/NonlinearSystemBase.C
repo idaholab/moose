@@ -3640,8 +3640,10 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
                         std::inserter(difference, difference.end()));
 
     // there supposed to be no kernels on this lower-dimensional subdomain
-    difference.erase(Moose::INTERNAL_SIDE_LOWERD_ID);
-    difference.erase(Moose::BOUNDARY_SIDE_LOWERD_ID);
+    for (const auto & id : _mesh.interiorLowerDBlocks())
+      difference.erase(id);
+    for (const auto & id : _mesh.boundaryLowerDBlocks())
+      difference.erase(id);
 
     if (!difference.empty())
     {
@@ -3681,8 +3683,9 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   for (auto & var_name : vars)
   {
     auto blks = getSubdomainsForVar(var_name);
-    if (blks.count(Moose::INTERNAL_SIDE_LOWERD_ID) || blks.count(Moose::BOUNDARY_SIDE_LOWERD_ID))
-      difference.erase(var_name);
+    for (const auto & id : blks)
+      if (_mesh.interiorLowerDBlocks().count(id) > 0 || _mesh.boundaryLowerDBlocks().count(id) > 0)
+        difference.erase(var_name);
   }
 
   if (!difference.empty())

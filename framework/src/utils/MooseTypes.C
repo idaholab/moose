@@ -17,8 +17,6 @@ namespace Moose
 {
 const processor_id_type INVALID_PROCESSOR_ID = libMesh::DofObject::invalid_processor_id;
 const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
-const SubdomainID INTERNAL_SIDE_LOWERD_ID = libMesh::Elem::invalid_subdomain_id - 2;
-const SubdomainID BOUNDARY_SIDE_LOWERD_ID = libMesh::Elem::invalid_subdomain_id - 3;
 const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
 const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;

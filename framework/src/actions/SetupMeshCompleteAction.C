@@ -71,8 +71,7 @@ SetupMeshCompleteAction::act()
 
         if (_mesh->uniformRefineLevel())
         {
-          if (_mesh->meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
-              _mesh->meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+          if (!_mesh->interiorLowerDBlocks().empty() || !_mesh->boundaryLowerDBlocks().empty())
             mooseError("HFEM does not support mesh uniform refinement currently.");
 
           Adaptivity::uniformRefine(_mesh.get());

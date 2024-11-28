@@ -18,19 +18,19 @@
   [uhat]
     order = CONSTANT
     family = MONOMIAL
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_EDGE2
     components = 2
   []
   [lambda]
     order = CONSTANT
     family = MONOMIAL
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
     components = 2
   []
   [lambdab]
     order = CONSTANT
     family = MONOMIAL
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_EDGE2
     components = 2
   []
 []
@@ -61,13 +61,13 @@
   [uhat_reaction]
     type = ArrayReaction
     variable = uhat
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_EDGE2
     reaction_coefficient = rc
   []
   [uhat_coupled]
     type = ArrayCoupledForce
     variable = uhat
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_EDGE2
     v = lambdab
     is_v_array = true
     coef = '1 1'
@@ -100,7 +100,7 @@
   []
   [rc]
     type = GenericConstantArray
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_EDGE2
     prop_name = rc
     prop_value = '0.5 0.5'
   []
@@ -115,7 +115,7 @@
   [lambdanorm]
     type = ElementArrayL2Norm
     variable = lambda
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
   []
 []
 

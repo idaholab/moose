@@ -300,7 +300,7 @@ ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
         if (dg->variable().number() == ivar && dg->isImplicit() &&
             dg->hasBlocks(neighbor->subdomain_id()) &&
             (jvariable.activeOnSubdomain(_subdomain) ||
-             jvariable.activeOnSubdomain(Moose::INTERNAL_SIDE_LOWERD_ID)))
+             jvariable.activeOnSubdomains(_fe_problem.mesh().interiorLowerDBlocks())))
         {
           dg->prepareShapes(jvar);
           dg->prepareNeighborShapes(jvar);

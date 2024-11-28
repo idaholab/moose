@@ -1,9 +1,11 @@
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
-    nx = 3
-    ny = 3
-    dim = 2
+    nx = 2
+    ny = 2
+    nz = 2
+    dim = 3
+    elem_type = PRISM6
   []
   build_all_side_lowerd_mesh = true
 []
@@ -13,19 +15,21 @@
     order = THIRD
     family = MONOMIAL
     block = 0
-    components = 2
+  []
+  [uhat]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 'BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4 BOUNDARY_SIDE_LOWERD_SUBDOMAIN_TRI3'
   []
   [lambda]
     order = CONSTANT
     family = MONOMIAL
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
-    components = 2
+    block = 'INTERNAL_SIDE_LOWERD_SUBDOMAIN_QUAD4 INTERNAL_SIDE_LOWERD_SUBDOMAIN_TRI3'
   []
   [lambdab]
     order = CONSTANT
     family = MONOMIAL
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_EDGE2
-    components = 2
+    block = 'BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4 BOUNDARY_SIDE_LOWERD_SUBDOMAIN_TRI3'
   []
 []
 
@@ -40,23 +44,36 @@
 
 [Kernels]
   [diff]
-    type = ArrayDiffusion
+    type = MatDiffusion
     variable = u
+    diffusivity = '1'
     block = 0
-    diffusion_coefficient = dc
   []
   [source]
-    type = ArrayCoupledForce
+    type = CoupledForce
     variable = u
     v = v
-    coef = '1 2'
+    coef = '1'
     block = 0
+  []
+  [reaction]
+    type = Reaction
+    variable = uhat
+    rate = '1'
+    block = 'BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4 BOUNDARY_SIDE_LOWERD_SUBDOMAIN_TRI3'
+  []
+  [uhat_coupled]
+    type = CoupledForce
+    variable = uhat
+    block = 'BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4 BOUNDARY_SIDE_LOWERD_SUBDOMAIN_TRI3'
+    v = lambdab
+    coef = '1'
   []
 []
 
 [DGKernels]
   [surface]
-    type = ArrayHFEMDiffusionTest
+    type = HFEMDiffusion
     variable = u
     lowerd_variable = lambda
   []
@@ -64,31 +81,24 @@
 
 [BCs]
   [all]
-    type = ArrayHFEMDirichletBC
-    boundary = 'left right top bottom'
+    type = HFEMDirichletBC
+    boundary = 'left right top bottom back front'
     variable = u
     lowerd_variable = lambdab
-  []
-[]
-
-[Materials]
-  [dc]
-    type = GenericConstantArray
-    prop_name = dc
-    prop_value = '1 1'
+    uhat = uhat
   []
 []
 
 [Postprocessors]
   [intu]
-    type = ElementIntegralArrayVariablePostprocessor
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = 0
   []
   [lambdanorm]
-    type = ElementArrayL2Norm
+    type = ElementL2Norm
     variable = lambda
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
+    block = 'INTERNAL_SIDE_LOWERD_SUBDOMAIN_QUAD4 INTERNAL_SIDE_LOWERD_SUBDOMAIN_TRI3'
   []
 []
 
