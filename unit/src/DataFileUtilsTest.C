@@ -17,13 +17,27 @@
 
 DataFileUtilsTest::DataFileUtilsTest()
   : ::testing::Test(),
-    _names({"DataFileUtilsTest_data0", "DataFileUtilsTest_data1"}),
+    _names({"data0", "data1"}),
     _paths({"files/data_file_tests/data0/data", "files/data_file_tests/data1/data"}),
     _abs_paths({MooseUtils::absolutePath(_paths[0]), MooseUtils::absolutePath(_paths[1])}),
     _cwd(std::filesystem::current_path().c_str())
 {
+}
+
+void
+DataFileUtilsTest::SetUp()
+{
+  _old_data_file_paths = Registry::getDataFilePaths();
+  Registry::setDataFilePaths({});
   Registry::addDataFilePath(_names[0], _paths[0]);
   Registry::addDataFilePath(_names[1], _paths[1]);
+}
+
+void
+DataFileUtilsTest::TearDown()
+{
+  Registry::setDataFilePaths(_old_data_file_paths);
+  _old_data_file_paths.clear();
 }
 
 void

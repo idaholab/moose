@@ -21,6 +21,9 @@ class DataFileUtilsTest : public ::testing::Test
 public:
   DataFileUtilsTest();
 
+  virtual void SetUp() override;
+  virtual void TearDown() override;
+
   void testData(const Moose::DataFileUtils::Path & path,
                 const unsigned int index,
                 const std::string & relative_path) const;
@@ -33,4 +36,5 @@ public:
   const std::array<std::string, 2> _paths;
   const std::array<std::string, 2> _abs_paths;
   const std::string _cwd;
+  std::map<std::string, std::string> _old_data_file_paths;
 };

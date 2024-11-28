@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "gtest_include.h"
+#include "RegistryTest.h"
 
 #include "Registry.h"
 
@@ -18,7 +18,27 @@
 
 #include <filesystem>
 
-TEST(RegistryTest, getClassName)
+void
+RegistryTest::SetUp()
+{
+  _old_data_file_paths = Registry::getDataFilePaths();
+  Registry::setDataFilePaths({});
+
+  _old_repos = Registry::getRepos();
+  Registry::setRepos({});
+}
+
+void
+RegistryTest::TearDown()
+{
+  Registry::setDataFilePaths(_old_data_file_paths);
+  _old_data_file_paths.clear();
+
+  Registry::setRepos(_old_repos);
+  _old_repos.clear();
+}
+
+TEST_F(RegistryTest, getClassName)
 {
   // This is a simple non-templated case
   EXPECT_EQ(Registry::getClassName<Diffusion>(), "Diffusion");
@@ -32,12 +52,12 @@ TEST(RegistryTest, getClassName)
   EXPECT_EQ(Registry::getClassName<CheckOutputAction>(), "CheckOutputAction");
 }
 
-TEST(RegistryTest, appNameFromAppPath)
+TEST_F(RegistryTest, appNameFromAppPath)
 {
   EXPECT_EQ(Registry::appNameFromAppPath("/path/to/FooBarBazApp.C"), "foo_bar_baz");
 }
 
-TEST(RegistryTest, appNameFromAppPathFailed)
+TEST_F(RegistryTest, appNameFromAppPathFailed)
 {
   const std::string app_path = "/path/to/FooBarBazApp.h";
   EXPECT_THROW(
@@ -57,7 +77,7 @@ TEST(RegistryTest, appNameFromAppPathFailed)
       std::exception);
 }
 
-TEST(RegistryTest, addDataFilePathNonDataFolder)
+TEST_F(RegistryTest, addDataFilePathNonDataFolder)
 {
   const std::string name = "non_data_folder";
   const std::string path = "foo";
@@ -80,7 +100,7 @@ TEST(RegistryTest, addDataFilePathNonDataFolder)
       std::exception);
 }
 
-TEST(RegistryTest, addDataFilePathMismatch)
+TEST_F(RegistryTest, addDataFilePathMismatch)
 {
   const std::string name = "data_mismatch";
   const std::string path = "files/data_file_tests/data0/data";
@@ -108,7 +128,7 @@ TEST(RegistryTest, addDataFilePathMismatch)
       std::exception);
 }
 
-TEST(RegistryTest, addDataFilePathUnallowedName)
+TEST_F(RegistryTest, addDataFilePathUnallowedName)
 {
   EXPECT_THROW(
       {
@@ -125,7 +145,7 @@ TEST(RegistryTest, addDataFilePathUnallowedName)
       std::exception);
 }
 
-TEST(RegistryTest, getDataPath)
+TEST_F(RegistryTest, getDataPath)
 {
   const std::string name = "data_working";
   const std::string path = "files/data_file_tests/data0/data";
@@ -138,7 +158,7 @@ TEST(RegistryTest, getDataPath)
   EXPECT_EQ(Registry::getDataFilePath(name), abs_path);
 }
 
-TEST(RegistryTest, getDataPathUnregistered)
+TEST_F(RegistryTest, getDataPathUnregistered)
 {
   const std::string name = "unregistered";
   EXPECT_THROW(
@@ -158,14 +178,14 @@ TEST(RegistryTest, getDataPathUnregistered)
       std::exception);
 }
 
-TEST(RegistryTest, determineFilePath)
+TEST_F(RegistryTest, determineFilePath)
 {
   const std::string path = "files/data_file_tests/data0/data";
   const std::string abs_path = MooseUtils::absolutePath(path);
   EXPECT_EQ(Registry::determineDataFilePath("unused", path), abs_path);
 }
 
-TEST(RegistryTest, determineFilePathFailed)
+TEST_F(RegistryTest, determineFilePathFailed)
 {
   const std::string name = "unused";
   const std::string path = "foo";
@@ -190,7 +210,7 @@ TEST(RegistryTest, determineFilePathFailed)
       std::exception);
 }
 
-TEST(RegistryTest, repositoryURL)
+TEST_F(RegistryTest, repositoryURL)
 {
   const std::string repo_name = "bar";
   const std::string repo_url = "github.com/foo/bar";

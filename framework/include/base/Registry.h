@@ -244,7 +244,6 @@ public:
   {
     return getRegistry()._data_file_paths;
   }
-
   /**
    * Gets a data path for the registered name.
    *
@@ -254,6 +253,10 @@ public:
 
   /// Returns the repository URL associated with \p repo_name
   static const std::string & getRepositoryURL(const std::string & repo_name);
+  /**
+   * Returns a map of all registered repositories
+   */
+  static const std::map<std::string, std::string> & getRepos() { return getRegistry()._repos; }
 
   /// returns the name() for a registered class
   template <typename T>
@@ -268,12 +271,36 @@ public:
   ///@}
 
 private:
+  /// Friends for unit testing
+  ///@{
+  friend class RegistryTest;
+  friend class DataFileUtilsTest;
   FRIEND_TEST(RegistryTest, determineFilePath);
   FRIEND_TEST(RegistryTest, determineFilePathFailed);
   FRIEND_TEST(RegistryTest, appNameFromAppPath);
   FRIEND_TEST(RegistryTest, appNameFromAppPathFailed);
+  ///@}
 
   Registry(){};
+
+  /**
+   * Manually set the data file paths.
+   *
+   * Used in unit testing.
+   */
+  static void setDataFilePaths(const std::map<std::string, std::string> & data_file_paths)
+  {
+    getRegistry()._data_file_paths = data_file_paths;
+  }
+  /**
+   * Manually set the repos.
+   *
+   * Used in unit testing
+   */
+  static void setRepos(const std::map<std::string, std::string> & repos)
+  {
+    getRegistry()._repos = repos;
+  }
 
   /// Internal helper for determing a root data file path (in-tree vs installed)
   static std::string determineDataFilePath(const std::string & name,
