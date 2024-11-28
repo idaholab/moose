@@ -17,7 +17,6 @@
       input = test.i
       cli_args = 'UserObjects/data_file/data_file=README.md'
       expect_out = 'data_file_relative_to_binary="../share/moose/data/README.md"'
-      requirement = 'The system shall be to find data files via a parameter in designated directories for installed builds'
       detail = 'and in installed builds'
       installation_type = relocated
     []
