@@ -23,6 +23,7 @@
 #include "SystemInfo.h"
 #include "Checkpoint.h"
 #include "InputParameterWarehouse.h"
+#include "Registry.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -430,6 +431,16 @@ outputLegacyInformation(MooseApp & app)
   }
 
   return oss.str();
+}
+
+std::string
+outputDataFilePaths()
+{
+  std::stringstream oss;
+  oss << "Data File Paths:\n";
+  for (const auto & [name, path] : Registry::getDataFilePaths())
+    oss << "  " << name << ": " << path << "\n";
+  return oss.str() + "\n";
 }
 
 std::string

@@ -83,4 +83,23 @@
     installation_type = in_tree
     requirement = 'The system shall support the output of all consumed data files via a parameter in designated data directories'
   []
+  [show_data_paths]
+    requirement = 'The system shall support the output of the designated data directories that cen be searched for'
+    [in_tree]
+      type = RunApp
+      input = test.i
+      cli_args = '--show-data-paths'
+      expect_out = 'moose: (.*)/framework/data'
+      detail = 'in-tree builds'
+      installation_type = in_tree
+    []
+    [relocated]
+      type = RunApp
+      input = test.i
+      cli_args = '--show-data-paths'
+      expect_out = 'moose: (.*)/share/moose/data'
+      detail = 'in-tree builds'
+      installation_type = relocated
+    []
+  []
 []

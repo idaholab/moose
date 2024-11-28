@@ -34,5 +34,7 @@ You may also utilize the `getDataFilePath()` method within this interface to man
 search for a relative path in the data without the use of a parameter (for hard-coded data). This
 search only searches relative to the installed or in-tree registered data file directories.
 
-You can see the file paths that were found in the search for all `DataFileName` parameters
-via the `--show-data-files` command line option.
+You can output additional information about the data files with the following comamnd line arguments:
+
+- `--show-data-files`: Output the file paths that were found in the search for all `DataFileName` parameters in the header
+- `--show-data-paths`: Output the registered file paths for searching in the header

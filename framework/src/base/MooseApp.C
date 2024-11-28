@@ -334,10 +334,15 @@ MooseApp::validParams()
       "To generate profiling report only on comma-separated list of MPI ranks.");
 #endif
 
-  params.addCommandLineParam<bool>("show_data_files",
-                                   "--show-data-files",
+  params.addCommandLineParam<bool>(
+      "show_data_files",
+      "--show-data-files",
+      false,
+      "Show found paths for all DataFileName parameters in the header");
+  params.addCommandLineParam<bool>("show_data_paths",
+                                   "--show-data-paths",
                                    false,
-                                   "Show found paths for all DataFileName parameters");
+                                   "Show registered data paths for searching in the header");
 
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
