@@ -24,7 +24,7 @@ public:
   WCNSFVSwitchableInletVelocityBC(const InputParameters & params);
 
 protected:
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
   /// Boolean switch to turn boundary condition on/off
   const bool & _switch_bc;

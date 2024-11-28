@@ -27,7 +27,8 @@ FVPostprocessorDirichletBC::FVPostprocessorDirichletBC(const InputParameters & p
 }
 
 ADReal
-FVPostprocessorDirichletBC::boundaryValue(const FaceInfo & /*fi*/) const
+FVPostprocessorDirichletBC::boundaryValue(const FaceInfo & /*fi*/,
+                                          const Moose::StateArg & /*state*/) const
 {
   return _postprocessor_value;
 }

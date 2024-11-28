@@ -38,10 +38,11 @@ INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputPara
 }
 
 ADReal
-INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi) const
+INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi,
+                                               const Moose::StateArg & state) const
 {
   if (_switch_bc)
-    return INSFVOutletPressureBCTempl<INSFVFlowBC>::boundaryValue(fi) * _face_limiter;
+    return INSFVOutletPressureBCTempl<INSFVFlowBC>::boundaryValue(fi, state) * _face_limiter;
   else
     // The two-term expansion = false piece is critical as it prevents infinite recursion that would
     // occur with a Green-Gauss gradient calculation which would call back to this "Dirichlet"
@@ -50,6 +51,6 @@ INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi) const
                                                  /*two_term_expansion=*/false,
                                                  /*correct_skewness=*/false,
                                                  fi.elemPtr(),
-                                                 determineState()) *
+                                                 state) *
            _face_limiter;
 }

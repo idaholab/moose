@@ -19,7 +19,7 @@ class INSFVMixingLengthTKEDBC : public FVDirichletBCBase
 public:
   static InputParameters validParams();
   INSFVMixingLengthTKEDBC(const InputParameters & params);
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
 protected:
   /// C-mu closure coefficient

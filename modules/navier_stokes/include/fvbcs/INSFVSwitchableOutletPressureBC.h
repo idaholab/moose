@@ -23,7 +23,8 @@ public:
   static InputParameters validParams();
   INSFVSwitchableOutletPressureBC(const InputParameters & params);
 
-  ADReal boundaryValue(const FaceInfo & /* fi */) const override;
+  ADReal boundaryValue(const FaceInfo & /* fi */,
+                       const Moose::StateArg & /* state */) const override;
 
 private:
   /// Boolean switch to turn boundary condition on/off

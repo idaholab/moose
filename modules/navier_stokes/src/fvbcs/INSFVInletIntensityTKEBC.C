@@ -40,10 +40,9 @@ INSFVInletIntensityTKEBC::INSFVInletIntensityTKEBC(const InputParameters & param
 }
 
 ADReal
-INSFVInletIntensityTKEBC::boundaryValue(const FaceInfo & fi) const
+INSFVInletIntensityTKEBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const
 {
   const auto boundary_face = singleSidedFaceArg(&fi);
-  const auto state = determineState();
 
   ADRealVectorValue velocity(_u(boundary_face, state));
   if (_v)

@@ -52,7 +52,8 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
 }
 
 ADReal
-INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
+INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
+                                                   const Moose::StateArg & /* state */) const
 {
   const Real wall_dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
