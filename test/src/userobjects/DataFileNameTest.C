@@ -47,5 +47,6 @@ DataFileNameTest::DataFileNameTest(const InputParameters & parameters)
   if (isParamSetByUser("data_file_deprecated"))
     print_path("data_file_deprecated", getDataFileName("data_file_deprecated"));
   if (isParamSetByUser("data_file_name_by_name"))
-    print_path("data_file_name_by_name", getDataFileNameByName(getParam<std::string>("data_file_name_by_name")));
+    print_path("data_file_name_by_name",
+               getDataFileNameByName(getParam<std::string>("data_file_name_by_name")));
 }
