@@ -1419,6 +1419,8 @@ MooseMesh::cacheInfo()
       _block_node_list[node.id()].insert(elem->subdomain_id());
     }
   }
+  _communicator.set_union(_lower_d_interior_blocks);
+  _communicator.set_union(_lower_d_boundary_blocks);
 
   for (const auto & elem : mesh.active_local_element_ptr_range())
   {
