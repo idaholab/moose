@@ -54,6 +54,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("WCNSLinearFVFlowPhysics", "Physics/NavierStokes/FlowSegregated/*");
   registerSyntax("WCNSFVFluidHeatTransferPhysics", "Physics/NavierStokes/FluidHeatTransfer/*");
   registerSyntax("WCNSFVScalarTransportPhysics", "Physics/NavierStokes/ScalarTransport/*");
+  registerSyntax("WCNSLinearFVScalarTransportPhysics",
+                 "Physics/NavierStokes/ScalarTransportSegregated/*");
   registerSyntax("WCNSFVTurbulencePhysics", "Physics/NavierStokes/Turbulence/*");
   registerSyntax("PNSFVSolidHeatTransferPhysics", "Physics/NavierStokes/SolidHeatTransfer/*");
   registerSyntax("WCNSFVTwoPhaseMixturePhysics", "Physics/NavierStokes/TwoPhaseMixture/*");

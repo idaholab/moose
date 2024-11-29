@@ -45,6 +45,7 @@ WCNSFVScalarTransportPhysicsBase::validParams()
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVBase::validParams(),
                                   "passive_scalar_advection_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "passive_scalar_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
   params.addRangeCheckedParam<std::vector<Real>>(
@@ -54,7 +55,8 @@ WCNSFVScalarTransportPhysicsBase::validParams()
 
   // Parameter groups
   params.addParamNamesToGroup("passive_scalar_names initial_scalar_variables", "Variable");
-  params.addParamNamesToGroup("passive_scalar_advection_interpolation passive_scalar_scaling",
+  params.addParamNamesToGroup("passive_scalar_advection_interpolation passive_scalar_scaling "
+                              "passive_scalar_two_term_bc_expansion",
                               "Numerical scheme");
   params.addParamNamesToGroup("passive_scalar_inlet_types passive_scalar_inlet_functors",
                               "Inlet boundary");
@@ -139,6 +141,8 @@ WCNSFVScalarTransportPhysicsBase::addFVBCs()
   // There is typically no wall flux of passive scalars, similarly we rarely know
   // their concentrations at the outlet at the beginning of the simulation
   // TODO: we will know the outlet values in case of flow reversal. Implement scalar outlet
+  addScalarWallBC();
+  addScalarOutletBC();
 }
 
 void
@@ -182,7 +186,7 @@ WCNSFVScalarTransportPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers =
       std::max(necessary_layers, _flow_equations_physics->getNumberAlgebraicGhostingLayersNeeded());
-  if (getParam<MooseEnum>("passive_scalar_face_interpolation") == "skewness-corrected")
+  if (getParam<MooseEnum>("passive_scalar_advection_interpolation") == "skewness-corrected")
     necessary_layers = std::max(necessary_layers, (unsigned short)3);
 
   return necessary_layers;

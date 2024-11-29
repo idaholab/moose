@@ -80,6 +80,7 @@ private:
   /// These are used for weakly-compressible simulations as well.
   virtual void addScalarInletBC() = 0;
   virtual void addScalarWallBC() = 0;
+  virtual void addScalarOutletBC() = 0;
 
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 };

@@ -23,7 +23,7 @@ public:
   WCNSFVFlowPhysics(const InputParameters & parameters);
 
   /// Get the name of the linear friction coefficient. Returns an empty string if no friction.
-  MooseFunctorName getLinearFrictionCoefName() const;
+  virtual MooseFunctorName getLinearFrictionCoefName() const override;
   /// Return the name of the Rhie Chow user object
   UserObjectName rhieChowUOName() const override;
   /// Return the number of algebraic ghosting layers needed

@@ -57,6 +57,10 @@ private:
 
   virtual void addRhieChowUserObjects() override;
 
+  virtual MooseFunctorName getLinearFrictionCoefName() const override
+  {
+    mooseError("Not implemented");
+  };
   UserObjectName rhieChowUOName() const override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
