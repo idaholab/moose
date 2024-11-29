@@ -24,10 +24,6 @@ WCNSLinearFVScalarTransportPhysics::validParams()
                         true,
                         "If the nonorthogonal correction should be used when computing the normal "
                         "gradient, notably in the diffusion term.");
-  params.addParam<bool>(
-      "scalar_boundary_two_term_expansion",
-      false,
-      "Whether to use the two term boundary expansion for boundary conditions that allow it");
   return params;
 }
 
@@ -221,7 +217,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarOutletBC()
     InputParameters params = getFactory().getValidParams(bc_type);
     params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
     params.set<bool>("use_two_term_expansion") =
-        getParam<bool>("scalar_boundary_two_term_expansion");
+        getParam<bool>("passive_scalar_two_term_bc_expansion");
 
     for (const auto name_i : index_range(_passive_scalar_names))
     {
