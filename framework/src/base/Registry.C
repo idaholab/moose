@@ -191,11 +191,11 @@ Registry::determineDataFilePath(const std::string & name, const std::string & in
   const auto installed_path =
       MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share", name, "data");
   if (MooseUtils::checkFileReadable(installed_path, false, false, false))
-    return MooseUtils::absolutePath(installed_path);
+    return MooseUtils::canonicalPath(installed_path);
 
   // In tree data
   if (MooseUtils::checkFileReadable(in_tree_path, false, false, false))
-    return MooseUtils::absolutePath(in_tree_path);
+    return MooseUtils::canonicalPath(in_tree_path);
 
   mooseError("Failed to determine data file path for '",
              name,

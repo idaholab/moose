@@ -50,7 +50,7 @@ getPath(std::string path, const std::optional<std::string> & base)
                  *data_name,
                  "')");
     if (MooseUtils::checkFileReadable(path, false, false, false))
-      return {MooseUtils::absolutePath(path), Context::ABSOLUTE};
+      return {MooseUtils::canonicalPath(path), Context::ABSOLUTE};
     mooseError("The absolute path '", path, "' does not exist or is not readable.");
   }
 
@@ -62,8 +62,8 @@ getPath(std::string path, const std::optional<std::string> & base)
   {
     const auto relative_to_base = MooseUtils::pathjoin(*base, path);
     if (MooseUtils::checkFileReadable(relative_to_base, false, false, false))
-      return {MooseUtils::absolutePath(relative_to_base), Context::RELATIVE};
-    not_found.emplace("working directory", MooseUtils::absolutePath(*base));
+      return {MooseUtils::canonicalPath(relative_to_base), Context::RELATIVE};
+    not_found.emplace("working directory", MooseUtils::canonicalPath(*base));
   }
 
   // See if we should skip searching data
@@ -93,7 +93,7 @@ getPath(std::string path, const std::optional<std::string> & base)
         continue;
       const auto file_path = MooseUtils::pathjoin(data_path, path);
       if (MooseUtils::checkFileReadable(file_path, false, false, false))
-        found.emplace(name, MooseUtils::absolutePath(file_path));
+        found.emplace(name, MooseUtils::canonicalPath(file_path));
       else
         not_found.emplace(name + " data", data_path);
     }
@@ -102,7 +102,7 @@ getPath(std::string path, const std::optional<std::string> & base)
   if (found.size() == 1)
   {
     const auto & [name, data_path] = *found.begin();
-    return {MooseUtils::absolutePath(data_path), Context::DATA, name};
+    return {MooseUtils::canonicalPath(data_path), Context::DATA, name};
   }
 
   std::stringstream oss;

@@ -1265,7 +1265,7 @@ prettyCppType(const std::string & cpp_type)
 }
 
 std::string
-absolutePath(const std::string & path)
+canonicalPath(const std::string & path)
 {
   return std::filesystem::weakly_canonical(path).c_str();
 }

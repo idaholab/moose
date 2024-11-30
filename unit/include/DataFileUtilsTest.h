@@ -34,7 +34,7 @@ public:
 
   const std::array<std::string, 2> _names;
   const std::array<std::string, 2> _paths;
-  const std::array<std::string, 2> _abs_paths;
+  const std::array<std::string, 2> _can_paths;
   const std::string _cwd;
   std::map<std::string, std::string> _old_data_file_paths;
 };

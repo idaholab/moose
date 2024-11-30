@@ -104,12 +104,12 @@ TEST_F(RegistryTest, addDataFilePathMismatch)
 {
   const std::string name = "data_mismatch";
   const std::string path = "files/data_file_tests/data0/data";
-  const std::string abs_path = MooseUtils::absolutePath(path);
+  const std::string can_path = MooseUtils::canonicalPath(path);
 
   Registry::addDataFilePath(name, path);
 
   const std::string other_path = "files/data_file_tests/data1/data";
-  const std::string other_abs_path = MooseUtils::absolutePath(other_path);
+  const std::string other_can_path = MooseUtils::canonicalPath(other_path);
 
   EXPECT_THROW(
       {
@@ -120,8 +120,8 @@ TEST_F(RegistryTest, addDataFilePathMismatch)
         catch (const std::exception & e)
         {
           EXPECT_EQ(std::string(e.what()),
-                    "While registering data file path '" + other_abs_path + "' for '" + name +
-                        "': the path '" + abs_path + "' is already registered");
+                    "While registering data file path '" + other_can_path + "' for '" + name +
+                        "': the path '" + can_path + "' is already registered");
           throw;
         }
       },
@@ -149,13 +149,13 @@ TEST_F(RegistryTest, getDataPath)
 {
   const std::string name = "data_working";
   const std::string path = "files/data_file_tests/data0/data";
-  const std::string abs_path = MooseUtils::absolutePath(path);
+  const std::string can_path = MooseUtils::canonicalPath(path);
 
   Registry::addDataFilePath(name, path);
-  EXPECT_EQ(Registry::getDataFilePath(name), abs_path);
+  EXPECT_EQ(Registry::getDataFilePath(name), can_path);
 
   Registry::addDataFilePath(name, path);
-  EXPECT_EQ(Registry::getDataFilePath(name), abs_path);
+  EXPECT_EQ(Registry::getDataFilePath(name), can_path);
 }
 
 TEST_F(RegistryTest, getDataPathUnregistered)
@@ -181,8 +181,8 @@ TEST_F(RegistryTest, getDataPathUnregistered)
 TEST_F(RegistryTest, determineFilePath)
 {
   const std::string path = "files/data_file_tests/data0/data";
-  const std::string abs_path = MooseUtils::absolutePath(path);
-  EXPECT_EQ(Registry::determineDataFilePath("unused", path), abs_path);
+  const std::string can_path = MooseUtils::canonicalPath(path);
+  EXPECT_EQ(Registry::determineDataFilePath("unused", path), can_path);
 }
 
 TEST_F(RegistryTest, determineFilePathFailed)
@@ -217,8 +217,8 @@ TEST_F(RegistryTest, addDeprecatedAppDataFilePath)
 
   Registry::addDeprecatedAppDataFilePath("../modules/solid_mechanics/src/base/SolidMechanicsApp.C");
 
-  const std::string abs_path = MooseUtils::absolutePath("../modules/solid_mechanics/data");
-  EXPECT_EQ(Registry::getDataFilePath("solid_mechanics"), abs_path);
+  const std::string can_path = MooseUtils::canonicalPath("../modules/solid_mechanics/data");
+  EXPECT_EQ(Registry::getDataFilePath("solid_mechanics"), can_path);
 
   Moose::_deprecated_is_error = deprecated_is_error_before;
 }

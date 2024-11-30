@@ -46,7 +46,7 @@ DataFileInterface::getDataFilePath(const std::string & relative_path) const
     _parent.mooseWarning("While using getDataFilePath(\"",
                          relative_path,
                          "\"): This API should not be used for absolute paths.");
-    return MooseUtils::absolutePath(relative_path);
+    return MooseUtils::canonicalPath(relative_path);
   }
 
   // Throw on error so that if getPath() fails, we can throw an error

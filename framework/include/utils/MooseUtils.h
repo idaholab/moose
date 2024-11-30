@@ -1234,9 +1234,9 @@ isFloat(const std::string & str)
 }
 
 /**
- * Gets the absolute path of the given path
+ * Gets the canonical path of the given path
  */
-std::string absolutePath(const std::string & path);
+std::string canonicalPath(const std::string & path);
 } // MooseUtils namespace
 
 namespace Moose

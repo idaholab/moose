@@ -19,7 +19,7 @@ DataFileUtilsTest::DataFileUtilsTest()
   : ::testing::Test(),
     _names({"data0", "data1"}),
     _paths({"files/data_file_tests/data0/data", "files/data_file_tests/data1/data"}),
-    _abs_paths({MooseUtils::absolutePath(_paths[0]), MooseUtils::absolutePath(_paths[1])}),
+    _can_paths({MooseUtils::canonicalPath(_paths[0]), MooseUtils::canonicalPath(_paths[1])}),
     _cwd(std::filesystem::current_path().c_str())
 {
 }
@@ -45,9 +45,9 @@ DataFileUtilsTest::testData(const Moose::DataFileUtils::Path & path,
                             const unsigned int index,
                             const std::string & relative_path) const
 {
-  const auto abs_path =
-      MooseUtils::absolutePath(MooseUtils::pathjoin(_abs_paths[index], relative_path));
-  EXPECT_EQ(path.path, abs_path);
+  const auto can_path =
+      MooseUtils::canonicalPath(MooseUtils::pathjoin(_can_paths[index], relative_path));
+  EXPECT_EQ(path.path, can_path);
   EXPECT_EQ(path.context, Moose::DataFileUtils::Context::DATA);
   EXPECT_TRUE(path.data_name);
   EXPECT_EQ(*path.data_name, _names[index]);
@@ -57,17 +57,17 @@ void
 DataFileUtilsTest::testRelative(const Moose::DataFileUtils::Path & path,
                                 const std::string & relative_path) const
 {
-  const auto abs_path = MooseUtils::absolutePath(relative_path);
-  EXPECT_EQ(path.path, abs_path);
+  const auto can_path = MooseUtils::canonicalPath(relative_path);
+  EXPECT_EQ(path.path, can_path);
   EXPECT_EQ(path.context, Moose::DataFileUtils::Context::RELATIVE);
   EXPECT_FALSE(path.data_name);
 }
 
 void
 DataFileUtilsTest::testAbsolute(const Moose::DataFileUtils::Path & path,
-                                const std::string & absolute_path) const
+                                const std::string & can_path) const
 {
-  EXPECT_EQ(path.path, absolute_path);
+  EXPECT_EQ(path.path, can_path);
   EXPECT_EQ(path.context, Moose::DataFileUtils::Context::ABSOLUTE);
   EXPECT_FALSE(path.data_name);
 }
@@ -180,8 +180,8 @@ TEST_F(DataFileUtilsTest, getPathAmbiguous)
         {
           EXPECT_EQ(std::string(e.what()),
                     "Multiple files were found when searching for the data file 'testdata':\n\n  " +
-                        _names[0] + ": " + _abs_paths[0] + "/" + file + "\n  " + _names[1] + ": " +
-                        _abs_paths[1] + "/" + file +
+                        _names[0] + ": " + _can_paths[0] + "/" + file + "\n  " + _names[1] + ": " +
+                        _can_paths[1] + "/" + file +
                         "\n\nYou can resolve this ambiguity by appending a prefix with the desired "
                         "data name, for example:\n\n  " +
                         _names[0] + ":" + file);
@@ -220,11 +220,11 @@ TEST_F(DataFileUtilsTest, getPathRelative)
 
 TEST_F(DataFileUtilsTest, getPathAbsolute)
 {
-  const auto absolute_path = MooseUtils::absolutePath("files/data_file_tests/unregistered_data");
+  const auto can_path = MooseUtils::canonicalPath("files/data_file_tests/unregistered_data");
 
   // Not using registered data, absolute path. Should work with and without base
-  testAbsolute(Moose::DataFileUtils::getPath(absolute_path), absolute_path);
-  testAbsolute(Moose::DataFileUtils::getPath(absolute_path, _cwd), absolute_path);
+  testAbsolute(Moose::DataFileUtils::getPath(can_path), can_path);
+  testAbsolute(Moose::DataFileUtils::getPath(can_path, _cwd), can_path);
 }
 
 TEST_F(DataFileUtilsTest, getPathAbsoluteExplicit)
@@ -250,19 +250,19 @@ TEST_F(DataFileUtilsTest, getPathAbsoluteExplicit)
 
 TEST_F(DataFileUtilsTest, getPathAbsoluteMissing)
 {
-  const auto absolute_path = MooseUtils::absolutePath("files/data_file_tests/foo");
+  const auto can_path = MooseUtils::canonicalPath("files/data_file_tests/foo");
 
   // Absolute and just doesn't exist
   EXPECT_THROW(
       {
         try
         {
-          testAbsolute(Moose::DataFileUtils::getPath(absolute_path), absolute_path);
+          testAbsolute(Moose::DataFileUtils::getPath(can_path), can_path);
         }
         catch (const std::exception & e)
         {
           EXPECT_EQ(std::string(e.what()),
-                    "The absolute path '" + absolute_path + "' does not exist or is not readable.");
+                    "The absolute path '" + can_path + "' does not exist or is not readable.");
           throw;
         }
       },
