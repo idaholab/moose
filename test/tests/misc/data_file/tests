@@ -43,7 +43,7 @@
       input = test.i
       cli_args = 'UserObjects/data_file/data_file_by_path=README.md'
       expect_out = 'Using data file \'(.*)/share/moose/data/README.md\' from moose data(.*)data_file_by_path_relative_to_binary="../share/moose/data/README.md"'
-      detail = 'and in installed builds builds'
+      detail = 'and in installed builds'
       installation_type = relocated
     []
   []
@@ -98,7 +98,7 @@
       input = test.i
       cli_args = '--show-data-paths'
       expect_out = 'moose: (.*)/share/moose/data'
-      detail = 'in-tree builds'
+      detail = 'and in installed builds'
       installation_type = relocated
     []
   []
