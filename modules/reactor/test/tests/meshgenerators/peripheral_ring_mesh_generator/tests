@@ -130,7 +130,7 @@
     type = 'RunException'
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/input_mesh_external_boundary=10001
-                Mesh/fmg/file=input_mesh_invalid_bdry_2.e
+                Mesh/fmg/file=input_sim.e
                 Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'This mesh generator does not work for the provided external boundary as it is not a closed loop.'
