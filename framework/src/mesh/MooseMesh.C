@@ -2176,6 +2176,7 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 
   _half_range = Point(dimensionWidth(0) / 2.0, dimensionWidth(1) / 2.0, dimensionWidth(2) / 2.0);
 
+  bool component_found = false;
   for (unsigned int component = 0; component < dimension(); ++component)
   {
     const std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
@@ -2183,8 +2184,20 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
     if (boundary_ids != nullptr &&
         ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
          (boundary_ids->first == secondary && boundary_ids->second == primary)))
+    {
       _periodic_dim[var_num][component] = true;
+      component_found = true;
+    }
   }
+  if (!component_found)
+    mooseWarning("Could not find a match between boundary '",
+                 getBoundaryName(primary),
+                 "' and '",
+                 getBoundaryName(secondary),
+                 "' to set periodic boundary conditions for variable (index:",
+                 var_num,
+                 ") in either the X, Y or Z direction. The periodic dimension of the mesh for this "
+                 "variable will not be stored.");
 }
 
 bool
