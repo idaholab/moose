@@ -728,7 +728,6 @@ std::string & removeColor(std::string & msg);
 std::list<std::string> listDir(const std::string path, bool files_only = false);
 
 bool pathExists(const std::string & path);
-bool pathIsDirectory(const std::string & path);
 
 /**
  * Retrieves the names of all of the files contained within the list of directories passed into

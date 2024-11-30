@@ -250,15 +250,6 @@ pathExists(const std::string & path)
 }
 
 bool
-pathIsDirectory(const std::string & path)
-{
-  // We use the non-throwing overload of this so that we suppress any issues with
-  // reading and just report it as an unavailable directory
-  std::error_code ec;
-  return std::filesystem::is_directory(path, ec);
-}
-
-bool
 checkFileReadable(const std::string & filename,
                   bool check_line_endings,
                   bool throw_on_unreadable,
