@@ -29,14 +29,32 @@
 
       detail = 'for finite volume variables mixed with finite element variables,'
     []
-    [lagrange]
+  []
+  [exceptions]
+    requirement = 'The system shall throw an error if the variables specified for elemental sampling are'
+    [nodal]
       type = 'RunException'
       input = 'element_value_sampler.i'
       cli_args = 'AuxVariables/u/family=LAGRANGE AuxVariables/u/order=FIRST'
-      expect_err = "The variable 'u' is not elemental"
+      expect_err = "The variable 'u' is a nodal variable. Nodal variables can be sampled using a 'NodalValueSampler'"
       mesh_mode = REPLICATED
-
-      detail = 'but not for nodal variables.'
+      detail = 'nodal variables,'
+    []
+    [vector]
+      type = 'RunException'
+      input = 'element_value_sampler.i'
+      cli_args = 'AuxVariables/u/family=MONOMIAL_VEC ICs/active='
+      expect_err = "The variable 'u' is a vector variable. Sampling those is not currently supported"
+      mesh_mode = REPLICATED
+      detail = 'vector variables,'
+    []
+    [array]
+      type = 'RunException'
+      input = 'element_value_sampler.i'
+      cli_args = 'AuxVariables/u/components=8 ICs/active='
+      expect_err = "The variable 'u' is an array variable. Sampling those is not currently supported"
+      mesh_mode = REPLICATED
+      detail = 'and array variables.'
     []
   []
 []

@@ -18,17 +18,17 @@
   [uhat]
     order = CONSTANT
     family = MONOMIAL
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4
   []
   [lambda]
     order = CONSTANT
     family = MONOMIAL
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_QUAD4
   []
   [lambdab]
     order = CONSTANT
     family = MONOMIAL
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4
   []
 []
 
@@ -59,12 +59,12 @@
     type = Reaction
     variable = uhat
     rate = '1'
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4
   []
   [uhat_coupled]
     type = CoupledForce
     variable = uhat
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4
     v = lambdab
     coef = '1'
   []
@@ -99,7 +99,7 @@
   [lambdanorm]
     type = ElementL2Norm
     variable = lambda
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_QUAD4
   []
 []
 

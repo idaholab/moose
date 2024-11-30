@@ -14,6 +14,9 @@ share the same names as the column headers.
 
 - the x, y and z coordinates of the requested sampled points
 
+!alert note title=General sampling
+The `PointValueSampler` samples variables at the specified points. For more flexible sampling,
+use the [PositionsFunctorValueSampler.md].
 
 ## Example input syntax
 

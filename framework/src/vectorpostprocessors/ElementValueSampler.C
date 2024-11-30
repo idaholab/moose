@@ -22,7 +22,7 @@ ElementValueSampler::validParams()
 {
   InputParameters params = ElementVariableVectorPostprocessor::validParams();
 
-  params.addClassDescription("Samples values of elemental variable(s).");
+  params.addClassDescription("Samples values of variables on elements.");
 
   params += SamplerBase::validParams();
 
@@ -32,12 +32,17 @@ ElementValueSampler::validParams()
 ElementValueSampler::ElementValueSampler(const InputParameters & parameters)
   : ElementVariableVectorPostprocessor(parameters), SamplerBase(parameters, this, _communicator)
 {
-  // ensure that variables are elemental, i.e., not scalar and and not nodal
+  // ensure that variables are 'elemental'
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-    if (_coupled_moose_vars[i]->feType().family == SCALAR || _coupled_moose_vars[i]->isNodal())
-      paramError(
-          "variable", "The variable '", _coupled_moose_vars[i]->name(), "' is not elemental.");
-
+  {
+    if (_coupled_moose_vars[i]->isNodal())
+      paramError("variable",
+                 "The variable '",
+                 _coupled_moose_vars[i]->name(),
+                 "' is a nodal variable. Nodal variables can be sampled using a "
+                 "'NodalValueSampler'.");
+    SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
+  }
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
 

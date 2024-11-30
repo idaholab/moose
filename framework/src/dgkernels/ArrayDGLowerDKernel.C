@@ -42,15 +42,21 @@ ArrayDGLowerDKernel::ArrayDGLowerDKernel(const InputParameters & parameters)
     _work_vector(_count)
 {
   const auto & lower_domains = _lowerd_var.activeSubdomains();
-  if (!lower_domains.count(Moose::INTERNAL_SIDE_LOWERD_ID) && lower_domains.size() != 1)
-    paramError(
-        "lowerd_variable",
-        "Must be only defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain that is "
-        "added by Mesh/build_all_side_lowerd_mesh=true");
+  for (const auto & id : _mesh.interiorLowerDBlocks())
+    if (lower_domains.count(id) == 0)
+      mooseDocumentedError(
+          "moose",
+          29151,
+          "'lowerd_variable' must be defined on the interior lower-dimensional subdomain '" +
+              _mesh.getSubdomainName(id) +
+              "' that is added by Mesh/build_all_side_lowerd_mesh=true.\nThe check could be overly "
+              "restrictive.");
 
-  if (_var.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID))
-    paramError("variable",
-               "Must not be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain");
+  for (const auto & id : _var.activeSubdomains())
+    if (_mesh.interiorLowerDBlocks().count(id) > 0)
+      paramError("variable",
+                 "Must not be defined on the interior lower-dimensional subdomain '" +
+                     _mesh.getSubdomainName(id) + "'");
 
   if (_lowerd_var.count() != _count)
     paramError("lowerd_variable",

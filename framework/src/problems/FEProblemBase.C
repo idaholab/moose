@@ -2253,7 +2253,7 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem,
   reinitNeighbor(elem, side, tid);
 
   const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
-  if (lower_d_elem && lower_d_elem->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID)
+  if (lower_d_elem && _mesh.interiorLowerDBlocks().count(lower_d_elem->subdomain_id()) > 0)
     reinitLowerDElem(lower_d_elem, tid);
   else
   {
@@ -2262,7 +2262,7 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem,
     auto & neighbor_side = _assembly[tid][0]->neighborSide();
     const Elem * lower_d_elem_neighbor = _mesh.getLowerDElem(neighbor, neighbor_side);
     if (lower_d_elem_neighbor &&
-        lower_d_elem_neighbor->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID)
+        _mesh.interiorLowerDBlocks().count(lower_d_elem_neighbor->subdomain_id()) > 0)
     {
       auto qps = _assembly[tid][0]->qPointsFaceNeighbor().stdVector();
       std::vector<Point> reference_points;
@@ -7744,8 +7744,7 @@ FEProblemBase::initialAdaptMesh()
   _cycles_completed = 0;
   if (n)
   {
-    if (_mesh.meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
-        _mesh.meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+    if (!_mesh.interiorLowerDBlocks().empty() || !_mesh.boundaryLowerDBlocks().empty())
       mooseError("HFEM does not support mesh adaptivity currently.");
 
     TIME_SECTION("initialAdaptMesh", 2, "Performing Initial Adaptivity");
@@ -7790,8 +7789,7 @@ FEProblemBase::adaptMesh()
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
-    if (_mesh.meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
-        _mesh.meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+    if (!_mesh.interiorLowerDBlocks().empty() || !_mesh.boundaryLowerDBlocks().empty())
       mooseError("HFEM does not support mesh adaptivity currently.");
 
     // Markers were already computed once by Executioner
