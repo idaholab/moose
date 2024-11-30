@@ -31,13 +31,19 @@
 # Exit on failure
 set -e
 
-{%- if SOURCE_FILE is defined %}
-# Loaded from {{ SOURCE_FILE }}
-{{ SOURCE_CONTENTS }}
+{%- for key, val in PRE_MODULE_VARS.items() %}
+export {{ key }}="{{ val }}"
+{%- endfor %}
+{%- if LOAD_MODULES is defined %}
+module load {{ " ".join(LOAD_MODULES) }}
 {%- endif %}
-
-# Add MOOSE's python path for python scripts
-export PYTHONPATH={{ MOOSE_PYTHONPATH }}:${PYTHONPATH}
+{%- for key, val in VARS.items() %}
+export {{ key }}="{{ val }}"
+{%- endfor %}
+{%- if PRE_SOURCE_FILE is defined %}
+# Loaded from {{ PRE_SOURCE_FILE }}
+{{ PRE_SOURCE_CONTENTS }}
+{%- endif %}
 
 # Print a useful header
 echo "TestHarness {{ SCHEDULER_NAME }} job on $(hostname) in job ${{ JOB_ID_VARIABLE }}"
@@ -100,6 +106,22 @@ if ((return_code > 128)); then
     new_return_code=$((return_code - 128))
     echo "Apptainer exited with code $return_code, using $new_return_code instead"
     return_code=$new_return_code
+fi
+# If we're using --sharens, make sure the instance is dead
+if [ "$APPTAINER_SHARENS" == "1" ] && [ -n "$APPTAINER_CONFIGDIR" ]; then
+    apptainer instance list
+    set +e
+    instance_list=$(apptainer instance list | tail -n +2)
+    if [ -n "$instance_list" ]; then
+        instance_name=$(echo "$instance_list" | awk '{print $1}')
+        instance_pid=$(echo "$instance_list" | awk '{print $2}')
+        echo "Killing running apptainer instance \"${instance_name}\" in ${instance_pid}"
+        apptainer instance stop ${instance_name}
+        if ps -p $instance_pid > /dev/null; then
+            kill -9 $instance_pid
+        fi
+    fi
+    set -e
 fi
 {%- endif %}
 # Load the execution time; we use a tail here because the process will

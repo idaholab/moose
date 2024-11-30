@@ -42,6 +42,11 @@ class HPCRunner(Runner):
         self.hpc_job = self.run_hpc.queueJob(self.job)
 
     def wait(self, timer):
+        # Sanity check on having a job
+        if self.hpc_job is None:
+            self.job.setStatus(self.job.error, 'HPCRUNNER MISSING HPCJOB')
+            return
+
         # The states that we should wait on. Anything else should
         # be an invalid state for waiting
         wait_states = [self.hpc_job.State.held,
@@ -98,8 +103,11 @@ class HPCRunner(Runner):
                 if self.fileIsReady(file):
                     # Store the result
                     if file == result_file:
-                        with open(file, 'r') as f:
-                            result = yaml.safe_load(f)
+                        try:
+                            with open(file, 'r') as f:
+                                result = yaml.safe_load(f)
+                        except:
+                            continue
                         self.exit_code = result['exit_code']
                         walltime = result['walltime']
 
