@@ -210,6 +210,19 @@ TEST_F(RegistryTest, determineFilePathFailed)
       std::exception);
 }
 
+TEST_F(RegistryTest, addDeprecatedAppDataFilePath)
+{
+  const auto deprecated_is_error_before = Moose::_deprecated_is_error;
+  Moose::_deprecated_is_error = false;
+
+  Registry::addDeprecatedAppDataFilePath("../modules/solid_mechanics/src/base/SolidMechanicsApp.C");
+
+  const std::string abs_path = MooseUtils::absolutePath("../modules/solid_mechanics/data");
+  EXPECT_EQ(Registry::getDataFilePath("solid_mechanics"), abs_path);
+
+  Moose::_deprecated_is_error = deprecated_is_error_before;
+}
+
 TEST_F(RegistryTest, repositoryURL)
 {
   const std::string repo_name = "bar";
