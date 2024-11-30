@@ -103,7 +103,10 @@ a=1.1
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    execute_on = 'final'
+  []
   csv = true
 []
 
