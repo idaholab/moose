@@ -92,7 +92,12 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p,
     {
       unsigned int var_num = nl.getVariable(0, var_name).number();
       p.set_variable(var_num);
-      _mesh->addPeriodicVariable(var_num, p.myboundary, p.pairedboundary);
+      // Only try to add periodic information to meshes which currently support them
+      if (_mesh->isRegularOrthogonal())
+        _mesh->addPeriodicVariable(var_num, p.myboundary, p.pairedboundary);
+      else
+        mooseInfoRepeated("Periodicity information for variable '" + var_name +
+                          "' will only be stored in the system's DoF map, not on the MooseMesh");
     }
   }
 }

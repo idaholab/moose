@@ -53,6 +53,8 @@
     exodiff = 'orthogonal_pbc_on_square_out.e'
     use_old_floor = true
     requirement = "The system shall support periodic boundary conditions on orthogonal boundaries with transforms defined as functions."
+    # Mesh is orthogonal but the periodic boundaries are not facing each other
+    allow_warnings = true
   []
 
   [parallel_pbc_using_trans_test]
@@ -189,7 +191,14 @@
       expect_err = "Boundary 'abs' does not exist in the mesh"
       input = 'all_periodic_trans.i'
       cli_args = "BCs/Periodic/x/secondary='abs'"
-      detail = 'the secondary boundary of a periodic boundary condition does not exist on the mesh.'
+      detail = 'the secondary boundary of a periodic boundary condition does not exist on the mesh,'
+    []
+    [not_matching_translation]
+      type = RunException
+      expect_err = "Could not find a match between boundary"
+      input = 'periodic_bc_test.i'
+      cli_args = "BCs/Periodic/x/secondary='left'"
+      detail = 'the primary and secondary boundaries on an orthogonal mesh do not match when applying a X,Y or Z translation.'
     []
   []
 []
