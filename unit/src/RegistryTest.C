@@ -80,8 +80,8 @@ TEST_F(RegistryTest, appNameFromAppPathFailed)
 TEST_F(RegistryTest, addDataFilePathNonDataFolder)
 {
   const std::string name = "non_data_folder";
-  const std::string path = "foo";
-  const std::string abs_path = MooseUtils::absolutePath(path);
+  const std::string path = "files/data_file_tests/data0";
+  const std::string folder = std::filesystem::path(path).filename().c_str();
 
   EXPECT_THROW(
       {
@@ -92,8 +92,8 @@ TEST_F(RegistryTest, addDataFilePathNonDataFolder)
         catch (const std::exception & e)
         {
           EXPECT_EQ(std::string(e.what()),
-                    "While registering data file path '" + abs_path + "' for '" + name +
-                        "': The folder must be named 'data' and it is named '" + path + "'");
+                    "While registering data file path '" + path + "' for '" + name +
+                        "': The folder must be named 'data' and it is named '" + folder + "'");
           throw;
         }
       },

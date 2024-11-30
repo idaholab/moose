@@ -95,7 +95,7 @@ Registry::addDataFilePath(const std::string & name, const std::string & in_tree_
 
   // Enforce that the folder is called "data", because we rely on the installed path
   // to be within PREFIX/share/<name>/data (see determineDataFilePath())
-  const auto folder = MooseUtils::shortName(in_tree_path);
+  const std::string folder = std::filesystem::path(in_tree_path).filename().c_str();
   if (folder != "data")
     mooseError("While registering data file path '",
                in_tree_path,
