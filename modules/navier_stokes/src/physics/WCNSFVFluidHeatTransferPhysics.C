@@ -8,9 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVFluidHeatTransferPhysics.h"
-#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSFVFlowPhysics.h"
-#include "PINSFVEnergyAnisotropicDiffusion.h"
 #include "NSFVBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
@@ -20,6 +18,8 @@ InputParameters
 WCNSFVFluidHeatTransferPhysics::validParams()
 {
   InputParameters params = WCNSFVFluidHeatTransferPhysicsBase::validParams();
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
+  params.addParamNamesToGroup("energy_face_interpolation", "Numerical scheme");
   return params;
 }
 
