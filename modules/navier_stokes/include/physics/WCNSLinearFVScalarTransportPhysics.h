@@ -13,7 +13,7 @@
 
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar transport equations
- * using the nonlinear finite volume weakly-compressible discretization (WCNSFV)
+ * using the linear finite volume weakly-compressible discretization (WCNSFV)
  */
 class WCNSLinearFVScalarTransportPhysics : public WCNSFVScalarTransportPhysicsBase
 {
@@ -23,8 +23,7 @@ public:
   WCNSLinearFVScalarTransportPhysics(const InputParameters & parameters);
 
 private:
-  // TODO Rename to linear or solver?
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport

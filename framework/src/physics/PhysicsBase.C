@@ -81,7 +81,7 @@ PhysicsBase::act()
   if (_current_task == "init_physics")
     initializePhysics();
   else if (_current_task == "add_variable")
-    addNonlinearVariables();
+    addSolverVariables();
   else if (_current_task == "add_ic")
     addInitialConditions();
 

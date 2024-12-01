@@ -115,7 +115,7 @@ WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParame
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addNonlinearVariables()
+WCNSFVFluidHeatTransferPhysics::addSolverVariables()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)

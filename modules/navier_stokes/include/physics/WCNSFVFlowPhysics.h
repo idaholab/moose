@@ -30,7 +30,7 @@ public:
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addUserObjects() override;
   virtual void addCorrectors() override;

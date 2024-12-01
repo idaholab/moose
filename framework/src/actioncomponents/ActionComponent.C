@@ -48,7 +48,7 @@ ActionComponent::act()
   // These combined components will likely still exist in the future, when it makes more
   // sense to include the physics than to split it off into its own block
   else if (_current_task == "add_variable")
-    addNonlinearVariables();
+    addSolverVariables();
   else
     // For a new task that isn't registered to ActionComponent in the framework
     actOnAdditionalTasks();

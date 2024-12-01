@@ -36,7 +36,6 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
   }
   // and for the passive scalar equations
   if (_has_passive_scalar_systems)
-  {
     for (auto system_i : index_range(_passive_scalar_system_names))
     {
       _passive_scalar_system_numbers.push_back(
@@ -44,7 +43,6 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
       _passive_scalar_systems.push_back(
           &_problem.getLinearSystem(_passive_scalar_system_numbers[system_i]));
     }
-  }
 }
 
 void
@@ -377,7 +375,7 @@ SIMPLESolve::solve()
   }
 
   // If we have passive scalar equations, solve them here. We assume the material properties in the
-  // Navier-Stokes equations do not depend on passive scalar, as they are passive, therefore we
+  // Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
   // solve outside of the velocity-pressure loop
   if (_has_passive_scalar_systems && converged)
   {

@@ -209,7 +209,7 @@ HeatConductionFV::addFVBCs()
 }
 
 void
-HeatConductionFV::addNonlinearVariables()
+HeatConductionFV::addSolverVariables()
 {
   if (variableExists(_temperature_name, /*error_if_aux=*/true))
     return;

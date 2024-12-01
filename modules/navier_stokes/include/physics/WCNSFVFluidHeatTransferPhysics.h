@@ -52,7 +52,7 @@ public:
 protected:
 private:
   void actOnAdditionalTasks() override;
-  void addNonlinearVariables() override;
+  void addSolverVariables() override;
   void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;

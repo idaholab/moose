@@ -22,8 +22,12 @@ The kernels created are:
 
 - [LinearFVScalarAdvection.md] for the scalar advection term
 - [LinearFVDiffusion.md] for the scalar diffusion term
-- [LinearFVSource.md] for the reaction terms
 - [LinearFVSource.md] for the source terms
+
+Reaction terms can be expressed as source terms by using a negative coefficient in the
+[!param](/Physics/NavierStokes/ScalarTransportSegregated/WCNSLinearFVScalarTransportPhysics/passive_scalar_coupled_source_coeff)
+parameter, and the scalar variable as one of the
+[!param](/Physics/NavierStokes/ScalarTransportSegregated/WCNSLinearFVScalarTransportPhysics/passive_scalar_coupled_source)(s).
 
 ## Coupling with other Physics
 

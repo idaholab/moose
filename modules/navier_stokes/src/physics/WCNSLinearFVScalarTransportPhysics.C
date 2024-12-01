@@ -34,7 +34,7 @@ WCNSLinearFVScalarTransportPhysics::WCNSLinearFVScalarTransportPhysics(
 }
 
 void
-WCNSLinearFVScalarTransportPhysics::addNonlinearVariables()
+WCNSLinearFVScalarTransportPhysics::addSolverVariables()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)

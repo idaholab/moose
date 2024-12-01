@@ -32,7 +32,7 @@ protected:
   virtual void initializePhysicsAdditional() override;
 
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addUserObjects() override;
 

@@ -32,7 +32,7 @@ WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters
 }
 
 void
-WCNSFVScalarTransportPhysics::addNonlinearVariables()
+WCNSFVScalarTransportPhysics::addSolverVariables()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)

@@ -29,7 +29,7 @@ public:
   WCNSFVScalarTransportPhysics(const InputParameters & parameters);
 
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport

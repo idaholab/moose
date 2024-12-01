@@ -14,8 +14,7 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * An advection kernel that implements the advection term for the enthalpy in the
- * energy equation.
+ * An advection kernel that implements the advection term for the passive scalar transport equation.
  */
 class LinearFVScalarAdvection : public LinearFVFluxKernel
 {
@@ -46,9 +45,9 @@ private:
   /// we don't compute it multiple times for different terms.
   std::pair<Real, Real> _advected_interp_coeffs;
 
-  /// Container for the mass flux on the face which will be reused in the advection term's
+  /// Container for the velocity on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
-  Real _face_mass_flux;
+  Real _face_velocity;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;

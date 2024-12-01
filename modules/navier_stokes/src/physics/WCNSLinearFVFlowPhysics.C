@@ -83,7 +83,7 @@ WCNSLinearFVFlowPhysics::initializePhysicsAdditional()
 }
 
 void
-WCNSLinearFVFlowPhysics::addNonlinearVariables()
+WCNSLinearFVFlowPhysics::addSolverVariables()
 {
   if (!_has_flow_equations)
     return;

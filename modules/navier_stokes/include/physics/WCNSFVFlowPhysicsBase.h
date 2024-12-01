@@ -80,7 +80,7 @@ public:
 protected:
   virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
-  virtual void addNonlinearVariables() override = 0;
+  virtual void addSolverVariables() override = 0;
   virtual void addInitialConditions() override;
   virtual void addFVKernels() override = 0;
   virtual void addFVBCs() override;
