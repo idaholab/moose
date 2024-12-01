@@ -26,12 +26,6 @@ class FEProblemBase;
 class TransientBase : public Executioner
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
-   */
   static InputParameters validParams();
 
   TransientBase(const InputParameters & parameters);

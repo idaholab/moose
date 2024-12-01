@@ -20,12 +20,6 @@ class FEProbleSolve;
 class Transient : public TransientBase
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
-   */
   static InputParameters validParams();
 
   Transient(const InputParameters & parameters);
