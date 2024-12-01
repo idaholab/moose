@@ -4,7 +4,7 @@
 
 ## Example Input Syntax
 
-!listing /Users/achaube/tools/moose/test/tests/postprocessors/num_time_steps/numtimesteps.i block=Postprocessors
+!listing /test/tests/postprocessors/num_time_steps/numtimesteps.i block=Postprocessors
 
 !syntax parameters /Postprocessors/NumTimeSteps
 

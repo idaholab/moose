@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#29127'
+  design = 'NumTimeSteps.md'
   [num_time_steps]
     type = 'CSVDiff'
     input = 'numtimesteps.i'
