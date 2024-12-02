@@ -8,9 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DumpObjectsProblem.h"
+#include "DumpObjectsAction.h"
 #include "DumpObjectsNonlinearSystem.h"
 #include "DumpObjectsLinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "InputParameters.h"
 #include <sstream>
 
 #include "libmesh/string_to_enum.h"
@@ -33,6 +35,14 @@ DumpObjectsProblem::validParams()
       true,
       "Whether to include all parameters that have been specified by a user in the dump, even if "
       "they match the default value of the parameter in the Factory");
+
+  // Change the default because any complex solve or executioners needs the problem to perform its
+  // setup duties (all the calls in initialSetup()) which are skipped by the DumpObjectsProblem
+  params.addParam<bool>(
+      "solve",
+      false,
+      "Whether to attempt to solve the Problem. This will only cause additional outputs of the "
+      "objects and their parameters. This is unlikely to succeed with more complex executioners.");
   return params;
 }
 
@@ -66,6 +76,16 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
 
   // Create extra solution vectors if any
   createTagSolutions();
+
+  // Add an action to call printObjects at the end of the action/tasks phase
+  // NOTE: We previously relied on problem.solve() but some executioners (SIMPLE in NavierStokes) do
+  // not support this
+  auto action_params = _app.getActionFactory().getValidParams("DumpObjectsAction");
+  action_params.applyParameters(parameters);
+  // action_params.finalize("");
+  auto dump_objects_action =
+      _app.getActionFactory().create("DumpObjectsAction", "dump_objects", action_params);
+  _app.actionWarehouse().addActionBlock(dump_objects_action);
 }
 
 std::string
@@ -162,18 +182,23 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 void
 DumpObjectsProblem::solve(unsigned int)
 {
+  printObjects();
+}
+
+void
+DumpObjectsProblem::solveLinearSystem(unsigned int, const Moose::PetscSupport::PetscOptions *)
+{
+  printObjects();
+}
+
+void
+DumpObjectsProblem::printObjects()
+{
   const auto path = getParam<std::string>("dump_path");
   if (path != "all")
     dumpGeneratedSyntax(path);
   else
     dumpAllGeneratedSyntax();
-}
-
-void
-DumpObjectsProblem::solveLinearSystem(unsigned int linear_sys_num,
-                                      const Moose::PetscSupport::PetscOptions *)
-{
-  solve(linear_sys_num);
 }
 
 void
