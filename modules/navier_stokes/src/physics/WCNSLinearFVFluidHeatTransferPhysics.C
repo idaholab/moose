@@ -100,7 +100,6 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
 {
-  const auto vector_conductivity = processThermalConductivity();
   const auto num_blocks = _thermal_conductivity_blocks.size();
   const auto num_used_blocks = num_blocks ? num_blocks : 1;
 
@@ -118,6 +117,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
     std::vector<SubdomainName> block_names =
         num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
     assignBlocks(params, block_names);
+    // NOTE: vector conductivities not supported at this time
     params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
     params.set<bool>("use_nonorthogonal_correction") =
         getParam<bool>("use_nonorthogonal_correction");

@@ -359,7 +359,7 @@
                  "Modules/NavierStokesFV/define_variables=false Modules/velocity_variable='vel_x "
                  "vel_y' Modules/pressure_variable='pressure'"
       expect_err = "(T_fluid is defined externally of NavierStokesFV, so should the inital "
-                   "condition|T_fluid is defined externally of WCNSFVFluidHeatTransferPhysics, so "
+                   "condition|T_fluid is defined externally of WCNSFVFluidHeatTransferPhysics(Base|), so "
                    "should the inital condition)"
     []
   []
