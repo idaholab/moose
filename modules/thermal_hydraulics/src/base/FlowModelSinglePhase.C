@@ -9,29 +9,33 @@
 
 #include "FlowModelSinglePhase.h"
 #include "FlowChannel1Phase.h"
+#include "THMNames.h"
 
-const std::string FlowModelSinglePhase::DENSITY = "rho";
-const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = "f_D";
-const std::string FlowModelSinglePhase::DYNAMIC_VISCOSITY = "mu";
-const std::string FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL = "Hw";
-const std::string FlowModelSinglePhase::HYDRAULIC_DIAMETER = "D_h";
-const std::string FlowModelSinglePhase::PRESSURE = "p";
-const std::string FlowModelSinglePhase::RHOA = "rhoA";
-const std::string FlowModelSinglePhase::RHOEA = "rhoEA";
-const std::string FlowModelSinglePhase::RHOUA = "rhouA";
-const std::string FlowModelSinglePhase::SOUND_SPEED = "c";
-const std::string FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE = "cp";
-const std::string FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_VOLUME = "cv";
-const std::string FlowModelSinglePhase::SPECIFIC_INTERNAL_ENERGY = "e";
-const std::string FlowModelSinglePhase::SPECIFIC_TOTAL_ENTHALPY = "H";
-const std::string FlowModelSinglePhase::SPECIFIC_VOLUME = "v";
-const std::string FlowModelSinglePhase::TEMPERATURE = "T";
-const std::string FlowModelSinglePhase::THERMAL_CONDUCTIVITY = "k";
-const std::string FlowModelSinglePhase::VELOCITY = "vel";
-const std::string FlowModelSinglePhase::VELOCITY_X = "vel_x";
-const std::string FlowModelSinglePhase::VELOCITY_Y = "vel_y";
-const std::string FlowModelSinglePhase::VELOCITY_Z = "vel_z";
-const std::string FlowModelSinglePhase::REYNOLDS_NUMBER = "Re";
+const std::string FlowModelSinglePhase::DENSITY = THM::DENSITY;
+const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = THM::FRICTION_FACTOR_DARCY;
+const std::string FlowModelSinglePhase::DYNAMIC_VISCOSITY = THM::DYNAMIC_VISCOSITY;
+const std::string FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL =
+    THM::HEAT_TRANSFER_COEFFICIENT_WALL;
+const std::string FlowModelSinglePhase::HYDRAULIC_DIAMETER = THM::HYDRAULIC_DIAMETER;
+const std::string FlowModelSinglePhase::PRESSURE = THM::PRESSURE;
+const std::string FlowModelSinglePhase::RHOA = THM::RHOA;
+const std::string FlowModelSinglePhase::RHOEA = THM::RHOEA;
+const std::string FlowModelSinglePhase::RHOUA = THM::RHOUA;
+const std::string FlowModelSinglePhase::SOUND_SPEED = THM::SOUND_SPEED;
+const std::string FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE =
+    THM::SPECIFIC_HEAT_CONSTANT_PRESSURE;
+const std::string FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_VOLUME =
+    THM::SPECIFIC_HEAT_CONSTANT_VOLUME;
+const std::string FlowModelSinglePhase::SPECIFIC_INTERNAL_ENERGY = THM::SPECIFIC_INTERNAL_ENERGY;
+const std::string FlowModelSinglePhase::SPECIFIC_TOTAL_ENTHALPY = THM::SPECIFIC_TOTAL_ENTHALPY;
+const std::string FlowModelSinglePhase::SPECIFIC_VOLUME = THM::SPECIFIC_VOLUME;
+const std::string FlowModelSinglePhase::TEMPERATURE = THM::TEMPERATURE;
+const std::string FlowModelSinglePhase::THERMAL_CONDUCTIVITY = THM::THERMAL_CONDUCTIVITY;
+const std::string FlowModelSinglePhase::VELOCITY = THM::VELOCITY;
+const std::string FlowModelSinglePhase::VELOCITY_X = THM::VELOCITY_X;
+const std::string FlowModelSinglePhase::VELOCITY_Y = THM::VELOCITY_Y;
+const std::string FlowModelSinglePhase::VELOCITY_Z = THM::VELOCITY_Z;
+const std::string FlowModelSinglePhase::REYNOLDS_NUMBER = THM::REYNOLDS_NUMBER;
 
 InputParameters
 FlowModelSinglePhase::validParams()
