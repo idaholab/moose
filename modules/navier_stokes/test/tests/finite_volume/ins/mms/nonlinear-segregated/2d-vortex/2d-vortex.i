@@ -6,7 +6,7 @@ pressure_tag = "pressure_grad"
 [GlobalParams]
   rhie_chow_user_object = 'rc'
   advected_interp_method = ${advected_interp_method}
-  momentum_norm_limiter = true
+  use_norm_for_momentum_limiter = true
   velocity_interp_method = 'rc'
   vel_x = 'vel_x'
   vel_y = 'vel_y'

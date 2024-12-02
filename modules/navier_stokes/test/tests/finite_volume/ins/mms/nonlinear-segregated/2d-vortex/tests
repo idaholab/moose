@@ -1,6 +1,6 @@
 [Tests]
   issues = '#20493'
-  design = 'SIMPLENonLinearAssembly.md'
+  design = 'SIMPLENonlinearAssembly.md'
   [vortex-orthogonal]
     type = PythonUnitTest
     input = test.py

@@ -31,7 +31,7 @@ INSFVMomentumAdvection::uniqueParams()
 std::vector<std::string>
 INSFVMomentumAdvection::listOfCommonParams()
 {
-  return {"characteristic_speed"};
+  return {"characteristic_speed", "use_norm_for_momentum_limiter"};
 }
 
 InputParameters
