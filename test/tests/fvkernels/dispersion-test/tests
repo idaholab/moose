@@ -1,0 +1,92 @@
+[Tests]
+  design = 'FVAdvection.md'
+  issues = '#28891'
+  [bottom_left_limited_scalar_advection]
+    requirement = 'The system shall be able to perform a variety of limiting schemes when solving scalar transport equations in cartesian meshes with bottom-left advection. These schemes include'
+    [sou]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = bottom_left_sou.e
+      cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=bottom_left_sou'
+      detail = 'second-order upwind'
+      recover = false # only using final for output in a transient
+    []
+    [vanLeer]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = bottom_left_vanLeer.e
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=bottom_left_vanLeer'
+      detail = 'van Leer'
+      recover = false # only using final for output in a transient
+    []
+    [min_mod]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = bottom_left_min_mod.e
+      cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=bottom_left_min_mod'
+      detail = 'min-mod'
+      recover = false # only using final for output in a transient
+    []
+    [quick]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = bottom_left_quick.e
+      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=bottom_left_quick'
+      detail = 'QUICK'
+      recover = false # only using final for output in a transient
+    []
+    [venkatakrishnan]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = bottom_left_venkatakrishnan.e
+      cli_args = 'GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=bottom_left_venkatakrishnan'
+      abs_zero = 1e-5
+      detail = 'venkatakrishnan'
+      recover = false # only using final for output in a transient
+    []
+  []
+  [top_right_limited_scalar_advection]
+    requirement = 'The system shall be able to perform a variety of limiting schemes when solving scalar transport equations in cartesian meshes with top-right advection. These schemes include'
+    [sou]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = top_right_sou.e
+      cli_args = "GlobalParams/advected_interp_method=sou Outputs/file_base=top_right_sou FVKernels/scalar_advection/velocity='-1 -1 0' FVBCs/inflow_1/boundary='top' FVBCs/inflow_0/boundary='right' FVBCs/outflow/boundary='left bottom' FVBCs/outflow/velocity='-1 -1 0'"
+      detail = 'second-order upwind'
+      recover = false # only using final for output in a transient
+    []
+    [vanLeer]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = top_right_vanLeer.e
+      cli_args = "GlobalParams/advected_interp_method=vanLeer Outputs/file_base=top_right_vanLeer FVKernels/scalar_advection/velocity='-1 -1 0' FVBCs/inflow_1/boundary='top' FVBCs/inflow_0/boundary='right' FVBCs/outflow/boundary='left bottom' FVBCs/outflow/velocity='-1 -1 0'"
+      detail = 'van Leer'
+      recover = false # only using final for output in a transient
+    []
+    [min_mod]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = top_right_min_mod.e
+      cli_args = "GlobalParams/advected_interp_method=min_mod Outputs/file_base=top_right_min_mod FVKernels/scalar_advection/velocity='-1 -1 0' FVBCs/inflow_1/boundary='top' FVBCs/inflow_0/boundary='right' FVBCs/outflow/boundary='left bottom' FVBCs/outflow/velocity='-1 -1 0'"
+      detail = 'min-mod'
+      recover = false # only using final for output in a transient
+    []
+    [quick]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = top_right_quick.e
+      cli_args = "GlobalParams/advected_interp_method=quick Outputs/file_base=top_right_quick FVKernels/scalar_advection/velocity='-1 -1 0' FVBCs/inflow_1/boundary='top' FVBCs/inflow_0/boundary='right' FVBCs/outflow/boundary='left bottom' FVBCs/outflow/velocity='-1 -1 0'"
+      detail = 'QUICK'
+      recover = false # only using final for output in a transient
+    []
+    [venkatakrishnan]
+      type = Exodiff
+      input = 'cartesian_advection.i'
+      exodiff = top_right_venkatakrishnan.e
+      cli_args = "GlobalParams/advected_interp_method=venkatakrishnan Outputs/file_base=top_right_venkatakrishnan FVKernels/scalar_advection/velocity='-1 -1 0' FVBCs/inflow_1/boundary='top' FVBCs/inflow_0/boundary='right' FVBCs/outflow/boundary='left bottom' FVBCs/outflow/velocity='-1 -1 0'"
+      abs_zero = 1e-5
+      detail = 'venkatakrishnan'
+      recover = false # only using final for output in a transient
+    []
+  []
+[]

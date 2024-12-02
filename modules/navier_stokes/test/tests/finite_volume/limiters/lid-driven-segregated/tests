@@ -1,0 +1,89 @@
+[Tests]
+  design = 'INSFVMomentumAdvection.md'
+  issues = '#28891'
+  [advection_limiting_schemes]
+    requirement = 'The system shall be able to perform a variety of limiting schemes when solving fluid flow equations in the segreagated solver. These schemes include'
+    [upwind]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'upwind.e'
+      detail = 'and reach converged results with upwind advection scheme.'
+      cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
+      heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [upwind_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'upwind_run.e'
+      detail = 'and pass debugging checks with segregated solvers with upwind advection scheme.'
+      cli_args = 'GlobalParams/advected_interp_method=upwind Executioner/num_iterations=10 Outputs/file_base=upwind_run'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [vanLeer]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'vanLeer.e'
+      detail = 'and reach converged results with van Leer limiter.'
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer Outputs/file_base=vanLeer Mesh/gen/nx=10 Mesh/gen/ny=10'
+      heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [vanLeer_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'vanLeer_run.e'
+      detail = 'and pass debugging checks with segregated solvers with van Leer limiter.'
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Executioner/num_iterations=10 Outputs/file_base=vanLeer_run Mesh/gen/nx=10 Mesh/gen/ny=10'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [min_mod]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'min_mod.e'
+      detail = 'and reach converged results with min-mod limiter.'
+      cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
+      heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [min_mod_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'min_mod_run.e'
+      detail = 'and pass debugging checks with segregated solvers with min-mod limiter.'
+      abs_zero = 1e-5 # limiter sensitive to roundoff
+      rel_err = 1e-4 # limiter sensitive to roundoff
+      cli_args = 'GlobalParams/advected_interp_method=min_mod Executioner/num_iterations=10 Outputs/file_base=min_mod_run'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      max_parallel = 4 # limiter sensitive to roundoff
+    []
+    [quick]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'quick.e'
+      detail = 'and reach converged results with QUICK limiter.'
+      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
+      heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [quick_run]
+      type = 'Exodiff'
+      input = 'lid-driven-segregated.i'
+      exodiff = 'quick_run.e'
+      detail = 'and pass debugging checks with segregated solvers with QUICK limiter.'
+      abs_zero = 1e-5 # limiter sensitive to roundoff
+      rel_err = 1e-4 # limiter sensitive to roundoff
+      cli_args = 'GlobalParams/advected_interp_method=quick Executioner/num_iterations=10 Outputs/file_base=quick_run'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      max_parallel = 4 # limiter sensitive to roundoff
+    []
+  []
+[]

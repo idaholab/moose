@@ -123,8 +123,15 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   else // we are an internal fluid flow face
   {
     const bool elem_is_upwind = MetaPhysicL::raw_value(v_face) * _normal > 0;
-    const Moose::FaceArg advected_face_arg{
-        &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
+    const auto & limiter_time = _subproblem.isTransient()
+                                    ? Moose::StateArg(1, Moose::SolutionIterationType::Time)
+                                    : Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+    const Moose::FaceArg advected_face_arg{&fi,
+                                           limiterType(_advected_interp_method),
+                                           elem_is_upwind,
+                                           correct_skewness,
+                                           nullptr,
+                                           &limiter_time};
     if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
             NS::isPorosityJumpFace(epsilon(), fi, state);
         is_jump)

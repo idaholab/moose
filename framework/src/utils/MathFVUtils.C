@@ -60,19 +60,20 @@ onBoundary(const std::set<SubdomainID> & subs, const FaceInfo & fi)
 MooseEnum
 interpolationMethods()
 {
-  return MooseEnum("average upwind sou min_mod vanLeer quick skewness-corrected", "upwind");
+  return MooseEnum("average upwind sou min_mod vanLeer quick venkatakrishnan skewness-corrected",
+                   "upwind");
 }
 
 InputParameters
 advectedInterpolationParameter()
 {
   auto params = emptyInputParameters();
-  params.addParam<MooseEnum>(
-      "advected_interp_method",
-      interpolationMethods(),
-      "The interpolation to use for the advected quantity. Options are "
-      "'upwind', 'average', 'sou' (for second-order upwind), 'min_mod', 'vanLeer', 'quick', and "
-      "'skewness-corrected' with the default being 'upwind'.");
+  params.addParam<MooseEnum>("advected_interp_method",
+                             interpolationMethods(),
+                             "The interpolation to use for the advected quantity. Options are "
+                             "'upwind', 'average', 'sou' (for second-order upwind), 'min_mod', "
+                             "'vanLeer', 'quick', 'venkatakrishnan', and "
+                             "'skewness-corrected' with the default being 'upwind'.");
   return params;
 }
 
@@ -97,6 +98,8 @@ selectInterpolationMethod(const std::string & interp_method)
     return InterpMethod::SOU;
   else if (interp_method == "quick")
     return InterpMethod::QUICK;
+  else if (interp_method == "venkatakrishnan")
+    return InterpMethod::Venkatakrishnan;
   else
     mooseError("Interpolation method ",
                interp_method,
@@ -114,7 +117,8 @@ setInterpolationMethod(const MooseObject & obj,
   interp_method = selectInterpolationMethod(interp_method_in);
 
   if (interp_method == InterpMethod::SOU || interp_method == InterpMethod::MinMod ||
-      interp_method == InterpMethod::VanLeer || interp_method == InterpMethod::QUICK)
+      interp_method == InterpMethod::VanLeer || interp_method == InterpMethod::QUICK ||
+      interp_method == InterpMethod::Venkatakrishnan)
     need_more_ghosting = true;
 
   return need_more_ghosting;

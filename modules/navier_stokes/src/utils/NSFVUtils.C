@@ -68,9 +68,9 @@ isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
               "Porosity should have blocks on both elem and neighbor");
 
   const Moose::FaceArg face_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr(), nullptr};
   const Moose::FaceArg face_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr(), nullptr};
   const auto eps_elem = porosity(face_elem, time), eps_neighbor = porosity(face_neighbor, time);
   return {!MooseUtils::relativeFuzzyEqual(eps_elem, eps_neighbor), eps_elem, eps_neighbor};
 }

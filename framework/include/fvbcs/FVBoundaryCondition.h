@@ -91,7 +91,8 @@ protected:
   Moose::FaceArg singleSidedFaceArg(
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
-      bool correct_skewness = false) const;
+      bool correct_skewness = false,
+      const Moose::StateArg * state_limiter = nullptr) const;
 
   MooseVariableFV<Real> & _var;
 
