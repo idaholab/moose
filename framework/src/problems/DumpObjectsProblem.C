@@ -9,6 +9,7 @@
 
 #include "DumpObjectsProblem.h"
 #include "DumpObjectsNonlinearSystem.h"
+#include "DumpObjectsLinearSystem.h"
 #include "AuxiliarySystem.h"
 #include <sstream>
 
@@ -37,12 +38,27 @@ DumpObjectsProblem::validParams()
 
 DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   : FEProblemBase(parameters),
-    _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0")),
     _include_all_user_specified_params(getParam<bool>("include_all_user_specified_params"))
 {
-  _nl[0] = _nl_sys;
-  _solver_systems[0] = std::dynamic_pointer_cast<SolverSystem>(_nl[0]);
+  // Make dummy systems based on parameters passed
+  _solver_systems.resize(0);
+  for (const auto i : index_range(_nl_sys_names))
+  {
+    const auto & sys_name = _nl_sys_names[i];
+    const auto & new_sys = std::make_shared<DumpObjectsNonlinearSystem>(*this, sys_name);
+    _solver_systems.push_back(new_sys);
+    _nl[i] = new_sys;
+  }
+  for (const auto i : index_range(_linear_sys_names))
+  {
+    const auto & sys_name = _linear_sys_names[i];
+    const auto & new_sys = std::make_shared<DumpObjectsLinearSystem>(*this, sys_name);
+    _solver_systems.push_back(new_sys);
+    _linear_systems[i] = new_sys;
+  }
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
+
+  // Create a dummy assembly for the systems at hand
   newAssemblyArray(_solver_systems);
 
   // Create extra vectors and matrices if any
@@ -151,6 +167,13 @@ DumpObjectsProblem::solve(unsigned int)
     dumpGeneratedSyntax(path);
   else
     dumpAllGeneratedSyntax();
+}
+
+void
+DumpObjectsProblem::solveLinearSystem(unsigned int linear_sys_num,
+                                      const Moose::PetscSupport::PetscOptions *)
+{
+  solve(linear_sys_num);
 }
 
 void
