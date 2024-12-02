@@ -64,6 +64,10 @@ protected:
   /// The density
   const Moose::Functor<ADReal> * _rho;
 
+  std::vector<std::string> _pressure_drop_sidesets;
+
+  std::vector<Real> _pressure_drop_form_factors;
+
 private:
   /// Switch to enable the two-term extrapolation on porosity jump faces.
   const bool _allow_two_term_expansion_on_bernoulli_faces;

@@ -23,6 +23,8 @@ BernoulliPressureVariable::validParams()
   params.addParam<MooseFunctorName>("w", 0, "The z-component of velocity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
+  params.addParam<std::vector<std::string>>("pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
+  params.addParam<std::vector<Real>>("pressure_drop_form_factors", {}, "User-suppled form loss coefficients to be applied over the sidesets listed above");
   params.addParam<bool>(
       "allow_two_term_expansion_on_bernoulli_faces",
       false,
@@ -41,6 +43,8 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _w(nullptr),
     _eps(nullptr),
     _rho(nullptr),
+    _pressure_drop_sidesets(getParam<std::vector<std::string>>("pressure_drop_sidesets")),
+    _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
 {
@@ -49,6 +53,11 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     paramError(
         "allow_two_term_expansion_on_bernoulli_faces",
         "Skewness correction with two term extrapolation on Bernoulli faces is not supported!");
+
+  if (_pressure_drop_sidesets.size() != _pressure_drop_form_factors.size())
+    paramError(
+        "pressure_drop_sidesets",
+        "The number of sidesets and form losses is not equal");
 }
 
 void
@@ -157,9 +166,21 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
   const auto v_dot_n_elem = interstitial_vel_elem * fi.normal();
   const auto v_dot_n_neighbor = interstitial_vel_neighbor * fi.normal();
-  const auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem;
+
+  ADReal factor_downwind = 0.0;
+  ADReal factor_upwind = 0.0;
+
+for(const auto& elem: _pressure_drop_sidesets){
+  if (std::find(fi.boundaryIDs.begin(), fi.boundaryIDs.end(), elem) != fi.boundaryIDs.end())
+  {
+    factor_downwind += _pressure_drop_form_factors[elem]
+  }
+}
+
+  const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
-      0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+      factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+
 
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
