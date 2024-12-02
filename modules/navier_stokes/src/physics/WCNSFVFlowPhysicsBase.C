@@ -67,6 +67,7 @@ WCNSFVFlowPhysicsBase::validParams()
   // Specify the numerical schemes for interpolations of velocity and pressure
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "velocity_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "momentum_advection_interpolation");
+  params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
   params.transferParam<bool>(NSFVBase::validParams(), "pressure_two_term_bc_expansion");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("mu_interp_method",
@@ -83,9 +84,10 @@ WCNSFVFlowPhysicsBase::validParams()
                               "Outlet boundary conditions");
   params.addParamNamesToGroup("wall_boundaries momentum_wall_types momentum_wall_functors",
                               "Wall boundary conditions");
-  params.addParamNamesToGroup("velocity_interpolation momentum_advection_interpolation "
-                              "pressure_two_term_bc_expansion mu_interp_method",
-                              "Numerical scheme");
+  params.addParamNamesToGroup(
+      "velocity_interpolation momentum_advection_interpolation "
+      "momentum_two_term_bc_expansion pressure_two_term_bc_expansion mu_interp_method",
+      "Numerical scheme");
   params.addParamNamesToGroup("thermal_expansion", "Gravity treatment");
 
   return params;
