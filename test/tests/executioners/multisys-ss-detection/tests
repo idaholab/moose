@@ -1,0 +1,10 @@
+[Tests]
+  design = 'Transient.md'
+  issues = '#29157'
+  [multi-sys-ss]
+    type = CSVDiff
+    input = transient_multi_diffusion.i
+    csvdiff = transient_multi_diffusion_out.csv
+    requirement = 'The system shall be able to detect steady-states of transient solves with multiple systems.'
+  []
+[]

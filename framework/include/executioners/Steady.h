@@ -23,7 +23,6 @@ public:
    * Constructor
    *
    * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
    */
   Steady(const InputParameters & parameters);
 

@@ -1262,7 +1262,7 @@ TEST_F(MooseServerTest, DefinitionObjectTypeSource)
   // expected locations with zero-based lines and columns
 
   std::string locations_expect = R"INPUT(
-document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    location_start: [38.0]    location_end: [38.1000]
+document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    location_start: [16.0]    location_end: [16.1000]
 )INPUT";
 
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
