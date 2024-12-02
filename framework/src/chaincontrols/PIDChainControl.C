@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PIDChainControl.h"
+#include "MooseUtils.h"
 
 registerMooseObject("MooseApp", PIDChainControl);
 
@@ -41,19 +42,33 @@ PIDChainControl::PIDChainControl(const InputParameters & parameters)
     _integral(declareChainControlData<Real>("integral")),
     _integral_old(getChainControlDataOldByName<Real>(fullControlDataName("integral"))),
     _derivative(declareChainControlData<Real>("derivative")),
-    _output(declareChainControlData<Real>("value"))
+    _output(declareChainControlData<Real>("value")),
+    _previous_time(declareRestartableData<Real>("previous_time"))
 {
   _integral = getParam<Real>("initial_integral");
+  _previous_time = std::numeric_limits<Real>::max();
 }
 
 void
 PIDChainControl::execute()
 {
+  if (!MooseUtils::absoluteFuzzyEqual(_t, _previous_time))
+    updateValues();
+
+  _previous_time = _t;
+}
+
+void
+PIDChainControl::updateValues()
+{
   _error = _set_point - _input;
 
   _proportional = _K_p * _error;
   _integral = _integral_old + _K_i * (_error * _dt);
-  _derivative = _K_d * (_error - _error_old) / _dt;
+  if (MooseUtils::absoluteFuzzyEqual(_dt, 0.0))
+    _derivative = 0.0;
+  else
+    _derivative = _K_d * (_error - _error_old) / _dt;
 
   _output = _proportional + _integral + _derivative;
 }

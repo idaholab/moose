@@ -25,6 +25,9 @@ public:
   virtual void execute() override;
 
 protected:
+  /// Performs the main execution
+  void executeInner();
+
   /// Input data
   const Real & _input;
   /// The number of points to use in the moving average
@@ -33,4 +36,6 @@ protected:
   Real & _output;
   /// Vector to store values
   std::vector<Real> & _values;
+  /// Previous time for which value was cached
+  Real & _previous_time;
 };

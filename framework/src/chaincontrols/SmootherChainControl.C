@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SmootherChainControl.h"
+#include "MooseUtils.h"
 
 registerMooseObject("MooseApp", SmootherChainControl);
 
@@ -31,12 +32,23 @@ SmootherChainControl::SmootherChainControl(const InputParameters & parameters)
     _input(getChainControlData<Real>("input")),
     _n_points(getParam<unsigned int>("n_points")),
     _output(declareChainControlData<Real>("value")),
-    _values(declareRestartableData<std::vector<Real>>("values"))
+    _values(declareRestartableData<std::vector<Real>>("values")),
+    _previous_time(declareRestartableData<Real>("previous_time"))
 {
+  _previous_time = std::numeric_limits<Real>::max();
 }
 
 void
 SmootherChainControl::execute()
+{
+  if (!MooseUtils::absoluteFuzzyEqual(_t, _previous_time))
+    executeInner();
+
+  _previous_time = _t;
+}
+
+void
+SmootherChainControl::executeInner()
 {
   if (_values.size() == _n_points)
     _values.erase(_values.begin());

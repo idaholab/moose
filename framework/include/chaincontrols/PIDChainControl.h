@@ -24,6 +24,9 @@ public:
   virtual void execute() override;
 
 protected:
+  /// Updates all control data values
+  void updateValues();
+
   /// input data
   const Real & _input;
   /// set point
@@ -51,4 +54,7 @@ protected:
 
   /// The output computed by the PID controller
   Real & _output;
+
+  /// Previous time for which value was computed
+  Real & _previous_time;
 };
