@@ -24,9 +24,9 @@ public:
   virtual void execute() override;
 
 protected:
-  /// Minimum value to apply to control data
+  /// Lower bound to apply to control data
   const Real _min_value;
-  /// Maximum value to apply to control data
+  /// Upper bound to apply to control data
   const Real _max_value;
   /// Control value before limiting
   const Real & _unlimited_value;

@@ -4,7 +4,7 @@ This [ChainControl](syntax/ChainControls/index.md) allows the user to scale
 the previous time value for a [chain control data](/ChainControlData.md)
 by another chain control data.
 The resulting value is named `<control>:value`, where `<control>` is the
-user-given name of the control.
+user-given name of the `ScaleOldChainControl`.
 The chain control data to scale may be the
 same chain control data created by this `ChainControl`, or it may be another.
 

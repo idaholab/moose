@@ -2,7 +2,7 @@
 
 This [ChainControl](syntax/ChainControls/index.md) converts a `Real`-valued
 [chain control data](/ChainControlData.md) to a `bool` data, with the name
-`<control>:value`, where `<control>` is the user-given name of the control:
+`<control>:value`, where `<control>` is the user-given name of the `RealToBoolChainControl`:
 
 - A value of 1 converts to `true`.
 - A value of 0 converts to `false`.

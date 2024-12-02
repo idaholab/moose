@@ -35,7 +35,7 @@ The inputs and outputs are retrieved and named as follows, respectively:
 - $x$ is set with [!param](/ChainControls/PIDChainControl/input).
 - $\bar{x}$ is set with [!param](/ChainControls/PIDChainControl/set_point).
 - $y$ is declared with the name `<control_name>:value`, where `<control_name>`
-  is the user-given name of the control object.
+  is the user-given name of the `PIDChainControl`.
 
 !alert tip title=Tuning PID coefficients
 If you are unsure on how to select the PID coefficients $K_p$, $K_i$, and $K_d$,

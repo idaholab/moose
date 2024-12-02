@@ -10,7 +10,7 @@ values $y$:
 where $i$ represents the time index.
 
 The resulting value is named `<control>:value`, where `<control>` is the
-user-given name of the control.
+user-given name of the `SmootherChainControl`.
 The number of points to average, $n$, is provided with [!param](/ChainControls/SmootherChainControl/n_points).
 
 !syntax parameters /ChainControls/SmootherChainControl
