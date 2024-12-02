@@ -1507,9 +1507,9 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
               std::string x_coord = std::to_string(intersection_coords(0));
               std::string y_coord = std::to_string(intersection_coords(1));
               std::string z_coord = std::to_string(intersection_coords(2));
-              std::string message = "Intersecting edges found between elements " + elem_id + " and " +
-                                    other_elem_id + " near point (" + x_coord + ", " + y_coord +
-                                    ", " + z_coord + ")";
+              std::string message = "Intersecting edges found between elements " + elem_id +
+                                    " and " + other_elem_id + " near point (" + x_coord + ", " +
+                                    y_coord + ", " + z_coord + ")";
               _console << message << std::endl;
             }
           }
