@@ -91,6 +91,9 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<LinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
+  if (!MooseUtils::isFloat(_specific_heat_name))
+    paramError(NS::cp, "Must be a Real number. Functors not supported at this time");
+  params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");

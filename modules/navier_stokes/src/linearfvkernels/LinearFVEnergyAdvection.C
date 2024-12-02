@@ -21,7 +21,7 @@ LinearFVEnergyAdvection::validParams()
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
                              "advection term for the energy e.g. h=int(cp dT). A user may still "
                              "override what quantity is advected, but the default is temperature.");
-  params.addParam<Real>("cp", 1, "Specific heat value");
+  params.addRequiredParam<Real>("cp", "Specific heat value");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
