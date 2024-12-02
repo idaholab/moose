@@ -513,25 +513,14 @@ $(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
 	@$(eval source_dir := $(word 1, $(kv)))
 	@$(eval dest_dir := $(if $(word 2, $(kv)),$(word 2, $(kv)),$(source_dir)))
-	@echo "Installing inputs from directory \"$(source_dir)\" into $(dest_dir)"
-	@rm -rf $(share_install_dir)/$(dest_dir)
-	@mkdir -p $(share_install_dir)/$(dest_dir)
+	@$(eval dest_dir_full := $(share_install_dir)/$(dest_dir))
 	@$(eval abs_source_dir := $(realpath $(APPLICATION_DIR)/$(source_dir)))
-	@if [ "$(abs_source_dir)" != "" ]; \
-	then \
-		cp -R $(abs_source_dir)/ $(share_install_dir)/$(dest_dir); \
-	else \
-		(echo "ERROR: Source directory $(APPLICATION_DIR)/$(source_dir) does not exist!"; exit 1) \
-	fi;
-	@if [ -e $(APPLICATION_DIR)/testroot ]; \
-	then \
-		cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$(dest_dir)/; \
-	elif [ -e $(source_dir)/testroot ]; \
-	then \
-		cp -f $(source_dir)/testroot $(share_install_dir)/$(dest_dir)/; \
-	else \
-		echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$(dest_dir)/testroot; \
-	fi; \
+	@echo "Installing tests $(dest_dir_full)"
+	@APPLICATION_DIR="$(APPLICATION_DIR)" \
+	 APPLICATION_NAME="$(APPLICATION_NAME)" \
+	 SOURCE_DIR="$(abs_source_dir)" \
+	 DEST_DIR="$(dest_dir_full)" \
+	 $(FRAMEWORK_DIR)/scripts/install_copy_inputs.sh
 
 # Install target for a single .la library archive and the associated .so/.dylib library
 install_lib_from_archive_%: %
