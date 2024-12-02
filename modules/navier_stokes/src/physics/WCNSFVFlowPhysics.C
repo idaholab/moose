@@ -63,7 +63,6 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "mass_advection_interpolation");
   params.transferParam<bool>(NSFVBase::validParams(),
                              "pressure_allow_expansion_on_bernoulli_faces");
-  params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
 
   // Nonlinear solver parameters
   params.transferParam<Real>(NSFVBase::validParams(), "mass_scaling");
@@ -75,11 +74,10 @@ WCNSFVFlowPhysics::validParams()
       "porosity_interface_pressure_treatment pressure_allow_expansion_on_bernoulli_faces "
       "porosity_smoothing_layers use_friction_correction consistent_scaling",
       "Flow medium discontinuity treatment");
-  params.addParamNamesToGroup(
-      "pressure_face_interpolation momentum_face_interpolation "
-      "mass_advection_interpolation momentum_advection_interpolation "
-      "momentum_two_term_bc_expansion mass_scaling momentum_scaling characteristic_speed",
-      "Numerical scheme");
+  params.addParamNamesToGroup("pressure_face_interpolation momentum_face_interpolation "
+                              "mass_advection_interpolation momentum_advection_interpolation "
+                              "mass_scaling momentum_scaling characteristic_speed",
+                              "Numerical scheme");
 
   // TODO Add default preconditioning and move scaling parameters to a preconditioning group
 
