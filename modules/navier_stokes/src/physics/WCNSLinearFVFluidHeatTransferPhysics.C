@@ -24,7 +24,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       "use_nonorthogonal_correction",
       true,
       "Whether to use a non-orthogonal correction. This will add off-diagonal terms potentially "
-      "slowing down convergence, but reducing numerical dispersion");
+      "slowing down convergence, but reducing numerical dispersion on non-orthogonal meshes. Can "
+      "be safely turned off on orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
 
   // Not implemented
@@ -94,7 +95,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");
 
-  getProblem().addFVKernel(kernel_type, kernel_name, params);
+  getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
 
 void
@@ -122,7 +123,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
     params.set<bool>("use_nonorthogonal_correction") =
         getParam<bool>("use_nonorthogonal_correction");
 
-    getProblem().addFVKernel(kernel_type, prefix() + "ins_energy_diffusion_" + block_name, params);
+    getProblem().addLinearFVKernel(
+        kernel_type, prefix() + "ins_energy_diffusion_" + block_name, params);
   }
 }
 
@@ -155,7 +157,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
     params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
     params.set<VariableName>(NS::T_solid) = _ambient_temperature[block_i];
 
-    getProblem().addFVKernel(kernel_type, prefix() + "ambient_convection_" + block_name, params);
+    getProblem().addLinearFVKernel(
+        kernel_type, prefix() + "ambient_convection_" + block_name, params);
   }
 }
 
@@ -170,7 +173,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
       getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
 
-  getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
+  getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
 }
 
 void
@@ -190,7 +193,6 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyInletBC()
                    ") should be the same size as inlet_boundaries (size " +
                    std::to_string(inlet_boundaries.size()) + ")");
 
-  unsigned int flux_bc_counter = 0;
   for (const auto bc_ind : index_range(_energy_inlet_types))
   {
     if (_energy_inlet_types[bc_ind] == "fixed-temperature")
@@ -201,7 +203,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyInletBC()
       params.set<MooseFunctorName>("functor") = _energy_inlet_functors[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
+      getProblem().addLinearFVBC(
           bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
     }
     else if (_energy_inlet_types[bc_ind] == "heatflux")
@@ -239,7 +241,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyWallBC()
       params.set<MooseFunctorName>("functor") = _energy_wall_functors[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
+      getProblem().addLinearFVBC(
           bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
     }
     else if (_energy_wall_types[bc_ind] == "heatflux")
@@ -257,4 +259,18 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyOutletBC()
 {
+  const auto & outlet_boundaries = _flow_equations_physics->getOutletBoundaries();
+  if (outlet_boundaries.empty())
+    return;
+
+  for (const auto & outlet_bdy : outlet_boundaries)
+  {
+    const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
+    params.set<bool>("use_two_term_expansion") = getParam<bool>("energy_two_term_bc_expansion");
+
+    params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+    getProblem().addLinearFVBC(bc_type, _fluid_temperature_name + "_" + outlet_bdy, params);
+  }
 }

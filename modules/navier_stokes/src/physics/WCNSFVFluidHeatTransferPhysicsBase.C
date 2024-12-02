@@ -138,6 +138,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addFVBCs()
 
   addINSEnergyInletBC();
   addINSEnergyWallBC();
+  addINSEnergyOutletBC();
 }
 
 void
