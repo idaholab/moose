@@ -42,4 +42,5 @@ private:
   /// These are used for weakly-compressible simulations as well.
   void addINSEnergyInletBC() override;
   void addINSEnergyWallBC() override;
+  void addINSEnergyOutletBC() override {}
 };
