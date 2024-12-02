@@ -370,6 +370,7 @@ WCNSLinearFVFlowPhysics::addINSOutletBC()
       const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
+      params.set<bool>("use_two_term_expansion") = getParam<bool>("momentum_two_term_bc_expansion");
 
       for (const auto d : make_range(dimension()))
       {
