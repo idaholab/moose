@@ -1,6 +1,6 @@
 # Navier Stokes Fluid Heat Transfer Physics
 
-This syntax was created for the [WCNSLinearFVFlowPhysics.md] `Physics`.
+This syntax was created for the [WCNSFVFluidHeatTransferPhysics.md] `Physics`.
 The additional nesting is intended to allow the definition of multiple instances of this `Physics`,
 with different block restrictions.
 
