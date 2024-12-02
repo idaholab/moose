@@ -8,6 +8,8 @@ This [ChainControl](syntax/ChainControls/index.md) converts a `Real`-valued
 - A value of 0 converts to `false`.
 - Other values result in an error.
 
+Note that the tolerance on the value is 1e-12 in a double-precision MOOSE build.
+
 !syntax parameters /ChainControls/RealToBoolChainControl
 
 !syntax inputs /ChainControls/RealToBoolChainControl
