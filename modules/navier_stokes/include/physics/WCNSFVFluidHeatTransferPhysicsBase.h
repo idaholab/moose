@@ -82,6 +82,7 @@ protected:
   /// These are used for weakly-compressible simulations as well.
   virtual void addINSEnergyInletBC() = 0;
   virtual void addINSEnergyWallBC() = 0;
+  virtual void addINSEnergyOutletBC() = 0;
 
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
