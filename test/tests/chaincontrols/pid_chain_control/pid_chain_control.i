@@ -30,7 +30,7 @@
     set_point = y_set_ctrl:value
     K_p = 0.1
     K_i = 0.01
-    K_d = 0.01
+    K_d = 0.001
   []
 []
 
