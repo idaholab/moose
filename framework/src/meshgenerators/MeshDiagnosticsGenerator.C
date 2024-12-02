@@ -21,6 +21,7 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/enum_point_locator_type.h"
 
 registerMooseObject("MooseApp", MeshDiagnosticsGenerator);
 
@@ -1430,26 +1431,28 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
     bounding_box_map.insert({elem, boundingBox});
   }
 
+  std::unique_ptr<PointLocatorBase> point_locator = PointLocatorBase::build(TREE_ELEMENTS, *mesh);
   std::set<std::array<dof_id_type, 4>> overlapping_edges_nodes;
   for (const auto elem : mesh->active_element_ptr_range())
   {
+    // loop through elem's nodes and find nearby elements with it
+    std::set<const Elem *> candidate_elems;
+    std::set<const Elem *> nearby_elems;
+    for (unsigned int i = 0; i < elem->n_nodes(); i++)
+    {
+      (*point_locator)(elem->point(i), candidate_elems);
+      nearby_elems.insert(candidate_elems.begin(), candidate_elems.end());
+    }
     std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
     for (auto i : elem->edge_index_range())
       elem_edges[i] = elem->build_edge_ptr(i);
-    const auto boundingBox1 = bounding_box_map[elem];
-    for (const auto other_elem : mesh->active_element_ptr_range())
+    for (const auto other_elem : nearby_elems)
     {
       // If they're the same element then there's no need to check for overlap
       if (elem->id() >= other_elem->id())
         continue;
 
-      // Get bounding boxes for both elements. If the bounding boxes don't intersect then no edges
-      // will either
-      const auto boundingBox2 = bounding_box_map[other_elem];
-      if (!(boundingBox1.intersects(boundingBox2)))
-        continue;
-
-      std::vector<std::unique_ptr<Elem>> other_edges(other_elem->n_edges());
+      std::vector<std::unique_ptr<const Elem>> other_edges(other_elem->n_edges());
       for (auto j : other_elem->edge_index_range())
         other_edges[j] = other_elem->build_edge_ptr(j);
       for (auto & edge : elem_edges)
@@ -1496,17 +1499,19 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
             // Add the nodes that make up the 2 edges to the vector overlapping_edges_nodes
             overlapping_edges_nodes.insert(node_id_array);
             num_intersecting_edges += 2;
-
-            // Print error message
-            std::string elem_id = std::to_string(elem->id());
-            std::string other_elem_id = std::to_string(other_elem->id());
-            std::string x_coord = std::to_string(intersection_coords(0));
-            std::string y_coord = std::to_string(intersection_coords(1));
-            std::string z_coord = std::to_string(intersection_coords(2));
-            std::string message = "Intersecting edges found between elements " + elem_id + " and " +
-                                  other_elem_id + " near point (" + x_coord + ", " + y_coord +
-                                  ", " + z_coord + ")";
-            _console << message << std::endl;
+            if (num_intersecting_edges < _num_outputs)
+            {
+              // Print error message
+              std::string elem_id = std::to_string(elem->id());
+              std::string other_elem_id = std::to_string(other_elem->id());
+              std::string x_coord = std::to_string(intersection_coords(0));
+              std::string y_coord = std::to_string(intersection_coords(1));
+              std::string z_coord = std::to_string(intersection_coords(2));
+              std::string message = "Intersecting edges found between elements " + elem_id + " and " +
+                                    other_elem_id + " near point (" + x_coord + ", " + y_coord +
+                                    ", " + z_coord + ")";
+              _console << message << std::endl;
+            }
           }
         }
       }
