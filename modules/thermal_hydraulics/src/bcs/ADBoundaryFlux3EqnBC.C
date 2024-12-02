@@ -44,21 +44,38 @@ ADBoundaryFlux3EqnBC::ADBoundaryFlux3EqnBC(const InputParameters & parameters)
     _rhouA_var(coupled("rhouA")),
     _rhoEA_var(coupled("rhoEA")),
 
-    _jmap(getIndexMapping()),
-    _equation_index(_jmap.at(_var.number())),
-
     _flux(getUserObject<ADBoundaryFluxBase>("boundary_flux"))
 {
+}
+
+void
+ADBoundaryFlux3EqnBC::initialSetup()
+{
+  ADOneDIntegratedBC::initialSetup();
+
+  const auto jmap = getIndexMapping();
+  _equation_index = jmap.at(_var.number());
 }
 
 ADReal
 ADBoundaryFlux3EqnBC::computeQpResidual()
 {
-  const std::vector<ADReal> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_linear[_qp]};
-  const auto & flux =
-      _flux.getFlux(_current_side, _current_elem->id(), U, MetaPhysicL::raw_value(_normals[_qp]));
+  const auto & flux = _flux.getFlux(
+      _current_side, _current_elem->id(), fluxInputVector(), MetaPhysicL::raw_value(_normals[_qp]));
 
   return flux[_equation_index] * _normal * _test[_i][_qp];
+}
+
+std::vector<ADReal>
+ADBoundaryFlux3EqnBC::fluxInputVector() const
+{
+  std::vector<ADReal> U(THMVACE1D::N_FLUX_INPUTS, 0);
+  U[THMVACE1D::RHOA] = _rhoA[_qp];
+  U[THMVACE1D::RHOUA] = _rhouA[_qp];
+  U[THMVACE1D::RHOEA] = _rhoEA[_qp];
+  U[THMVACE1D::AREA] = _A_linear[_qp];
+
+  return U;
 }
 
 std::map<unsigned int, unsigned int>

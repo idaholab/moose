@@ -26,7 +26,7 @@ protected:
   /**
    * Creates the boundary condition objects for 1-phase flow
    */
-  void addWeakBC3Eqn();
+  virtual void addWeakBCs();
 
   /// Numerical flux user object name
   UserObjectName _numerical_flux_name;
