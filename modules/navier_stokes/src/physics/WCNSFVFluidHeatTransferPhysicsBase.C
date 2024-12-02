@@ -37,6 +37,7 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
 
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
   params.transferParam<bool>(NSFVBase::validParams(), "energy_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
@@ -45,7 +46,7 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
                               "use_external_enthalpy_material",
                               "Material properties");
-  params.addParamNamesToGroup("energy_advection_interpolation "
+  params.addParamNamesToGroup("energy_advection_interpolation energy_face_interpolation "
                               "energy_two_term_bc_expansion energy_scaling",
                               "Numerical scheme");
   params.addParamNamesToGroup("energy_inlet_types energy_inlet_functors",
