@@ -65,5 +65,5 @@ InletVelocityTemperature1Phase::addMooseObjects()
   }
 
   // BCs
-  addWeakBC3Eqn();
+  addWeakBCs();
 }
