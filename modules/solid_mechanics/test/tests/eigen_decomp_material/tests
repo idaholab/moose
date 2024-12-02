@@ -1,0 +1,17 @@
+[Tests]
+  design = 'source/materials/EigenDecompMaterial.md'
+  issues = '#29179'
+  requirement = 'The system shall output eigen decompositions of tensors in '
+  [3D]
+    type = Exodiff
+    input = prescribed_strain_3D.i
+    exodiff = prescribed_strain_3D_out.e
+    detail = 'a 3D simulation with an evolving rank two tensor.'
+  []
+  [2Drz]
+    type = Exodiff
+    input = pipe_2d.i
+    exodiff =pipe_2d_out.e
+    detail = 'a 2D radial symmetry simulation of a pressurized pipe.'
+  []
+[]

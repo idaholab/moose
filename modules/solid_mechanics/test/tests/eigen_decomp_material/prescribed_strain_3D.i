@@ -30,21 +30,21 @@
     type = ParsedAux
     variable = disp_x
     use_xyzt = true
-    expression = "4e-1*x*t"
+    expression = "if(t<4.1,4e-1*x*t,x)"
   []
   [disp_y]
     execute_on = 'TIMESTEP_BEGIN'
     type = ParsedAux
     variable = disp_y
     use_xyzt = true
-    expression = "3e-1*y*t^2"
+    expression = "if(t<4.1,3e-1*y*t^2,1e-1*y*t+1e-1*x*t)"
   []
   [disp_z]
     execute_on = 'TIMESTEP_BEGIN'
     type = ParsedAux
     variable = disp_z
     use_xyzt = true
-    expression = "1e-1*z*t^3"
+    expression = "if(t<4.1,1e-1*z*t^3,z)"
   []
 []
 
@@ -91,6 +91,13 @@
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
+    execute_on = 'TIMESTEP_END'
+  []
+  [sxy]
+    type = ADMaterialTensorAverage
+    rank_two_tensor = mechanical_strain
+    index_i = 0
+    index_j = 1
     execute_on = 'TIMESTEP_END'
   []
   [syy]

@@ -12,7 +12,7 @@
 #include "Material.h"
 #include "RankTwoTensorForward.h"
 /**
- * Decomp
+ * Perform eigen decomposition on Rank two tensor
  */
 template <bool is_ad>
 class EigenDecompMaterialTempl : public Material
