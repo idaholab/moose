@@ -1,0 +1,105 @@
+[Tests]
+  design = 'MooseObject.md DataFileInterface.md'
+  issues = '#20839 #29141'
+
+  [param]
+    requirement = 'The system shall be to find data files via a parameter in designated directories for'
+    [in_tree]
+      type = RunApp
+      input = test.i
+      cli_args = 'UserObjects/data_file/data_file=README.md'
+      expect_out = 'data_file_relative="../../../../framework/data/README.md"'
+      detail = 'in-tree builds'
+      installation_type = in_tree
+    []
+    [relocated]
+      type = RunApp
+      input = test.i
+      cli_args = 'UserObjects/data_file/data_file=README.md'
+      expect_out = 'data_file_relative_to_binary="../share/moose/data/README.md"'
+      detail = 'and in installed builds'
+      installation_type = relocated
+    []
+  []
+  [param_not_found]
+    type = RunException
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file=this/file/does/not/exist/anywhere.dat'
+    expect_err = 'CLI_ARGS:1: \(UserObjects/data_file/data_file\) Unable to find the data file \'this/file/does/not/exist/anywhere.dat\' anywhere.\s+Paths searched:\s+moose data:(.*)/data\s+working directory:(.*)/misc/data_file'
+    requirement = 'The system shall throw an exception if a data file by parameter cannot be found in any of the designated directories.'
+  []
+  [by_path]
+    requirement = 'The system shall be to find data files via a path in designated directories for'
+    [in_tree]
+      type = RunApp
+      input = test.i
+      cli_args = 'UserObjects/data_file/data_file_by_path=README.md'
+      expect_out = 'Using data file \'(.*)/framework/data/README.md\' from moose data(.*)data_file_by_path_relative="../../../../framework/data/README.md"'
+      detail = 'in-tree builds'
+      installation_type = in_tree
+    []
+    [relocated]
+      type = RunApp
+      input = test.i
+      cli_args = 'UserObjects/data_file/data_file_by_path=README.md'
+      expect_out = 'Using data file \'(.*)/share/moose/data/README.md\' from moose data(.*)data_file_by_path_relative_to_binary="../share/moose/data/README.md"'
+      detail = 'and in installed builds'
+      installation_type = relocated
+    []
+  []
+  [by_path_not_found]
+    type = RunException
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file_by_path=surely/no/exist'
+    expect_err = "The following error occurred in the UserObject 'data_file' of type DataFileNameTest.\s+Unable to find the data file 'surely/no/exist\' anywhere"
+    requirement = 'The system shall throw an exception if finding a data file via a path in designated directories fails'
+  []
+  [by_path_absolute]
+    type = RunException
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file_by_path=/path/to/README.md'
+    expect_err = 'While using getDataFilePath\("/path/to/README.md"\): This API should not be used for absolute paths.'
+    requirement = 'The system shall warn when searching data files in designated directories by path with an absolute path'
+  []
+  [param_deprecated]
+    type = RunApp
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file_deprecated=README.md'
+    expect_out = 'data_file_deprecated_relative="(.*)/data/README.md"'
+    requirement = 'The system shall be to find data files via a parameter in designated directories using the deprecated interface'
+  []
+  [by_name_deprecated]
+    type = RunApp
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file_name_by_name=README.md'
+    expect_out = 'data_file_name_by_name_relative="(.*)/data/README.md"'
+    requirement = 'The system shall be to find data files in designated directories by relative path using the deprecated interface'
+  []
+  [show_data_params]
+    type = RunApp
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file=README.md --show-data-params'
+    expect_out = 'UserObjects/data_file/data_file = (.*)framework/data/README.md'
+    installation_type = in_tree
+    requirement = 'The system shall support the output of all consumed data files via a parameter in designated data directories'
+  []
+  [show_data_paths]
+    requirement = 'The system shall support the output of the designated data directories that cen be searched for'
+    [in_tree]
+      type = RunApp
+      input = test.i
+      cli_args = '--show-data-paths'
+      expect_out = 'moose: (.*)/framework/data'
+      detail = 'in-tree builds'
+      installation_type = in_tree
+    []
+    [relocated]
+      type = RunApp
+      input = test.i
+      cli_args = '--show-data-paths'
+      expect_out = 'moose: (.*)/share/moose/data'
+      detail = 'and in installed builds'
+      installation_type = relocated
+    []
+  []
+[]

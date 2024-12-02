@@ -728,7 +728,6 @@ std::string & removeColor(std::string & msg);
 std::list<std::string> listDir(const std::string path, bool files_only = false);
 
 bool pathExists(const std::string & path);
-bool pathIsDirectory(const std::string & path);
 
 /**
  * Retrieves the names of all of the files contained within the list of directories passed into
@@ -1234,6 +1233,10 @@ isFloat(const std::string & str)
   return (*ptr) == '\0';
 }
 
+/**
+ * Gets the canonical path of the given path
+ */
+std::string canonicalPath(const std::string & path);
 } // MooseUtils namespace
 
 namespace Moose
