@@ -271,6 +271,10 @@ SIMPLESolve::solveAdvectedSystem(const unsigned int system_num,
 bool
 SIMPLESolve::solve()
 {
+  // Do not solve if problem is set not to
+  if (!_problem.shouldSolve())
+    return true;
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;

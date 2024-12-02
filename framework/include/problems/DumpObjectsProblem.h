@@ -39,10 +39,13 @@ public:
   /// output input blocks for all paths
   void dumpAllGeneratedSyntax() const;
 
-  /// output data in solve
+  /// output data in solve (if ever called)
   virtual void solve(unsigned int nl_sys_num) override;
   virtual void solveLinearSystem(unsigned int linear_sys_num,
                                  const Moose::PetscSupport::PetscOptions * po) override;
+
+  // output data (we expect to call this from the DumpObjectsAction)
+  void printObjects();
 
   virtual void initialSetup() override {}
   virtual void advanceState() override {}
