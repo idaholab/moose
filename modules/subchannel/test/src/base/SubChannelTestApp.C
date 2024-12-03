@@ -13,11 +13,9 @@
 /********************************************************************/
 
 #include "SubChannelTestApp.h"
-#include "SubChannelApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
-#include "ModulesApp.h"
 
 InputParameters
 SubChannelTestApp::validParams()
@@ -26,7 +24,7 @@ SubChannelTestApp::validParams()
   return params;
 }
 
-SubChannelTestApp::SubChannelTestApp(InputParameters parameters) : MooseApp(parameters)
+SubChannelTestApp::SubChannelTestApp(InputParameters parameters) : SubChannelApp(parameters)
 {
   SubChannelTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

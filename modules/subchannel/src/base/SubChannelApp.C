@@ -15,12 +15,12 @@
 #include "SubChannelApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
-#include "ModulesApp.h"
+#include "FluidPropertiesApp.h"
+#include "HeatTransferApp.h"
+#include "ReactorApp.h"
+#include "ThermalHydraulicsApp.h"
 #include "MooseSyntax.h"
 #include "SubChannelSyntax.h"
-#ifdef BISON_ENABLED
-#include "BisonApp.h"
-#endif
 
 const std::string SubChannelApp::MASS_FLOW_RATE = "mdot";
 const std::string SubChannelApp::SURFACE_AREA = "S";
@@ -56,25 +56,27 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   Registry::registerObjectsTo(f, {"SubChannelApp"});
   Registry::registerActionsTo(af, {"SubChannelApp"});
-  ModulesApp::registerAllObjects<SubChannelApp>(f, af, s);
 
   /* register custom execute flags, action syntax, etc. here */
   SubChannel::associateSyntax(s, af);
 
-#ifdef BISON_ENABLED
-  BisonApp::registerAll(f, af, s);
-#endif
+  FluidPropertiesApp::registerAll(f, af, s);
+  HeatTransferApp::registerAll(f, af, s);
+  ReactorApp::registerAll(f, af, s);
+  ThermalHydraulicsApp::registerAll(f, af, s);
 }
 
 void
 SubChannelApp::registerApps()
 {
   registerApp(SubChannelApp);
-  ModulesApp::registerApps();
-#ifdef BISON_ENABLED
-  BisonApp::registerApps();
-#endif
+
+  FluidPropertiesApp::registerApps();
+  HeatTransferApp::registerApps();
+  ReactorApp::registerApps();
+  ThermalHydraulicsApp::registerApps();
 }
+
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/
