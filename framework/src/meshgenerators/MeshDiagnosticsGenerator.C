@@ -52,7 +52,10 @@ MeshDiagnosticsGenerator::validParams()
       chk_option,
       "whether to check for external nodes that are not assigned to any nodeset");
   params.addParam<std::vector<BoundaryID>>(
-      "boundaries_to_check", {}, "Names boundaries that should form a watertight envelope around the mesh. Defaults to all the boundaries combined.");
+      "boundaries_to_check",
+      {},
+      "Names boundaries that should form a watertight envelope around the mesh. Defaults to all "
+      "the boundaries combined.");
   params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
@@ -466,8 +469,9 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
 }
 
 std::vector<boundary_id_type>
-MeshDiagnosticsGenerator::findBoundaryOverlap(const std::vector<boundary_id_type> & watertight_boundaries,
-                                              std::vector<boundary_id_type> & boundary_ids) const
+MeshDiagnosticsGenerator::findBoundaryOverlap(
+    const std::vector<boundary_id_type> & watertight_boundaries,
+    std::vector<boundary_id_type> & boundary_ids) const
 {
   // Only the boundary_ids vector is sorted here. watertight_boundaries has to be sorted beforehand
   // Returns their intersection (elements that they share)
