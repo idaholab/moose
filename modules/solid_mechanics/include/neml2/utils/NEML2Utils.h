@@ -164,9 +164,10 @@ homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
 {
   typedef typename std::tuple_element<I, std::tuple<Args...>>::type Arg;
   std::vector<Arg> toi;
-  std::transform(from.cbegin(), from.cend(), std::back_inserter(toi), [](const auto & b) {
-    return std::get<I>(b);
-  });
+  std::transform(from.cbegin(),
+                 from.cend(),
+                 std::back_inserter(toi),
+                 [](const auto & b) { return std::get<I>(b); });
   std::get<I>(to) = toi;
 
   // recursively act on the rest of the args
