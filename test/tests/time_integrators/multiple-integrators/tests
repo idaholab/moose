@@ -23,4 +23,10 @@
     run_sim = True
     requirement = 'The system shall have an exact Jacobian when running with multiple time integrators.'
   []
+  [test_multisys]
+    issues = '#29158'
+    requirement = 'The system shall be able to solve transient problems using multiple nonlinear systems and multiple time integrators.'
+    input = test_ti_split.i
+    csvdiff = 'test_ti_split_out.csv'
+  []
 []

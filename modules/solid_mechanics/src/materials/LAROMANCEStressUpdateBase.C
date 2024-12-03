@@ -270,7 +270,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
   // load JSON datafile
   if (this->isParamValid("model"))
   {
-    const auto model_file_name = this->getDataFileName("model");
+    const auto model_file_name = this->template getParam<DataFileName>("model");
     std::ifstream model_file(model_file_name.c_str());
     model_file >> _json;
   }

@@ -19,6 +19,8 @@
 
 #include "libmesh/utility.h"
 
+#include <gtest/gtest.h>
+
 #define combineNames1(X, Y) X##Y
 #define combineNames(X, Y) combineNames1(X, Y)
 
@@ -76,7 +78,14 @@
 #define registerADMooseObjectRenamed(app, orig_class, time, new_class)                             \
   registerMooseObjectRenamed(app, orig_class, time, new_class)
 
-#define registerDataFilePath() Registry::addDataFilePath(__FILE__)
+/// Register a non-MooseApp data file path (folder name must be data)
+#define registerNonAppDataFilePath(name, path) Registry::addDataFilePath(name, path)
+/// Register a data file path for an application. Uses the current file to register
+/// ../../data as a path. The app name must be the APPLICATION_NAME used to build
+/// the app (solid_mechanics instead of SolidMechanicsApp, for example)
+#define registerAppDataFilePath(app) Registry::addAppDataFilePath(app, __FILE__)
+/// Deprecated method; use registerAppDataFilePath instead
+#define registerDataFilePath() Registry::addDeprecatedAppDataFilePath(__FILE__)
 
 #define registerRepository(repo_name, repo_url) Registry::addRepository(repo_name, repo_url);
 
@@ -198,8 +207,13 @@ public:
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
   static char addKnownLabel(const std::string & label);
 
-  /// register search paths for built-in data files
-  static void addDataFilePath(const std::string & path);
+  /// register general search paths (folder name must be data)
+  static void addDataFilePath(const std::string & name, const std::string & in_tree_path);
+  /// register search paths for an application (path determined relative to app_path);
+  /// app_path should be passed as __FILE__ from the application source file
+  static void addAppDataFilePath(const std::string & app_name, const std::string & app_path);
+  /// deprecated method; use addAppDataFilePath instead
+  static void addDeprecatedAppDataFilePath(const std::string & app_path);
 
   /// register a repository
   static void addRepository(const std::string & repo_name, const std::string & repo_url);
@@ -225,14 +239,24 @@ public:
     return getRegistry()._name_to_entry.count(name);
   }
 
-  /// Returns a vector of all registered data file paths
-  static const std::vector<std::string> & getDataFilePaths()
+  /// Returns a map of all registered data file paths (name -> path)
+  static const std::map<std::string, std::string> & getDataFilePaths()
   {
     return getRegistry()._data_file_paths;
   }
+  /**
+   * Gets a data path for the registered name.
+   *
+   * Finds either the installed path or the in-tree path.
+   */
+  static std::string getDataFilePath(const std::string & name);
 
   /// Returns the repository URL associated with \p repo_name
   static const std::string & getRepositoryURL(const std::string & repo_name);
+  /**
+   * Returns a map of all registered repositories
+   */
+  static const std::map<std::string, std::string> & getRepos() { return getRegistry()._repos; }
 
   /// returns the name() for a registered class
   template <typename T>
@@ -247,13 +271,51 @@ public:
   ///@}
 
 private:
+  /// Friends for unit testing
+  ///@{
+  friend class RegistryTest;
+  friend class DataFileUtilsTest;
+  FRIEND_TEST(RegistryTest, determineFilePath);
+  FRIEND_TEST(RegistryTest, determineFilePathFailed);
+  FRIEND_TEST(RegistryTest, appNameFromAppPath);
+  FRIEND_TEST(RegistryTest, appNameFromAppPathFailed);
+  ///@}
+
   Registry(){};
+
+  /**
+   * Manually set the data file paths.
+   *
+   * Used in unit testing.
+   */
+  static void setDataFilePaths(const std::map<std::string, std::string> & data_file_paths)
+  {
+    getRegistry()._data_file_paths = data_file_paths;
+  }
+  /**
+   * Manually set the repos.
+   *
+   * Used in unit testing
+   */
+  static void setRepos(const std::map<std::string, std::string> & repos)
+  {
+    getRegistry()._repos = repos;
+  }
+
+  /// Internal helper for determing a root data file path (in-tree vs installed)
+  static std::string determineDataFilePath(const std::string & name,
+                                           const std::string & in_tree_path);
+
+  /// Internal helper for getting an application name from its path, for example:
+  /// /path/to/FooBarBazApp.C -> foo_bar_baz, for use in addDeprecatedAppDataFilePath
+  static std::string appNameFromAppPath(const std::string & app_path);
 
   std::map<std::string, std::shared_ptr<RegistryEntryBase>> _name_to_entry;
   std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> _per_label_objects;
   std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> _per_label_actions;
   std::set<std::string> _known_labels;
-  std::vector<std::string> _data_file_paths;
+  /// Data file registry; name -> in-tree path
+  std::map<std::string, std::string> _data_file_paths;
   /// Repository name -> repository URL; used for mooseDocumentedError
   std::map<std::string, std::string> _repos;
   std::map<std::string, std::string> _type_to_classname;
