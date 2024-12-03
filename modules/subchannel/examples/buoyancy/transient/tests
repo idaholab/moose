@@ -3,5 +3,6 @@
     type = 'RunApp'
     input = '2X6_transient.i'
     check_input = true
+    max_parallel = 1
   []
 []

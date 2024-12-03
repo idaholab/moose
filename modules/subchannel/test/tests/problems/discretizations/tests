@@ -9,6 +9,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_explicit_staggered]
     type = Exodiff
@@ -20,6 +21,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_implicit]
     type = Exodiff
@@ -31,6 +33,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_monolithic]
     type = Exodiff
@@ -42,6 +45,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_full_monolithic]
     type = Exodiff
@@ -53,6 +57,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_full_monolithic_staggered]
     type = Exodiff
@@ -64,5 +69,6 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
 []

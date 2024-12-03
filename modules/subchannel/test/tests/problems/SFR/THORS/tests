@@ -8,5 +8,6 @@
     valgrind = NONE
     recover = false
     rel_err = 4e-4
+    max_parallel = 1
   []
 []

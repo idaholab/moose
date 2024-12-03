@@ -4,5 +4,6 @@
     input = 'test.i'
     csvdiff = 'Temp_out_matrix.csv'
     recover = False
+    max_parallel = 1
   []
 []
