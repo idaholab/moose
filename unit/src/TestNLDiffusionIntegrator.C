@@ -76,7 +76,7 @@ TEST(CheckData, NLDiffusionTest)
    const char *mesh_file = "./data/star.mesh";
  
    int order = 1;
-   bool nonzero_rhs = false;
+   bool nonzero_rhs = true;
 
    // 2. Read the mesh from the given mesh file, and refine once uniformly.
    Mesh mesh(mesh_file);
