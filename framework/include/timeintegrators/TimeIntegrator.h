@@ -134,6 +134,12 @@ public:
   virtual bool isExplicit() const { return false; }
 
   /**
+   * Return the number of states this requires in a linear
+   * system setting
+   */
+  virtual unsigned int numStatesRequired() const { return 1; }
+
+  /**
    * Returns whether mass matrix is lumped
    */
   virtual const bool & isLumped() const { return _is_lumped; }
