@@ -52,7 +52,7 @@ MeshDiagnosticsGenerator::validParams()
       chk_option,
       "whether to check for external nodes that are not assigned to any nodeset");
   params.addParam<std::vector<BoundaryID>>(
-      "boundaries_to_check", {}, "IDs of boundaries to be checked for watertight checks");
+      "boundaries_to_check", {}, "Names boundaries that should form a watertight envelope around the mesh. Defaults to all the boundaries combined.");
   params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
@@ -109,6 +109,9 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
     _num_outputs(getParam<unsigned int>("log_length_limit"))
 {
+  // Sort boundary vector if not empty
+  if (!_watertight_boundaries.empty())
+    std::sort(_watertight_boundaries.begin(), _watertight_boundaries.end());
   // Check that no secondary parameters have been passed with the main check disabled
   if ((isParamSetByUser("minimum_element_volumes") ||
        isParamSetByUser("maximum_element_volumes")) &&
@@ -316,10 +319,6 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
   const auto sideset_map = boundary_info.get_sideset_map();
   unsigned int num_faces_without_sideset = 0;
 
-  // Make copy of _watertight_boundaries and sort it for later use
-  std::vector<BoundaryID> boundary_copy = _watertight_boundaries;
-  std::sort(boundary_copy.begin(), boundary_copy.end());
-
   for (const auto elem : mesh->active_element_ptr_range())
   {
     for (auto i : elem->side_index_range())
@@ -329,14 +328,13 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
       {
         // If external get the boundary ids associated with this side
         std::vector<boundary_id_type> boundary_ids;
-        // boundary_info.boundary_ids(elem, i, boundary_ids);
         auto side_range = sideset_map.equal_range(elem);
         for (const auto & itr : as_range(side_range))
           if (itr.second.first == i)
             boundary_ids.push_back(i);
         // get intersection of boundary_ids and _watertight_boundaries
         std::vector<boundary_id_type> intersections =
-            findBoundaryOverlap(boundary_copy, boundary_ids);
+            findBoundaryOverlap(_watertight_boundaries, boundary_ids);
         if (boundary_ids.empty())
         {
           // This side does not have a sideset!!!
@@ -468,15 +466,15 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
 }
 
 std::vector<boundary_id_type>
-MeshDiagnosticsGenerator::findBoundaryOverlap(std::vector<boundary_id_type> boundary_copy,
-                                              std::vector<boundary_id_type> boundary_ids) const
+MeshDiagnosticsGenerator::findBoundaryOverlap(const std::vector<boundary_id_type> & watertight_boundaries,
+                                              std::vector<boundary_id_type> & boundary_ids) const
 {
-  // Both vectors must be sorted first
+  // Only the boundary_ids vector is sorted here. watertight_boundaries has to be sorted beforehand
   // Returns their intersection (elements that they share)
   std::sort(boundary_ids.begin(), boundary_ids.end());
   std::vector<boundary_id_type> boundary_intersection;
-  std::set_intersection(boundary_copy.begin(),
-                        boundary_copy.end(),
+  std::set_intersection(watertight_boundaries.begin(),
+                        watertight_boundaries.end(),
                         boundary_ids.begin(),
                         boundary_ids.end(),
                         std::back_inserter(boundary_intersection));
