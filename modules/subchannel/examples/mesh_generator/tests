@@ -3,5 +3,6 @@
     type = 'RunApp'
     input = 'psbt_test_mesh_generator.i'
     check_input = true
+    max_parallel = 1
   []
 []

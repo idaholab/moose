@@ -3,5 +3,6 @@
     type = 'RunApp'
     input = '3X3_channel.i'
     check_input = true
+    max_parallel = 1
   []
 []

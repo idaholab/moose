@@ -8,6 +8,7 @@
     valgrind = NONE
     recover = false
     allow_warnings = true
+    max_parallel = 1
   []
   [test_implicit]
     type = Exodiff
@@ -18,6 +19,7 @@
     valgrind = NONE
     recover = false
     allow_warnings = true
+    max_parallel = 1
   []
   [test_monolithic]
     type = Exodiff
@@ -28,6 +30,7 @@
     abs_zero = 1e-7
     valgrind = NONE
     recover = false
+    max_parallel = 1
   []
   [test_monolithic_csv]
     type = CSVDiff
@@ -35,5 +38,6 @@
     csvdiff = 'test19_monolithic_out.csv'
     recover = False
     rel_err = 3e-4
+    max_parallel = 1
   []
 []

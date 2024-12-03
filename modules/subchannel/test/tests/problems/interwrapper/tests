@@ -9,6 +9,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [quad_interwrapper_monolithic]
     type = Exodiff
@@ -20,6 +21,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [quad_interwrapper_monolithic_staggered]
     type = Exodiff
@@ -31,6 +33,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [tri_interwrapper]
     type = Exodiff
@@ -42,6 +45,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [tri_interwrapper_tight_side]
     type = Exodiff
@@ -55,6 +59,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [tri_interwrapper_implicit]
     type = Exodiff
@@ -66,6 +71,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
 
   [tri_interwrapper_monolithic]
@@ -78,6 +84,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [tri_interwrapper_monolithic_staggered]
     type = Exodiff
@@ -89,5 +96,6 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
 []

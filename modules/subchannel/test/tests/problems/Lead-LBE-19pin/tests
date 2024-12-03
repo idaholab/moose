@@ -7,6 +7,7 @@
         method = '!DBG'
         valgrind = NONE
         recover = false
+        max_parallel = 1
     []
     [test_LEAD]
         type = Exodiff
@@ -16,5 +17,6 @@
         method = '!DBG'
         valgrind = NONE
         recover = false
+        max_parallel = 1
     []
 []

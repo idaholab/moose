@@ -3,5 +3,6 @@
     type = 'RunApp'
     input = 'psbt_transient.i'
     check_input = true
+    max_parallel = 1
   []
 []
