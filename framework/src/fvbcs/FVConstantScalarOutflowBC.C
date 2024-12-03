@@ -33,7 +33,10 @@ FVConstantScalarOutflowBC::computeQpResidual()
               "This boundary condition is for outflow but the flow is in the opposite direction of "
               "the boundary normal");
 
+  const auto boundary_face = singleSidedFaceArg();
+  const auto state = determineState();
+
   // This will either be second or first order accurate depending on whether the user has asked
   // for a two term expansion in their input file
-  return _normal * _velocity * _var.getBoundaryFaceValue(*_face_info, determineState());
+  return _normal * _velocity * _var(boundary_face, state);
 }

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVAdvection.h"
+#include "Steady.h"
 
 registerADMooseObject("MooseApp", FVAdvection);
 
@@ -37,15 +38,33 @@ FVAdvection::FVAdvection(const InputParameters & params)
     getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
         ->setErrorOnJacobianNonzeroReallocation(false);
   }
+
+  if (dynamic_cast<Steady *>(_app.getExecutioner()))
+  {
+    const MooseEnum not_available_with_steady("sou min_mod vanLeer quick venkatakrishnan");
+    const std::string chosen_scheme =
+        static_cast<std::string>(getParam<MooseEnum>("advected_interp_method"));
+    if (not_available_with_steady.find(chosen_scheme) != not_available_with_steady.items().end())
+      paramError("advected_interp_method",
+                 "The given advected interpolation cannot be used with steady-state runs!");
+  }
 }
 
 ADReal
 FVAdvection::computeQpResidual()
 {
+  const auto state = determineState();
+  const auto & limiter_time = _subproblem.isTransient()
+                                  ? Moose::StateArg(1, Moose::SolutionIterationType::Time)
+                                  : Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+
   const bool elem_is_upwind = _velocity * _normal >= 0;
-  const auto face =
-      makeFace(*_face_info, Moose::FV::limiterType(_advected_interp_method), elem_is_upwind);
-  ADReal u_interface = _var(face, determineState());
+  const auto face = makeFace(*_face_info,
+                             Moose::FV::limiterType(_advected_interp_method),
+                             elem_is_upwind,
+                             false,
+                             &limiter_time);
+  ADReal u_interface = _var(face, state);
 
   return _normal * _velocity * u_interface;
 }

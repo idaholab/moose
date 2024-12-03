@@ -544,8 +544,12 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (Moose::FV::onBoundary(*this, fi))
   {
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
-    const Moose::FaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
+    const Moose::FaceArg boundary_face{&fi,
+                                       Moose::FV::LimiterType::CentralDifference,
+                                       true,
+                                       correct_skewness,
+                                       boundary_elem,
+                                       nullptr};
     auto velocity = vel(boundary_face, time);
     incorporate_mesh_velocity(boundary_face, velocity);
 
@@ -559,7 +563,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   VectorValue<ADReal> velocity;
 
   Moose::FaceArg face{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr, nullptr};
   // Create the average face velocity (not corrected using RhieChow yet)
   velocity(0) = (*u)(face, time);
   if (v)
@@ -625,7 +629,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
     // Compute the corrected interpolated face value
     Moose::FaceArg face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr, nullptr};
 
     interp_vf = 0.0;
     for (const auto i : make_range(_volumetric_force.size()))
@@ -654,7 +658,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                elem_has_fi ? side : loc_neighbor->which_neighbor_am_i(elem));
 
       Moose::FaceArg loc_face{
-          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem};
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem, nullptr};
 
       MooseMeshUtils::coordTransformFactor(
           elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
@@ -689,7 +693,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                elem_has_fi ? side : loc_elem->which_neighbor_am_i(neighbor));
 
       Moose::FaceArg loc_face{
-          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem};
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem, nullptr};
 
       MooseMeshUtils::coordTransformFactor(
           neighbor->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
@@ -730,7 +734,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   {
     Real value = 0.0;
     Moose::FaceArg loc_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr, nullptr};
 
     for (const auto i : make_range(_volumetric_force.size()))
       value += (*_volumetric_force[i])(loc_face, time) * (face_normal * fi.normal());

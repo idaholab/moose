@@ -13,7 +13,8 @@ Moose::FaceArg
 FaceArgProducerInterface::makeFace(const FaceInfo & fi,
                                    const Moose::FV::LimiterType limiter_type,
                                    const bool elem_is_upwind,
-                                   const bool correct_skewness) const
+                                   const bool correct_skewness,
+                                   const Moose::StateArg * state_limiter) const
 {
   const bool defined_on_elem_side = hasFaceSide(fi, true);
   const bool defined_on_neighbor_side = hasFaceSide(fi, false);
@@ -24,5 +25,5 @@ FaceArgProducerInterface::makeFace(const FaceInfo & fi,
   if (!defined_on_elem_side && !defined_on_neighbor_side)
     mooseError("No definition on either side");
 
-  return {&fi, limiter_type, elem_is_upwind, correct_skewness, elem};
+  return {&fi, limiter_type, elem_is_upwind, correct_skewness, elem, state_limiter};
 }

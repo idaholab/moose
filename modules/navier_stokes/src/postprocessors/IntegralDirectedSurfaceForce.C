@@ -74,8 +74,8 @@ IntegralDirectedSurfaceForce::computeFaceInfoIntegral(const FaceInfo * fi)
   mooseAssert(fi, "We should have a face info in " + name());
 
   const auto state = determineState();
-  const auto face_arg =
-      Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
+  const auto face_arg = Moose::FaceArg(
+      {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr});
   const auto elem_arg = Moose::ElemArg({fi->elemPtr(), false});
 
   RealTensorValue pressure_term;

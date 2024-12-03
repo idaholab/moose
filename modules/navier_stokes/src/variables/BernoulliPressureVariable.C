@@ -68,7 +68,8 @@ BernoulliPressureVariable::elemIsUpwind(const Elem & elem,
                                         const FaceInfo & fi,
                                         const Moose::StateArg & time) const
 {
-  const Moose::FaceArg face{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+  const Moose::FaceArg face{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
   const VectorValue<ADReal> vel_face{(*_u)(face, time), (*_v)(face, time), (*_w)(face, time)};
   const bool fi_elem_is_upwind = vel_face * fi.normal() > 0;
@@ -131,9 +132,9 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
 #endif
 
   const Moose::FaceArg face_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem(), nullptr};
   const Moose::FaceArg face_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr(), nullptr};
 
   const auto [elem_is_upwind, vel_face] = elemIsUpwind(*elem, fi, time);
   const auto & vel_elem = vel_face;
