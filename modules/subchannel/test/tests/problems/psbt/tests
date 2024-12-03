@@ -9,6 +9,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_explicit_friction2]
     type = Exodiff
@@ -20,6 +21,7 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_implicit]
     type = Exodiff
@@ -32,6 +34,7 @@
     abs_zero = 5e-6
     rel_err = 2e-2
     max_threads = 1
+    max_parallel = 1
   []
   [psbt_implicit_csv]
     type = CSVDiff
@@ -39,6 +42,7 @@
     csvdiff = 'psbt_implicit_out.csv'
     recover = False
     rel_err = 3e-4
+    max_parallel = 1
   []
   [psbt_monolithic]
     type = Exodiff
@@ -50,5 +54,6 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
+    max_parallel = 1
   []
 []

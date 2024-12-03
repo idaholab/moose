@@ -3,6 +3,7 @@
     type = 'RunApp'
     input = 'subchannel.i'
     check_input = true
+    max_parallel = 1
   []
   [THM_coupling_check_syntax]
     type = 'RunApp'

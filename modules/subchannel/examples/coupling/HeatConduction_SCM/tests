@@ -4,5 +4,6 @@
     input = 'main.i'
     check_input = true
     mesh_mode = 'replicated'
+    max_parallel = 1
   []
 []

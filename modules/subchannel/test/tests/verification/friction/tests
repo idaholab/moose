@@ -6,6 +6,7 @@
     method = '!DBG'
     valgrind = NONE
     recover = false
+    max_parallel = 1
   []
   [friction2]
     type = Exodiff
@@ -14,5 +15,6 @@
     method = '!DBG'
     valgrind = NONE
     recover = false
+    max_parallel = 1
   []
 []
