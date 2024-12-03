@@ -3,10 +3,8 @@
 
 using namespace mfem;
 
-static const double alpha = -0.5;
-
-double f(double u) { return exp(alpha*u); }
-double df(double u) { return alpha*exp(alpha*u); }
+double f(double u) { return u; }
+double df(double u) { return 1.0; }
 
 // Define a coefficient that, given a grid function u, returns f(u)
 class NonlinearCoefficient : public Coefficient
@@ -71,89 +69,93 @@ public:
 };
 
 
-
 TEST(CheckData, NLDiffusionTest)
 {
-   Mesh mesh("./data/holes.mesh", 1, 1);
 
-   H1_FECollection fec(1, mesh.Dimension());
+   // 1. Parse command line options
+   const char *mesh_file = "./data/star.mesh";
+ 
+   int order = 1;
+   bool nonzero_rhs = false;
 
-   FiniteElementSpace fespace(&mesh, &fec);
+   // 2. Read the mesh from the given mesh file, and refine once uniformly.
+   Mesh mesh(mesh_file);
+   mesh.UniformRefinement();
+   ParMesh pmesh(MPI_COMM_WORLD, mesh);
 
-   Array<int> nbc_bdr(mesh.bdr_attributes.Max());
-   Array<int> rbc_bdr(mesh.bdr_attributes.Max());
-   Array<int> dbc_bdr(mesh.bdr_attributes.Max());
-   nbc_bdr = 0; nbc_bdr[0] = 1;
-   rbc_bdr = 0; rbc_bdr[1] = 1;
-   dbc_bdr = 0; dbc_bdr[2] = 1;
+   // 3. Define a finite element space on the mesh. Here we use H1 continuous
+   //    high-order Lagrange finite elements of the given order.
+   H1_FECollection fec(order, mesh.Dimension());
+   ParFiniteElementSpace fespace(&pmesh, &fec);
 
-   Array<int> ess_tdof_list(0);
-   fespace.GetEssentialTrueDofs(dbc_bdr, ess_tdof_list);
+   // 4. Extract the list of all the boundaries. These will be marked as
+   //    Dirichlet in order to enforce zero boundary conditions.
+   Array<int> ess_bdr(pmesh.bdr_attributes.Max());
+   ess_bdr = 1;
+   Array<int> ess_tdof_list;
+   fespace.GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
 
-   // See defaults in ex27.
-   ConstantCoefficient matCoef(1.0);
-   ConstantCoefficient dbcCoef(0.0);
-   ConstantCoefficient nbcCoef(1.0);
-   ConstantCoefficient rbcACoef(1.0);
-   ConstantCoefficient rbcBCoef(1.0);
-   ProductCoefficient m_nbcCoef(matCoef, nbcCoef);
-   ProductCoefficient m_rbcACoef(matCoef, rbcACoef);
-   ProductCoefficient m_rbcBCoef(matCoef, rbcBCoef);
-
-   GridFunction u1(&fespace), u2(&fespace);
+   // 5. Define the solution x as a finite element grid function in fespace. Set
+   //    the initial guess to zero, which also sets the boundary conditions.
+   ParGridFunction u1(&fespace), u2(&fespace);
    u1 = 0.0;
    u2 = 0.0;
-   u1.ProjectBdrCoefficient(dbcCoef, dbc_bdr);
-   u2.ProjectBdrCoefficient(dbcCoef, dbc_bdr);
 
-   LinearForm b(&fespace);
-   b.AddBoundaryIntegrator(new BoundaryLFIntegrator(m_nbcCoef), nbc_bdr);
-   b.AddBoundaryIntegrator(new BoundaryLFIntegrator(m_rbcBCoef), rbc_bdr);
-   b.Assemble();
+   // Solve as a non-linear problem.
+
+   // 6. Set up the nonlinear form n(u,v) = (grad u, grad v) + (f(u), v)
+   ParNonlinearForm n(&fespace);
+   n.AddDomainIntegrator(new NonlinearMassIntegrator(fespace));
+   n.AddDomainIntegrator(new DiffusionIntegrator);
+
+   // 7. Set up the the right-hand side. For simplicitly, we just use a zero
+   //    vector. Because of the form of the nonlinear function f, it is still
+   //    nontrivial to solve n(u,v) = 0.
+   ParLinearForm b(&fespace);
+   b = 0.0;
+   if (nonzero_rhs) {
+      ConstantCoefficient five(5.0);
+      b.AddDomainIntegrator(new DomainLFIntegrator(five));
+      b.Assemble();
+   }
+
+   // 8. Get true dof vectors and set essential BCs on rhs.
+   Vector X(fespace.GetTrueVSize()), B(fespace.GetTrueVSize());
+   u1.GetTrueDofs(X);
+   b.ParallelAssemble(B);
+   n.SetEssentialBC(ess_bdr, &B);
+
+   // 9. Set up the Newton solver. Each Newton iteration requires a linear
+   //    solve. Here we use UMFPack as a direct solver for these systems.
+   CGSolver solver(MPI_COMM_WORLD);
+   NewtonSolver newton(MPI_COMM_WORLD);
+   newton.SetOperator(n);
+   newton.SetSolver(solver);
+   newton.SetPrintLevel(1);
+   newton.SetRelTol(1e-10);
+   newton.SetMaxIter(20);
+
+   // 10. Solve the nonlinear system.
+   newton.Mult(B, X);
+   u1.Distribute(X);
+
 
    // Solve as a linear problem.
    {
       BilinearForm a(&fespace);
-      a.AddDomainIntegrator(new DiffusionIntegrator(matCoef));
-      a.AddBoundaryIntegrator(new MassIntegrator(m_rbcACoef), rbc_bdr);
+      a.AddDomainIntegrator(new DiffusionIntegrator);
+      a.AddDomainIntegrator(new MassIntegrator);
       a.Assemble();
 
       OperatorPtr A;
-      Vector B, X;
-      a.FormLinearSystem(ess_tdof_list, u1, b, A, X, B);
+      Vector C, Y;
+      a.FormLinearSystem(ess_tdof_list, u2, b, A, Y, C);
       GSSmoother M((SparseMatrix&)(*A));
-      PCG(*A, M, B, X, 1, 500, 1e-12, 0.0);
-      a.RecoverFEMSolution(X, b, u1);
+      PCG(*A, M, C, Y, 1, 500, 1e-12, 0.0);
+      a.RecoverFEMSolution(Y, b, u2);
    }
 
-   // Solve as a nonlinear problem.
-   {
-      NonlinearForm a_nf(&fespace);
-      a_nf.AddDomainIntegrator(new DiffusionIntegrator(matCoef));
-      a_nf.AddBoundaryIntegrator(new MassIntegrator(m_rbcACoef), rbc_bdr);
-      a_nf.SetEssentialTrueDofs(ess_tdof_list);
+   u1 -= u2;
 
-      IterativeSolver::PrintLevel print;
-      print.Iterations();
-      CGSolver cg;
-      cg.SetPrintLevel(print);
-      cg.SetMaxIter(100);
-      cg.SetRelTol(1e-12); cg.SetAbsTol(0.0);
-
-      NewtonSolver newton;
-      newton.iterative_mode = false;
-      newton.SetSolver(cg);
-      newton.SetOperator(a_nf);
-      newton.SetPrintLevel(print);
-      newton.SetRelTol(1e-14); newton.SetAbsTol(0.0);
-      newton.SetMaxIter(1);
-
-      newton.Mult(b, u2);
-   }
-
-   u2 -= u1;
-   //REQUIRE(u2.Norml2() == MFEM_Approx(0.0, 1e-5));
-   EXPECT_NEAR(u2.Norml2(), 0, 1e-5);
-
-  //EXPECT_NO_THROW({ integ_scale.SetIntRule(&ir); });
+   EXPECT_NEAR(u1.Norml2(), 0, 1e-5);
 }
