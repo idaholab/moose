@@ -129,7 +129,7 @@ public:
 
 private:
   using PWData = std::tuple<std::shared_ptr<Tpw>, std::map<const std::string, std::shared_ptr<T>>>;
-  std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _properties;
+  std::map<std::string, std::variant<std::shared_ptr<T>, PWData>> _properties;
   ObjectManager<T> & _manager;
 
   PWData emptyPWData(std::shared_ptr<T> /*coeff*/)

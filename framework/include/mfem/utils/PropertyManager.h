@@ -98,12 +98,12 @@ public:
     this->declareMatrix<P>(name, std::vector<std::string>(), args...);
   }
 
-  mfem::Coefficient & getScalarProperty(const std::string name);
-  mfem::VectorCoefficient & getVectorProperty(const std::string name);
-  mfem::MatrixCoefficient & getMatrixProperty(const std::string name);
-  std::shared_ptr<mfem::Coefficient> getScalarPropertyPtr(const std::string name);
-  std::shared_ptr<mfem::VectorCoefficient> getVectorPropertyPtr(const std::string name);
-  std::shared_ptr<mfem::MatrixCoefficient> getMatrixPropertyPtr(const std::string name);
+  mfem::Coefficient & getScalarProperty(const std::string & name);
+  mfem::VectorCoefficient & getVectorProperty(const std::string & name);
+  mfem::MatrixCoefficient & getMatrixProperty(const std::string & name);
+  std::shared_ptr<mfem::Coefficient> getScalarPropertyPtr(const std::string & name);
+  std::shared_ptr<mfem::VectorCoefficient> getVectorPropertyPtr(const std::string & name);
+  std::shared_ptr<mfem::MatrixCoefficient> getMatrixPropertyPtr(const std::string & name);
   bool scalarIsDefined(const std::string & name, const std::string & block) const;
   bool vectorIsDefined(const std::string & name, const std::string & block) const;
   bool matrixIsDefined(const std::string & name, const std::string & block) const;
