@@ -131,7 +131,7 @@ To debug NEML2 related issues:
    run the simulation through a debugger: See
    https://mooseframework.inl.gov/application_development/debugging.html
 4. If the issue is due to a NEML2 bug, feel free to report it at
-   https://github.com/reverendbedford/neml2/issues
+   https://github.com/applied-material-modeling/neml2/issues
 ==============================================================================
 )"""";
 
@@ -164,10 +164,9 @@ homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
 {
   typedef typename std::tuple_element<I, std::tuple<Args...>>::type Arg;
   std::vector<Arg> toi;
-  std::transform(from.cbegin(),
-                 from.cend(),
-                 std::back_inserter(toi),
-                 [](const auto & b) { return std::get<I>(b); });
+  std::transform(from.cbegin(), from.cend(), std::back_inserter(toi), [](const auto & b) {
+    return std::get<I>(b);
+  });
   std::get<I>(to) = toi;
 
   // recursively act on the rest of the args
