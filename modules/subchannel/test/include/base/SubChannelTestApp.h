@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "SubChannelApp.h"
 
-class SubChannelTestApp : public MooseApp
+class SubChannelTestApp : public SubChannelApp
 {
 public:
   SubChannelTestApp(InputParameters parameters);

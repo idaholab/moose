@@ -296,6 +296,7 @@ share/
 /modules/reactor/reactor.yaml
 /modules/rdg/rdg.yaml
 /modules/fsi/fsi.yaml
+/modules/subchannel/subchannel.yaml
 /unit/moose-unit.yaml
 /modules/functional_expansion_tools/unit/functional_expansion_tools-unit.yaml
 /modules/solid_properties/unit/solid_properties-unit.yaml
@@ -324,6 +325,7 @@ share/
 /modules/reactor/unit/reactor-unit.yaml
 /modules/rdg/unit/rdg-unit.yaml
 /modules/fsi/unit/fsi-unit.yaml
+/modules/subchannel/unit/subchannel-unit.yaml
 /modules/misc/misc.yaml
 /tutorials/tutorial01_app_development/*/babbler.yaml
 /tutorials/darcy_thermo_mech/*/darcy_thermo_mech.yaml

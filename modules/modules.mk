@@ -39,12 +39,20 @@ ifeq ($(ALL_MODULES),yes)
         SOLID_MECHANICS             := yes
         SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
+        SUBCHANNEL                  := yes
         THERMAL_HYDRAULICS          := yes
         XFEM                        := yes
 endif
 
 # Modules that follow have one or more dependencies
 # on the modules defined above them.
+ifeq ($(SUBCHANNEL),yes)
+        FLUID_PROPERTIES            := yes
+        HEAT_TRANSFER               := yes
+        REACTOR                     := yes
+        THERMAL_HYDRAULICS          := yes
+endif
+
 ifeq ($(THERMAL_HYDRAULICS),yes)
         NAVIER_STOKES               := yes
         FLUID_PROPERTIES            := yes
@@ -325,6 +333,14 @@ ifeq ($(SCALAR_TRANSPORT),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/scalar_transport
   APPLICATION_NAME   := scalar_transport
   DEPEND_MODULES     := chemical_reactions navier_stokes thermal_hydraulics fluid_properties heat_transfer rdg ray_tracing solid_properties misc
+  SUFFIX             := st
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SUBCHANNEL),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/subchannel
+  APPLICATION_NAME   := subchannel
+  DEPEND_MODULES     := fluid_properties heat_transfer reactor thermal_hydraulics
   SUFFIX             := st
   include $(FRAMEWORK_DIR)/app.mk
 endif
