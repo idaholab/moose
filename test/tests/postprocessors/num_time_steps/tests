@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#29127'
+  design = 'NumTimeSteps.md'
+  [num_time_steps]
+    type = 'CSVDiff'
+    input = 'numtimesteps.i'
+    csvdiff = 'numtimesteps_out.csv'
+    requirement = 'The postprocessor shall be able to count the number of time-steps that have been taken '
+                   'over the course of the simulation of a transient.'
+  []
+[]
