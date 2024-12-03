@@ -170,12 +170,12 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   ADReal factor_downwind = 0.0;
   ADReal factor_upwind = 0.0;
 
-for(const auto& elem: _pressure_drop_sidesets){
-  if (std::find(fi.boundaryIDs.begin(), fi.boundaryIDs.end(), elem) != fi.boundaryIDs.end())
-  {
-    factor_downwind += _pressure_drop_form_factors[elem]
-  }
-}
+// for(const auto& elem: _pressure_drop_sidesets){
+//   if (std::find(fi.boundaryIDs.begin(), fi.boundaryIDs.end(), elem) != fi.boundaryIDs.end())
+//   {
+//     factor_downwind += _pressure_drop_form_factors[elem];
+//   }
+// }
 
   const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
