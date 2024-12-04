@@ -1,0 +1,17 @@
+[Tests]
+  design = 'RealToBoolChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'real_to_bool_chain_control.i'
+    csvdiff = 'real_to_bool_chain_control_out.csv'
+    requirement = 'The system shall be able to convert a floating point chain control data to a boolean chain control data.'
+  []
+  [invalid_input_value]
+    type = RunException
+    input = 'real_to_bool_chain_control.i'
+    cli_args = "Functions/test_fn/y='1 0.1 0 1'"
+    expect_err = "The current input value \(0.1\) is not equal to 1 or 0"
+    requirement = 'The system shall report an error if a value other than 0 or 1 is requested to be converted to a boolean chain control data.'
+  []
+[]

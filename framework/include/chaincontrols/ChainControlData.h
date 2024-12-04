@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Restartable.h"
+#include "MooseUtils.h"
 
 class ChainControl;
 
@@ -131,7 +132,7 @@ template <typename T>
 inline std::string
 ChainControlData<T>::type()
 {
-  return typeid(T).name();
+  return MooseUtils::prettyCppType<T>();
 }
 
 template <typename T>
