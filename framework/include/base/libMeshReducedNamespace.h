@@ -14,14 +14,19 @@
 // If we want to reduce this list, we would have to forward-declare functions as well
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
-#include "libmesh/simple_range.h"
 #include "libmesh/int_range.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/mesh_tools.h"
+
+// For the remote_elem singleton
+#include "libmesh/remote_elem.h"
+
+// These are required for the range typedefs they contain, which cannot be forward-declared
+// without re-defining the typedef. This allows us to add the ranges in the local namespace
+// but at the cost of defining them, including very many headers
 #include "libmesh/elem_range.h"
 #include "libmesh/node_range.h"
-#include "libmesh/remote_elem.h"
 
 // Added for convenience
 #include "libmesh/enum_elem_type.h"
@@ -143,6 +148,7 @@ class FEInterface;
 class FEMap;
 template <typename T>
 class FEGenericBase;
+// "Forward-declaring" typedefs must match exactly how they were defined
 typedef FEGenericBase<Real> FEBase;
 typedef FEGenericBase<RealGradient> FEVectorBase;
 }
@@ -337,11 +343,10 @@ namespace Utility = libMesh::Utility;
 namespace Parallel = libMesh::Parallel;
 
 // Added to pass downstream app tests
-// All these are all prefaced with 'libMesh::' in the framework and modules
+// All these are all already prefaced with 'libMesh::' in the framework and modules
 #include "libmesh/enum_norm_type.h"
 using libMesh::DISCRETE_L2;
 
-#include "libmesh/libmesh.h"
 using libMesh::pi;
 using libMesh::zero;
 

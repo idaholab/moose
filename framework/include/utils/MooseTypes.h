@@ -20,6 +20,10 @@
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
 
+// This is not strictly needed here, but it used to be included by ADReal.h
+// so developers relied heavily on it being already available
+#include "MooseError.h"
+
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"

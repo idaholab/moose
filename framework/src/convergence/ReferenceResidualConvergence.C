@@ -102,22 +102,22 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
       parameters.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
   if (norm_type_enum == NormalizationType::LOCAL_L2)
   {
-    _norm_type = DISCRETE_L2;
+    _norm_type = libMesh::DISCRETE_L2;
     _local_norm = true;
   }
   else if (norm_type_enum == NormalizationType::GLOBAL_L2)
   {
-    _norm_type = DISCRETE_L2;
+    _norm_type = libMesh::DISCRETE_L2;
     _local_norm = false;
   }
   else if (norm_type_enum == NormalizationType::LOCAL_LINF)
   {
-    _norm_type = DISCRETE_L_INF;
+    _norm_type = libMesh::DISCRETE_L_INF;
     _local_norm = true;
   }
   else if (norm_type_enum == NormalizationType::GLOBAL_LINF)
   {
-    _norm_type = DISCRETE_L_INF;
+    _norm_type = libMesh::DISCRETE_L_INF;
     _local_norm = false;
   }
   else

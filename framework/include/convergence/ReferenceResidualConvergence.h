@@ -135,7 +135,7 @@ protected:
   bool _local_norm;
 
   /// Container for normalization type
-  FEMNormType _norm_type;
+  libMesh::FEMNormType _norm_type;
 
   /// The reference vector tag id
   TagID _reference_vector_tag_id;

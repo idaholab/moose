@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "MeshBaseDiagnosticsUtils.h"
 #include "ConsoleStream.h"
+#include "MooseError.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/node.h"

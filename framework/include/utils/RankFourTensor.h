@@ -14,6 +14,7 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "ADRankThreeTensorForward.h"
+#include "MooseError.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
