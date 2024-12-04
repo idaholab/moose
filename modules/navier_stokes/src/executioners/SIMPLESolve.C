@@ -34,6 +34,15 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _momentum_system_numbers.push_back(_problem.linearSysNum(_momentum_system_names[system_i]));
     _momentum_systems.push_back(&_problem.getLinearSystem(_momentum_system_numbers[system_i]));
   }
+  // and for the passive scalar equations
+  if (_has_passive_scalar_systems)
+    for (auto system_i : index_range(_passive_scalar_system_names))
+    {
+      _passive_scalar_system_numbers.push_back(
+          _problem.linearSysNum(_passive_scalar_system_names[system_i]));
+      _passive_scalar_systems.push_back(
+          &_problem.getLinearSystem(_passive_scalar_system_numbers[system_i]));
+    }
 }
 
 void
@@ -363,6 +372,48 @@ SIMPLESolve::solve()
                << " Linear its: " << ns_residuals[momentum_residual.size() + 1].first << std::endl;
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
+  }
+
+  // If we have passive scalar equations, solve them here. We assume the material properties in the
+  // Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
+  // solve outside of the velocity-pressure loop
+  if (_has_passive_scalar_systems && converged)
+  {
+    // The reason why we need more than one iteration is due to the matrix relaxation
+    // which can be used to stabilize the equations
+    bool passive_scalar_converged = false;
+    iteration_counter = 0;
+    while (iteration_counter < _num_iterations && !passive_scalar_converged)
+    {
+      std::vector<std::pair<unsigned int, Real>> scalar_residuals(
+          _passive_scalar_system_names.size(), std::make_pair(0, 1.0));
+      std::vector<Real> scalar_abs_tols;
+      for (const auto scalar_tol : _passive_scalar_absolute_tolerance)
+        scalar_abs_tols.push_back(scalar_tol);
+
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
+      for (const auto i : index_range(_passive_scalar_system_names))
+        scalar_residuals[i] = solveAdvectedSystem(_passive_scalar_system_numbers[i],
+                                                  *_passive_scalar_systems[i],
+                                                  _passive_scalar_equation_relaxation[i],
+                                                  _passive_scalar_linear_control,
+                                                  _passive_scalar_l_abs_tol);
+
+      if (_has_passive_scalar_systems)
+        _console << " Passive scalar equations:\n";
+      for (const auto i : index_range(_passive_scalar_system_names))
+        _console << COLOR_GREEN << "    " << _passive_scalar_system_names[i] << ": "
+                 << scalar_residuals[i].second << COLOR_DEFAULT
+                 << " Linear its: " << scalar_residuals[i].first << std::endl;
+
+      passive_scalar_converged = NS::FV::converged(scalar_residuals, scalar_abs_tols);
+      iteration_counter++;
+    }
+
+    // Both flow and scalars must converge
+    converged = passive_scalar_converged && converged;
   }
 
   converged = _continue_on_max_its ? true : converged;

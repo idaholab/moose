@@ -330,7 +330,7 @@ WCNSFVTurbulencePhysics::retrieveCoupledPhysics()
 }
 
 void
-WCNSFVTurbulencePhysics::addNonlinearVariables()
+WCNSFVTurbulencePhysics::addSolverVariables()
 {
   if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
     return;

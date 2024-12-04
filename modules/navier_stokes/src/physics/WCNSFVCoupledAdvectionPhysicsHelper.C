@@ -10,7 +10,7 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "RelationshipManager.h"
-#include "WCNSFVFlowPhysics.h"
+#include "WCNSFVFlowPhysicsBase.h"
 #include "WCNSFVTurbulencePhysics.h"
 
 InputParameters
@@ -49,17 +49,18 @@ WCNSFVCoupledAdvectionPhysicsHelper::getPorosityFunctorName(bool smoothed) const
   return _flow_equations_physics->getPorosityFunctorName(smoothed);
 }
 
-const WCNSFVFlowPhysics *
+const WCNSFVFlowPhysicsBase *
 WCNSFVCoupledAdvectionPhysicsHelper::getCoupledFlowPhysics() const
 {
   // User passed it, just use that
   if (_advection_physics->isParamValid("coupled_flow_physics"))
-    return _advection_physics->getCoupledPhysics<WCNSFVFlowPhysics>(
+    return _advection_physics->getCoupledPhysics<WCNSFVFlowPhysicsBase>(
         _advection_physics->getParam<PhysicsName>("coupled_flow_physics"));
   // Look for any physics of the right type, and check the block restriction
   else
   {
-    const auto all_flow_physics = _advection_physics->getCoupledPhysics<const WCNSFVFlowPhysics>();
+    const auto all_flow_physics =
+        _advection_physics->getCoupledPhysics<const WCNSFVFlowPhysicsBase>();
     for (const auto physics : all_flow_physics)
       if (_advection_physics->checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
@@ -67,9 +68,9 @@ WCNSFVCoupledAdvectionPhysicsHelper::getCoupledFlowPhysics() const
         return physics;
       }
   }
-  mooseError(
-      "No coupled flow Physics found of type 'WCNSFVFlowPhysics'. Use the 'coupled_flow_physics' "
-      "parameter to give the name of the desired WCNSFVFlowPhysics to couple with");
+  mooseError("No coupled flow Physics found of type derived from 'WCNSFVFlowPhysicsBase'. Use the "
+             "'coupled_flow_physics' parameter to give the name of the desired "
+             "WCNSFVFlowPhysicsBase-derived Physics to couple with");
 }
 
 const WCNSFVTurbulencePhysics *

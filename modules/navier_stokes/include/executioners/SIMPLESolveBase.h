@@ -136,10 +136,31 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _energy_l_abs_tol;
 
-  // ************************ Iteration control **************************** //
+  // ************************ Passive Scalar Variables ************************ //
 
-  /// The maximum number of momentum-pressure iterations
-  const unsigned int _num_iterations;
+  /// The names of the passive scalar systems
+  const std::vector<SolverSystemName> & _passive_scalar_system_names;
+
+  /// Boolean for easy check if a passive scalar systems shall be solved or not
+  const bool _has_passive_scalar_systems;
+
+  // The number(s) of the system(s) corresponding to the passive scalar equation(s)
+  std::vector<unsigned int> _passive_scalar_system_numbers;
+
+  /// The user-defined relaxation parameter(s) for the passive scalar equation(s)
+  const std::vector<Real> _passive_scalar_equation_relaxation;
+
+  /// Options which hold the petsc settings for the passive scalar equation(s)
+  Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
+
+  /// Options for the linear solver of the passive scalar equation(s)
+  SIMPLESolverConfiguration _passive_scalar_linear_control;
+
+  /// Absolute linear tolerance for the passive scalar equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _passive_scalar_l_abs_tol;
+
+  // ************************ Iteration control **************************** //
 
   /// The user-defined absolute tolerance for determining the convergence in momentum
   const Real _momentum_absolute_tolerance;
@@ -149,6 +170,12 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in energy
   const Real _energy_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in passive scalars
+  const std::vector<Real> _passive_scalar_absolute_tolerance;
+
+  /// The maximum number of momentum-pressure iterations
+  const unsigned int _num_iterations;
 
   /// If solve should continue if maximum number of iterations is hit
   const bool _continue_on_max_its;

@@ -12,7 +12,7 @@
 #include "PhysicsBase.h"
 
 class NavierStokesPhysicsBase;
-class WCNSFVFlowPhysics;
+class WCNSFVFlowPhysicsBase;
 class WCNSFVTurbulencePhysics;
 
 /**
@@ -26,7 +26,7 @@ public:
 
   WCNSFVCoupledAdvectionPhysicsHelper(const NavierStokesPhysicsBase * derived_physics);
 
-  const WCNSFVFlowPhysics * getCoupledFlowPhysics() const;
+  const WCNSFVFlowPhysicsBase * getCoupledFlowPhysics() const;
   const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
 
   /// Return the porosity functor name.
@@ -40,7 +40,7 @@ protected:
   /// The Physics class using this helper
   const NavierStokesPhysicsBase * _advection_physics;
   /// Flow physics
-  const WCNSFVFlowPhysics * _flow_equations_physics;
+  const WCNSFVFlowPhysicsBase * _flow_equations_physics;
   /// Turbulence
   const WCNSFVTurbulencePhysics * _turbulence_physics;
 

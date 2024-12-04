@@ -24,7 +24,7 @@ public:
 
 protected:
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addMaterials() override;
 

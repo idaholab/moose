@@ -198,7 +198,7 @@ private:
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
-  virtual void addNonlinearVariables() {}
+  virtual void addSolverVariables() {}
   virtual void addAuxiliaryVariables() {}
   virtual void addInitialConditions() {}
   virtual void addFEKernels() {}

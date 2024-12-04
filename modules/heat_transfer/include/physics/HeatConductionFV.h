@@ -26,6 +26,6 @@ public:
 
 private:
   virtual void initializePhysicsAdditional() override;
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
 };

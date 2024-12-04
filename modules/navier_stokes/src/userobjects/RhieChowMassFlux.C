@@ -234,6 +234,19 @@ RhieChowMassFlux::getMassFlux(const FaceInfo & fi) const
   return _face_mass_flux.evaluate(&fi);
 }
 
+Real
+RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
+{
+  const Moose::FaceArg face_arg{&fi,
+                                /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
+                                /*elem_is_upwind=*/true,
+                                /*correct_skewness=*/false,
+                                &fi.elem(),
+                                /*state_limiter*/ nullptr};
+  const Real face_rho = _rho(face_arg, Moose::currentState());
+  return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
+}
+
 void
 RhieChowMassFlux::computeFaceMassFlux()
 {
@@ -293,7 +306,7 @@ RhieChowMassFlux::computeFaceMassFlux()
       const auto rhs_contribution =
           _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
 
-      // On the boundary, only the element side has a constibution
+      // On the boundary, only the element side has a contribution
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
     }
     // Compute the new face flux

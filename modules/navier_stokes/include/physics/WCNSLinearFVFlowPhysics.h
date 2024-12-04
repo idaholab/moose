@@ -32,7 +32,7 @@ protected:
   virtual void initializePhysicsAdditional() override;
 
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addUserObjects() override;
 
@@ -57,6 +57,10 @@ private:
 
   virtual void addRhieChowUserObjects() override;
 
+  virtual MooseFunctorName getLinearFrictionCoefName() const override
+  {
+    mooseError("Not implemented");
+  };
   UserObjectName rhieChowUOName() const override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;

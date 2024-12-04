@@ -197,7 +197,7 @@ HeatConductionCG::addFEBCs()
 }
 
 void
-HeatConductionCG::addNonlinearVariables()
+HeatConductionCG::addSolverVariables()
 {
   if (variableExists(_temperature_name, /*error_if_aux=*/true))
     return;
