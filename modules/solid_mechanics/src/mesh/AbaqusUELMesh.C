@@ -198,6 +198,23 @@ AbaqusUELMesh::buildMesh()
     _uel_block_ids.insert(elem->subdomain_id());
 }
 
+bool
+AbaqusUELMesh::prepare(const MeshBase * mesh_to_clone)
+{
+  // set the correct processor ID for each element
+  for (const auto i : index_range(_elements))
+    _elements[i].pid = elemPtr(_elements[i].nodes[i % _elements[i].nodes.size()])->processor_id();
+
+  if (_debug)
+  {
+    for (auto & elem : _elements)
+      _console << elem.pid << ' ';
+    _console << std::endl;
+  }
+
+  return MooseMesh::prepare(mesh_to_clone);
+}
+
 void
 AbaqusUELMesh::readNodes()
 {
@@ -318,6 +335,12 @@ AbaqusUELMesh::readElements(const std::string & header)
     paramError("file", "Unknown user element type '", type, "' in Abaqus input.");
   const auto type_id = it->second;
 
+  // add new elements to an element set?
+  auto * elset = map.has("elset") ? &_element_set[map.get<std::string>("elset")] : nullptr;
+  std::set<std::size_t> unique_ids;
+  if (elset)
+    unique_ids.insert(elset->begin(), elset->end());
+
   // We will read nodes until the next line begins with *
   std::string s;
   while (readDataLine(s))
@@ -345,7 +368,13 @@ AbaqusUELMesh::readElements(const std::string & header)
         elem.nodes.push_back(col[i] - 1);
 
     _elements[elem_id] = elem;
+
+    if (elset)
+      unique_ids.insert(elem_id);
   }
+
+  if (elset)
+    elset->assign(unique_ids.begin(), unique_ids.end());
 }
 
 void
@@ -561,6 +590,15 @@ AbaqusUELMesh::getUEL(const std::string & type) const
 }
 
 const std::vector<std::size_t> &
+AbaqusUELMesh::getNodeSet(const std::string & nset) const
+{
+  const auto it = _node_set.find(MooseUtils::toUpper(nset));
+  if (it == _node_set.end())
+    mooseError("Node set '", nset, "' does not exist.");
+  return it->second;
+}
+
+const std::vector<std::size_t> &
 AbaqusUELMesh::getElementSet(const std::string & elset) const
 {
   const auto it = _element_set.find(MooseUtils::toUpper(elset));
@@ -579,6 +617,12 @@ AbaqusUELMesh::getVarName(std::size_t id) const
     return std::string("rot_") + coord[id - 3];
 
   return "var_" + Moose::stringify(id + 1);
+}
+
+void
+AbaqusUELMesh::addNodeset(BoundaryID id)
+{
+  _mesh_nodeset_ids.insert(id);
 }
 
 HeaderMap::HeaderMap(const std::string & header) : _header(header)
