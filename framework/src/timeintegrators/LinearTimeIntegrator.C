@@ -16,17 +16,20 @@
 LinearTimeIntegrator::LinearTimeIntegrator(SystemBase & system)
   : _linear_system(dynamic_cast<LinearSystem *>(&system)),
     _integrates_linear_system(_linear_system),
-    _linear_implicit_system(_linear_system ? dynamic_cast<LinearImplicitSystem *>(&_linear_system->system()) : nullptr)
+    _linear_implicit_system(
+        _linear_system ? dynamic_cast<LinearImplicitSystem *>(&_linear_system->system()) : nullptr)
 {
 }
 
-Real LinearTimeIntegrator::timeDerivativeRHSContribution(const dof_id_type /*dof_id*/,
-                                            const std::vector<Real> & /*factors*/) const
+Real
+LinearTimeIntegrator::timeDerivativeRHSContribution(const dof_id_type /*dof_id*/,
+                                                    const std::vector<Real> & /*factors*/) const
 {
   mooseError("The time derivative right hand side contribution has not been implemented yet!");
 }
 
-Real LinearTimeIntegrator::timeDerivativeMatrixContribution(const Real /*factor*/) const
+Real
+LinearTimeIntegrator::timeDerivativeMatrixContribution(const Real /*factor*/) const
 {
   mooseError("The time derivative matrix contribution has not been implemented yet!");
 }

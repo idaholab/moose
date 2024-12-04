@@ -45,7 +45,8 @@ LinearFVTimeDerivative::computeMatrixContribution()
 Real
 LinearFVTimeDerivative::computeRightHandSideContribution()
 {
-  return _time_integrator.timeDerivativeRHSContribution(_dof_id, _factor_history) * _current_elem_volume;
+  return _time_integrator.timeDerivativeRHSContribution(_dof_id, _factor_history) *
+         _current_elem_volume;
 }
 
 void

@@ -37,7 +37,10 @@ class NonlinearImplicitSystem;
  * used
  * only by NonlinearSystem (AuxiliarySystem does not produce residual).
  */
-class TimeIntegrator : public MooseObject, public Restartable, public NonlinearTimeIntegrator, public LinearTimeIntegrator
+class TimeIntegrator : public MooseObject,
+                       public Restartable,
+                       public NonlinearTimeIntegrator,
+                       public LinearTimeIntegrator
 {
 public:
   static InputParameters validParams();

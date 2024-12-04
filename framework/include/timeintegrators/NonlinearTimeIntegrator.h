@@ -9,7 +9,6 @@
 
 #pragma once
 
-
 // MOOSE includes
 class SystemBase;
 class NonlinearSystemBase;
@@ -56,15 +55,13 @@ public:
   TagID uDotDotFactorTag() const { return _u_dotdot_factor_tag; }
 
 protected:
-
   /// Wrapper around vector addition for nonlinear time integrators. If we don't
   /// operate on a nonlinear system we don't need to add the vector.
   /// @param name The name of the vector
   /// @param project If the vector should be projected
   /// @param type PThe parallel distribution of the vetor
-  NumericVector<Number> * addVectorForNonlinearTI(const std::string & name,
-                                                  const bool project,
-                                                  const ParallelType type);
+  NumericVector<Number> *
+  addVectorForNonlinearTI(const std::string & name, const bool project, const ParallelType type);
 
   /// Pointer to the nonlinear system, can happen that we dont have any
   NonlinearSystemBase * _nl;
@@ -86,6 +83,4 @@ protected:
 
   /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
   const TagID _u_dotdot_factor_tag;
-
-
 };

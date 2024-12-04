@@ -74,7 +74,6 @@ CrankNicolson::init()
     mooseError("CrankNicolson: Time derivative of solution (`u_dot`) is not stored. Please set "
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
 
-
   // time derivative is assumed to be zero on initial
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot.zero();

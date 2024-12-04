@@ -34,7 +34,8 @@ ExplicitSSPRungeKutta::ExplicitSSPRungeKutta(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _order(getParam<MooseEnum>("order")),
     _stage(0),
-    _solution_intermediate_stage(addVectorForNonlinearTI("solution_intermediate_stage", false, GHOSTED)),
+    _solution_intermediate_stage(
+        addVectorForNonlinearTI("solution_intermediate_stage", false, GHOSTED)),
     _tmp_solution(addVectorForNonlinearTI("tmp_solution", false, GHOSTED)),
     _tmp_mass_solution_product(addVectorForNonlinearTI("tmp_mass_solution_product", false, GHOSTED))
 {

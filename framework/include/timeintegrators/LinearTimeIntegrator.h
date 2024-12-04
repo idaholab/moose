@@ -34,14 +34,13 @@ public:
   /// @param factors Multiplicative factor (e.g. a material property) at multiple
   ///                states (old, older, etc)
   virtual Real timeDerivativeRHSContribution(dof_id_type dof_id,
-                                      const std::vector<Real> & factors = {}) const;
+                                             const std::vector<Real> & factors = {}) const;
 
   /// The time derivative's contribution to the right hand side of a linear system.
   /// For now, this does not depend of the DoF index, might change in the furutre.
   virtual Real timeDerivativeMatrixContribution(const Real factor) const;
 
 protected:
-
   /// Pointer to the nonlinear system, can happen that we dont have any
   LinearSystem * _linear_system;
 

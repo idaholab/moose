@@ -18,7 +18,8 @@
 NonlinearTimeIntegrator::NonlinearTimeIntegrator(FEProblemBase & problem, SystemBase & system)
   : _nl(dynamic_cast<NonlinearSystemBase *>(&system)),
     _integrates_nl(_nl),
-    _nonlinear_implicit_system(_integrates_nl ? dynamic_cast<NonlinearImplicitSystem *>(&_nl->system()) : nullptr),
+    _nonlinear_implicit_system(
+        _integrates_nl ? dynamic_cast<NonlinearImplicitSystem *>(&_nl->system()) : nullptr),
     _Re_time(_integrates_nl ? &_nl->getResidualTimeVector() : nullptr),
     _Re_non_time(_integrates_nl ? &_nl->getResidualNonTimeVector() : nullptr),
     _u_dot_factor_tag(problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
@@ -26,9 +27,10 @@ NonlinearTimeIntegrator::NonlinearTimeIntegrator(FEProblemBase & problem, System
 {
 }
 
-NumericVector<Number> * NonlinearTimeIntegrator::addVectorForNonlinearTI(const std::string & name,
-                                                  const bool project,
-                                                  const ParallelType type)
+NumericVector<Number> *
+NonlinearTimeIntegrator::addVectorForNonlinearTI(const std::string & name,
+                                                 const bool project,
+                                                 const ParallelType type)
 {
   if (_integrates_nl)
     return &_nl->addVector(name, project, type);

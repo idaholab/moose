@@ -84,9 +84,10 @@ ImplicitEuler::postResidual(NumericVector<Number> & residual)
 
 Real
 ImplicitEuler::timeDerivativeRHSContribution(dof_id_type dof_id,
-                                              const std::vector<Real> & factors) const
+                                             const std::vector<Real> & factors) const
 {
-  mooseAssert(factors.size() == numStatesRequired(), "Either too many or too few states are given!");
+  mooseAssert(factors.size() == numStatesRequired(),
+              "Either too many or too few states are given!");
   return factors[0] * _solution_old(dof_id) / _dt;
 }
 
