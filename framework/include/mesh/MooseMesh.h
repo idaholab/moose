@@ -558,7 +558,7 @@ public:
    * no-argument prepare() instead.
    * @param mesh_to_clone Must be null; mesh cloning is handled elsewhere now
    */
-  void prepare(const MeshBase * mesh_to_clone);
+  virtual bool prepare(const MeshBase * mesh_to_clone);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().

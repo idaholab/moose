@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseMesh.h"
+#include "MoosePassKey.h"
 
 #include <stdexcept>
 
@@ -29,6 +30,8 @@ private:
   const std::string _header;
 };
 
+class AbaqusUELMeshUserElement;
+
 /**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
@@ -43,6 +46,8 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;
+
+  virtual bool prepare(const MeshBase * mesh_to_clone) override;
 
   struct UELDefinition
   {
@@ -76,14 +81,20 @@ public:
   const auto & getVarBlocks() const { return _uel_block_ids; }
   const auto & getUELs() const { return _element_definition; }
   const auto & getElements() const { return _elements; }
+  const std::vector<std::size_t> & getNodeSet(const std::string & elset) const;
   const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
   const auto & getElementSets() const { return _element_set; }
   const auto & getNodeToUELMap() const { return _node_to_uel_map; }
   const auto & getICBlocks() const { return _abaqus_ics; }
   const auto & getProperties() const { return _properties; }
 
+  /// privileged write access
+  auto & getElements(Moose::PassKey<AbaqusUELMeshUserElement>) { return _elements; }
+
   std::string getVarName(std::size_t id) const;
   const UELDefinition & getUEL(const std::string & type) const;
+
+  void addNodeset(BoundaryID id);
 
 protected:
   /// read a single line from the input
