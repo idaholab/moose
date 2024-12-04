@@ -15,7 +15,7 @@ where:
 - $\phi_i$ is the i-th scalar quantity
 - \mathbf{v} is the advecting velocity
 - $k_i$ the i-th scalar diffusivity
-- $Q_i$ is the i-th precursor source
+- $Q_i$ is the i-th scalar source
 - $\lambda_i$ is a reaction coefficient. It should be negative for a loss term
 
 The kernels created are:

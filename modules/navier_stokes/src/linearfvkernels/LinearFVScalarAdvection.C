@@ -31,7 +31,7 @@ LinearFVScalarAdvection::LinearFVScalarAdvection(const InputParameters & params)
   : LinearFVFluxKernel(params),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
-    _face_velocity(0.0)
+    _volumetric_face_flux(0.0)
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
 }
@@ -39,13 +39,13 @@ LinearFVScalarAdvection::LinearFVScalarAdvection(const InputParameters & params)
 Real
 LinearFVScalarAdvection::computeElemMatrixContribution()
 {
-  return _advected_interp_coeffs.first * _face_velocity * _current_face_area;
+  return _advected_interp_coeffs.first * _volumetric_face_flux * _current_face_area;
 }
 
 Real
 LinearFVScalarAdvection::computeNeighborMatrixContribution()
 {
-  return _advected_interp_coeffs.second * _face_velocity * _current_face_area;
+  return _advected_interp_coeffs.second * _volumetric_face_flux * _current_face_area;
 }
 
 Real
@@ -71,7 +71,7 @@ LinearFVScalarAdvection::computeBoundaryMatrixContribution(const LinearFVBoundar
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return boundary_value_matrix_contrib * factor * _face_velocity * _current_face_area;
+  return boundary_value_matrix_contrib * factor * _volumetric_face_flux * _current_face_area;
 }
 
 Real
@@ -84,7 +84,7 @@ LinearFVScalarAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCo
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
   const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * factor * _face_velocity * _current_face_area;
+  return -boundary_value_rhs_contrib * factor * _volumetric_face_flux * _current_face_area;
 }
 
 void
@@ -94,10 +94,10 @@ LinearFVScalarAdvection::setupFaceData(const FaceInfo * face_info)
 
   // Caching the velocity on the face which will be reused in the advection term's matrix and right
   // hand side contributions
-  _face_velocity = _mass_flux_provider.getFaceVelocity(*face_info);
+  _volumetric_face_flux = _mass_flux_provider.getVolumetricFaceFlux(*face_info);
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
   _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_velocity);
+      interpCoeffs(_advected_interp_method, *_current_face_info, true, _volumetric_face_flux);
 }

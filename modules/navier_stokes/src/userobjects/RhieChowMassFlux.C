@@ -235,15 +235,16 @@ RhieChowMassFlux::getMassFlux(const FaceInfo & fi) const
 }
 
 Real
-RhieChowMassFlux::getFaceVelocity(const FaceInfo & fi) const
+RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
 {
   const Moose::FaceArg face_arg{&fi,
                                 /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
                                 /*elem_is_upwind=*/true,
                                 /*correct_skewness=*/false,
-                                &fi.elem()};
+                                &fi.elem(),
+                                /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
-  return _face_mass_flux.evaluate(&fi) / face_rho;
+  return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
 }
 
 void

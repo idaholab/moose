@@ -12,7 +12,7 @@ For FV, the integral of the advection term of scalar $C_i$ over a cell can be ex
 
 where $C_{if}$ is the face value of the scalar concentration. An interpolation scheme (e.g. upwind) can be used to compute the face value. This kernel adds the face contribution for each face $f$ to the right hand side and matrix.
 
-The face mass flux $(\vec{u}\cdot \vec{n})_{RC}$ is provided by the [RhieChowMassFlux.md] object which uses pressure
+The volumetric face flux $(\vec{u}\cdot \vec{n})_{RC}$ is provided by the [RhieChowMassFlux.md] object which uses pressure
 gradients and the discrete momentum equation to compute face velocities and mass fluxes.
 For more information on the expression that is used, see [SIMPLE.md].
 

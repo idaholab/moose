@@ -47,7 +47,7 @@ private:
 
   /// Container for the velocity on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
-  Real _face_velocity;
+  Real _volumetric_face_flux;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
