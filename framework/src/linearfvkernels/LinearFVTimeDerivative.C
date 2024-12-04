@@ -38,14 +38,14 @@ Real
 LinearFVTimeDerivative::computeMatrixContribution()
 {
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
-  return _factor(elem_arg, _state_args[0]) * /*_time_integrator.matrixContribution() */
+  return _time_integrator.timeDerivativeMatrixContribution(_factor(elem_arg, _state_args[0])) *
          _current_elem_volume;
 }
 
 Real
 LinearFVTimeDerivative::computeRightHandSideContribution()
 {
-  return /*_time_integrator.rhsContribution(_dof_id, _factor_history) */ _current_elem_volume;
+  return _time_integrator.timeDerivativeRHSContribution(_dof_id, _factor_history) * _current_elem_volume;
 }
 
 void

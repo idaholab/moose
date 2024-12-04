@@ -73,7 +73,6 @@ protected:
   const bool _integrates_nl;
 
   /// Nonlinear implicit system, if applicable; otherwise, nullptr
-  /// NonlinearImplicitSystem * _nonlinear_implicit_system;
   NonlinearImplicitSystem * _nonlinear_implicit_system;
 
   /// residual vector for time contributions

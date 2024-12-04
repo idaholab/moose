@@ -81,3 +81,17 @@ ImplicitEuler::postResidual(NumericVector<Number> & residual)
     _Re_non_time->restore_subvector(std::move(re_non_time_sub), _local_indices);
   }
 }
+
+Real
+ImplicitEuler::timeDerivativeRHSContribution(dof_id_type dof_id,
+                                              const std::vector<Real> & factors) const
+{
+  mooseAssert(factors.size() == numStatesRequired(), "Either too many or too few states are given!");
+  return factors[0] * _solution_old(dof_id) / _dt;
+}
+
+Real
+ImplicitEuler::timeDerivativeMatrixContribution(const Real factor) const
+{
+  return factor / _dt;
+}

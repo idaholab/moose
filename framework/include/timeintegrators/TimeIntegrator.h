@@ -13,6 +13,7 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 #include "NonlinearTimeIntegrator.h"
+#include "LinearTimeIntegrator.h"
 
 class FEProblemBase;
 class SystemBase;
@@ -36,7 +37,7 @@ class NonlinearImplicitSystem;
  * used
  * only by NonlinearSystem (AuxiliarySystem does not produce residual).
  */
-class TimeIntegrator : public MooseObject, public Restartable, public NonlinearTimeIntegrator
+class TimeIntegrator : public MooseObject, public Restartable, public NonlinearTimeIntegrator, public LinearTimeIntegrator
 {
 public:
   static InputParameters validParams();
