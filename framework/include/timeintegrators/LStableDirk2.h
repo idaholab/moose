@@ -62,10 +62,10 @@ protected:
   unsigned int _stage;
 
   //! Buffer to store non-time residual from first stage solve.
-  NumericVector<Number> & _residual_stage1;
+  NumericVector<Number> * _residual_stage1;
 
   //! Buffer to store non-time residual from second stage solve
-  NumericVector<Number> & _residual_stage2;
+  NumericVector<Number> * _residual_stage2;
 
   // The parameter of the method, set at construction time and cannot be changed.
   const Real _alpha;

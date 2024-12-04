@@ -57,7 +57,8 @@ public:
 
 protected:
 
-  /// Wrapper around vector addition for nonlinear time integrators.
+  /// Wrapper around vector addition for nonlinear time integrators. If we don't
+  /// operate on a nonlinear system we don't need to add the vector.
   /// @param name The name of the vector
   /// @param project If the vector should be projected
   /// @param type PThe parallel distribution of the vetor
@@ -65,7 +66,7 @@ protected:
                                                   const bool project,
                                                   const ParallelType type);
 
-  /// Pointer to the nonlinear system
+  /// Pointer to the nonlinear system, can happen that we dont have any
   NonlinearSystemBase * _nl;
 
   /// Boolean to check if this integrator belongs to a nonlinear system

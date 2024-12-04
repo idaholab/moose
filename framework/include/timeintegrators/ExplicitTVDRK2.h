@@ -70,7 +70,7 @@ protected:
   unsigned int _stage;
 
   /// Buffer to store non-time residual from the first stage.
-  NumericVector<Number> & _residual_old;
+  NumericVector<Number> * _residual_old;
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
