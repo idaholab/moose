@@ -1089,6 +1089,7 @@ class TestHarness:
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
         parser.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations')
         parser.add_argument('--allow-unused',action='store_true', help='Run the tests without errors on unused parameters (Pass "--allow-unused" to executable)')
+        parser.add_argument('--allow-warnings',action='store_true', help='Run the tests with warnings not as errors (Do not pass "--error" to executable)')
         # Option to use for passing unwrapped options to the executable
         parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
         parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
@@ -1195,6 +1196,9 @@ class TestHarness:
                 self.options.input_file_name = os.path.basename(opts.spec_file)
         if opts.verbose and opts.quiet:
             print('Do not be an oxymoron with --verbose and --quiet')
+            sys.exit(1)
+        if opts.error and opts.allow_warnings:
+            print(f'ERROR: Cannot use --error and --allow-warnings together')
             sys.exit(1)
 
         # Setup absolute paths and output paths
