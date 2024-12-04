@@ -503,9 +503,11 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // rule (expect for specific FV objects like kernels). Since there are no
   // FV specific material objects, then the material data uses the FE quadrature
   // points.
-  _fe_problem.resizeMaterialData(Moose::MaterialDataType::FACE_MATERIAL_DATA,
-                                 _fe_problem.assembly(_tid, _nl_system_num).qRuleFace()->n_points(),
-                                 _tid);
+  int nqp = 1;
+  if (areFE)
+    nqp = _fe_problem.assembly(_tid, _nl_system_num).qRuleFace()->n_points();
+
+  _fe_problem.resizeMaterialData(Moose::MaterialDataType::FACE_MATERIAL_DATA, nqp, _tid);
 
   for (std::shared_ptr<MaterialBase> mat : _elem_face_mats)
   {
@@ -516,9 +518,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   if (fi.neighborPtr())
   {
     _fe_problem.resizeMaterialData(
-        Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA,
-        _fe_problem.assembly(_tid, _nl_system_num).qRuleFace()->n_points(),
-        _tid);
+          Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA, nqp, _tid);
 
     for (std::shared_ptr<MaterialBase> mat : _neigh_face_mats)
     {
