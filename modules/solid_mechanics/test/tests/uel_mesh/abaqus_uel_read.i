@@ -29,7 +29,6 @@
 []
 
 [Problem]
-  solve = false
   kernel_coverage_check = false
 []
 
@@ -38,6 +37,7 @@
     type = AbaqusUELMeshUserElement
     uel_type = U1
     plugin = elasticity_uel/uel
+    element_sets = cube
   []
 []
 

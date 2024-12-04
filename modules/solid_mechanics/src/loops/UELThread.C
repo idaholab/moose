@@ -179,10 +179,7 @@ UELThread::onElement(const Elem * elem)
 
   // stateful data
   if (_uel_uo._nstatev)
-  {
-    const auto & statev_old = _uel_uo._statev[_uel_uo._statev_index_old][elem->id()];
-    std::copy(statev_old.begin(), statev_old.end(), _statev_copy.begin());
-  }
+    _statev_copy = _uel_uo._statev[_uel_uo._statev_index_old][elem->id()];
 
   // call the plugin
   _uel(_local_re.get_values().data(),
@@ -227,10 +224,7 @@ UELThread::onElement(const Elem * elem)
     _min_pnewdt = pnewdt;
 
   if (_uel_uo._nstatev)
-  {
-    auto & statev_current = _uel_uo._statev[_uel_uo._statev_index_current][elem->id()];
-    std::copy(_statev_copy.begin(), _statev_copy.end(), statev_current.begin());
-  }
+    _uel_uo._statev[_uel_uo._statev_index_current][elem->id()] = _statev_copy;
 
   // write to the residual vector
   // sign of 'residuals' has been tested with external loading and matches that of moose-umat
