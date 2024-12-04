@@ -18,8 +18,8 @@ InputParameters
 EigenDecompositionMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription(
-      "Creates material with eigenvalues and eigenvectors of a symmetric rank two tensor.");
+  params.addClassDescription("Emits material properties for the eigenvalues and eigenvectors of a "
+                             "symmetric rank two tensor.");
   params.addRequiredParam<MaterialPropertyName>(
       "rank_two_tensor",
       "The name of the symmetric rank two tensor to used in eigen decomposition.");
@@ -30,7 +30,8 @@ EigenDecompositionMaterialTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-EigenDecompositionMaterialTempl<is_ad>::EigenDecompositionMaterialTempl(const InputParameters & parameters)
+EigenDecompositionMaterialTempl<is_ad>::EigenDecompositionMaterialTempl(
+    const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
@@ -44,12 +45,18 @@ EigenDecompositionMaterialTempl<is_ad>::EigenDecompositionMaterialTempl(const In
     _mid_eigen_value(declareGenericProperty<Real, is_ad>(_base_name + "mid_eigen_value")),
     _min_eigen_value(declareGenericProperty<Real, is_ad>(_base_name + "min_eigen_value"))
 {
+  if (LIBMESH_DIM != 3)
+    mooseError("EigenDecompositionMaterial is only defined for LIBMESH_DIM=3");
 }
 
 template <bool is_ad>
 void
 EigenDecompositionMaterialTempl<is_ad>::computeQpProperties()
 {
+
+  if (!_tensor[_qp].isSymmetric())
+    mooseError("EigenDecompositionMaterial will only operate on symmetric rank two tensors.");
+
   std::vector<GenericReal<is_ad>> eigval(3, 0.0);
   GenericRankTwoTensor<is_ad> eigvec;
 

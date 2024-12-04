@@ -1,3 +1,7 @@
+[Debug]
+  show_material_props = true
+[]
+
 [Problem]
   kernel_coverage_check = false
   solve = false
@@ -25,6 +29,8 @@
 []
 
 [AuxKernels]
+  # The applied displacements will cause the max eigenvector to change directions.
+  # At t=5, the body undergoes simple shear, producing a nonsymmetric deformation gradient.
   [disp_x]
     execute_on = 'TIMESTEP_BEGIN'
     type = ParsedAux
@@ -49,29 +55,36 @@
 []
 
 [Materials]
-  [strain]
-    type = ADComputeFiniteStrain
+  [compute_strain]
+    type = ComputeLagrangianStrain
     displacements = 'disp_x disp_y disp_z'
+    large_kinematics = true
   []
   [nonAD_strain]
     type = RankTwoTensorMaterialADConverter
-    ad_props_in = mechanical_strain
-    reg_props_out = nonAD_mechanical_strain
+    reg_props_in = mechanical_strain
+    ad_props_out = AD_mechanical_strain
   []
   [eig_decomp]
     type = ADEigenDecompositionMaterial
-    rank_two_tensor = mechanical_strain
+    rank_two_tensor = AD_mechanical_strain
     outputs = exodus
     output_properties = "max_eigen_vector mid_eigen_vector min_eigen_vector max_eigen_value "
                         "mid_eigen_value min_eigen_value"
   []
   [nonADeig_decomp]
     type = EigenDecompositionMaterial
-    rank_two_tensor = nonAD_mechanical_strain
+    rank_two_tensor = mechanical_strain
     base_name = nonAD
     outputs = exodus
     output_properties = "nonAD_max_eigen_vector nonAD_mid_eigen_vector nonAD_min_eigen_vector "
                         "nonAD_max_eigen_value nonAD_mid_eigen_value nonAD_min_eigen_value"
+  []
+
+  [non_symmetric_eig_decomp_error]
+    type = EigenDecompositionMaterial
+    rank_two_tensor = deformation_gradient
+    base_name = nonSym
   []
 []
 
@@ -87,30 +100,30 @@
 
 [Postprocessors]
   [sxx]
-    type = ADMaterialTensorAverage
+    type = MaterialTensorAverage
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
     execute_on = 'TIMESTEP_END'
   []
   [sxy]
-    type = ADMaterialTensorAverage
+    type = MaterialTensorAverage
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 1
     execute_on = 'TIMESTEP_END'
   []
   [syy]
-    type = ADMaterialTensorAverage
+    type = MaterialTensorAverage
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
   []
   [szz]
-    type = ADMaterialTensorAverage
+    type = MaterialTensorAverage
     rank_two_tensor = mechanical_strain
-    index_i = 2
-    index_j = 2
+    index_i = 1
+    index_j = 0
   []
   [AD_eigval_max]
     type = ADElementAverageMaterialProperty

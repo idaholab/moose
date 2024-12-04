@@ -12,7 +12,7 @@
 #include "Material.h"
 #include "RankTwoTensorForward.h"
 /**
- * Perform eigen decomposition on Rank two tensor
+ * Perform eigendecomposition on a RankTwoTensor material property
  */
 template <bool is_ad>
 class EigenDecompositionMaterialTempl : public Material
@@ -22,9 +22,8 @@ public:
 
   EigenDecompositionMaterialTempl(const InputParameters & parameters);
 
-  virtual void computeQpProperties() override;
-
 protected:
+  virtual void computeQpProperties() override;
   /// Base name to allow multiple tensors to be decomposed
   const std::string _base_name;
   /// Rank two tensor for eigen decomposition

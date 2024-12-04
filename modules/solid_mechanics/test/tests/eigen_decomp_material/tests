@@ -1,17 +1,24 @@
 [Tests]
-  design = 'source/materials/EigenDecompMaterial.md'
+  design = 'source/materials/EigenDecompositionMaterial.md'
   issues = '#29179'
-  requirement = 'The system shall output eigen decompositions of tensors in '
+  requirement = 'The system shall output an eigen decomposition of a symmetric rank two tensor '
   [3D]
     type = Exodiff
     input = prescribed_strain_3D.i
     exodiff = prescribed_strain_3D_out.e
-    detail = 'a 3D simulation with an evolving rank two tensor.'
+    cli_args = 'Materials/inactive=non_symmetric_eig_decomp_error'
+    detail = 'in a 3D simulation with an evolving strain field.'
+  []
+  [nonSymmetricError]
+    type = RunException
+    input = 'prescribed_strain_3D.i'
+    expect_err = 'EigenDecompositionMaterial will only operate on symmetric rank two tensors.'
+    requirement = 'The system shall produce an error if the rank two tensor is unsymmetric.'
   []
   [2Drz]
     type = Exodiff
     input = pipe_2d.i
     exodiff =pipe_2d_out.e
-    detail = 'a 2D radial symmetry simulation of a pressurized pipe.'
+    detail = 'in a 2D radial symmetry simulation of a pressurized pipe.'
   []
 []

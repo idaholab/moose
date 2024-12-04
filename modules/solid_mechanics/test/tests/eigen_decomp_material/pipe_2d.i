@@ -1,3 +1,5 @@
+
+# pipe with outer diameter = 24", wall thickness 0.979"
 # units in MPa, meters
 [GlobalParams]
   order = SECOND
@@ -36,9 +38,6 @@
         new_system = true
         formulation = TOTAL
         volumetric_locking_correction = false
-        # generate_output = "cauchy_stress_xx cauchy_stress_yy cauchy_stress_zz cauchy_stress_xy "
-        #                   "cauchy_stress_xz cauchy_stress_yz strain_xx strain_yy strain_zz strain_xy "
-        #                   "strain_xz strain_yz vonmises_cauchy_stress"
       []
     []
   []
@@ -81,7 +80,7 @@
   [top]
     type = EqualValueBoundaryConstraint
     variable = disp_y
-    secondary = top #sideset on top boundary
+    secondary = top
     penalty = 1e+14
     formulation = penalty
   []
