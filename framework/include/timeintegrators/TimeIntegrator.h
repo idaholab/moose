@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
+#include "NonlinearTimeIntegrator.h"
 
 class FEProblemBase;
 class SystemBase;
@@ -35,7 +36,7 @@ class NonlinearImplicitSystem;
  * used
  * only by NonlinearSystem (AuxiliarySystem does not produce residual).
  */
-class TimeIntegrator : public MooseObject, public Restartable
+class TimeIntegrator : public MooseObject, public Restartable, public NonlinearTimeIntegrator
 {
 public:
   static InputParameters validParams();
@@ -68,16 +69,6 @@ public:
    * Solves the time step and sets the number of nonlinear and linear iterations.
    */
   virtual void solve();
-
-  /**
-   * Callback to the TimeIntegrator called immediately after the
-   * residuals are computed in NonlinearSystem::computeResidual().
-   * The residual vector which is passed in to this function should
-   * be filled in by the user with the _Re_time and _Re_non_time
-   * vectors in a way that makes sense for the particular
-   * TimeIntegration method.
-   */
-  virtual void postResidual(NumericVector<Number> & /*residual*/) {}
 
   /**
    * Callback to the TimeIntegrator called immediately after
@@ -145,21 +136,6 @@ public:
   virtual const bool & isLumped() const { return _is_lumped; }
 
   /**
-   * Returns the tag for the nodal multiplication factor for the residual calculation of the udot
-   * term.
-   *
-   * By default, this tag will be associated with udot.
-   */
-  TagID uDotFactorTag() const { return _u_dot_factor_tag; }
-  /**
-   * Returns the tag for the nodal multiplication factor for the residual calculation of the udotdot
-   * term.
-   *
-   * By default, this tag will be associated with udotdot.
-   */
-  TagID uDotDotFactorTag() const { return _u_dotdot_factor_tag; }
-
-  /**
    * @returns whether this integrator integrates the given variable
    */
   bool integratesVar(const unsigned int var_num) const;
@@ -202,31 +178,32 @@ protected:
    */
   void computeDuDotDu();
 
+  /// Reference to the problem
   FEProblemBase & _fe_problem;
+
+  /// Reference to the system this time integrator operates on
   SystemBase & _sys;
-  NonlinearSystemBase & _nl;
-
-  /// Nonlinear implicit system, if applicable; otherwise, nullptr
-  libMesh::NonlinearImplicitSystem * _nonlinear_implicit_system;
-
-  /// residual vector for time contributions
-  NumericVector<Number> & _Re_time;
-  /// residual vector for non-time contributions
-  NumericVector<Number> & _Re_non_time;
 
   /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$ for
   /// the different variables. We will only modify the elements in this vector corresponding to the
   /// variables that we integrate
   std::vector<Real> & _du_dot_du;
-  /// solution vectors
+
+  /// @{
+  /// Solution vectors for different states and variable restrictions
   const NumericVector<Number> * const & _solution;
   const NumericVector<Number> & _solution_old;
   std::unique_ptr<NumericVector<Number>> & _solution_sub;
   std::unique_ptr<NumericVector<Number>> & _solution_old_sub;
-  //
+  ///@}
+
+  /// The current time step number
   int & _t_step;
-  //
+
+  /// The current time step size
   Real & _dt;
+
+  /// The previous time step size
   Real & _dt_old;
 
   /// Total number of nonlinear iterations over all stages of the time step
@@ -236,11 +213,6 @@ protected:
 
   /// Boolean flag that is set to true if lumped mass matrix is used
   bool _is_lumped;
-
-  /// The vector tag for the nodal multiplication factor for the residual calculation of the udot term
-  const TagID _u_dot_factor_tag;
-  /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
-  const TagID _u_dotdot_factor_tag;
 
   /// Whether the user has requested that the time integrator be applied to a subset of variables
   bool & _var_restriction;
