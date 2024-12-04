@@ -3,7 +3,7 @@
   issues = '#1953'
 
   [group]
-    requirement = "The system shall support the use of an implicit Euler solver with"
+    requirement = "The system shall support the use of an implicit Euler solver "
 
     [test]
       type = 'Exodiff'
@@ -11,7 +11,7 @@
       exodiff = 'ie_out.e'
       use_old_floor = true
       abs_zero = 1e-9
-      detail = "with and"
+      detail = "without and"
     []
 
     [adapt]
@@ -19,7 +19,7 @@
       input = 'ie_adapt.i'
       exodiff = 'ie_adapt_out.e-s005'
       group = 'adaptive'
-      detail = "without mesh adaptivity."
+      detail = "with mesh adaptivity."
     []
   []
 
