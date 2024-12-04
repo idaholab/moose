@@ -15,12 +15,12 @@
  * Perform eigen decomposition on Rank two tensor
  */
 template <bool is_ad>
-class EigenDecompMaterialTempl : public Material
+class EigenDecompositionMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  EigenDecompMaterialTempl(const InputParameters & parameters);
+  EigenDecompositionMaterialTempl(const InputParameters & parameters);
 
   virtual void computeQpProperties() override;
 
@@ -41,5 +41,5 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _min_eigen_value;
 };
 
-typedef EigenDecompMaterialTempl<false> EigenDecompMaterial;
-typedef EigenDecompMaterialTempl<true> ADEigenDecompMaterial;
+typedef EigenDecompositionMaterialTempl<false> EigenDecompositionMaterial;
+typedef EigenDecompositionMaterialTempl<true> ADEigenDecompositionMaterial;

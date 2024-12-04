@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "EigenDecompMaterial.h"
+#include "EigenDecompositionMaterial.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("SolidMechanicsApp", EigenDecompMaterial);
-registerMooseObject("SolidMechanicsApp", ADEigenDecompMaterial);
+registerMooseObject("SolidMechanicsApp", EigenDecompositionMaterial);
+registerMooseObject("SolidMechanicsApp", ADEigenDecompositionMaterial);
 
 template <bool is_ad>
 InputParameters
-EigenDecompMaterialTempl<is_ad>::validParams()
+EigenDecompositionMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription(
@@ -30,7 +30,7 @@ EigenDecompMaterialTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-EigenDecompMaterialTempl<is_ad>::EigenDecompMaterialTempl(const InputParameters & parameters)
+EigenDecompositionMaterialTempl<is_ad>::EigenDecompositionMaterialTempl(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
@@ -48,7 +48,7 @@ EigenDecompMaterialTempl<is_ad>::EigenDecompMaterialTempl(const InputParameters 
 
 template <bool is_ad>
 void
-EigenDecompMaterialTempl<is_ad>::computeQpProperties()
+EigenDecompositionMaterialTempl<is_ad>::computeQpProperties()
 {
   std::vector<GenericReal<is_ad>> eigval(3, 0.0);
   GenericRankTwoTensor<is_ad> eigvec;

@@ -97,7 +97,7 @@
     type = ComputeLagrangianLinearElasticStress
   []
   [nonADeig_decomp]
-    type = EigenDecompMaterial
+    type = EigenDecompositionMaterial
     rank_two_tensor = cauchy_stress
     outputs = exodus
     output_properties = "max_eigen_vector mid_eigen_vector min_eigen_vector "

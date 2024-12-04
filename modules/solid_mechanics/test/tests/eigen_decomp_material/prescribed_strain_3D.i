@@ -59,14 +59,14 @@
     reg_props_out = nonAD_mechanical_strain
   []
   [eig_decomp]
-    type = ADEigenDecompMaterial
+    type = ADEigenDecompositionMaterial
     rank_two_tensor = mechanical_strain
     outputs = exodus
     output_properties = "max_eigen_vector mid_eigen_vector min_eigen_vector max_eigen_value "
                         "mid_eigen_value min_eigen_value"
   []
   [nonADeig_decomp]
-    type = EigenDecompMaterial
+    type = EigenDecompositionMaterial
     rank_two_tensor = nonAD_mechanical_strain
     base_name = nonAD
     outputs = exodus
