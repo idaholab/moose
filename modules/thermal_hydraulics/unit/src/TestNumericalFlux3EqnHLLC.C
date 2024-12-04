@@ -9,31 +9,50 @@
 
 #include "TestNumericalFlux3EqnHLLC.h"
 #include "ADNumericalFlux3EqnHLLC.h"
+#include "THMIndicesVACE.h"
 
 TEST_F(TestNumericalFlux3EqnHLLC, testSymmetry) { testSymmetry(); }
 TEST_F(TestNumericalFlux3EqnHLLC, testConsistency) { testConsistency(); }
 
-const ADNumericalFlux3EqnBase *
+TestNumericalFlux3EqnHLLC::TestNumericalFlux3EqnHLLC() : TestNumericalFlux3EqnBase()
+{
+}
+
+const NumericalFlux1D &
 TestNumericalFlux3EqnHLLC::createFluxObject()
 {
   const std::string class_name = "ADNumericalFlux3EqnHLLC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<UserObjectName>("fluid_properties") = _fp_name;
   _fe_problem->addUserObject(class_name, class_name, params);
-  return static_cast<const ADNumericalFlux3EqnBase *>(
-      &_fe_problem->getUserObject<ADNumericalFlux3EqnHLLC>(class_name));
+
+  return _fe_problem->getUserObject<NumericalFlux1D>(class_name);
 }
 
 std::vector<std::pair<std::vector<ADReal>, std::vector<ADReal>>>
 TestNumericalFlux3EqnHLLC::getPrimitiveSolutionsSymmetryTest() const
 {
   // sL < 0 < sM
-  const std::vector<ADReal> W1{1e5, 300, 20.0};
-  const std::vector<ADReal> W2{2e5, 310, 1.2};
+  std::vector<ADReal> W1(THMVACE1D::N_PRIM_VARS);
+  W1[THMVACE1D::PRESSURE] = 1e5;
+  W1[THMVACE1D::TEMPERATURE] = 300;
+  W1[THMVACE1D::VELOCITY] = 20;
+
+  std::vector<ADReal> W2(THMVACE1D::N_PRIM_VARS);
+  W2[THMVACE1D::PRESSURE] = 2e5;
+  W2[THMVACE1D::TEMPERATURE] = 310;
+  W2[THMVACE1D::VELOCITY] = 1.2;
 
   // sL > 0
-  const std::vector<ADReal> W3{1e5, 300, 20};
-  const std::vector<ADReal> W4{2e5, 310, 25};
+  std::vector<ADReal> W3(THMVACE1D::N_PRIM_VARS);
+  W3[THMVACE1D::PRESSURE] = 1e5;
+  W3[THMVACE1D::TEMPERATURE] = 300;
+  W3[THMVACE1D::VELOCITY] = 20;
+
+  std::vector<ADReal> W4(THMVACE1D::N_PRIM_VARS);
+  W4[THMVACE1D::PRESSURE] = 2e5;
+  W4[THMVACE1D::TEMPERATURE] = 310;
+  W4[THMVACE1D::VELOCITY] = 25;
 
   std::vector<std::pair<std::vector<ADReal>, std::vector<ADReal>>> W_pairs;
   W_pairs.push_back(std::pair<std::vector<ADReal>, std::vector<ADReal>>(W1, W2));
@@ -45,7 +64,10 @@ TestNumericalFlux3EqnHLLC::getPrimitiveSolutionsSymmetryTest() const
 std::vector<std::vector<ADReal>>
 TestNumericalFlux3EqnHLLC::getPrimitiveSolutionsConsistencyTest() const
 {
-  const std::vector<ADReal> W1{1e5, 300, 1.5};
+  std::vector<ADReal> W1(THMVACE1D::N_PRIM_VARS);
+  W1[THMVACE1D::PRESSURE] = 1e5;
+  W1[THMVACE1D::TEMPERATURE] = 300;
+  W1[THMVACE1D::VELOCITY] = 1.5;
 
   std::vector<std::vector<ADReal>> W_list;
   W_list.push_back(W1);
