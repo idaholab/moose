@@ -68,7 +68,7 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
           return *uel_mesh;
         }()),
     _uel_definition(_uel_mesh.getUEL(_uel_type)),
-    _uel_elements(_uel_mesh.getElements()),
+    _uel_elements(_uel_mesh.getElements({})),
     _element_set_names(getParam<std::vector<std::string>>("element_sets")),
     _variables(_uel_definition.nodes),
     _nstatev(_uel_definition.n_statev),
@@ -147,9 +147,6 @@ AbaqusUELMeshUserElement::execute()
   DenseVector<Real> local_re;
   DenseMatrix<Real> local_ke;
 
-  // state variable copy
-  std::vector<Real> statev_copy(_uel_definition.n_statev);
-
   std::array<Real, 8> dummy_energy;
   Real pnewdt;
 
@@ -161,7 +158,7 @@ AbaqusUELMeshUserElement::execute()
   for (const auto & uel_elem_id : _active_elements)
   {
 
-    const auto & uel_elem = _uel_elements[uel_elem_id];
+    auto & uel_elem = _uel_elements[uel_elem_id];
     mooseAssert(_uel_definition.nodes == uel_elem.nodes.size(),
                 "Inconsistent node numbers between element and UEL definition");
 
@@ -240,15 +237,18 @@ AbaqusUELMeshUserElement::execute()
     Real rdummy = 0;
     int idummy = 0;
 
+    // make sure stateful data storage is sized correctly
+    _statev[_statev_index_current][uel_elem_id].resize(_nstatev);
+
     // call the plugin
     _uel(local_re.get_values().data(),
          local_ke.get_values().data(),
-         statev_copy.data(),
+         _statev[_statev_index_current][uel_elem_id].data(),
          _use_energy ? _energy[uel_elem_id].data() : dummy_energy.data(),
          &ndofel,
          &nrhs,
          &_nstatev,
-         const_cast<Real *>(uel_elem.properties.first), // fortran forces us to do terrible things
+         uel_elem.properties.first, // fortran forces us to do terrible things
          const_cast<int *>(&_uel_definition.n_properties),
          coords.data(),
          &dim,
@@ -274,19 +274,13 @@ AbaqusUELMeshUserElement::execute()
          nullptr /* DDLMAG[] */,
          &idummy /* MDLOAD */,
          &pnewdt,
-         const_cast<int *>(uel_elem.properties.second), // fortran forces us to do terrible things
+         uel_elem.properties.second,
          const_cast<int *>(&_uel_definition.n_iproperties),
          &rdummy /* PERIOD */
     );
 
     if (pnewdt < _pnewdt && pnewdt != 0.0)
       _pnewdt = pnewdt;
-
-    if (_nstatev)
-    {
-      auto & statev_current = _statev[_statev_index_current][uel_elem_id];
-      std::copy(statev_copy.begin(), statev_copy.end(), statev_current.begin());
-    }
 
     // write to the residual vector
     // sign of 'residuals' has been tested with external loading and matches that of moose-umat
