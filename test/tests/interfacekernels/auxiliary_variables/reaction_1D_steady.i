@@ -34,6 +34,7 @@
     order = FIRST
     family = LAGRANGE
     block = '1'
+    initial_condition = 4
   []
 []
 
@@ -48,12 +49,13 @@
 
 [InterfaceKernels]
   [interface]
-    type = InterfaceDiffusion
+    type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = 'v'
     boundary = 'primary0_interface'
-    D = D
-    D_neighbor = D
+    # D = D
+    # D_neighbor = D
+    penalty = 1e3
   []
 []
 
@@ -76,8 +78,27 @@
   type = Steady
   solve_type = PJFNK
   nl_rel_tol = 1e-10
+  nl_forced_its = 2
 []
 
 [Problem]
   kernel_coverage_check = false
+[]
+
+[Outputs]
+  csv = true
+[]
+
+[Postprocessors]
+  [min]
+    type = ElementExtremeValue
+    variable = 'u'
+    value_type = 'min'
+    block = '0'
+  []
+  [max]
+    type = ElementExtremeValue
+    variable = 'u'
+    block = '0'
+  []
 []
