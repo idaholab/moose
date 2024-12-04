@@ -78,6 +78,12 @@
 [Executioner]
   type = Transient
 
+  system_names = u_sys
+  l_tol = 1e-10
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
   # Test of the TimeIntegrator System
   scheme = 'implicit-euler'
 

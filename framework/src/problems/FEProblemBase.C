@@ -6457,13 +6457,13 @@ FEProblemBase::advanceState()
 {
   TIME_SECTION("advanceState", 5, "Advancing State");
 
-  for (auto & nl : _nl)
-    nl->copyOldSolutions();
+  for (auto & sys : _solver_systems)
+    sys->copyOldSolutions();
   _aux->copyOldSolutions();
 
   if (_displaced_problem)
   {
-    for (const auto i : index_range(_nl))
+    for (const auto i : index_range(_solver_systems))
       _displaced_problem->solverSys(i).copyOldSolutions();
     _displaced_problem->auxSys().copyOldSolutions();
   }
