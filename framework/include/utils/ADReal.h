@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ADRealForward.h"
-#include "MooseError.h"
 
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/metaphysicl_exceptions.h"
@@ -30,9 +29,12 @@ derivInsert(SemiDynamicSparseNumberArray<Real, libMesh::dof_id_type, NWrapper<N>
   }
   catch (MetaPhysicL::LogicError &)
   {
-    mooseError("The last insertion into the sparse derivative storage container exceeded the "
-               "underlying array size. Consider running `configure --with-derivative-size=<n>` to "
-               "obtain a larger underlying container");
+    // We don't want to use a MooseError here to keep the list of includes in parsed ADReal logic
+    // minimal
+    libmesh_error_msg(
+        "The last insertion into the sparse derivative storage container exceeded the "
+        "underlying array size. Consider running `configure --with-derivative-size=<n>` to "
+        "obtain a larger underlying container");
   }
 #else
   derivs.insert(index) = value;

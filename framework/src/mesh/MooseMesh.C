@@ -65,6 +65,8 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
+using namespace libMesh;
+
 // Make newer nanoflann API compatible with older nanoflann versions
 #if NANOFLANN_VERSION < 0x150
 namespace nanoflann
