@@ -78,10 +78,10 @@ public:
   AbaqusUELMeshUserElement(const InputParameters & params);
 
   virtual void timestepSetup() override;
-  virtual void initialSetup() override;
-  virtual void meshChanged() override;
+  // virtual void initialSetup() override;
+  // virtual void meshChanged() override;
 
-  virtual void initialize() override final;
+  virtual void initialize() override final {}
   virtual void execute() override;
   virtual void finalize() override final {}
 
@@ -103,13 +103,13 @@ protected:
   const uel_t _uel;
 
   /// The \p MooseMesh that this user object operates on
-  const AbaqusUELMesh & _uel_mesh;
+  AbaqusUELMesh & _uel_mesh;
 
   /// definition of the UEL this object is operating on
   const AbaqusUELMesh::UELDefinition & _uel_definition;
 
   /// all elements in the UEL mesh
-  const std::vector<AbaqusUELMesh::UserElement> & _uel_elements;
+  std::vector<AbaqusUELMesh::UserElement> & _uel_elements;
 
   /// selected set names
   const std::vector<std::string> & _element_set_names;
