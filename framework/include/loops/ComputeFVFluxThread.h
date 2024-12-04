@@ -517,8 +517,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
 
   if (fi.neighborPtr())
   {
-    _fe_problem.resizeMaterialData(
-          Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA, nqp, _tid);
+    _fe_problem.resizeMaterialData(Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA, nqp, _tid);
 
     for (std::shared_ptr<MaterialBase> mat : _neigh_face_mats)
     {
