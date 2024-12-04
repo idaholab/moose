@@ -213,7 +213,7 @@ class RunApp(Tester):
             # and it is NOT supplied already in the cli-args option
             cli_args.append('--distributed-mesh')
 
-        if '--error' not in cli_args and (not specs["allow_warnings"] or options.error):
+        if '--error' not in cli_args and (not specs["allow_warnings"] or options.error) and not options.allow_warnings:
             cli_args.append('--error')
 
         if '--error-unused' not in cli_args and options.error_unused:
