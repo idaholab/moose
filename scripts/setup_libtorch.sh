@@ -48,7 +48,7 @@ if [[ -n "$HELP" ]]; then
   echo "--cleanup                            Remove the downloaded tarball after the install"
   echo "--version=VERSION_NUMBER             Specify the version number of libtorch"
   echo "--libtorch-dest=DESTINATION          Specify where the packages are to be copied"
-  echo "--libtorch-distribution=DISTRIBUTION Specify the distribution (cpu/cuda)"
+  echo "--libtorch-distribution=DISTRIBUTION Specify the distribution (cpu/cu118/cu121/cu124/rocm6.2)"
   echo "*************************************************************************************"
   echo ""
   exit 0
