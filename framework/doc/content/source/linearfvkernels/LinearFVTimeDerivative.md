@@ -21,13 +21,13 @@ the [TimeIntegrators](Executioner/TimeIntegrators/index.md) page.
 For example, with an implicit euler scheme the controbution to the right hand side becomes:
 
 !equation
-\frac{c_C}{\delta t}V_C,
+\frac{c_C}{\Delta t}V_C,
 
-where $\delta t$ and $\frac{c_C}$ are the time step size and multiplier at the cell center,
+where $\Delta t$ and $\frac{c_C}$ are the time step size and multiplier at the cell center,
  repectively. With these, the contribution to the right hand side becomes:
 
 !equation
-\frac{c_C u_{old,C}}{\delta t}V_C,
+\frac{c_C u_{old,C}}{\Delta t}V_C,
 
 where $u_{old,C}$ represents the solution at the previous time step.
 
