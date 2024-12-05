@@ -105,7 +105,7 @@ that all new code is documented in a specific manner to meet the guidelines, ple
 
 ### 5. Consider Adding a MOOSE Newsletter Entry
 
-The [MOOSE Newsletter](newsletter/index.md) is a monthly digest of MOOSE bugfixes, changes, updates,
+The [MOOSE Newsletter](newsletter/index.md optional=True) is a monthly digest of MOOSE bugfixes, changes, updates,
 and new features. We encourage all developers who create MOOSE PRs to add a notice of this change to
 the newsletter as part of the PR creation and review process. This helps advertise your change to
 other developers and users who want to keep up-to-date, as each news update is also posted to our
