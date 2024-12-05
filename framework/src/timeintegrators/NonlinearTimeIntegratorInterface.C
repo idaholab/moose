@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NonlinearTimeIntegrator.h"
+#include "NonLinearTimeIntegratorInterfaceInterface.h"
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
@@ -15,7 +15,8 @@
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/dof_map.h"
 
-NonlinearTimeIntegrator::NonlinearTimeIntegrator(FEProblemBase & problem, SystemBase & system)
+NonLinearTimeIntegratorInterfaceInterface::NonLinearTimeIntegratorInterfaceInterface(
+    FEProblemBase & problem, SystemBase & system)
   : _nl(dynamic_cast<NonlinearSystemBase *>(&system)),
     _integrates_nl(_nl),
     _nonlinear_implicit_system(
@@ -28,9 +29,9 @@ NonlinearTimeIntegrator::NonlinearTimeIntegrator(FEProblemBase & problem, System
 }
 
 NumericVector<Number> *
-NonlinearTimeIntegrator::addVectorForNonlinearTI(const std::string & name,
-                                                 const bool project,
-                                                 const ParallelType type)
+NonLinearTimeIntegratorInterfaceInterface::addVectorForNonlinearTI(const std::string & name,
+                                                                   const bool project,
+                                                                   const ParallelType type)
 {
   if (_integrates_nl)
     return &_nl->addVector(name, project, type);

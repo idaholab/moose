@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearTimeIntegrator.h"
+#include "LinearTimeIntegratorInterface.h"
 #include "FEProblem.h"
 #include "LinearSystem.h"
 
 #include "libmesh/linear_implicit_system.h"
 
-LinearTimeIntegrator::LinearTimeIntegrator(SystemBase & system)
+LinearTimeIntegratorInterface::LinearTimeIntegratorInterface(SystemBase & system)
   : _linear_system(dynamic_cast<LinearSystem *>(&system)),
     _integrates_linear_system(_linear_system),
     _linear_implicit_system(
@@ -22,14 +22,14 @@ LinearTimeIntegrator::LinearTimeIntegrator(SystemBase & system)
 }
 
 Real
-LinearTimeIntegrator::timeDerivativeRHSContribution(const dof_id_type /*dof_id*/,
-                                                    const std::vector<Real> & /*factors*/) const
+LinearTimeIntegratorInterface::timeDerivativeRHSContribution(
+    const dof_id_type /*dof_id*/, const std::vector<Real> & /*factors*/) const
 {
   mooseError("The time derivative right hand side contribution has not been implemented yet!");
 }
 
 Real
-LinearTimeIntegrator::timeDerivativeMatrixContribution(const Real /*factor*/) const
+LinearTimeIntegratorInterface::timeDerivativeMatrixContribution(const Real /*factor*/) const
 {
   mooseError("The time derivative matrix contribution has not been implemented yet!");
 }

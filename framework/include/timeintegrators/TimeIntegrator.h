@@ -12,8 +12,8 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "NonlinearTimeIntegrator.h"
-#include "LinearTimeIntegrator.h"
+#include "NonLinearTimeIntegratorInterfaceInterface.h"
+#include "LinearTimeIntegratorInterface.h"
 
 class FEProblemBase;
 class SystemBase;
@@ -39,8 +39,8 @@ class NonlinearImplicitSystem;
  */
 class TimeIntegrator : public MooseObject,
                        public Restartable,
-                       public NonlinearTimeIntegrator,
-                       public LinearTimeIntegrator
+                       public NonLinearTimeIntegratorInterfaceInterface,
+                       public LinearTimeIntegratorInterface
 {
 public:
   static InputParameters validParams();

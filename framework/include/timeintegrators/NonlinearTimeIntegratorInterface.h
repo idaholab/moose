@@ -24,13 +24,13 @@ class NonlinearImplicitSystem;
  * Interface class for routines and member variables for time integrators
  * relying on Newton's method.
  */
-class NonlinearTimeIntegrator
+class NonLinearTimeIntegratorInterfaceInterface
 {
 public:
-  NonlinearTimeIntegrator(FEProblemBase & problem, SystemBase & system);
+  NonLinearTimeIntegratorInterfaceInterface(FEProblemBase & problem, SystemBase & system);
 
   /**
-   * Callback to the NonlinearTimeIntegrator called immediately after the
+   * Callback to the NonLinearTimeIntegratorInterfaceInterface called immediately after the
    * residuals are computed in NonlinearSystem::computeResidual().
    * The residual vector which is passed in to this function should
    * be filled in by the user with the _Re_time and _Re_non_time

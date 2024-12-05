@@ -24,10 +24,10 @@ class LinearImplicitSystem;
  * Interface class for routines and member variables for time integrators
  * relying on Newton's method.
  */
-class LinearTimeIntegrator
+class LinearTimeIntegratorInterface
 {
 public:
-  LinearTimeIntegrator(SystemBase & system);
+  LinearTimeIntegratorInterface(SystemBase & system);
 
   /// The time derivative's contribution to the right hand side of a linear system
   /// @param dof_id The dof index at which this contribution should be fetched at
