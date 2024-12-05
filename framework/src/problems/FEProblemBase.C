@@ -1011,8 +1011,13 @@ FEProblemBase::initialSetup()
   groupUserObjects(
       theWarehouse(), getAuxiliarySystem(), _app.getExecuteOnEnum(), userobjs, depend_objects_ic);
 
+  std::map<int, std::vector<UserObject *>> group_userobjs;
   for (auto obj : userobjs)
-    obj->initialSetup();
+    group_userobjs[obj->getParam<int>("execution_order_group")].push_back(obj);
+
+  for (auto & [group, objs] : group_userobjs)
+    for (auto obj : objs)
+      obj->initialSetup();
 
   // check if jacobian calculation is done in userobject
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
