@@ -705,12 +705,12 @@ dataLoad(std::istream & stream, std::unique_ptr<libMesh::NumericVector<Number>> 
   // Construct the vector given the type, only if we need to. v could be non-null here
   // if we're advancing back and loading a backup
   if (!v)
-  {
     v = NumericVector<Number>::build(comm, solver_package);
-    v->init(size, local_size);
-  }
   else
     mooseAssert(v->type() != GHOSTED, "Cannot be ghosted");
+
+  if (!v->initialized())
+    v->init(size, local_size);
 
   // Make sure that the sizes are consistent; this will happen if we're calling this
   // on a vector that has already been loaded previously
