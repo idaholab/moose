@@ -1,6 +1,6 @@
 # NEML2
 
-In addition to the MOOSE native material models, MOOSE can also seamlessly interface with the external material modeling library [NEML2](https://github.com/reverendbedford/neml2) [!cite](neml2_anl_report).
+In addition to the MOOSE native material models, MOOSE can also seamlessly interface with the external material modeling library [NEML2](https://github.com/applied-material-modeling/neml2) [!cite](neml2_anl_report).
 
 ## What is NEML2?
 
@@ -15,7 +15,7 @@ built on top of [libTorch](https://pytorch.org/cppdocs/) to provide GPU support,
 means that NEML2 models have all the features of a Torch module.  So, for example, users can take
 derivatives of the model with respect to parameters using pytorch automatic differentiation (AD).
 
-NEML2 is provided as open source software under a MIT [license](https://raw.githubusercontent.com/reverendbedford/neml2/main/LICENSE).
+NEML2 is provided as open source software under a MIT [license](https://raw.githubusercontent.com/applied-material-modeling/neml2/main/LICENSE).
 
 ## How to use NEML2?
 
@@ -59,7 +59,7 @@ A dedicated input file syntax block is reserved for MOOSE-NEML2 interaction. The
 []
 ```
 
-The field `input` informs MOOSE where to look for the NEML2 input file. The field `model` tells MOOSE which material model in the NEML2 input file should be "imported". Details about all the options can be found in the [MOOSE-NEML2 syntax documentation](syntax/NEML2/index.md). To understand how to write a NEML2 input file, please refer to the [NEML2 documentation](https://reverendbedford.github.io/neml2/).
+The field `input` informs MOOSE where to look for the NEML2 input file. The field `model` tells MOOSE which material model in the NEML2 input file should be "imported". Details about all the options can be found in the [MOOSE-NEML2 syntax documentation](syntax/NEML2/index.md). To understand how to write a NEML2 input file, please refer to the [NEML2 documentation](https://applied-material-modeling.github.io/neml2/).
 
 ## Citing NEML2
 

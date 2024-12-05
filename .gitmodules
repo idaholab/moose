@@ -21,7 +21,7 @@
     url = https://code.ornl.gov/neams-workbench/wasp.git
 [submodule "modules/solid_mechanics/contrib/neml2"]
     path = modules/solid_mechanics/contrib/neml2
-    url = https://github.com/reverendbedford/neml2.git
+    url = ../../applied-material-modeling/neml2.git
     update = none
 [submodule "modules/fluid_properties/contrib/sodium"]
 	path = modules/fluid_properties/contrib/sodium
