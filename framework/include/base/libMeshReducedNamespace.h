@@ -11,16 +11,20 @@
 
 // This is the minimal set of headers to make all the types below that cannot be
 // forward-declared as classes available.
-// If we want to reduce this list, we would have to forward-declare functions as well
+
+// These headers add constants that we want to add to the namespace.
 #include "libmesh/libmesh.h"
+#include "libmesh/remote_elem.h"
+
+// This header declares functions that we want to add to the namespace. If we chose not to include
+// this header, we will need to repeat the function declaration here
+#include "libmesh/int_range.h" // for make_range + several typedefs
+
+// These headers introduce typedefs that we are adding to the local namespace. If we chose not
+// to include these headers, we will need to repeat the typedef here
 #include "libmesh/id_types.h"
-#include "libmesh/int_range.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
-#include "libmesh/mesh_tools.h"
-
-// For the remote_elem singleton
-#include "libmesh/remote_elem.h"
 
 // These are required for the range typedefs they contain, which cannot be forward-declared
 // without re-defining the typedef. This allows us to add the ranges in the local namespace
