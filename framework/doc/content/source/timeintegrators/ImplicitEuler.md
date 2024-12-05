@@ -25,14 +25,14 @@ in the non linear system solve [documentation](systems/NonlinearSystem.md).
 
 For [linear systems](systems/LinearSystem.md), on top of creating the
 time derivatives of the degrees of freedom, this provides contributions
-to the matrix and the right hand side. Taking a finite volume system for example,
-the contributions to the matrix will be:
+to the matrix diagonal and the right hand side. Taking a finite volume system for example,
+the contributions to the matrix diagonal will be:
 
 !equation
 \frac{1}{\Delta t}V_C,
 
 where $\Delta t$ and $\frac{V_C}$ are the time step size and cell volume,
- repectively. The contribution to the right hand side is:
+respectively. The contribution to the right hand side is:
 
 !equation
 \frac{u_{old,C}}{\Delta t}V_C,

@@ -25,11 +25,15 @@ Real
 LinearTimeIntegratorInterface::timeDerivativeRHSContribution(
     const dof_id_type /*dof_id*/, const std::vector<Real> & /*factors*/) const
 {
-  mooseError("The time derivative right hand side contribution has not been implemented yet!");
+  mooseError("The time derivative right hand side contribution has not been implemented yet",
+             _linear_system ? " for time integrator of system " + _linear_system->name() : "",
+             "!");
 }
 
 Real
 LinearTimeIntegratorInterface::timeDerivativeMatrixContribution(const Real /*factor*/) const
 {
-  mooseError("The time derivative matrix contribution has not been implemented yet!");
+  mooseError("The time derivative matrix contribution has not been implemented yet",
+             _linear_system ? " for time integrator of system " + _linear_system->name() : "",
+             "!");
 }

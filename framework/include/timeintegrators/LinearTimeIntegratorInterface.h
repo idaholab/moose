@@ -40,7 +40,7 @@ public:
                                              const std::vector<Real> & factors = {}) const;
 
   /// The time derivative's contribution to the right hand side of a linear system.
-  /// For now, this does not depend of the DoF index, might change in the furutre.
+  /// For now, this does not depend of the DoF index, might change in the future.
   virtual Real timeDerivativeMatrixContribution(const Real factor) const;
 
 protected:

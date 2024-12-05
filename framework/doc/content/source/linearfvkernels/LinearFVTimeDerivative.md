@@ -18,13 +18,13 @@ This kernel adds to the matrix diagonal and right hand side of a
 linear system and the contributions depend on the
 method chosen for time integration. For more information on available methods, see
 the [TimeIntegrators](Executioner/TimeIntegrators/index.md) page.
-For example, with an implicit euler scheme the controbution to the right hand side becomes:
+For example, with an implicit Euler scheme the contribution to the right hand side becomes:
 
 !equation
 \frac{c_C}{\Delta t}V_C,
 
 where $\Delta t$ and $\frac{c_C}$ are the time step size and multiplier at the cell center,
- repectively. With these, the contribution to the right hand side becomes:
+respectively. With these, the contribution to the right hand side becomes:
 
 !equation
 \frac{c_C u_{old,C}}{\Delta t}V_C,

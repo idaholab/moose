@@ -29,6 +29,7 @@
     exodiff = 'ie-linearfv_out.e'
     abs_zero = 1e-9
     requirement = "The system shall be able to use implicit euler time integration with linear FV spatial discretization."
+    max_threads = 1
   []
 
   [monomials]
