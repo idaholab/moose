@@ -13,8 +13,8 @@
 #include "TimeIntegrator.h"
 
 /**
- * Kernel that adds contributions from a time derivative term discretized using the
- * finite volume method to a linear system.
+ * Kernel that adds contributions from a time derivative term to a linear system
+ * populated using the finite volume method.
  */
 class LinearFVTimeDerivative : public LinearFVElementalKernel
 {
