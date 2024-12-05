@@ -398,6 +398,23 @@ outputOutputInformation(MooseApp & app)
 }
 
 std::string
+outputPreSMOResidualInformation()
+{
+  std::stringstream oss;
+  oss << std::left;
+
+  oss << COLOR_BLUE;
+  oss << "Executioner/use_pre_smo_residual is set to true. The pre-SMO residual will be evaluated "
+         "at the beginning of each time step before executing objects that could modify the "
+         "solution, such as preset BCs, predictors, correctors, constraints, and certain user "
+         "objects. The pre-SMO residuals will be prefixed with * and will be used in the relative "
+         "convergence check.\n";
+  oss << COLOR_DEFAULT;
+
+  return oss.str();
+}
+
+std::string
 outputLegacyInformation(MooseApp & app)
 {
   std::stringstream oss;
