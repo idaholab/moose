@@ -43,7 +43,7 @@
     abs_zero = 1e-6
     # This test is very sensitive to partitioner (parmetis).
     # GridPartitioner is robust and beautiful
-    cli_args = 'Mesh/Partitioner/type=GridPartitioner'
+    cli_args = 'Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/grid_computation=automatic'
     requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x', 'y', and 'z' directions."
   []
 

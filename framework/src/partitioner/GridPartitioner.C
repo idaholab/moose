@@ -83,11 +83,12 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   if (dim == 3)
     nz = isParamValid("nz") ? getParam<unsigned int>("nz") : nz;
 
-  // error on unused parameters
+  // simple info message unused parameters as this can be normal: we could be partitioning
+  // a 2D mesh before extruding it to 3D. The nz parameter is needed for the 3D mesh
   if (dim < 2 && isParamValid("ny") && getParam<unsigned int>("ny") > 1)
-    paramError("ny", "Should not be specified for a mesh of dimension less than 2.");
+    paramInfo("ny", "Parameter ignored as mesh is currently of dimension less than 2.");
   if (dim < 3 && isParamValid("nz") && getParam<unsigned int>("nz") > 1)
-    paramError("nz", "Should not be specified for a mesh of dimension less than 3.");
+    paramInfo("nz", "Parameter ignored as mesh is currently of dimension less than 3.");
 
   // User parameters, which should match the number of partitions needed
   if (getParam<MooseEnum>("grid_computation") == "manual")
