@@ -9,8 +9,15 @@
 
 #pragma once
 
-// MOOSE includes
+// Moose includes
+#include "MooseTypes.h"
+
+// Libmesh includes
+#include "libmesh/enum_parallel_type.h"
+
+// Forward declarations
 class SystemBase;
+class FEProblemBase;
 class NonlinearSystemBase;
 
 namespace libMesh
@@ -24,13 +31,13 @@ class NonlinearImplicitSystem;
  * Interface class for routines and member variables for time integrators
  * relying on Newton's method.
  */
-class NonLinearTimeIntegratorInterfaceInterface
+class NonlinearTimeIntegratorInterface
 {
 public:
-  NonLinearTimeIntegratorInterfaceInterface(FEProblemBase & problem, SystemBase & system);
+  NonlinearTimeIntegratorInterface(FEProblemBase & problem, SystemBase & system);
 
   /**
-   * Callback to the NonLinearTimeIntegratorInterfaceInterface called immediately after the
+   * Callback to the NonLinearTimeIntegratorInterface called immediately after the
    * residuals are computed in NonlinearSystem::computeResidual().
    * The residual vector which is passed in to this function should
    * be filled in by the user with the _Re_time and _Re_non_time

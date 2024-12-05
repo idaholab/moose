@@ -9,7 +9,10 @@
 
 #pragma once
 
-// MOOSE includes
+// Moose includes
+#include "MooseTypes.h"
+
+// Forward declarations
 class SystemBase;
 class LinearSystem;
 
@@ -22,7 +25,7 @@ class LinearImplicitSystem;
 
 /**
  * Interface class for routines and member variables for time integrators
- * relying on Newton's method.
+ * relying on linear system assembly method.
  */
 class LinearTimeIntegratorInterface
 {

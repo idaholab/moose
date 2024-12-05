@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "NonLinearTimeIntegratorInterfaceInterface.h"
+#include "NonlinearTimeIntegratorInterface.h"
 #include "LinearTimeIntegratorInterface.h"
 
 class FEProblemBase;
@@ -39,7 +39,7 @@ class NonlinearImplicitSystem;
  */
 class TimeIntegrator : public MooseObject,
                        public Restartable,
-                       public NonLinearTimeIntegratorInterfaceInterface,
+                       public NonlinearTimeIntegratorInterface,
                        public LinearTimeIntegratorInterface
 {
 public:
