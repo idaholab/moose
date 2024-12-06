@@ -868,5 +868,8 @@ TEST(CommandLineTest, mergeHIT)
   cl.addArgument("Foo/bar=bang");
   cl.parse();
 
+  InputParameters params = emptyInputParameters();
+  cl.populateCommandLineParams(params);
+
   ASSERT_EQ(cl.buildHitParams(), "Foo/bar=baz Foo/bar=bang");
 }
