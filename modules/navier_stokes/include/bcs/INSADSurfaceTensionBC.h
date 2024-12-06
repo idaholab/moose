@@ -37,4 +37,8 @@ private:
   /// If the surface tension should include the gradient terms
   /// (increases fidelity, decreases stability)
   const bool _include_gradient_terms;
+
+  /// Curvature force multiplier. The reason behind this is that
+  /// libmesh has a different sign convention for 2D and 3D.
+  const Real _curvature_factor;
 };

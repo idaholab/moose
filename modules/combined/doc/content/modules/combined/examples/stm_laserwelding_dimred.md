@@ -78,9 +78,9 @@ The reference results are filtered to show the melt pool shape. We see that for 
 steel melts, but no displacement is visible due to little to no evaporation. On the other hand, the
 increase in laser power results in an increased evaporation resulting in significant surface deformation.
 
-!media combined/laser_weld/60.png caption=Problem setup for the laser melt pool simulation id=fig:result-60 style=width:100%
+!media combined/laser_weld/60.png caption=Simulation results at the final time step with laser power ($60~W$) and wide effective laser radius ($155~\mu m$) id=fig:result-60 style=width:100%
 
-!media combined/laser_weld/74.png caption=Problem setup for the laser melt pool simulation id=fig:result-74 style=width:100%
+!media combined/laser_weld/74.png caption=Simulation results at the final time step with laser power ($74~W$) and narrow effective laser radius ($125~\mu m$) id=fig:result-74 style=width:100%
 
 ## Training the reduced-order model
 
@@ -96,7 +96,7 @@ parts in the transfer and reporter blocks.
 !listing examples/stochastic/laser_welding_dimred/train.i caption=Transfers and Reporters needed for snapshot collection block=Transfers Reporters VariableMappings remove=Reporters/matrix Reporters/svd id=list:training-trans-rep
 
 With the snapshots all available in one place, we can extract the POD modes
-necessary for the dimensionality reduction. This is dones using the
+necessary for the dimensionality reduction. This is done using the
 [PODMapping.md] reporter which not only creates the decomposition but also maps the
 created snapshots onto a low-dimensional latent space.
 
@@ -161,7 +161,7 @@ in the 0-0.2% interval.
 
 
 !plot histogram
-  id=test-results caption=Historgram of the L2 errors over the 90 test samples.
+  id=test-results caption=Histogram of the L2 errors over the 90 test samples.
   filename=examples/stochastic/laser_welding_dimred/gold/error_to_plot.csv
   data=[{'x':'l2error', 'name':'L2 Error'}]
   layout={'xaxis':{'type':'linear', 'title':'Relative L2 Error'},

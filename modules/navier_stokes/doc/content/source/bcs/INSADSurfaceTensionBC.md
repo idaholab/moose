@@ -11,11 +11,9 @@ where $\mathcal{H}$ is the mean curvature of the surface, while
 $\sigma$ describes the suface tension. In this context, $\nabla_s = (I-\vec{n}\vec{n})\cdot \nabla$
 is the surface gradient operator. Parameter [!param](/BCs/INSADSurfaceTensionBC/include_gradient_terms)
 can be used to enable or disable the second term in the expression.
-Disabling the second term would disable the MArangoni effect and would decrease the
+Disabling the second term would disable the Marangoni effect and would decrease the
 surface deformations. This decreases the fidelity of the model, with an increased robustness.
 The model is based on the one discussed in [!cite](cairncross2000finite).
-
-!syntax description /BCs/INSADSurfaceTensionBC
 
 !syntax parameters /BCs/INSADSurfaceTensionBC
 

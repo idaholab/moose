@@ -28,15 +28,17 @@ INSADSurfaceTensionBC::INSADSurfaceTensionBC(const InputParameters & parameters)
     _surface_term_curvature(getADMaterialProperty<RealVectorValue>("surface_term_curvature")),
     _surface_term_gradient1(getADMaterialProperty<RealVectorValue>("surface_term_gradient1")),
     _surface_term_gradient2(getADMaterialProperty<RealVectorValue>("surface_term_gradient2")),
-    _include_gradient_terms(getParam<bool>("include_gradient_terms"))
+    _include_gradient_terms(getParam<bool>("include_gradient_terms")),
+    _curvature_factor(_subproblem.mesh().dimension() == 3 ? 1.0 : -1.0)
 {
 }
 
 ADReal
 INSADSurfaceTensionBC::computeQpResidual()
 {
-  auto force = _surface_term_curvature[_qp];
+  auto force = _curvature_factor * _surface_term_curvature[_qp];
+
   if (_include_gradient_terms)
     force += _surface_term_gradient1[_qp] + _surface_term_gradient2[_qp];
-  return _test[_i][_qp] * force;
+  return -_test[_i][_qp] * force;
 }
