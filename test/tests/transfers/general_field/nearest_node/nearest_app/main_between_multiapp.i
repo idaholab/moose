@@ -34,6 +34,10 @@
   max_procs_per_app = 3
   positions_objects = 'input_app1'
   output_in_position = true
+  # We must ensure that each point on each app is closest to the app
+  # position than to any other app position.
+  # This is to ensure that nearest-app is the same as nearest-position with the app position
+  cli_args = "Mesh/gen/xmax=0.1;Mesh/gen/ymax=0.1"
 []
 
 # This application will use as many processes as the main app
@@ -42,7 +46,12 @@
   input_files = sub_between_diffusion.i
   positions_objects = 'input_app2'
   output_in_position = true
+  cli_args = "Mesh/gen/xmax=0.1;Mesh/gen/ymax=0.1"
 []
+
+# slight inflation to avoid floating point issues on borders
+bbox_factor_tr = 1.0001
+
 
 [Transfers]
   # Nodal to nodal variables
@@ -54,8 +63,7 @@
     variable = received_nodal
     assume_nearest_app_holds_nearest_location = true
     search_value_conflicts = true
-    # slight inflation to avoid floating point issues on borders
-    bbox_factor = 1.000001
+    bbox_factor = ${bbox_factor_tr}
   []
   [app2_to_1_nodal_nodal]
     type = MultiAppGeneralFieldNearestLocationTransfer
@@ -63,9 +71,9 @@
     to_multi_app = ma1
     source_variable = sent_nodal
     variable = received_nodal
-    bbox_factor = 1.000001
-    search_value_conflicts = true
     assume_nearest_app_holds_nearest_location = true
+    search_value_conflicts = true
+    bbox_factor = ${bbox_factor_tr}
   []
 
   # Elemental to elemental variables
@@ -77,7 +85,7 @@
     variable = received_elem
     assume_nearest_app_holds_nearest_location = true
     search_value_conflicts = true
-    bbox_factor = 1.000001
+    bbox_factor = ${bbox_factor_tr}
   []
   [app2_to_1_elem_elem]
     type = MultiAppGeneralFieldNearestLocationTransfer
@@ -87,7 +95,7 @@
     variable = received_elem
     assume_nearest_app_holds_nearest_location = true
     search_value_conflicts = true
-    bbox_factor = 1.000001
+    bbox_factor = ${bbox_factor_tr}
   []
 []
 
