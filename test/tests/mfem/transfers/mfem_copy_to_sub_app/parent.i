@@ -113,7 +113,7 @@
 
 [Transfers]
     [./to_sub]
-        type = MFEMCopyTransfer
+        type = MultiAppMFEMCopyTransfer
         source_variable = send
         variable = recv
         to_multi_app = subapp

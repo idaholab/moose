@@ -1,4 +1,4 @@
-#include "MFEMCopyTransfer.h"
+#include "MultiAppMFEMCopyTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
@@ -6,10 +6,10 @@
 #include "MFEMProblem.h"
 #include "MFEMMesh.h"
 
-registerMooseObject("PlatypusApp", MFEMCopyTransfer);
+registerMooseObject("PlatypusApp", MultiAppMFEMCopyTransfer);
 
 InputParameters
-MFEMCopyTransfer::validParams()
+MultiAppMFEMCopyTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>(
@@ -19,7 +19,7 @@ MFEMCopyTransfer::validParams()
   return params;
 }
 
-MFEMCopyTransfer::MFEMCopyTransfer(InputParameters const & params)
+MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & params)
   : MultiAppTransfer(params),
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
@@ -28,7 +28,7 @@ MFEMCopyTransfer::MFEMCopyTransfer(InputParameters const & params)
 
 //
 void
-MFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_problem)
+MultiAppMFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_problem)
 {
   // Redundant as source name is required?
   if (!numToVar())
@@ -47,9 +47,9 @@ MFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_problem)
 }
 
 void
-MFEMCopyTransfer::execute()
+MultiAppMFEMCopyTransfer::execute()
 {
-  TIME_SECTION("MFEMCopyTransfer::execute", 5, "Copies variables");
+  TIME_SECTION("MultiAppMFEMCopyTransfer::execute", 5, "Copies variables");
   if (_current_direction == TO_MULTIAPP)
   {
     for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
@@ -94,7 +94,7 @@ MFEMCopyTransfer::execute()
 }
 
 void
-MFEMCopyTransfer::checkSiblingsTransferSupported() const
+MultiAppMFEMCopyTransfer::checkSiblingsTransferSupported() const
 {
   // Check that we are in the supported configuration: same number of source and target apps
   // The allocation of the child apps on the processors must be the same
