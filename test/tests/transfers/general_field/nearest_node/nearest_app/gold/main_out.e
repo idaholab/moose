@@ -1,0 +1,1 @@
+../../nearest_position/gold/main_out.e
