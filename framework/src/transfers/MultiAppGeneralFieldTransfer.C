@@ -576,9 +576,10 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
 
     // Find the apps that are nearest to the same position
     // Global search over all applications
-    unsigned int from0 = 0;
-    for (processor_id_type i_proc = 0; i_proc < n_processors();
-         from0 += _froms_per_proc[i_proc], ++i_proc)
+    for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
+    {
+      // We need i_from to correspond to the global app index
+      unsigned int from0 = _global_app_start_per_proc[i_proc];
       for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
       {
         if (_greedy_search || _search_value_conflicts || i_from == nearest_index)
@@ -586,9 +587,12 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
           processors.insert(i_proc);
           found = true;
         }
+        mooseAssert(i_from < getFromMultiApp()->numGlobalApps(), "We should not reach this");
       }
-    mooseAssert(processors.size() == 1 || _greedy_search || _search_value_conflicts,
-                "Should only be one nearest app");
+    }
+    mooseAssert((getFromMultiApp()->numGlobalApps() < n_processors() || processors.size() == 1) ||
+                    _greedy_search || _search_value_conflicts,
+                "Should only be one source processor when using more processors than source apps");
   }
   else if (_use_bounding_boxes)
   {
@@ -609,6 +613,7 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
     unsigned int from0 = 0;
     for (processor_id_type i_proc = 0; i_proc < n_processors();
          from0 += _froms_per_proc[i_proc], ++i_proc)
+      // i_from here is a hybrid index based on the cumulative sum of the apps per processor
       for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
       {
         Real distance = bboxMinDistance(point, _from_bboxes[i_from]);
