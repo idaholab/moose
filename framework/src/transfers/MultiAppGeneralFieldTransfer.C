@@ -207,7 +207,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   }
 
   // Dont let users get wrecked by bounding boxes if it looks like they are trying to extrapolate
-  if (!_source_app_must_contain_point &&
+  if (!_source_app_must_contain_point && _use_bounding_boxes &&
       (_nearest_positions_obj || isParamSetByUser("from_app_must_contain_point")))
     if (!isParamSetByUser("bbox_factor") && !isParamSetByUser("fixed_bounding_box_size"))
       mooseWarning(
@@ -997,7 +997,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // - valid (or from nearest app)
         // - closest distance
         // - the smallest rank with the same distance
-        // TODO Fix
+        // It is debatable whether we want invalid values from the nearest app. It could just be
+        // that the app position was closer but the extent of another child app was large enough
         if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) ||
              _use_nearest_app) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
@@ -1733,7 +1734,35 @@ MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Po
   if (!_skip_coordinate_collapsing)
     paramError("skip_coordinate_collapsing", "Coordinate collapsing not implemented");
   bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
-  return pos_index == _nearest_positions_obj->getNearestPositionIndex(pt, initial);
+  if (!_search_value_conflicts)
+    // Faster to just compare the index
+    return pos_index == _nearest_positions_obj->getNearestPositionIndex(pt, initial);
+  else
+  {
+    // Get the distance to the position and see if we are missing a value just because the position
+    // is not officially the closest, but it is actually at the same distance
+    const auto nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
+    const auto nearest_position_at_index = _nearest_positions_obj->getPosition(pos_index, initial);
+    Real distance_to_position_at_index = (pt - nearest_position_at_index).norm();
+    const Real distance_to_nearest_position = (pt - nearest_position).norm();
+
+    if (!MooseUtils::absoluteFuzzyEqual(distance_to_position_at_index,
+                                        distance_to_nearest_position))
+      return false;
+    // Actually the same position (point)
+    else if (nearest_position == nearest_position_at_index)
+      return true;
+    else
+    {
+      mooseWarning("Two equidistant positions ",
+                   nearest_position,
+                   " and ",
+                   nearest_position_at_index,
+                   " detected near point ",
+                   pt);
+      return true;
+    }
+  }
 }
 
 Real

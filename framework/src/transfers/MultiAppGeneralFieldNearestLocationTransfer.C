@@ -47,7 +47,6 @@ MultiAppGeneralFieldNearestLocationTransfer::validParams()
   // However, if the user knows this is true, we can use this heuristic to reduce the number of apps
   // that are requested to provide a candidate value. If the user is wrong, then the nearest
   // location is used, which can be from the non-nearest app.
-  params.set<bool>("use_nearest_app") = true;
   params.renameParam("use_nearest_app", "assume_nearest_app_holds_nearest_location", "");
 
   // the default of node/centroid switching based on the variable is causing lots of mistakes and
@@ -400,7 +399,8 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
       if (!checkRestrictionsForSource(pt, mesh_div, i_from))
         continue;
 
-      // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+      // TODO: Pre-allocate these two work arrays. They will be regularly resized by the
+      // searches
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
 
@@ -628,10 +628,22 @@ MultiAppGeneralFieldNearestLocationTransfer::checkRestrictionsForSource(
     const Point & pt, const unsigned int mesh_div, const unsigned int i_from) const
 {
   // Only use the KDTree from the closest position if in "nearest-position" mode
-  const auto position_index =
-      (_group_subapps || _use_nearest_app) ? i_from : i_from % getNumDivisions();
-  if (_nearest_positions_obj && !closestToPosition(position_index, pt))
-    return false;
+  if (_nearest_positions_obj)
+  {
+    // See computeNumSources for the number of sources. i_from is the index in the source loop
+    // i_from is local if looping on _from_problems as sources, positions are indexed globally
+    // i_from is already indexing in positions if using group_subapps
+    auto position_index = i_from; // if _group_subapps
+    if (_use_nearest_app)
+      position_index = getGlobalSourceAppIndex(i_from);
+    else if (!_group_subapps)
+      position_index = i_from % getNumDivisions();
+
+    // NOTE: if two positions are equi-distant to the point, this will chose one
+    // This problem is detected if using search_value_conflicts in this call
+    if (!closestToPosition(position_index, pt))
+      return false;
+  }
 
   // Application index depends on which source/grouping mode we are using
   const unsigned int app_index = getAppIndex(i_from, i_from / getNumDivisions());
@@ -639,6 +651,9 @@ MultiAppGeneralFieldNearestLocationTransfer::checkRestrictionsForSource(
   // Check mesh restriction before anything
   if (_source_app_must_contain_point)
   {
+    // We have to be careful that getPointInLocalSourceFrame returns in the reference frame
+    if (_nearest_positions_obj)
+      mooseError("Nearest-positions + source_app_must_contain_point not implemented");
     // Transform the point to place it in the local coordinate system
     const auto local_pt = getPointInLocalSourceFrame(app_index, pt);
     if (!inMesh(_from_point_locators[app_index].get(), local_pt))
