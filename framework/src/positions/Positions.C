@@ -98,9 +98,7 @@ Positions::getNearestPositionIndex(const Point & target, const bool initial) con
   mooseAssert(initialized(initial), "Positions vector has not been initialized.");
   std::vector<std::size_t> return_index(1);
 
-  // Note that we do not need to use the transformed_pt (in the source app frame)
-  // because the KDTree has been created in the reference frame
-  if (initial)
+  if (initial && _initial_positions)
   {
     mooseAssert(_initial_positions_kd_tree, "Should have an initial positions KDTree");
     _initial_positions_kd_tree->neighborSearch(target, 1, return_index);

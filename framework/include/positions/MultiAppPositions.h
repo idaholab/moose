@@ -25,6 +25,13 @@ public:
   // MultiApp positions are not known at construction
   void initialize() override;
 
+  // Since we did not initialize on construction, initialize on setup by default
+  void initialSetup() override
+  {
+    initialize();
+    finalize();
+  }
+
   /// Whether to use the subapp mesh centroids to compute the positions, further translated by the positions
   const bool _use_apps_centroid;
 };

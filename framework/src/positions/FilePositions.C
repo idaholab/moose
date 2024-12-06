@@ -49,4 +49,6 @@ FilePositions::FilePositions(const InputParameters & parameters) : Positions(par
     }
   }
   _initialized = true;
+  // Sort (if requested) and create KDTree
+  finalize();
 }

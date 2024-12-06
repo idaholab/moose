@@ -30,4 +30,6 @@ InputPositions::InputPositions(const InputParameters & parameters) : Positions(p
 {
   _positions = getParam<std::vector<Point>>("positions");
   _initialized = true;
+  // Sort (if requested) and create KDTree
+  finalize();
 }
