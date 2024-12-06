@@ -30,3 +30,20 @@ MooseUnitApp::registerAll(Factory & f, ActionFactory &, Syntax &)
 }
 
 MooseUnitApp::~MooseUnitApp() {}
+
+InputParameters
+OtherMooseUnitApp::validParams()
+{
+  return MooseApp::validParams();
+}
+
+OtherMooseUnitApp::OtherMooseUnitApp(const InputParameters & parameters) : MooseApp(parameters)
+{
+  OtherMooseUnitApp::registerAll(_factory, _action_factory, _syntax);
+}
+
+void
+OtherMooseUnitApp::registerAll(Factory & f, ActionFactory &, Syntax &)
+{
+  Registry::registerObjectsTo(f, {"OtherMooseUnitApp"});
+}

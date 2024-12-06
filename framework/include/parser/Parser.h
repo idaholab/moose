@@ -92,18 +92,6 @@ private:
   const CompileParamWalker::ParamMap & _map;
 };
 
-class FindAppWalker : public hit::Walker
-{
-public:
-  void walk(const std::string & /*fullpath*/,
-            const std::string & /*nodepath*/,
-            hit::Node * section) override;
-  std::string getApp() { return _app_type; };
-
-private:
-  std::string _app_type;
-};
-
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
  * parsing files. It is not currently designed for extensibility. If you wish to build your own

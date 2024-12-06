@@ -37,43 +37,22 @@ AppFactory::getValidParams(const std::string & name)
 }
 
 MooseAppPtr
-AppFactory::createAppShared(const std::string & default_app_type,
-                            int argc,
-                            char ** argv,
-                            std::unique_ptr<Parser> parser,
-                            MPI_Comm comm_world_in)
+AppFactory::createAppShared(int argc, char ** argv, std::unique_ptr<Parser> parser)
 {
-  auto which_app_param = emptyInputParameters();
-  MooseApp::addAppParam(which_app_param);
-
-  {
-    CommandLine which_app_command_line(argc, argv);
-    which_app_command_line.parse();
-    which_app_command_line.populateCommandLineParams(which_app_param);
-  }
-
-  std::string app_type = which_app_param.get<std::string>("app_to_run");
-  if (app_type.empty())
-    app_type = default_app_type;
-  else
-    mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
-                    "is deprecated and will be removed in a future release.");
-
-  auto app_params = AppFactory::instance().getValidParams(app_type);
-  parser->setAppType(app_type);
+  mooseAssert(parser, "Not set");
+  mooseAssert(parser->getAppType().size(), "App type not set");
+  const std::string app_type = parser->getAppType();
 
   auto command_line = std::make_unique<CommandLine>(argc, argv);
   command_line->parse();
 
+  auto app_params = AppFactory::instance().getValidParams(parser->getAppType());
   app_params.set<int>("_argc") = argc;
   app_params.set<char **>("_argv") = argv;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
-
-  // Take the front parser and add it to the parameters so that it can be retrieved in the
-  // Application
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
 
-  return AppFactory::instance().createShared(app_type, "main", app_params, comm_world_in);
+  return AppFactory::instance().createShared(app_type, "main", app_params, MPI_COMM_WORLD);
 }
 
 MooseAppPtr
