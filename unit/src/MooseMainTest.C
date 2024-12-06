@@ -88,7 +88,7 @@ TEST(MooseMainTest, createUnregistered)
         catch (const std::exception & e)
         {
           EXPECT_EQ(std::string(e.what()),
-                    "'" + app_name + "' is not a registered application name.");
+                    "'" + app_name + "' is not a registered application type.");
           throw;
         }
       },
