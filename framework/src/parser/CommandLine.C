@@ -237,8 +237,7 @@ CommandLine::buildHitParams()
 {
   mooseAssert(_command_line_params_populated, "Must populate command line params first");
 
-  std::string params;
-  std::map<std::string, std::string> hit_path_to_arg;
+  std::vector<std::string> params;
 
   // Collect all hit parameters that aren't for subapps
   for (auto & entry : getEntries())
@@ -279,25 +278,12 @@ CommandLine::buildHitParams()
       }
 
       // Append to the total output
-      params += arg + " ";
+      params.push_back(arg);
       // Consider this parameter used
       entry.used = true;
-
-      // Make sure that the same hit path isn't applied more than once
-      // with a different value
-      if (const auto it_inserted_pair = hit_path_to_arg.emplace(entry.name, arg);
-          (!it_inserted_pair.second && arg != it_inserted_pair.first->second))
-        mooseError("The HIT command line argument for '",
-                   entry.name,
-                   "' was specified more than once, as:\n\n  ",
-                   arg,
-                   "\n  ",
-                   it_inserted_pair.first->second);
     }
 
-  if (params.size()) // remove the last space
-    params = params.substr(0, params.size() - 1);
-  return params;
+  return MooseUtils::stringJoin(params, " ");
 }
 
 void

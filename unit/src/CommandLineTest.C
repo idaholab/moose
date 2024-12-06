@@ -15,7 +15,7 @@
 
 #include <type_traits>
 
-TEST(CommandLine, parse)
+TEST(CommandLineTest, parse)
 {
   const auto test_parse =
       [](const std::vector<std::string> & args,
@@ -105,7 +105,7 @@ TEST(CommandLine, parse)
              {{}, {"sub0"}, {"sub"}});
 }
 
-TEST(CommandLine, parseHIT)
+TEST(CommandLineTest, parseHIT)
 {
   const auto test = [](const std::string & arg,
                        const std::string & path = "",
@@ -166,7 +166,7 @@ TEST(CommandLine, parseHIT)
   test_not({"-some_value=1234"});
 }
 
-TEST(CommandLine, parseMultiAppDashedOption)
+TEST(CommandLineTest, parseMultiAppDashedOption)
 {
   const auto test = [](const std::string & arg)
   {
@@ -194,7 +194,7 @@ TEST(CommandLine, parseMultiAppDashedOption)
   test("sub1:--cool-vector=1 2 3 4");
 }
 
-TEST(CommandLine, populate)
+TEST(CommandLineTest, populate)
 {
   const auto test_populate = [](const auto value_type,
                                 const auto & without_default_value,
@@ -351,7 +351,7 @@ TEST(CommandLine, populate)
   test_populate(bool(), bool(true), nullptr, nullptr, nullptr);
 }
 
-TEST(CommandLine, populateBadInterpret)
+TEST(CommandLineTest, populateBadInterpret)
 {
   const auto test = [](const auto & value_type, const std::string & value)
   {
@@ -386,7 +386,7 @@ TEST(CommandLine, populateBadInterpret)
   test(int(), "XYZ?");
 }
 
-TEST(CommandLine, populateSameSwitch)
+TEST(CommandLineTest, populateSameSwitch)
 {
   InputParameters params = emptyInputParameters();
   params.addCommandLineParam<bool>("value", "--value", "Doc");
@@ -408,7 +408,7 @@ TEST(CommandLine, populateSameSwitch)
   }
 }
 
-TEST(CommandLine, populateMooseEnum)
+TEST(CommandLineTest, populateMooseEnum)
 {
   InputParameters params = emptyInputParameters();
   const auto default_value = "foo";
@@ -447,7 +447,7 @@ TEST(CommandLine, populateMooseEnum)
   }
 }
 
-TEST(CommandLine, populateSetByUser)
+TEST(CommandLineTest, populateSetByUser)
 {
   InputParameters params = emptyInputParameters();
   params.addCommandLineParam<bool>("value", "--value", "Doc");
@@ -475,7 +475,7 @@ TEST(CommandLine, populateSetByUser)
   }
 }
 
-TEST(CommandLine, initSubAppCommandLine)
+TEST(CommandLineTest, initSubAppCommandLine)
 {
   const auto test = [](const std::vector<std::string> & args,
                        const std::string & multiapp_name,
@@ -515,7 +515,7 @@ TEST(CommandLine, initSubAppCommandLine)
   test({"--unused", "--another_global"}, "sub", "sub1", {});
 }
 
-TEST(CommandLine, requiredParameter)
+TEST(CommandLineTest, requiredParameter)
 {
   InputParameters params = emptyInputParameters();
   params.addRequiredCommandLineParam<std::string>("value", "--value", "Doc");
@@ -549,7 +549,7 @@ TEST(CommandLine, requiredParameter)
   }
 }
 
-TEST(CommandLine, requiredParameterArgument)
+TEST(CommandLineTest, requiredParameterArgument)
 {
   const auto check = [](auto & params, const bool fail)
   {
@@ -593,7 +593,7 @@ TEST(CommandLine, requiredParameterArgument)
   }
 }
 
-TEST(CommandLine, duplicateOptions)
+TEST(CommandLineTest, duplicateOptions)
 {
   InputParameters params = emptyInputParameters();
   params.addCommandLineParam<unsigned int>("value", "-v --value", "Doc");
@@ -613,7 +613,7 @@ TEST(CommandLine, duplicateOptions)
   ASSERT_EQ(params.get<unsigned int>("value"), uint(3));
 }
 
-TEST(CommandLine, unappliedArgument)
+TEST(CommandLineTest, unappliedArgument)
 {
   const auto test_not_applied = [](const std::vector<std::string> & args,
                                    const std::string & not_applied_arg,
@@ -645,7 +645,7 @@ TEST(CommandLine, unappliedArgument)
   test_not_applied({"foo=bar", "coolio"}, "coolio", "foo='bar coolio'");
 }
 
-TEST(CommandLine, boolParamWithValue)
+TEST(CommandLineTest, boolParamWithValue)
 {
   InputParameters params = emptyInputParameters();
   params.addCommandLineParam<bool>("value", "--value", "Doc");
@@ -669,7 +669,7 @@ TEST(CommandLine, boolParamWithValue)
   }
 }
 
-TEST(CommandLine, negativeScalarParam)
+TEST(CommandLineTest, negativeScalarParam)
 {
   const auto test = [](auto value)
   {
@@ -708,7 +708,7 @@ TEST(CommandLine, negativeScalarParam)
   test(int(-2));
 }
 
-TEST(CommandLine, mergeArgsForParam)
+TEST(CommandLineTest, mergeArgsForParam)
 {
   const auto test = [](const std::string & argument)
   {
@@ -751,7 +751,7 @@ TEST(CommandLine, mergeArgsForParam)
   test("neml   foo=bar");
 }
 
-TEST(CommandLine, findCommandLineParam)
+TEST(CommandLineTest, findCommandLineParam)
 {
   CommandLine cl;
   cl.addArgument("/path/to/exe");
@@ -784,7 +784,7 @@ TEST(CommandLine, findCommandLineParam)
   }
 }
 
-TEST(CommandLine, disallowApplicationType)
+TEST(CommandLineTest, disallowApplicationType)
 {
   {
     CommandLine cl;
@@ -822,7 +822,7 @@ TEST(CommandLine, disallowApplicationType)
   }
 }
 
-TEST(CommandLine, optionalValuedParam)
+TEST(CommandLineTest, optionalValuedParam)
 {
   {
     // Because --mesh-only is optional, we shouldn't associate
@@ -858,4 +858,15 @@ TEST(CommandLine, optionalValuedParam)
 
     ASSERT_EQ(params.get<std::string>("mesh_only"), std::string("foo"));
   }
+}
+
+TEST(CommandLineTest, mergeHIT)
+{
+  CommandLine cl;
+  cl.addArgument("/path/to/exe");
+  cl.addArgument("Foo/bar=baz");
+  cl.addArgument("Foo/bar=bang");
+  cl.parse();
+
+  ASSERT_EQ(cl.buildHitParams(), "Foo/bar=baz Foo/bar=bang");
 }
