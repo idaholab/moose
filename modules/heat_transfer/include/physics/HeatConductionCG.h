@@ -22,7 +22,7 @@ public:
   HeatConductionCG(const InputParameters & parameters);
 
 private:
-  void addNonlinearVariables() override;
+  void addSolverVariables() override;
   void addFEKernels() override;
   void addFEBCs() override;
 };

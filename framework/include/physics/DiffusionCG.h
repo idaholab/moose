@@ -23,7 +23,7 @@ public:
   DiffusionCG(const InputParameters & parameters);
 
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFEKernels() override;
   virtual void addFEBCs() override;
 

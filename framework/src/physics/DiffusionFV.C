@@ -175,7 +175,7 @@ DiffusionFV::addFVBCs()
 }
 
 void
-DiffusionFV::addNonlinearVariables()
+DiffusionFV::addSolverVariables()
 {
   if (variableExists(_var_name, true))
     return;

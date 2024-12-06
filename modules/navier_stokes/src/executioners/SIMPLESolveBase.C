@@ -25,6 +25,8 @@ SIMPLESolveBase::validParams()
   params.addRequiredParam<SolverSystemName>("pressure_system",
                                             "The solver system for the pressure equation.");
   params.addParam<SolverSystemName>("energy_system", "The solver system for the energy equation.");
+  params.addParam<std::vector<SolverSystemName>>(
+      "passive_scalar_systems", {}, "The solver system for each scalar advection equation.");
 
   /*
    * Parameters to control the solution of the momentum equation
@@ -183,6 +185,59 @@ SIMPLESolveBase::validParams()
       "0<energy_l_max_its",
       "The maximum allowed iterations in the linear solver of the energy equation.");
 
+  params.addParamNamesToGroup(
+      "energy_equation_relaxation energy_petsc_options energy_petsc_options_iname "
+      "energy_petsc_options_value energy_petsc_options_value energy_absolute_tolerance "
+      "energy_l_tol energy_l_abs_tol energy_l_max_its",
+      "Energy Equation");
+
+  /*
+   * Parameters to control the solution of each scalar advection system
+   */
+  params.addParam<std::vector<Real>>("passive_scalar_equation_relaxation",
+                                     std::vector<Real>(),
+                                     "The relaxation which should be used for the passive scalar "
+                                     "equations. (=1 for no relaxation, "
+                                     "diagonal dominance will still be enforced)");
+
+  params.addParam<MultiMooseEnum>("passive_scalar_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the passive scalar equation(s)");
+  params.addParam<MultiMooseEnum>(
+      "passive_scalar_petsc_options_iname",
+      Moose::PetscSupport::getCommonPetscKeys(),
+      "Names of PETSc name/value pairs for the passive scalar equation(s)");
+  params.addParam<std::vector<std::string>>(
+      "passive_scalar_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "passive scalar equation(s)");
+  params.addParam<std::vector<Real>>(
+      "passive_scalar_absolute_tolerance",
+      std::vector<Real>(),
+      "The absolute tolerance(s) on the normalized residual(s) of the passive scalar equation(s).");
+  params.addRangeCheckedParam<Real>("passive_scalar_l_tol",
+                                    1e-5,
+                                    "0.0<=passive_scalar_l_tol & passive_scalar_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the passive scalar equation(s).");
+  params.addRangeCheckedParam<Real>("passive_scalar_l_abs_tol",
+                                    1e-10,
+                                    "0.0<passive_scalar_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the passive scalar equation(s).");
+  params.addParam<unsigned int>(
+      "passive_scalar_l_max_its",
+      10000,
+      "The maximum allowed iterations in the linear solver of the turbulence equation.");
+
+  params.addParamNamesToGroup(
+      "passive_scalar_systems passive_scalar_equation_relaxation passive_scalar_petsc_options "
+      "passive_scalar_petsc_options_iname "
+      "passive_scalar_petsc_options_value passive_scalar_petsc_options_value "
+      "passive_scalar_absolute_tolerance "
+      "passive_scalar_l_tol passive_scalar_l_abs_tol passive_scalar_l_max_its",
+      "passive_scalar Equation");
+
   /*
    * SIMPLE iteration control
    */
@@ -214,10 +269,17 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _has_energy_system(isParamValid("energy_system")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
-    _num_iterations(getParam<unsigned int>("num_iterations")),
+    _passive_scalar_system_names(getParam<std::vector<SolverSystemName>>("passive_scalar_systems")),
+    _has_passive_scalar_systems(!_passive_scalar_system_names.empty()),
+    _passive_scalar_equation_relaxation(
+        getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
+    _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
+    _passive_scalar_absolute_tolerance(
+        getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
+    _num_iterations(getParam<unsigned int>("num_iterations")),
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
 {
@@ -273,6 +335,50 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "energy_l_max_its",
                                   "energy_absolute_tolerance",
                                   "energy_equation_relaxation"},
+                                 false);
+
+  // We check for input errors with regards to the passive scalar equations. At the same time, we
+  // set up the corresponding system numbers
+  if (_has_passive_scalar_systems)
+  {
+    if (_passive_scalar_system_names.size() != _passive_scalar_equation_relaxation.size())
+      paramError("passive_scalar_equation_relaxation",
+                 "The number of equation relaxation parameters does not match the number of "
+                 "passive scalar equations!");
+    if (_passive_scalar_system_names.size() != _passive_scalar_absolute_tolerance.size())
+      paramError("passive_scalar_absolute_tolerance",
+                 "The number of absolute tolerances does not match the number of "
+                 "passive scalar equations!");
+  }
+  if (_has_passive_scalar_systems)
+  {
+    const auto & passive_scalar_petsc_options =
+        getParam<MultiMooseEnum>("passive_scalar_petsc_options");
+    const auto & passive_scalar_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "passive_scalar_petsc_options_iname", "passive_scalar_petsc_options_value");
+    Moose::PetscSupport::processPetscFlags(passive_scalar_petsc_options,
+                                           _passive_scalar_petsc_options);
+    Moose::PetscSupport::processPetscPairs(passive_scalar_petsc_pair_options,
+                                           _problem.mesh().dimension(),
+                                           _passive_scalar_petsc_options);
+
+    _passive_scalar_linear_control.real_valued_data["rel_tol"] =
+        getParam<Real>("passive_scalar_l_tol");
+    _passive_scalar_linear_control.real_valued_data["abs_tol"] =
+        getParam<Real>("passive_scalar_l_abs_tol");
+    _passive_scalar_linear_control.int_valued_data["max_its"] =
+        getParam<unsigned int>("passive_scalar_l_max_its");
+  }
+  else
+    checkDependentParameterError("passive_scalar_systems",
+                                 {"passive_scalar_petsc_options",
+                                  "passive_scalar_petsc_options_iname",
+                                  "passive_scalar_petsc_options_value",
+                                  "passive_scalar_l_tol",
+                                  "passive_scalar_l_abs_tol",
+                                  "passive_scalar_l_max_its",
+                                  "passive_scalar_equation_relaxation",
+                                  "passive_scalar_absolute_tolerance"},
                                  false);
 }
 

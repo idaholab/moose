@@ -213,7 +213,7 @@ DiffusionCG::addFEBCs()
 }
 
 void
-DiffusionCG::addNonlinearVariables()
+DiffusionCG::addSolverVariables()
 {
   // If the variable was added outside the Physics
   if (variableExists(_var_name, /*error_if_aux*/ true))

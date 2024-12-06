@@ -49,7 +49,7 @@ private:
   /// to add the relevant terms (turbulent diffusion notably)
   void retrieveCoupledPhysics();
 
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addAuxiliaryVariables() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;

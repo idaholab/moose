@@ -228,7 +228,7 @@ MultiSpeciesDiffusionCG::addFEBCs()
 }
 
 void
-MultiSpeciesDiffusionCG::addNonlinearVariables()
+MultiSpeciesDiffusionCG::addSolverVariables()
 {
   for (const auto & var_name : _species_names)
   {

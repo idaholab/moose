@@ -12,6 +12,7 @@
 #include "Control.h"
 #include "ChainControlData.h"
 #include "ChainControlDataSystem.h"
+#include "MooseUtils.h"
 
 /**
  * Control that additionally provides the capability to produce/consume data values,
@@ -97,6 +98,15 @@ protected:
    */
   void addChainControlDataDependency(const std::string & data_name);
 
+  /**
+   * Gets the full control data name, including object name prefix (if any)
+   *
+   * @param data_name   Chain control data name
+   * @param apply_object_prefix   If true, apply the object name as a prefix to the data name
+   */
+  std::string fullControlDataName(const std::string & data_name,
+                                  bool apply_object_prefix = true) const;
+
   /// List of chain control data that this control depends upon
   std::vector<std::string> _control_data_depends_on;
 };
@@ -105,7 +115,7 @@ template <typename T>
 T &
 ChainControl::declareChainControlData(const std::string & data_name, bool apply_object_prefix)
 {
-  const std::string full_data_name = (apply_object_prefix ? name() + ":" : "") + data_name;
+  const std::string full_data_name = fullControlDataName(data_name, apply_object_prefix);
   auto & data =
       getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, *this);
   return data.set();
@@ -129,7 +139,18 @@ template <typename T>
 const T &
 ChainControl::getChainControlDataByName(const std::string & data_name)
 {
-  auto & data = getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
+  auto & system = getMooseApp().getChainControlDataSystem();
+
+  if (system.hasChainControlData(data_name) && !system.hasChainControlDataOfType<T>(data_name))
+    mooseError("The chain control data '",
+               data_name,
+               "' has the type '",
+               system.getChainControlDataMap().at(data_name)->type(),
+               "', but this chain control requires its type to be '",
+               MooseUtils::prettyCppType<T>(),
+               "'.");
+
+  auto & data = system.getChainControlData<T>(data_name);
 
   addChainControlDataDependency(data_name);
 

@@ -83,7 +83,7 @@ WCNSLinearFVFlowPhysics::initializePhysicsAdditional()
 }
 
 void
-WCNSLinearFVFlowPhysics::addNonlinearVariables()
+WCNSLinearFVFlowPhysics::addSolverVariables()
 {
   if (!_has_flow_equations)
     return;
@@ -279,8 +279,8 @@ WCNSLinearFVFlowPhysics::addINSInletBC()
 {
   // Check the size of the BC parameters
   unsigned int num_velocity_functor_inlets = 0;
-  for (const auto & [bdy, momentum_outlet_type] : _momentum_inlet_types)
-    if (momentum_outlet_type == "fixed-velocity" || momentum_outlet_type == "fixed-pressure")
+  for (const auto & [bdy, momentum_inlet_type] : _momentum_inlet_types)
+    if (momentum_inlet_type == "fixed-velocity" || momentum_inlet_type == "fixed-pressure")
       num_velocity_functor_inlets++;
 
   if (num_velocity_functor_inlets != _momentum_inlet_functors.size())

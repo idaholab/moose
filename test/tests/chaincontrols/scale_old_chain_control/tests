@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ScaleOldChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'scale_old_chain_control.i'
+    csvdiff = 'scale_old_chain_control_out.csv'
+    requirement = 'The system shall be able to scale a chain control data by another chain control data.'
+  []
+[]

@@ -154,7 +154,7 @@ PNSFVSolidHeatTransferPhysics::PNSFVSolidHeatTransferPhysics(const InputParamete
 }
 
 void
-PNSFVSolidHeatTransferPhysics::addNonlinearVariables()
+PNSFVSolidHeatTransferPhysics::addSolverVariables()
 {
   // Dont add if the user already defined the variable
   if (variableExists(_solid_temperature_name,

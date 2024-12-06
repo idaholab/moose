@@ -26,3 +26,9 @@ ChainControl::addChainControlDataDependency(const std::string & data_name)
       _control_data_depends_on.end())
     _control_data_depends_on.push_back(data_name);
 }
+
+std::string
+ChainControl::fullControlDataName(const std::string & data_name, bool apply_object_prefix) const
+{
+  return (apply_object_prefix ? name() + ":" : "") + data_name;
+}

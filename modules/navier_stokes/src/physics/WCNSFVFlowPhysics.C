@@ -145,7 +145,7 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
 }
 
 void
-WCNSFVFlowPhysics::addNonlinearVariables()
+WCNSFVFlowPhysics::addSolverVariables()
 {
   if (!_has_flow_equations)
     return;

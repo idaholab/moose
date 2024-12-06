@@ -44,8 +44,10 @@ public:
   static InputParameters validParams();
   RhieChowMassFlux(const InputParameters & params);
 
-  /// Get the face velocity (used in advection terms)
+  /// Get the face velocity times density (used in advection terms)
   Real getMassFlux(const FaceInfo & fi) const;
+  /// Get the volumetric face flux (used in advection terms)
+  Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
   /// Initialize the container for face velocities
   void initFaceMassFlux();

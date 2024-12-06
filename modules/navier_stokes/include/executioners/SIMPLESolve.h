@@ -68,6 +68,9 @@ protected:
   /// Pointer to the nonlinear system corresponding to the fluid energy equation
   LinearSystem * _energy_system;
 
+  /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
+  std::vector<LinearSystem *> _passive_scalar_systems;
+
   /// Pointer to the segregated RhieChow interpolation object
   RhieChowMassFlux * _rc_uo;
 };

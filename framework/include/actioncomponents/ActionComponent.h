@@ -61,7 +61,7 @@ protected:
   virtual void setupComponent() {}
 
   // These routines can help define a component that also defines a Physics
-  virtual void addNonlinearVariables() {}
+  virtual void addSolverVariables() {}
 
   /// Used to add one or more Physics to be active on the component.
   /// We recommend using the PhysicsComponentInterface instead of overriding this directly
