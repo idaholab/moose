@@ -22,6 +22,7 @@
 #include "HDGPrimalSolutionUpdateThread.h"
 #include "HDGKernel.h"
 #include "AuxiliarySystem.h"
+#include "Console.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -175,7 +176,10 @@ NonlinearSystem::solve()
     _computing_pre_smo_residual = false;
     _nl_implicit_sys.rhs->close();
     _pre_smo_residual = _nl_implicit_sys.rhs->l2_norm();
-    _console << "Pre-SMO residual: " << _pre_smo_residual << std::endl;
+    _console << " * Nonlinear |R| = "
+             << Console::outputNorm(std::numeric_limits<Real>::max(), _pre_smo_residual)
+             << " (Before preset BCs, predictors, correctors, and constraints)\n";
+    _console << std::flush;
   }
 
   const bool presolve_succeeded = preSolve();

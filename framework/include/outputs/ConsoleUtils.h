@@ -83,6 +83,11 @@ std::string outputOutputInformation(MooseApp & app);
 std::string outputSystemInformationHelper(System & system);
 
 /**
+ * Output the information about pre-SMO residual evaluation
+ */
+std::string outputPreSMOResidualInformation();
+
+/**
  * Output the legacy flag information
  */
 std::string outputLegacyInformation(MooseApp & app);
