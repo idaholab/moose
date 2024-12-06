@@ -22,6 +22,8 @@
 
 registerMooseObject("MooseApp", AbaqusUELRelationshipManager);
 
+using namespace libMesh;
+
 InputParameters
 AbaqusUELRelationshipManager::validParams()
 {
