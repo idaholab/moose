@@ -112,6 +112,7 @@ class Versioner:
             _hc = head[package]['conda']
             _hc['hash'] = head[package]['hash']
             _bc = base[package]['conda']
+
             # new libraries being added or tracked in this PR
             if not _bc:
                 _bc = dict(empty)
@@ -123,18 +124,29 @@ class Versioner:
             if _bc['build'] == 'n/a':
                 v_fill = f'{"".rjust((version_fill - len(_bc["version"]))," ")}'
 
-            # HASH MATCH, nothing to do. Anything beyond this logic block is a PR change, for
-            # good or for worse.
+            # HASH MATCH, nothing to do
             if _hc['hash'] == _bc['hash']:
                 print(f'{_hc["name"]}:{n_fill}no changes')
                 continue
 
-            # version/build has not changed, yet some influential file suggests it should.
-            # This is considered a failure.
+            # version/build has not changed, yet some influential file suggests it should
+            conda_base=f'conda{os.path.sep}{package}{os.path.sep}'
             if (_hc['version'], _hc['build']) == (_bc['version'], _bc['build']):
                 formatted_output+=(f'{_hc["name"]}:{n_fill}{red}'
                                    f'{_hc["version"]}{reset} build: '
                                    f'{red}{_hc["build"]}{reset}\n')
+
+            # a combo issue of having versioner begin tracking an existing library while
+            # also mucking with its influentials files, but forgetting to update the
+            # version/build.
+            elif not (self.git_is_diff(commit=args.verify[0],
+                                   file=f'{conda_base}meta.yaml') or
+                  self.git_is_diff(commit=args.verify[0],
+                                   file=f'{conda_base}conda_build_config.yaml')):
+                formatted_output+=(f'{_hc["name"]}:{n_fill}{red}'
+                                   f'{_hc["version"]}{reset} build: '
+                                   f'{red}{_hc["build"]}{reset} '
+                                   f'{v_fill}{v_fill} {red}update required{reset}\n')
 
             # things seem correct, highlight the changed bits in green to aid the user.
             else:
@@ -255,9 +267,13 @@ class Versioner:
             sys.exit(1)
 
     @staticmethod
-    def git_is_diff(repo_dir=MOOSE_DIR) ->bool:
+    def git_is_diff(repo_dir=MOOSE_DIR, commit=None, file=None) ->bool:
         """ returns bool on diff changes present in MOOSE_DIR """
         command = ['git', 'diff']
+        if commit is not None:
+            command.append(commit)
+        if file is not None:
+            command.append(file)
         try:
             diff = subprocess.run(command, stdout=subprocess.PIPE,
                                   stderr=subprocess.DEVNULL, check=True, cwd=repo_dir)
