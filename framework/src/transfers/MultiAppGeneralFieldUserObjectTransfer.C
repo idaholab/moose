@@ -117,14 +117,20 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
             _from_problems[i_from]->getUserObjectBase(_user_object_name);
 
         // Use spatial value routine to compute the origin value to transfer
-        auto val = user_object.spatialValue(_from_transforms[from_global_num]->mapBack(pt));
+        const auto local_pt = _from_transforms[from_global_num]->mapBack(pt);
+        auto val = user_object.spatialValue(local_pt);
 
         // Look for overlaps. The check is not active outside of overlap search because in that
         // case we accept the first value from the lowest ranked process
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but we register an overlap as soon as two values are possible from this rank
         if (detectConflict(val, outgoing_vals[i_pt].first, distance, outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, _from_transforms[from_global_num]->mapBack(pt), 1, true);
+        {
+          if (_nearest_positions_obj)
+            registerConflict(i_from, 0, pt, distance, true);
+          else
+            registerConflict(i_from, 0, local_pt, distance, true);
+        }
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

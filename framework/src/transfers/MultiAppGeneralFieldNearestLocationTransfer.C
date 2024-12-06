@@ -481,7 +481,12 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
           if (num_found > 1 && num_found == num_search &&
               MooseUtils::absoluteFuzzyEqual(zipped_nearest_points[num_found - 1].first,
                                              zipped_nearest_points[num_found - 2].first))
-            registerConflict(app_index, 0, local_pt, outgoing_vals[i_pt].second, true);
+          {
+            if (_nearest_positions_obj)
+              registerConflict(app_index, 0, pt, outgoing_vals[i_pt].second, true);
+            else
+              registerConflict(app_index, 0, local_pt, outgoing_vals[i_pt].second, true);
+          }
 
           // Recompute the distance for this problem. If it matches the cached value more than
           // once it means multiple problems provide equidistant values for this point
@@ -498,7 +503,12 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
           {
             num_equidistant_problems++;
             if (num_equidistant_problems > 1)
-              registerConflict(app_index, 0, local_pt, outgoing_vals[i_pt].second, true);
+            {
+              if (_nearest_positions_obj)
+                registerConflict(app_index, 0, pt, outgoing_vals[i_pt].second, true);
+              else
+                registerConflict(app_index, 0, local_pt, outgoing_vals[i_pt].second, true);
+            }
           }
         }
       }

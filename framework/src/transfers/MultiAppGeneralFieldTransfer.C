@@ -17,7 +17,7 @@
 #include "MooseVariableFE.h"
 #include "MeshDivision.h"
 #include "Positions.h"
-#include "MultiAppPositions.h" // remove after use_nearest_app deprecation
+#include "Factory.h"
 #include "MooseAppCoordTransform.h"
 
 // libmesh includes
@@ -200,10 +200,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     if (!hasFromMultiApp())
       paramError("use_nearest_app",
                  "Should have a 'from_multiapp' when using the nearest-app informed search");
-    auto pos_params = MultiAppPositions::validParams();
-    pos_params.set<std::vector<MultiAppName>>("multiapps") = {getMultiApp()->name()};
-    pos_params.set<MooseApp *>("_moose_app") =
-        parameters.getCheckedPointerParam<MooseApp *>("_moose_app");
+    auto pos_params = _app.getFactory().getValidParams("MultiAppPositions");
+    pos_params.set<std::vector<MultiAppName>>("multiapps") = {getFromMultiApp()->name()};
     _fe_problem.addReporter("MultiAppPositions", "_created_for_" + name(), pos_params);
     _nearest_positions_obj = &_fe_problem.getPositionsObject("_created_for_" + name());
   }
@@ -583,13 +581,14 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
          from0 += _froms_per_proc[i_proc], ++i_proc)
       for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
       {
-        if (_greedy_search || i_from == nearest_index)
+        if (_greedy_search || _search_value_conflicts || i_from == nearest_index)
         {
           processors.insert(i_proc);
           found = true;
         }
       }
-    mooseAssert(processors.size() == 1 || _greedy_search, "Should only be one nearest app");
+    mooseAssert(processors.size() == 1 || _greedy_search || _search_value_conflicts,
+                "Should only be one nearest app");
   }
   else if (_use_bounding_boxes)
   {
@@ -669,8 +668,9 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
         "Cannot find a source application to provide a value at point: ",
         point,
         " \n ",
-        "It must be that mismatched matches are used.\nIf you are using bounding boxes, "
-        "nearest-app or mesh-divisions, please consider using the greedy_search to confirm.");
+        "It must be that mismatched meshes, between the source and target application, are being "
+        "used.\nIf you are using bounding boxes, nearest-app or mesh-divisions, please consider "
+        "using the greedy_search to confirm. Then consider choosing a different transfer type.");
 }
 
 void
@@ -923,7 +923,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
 
       // if we use the nearest app, even if the value is bad we want to save the distance because
       // it's the distance to the app, if that's the closest app then so be it with the bad value
-      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val)) &&
+      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val) || _use_nearest_app) &&
           MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
       {
         // NOTE: We store the distance as well as the value. We really only need the
@@ -997,7 +997,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // - valid (or from nearest app)
         // - closest distance
         // - the smallest rank with the same distance
-        if (!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) &&
+        // TODO Fix
+        if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) ||
+             _use_nearest_app) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
              ((val.pid > pid) &&
               MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second))))
@@ -1551,13 +1553,20 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
           _from_transforms[from_global_num]->hasNonTranslationTransformation())
         mooseError("Rotation and scaling currently unsupported with nearest positions transfer.");
 
+      // Compute distance to nearest position and nearest position source
+      const Real distance_to_position_nearest_source = (pt - nearest_position_source).norm();
+      const Real distance_to_nearest_position = (pt - nearest_position).norm();
+
       // Source (usually app position) is not closest to the same positions as the target, dont
-      // send values
-      if (nearest_position != nearest_position_source)
+      // send values. We check the distance instead of the positions because if they are the same
+      // that means there's two equidistant positions and we would want to capture that as a "value
+      // conflict"
+      if (!MooseUtils::absoluteFuzzyEqual(distance_to_position_nearest_source,
+                                          distance_to_nearest_position))
         return false;
 
       // Set the distance as the distance from the nearest position to the target point
-      distance = (pt - nearest_position_source).norm();
+      distance = distance_to_position_nearest_source;
     }
 
     // Check that the app actually contains the origin point
