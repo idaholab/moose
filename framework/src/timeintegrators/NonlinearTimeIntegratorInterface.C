@@ -29,9 +29,9 @@ NonlinearTimeIntegratorInterface::NonlinearTimeIntegratorInterface(FEProblemBase
 }
 
 NumericVector<Number> *
-NonlinearTimeIntegratorInterface::addVectorForNonlinearTI(const std::string & name,
-                                                          const bool project,
-                                                          const ParallelType type)
+NonlinearTimeIntegratorInterface::addVector(const std::string & name,
+                                            const bool project,
+                                            const libMesh::ParallelType type)
 {
   if (_integrates_nl)
     return &_nl->addVector(name, project, type);

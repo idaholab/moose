@@ -66,9 +66,9 @@ protected:
   /// operate on a nonlinear system we don't need to add the vector.
   /// @param name The name of the vector
   /// @param project If the vector should be projected
-  /// @param type PThe parallel distribution of the vetor
+  /// @param type The parallel distribution of the vetor
   NumericVector<Number> *
-  addVectorForNonlinearTI(const std::string & name, const bool project, const ParallelType type);
+  addVector(const std::string & name, const bool project, const libMesh::ParallelType type);
 
   /// Pointer to the nonlinear system, can happen that we dont have any
   NonlinearSystemBase * _nl;
@@ -76,8 +76,8 @@ protected:
   /// Boolean to check if this integrator belongs to a nonlinear system
   const bool _integrates_nl;
 
-  /// Nonlinear implicit system, if applicable; otherwise, nullptr
-  NonlinearImplicitSystem * _nonlinear_implicit_system;
+  /// libMesh nonlinear implicit system, if applicable; otherwise, nullptr
+  libMesh::NonlinearImplicitSystem * _nonlinear_implicit_system;
 
   /// residual vector for time contributions
   NumericVector<Number> * _Re_time;

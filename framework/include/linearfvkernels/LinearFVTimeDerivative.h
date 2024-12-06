@@ -31,10 +31,6 @@ public:
 
   virtual Real computeRightHandSideContribution() override;
 
-  /**
-   * Set the current ElemInfo object.
-   * @param elem_info The new ElemInfo which will be used as the current
-   */
   virtual void setCurrentElemInfo(const ElemInfo * elem_info) override;
 
 protected:
@@ -46,8 +42,7 @@ protected:
   const TimeIntegrator & _time_integrator;
 
 private:
-  /// Current values of the material property multiplier. Used
-  /// for caching.
+  /// Current and older values of the material property multiplier.
   std::vector<Real> _factor_history;
 
   /// State args, the args which will help us fetch the different states of

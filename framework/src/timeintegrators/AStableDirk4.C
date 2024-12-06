@@ -42,7 +42,7 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters)
   {
     std::ostringstream oss;
     oss << "residual_stage" << stage + 1;
-    _stage_residuals[stage] = addVectorForNonlinearTI(oss.str(), false, GHOSTED);
+    _stage_residuals[stage] = addVector(oss.str(), false, GHOSTED);
   }
 
   // Initialize parameters

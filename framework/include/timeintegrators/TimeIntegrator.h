@@ -23,7 +23,6 @@ namespace libMesh
 {
 template <typename T>
 class NumericVector;
-class NonlinearImplicitSystem;
 } // namespace libMesh
 
 /**

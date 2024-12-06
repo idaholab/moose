@@ -41,9 +41,9 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
     MeshChangedInterface(parameters),
 
     _solve_type(getParam<MooseEnum>("solve_type")),
-    _explicit_residual(addVectorForNonlinearTI("explicit_residual", false, PARALLEL)),
-    _solution_update(addVectorForNonlinearTI("solution_update", true, PARALLEL)),
-    _mass_matrix_diag(addVectorForNonlinearTI("mass_matrix_diag", false, PARALLEL))
+    _explicit_residual(addVector("explicit_residual", false, PARALLEL)),
+    _solution_update(addVector("solution_update", true, PARALLEL)),
+    _mass_matrix_diag(addVector("mass_matrix_diag", false, PARALLEL))
 {
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
@@ -52,7 +52,7 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
   _fe_problem.solverParams()._type = Moose::ST_LINEAR;
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
-    _ones = addVectorForNonlinearTI("ones", false, PARALLEL);
+    _ones = addVector("ones", false, PARALLEL);
 }
 
 void

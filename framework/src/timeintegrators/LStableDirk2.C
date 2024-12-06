@@ -28,8 +28,8 @@ LStableDirk2::validParams()
 LStableDirk2::LStableDirk2(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_stage1(addVectorForNonlinearTI("residual_stage1", false, GHOSTED)),
-    _residual_stage2(addVectorForNonlinearTI("residual_stage2", false, GHOSTED)),
+    _residual_stage1(addVector("residual_stage1", false, GHOSTED)),
+    _residual_stage2(addVector("residual_stage2", false, GHOSTED)),
     _alpha(1. - 0.5 * std::sqrt(2))
 {
   mooseInfo("LStableDirk2 and other multistage TimeIntegrators are known not to work with "

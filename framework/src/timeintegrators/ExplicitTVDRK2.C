@@ -26,7 +26,7 @@ ExplicitTVDRK2::validParams()
 ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_old(addVectorForNonlinearTI("residual_old", false, libMesh::GHOSTED)),
+    _residual_old(addVector("residual_old", false, libMesh::GHOSTED)),
     _solution_older(_sys.solutionState(2))
 {
   mooseInfo("ExplicitTVDRK2 and other multistage TimeIntegrators are known not to work with "

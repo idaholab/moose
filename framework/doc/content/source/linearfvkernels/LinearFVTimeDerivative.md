@@ -23,7 +23,7 @@ For example, with an implicit Euler scheme the contribution to the right hand si
 !equation
 \frac{c_C}{\Delta t}V_C,
 
-where $\Delta t$ and $\frac{c_C}$ are the time step size and multiplier at the cell center,
+where $\Delta t$ and $c_C$ are the time step size and multiplier at the cell center,
 respectively. With these, the contribution to the right hand side becomes:
 
 !equation

@@ -34,10 +34,9 @@ ExplicitSSPRungeKutta::ExplicitSSPRungeKutta(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _order(getParam<MooseEnum>("order")),
     _stage(0),
-    _solution_intermediate_stage(
-        addVectorForNonlinearTI("solution_intermediate_stage", false, GHOSTED)),
-    _tmp_solution(addVectorForNonlinearTI("tmp_solution", false, GHOSTED)),
-    _tmp_mass_solution_product(addVectorForNonlinearTI("tmp_mass_solution_product", false, GHOSTED))
+    _solution_intermediate_stage(addVector("solution_intermediate_stage", false, GHOSTED)),
+    _tmp_solution(addVector("tmp_solution", false, GHOSTED)),
+    _tmp_mass_solution_product(addVector("tmp_mass_solution_product", false, GHOSTED))
 {
   // For SSPRK methods up to order 3, the number of stages equals the order
   _n_stages = _order;
