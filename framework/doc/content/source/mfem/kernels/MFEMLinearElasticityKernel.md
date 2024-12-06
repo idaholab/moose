@@ -11,7 +11,7 @@ Adds the domain integrator for integrating the bilinear form
 !equation
 (\sigma_{ij}, \partial_j v_i)_\Omega \,\,\, \forall v_i \in V
 
-where $v_i \in H^1$, and $\sigma$ is the stress tensor of an material with an isotropic stress/strain
+where $v_i \in H^1$, and $\sigma$ is the stress tensor of a material with an isotropic stress/strain
 relation, with components given by
 
 !equation

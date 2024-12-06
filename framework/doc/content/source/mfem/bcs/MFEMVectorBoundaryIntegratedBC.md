@@ -11,8 +11,7 @@ Adds the boundary integrator for integrating the linear form
 !equation
 (\vec f, \vec v)_{\partial\Omega} \,\,\, \forall \vec v \in V
 
-where $v \in \vec H^1$, $\vec f$ is a vector coefficient of the same dimension, and
-$\hat n$ is the outward facing unit normal vector on the boundary.
+where $v \in \vec H^1$ and $\vec f$ is a vector coefficient of the same dimension.
 
 ## Example Input File Syntax
 
