@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FluidPropertiesGasMixMaterial.md'
+  issues = '#28335'
+  [test]
+    type = CSVDiff
+    input = 'fluid_properties_gas_mix_material.i'
+    csvdiff = 'fluid_properties_gas_mix_material_out.csv'
+    requirement = 'The system shall be able to compute fluid properties for the gas mixture flow model.'
+  []
+[]
