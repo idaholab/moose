@@ -26,8 +26,7 @@ requirements:
     - {{ moose_gfortran }}
     - {{ moose_ccompiler }}
     - {{ moose_cxxcompiler }}
-    - xorg-libx11
-    - xorg-x11-proto-devel-cos7-x86_64
+    - xorg-libx11 1.8.9
     - cmake
     - make
     - automake
