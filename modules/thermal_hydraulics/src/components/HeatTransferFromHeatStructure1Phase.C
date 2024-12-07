@@ -38,7 +38,7 @@ HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
 {
 }
 
-const FEType &
+const libMesh::FEType &
 HeatTransferFromHeatStructure1Phase::getFEType()
 {
   return HeatConductionModel::feType();

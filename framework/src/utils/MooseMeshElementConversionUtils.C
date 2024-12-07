@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "MooseMeshElementConversionUtils.h"
+#include "MooseError.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/enum_order.h"

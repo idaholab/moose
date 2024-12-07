@@ -14,6 +14,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/dof_map.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", ProxyRelationshipManager);
 
 InputParameters

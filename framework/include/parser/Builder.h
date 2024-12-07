@@ -105,7 +105,7 @@ public:
 
   void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n);
 
-  void errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused);
+  void errorCheck(const libMesh::Parallel::Communicator & comm, bool warn_unused, bool err_unused);
 
   std::vector<std::string> listValidParams(std::string & section_name);
 

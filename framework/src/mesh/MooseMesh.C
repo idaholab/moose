@@ -65,6 +65,8 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
+using namespace libMesh;
+
 // Make newer nanoflann API compatible with older nanoflann versions
 #if NANOFLANN_VERSION < 0x150
 namespace nanoflann
@@ -1765,7 +1767,7 @@ PointListAdaptor<MooseMesh::PeriodicNodeInfo>::getPoint(
 void
 MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map,
                                 unsigned int var_number,
-                                PeriodicBoundaries * pbs) const
+                                libMesh::PeriodicBoundaries * pbs) const
 {
   TIME_SECTION("buildPeriodicNodeMap", 5);
 
@@ -1809,7 +1811,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   std::vector<nanoflann::ResultItem<std::size_t, Real>> ret_matches;
 
   // iterate over periodic nodes (boundary ids are in contiguous blocks)
-  PeriodicBoundaryBase * periodic = nullptr;
+  libMesh::PeriodicBoundaryBase * periodic = nullptr;
   BoundaryID current_bc_id = BoundaryInfo::invalid_id;
   for (auto & pair : periodic_nodes)
   {
@@ -1850,7 +1852,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 void
 MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & periodic_node_sets,
                                  unsigned int var_number,
-                                 PeriodicBoundaries * pbs) const
+                                 libMesh::PeriodicBoundaries * pbs) const
 {
   TIME_SECTION("buildPeriodicNodeSets", 5);
 
@@ -1867,7 +1869,7 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & p
       periodic_node_sets[bc_id].insert(node_id);
     else // This still might be a periodic node but we just haven't seen this boundary_id yet
     {
-      const PeriodicBoundaryBase * periodic = pbs->boundary(bc_id);
+      const libMesh::PeriodicBoundaryBase * periodic = pbs->boundary(bc_id);
       if (periodic && periodic->is_my_variable(var_number))
         periodic_node_sets[bc_id].insert(node_id);
     }
@@ -1974,15 +1976,15 @@ MooseMesh::detectPairedSidesets()
       plus_y_ids(dim), minus_z_ids(dim), plus_z_ids(dim);
 
   std::vector<std::unique_ptr<FEBase>> fe_faces(dim);
-  std::vector<std::unique_ptr<QGauss>> qfaces(dim);
+  std::vector<std::unique_ptr<libMesh::QGauss>> qfaces(dim);
   for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
   {
     // Face is assumed to be flat, therefore normal is assumed to be
     // constant over the face, therefore only compute it at 1 qp.
-    qfaces[side_dim] = std::unique_ptr<QGauss>(new QGauss(side_dim, CONSTANT));
+    qfaces[side_dim] = std::unique_ptr<libMesh::QGauss>(new libMesh::QGauss(side_dim, CONSTANT));
 
     // A first-order Lagrange FE for the face.
-    fe_faces[side_dim] = FEBase::build(side_dim + 1, FEType(FIRST, LAGRANGE));
+    fe_faces[side_dim] = FEBase::build(side_dim + 1, FEType(FIRST, libMesh::LAGRANGE));
     fe_faces[side_dim]->attach_quadrature_rule(qfaces[side_dim].get());
   }
 
@@ -2337,7 +2339,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
   }
 
   // The only requirement on the FEType is that it can be arbitrarily p-refined
-  const FEType p_refinable_fe_type(CONSTANT, MONOMIAL);
+  const FEType p_refinable_fe_type(CONSTANT, libMesh::MONOMIAL);
   std::vector<Point> volume_ref_points_coarse, volume_ref_points_fine, face_ref_points_coarse,
       face_ref_points_fine;
   std::vector<unsigned int> p_levels;
@@ -2371,12 +2373,12 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     qrule->init(elem->type(), elem->p_level());
     volume_ref_points_coarse = qrule->get_points();
     fe_face->reinit(elem, (unsigned int)0);
-    FEInterface::inverse_map(
+    libMesh::FEInterface::inverse_map(
         dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_coarse);
 
     p_levels.resize(max_p_level + 1);
     std::iota(p_levels.begin(), p_levels.end(), 0);
-    MeshRefinement mesh_refinement(mesh);
+    libMesh::MeshRefinement mesh_refinement(mesh);
 
     for (const auto p_level : p_levels)
     {
@@ -2384,7 +2386,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
       qrule->init(elem->type(), elem->p_level());
       volume_ref_points_fine = qrule->get_points();
       fe_face->reinit(elem, (unsigned int)0);
-      FEInterface::inverse_map(
+      libMesh::FEInterface::inverse_map(
           dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_fine);
 
       const auto map_key = std::make_pair(elem_type, p_level);
@@ -2625,8 +2627,8 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
   std::vector<Point> parent_ref_points;
 
-  FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, parent_ref_points);
-  MeshRefinement mesh_refinement(mesh);
+  libMesh::FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, parent_ref_points);
+  libMesh::MeshRefinement mesh_refinement(mesh);
   mesh_refinement.uniformly_refine(1);
 
   // A map from the child element index to the locations of all the child's quadrature points in
@@ -2671,7 +2673,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
     std::vector<Point> child_ref_points;
 
-    FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, child_ref_points);
+    libMesh::FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, child_ref_points);
     child_to_ref_points[child] = child_ref_points;
 
     std::vector<QpMap> & qp_map = refinement_map[child];
@@ -3619,7 +3621,7 @@ MooseMesh::setPartitioner(MeshBase & mesh_base,
       break;
 
     case 0: // linear
-      mesh_base.partitioner().reset(new LinearPartitioner);
+      mesh_base.partitioner().reset(new libMesh::LinearPartitioner);
       break;
     case 1: // centroid
     {
@@ -3631,20 +3633,24 @@ MooseMesh::setPartitioner(MeshBase & mesh_base,
       MooseEnum direction = params.get<MooseEnum>("centroid_partitioner_direction");
 
       if (direction == "x")
-        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+        mesh_base.partitioner().reset(
+            new libMesh::CentroidPartitioner(libMesh::CentroidPartitioner::X));
       else if (direction == "y")
-        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
+        mesh_base.partitioner().reset(
+            new libMesh::CentroidPartitioner(libMesh::CentroidPartitioner::Y));
       else if (direction == "z")
-        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
+        mesh_base.partitioner().reset(
+            new libMesh::CentroidPartitioner(libMesh::CentroidPartitioner::Z));
       else if (direction == "radial")
-        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+        mesh_base.partitioner().reset(
+            new libMesh::CentroidPartitioner(libMesh::CentroidPartitioner::RADIAL));
       break;
     }
     case 2: // hilbert_sfc
-      mesh_base.partitioner().reset(new HilbertSFCPartitioner);
+      mesh_base.partitioner().reset(new libMesh::HilbertSFCPartitioner);
       break;
     case 3: // morton_sfc
-      mesh_base.partitioner().reset(new MortonSFCPartitioner);
+      mesh_base.partitioner().reset(new libMesh::MortonSFCPartitioner);
       break;
   }
 }
@@ -3683,7 +3689,7 @@ MooseMesh::setIsCustomPartitionerRequested(bool cpr)
   _custom_partitioner_requested = cpr;
 }
 
-std::unique_ptr<PointLocatorBase>
+std::unique_ptr<libMesh::PointLocatorBase>
 MooseMesh::getPointLocator() const
 {
   return getMesh().sub_point_locator();
@@ -3760,7 +3766,7 @@ MooseMesh::buildFiniteVolumeInfo() const
         // We initialize the weights/other information in faceInfo. If the neighbor does not exist
         // or is remote (so when we are on some sort of mesh boundary), we initialize the ghost
         // cell and use it to compute the weights corresponding to the faceInfo.
-        if (!neighbor || neighbor == remote_elem)
+        if (!neighbor || neighbor == libMesh::remote_elem)
           fi.computeBoundaryCoefficients();
         else
           fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor->id()]);

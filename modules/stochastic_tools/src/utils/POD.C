@@ -11,6 +11,8 @@
 #include "MooseError.h"
 #include "POD.h"
 
+using namespace libMesh;
+
 namespace StochasticTools
 {
 

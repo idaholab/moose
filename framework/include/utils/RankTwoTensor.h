@@ -473,7 +473,7 @@ public:
    * //         6 ]
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  VectorValue<T> column(const unsigned int i) const;
+  libMesh::VectorValue<T> column(const unsigned int i) const;
 
   /// @}
 
@@ -541,7 +541,8 @@ public:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <typename Scalar>
-  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankTwoTensorTempl &>::type
+  typename libMesh::boostcopy::enable_if_c<libMesh::ScalarTraits<Scalar>::value,
+                                           RankTwoTensorTempl &>::type
   operator=(const Scalar & libmesh_dbg_var(p))
   {
     libmesh_assert_equal_to(p, Scalar(0));
@@ -940,7 +941,7 @@ public:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <typename T2>
-  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
   operator+(const libMesh::TypeTensor<T2> & a) const;
 
   /**
@@ -962,7 +963,7 @@ public:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <typename T2>
-  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
   operator-(const libMesh::TypeTensor<T2> & a) const;
 
   /**
@@ -995,8 +996,9 @@ public:
    * //       6 12 18 ]
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
-  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> operator*(const T2 & a) const;
+  template <typename T2, typename std::enable_if<libMesh::ScalarTraits<T2>::value, int>::type = 0>
+  RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
+  operator*(const T2 & a) const;
 
   /**
    * Return this tensor divided by a scalar (component-wise)
@@ -1012,8 +1014,9 @@ public:
    * //       1.5 3.0 4.5 ]
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
-  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> operator/(const T2 & a) const;
+  template <typename T2, typename std::enable_if<libMesh::ScalarTraits<T2>::value, int>::type = 0>
+  RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
+  operator/(const T2 & a) const;
 
   /**
    * Return this tensor multiplied by a vector. \f$ b_i = A_{ij} a_j \f$
@@ -1034,7 +1037,7 @@ public:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <typename T2>
-  libMesh::TypeVector<typename CompareTypes<T, T2>::supertype>
+  libMesh::TypeVector<typename libMesh::CompareTypes<T, T2>::supertype>
   operator*(const libMesh::TypeVector<T2> & a) const;
 
   /**
@@ -1056,7 +1059,7 @@ public:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <typename T2>
-  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
   operator*(const libMesh::TypeTensor<T2> & a) const;
 
   /**
@@ -1163,7 +1166,7 @@ public:
    * @brief Return the tensor product of this second order tensor with a vector \f$ C_{ijk} = A_{jk}
    * b_{i} \f$
    */
-  RankThreeTensorTempl<T> mixedProductJkI(const VectorValue<T> & b) const;
+  RankThreeTensorTempl<T> mixedProductJkI(const libMesh::VectorValue<T> & b) const;
 
   /**
    * @brief Return the positive projection tensor
@@ -1383,8 +1386,8 @@ struct RawType<RankTwoTensorTempl<T>>
   static value_type value(const RankTwoTensorTempl<T> & in)
   {
     value_type ret;
-    for (auto i : make_range(RankTwoTensorTempl<T>::N))
-      for (auto j : make_range(RankTwoTensorTempl<T>::N))
+    for (auto i : libMesh::make_range(RankTwoTensorTempl<T>::N))
+      for (auto j : libMesh::make_range(RankTwoTensorTempl<T>::N))
         ret(i, j) = raw_value(in(i, j));
 
     return ret;
@@ -1394,7 +1397,7 @@ struct RawType<RankTwoTensorTempl<T>>
 
 template <typename T>
 template <typename T2>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 RankTwoTensorTempl<T>::operator+(const libMesh::TypeTensor<T2> & b) const
 {
   return libMesh::TensorValue<T>::operator+(b);
@@ -1402,15 +1405,15 @@ RankTwoTensorTempl<T>::operator+(const libMesh::TypeTensor<T2> & b) const
 
 template <typename T>
 template <typename T2>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 RankTwoTensorTempl<T>::operator-(const libMesh::TypeTensor<T2> & b) const
 {
   return libMesh::TensorValue<T>::operator-(b);
 }
 
 template <typename T>
-template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+template <typename T2, typename std::enable_if<libMesh::ScalarTraits<T2>::value, int>::type>
+RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 RankTwoTensorTempl<T>::operator*(const T2 & b) const
 {
   return libMesh::TensorValue<T>::operator*(b);
@@ -1418,7 +1421,7 @@ RankTwoTensorTempl<T>::operator*(const T2 & b) const
 
 template <typename T>
 template <typename T2>
-libMesh::TypeVector<typename CompareTypes<T, T2>::supertype>
+libMesh::TypeVector<typename libMesh::CompareTypes<T, T2>::supertype>
 RankTwoTensorTempl<T>::operator*(const libMesh::TypeVector<T2> & b) const
 {
   return libMesh::TensorValue<T>::operator*(b);
@@ -1426,15 +1429,15 @@ RankTwoTensorTempl<T>::operator*(const libMesh::TypeVector<T2> & b) const
 
 template <typename T>
 template <typename T2>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 RankTwoTensorTempl<T>::operator*(const libMesh::TypeTensor<T2> & b) const
 {
   return libMesh::TensorValue<T>::operator*(b);
 }
 
 template <typename T>
-template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+template <typename T2, typename std::enable_if<libMesh::ScalarTraits<T2>::value, int>::type>
+RankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 RankTwoTensorTempl<T>::operator/(const T2 & b) const
 {
   return libMesh::TensorValue<T>::operator/(b);
@@ -1453,7 +1456,7 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     // Separate out positive and negative eigen values
     std::array<T, N> epos;
     std::array<T, N> d;
-    for (auto i : make_range(N))
+    for (auto i : libMesh::make_range(N))
     {
       epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
       d[i] = 0 < eigval[i] ? 1.0 : 0.0;
@@ -1463,15 +1466,15 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     RankFourTensorTempl<T> proj_pos;
     RankFourTensorTempl<T> Gab, Gba;
 
-    for (auto a : make_range(N))
+    for (auto a : libMesh::make_range(N))
     {
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       proj_pos += d[a] * Ma.outerProduct(Ma);
     }
 
     usingTensorIndices(i_, j_, k_, l_);
-    for (const auto a : make_range(N))
-      for (const auto b : make_range(a))
+    for (const auto a : libMesh::make_range(N))
+      for (const auto b : libMesh::make_range(a))
       {
         const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
         const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));

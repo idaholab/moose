@@ -10,6 +10,8 @@
 #include "RelationshipManager.h"
 #include "MooseApp.h"
 
+using namespace libMesh;
+
 InputParameters
 RelationshipManager::validParams()
 {

@@ -95,8 +95,8 @@ struct ElemSideQpArg
   /// The quadrature point index
   unsigned int qp;
 
-  /// The qudrature rule
-  const QBase * qrule;
+  /// The quadrature rule
+  const libMesh::QBase * qrule;
 
   /// The physical location of the quadrature point
   Point point;
@@ -190,7 +190,7 @@ struct FaceArg
   /// functor, then we will error
   /// If unspecified (nullptr), the evaluation will be two-sided, unless the functor is not defined
   /// on one side of the face.
-  const Elem * face_side;
+  const libMesh::Elem * face_side;
 
   /// A member that can be used to define the instance in which the limiters are executed
   const Moose::StateArg * state_limiter;
@@ -198,7 +198,7 @@ struct FaceArg
   /**
    * @returns The conceptual physical location of this data structure
    */
-  Point getPoint() const { return fi->faceCentroid(); }
+  libMesh::Point getPoint() const { return fi->faceCentroid(); }
 
   /**
    * Make a \p ElemArg from our data using the face information element
@@ -225,12 +225,12 @@ struct FaceArg
 struct NodeArg
 {
   /// The node which defines our location in space
-  const Node * node;
+  const libMesh::Node * node;
   /// Indicates what subdomain this argument should be associated with. This removes ambiguity when
   /// this argument is used to evaluate functors at the intersection of different blocks
   SubdomainID subdomain_id;
 
-  Point getPoint() const { return *node; }
+  libMesh::Point getPoint() const { return *node; }
 };
 
 /**
@@ -250,14 +250,14 @@ struct ElemQpArg
   unsigned int qp;
 
   /// The quadrature rule
-  const QBase * qrule;
+  const libMesh::QBase * qrule;
 
   /// The physical location of the quadrature point
-  Point point;
+  libMesh::Point point;
 
   /**
    * @returns The conceptual physical location of this data structure
    */
-  Point getPoint() const { return point; }
+  libMesh::Point getPoint() const { return point; }
 };
 }

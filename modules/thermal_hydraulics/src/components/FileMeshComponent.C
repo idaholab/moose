@@ -70,7 +70,7 @@ FileMeshComponent::buildMesh()
 
   auto & thm_mesh = mesh();
 
-  ExodusII_IO_Helper exio_helper(*this, false, true, false);
+  libMesh::ExodusII_IO_Helper exio_helper(*this, false, true, false);
   exio_helper.open(_file_name.c_str(), true);
   exio_helper.read_and_store_header_info();
 

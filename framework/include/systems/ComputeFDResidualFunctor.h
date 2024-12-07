@@ -10,12 +10,18 @@
 #pragma once
 
 #include "libmesh/nonlinear_implicit_system.h"
+#include "MooseTypes.h"
 
-using namespace libMesh;
+namespace libMesh
+{
+template <typename>
+class NumericVector;
+class NonlinearImplicitSystem;
+}
 
 class FEProblemBase;
 
-class ComputeFDResidualFunctor : public NonlinearImplicitSystem::ComputeResidual
+class ComputeFDResidualFunctor : public libMesh::NonlinearImplicitSystem::ComputeResidual
 {
 private:
   FEProblemBase & _fe_problem;
@@ -23,7 +29,7 @@ private:
 public:
   ComputeFDResidualFunctor(FEProblemBase & fe_problem);
 
-  void residual(const NumericVector<Number> & soln,
-                NumericVector<Number> & residual,
-                NonlinearImplicitSystem & sys) override;
+  void residual(const libMesh::NumericVector<Number> & soln,
+                libMesh::NumericVector<Number> & residual,
+                libMesh::NonlinearImplicitSystem & sys) override;
 };

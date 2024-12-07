@@ -68,5 +68,5 @@ protected:
   std::vector<Point> _point_vec;
 
   /// helper object to locate elements containing points
-  std::unique_ptr<PointLocatorBase> _pl;
+  std::unique_ptr<libMesh::PointLocatorBase> _pl;
 };

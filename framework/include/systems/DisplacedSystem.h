@@ -21,6 +21,8 @@ class TransientSystem;
 typedef TransientSystem<ExplicitSystem> TransientExplicitSystem;
 }
 
+using libMesh::TransientExplicitSystem;
+
 class DisplacedSystem : public SystemBase
 {
 public:
@@ -83,12 +85,12 @@ public:
     _undisplaced_system.disassociateDefaultVectorTags();
   }
 
-  virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag) override
+  virtual void associateMatrixToTag(libMesh::SparseMatrix<Number> & matrix, TagID tag) override
   {
     _undisplaced_system.associateMatrixToTag(matrix, tag);
   }
 
-  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag) override
+  virtual void disassociateMatrixFromTag(libMesh::SparseMatrix<Number> & matrix, TagID tag) override
   {
     _undisplaced_system.disassociateMatrixFromTag(matrix, tag);
   }
@@ -178,7 +180,7 @@ public:
    * This is an empty function since the displaced system doesn't have a matrix!
    * All sparsity pattern modification will be taken care of by the undisplaced system directly
    */
-  virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+  virtual void augmentSparsity(libMesh::SparsityPattern::Graph & /*sparsity*/,
                                std::vector<dof_id_type> & /*n_nz*/,
                                std::vector<dof_id_type> & /*n_oz*/) override
   {
@@ -235,11 +237,11 @@ public:
                                 Moose::SolutionIterationType iteration_type =
                                     Moose::SolutionIterationType::Time) const override;
 
-  virtual SparseMatrix<Number> & getMatrix(TagID tag) override
+  virtual libMesh::SparseMatrix<Number> & getMatrix(TagID tag) override
   {
     return _undisplaced_system.getMatrix(tag);
   }
-  virtual const SparseMatrix<Number> & getMatrix(TagID tag) const override
+  virtual const libMesh::SparseMatrix<Number> & getMatrix(TagID tag) const override
   {
     return _undisplaced_system.getMatrix(tag);
   }

@@ -61,7 +61,7 @@ class Builder;
  * The main MOOSE class responsible for handling user-defined
  * parameters in almost every MOOSE system.
  */
-class InputParameters : public Parameters
+class InputParameters : public libMesh::Parameters
 {
 public:
   InputParameters(const InputParameters & rhs);
@@ -1761,7 +1761,7 @@ InputParameters::checkConsistentType(const std::string & name_in) const
     mooseError("Attempting to set parameter \"",
                name,
                "\" with type (",
-               demangle(typeid(T).name()),
+               libMesh::demangle(typeid(T).name()),
                ")\nbut the parameter already exists as type (",
                it->second->type(),
                ")");
@@ -2110,7 +2110,7 @@ InputParameters::transferParam(const InputParameters & source_params,
       else
       {
         std::vector<Real> coupled_values;
-        for (const auto i : make_range(source_params.numberDefaultCoupledValues(name)))
+        for (const auto i : libMesh::make_range(source_params.numberDefaultCoupledValues(name)))
           coupled_values.push_back(source_params.defaultCoupledValue(name, i));
         addCoupledVar(p_name, coupled_values, description);
       }

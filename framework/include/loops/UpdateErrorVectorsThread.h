@@ -16,12 +16,12 @@
 class AuxiliarySystem;
 class Adaptivity;
 
-class UpdateErrorVectorsThread : public ThreadedElementLoop<ConstElemRange>
+class UpdateErrorVectorsThread : public ThreadedElementLoop<libMesh::ConstElemRange>
 {
 public:
-  UpdateErrorVectorsThread(
-      FEProblemBase & fe_problem,
-      const std::map<std::string, std::unique_ptr<ErrorVector>> & indicator_field_to_error_vector);
+  UpdateErrorVectorsThread(FEProblemBase & fe_problem,
+                           const std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> &
+                               indicator_field_to_error_vector);
 
   // Splitting Constructor
   UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split);
@@ -32,12 +32,13 @@ public:
 
 protected:
   /// Map from indicators to error vectors (markers solution vector)
-  const std::map<std::string, std::unique_ptr<ErrorVector>> & _indicator_field_to_error_vector;
+  const std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> &
+      _indicator_field_to_error_vector;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;
   NumericVector<Number> & _solution;
 
   /// Map from indicator variable number to error vectors (markers solution vector)
-  std::map<unsigned int, ErrorVector *> _indicator_field_number_to_error_vector;
+  std::map<unsigned int, libMesh::ErrorVector *> _indicator_field_number_to_error_vector;
 };

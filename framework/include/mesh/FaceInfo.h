@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "ElemInfo.h"
+#include "MooseError.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/remote_elem.h"

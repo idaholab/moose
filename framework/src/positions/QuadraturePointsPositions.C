@@ -11,6 +11,8 @@
 #include "libmesh/quadrature_gauss.h"
 #include "SetupQuadratureAction.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", QuadraturePointsPositions);
 
 InputParameters

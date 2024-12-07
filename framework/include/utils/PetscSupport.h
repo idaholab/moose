@@ -69,9 +69,10 @@ void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
  */
 template <typename T>
 void
-setLinearSolverDefaults(FEProblemBase & problem, LinearSolver<T> & linear_solver)
+setLinearSolverDefaults(FEProblemBase & problem, libMesh::LinearSolver<T> & linear_solver)
 {
-  petscSetKSPDefaults(problem, libMesh::cast_ref<PetscLinearSolver<T> &>(linear_solver).ksp());
+  petscSetKSPDefaults(problem,
+                      libMesh::cast_ref<libMesh::PetscLinearSolver<T> &>(linear_solver).ksp());
 }
 
 /**

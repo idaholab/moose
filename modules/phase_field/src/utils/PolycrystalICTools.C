@@ -17,6 +17,8 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/point_locator_base.h"
 
+using namespace libMesh;
+
 namespace GraphColoring
 {
 const unsigned int INVALID_COLOR = std::numeric_limits<unsigned int>::max();

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "libMeshReducedNamespace.h"
 #include "libmesh/perf_log.h"
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
@@ -32,18 +33,16 @@ using UniquePtr = std::unique_ptr<T>;
 #endif
 }
 
-using namespace libMesh;
-
 class ActionFactory;
 class Factory;
 class MooseEnumItem;
 class ExecFlagEnum;
 class MooseVariableFieldBase;
 
-void MooseVecView(NumericVector<Number> & vector);
-void MooseVecView(const NumericVector<Number> & vector);
-void MooseMatView(SparseMatrix<Number> & mat);
-void MooseMatView(const SparseMatrix<Number> & mat);
+void MooseVecView(libMesh::NumericVector<libMesh::Number> & vector);
+void MooseVecView(const libMesh::NumericVector<libMesh::Number> & vector);
+void MooseMatView(libMesh::SparseMatrix<libMesh::Number> & mat);
+void MooseMatView(const libMesh::SparseMatrix<libMesh::Number> & mat);
 
 /**
  * MOOSE now contains C++17 code, so give a reasonable error message
@@ -172,7 +171,7 @@ extern bool show_multiple;
  *
  * This is no longer instantiated in the framework and will be removed in the future.
  */
-extern PerfLog perf_log;
+extern libMesh::PerfLog perf_log;
 
 /**
  * Variable indicating whether we will enable FPE trapping for this run.

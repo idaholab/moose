@@ -63,7 +63,7 @@ Tecplot::Tecplot(const InputParameters & parameters)
 void
 Tecplot::output()
 {
-  TecplotIO out(*_mesh_ptr, _binary, getOutputTime() + _app.getGlobalTimeOffset());
+  libMesh::TecplotIO out(*_mesh_ptr, _binary, getOutputTime() + _app.getGlobalTimeOffset());
 
   // Only set the append flag on the TecplotIO object if the user has
   // asked for it, and this is not the first time we called output().

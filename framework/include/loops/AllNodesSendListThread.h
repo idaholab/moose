@@ -27,7 +27,7 @@ public:
   AllNodesSendListThread(FEProblemBase & fe_problem,
                          const MooseMesh & mesh,
                          const std::vector<unsigned int> & var_nums,
-                         const System & system);
+                         const libMesh::System & system);
 
   AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split);
 
@@ -47,7 +47,7 @@ protected:
 private:
   std::vector<unsigned int> _var_nums;
 
-  const System & _system;
+  const libMesh::System & _system;
 
   const unsigned int _system_number;
 

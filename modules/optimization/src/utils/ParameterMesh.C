@@ -17,6 +17,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/explicit_system.h"
 
+using namespace libMesh;
+
 ParameterMesh::ParameterMesh(const FEType & param_type,
                              const std::string & exodus_mesh,
                              const std::vector<std::string> & var_names)

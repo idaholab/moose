@@ -19,6 +19,8 @@
 #include "libmesh/petsc_vector.h"
 #include "petscmat.h"
 
+using namespace libMesh;
+
 InputParameters
 AdjointSolve::validParams()
 {

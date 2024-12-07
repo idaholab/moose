@@ -63,7 +63,7 @@ protected:
    * functions, and u is the diffused scalar field
    */
   void vectorVolumeResidual(const unsigned int i_offset,
-                            const MooseArray<Gradient> & vector_sol,
+                            const MooseArray<libMesh::Gradient> & vector_sol,
                             const MooseArray<Number> & scalar_sol,
                             const MooseArray<Real> & JxW,
                             const QBase & qrule);
@@ -87,7 +87,7 @@ protected:
    * a forcing function
    */
   void scalarVolumeResidual(const unsigned int i_offset,
-                            const MooseArray<Gradient> & vector_field,
+                            const MooseArray<libMesh::Gradient> & vector_field,
                             const Moose::Functor<Real> & source,
                             const MooseArray<Real> & JxW,
                             const QBase & qrule,
@@ -138,7 +138,7 @@ protected:
    * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
    */
   void scalarFaceResidual(const unsigned int i_offset,
-                          const MooseArray<Gradient> & vector_sol,
+                          const MooseArray<libMesh::Gradient> & vector_sol,
                           const MooseArray<Number> & scalar_sol,
                           const MooseArray<Number> & lm_sol,
                           const MooseArray<Real> & JxW_face,
@@ -162,7 +162,7 @@ protected:
    * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
    */
   void lmFaceResidual(const unsigned int i_offset,
-                      const MooseArray<Gradient> & vector_sol,
+                      const MooseArray<libMesh::Gradient> & vector_sol,
                       const MooseArray<Number> & scalar_sol,
                       const MooseArray<Number> & lm_sol,
                       const MooseArray<Real> & JxW_face,
@@ -197,7 +197,7 @@ protected:
    * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
    */
   void scalarDirichletResidual(const unsigned int i_offset,
-                               const MooseArray<Gradient> & vector_sol,
+                               const MooseArray<libMesh::Gradient> & vector_sol,
                                const MooseArray<Number> & scalar_sol,
                                const Moose::Functor<Real> & dirichlet_value,
                                const MooseArray<Real> & JxW_face,
@@ -228,7 +228,7 @@ protected:
   const std::vector<dof_id_type> & _lm_u_dof_indices;
 
   // local solutions at quadrature points
-  const MooseArray<Gradient> & _qu_sol;
+  const MooseArray<libMesh::Gradient> & _qu_sol;
   const MooseArray<Number> & _u_sol;
   const MooseArray<Number> & _lm_u_sol;
 

@@ -25,7 +25,8 @@ class NonlinearSystemBase;
 /**
  * Implements a segregated solve preconditioner.
  */
-class PhysicsBasedPreconditioner : public MoosePreconditioner, public Preconditioner<Number>
+class PhysicsBasedPreconditioner : public MoosePreconditioner,
+                                   public libMesh::Preconditioner<Number>
 {
 public:
   /**
@@ -43,7 +44,7 @@ public:
   // FIXME: use better name
   void addSystem(unsigned int var,
                  std::vector<unsigned int> off_diag,
-                 PreconditionerType type = AMG_PRECOND);
+                 libMesh::PreconditionerType type = libMesh::AMG_PRECOND);
 
   /**
    * Computes the preconditioned vector "y" based on input "x".
@@ -72,13 +73,13 @@ protected:
   /// The nonlinear system this PBP is associated with (convenience reference)
   NonlinearSystemBase & _nl;
   /// List of linear system that build up the preconditioner
-  std::vector<LinearImplicitSystem *> _systems;
+  std::vector<libMesh::LinearImplicitSystem *> _systems;
   /// Holds one Preconditioner object per small system to solve.
-  std::vector<std::unique_ptr<Preconditioner<Number>>> _preconditioners;
+  std::vector<std::unique_ptr<libMesh::Preconditioner<Number>>> _preconditioners;
   /// Holds the order the blocks are solved for.
   std::vector<unsigned int> _solve_order;
   /// Which preconditioner to use for each solve.
-  std::vector<PreconditionerType> _pre_type;
+  std::vector<libMesh::PreconditionerType> _pre_type;
   /// Holds which off diagonal blocks to compute.
   std::vector<std::vector<unsigned int>> _off_diag;
 
@@ -89,5 +90,5 @@ protected:
    * This is really just for convenience so we don't have
    * to keep looking this thing up through it's name.
    */
-  std::vector<std::vector<SparseMatrix<Number> *>> _off_diag_mats;
+  std::vector<std::vector<libMesh::SparseMatrix<Number> *>> _off_diag_mats;
 };

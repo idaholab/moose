@@ -63,7 +63,7 @@ LineSegment::contains_point(const Point & p) const
 }
 
 bool
-LineSegment::intersect(const Plane & pl, Point & intersect_p) const
+LineSegment::intersect(const libMesh::Plane & pl, Point & intersect_p) const
 {
   /**
    * There are three cases in 3D for intersection of a line and a plane

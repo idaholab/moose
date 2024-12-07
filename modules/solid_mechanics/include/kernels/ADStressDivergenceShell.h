@@ -44,7 +44,7 @@ protected:
   std::vector<const ADMaterialProperty<Real> *> _J_map;
 
   /// Quadrature rule in the out of plane direction
-  std::unique_ptr<QGauss> _t_qrule;
+  std::unique_ptr<libMesh::QGauss> _t_qrule;
 
   /// Quadrature weights in the out of plane direction in isoparametric coordinate system
   std::vector<Real> _t_weights;

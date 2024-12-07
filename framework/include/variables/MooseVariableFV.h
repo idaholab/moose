@@ -157,7 +157,10 @@ public:
 
   bool hasDoFsOnNodes() const override final { return false; }
 
-  FEContinuity getContinuity() const override final { return _element_data->getContinuity(); };
+  libMesh::FEContinuity getContinuity() const override final
+  {
+    return _element_data->getContinuity();
+  };
 
   virtual bool isNodalDefined() const override final { return false; }
 
@@ -398,9 +401,9 @@ public:
   /// @return Variable value
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
 
-  virtual void insert(NumericVector<Number> & vector) override;
-  virtual void insertLower(NumericVector<Number> & vector) override;
-  virtual void add(NumericVector<Number> & vector) override;
+  virtual void insert(libMesh::NumericVector<libMesh::Number> & vector) override;
+  virtual void insertLower(libMesh::NumericVector<libMesh::Number> & vector) override;
+  virtual void add(libMesh::NumericVector<libMesh::Number> & vector) override;
 
   const DoFValue & dofValues() const override;
   const DoFValue & dofValuesOld() const override;
@@ -418,10 +421,10 @@ public:
   const DoFValue & dofValuesDotDotNeighbor() const override;
   const DoFValue & dofValuesDotDotOld() const override;
   const DoFValue & dofValuesDotDotOldNeighbor() const override;
-  const MooseArray<Number> & dofValuesDuDotDu() const override;
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
-  const MooseArray<Number> & dofValuesDuDotDotDu() const override;
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDu() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDuNeighbor() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDotDuNeighbor() const override;
 
   const MooseArray<ADReal> & adDofValues() const override;
   const MooseArray<ADReal> & adDofValuesNeighbor() const override;
@@ -672,7 +675,7 @@ private:
   /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
   /// because the solution might not exist at the time that this variable is constructed, so we
   /// cannot safely dereference at that time
-  const NumericVector<Number> * const & _solution;
+  const libMesh::NumericVector<libMesh::Number> * const & _solution;
 
   /// Shape functions
   const FieldVariablePhiValue & _phi;

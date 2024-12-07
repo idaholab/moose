@@ -455,12 +455,15 @@ public:
   /**
    * Set the Exodus reader to restart variables from an Exodus mesh file
    */
-  void setExReaderForRestart(std::shared_ptr<ExodusII_IO> && exreader) { _ex_reader = exreader; }
+  void setExReaderForRestart(std::shared_ptr<libMesh::ExodusII_IO> && exreader)
+  {
+    _ex_reader = exreader;
+  }
 
   /**
    * Get the Exodus reader to restart variables from an Exodus mesh file
    */
-  ExodusII_IO * getExReaderForRestart() const { return _ex_reader.get(); }
+  libMesh::ExodusII_IO * getExReaderForRestart() const { return _ex_reader.get(); }
 
   /**
    * Actually build everything in the input file.
@@ -1042,7 +1045,7 @@ public:
   bool defaultAutomaticScaling() const { return _automatic_automatic_scaling; }
 
   // Return the communicator for this application
-  const std::shared_ptr<Parallel::Communicator> getCommunicator() const { return _comm; }
+  const std::shared_ptr<libMesh::Parallel::Communicator> getCommunicator() const { return _comm; }
 
   /**
    * Return the container of relationship managers
@@ -1097,14 +1100,14 @@ protected:
   /**
    * Helper method for dynamic loading of objects
    */
-  void dynamicRegistration(const Parameters & params);
+  void dynamicRegistration(const libMesh::Parameters & params);
 
   /**
    * Recursively loads libraries and dependencies in the proper order to fully register a
    * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
    */
   void loadLibraryAndDependencies(const std::string & library_filename,
-                                  const Parameters & params,
+                                  const libMesh::Parameters & params,
                                   bool load_dependencies = true);
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
@@ -1138,7 +1141,7 @@ protected:
   const std::string _type;
 
   /// The MPI communicator this App is going to use
-  const std::shared_ptr<Parallel::Communicator> _comm;
+  const std::shared_ptr<libMesh::Parallel::Communicator> _comm;
 
   /// The output file basename
   std::string _output_file_base;
@@ -1258,7 +1261,7 @@ protected:
   bool _initial_from_file;
 
   /// The Exodus reader when _initial_from_file is set to true
-  std::shared_ptr<ExodusII_IO> _ex_reader;
+  std::shared_ptr<libMesh::ExodusII_IO> _ex_reader;
 
   /// This variable indicates that DistributedMesh should be used for the libMesh mesh underlying MooseMesh.
   bool _distributed_mesh_on_command_line;
@@ -1301,7 +1304,8 @@ protected:
   /// GhostingFunctor). Anytime we clone in attachRelationshipManagers we create a map entry from
   /// the cloned undisplaced relationship manager to its displaced clone counterpart. We leverage
   /// this map when removing relationship managers/ghosting functors
-  std::unordered_map<RelationshipManager *, std::shared_ptr<GhostingFunctor>> _undisp_to_disp_rms;
+  std::unordered_map<RelationshipManager *, std::shared_ptr<libMesh::GhostingFunctor>>
+      _undisp_to_disp_rms;
 
   struct DynamicLibraryInfo
   {
@@ -1389,7 +1393,7 @@ private:
   RelationshipManager & createRMFromTemplateAndInit(const RelationshipManager & template_rm,
                                                     MooseMesh & moose_mesh,
                                                     MeshBase & mesh,
-                                                    const DofMap * dof_map = nullptr);
+                                                    const libMesh::DofMap * dof_map = nullptr);
 
   /**
    * Creates a recoverable PerfGraph.

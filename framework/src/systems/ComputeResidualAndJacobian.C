@@ -19,7 +19,7 @@ void
 ComputeResidualAndJacobian::residual_and_jacobian(const NumericVector<Number> & u,
                                                   NumericVector<Number> * R,
                                                   SparseMatrix<Number> * J,
-                                                  NonlinearImplicitSystem &)
+                                                  libMesh::NonlinearImplicitSystem &)
 {
   mooseAssert(R, "This should be non-null");
   mooseAssert(J, "This should be non-null");

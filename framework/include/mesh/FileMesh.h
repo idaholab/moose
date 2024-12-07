@@ -35,7 +35,7 @@ protected:
   std::string _file_name;
 
   /// Auxiliary object for restart
-  std::unique_ptr<ExodusII_IO> _exreader;
+  std::unique_ptr<libMesh::ExodusII_IO> _exreader;
 
   /// The requested dimension of the mesh. For some file meshes, this is not required may be implied
   /// from the element type(s).

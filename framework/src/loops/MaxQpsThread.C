@@ -26,7 +26,7 @@ MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/)
 }
 
 void
-MaxQpsThread::operator()(const ConstElemRange & range)
+MaxQpsThread::operator()(const libMesh::ConstElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;

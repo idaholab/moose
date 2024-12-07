@@ -31,6 +31,8 @@
 // TIMPI includes
 #include "timpi/parallel_sync.h"
 
+using namespace libMesh;
+
 void
 assemble_l2(EquationSystems & es, const std::string & system_name)
 {

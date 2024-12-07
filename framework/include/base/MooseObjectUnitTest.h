@@ -95,7 +95,7 @@ protected:
     problem_params.set<std::string>("_object_name") = "name2";
     _fe_problem = _factory.create<FEProblem>("FEProblem", "problem", problem_params);
 
-    _fe_problem->createQRules(QGAUSS, FIRST, FIRST, FIRST);
+    _fe_problem->createQRules(libMesh::QGAUSS, libMesh::FIRST, libMesh::FIRST, libMesh::FIRST);
 
     _app->actionWarehouse().problemBase() = _fe_problem;
   }

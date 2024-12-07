@@ -47,7 +47,7 @@ protected:
   std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
                                                     LinearSystem & system,
                                                     const Real relaxation_factor,
-                                                    SolverConfiguration & solver_config,
+                                                    libMesh::SolverConfiguration & solver_config,
                                                     const Real abs_tol);
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)

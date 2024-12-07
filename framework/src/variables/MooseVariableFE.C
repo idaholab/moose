@@ -18,6 +18,8 @@
 
 #include "libmesh/quadrature_monomial.h"
 
+using namespace libMesh;
+
 template <>
 InputParameters
 MooseVariableFE<Real>::validParams()

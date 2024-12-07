@@ -14,10 +14,10 @@
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_aux_variable");
-
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_postprocessor");
-
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_user_object");
 
 InputParameters

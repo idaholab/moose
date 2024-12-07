@@ -19,6 +19,8 @@
 #include "libmesh/point_neighbor_coupling.h"
 #include "libmesh/dof_map.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
 InputParameters

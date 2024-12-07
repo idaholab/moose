@@ -35,6 +35,8 @@
 
 #include <petscmat.h>
 
+using namespace libMesh;
+
 registerMooseObjectAliased("MooseApp", VariableCondensationPreconditioner, "VCP");
 
 InputParameters

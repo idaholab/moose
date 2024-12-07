@@ -11,6 +11,8 @@
 
 #include "libmesh/plane.h"
 
+using namespace libMesh;
+
 TEST_F(LineSegmentTest, closestPointTest)
 {
   // positive x end cases

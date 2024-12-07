@@ -26,7 +26,7 @@ class LumpedPreconditioner;
  * Class to that applies the lumped mass matrix preconditioner
  * in the ExplicitTimeIntegrator
  */
-class LumpedPreconditioner : public Preconditioner<Real>
+class LumpedPreconditioner : public libMesh::Preconditioner<Real>
 {
 public:
   LumpedPreconditioner(const NumericVector<Real> & diag_inverse)

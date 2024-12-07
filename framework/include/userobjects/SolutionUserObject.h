@@ -139,7 +139,7 @@ public:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  RealGradient
+  libMesh::RealGradient
   pointValueGradientWrapper(Real t,
                             const Point & p,
                             const std::string & var_name,
@@ -155,7 +155,7 @@ public:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  RealGradient
+  libMesh::RealGradient
   pointValueGradient(Real t,
                      const Point & p,
                      const std::string & var_name,
@@ -170,7 +170,7 @@ public:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  RealGradient
+  libMesh::RealGradient
   pointValueGradient(Real t,
                      Point pt,
                      const unsigned int local_var_index,
@@ -188,7 +188,7 @@ public:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(
+  std::map<const Elem *, libMesh::RealGradient> discontinuousPointValueGradient(
       Real t,
       const Point & p,
       const std::string & var_name,
@@ -206,7 +206,7 @@ public:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(
+  std::map<const Elem *, libMesh::RealGradient> discontinuousPointValueGradient(
       Real t,
       Point pt,
       const unsigned int local_var_index,
@@ -364,7 +364,7 @@ protected:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
-  RealGradient
+  libMesh::RealGradient
   evalMeshFunctionGradient(const Point & p,
                            const unsigned int local_var_index,
                            unsigned int func_num,
@@ -379,7 +379,7 @@ protected:
    * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
-  std::map<const Elem *, RealGradient> evalMultiValuedMeshFunctionGradient(
+  std::map<const Elem *, libMesh::RealGradient> evalMultiValuedMeshFunctionGradient(
       const Point & p,
       const unsigned int local_var_index,
       unsigned int func_num,
@@ -423,32 +423,32 @@ protected:
   /// Flag for triggering interpolation of ExodusII data
   bool _interpolate_times;
 
-  /// Pointer the libmesh::mesh object
-  std::unique_ptr<MeshBase> _mesh;
+  /// Pointer the libMesh::mesh object
+  std::unique_ptr<libMesh::MeshBase> _mesh;
 
-  /// Pointer to the libmesh::EquationSystems object
-  std::unique_ptr<EquationSystems> _es;
+  /// Pointer to the libMesh::EquationSystems object
+  std::unique_ptr<libMesh::EquationSystems> _es;
 
   /// Pointer libMesh::System class storing the read solution
-  System * _system;
+  libMesh::System * _system;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored
-  std::unique_ptr<MeshFunction> _mesh_function;
+  std::unique_ptr<libMesh::MeshFunction> _mesh_function;
 
   /// Pointer to the libMesh::ExodusII used to read the files
-  std::unique_ptr<ExodusII_IO> _exodusII_io;
+  std::unique_ptr<libMesh::ExodusII_IO> _exodusII_io;
 
   /// Pointer to the serial solution vector
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
   /// Pointer to second libMesh::EquationSystems object, used for interpolation
-  std::unique_ptr<EquationSystems> _es2;
+  std::unique_ptr<libMesh::EquationSystems> _es2;
 
   /// Pointer to a second libMesh::System object, used for interpolation
-  System * _system2;
+  libMesh::System * _system2;
 
   /// Pointer to second libMesh::MeshFuntion, used for interpolation
-  std::unique_ptr<MeshFunction> _mesh_function2;
+  std::unique_ptr<libMesh::MeshFunction> _mesh_function2;
 
   /// Pointer to second serial solution, used for interpolation
   std::unique_ptr<NumericVector<Number>> _serialized_solution2;

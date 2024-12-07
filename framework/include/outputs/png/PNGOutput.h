@@ -63,7 +63,7 @@ protected:
   const Real _transparency;
 
   /// Pointer to the libMesh::MeshFunction object in which the read data is stored.
-  std::unique_ptr<MeshFunction> _mesh_function;
+  std::unique_ptr<libMesh::MeshFunction> _mesh_function;
 
   /// The boundaries of the image.
   BoundingBox _box;

@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "HashMap.h"
+#include "MooseError.h"
 
 #include <vector>
 #include <map>

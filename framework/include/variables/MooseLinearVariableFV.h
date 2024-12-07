@@ -183,7 +183,7 @@ protected:
   mutable RealVectorValue _cell_gradient;
 
   /// Pointer to the cell gradients which are stored on the linear system
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & _grad_container;
+  const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & _grad_container;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
@@ -229,7 +229,7 @@ private:
   /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
   /// because the solution might not exist at the time that this variable is constructed, so we
   /// cannot safely dereference at that time
-  const NumericVector<Number> * const & _solution;
+  const libMesh::NumericVector<libMesh::Number> * const & _solution;
 
   /// Shape functions, only used when we are postprocessing or using this variable
   /// in an auxiliary system
@@ -276,7 +276,10 @@ public:
   virtual void residualSetup() override {}
   virtual void jacobianSetup() override {}
 
-  virtual FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
+  virtual libMesh::FEContinuity getContinuity() const override
+  {
+    return _element_data->getContinuity();
+  };
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
@@ -308,9 +311,9 @@ public:
 
   virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
 
-  virtual void insert(NumericVector<Number> & vector) override;
-  virtual void insertLower(NumericVector<Number> & vector) override;
-  virtual void add(NumericVector<Number> & vector) override;
+  virtual void insert(libMesh::NumericVector<libMesh::Number> & vector) override;
+  virtual void insertLower(libMesh::NumericVector<libMesh::Number> & vector) override;
+  virtual void add(libMesh::NumericVector<libMesh::Number> & vector) override;
 
   virtual void setActiveTags(const std::set<TagID> & vtags) override;
 
@@ -397,10 +400,12 @@ public:
   [[noreturn]] virtual const DoFValue & dofValuesDotDotNeighbor() const override;
   [[noreturn]] virtual const DoFValue & dofValuesDotDotOld() const override;
   [[noreturn]] virtual const DoFValue & dofValuesDotDotOldNeighbor() const override;
-  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDu() const override;
-  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
-  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDotDu() const override;
-  [[noreturn]] virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
+  [[noreturn]] virtual const MooseArray<libMesh::Number> & dofValuesDuDotDu() const override;
+  [[noreturn]] virtual const MooseArray<libMesh::Number> &
+  dofValuesDuDotDuNeighbor() const override;
+  [[noreturn]] virtual const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const override;
+  [[noreturn]] virtual const MooseArray<libMesh::Number> &
+  dofValuesDuDotDotDuNeighbor() const override;
 
   [[noreturn]] virtual const MooseArray<ADReal> & adDofValues() const override;
   [[noreturn]] virtual const MooseArray<ADReal> & adDofValuesNeighbor() const override;

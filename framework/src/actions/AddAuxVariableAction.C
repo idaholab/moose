@@ -46,7 +46,7 @@ AddAuxVariableAction::init()
 {
   AddVariableAction::init();
 
-  if (_fe_type.order > NINTH && !_scalar_var)
+  if (_fe_type.order > libMesh::NINTH && !_scalar_var)
     mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
                "SIXTH, SEVENTH, EIGHTH or NINTH order (",
                _fe_type.order,

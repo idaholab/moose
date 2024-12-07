@@ -52,7 +52,7 @@ ElementQualityChecker::validParams()
 
 ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _m_type(getParam<MooseEnum>("metric_type").getEnum<ElemQuality>()),
+    _m_type(getParam<MooseEnum>("metric_type").getEnum<libMesh::ElemQuality>()),
     _has_upper_bound(isParamValid("upper_bound")),
     _has_lower_bound(isParamValid("lower_bound")),
     _upper_bound(_has_upper_bound ? getParam<Real>("upper_bound") : 0.0),
@@ -80,7 +80,7 @@ void
 ElementQualityChecker::execute()
 {
   // obtain the available quality metric for current ElemType
-  std::vector<ElemQuality> metrics_avail = libMesh::Quality::valid(_current_elem->type());
+  std::vector<libMesh::ElemQuality> metrics_avail = libMesh::Quality::valid(_current_elem->type());
 
   // check whether the provided quality metric is applicable to current ElemType
   if (!checkMetricApplicability(_m_type, metrics_avail))
@@ -197,8 +197,9 @@ ElementQualityChecker::finalize()
 }
 
 bool
-ElementQualityChecker::checkMetricApplicability(const ElemQuality & elem_metric,
-                                                const std::vector<ElemQuality> & elem_metrics)
+ElementQualityChecker::checkMetricApplicability(
+    const libMesh::ElemQuality & elem_metric,
+    const std::vector<libMesh::ElemQuality> & elem_metrics)
 {
   bool has_metric = false;
 

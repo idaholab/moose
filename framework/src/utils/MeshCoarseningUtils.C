@@ -9,8 +9,12 @@
 
 #include "MeshCoarseningUtils.h"
 #include "Conversion.h"
+#include "MooseError.h"
+
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/remote_elem.h"
+
+using namespace libMesh;
 
 namespace MeshCoarseningUtils
 {

@@ -93,7 +93,7 @@ FileMeshGenerator::generate()
   bool restart_exodus = (getParam<bool>("use_for_exodus_restart") && _app.getExodusFileRestart());
   if (exodus)
   {
-    auto exreader = std::make_shared<ExodusII_IO>(*mesh);
+    auto exreader = std::make_shared<libMesh::ExodusII_IO>(*mesh);
     MooseUtils::checkFileReadable(_file_name);
 
     if (has_exodus_integers)
@@ -119,7 +119,7 @@ FileMeshGenerator::generate()
         if (getParam<bool>("clear_spline_nodes"))
           MeshTools::clear_spline_nodes(*mesh);
       }
-      MeshCommunication().broadcast(*mesh);
+      libMesh::MeshCommunication().broadcast(*mesh);
     }
     // Skip partitioning if the user requested it
     if (_skip_partitioning)

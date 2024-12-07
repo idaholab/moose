@@ -35,8 +35,9 @@ namespace FV
  * @param mesh The mesh on which we are computing the gradient
  * @return The computed cell gradient
  */
-template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
-VectorValue<T>
+template <typename T,
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<T>::value>::type>
+libMesh::VectorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
                    const StateArg & state_arg,
                    const FunctorBase<T> & functor,
@@ -79,15 +80,15 @@ greenGaussGradient(const ElemArg & elem_arg,
       // vector, e.g. the face area times the outward facing normal
 
       // ebf eqns: element gradient coefficients, e.g. eqn. 2, LHS term 2 coefficient
-      std::vector<VectorValue<Real>> ebf_grad_coeffs;
+      std::vector<libMesh::VectorValue<Real>> ebf_grad_coeffs;
       // ebf eqns: rhs b values. These will actually correspond to the elem_value so we can use a
       // pointer and avoid copying. This is the RHS of eqn. 2
       std::vector<const T *> ebf_b;
 
       // elem grad eqns: ebf coefficients, e.g. eqn. 1, LHS term 2 coefficients
-      std::vector<VectorValue<Real>> grad_ebf_coeffs;
+      std::vector<libMesh::VectorValue<Real>> grad_ebf_coeffs;
       // elem grad eqns: rhs b value, e.g. eqn. 1 RHS
-      VectorValue<T> grad_b = 0;
+      libMesh::VectorValue<T> grad_b = 0;
 
       auto action_functor = [&volume_set,
                              &volume,
@@ -541,8 +542,9 @@ greenGaussGradient(const ElemArg & elem_arg,
  * @param mesh The mesh on which we are computing the gradient
  * @return The computed cell gradient
  */
-template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
-VectorValue<T>
+template <typename T,
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<T>::value>::type>
+libMesh::VectorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
                    const StateArg & state_arg,
                    const FunctorBase<T> & functor,
@@ -564,14 +566,14 @@ greenGaussGradient(const FaceArg & face_arg,
     // This is the component of the gradient which is parallel to the line connecting
     // the cell centers. Therefore, we can use our second order, central difference
     // scheme to approximate it.
-    VectorValue<T> face_gradient = (value_neighbor - value_elem) / fi.dCNMag() * fi.eCN();
+    libMesh::VectorValue<T> face_gradient = (value_neighbor - value_elem) / fi.dCNMag() * fi.eCN();
 
     // We only need nonorthogonal correctors in 2+ dimensions
     if (mesh.dimension() > 1)
     {
       // We are using an orthogonal approach for the non-orthogonal correction, for more information
       // see Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
-      VectorValue<T> interpolated_gradient;
+      libMesh::VectorValue<T> interpolated_gradient;
 
       // Compute the gradients in the two cells on both sides of the face
       const auto & grad_elem =
@@ -603,7 +605,7 @@ template <typename T>
 TensorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
                    const StateArg & state_arg,
-                   const Moose::FunctorBase<VectorValue<T>> & functor,
+                   const Moose::FunctorBase<libMesh::VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
 {
@@ -624,7 +626,7 @@ template <typename T>
 TensorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
                    const StateArg & state_arg,
-                   const Moose::FunctorBase<VectorValue<T>> & functor,
+                   const Moose::FunctorBase<libMesh::VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
 {

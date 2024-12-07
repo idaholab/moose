@@ -16,6 +16,8 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
+using namespace libMesh;
+
 template <typename T>
 InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & parameters)
   : InitialConditionBase(parameters),

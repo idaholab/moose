@@ -32,6 +32,8 @@
 #include "libmesh/petsc_shell_matrix.h"
 #include "libmesh/petsc_solver_exception.h"
 
+using namespace libMesh;
+
 #ifdef LIBMESH_HAVE_SLEPC
 
 namespace Moose

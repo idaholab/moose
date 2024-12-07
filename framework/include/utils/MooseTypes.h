@@ -20,6 +20,10 @@
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
 
+// This is not strictly needed here, but it used to be included by ADReal.h
+// so developers relied heavily on it being already available
+#include "MooseError.h"
+
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"
@@ -27,6 +31,7 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/parameters.h"
 #include "libmesh/dense_vector.h"
+#include "libmesh/dense_matrix.h"
 #include "libmesh/int_range.h"
 
 // BOOST include
@@ -132,28 +137,13 @@ class InputParameters;
 
 namespace libMesh
 {
-template <typename>
-class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, Moose::dim, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim * Moose::dim> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
-template <typename>
-class TypeVector;
-template <typename>
-class TensorValue;
 typedef TensorValue<Real> RealTensorValue;
-template <typename>
-class TypeTensor;
-template <unsigned int, typename>
-class TypeNTensor;
-class Point;
-template <typename>
-class DenseMatrix;
-template <typename>
-class DenseVector;
 
 namespace TensorTools
 {
@@ -176,6 +166,22 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim>>
 };
 }
 }
+
+// Common types defined in libMesh
+using libMesh::Gradient;
+using libMesh::RealGradient;
+
+// Bring these common types added to the libMesh namespace in this header
+// to global namespace
+using libMesh::DenseMatrix;
+using libMesh::DenseVector;
+using libMesh::RealDIMValue;
+using libMesh::RealEigenMatrix;
+using libMesh::RealEigenVector;
+using libMesh::RealTensorArrayValue;
+using libMesh::RealTensorValue;
+using libMesh::RealVectorArrayValue;
+using libMesh::RealVectorValue;
 
 namespace MetaPhysicL
 {
@@ -203,8 +209,9 @@ typedef unsigned int PerfID;
 typedef unsigned int InvalidSolutionID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
-typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
-typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
+typedef libMesh::StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
+typedef libMesh::StoredRange<std::vector<const Elem *>::iterator, const Elem *>
+    ConstElemPointerRange;
 
 namespace Moose
 {
@@ -266,9 +273,9 @@ struct DOFType<RealVectorValue>
 template <typename OutputType>
 struct OutputTools
 {
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   typedef MooseArray<OutputType> VariableValue;
   typedef MooseArray<OutputGradient> VariableGradient;
@@ -277,9 +284,9 @@ struct OutputTools
   typedef MooseArray<OutputDivergence> VariableDivergence;
 
   typedef typename Moose::ShapeType<OutputType>::type OutputShape;
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
-  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
 
   typedef MooseArray<std::vector<OutputShape>> VariablePhiValue;
   typedef MooseArray<std::vector<OutputShapeGradient>> VariablePhiGradient;
