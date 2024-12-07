@@ -37,6 +37,7 @@
     growth_direction_z = growth_func_z
     growth_rate = growth_func_v
     crack_front_nodes = '7 6 5 4'
+    execution_order_group = -2
   [../]
 []
 
