@@ -1,0 +1,60 @@
+[Tests]
+  design = 'BatchMeshGeneratorAction.md'
+  issues = '#29800'
+  [single_scalar]
+    type = 'Exodiff'
+      input = 'single_scalar.i'
+      exodiff = 'single_scalar_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one single scalar parameter'
+  []
+  [double_scalar_corr]
+    type = 'Exodiff'
+      input = 'double_scalar_corr.i'
+      exodiff = 'double_scalar_corr_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two corresponding scalar parameters'
+  []
+  [double_scalar_cp]
+    type = 'Exodiff'
+      input = 'double_scalar_cp.i'
+      exodiff = 'double_scalar_cp_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product'
+  []
+  [single_vector]
+    type = 'Exodiff'
+      input = 'single_vector.i'
+      exodiff = 'single_vector_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one single vector parameter'
+  []
+  [scalar_vector_corr]
+    type = 'Exodiff'
+      input = 'scalar_vector_corr.i'
+      exodiff = 'scalar_vector_corr_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one scalar and one corresponding vector parameter'
+  []
+  [scalar_vector_cp]
+    type = 'Exodiff'
+      input = 'scalar_vector_cp.i'
+      exodiff = 'scalar_vector_cp_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one scalar and one vector parameter using a Cartesian product and decomposed indexing'
+  []
+  [enum_batch]
+    type = 'Exodiff'
+      input = 'scalar_enum_test.i'
+      exodiff = 'scalar_enum_test_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should '
+  []
+[]
