@@ -25,30 +25,27 @@
 
 class MooseObject;
 class Action;
+class SubProblem;
 
 #ifdef NEML2_ENABLED
-
-/**
- * Pretty print the summary of a NEML2 model
- */
 namespace neml2
 {
+/// Pretty print the summary of a NEML2 model
 std::ostream & operator<<(std::ostream &, const Model &);
 }
-
 #endif
 
 namespace NEML2Utils
 {
 
 #ifdef NEML2_ENABLED
+/// Assert that the NEML2 variable name sits on either the forces or the state subaxis
+void assertVariable(const neml2::VariableName &);
 
-/// Map a variable name onto the old_xxx sub-axis
-neml2::VariableName getOldName(const neml2::VariableName & var);
+/// Assert that the NEML2 variable name sits on either the old_forces or the old_state subaxis
+void assertOldVariable(const neml2::VariableName &);
 
-/**
- * Convert a MOOSE data structure to its NEML2 counterpart
- */
+/// Convert a MOOSE data structure to its NEML2 counterpart
 template <typename T>
 neml2::Tensor toNEML2(const T &);
 
@@ -84,9 +81,7 @@ template <size_t I = 0, typename... Args>
 void homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
                                  std::tuple<std::vector<Args>...> & to);
 
-/**
- * Convert a NEML2 data structure to its MOOSE counterpart
- */
+/// Convert a NEML2 data structure to its MOOSE counterpart
 template <typename T>
 T toMOOSE(const neml2::Tensor &);
 
@@ -209,53 +204,17 @@ setBatched(neml2::LabeledVector & v,
 
 #endif // NEML2_ENABLED
 
-/**
- * Augment class description if NEML2 is not enabled
- */
-void addClassDescription(InputParameters & params, const std::string & desc);
+/// Determine whether the NEML2 material model should be evaluated
+bool shouldCompute(const SubProblem &);
 
 /**
- * Error message if NEML2 is not enabled
+ * Augment docstring if NEML2 is not enabled
  */
-void libraryNotEnabledError(const InputParameters & params);
+std::string docstring(const std::string & desc);
+
+/**
+ * Assert that NEML2 is enabled. A MooseError is raised if NEML2 is not enabled.
+ */
+void assertNEML2Enabled();
 
 } // namespace NEML2Utils
-
-// Macros to simplify setting up stub objects when compiling without NEML2.
-// The stub objects ensure that the MOOSE documentation can be generated correctly.
-
-#define NEML2ObjectStubHeader(name, parent)                                                        \
-  class name : public parent                                                                       \
-  {                                                                                                \
-  public:                                                                                          \
-    static InputParameters validParams();                                                          \
-    name(const InputParameters & params);                                                          \
-    /* potential pure virtuals (for user object derived classes) */                                \
-    virtual void execute() {}                                                                      \
-    virtual void initialize() {}                                                                   \
-    virtual void finalize() {}                                                                     \
-    virtual void threadJoin(const UserObject &) {}                                                 \
-  }
-
-#define NEML2ObjectStubImplementationOpen(name, parent)                                            \
-  InputParameters name::validParams()                                                              \
-  {                                                                                                \
-    auto params = parent::validParams();                                                           \
-    params.addClassDescription("This object requires the application to be built with NEML2.")
-
-#define NEML2ObjectStubImplementationClose(name, parent)                                           \
-  return params;                                                                                   \
-  }                                                                                                \
-  name::name(const InputParameters & params) : parent(params)                                      \
-  {                                                                                                \
-    NEML2Utils::libraryNotEnabledError(params);                                                    \
-  }
-
-#define NEML2ObjectStubImplementation(name, parent)                                                \
-  NEML2ObjectStubImplementationOpen(name, parent);                                                 \
-  NEML2ObjectStubImplementationClose(name, parent);
-
-#define NEML2ObjectStubParam(type, param_name)                                                     \
-  params.addParam<type>(param_name, "This object requires the application to be built with NEML2.")
-#define NEML2ObjectStubVariable(param_name)                                                        \
-  params.addCoupledVar(param_name, "This object requires the application to be built with NEML2.")

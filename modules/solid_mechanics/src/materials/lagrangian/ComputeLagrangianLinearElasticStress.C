@@ -25,8 +25,8 @@ ComputeLagrangianLinearElasticStress::validParams()
 ComputeLagrangianLinearElasticStress::ComputeLagrangianLinearElasticStress(
     const InputParameters & parameters)
   : ComputeLagrangianObjectiveStress(parameters),
-    _elasticity_tensor(
-        getMaterialProperty<RankFourTensor>(getParam<MaterialPropertyName>("elasticity_tensor")))
+    _elasticity_tensor(getMaterialProperty<RankFourTensor>(
+        _base_name + getParam<MaterialPropertyName>("elasticity_tensor")))
 {
 }
 

@@ -154,7 +154,10 @@ public:
   template <typename T2>
   SymmetricRankFourTensorTempl(const SymmetricRankFourTensorTempl<T2> & copy);
 
-  // explicit cast to a full tensor
+  /// Copy constructor from RankFourTensorTempl<T>
+  explicit SymmetricRankFourTensorTempl(const RankFourTensorTempl<T> & a);
+
+  /// The conversion operator to `RankFourTensorTempl`
   explicit operator RankFourTensorTempl<T>();
 
   // Named constructors

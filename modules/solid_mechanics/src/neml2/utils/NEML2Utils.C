@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Utils.h"
+#include "SubProblem.h"
 
 #ifdef NEML2_ENABLED
 
@@ -19,28 +20,22 @@ namespace neml2
 std::ostream &
 operator<<(std::ostream & os, const Model & model)
 {
-  auto print_axis = [](std::ostream & os, const LabeledAxis & axis)
-  {
-    VariadicTable<std::string, Size> table({"Variable", "Storage size"});
-    for (const auto & var : axis.variable_names())
-      table.addRow(utils::stringify(var), axis.storage_size(var));
-    table.print(os);
-  };
+  VariadicTable<std::string, std::string, std::string, Size> table(
+      {"Type", "Name", "Tensor type", "Storage size"});
 
-  os << "Input:" << std::endl;
-  print_axis(os, model.input_axis());
+  for (const auto && [name, var] : model.input_variables())
+    table.addRow("input", utils::stringify(name), utils::stringify(var.type()), var.base_storage());
 
-  os << std::endl;
+  for (const auto && [name, var] : model.output_variables())
+    table.addRow(
+        "output", utils::stringify(name), utils::stringify(var.type()), var.base_storage());
 
-  os << "Output:" << std::endl;
-  print_axis(os, model.output_axis());
-
-  os << std::endl;
-
-  os << "Parameters: " << std::endl;
-  VariadicTable<std::string, std::string> table({"Parameter", "Requires grad"});
   for (auto && [name, param] : model.named_parameters())
-    table.addRow(name, Tensor(param).requires_grad() ? "True" : "False");
+    table.addRow("parameter", name, utils::stringify(param.type()), Tensor(param).base_storage());
+
+  for (auto && [name, buffer] : model.named_buffers())
+    table.addRow("buffer", name, utils::stringify(buffer.type()), Tensor(buffer).base_storage());
+
   table.print(os);
 
   return os;
@@ -53,29 +48,39 @@ namespace NEML2Utils
 {
 
 #ifdef NEML2_ENABLED
-
-neml2::VariableName
-getOldName(const neml2::VariableName & var)
+void
+assertVariable(const neml2::VariableName & v)
 {
-  if (var.start_with("forces"))
-    return var.slice(1).prepend("old_forces");
+  if (v.empty())
+    mooseError("Empty NEML2 variable");
 
-  if (var.start_with("state"))
-    return var.slice(1).prepend("old_state");
+  if (!v.start_with("forces") && !v.start_with("state"))
+    mooseError("The NEML2 variable '",
+               v,
+               "' should be defined on the forces or the state sub-axis, got ",
+               v.slice(0, 1),
+               " instead");
+}
 
-  mooseError("An error occurred when trying to map a stateful NEML2 variable name '",
-             var,
-             "' onto its old counterpart. The leading sub-axis of the variable should either be "
-             "'state' or 'forces'. However, we got '",
-             var.slice(0, 1),
-             "'");
+void
+assertOldVariable(const neml2::VariableName & v)
+{
+  if (v.empty())
+    mooseError("Empty NEML2 variable");
+
+  if (!v.start_with("old_forces") && !v.start_with("old_state"))
+    mooseError("The NEML2 variable '",
+               v,
+               "' should be defined on the old_forces or the old_state sub-axis, got ",
+               v.slice(0, 1),
+               " instead");
 }
 
 template <>
 neml2::Tensor
 toNEML2(const Real & v)
 {
-  return neml2::Scalar(v, neml2::default_tensor_options());
+  return neml2::Scalar::full(v);
 }
 
 // FIXME: This is an unfortunately specialization because the models I included for testing use
@@ -145,35 +150,42 @@ toMOOSE(const neml2::Tensor & t)
 
 #endif // NEML2_ENABLED
 
-static const std::string message_all =
-    "To use this object, you need to have the `NEML2` library installed. Refer to the "
-    "documentation for guidance on how to enable it.";
-#ifdef LIBTORCH_ENABLED
-static const std::string message = message_all;
-#else
-static const std::string message =
-    message_all + " To build this library MOOSE must be configured with `LIBTORCH` support!";
-#endif
+static const std::string missing_neml2 = "The `NEML2` library is required but not enabled. Refer "
+                                         "to the documentation for guidance on how to enable it.";
 
-void
-addClassDescription(InputParameters & params, const std::string & desc)
+bool
+shouldCompute(const SubProblem & problem)
 {
-#ifdef NEML2_ENABLED
-  params.addClassDescription(desc);
+  // NEML2 computes residual and Jacobian together at EXEC_LINEAR
+  // There is no work to be done at EXEC_NONLINEAR **UNLESS** we are computing the Jacobian for
+  // automatic scaling.
+  if (problem.computingScalingJacobian())
+    return true;
+
+  if (problem.currentlyComputingResidualAndJacobian())
+    return true;
+
+  if (problem.currentlyComputingJacobian())
+    return false;
+
+  return true;
+}
+
+std::string
+docstring(const std::string & desc)
+{
+#ifndef NEML2_ENABLED
+  return missing_neml2 + " (Original description: " + desc + ")";
 #else
-  params.addClassDescription(message + " (Original description: " + desc + ")");
+  return desc;
 #endif
 }
 
 void
-libraryNotEnabledError(const InputParameters & params)
+assertNEML2Enabled()
 {
 #ifndef NEML2_ENABLED
-  mooseError(params.blockLocation() + ": " + message);
-#else
-  libmesh_ignore(params);
-  static_assert(
-      "Only place libraryNotEnabledError() in a branch that is compiled if NEML2 is not enabled!");
+  mooseError(missing_neml2);
 #endif
 }
 

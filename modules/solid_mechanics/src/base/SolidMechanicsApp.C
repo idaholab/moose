@@ -182,7 +182,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("parse_neml2", /*required=*/true);
   syntax.addDependency("add_material", "parse_neml2");
   syntax.addDependency("add_user_object", "parse_neml2");
-  registerSyntax("NEML2Action", "NEML2");
+  registerSyntax("NEML2ActionCommon", "NEML2");
+  registerSyntax("NEML2Action", "NEML2/*");
 }
 
 void

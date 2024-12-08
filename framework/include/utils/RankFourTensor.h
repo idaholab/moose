@@ -144,6 +144,29 @@ public:
   template <typename T2>
   RankFourTensorTempl(const RankFourTensorTempl<T2> & copy);
 
+  /**
+   * The conversion operator from a `SymmetricRankFourTensorTempl`
+   */
+  template <typename T2>
+  RankFourTensorTempl(const SymmetricRankFourTensorTempl<T2> & t)
+  {
+    for (const auto a : make_range(SymmetricRankFourTensorTempl<T2>::N))
+      for (const auto b : make_range(SymmetricRankFourTensorTempl<T2>::N))
+      {
+        const auto & idx = SymmetricRankFourTensorTempl<T2>::full_index[a][b];
+        const auto i = idx[0];
+        const auto j = idx[1];
+        const auto k = idx[2];
+        const auto l = idx[3];
+
+        // Rijkl = Rjikl = Rijlk = Rjilk
+        (*this)(i, j, k, l) = t(a, b) / SymmetricRankFourTensorTempl<T2>::mandelFactor(a, b);
+        (*this)(j, i, k, l) = t(a, b) / SymmetricRankFourTensorTempl<T2>::mandelFactor(a, b);
+        (*this)(i, j, l, k) = t(a, b) / SymmetricRankFourTensorTempl<T2>::mandelFactor(a, b);
+        (*this)(j, i, l, k) = t(a, b) / SymmetricRankFourTensorTempl<T2>::mandelFactor(a, b);
+      }
+  }
+
   // Named constructors
   static RankFourTensorTempl<T> Identity() { return RankFourTensorTempl<T>(initIdentity); }
   static RankFourTensorTempl<T> IdentityFour() { return RankFourTensorTempl<T>(initIdentityFour); };

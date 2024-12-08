@@ -4,20 +4,11 @@ In addition to the MOOSE native material models, MOOSE can also seamlessly inter
 
 ## What is NEML2?
 
-NEML2 stands for the New Engineering Material model Library, version 2.
+NEML2, the New Engineering Material modeling Library, version 2, is an offshoot of [NEML2](https://github.com/Argonne-National-Laboratory/neml), an earlier material modeling code developed at Argonne National Laboratory. the library is provided as open source software under a MIT license.
 
-NEML2 is an offshoot of [NEML](https://github.com/Argonne-National-Laboratory/neml),
-an earlier constitutive modeling code developed at Argonne National Laboratory (which
-can be used through the MOOSE based [BlackBear](https://github.com/idaholab/blackbear) application).
-Like NEML, NEML2 provides a flexible, modular way to build constitutive models from smaller blocks.
-Unlike NEML, NEML2 vectorizes the constitutive update to efficiently run on GPUs.  NEML2 is
-built on top of [libTorch](https://pytorch.org/cppdocs/) to provide GPU support, but this also
-means that NEML2 models have all the features of a Torch module.  So, for example, users can take
-derivatives of the model with respect to parameters using pytorch automatic differentiation (AD).
+NEML2 extends the key philosophy of its predecessor, i.e., material models are flexible, modular, and can be built from smaller blocks. It also provides modern features that do not exist in the framework of its predecessor such as material model vectorization, automatic differentiation, device-portable just-in-time compilation, operator fusion, lazy tensor evaluation, etc. Moreover, NEML2 can seamlessly integrate with the popular machine learning package PyTorch to take advantage of modern and fast-growing machine learning techniques.
 
-NEML2 is provided as open source software under a MIT [license](https://raw.githubusercontent.com/applied-material-modeling/neml2/main/LICENSE).
-
-## How to use NEML2?
+## How to install NEML2?
 
 To enable NEML2 in MOOSE, set the environment variable `NEML2_DIR` to the path to the NEML2 directory.
 Alternatively, a compatible version of NEML2 also comes with MOOSE as an optional submodule. To obtain the submodule, run
@@ -45,21 +36,10 @@ cd ~/projects/moose
 
 After that, you can follow the [getting started](getting_started/installation/index_content.md optional=True) instructions to build MOOSE as usual.
 
-## Input file syntax
+## How to use NEML2 in a MOOSE simulation
 
-A dedicated input file syntax block is reserved for MOOSE-NEML2 interaction. The entry point to the syntax block is `[NEML2]`. An example syntax is shown below:
-
-```python
-[NEML2]
-  input = 'neml2.i'
-  model = 'model'
-  temperature = 'T'
-  verbose = true
-  mode = ELEMENT
-[]
-```
-
-The field `input` informs MOOSE where to look for the NEML2 input file. The field `model` tells MOOSE which material model in the NEML2 input file should be "imported". Details about all the options can be found in the [MOOSE-NEML2 syntax documentation](syntax/NEML2/index.md). To understand how to write a NEML2 input file, please refer to the [NEML2 documentation](https://applied-material-modeling.github.io/neml2/).
+A dedicated input file syntax block is reserved for MOOSE-NEML2 interaction. The entry point to the syntax block is `[NEML2]`.
+Please refer to the [NEML2 syntax](syntax/NEML2/index.md) documentation for more details.
 
 ## Citing NEML2
 
