@@ -100,7 +100,7 @@ protected:
   /// Pressures on static pressure boundaries
   std::vector<Real> _static_pressure;
   /// FE type for various variables
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
   /// Initial value for pressure
   Real _initial_pressure;
   /// Initial value for temperature

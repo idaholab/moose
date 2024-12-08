@@ -8,19 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2ToMOOSEMaterialProperty.h"
-#include "ExecuteNEML2Model.h"
+#include "NEML2ModelExecutor.h"
 
-registerMooseObject("SolidMechanicsApp", NEML2ToRealMOOSEMaterialProperty);
-registerMooseObject("SolidMechanicsApp", NEML2ToStdVectorRealMOOSEMaterialProperty);
-registerMooseObject("SolidMechanicsApp", NEML2ToSymmetricRankTwoTensorMOOSEMaterialProperty);
-registerMooseObject("SolidMechanicsApp", NEML2ToSymmetricRankFourTensorMOOSEMaterialProperty);
+#define RegisterNEML2ToMOOSEMaterialProperty(alias)                                                \
+  registerMooseObject("SolidMechanicsApp", NEML2ToMOOSE##alias##MaterialProperty)
 
-#ifndef NEML2_ENABLED
-NEML2ObjectStubImplementation(NEML2ToRealMOOSEMaterialProperty, Material);
-NEML2ObjectStubImplementation(NEML2ToStdVectorRealMOOSEMaterialProperty, Material);
-NEML2ObjectStubImplementation(NEML2ToSymmetricRankTwoTensorMOOSEMaterialProperty, Material);
-NEML2ObjectStubImplementation(NEML2ToSymmetricRankFourTensorMOOSEMaterialProperty, Material);
-#else
+RegisterNEML2ToMOOSEMaterialProperty(Real);
+RegisterNEML2ToMOOSEMaterialProperty(SymmetricRankTwoTensor);
+RegisterNEML2ToMOOSEMaterialProperty(SymmetricRankFourTensor);
+RegisterNEML2ToMOOSEMaterialProperty(StdVector);
 
 template <typename T>
 InputParameters
@@ -28,45 +24,66 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
 {
   auto params = Material::validParams();
   params.addClassDescription(
-      "Provide an output from a NEML2 model as a MOOSE material property of type " +
-      demangle(typeid(T).name()) + ".");
+      NEML2Utils::docstring("Provide an output (or its derivative) from a NEML2 model as a MOOSE "
+                            "material property of type " +
+                            demangle(typeid(T).name()) + "."));
 
-  params.addRequiredParam<UserObjectName>("execute_neml2_model_uo",
-                                          "User object managing the execution of the NEML2 model.");
-  params.addRequiredParam<MaterialPropertyName>("moose_material_property",
-                                                "MOOSE material property to emit");
-  params.addRequiredParam<std::string>("neml2_variable", "NEML2 output variable to read");
+  params.addRequiredParam<UserObjectName>(
+      "neml2_executor",
+      NEML2Utils::docstring("User object managing the execution of the NEML2 model."));
+  params.addRequiredParam<MaterialPropertyName>(
+      "to_moose",
+      NEML2Utils::docstring(
+          "MOOSE material property used to store the NEML2 output variable (or its derivative)"));
+  params.addRequiredParam<std::string>("from_neml2",
+                                       NEML2Utils::docstring("NEML2 output variable to read from"));
   params.addParam<std::string>(
       "neml2_input_derivative",
-      "If supplied return the derivative of neml2_variable with respect to this");
+      NEML2Utils::docstring(
+          "If supplied return the derivative of the NEML2 output variable with respect to this"));
+  params.addParam<std::string>(
+      "neml2_parameter_derivative",
+      NEML2Utils::docstring(
+          "If supplied return the derivative of neml2_variable with respect to this"));
 
   // provide an optional initialization of the moose property (because we don't really know if it is
   // going to become stateful or not)
-  params.addParam<MaterialPropertyName>("moose_material_property_init",
-                                        "Optional material property as the initial condition");
+  params.addParam<MaterialPropertyName>(
+      "moose_material_property_init",
+      NEML2Utils::docstring("Optional material property as the initial condition"));
 
   return params;
 }
 
 template <typename T>
 NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParameters & params)
-  : Material(params),
-    _execute_neml2_model(getUserObject<ExecuteNEML2Model>("execute_neml2_model_uo")),
-    _prop(declareProperty<T>(getParam<MaterialPropertyName>("moose_material_property"))),
+  : Material(params)
+#ifdef NEML2_ENABLED
+    ,
+    _execute_neml2_model(getUserObject<NEML2ModelExecutor>("neml2_executor")),
+    _prop(declareProperty<T>(getParam<MaterialPropertyName>("to_moose"))),
     _prop0(isParamValid("moose_material_property_init")
                ? &getMaterialProperty<T>("moose_material_property_init")
                : nullptr),
     _output_view(
         !isParamValid("neml2_input_derivative")
-            ? _execute_neml2_model.getOutputView(
-                  neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_variable")))
+            ? (!isParamValid("neml2_parameter_derivative")
+                   ? _execute_neml2_model.getOutputView(neml2::utils::parse<neml2::VariableName>(
+                         getParam<std::string>("from_neml2")))
+                   : _execute_neml2_model.getOutputParameterDerivativeView(
+                         neml2::utils::parse<neml2::VariableName>(
+                             getParam<std::string>("from_neml2")),
+                         getParam<std::string>("neml2_parameter_derivative")))
             : _execute_neml2_model.getOutputDerivativeView(
-                  neml2::utils::parse<neml2::VariableName>(getParam<std::string>("neml2_variable")),
+                  neml2::utils::parse<neml2::VariableName>(getParam<std::string>("from_neml2")),
                   neml2::utils::parse<neml2::VariableName>(
                       getParam<std::string>("neml2_input_derivative"))))
+#endif
 {
+  NEML2Utils::assertNEML2Enabled();
 }
 
+#ifdef NEML2_ENABLED
 template <typename T>
 void
 NEML2ToMOOSEMaterialProperty<T>::initQpStatefulProperties()
@@ -88,10 +105,11 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   for (std::size_t qp = 0; qp < _qrule->n_points(); qp++)
     _prop[qp] = NEML2Utils::toMOOSE<T>(_output_view.batch_index({neml2::Size(i + qp)}));
 }
-
-template class NEML2ToMOOSEMaterialProperty<Real>;
-template class NEML2ToMOOSEMaterialProperty<std::vector<Real>>;
-template class NEML2ToMOOSEMaterialProperty<SymmetricRankTwoTensor>;
-template class NEML2ToMOOSEMaterialProperty<SymmetricRankFourTensor>;
-
 #endif
+
+#define InstantiateNEML2ToMOOSEMaterialProperty(T) template class NEML2ToMOOSEMaterialProperty<T>
+
+InstantiateNEML2ToMOOSEMaterialProperty(Real);
+InstantiateNEML2ToMOOSEMaterialProperty(SymmetricRankTwoTensor);
+InstantiateNEML2ToMOOSEMaterialProperty(SymmetricRankFourTensor);
+InstantiateNEML2ToMOOSEMaterialProperty(std::vector<Real>);

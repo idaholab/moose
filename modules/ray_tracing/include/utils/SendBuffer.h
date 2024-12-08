@@ -23,7 +23,7 @@
 #include <list>
 
 template <typename Object, typename Context>
-class SendBuffer : public ParallelObject
+class SendBuffer : public libMesh::ParallelObject
 {
 public:
   SendBuffer(const libMesh::Parallel::Communicator & comm,

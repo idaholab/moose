@@ -54,7 +54,7 @@ protected:
   const unsigned int _level_set_var_number;
 
   /// system reference
-  const System & _system;
+  const libMesh::System & _system;
 
   /// the subproblem solution vector
   const NumericVector<Number> & _solution;

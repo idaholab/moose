@@ -32,6 +32,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 
+using namespace libMesh;
+
 /// Free function used for a libMesh callback
 void
 extraSendList(std::vector<dof_id_type> & send_list, void * context)

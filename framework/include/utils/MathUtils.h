@@ -159,12 +159,13 @@ negativePart(T x)
   return x < 0.0 ? x : 0.0;
 }
 
-template <typename T,
-          typename T2,
-          typename T3,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 void
 addScaled(const T & a, const T2 & b, T3 & result)
 {
@@ -174,9 +175,11 @@ addScaled(const T & a, const T2 & b, T3 & result)
 template <typename T,
           typename T2,
           typename T3,
-          typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>
+          typename std::enable_if<libMesh::ScalarTraits<T>::value, int>::type = 0>
 void
-addScaled(const T & scalar, const NumericVector<T2> & numeric_vector, NumericVector<T3> & result)
+addScaled(const T & scalar,
+          const libMesh::NumericVector<T2> & numeric_vector,
+          libMesh::NumericVector<T3> & result)
 {
   result.add(scalar, numeric_vector);
 }
@@ -328,8 +331,8 @@ smootherStep(T x, T2 start, T2 end, bool derivative = false)
   }
   x = (x - start) / (end - start);
   if (derivative)
-    return 30.0 * Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
-  return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
+    return 30.0 * libMesh::Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
+  return libMesh::Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
 }
 
 enum class ComputeType
@@ -354,9 +357,9 @@ smootherStep(const X & x, const S & start, const E & end)
   }
   const auto u = (x - start) / (end - start);
   if constexpr (compute_type == ComputeType::derivative)
-    return 30.0 * Utility::pow<2>(u) * (u * (u - 2.0) + 1.0) / (end - start);
+    return 30.0 * libMesh::Utility::pow<2>(u) * (u * (u - 2.0) + 1.0) / (end - start);
   if constexpr (compute_type == ComputeType::value)
-    return Utility::pow<3>(u) * (u * (u * 6.0 - 15.0) + 10.0);
+    return libMesh::Utility::pow<3>(u) * (u * (u * 6.0 - 15.0) + 10.0);
 }
 
 /**

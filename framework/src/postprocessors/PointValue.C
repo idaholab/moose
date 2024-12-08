@@ -61,10 +61,10 @@ PointValue::execute()
     pl->enable_out_of_mesh_mode();
 
     auto * elem = (*pl)(_point);
-    auto elem_id = elem ? elem->id() : DofObject::invalid_id;
+    auto elem_id = elem ? elem->id() : libMesh::DofObject::invalid_id;
     gatherMin(elem_id);
 
-    if (elem_id == DofObject::invalid_id)
+    if (elem_id == libMesh::DofObject::invalid_id)
       mooseError("No element located at ", _point, " in PointValue Postprocessor named: ", name());
   }
 }

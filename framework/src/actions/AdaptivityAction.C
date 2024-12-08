@@ -25,6 +25,8 @@
 #include "libmesh/system_norm.h"
 #include "libmesh/enum_norm_type.h"
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
 registerMooseAction("MooseApp", AdaptivityAction, "add_geometric_rm");
 registerMooseAction("MooseApp", AdaptivityAction, "add_algebraic_rm");

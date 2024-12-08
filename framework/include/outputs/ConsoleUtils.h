@@ -80,7 +80,7 @@ std::string outputOutputInformation(MooseApp & app);
  * @param system The libMesh system to output
  * @see outputAuxiliarySystemInformation outputNonlinearSystemInformation
  */
-std::string outputSystemInformationHelper(System & system);
+std::string outputSystemInformationHelper(libMesh::System & system);
 
 /**
  * Output the information about pre-SMO residual evaluation

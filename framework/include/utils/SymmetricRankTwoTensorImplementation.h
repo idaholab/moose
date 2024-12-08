@@ -269,17 +269,20 @@ SymmetricRankTwoTensorTempl<T>::transpose() const
 
 /// multiply vector v with row n of this tensor
 template <typename T>
-VectorValue<T>
+libMesh::VectorValue<T>
 SymmetricRankTwoTensorTempl<T>::row(const unsigned int n) const
 {
   switch (n)
   {
     case 0:
-      return VectorValue<T>(_vals[0], _vals[5] / mandelFactor(5), _vals[4] / mandelFactor(4));
+      return libMesh::VectorValue<T>(
+          _vals[0], _vals[5] / mandelFactor(5), _vals[4] / mandelFactor(4));
     case 1:
-      return VectorValue<T>(_vals[5] / mandelFactor(5), _vals[1], _vals[3] / mandelFactor(3));
+      return libMesh::VectorValue<T>(
+          _vals[5] / mandelFactor(5), _vals[1], _vals[3] / mandelFactor(3));
     case 2:
-      return VectorValue<T>(_vals[4] / mandelFactor(4), _vals[3] / mandelFactor(3), _vals[2]);
+      return libMesh::VectorValue<T>(
+          _vals[4] / mandelFactor(4), _vals[3] / mandelFactor(3), _vals[2]);
     default:
       mooseError("Invalid row");
   }
@@ -383,10 +386,10 @@ SymmetricRankTwoTensorTempl<T>::operator-=(const SymmetricRankTwoTensorTempl<T> 
 
 template <typename T>
 template <typename T2>
-SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 SymmetricRankTwoTensorTempl<T>::operator+(const SymmetricRankTwoTensorTempl<T2> & a) const
 {
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> result;
+  SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype> result;
   for (std::size_t i = 0; i < N; ++i)
     result(i) = _vals[i] + a(i);
   return result;
@@ -394,11 +397,11 @@ SymmetricRankTwoTensorTempl<T>::operator+(const SymmetricRankTwoTensorTempl<T2> 
 
 template <typename T>
 template <typename T2>
-SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>
 SymmetricRankTwoTensorTempl<T>::operator-(const SymmetricRankTwoTensorTempl<T2> & a) const
 {
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> result(
-      SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>::initNone);
+  SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype> result(
+      SymmetricRankTwoTensorTempl<typename libMesh::CompareTypes<T, T2>::supertype>::initNone);
   for (std::size_t i = 0; i < N; ++i)
     result(i) = _vals[i] - a(i);
   return result;

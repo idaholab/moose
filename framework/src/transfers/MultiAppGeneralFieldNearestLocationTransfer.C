@@ -20,6 +20,8 @@
 
 #include "libmesh/system.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", MultiAppGeneralFieldNearestLocationTransfer);
 registerMooseObjectRenamed("MooseApp",
                            MultiAppGeneralFieldNearestNodeTransfer,

@@ -61,12 +61,12 @@ public:
    * Return the pixel value for the given point
    * @param p The point at which to extract pixel data
    */
-  virtual Real sample(const Point & p);
+  virtual libMesh::Real sample(const libMesh::Point & p);
 
   /**
    * Perform initialization of image data
    */
-  virtual void setupImageSampler(MeshBase & mesh);
+  virtual void setupImageSampler(libMesh::MeshBase & mesh);
 
 protected:
   /**
@@ -131,13 +131,13 @@ private:
 #endif
 
   /// Origin of image
-  Point _origin;
+  libMesh::Point _origin;
 
   /// Pixel dimension of image
   std::vector<int> _dims;
 
   /// Physical dimensions of image
-  Point _physical_dims;
+  libMesh::Point _physical_dims;
 
   /// Physical pixel size
   std::vector<double> _voxel;
@@ -148,7 +148,7 @@ private:
 #endif
 
   /// Bounding box for testing points
-  BoundingBox _bounding_box;
+  libMesh::BoundingBox _bounding_box;
 
   /// Parameters for interface
   const InputParameters & _is_pars;

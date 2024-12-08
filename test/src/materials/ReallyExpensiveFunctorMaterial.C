@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReallyExpensiveFunctorMaterial.h"
+#include "MooseMesh.h"
 
 registerMooseObject("MooseTestApp", ReallyExpensiveFunctorMaterial);
 

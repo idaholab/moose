@@ -54,7 +54,7 @@ protected:
   std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
                                                     NonlinearSystemBase & system,
                                                     const Real relaxation_factor,
-                                                    SolverConfiguration & solver_config,
+                                                    libMesh::SolverConfiguration & solver_config,
                                                     const Real abs_tol);
 
   /// Solve the solid energy conservation equation.

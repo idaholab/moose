@@ -11,7 +11,7 @@
 namespace StochasticTools
 {
 template <typename InType, typename OutType>
-SobolCalculator<InType, OutType>::SobolCalculator(const ParallelObject & other,
+SobolCalculator<InType, OutType>::SobolCalculator(const libMesh::ParallelObject & other,
                                                   const std::string & name,
                                                   bool resample)
   : Calculator<std::vector<InType>, std::vector<OutType>>(other, name), _resample(resample)

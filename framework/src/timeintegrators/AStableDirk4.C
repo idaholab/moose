@@ -14,6 +14,8 @@
 #include "PetscSupport.h"
 #include "LStableDirk4.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", AStableDirk4);
 
 InputParameters

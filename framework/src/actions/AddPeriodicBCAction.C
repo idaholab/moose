@@ -22,6 +22,8 @@
 
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_periodic_bc");
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_geometric_rm");
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_algebraic_rm");
@@ -69,7 +71,7 @@ AddPeriodicBCAction::AddPeriodicBCAction(const InputParameters & params)
 }
 
 void
-AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p,
+AddPeriodicBCAction::setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
                                      const std::vector<VariableName> & var_names)
 {
   // TODO: multi-system

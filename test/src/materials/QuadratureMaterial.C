@@ -9,6 +9,8 @@
 
 #include "QuadratureMaterial.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseTestApp", QuadratureMaterial);
 
 InputParameters

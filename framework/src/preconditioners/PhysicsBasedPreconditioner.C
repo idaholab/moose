@@ -28,6 +28,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/coupling_matrix.h"
 
+using namespace libMesh;
+
 registerMooseObjectAliased("MooseApp", PhysicsBasedPreconditioner, "PBP");
 
 InputParameters

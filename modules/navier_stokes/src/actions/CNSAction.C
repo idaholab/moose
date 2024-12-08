@@ -21,6 +21,8 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
 registerMooseAction("NavierStokesApp", CNSAction, "add_navier_stokes_variables");
 registerMooseAction("NavierStokesApp", CNSAction, "add_navier_stokes_kernels");
 registerMooseAction("NavierStokesApp", CNSAction, "add_navier_stokes_bcs");

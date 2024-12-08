@@ -980,7 +980,7 @@ ConcentricCircleMeshGenerator::generate()
     mesh->prepare_for_use();
 
   // Laplace smoothing
-  LaplaceMeshSmoother lms(*mesh);
+  libMesh::LaplaceMeshSmoother lms(*mesh);
   lms.smooth(_smoothing_max_it);
 
   mesh->prepare_for_use();

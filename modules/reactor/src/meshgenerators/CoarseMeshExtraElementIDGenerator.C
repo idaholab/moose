@@ -8,14 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CoarseMeshExtraElementIDGenerator.h"
-
-registerMooseObject("ReactorApp", CoarseMeshExtraElementIDGenerator);
-
 #include "MooseMeshUtils.h"
 
 #include "libmesh/enum_point_locator_type.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_serializer.h"
+
+using namespace libMesh;
+
+registerMooseObject("ReactorApp", CoarseMeshExtraElementIDGenerator);
 
 InputParameters
 CoarseMeshExtraElementIDGenerator::validParams()

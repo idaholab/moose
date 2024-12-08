@@ -35,7 +35,7 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblemBase & feproblem,
 }
 
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o)
-  : PeriodicBoundaryBase(o), _dim(o._dim), _tr_x(o._tr_x), _tr_y(o._tr_y), _tr_z(o._tr_z)
+  : libMesh::PeriodicBoundaryBase(o), _dim(o._dim), _tr_x(o._tr_x), _tr_y(o._tr_y), _tr_z(o._tr_z)
 {
   // Initialize the functions (i.e., call thier initialSetup methods)
   init();
@@ -71,7 +71,7 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
   return pt;
 }
 
-std::unique_ptr<PeriodicBoundaryBase>
+std::unique_ptr<libMesh::PeriodicBoundaryBase>
 FunctionPeriodicBoundary::clone(TransformationType t) const
 {
   if (t == INVERSE)

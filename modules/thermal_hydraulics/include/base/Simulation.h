@@ -45,7 +45,7 @@ public:
   /**
    * Gets the FE type for the flow in this simulation
    */
-  const FEType & getFlowFEType() const { return _flow_fe_type; }
+  const libMesh::FEType & getFlowFEType() const { return _flow_fe_type; }
 
   /**
    * Sets up quadrature rules
@@ -148,8 +148,10 @@ public:
    * @param[in] fe_type   FEType of the variable
    * @param[in] scaling_factor   Scaling factor for the variable
    */
-  void
-  addSimVariable(bool nl, const VariableName & name, FEType fe_type, Real scaling_factor = 1.0);
+  void addSimVariable(bool nl,
+                      const VariableName & name,
+                      libMesh::FEType fe_type,
+                      Real scaling_factor = 1.0);
 
   /**
    * Queues a variable of type MooseVariable to be added to the nonlinear or aux system.
@@ -162,7 +164,7 @@ public:
    */
   void addSimVariable(bool nl,
                       const VariableName & name,
-                      FEType fe_type,
+                      libMesh::FEType fe_type,
                       const std::vector<SubdomainName> & subdomain_names,
                       Real scaling_factor = 1.0);
 
@@ -425,7 +427,7 @@ protected:
   const InputParameters & _thm_pars;
 
   /// finite element type for the flow in the simulation
-  FEType _flow_fe_type;
+  libMesh::FEType _flow_fe_type;
 
   /**
    * Setup equations to be solved in this simulation

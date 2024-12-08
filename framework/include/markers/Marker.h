@@ -32,6 +32,8 @@ typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class Adaptivity;
 
+using libMesh::ErrorVector;
+
 class Marker : public MooseObject,
                public BlockRestrictable,
                public SetupInterface,

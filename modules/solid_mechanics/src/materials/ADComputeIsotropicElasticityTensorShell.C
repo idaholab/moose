@@ -54,7 +54,7 @@ ADComputeIsotropicElasticityTensorShell::ADComputeIsotropicElasticityTensorShell
   _Cijkl(2, 2, 1, 1) = 0.0;
 
   // get number of quadrature points along thickness based on order
-  std::unique_ptr<QGauss> t_qrule = std::make_unique<QGauss>(
+  std::unique_ptr<libMesh::QGauss> t_qrule = std::make_unique<libMesh::QGauss>(
       1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
   _t_points = t_qrule->get_points();
   _elasticity_tensor.resize(_t_points.size());

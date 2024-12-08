@@ -76,7 +76,7 @@ protected:
   virtual std::string filename() override;
 
   /// Pointer to the libMesh::NemesisII_IO object that performs the actual data output
-  std::unique_ptr<Nemesis_IO> _nemesis_io_ptr;
+  std::unique_ptr<libMesh::Nemesis_IO> _nemesis_io_ptr;
 
   /// Storage for scalar values (postprocessors and scalar AuxVariables)
   std::vector<Real> _global_values;

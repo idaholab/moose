@@ -32,7 +32,7 @@ protected:
   const std::string _var_name_base;
 
   /// FEType for the variable being created
-  const FEType _fe_type;
+  const libMesh::FEType _fe_type;
 
   /// Take initial values from file?
   const bool _initial_from_file;

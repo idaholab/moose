@@ -57,7 +57,7 @@ protected:
   std::vector<short> _found_points;
 
   /// Point locator
-  std::unique_ptr<PointLocatorBase> _pl;
+  std::unique_ptr<libMesh::PointLocatorBase> _pl;
 
   /// Postprocessor multiplying the variables
   const Real & _pp_value;

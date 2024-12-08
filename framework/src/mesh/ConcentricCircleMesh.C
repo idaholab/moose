@@ -148,7 +148,7 @@ ConcentricCircleMesh::buildMesh()
       // volume preserving function for the center circle
       if (i == 0)
       {
-        const Real target_area = M_PI * Utility::pow<2>(total_concentric_circles[i]);
+        const Real target_area = M_PI * libMesh::Utility::pow<2>(total_concentric_circles[i]);
         Real modified_radius = std::sqrt(2 * target_area / std::sin(d_angle) / _num_sectors / 4);
         original_radius = total_concentric_circles[i];
         total_concentric_circles[i] = modified_radius;
@@ -156,10 +156,10 @@ ConcentricCircleMesh::buildMesh()
       else
       {
         // volume preserving functions for outer circles
-        const Real target_area = M_PI * (Utility::pow<2>(total_concentric_circles[i]) -
-                                         Utility::pow<2>(original_radius));
+        const Real target_area = M_PI * (libMesh::Utility::pow<2>(total_concentric_circles[i]) -
+                                         libMesh::Utility::pow<2>(original_radius));
         Real modified_radius = std::sqrt(target_area / std::sin(d_angle) / _num_sectors / 2 +
-                                         Utility::pow<2>(total_concentric_circles[i - 1]));
+                                         libMesh::Utility::pow<2>(total_concentric_circles[i - 1]));
         original_radius = total_concentric_circles[i];
         total_concentric_circles[i] = modified_radius;
       }
@@ -169,11 +169,11 @@ ConcentricCircleMesh::buildMesh()
   // number of total nodes
   unsigned num_total_nodes = 0;
   if (_has_outer_square)
-    num_total_nodes = Utility::pow<2>(_num_sectors / 2 + 1) +
+    num_total_nodes = libMesh::Utility::pow<2>(_num_sectors / 2 + 1) +
                       (_num_sectors + 1) * (total_concentric_circles.size() + _rings.back()) +
                       (_num_sectors + 1);
   else
-    num_total_nodes = Utility::pow<2>(_num_sectors / 2 + 1) +
+    num_total_nodes = libMesh::Utility::pow<2>(_num_sectors / 2 + 1) +
                       (_num_sectors + 1) * total_concentric_circles.size();
 
   std::vector<Node *> nodes(num_total_nodes);
@@ -329,9 +329,9 @@ ConcentricCircleMesh::buildMesh()
   }
 
   // adding elements for other concentric circles
-  index = Utility::pow<2>(_num_sectors / 2 + 1);
+  index = libMesh::Utility::pow<2>(_num_sectors / 2 + 1);
   limit = static_cast<int>(num_total_nodes) - standard - 2;
-  int num_nodes_boundary = Utility::pow<2>(_num_sectors / 2 + 1) + _num_sectors + 1;
+  int num_nodes_boundary = libMesh::Utility::pow<2>(_num_sectors / 2 + 1) + _num_sectors + 1;
 
   counter = 0;
   while (index < limit)
@@ -347,8 +347,8 @@ ConcentricCircleMesh::buildMesh()
       if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
         elem->subdomain_id() = subdomainIDs[subdomainIDs.size() - 1 - i];
 
-    int const initial = Utility::pow<2>(standard / 2 + 1);
-    int const final = Utility::pow<2>(standard / 2 + 1) + _num_sectors - 1;
+    int const initial = libMesh::Utility::pow<2>(standard / 2 + 1);
+    int const final = libMesh::Utility::pow<2>(standard / 2 + 1) + _num_sectors - 1;
 
     if ((index - initial) % (standard + 1) == 0)
       boundary_info.add_side(elem, 0, 2);
@@ -390,7 +390,7 @@ ConcentricCircleMesh::buildMesh()
 
   if (_portion == "top_left")
   {
-    MeshTools::Modification::rotate(mesh, 90, 0, 0);
+    libMesh::MeshTools::Modification::rotate(mesh, 90, 0, 0);
     boundary_info.sideset_name(1) = "bottom";
     boundary_info.sideset_name(2) = "right";
 
@@ -404,7 +404,7 @@ ConcentricCircleMesh::buildMesh()
   }
   else if (_portion == "bottom_left")
   {
-    MeshTools::Modification::rotate(mesh, 180, 0, 0);
+    libMesh::MeshTools::Modification::rotate(mesh, 180, 0, 0);
     boundary_info.sideset_name(1) = "right";
     boundary_info.sideset_name(2) = "top";
 
@@ -418,7 +418,7 @@ ConcentricCircleMesh::buildMesh()
   }
   else if (_portion == "bottom_right")
   {
-    MeshTools::Modification::rotate(mesh, 270, 0, 0);
+    libMesh::MeshTools::Modification::rotate(mesh, 270, 0, 0);
     boundary_info.sideset_name(1) = "top";
     boundary_info.sideset_name(2) = "left";
 
@@ -435,16 +435,16 @@ ConcentricCircleMesh::buildMesh()
   {
     ReplicatedMesh other_mesh(mesh);
     // This is to rotate the mesh and also to reset boundary IDs.
-    MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
+    libMesh::MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
     if (_has_outer_square)
     {
-      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
-      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
-      MeshTools::Modification::change_boundary_id(other_mesh, 4, 1);
-      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
-      MeshTools::Modification::change_boundary_id(other_mesh, 6, 3);
-      MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 4, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 6, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 1, 3, TOLERANCE, true);
@@ -455,15 +455,15 @@ ConcentricCircleMesh::buildMesh()
     }
     else
     {
-      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(other_mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
 
-      MeshTools::Modification::change_boundary_id(mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(mesh, 3, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 2);
       mesh.get_boundary_info().sideset_name(1) = "bottom";
       mesh.get_boundary_info().sideset_name(2) = "outer";
     }
@@ -474,16 +474,16 @@ ConcentricCircleMesh::buildMesh()
   {
     ReplicatedMesh other_mesh(mesh);
     // This is to rotate the mesh and also to reset boundary IDs.
-    MeshTools::Modification::rotate(other_mesh, 270, 0, 0);
+    libMesh::MeshTools::Modification::rotate(other_mesh, 270, 0, 0);
     if (_has_outer_square)
     {
-      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
-      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
-      MeshTools::Modification::change_boundary_id(other_mesh, 4, 3);
-      MeshTools::Modification::change_boundary_id(other_mesh, 5, 4);
-      MeshTools::Modification::change_boundary_id(other_mesh, 6, 1);
-      MeshTools::Modification::change_boundary_id(other_mesh, 7, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 4, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 5, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 6, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 7, 2);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 2, 4, TOLERANCE, true);
@@ -494,14 +494,14 @@ ConcentricCircleMesh::buildMesh()
     }
     else
     {
-      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(other_mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 2, 2, TOLERANCE, true);
 
-      MeshTools::Modification::change_boundary_id(mesh, 3, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 2);
       mesh.get_boundary_info().sideset_name(1) = "left";
       mesh.get_boundary_info().sideset_name(2) = "outer";
     }
@@ -512,26 +512,26 @@ ConcentricCircleMesh::buildMesh()
     ReplicatedMesh other_mesh(mesh);
 
     // This is to rotate the mesh and to reset boundary IDs.
-    MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
-    MeshTools::Modification::rotate(mesh, 180, 0, 0);
+    libMesh::MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
+    libMesh::MeshTools::Modification::rotate(mesh, 180, 0, 0);
     if (_has_outer_square)
     {
       // The other mesh is created by rotating the original mesh about 90 degrees.
-      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
-      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
-      MeshTools::Modification::change_boundary_id(other_mesh, 4, 1);
-      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
-      MeshTools::Modification::change_boundary_id(other_mesh, 6, 3);
-      MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 4, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 6, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
       // The original mesh is then rotated about 180 degrees.
-      MeshTools::Modification::change_boundary_id(mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(mesh, 2, 6);
-      MeshTools::Modification::change_boundary_id(mesh, 3, 7);
-      MeshTools::Modification::change_boundary_id(mesh, 4, 2);
-      MeshTools::Modification::change_boundary_id(mesh, 5, 3);
-      MeshTools::Modification::change_boundary_id(mesh, 6, 4);
-      MeshTools::Modification::change_boundary_id(mesh, 7, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 4, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 5, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 6, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 7, 1);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 4, 2, TOLERANCE, true);
@@ -542,15 +542,15 @@ ConcentricCircleMesh::buildMesh()
     }
     else
     {
-      MeshTools::Modification::change_boundary_id(mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(mesh, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 5, 2);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
 
-      MeshTools::Modification::change_boundary_id(mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(mesh, 3, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 2);
       mesh.get_boundary_info().sideset_name(1) = "right";
       mesh.get_boundary_info().sideset_name(2) = "outer";
     }
@@ -560,26 +560,26 @@ ConcentricCircleMesh::buildMesh()
   {
     ReplicatedMesh other_mesh(mesh);
     // This is to rotate the mesh and also to reset boundary IDs.
-    MeshTools::Modification::rotate(other_mesh, 180, 0, 0);
-    MeshTools::Modification::rotate(mesh, 270, 0, 0);
+    libMesh::MeshTools::Modification::rotate(other_mesh, 180, 0, 0);
+    libMesh::MeshTools::Modification::rotate(mesh, 270, 0, 0);
     if (_has_outer_square)
     {
       // The other mesh is created by rotating the original mesh about 180 degrees.
-      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
-      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
-      MeshTools::Modification::change_boundary_id(other_mesh, 4, 2);
-      MeshTools::Modification::change_boundary_id(other_mesh, 5, 3);
-      MeshTools::Modification::change_boundary_id(other_mesh, 6, 4);
-      MeshTools::Modification::change_boundary_id(other_mesh, 7, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 4, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 5, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 6, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(other_mesh, 7, 1);
       // The original mesh is rotated about 270 degrees.
-      MeshTools::Modification::change_boundary_id(mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(mesh, 2, 6);
-      MeshTools::Modification::change_boundary_id(mesh, 3, 7);
-      MeshTools::Modification::change_boundary_id(mesh, 4, 3);
-      MeshTools::Modification::change_boundary_id(mesh, 5, 4);
-      MeshTools::Modification::change_boundary_id(mesh, 6, 1);
-      MeshTools::Modification::change_boundary_id(mesh, 7, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 4, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 5, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 6, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 7, 2);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 1, 3, TOLERANCE, true);
@@ -590,15 +590,15 @@ ConcentricCircleMesh::buildMesh()
     }
     else
     {
-      MeshTools::Modification::change_boundary_id(mesh, 1, 5);
-      MeshTools::Modification::change_boundary_id(mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(mesh, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 5, 2);
       mesh.prepare_for_use();
       other_mesh.prepare_for_use();
       mesh.stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
 
-      MeshTools::Modification::change_boundary_id(mesh, 2, 1);
-      MeshTools::Modification::change_boundary_id(mesh, 3, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 2);
       mesh.get_boundary_info().sideset_name(1) = "top";
       mesh.get_boundary_info().sideset_name(2) = "outer";
     }
@@ -609,18 +609,18 @@ ConcentricCircleMesh::buildMesh()
     ReplicatedMesh portion_two(mesh);
 
     // This is to rotate the mesh and also to reset boundary IDs.
-    MeshTools::Modification::rotate(portion_two, 90, 0, 0);
+    libMesh::MeshTools::Modification::rotate(portion_two, 90, 0, 0);
 
     if (_has_outer_square)
     {
       // Portion 2: 2nd quadrant
-      MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
-      MeshTools::Modification::change_boundary_id(portion_two, 2, 6);
-      MeshTools::Modification::change_boundary_id(portion_two, 3, 7);
-      MeshTools::Modification::change_boundary_id(portion_two, 4, 1);
-      MeshTools::Modification::change_boundary_id(portion_two, 5, 2);
-      MeshTools::Modification::change_boundary_id(portion_two, 6, 3);
-      MeshTools::Modification::change_boundary_id(portion_two, 7, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 4, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 6, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 7, 4);
       mesh.prepare_for_use();
       portion_two.prepare_for_use();
       // 'top_half'
@@ -628,14 +628,14 @@ ConcentricCircleMesh::buildMesh()
 
       // 'bottom_half'
       ReplicatedMesh portion_bottom(mesh);
-      MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 1, 5);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 2, 6);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 3, 7);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 4, 2);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 5, 3);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 6, 4);
-      MeshTools::Modification::change_boundary_id(portion_bottom, 7, 1);
+      libMesh::MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 2, 6);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 3, 7);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 4, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 5, 3);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 6, 4);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_bottom, 7, 1);
       mesh.prepare_for_use();
       portion_bottom.prepare_for_use();
       // 'full'
@@ -649,21 +649,21 @@ ConcentricCircleMesh::buildMesh()
     }
     else
     {
-      MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
-      MeshTools::Modification::change_boundary_id(portion_two, 2, 1);
-      MeshTools::Modification::change_boundary_id(portion_two, 5, 2);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 2, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(portion_two, 5, 2);
       // 'top half'
       mesh.prepare_for_use();
       portion_two.prepare_for_use();
       mesh.stitch_meshes(portion_two, 1, 1, TOLERANCE, true);
       // 'bottom half'
       ReplicatedMesh portion_bottom(mesh);
-      MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
+      libMesh::MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
       // 'full'
       mesh.prepare_for_use();
       portion_bottom.prepare_for_use();
       mesh.stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true);
-      MeshTools::Modification::change_boundary_id(mesh, 3, 1);
+      libMesh::MeshTools::Modification::change_boundary_id(mesh, 3, 1);
       mesh.get_boundary_info().sideset_name(1) = "outer";
       portion_bottom.clear();
     }

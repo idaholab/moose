@@ -10,8 +10,7 @@
     points = '    0 0.5 0.5
                   1 0.5 0.5
                   0.5 0.0 0.5
-               '
-             '   0.5 1.0 0.5
+                  0.5 1.0 0.5
                   0.5 0.5 0.0
                   0.5 0.5 1.0'
   []
@@ -20,7 +19,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true
-  base_name = "whatever"
+  base_name = 'whatever'
 []
 
 [Variables]
@@ -243,7 +242,7 @@
   []
   [compute_stress]
     type = ComputeLagrangianLinearElasticStress
-    elasticity_tensor = whatever_elasticity_tensor
+    elasticity_tensor = elasticity_tensor
   []
   [compute_strain]
     type = ComputeLagrangianStrain

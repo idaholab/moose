@@ -9,6 +9,8 @@
 
 #include "PolygonConcentricCircleMeshGenerator.h"
 
+using namespace libMesh;
+
 registerMooseObject("ReactorApp", PolygonConcentricCircleMeshGenerator);
 
 InputParameters

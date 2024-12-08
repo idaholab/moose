@@ -26,6 +26,9 @@
 #include "libmesh/eigen_solver.h"
 #include "libmesh/enum_eigen_solver_type.h"
 
+// Needed for LIBMESH_CHECK_ERR
+using libMesh::PetscSolverException;
+
 registerMooseObject("MooseApp", EigenProblem);
 
 InputParameters

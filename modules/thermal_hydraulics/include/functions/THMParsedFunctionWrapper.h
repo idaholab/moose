@@ -78,7 +78,7 @@ private:
   std::vector<Real> _initial_vals;
 
   /// Pointer to the libMesh::ParsedFunction object
-  std::unique_ptr<ParsedFunction<Real>> _function_ptr;
+  std::unique_ptr<libMesh::ParsedFunction<Real>> _function_ptr;
 
   /// Stores _addr variable indices for each ControlData<Real> value
   std::vector<unsigned int> _cd_real_index;

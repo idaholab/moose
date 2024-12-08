@@ -56,7 +56,7 @@ void extraSendList(std::vector<dof_id_type> & send_list, void * context);
 /**
  * Free function used for a libMesh callback
  */
-void extraSparsity(SparsityPattern::Graph & sparsity,
+void extraSparsity(libMesh::SparsityPattern::Graph & sparsity,
                    std::vector<dof_id_type> & n_nz,
                    std::vector<dof_id_type> & n_oz,
                    void * context);
@@ -147,8 +147,8 @@ public:
   /**
    * Get the reference to the libMesh system
    */
-  virtual System & system() = 0;
-  virtual const System & system() const = 0;
+  virtual libMesh::System & system() = 0;
+  virtual const libMesh::System & system() const = 0;
 
   /**
    * This is called prior to the libMesh system has been init'd. MOOSE system wrappers can use this
@@ -356,12 +356,12 @@ public:
   /**
    * Get a raw SparseMatrix
    */
-  virtual SparseMatrix<Number> & getMatrix(TagID tag);
+  virtual libMesh::SparseMatrix<Number> & getMatrix(TagID tag);
 
   /**
    * Get a raw SparseMatrix
    */
-  virtual const SparseMatrix<Number> & getMatrix(TagID tag) const;
+  virtual const libMesh::SparseMatrix<Number> & getMatrix(TagID tag) const;
 
   /**
    *  Make all exsiting matrices ative
@@ -402,12 +402,12 @@ public:
   /**
    * Associate a matrix to a tag
    */
-  virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag);
+  virtual void associateMatrixToTag(libMesh::SparseMatrix<Number> & matrix, TagID tag);
 
   /**
    * Disassociate a matrix from a tag
    */
-  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag);
+  virtual void disassociateMatrixFromTag(libMesh::SparseMatrix<Number> & matrix, TagID tag);
 
   /**
    * Disassociate any matrix that is associated with a given tag
@@ -441,7 +441,7 @@ public:
   /**
    * Will modify the sparsity pattern to add logical geometric connections
    */
-  virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
+  virtual void augmentSparsity(libMesh::SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) = 0;
 
@@ -638,7 +638,7 @@ public:
    * Get minimal quadrature order needed for integrating variables in this system
    * @return The minimal order of quadrature
    */
-  virtual Order getMinQuadratureOrder();
+  virtual libMesh::Order getMinQuadratureOrder();
 
   /**
    * Prepare the system for use
@@ -794,7 +794,7 @@ public:
    * vector.
    */
   NumericVector<Number> &
-  addVector(const std::string & vector_name, const bool project, const ParallelType type);
+  addVector(const std::string & vector_name, const bool project, const libMesh::ParallelType type);
 
   /**
    * Adds a solution length vector to the system with the specified TagID
@@ -809,7 +809,8 @@ public:
    *                                            The ghosting pattern is the same as the solution
    * vector.
    */
-  NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
+  NumericVector<Number> &
+  addVector(TagID tag, const bool project, const libMesh::ParallelType type);
 
   /**
    * Close vector with the given tag
@@ -849,7 +850,7 @@ public:
    *
    * @param tag_name The name of the tag
    */
-  SparseMatrix<Number> & addMatrix(TagID tag);
+  libMesh::SparseMatrix<Number> & addMatrix(TagID tag);
 
   /**
    * Removes a matrix with a given tag
@@ -871,7 +872,7 @@ public:
 
   virtual void computeVariables(const NumericVector<Number> & /*soln*/) {}
 
-  void copyVars(ExodusII_IO & io);
+  void copyVars(libMesh::ExodusII_IO & io);
 
   /**
    * Copy current solution into old and older
@@ -1011,7 +1012,7 @@ protected:
   /// Tagged vectors (pointer)
   std::vector<NumericVector<Number> *> _tagged_vectors;
   /// Tagged matrices (pointer)
-  std::vector<SparseMatrix<Number> *> _tagged_matrices;
+  std::vector<libMesh::SparseMatrix<Number> *> _tagged_matrices;
   /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;
 

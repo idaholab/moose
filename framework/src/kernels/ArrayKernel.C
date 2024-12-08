@@ -114,7 +114,7 @@ ArrayKernel::computeResidual()
 
   if (_has_save_in)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    libMesh::Threads::spin_mutex::scoped_lock lock(libMesh::Threads::spin_mtx);
     for (const auto & var : _save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
@@ -149,7 +149,7 @@ ArrayKernel::computeJacobian()
   if (_has_diag_save_in)
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    libMesh::Threads::spin_mutex::scoped_lock lock(libMesh::Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
@@ -198,7 +198,7 @@ ArrayKernel::computeOffDiagJacobian(const unsigned int jvar_num)
   if (_has_diag_save_in && same_var)
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    libMesh::Threads::spin_mutex::scoped_lock lock(libMesh::Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);

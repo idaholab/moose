@@ -10,6 +10,9 @@
 #include "ImageMesh.h"
 #include "pcrecpp.h"
 #include "MooseApp.h"
+#include "MooseTypes.h"
+#include "libmesh/cell_hex8.h"
+#include "libmesh/face_quad4.h"
 
 #include <cstdlib> // std::system, mkstemp
 #include <fstream>

@@ -29,7 +29,7 @@ HeatStructureFromFile3D::HeatStructureFromFile3D(const InputParameters & params)
 {
   if (_file_is_readable)
   {
-    ExodusII_IO_Helper exio_helper(*this, false, true, false);
+    libMesh::ExodusII_IO_Helper exio_helper(*this, false, true, false);
     exio_helper.open(_file_name.c_str(), true);
     exio_helper.read_and_store_header_info();
     if (exio_helper.num_dim != 3)

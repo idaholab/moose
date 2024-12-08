@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/vector_value.h"
@@ -37,10 +38,14 @@ Number ManSol4ADR1src(const Point & p,
                       Real & omega,
                       Real & t,
                       bool & is_transient);
-Number
-ManSol4ADR1exv(const Point & p, const Parameters &, const std::string &, const std::string &);
-Gradient
-ManSol4ADR1exd(const Point & p, const Parameters &, const std::string &, const std::string &);
+Number ManSol4ADR1exv(const Point & p,
+                      const libMesh::Parameters &,
+                      const std::string &,
+                      const std::string &);
+Gradient ManSol4ADR1exd(const Point & p,
+                        const libMesh::Parameters &,
+                        const std::string &,
+                        const std::string &);
 
 /**
  *   Manufactured solution for advection-diffusion problem-2.
@@ -61,10 +66,16 @@ Number ManSol4ADR2src(const Point & p,
                       Real & Ck,
                       Real & omega,
                       Real & t);
-Number
-ManSol4ADR2exv(const Point & p, const Parameters &, const std::string &, const std::string &);
-Gradient
-ManSol4ADR2exd(const Point & p, const Parameters &, const std::string &, const std::string &);
+Number ManSol4ADR2exv(const Point & p,
+                      const libMesh::Parameters &,
+                      const std::string &,
+                      const std::string &);
+Gradient ManSol4ADR2exd(const Point & p,
+                        const libMesh::Parameters &,
+                        const std::string &,
+                        const std::string &);
 
-Number ManSolzeroV(const Point & p, const Parameters &, const std::string &, const std::string &);
-Gradient ManSolzeroG(const Point & p, const Parameters &, const std::string &, const std::string &);
+Number
+ManSolzeroV(const Point & p, const libMesh::Parameters &, const std::string &, const std::string &);
+Gradient
+ManSolzeroG(const Point & p, const libMesh::Parameters &, const std::string &, const std::string &);

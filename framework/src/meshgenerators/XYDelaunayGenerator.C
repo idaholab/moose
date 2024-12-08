@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/enum_to_string.h"
 #include "libmesh/int_range.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_serializer.h"
@@ -213,8 +214,8 @@ XYDelaunayGenerator::generate()
       dynamic_pointer_cast<UnstructuredMesh>(std::move(_bdy_ptr));
 
   // Get ready to triangulate the line segments we extract from it
-  Poly2TriTriangulator poly2tri(*mesh);
-  poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
+  libMesh::Poly2TriTriangulator poly2tri(*mesh);
+  poly2tri.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
 
   // If we're using a user-requested subset of boundaries on that
   // mesh, get their ids.
@@ -269,8 +270,8 @@ XYDelaunayGenerator::generate()
   poly2tri.minimum_angle() = 0; // Not yet supported
   poly2tri.smooth_after_generating() = _smooth_tri;
 
-  std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
-  std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
+  std::vector<libMesh::TriangulatorInterface::MeshedHole> meshed_holes;
+  std::vector<libMesh::TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
   std::vector<std::unique_ptr<MeshBase>> hole_ptrs(_hole_ptrs.size());
   // This tells us the element orders of the hole meshes
   // For the boundary meshes, it can be access through poly2tri.segment_midpoints.
@@ -303,7 +304,7 @@ XYDelaunayGenerator::generate()
   if (_desired_area_func != "")
   {
     // poly2tri will clone this so it's fine going out of scope
-    ParsedFunction<Real> area_func{_desired_area_func};
+    libMesh::ParsedFunction<Real> area_func{_desired_area_func};
     poly2tri.set_desired_area_function(&area_func);
   }
   else if (_use_auto_area_func)
@@ -360,7 +361,7 @@ XYDelaunayGenerator::generate()
     {
       mooseAssert(elem->type() ==
                       (_tri_elem_type == "TRI6" ? TRI6 : (_tri_elem_type == "TRI7" ? TRI7 : TRI3)),
-                  "Unexpected element type " << Utility::enum_to_string(elem->type())
+                  "Unexpected element type " << libMesh::Utility::enum_to_string(elem->type())
                                              << " found in triangulation");
 
       elem->subdomain_id() = _output_subdomain_id;
@@ -473,7 +474,7 @@ XYDelaunayGenerator::generate()
 
   // libMesh mesh stitching still requires a serialized mesh, and it's
   // cheaper to do that once than to do it once-per-hole
-  MeshSerializer serial(*mesh, doing_stitching);
+  libMesh::MeshSerializer serial(*mesh, doing_stitching);
 
   // Define a reference map variable for subdomain map
   auto & main_subdomain_map = mesh->set_subdomain_name_map();
@@ -496,14 +497,14 @@ XYDelaunayGenerator::generate()
       // redundant serialization and deserialization (libMesh
       // MeshedHole and stitch_meshes still also require
       // serialization) we'll do the serialization up front.
-      MeshSerializer serial_hole(hole_mesh);
+      libMesh::MeshSerializer serial_hole(hole_mesh);
 
       // It would have been nicer for MeshedHole to add the BCID
       // itself, but we want MeshedHole to work with a const mesh.
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
-      TriangulatorInterface::MeshedHole mh{hole_mesh};
+      libMesh::TriangulatorInterface::MeshedHole mh{hole_mesh};
 
       // We have to translate from MeshedHole points to mesh
       // sides.

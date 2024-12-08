@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 /**
  * Class designed to hold node ID information and information

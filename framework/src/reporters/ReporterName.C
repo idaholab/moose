@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReporterName.h"
+#include "MooseError.h"
 
 const std::string ReporterName::REPORTER_RESTARTABLE_DATA_PREFIX = "ReporterData";
 

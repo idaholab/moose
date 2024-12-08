@@ -19,6 +19,8 @@
 #include "libmesh/enum_point_locator_type.h"
 #include "libmesh/mesh_tools.h"
 
+using namespace libMesh;
+
 ClaimRays::ClaimRays(RayTracingStudy & study,
                      const std::vector<std::shared_ptr<Ray>> & rays,
                      std::vector<std::shared_ptr<Ray>> & local_rays,

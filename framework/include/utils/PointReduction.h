@@ -15,7 +15,7 @@
 namespace PointReduction
 {
 
-typedef std::pair<Real, Real> FunctionNode;
+typedef std::pair<libMesh::Real, libMesh::Real> FunctionNode;
 typedef std::vector<FunctionNode> FunctionNodeList;
 
 /**
@@ -26,9 +26,9 @@ typedef std::vector<FunctionNode> FunctionNodeList;
  * @param begin The first (x,y) point defining the line to compute the distance to
  * @param end The second (x,y) point defining the line to compute the distance to
  */
-Real perpendicularDistance(const FunctionNode & point,
-                           const FunctionNode & begin,
-                           const FunctionNode & end);
+libMesh::Real perpendicularDistance(const FunctionNode & point,
+                                    const FunctionNode & begin,
+                                    const FunctionNode & end);
 
 /**
  * Generate a pruned function node list using the Ramer-Douglas-Peucker algorithm.
@@ -36,6 +36,6 @@ Real perpendicularDistance(const FunctionNode & point,
  * @param list An ordered (by x) list of (x,y) points defining a pointwise defined function.
  * @param epsilon The Ramer-Douglas-Peucker tolerance parameter for coarsening.
  */
-FunctionNodeList douglasPeucker(const FunctionNodeList &, Real epsilon);
+FunctionNodeList douglasPeucker(const FunctionNodeList &, libMesh::Real epsilon);
 
 } // namespace PointReduction

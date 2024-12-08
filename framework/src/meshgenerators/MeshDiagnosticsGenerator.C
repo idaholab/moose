@@ -224,8 +224,9 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 
       // Get side normal
       const std::unique_ptr<const Elem> face = elem_ptr->build_side_ptr(side_id);
-      std::unique_ptr<FEBase> fe(FEBase::build(elem_ptr->dim(), FEType(elem_ptr->default_order())));
-      QGauss qface(elem_ptr->dim() - 1, CONSTANT);
+      std::unique_ptr<libMesh::FEBase> fe(
+          libMesh::FEBase::build(elem_ptr->dim(), libMesh::FEType(elem_ptr->default_order())));
+      libMesh::QGauss qface(elem_ptr->dim() - 1, CONSTANT);
       fe->attach_quadrature_rule(&qface);
       const auto & normals = fe->get_normals();
       fe->reinit(elem_ptr, side_id);
@@ -242,9 +243,9 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
               continue;
 
             // We re-init everything for the neighbor in case it's a different dimension
-            std::unique_ptr<FEBase> fe_neighbor(
-                FEBase::build(neighbor->dim(), FEType(neighbor->default_order())));
-            QGauss qface(neighbor->dim() - 1, CONSTANT);
+            std::unique_ptr<libMesh::FEBase> fe_neighbor(libMesh::FEBase::build(
+                neighbor->dim(), libMesh::FEType(neighbor->default_order())));
+            libMesh::QGauss qface(neighbor->dim() - 1, CONSTANT);
             fe_neighbor->attach_quadrature_rule(&qface);
             const auto & neigh_normals = fe_neighbor->get_normals();
             fe_neighbor->reinit(neighbor, neigh_side_index);
@@ -626,7 +627,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
   // will modify the mesh for the analysis of the next nodes
   // Make a copy of the mesh, add this element
   auto mesh_copy = mesh->clone();
-  MeshRefinement mesh_refiner(*mesh_copy);
+  libMesh::MeshRefinement mesh_refiner(*mesh_copy);
 
   // loop on nodes, assumes a replicated mesh
   for (auto & node : mesh->node_ptr_range())
@@ -1265,19 +1266,19 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
   unsigned int num_negative_elem_qp_jacobians = 0;
   // Get a high-ish order quadrature
   auto qrule_dimension = mesh->mesh_dimension();
-  QGauss qrule(qrule_dimension, FIFTH);
+  libMesh::QGauss qrule(qrule_dimension, FIFTH);
 
   // Use a constant monomial
-  const FEType fe_type(CONSTANT, libMesh::MONOMIAL);
+  const libMesh::FEType fe_type(CONSTANT, libMesh::MONOMIAL);
 
   // Initialize a basic constant monomial shape function everywhere
-  std::unique_ptr<FEBase> fe_elem;
+  std::unique_ptr<libMesh::FEBase> fe_elem;
   if (mesh->mesh_dimension() == 1)
-    fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+    fe_elem = std::make_unique<libMesh::FEMonomial<1>>(fe_type);
   if (mesh->mesh_dimension() == 2)
-    fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+    fe_elem = std::make_unique<libMesh::FEMonomial<2>>(fe_type);
   else
-    fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+    fe_elem = std::make_unique<libMesh::FEMonomial<3>>(fe_type);
 
   fe_elem->get_JxW();
   fe_elem->attach_quadrature_rule(&qrule);
@@ -1290,15 +1291,15 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
     {
       // Re-initialize a quadrature
       qrule_dimension = elem->dim();
-      qrule = QGauss(qrule_dimension, FIFTH);
+      qrule = libMesh::QGauss(qrule_dimension, FIFTH);
 
       // Re-initialize a monomial FE
       if (elem->dim() == 1)
-        fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<1>>(fe_type);
       if (elem->dim() == 2)
-        fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<2>>(fe_type);
       else
-        fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<3>>(fe_type);
 
       fe_elem->get_JxW();
       fe_elem->attach_quadrature_rule(&qrule);
@@ -1332,7 +1333,7 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
   unsigned int num_negative_side_qp_jacobians = 0;
   // Get a high-ish order side quadrature
   auto qrule_side_dimension = mesh->mesh_dimension() - 1;
-  QGauss qrule_side(qrule_side_dimension, FIFTH);
+  libMesh::QGauss qrule_side(qrule_side_dimension, FIFTH);
 
   // Use the side quadrature now
   fe_elem->attach_quadrature_rule(&qrule_side);
@@ -1344,15 +1345,15 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
     if (int(qrule_side_dimension) != elem->dim() - 1)
     {
       qrule_side_dimension = elem->dim() - 1;
-      qrule_side = QGauss(qrule_side_dimension, FIFTH);
+      qrule_side = libMesh::QGauss(qrule_side_dimension, FIFTH);
 
       // Re-initialize a side FE
       if (elem->dim() == 1)
-        fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<1>>(fe_type);
       if (elem->dim() == 2)
-        fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<2>>(fe_type);
       else
-        fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<3>>(fe_type);
 
       fe_elem->get_JxW();
       fe_elem->attach_quadrature_rule(&qrule_side);

@@ -143,7 +143,7 @@ public:
    * Note, this is meaningless if there are no named porous_flow_variables: consistentFEType()
    * should be used to check this
    */
-  FEType feType() const;
+  libMesh::FEType feType() const;
 
   /**
    * Check if the simulation includes derivatives of permeability
@@ -184,7 +184,7 @@ private:
   bool _consistent_fe_type;
 
   /// FE type used by the PorousFlow variables
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
   /// _moose_var_num[i] = the moose variable number corresponding to porous flow variable i
   std::vector<unsigned int> _moose_var_num;

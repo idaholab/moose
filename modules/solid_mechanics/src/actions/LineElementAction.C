@@ -20,18 +20,14 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
+using namespace libMesh;
+
 registerMooseAction("SolidMechanicsApp", LineElementAction, "create_problem");
-
 registerMooseAction("SolidMechanicsApp", LineElementAction, "add_variable");
-
 registerMooseAction("SolidMechanicsApp", LineElementAction, "add_aux_variable");
-
 registerMooseAction("SolidMechanicsApp", LineElementAction, "add_kernel");
-
 registerMooseAction("SolidMechanicsApp", LineElementAction, "add_aux_kernel");
-
 registerMooseAction("SolidMechanicsApp", LineElementAction, "add_nodal_kernel");
-
 registerMooseAction("SolidMechanicsApp", LineElementAction, "add_material");
 
 InputParameters

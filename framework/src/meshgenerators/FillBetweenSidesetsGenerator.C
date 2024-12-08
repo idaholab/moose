@@ -110,8 +110,8 @@ FillBetweenSidesetsGenerator::generate()
   auto input_mesh_2 = std::move(_input_2);
 
   // Only serialized meshes are supported right now
-  MeshSerializer serial_1(*input_mesh_1);
-  MeshSerializer serial_2(*input_mesh_2);
+  libMesh::MeshSerializer serial_1(*input_mesh_1);
+  libMesh::MeshSerializer serial_2(*input_mesh_2);
 
   if (*(input_mesh_1->elem_dimensions().begin()) != 2 ||
       *(input_mesh_1->elem_dimensions().rbegin()) != 2)

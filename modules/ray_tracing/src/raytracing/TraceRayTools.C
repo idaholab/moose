@@ -34,6 +34,8 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/tensor_value.h"
 
+using namespace libMesh;
+
 namespace TraceRayTools
 {
 

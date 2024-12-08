@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
 
+using namespace libMesh;
+
 InputParameters
 SIMPLESolveNonlinearAssembly::validParams()
 {
@@ -441,7 +443,7 @@ std::pair<unsigned int, Real>
 SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
                                                   NonlinearSystemBase & system,
                                                   const Real relaxation_factor,
-                                                  SolverConfiguration & solver_config,
+                                                  libMesh::SolverConfiguration & solver_config,
                                                   const Real absolute_tol)
 {
   _problem.setCurrentNonlinearSystem(system_num);

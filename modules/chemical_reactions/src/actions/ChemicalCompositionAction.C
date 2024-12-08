@@ -429,7 +429,7 @@ ChemicalCompositionAction::act()
     auto aux_var_type = AddVariableAction::variableType(
         FEType(Utility::string_to_enum<Order>(_problem->mesh().hasSecondOrderElements() ? "SECOND"
                                                                                         : "FIRST"),
-               Utility::string_to_enum<FEFamily>("LAGRANGE")),
+               Utility::string_to_enum<libMesh::FEFamily>("LAGRANGE")),
         /* is_fv = */ getParam<bool>("is_fv"),
         /* is_array = */ false);
     auto params = _factory.getValidParams(aux_var_type);

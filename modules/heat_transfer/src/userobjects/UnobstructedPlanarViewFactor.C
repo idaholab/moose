@@ -149,7 +149,7 @@ UnobstructedPlanarViewFactor::reinitFace(dof_id_type elem_id, unsigned int side)
   Order order = current_remote_elem->default_order();
   unsigned int dim = _mesh.getMesh().mesh_dimension();
   _current_remote_fe = FEBase::build(dim, FEType(order));
-  QGauss qface(dim - 1, FEType(order).default_quadrature_order());
+  libMesh::QGauss qface(dim - 1, FEType(order).default_quadrature_order());
   _current_remote_fe->attach_quadrature_rule(&qface);
 
   _current_remote_JxW = &_current_remote_fe->get_JxW();

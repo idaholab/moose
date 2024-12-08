@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Moose.h"
+#include "MooseTypes.h"
 
 #include "libmesh/point.h"
 

@@ -42,5 +42,5 @@ protected:
   NonlinearSystemBase & _nl;
 
   /// Reference to libMesh system
-  System & _sys;
+  libMesh::System & _sys;
 };

@@ -17,11 +17,13 @@
 
 #include <algorithm>
 
+using namespace libMesh;
+
 namespace Moose
 {
 
 void
-findElementsIntersectedByPlane(const Plane & plane,
+findElementsIntersectedByPlane(const libMesh::Plane & plane,
                                const MeshBase & mesh,
                                std::vector<const Elem *> & intersected_elems)
 {
@@ -59,7 +61,7 @@ elementsIntersectedByPlane(const Point & p0,
   intersected_elems.clear();
 
   // Create plane from point and normal:
-  Plane plane(p0, normal);
+  libMesh::Plane plane(p0, normal);
 
   // Find 'em!
   findElementsIntersectedByPlane(plane, mesh, intersected_elems);
@@ -76,7 +78,7 @@ elementsIntersectedByPlane(const Point & p0,
   intersected_elems.clear();
 
   // Create plane from three points:
-  Plane plane(p0, p1, p2);
+  libMesh::Plane plane(p0, p1, p2);
 
   // Find 'em!
   findElementsIntersectedByPlane(plane, mesh, intersected_elems);

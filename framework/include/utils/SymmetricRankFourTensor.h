@@ -46,6 +46,8 @@ class VectorValue;
 // Forward declarations
 class MooseEnum;
 
+namespace boostcopy = libMesh::boostcopy;
+
 namespace MathUtils
 {
 /**
@@ -121,17 +123,17 @@ public:
   template <typename Scalar>
   struct TwoTensorMultTraits<SymmetricRankTwoTensorTempl, Scalar>
   {
-    static const bool value = ScalarTraits<Scalar>::value;
+    static const bool value = libMesh::ScalarTraits<Scalar>::value;
   };
   template <typename Scalar>
   struct TwoTensorMultTraits<TensorValue, Scalar>
   {
-    static const bool value = ScalarTraits<Scalar>::value;
+    static const bool value = libMesh::ScalarTraits<Scalar>::value;
   };
   template <typename Scalar>
   struct TwoTensorMultTraits<TypeTensor, Scalar>
   {
-    static const bool value = ScalarTraits<Scalar>::value;
+    static const bool value = libMesh::ScalarTraits<Scalar>::value;
   };
 
   /// Default constructor; fills to zero
@@ -152,7 +154,10 @@ public:
   template <typename T2>
   SymmetricRankFourTensorTempl(const SymmetricRankFourTensorTempl<T2> & copy);
 
-  // explicit cast to a full tensor
+  /// Copy constructor from RankFourTensorTempl<T>
+  explicit SymmetricRankFourTensorTempl(const RankFourTensorTempl<T> & a);
+
+  /// The conversion operator to `RankFourTensorTempl`
   explicit operator RankFourTensorTempl<T>();
 
   // Named constructors
@@ -192,7 +197,8 @@ public:
    * \returns A reference to *this.
    */
   template <typename Scalar>
-  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, SymmetricRankFourTensorTempl &>::type
+  typename boostcopy::enable_if_c<libMesh::ScalarTraits<Scalar>::value,
+                                  SymmetricRankFourTensorTempl &>::type
   operator=(const Scalar & libmesh_dbg_var(p))
   {
     libmesh_assert_equal_to(p, Scalar(0));
@@ -208,7 +214,7 @@ public:
   /// C_ijkl*a
   template <typename T2>
   auto operator*(const T2 & a) const ->
-      typename std::enable_if<ScalarTraits<T2>::value,
+      typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                               SymmetricRankFourTensorTempl<decltype(T() * T2())>>::type;
 
   /// C_ijkl *= a
@@ -217,7 +223,7 @@ public:
   /// C_ijkl/a
   template <typename T2>
   auto operator/(const T2 & a) const ->
-      typename std::enable_if<ScalarTraits<T2>::value,
+      typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                               SymmetricRankFourTensorTempl<decltype(T() / T2())>>::type;
 
   /// C_ijkl /= a  for all i, j, k, l
@@ -326,7 +332,7 @@ public:
   T sum3x3() const;
 
   /// Calculates the vector a[i] = sum over j Ciijj for i and j varying from 0 to 2
-  VectorValue<T> sum3x1() const;
+  libMesh::VectorValue<T> sum3x1() const;
 
   /// checks if the tensor is symmetric
   bool isSymmetric() const;
@@ -427,7 +433,7 @@ struct RawType<SymmetricRankFourTensorTempl<T>>
 template <typename T1, typename T2>
 inline auto
 operator*(const T1 & a, const SymmetricRankFourTensorTempl<T2> & b) ->
-    typename std::enable_if<ScalarTraits<T1>::value,
+    typename std::enable_if<libMesh::ScalarTraits<T1>::value,
                             SymmetricRankFourTensorTempl<decltype(T1() * T2())>>::type
 {
   return b * a;
@@ -446,7 +452,7 @@ template <typename T>
 template <typename T2>
 auto
 SymmetricRankFourTensorTempl<T>::operator*(const T2 & b) const ->
-    typename std::enable_if<ScalarTraits<T2>::value,
+    typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                             SymmetricRankFourTensorTempl<decltype(T() * T2())>>::type
 {
   typedef decltype(T() * T2()) ValueType;
@@ -483,7 +489,7 @@ template <typename T>
 template <typename T2>
 auto
 SymmetricRankFourTensorTempl<T>::operator/(const T2 & b) const ->
-    typename std::enable_if<ScalarTraits<T2>::value,
+    typename std::enable_if<libMesh::ScalarTraits<T2>::value,
                             SymmetricRankFourTensorTempl<decltype(T() / T2())>>::type
 {
   SymmetricRankFourTensorTempl<decltype(T() / T2())> result;

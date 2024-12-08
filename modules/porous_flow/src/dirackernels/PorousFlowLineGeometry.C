@@ -183,15 +183,15 @@ PorousFlowLineGeometry::initialSetup()
     pl->enable_out_of_mesh_mode();
 
     auto * elem = (*pl)(start);
-    auto elem_id = elem ? elem->id() : DofObject::invalid_id;
+    auto elem_id = elem ? elem->id() : libMesh::DofObject::invalid_id;
     _communicator.min(elem_id);
-    if (elem_id == DofObject::invalid_id)
+    if (elem_id == libMesh::DofObject::invalid_id)
       paramError("line_base", "base point ", start, " lies outside the mesh");
 
     elem = (*pl)(end);
-    elem_id = elem ? elem->id() : DofObject::invalid_id;
+    elem_id = elem ? elem->id() : libMesh::DofObject::invalid_id;
     _communicator.min(elem_id);
-    if (elem_id == DofObject::invalid_id)
+    if (elem_id == libMesh::DofObject::invalid_id)
       paramError("line_length", "length causes end point ", end, " to lie outside the mesh");
 
     regenPoints();

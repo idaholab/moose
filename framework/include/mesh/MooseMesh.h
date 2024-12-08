@@ -52,7 +52,7 @@ class GhostingFunctor;
 class BoundingBox;
 }
 // Useful typedefs
-typedef StoredRange<std::set<Node *>::iterator, Node *> SemiLocalNodeRange;
+typedef libMesh::StoredRange<std::set<Node *>::iterator, Node *> SemiLocalNodeRange;
 
 // List of supported geometrical elements
 const std::string LIST_GEOM_ELEM = "EDGE EDGE2 EDGE3 EDGE4 "
@@ -426,12 +426,14 @@ public:
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
    */
-  ConstElemRange * getActiveLocalElementRange();
-  NodeRange * getActiveNodeRange();
+  libMesh::ConstElemRange * getActiveLocalElementRange();
+  libMesh::NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
-  ConstNodeRange * getLocalNodeRange();
-  StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> * getBoundaryNodeRange();
-  StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> * getBoundaryElementRange();
+  libMesh::ConstNodeRange * getLocalNodeRange();
+  libMesh::StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> *
+  getBoundaryNodeRange();
+  libMesh::StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> *
+  getBoundaryElementRange();
   ///@}
 
   /**
@@ -631,7 +633,7 @@ public:
    * @param inflation_multiplier This amount will be multiplied by the length of the diagonal of the
    * bounding box to find the amount to inflate the bounding box by in all directions.
    */
-  BoundingBox getInflatedProcessorBoundingBox(Real inflation_multiplier = 0.01) const;
+  libMesh::BoundingBox getInflatedProcessorBoundingBox(Real inflation_multiplier = 0.01) const;
 
   /**
    * Implicit conversion operator from MooseMesh -> libMesh::MeshBase.
@@ -780,14 +782,14 @@ public:
    */
   void buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map,
                             unsigned int var_number,
-                            PeriodicBoundaries * pbs) const;
+                            libMesh::PeriodicBoundaries * pbs) const;
 
   /**
    * This routine builds a datastructure of node ids organized by periodic boundary ids
    */
   void buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & periodic_node_sets,
                              unsigned int var_number,
-                             PeriodicBoundaries * pbs) const;
+                             libMesh::PeriodicBoundaries * pbs) const;
 
   /**
    * Returns the width of the requested dimension
@@ -1020,7 +1022,7 @@ public:
   /**
    * Setter for custom partitioner
    */
-  void setCustomPartitioner(Partitioner * partitioner);
+  void setCustomPartitioner(libMesh::Partitioner * partitioner);
 
   ///@{
   /**
@@ -1040,7 +1042,7 @@ public:
    * Proxy function to get a (sub)PointLocator from either the underlying libMesh mesh (default), or
    * to allow derived meshes to return a custom point locator.
    */
-  virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
+  virtual std::unique_ptr<libMesh::PointLocatorBase> getPointLocator() const;
 
   /**
    * Returns the name of the mesh file read to produce this mesh if any or an empty string
@@ -1376,7 +1378,7 @@ public:
 
 protected:
   /// Deprecated (DO NOT USE)
-  std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
+  std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
 
   /// The list of active geometric relationship managers (bound to the underlying MeshBase object).
   std::vector<std::shared_ptr<RelationshipManager>> _relationship_managers;
@@ -1403,7 +1405,7 @@ protected:
   bool _partitioner_overridden;
 
   /// The custom partitioner
-  std::unique_ptr<Partitioner> _custom_partitioner;
+  std::unique_ptr<libMesh::Partitioner> _custom_partitioner;
   bool _custom_partitioner_requested;
 
   /// Convenience enums
@@ -1457,13 +1459,14 @@ protected:
    * A range for use with threading.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
    */
-  std::unique_ptr<ConstElemRange> _active_local_elem_range;
+  std::unique_ptr<libMesh::ConstElemRange> _active_local_elem_range;
 
   std::unique_ptr<SemiLocalNodeRange> _active_semilocal_node_range;
-  std::unique_ptr<NodeRange> _active_node_range;
-  std::unique_ptr<ConstNodeRange> _local_node_range;
-  std::unique_ptr<StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *>> _bnd_node_range;
-  std::unique_ptr<StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *>>
+  std::unique_ptr<libMesh::NodeRange> _active_node_range;
+  std::unique_ptr<libMesh::ConstNodeRange> _local_node_range;
+  std::unique_ptr<libMesh::StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *>>
+      _bnd_node_range;
+  std::unique_ptr<libMesh::StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *>>
       _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
@@ -1617,8 +1620,8 @@ private:
    * @param child_side The side number of the child (-1 if not mapping sides)
    */
   void buildRefinementMap(const Elem & elem,
-                          QBase & qrule,
-                          QBase & qrule_face,
+                          libMesh::QBase & qrule,
+                          libMesh::QBase & qrule_face,
                           int parent_side,
                           int child,
                           int child_side);
@@ -1632,7 +1635,10 @@ private:
    * @param qrule_face The current face quadrature rule
    * @param input_side The side to map
    */
-  void buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_face, int input_side);
+  void buildCoarseningMap(const Elem & elem,
+                          libMesh::QBase & qrule,
+                          libMesh::QBase & qrule_face,
+                          int input_side);
 
   /**
    * Find the closest points that map "from" to "to" and fill up "qp_map".
@@ -1669,8 +1675,8 @@ private:
    * @param child_side - The id of the child's side
    */
   void findAdaptivityQpMaps(const Elem * template_elem,
-                            QBase & qrule,
-                            QBase & qrule_face,
+                            libMesh::QBase & qrule,
+                            libMesh::QBase & qrule_face,
                             std::vector<std::vector<QpMap>> & refinement_map,
                             std::vector<std::pair<unsigned int, QpMap>> & coarsen_map,
                             int parent_side,
@@ -1681,10 +1687,10 @@ private:
 
   const std::vector<QpMap> & getPRefinementMapHelper(
       const Elem & elem,
-      const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> &) const;
+      const std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>> &) const;
   const std::vector<QpMap> & getPCoarseningMapHelper(
       const Elem & elem,
-      const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> &) const;
+      const std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>> &) const;
 
   /**
    * Update the coordinate transformation object based on our coordinate system data. The coordinate
@@ -1711,14 +1717,16 @@ private:
   ///   on the parent element that the child element reference point is closest to, and a
   ///   \p _distance member which is the distance between the mapped child and parent reference
   ///   quadrature points
-  std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
+  std::map<std::pair<int, libMesh::ElemType>, std::vector<std::vector<QpMap>>>
+      _elem_type_to_refinement_map;
 
-  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> _elem_type_to_p_refinement_map;
-  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>>
+  std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>>
+      _elem_type_to_p_refinement_map;
+  std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>>
       _elem_type_to_p_refinement_side_map;
 
   /// Holds mappings for "internal" child sides to parent volume.  The second key is (child, child_side).
-  std::map<ElemType, std::map<std::pair<int, int>, std::vector<std::vector<QpMap>>>>
+  std::map<libMesh::ElemType, std::map<std::pair<int, int>, std::vector<std::vector<QpMap>>>>
       _elem_type_to_child_side_refinement_map;
 
   /// Holds mappings for volume to volume and parent side to child side
@@ -1735,11 +1743,12 @@ private:
   ///     the parent quadrature point index. The \p _to data member will correspond to which child
   ///     element quadrature point is closest to the parent quadrature point. And \p _distance is
   ///     the distance between the two
-  std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap>>>
+  std::map<std::pair<int, libMesh::ElemType>, std::vector<std::pair<unsigned int, QpMap>>>
       _elem_type_to_coarsening_map;
 
-  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> _elem_type_to_p_coarsening_map;
-  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>>
+  std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>>
+      _elem_type_to_p_coarsening_map;
+  std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>>
       _elem_type_to_p_coarsening_side_map;
 
   struct SubdomainData
@@ -1847,13 +1856,13 @@ MooseMesh::coordTransform()
 }
 
 template <>
-struct MooseMesh::MeshType<ReplicatedMesh>
+struct MooseMesh::MeshType<libMesh::ReplicatedMesh>
 {
   static const ParallelType value = ParallelType::REPLICATED;
 };
 
 template <>
-struct MooseMesh::MeshType<DistributedMesh>
+struct MooseMesh::MeshType<libMesh::DistributedMesh>
 {
   static const ParallelType value = ParallelType::DISTRIBUTED;
 };
@@ -2036,8 +2045,9 @@ struct MooseMesh::const_bnd_elem_iterator : variant_filter_iterator<MeshBase::Pr
  * Some useful StoredRange typedefs.  These are defined *outside* the
  * MooseMesh class to mimic the Const{Node,Elem}Range classes in libmesh.
  */
-typedef StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> ConstBndNodeRange;
-typedef StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> ConstBndElemRange;
+typedef libMesh::StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> ConstBndNodeRange;
+typedef libMesh::StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *>
+    ConstBndElemRange;
 
 template <typename T>
 std::unique_ptr<T>
@@ -2046,7 +2056,7 @@ MooseMesh::buildTypedMesh(unsigned int dim)
   // If the requested mesh type to build doesn't match our current value for _use_distributed_mesh,
   // then we need to make sure to make our state consistent because other objects, like the periodic
   // boundary condition action, will be querying isDistributedMesh()
-  if (_use_distributed_mesh != std::is_same<T, DistributedMesh>::value)
+  if (_use_distributed_mesh != std::is_same<T, libMesh::DistributedMesh>::value)
   {
     if (getMeshPtr())
       mooseError("A MooseMesh object is being asked to build a libMesh mesh that is a different "

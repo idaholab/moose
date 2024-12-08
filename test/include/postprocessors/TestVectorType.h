@@ -13,7 +13,7 @@
 
 /**
  * A postprocessor for testing e.g. that a parallel system vector has
- * not been inadvertently redeclared as ghosted
+ * not been inadvertently re-declared as ghosted
  */
 class TestVectorType : public GeneralPostprocessor
 {
@@ -43,5 +43,5 @@ protected:
   std::string _test_vec_name;
 
   /// The type to expect to find
-  ParallelType _par_type;
+  libMesh::ParallelType _par_type;
 };

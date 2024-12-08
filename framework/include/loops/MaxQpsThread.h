@@ -32,7 +32,7 @@ public:
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
 
-  void operator()(const ConstElemRange & range);
+  void operator()(const libMesh::ConstElemRange & range);
 
   void join(const MaxQpsThread & y);
 

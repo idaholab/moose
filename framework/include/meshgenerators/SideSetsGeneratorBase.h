@@ -144,7 +144,7 @@ protected:
    */
   const Real _normal_tol;
 
-  std::unique_ptr<FEBase> _fe_face;
-  std::unique_ptr<QGauss> _qface;
+  std::unique_ptr<libMesh::FEBase> _fe_face;
+  std::unique_ptr<libMesh::QGauss> _qface;
   std::map<boundary_id_type, std::set<const Elem *>> _visited;
 };
