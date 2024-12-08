@@ -33,7 +33,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_tri_tests; METHOD=dbg make"
     use_shell = True
-    requirement = "The UEL tri tests example shall be built."
+    requirement = "The UEL tri tests example shall be built in dbg mode."
     method = 'dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
@@ -42,7 +42,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_tri_states_tests; METHOD=dbg make"
     use_shell = True
-    requirement = "The UEL tri states tests example shall be built."
+    requirement = "The UEL tri states tests example shall be built in dbg mode."
     method = 'dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
@@ -51,7 +51,7 @@
     type = RunCommand
     command = "cd ../../../examples/uel_build_tests; METHOD=dbg make"
     use_shell = True
-    requirement = "The UEL build tests example shall be built."
+    requirement = "The UEL build tests example shall be built in dbg mode."
     method = 'dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
@@ -110,9 +110,7 @@
     type = Exodiff
     input = small_test_expanded.i
     exodiff = small_test_expanded_out.e
-    requirement = 'The Abaqus UEL interface shall be able to interface with a UEL that calls a UMAT '
-                  'interface and must yield the same results for a triangular element as a UEL '
-                  'routine that computes internal forces without calling a UMAT routine.'
+    requirement = 'The Abaqus UEL interface shall be able to interface with a UEL that calls a UMAT interface and must yield the same results for a triangular element as a UEL routine that computes internal forces without calling a UMAT routine.'
     abs_zero = 1e-12
     # Only test plugins in dbg and opt.
     method = 'dbg opt'
@@ -123,10 +121,7 @@
     type = Exodiff
     input = small_test_expanded_umat.i
     exodiff = small_test_expanded_umat_out.e
-    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a '
-                  'triangular element as a UEL routine that computes internal forces without calling '
-                  'a UMAT routine or an analogous UEL interface that calls a UMAT routine for '
-                  'computing the stress vector and the Jacobian.'
+    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a triangular element as a UEL routine that computes internal forces without calling a UMAT routine or an analogous UEL interface that calls a UMAT routine for computing the stress vector and the Jacobian.'
     abs_zero = 1e-12
     # Only test plugins in dbg and opt.
     method = 'dbg opt'
@@ -137,10 +132,7 @@
     type = Exodiff
     input = small_test_uel_states_fields.i
     exodiff = small_test_uel_states_fields_out.e
-    requirement = 'The Abaqus UEL interface, calling a UMAT routine, shall be able to yield the same '
-                  'results for a triangular element that a UMAT routine that computes internal '
-                  'forces when the solution depends on system states and two external fields, '
-                  'including temperature.'
+    requirement = 'The Abaqus UEL interface, calling a UMAT routine, shall be able to yield the same results for a triangular element that a UMAT routine that computes internal forces when the solution depends on system states and two external fields, including temperature.'
     abs_zero = 1e-12
     # Only test plugins in dbg and opt.
     method = 'dbg opt'
@@ -151,10 +143,7 @@
     type = Exodiff
     input = small_test_umat_states_fields.i
     exodiff = small_test_umat_states_fields_out.e
-    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a '
-                  'triangular element that a UEL routine that computes internal forces, calling a '
-                  'UMAT routine, when the solution depends on system states and two external fields, '
-                  'including temperature.'
+    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a triangular element that a UEL routine that computes internal forces, calling a UMAT routine, when the solution depends on system states and two external fields, including temperature.'
     abs_zero = 1e-12
     # Only test plugins in dbg and opt.
     method = 'dbg opt'
@@ -165,10 +154,7 @@
     type = Exodiff
     input = small_test_umat_states_fields_gradient.i
     exodiff = small_test_umat_states_fields_gradient_out.e
-    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a '
-                  'triangular element that a UEL routine that computes internal forces, calling a '
-                  'UMAT routine, when the solution depends on system states and two external fields, '
-                  'including temperature, which vary significantly with space.'
+    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a triangular element that a UEL routine that computes internal forces, calling a UMAT routine, when the solution depends on system states and two external fields, including temperature, which vary significantly with space.'
     abs_zero = 1e-12
     # Only test plugins in dbg and opt.
     method = 'dbg opt'
@@ -179,11 +165,7 @@
     type = Exodiff
     input = small_test_uel_states_fields_gradient.i
     exodiff = small_test_uel_states_fields_gradient_out.e
-    requirement = 'The Abaqus UEL interface shall be able to yield the same results for a triangular '
-                  'element that a UMAT routine that computes internal forces when the solution '
-                  'depends on system states and two external fields, including temperature, which '
-                  'vary significantly with space. Therefore, the system shall properly handle state '
-                  'and external fields whose values depend on element location.'
+    requirement = 'The Abaqus UEL interface shall be able to yield the same results for a triangular element that a UMAT routine that computes internal forces when the solution depends on system states and two external fields, including temperature, which vary significantly with space. Therefore, the system shall properly handle state and external fields whose values depend on element location.'
     abs_zero = 1e-12
     # Only test plugins in dbg and opt.
     method = 'dbg opt'

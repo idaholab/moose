@@ -6,73 +6,62 @@
     input = 'test_one_step.i'
     cli_args = "VectorPostprocessors/section_output/positions='10.0 18.0'"
     csvdiff = 'test_one_step_out_section_output_0001.csv'
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section defined by the user via a nodal vector.'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via a nodal vector.'
   []
   [test_one_step_auto_positions]
     type = 'CSVDiff'
     input = 'test_one_step.i'
     cli_args = 'Outputs/file_base=test_one_step_auto_out'
     csvdiff = 'test_one_step_auto_out_section_output_0001.csv'
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section defined by the user via a nodal vector at automatically determined positions.'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via a nodal vector at automatically determined positions.'
   []
   [test_adapt]
     type = 'CSVDiff'
     input = 'test_adapt.i'
     csvdiff = 'test_adapt_out_section_output_0001.csv test_adapt_out_section_output_0002.csv'
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section at automatically located points that are updated with mesh adaptivity.'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section at automatically located points that are updated with mesh adaptivity.'
   []
   [test_adapt_err]
     type = 'RunException'
     input = 'test_adapt.i'
     cli_args = 'VectorPostprocessors/section_output/require_equal_node_counts=true Outputs/file_base=test_adapt_err_out'
-    expect_err = "Node counts do not match for all axial positions. If this behavior is desired to accommodate nonuniform meshes, set 'require_equal_node_counts=false'"
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section at automatically located points that are updated with mesh adaptivity.'
+    expect_err = "Node counts do not match for all axial positions. If this behavior is desired to "
+                 "accommodate nonuniform meshes, set 'require_equal_node_counts=false'"
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section at automatically located points that are updated with mesh adaptivity and raise an error if node counts do not match for all axial positions.'
   []
   [test_one_step_empty_positions_err]
     type = 'RunException'
     input = 'test_one_step.i'
     cli_args = "VectorPostprocessors/section_output/positions='' Outputs/file_base=err_pos_out"
     expect_err = "If 'positions' is specified, at least one value must be provided"
-    requirement = 'The system shall generate an error if the user defines '
-                  'an empty set of positions in AverageSectionValueSampler.' 
+    requirement = 'The system shall generate an error if the user defines an empty set of positions in AverageSectionValueSampler.'
   []
   [test_one_step_nonexistent_variable]
     type = 'RunException'
     input = 'test_one_step.i'
     cli_args = "VectorPostprocessors/section_output/variables='dummy' Outputs/file_base=err_var_out"
     expect_err = "One or more of the specified variables do not exist in this system."
-    requirement = 'The system shall generate an error if the user specifies '
-                  'a nonexistent variable in AverageSectionValueSampler.' 
+    requirement = 'The system shall generate an error if the user specifies a nonexistent variable in AverageSectionValueSampler.'
   []
   [test_one_step_heavy]
     type = 'CSVDiff'
     input = 'test_one_step.i'
     cli_args = "VectorPostprocessors/section_output/positions='10.0 18.0' Executioner/end_time=2.0"
-    csvdiff = 'test_one_step_out_section_output_0001.csv test_one_step_out_section_output_0002.csv '
-              'test_one_step_out_section_output_0003.csv test_one_step_out_section_output_0004.csv'
+    csvdiff = 'test_one_step_out_section_output_0001.csv test_one_step_out_section_output_0002.csv test_one_step_out_section_output_0003.csv test_one_step_out_section_output_0004.csv'
     heavy = true
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section defined by the user via a nodal vector at multiple steps.'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via a nodal vector at multiple steps.'
   []
   [test_one_step_two_ducts]
     type = 'CSVDiff'
     input = 'test_one_step_two_ducts.i'
-    csvdiff = 'test_one_step_two_ducts_out_section_output_0001.csv '
-              'test_one_step_two_ducts_out_section_output_two_0001.csv'
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section defined by the user via two nodal vector and two reference points for two '
-                  'respective ducts.'
+    csvdiff = 'test_one_step_two_ducts_out_section_output_0001.csv test_one_step_two_ducts_out_section_output_two_0001.csv'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via two nodal vector and two reference points for two respective ducts.'
   []
   [test_therm_exp]
     type = 'CSVDiff'
     input = 'test_therm_exp.i'
     csvdiff = 'test_therm_exp_out_section_output_0001.csv'
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section with mechanically and thermally induced deformation.'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section with mechanically and thermally induced deformation.'
   []
   [test_therm_exp_symm]
     type = 'CSVDiff'
@@ -80,9 +69,6 @@
     csvdiff = 'test_therm_exp_symm_out_section_output_0001.csv'
     ignore_columns = 'node_count'
     rel_err = 5e-3
-    requirement = 'The system shall compute the average of the nodal displacements of a cross '
-                  'section with mechanically and thermally induced deformation with a symmetry '
-                  'plane not aligned with a Cartesian coordinate, and match a reference '
-                  'solution without the symmetry plane.'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section with mechanically and thermally induced deformation with a symmetry plane not aligned with a Cartesian coordinate, and match a reference solution without the symmetry plane.'
   []
 []

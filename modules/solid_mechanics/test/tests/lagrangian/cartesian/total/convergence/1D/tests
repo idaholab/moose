@@ -1,16 +1,18 @@
 [Tests]
-  issues = '#17472' 
+  issues = '#17472'
   design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
-  [./dirichlet]
+  [dirichlet]
     type = CSVDiff
     input = 'dirichlet.i'
     csvdiff = 'dirichlet_out.csv'
-    requirement = "Quadratic convergence in 1D for DirichletBCs, SMP does better than FDP for this problem."
-  [../]
-  [./neumann]
+    requirement = "Quadratic convergence in 1D for DirichletBCs with the total Lagrangian "
+                  "formulation, SMP does better than FDP for this problem."
+  []
+  [neumann]
     type = CSVDiff
     input = 'neumann.i'
     csvdiff = 'neumann_out.csv'
-    requirement = "Quadratic convergence in 1D for NeumannBCs, SMP does better than FDP for this problem."
-  [../]
+    requirement = "Quadratic convergence in 1D for NeumannBCs with the total Lagrangian formulation, "
+                  "SMP does better than FDP for this problem."
+  []
 []

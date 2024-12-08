@@ -15,8 +15,8 @@ InputParameters
 CZMInterfaceKernelTotalLagrangian::validParams()
 {
   InputParameters params = CZMInterfaceKernelBase::validParams();
-  params.addClassDescription(
-      "Assembles the integrated first Piola-Kirchhoff traction computed by a cohesive zone model");
+  params.addClassDescription("Calculate residual contribution for balancing the traction across an "
+                             "interface (used in the cohesive zone method).");
   params.set<std::string>("traction_global_name") = "PK1traction";
   return params;
 }
