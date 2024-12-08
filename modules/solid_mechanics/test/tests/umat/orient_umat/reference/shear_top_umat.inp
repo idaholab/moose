@@ -1,0 +1,71 @@
+** Reference Abaqus input for "hw_reference_umat_output" MOOSE test
+*NODE, NSET=NALL
+   1, -0.5, -0.5, -0.5
+   2,  0.5, -0.5, -0.5
+   3,  0.5,  0.5, -0.5
+   4, -0.5,  0.5, -0.5
+   5, -0.5, -0.5,  0.5
+   6,  0.5, -0.5,  0.5
+   7,  0.5,  0.5,  0.5
+   8, -0.5,  0.5,  0.5
+   9,  0.0, -0.5, -0.5
+  10,  0.5,  0.0, -0.5
+  11,  0.0,  0.5, -0.5
+  12, -0.5,  0.0, -0.5
+  13,  0.0, -0.5,  0.5
+  14,  0.5,  0.0,  0.5
+  15,  0.0,  0.5,  0.5
+  16, -0.5,  0.0,  0.5
+  17, -0.5, -0.5,  0.0
+  18,  0.5, -0.5,  0.0
+  19,  0.5,  0.5,  0.0
+  20, -0.5,  0.5,  0.0
+*ELEMENT, TYPE=C3D20, ELSET=EALL
+1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+**
+** Use this for no material model rotation
+** *SOLID SECTION, ELSET=EALL, MATERIAL=UMAT
+** ,
+**
+** Use this section for a 30 degree material model rotation
+** *ORIENTATION, NAME=30_DEGREE_Z, SYSTEM=RECTANGULAR
+** 0.8660254, 0.5, 0.,   -0.5, 0.8660254, 0.,   0., 0., 0.
+** 3, 0.0
+** *SOLID SECTION, ELSET=EALL, MATERIAL=UMAT, ORIENTATION=30_DEGREE_Z
+** ,
+**
+** Use this section for a 0 degree material model rotation but stress calculated in rotated configuration
+*ORIENTATION, NAME=0_DEGREE_Z, SYSTEM=RECTANGULAR
+1., 0., 0.,   0., 1., 0.,   0., 0., 0.
+3, 0.0
+*SOLID SECTION, ELSET=EALL, MATERIAL=UMAT, ORIENTATION=0_DEGREE_Z
+,
+**
+** Node Set for bottom face
+*NSET, NSET=BOTTOM
+   1, 2, 5, 6, 9, 13, 17, 18
+** Node Set for top face
+*NSET, NSET=TOP
+   3, 4, 7, 8, 11, 15, 19, 20
+** Hold bottom fixed
+*BOUNDARY
+BOTTOM, 1, 3, 0.0
+** Call UMAT
+*MATERIAL, NAME=UMAT
+*USER MATERIAL, CONSTANTS=2
+1000.0, 0.3
+** Shear top face in +x direction by 0.005 over 5 seconds
+*STEP, NAME=STEP-1, NLGEOM=YES
+*STATIC
+1.0, 5.0, 1.0, 1.0
+*BOUNDARY
+TOP, 1, 1, 0.005
+*OUTPUT, FIELD
+*NODE OUTPUT, NSET=NALL
+U
+COORD
+*ELEMENT OUTPUT, ELSET=EALL, POSITION=INTEGRATION POINTS
+S
+COORD
+*END STEP
