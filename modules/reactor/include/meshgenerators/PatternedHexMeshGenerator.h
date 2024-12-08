@@ -28,7 +28,7 @@ public:
 
 protected:
   /// The input meshes
-  const std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
 
   /// Names of input meshes
   const std::vector<MeshGeneratorName> & _input_names;
