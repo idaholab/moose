@@ -66,6 +66,8 @@ AriaLaserWeld304LStainlessSteelBoundary::AriaLaserWeld304LStainlessSteelBoundary
     _grad_surface_tension(declareADProperty<RealVectorValue>(
         getParam<MaterialPropertyName>("grad_surface_tension_name"))),
     _ad_normals(_assembly.adNormals()),
+    _ad_curvatures(_assembly.adCurvatures()),
+    _surface_term_curvature(declareADProperty<RealVectorValue>("surface_term_curvature")),
     _surface_term_gradient1(declareADProperty<RealVectorValue>("surface_term_gradient1")),
     _surface_term_gradient2(declareADProperty<RealVectorValue>("surface_term_gradient2"))
 {
@@ -84,6 +86,8 @@ AriaLaserWeld304LStainlessSteelBoundary::computeQpProperties()
 
   _surface_tension[_qp] = _sigma0 + _alpha * (_temperature[_qp] - _T0);
   _grad_surface_tension[_qp] = _alpha * _grad_temperature[_qp];
+  _surface_term_curvature[_qp] =
+      -2. * _ad_curvatures[_qp] * _surface_tension[_qp] * _ad_normals[_qp];
   _surface_term_gradient1[_qp] = -_grad_surface_tension[_qp];
   _surface_term_gradient2[_qp] = _ad_normals[_qp] * (_ad_normals[_qp] * _grad_surface_tension[_qp]);
 }
