@@ -120,6 +120,8 @@ std::string trim(const std::string & str, const std::string & white_space = " \t
 
 /**
  * Removes additional whitespace from a string
+ *
+ * Removes beginning whitespace, end whitespace, and repeated whitespace into a single space
  */
 std::string removeExtraWhitespace(const std::string & str);
 
