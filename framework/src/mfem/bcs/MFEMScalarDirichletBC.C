@@ -6,6 +6,7 @@ InputParameters
 MFEMScalarDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
+  params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
   params.addRequiredParam<UserObjectName>(
       "coefficient", "The scalar MFEM coefficient to use in the Dirichlet condition");
   return params;

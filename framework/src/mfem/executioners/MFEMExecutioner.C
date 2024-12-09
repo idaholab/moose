@@ -5,6 +5,7 @@ InputParameters
 MFEMExecutioner::validParams()
 {
   InputParameters params = Executioner::validParams();
+  params.addClassDescription("Executioner for MFEM problems.");
   params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
   params.addParam<MooseEnum>(

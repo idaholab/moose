@@ -7,11 +7,11 @@ MFEMMixedVectorGradientKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription(
-      "The scaled gradient operator for the mixed form "
-      "$(k\\nabla q, \\vec u')$ with $\\vec u$ a vector FE type, to be added to an MFEM problem");
-
+      "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
+      "$(k\\vec\\nabla u, \\vec v)_\\Omega$ "
+      "arising from the weak form of the gradient operator "
+      "$k\\vec \\nabla u$.");
   params.addParam<std::string>("coefficient", "Name of property k to use.");
-
   return params;
 }
 

@@ -7,6 +7,8 @@ InputParameters
 MFEMHypreAMS::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
+  params.addClassDescription("Hypre auxiliary-space Maxwell solver and preconditioner for the "
+                             "iterative solution of MFEM equation systems.");
   params.addParam<UserObjectName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
   params.addParam<bool>("singular",
                         false,
