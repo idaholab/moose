@@ -6,6 +6,10 @@ InputParameters
 MFEMTimeDerivativeMassKernel::validParams()
 {
   InputParameters params = MFEMMassKernel::validParams();
+  params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
+                             "$(k \\dot{u}, v)_\\Omega$ "
+                             "arising from the weak form of the operator "
+                             "$k \\dot{u}$.");
   return params;
 }
 
