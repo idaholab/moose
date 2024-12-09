@@ -861,24 +861,18 @@ template <typename T>
 T
 convert(const std::string & str, bool throw_on_failure = false)
 {
-  const auto do_error = [&throw_on_failure](const std::string & message)
-  {
-    if (throw_on_failure)
-      throw std::invalid_argument(message);
-    else
-      mooseError(message);
-  };
-
-  if constexpr (std::is_unsigned_v<T>)
-  {
-    if (std::regex_search(str, std::regex("^\\-\\d")))
-      do_error("Unable to convert '" + str + "' to unsigned value");
-  }
-
-  T val;
   std::stringstream ss(str);
+  T val;
   if ((ss >> val).fail() || !ss.eof())
-    do_error("Unable to convert '" + str + "' to type " + prettyCppType<T>());
+  {
+    std::string msg = std::string("Unable to convert '") + str + "' to type " +
+                      libMesh::demangle(typeid(T).name());
+
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
 
   return val;
 }
