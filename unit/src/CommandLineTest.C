@@ -873,3 +873,31 @@ TEST(CommandLineTest, mergeHIT)
 
   ASSERT_EQ(cl.buildHitParams(), "Foo/bar=baz Foo/bar=bang");
 }
+
+TEST(CommandLineTest, removeArgument)
+{
+  CommandLine cl;
+  cl.addArgument("/path/to/exe");
+  cl.addArgument("--arg");
+  EXPECT_TRUE(cl.hasArgument("--arg"));
+  cl.removeArgument("--arg");
+  EXPECT_FALSE(cl.hasArgument("--arg"));
+}
+
+TEST(CommandLineTest, removeArgumentMissing)
+{
+  CommandLine cl;
+  cl.addArgument("/path/to/exe");
+
+  EXPECT_FALSE(cl.hasArgument("--arg"));
+  try
+  {
+    cl.removeArgument("--arg");
+    FAIL();
+  }
+  catch (const std::exception & e)
+  {
+    EXPECT_EQ(std::string(e.what()),
+              "CommandLine::removeArgument(): The argument '--arg' does not exist");
+  }
+}
