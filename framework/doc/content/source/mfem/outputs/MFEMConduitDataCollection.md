@@ -7,7 +7,8 @@
 ## Overview
 
 `MFEMDataCollection` controlling output of data to an `mfem::ConduitDataCollection` for visualisation
-in VisIt. Conduit output is typically significantly faster than other data collections since VisIt uses the MFEM FE types for visualization, and ParaViewDataCollection oversamples the degrees of freedom.
+in VisIt. Conduit output is typically significantly faster than other data collections since VisIt uses
+the MFEM FE types for visualisation, and ParaViewDataCollection oversamples the degrees of freedom.
 
 The user may choose the output protocol out of the following options: `hdf5`, `json`, `conduit_json`, and `conduit_bin`.
 
