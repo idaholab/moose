@@ -442,6 +442,7 @@ public:
   class CommandLineParamSetKey
   {
     friend class CommandLine;
+    FRIEND_TEST(InputParametersTest, commandLineParamSetNotCLParam);
     CommandLineParamSetKey() {}
     CommandLineParamSetKey(const CommandLineParamSetKey &) {}
   };

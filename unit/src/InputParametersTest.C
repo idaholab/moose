@@ -761,3 +761,64 @@ TEST(InputParametersTest, alphaCommandLineParamSwitch)
               "begin with an alphabetical character.");
   }
 }
+
+TEST(InputParametersTest, setGlobalCommandLineParamNotCLParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("param", "Doc");
+  try
+  {
+    params.setGlobalCommandLineParam("param");
+    FAIL();
+  }
+  catch (const std::exception & e)
+  {
+    EXPECT_EQ(std::string(e.what()),
+              "InputParameters::setGlobalCommandLineParam: The parameter 'param' is not a command "
+              "line parameter");
+  }
+}
+
+TEST(InputParametersTest, getCommandLineMetadataNotCLParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("param", "Doc");
+  try
+  {
+    params.getCommandLineMetadata("param");
+    FAIL();
+  }
+  catch (const std::exception & e)
+  {
+    EXPECT_EQ(std::string(e.what()),
+              "InputParameters::getCommandLineMetadata: The parameter 'param' is not a command "
+              "line parameter");
+  }
+}
+
+TEST(InputParametersTest, commandLineParamSetNotCLParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("param", "Doc");
+  try
+  {
+    params.commandLineParamSet("param", {});
+    FAIL();
+  }
+  catch (const std::exception & e)
+  {
+    EXPECT_EQ(std::string(e.what()),
+              "InputParameters::commandLineParamSet: The parameter 'param' is not a command "
+              "line parameter");
+  }
+}
+
+TEST(InputParametersTest, isCommandLineParameter)
+{
+  InputParameters params = emptyInputParameters();
+  params.addCommandLineParam<std::string>("cliparam", "--cliparam", "Doc");
+  params.addParam<std::string>("noncliparam", "Doc");
+
+  EXPECT_TRUE(params.isCommandLineParameter("cliparam"));
+  EXPECT_FALSE(params.isCommandLineParameter("noncliparam"));
+}
