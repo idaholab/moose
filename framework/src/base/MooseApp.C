@@ -185,10 +185,12 @@ MooseApp::validParams()
       "Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>");
   // TODO: Should this remain a bool? It can't be a regular argument because it contains
   // values that have dashes in it, so it'll get treated as another arg
-  params.addCommandLineParam<bool>("run",
-                                   "--run <test harness args>",
-                                   "Runs the inputs in the current directory copied to a "
-                                   "user-writable location by \"--copy-inputs\"");
+  params.addOptionalValuedCommandLineParam<std::string>(
+      "run",
+      "--run <test harness args>",
+      {},
+      "Runs the inputs in the current directory copied to a "
+      "user-writable location by \"--copy-inputs\"");
 
   params.addCommandLineParam<bool>(
       "list_constructed_objects",
@@ -1668,27 +1670,24 @@ MooseApp::copyInputs()
 bool
 MooseApp::runInputs()
 {
-  if (getParam<bool>("run"))
+  if (isParamSetByUser("run"))
   {
-    // These options will show as unused by petsc; ignore them all
-    Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
-
     if (comm().size() > 1)
       mooseError("The --run option should not be ran in parallel");
 
-    // Here we are going to pass everything after --run on the cli to the TestHarness. That means
-    // cannot validate these CLIs.
+    // Pass everything after --run on the cli to the TestHarness
     const auto find_run_it = std::as_const(*_command_line).findCommandLineParam("run");
     const auto & cl_entries = std::as_const(*_command_line).getEntries();
     mooseAssert(find_run_it != cl_entries.end(), "Didn't find the option");
     std::string test_args;
     for (auto it = std::next(find_run_it); it != cl_entries.end(); ++it)
       for (const auto & arg : it->raw_args)
+      {
         test_args += " " + arg;
+        libMesh::add_command_line_name(arg);
+      }
 
-    auto cmd = MooseUtils::runTestsExecutable() + test_args;
     auto working_dir = MooseUtils::getCurrentWorkingDir();
-
     if (MooseUtils::findTestRoot() == "")
     {
       auto bin_name = appBinaryName();
@@ -1712,6 +1711,7 @@ MooseApp::runInputs()
     // Set this application as the app name for the moose_test_runner script that we're running
     setenv("MOOSE_TEST_RUNNER_APP_NAME", appBinaryName().c_str(), true);
 
+    const std::string cmd = MooseUtils::runTestsExecutable() + test_args;
     Moose::out << "Working Directory: " << working_dir << "\nRunning Command: " << cmd << std::endl;
     mooseAssert(comm().size() == 1, "Should be run in serial");
     const auto return_value = system(cmd.c_str());

@@ -357,6 +357,9 @@ public:
    * one of these is a hit cli parameter, we don't know if we should
    * apply it to the optional option or as a hit parameter.
    *
+   * It is also allowed for "run" as we take all arguments past
+   * --run and pass to python.
+   *
    * @param name The name of the parameer
    * @param syntax Space separated list of command-line switch syntax that can set this option
    * @param value The default value to assign
@@ -1909,7 +1912,8 @@ InputParameters::addOptionalValuedCommandLineParam(const std::string & name,
                                                    const T & value,
                                                    const std::string & doc_string)
 {
-  mooseAssert(name == "mesh_only" || name == "recover", "Not supported for new parameters");
+  mooseAssert(name == "mesh_only" || name == "recover" || name == "run",
+              "Not supported for new parameters");
   static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (does not take a value)");
   addParam<T>(name, value, doc_string);
   addCommandLineParamHelper<T>(name, syntax, /* required = */ false, /* value_required = */ false);
