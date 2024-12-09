@@ -12,6 +12,8 @@ InputParameters
 MFEMCoefficient::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
+  params.addClassDescription(
+      "Base class for defining mfem::Coefficient objects to add to an MFEMProblem.");
   params.registerBase("MFEMCoefficient");
   return params;
 }
