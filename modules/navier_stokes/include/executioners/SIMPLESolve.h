@@ -25,6 +25,9 @@ public:
 
   static InputParameters validParams();
 
+  /// Check if the user defined time kernels, if yes error out
+  virtual void checkIntegrity() override;
+
 protected:
   /// Check if the system contains time kernels
   virtual void checkTimeKernels(LinearSystem & system);

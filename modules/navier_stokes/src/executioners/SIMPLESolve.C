@@ -28,6 +28,20 @@ SIMPLESolve::validParams()
 SIMPLESolve::SIMPLESolve(Executioner & ex)
   : PIMPLESolve(ex)
 {
+}
+
+void
+SIMPLESolve::checkTimeKernels(LinearSystem & system)
+{
+  // check to make sure that we don't have any time kernels in this simulation (Steady State)
+  if (system.containsTimeKernel())
+    mooseError("You have specified time kernels in your steady state simulation in system",
+               system.name(), ", SIMPLE is a steady-state solver!");
+}
+
+void
+SIMPLESolve::checkIntegrity()
+{
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   for (const auto system : _momentum_systems)
     checkTimeKernels(*system);
@@ -40,13 +54,4 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
   if (_has_passive_scalar_systems)
     for (const auto system : _passive_scalar_systems)
       checkTimeKernels(*system);
-}
-
-void
-SIMPLESolve::checkTimeKernels(LinearSystem & system)
-{
-  // check to make sure that we don't have any time kernels in this simulation (Steady State)
-  if (system.containsTimeKernel())
-    mooseError("You have specified time kernels in your steady state simulation in system",
-               system.name(), ", SIMPLE is a steady-state solver!");
 }

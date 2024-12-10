@@ -34,7 +34,6 @@ public:
 
   static InputParameters validParams();
 
-  /// Fetch the Rhie Chow user object that
   virtual void linkRhieChowUserObject() override;
 
   /**
