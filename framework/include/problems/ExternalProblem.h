@@ -46,4 +46,9 @@ public:
    * transfer to variables in Multiapp simulations.
    */
   virtual void addExternalVariables() {}
+
+  /**
+   * Method to initialize variable before starting the simulation
+   */
+  virtual void initializeVariable() {}
 };

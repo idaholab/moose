@@ -19,6 +19,7 @@ public:
   static InputParameters validParams();
 
   virtual void addExternalVariables() override;
+  virtual void initializeVariable() override;
   virtual void externalSolve() override;
   virtual void syncSolutions(ExternalProblem::Direction direction) override;
 

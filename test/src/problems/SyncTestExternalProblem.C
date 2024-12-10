@@ -35,6 +35,23 @@ SyncTestExternalProblem::addExternalVariables()
 }
 
 void
+SyncTestExternalProblem::initializeVariable()
+{
+  auto & solution = _aux->solution();
+  const auto sys_number = _aux->number();
+  const auto & mesh = _mesh.getMesh();
+
+  for (const auto elem_ptr : mesh.element_ptr_range())
+  {
+    auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
+    solution.set(dof_idx, 12345);
+  }
+
+  solution.close();
+  _aux->system().update();
+}
+
+void
 SyncTestExternalProblem::externalSolve()
 {
 }

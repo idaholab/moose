@@ -28,4 +28,9 @@ InitProblemAction::act()
     _problem->init();
   else
     mooseError("Problem doesn't exist in InitProblemAction!");
+
+  // check for external variable to initialize
+  auto external_problem_ptr = std::dynamic_pointer_cast<ExternalProblem>(_problem);
+  if (external_problem_ptr)
+    external_problem_ptr->initializeVariable();
 }
