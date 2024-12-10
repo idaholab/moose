@@ -25,6 +25,11 @@ public:
 
   virtual void init() override;
 
+  virtual Real relativeSolutionDifferenceNorm() override;
+
 protected:
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override;
+
+  /// The solve object performing the PIMPLE iteration
   PIMPLESolve _pimple_solve;
 };

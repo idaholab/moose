@@ -42,6 +42,9 @@ public:
    */
   virtual bool solve() override;
 
+  /// Return pointers to the systems which are solved for within this object
+  const std::vector<LinearSystem *> systemsToSolve() const { return _systems_to_solve; }
+
 protected:
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
@@ -87,4 +90,7 @@ protected:
   /// Number of H(u) and u iterations with fixed face flux. This will be
   /// fixed to 0 in SIMPLE
   const unsigned int _num_piso_iterations;
+
+  /// Shortcut to every linear system that we solve for here
+  std::vector<LinearSystem *> _systems_to_solve;
 };
