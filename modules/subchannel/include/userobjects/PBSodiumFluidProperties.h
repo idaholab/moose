@@ -57,4 +57,3 @@ protected:
 public:
   static InputParameters validParams();
 };
-
