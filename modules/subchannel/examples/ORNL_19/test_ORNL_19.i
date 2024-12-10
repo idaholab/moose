@@ -1,6 +1,6 @@
 # M. Fontana, et All,
-# “Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
-# ” Nuclear Technology, vol. 24, no. 2, pp. 176–200, 1974.
+# "Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
+# "Nuclear Technology, vol. 24, no. 2, pp. 176-200, 1974.
 T_in = 588.5
 A12 = 1.00423e3
 A13 = -0.21390
