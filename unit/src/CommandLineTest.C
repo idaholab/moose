@@ -743,12 +743,14 @@ TEST(CommandLineTest, mergeArgsForParam)
     }
   };
 
-  test("petsc>=3.2 slepc<=1.0");
-  test("petsc slepc<=1.0");
-  test("slepc petsc=1");
-  test("petsc==1.5 slepc");
-  test("!neml petsc>=1.0");
-  test("neml   foo=bar");
+  test("petsc>=3.2 & slepc<=1.0");
+  test("petsc & slepc<=1.0");
+  test("slepc & petsc=1");
+  test("petsc==1.5 & slepc");
+  test("!neml & !petsc>=1.0");
+  test("neml    & foo=bar");
+  test("petsc>=3.11 & ad_size=30 & libtorch");
+  test("(neml) & !(petsc<3 & !libtorch)");
 }
 
 TEST(CommandLineTest, findCommandLineParam)
