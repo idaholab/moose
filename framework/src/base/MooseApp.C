@@ -112,7 +112,7 @@ MooseApp::validParams()
   params.addOptionalValuedCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only <optional path>",
-      {},
+      "",
       "Build and output the mesh only (Default: \"<input_file_name>_in.e\")");
 
   params.addCommandLineParam<bool>(
@@ -188,7 +188,7 @@ MooseApp::validParams()
   params.addOptionalValuedCommandLineParam<std::string>(
       "run",
       "--run <test harness args>",
-      {},
+      "",
       "Runs the inputs in the current directory copied to a "
       "user-writable location by \"--copy-inputs\"");
 
@@ -243,7 +243,7 @@ MooseApp::validParams()
   params.addOptionalValuedCommandLineParam<std::string>(
       "recover",
       "--recover <optional file base>",
-      {},
+      "",
       "Continue the calculation. Without <file base>, the most recent recovery file will be used");
   params.setGlobalCommandLineParam("recover");
 

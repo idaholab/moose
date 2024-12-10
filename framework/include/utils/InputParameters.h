@@ -365,22 +365,11 @@ public:
    * @param value The default value to assign
    * @param doc_string Documentation.  This will be shown for --help
    */
-  ///@{
   template <typename T>
   void addOptionalValuedCommandLineParam(const std::string & name,
                                          const std::string & syntax,
                                          const T & value,
                                          const std::string & doc_string);
-  template <typename T>
-  void
-  addOptionalValuedCommandLineParam(const std::string & name,
-                                    const std::string & syntax,
-                                    const std::initializer_list<typename T::value_type> & value,
-                                    const std::string & doc_string)
-  {
-    addOptionalValuedCommandLineParam<T>(name, syntax, T{value}, doc_string);
-  }
-  ///@}
 
   /**
    * Sets the command line parameter with \p name as global.
