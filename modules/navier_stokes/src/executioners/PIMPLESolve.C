@@ -34,12 +34,20 @@ PIMPLESolve::PIMPLESolve(Executioner & ex)
     _num_piso_iterations(getParam<unsigned int>("num_piso_iterations"))
 
 {
+
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
   {
     _momentum_system_numbers.push_back(_problem.linearSysNum(_momentum_system_names[system_i]));
     _momentum_systems.push_back(&_problem.getLinearSystem(_momentum_system_numbers[system_i]));
+    _systems_to_solve.push_back(_momentum_systems.back());
   }
+
+  _systems_to_solve.push_back(&_pressure_system);
+
+  if (_has_energy_system)
+    _systems_to_solve.push_back(_energy_system);
+
   // and for the passive scalar equations
   if (_has_passive_scalar_systems)
     for (auto system_i : index_range(_passive_scalar_system_names))
@@ -48,6 +56,7 @@ PIMPLESolve::PIMPLESolve(Executioner & ex)
           _problem.linearSysNum(_passive_scalar_system_names[system_i]));
       _passive_scalar_systems.push_back(
           &_problem.getLinearSystem(_passive_scalar_system_numbers[system_i]));
+      _systems_to_solve.push_back(_passive_scalar_systems.back());
     }
 }
 
