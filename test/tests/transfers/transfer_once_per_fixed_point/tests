@@ -22,9 +22,9 @@
     type = CSVDiff
     input = parent.i
     cli_args = 'Outputs/file_base=multiapp_fp_begin Outputs/fp_end/file_base=multiapp_fp_begin_on_fp_end
-                Transfers/from_sub/execute_on=MULTIAPP_FIXED_POINT_BEGIN Transfers/to_sub/execute_on=MULTIAPP_FIXED_POINT_BEGIN
-                MultiApps/sub/cli_args=Outputs/fp/execute_on=MULTIAPP_FIXED_POINT_BEGIN
-                MultiApps/sub/execute_on=MULTIAPP_FIXED_POINT_BEGIN'
+                Transfers/from_sub/execute_on=TIMESTEP_BEGIN Transfers/to_sub/execute_on=TIMESTEP_BEGIN
+                MultiApps/sub/cli_args=Outputs/fp/execute_on=TIMESTEP_BEGIN
+                MultiApps/sub/execute_on=TIMESTEP_BEGIN'
     csvdiff = 'multiapp_fp_begin.csv multiapp_fp_begin_on_fp_end.csv multiapp_fp_begin_sub0_fp.csv'
     requirement = "The system shall be able to transfer data to and from an application executed at the beginning of the fixed point iterations."
   []

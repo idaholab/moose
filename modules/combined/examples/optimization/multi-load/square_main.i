@@ -173,7 +173,7 @@ Emin = 1.0e-6
     density_sensitivity = total_sensitivity
     design_density = mat_den
     volume_fraction = ${vol_frac}
-    execute_on = MULTIAPP_FIXED_POINT_BEGIN
+    execute_on = TIMESTEP_BEGIN
   []
 []
 
