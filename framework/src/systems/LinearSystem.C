@@ -33,6 +33,7 @@
 #include "UserObject.h"
 #include "SolutionInvalidity.h"
 #include "MooseLinearVariableFV.h"
+#include "LinearFVTimeDerivative.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -299,4 +300,26 @@ LinearSystem::stopSolve(const ExecFlagType & /*exec_flag*/,
   // We close the containers in case the solve restarts from a failed iteration
   closeTaggedVectors(vector_tags_to_close);
   _linear_implicit_system.matrix->close();
+}
+
+bool
+LinearSystem::containsTimeKernel()
+{
+  // Right now, FV kernels are in TheWarehouse so we have to use that.
+  std::vector<LinearFVKernel *> kernels;
+  auto base_query = _fe_problem.theWarehouse()
+                        .query()
+                        .template condition<AttribSysNum>(this->number())
+                        .template condition<AttribSystem>("LinearFVKernel")
+                        .queryInto(kernels);
+
+  bool contains_time_kernel = false;
+  for (const auto kernel : kernels)
+  {
+    contains_time_kernel = dynamic_cast<LinearFVTimeDerivative *>(kernel);
+    if (contains_time_kernel)
+      break;
+  }
+
+  return contains_time_kernel;
 }

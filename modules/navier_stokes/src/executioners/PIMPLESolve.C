@@ -18,7 +18,7 @@ InputParameters
 PIMPLESolve::validParams()
 {
   InputParameters params = SIMPLESolveBase::validParams();
-  param.addParam<unsigned int>("num_piso_iterations", 0, "The number of PISO iterations without recomputing the momentum matrix.");
+  params.addParam<unsigned int>("num_piso_iterations", 0, "The number of PISO iterations without recomputing the momentum matrix.");
 
   return params;
 }
@@ -288,7 +288,7 @@ PIMPLESolve::solveAdvectedSystem(const unsigned int system_num,
 
   _console << " Advected system: " << system.name() << " " << COLOR_GREEN
            << residuals.second << COLOR_DEFAULT
-           << " Linear its: " << ns_residuals.first << std::endl;
+           << " Linear its: " << residuals.first << std::endl;
 
   return residuals;
 }
@@ -404,9 +404,13 @@ PIMPLESolve::solve()
     // The reason why we need more than one iteration is due to the matrix relaxation
     // which can be used to stabilize the equations
     bool passive_scalar_converged = false;
-    iteration_counter = 0;
-    while (iteration_counter < _num_iterations && !passive_scalar_converged)
+    unsigned int ps_iteration_counter = 0;
+
+    _console << "Passive scalar iteration " << ps_iteration_counter << " Initial residual norms:" << std::endl;
+
+    while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
     {
+      ps_iteration_counter++;
       std::vector<std::pair<unsigned int, Real>> scalar_residuals(
           _passive_scalar_system_names.size(), std::make_pair(0, 1.0));
       std::vector<Real> scalar_abs_tols;
@@ -424,7 +428,6 @@ PIMPLESolve::solve()
                                                   _passive_scalar_l_abs_tol);
 
       passive_scalar_converged = NS::FV::converged(scalar_residuals, scalar_abs_tols);
-      iteration_counter++;
     }
 
     // Both flow and scalars must converge

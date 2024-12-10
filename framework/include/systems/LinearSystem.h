@@ -65,7 +65,7 @@ public:
    * Considering that we don't have transient capabilities for linear
    * systems at the moment, this is false.
    */
-  virtual bool containsTimeKernel() override { return false; }
+  virtual bool containsTimeKernel() override;
   virtual std::vector<std::string> timeKernelVariableNames() override { return {}; }
 
   /**

@@ -10,7 +10,7 @@
 #pragma once
 
 // Moose includes
-#include "SIMPLESolve.h"
+#include "PIMPLESolve.h"
 
 /**
  * Implementation of Semi-Implicit Method for Pressure-Linked Equations (SIMPLE)

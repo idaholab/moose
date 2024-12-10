@@ -521,12 +521,12 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
     mmat->vector_mult(HbyA, solution);
     working_vector_petsc->pointwise_mult(*working_vector_petsc, solution);
-    HbyA.add(-1.0, working_vector_petsc);
+    HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
     {
       _console << " H(u)" << std::endl;
-      HbyA->print();
+      HbyA.print();
     }
 
     // We continue by adding the momentum right hand side contributions
@@ -584,10 +584,8 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
     for (const auto & component : _pressure_system->gradientContainer())
       _grad_p_current.push_back(component->clone());
   }
-  else
-  {
-    return _grad_p_current;
-  }
+
+  return _grad_p_current;
 }
 
 bool
