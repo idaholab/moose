@@ -6,6 +6,9 @@ InputParameters
 MFEMScalarBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
+  params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
+                             "$(f, v)_\\Omega$ "
+                             "arising from the weak form of the forcing term $f$.");
   params.addRequiredParam<std::string>(
       "coefficient", "The scalar MFEM coefficient which will be used in the integrated BC.");
   return params;
@@ -14,7 +17,7 @@ MFEMScalarBoundaryIntegratedBC::validParams()
 MFEMScalarBoundaryIntegratedBC::MFEMScalarBoundaryIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _coef_name(getParam<std::string>("coefficient")),
-    _coef(const_cast<MFEMCoefficient *>(&getUserObject<MFEMCoefficient>("coefficient")))
+    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }
 
@@ -23,7 +26,7 @@ MFEMScalarBoundaryIntegratedBC::MFEMScalarBoundaryIntegratedBC(const InputParame
 mfem::LinearFormIntegrator *
 MFEMScalarBoundaryIntegratedBC::createLinearFormIntegrator()
 {
-  return new mfem::BoundaryLFIntegrator(*_coef->getCoefficient());
+  return new mfem::BoundaryLFIntegrator(_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
