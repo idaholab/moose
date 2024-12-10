@@ -58,4 +58,11 @@
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem set up from MOOSE and produce the same result as a native run.'
   []
+  [./MFEMGravity]
+    type = XMLDiff
+    input = gravity.i
+    xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
+                OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Platypus shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
+  []  
 []
