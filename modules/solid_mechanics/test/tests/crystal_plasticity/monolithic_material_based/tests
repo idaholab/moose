@@ -1,61 +1,64 @@
 [Tests]
-  issues = ''
+  issues = '#16064'
   design = 'solid_mechanics/index.md'
-  [./test]
-    type = 'Exodiff'
-    input = 'crysp.i'
-    exodiff = 'out.e'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_fileread]
-    type = 'Exodiff'
-    input = 'crysp_fileread.i'
-    exodiff = 'crysp_fileread_out.e'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_user_object]
-    type = 'Exodiff'
-    input = 'crysp_user_object.i'
-    exodiff = 'crysp_user_object_out.e'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_save_euler]
-    type = 'Exodiff'
-    input = 'crysp_save_euler.i'
-    exodiff = 'crysp_save_euler_out.e'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_read_slip_prop]
-    type = 'Exodiff'
-    input = 'crysp_read_slip_prop.i'
-    exodiff = 'crysp_read_slip_prop_out.e'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_cutback]
-    type = 'Exodiff'
-    input = 'crysp_cutback.i'
-    exodiff = 'crysp_cutback_out.e'
-    allow_warnings = true
-    max_parallel = 1
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_substep]
-    type = 'Exodiff'
-    input = 'crysp_substep.i'
-    exodiff = 'crysp_substep_out.e'
-    allow_warnings = true
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./test_linesearch]
-    type = 'Exodiff'
-    input = 'crysp_linesearch.i'
-    exodiff = 'crysp_lsearch_out.e'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
-  [./orthotropic_rotation]
-    type = 'CSVDiff'
-    input = 'orthotropic_rotation_Cijkl.i'
-    csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed.'
-  [../]
+  [test]
+    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed. List of deprecated test cases:'
+    [test]
+      type = 'Exodiff'
+      input = 'crysp.i'
+      exodiff = 'out.e'
+      detail = 'test'
+    []
+    [test_fileread]
+      type = 'Exodiff'
+      input = 'crysp_fileread.i'
+      exodiff = 'crysp_fileread_out.e'
+      detail = 'test_fileread'
+    []
+    [test_user_object]
+      type = 'Exodiff'
+      input = 'crysp_user_object.i'
+      exodiff = 'crysp_user_object_out.e'
+      detail = 'test_user_object'
+    []
+    [test_save_euler]
+      type = 'Exodiff'
+      input = 'crysp_save_euler.i'
+      exodiff = 'crysp_save_euler_out.e'
+      detail = 'test_save_euler'
+    []
+    [test_read_slip_prop]
+      type = 'Exodiff'
+      input = 'crysp_read_slip_prop.i'
+      exodiff = 'crysp_read_slip_prop_out.e'
+      detail = 'test_read_slip_prop'
+    []
+    [test_cutback]
+      type = 'Exodiff'
+      input = 'crysp_cutback.i'
+      exodiff = 'crysp_cutback_out.e'
+      allow_warnings = true
+      max_parallel = 1
+      detail = 'test_cutback'
+    []
+    [test_substep]
+      type = 'Exodiff'
+      input = 'crysp_substep.i'
+      exodiff = 'crysp_substep_out.e'
+      allow_warnings = true
+      detail = 'test_substep'
+    []
+    [test_linesearch]
+      type = 'Exodiff'
+      input = 'crysp_linesearch.i'
+      exodiff = 'crysp_lsearch_out.e'
+      detail = 'test_linesearch'
+    []
+    [orthotropic_rotation]
+      type = 'CSVDiff'
+      input = 'orthotropic_rotation_Cijkl.i'
+      csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
+      detail = 'orthotropic_rotation'
+    []
+  []
 []

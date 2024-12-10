@@ -29,8 +29,8 @@ InputParameters
 HomogenizationConstraintScalarKernel::validParams()
 {
   InputParameters params = ScalarKernel::validParams();
-  params.addClassDescription("Retrieves the residual and Jacobian contribution from the "
-                             "homogenization constraint user object");
+  params.addClassDescription("Calculate the scalar equation residual and Jacobian associated with "
+                             "the homogenization constraint.");
   params.addRequiredParam<UserObjectName>("homogenization_constraint",
                                           "The UserObject defining the homogenization constraint");
 

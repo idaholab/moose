@@ -206,6 +206,13 @@ R=1.8257418583505537e-4 # m
     boundary = 'top'
     use_displaced_mesh = true
   []
+  [surface_tension]
+    type = INSADSurfaceTensionBC
+    variable = vel
+    boundary = 'top'
+    use_displaced_mesh = true
+    include_gradient_terms = true
+  []
   [displace_x_top]
     type = INSADDisplaceBoundaryBC
     boundary = 'top'

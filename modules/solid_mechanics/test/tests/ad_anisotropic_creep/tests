@@ -7,15 +7,13 @@
     exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test_out.e'
     min_parallel = 2
     custom_cmp = 'generalized.exodiff'
-    requirement = 'The system shall avoid regression on material time step and combined anisotropic creep '
-                  'computations'
+    requirement = 'The system shall avoid regression on material time step and combined anisotropic creep computations'
   []
   [ad_aniso_creep_x_3d]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_x_3d.i'
     csvdiff = ad_aniso_creep_x_3d_out.csv
-    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
-                  'along the X direction.'
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios along the X direction.'
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
@@ -24,8 +22,7 @@
     type = 'CSVDiff'
     input = 'aniso_creep_x_3d.i'
     csvdiff = aniso_creep_x_3d_out.csv
-    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
-                  'along the X direction using hand-coded Jacobians.'
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios along the X direction using hand-coded Jacobians.'
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
@@ -34,13 +31,12 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_x_3d_anisoElasticity.i'
     csvdiff = ad_aniso_creep_x_3d_anisoElasticity_out.csv
-    requirement = 'The system shall reproduce the creep strain as those evaluated with '
-                  'residual and derivative computations used for isotropic elasticity.'
+    requirement = 'The system shall reproduce the creep strain as those evaluated with residual and derivative computations used for isotropic elasticity.'
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
     heavy = true
-    max_time = 900 
+    max_time = 900
   []
   [ad_aniso_creep_x_3d_shear]
     type = 'CSVDiff'
@@ -67,16 +63,15 @@
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
     heavy = true
-    max_time = 900 
+    max_time = 900
   []
   [aniso_creep_x_3d_no_trafo]
     type = 'CSVDiff'
     input = 'aniso_creep_x_3d.i'
     csvdiff = aniso_creep_x_3d_no_trafo_out.csv
-    cli_args = "Materials/trial_creep_two/use_transformation=false Outputs/file_base=aniso_creep_x_3d_no_trafo_out"
-    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
-                  'along the X direction using hand-coded Jacobians when no transformation is used to rotate '
-                  'the Hill tensor for small deformation.'
+    cli_args = "Materials/trial_creep_two/use_transformation=false "
+               "Outputs/file_base=aniso_creep_x_3d_no_trafo_out"
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios along the X direction using hand-coded Jacobians when no transformation is used to rotate the Hill tensor for small deformation.'
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
@@ -85,8 +80,7 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_y_3d.i'
     csvdiff = ad_aniso_creep_y_3d_out.csv
-    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
-                  'along the Y direction.'
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios along the Y direction.'
     min_parallel = 2
     rel_err = 1.0e-5
     abs_zero = 1.0e-7
@@ -95,8 +89,7 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_z_3d.i'
     csvdiff = ad_aniso_creep_z_3d_out.csv
-    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
-                  'along the Z direction.'
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios along the Z direction.'
     min_parallel = 2
     rel_err = 1.0e-5
     abs_zero = 1.0e-7
@@ -108,8 +101,7 @@
     cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
                "Materials/inactive='trial_creep_aniso_iso' "
                "Outputs/file_base=ad_aniso_iso_creep_x_3d_out"
-    requirement = 'The system shall be capable of reproducing isotropic creep with the right anisotropic '
-                  'creep parameters: Baseline'
+    requirement = 'The system shall be capable of reproducing isotropic creep with the right anisotropic creep parameters: Baseline'
     min_parallel = 2
     rel_err = 1.0e-5
     abs_zero = 1.0e-8
@@ -127,8 +119,7 @@
     difference_tol = 0.1
     only_final_jacobian = 'True'
     issues = '#17456'
-    requirement = 'The system shall provide a perfect Jacobian while calculating large deformation '
-                  'creep.'
+    requirement = 'The system shall provide a perfect Jacobian while calculating large deformation creep.'
   []
   [jac]
     type = 'PetscJacobianTester'
@@ -143,8 +134,7 @@
     difference_tol = 0.35
     only_final_jacobian = 'True'
     issues = '#21824'
-    requirement = 'The system shall provide a reasonable Jacobian while calculating large deformation '
-                  'creep using the elasticity tensor as the tangent operator.'
+    requirement = 'The system shall provide a reasonable Jacobian while calculating large deformation creep using the elasticity tensor as the tangent operator.'
   []
   [ad_aniso_iso_aniso]
     type = 'CSVDiff'
@@ -153,8 +143,7 @@
     cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_aniso_iso' "
                "Materials/inactive='trial_creep_iso' "
                "Outputs/file_base=ad_aniso_iso_aniso_creep_x_3d_out"
-    requirement = 'The system shall be capable of reproducing isotropic creep with the right anisotropic '
-                  'creep parameters.'
+    requirement = 'The system shall be capable of reproducing isotropic creep with the right anisotropic creep parameters.'
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
@@ -163,9 +152,7 @@
     type = 'CSVDiff'
     input = 'aniso_creep_integration_error.i'
     csvdiff = aniso_creep_integration_error_out.csv
-    requirement = 'The system shall be capable of enforcing a time step such that the creep rate '
-                  'integration error is controled by the user with the aid of a soft terminator when '
-                  'regular (non-AD) objects are used.'
+    requirement = 'The system shall be capable of enforcing a time step such that the creep rate integration error is controled by the user with the aid of a soft terminator when regular (non-AD) objects are used.'
     heavy = true
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
@@ -175,8 +162,7 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_integration_error.i'
     csvdiff = ad_aniso_creep_integration_error_out.csv
-    requirement = 'The system shall be capable of enforcing a time step such that the creep rate '
-                  'integration error is controled by the user with the aid of a soft terminator.'
+    requirement = 'The system shall be capable of enforcing a time step such that the creep rate integration error is controled by the user with the aid of a soft terminator.'
     heavy = true
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
@@ -185,9 +171,7 @@
     type = 'Exodiff'
     input = 'ad_aniso_creep_temperature_coefficients.i'
     exodiff = ad_aniso_creep_temperature_coefficients_out.e
-    requirement = 'The system shall be capable of running Hill materials with constant coefficients and '
-                  'coefficients that are function of temperature to capture material texture. This '
-                  'test performs a reference run with constant coefficients'
+    requirement = 'The system shall be capable of running Hill materials with constant coefficients and coefficients that are function of temperature to capture material texture. This test performs a reference run with constant coefficients'
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
     heavy = true
@@ -197,9 +181,7 @@
     input = 'ad_aniso_creep_temperature_coefficients_function.i'
     exodiff = ad_aniso_creep_temperature_coefficients_function_out.e
     custom_cmp = 'temperature.exodiff'
-    requirement = 'The system shall be capable of running Hill materials with constant coefficients and '
-                  'coefficients that are function of temperature to capture material texture. This '
-                  'test performs a run using a constant temperature function.'
+    requirement = 'The system shall be capable of running Hill materials with constant coefficients and coefficients that are function of temperature to capture material texture. This test performs a run using a constant temperature function.'
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
     heavy = true
@@ -208,8 +190,7 @@
     type = 'Exodiff'
     input = 'ad_aniso_creep_temperature_coefficients_function_variation.i'
     exodiff = ad_aniso_creep_temperature_coefficients_function_variation_out.e
-    requirement = 'The system shall be capable of running anisotropic Hill creep with '
-                  'temperature-dependent Hill coefficients and generating correct output.'
+    requirement = 'The system shall be capable of running anisotropic Hill creep with temperature-dependent Hill coefficients and generating correct output.'
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
     heavy = true
@@ -218,10 +199,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_z_no_rotation.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_z_no_rotation_out.csv
-    requirement = 'The system shall be capable of using large deformation rotation to update the '
-                  'orientation of Hill parameters even when there is no rigid body rotation. This '
-                  'test also serves as a reference to verify the updates to the Hill parameters when '
-                  'there is significant rigid body motion'
+    requirement = 'The system shall be capable of using large deformation rotation about the z-axis to update the orientation of Hill parameters even when there is no rigid body rotation. This test also serves as a reference to verify the updates to the Hill parameters when there is significant rigid body motion'
     rel_err = 1.0e-3
     abs_zero = 1.0e-10
     heavy = true
@@ -230,11 +208,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_z.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_z_out.csv
-    requirement = 'The system shall be capable of using large deformation rotation to update the '
-                  'orientation of Hill parameters when there is 90-degree rigid body orientation '
-                  'change about the Z axis. The creep strains have to be very similar to the output '
-                  'when there is no rigid body motion (Note: The mere constraints enforcing rigid '
-                  'body rotation induce numerical errors). In this case using Hill constants.'
+    requirement = 'The system shall be capable of using large deformation rotation to update the orientation of Hill parameters when there is 90-degree rigid body orientation change about the Z axis. The creep strains have to be very similar to the output when there is no rigid body motion (Note: The mere constraints enforcing rigid body rotation induce numerical errors). In this case using Hill constants.'
     rel_err = 2.0e-2
     abs_zero = 5.0e-10
     heavy = true
@@ -243,10 +217,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_out.csv
-    requirement = 'The system shall be capable of using large deformation rotation to update the '
-                  'orientation of Hill parameters even when there is no rigid body rotation. This '
-                  'test also serves as a reference to verify the updates to the Hill parameters when '
-                  'there is significant rigid body motion'
+    requirement = 'The system shall be capable of using large deformation rotation about the x-axis to update the orientation of Hill parameters even when there is no rigid body rotation. This test also serves as a reference to verify the updates to the Hill parameters when there is significant rigid body motion'
     rel_err = 1.0e-3
     abs_zero = 1.0e-10
     heavy = true
@@ -259,8 +230,7 @@
                "Materials/trial_creep/use_transformation=false "
                "Outputs/file_base=3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_no_transfo"
                "rmation_out"
-    requirement = 'The system shall be capable of not using large deformation rotation to define '
-                  'Hill anisotropic parameters. '
+    requirement = 'The system shall be capable of not using large deformation rotation to define Hill anisotropic parameters. '
     rel_err = 1.0e-3
     abs_zero = 1.0e-10
     heavy = true
@@ -269,11 +239,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_x.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_x_out.csv
-    requirement = 'The system shall be capable of using large deformation rotation to update the '
-                  'orientation of Hill parameters when there is 90-degree rigid body orientation '
-                  'change about the X axis. The creep strains have to be very similar to the output '
-                  'when there is no rigid body motion (Note: The mere constraints enforcing rigid '
-                  'body rotation induce numerical errors). In this case using Hill constants.'
+    requirement = 'The system shall be capable of using large deformation rotation to update the orientation of Hill parameters when there is 90-degree rigid body orientation change about the X axis. The creep strains have to be very similar to the output when there is no rigid body motion (Note: The mere constraints enforcing rigid body rotation induce numerical errors). In this case using Hill constants.'
     rel_err = 2.0e-2
     abs_zero = 5.0e-10
     heavy = true

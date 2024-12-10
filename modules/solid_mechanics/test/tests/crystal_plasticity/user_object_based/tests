@@ -1,21 +1,21 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
     issues = '#6097'
     requirement = 'The system shall provide a plug-in based extensible crystal plasticity system'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./user_object_011orientation]
+  []
+  [user_object_011orientation]
     type = 'CSVDiff'
     input = 'user_object_011orientation.i'
     csvdiff = 'user_object_011orientation_out.csv'
     issues = '#16064'
-    requirement = 'The material-based crystal plasticity model shall compute the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
+    requirement = 'The user-object-based crystal plasticity model shall compute the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./exception]
+  []
+  [exception]
     type = 'Exodiff'
     input = 'exception.i'
     exodiff = 'exception_out.e'
@@ -23,32 +23,32 @@
     issues = '#10133'
     requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./fileread]
+  []
+  [fileread]
     type = 'Exodiff'
     input = 'fileread.i'
     exodiff = 'fileread_out.e'
     issues = '#6097'
     requirement = 'The crystal plasticity system shall provide a function to read slip system parameters from files'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./user_object]
+  []
+  [user_object]
     type = 'Exodiff'
     input = 'user_object.i'
     exodiff = 'user_object_out.e'
     issues = '#6097'
     requirement = 'The crystal plasticity system shall use pluggable user objects to dtermine the plasticity state variable evolution'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./save_euler]
+  []
+  [save_euler]
     type = 'Exodiff'
     input = 'save_euler.i'
     exodiff = 'save_euler_out.e'
     issues = '#6097'
     requirement = 'The crystal plasticity system shall make local Euler angles at material points available for output'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./substep]
+  []
+  [substep]
     type = 'Exodiff'
     input = 'substep.i'
     exodiff = 'substep_out.e'
@@ -56,42 +56,44 @@
     issues = '#6097'
     requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./linesearch]
+  []
+  [linesearch]
     type = 'Exodiff'
     input = 'linesearch.i'
     exodiff = 'linesearch_out.e'
     issues = '#6097'
     requirement = 'The crystal plasticity system shall implement a line search capability for accellerated internal Newton solves'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
-  [./orthotropic_rotation_Cijkl]
+  []
+  [orthotropic_rotation_Cijkl]
     type = 'CSVDiff'
     input = 'orthotropic_rotation_Cijkl.i'
     csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
     issues = '#10629'
     requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at each material point'
     design = '/ComputeElasticityTensorCP.md'
-  [../]
-  [./user_object_Voce_BCC]
+  []
+  [user_object_Voce_BCC]
     type = 'Exodiff'
     input = 'user_object_Voce_BCC.i'
     exodiff = 'user_object_Voce_BCC_out.e'
     issues = '#11307'
     requirement = 'The crystal plasticity system shall provide a plugin user object implementing the Voce hardening law'
     design = '/CrystalPlasticityStateVarRateComponentVoce.md'
-  [../]
-  [./patch_recovery]
+  []
+  [patch_recovery]
     type = 'Exodiff'
     input = 'patch_recovery.i'
     exodiff = 'patch_recovery_out.e'
     abs_zero = 1e-8
     mesh_mode = replicated
-    requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, with equivalent results in both serial and parallel simulations, in a crystal plasticity finite strain application."
+    requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, "
+                  "with equivalent results in both serial and parallel simulations, in a crystal "
+                  "plasticity finite strain application."
     design = 'nodal_patch_recovery.md'
     issues = '#18721'
-  [../]
-  [./prop_block_read]
+  []
+  [prop_block_read]
     type = 'Exodiff'
     input = 'prop_block_read.i'
     exodiff = 'prop_block_read_out.e'
@@ -99,8 +101,8 @@
     requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh block IDs'
     design = 'PropertyReadFile.md'
     allow_warnings = true # number of blocks is smaller than number of data points in CSV file
-  [../]
-  [./use_substep_dt]
+  []
+  [use_substep_dt]
     type = 'CSVDiff'
     input = 'use_substep_dt.i'
     csvdiff = 'use_substep_dt_out.csv'
@@ -109,5 +111,5 @@
     issues = '#17340'
     requirement = 'The system shall apply correct boundary condition after timestep being cut during substepping'
     design = '/FiniteStrainUObasedCP.md'
-  [../]
+  []
 []

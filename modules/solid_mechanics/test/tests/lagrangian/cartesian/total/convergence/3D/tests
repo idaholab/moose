@@ -1,16 +1,18 @@
 [Tests]
   issues = '#17472'
   design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
-  [./dirichlet]
+  [dirichlet]
     type = CSVDiff
     input = 'dirichlet.i'
     csvdiff = 'dirichlet_out.csv'
-    requirement = "Quadratic convergence in 3D for DirichletBCs, SMP matches FDP."
-  [../]
-  [./neumann]
+    requirement = "Quadratic convergence in 3D for DirichletBCs with the total Lagrangian "
+                  "formulation, SMP matches FDP."
+  []
+  [neumann]
     type = CSVDiff
     input = 'neumann.i'
     csvdiff = 'neumann_out.csv'
-    requirement = "Quadratic convergence in 3D for NeumannBCs, SMP matches FDP."
-  [../]
+    requirement = "Quadratic convergence in 3D for NeumannBCs with the total Lagrangian formulation, "
+                  "SMP matches FDP."
+  []
 []

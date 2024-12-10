@@ -1,23 +1,14 @@
 [Tests]
-  design = 'source/materials/ComputeRSphericalSmallStrain.md  '
-           'source/materials/ComputeLinearElasticStress.md '
-           'syntax/Physics/SolidMechanics/QuasiStatic/index.md '
-           'source/materials/RankTwoSphericalComponent.md'
+  design = 'source/materials/ComputeRSphericalSmallStrain.md  source/materials/ComputeLinearElasticStress.md syntax/Physics/SolidMechanics/QuasiStatic/index.md source/materials/RankTwoSphericalComponent.md'
   [smallStrain_1DSphere]
     type = Exodiff
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
     compiler = 'CLANG GCC'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
-                '
-               'Materials/stress/type=ADComputeLinearElasticStress'
+                Materials/stress/type=ADComputeLinearElasticStress'
     issues = '#6256 #7555 #18876'
-    requirement = 'The ComputeRSphericalSmallStrain class, called through the QuasiStatic SolidMechanics Physics '
-                  'action, shall compute the total linearized solution for the displacement of a '
-                  'solid isotropic elastic sphere with a pressure applied to the outer surface using '
-                  'a 1D spherical symmetric formulation with total small strain assumptions. The '
-                  'RankTwoSphericalComponent class, called through the QuasiStatic SolidMechanics Physics, '
-                  'shall output the spherical radial and hoop stress.'
+    requirement = 'The ADComputeRSphericalSmallStrain class, called through the QuasiStatic SolidMechanics Physics action, shall compute the total linearized solution for the displacement of a solid isotropic elastic sphere with a pressure applied to the outer surface using a 1D spherical symmetric formulation with total small strain assumptions. The RankTwoSphericalComponent class, called through the QuasiStatic SolidMechanics Physics, shall output the spherical radial and hoop stress.'
   []
   [smallStrain_1DSphere_incremental]
     type = Exodiff
@@ -25,16 +16,10 @@
     exodiff = 'smallStrain_1DSphere_out.e'
     compiler = 'CLANG GCC'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
-                '
-               'Materials/stress/type=ADComputeFiniteStrainElasticStress'
+                Materials/stress/type=ADComputeFiniteStrainElasticStress'
     prereq = 'smallStrain_1DSphere'
     issues = '#6256 #7555 #18876'
-    requirement = 'The ComputeRSphericalIncrementalStrain class, called through the '
-                  'QuasiStatic SolidMechanics Physics, shall find the linearized incremental strain '
-                  'displacement of a solid isotropic elastic sphere with a pressure applied to the '
-                  'outer surface using a 1D spherical symmetric formulation with incremental small '
-                  'strain assumptions. The RankTwoSphericalComponent class, called through the '
-                  'QuasiStatic SolidMechanics Physics, shall output the spherical radial and hoop stress.'
+    requirement = 'The ADComputeRSphericalIncrementalStrain class, called through the QuasiStatic SolidMechanics Physics, shall find the linearized incremental strain displacement of a solid isotropic elastic sphere with a pressure applied to the outer surface using a 1D spherical symmetric formulation with incremental small strain assumptions. The RankTwoSphericalComponent class, called through the QuasiStatic SolidMechanics Physics, shall output the spherical radial and hoop stress.'
   []
   [finiteStrain_1DSphere_hollow]
     type = Exodiff
@@ -42,12 +27,7 @@
     exodiff = 'finiteStrain_1DSphere_hollow_out.e'
     compiler = 'CLANG GCC'
     issues = '#6256 #7555 #18876'
-    requirement = 'The ComputeRSphericalFiniteStrain class, called through the QuasiStatic SolidMechanics Physics '
-                  'action, shall find the finite incremental strain displacement of a thick walled '
-                  'hollow isotropic elastic sphere under an applied load using a 1D spherical '
-                  'symmetric fomulation with incremental finite strain assumptions. The '
-                  'RankTwoSphericalComponent class, called through the QuasiStatic SolidMechanics Physics, '
-                  'shall output the spherical radial stress.'
+    requirement = 'The ADComputeRSphericalFiniteStrain class, called through the QuasiStatic SolidMechanics Physics action, shall find the finite incremental strain displacement of a thick walled hollow isotropic elastic sphere under an applied load using a 1D spherical symmetric fomulation with incremental finite strain assumptions. The RankTwoSphericalComponent class, called through the QuasiStatic SolidMechanics Physics, shall output the spherical radial stress.'
   []
 
   [smallStrain_1DSphere-jac]
@@ -56,11 +36,9 @@
     run_sim = 'True'
     difference_tol = 1e-5
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
-                '
-               'Materials/stress/type=ADComputeLinearElasticStress'
+                Materials/stress/type=ADComputeLinearElasticStress'
     issues = '#12650'
-    requirement = 'The Jacobian for the AD small strain elasticity problem with Pressure BC in '
-                  'spherical coordinates shall be perfect'
+    requirement = 'The Jacobian for the AD small strain elasticity problem with Pressure BC in spherical coordinates shall be perfect'
   []
   [smallStrain_1DSphere_incremental-jac]
     type = 'PetscJacobianTester'
@@ -68,11 +46,9 @@
     run_sim = 'True'
     difference_tol = 1e-5
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
-                '
-               'Materials/stress/type=ADComputeFiniteStrainElasticStress'
+                Materials/stress/type=ADComputeFiniteStrainElasticStress'
     issues = '#12650'
-    requirement = 'The Jacobian for the AD small incremental strain elasticity problem with Pressure '
-                  'BC in spherical coordinates shall be perfect'
+    requirement = 'The Jacobian for the AD small incremental strain elasticity problem with Pressure BC in spherical coordinates shall be perfect'
   []
   [finiteStrain_1DSphere_hollow-jac]
     type = 'PetscJacobianTester'
@@ -80,7 +56,6 @@
     run_sim = 'True'
     difference_tol = 1
     issues = '#12650'
-    requirement = 'The Jacobian for the AD small incremental strain elasticity problem with Pressure '
-                  'BC in spherical coordinates shall be perfect'
+    requirement = 'The Jacobian for the AD incremental finite strain elasticity problem with Pressure BC in spherical coordinates shall be perfect'
   []
 []

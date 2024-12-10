@@ -1,0 +1,40 @@
+[Tests]
+  design = '/stochastic_tools/index.md'
+  issues = '#28200'
+
+  [train]
+    type = CheckFiles
+    input = train.i
+    cli_args = 'Samplers/train/num_rows=4
+                worker:/Mesh/cmg/nx=30
+                worker:/Mesh/cmg/ny=5
+                worker:endtime=1e-4
+                worker:timestep=1e-6
+                VariableMappings/pod/num_modes_to_compute=4
+                Covariance/lmc/num_outputs=4'
+    check_files = 'train_mogp_out_mogp.rd/data
+                   train_pod_out_pod.rd/data
+                   train_json.json'
+    requirement = "The system shall be able to train a surrogate model on the coefficients obtained by dimensionality reduction."
+    heavy = true
+    min_parallel = 8
+    max_parallel = 8
+    allow_test_objects = true
+  []
+  [test]
+    type = JSONDiff
+    input = test.i
+    cli_args = 'Samplers/test/num_rows=4
+                worker:/Mesh/cmg/nx=30
+                worker:/Mesh/cmg/ny=5
+                worker:endtime=1e-4
+                worker:timestep=1e-6'
+    jsondiff = 'test_json.json'
+    requirement = "The system shall be able to test the full field reconstruction using inverse mapping."
+    heavy = true
+    min_parallel = 8
+    max_parallel = 8
+    allow_test_objects = true
+    prereq = train
+  []
+[]

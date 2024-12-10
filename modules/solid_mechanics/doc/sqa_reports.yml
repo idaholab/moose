@@ -27,14 +27,11 @@ Documents:
     software_library_list: sqa/solid_mechanics_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
-    log_user_manual: WARNING
-    log_theory_manual: WARNING
+    user_manual: content/modules/solid_mechanics/index.md
+    theory_manual: content/modules/solid_mechanics/index.md
 
 Requirements:
     solid_mechanics:
         directories:
             - ${MOOSE_DIR}/modules/solid_mechanics
-        log_duplicate_requirement: WARNING
         log_missing: WARNING
-        log_empty_issues: WARNING
-        log_testable: WARNING

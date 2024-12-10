@@ -1,83 +1,83 @@
 [Tests]
   issues = '#7902'
   design = 'WeakPlaneStress.md'
-  [./weak_plane_stress_elastic_jacobian]
+  [weak_plane_stress_elastic_jacobian]
     type = 'PetscJacobianTester'
     input = 'weak_plane_stress_elastic_jacobian.i'
     ratio_tol = 1E-12
     difference_tol = 1E10
     requirement = 'The system shall compute the correct Jacobian for plane stress conditions'
-  [../]
+  []
 
-  [./ad_weak_plane_stress_elastic_jacobian]
+  [ad_weak_plane_stress_elastic_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_weak_plane_stress_elastic_jacobian.i'
     ratio_tol = 1E-12
     difference_tol = 1E10
-    requirement = 'The system shall compute the correct Jacobian for plane stress conditions'
-  [../]
+    requirement = 'The system shall compute the correct Jacobian for plane stress conditions with automatic differentiation'
+  []
 
-  [./weak_plane_stress_small]
+  [weak_plane_stress_small]
     type = 'Exodiff'
     input = 'weak_plane_stress_small.i'
     exodiff = 'weak_plane_stress_small_out.e'
     requirement = 'The system shall compute plane stress conditions with small strains with input provided using the Master action'
-  [../]
+  []
 
-  [./ad_weak_plane_stress_small]
+  [ad_weak_plane_stress_small]
     prereq = 'weak_plane_stress_small'
     type = 'Exodiff'
     input = 'ad_weak_plane_stress_small.i'
     exodiff = 'weak_plane_stress_small_out.e'
     requirement = 'The system shall compute plane stress conditions with small strains'
-  [../]
+  []
 
-  [./weak_plane_stress_incremental]
+  [weak_plane_stress_incremental]
     type = 'Exodiff'
     input = 'weak_plane_stress_incremental.i'
     exodiff = 'weak_plane_stress_incremental_out.e'
     requirement = 'The system shall compute plane stress conditions with incremental strains with input provided using the Master action'
-  [../]
+  []
 
-  [./ad_weak_plane_stress_incremental]
+  [ad_weak_plane_stress_incremental]
     prereq = 'weak_plane_stress_incremental'
     type = 'Exodiff'
     input = 'ad_weak_plane_stress_incremental.i'
     exodiff = 'weak_plane_stress_incremental_out.e'
-    requirement = 'The system shall compute plane stress conditions with incremental strains with input provided using the Master action'
-  [../]
+    requirement = 'The system shall compute plane stress conditions with incremental strains with input provided using the Master action when automatic differentiation is requested'
+  []
 
-  [./weak_plane_stress_finite]
+  [weak_plane_stress_finite]
     type = 'Exodiff'
     input = 'weak_plane_stress_finite.i'
     exodiff = 'weak_plane_stress_finite_out.e'
     abs_zero = 1e-9
     requirement = 'The system shall compute plane stress conditions with finite strains with input provided using the Master action'
-  [../]
+  []
 
-  [./ad_weak_plane_stress_finite]
+  [ad_weak_plane_stress_finite]
     prereq = 'weak_plane_stress_finite'
     type = 'Exodiff'
     input = 'ad_weak_plane_stress_finite.i'
     exodiff = 'weak_plane_stress_finite_out.e'
     abs_zero = 1e-9
-    requirement = 'The system shall compute plane stress conditions with finite strains with input provided using the Master action'
-  [../]
+    requirement = 'The system shall compute plane stress conditions with finite strains with input provided using the Master action when automatic differentiation is requested'
+  []
 
-  [./3D_finite_tension_pull]
+  [3D_finite_tension_pull]
     type = 'CSVDiff'
     input = '3D_finite_tension_pull.i'
     csvdiff = '3D_finite_tension_pull_out.csv'
     requirement = 'The system shall compute the response of a 3D cube in uniaxial tension with finite strain to provide a benchmark for a 2D plane stress, finite strain model'
     max_parallel = 1 #Single element test
-  [../]
+  []
 
-  [./weak_plane_stress_finite_tension_pull]
+  [weak_plane_stress_finite_tension_pull]
     type = 'CSVDiff'
     input = 'weak_plane_stress_finite_tension_pull.i'
     csvdiff = 'weak_plane_stress_finite_tension_pull_out.csv'
     rel_err = 1e-4
     requirement = 'The system shall compute the response of a cube in uniaxial tension using a 2D plane stress, finite strain model, and produce the same result as a 3D model'
     max_parallel = 1 #Single element test
-  [../]
+  []
 []

@@ -44,7 +44,7 @@ The problem of interest involves a steady-state thermomechanics model. The geome
 
 !row-end!
 
-!listing examples/stochastic/graphite_ring_thermomechanics.i caption=Thermomechanics model input file id=list:thermo
+!listing examples/stochastic/thermomech/graphite_ring_thermomechanics.i caption=Thermomechanics model input file id=list:thermo
 
 ### Uncertain Parameters
 
@@ -96,11 +96,11 @@ Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics 
 | Polynomial Chaos --- Training | 7,344 | 13.7 hr  |
 | Polynomial Chaos --- Evaluation | 100,000 | 6.8 s  |
 
-!listing combined/examples/stochastic/lhs_uniform.i id=list:lhs caption=Latin hypercube sampling and statistics input file
+!listing combined/examples/stochastic/thermomech/lhs_uniform.i id=list:lhs caption=Latin hypercube sampling and statistics input file
 
-!listing combined/examples/stochastic/poly_chaos_train_uniform.i id=list:train caption=Polynomial chaos training input file
+!listing combined/examples/stochastic/thermomech/poly_chaos_train_uniform.i id=list:train caption=Polynomial chaos training input file
 
-!listing combined/examples/stochastic/poly_chaos_uniform.i id=list:eval caption=Polynomial chaos evaluation input file
+!listing combined/examples/stochastic/thermomech/poly_chaos_uniform.i id=list:eval caption=Polynomial chaos evaluation input file
 
 ### Statistics
 

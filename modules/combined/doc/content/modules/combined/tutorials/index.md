@@ -5,6 +5,7 @@ physics modules can be used together:
 
 - [Introduction to Coupled Thermo-Mechanical Modeling](combined/tutorials/introduction/index.md)
 - [Using Stochastic Tools with Multiphysics Models](combined/examples/stm_thermomechanics.md)
+- [Using dimensionality reduction and full-field reconstruction with multiphysics models](combined/examples/stm_laserwelding_dimred.md)
 
 # Solid Isotropic Material Penalization (SIMP) Topology Optimization
 

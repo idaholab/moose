@@ -1,49 +1,68 @@
 [Tests]
   issues = '#17472'
-  [./action_large_stab]
+  [action_large_stab]
     type = Exodiff
     input = 'action_L.i'
     exodiff = 'L_large_stab.e'
-    requirement = "Action produces identical results for large deformations/with stabilization"
+    requirement = "Action produces identical results for large deformations/with stabilization with "
+                  "the total Lagrangian formulation"
     abs_zero = 1e-6
-    cli_args = "Outputs/out/file_base=L_large_stab Physics/SolidMechanics/QuasiStatic/all/strain=FINITE Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true Materials/compute_stress/large_kinematics=true"
+    cli_args = "Outputs/out/file_base=L_large_stab "
+               "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
+               "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true "
+               "Materials/compute_stress/large_kinematics=true"
     design = 'source/actions/TensorMechanicsAction.md'
     heavy = true
-  [../]
-  [./action_large_no_stab]
+  []
+  [action_large_no_stab]
     type = Exodiff
     input = 'action_L.i'
     exodiff = 'L_large_nostab.e'
-    requirement = "Action produces identical results for large deformations/no stabilization"
+    requirement = "Action produces identical results for large deformations/no stabilization with "
+                  "the total Lagrangian formulation"
     abs_zero = 1e-6
-    cli_args = "Outputs/out/file_base=L_large_nostab Physics/SolidMechanics/QuasiStatic/all/strain=FINITE Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false Materials/compute_stress/large_kinematics=true"
+    cli_args = "Outputs/out/file_base=L_large_nostab "
+               "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
+               "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
+               "Materials/compute_stress/large_kinematics=true"
     design = 'source/actions/TensorMechanicsAction.md'
     heavy = true
-  [../]
-  [./action_small_stab]
+  []
+  [action_small_stab]
     type = Exodiff
     input = 'action_L.i'
     exodiff = 'L_small_stab.e'
-    requirement = "Action produces identical results for small deformations/with stabilization"
+    requirement = "Action produces identical results for small deformations/with stabilization with "
+                  "the total Lagrangian formulation"
     abs_zero = 1e-6
-    cli_args = "Outputs/out/file_base=L_small_stab Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
+    cli_args = "Outputs/out/file_base=L_small_stab "
+               "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
+               "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
     design = 'source/actions/TensorMechanicsAction.md'
-  [../]
-  [./action_small_no_stab]
+  []
+  [action_small_no_stab]
     type = Exodiff
     input = 'action_L.i'
     exodiff = 'L_small_nostab.e'
-    requirement = "Action produces identical results for small deformations/no stabilization"
+    requirement = "Action produces identical results for small deformations/no stabilization with "
+                  "the total Lagrangian formulation"
     abs_zero = 1e-4
-    cli_args = "Outputs/out/file_base=L_small_nostab Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
+    cli_args = "Outputs/out/file_base=L_small_nostab "
+               "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
+               "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
     design = 'source/actions/TensorMechanicsAction.md'
-  [../]
-  [./action_1D]
+  []
+  [action_1D]
     type = Exodiff
     input = 'action_1D.i'
     exodiff = 'action_1D_out.e'
-    requirement = "Action produces identical results for 1D Cartesian problem"
+    requirement = "Action produces identical results for 1D Cartesian problem with the total "
+                  "Lagrangian formulation"
     abs_zero = 1e-6
     design = 'source/actions/TensorMechanicsAction.md'
-  [../]
+  []
 []

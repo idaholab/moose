@@ -55,7 +55,8 @@ def _print_reports(title, reports, status):
     if reports:
         print(mooseutils.colorText('\n{0}\n{1} REPORT(S):\n{0}\n'.format('-'*80, title.upper()), 'MAGENTA'), end='', flush=True)
         for report in reports:
-            print(report.getReport(), '\n')
+            if report.status != 1 or report.show_warning:
+                print(report.getReport(), '\n')
             status = report.status if status < report.status else status
     return status
 
