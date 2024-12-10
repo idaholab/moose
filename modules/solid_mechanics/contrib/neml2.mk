@@ -78,6 +78,12 @@ NEML2_SRC            := $(shell find $(NEML2_SRC_DIRS) -name "*.cxx")
 NEML2_OBJ            := $(patsubst %.cxx,%.$(obj-suffix),$(NEML2_SRC))
 NEML2_LIB            := $(NEML2_DIR)/libNEML2-$(METHOD).la
 
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+$(NEML2_OBJ): $(moose_config_symlink) | moose_header_symlinks
+else
+$(NEML2_OBJ): $(moose_config)
+endif
+
 $(NEML2_LIB): $(NEML2_OBJ)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
