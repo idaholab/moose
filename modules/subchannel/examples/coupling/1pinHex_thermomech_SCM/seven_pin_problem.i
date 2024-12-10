@@ -1,6 +1,6 @@
 # M. Fontana, et All, VARIATION of subassembly made to have only one pin
-# “Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
-# ”Nuclear Technology, vol. 24, no. 2, pp. 176–200, 1974.
+# "Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
+# "Nuclear Technology, vol. 24, no. 2, pp. 176-200, 1974.
 T_in = 588.5
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 2.0e5 # Pa
