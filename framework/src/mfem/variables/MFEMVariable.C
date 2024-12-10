@@ -24,7 +24,7 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
     _fespace(getUserObject<MFEMFESpace>("fespace")),
     _gridfunction(buildGridFunction())
 {
-  
+
   *_gridfunction = parameters.get<double>("ic");
 }
 
