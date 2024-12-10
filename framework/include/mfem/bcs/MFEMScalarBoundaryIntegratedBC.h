@@ -18,5 +18,5 @@ public:
 
 protected:
   std::string _coef_name;
-  MFEMCoefficient * _coef;
+  mfem::Coefficient & _coef;
 };
