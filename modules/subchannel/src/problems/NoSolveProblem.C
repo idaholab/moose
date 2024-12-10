@@ -26,7 +26,10 @@ NoSolveProblem::externalSolve()
 {
 }
 
-void NoSolveProblem::syncSolutions(Direction /*direction*/) {}
+void
+NoSolveProblem::syncSolutions(Direction /*direction*/)
+{
+}
 
 bool
 NoSolveProblem::solverSystemConverged(const unsigned int)
