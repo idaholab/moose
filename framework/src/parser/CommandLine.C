@@ -451,14 +451,13 @@ CommandLine::findCommandLineParam(const std::string & name) const
                "' is not a command line parameter");
 
   // Search for the last thing that matches a switch from this param
-  std::optional<std::list<Entry>::const_iterator> found_it;
   const auto & param = find_param->second;
-  for (auto it = _entries.begin(); it != _entries.end(); ++it)
+  for (auto rit = _entries.rbegin(); rit != _entries.rend(); ++rit)
     for (const auto & search_switch : param.metadata.switches)
-      if (it->name == search_switch)
-        found_it = it;
+      if (rit->name == search_switch)
+        return --(rit.base());
 
-  return found_it ? *found_it : getEntries().end();
+  return getEntries().end();
 }
 
 std::list<CommandLine::Entry>::iterator
