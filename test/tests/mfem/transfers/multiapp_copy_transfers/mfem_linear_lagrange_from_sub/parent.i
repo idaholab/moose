@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = gold/mug.e
+  file = square.msh
   dim = 3
 []
 
@@ -18,7 +18,7 @@
 []
 
 [AuxVariables]
-  [recv]
+  [u]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -28,7 +28,7 @@
   [./subapp]
     type = FullSolveMultiApp
     input_files = sub.i
-    execute_on = FINAL
+    execute_on = INITIAL
   [../]
 []
 
@@ -40,10 +40,17 @@
 [Transfers]
     [./to_sub]
         type = MultiAppMFEMCopyTransfer
-        source_variable = send
-        variable = recv
+        source_variable = u
+        variable = u
         from_multi_app = subapp
     [../]
 []
 
+[Outputs]
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/Diffusion
+    vtk_format = ASCII
+  []
+[]
 

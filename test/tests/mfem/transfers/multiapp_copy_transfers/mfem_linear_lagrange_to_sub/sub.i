@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = gold/mug.e
+  file = square.msh
   dim = 3
 []
 
@@ -18,7 +18,7 @@
 []
 
 [AuxVariables]
-  [recv]
+  [u]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -29,10 +29,12 @@
   device = cpu
 []
 
+
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionSubApp
+    file_base = OutputData/Diffusion
     vtk_format = ASCII
   []
 []
+

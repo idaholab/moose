@@ -1,4 +1,4 @@
-[Tests]
+[ests]
   [test]
     [run]
       type = RunApp
@@ -6,11 +6,11 @@
     []
     [verify]
       type = RunCommand
-      command = './gold/check.sh
-                recv
+      command = './check.sh
+                u
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                send
-                OutputData/DiffusionSubApp/Run0/Cycle000001/proc000000.vtu'
+                u
+                OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
 	  prereq = test/run
     []
   []

@@ -8,6 +8,12 @@
 
 class MooseMesh;
 
+//*
+// Copy MFEMVariables between multiapps
+// The variables must be of the same type and dimension
+// and the MFEMMesh must be identical in both multiapps
+// */
+
 class MultiAppMFEMCopyTransfer : public MultiAppTransfer
 {
 public:

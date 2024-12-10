@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = gold/mug.e
+  file = square.msh
   dim = 3
 []
 
@@ -17,7 +17,7 @@
 []
 
 [Variables]
-  [send]
+  [u]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -37,14 +37,14 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = send
-    boundary = '1'
+    variable = u
+    boundary = 2
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = send
-    boundary = '2'
+    variable = u
+    boundary = 4
     coefficient = TopValue
   []
 []
@@ -71,7 +71,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = send
+    variable = u
     coefficient = diffusivity
   []
 []
@@ -93,7 +93,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/DiffusionSub
     vtk_format = ASCII
   []
 []
@@ -102,4 +102,3 @@
   type = MFEMSteady
   device = cpu
 []
-

@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = gold/mug.e
+  file = square.msh
   dim = 3
 []
 
@@ -16,6 +16,12 @@
   []
 []
 
+[Variables]
+  [u]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
+[]
 
 [Functions]
   [value_bottom]
@@ -31,14 +37,14 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = send
-    boundary = '1'
+    variable = u
+    boundary = 2
     coefficient = BottomValue
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = send
-    boundary = '2'
+    variable = u
+    boundary = 4
     coefficient = TopValue
   []
 []
@@ -65,7 +71,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = send
+    variable = u
     coefficient = diffusivity
   []
 []
@@ -83,41 +89,33 @@
   l_max_its = 1000  
 []
 
-[Executioner]
-  type = MFEMSteady
-  device = cpu
-[]
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/DiffusionSub
     vtk_format = ASCII
   []
 []
 
-[Variables]
-  [send]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
+[Executioner]
+  type = MFEMSteady
+  device = cpu
 []
 
 [MultiApps]
   [./subapp]
     type = FullSolveMultiApp
     input_files = sub.i
-    execute_on = FINAL 
+    execute_on = FINAL
   [../]
 []
 
 [Transfers]
     [./to_sub]
         type = MultiAppMFEMCopyTransfer
-        source_variable = send
-        variable = recv
+        source_variable = u
+        variable = u
         to_multi_app = subapp
     [../]
 []
-
-
