@@ -47,14 +47,17 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
+    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs(_pressure_drop_sidesets));
 {
   if (_allow_two_term_expansion_on_bernoulli_faces &&
       _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
     paramError(
         "allow_two_term_expansion_on_bernoulli_faces",
         "Skewness correction with two term extrapolation on Bernoulli faces is not supported!");
+size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
+size_t num_pressure_drop_form_factors = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
 
-  if (_pressure_drop_sidesets.size() != _pressure_drop_form_factors.size())
+  if (num_pressure_drop_form_factors != num_pressure_drop_sidesets)
     paramError(
         "pressure_drop_sidesets",
         "The number of sidesets and form losses is not equal");
@@ -169,13 +172,16 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
 
   ADReal factor_downwind = 0.0;
   ADReal factor_upwind = 0.0;
+// Iterate through sidesets to see if they are boundary faces or not
+//How do I access the variable I defined above titled num_pressure_drop_sidesets?
+size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
 
-// for(const auto& elem: _pressure_drop_sidesets){
-//   if (std::find(fi.boundaryIDs.begin(), fi.boundaryIDs.end(), elem) != fi.boundaryIDs.end())
-//   {
-//     factor_downwind += _pressure_drop_form_factors[elem];
-//   }
-// }
+for(size_t i =0; i < num_pressure_drop_sidesets, i++; ){
+  if (std::find(std::begin(fi.boundaryIDs), std::end(fi.boundaryIDs), _pressure_drop_sidesets[i]);)
+  {
+    factor_downwind += _pressure_drop_form_factors[i];
+  }
+}
 
   const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
