@@ -6,7 +6,7 @@
     []
     [verify]
       type = RunCommand
-      command = './check.sh
+      command = '../check.sh
                 recv
                 OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
                 send
