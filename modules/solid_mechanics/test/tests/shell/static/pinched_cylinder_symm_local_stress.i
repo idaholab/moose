@@ -227,106 +227,122 @@
   []
 
   [force_1]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = force_1
-    property = shell_force_1
+    output_resultant = axial_force_1
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [force_2]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = force_2
-    property = shell_force_2
+    output_resultant = axial_force_2
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [moment_11]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = moment_11
-    property = shell_moment_11
+    output_resultant = bending_moment_00
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [moment_22]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = moment_22
-    property = shell_moment_22
+    output_resultant = bending_moment_11
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
 
   [moment_12]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = moment_12
-    property = shell_moment_12
+    output_resultant = bending_moment_01
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [shear_12]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = shear_12
-    property = shell_shear_12
+    output_resultant = shear_force_01
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [shear_13]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = shear_13
-    property = shell_shear_13
+    output_resultant = shear_force_02
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [shear_23]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = shear_23
-    property = shell_shear_23
+    output_resultant = shear_force_12
+    thickness = 0.01
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [first_axis_x]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = first_axis_x
     property = first_local_vector
     component = 0
   []
   [first_axis_y]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = first_axis_y
     property = first_local_vector
     component = 1
   []
   [first_axis_z]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = first_axis_z
     property = first_local_vector
     component = 2
   []
 
   [second_axis_x]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = second_axis_x
     property = second_local_vector
     component = 0
   []
   [second_axis_y]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = second_axis_y
     property = second_local_vector
     component = 1
   []
   [second_axis_z]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = second_axis_z
     property = second_local_vector
     component = 2
   []
 
   [normal_axis_x]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = normal_axis_x
     property = normal_local_vector
     component = 0
   []
   [normal_axis_y]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = normal_axis_y
     property = normal_local_vector
     component = 1
   []
   [normal_axis_z]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = normal_axis_z
     property = normal_local_vector
     component = 2
@@ -407,7 +423,7 @@
     rotations = 'rot_x rot_y'
     thickness = 0.01
     through_thickness_order = SECOND
-    first_local_vector_ref = '1 -1 0'
+    reference_first_local_direction = '1 -1 0'
   []
   [stress]
     type = ADComputeShellStress

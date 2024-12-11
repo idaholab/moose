@@ -63,13 +63,19 @@ g^2=\dfrac{g_3 \times g_1}{g_1 \cdot (g_2 \times g_3)}
 \begin{equation}
 g^3=\dfrac{g_1 \times g_2}{g_1 \cdot (g_2 \times g_3)}
 \end{equation}
-These contravariant base vectors satisfy the orthogonality condition: $g^i \cdot g_j =\delta_{ij}$, where $\delta_{ij}$ is Kronecker delta. The $\hat{e}_i$ vectors are the local cartesian coordinate system computed using the following rule:
+These contravariant base vectors satisfy the orthogonality condition: $g^i \cdot g_j =\delta_{ij}$, where $\delta_{ij}$ is Kronecker delta. The vectors $\hat{e}_i$ define the local Cartesian coordinate system on the shell element. By default, these local coordinates are computed using the following rule
 
 \begin{equation}
-\hat{e}_3 = V_n; \hat{e}_1 = \frac{X_2 \times \hat{e}^3}{|X_2 \times \hat{e}^3|}; \hat{e}_2 = \hat{e}_3 \times \hat{e}_1
+\hat{e}_3 = V_n; \hat{e}_1 = \dfrac{X_2 \times \hat{e}_3}{|X_2 \times \hat{e}_3|}; \hat{e}_2 = \hat{e}_3 \times \hat{e}_1
 \end{equation}
 
-In this equation, $V_n$ represents the element's normal vector, and $X_2$ is the unit vector in the global y-direction, given by $X_2={0, 1, 0}$. Users also have the option to define the local coordinate system by introducing the parameter "first_local_vector_ref" in the input file. When this option is selected, the first local vector $e_1$ of each shell element is calculated by projecting the user_defined vector onto the element, ensuring it lies "in plane" and is perpendicular to the element's normal. The second local vector $e_2$ is then determined using right-hand-rule, via the cross product of $e_3$ and $e_1$. The elasticity tensor at each quadrature point (qp) is computed in [ADComputeIsotropicElasticityTensorShell](/ADComputeIsotropicElasticityTensorShell.md).
+In this equation, $V_n$ represents the element's normal vector and $X_2$ is the unit vector in the global y-direction, given by $X_2={0, 1, 0}$. Users also have the option to specify the direction of the first local vector by introducing the parameter `reference_first_local_direction` in the input file. When this option is selected, the first local vector $e_1$ of each shell element is calculated by projecting the user-defined vector $\hat{e}_{1r}$ onto the element, ensuring it lies "in-plane" and is perpendicular to the element's normal. The second local vector $\hat{e}_2$ is then determined via the cross product of $\hat{e}_3$ and $\hat{e}_1$. In this case, the computation of the shell's local coordinate is as follows:
+
+\begin{equation}
+\hat{e}_3 = V_n; \hat{e}_1 = \dfrac{\hat{e}_{1r}-(\hat{e}_{1r} \cdot \hat{e}_3) \hat{e}_3}{|\hat{e}_{1r}-(\hat{e}_{1r} \cdot \hat{e}_3) \hat{e}_3|} ; \hat{e}_2 = \hat{e}_3 \times \hat{e}_1
+\end{equation}
+
+ The elasticity tensor at each quadrature point (qp) is computed in [ADComputeIsotropicElasticityTensorShell](/ADComputeIsotropicElasticityTensorShell.md).
 
 ## Stress calculation
 

@@ -2,8 +2,8 @@
 # A single shell element is oriented at a 45 deg. angle with respect to the Y axis.
 # One end of the shell is fixed and an axial deformation to the shell element is
 # applied at the other end by resolving the deformation into Y and Z direction.
-# The local stresses are computed.
-# The local stress_22 should be zero.
+# The local stresses are computed and stored in aux variables.
+# The local stress_22 should be zero (because of plane stress condition).
 
 [Mesh]
   type = FileMesh
@@ -252,7 +252,6 @@
     elementid = 0
     variable = stress_22
   []
-
 []
 
 [Preconditioning]

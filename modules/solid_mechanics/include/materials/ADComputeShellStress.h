@@ -44,9 +44,6 @@ protected:
   /// Material property for elasticity tensor
   std::vector<const ADMaterialProperty<RankFourTensor> *> _elasticity_tensor;
 
-  /// shell thickness
-  const MaterialProperty<Real> * _t_shell;
-
   /// Quadrature points along thickness
   std::vector<Point> _t_points;
 
@@ -64,14 +61,4 @@ protected:
 
   /// Real value of stress in the local coordinate system
   RankTwoTensor _unrotated_stress;
-
-  std::vector<Real> _t_weights;
-  MaterialProperty<Real> * _shell_force_1;
-  MaterialProperty<Real> * _shell_force_2;
-  MaterialProperty<Real> * _shell_shear_12;
-  MaterialProperty<Real> * _shell_shear_13;
-  MaterialProperty<Real> * _shell_shear_23;
-  MaterialProperty<Real> * _shell_moment_11;
-  MaterialProperty<Real> * _shell_moment_22;
-  MaterialProperty<Real> * _shell_moment_12;
 };

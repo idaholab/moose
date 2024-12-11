@@ -219,70 +219,74 @@
 [AuxKernels]
 
   [moment_11]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = moment_11
-    property = shell_moment_11
+    output_resultant = bending_moment_00
+    thickness = 0.133887
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
 
   [shear_23]
-    type = MaterialRealAux
+    type = ShellResultantsAux
     variable = shear_23
-    property = shell_shear_23
+    output_resultant = shear_force_12
+    thickness = 0.133887
+    through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
   [first_axis_x]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = first_axis_x
     property = first_local_vector
     component = 0
   []
   [first_axis_y]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = first_axis_y
     property = first_local_vector
     component = 1
   []
   [first_axis_z]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = first_axis_z
     property = first_local_vector
     component = 2
   []
 
   [second_axis_x]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = second_axis_x
     property = second_local_vector
     component = 0
   []
   [second_axis_y]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = second_axis_y
     property = second_local_vector
     component = 1
   []
   [second_axis_z]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = second_axis_z
     property = second_local_vector
     component = 2
   []
 
   [normal_axis_x]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = normal_axis_x
     property = normal_local_vector
     component = 0
   []
   [normal_axis_y]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = normal_axis_y
     property = normal_local_vector
     component = 1
   []
   [normal_axis_z]
-    type = MaterialRealVectorValueAux
+    type = ShellLocalCoordinatesAux
     variable = normal_axis_z
     property = normal_local_vector
     component = 2

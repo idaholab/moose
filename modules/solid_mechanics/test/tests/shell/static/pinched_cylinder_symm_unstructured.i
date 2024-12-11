@@ -211,7 +211,7 @@
     rotations = 'rot_x rot_y'
     thickness = 0.01
     through_thickness_order = SECOND
-    first_local_vector_ref = '0 0 1'
+    reference_first_local_direction = '0 0 1'
   []
   [stress]
     type = ADComputeShellStress

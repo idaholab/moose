@@ -47,8 +47,8 @@ protected:
   /// Computes the transformation matrix from natural coordinates to local cartesian coordinates for elasticity tensor transformation
   virtual void computeGMatrix();
 
-  /// Computes the element's local coordinate
-  virtual void computeLocalCoordinate();
+  /// Computes the element's local coordinates and store in _e1, _e2 and _e3
+  virtual void computeLocalCoordinates();
 
   /// Number of coupled rotational variables
   unsigned int _nrot;
@@ -178,11 +178,6 @@ protected:
 
   /// Rotation matrix material property
   ADMaterialProperty<RankTwoTensor> * _transformation_matrix;
-
-  MaterialProperty<RealVectorValue> * _first_local_vector;
-  MaterialProperty<RealVectorValue> * _second_local_vector;
-  MaterialProperty<RealVectorValue> * _normal_local_vector;
-  MaterialProperty<Real> * _shell_thickness;
 
   /// simulation variables
   ADRealVectorValue _x2;

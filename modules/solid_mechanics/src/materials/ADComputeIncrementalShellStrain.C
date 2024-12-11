@@ -41,9 +41,9 @@ ADComputeIncrementalShellStrain::validParams()
                                        "Quadrature order in out of plane direction");
   params.addParam<bool>(
       "large_strain", false, "Set to true to turn on finite strain calculations.");
-  params.addParam<RealVectorValue>(
-      "first_local_vector_ref",
-      "Optional vector defining the reference direction for the first local vector e1");
+  params.addParam<RealVectorValue>("reference_first_local_direction",
+                                   "Vector that is projected onto an element to define the "
+                                   "direction for the first local coordinate direction e1.");
   return params;
 }
 
@@ -89,7 +89,7 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     _total_global_strain(),
     _sol(_nonlinear_sys.currentSolution()),
     _sol_old(_nonlinear_sys.solutionOld()),
-    _is_v1_defined(isParamValid("first_local_vector_ref"))
+    _is_v1_defined(isParamValid("reference_first_local_direction"))
 {
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != 3 || _nrot != 2)
@@ -141,10 +141,6 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   _total_global_strain.resize(_t_points.size());
 
   _transformation_matrix = &declareADProperty<RankTwoTensor>("transformation_matrix_element");
-  _first_local_vector = &declareProperty<RealVectorValue>("first_local_vector");
-  _second_local_vector = &declareProperty<RealVectorValue>("second_local_vector");
-  _normal_local_vector = &declareProperty<RealVectorValue>("normal_local_vector");
-  _shell_thickness = &declareProperty<Real>("shell_thickness");
 
   for (unsigned int i = 0; i < _t_points.size(); ++i)
   {
@@ -280,18 +276,6 @@ ADComputeIncrementalShellStrain::computeProperties()
                                       _unrotated_total_strain *
                                       (*_contravariant_transformation_matrix[j])[i].transpose();
     }
-    // the element's local coordinate is saved here for the post processing and visualization
-    computeLocalCoordinate();
-    for (unsigned int ii = 0; ii < 3; ++ii)
-    {
-      (*_first_local_vector)[i](ii) = MetaPhysicL::raw_value(_e1(ii));
-      (*_second_local_vector)[i](ii) = MetaPhysicL::raw_value(_e2(ii));
-      (*_normal_local_vector)[i](ii) = MetaPhysicL::raw_value(_e3(ii));
-    }
-
-    // save the shell thickness here; to be used later in ComputeShellStress for calculating the
-    // local force and moments
-    (*_shell_thickness)[i] = _thickness[i];
   }
 }
 
@@ -330,9 +314,6 @@ ADComputeIncrementalShellStrain::computeGMatrix()
   RealVectorValue f;
   for (unsigned int t = 0; t < _t_points.size(); ++t)
   {
-    (*_first_local_vector)[_qp] = f;
-    (*_second_local_vector)[_qp] = f;
-    (*_normal_local_vector)[_qp] = f;
     (*_strain_increment[t])[_qp] = a;
     (*_total_strain[t])[_qp] = a;
     (*_B[t])[_qp] = b;
@@ -426,7 +407,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       (*_transformation_matrix)[i] = J;
 
       // compute element's local coordinate
-      computeLocalCoordinate();
+      computeLocalCoordinates();
 
       // calculate the local transformation matrix to be used to map the global stresses to the
       // local element coordinate
@@ -475,19 +456,19 @@ ADComputeIncrementalShellStrain::computeGMatrix()
 }
 
 void
-ADComputeIncrementalShellStrain::computeLocalCoordinate()
+ADComputeIncrementalShellStrain::computeLocalCoordinates()
 {
   // default option:the convention used to calculate the local nodal coordinates is also adopted for
   // calculating the element's local coordinates
   // the first local vector can be also defined by the user
 
-  // All nodes have the same normal vector. Therefore, here, we use only the normal vecor of the
-  // first element as "the element's normal vector"
+  // All nodes in an element have the same normal vector. Therefore, here, we use only the normal
+  // vecor of the first node as "the element's normal vector"
   _e3 = _node_normal[0];
 
   if (_is_v1_defined)
   {
-    _e1 = getParam<RealVectorValue>("first_local_vector_ref");
+    _e1 = getParam<RealVectorValue>("reference_first_local_direction");
 
     if (MooseUtils::absoluteFuzzyEqual(_e1.norm(), 0.0, 1e-3))
       mooseError(
@@ -496,8 +477,8 @@ ADComputeIncrementalShellStrain::computeLocalCoordinate()
     _e1 /= _e1.norm();
 
     // vector v1 and the normal are considered parallel if the angle between them is less
-    // than 0.05 degree
-    if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
+    // than libMesh::TOLERANCE
+    if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, libMesh::TOLERANCE))
     {
       mooseError("The defined first local axis must not be perpendicular to any of the shell "
                  "elements ");
@@ -511,9 +492,9 @@ ADComputeIncrementalShellStrain::computeLocalCoordinate()
   else
   {
     _e1 = _x2.cross(_e3);
-    // If x2 is parallel to the element's normal, set e1 to x3 (less than 0.05 degree is considered
-    // parallel)
-    if (MooseUtils::absoluteFuzzyEqual(std::abs(_x2 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
+    // If x2 is parallel to the element's normal, set e1 to x3 (less than libMesh::TOLERANCE is
+    // considered parallel)
+    if (MooseUtils::absoluteFuzzyEqual(std::abs(_x2 * _e3), 1.0, libMesh::TOLERANCE))
       _e1 = _x3;
   }
 
@@ -533,7 +514,7 @@ void
 ADComputeIncrementalShellStrain::computeBMatrix()
 {
   // compute nodal local axis
-  computeLocalCoordinate();
+  computeLocalCoordinates();
   for (unsigned int k = 0; k < _nodes.size(); ++k)
   {
     _v1[k] = _e1;
