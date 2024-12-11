@@ -132,13 +132,15 @@ TabulatedFluidProperties::validParams()
   params.addParam<bool>(
       "allow_fp_and_tabulation", false, "Whether to allow the two sources of data concurrently");
 
-  params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
+  params.addParamNamesToGroup("fluid_property_file fluid_property_ve_file "
+                              "fluid_property_output_file fluid_property_ve_output_file",
+                              "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
                               "Variable set conversion");
   params.addParamNamesToGroup("temperature_min temperature_max pressure_min pressure_max e_min "
                               "e_max v_min v_max error_on_out_of_bounds out_of_bounds_behavior",
                               "Tabulation and interpolation bounds");
-  params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v",
+  params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v use_log_grid_e",
                               "Tabulation and interpolation discretization");
 
   return params;
@@ -545,8 +547,13 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
   { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, rho, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                             rho,
+                                             _T_initial_guess,
+                                             _tolerance,
+                                             lambda,
+                                             name() + "::T_from_p_rho",
+                                             _max_newton_its)
                .first;
   // check for nans
   if (std::isnan(T))
@@ -573,8 +580,13 @@ TabulatedFluidProperties::T_from_p_s(Real pressure, Real s) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_s, Real & ds_dp, Real & ds_dT)
   { s_from_p_T(p, current_T, new_s, ds_dp, ds_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, s, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_s")
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                             s,
+                                             _T_initial_guess,
+                                             _tolerance,
+                                             lambda,
+                                             name() + "::T_from_p_s",
+                                             _max_newton_its)
                .first;
   // check for nans
   if (std::isnan(T))
@@ -875,7 +887,8 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
                                                /*e initial guess*/ h - _p_initial_guess * v,
                                                _tolerance,
                                                lambda,
-                                               name() + "::e_from_v_h")
+                                               name() + "::e_from_v_h",
+                                               _max_newton_its)
                  .first;
     return e;
   }
@@ -911,7 +924,8 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
                                           /*e initial guess*/ h - _p_initial_guess * v,
                                           _tolerance,
                                           lambda,
-                                          name() + "::e_from_v_h");
+                                          name() + "::e_from_v_h",
+                                          _max_newton_its);
     e = e_data.first;
     // Finite difference approximation
     const auto e2 = e_from_v_h(v * (1 + TOLERANCE), h);
@@ -1989,10 +2003,10 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
       paramError("construct_pT_from_ve",
                  "Reading a (v,e) tabulation and generating (p,T) to (v,e) interpolation tables is "
                  "not supported at this time.");
-    if (_construct_pT_from_vh)
-      paramError("construct_pT_from_vh",
-                 "Reading a (v,e) tabulation and generating (p,T) to (v,h) interpolation tables is "
-                 "not supported at this time.");
+    // if (_construct_pT_from_vh)
+    //   paramError("construct_pT_from_vh",
+    //              "Reading a (v,e) tabulation and generating (p,T) to (v,h) interpolation tables
+    //              is " "not supported at this time.");
 
     // Make sure we use the tabulation bounds
     _e_bounds_specified = true;

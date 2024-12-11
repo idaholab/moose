@@ -438,12 +438,15 @@ protected:
 
   /**
    * Newton's method may be used to convert between variable sets
-   * _tolerance, _T_initial_guess, and _p_initial_guess are the parameters for these
-   * iterative solves
    */
+  /// Relative tolerance of the solves
   const Real _tolerance;
+  /// Initial guess for temperature (or temperature used to compute the initial guess)
   const Real _T_initial_guess;
+  /// Initial guess for pressure (or pressure used to compute the initial guess)
   const Real _p_initial_guess;
+  /// Maximum number of iterations for the variable conversion newton solves
+  const unsigned int _max_newton_its;
 
 private:
   void unimplementedDerivativeMethod(const std::string & property_function_name) const
