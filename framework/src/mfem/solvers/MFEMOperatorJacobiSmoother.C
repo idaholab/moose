@@ -8,7 +8,7 @@ InputParameters
 MFEMOperatorJacobiSmoother::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
-
+  params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
   return params;
 }
 

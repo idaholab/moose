@@ -7,9 +7,7 @@ InputParameters
 AddMFEMPreconditionerAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-
   params.addClassDescription("Add a preconditioner to the MFEM problem.");
-
   return params;
 }
 
