@@ -226,7 +226,15 @@ protected:
   /// - if user-specified, use _v_min/max and _e_min/max
   /// - if reading a (v,e) interpolation, the bounds of that range
   /// - if a _fp exist find the min/max v/e from T_min/max and p_min/max
+  void createVGridVector();
   void createVEGridVectors();
+  /// Create (or reset) the grid vectors for the specific volume and enthalpy interpolation
+  /// The order of priority for determining the range boundaries in v and h:
+  /// - if user-specified, use _v_min/max and _e_min/max
+  /// - if a _fp exist find the min/max v/e from T_min/max and p_min/max
+  /// - if reading a (p,T) tabulation, the bounds of the enthalpy grid
+  /// - if reading a (v,e) tabulation, the bounds of the enthalpy grid
+  void createVHGridVectors();
 
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;

@@ -2003,10 +2003,6 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
       paramError("construct_pT_from_ve",
                  "Reading a (v,e) tabulation and generating (p,T) to (v,e) interpolation tables is "
                  "not supported at this time.");
-    // if (_construct_pT_from_vh)
-    //   paramError("construct_pT_from_vh",
-    //              "Reading a (v,e) tabulation and generating (p,T) to (v,h) interpolation tables
-    //              is " "not supported at this time.");
 
     // Make sure we use the tabulation bounds
     _e_bounds_specified = true;
@@ -2153,9 +2149,8 @@ TabulatedFluidProperties::computePropertyIndicesInInterpolationVectors()
 }
 
 void
-TabulatedFluidProperties::createVEGridVectors()
+TabulatedFluidProperties::createVGridVector()
 {
-  mooseAssert(_file_name_ve_in.empty(), "We should be reading the (v, e) grid from file");
   if (!_v_bounds_specified)
   {
     if (_fp)
@@ -2178,6 +2173,8 @@ TabulatedFluidProperties::createVEGridVectors()
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
+    // Prevent changing the bounds of the grid
+    _v_bounds_specified = true;
   }
 
   // Create v grid for interpolation
@@ -2197,7 +2194,12 @@ TabulatedFluidProperties::createVEGridVectors()
     for (unsigned int j = 0; j < _num_v; ++j)
       _specific_volume[j] = _v_min + j * dv;
   }
+}
 
+void
+TabulatedFluidProperties::createVEGridVectors()
+{
+  createVGridVector();
   if (!_e_bounds_specified)
   {
     if (_fp)
@@ -2241,6 +2243,43 @@ TabulatedFluidProperties::createVEGridVectors()
     for (const auto j : make_range(_num_e))
       _internal_energy[j] = _e_min + j * de;
   }
+}
+
+void
+TabulatedFluidProperties::createVHGridVectors()
+{
+  createVGridVector();
+  if (_fp)
+  {
+    // extreme values of enthalpy for the grid bounds
+    Real h1 = h_from_p_T(_pressure_min, _temperature_min);
+    Real h2 = h_from_p_T(_pressure_max, _temperature_min);
+    Real h3 = h_from_p_T(_pressure_min, _temperature_max);
+    Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+    _h_min = std::min({h1, h2, h3, h4});
+    _h_max = std::max({h1, h2, h3, h4});
+  }
+  // if csv exists, get max and min values from csv file
+  else if (_properties.size())
+  {
+    _h_max = *max_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+    _h_min = *min_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+  }
+  else if (_properties_ve.size())
+  {
+    _h_max = *max_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+    _h_min = *min_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+  }
+  else
+    mooseError("Need a source to compute the enthalpy grid bounds: either a FP object, or a (p,T) "
+               "tabulation file or a (v,e) tabulation file");
+  Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
+
+  // Create h grid for interpolation
+  // enthalpy & internal energy use same # grid points
+  _enthalpy.resize(_num_e);
+  for (unsigned int j = 0; j < _num_e; ++j)
+    _enthalpy[j] = _h_min + j * dh;
 }
 
 void
