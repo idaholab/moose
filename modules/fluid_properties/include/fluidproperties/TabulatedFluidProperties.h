@@ -355,6 +355,7 @@ protected:
     Ignore,
     Throw,
     DeclareInvalid,
+    WarnInvalid,
     SetToClosestBound
   };
 

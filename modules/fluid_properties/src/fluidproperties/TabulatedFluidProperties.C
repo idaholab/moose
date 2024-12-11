@@ -125,7 +125,7 @@ TabulatedFluidProperties::validParams()
       "This parameter has been replaced by the 'out_of_bounds_behavior' parameter which offers "
       "more flexibility. The option to error is called 'throw' in that parameter.");
   // NOTE: this enum must remain the same as OOBBehavior in the header
-  MooseEnum OOBBehavior("ignore throw declare_invalid set_to_closest_bound", "throw");
+  MooseEnum OOBBehavior("ignore throw declare_invalid warn_invalid set_to_closest_bound", "throw");
   params.addParam<MooseEnum>("out_of_bounds_behavior",
                              OOBBehavior,
                              "Property evaluation behavior when evaluated outside the "
@@ -1798,6 +1798,8 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
       pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Pressure out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Pressure out of bounds");
     }
   }
 
@@ -1814,6 +1816,8 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
       temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Temperature out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Temperature out of bounds");
     }
   }
 }
@@ -1835,6 +1839,8 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
       e = std::max(_e_min, std::min(e, _e_max));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Specific internal energy out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Specific internal energy out of bounds");
     }
   }
 
@@ -1849,6 +1855,8 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
       v = std::max(T(_v_min), std::min(v, T(_v_max)));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Specific volume out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Specific volume out of bounds");
     }
   }
 }
