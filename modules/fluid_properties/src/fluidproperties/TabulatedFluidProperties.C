@@ -111,6 +111,11 @@ TabulatedFluidProperties::validParams()
       false,
       "Option to use a base-10 logarithmically-spaced grid for specific internal energy instead "
       "of a linearly-spaced grid.");
+  params.addParam<bool>(
+      "use_log_grid_h",
+      false,
+      "Option to use a base-10 logarithmically-spaced grid for specific enthalpy instead "
+      "of a linearly-spaced grid.");
 
   // Out of bounds behavior
   params.addDeprecatedParam<bool>(
@@ -140,8 +145,9 @@ TabulatedFluidProperties::validParams()
   params.addParamNamesToGroup("temperature_min temperature_max pressure_min pressure_max e_min "
                               "e_max v_min v_max error_on_out_of_bounds out_of_bounds_behavior",
                               "Tabulation and interpolation bounds");
-  params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v use_log_grid_e",
-                              "Tabulation and interpolation discretization");
+  params.addParamNamesToGroup(
+      "num_T num_p num_v num_e use_log_grid_v use_log_grid_e use_log_grid_h",
+      "Tabulation and interpolation discretization");
 
   return params;
 }
@@ -202,6 +208,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_e(getParam<unsigned int>("num_e")),
     _log_space_v(getParam<bool>("use_log_grid_v")),
     _log_space_e(getParam<bool>("use_log_grid_e")),
+    _log_space_h(getParam<bool>("use_log_grid_h")),
     _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
@@ -2273,13 +2280,29 @@ TabulatedFluidProperties::createVHGridVectors()
   else
     mooseError("Need a source to compute the enthalpy grid bounds: either a FP object, or a (p,T) "
                "tabulation file or a (v,e) tabulation file");
-  Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
 
   // Create h grid for interpolation
   // enthalpy & internal energy use same # grid points
   _enthalpy.resize(_num_e);
-  for (unsigned int j = 0; j < _num_e; ++j)
-    _enthalpy[j] = _h_min + j * dh;
+  if (_log_space_h)
+  {
+    // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
+    // the power of 10
+    if (_h_min < 0)
+      mooseError("Logarithmic grid in specific energy can only be used with a positive enthalpy. "
+                 "Current minimum: " +
+                 std::to_string(_h_min));
+    Real dh = (std::log10(_h_max) - std::log10(_h_min)) / ((Real)_num_e - 1);
+    Real log_h_min = std::log10(_h_min);
+    for (const auto j : make_range(_num_e))
+      _enthalpy[j] = std::pow(10, log_h_min + j * dh);
+  }
+  else
+  {
+    Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
+    for (const auto j : make_range(_num_e))
+      _enthalpy[j] = _h_min + j * dh;
+  }
 }
 
 void

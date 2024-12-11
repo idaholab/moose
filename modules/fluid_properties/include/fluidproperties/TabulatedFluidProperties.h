@@ -344,6 +344,8 @@ protected:
   bool _log_space_v;
   /// log-space the internal energy interpolation grid axis instead of linear
   bool _log_space_e;
+  /// log-space the enthalpy interpolation grid axis instead of linear
+  bool _log_space_h;
 
   /// User-selected out-of-bounds behavior
   MooseEnum _OOBBehavior;
