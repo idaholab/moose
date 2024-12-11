@@ -11,6 +11,8 @@ discretized using the finite volume method:
 where $\left(\frac{\partial cu}{\partial t}\right)_C$ and $V_C$ are the time derivative of the
 field value at the cell center and the cell volume, respectively.
 Note that we added a multiplier, $c$ which often represents a material property.
+A good example for the multiplier can be the density in the momentum equation
+in the Navier Stokes equation.
 This can be defined through parameter [!param](/LinearFVKernels/LinearFVTimeDerivative/factor)
 that accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
