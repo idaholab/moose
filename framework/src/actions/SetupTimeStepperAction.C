@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SetupTimeStepperAction.h"
-#include "Transient.h"
+#include "TransientBase.h"
 #include "MooseApp.h"
 #include "Factory.h"
 #include "TimeStepper.h"
@@ -34,7 +34,7 @@ SetupTimeStepperAction::SetupTimeStepperAction(const InputParameters & parameter
 void
 SetupTimeStepperAction::act()
 {
-  if (Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner()))
+  if (TransientBase * transient = dynamic_cast<TransientBase *>(_app.getExecutioner()))
   {
     std::vector<TimeStepper *> timesteppers;
     _problem->theWarehouse().query().condition<AttribSystem>("TimeStepper").queryInto(timesteppers);
@@ -44,7 +44,7 @@ SetupTimeStepperAction::act()
     {
       const auto ts_name = "ConstantDT";
       auto params = _factory.getValidParams(ts_name);
-      params.set<Transient *>("_executioner") = transient;
+      params.set<TransientBase *>("_executioner") = transient;
 
       if (!transient->parameters().isParamSetByAddParam("end_time") &&
           !transient->parameters().isParamSetByAddParam("num_steps") &&
