@@ -633,7 +633,7 @@ Simulation::sortAddedComponentVariables() const
 void
 Simulation::addVariables()
 {
-  Transient * trex = dynamic_cast<Transient *>(getApp().getExecutioner());
+  TransientBase * trex = dynamic_cast<TransientBase *>(getApp().getExecutioner());
   if (trex)
   {
     Moose::TimeIntegratorType ti_type = trex->getTimeScheme();

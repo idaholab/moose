@@ -36,8 +36,7 @@ PIMPLE::PIMPLE(const InputParameters & parameters) : TransientBase(parameters), 
 void
 PIMPLE::init()
 {
-  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _problem.initialSetup();
+  TransientBase::init();
   _pimple_solve.linkRhieChowUserObject();
   _pimple_solve.setupPressurePin();
 }

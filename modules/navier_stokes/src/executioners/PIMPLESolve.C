@@ -161,7 +161,7 @@ PIMPLESolve::solveMomentumPredictor()
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copySolutionsBackwards();
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
 
   return its_normalized_residuals;
@@ -349,8 +349,6 @@ PIMPLESolve::solve()
 
     while (piso_iteration_counter <= _num_piso_iterations)
     {
-      piso_iteration_counter++;
-
       // Compute the coupling fields between the momentum and pressure equations.
       // The first argument makes sure the pressure gradient is staged at the first
       // iteration
@@ -384,6 +382,8 @@ PIMPLESolve::solve()
 
       // Reconstruct the cell velocity as well to accelerate convergence
       _rc_uo->computeCellVelocity();
+
+      piso_iteration_counter++;
     }
 
     // If we have an energy equation, solve it here.We assume the material properties in the
