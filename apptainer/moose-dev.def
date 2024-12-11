@@ -43,6 +43,7 @@ From: {{ APPTAINER_FROM }}
 
 %environment
     export PATH={{ MOOSE_MINIFORGE }}/bin:/opt/code-server/bin:$PATH
+    source activate {{ MOOSE_MINIFORGE }}
 
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
