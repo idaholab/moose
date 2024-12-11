@@ -33,13 +33,36 @@ well as the installed extensions.
 - +Close VSCode+. From now on we will _only_ start it from the command line using the `code`
   terminal command ensuring that VSCode sees the full MOOSE build environment.
 
-## Important commands
+## Commands
 
-- +`Cmd-Shift-P`+ opens the command palette. Every available command can be accessed by typing a
+Note that letters shown upper case in commands do not mean literal upper case. You do not have to press shift when typing these letters. This is just the notation (confusing I know). A good reference for hotkeys can be found [here](https://go.microsoft.com/fwlink/?linkid=832143). Linux hotkeys can be found [here](https://go.microsoft.com/fwlink/?linkid=832144). The hotkeys we give below assume MacOS.
+
+- +`Cmd+Shift+P`+ opens the command palette. Every available command can be accessed by typing a
   few letters here. The dropdown list shows the keyboard shortcuts.
-- +`Cmd-P`+ opens a file anywhere in the current project tree (i.e. below the directory in which you
+- +`Cmd+P`+ opens a file anywhere in the current project tree (i.e. below the directory in which you
   issued the `code .` command. No need to know the precise path or even the precise spelling of the
   filename!
+- +`Cmd+[`+ Decrease indent (Outdent)
+- +`Cmd+]`+ Increase indent (Indent)
+- +`Cmd+F`+ Find
+- +`Cmd+Option+F`+ Find and replace
+  - +`Enter`+ Find next match without replacement
+  - +`Ctrl+Enter`+ Replace
+- +`Cmd+Option+Left/Right Arrow`+ tab between open editor files as ordered on the screen
+- +`Ctrl+Tab`+ tab between editor files in the order they were opened
+- +`Shift+Option+Drag Mouse`+ Rectangular text selection
+- +`Option+Repeated Clicks`+ Place multiple cursors (one per each click)
+- +`Cmd+S`+ Save current file
+- +`` Ctrl+` ``+ Open terminal
+- +`Cmd+\`+ Split screen vertically
+- +`Cmd+W`+ Close current file. If last file in split, then split will disappear
+- +`Ctrl+G`+ Goto line
+
+### Focuses
+
+- +`findInputFocussed`+ Cursor is in the Find box (note that cursor in the Replace box of the Find and Replace box *does not count*)
+- +`editorFocus`+ Cursor is within the code editor
+
 
 ## Extensions
 
