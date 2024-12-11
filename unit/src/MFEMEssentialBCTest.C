@@ -11,13 +11,16 @@ class MFEMEssentialBCTest : public MFEMObjectUnitTest
 {
 public:
   mfem::common::H1_FESpace _scalar_fes;
-  mfem::common::ND_FESpace _vector_fes;
+  //  mfem::common::ND_FESpace _vector_fes;
+  mfem::common::H1_FESpace _vector_fes;
   mfem::GridFunction _scalar_gridfunc, _vector_gridfunc;
 
   MFEMEssentialBCTest()
     : MFEMObjectUnitTest("PlatypusApp"),
       _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
-      _vector_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
+      // _vector_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
+      _vector_fes(
+          _mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, mfem::BasisType::GaussLobatto, 3),
       _scalar_gridfunc(&_scalar_fes),
       _vector_gridfunc(&_vector_fes)
   {
@@ -56,9 +59,10 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
   mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
   _scalar_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker);
   _scalar_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
+  const Real expected = bc_params.get<Real>("value");
   for (auto ess_dof : ess_vdofs_list)
   {
-    EXPECT_EQ(_scalar_gridfunc[ess_dof], bc_params.get<Real>("value"));
+    EXPECT_EQ(_scalar_gridfunc[ess_dof], expected);
   }
 }
 
@@ -100,7 +104,19 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  // FIXME: We should actually check this applies the right boundary values...
+  // Check the correct boundary values have been applied
+  mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
+  const std::vector<Real> expected = bc_params.get<std::vector<Real>>("values");
+  for (int i = 0; i < 3; i++)
+  {
+    _vector_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker, i);
+    _vector_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
+    for (auto ess_dof : ess_vdofs_list)
+    {
+      std::cout << "Index: " << ess_dof << std::endl;
+      EXPECT_EQ(_vector_gridfunc[ess_dof], expected[i]);
+    }
+  }
 }
 
 /**
@@ -142,7 +158,19 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  // FIXME: We should actually check this applies the right boundary values...
+  // Check the correct boundary values have been applied
+  mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
+  const std::vector<Real> expected = bc_params.get<std::vector<Real>>("values");
+  for (int i = 0; i < 3; i++)
+  {
+    _vector_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker, i);
+    _vector_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
+    for (auto ess_dof : ess_vdofs_list)
+    {
+      std::cout << "Index: " << ess_dof << std::endl;
+      EXPECT_EQ(_vector_gridfunc[ess_dof], expected[i]);
+    }
+  }
 }
 
 /**
