@@ -6,7 +6,9 @@ registerMooseObject("PlatypusApp", MFEMGeneralUserObject);
 InputParameters
 MFEMGeneralUserObject::validParams()
 {
-  return GeneralUserObject::validParams();
+  InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("Base class for custom GeneralUserObjects to add to MFEM problems.");
+  return params;
 }
 
 MFEMGeneralUserObject::MFEMGeneralUserObject(const InputParameters & parameters)

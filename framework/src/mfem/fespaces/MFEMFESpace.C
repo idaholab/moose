@@ -8,14 +8,12 @@ MFEMFESpace::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMFESpace");
-
+  params.addClassDescription("Specifies a finite element space for `MFEMVariable`s to be defined "
+                             "with respect to.");
   params.addParam<int>("vdim", 1, "Dimension of degrees of freedom");
-
   MooseEnum ordering("NODES VDIM", "VDIM", false);
-  params.addParam<MooseEnum>("ordering", ordering, "Type of ordering of the vector dofs.");
-
+  params.addParam<MooseEnum>("ordering", ordering, "Ordering style to use for vector DoFs.");
   params += MFEMFECollection::validParams();
-
   return params;
 }
 

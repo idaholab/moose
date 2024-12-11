@@ -9,6 +9,8 @@ InputParameters
 MFEMProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params.addClassDescription("Problem type for building and solving finite element problem using"
+                             " the MFEM finite element library.");
   return params;
 }
 
