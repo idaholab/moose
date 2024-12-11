@@ -4,8 +4,8 @@ InputParameters
 MFEMVectorDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<std::vector<Real>>(
-      "values", "The vector whose normal component will be used in the integrated BC");
+  params.addRequiredParam<std::vector<Real>>("values",
+                                             "The vector which will be used in the integrated BC");
   return params;
 }
 
