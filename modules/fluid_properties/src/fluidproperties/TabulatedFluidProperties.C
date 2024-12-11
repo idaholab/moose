@@ -288,8 +288,12 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
         "from the bounds of the input tabulation.");
   if (!_fp && !_file_name_ve_in.empty() && (isParamSetByUser("num_e") || isParamSetByUser("num_v")))
     mooseWarning("User-specified grid sizes in specific volume and internal energy are ignored "
-                 "when reading a 'fluid_property_ve_file'. The tabulation bounds are selected "
-                 "from the bounds of the input tabulation.");
+                 "when reading a 'fluid_property_ve_file'. The tabulation widths are read "
+                 "from the input tabulation.");
+  if (!_file_name_ve_in.empty() && (_log_space_v || _log_space_e))
+    mooseWarning(
+        "User specfied logarithmic grids in specific volume and energy are ignored when reading a "
+        "'fluid_properties_ve_file'. The tabulation grid is read from the input tabulation");
 }
 
 void
@@ -2158,6 +2162,7 @@ TabulatedFluidProperties::computePropertyIndicesInInterpolationVectors()
 void
 TabulatedFluidProperties::createVGridVector()
 {
+  mooseAssert(_file_name_ve_in.empty(), "We should be reading the specific volume grid from file");
   if (!_v_bounds_specified)
   {
     if (_fp)
@@ -2255,7 +2260,8 @@ TabulatedFluidProperties::createVEGridVectors()
 void
 TabulatedFluidProperties::createVHGridVectors()
 {
-  createVGridVector();
+  if (_file_name_ve_in.empty())
+    createVGridVector();
   if (_fp)
   {
     // extreme values of enthalpy for the grid bounds
