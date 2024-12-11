@@ -24,8 +24,7 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
     _fespace(getUserObject<MFEMFESpace>("fespace")),
     _gridfunction(buildGridFunction())
 {
-
-  *_gridfunction = parameters.get<double>("ic");
+  *_gridfunction = 0.0;
 }
 
 const std::shared_ptr<mfem::ParGridFunction>
