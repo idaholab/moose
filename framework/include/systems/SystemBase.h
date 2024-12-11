@@ -184,6 +184,7 @@ public:
   virtual void solve();
 
   virtual void copyOldSolutions();
+  virtual void copyPreviousNonlinearSolutions();
   virtual void restoreSolutions();
 
   /**
