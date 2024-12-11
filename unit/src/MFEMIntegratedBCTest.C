@@ -90,6 +90,10 @@ TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
       dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
   delete lf_integrator;
+
+  auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
 }
 
 /**
