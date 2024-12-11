@@ -22,5 +22,5 @@ MFEMVectorFunctionNormalDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem
 {
   mfem::Array<int> ess_bdrs(mesh_->bdr_attributes.Max());
   ess_bdrs = GetMarkers(*mesh_);
-  gridfunc.ProjectBdrCoefficientNormal(*_vec_coef->getVectorCoefficient(), ess_bdrs);
+  gridfunc.ProjectBdrCoefficientNormal(*_vec_coef, ess_bdrs);
 }

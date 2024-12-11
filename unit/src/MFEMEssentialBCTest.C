@@ -113,7 +113,6 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
     _vector_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
     for (auto ess_dof : ess_vdofs_list)
     {
-      std::cout << "Index: " << ess_dof << std::endl;
       EXPECT_EQ(_vector_gridfunc[ess_dof], expected[i]);
     }
   }
