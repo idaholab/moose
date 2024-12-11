@@ -240,7 +240,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
   }
   else if (isParamValid("v_min") || isParamValid("v_max"))
     paramError("v_min",
-               "Either both or none of the min and max values of the specific internal energy "
+               "Either both or none of the min and max values of the specific volume "
                "should be specified");
   else
     _v_bounds_specified = false;
