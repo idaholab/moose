@@ -43,5 +43,5 @@ public:
 
 protected:
   /// Transient executioner
-  Transient * _trex;
+  TransientBase * _trex;
 };

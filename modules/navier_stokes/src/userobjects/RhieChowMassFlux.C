@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "NS.h"
 #include "VectorCompositeFunctor.h"
+#include "PIMPLE.h"
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
@@ -90,7 +91,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
   }
 
-  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()))
+  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()) && !dynamic_cast<PIMPLE *>(getMooseApp().getExecutioner()))
     mooseError(this->name(),
                " should only be used with a linear segregated thermal-hydraulics solver!");
 }
@@ -512,7 +513,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
     // We create a working vector to ease some of the operations, we initialize its values
     // with the current solution values to have something for the A*u term
-    auto working_vector = momentum_system->current_local_solution->clone();
+    auto working_vector = momentum_system->current_local_solution->zero_clone();
     PetscVector<Number> * working_vector_petsc =
         dynamic_cast<PetscVector<Number> *>(working_vector.get());
     mooseAssert(working_vector_petsc,
@@ -520,7 +521,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
                 "to PetscVectors!");
 
     mmat->vector_mult(HbyA, solution);
-    working_vector_petsc->pointwise_mult(*working_vector_petsc, solution);
+    working_vector_petsc->pointwise_mult(Ainv, solution);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
@@ -534,8 +535,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
     // Unfortunately, the pressure forces are included in the momentum RHS
     // so we have to correct them back
-    *working_vector_petsc = *pressure_gradient[system_i];
-    working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
+    working_vector_petsc->pointwise_mult(*pressure_gradient[system_i], *_cell_volumes);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)

@@ -13,7 +13,7 @@
 
 #include "libmesh/numeric_vector.h"
 
-class Transient;
+class TransientBase;
 
 /**
  * MultiApp Implementation for Transient Apps.
@@ -54,7 +54,7 @@ private:
    */
   void setupApp(unsigned int i, Real time = 0.0);
 
-  std::vector<Transient *> _transient_executioners;
+  std::vector<TransientBase *> _transient_executioners;
 
   bool _sub_cycling;
   bool _interpolate_transfers;
