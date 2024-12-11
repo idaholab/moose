@@ -13,7 +13,7 @@ MFEMLinearElasticityKernel::validParams()
       "$c_{ikjl} = \\lambda \\delta_{ik} \\delta_{jl} + \\mu \\left( \\delta_{ij} \\delta_{kl} + "
       "\\delta_{il} \\delta_{jk} \\right)$, "
       "$\\lambda$ is the first Lamé parameter, $\\lambda = \\frac{E\\nu}{(1-2\\nu)(1+\\nu)}$, "
-      "$\\mu$ is the second Lamé parameter, $\\mu = \\frac{E}{2(1+\\nu)}, "
+      "$\\mu$ is the second Lamé parameter, $\\mu = \\frac{E}{2(1+\\nu)}$, "
       "where $E$ is Young's modulus and $\\nu$ is Poisson's ratio.");
 
   params.addParam<std::string>(

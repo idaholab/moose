@@ -8,6 +8,8 @@ InputParameters
 MFEMHyprePCG::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
+  params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
+                             "using the preconditioned conjugate gradient method.");
 
   params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<double>("l_abs_tol", 1e-50, "Set the absolute tolerance.");

@@ -8,11 +8,12 @@ MFEMCurlCurlKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription(
-      "The curl curl operator ($-k\\nabla \\times \\nabla \\times u$), with the weak "
-      "form of $ (k\\nabla \\times \\phi_i, \\nabla \\times u_h), to be added to an MFEM problem");
-
-  params.addParam<std::string>("coefficient", "Name of property k to multiply the Laplacian by");
-
+      "Adds the domain integrator to an MFEM problem for the bilinear form "
+      "$(k\\vec\\nabla \\times \\vec u, \\vec\\nabla \\times \\vec v)_\\Omega$ "
+      "arising from the weak form of the curl curl operator "
+      "$-k\\vec\\nabla \\times \\vec\\nabla \\times \\vec u$.");
+  params.addParam<std::string>("coefficient",
+                               "Name of scalar property k to multiply the integrator by.");
   return params;
 }
 

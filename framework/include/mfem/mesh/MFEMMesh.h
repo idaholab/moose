@@ -75,7 +75,7 @@ private:
   void buildDummyMooseMesh();
 
   /**
-   * Performs a uniform refinement on the chosen mesh @nref times.
+   * Performs a uniform refinement on the chosen mesh nref times.
    */
   void uniformRefinement(mfem::Mesh & mesh, int nref);
 

@@ -6,6 +6,8 @@ InputParameters
 MFEMVectorNormalIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
+  params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
+                             "$(\\vec f \\cdot \\hat n, v)_{\\partial\\Omega}$");
   params.addRequiredParam<std::vector<Real>>(
       "values", "The vector whose normal component will be used in the integrated BC");
   return params;

@@ -6,7 +6,7 @@ InputParameters
 MFEMParaViewDataCollection::validParams()
 {
   InputParameters params = MFEMDataCollection::validParams();
-  params.addClassDescription("Output for controlling MFEMParaViewDataCollection inherited data.");
+  params.addClassDescription("Output for controlling export to an mfem::ParaViewDataCollection.");
   params.addParam<unsigned int>("refinements",
                                 0,
                                 "Number of uniform refinements for oversampling "
