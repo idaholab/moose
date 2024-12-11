@@ -55,7 +55,7 @@
     type = MFEMVectorNormalDirichletBC
     variable = F
     boundary = '1 2 3'
-    vector_coefficient = F_exact
+    function = F_exact
   []
 []
 
