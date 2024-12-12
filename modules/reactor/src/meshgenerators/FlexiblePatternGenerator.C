@@ -129,6 +129,15 @@ FlexiblePatternGenerator::validParams()
                         true,
                         "Whether to delete the default external boundary from the input meshes.");
 
+  params.addParam<std::string>(
+      "unit_mesh_id_name",
+      "The name of the extra element id to be assigned to the unit meshes used for patterning.");
+
+  params.addParam<dof_id_type>("unit_mesh_id_shift",
+                               0,
+                               "The shift value to be added to the unit mesh id to avoid conflicts "
+                               "with ids in other meshes.");
+
   params.addClassDescription("This FlexiblePatternGenerator object is designed to generate a "
                              "mesh with a background region with dispersed unit meshes in "
                              "it and distributed based on a series of flexible patterns.");
@@ -207,6 +216,10 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                                    : SubdomainName()),
     _delete_default_external_boundary_from_inputs(
         getParam<bool>("delete_default_external_boundary_from_inputs")),
+    _unit_mesh_id_name(isParamValid("unit_mesh_id_name")
+                           ? getParam<std::string>("unit_mesh_id_name")
+                           : std::string()),
+    _unit_mesh_id_shift(getParam<dof_id_type>("unit_mesh_id_shift")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : (boundary_id_type)OUTER_SIDESET_ID),
@@ -216,6 +229,12 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 
 {
   declareMeshesForSub("inputs");
+
+  if (_unit_mesh_id_name.empty() && isParamSetByUser("unit_mesh_id_name"))
+    paramError("unit_mesh_id_name", "This parameter must be non empty if provided.");
+  if (_unit_mesh_id_name.empty() && isParamSetByUser("unit_mesh_id_shift"))
+    paramError("unit_mesh_id_name",
+               "This parameter must be provided if unit_mesh_id_shift is set.");
 
   const std::vector<Point> extra_positions(getParam<std::vector<Point>>("extra_positions"));
   const std::vector<unsigned int> extra_positions_mg_indices(
@@ -509,6 +528,17 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
     patterned_pin_mg_series.push_back(name() + "_pos_" + std::to_string(i));
 
     addMeshSubgenerator("TransformGenerator", patterned_pin_mg_series.back(), params);
+
+    if (_unit_mesh_id_name.size())
+    {
+      auto params = _app.getFactory().getValidParams("ParsedExtraElementIDGenerator");
+      params.set<MeshGeneratorName>("input") = patterned_pin_mg_series.back();
+      params.set<std::string>("expression") = std::to_string(i + _unit_mesh_id_shift);
+      params.set<std::string>("extra_elem_integer_name") = _unit_mesh_id_name;
+
+      patterned_pin_mg_series.back() = name() + "_eeid_" + std::to_string(i);
+      addMeshSubgenerator("ParsedExtraElementIDGenerator", patterned_pin_mg_series.back(), params);
+    }
   }
 
   auto params = _app.getFactory().getValidParams("XYDelaunayGenerator");

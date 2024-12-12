@@ -91,6 +91,10 @@ In both [!param](/Mesh/FlexiblePatternGenerator/hex_patterns) and [!param](/Mesh
       id=mixed_pattern_m
       caption=Output example of mixed patterning with dummy unit meshes.
 
+## Extra Element ID Assignment for Unit Meshes
+
+For each unit mesh involved in the patterning, an additional element ID can be automatically assigned to facilitate subsequent data analysis. This extra element ID can be specified using the [!param](/Mesh/FlexiblePatternGenerator/unit_mesh_id_name) parameter. By default, the assigned extra element ID begins with 0 and increments by 1. Alternatively, the generated extra element ID can be shifted using the [!param](/Mesh/FlexiblePatternGenerator/unit_mesh_id_shift) parameter.
+
 !syntax parameters /Mesh/FlexiblePatternGenerator
 
 !syntax inputs /Mesh/FlexiblePatternGenerator
