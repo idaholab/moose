@@ -48,8 +48,8 @@ Note that letters shown upper case in commands do not mean literal upper case. Y
 - +`Cmd+Option+F`+ Find and replace
   - +`Enter`+ Find next match without replacement
   - +`Ctrl+Enter`+ Replace
-- +`Cmd+Option+Left/Right Arrow`+ tab between open editor files as ordered on the screen
-- +`Ctrl+Tab`+ tab between editor files in the order they were opened
+- +`Cmd+Option+Left/Right Arrow`+ Tab between open editor files as ordered on the screen
+- +`Ctrl+Tab`+ Tab between editor files in the order they were opened
 - +`Shift+Option+Drag Mouse`+ Rectangular text selection
 - +`Option+Repeated Clicks`+ Place multiple cursors (one per each click)
 - +`Cmd+S`+ Save current file
