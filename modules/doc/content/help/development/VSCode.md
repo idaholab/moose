@@ -63,7 +63,7 @@ Note that letters shown upper case in commands do not mean literal upper case. Y
 - +`Ctrl+E`+ Move cursor to end of line
 - +`Ctrl+A`+ Move cursor to beginning of line
 - +`Ctrl+K`+ Kill from cursor to end of line
-- +`Ctrl+Y`+ Yank last kill
+- +`Ctrl+Y`+ Redo last undone action (not yank like in emacs)
 - +`Ctrl+F`+ Move cursor to next character
 - +`Ctrl+B`+ Move cursor to previous character
 
