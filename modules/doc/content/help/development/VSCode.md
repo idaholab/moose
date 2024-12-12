@@ -53,10 +53,19 @@ Note that letters shown upper case in commands do not mean literal upper case. Y
 - +`Shift+Option+Drag Mouse`+ Rectangular text selection
 - +`Option+Repeated Clicks`+ Place multiple cursors (one per each click)
 - +`Cmd+S`+ Save current file
-- +`` Ctrl+` ``+ Open terminal
+- +`` Ctrl+` ``+ or +`Cmd+J`+ Open/close terminal
+- +`Cmd+1`+ Change focus to code editor
 - +`Cmd+\`+ Split screen vertically
 - +`Cmd+W`+ Close current file. If last file in split, then split will disappear
 - +`Ctrl+G`+ Goto line
+- +`Ctrl+N`+ Move cursor to next line
+- +`Ctrl+P`+ Move cursor to previous line
+- +`Ctrl+E`+ Move cursor to end of line
+- +`Ctrl+A`+ Move cursor to beginning of line
+- +`Ctrl+K`+ Kill from cursor to end of line
+- +`Ctrl+Y`+ Yank last kill
+- +`Ctrl+F`+ Move cursor to next character
+- +`Ctrl+B`+ Move cursor to previous character
 
 ### Focuses
 
