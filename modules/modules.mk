@@ -46,13 +46,6 @@ endif
 
 # Modules that follow have one or more dependencies
 # on the modules defined above them.
-ifeq ($(SUBCHANNEL),yes)
-        FLUID_PROPERTIES            := yes
-        HEAT_TRANSFER               := yes
-        REACTOR                     := yes
-        THERMAL_HYDRAULICS          := yes
-endif
-
 ifeq ($(THERMAL_HYDRAULICS),yes)
         NAVIER_STOKES               := yes
         FLUID_PROPERTIES            := yes
@@ -80,6 +73,12 @@ endif
 
 ifeq ($(CONTACT),yes)
         SOLID_MECHANICS             := yes
+endif
+
+ifeq ($(SUBCHANNEL),yes)
+        FLUID_PROPERTIES            := yes
+        HEAT_TRANSFER               := yes
+        REACTOR                     := yes
 endif
 
 # heat_conduction was renamed to heat_transfer
@@ -340,7 +339,7 @@ endif
 ifeq ($(SUBCHANNEL),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/subchannel
   APPLICATION_NAME   := subchannel
-  DEPEND_MODULES     := fluid_properties heat_transfer reactor thermal_hydraulics
+  DEPEND_MODULES     := fluid_properties heat_transfer reactor
   SUFFIX             := st
   include $(FRAMEWORK_DIR)/app.mk
 endif
