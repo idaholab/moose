@@ -131,6 +131,8 @@ AbaqusUELMeshUserElement::timestepSetup()
 void
 AbaqusUELMeshUserElement::execute()
 {
+  mooseInfoRepeated("AbaqusUELMeshUserElement::execute()");
+
   // dof indices of all coupled variables
   std::vector<dof_id_type> var_dof_indices;
   std::vector<dof_id_type> all_dof_indices;
@@ -142,6 +144,7 @@ AbaqusUELMeshUserElement::execute()
   // parameters for the UEL plugin
   std::array<int, 5> lflags;
   int dim = _uel_definition.coords;
+
   std::vector<Real> coords(_uel_definition.nodes * dim);
 
   DenseVector<Real> local_re;
@@ -153,6 +156,27 @@ AbaqusUELMeshUserElement::execute()
   Real dt = _fe_problem.dt();
   Real time = _fe_problem.time();
   std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
+
+  // debug stuff
+  {
+    const auto i1 = _sys.currentSolution()->first_local_index();
+    const auto i2 = _sys.currentSolution()->last_local_index();
+    for (const auto & node_elem : _uel_mesh.getMesh().element_ptr_range())
+    {
+      bool is_local = false;
+
+      _variables[0][0]->getDofIndices(node_elem, var_dof_indices); // 1
+      is_local = is_local || (var_dof_indices.size() && (var_dof_indices[0] >= i1 && var_dof_indices[0] < i2));
+      _variables[8][0]->getDofIndices(node_elem, var_dof_indices); // 4
+      is_local = is_local || (var_dof_indices.size() && (var_dof_indices[0] >= i1 && var_dof_indices[0] < i2));
+
+      if (is_local)
+         std::cout << "UELDBG " << node_elem->point(0)(0) << ' ' << node_elem->point(0)(1) << ' ' << node_elem->processor_id() << '\n';
+    }
+    mooseInfoRepeated("First/last ",   _sys.currentSolution()->first_local_index(), ' ',_sys.currentSolution()->last_local_index());
+  }
+
+  mooseInfoRepeated("END");
 
   // loop over active element sets
   for (const auto & uel_elem_id : _active_elements)
