@@ -45,12 +45,11 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
   // Check parameters
   if (!( (_fluid && !_h_from_p_T_functor && !_T_from_p_h_functor) ||
          (!_fluid && _h_from_p_T_functor && _T_from_p_h_functor)))
-    {
-    mooseError(false,
-                "For `LinearFVEnthalpyFunctorMaterial` , an unsupported combination of input parameters was given. Current"
-                "supported combinations are either i) fp and no _h_from_p_T_functor and _T_from_p_h_functor, or ii) "
-                "no fp and _h_from_p_T_functor and _T_from_p_h_functor.");
-    }
+  {
+    mooseError("An unsupported combination of input parameters was given. Current"
+               "supported combinations are either i) `fp` and neither `h_from_p_T_functor` nor `T_from_p_h_functor`, or ii) "
+               "no `fp` and `h_from_p_T_functor` and `T_from_p_h_functor`.");
+  }
 
   //
   // Set material properties functors

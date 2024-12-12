@@ -10,13 +10,13 @@
 #pragma once
 
 #include "FunctorMaterial.h"
-#include "Function.h"
 
 class SinglePhaseFluidProperties;
-class Function;
 
 /**e
- * Computes fluid properties in (P, T) formulation using functor material properties
+ * Converts temperature to enthalpy or enthalpy to temperature using
+ * functor material properties. The derivatives are discarded, so can't
+ * be used with AD.
  */
 class LinearFVEnthalpyFunctorMaterial : public FunctorMaterial
 {
@@ -25,12 +25,16 @@ public:
   LinearFVEnthalpyFunctorMaterial(const InputParameters & parameters);
 
 protected:
-  /// variables
+  /// Variables, treated as functors, needs to be AD because
+  /// Materials inherit from ADFunctorInterface
   const Moose::Functor<ADReal> & _pressure;
   const Moose::Functor<ADReal> & _T_fluid;
   const Moose::Functor<ADReal> & _h;
 
+  /// The fluid properties that containt the h from Tconversion routines
   const SinglePhaseFluidProperties * _fluid;
+
+  /// Pointers to the the conversion functors (in case the fluid property is not provided)
   const Moose::Functor<Real> * _h_from_p_T_functor;
   const Moose::Functor<Real> * _T_from_p_h_functor;
 
