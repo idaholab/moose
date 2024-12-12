@@ -13,7 +13,6 @@
 #include "FluidPropertiesApp.h"
 #include "HeatTransferApp.h"
 #include "ReactorApp.h"
-#include "ThermalHydraulicsApp.h"
 #include "MooseSyntax.h"
 #include "SubChannelSyntax.h"
 
@@ -58,7 +57,6 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   FluidPropertiesApp::registerAll(f, af, s);
   HeatTransferApp::registerAll(f, af, s);
   ReactorApp::registerAll(f, af, s);
-  ThermalHydraulicsApp::registerAll(f, af, s);
 }
 
 void
@@ -69,7 +67,6 @@ SubChannelApp::registerApps()
   FluidPropertiesApp::registerApps();
   HeatTransferApp::registerApps();
   ReactorApp::registerApps();
-  ThermalHydraulicsApp::registerApps();
 }
 
 /***************************************************************************************************
