@@ -112,20 +112,27 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
                    "User specified (nx,ny,nz) grid exceeded number of partitions, these parameters "
                    "will be ignored.");
     }
-    if (nx > 0 && ny > 0 && nz > 0 && nx * ny * nz != mesh.n_partitions())
-    {
-      nx = 0;
-      ny = 0;
-      nz = 0;
-      paramWarning("grid_computation",
-                   "User specified (nx,ny,nz) grid do not match the number of partitions and "
-                   "constrain the grid partitioner in every direction, these parameters "
-                   "will be ignored.");
-    }
     // 0 means no restriction on which number to choose
     int dims[] = {isParamValid("nx") ? int(nx) : 0,
                   isParamValid("ny") ? int(ny) : 0,
                   isParamValid("nz") ? int(nz) : 0};
+
+    if ((dims[0] > 0 && dim == 1 && dims[0] != int(mesh.n_partitions())) ||
+        (dims[0] > 0 && dims[1] > 0 && dim == 2 && dims[0] * dims[1] != int(mesh.n_partitions())) ||
+        (dims[0] > 0 && dims[1] > 0 && dims[2] > 0 && dim == 3 &&
+         dims[0] * dims[1] * dims[2] != int(mesh.n_partitions())))
+    {
+      dims[0] = 0;
+      dims[1] = 0;
+      dims[2] = 0;
+      paramWarning("grid_computation",
+                   "User specified grid for the current dimension of the mesh (" +
+                       std::to_string(dim) + ") does not fit the number of partitions (" +
+                       std::to_string(mesh.n_partitions()) +
+                       ") and constrain the grid partitioner in every direction, these parameters "
+                       "will be ignored.");
+    }
+
     // This will error if the factorization is not possible
     MPI_Dims_create(mesh.n_partitions(), dim, dims);
 
