@@ -748,10 +748,10 @@
   []
 
   [wrong_input_switch]
-    type = 'RunApp'
-    input = 'Foo'
-    input_switch = '-m'
-    expect_out = '^Usage:'
+    type = 'RunException'
+    cli_args = '--foo'
+    no_additional_cli_args = True
+    expect_err = '^Usage:'
 
     requirement = 'The system shall report a standard Unix usage statement when an invalid command line switch is used.'
     issues = '#1405'
@@ -849,8 +849,8 @@
 
   [check_syntax_no_input]
     type = 'RunException'
-    input = 'Foo'
-    input_switch = '--check-input'
+    input = ''
+    cli_args = '--check-input'
     expect_err = 'You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.'
 
     requirement = 'The system shall report an error when requested to check the syntax in an input file but no input file is supplied.'
@@ -1181,7 +1181,7 @@
   [dump_error_with_unrecogized_param]
     type = 'RunException'
     input = ''
-    cli_args = '--dump bad_parameter'
+    cli_args = '--dump-search bad_parameter'
     expect_err = "Search parameter 'bad_parameter' was not found in the registered syntax."
 
     requirement = 'The system shall report a helpful error when the dump parameter does not match any valid parameters'

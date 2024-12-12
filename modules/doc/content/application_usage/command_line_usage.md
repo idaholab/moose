@@ -6,57 +6,81 @@ All MOOSE-based applications come with quite a few command-line options.  These 
 
 Command-line options can be set using either short syntax such as `-i inputfile.i` or longer syntax with either `--long-option value` or `--long-option=value`.  If spaces are needed for the value then you need to quote them like `--long-option='value1 value2'`.  If using the `=` it's important not to put any space around it.
 
+An option that is designated as "global" means that it will also be passed to any MultiApps that exist in the simulation.
+
 To print out the available command-line options use `--help`.  An example from MooseTest looks like this:
 
 ```
-> ./moose_test-opt --help
-
-Usage: ./moose_test-opt [<options>]
+> Usage: moose_test-opt [<options>]
 
 Options:
-  --check-input                                     Check the input file (i.e. requires -i <filename>) and quit.
-  --color [auto,on,off]                             Whether to use color in console output (default 'on').
-  --definition                                      Shows a SON style input definition dump for input validation
-  --disallow-test-objects                           Don't register test objects and syntax
-  -v --version                                      Print application version
-  --distributed-mesh                                The libMesh Mesh underlying MooseMesh should always be a DistributedMesh
-  --dump [search_string]                            Shows a dump of available input file syntax.
-  --error                                           Turn all warnings into errors
-  --error-deprecated                                Turn deprecated code messages into Errors
-  -o --error-override                               Error when encountering overridden or parameters supplied multiple times
-  -e --error-unused                                 Error when encountering unused input file options
-  --half-transient                                  When true the simulation will only run half of its specified transient (ie half the timesteps).  This is useful for testing recovery and restart
-  -h --help                                         Displays CLI usage statement.
-  -i <input_files>                                  Specify one or multiple input files. Multiple files get merged into a single simulation input.
-  --json                                            Dumps input file syntax in JSON format.
-  --keep-cout                                       Keep standard output from all processors when running in parallel
-  --list-constructed-objects                        List all moose object type names constructed by the master app factory.
-  --mesh-only [mesh_file_name]                      Setup and Output the input mesh only (Default: "<input_file_name>_in.e")
-  --minimal                                         Ignore input file and build a minimal application with Transient executioner.
-  --n-threads=<n>                                   Runs the specified number of threads per process
-  --no-color                                        Disable coloring of all Console outputs.
-  --no-timing                                       Disabled performance logging. Overrides -t or --timing if passed in conjunction with this flag
-  --no-trap-fpe                                     Disable Floating Point Exception handling in critical sections of code when using DEBUG mode.
-  --recover [file_base]                             Continue the calculation.  If file_base is omitted then the most recent recovery file will be utilized
-  --recoversuffix [suffix]                          Use a different file extension, other than cpr, for a recovery file
-  --redirect-stdout                                 Keep standard output from all processors when running in parallel
-  -r <n>                                            Specify additional initial uniform refinements for automatic scaling
-  --registry                                        Lists all known objects and actions.
-  --registry-hit                                    Lists all known objects and actions in hit format.
-  --show-controls                                   Shows the Control logic available and executed.
-  --show-input                                      Shows the parsed input file before running the simulation.
-  --show-outputs                                    Shows the output execution time information.
-  --split-file [filename]                           optional name of split mesh file(s) to write/read
-  --split-mesh [splits]                             comma-separated list of numbers of chunks to split the mesh into
-  --syntax                                          Dumps the associated Action syntax paths ONLY
-  -t --timing                                       Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.
-  --trap-fpe                                        Enable Floating Point Exception handling in critical sections of code.  This is enabled automatically in DEBUG mode
-  --use-split                                       use split distributed mesh files
-  -w --allow_unused                                 Warn about unused input file options
-  --yaml                                            Dumps input file syntax in YAML format.
+  --app <type>                        Specify the application type to run (case-sensitive)
+  --copy-inputs <dir>                 Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>
+  --definition                        Shows a SON style input definition dump for input validation
+  --disallow-test-objects             Don't register test objects and syntax
+  -v --version                        Print application version
+  --dump                              Shows a dump of available input file syntax
+  --dump-search <search>              Shows a dump of available input syntax matching a search
+  -h --help                           Displays CLI usage statement
+  -i <input file(s)>                  Specify input file(s); multiple files are merged
+  --json                              Dumps all input file syntax in JSON format
+  --json-search                       Dumps input file syntax matching a search in JSON format
+  --language-server                   Starts a process to communicate with development tools using the language server protocol
+  --libtorch-device                   The device type we want to run libtorch on.
+  --list-constructed-objects          List all moose object type names constructed by the master app factory
+  --mesh-only <optional path>         Build and output the mesh only (Default: "<input_file_name>_in.e")
+  --minimal                           Ignore input file and build a minimal application with Transient executioner
+  --output-inverse-eigenvalue         True to let EigenProblem output inverse eigenvalue.
+  --output-wall-time-interval <sec>   The target wall time interval at which to write to output; for testing
+  -r <num refinements>                Specify additional initial uniform mesh refinements
+  --registry                          Lists all known objects and actions
+  --registry-hit                      Lists all known objects and actions in hit format
+  --run <test harness args>           Runs the inputs in the current directory copied to a user-writable location by "--copy-inputs"
+  --docs                              Print url/path to the documentation website
+  --show-copyable-inputs              Shows the directories able to be copied into a user-writable location
+  --show-type                         Return the name of the application object
+  --split-file <filename>             Name of split mesh file(s) to write/read
+  --split-mesh <splits>               Comma-separated list of numbers of chunks to split the mesh into
+  --start-in-debugger <debugger>      Start the application and attach a debugger; this will launch xterm windows using <debugger>
+  --stop-for-debugger <seconds>       Pauses the application during startup for <seconds> to allow for connection of debuggers
+  --syntax                            Dumps the associated Action syntax paths ONLY
+  --test-check-legacy-params          Check for legacy parameter construction with CheckLegacyParamsAction; for testing
+  --test_getRestartableDataMap_error  Call getRestartableDataMap with a bad name.
+  --executor                          Use the new Executor system instead of Executioners
+  --use-split                         Use split distributed mesh files
+  --yaml                              Dumps all input file syntax in YAML format
+  --yaml-search                       Dumps input file syntax matching a search in YAML format
+
+Global Options:
+  --allow-test-objects                Register test objects and syntax
+  -w --allow-unused                   Warn about unused input file options instead of erroring
+  --check-input                       Check the input file (i.e. requires -i <filename>) and quit
+  --color <auto,on,off=on>            Whether to use color in console output
+  --disable-perf-graph-live           Disables PerfGraph live printing
+  --distributed-mesh                  Forces the use of a distributed finite element mesh
+  --error                             Turn all warnings into errors
+  --error-deprecated                  Turn deprecated code messages into Errors
+  -o --error-override                 Error when encountering overridden or parameters supplied multiple times
+  -e --error-unused                   Error when encountering unused input file options
+  --keep-cout                         Keep standard output from all processors when running in parallel
+  --n-threads=<n>                     Runs the specified number of threads per process
+  --no-color                          Disable coloring of all Console outputs
+  --no-gdb-backtrace                  Disables gdb backtraces.
+  --no-timing                         Disabled performance logging; overrides -t or --timing
+  --no-trap-fpe                       Disable floating point exception handling in critical sections of code (unused due to non-debug build)
+  --perf-graph-live-all               Forces printing of ALL progress messages
+  --recover <optional file base>      Continue the calculation. Without <file base>, the most recent recovery file will be used
+  --redirect-stdout                   Keep standard output from all processors when running in parallel
+  --show-controls                     Shows the Control logic available and executed
+  --show-input                        Shows the parsed input file before running the simulation
+  --show-outputs                      Shows the output execution time information
+  --test-checkpoint-half-transient    Run half of a transient with checkpoints enabled; used by the TestHarness
+  -t --timing                         Enable all performance logging for timing; disables screen output of performance logs for all Console objects
+  --timpi-sync <type=nbx>             Changes the sync type used in spare parallel communitations within TIMPI
+  --trap-fpe                          Enable floating point exception handling in critical sections of code
 
 Solver Options:
-  See solver manual for details (Petsc or Trilinos)
+  See PETSc manual for details
 ```
 
 ## Important Options

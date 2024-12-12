@@ -36,15 +36,15 @@ public:
 
 protected:
   /**
-   * Based on a cli_args-like string, return a map between SamplerReceiver objects and the
+   * Based on command line args, return a map between SamplerReceiver objects and the
    * parameter-value pairs.
    *
    * @param app_index The global sup-app index
-   * @param cmd_line cli_args-like string
+   * @param args The command line args
    * @return A map between the SamplerReceiver object and the parameter-value pairs
    */
   std::map<SamplerReceiver *, std::map<std::string, std::vector<Real>>>
-  getReceivers(unsigned int app_index, const std::string & cmd_line);
+  getReceivers(unsigned int app_index, const std::vector<std::string> & args);
 
   /// Storage for the list of parameters to control
   const std::vector<std::string> & _parameter_names;

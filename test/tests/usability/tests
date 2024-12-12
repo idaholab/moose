@@ -5,9 +5,9 @@
   [command-line]
     requirement = "The system will be operated using a command-line interface that"
     [empty]
-      type = RunApp
+      type = RunException
       no_additional_cli_args = True
-      expect_out = "Usage: \S+"
+      expect_err = "Usage: \S+"
       valgrind = NONE
 
       detail = "reports the available options when none are provided and"

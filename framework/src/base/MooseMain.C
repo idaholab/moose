@@ -22,62 +22,47 @@
 
 namespace Moose
 {
-void
-addMainCommandLineParams(InputParameters & params)
-{
-  params.addCommandLineParam<std::vector<std::string>>(
-      "input_file",
-      "-i <input_files>",
-      "Specify one or multiple input files. Multiple files get merged into a single simulation "
-      "input.");
-
-  params.addCommandLineParam<std::string>(
-      "application_type", "Application/type=<app_type>", "Specify the application type.");
-}
 
 std::shared_ptr<MooseApp>
-createMooseApp(const std::string & default_app_name, int argc, char * argv[])
+createMooseApp(const std::string & default_app_type, int argc, char * argv[])
 {
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
+  // Parse the command line early in order to determine the application type, from:
+  // - the input file, to load and search for Application/type
+  // - the --app command line argument
+  // - The Application/type= hit command line argument
+  CommandLine cl(argc, argv);
+  cl.parse();
+  auto command_line_params = emptyInputParameters();
+  MooseApp::addInputParam(command_line_params);
+  MooseApp::addAppParam(command_line_params);
+  cl.populateCommandLineParams(command_line_params);
 
-  {
-    auto input_param = emptyInputParameters();
-    addMainCommandLineParams(input_param);
-    command_line->addCommandLineOptionsFromParams(input_param);
-  }
+  // Do not allow overriding Application/type= for subapps
+  for (const auto & arg : cl.getArguments())
+    if (std::regex_match(arg, std::regex("[A-Za-z0-9]*:Application/.*")))
+      mooseError(
+          "For command line argument '",
+          arg,
+          "': overriding the application type for MultiApps via command line is not allowed.");
 
-  std::vector<std::string> input_filenames;
-  std::string cl_app_type;
-
-  // Get command line arguments
-  command_line->search("input_file", input_filenames);
-  command_line->search("application_type", cl_app_type);
-
-  // loop over all the command line arguments and error out when the user uses Application block for
-  // subapps
-  auto cli_args = command_line->getArguments();
-  if (std::find_if(cli_args.begin(),
-                   cli_args.end(),
-                   [&](auto & arg) {
-                     return std::regex_match(arg, std::regex("[A-Za-z0-9]*:Application/.*"));
-                   }) != cli_args.end())
-    mooseError("Using the CommandLine option to overwite [Application] block is not supported for "
-               "sub_apps");
-
+  // Parse the input file; this will set Parser::getAppType() if Application/type= is found
+  const auto & input_filenames = command_line_params.get<std::vector<std::string>>("input_file");
   auto parser = std::make_unique<Parser>(input_filenames);
+  parser->setAppType(default_app_type);
   if (input_filenames.size())
     parser->parse();
 
-  // Check whether the application name given in [Application] block is registered or not
-  if (!cl_app_type.empty())
-    parser->setAppType(cl_app_type);
+  // Search the command line for either --app or Application/type and let the last one win
+  for (const auto & entry : std::as_const(cl).getEntries())
+    if (!entry.subapp_name && entry.value &&
+        (entry.name == "--app" || entry.name == "Application/type"))
+      parser->setAppType(*entry.value);
 
-  auto app_type = parser->getAppType();
-  if (!app_type.empty())
-    if (!AppFactory::instance().isRegistered(app_type))
-      mooseError("'", app_type, "' is not a registered application name.\n");
+  const auto & app_type = parser->getAppType();
+  if (!AppFactory::instance().isRegistered(app_type))
+    mooseError("'", app_type, "' is not a registered application type.");
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  return AppFactory::createAppShared(default_app_name, argc, argv, std::move(parser));
+  return AppFactory::createAppShared(argc, argv, std::move(parser));
 }
 }

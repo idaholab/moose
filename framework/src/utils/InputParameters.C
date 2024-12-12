@@ -175,7 +175,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
-  _finalized = rhs._finalized;
+  _finalized = false;
 
   return *this;
 }
@@ -957,22 +957,52 @@ InputParameters::renameParameterGroup(const std::string & old_name, const std::s
       param.second._group = new_name;
 }
 
+void
+InputParameters::setGlobalCommandLineParam(const std::string & name)
+{
+  auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::setGlobalCommandLineParam: The parameter '",
+               name,
+               "' is not a command line parameter");
+  cl_data->global = true;
+}
+
 bool
 InputParameters::isCommandLineParameter(const std::string & name) const
 {
   return at(checkForRename(name))._cl_data.has_value();
 }
 
-const std::vector<std::string> &
-InputParameters::getCommandLineSyntax(const std::string & name) const
+std::optional<InputParameters::CommandLineMetadata>
+InputParameters::queryCommandLineMetadata(const std::string & name) const
 {
-  return getCommandLineMetadata(name).syntax;
+  const auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    return {};
+  return *cl_data;
 }
 
-InputParameters::CommandLineMetadata::ArgumentType
-InputParameters::getCommandLineArgumentType(const std::string & name) const
+const InputParameters::CommandLineMetadata &
+InputParameters::getCommandLineMetadata(const std::string & name) const
 {
-  return getCommandLineMetadata(name).argument_type;
+  const auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::getCommandLineMetadata: The parameter '",
+               name,
+               "' is not a command line parameter");
+  return *cl_data;
+}
+
+void
+InputParameters::commandLineParamSet(const std::string & name, const CommandLineParamSetKey)
+{
+  auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::commandLineParamSet: The parameter '",
+               name,
+               "' is not a command line parameter");
+  cl_data->set_by_command_line = true;
 }
 
 std::string
@@ -1143,14 +1173,17 @@ bool
 InputParameters::isParamSetByUser(const std::string & name_in) const
 {
   const auto name = checkForRename(name_in);
+  // Invalid; for sure not set by the user
   if (!isParamValid(name))
-    // if the parameter is invalid, it is for sure not set by the user
     return false;
-  else
-    // If the parameters is not located in the list, then it was set by the user
-    // If the parameter is private, and present in global params, it is ignored, therefore not set
-    return _params.count(name) > 0 && !_params.at(name)._set_by_add_param &&
-           !_params.at(name)._is_private;
+  // Parameter is not located in the list (called Parameters::set)
+  if (!_params.count(name))
+    return false;
+  // Special case for a command line option, which is a private parameter
+  if (const auto cl_data = queryCommandLineMetadata(name))
+    return cl_data->set_by_command_line;
+  // Not a command line option, not set by addParam and not private
+  return !_params.at(name)._set_by_add_param && !_params.at(name)._is_private;
 }
 
 const std::string &
@@ -1512,15 +1545,6 @@ InputParameters::checkParamName(const std::string & name) const
   const static pcrecpp::RE valid("[\\w:/]+");
   if (!valid.FullMatch(name))
     mooseError("Invalid parameter name: '", name, "'");
-}
-
-const InputParameters::CommandLineMetadata &
-InputParameters::getCommandLineMetadata(const std::string & name) const
-{
-  const auto & cl_data = at(checkForRename(name))._cl_data;
-  if (!cl_data)
-    mooseError("The parameter '", name, "' is not a command line parameter.");
-  return *cl_data;
 }
 
 bool

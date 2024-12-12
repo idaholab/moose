@@ -254,7 +254,10 @@ class RunApp(Tester):
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
 
-        command = specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
+        command = specs['executable'] + ' '
+        if len(specs['input']) > 0: # only apply if we have input set
+            command += specs['input_switch'] + ' ' + specs['input'] + ' '
+        command += ' '.join(cli_args)
         if options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
             command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + command
         elif nthreads > 1:

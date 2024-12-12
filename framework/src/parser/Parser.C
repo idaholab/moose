@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 
 std::string
 FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
@@ -271,14 +272,20 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
   }
 }
 
-void
-FindAppWalker ::walk(const std::string & /*fullpath*/,
-                     const std::string & /*nodepath*/,
-                     hit::Node * n)
+class FindAppWalker : public hit::Walker
 {
-  if (n && n->type() == hit::NodeType::Field && n->fullpath() == "Application/type")
-    _app_type = n->param<std::string>();
-}
+public:
+  void
+  walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    if (n && n->type() == hit::NodeType::Field && n->fullpath() == "Application/type")
+      _app_type = n->param<std::string>();
+  }
+  const std::optional<std::string> & getApp() { return _app_type; };
+
+private:
+  std::optional<std::string> _app_type;
+};
 
 const std::string &
 Parser::getLastInputFileName() const
@@ -372,7 +379,8 @@ Parser::parse()
 
   FindAppWalker fw;
   _root->walk(&fw, hit::NodeType::Field);
-  _app_type = fw.getApp();
+  if (fw.getApp())
+    setAppType(*fw.getApp());
 
   for (auto & msg : bw.errors)
     errmsg += msg + "\n";

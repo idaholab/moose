@@ -24,8 +24,12 @@
 #include "Checkpoint.h"
 #include "InputParameterWarehouse.h"
 #include "Registry.h"
+#include "CommandLine.h"
+
+#include <filesystem>
 
 #include "libmesh/string_to_enum.h"
+#include "libmesh/simple_range.h"
 
 using namespace libMesh;
 
@@ -46,6 +50,28 @@ outputFrameworkInformation(const MooseApp & app)
 
   if (app.getSystemInfo() != NULL)
     oss << app.getSystemInfo()->getInfo();
+
+  oss << "Input File(s):\n";
+  for (const auto & entry : app.getInputFileNames())
+    oss << "  " << std::filesystem::absolute(entry).c_str() << "\n";
+  oss << "\n";
+
+  const auto & cl = std::as_const(*app.commandLine());
+  const auto cl_range = as_range(std::next(cl.getEntries().begin()), cl.getEntries().end());
+
+  std::stringstream args_oss;
+  for (const auto & entry : cl_range)
+    if (!entry.hit_param && !entry.subapp_name && entry.name != "-i")
+      args_oss << "  " << cl.formatEntry(entry) << "\n";
+  if (args_oss.str().size())
+    oss << "Command Line Argument(s):\n" << args_oss.str() << "\n";
+
+  std::stringstream input_args_oss;
+  for (const auto & entry : cl_range)
+    if (entry.hit_param && !entry.subapp_name)
+      input_args_oss << "  " << cl.formatEntry(entry) << "\n";
+  if (input_args_oss.str().size())
+    oss << "Command Line Input Argument(s):\n" << input_args_oss.str() << "\n";
 
   const auto checkpoints = app.getOutputWarehouse().getOutputs<Checkpoint>();
   if (checkpoints.size())

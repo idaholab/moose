@@ -46,7 +46,7 @@ protected:
   dof_id_type _local_batch_app_index;
 
   /// Override to allow to get correct cli_args
-  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app) override;
+  virtual std::vector<std::string> getCommandLineArgs(const unsigned int local_app) override;
 
 private:
   /**

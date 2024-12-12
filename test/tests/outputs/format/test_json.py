@@ -47,8 +47,12 @@ class TestJSONBase(unittest.TestCase):
     Make sure the Json dump produces valid Json
     and has the expected structure
     """
-    def getJsonData(self, extra=[]):
-        args = ["--json"] + extra
+    def getJsonData(self, search=None, extra=[]):
+        if search:
+            args = ['--json-search', search]
+        else:
+            args = ['--json']
+        args.extend(extra)
         output = run_app(args)
         self.assertIn("**START JSON DATA**\n", output)
         self.assertIn("**END JSON DATA**\n", output)
@@ -104,31 +108,6 @@ class TestJSONBase(unittest.TestCase):
         self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
         self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
 
-    def getBlockSections(self, node):
-        return {c.path(): c for c in node.children(node_type=hit.NodeType.Section)}
-
-    def getBlockParams(self, node):
-        return {c.path(): c for c in node.children(node_type=hit.NodeType.Field)}
-
-    def getInputFileFormat(self, extra=[]):
-        """
-        Does a dump and uses the GetPotParser to parse the output.
-        """
-        args = ["--disable-refcount-printing", "--dump"] + extra
-        output = run_app(args)
-        self.assertIn("### START DUMP DATA ###\n", output)
-        self.assertIn("### END DUMP DATA ###\n", output)
-
-        output = output.split('### START DUMP DATA ###\n')[1]
-        output = output.split('### END DUMP DATA ###')[0]
-
-        self.assertNotEqual(len(output), 0)
-        root = pyhit.parse(output)
-        errors = list(Parser.checkDuplicates(root))
-        self.assertEqual(errors, [])
-        return root
-
-
 class TestFull(TestJSONBase):
     def testFullJson(self):
          """
@@ -147,7 +126,7 @@ class TestFull(TestJSONBase):
 class TestNoTestObjects(TestJSONBase):
     def testNoTestObjects(self):
         # Make sure test objects are removed from the output
-        all_data = self.getJsonData(["--disallow-test-objects"])
+        all_data = self.getJsonData(extra=["--disallow-test-objects"])
         self.assertIn("active", all_data["global"]["parameters"])
         data = all_data["blocks"]
         self.check_basic_json(data)
@@ -159,7 +138,7 @@ class TestSearch(TestJSONBase):
         """
         Make sure parameter search works
         """
-        all_data = self.getJsonData(["initial_marker"])
+        all_data = self.getJsonData(search="initial_marker")
         self.assertNotIn("global", all_data)
         data = all_data["blocks"]
         self.assertNotIn("Executioner", data)

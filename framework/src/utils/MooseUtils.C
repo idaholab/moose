@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <ctime>
 #include <cstdlib>
+#include <regex>
 
 // System includes
 #include <sys/stat.h>
@@ -224,6 +225,12 @@ trim(const std::string & str, const std::string & white_space)
     return ""; // no content
   const auto end = str.find_last_not_of(white_space);
   return str.substr(begin, end - begin + 1);
+}
+
+std::string
+removeExtraWhitespace(const std::string & input)
+{
+  return std::regex_replace(input, std::regex("^\\s+|\\s+$|\\s+(?=\\s)"), "");
 }
 
 bool
@@ -1063,6 +1070,23 @@ toLower(const std::string & name)
   std::string lower(name);
   std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
   return lower;
+}
+
+std::string
+stringJoin(const std::vector<std::string> & values, const std::string & separator)
+{
+  std::string combined;
+  for (const auto & value : values)
+    combined += value + separator;
+  if (values.size())
+    combined = combined.substr(0, combined.size() - separator.size());
+  return combined;
+}
+
+bool
+beginsWith(const std::string & value, const std::string & begin_value)
+{
+  return value.rfind(begin_value, 0) == 0;
 }
 
 ExecFlagEnum

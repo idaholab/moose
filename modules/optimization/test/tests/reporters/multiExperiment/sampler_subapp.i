@@ -20,8 +20,8 @@
     positions = '0 0 0
                  0 0 0
                  0 0 0'
-    cli_args = 'omega=2.0;
-                omega=3.0;
+    cli_args = 'omega=2.0
+                omega=3.0
                 omega=5.0'
   []
 []

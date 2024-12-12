@@ -37,13 +37,13 @@
     type = ElementGroupCentroidPositions
     block = '1 2'
     extra_id_name = 'assembly_id pin_id material_id'
-    extra_id = '0; 1 2 4 6; ;'
+    extra_id = '0; 1 2 4 6;'
     grouping_type = 'block_and_extra_id'
   []
   [three_ids]
     type = ElementGroupCentroidPositions
     extra_id_name = 'assembly_id pin_id material_id'
-    extra_id = '0; 1 2 4 6; ;'
+    extra_id = '0; 1 2 4 6;'
     grouping_type = 'extra_id'
   []
 []
