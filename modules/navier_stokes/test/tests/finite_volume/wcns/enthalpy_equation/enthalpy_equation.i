@@ -64,7 +64,7 @@ advected_interp_method = 'upwind'
   [h]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse 860.*1900.} # 1900 is an approx of cp(T)
+    initial_condition = ${fparse 860.*2416.} # 1900 is an approx of cp(T)
   []
 []
 
@@ -158,14 +158,14 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = h
     boundary = 'left'
-    functor = ${fparse 1900.*860.}
+    functor = h_from_p_T # ${fparse 1900.*860.}
   []
-  # [inlet_T]
-  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
-  #   variable = T
-  #   boundary = 'left'
-  #   functor = 860.
-  # []
+  [inlet_T]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    variable = T
+    boundary = 'left'
+    functor = 860.
+  []
 
   [walls-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -183,14 +183,14 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = h
     boundary = 'top bottom'
-    functor = ${fparse 1900. * 950}
+    functor = h_from_p_T # ${fparse 1900. * 950}
   []
-  # [walls_T]
-  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
-  #   variable = T
-  #   boundary = 'top bottom'
-  #   functor = 950.
-  # []
+  [walls_T]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    variable = T
+    boundary = 'top bottom'
+    functor = 950.
+  []
   [walls_p]
     type = LinearFVExtrapolatedPressureBC
     boundary = 'top bottom'
@@ -216,34 +216,23 @@ advected_interp_method = 'upwind'
     use_two_term_expansion = false
     boundary = 'right'
   []
-[]
-
-[UserObjects]
-  [read_recycling]
-    type = PropertyReadFile
-    prop_file_name = 'LaminarInletProfile.csv'
-    read_type = 'voronoi'
-    nprop = 9
-    execute_on = TIMESTEP_BEGIN
-    nvoronoi = 30
+  [outlet_u]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    variable = vel_x
+    use_two_term_expansion = false
+    boundary = right
   []
-[]
-
-[Functions]
-  [fully_developed_velocity]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_recycling'
-    read_type = 'voronoi'
-    column_number = '6'
+  [outlet_v]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    variable = vel_y
+    use_two_term_expansion = false
+    boundary = right
   []
 []
 
 [FluidProperties]
   [salt]
-    type = SalineMoltenSaltFluidProperties
-    comp_name = "LiF NaF KF"
-    comp_val = "0.465 0.115 0.42"
-    prop_def_file = "saline_custom.prp"
+    type = FlibeFluidProperties
   []
 []
 
@@ -261,7 +250,7 @@ advected_interp_method = 'upwind'
     type = ADParsedFunctorMaterial
     property_name = 'alpha'
     functor_names = 'k cp'
-    expression = 'k/cp'
+    expression = '100*k/cp'
   []
   [enthalpy_material]
     type = LinearFVEnthalpyFunctorMaterial
@@ -309,7 +298,7 @@ advected_interp_method = 'upwind'
   type = SIMPLE
   momentum_l_abs_tol = 1e-6
   pressure_l_abs_tol = 1e-6
-  energy_l_abs_tol = 1e-6
+  energy_l_abs_tol = 1e-8
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -319,11 +308,11 @@ advected_interp_method = 'upwind'
   energy_system = 'energy_system'
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.8
-  num_iterations = 1
+  energy_equation_relaxation = 0.7
+  num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-6
+  energy_absolute_tolerance = 1e-8
   print_fields = false
   momentum_l_max_its = 1000
 
@@ -335,10 +324,10 @@ advected_interp_method = 'upwind'
 
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
+  continue_on_max_its = true
 []
 
 [Outputs]
   exodus = true
-  execute_on = 'TIMESTEP_BEGIN NONLINEAR'
-
+  execute_on = 'TIMESTEP_BEGIN FINAL'
 []
