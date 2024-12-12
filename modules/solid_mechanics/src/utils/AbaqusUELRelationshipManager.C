@@ -75,10 +75,10 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
       // iterate over the NodeElements
       for (const auto nodeelem_id : elements[uel_elem_id].nodes)
       {
-        const auto elem = _mesh->elem_ptr(nodeelem_id);
-        mooseAssert(elem, "Element not found. Internal error");
-        if (elem->processor_id() != p)
-          coupled_elements.emplace(elem, nullptr);
+        const auto coupled_elem = _mesh->elem_ptr(nodeelem_id);
+        mooseAssert(coupled_elem, "Element not found. Internal error");
+        if (coupled_elem->processor_id() != p)
+          coupled_elements.emplace(coupled_elem, nullptr);
       }
   }
 }
