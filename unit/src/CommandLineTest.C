@@ -511,7 +511,7 @@ TEST(CommandLineTest, initSubAppCommandLine)
         "sub1:Kernels/active=foo"},
        "sub",
        "sub0",
-       {"--global", "some/value=123", "App/foo=bar", "Foo/bar=baz", "subsub0:val=5"});
+       {"--global", "some/value=123", "App/foo=bar", ":Foo/bar=baz", "subsub0:val=5"});
   test({"--unused", "--another_global"}, "sub", "sub1", {});
 }
 

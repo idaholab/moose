@@ -47,8 +47,7 @@ public:
     std::vector<std::string> raw_args;
     /// Whether or not this set of arguments was used
     bool used = false;
-    /// Whether or not this parameter is global (filled for moose params only)
-    /// Global means that it should be passed to MultiApps
+    /// Whether or not this parameter is global (passed to MultiApps)
     bool global = false;
     /// Whether or not this parameter is recognized as a HIT parameter
     bool hit_param = false;

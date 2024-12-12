@@ -105,7 +105,12 @@ CommandLine::parse()
     {
       auto & entry = add_entry(hit_path);
       if (subapp_prefix.size())
-        entry.subapp_name = subapp_name;
+      {
+        if (subapp_name.empty()) // :param=value; means apply to all
+          entry.global = true;
+        else
+          entry.subapp_name = subapp_name;
+      }
       entry.value = MooseUtils::removeExtraWhitespace(hit_value);
       entry.value_separator = "=";
       entry.raw_args.push_back(arg);
@@ -207,27 +212,21 @@ CommandLine::initSubAppCommandLine(const std::string & multiapp_name,
 
   // Pull out all of the arguments that are relevant to this multiapp from the parent
   for (auto & entry : as_range(std::next(getEntries().begin()), getEntries().end()))
-  {
-    // Apply all global parameters
-    if (entry.global)
-      subapp_args.insert(subapp_args.end(), entry.raw_args.begin(), entry.raw_args.end());
-    // Has a subapp name; see if it applies to this one and apply the parameters
-    else if (entry.subapp_name)
+    if (entry.global || (entry.subapp_name && (*entry.subapp_name == multiapp_name ||
+                                               *entry.subapp_name == subapp_name)))
     {
-      mooseAssert(entry.value, "Should have a value");
-
-      // We matched either the multiapp name (i.e., sub:...), subapp name (i.e., sub:...),
-      // or the global option (:...)
-      if (*entry.subapp_name == subapp_name || *entry.subapp_name == multiapp_name ||
-          entry.subapp_name->empty())
+      if (entry.hit_param)
       {
+        // Append : to the beginning if this is global and should be passed to all
+        const std::string prefix = entry.global ? ":" : "";
         // Apply the param, but without the subapp name
-        subapp_args.push_back(entry.name + *entry.value_separator + *entry.value);
+        subapp_args.push_back(prefix + entry.name + *entry.value_separator + *entry.value);
         // Mark this entry as used as a child has consumed it
         entry.used = true;
       }
+      else
+        subapp_args.insert(subapp_args.end(), entry.raw_args.begin(), entry.raw_args.end());
     }
-  }
 
   return std::make_unique<CommandLine>(subapp_args);
 }
