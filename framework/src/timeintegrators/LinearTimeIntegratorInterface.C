@@ -15,7 +15,6 @@
 
 LinearTimeIntegratorInterface::LinearTimeIntegratorInterface(SystemBase & system)
   : _linear_system(dynamic_cast<LinearSystem *>(&system)),
-    _integrates_linear_system(_linear_system),
     _linear_implicit_system(
         _linear_system ? dynamic_cast<LinearImplicitSystem *>(&_linear_system->system()) : nullptr)
 {

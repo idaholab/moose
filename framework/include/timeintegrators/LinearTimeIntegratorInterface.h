@@ -47,9 +47,6 @@ protected:
   /// Pointer to the linear system, can happen that we dont have any
   LinearSystem * _linear_system;
 
-  /// Boolean to check if it integrates a linear system
-  const bool _integrates_linear_system;
-
   /// Nonlinear implicit system, if applicable; otherwise, nullptr
   libMesh::LinearImplicitSystem * _linear_implicit_system;
 };

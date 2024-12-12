@@ -73,9 +73,6 @@ protected:
   /// Pointer to the nonlinear system, can happen that we dont have any
   NonlinearSystemBase * _nl;
 
-  /// Boolean to check if this integrator belongs to a nonlinear system
-  const bool _integrates_nl;
-
   /// libMesh nonlinear implicit system, if applicable; otherwise, nullptr
   libMesh::NonlinearImplicitSystem * _nonlinear_implicit_system;
 

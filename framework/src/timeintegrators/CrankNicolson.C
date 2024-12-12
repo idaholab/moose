@@ -78,7 +78,7 @@ CrankNicolson::init()
   u_dot.zero();
   computeDuDotDu();
 
-  if (_integrates_nl)
+  if (_nl)
   {
     // compute residual for the initial time step
     // Note: we can not directly pass _residual_old in computeResidualTag because
