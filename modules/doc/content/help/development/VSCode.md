@@ -53,7 +53,8 @@ Note that letters shown upper case in commands do not mean literal upper case. Y
 - +`Shift+Option+Drag Mouse`+ Rectangular text selection
 - +`Option+Repeated Clicks`+ Place multiple cursors (one per each click)
 - +`Cmd+S`+ Save current file
-- +`` Ctrl+` ``+ or +`Cmd+J`+ Open/close terminal
+- +`Cmd+J`+ Toggle terminal visibility
+- +`` Ctrl+` ``+ Toggles on terminal visibility if not currently visible. Switch focus to terminal if focus is elsewhere. If focus is already on terminal, toggles off terminal visibility
 - +`Cmd+1`+ Change focus to code editor
 - +`Cmd+\`+ Split screen vertically
 - +`Cmd+W`+ Close current file. If last file in split, then split will disappear
