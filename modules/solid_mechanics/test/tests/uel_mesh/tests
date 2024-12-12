@@ -1,0 +1,10 @@
+[Tests]
+  [mesh_only]
+    type = Exodiff
+    input = abaqus_uel_read.i
+    exodiff = abaqus_uel_read_in.e
+    issues = #29382
+    cli_args = '--mesh_only'
+    requirement = 'The system shall be able to load an Abaqus input file with UEL user elements.'
+  []
+[]
