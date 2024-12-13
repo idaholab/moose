@@ -1,8 +1,37 @@
-# NOTE:
-# This sqa_reports.yml file is a dummy in order to enable
-# documentation stub generation in MooseDocs without enabling
-# SQA itself. This file should be removed and re-generated if
-# full SQA compliance is desired.
 Applications:
     subchannel:
-        log_default: WARNING
+        exe_directory: ${MOOSE_DIR}/modules/subchannel
+        app_types:
+            - PorousFlowApp
+        content_directory: ${MOOSE_DIR}/modules/subchannel/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_stub_files: WARNING
+
+Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/subchannel_srs.md
+    software_design_description: sqa/subchannel_sdd.md
+    software_test_plan: sqa/subchannel_stp.md
+    requirements_traceability_matrix: sqa/subchannel_rtm.md
+    verification_validation_report: sqa/subchannel_vvr.md
+    failure_analysis_report: sqa/subchannel_far.md
+    software_library_list: sqa/subchannel_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+
+Requirements:
+    subchannel:
+        directories:
+            - ${MOOSE_DIR}/modules/subchannel
+        log_missing: WARNING

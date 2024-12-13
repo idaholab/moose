@@ -9,7 +9,7 @@ therefore ensuring stability and robustness.
 
 The test folder in SCM contains the suite of all problems that are used for regression and code coverage testing.
 The example folder in SCM contains various examples cases for how to use the code. This includes verification and validation cases as well as other examples.
-Finally, a list of publications supporting SCM development can be found [here](list_of_publications.md).
+Finally, a list of publications supporting SCM development can be found [here](publication_list.md).
 
 ## List of verification cases
 

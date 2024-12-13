@@ -1,0 +1,8 @@
+directories:
+    - ${MOOSE_DIR}/modules/subchannel/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/subchannel/doc/sqa_reports.yml
