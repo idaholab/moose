@@ -65,7 +65,7 @@ FindValueOnLine::FindValueOnLine(const InputParameters & parameters)
 void
 FindValueOnLine::initialize()
 {
-  // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
+  // We do this here just in case it's been destroyed and recreated because of mesh adaptivity.
   _pl = _mesh.getPointLocator();
   _pl->enable_out_of_mesh_mode();
 }
