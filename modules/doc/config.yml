@@ -55,6 +55,8 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/solid_properties/doc/content
     stochastic_tools:
         root_dir: ${MOOSE_DIR}/modules/stochastic_tools/doc/content
+    subchannel:
+        root_dir: ${MOOSE_DIR}/modules/subchannel/doc/content
     thermal_hydraulics:
         root_dir: ${MOOSE_DIR}/modules/thermal_hydraulics/doc/content
     xfem:
@@ -132,6 +134,7 @@ Extensions:
             fluid_properties: !include modules/fluid_properties/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
+            subchannel: !include modules/subchannel/doc/remove.yml
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
