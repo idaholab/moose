@@ -23,6 +23,10 @@ index, white is the fuel-pin index and red is the gap index.
     id=hindex
     caption=Triangular Lattice subchannel index notation, in a $3$ ring sub-assemly.
 
+In order for the user to print out the index notaion for subchannels and pins in a triangualar lattice arrangement they are invited to run the following Python script:
+
+!listing /scripts/Geometries_script.ipynb  language=python
+
 ## Pressure boundary condition caveat
 
 SCM's solver is designed to solve for relative pressure: $P_{relative} = P_{absolute} - P_{boundary}$, such that the relative pressure at the outlet boundary is zero. The pressure boundary condition is only explicitly used in the calculation of fluid properties. The user should be careful to initialize/set the pressure at the assembly outlet to zero (not setting it at all will also define the default value of zero).

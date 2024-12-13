@@ -1,31 +1,15 @@
 Content:
     - framework/doc/content
     - modules/subchannel/doc/content
-    - modules/fluid_properties/doc/content
-    - modules/heat_transfer/doc/content
-    - modules/ray_tracing/doc/content
-    - modules/reactor/doc/content
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE SubChannel Module
         repo: https://github.com/idaholab/moose
-        home: /modules/subchannel
-        # menu:
-        #     Getting Started:
-        #         Installation: getting_started/installation.md
-        #         Using SCM: getting_started/using_SubChannel.md
-        #         User Notes: getting_started/user_notes.md
-        #         SubChannel Theory: getting_started/subchannel_theory.md
-        #         List of Publications: getting_started/list_of_publications.md
-        #     Documentation:
-        #         SCM-only Syntax: syntax/subchannel_only.md
-        #         Complete Code Syntax: syntax/index.md
-        #     V&V:
-        #         Verification & Validation: v&v/v&v-list.md
-        #     Tutorial:
-        #         Tutorial Slides: main/index.md
+        home: /modules/subchannel/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/subchannel
         remove:
@@ -36,13 +20,17 @@ Extensions:
         includes:
             - framework/include
             - modules/subchannel/include
-            - modules/fluid_properties/include
-            - modules/heat_transfer/include
-            - modules/ray_tracing/include
-            - modules/reactor/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.template:
+        active: True
     MooseDocs.extensions.bibtex:
         duplicate_warning: False
+    MooseDocs.extensions.sqa:
+            active: True
+            reports: !include modules/subchannel/doc/sqa_reports.yml
+            categories:
+                framework: !include framework/doc/sqa_framework.yml
+                solid_mechanics: !include modules/subchannel/doc/sqa_subchannel.yml
