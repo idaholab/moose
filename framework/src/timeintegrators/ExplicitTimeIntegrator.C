@@ -54,15 +54,8 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     _ones = addVector("ones", false, PARALLEL);
 
-  // Petsc
-  const auto snes_options = Moose::PetscSupport::getCommonSNESFlags();
-  auto & petsc_options = _fe_problem.getPetscOptions();
-  for (const auto & flag : snes_options.items())
-  {
-    const auto & flag_name = flag.rawName();
-    if (!petsc_options.ignored_flags.contains(flag_name))
-      petsc_options.ignored_flags.setAdditionalValue(flag_name);
-  }
+  // ignore all common SNES-related petsc options to prevent unused option warnings
+  Moose::PetscSupport::ignoreCommonSNESOptions(_fe_problem);
 }
 
 void

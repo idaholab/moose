@@ -38,7 +38,10 @@ namespace PetscSupport
 class PetscOptions
 {
 public:
-  PetscOptions() : flags("", "", true), ignored_flags("", "", true) {}
+  PetscOptions()
+    : flags("", "", true), ignored_options("", "", true), user_set_options("", "", true)
+  {
+  }
 
   /// PETSc key-value pairs
   std::vector<std::pair<std::string, std::string>> pairs;
@@ -47,7 +50,10 @@ public:
   MultiMooseEnum flags;
 
   /// Flags to explicitly not set, even if they are specified in flags
-  MultiMooseEnum ignored_flags;
+  MultiMooseEnum ignored_options;
+
+  /// Options that are set by the user at the input level
+  MultiMooseEnum user_set_options;
 
   /// Preconditioner description
   std::string pc_description;
@@ -190,6 +196,15 @@ void setSinglePetscOption(const std::string & name,
                           const std::string & value = "",
                           FEProblemBase * const problem = nullptr);
 
+/**
+Same as setSinglePetscOption, but does not set the option if it belongs to the given list of
+ignored options.
+*/
+void setSinglePetscOptionIfNotIgnored(const MultiMooseEnum & ignored_options,
+                                      const std::string & name,
+                                      const std::string & value = "",
+                                      FEProblemBase * const problem = nullptr);
+
 void addPetscOptionsFromCommandline();
 
 /**
@@ -220,14 +235,6 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 void disablePetscFlag(const std::string & flag, PetscOptions & petsc_options);
 
 /**
- * disable "ignored" petsc flags
- * @param ignored_petsc_flags Container holding the flags of the petsc options to be ignored
- * @param petsc_options Data structure which handles petsc options within moose
- */
-void disableIgnoredPetscFlags(const MultiMooseEnum & ignored_petsc_flags,
-                              PetscOptions & petsc_options);
-
-/**
  * disable printing of the nonlinear convergence reason
  */
 void disableNonlinearConvergedReason(FEProblemBase & fe_problem);
@@ -240,12 +247,12 @@ void disableLinearConvergedReason(FEProblemBase & fe_problem);
 /**
  * disable common ksp flags
  */
-void disableCommonKSPFlags(FEProblemBase & fe_problem);
+void ignoreCommonKSPOptions(FEProblemBase & fe_problem);
 
 /**
  * disable common snes flags
  */
-void disableCommonSNESFlags(FEProblemBase & fe_problem);
+void ignoreCommonSNESOptions(FEProblemBase & fe_problem);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }
