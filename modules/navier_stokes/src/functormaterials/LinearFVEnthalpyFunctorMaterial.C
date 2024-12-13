@@ -59,7 +59,8 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
   {
     addFunctorProperty<Real>("h_from_p_T",
                                 [this](const auto & r, const auto & t) -> Real
-                                { return _fluid->h_from_p_T(raw_value(_pressure(r, t)), raw_value(_T_fluid(r, t))); });
+                                {
+                                  return _fluid->h_from_p_T(raw_value(_pressure(r, t)), raw_value(_T_fluid(r, t))); });
     addFunctorProperty<Real>("T_from_p_h",
                                 [this](const auto & r, const auto & t) -> Real
                                 { return _fluid->T_from_p_h(raw_value(_pressure(r, t)), raw_value(_h(r, t))); });
