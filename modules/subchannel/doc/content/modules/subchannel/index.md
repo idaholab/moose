@@ -1,5 +1,3 @@
-!config navigation breadcrumbs=False scrollspy=False
-
 # SCM class=center style=font-weight:600;font-size:350%
 
 !style halign=center
@@ -7,13 +5,16 @@ SCM is a Subchannel Module for performing reactor core, single-phase thermal-hyd
 subchannel simulations, for bare rod, square lattice bundles or wire-wrapped/bare rod, triangular lattice bundles. It can model water cooled or metal cooled (lead, sodium, LBE) bundles. It is based on the [MOOSE framework](https://mooseframework.inl.gov), and builds on the framework and modules for many of its capabilities.
 
 !row!
-!col! small=12 medium=4 large=4 icon=get_app
 
-## [Getting Started](modules/subchannel/getting_started/installation.md) class=center style=font-weight:200;font-size:150%
+!col! small=12 medium=4 large=4 icon=school
 
-!style halign=center
-Quickly learn how to obtain the SCM source code, compile an executable, and
-run simulations with the instructions found [here](getting_started/installation.md).
+## General Information class=center style=font-weight:200;
+
+Familiarize yourself with the theory behind SCM and some important user notes. Browse through the following information:
+
+- [Theory](theory/subchannel_theory.md)
+- [User Notes](theory/user_notes.md)
+- [Publication List](theory/publication_list.md)
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=settings
@@ -23,7 +24,7 @@ run simulations with the instructions found [here](getting_started/installation.
 !style halign=center
 SCM provides capabilities that can be applied to a wide variety of problems.
 The Code Reference provides detailed documentation of specific code features.
-General user notes on SCM can also be found [here](getting_started/user_notes.md).
+General user notes on SCM can also be found [here](theory/user_notes.md).
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=assessment

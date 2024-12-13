@@ -242,6 +242,18 @@ Applications:
             - framework/doc/unregister.yml
         log_stub_files: WARNING
 
+    subchannel:
+        exe_directory: modules/combined
+        app_types:
+            - SubChannelApp
+        content_directory: modules/subchannel/doc/content
+        remove:
+            - framework/doc/remove.yml
+            - modules/subchannel/doc/remove.yml
+        unregister:
+            - framework/doc/unregister.yml
+        log_stub_files: WARNING
+
     THM:
         exe_directory: modules/combined
         app_types:
@@ -418,6 +430,11 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING
+
+    subchannel:
+        directories:
+            - modules/subchannel
+        log_missing: WARNING
 
     thermal_hydraulics:
         directories:
