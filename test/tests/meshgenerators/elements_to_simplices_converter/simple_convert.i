@@ -16,4 +16,7 @@
     type = ElementsToSimplicesConverter
     input = block_1
   []
+
+  # Simplices conversion currently depends on element id numbering
+  allow_renumbering = false
 []

@@ -19,4 +19,7 @@
     type = ElementsToSimplicesConverter
     input = extrude
   []
+
+  # Simplices conversion currently depends on element id numbering
+  allow_renumbering = false
 []
