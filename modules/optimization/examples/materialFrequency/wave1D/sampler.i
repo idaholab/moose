@@ -22,9 +22,9 @@
                  0 0 0
                  0 0 0
                  0 0 0'
-    cli_args = 'id=1;frequencyHz=1.0;
-                id=2;frequencyHz=2.0;
-                id=3;frequencyHz=3.0;
+    cli_args = 'id=1;frequencyHz=1.0
+                id=2;frequencyHz=2.0
+                id=3;frequencyHz=3.0
                 id=4;frequencyHz=4.0'
   []
 []

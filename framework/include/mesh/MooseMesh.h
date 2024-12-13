@@ -995,6 +995,11 @@ public:
    */
   void setParallelType(ParallelType parallel_type);
 
+  /**
+   * @return The parallel type
+   */
+  ParallelType getParallelType() const { return _parallel_type; }
+
   /*
    * Set/Get the partitioner name
    */

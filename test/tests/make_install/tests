@@ -92,12 +92,13 @@
 
     [run]
       type = 'RunApp'
-      cli_args = "--run"
+      cli_args = "--run '-v -t --no-color'"
       working_directory = "../../../make_install_test/moose_test/tests"
       no_additional_cli_args = True
       installation_type = IN_TREE
       max_parallel = 1
       prereq = 'test_copy_install/link_exec_installed'
+      expect_out = 'version.print_version_long:(.*)2 passed, 0 skipped, 0 failed'
 
       detail = 'able to successfully launch the TestHarness using a MOOSE-based binary;'
     []

@@ -31,7 +31,9 @@ void
 SplitMeshAction::act()
 {
   auto mesh = _app.actionWarehouse().mesh();
-  auto split_file_arg = _app.parameters().get<std::string>("split_file");
+  const std::string split_file_arg = _app.parameters().isParamSetByUser("split_file")
+                                         ? _app.parameters().get<std::string>("split_file")
+                                         : "";
 
   if (mesh->getFileName() == "" && split_file_arg == "")
     mooseError("Output mesh file name must be specified (with --split-file) when splitting "

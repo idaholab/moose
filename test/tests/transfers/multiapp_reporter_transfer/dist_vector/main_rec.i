@@ -37,9 +37,9 @@
     input_files = 'sub.i'
     positions_objects = elem
     execute_on = TIMESTEP_END
-    cli_args = 'Reporters/from_main_rep/real_vector_values="0 1";Reporters/from_main_rep/real_values=0;
-    Reporters/from_main_rep/real_vector_values="-10";Reporters/from_main_rep/real_values=-5;
-    Reporters/from_main_rep/real_vector_values="100 -100 -200";Reporters/from_main_rep/real_values=3.33;
+    cli_args = 'Reporters/from_main_rep/real_vector_values="0 1";Reporters/from_main_rep/real_values=0
+    Reporters/from_main_rep/real_vector_values="-10";Reporters/from_main_rep/real_values=-5
+    Reporters/from_main_rep/real_vector_values="100 -100 -200";Reporters/from_main_rep/real_values=3.33
     Reporters/from_main_rep/real_vector_values="5.55 5.55 5.55 5.55";Reporters/from_main_rep/real_values=7'
 
   []

@@ -77,13 +77,16 @@ class SubmoduleHashCommand(command.CommandComponent):
             check_dir = MooseDocs.ROOT_DIR
 
         status = mooseutils.git_submodule_info(check_dir, '--recursive')
-        for repo, ginfo in status.items():
+        sorted_items = sorted(list(status), key=len)
+        for repo in sorted_items:
             if repo.endswith(name):
                 url = settings['url']
                 if url is None:
-                    core.Word(parent, content=ginfo[1])
+                    core.Word(parent, content=status[repo][1])
                 else:
-                    core.Link(parent, url=f"{url.rstrip('/')}/{ginfo[1]}", string=ginfo[1])
+                    core.Link(parent,
+                              url=f"{url.rstrip('/')}/{status[repo][1]}",
+                              string=status[repo][1])
                 return parent
 
         msg = "The submodule '{}' was not located, the available submodules are: {}"

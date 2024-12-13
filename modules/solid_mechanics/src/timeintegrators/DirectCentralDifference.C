@@ -90,35 +90,35 @@ DirectCentralDifference::solve()
   _nonlinear_implicit_system->update();
 
   // Calculating the lumped mass matrix for use in residual calculation
-  mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+  mass_matrix.vector_mult(*_mass_matrix_diag, *_ones);
 
   // Compute the residual
-  _explicit_residual.zero();
+  _explicit_residual->zero();
   _fe_problem.computeResidual(
-      *_nonlinear_implicit_system->current_local_solution, _explicit_residual, _nl.number());
+      *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
 
   // Move the residual to the RHS
-  _explicit_residual *= -1.0;
+  *_explicit_residual *= -1.0;
 
   // Perform the linear solve
   bool converged = performExplicitSolve(mass_matrix);
-  _nl.overwriteNodeFace(*_nonlinear_implicit_system->solution);
+  _nl->overwriteNodeFace(*_nonlinear_implicit_system->solution);
 
   // Update the solution
-  *_nonlinear_implicit_system->solution = _nl.solutionOld();
-  *_nonlinear_implicit_system->solution += _solution_update;
+  *_nonlinear_implicit_system->solution = _nl->solutionOld();
+  *_nonlinear_implicit_system->solution += *_solution_update;
 
   _nonlinear_implicit_system->update();
 
-  _nl.setSolution(*_nonlinear_implicit_system->current_local_solution);
+  _nl->setSolution(*_nonlinear_implicit_system->current_local_solution);
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 }
 
 void
 DirectCentralDifference::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
+  residual += *_Re_time;
+  residual += *_Re_non_time;
   residual.close();
 
   // Reset time to the time at which to evaluate nodal BCs, which comes next
@@ -131,10 +131,10 @@ DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
   bool converged = false;
 
   // "Invert" the diagonal mass matrix
-  _mass_matrix_diag.reciprocal();
+  _mass_matrix_diag->reciprocal();
   // Calculate acceleration
   auto & accel = *_sys.solutionUDotDot();
-  accel.pointwise_mult(_mass_matrix_diag, _explicit_residual);
+  accel.pointwise_mult(*_mass_matrix_diag, *_explicit_residual);
 
   // Scaling the acceleration
   auto accel_scaled = accel.clone();
@@ -147,11 +147,11 @@ DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
   vel = *old_vel->clone();
   vel += *accel_scaled;
 
-  _solution_update = vel;
-  _solution_update.scale(_dt);
+  *_solution_update = vel;
+  _solution_update->scale(_dt);
 
   // Check for convergence by seeing if there is a nan or inf
-  auto sum = _solution_update.sum();
+  auto sum = _solution_update->sum();
   converged = std::isfinite(sum);
 
   // The linear iteration count remains zero

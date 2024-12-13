@@ -37,7 +37,7 @@ class TestAverageTriangles(unittest.TestCase):
 
 class TestHarmonicQuads(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('diffusion.i', 4, 'FVKernels/diff/coeff_interp_method=harmonic Mesh/gen_mesh/elem_type=QUAD')
+        df1 = mms.run_spatial('diffusion.i', 4, 'FVKernels/diff/coeff_interp_method=harmonic', 'Mesh/gen_mesh/elem_type=QUAD')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -53,7 +53,7 @@ class TestHarmonicQuads(unittest.TestCase):
 
 class TestAverageQuads(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('diffusion.i', 5, 'FVKernels/diff/coeff_interp_method=average Mesh/gen_mesh/elem_type=QUAD')
+        df1 = mms.run_spatial('diffusion.i', 5, 'FVKernels/diff/coeff_interp_method=average', 'Mesh/gen_mesh/elem_type=QUAD')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

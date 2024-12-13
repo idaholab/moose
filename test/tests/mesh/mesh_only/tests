@@ -24,17 +24,6 @@
     requirement = 'The system shall print out information about the mesh when writing out the mesh and avoid emitting petsc warnings in mesh-only mode.'
   []
 
-  [mesh_only_warning]
-    type = RunApp
-    input = 'mesh_only.i'
-    # Intentional error (not a mesh filename)
-    cli_args = '--mesh-only Outputs/exodus=false'
-    allow_warnings = true
-    expect_out = 'The --mesh-only option should be followed by a file name.'
-    issues = '#1568'
-    requirement = 'The system shall warn when using --mesh-only and there is no clear filename to use'
-  []
-
   [output_dimension_override]
     type = 'Exodiff'
     input = 'output_dimension_override.i'

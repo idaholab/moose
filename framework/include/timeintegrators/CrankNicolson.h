@@ -45,7 +45,7 @@ protected:
 
   virtual Real duDotDuCoeff() const override;
 
-  NumericVector<Number> & _residual_old;
+  NumericVector<Number> * _residual_old;
 };
 
 template <typename T, typename T2>

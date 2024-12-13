@@ -1095,6 +1095,7 @@ public:
   const std::vector<T *> & getInterfaceObjects() const;
 
   static void addAppParam(InputParameters & params);
+  static void addInputParam(InputParameters & params);
 
 protected:
   /**

@@ -42,22 +42,7 @@ MeshOnlyAction::act()
   // Print information about the mesh
   _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2) << std::endl;
 
-  bool should_generate = false;
-
-  // If no argument specified or if the argument following --mesh-only starts
-  // with a dash, try to build an output filename based on the input mesh filename.
-  if (mesh_file.empty() || (mesh_file[0] == '-'))
-    should_generate = true;
-  // There's something following the --mesh-only flag, let's make an attempt to validate it.
-  // If we don't find a '.' or we DO find an equals sign, chances are this is not a file!
-  else if ((mesh_file.find('.') == std::string::npos || mesh_file.find('=') != std::string::npos))
-  {
-    mooseWarning("The --mesh-only option should be followed by a file name. Move it to the end of "
-                 "your CLI args or follow it by another \"-\" argument.");
-    should_generate = true;
-  }
-
-  if (should_generate)
+  if (mesh_file.empty())
   {
     mesh_file = _app.builder().getPrimaryFileName();
     size_t pos = mesh_file.find_last_of('.');

@@ -20,6 +20,7 @@
 #include "ExecFlagEnum.h"
 #include "JsonSyntaxTree.h"
 #include "FileLineInfo.h"
+#include "CommandLine.h"
 #include "pcrecpp.h"
 #include "hit/hit.h"
 #include "wasphit/HITInterpreter.h"
@@ -58,16 +59,20 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
   // copy parent application parameters and modify to set up input check
-  InputParameters app_params = AppFactory::instance().getValidParams(_moose_app.type());
-  app_params.applyParameters(_moose_app.parameters());
-  app_params.set<bool>("check_input") = true;
-  app_params.set<bool>("error_unused") = true;
-  app_params.set<bool>("error") = true;
-  app_params.set<std::string>("color") = "off";
-  app_params.set<bool>("disable_perf_graph_live") = true;
+  InputParameters app_params = _moose_app.parameters();
   app_params.set<std::shared_ptr<Parser>>("_parser") =
       std::make_shared<Parser>(parse_file_path, document_text);
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _moose_app.commandLine();
+
+  auto command_line = std::make_unique<CommandLine>(_moose_app.commandLine()->getArguments());
+  if (command_line->hasArgument("--language-server"))
+    command_line->removeArgument("--language-server");
+  command_line->addArgument("--check-input");
+  command_line->addArgument("--error-unused");
+  command_line->addArgument("--error");
+  command_line->addArgument("--color=off");
+  command_line->addArgument("--disable-perf-graph-live");
+  command_line->parse();
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
 
   // create new application with parameters modified for input check run
   _check_apps[document_path] = AppFactory::instance().createShared(

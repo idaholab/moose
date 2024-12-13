@@ -22,8 +22,7 @@ CrankNicolson::validParams()
 }
 
 CrankNicolson::CrankNicolson(const InputParameters & parameters)
-  : TimeIntegrator(parameters),
-    _residual_old(_nl.addVector("residual_old", false, libMesh::GHOSTED))
+  : TimeIntegrator(parameters), _residual_old(addVector("residual_old", false, libMesh::GHOSTED))
 {
 }
 
@@ -79,17 +78,20 @@ CrankNicolson::init()
   u_dot.zero();
   computeDuDotDu();
 
-  // compute residual for the initial time step
-  // Note: we can not directly pass _residual_old in computeResidualTag because
-  //       the function will call postResidual, which will cause _residual_old
-  //       to be added on top of itself prohibited by PETSc.
-  //       Objects executed on initial have been executed by FEProblem,
-  //       so we can and should directly call NonlinearSystem residual evaluation.
-  _fe_problem.setCurrentResidualVectorTags({_nl.nonTimeVectorTag()});
-  _nl.computeResidualTag(_nl.RHS(), _nl.nonTimeVectorTag());
-  _fe_problem.clearCurrentResidualVectorTags();
+  if (_nl)
+  {
+    // compute residual for the initial time step
+    // Note: we can not directly pass _residual_old in computeResidualTag because
+    //       the function will call postResidual, which will cause _residual_old
+    //       to be added on top of itself prohibited by PETSc.
+    //       Objects executed on initial have been executed by FEProblem,
+    //       so we can and should directly call NonlinearSystem residual evaluation.
+    _fe_problem.setCurrentResidualVectorTags({_nl->nonTimeVectorTag()});
+    _nl->computeResidualTag(_nl->RHS(), _nl->nonTimeVectorTag());
+    _fe_problem.clearCurrentResidualVectorTags();
 
-  copyVector(_nl.RHS(), _residual_old);
+    copyVector(_nl->RHS(), *_residual_old);
+  }
 }
 
 void
@@ -99,7 +101,7 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
   // and that's probably a good idea with earlier versions too, but
   // we don't always get here with _Re_time closed.
   std::vector<unsigned char> inputs_closed = {
-      _Re_time.closed(), _Re_non_time.closed(), _residual_old.closed()};
+      _Re_time->closed(), _Re_non_time->closed(), _residual_old->closed()};
 
   // We might have done work on one processor but not all processors,
   // so we have to sync our closed() checks.  Congrats to the BISON
@@ -107,38 +109,38 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
   comm().min(inputs_closed);
 
   if (!inputs_closed[0])
-    _Re_time.close();
+    _Re_time->close();
   if (!inputs_closed[1])
-    _Re_non_time.close();
+    _Re_non_time->close();
   if (!inputs_closed[2])
-    _residual_old.close();
+    _residual_old->close();
 
   if (!_var_restriction)
   {
-    residual += _Re_time;
-    residual += _Re_non_time;
-    residual += _residual_old;
+    residual += *_Re_time;
+    residual += *_Re_non_time;
+    residual += *_residual_old;
   }
   else
   {
     auto residual_sub = residual.get_subvector(_local_indices);
-    auto re_time_sub = _Re_time.get_subvector(_local_indices);
-    auto re_non_time_sub = _Re_non_time.get_subvector(_local_indices);
-    auto residual_old_sub = _residual_old.get_subvector(_local_indices);
+    auto re_time_sub = _Re_time->get_subvector(_local_indices);
+    auto re_non_time_sub = _Re_non_time->get_subvector(_local_indices);
+    auto residual_old_sub = _residual_old->get_subvector(_local_indices);
     *residual_sub += *re_time_sub;
     *residual_sub += *re_non_time_sub;
     *residual_sub += *residual_old_sub;
     residual.restore_subvector(std::move(residual_sub), _local_indices);
-    _Re_time.restore_subvector(std::move(re_time_sub), _local_indices);
-    _Re_non_time.restore_subvector(std::move(re_non_time_sub), _local_indices);
-    _residual_old.restore_subvector(std::move(residual_old_sub), _local_indices);
+    _Re_time->restore_subvector(std::move(re_time_sub), _local_indices);
+    _Re_non_time->restore_subvector(std::move(re_non_time_sub), _local_indices);
+    _residual_old->restore_subvector(std::move(residual_old_sub), _local_indices);
   }
 }
 
 void
 CrankNicolson::postStep()
 {
-  copyVector(_Re_non_time, _residual_old);
+  copyVector(*_Re_non_time, *_residual_old);
 }
 
 Real

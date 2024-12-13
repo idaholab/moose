@@ -53,7 +53,11 @@ class TestHITBase(unittest.TestCase):
         """
         Does a dump and uses the GetPotParser to parse the output.
         """
-        args = ["--disable-refcount-printing", "--dump"] + extra
+        args = ["--disable-refcount-printing"]
+        if extra:
+            args.extend(["--dump-search"] + extra)
+        else:
+            args.append('--dump')
         output = run_app(args)
         self.assertIn("### START DUMP DATA ###\n", output)
         self.assertIn("### END DUMP DATA ###\n", output)

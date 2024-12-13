@@ -1,9 +1,9 @@
 [Tests]
   design = 'ImplicitEuler.md'
-  issues = '#1953'
+  issues = '#1953 #29149'
 
   [group]
-    requirement = "The system shall support the use of an implicit Euler solver with"
+    requirement = "The system shall support the use of an implicit Euler solver "
 
     [test]
       type = 'Exodiff'
@@ -11,7 +11,7 @@
       exodiff = 'ie_out.e'
       use_old_floor = true
       abs_zero = 1e-9
-      detail = "with and"
+      detail = "without and"
     []
 
     [adapt]
@@ -19,8 +19,17 @@
       input = 'ie_adapt.i'
       exodiff = 'ie_adapt_out.e-s005'
       group = 'adaptive'
-      detail = "without mesh adaptivity."
+      detail = "with mesh adaptivity."
     []
+  []
+
+  [linearfv]
+    type = 'Exodiff'
+    input = 'ie-linearfv.i'
+    exodiff = 'ie-linearfv_out.e'
+    abs_zero = 1e-9
+    requirement = "The system shall be able to use implicit euler time integration with linear FV spatial discretization."
+    max_threads = 1
   []
 
   [monomials]

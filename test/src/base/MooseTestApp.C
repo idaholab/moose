@@ -28,29 +28,29 @@ MooseTestApp::validParams()
   // Flag for testing MooseApp::getRestartableDataMap error message
   params.addCommandLineParam<bool>("test_getRestartableDataMap_error",
                                    "--test_getRestartableDataMap_error",
-                                   false,
                                    "Call getRestartableDataMap with a bad name.");
 
   // Flag for turning how EigenProblem output eigenvalues
   params.addCommandLineParam<bool>("output_inverse_eigenvalue",
                                    "--output-inverse-eigenvalue",
-                                   false,
                                    "True to let EigenProblem output inverse eigenvalue.");
 
   /* MooseTestApp is special because it will have its own
    * binary and we want the default to allow test objects.
    */
   params.suppressParameter<bool>("allow_test_objects");
-  params.addCommandLineParam<bool>("disallow_test_objects",
-                                   "--disallow-test-objects",
-                                   false,
-                                   "Don't register test objects and syntax");
+  params.addCommandLineParam<bool>(
+      "disallow_test_objects", "--disallow-test-objects", "Don't register test objects and syntax");
+
+  params.addCommandLineParam<Real>(
+      "output_wall_time_interval",
+      "--output-wall-time-interval <sec>",
+      "The target wall time interval at which to write to output; for testing");
 
   params.addCommandLineParam<bool>(
       "test_check_legacy_params",
       "--test-check-legacy-params",
-      false,
-      "True to test checking for legacy parameter construction with CheckLegacyParamsAction");
+      "Check for legacy parameter construction with CheckLegacyParamsAction; for testing");
 
   params.set<bool>("automatic_automatic_scaling") = false;
   params.set<bool>("use_legacy_material_output") = false;
@@ -86,6 +86,19 @@ MooseTestApp::executeExecutioner()
 #endif
 
   MooseApp::executeExecutioner();
+}
+
+void
+MooseTestApp::setupOptions()
+{
+  MooseApp::setupOptions();
+
+  if (isParamValid("output_wall_time_interval"))
+  {
+    const auto output_wall_time_interval = getParam<Real>("output_wall_time_interval");
+    if (output_wall_time_interval <= 0)
+      mooseError("--output-wall-time-interval must be greater than zero.");
+  }
 }
 
 std::string
