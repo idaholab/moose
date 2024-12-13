@@ -10,7 +10,7 @@
 #include "DiffusionFluxFVAux.h"
 #include "Assembly.h"
 
-registerMooseObject("MooseApp", DiffusionFluxFVAux);
+registerMooseObject("SubChannelApp", DiffusionFluxFVAux);
 
 InputParameters
 DiffusionFluxFVAux::validParams()

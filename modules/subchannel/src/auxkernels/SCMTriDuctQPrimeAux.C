@@ -9,7 +9,7 @@
 
 #include "SCMTriDuctQPrimeAux.h"
 
-registerMooseObject("MooseApp", SCMTriDuctQPrimeAux);
+registerMooseObject("SubChannelApp", SCMTriDuctQPrimeAux);
 
 InputParameters
 SCMTriDuctQPrimeAux::validParams()
