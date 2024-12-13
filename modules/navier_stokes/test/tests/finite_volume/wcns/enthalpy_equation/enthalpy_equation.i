@@ -1,5 +1,5 @@
-H = 0.05 #halfwidth of the channel, 10 cm of channel height
-L = 30
+H = 0.015 #halfwidth of the channel, 10 cm of channel height
+L = 3
 bulk_u = 0.01
 p_ref = 101325.0
 #inlet_temp = 860.
@@ -15,18 +15,9 @@ advected_interp_method = 'upwind'
     xmax = ${L}
     ymin = -${H}
     ymax = ${H}
-    nx = 200
-    ny = 80
-    #bias_y = 0.95
+    nx = 100
+    ny = 30
   []
-[]
-
-[GlobalParams]
-  rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
-  #velocity_interp_method = 'rc'
-  u = vel_x
-  v = vel_y
 []
 
 [Problem]
@@ -64,7 +55,7 @@ advected_interp_method = 'upwind'
   [h]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse 860.*2416.} # 1900 is an approx of cp(T)
+    initial_condition = 44000 # 1900 is an approx of cp(T)
   []
 []
 
@@ -83,7 +74,7 @@ advected_interp_method = 'upwind'
   []
   [T]
     type = MooseLinearVariableFVReal
-    initial_condition = 860.
+    initial_condition = 777.
   []
 []
 
@@ -95,6 +86,10 @@ advected_interp_method = 'upwind'
     mu = 'mu'
     momentum_component = 'x'
     use_nonorthogonal_correction = false
+    advected_interp_method = ${advected_interp_method}
+    rhie_chow_user_object = 'rc'
+    u = vel_x
+    v = vel_y
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -109,6 +104,10 @@ advected_interp_method = 'upwind'
     mu = 'mu'
     momentum_component = 'y'
     use_nonorthogonal_correction = false
+    advected_interp_method = ${advected_interp_method}
+    rhie_chow_user_object = 'rc'
+    u = vel_x
+    v = vel_y
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -138,6 +137,8 @@ advected_interp_method = 'upwind'
   [temp_advection]
     type = LinearFVEnergyAdvection
     variable = h
+    advected_interp_method = ${advected_interp_method}
+    rhie_chow_user_object = 'rc'
   []
 []
 
@@ -232,7 +233,8 @@ advected_interp_method = 'upwind'
 
 [FluidProperties]
   [salt]
-    type = FlibeFluidProperties
+    # type = FlibeFluidProperties
+    type = LeadFluidProperties
   []
 []
 
@@ -250,7 +252,7 @@ advected_interp_method = 'upwind'
     type = ADParsedFunctorMaterial
     property_name = 'alpha'
     functor_names = 'k cp'
-    expression = '100*k/cp'
+    expression = 'k/cp'
   []
   [enthalpy_material]
     type = LinearFVEnthalpyFunctorMaterial
@@ -308,8 +310,8 @@ advected_interp_method = 'upwind'
   energy_system = 'energy_system'
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.7
-  num_iterations = 1000
+  energy_equation_relaxation = 0.9
+  num_iterations = 200
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   energy_absolute_tolerance = 1e-8
