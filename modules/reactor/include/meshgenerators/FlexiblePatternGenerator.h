@@ -74,10 +74,14 @@ protected:
   // PolygonMeshGeneratorBase::INTRINSIC_SIDESET_ID::OUTER_SIDESET_ID) from the inputs
   const bool _delete_default_external_boundary_from_inputs;
 
-  /// Name of the extra element id to be assigned to distinguish each unit mesh
-  const std::string _unit_mesh_id_name;
-  /// Shift value to be added to the extra element id to distinguish each unit mesh
-  const dof_id_type _unit_mesh_id_shift;
+  /// Name of the extra element id to be assigned to distinguish component unit cell meshes
+  const ExtraElementIDName _cell_id_name;
+  /// Shift value to be added to the extra element id to distinguish component unit cell meshes
+  const dof_id_type _cell_id_shift;
+  /// Name of the extra element id to be assigned to distinguish input unit meshes
+  const ExtraElementIDName _pattern_id_name;
+  /// Shift value to be added to the extra element id to distinguish input unit meshes
+  const dof_id_type _pattern_id_shift;
 
   /// Boundary ID of the external boundary
   const boundary_id_type _external_boundary_id;

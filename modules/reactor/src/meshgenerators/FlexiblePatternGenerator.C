@@ -129,14 +129,25 @@ FlexiblePatternGenerator::validParams()
                         true,
                         "Whether to delete the default external boundary from the input meshes.");
 
-  params.addParam<std::string>(
-      "unit_mesh_id_name",
-      "The name of the extra element id to be assigned to the unit meshes used for patterning.");
+  params.addParam<ExtraElementIDName>(
+      "cell_id_name",
+      "The name of the extra element id to be assigned for each component "
+      "unit mesh in sequential order.");
 
-  params.addParam<dof_id_type>("unit_mesh_id_shift",
-                               0,
-                               "The shift value to be added to the unit mesh id to avoid conflicts "
-                               "with ids in other meshes.");
+  params.addParam<dof_id_type>(
+      "cell_id_shift",
+      0,
+      "The shift value to be added to the cell id to avoid conflicts with ids in other meshes.");
+
+  params.addParam<ExtraElementIDName>(
+      "pattern_id_name",
+      "The name of the extra element id to be assigned based on the ID of "
+      "the input meshes in sequential order.");
+
+  params.addParam<dof_id_type>(
+      "pattern_id_shift",
+      0,
+      "The shift value to be added to the pattern id to avoid conflicts with ids in other meshes.");
 
   params.addClassDescription("This FlexiblePatternGenerator object is designed to generate a "
                              "mesh with a background region with dispersed unit meshes in "
@@ -160,6 +171,8 @@ FlexiblePatternGenerator::validParams()
       "boundary_type boundary_mesh boundary_sectors boundary_size "
       "delete_default_external_boundary_from_inputs external_boundary_id external_boundary_name",
       "Boundary");
+  params.addParamNamesToGroup("cell_id_name cell_id_shift pattern_id_name pattern_id_shift",
+                              "Reporting Id Parameters");
 
   return params;
 }
@@ -216,10 +229,13 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
                                    : SubdomainName()),
     _delete_default_external_boundary_from_inputs(
         getParam<bool>("delete_default_external_boundary_from_inputs")),
-    _unit_mesh_id_name(isParamValid("unit_mesh_id_name")
-                           ? getParam<std::string>("unit_mesh_id_name")
-                           : std::string()),
-    _unit_mesh_id_shift(getParam<dof_id_type>("unit_mesh_id_shift")),
+    _cell_id_name(isParamValid("cell_id_name") ? getParam<ExtraElementIDName>("cell_id_name")
+                                               : ExtraElementIDName()),
+    _cell_id_shift(getParam<dof_id_type>("cell_id_shift")),
+    _pattern_id_name(isParamValid("pattern_id_name")
+                         ? getParam<ExtraElementIDName>("pattern_id_name")
+                         : ExtraElementIDName()),
+    _pattern_id_shift(getParam<dof_id_type>("pattern_id_shift")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : (boundary_id_type)OUTER_SIDESET_ID),
@@ -230,11 +246,14 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 {
   declareMeshesForSub("inputs");
 
-  if (_unit_mesh_id_name.empty() && isParamSetByUser("unit_mesh_id_name"))
-    paramError("unit_mesh_id_name", "This parameter must be non empty if provided.");
-  if (_unit_mesh_id_name.empty() && isParamSetByUser("unit_mesh_id_shift"))
-    paramError("unit_mesh_id_name",
-               "This parameter must be provided if unit_mesh_id_shift is set.");
+  if (_cell_id_name.empty() && isParamSetByUser("cell_id_name"))
+    paramError("cell_id_name", "This parameter must be non empty if provided.");
+  if (_cell_id_name.empty() && isParamSetByUser("cell_id_shift"))
+    paramError("cell_id_name", "This parameter must be provided if cell_id_shift is set.");
+  if (_pattern_id_name.empty() && isParamSetByUser("pattern_id_name"))
+    paramError("pattern_id_name", "This parameter must be non empty if provided.");
+  if (_pattern_id_name.empty() && isParamSetByUser("pattern_id_shift"))
+    paramError("pattern_id_name", "This parameter must be provided if pattern_id_shift is set.");
 
   const std::vector<Point> extra_positions(getParam<std::vector<Point>>("extra_positions"));
   const std::vector<unsigned int> extra_positions_mg_indices(
@@ -529,14 +548,25 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
 
     addMeshSubgenerator("TransformGenerator", patterned_pin_mg_series.back(), params);
 
-    if (_unit_mesh_id_name.size())
+    if (_cell_id_name.size())
     {
       auto params = _app.getFactory().getValidParams("ParsedExtraElementIDGenerator");
       params.set<MeshGeneratorName>("input") = patterned_pin_mg_series.back();
-      params.set<std::string>("expression") = std::to_string(i + _unit_mesh_id_shift);
-      params.set<std::string>("extra_elem_integer_name") = _unit_mesh_id_name;
+      params.set<std::string>("expression") = std::to_string(i + _cell_id_shift);
+      params.set<std::string>("extra_elem_integer_name") = _cell_id_name;
 
-      patterned_pin_mg_series.back() = name() + "_eeid_" + std::to_string(i);
+      patterned_pin_mg_series.back() = name() + "_ceeid_" + std::to_string(i);
+      addMeshSubgenerator("ParsedExtraElementIDGenerator", patterned_pin_mg_series.back(), params);
+    }
+    if (_pattern_id_name.size())
+    {
+      auto params = _app.getFactory().getValidParams("ParsedExtraElementIDGenerator");
+      params.set<MeshGeneratorName>("input") = patterned_pin_mg_series.back();
+      params.set<std::string>("expression") =
+          std::to_string(_positions[i].second + _pattern_id_shift);
+      params.set<std::string>("extra_elem_integer_name") = _pattern_id_name;
+
+      patterned_pin_mg_series.back() = name() + "_peeid_" + std::to_string(i);
       addMeshSubgenerator("ParsedExtraElementIDGenerator", patterned_pin_mg_series.back(), params);
     }
   }
