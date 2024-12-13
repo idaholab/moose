@@ -4,6 +4,8 @@
 #include "MFEMScalarFunctionDirichletBC.h"
 #include "MFEMVectorDirichletBC.h"
 #include "MFEMVectorFunctionDirichletBC.h"
+#include "MFEMVectorNormalDirichletBC.h"
+#include "MFEMVectorFunctionNormalDirichletBC.h"
 #include "MFEMVectorTangentialDirichletBC.h"
 #include "MFEMVectorFunctionTangentialDirichletBC.h"
 
@@ -11,18 +13,22 @@ class MFEMEssentialBCTest : public MFEMObjectUnitTest
 {
 public:
   mfem::common::H1_FESpace _scalar_fes;
-  //  mfem::common::ND_FESpace _vector_fes;
+  // mfem::common::ND_FESpace _vector_fes;
   mfem::common::H1_FESpace _vector_fes;
   mfem::GridFunction _scalar_gridfunc, _vector_gridfunc;
+  mfem::ConstantCoefficient _scalar_zero;
+  mfem::VectorConstantCoefficient _vector_zero;
 
   MFEMEssentialBCTest()
     : MFEMObjectUnitTest("PlatypusApp"),
       _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
-      // _vector_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
+      //_vector_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
       _vector_fes(
           _mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, mfem::BasisType::GaussLobatto, 3),
       _scalar_gridfunc(&_scalar_fes),
-      _vector_gridfunc(&_vector_fes)
+      _vector_gridfunc(&_vector_fes),
+      _scalar_zero(0.),
+      _vector_zero(mfem::Vector({0., 0., 0.}))
   {
     InputParameters func_params = _factory.getValidParams("ParsedFunction");
     func_params.set<std::string>("expression") = "x + y";
@@ -34,6 +40,42 @@ public:
     vecfunc_params.set<std::string>("expression_z") = "x + y + 2";
     _mfem_problem->addFunction("ParsedVectorFunction", "func2", vecfunc_params);
     _mfem_problem->getFunction("func2").initialSetup();
+    _scalar_gridfunc.ProjectCoefficient(_scalar_zero);
+    _vector_gridfunc.ProjectCoefficient(_vector_zero);
+  }
+
+  void check_boundary(int bound,
+                      std::function<double(mfem::ElementTransformation *,
+                                           const mfem::IntegrationPoint &)> error_func,
+                      double tolerance)
+  {
+    for (int be = 0; be < _mfem_mesh_ptr->getMFEMParMeshPtr()->GetNBE(); be++)
+    {
+      mfem::Element * elem = _mfem_mesh_ptr->getMFEMParMeshPtr()->GetBdrElement(be);
+      if (elem->GetAttribute() != 1)
+        continue;
+      mfem::ElementTransformation * transform =
+          _mfem_mesh_ptr->getMFEMParMeshPtr()->GetBdrElementTransformation(be);
+      const mfem::FiniteElement * fe = _scalar_fes.GetBE(be);
+      const mfem::IntegrationRule & ir =
+          mfem::IntRules.Get(fe->GetGeomType(), 2 * fe->GetOrder() + 2);
+      double total_error = 0.0;
+      for (int j = 0; j < ir.GetNPoints(); j++)
+      {
+        const mfem::IntegrationPoint point = ir.IntPoint(j);
+        transform->SetIntPoint(&point);
+        const double error = error_func(transform, point);
+        total_error += error * error;
+      }
+      EXPECT_LT(total_error, tolerance);
+    }
+  }
+
+  mfem::Vector calc_normal(mfem::ElementTransformation * transform) const
+  {
+    mfem::Vector normal(3);
+    mfem::CalcOrtho(transform->Jacobian(), normal);
+    return normal;
   }
 };
 
@@ -56,14 +98,13 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
   essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
-  _scalar_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker);
-  _scalar_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
-  const Real expected = bc_params.get<Real>("value");
-  for (auto ess_dof : ess_vdofs_list)
-  {
-    EXPECT_EQ(_scalar_gridfunc[ess_dof], expected);
-  }
+  mfem::GridFunctionCoefficient scalar_variable(&_scalar_gridfunc);
+  check_boundary(
+      1,
+      [&scalar_variable](mfem::ElementTransformation * transform,
+                         const mfem::IntegrationPoint & point)
+      { return scalar_variable.Eval(*transform, point) - 1.; },
+      1e-8);
 }
 
 /**
@@ -84,7 +125,17 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_scalar_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  // FIXME: We should actually check this applies the right boundary values...
+
+  // Check the correct boundary values have been applied
+  mfem::GridFunctionCoefficient scalar_variable(&_scalar_gridfunc);
+  std::shared_ptr<mfem::FunctionCoefficient> expected =
+      _mfem_problem->getScalarFunctionCoefficient("func1");
+  check_boundary(
+      1,
+      [&scalar_variable, expected](mfem::ElementTransformation * transform,
+                                   const mfem::IntegrationPoint & point)
+      { return scalar_variable.Eval(*transform, point) - expected->Eval(*transform, point); },
+      1e-8);
 }
 
 /**
@@ -104,18 +155,21 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+
   // Check the correct boundary values have been applied
-  mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
-  const std::vector<Real> expected = bc_params.get<std::vector<Real>>("values");
-  for (int i = 0; i < 3; i++)
-  {
-    _vector_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker, i);
-    _vector_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
-    for (auto ess_dof : ess_vdofs_list)
-    {
-      EXPECT_EQ(_vector_gridfunc[ess_dof], expected[i]);
-    }
-  }
+  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::Vector expected({1., 2., 3.});
+  check_boundary(
+      1,
+      [&variable, &expected](mfem::ElementTransformation * transform,
+                             const mfem::IntegrationPoint & point)
+      {
+        mfem::Vector actual(3);
+        variable.Eval(actual, *transform, point);
+        actual -= expected;
+        return actual.Norml2();
+      },
+      1e-8);
 }
 
 /**
@@ -136,7 +190,101 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  // FIXME: We should actually check this applies the right boundary values...
+
+  // Check the correct boundary values have been applied
+  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  std::shared_ptr<mfem::VectorFunctionCoefficient> function =
+      _mfem_problem->getVectorFunctionCoefficient("func2");
+  check_boundary(
+      1,
+      [&variable, &function](mfem::ElementTransformation * transform,
+                             const mfem::IntegrationPoint & point)
+      {
+        mfem::Vector actual(3), expected(3);
+        variable.Eval(actual, *transform, point);
+        function->Eval(expected, *transform, point);
+        actual -= expected;
+        return actual.Norml2();
+      },
+      1e-8);
+}
+
+/**
+ * Test MFEMVectorNormalDirichletBC can be constructed and applied successfully
+ */
+TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorNormalDirichletBC");
+  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<std::vector<Real>>("values") = {1., 2., 3.};
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  auto & essential_bc =
+      addObject<MFEMVectorNormalDirichletBC>("MFEMVectorNormalDirichletBC", "bc1", bc_params);
+
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
+
+  // Test applying the BC
+  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+
+  // Check the correct boundary values have been applied
+  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::Vector assigned_val({1., 2., 3.});
+  check_boundary(
+      1,
+      [this, &variable, &assigned_val](mfem::ElementTransformation * transform,
+                                       const mfem::IntegrationPoint & point)
+      {
+        mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
+        variable.Eval(actual, *transform, point);
+        std::cout << "[" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]" << std::endl;
+        // Project the assigned BC val into the direction of the normal
+        expected = normal;
+        expected *= (assigned_val * normal) / (normal * normal);
+        actual -= expected;
+        // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
+        return actual.Norml2();
+      },
+      1e-8);
+}
+
+/**
+ * Test MFEMVectorFunctionNormalDirichletBC can be constructed and applied successfully
+ */
+TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
+{
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionNormalDirichletBC");
+  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<FunctionName>("function") = "func2";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  auto & essential_bc = addObject<MFEMVectorFunctionNormalDirichletBC>(
+      "MFEMVectorFunctionNormalDirichletBC", "bc1", bc_params);
+
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
+
+  // Test applying the BC
+  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+
+  // Check the correct boundary values have been applied
+  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  std::shared_ptr<mfem::VectorFunctionCoefficient> function =
+      _mfem_problem->getVectorFunctionCoefficient("func2");
+  check_boundary(
+      1,
+      [this, &variable, &function](mfem::ElementTransformation * transform,
+                                   const mfem::IntegrationPoint & point)
+      {
+        mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
+        variable.Eval(actual, *transform, point);
+        function->Eval(expected, *transform, point);
+        actual -= expected;
+        // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
+        return normal[0] * actual[0] + normal[1] * actual[1] + normal[2] * actual[2];
+      },
+      1e-8);
 }
 
 /**
@@ -158,22 +306,33 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
   // Test applying the BC
   essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // Check the correct boundary values have been applied
-  mfem::Array<int> ess_vdofs_list, ess_vdofs_marker;
-  const std::vector<Real> expected = bc_params.get<std::vector<Real>>("values");
-  for (int i = 0; i < 3; i++)
-  {
-    _vector_fes.GetEssentialVDofs(essential_bc._bdr_markers, ess_vdofs_marker, i);
-    _vector_fes.MarkerToList(ess_vdofs_marker, ess_vdofs_list);
-    for (auto ess_dof : ess_vdofs_list)
-    {
-      std::cout << "Index: " << ess_dof << std::endl;
-      EXPECT_EQ(_vector_gridfunc[ess_dof], expected[i]);
-    }
-  }
+  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::Vector expected({1., 2., 3.});
+  check_boundary(
+      1,
+      [this, &variable, &expected](mfem::ElementTransformation * transform,
+                                   const mfem::IntegrationPoint & point)
+      {
+        mfem::Vector actual(3), normal = calc_normal(transform), cross_prod(3);
+        variable.Eval(actual, *transform, point);
+        std::cout << "Normal [" << normal[0] << ", " << normal[1] << ", " << normal[2] << "]"
+                  << std::endl;
+        std::cout << "Actual [" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]"
+                  << std::endl;
+        std::cout << "Expected [" << expected[0] << ", " << expected[1] << ", " << expected[2]
+                  << "]" << std::endl;
+        actual -= expected;
+        // (actual - expected) should be parallel to the normal and have a cross product of 0.
+        cross_prod = normal[1] * actual[2] - normal[2] * actual[1];
+        cross_prod = normal[2] * actual[0] - normal[0] * actual[2];
+        cross_prod = normal[0] * actual[1] - normal[1] * actual[0];
+        return cross_prod.Norml2();
+      },
+      1e-8);
 }
 
 /**
- * Test MFEMVectorFunctionDirichletBC can be constructed and applied successfully
+ * Test MFEMVectorFunctionTangentialDirichletBC can be constructed and applied successfully
  */
 TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
 {
@@ -190,5 +349,31 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
-  // FIXME: We should actually check this applies the right boundary values...
+
+  // Check the correct boundary values have been applied
+  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  std::shared_ptr<mfem::VectorFunctionCoefficient> function =
+      _mfem_problem->getVectorFunctionCoefficient("func2");
+  check_boundary(
+      1,
+      [this, &variable, &function](mfem::ElementTransformation * transform,
+                                   const mfem::IntegrationPoint & point)
+      {
+        mfem::Vector actual(3), expected(3), normal = calc_normal(transform), cross_prod(3);
+        variable.Eval(actual, *transform, point);
+        function->Eval(expected, *transform, point);
+        std::cout << "Normal [" << normal[0] << ", " << normal[1] << ", " << normal[2] << "]"
+                  << std::endl;
+        std::cout << "Actual [" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]"
+                  << std::endl;
+        std::cout << "Expected [" << expected[0] << ", " << expected[1] << ", " << expected[2]
+                  << "]" << std::endl;
+        actual -= expected;
+        // (actual - expected) should be parallel to the normal and have a cross product of 0.
+        cross_prod = normal[1] * actual[2] - normal[2] * actual[1];
+        cross_prod = normal[2] * actual[0] - normal[0] * actual[2];
+        cross_prod = normal[0] * actual[1] - normal[1] * actual[0];
+        return cross_prod.Norml2();
+      },
+      1e-8);
 }
