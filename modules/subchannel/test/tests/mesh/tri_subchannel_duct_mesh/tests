@@ -5,5 +5,6 @@
     exodiff = coords_in.e
     cli_args = "--mesh-only"
     recover = false
+    mesh_mode = 'replicated'
   []
 []
