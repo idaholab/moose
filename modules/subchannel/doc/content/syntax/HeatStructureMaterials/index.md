@@ -1,1 +1,0 @@
-See THM [documentation](https://mooseframework.inl.gov/syntax/HeatStructureMaterials/index.html) for heat structure materials description.
