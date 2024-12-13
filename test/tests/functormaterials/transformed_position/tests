@@ -1,0 +1,23 @@
+[Tests]
+  design = 'FunctorTransformFunctorMaterial.md'
+  issues = '#25452'
+  [node_elem_elemqp]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    requirement = 'The system shall be able to evaluate a functor whose evaluation at a node, element or (element, quadrature point) location has been translated.'
+    # We do not have ghosting for aux-variables over the entire domain for being able to
+    # evaluate them at an arbitrary location
+    max_parallel = 1
+  []
+  [elem_point]
+    type = CSVDiff
+    input = 'test.i'
+    prereq = 'node_elem_elemqp'
+    csvdiff = 'test_out_elem_point_evals_0001.csv'
+    requirement = 'The system shall be able to evaluate a functor whose evaluation at an (element, point) location has been translated.'
+    # We do not have ghosting for aux-variables over the entire domain for being able to
+    # evaluate them at an arbitrary location
+    max_parallel = 1
+  []
+[]
