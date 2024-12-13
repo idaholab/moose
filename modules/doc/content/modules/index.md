@@ -26,6 +26,7 @@ application.
 - [Solid Mechanics](modules/solid_mechanics/index.md)
 - [Solid Properties](modules/solid_properties/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)
+- [Sub Channel](modules/subchannel/index.md)
 - [Thermal Hydraulics](modules/thermal_hydraulics/index.md)
 - [XFEM](modules/xfem/index.md)
 

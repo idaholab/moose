@@ -11,8 +11,6 @@ The postprocessor calculates a massflow rate weighted average at the inlet and o
 
 ## Example Input File Syntax
 
-!listing /examples/coupling/THM_SCM/subchannel.i block=Postprocessors language=cpp
-
 !syntax parameters /Postprocessors/SubChannelDelta
 
 !syntax inputs /Postprocessors/SubChannelDelta

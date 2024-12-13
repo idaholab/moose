@@ -1,40 +1,48 @@
 Content:
-    - ${ROOT_DIR}/doc/content
-    - ${MOOSE_DIR}/framework/doc/content
-    - ${MOOSE_DIR}/modules/fluid_properties/doc/content
-    - ${MOOSE_DIR}/modules/heat_transfer/doc/content
-    - ${MOOSE_DIR}/modules/ray_tracing/doc/content
-    - ${MOOSE_DIR}/modules/navier_stokes/doc/content
-    - ${MOOSE_DIR}/modules/reactor/doc/content
+    - framework/doc/content
+    - modules/subchannel/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/heat_transfer/doc/content
+    - modules/ray_tracing/doc/content
+    - modules/reactor/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 Extensions:
     MooseDocs.extensions.navigation:
-        name: SCM
-        repo: https://github.inl.gov/ncrc/subchannel
-        menu:
-            Getting Started:
-                Installation: getting_started/installation.md
-                Using SCM: getting_started/using_SubChannel.md
-                User Notes: getting_started/user_notes.md
-                SubChannel Theory: getting_started/subchannel_theory.md
-                List of Publications: getting_started/list_of_publications.md
-            Documentation:
-                SCM-only Syntax: syntax/subchannel_only.md
-                Complete Code Syntax: syntax/index.md
-            V&V:
-                Verification & Validation: v&v/v&v-list.md
-            Tutorial:
-                Tutorial Slides: main/index.md
+        name: MOOSE SubChannel Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/subchannel
+        # menu:
+        #     Getting Started:
+        #         Installation: getting_started/installation.md
+        #         Using SCM: getting_started/using_SubChannel.md
+        #         User Notes: getting_started/user_notes.md
+        #         SubChannel Theory: getting_started/subchannel_theory.md
+        #         List of Publications: getting_started/list_of_publications.md
+        #     Documentation:
+        #         SCM-only Syntax: syntax/subchannel_only.md
+        #         Complete Code Syntax: syntax/index.md
+        #     V&V:
+        #         Verification & Validation: v&v/v&v-list.md
+        #     Tutorial:
+        #         Tutorial Slides: main/index.md
     MooseDocs.extensions.appsyntax:
-        executable: ${ROOT_DIR}
+        executable: ${MOOSE_DIR}/modules/subchannel
         remove:
-            framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
-            subchannel: !include ${ROOT_DIR}/doc/remove.yml
+            framework: !include framework/doc/remove.yml
+            subchannel: !include modules/subchannel/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
+        includes:
+            - framework/include
+            - modules/subchannel/include
+            - modules/fluid_properties/include
+            - modules/heat_transfer/include
+            - modules/ray_tracing/include
+            - modules/reactor/include
     MooseDocs.extensions.common:
-        shortcuts:
-            framework: !include ${MOOSE_DIR}/framework/doc/globals.yml
+        shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
-        acronyms: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+        acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.bibtex:
         duplicate_warning: False

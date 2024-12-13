@@ -1,6 +1,6 @@
 Content:
     tutorial:
-        root_dir: ${ROOT_DIR}/doc/tutorials
+        root_dir: modules/subchannel/doc/tutorials
 
 Executioner:
     type: MooseDocs.base.Serial
@@ -32,5 +32,4 @@ Extensions:
     MooseDocs.extensions.listing: default
     MooseDocs.extensions.datetime: default
     MooseDocs.extensions.katex:
-        macros: !include ${MOOSE_DIR}/modules/doc/katex_macros.yml
-        
+        macros: !include modules/doc/katex_macros.yml

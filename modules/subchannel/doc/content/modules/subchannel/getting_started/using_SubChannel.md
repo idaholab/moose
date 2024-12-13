@@ -35,7 +35,7 @@ like [Paraview](http://www.paraview.org/download/).
 !style halign=left
 In general the validation examples located within the `test/tests` directory or the `examples` directory and are meant to be a showcase of "production" SCM capability. Users are encouraged to start there
 when learning SCM and setting up new simulations. Documentation for the validation
-examples can be found [on the SCM validation page](v&v/v&v-list.md). The
+examples can be found [on the SCM validation page](modules/subchannel/v&v/v&v-list.md). The
 `test/tests` directory also holds *all* SCM regression tests for both complete and in-progress capability. These files *should not* be modified, so that periodic tests of SCM function can be performed successfully. If modification of example inputs is desired, they should be copied and run elsewhere.
 
 As SCM is further developed and more capabilities are added, the tests directory will continue to
