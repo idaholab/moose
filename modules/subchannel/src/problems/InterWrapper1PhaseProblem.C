@@ -2766,7 +2766,7 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   // IS rows[Q];
   PetscInt M = 0;
   LibmeshPetscCall(MatNestGetISs(A_nest, rows.data(), NULL));
-  for (unsigned int j = 0; j < Q; ++j)
+  for (PetscInt j = 0; j < Q; ++j)
   {
     IS expand1;
     LibmeshPetscCall(ISDuplicate(rows[M], &expand1));
@@ -2785,11 +2785,11 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecDestroy(&b_nest));
   LibmeshPetscCall(MatDestroy(&A_nest));
   LibmeshPetscCall(KSPDestroy(&ksp));
-  for (unsigned int i = 0; i < Q * Q; i++)
+  for (PetscInt i = 0; i < Q * Q; i++)
   {
     LibmeshPetscCall(MatDestroy(&mat_array[i]));
   }
-  for (unsigned int i = 0; i < Q; i++)
+  for (PetscInt i = 0; i < Q; i++)
   {
     LibmeshPetscCall(VecDestroy(&vec_array[i]));
   }
