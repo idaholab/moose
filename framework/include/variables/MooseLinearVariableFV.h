@@ -148,6 +148,7 @@ public:
 
   virtual bool supportsFaceArg() const override final { return true; }
   virtual bool supportsElemSideQpArg() const override final { return false; }
+  virtual bool mayRequireGhosting() const override final { return true; }
 
   virtual const Elem * const & currentElem() const override;
 

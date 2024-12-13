@@ -60,6 +60,8 @@ public:
 
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return true; }
+  // we cannot know what the lambda functor will depend on
+  bool mayRequireGhosting() const override final { return true; }
 
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;

@@ -42,6 +42,7 @@ public:
 
   bool supportsFaceArg() const override final { return _ad_functor.supportsFaceArg(); }
   bool supportsElemSideQpArg() const override final { return _ad_functor.supportsElemSideQpArg(); }
+  bool mayRequireGhosting() const override final { return _ad_functor.mayRequireGhosting(); }
 
 protected:
   ///@{
