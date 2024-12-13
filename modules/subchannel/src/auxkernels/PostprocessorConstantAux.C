@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PostprocessorConstantAux.h"
-registerMooseObject("MooseApp", PostprocessorConstantAux);
+registerMooseObject("SubChannelApp", PostprocessorConstantAux);
 
 InputParameters
 PostprocessorConstantAux::validParams()
