@@ -9,7 +9,7 @@
 
 #include "SCMRZPinQPrimeAux.h"
 
-registerMooseObject("MooseApp", SCMRZPinQPrimeAux);
+registerMooseObject("SubChannelApp", SCMRZPinQPrimeAux);
 
 InputParameters
 SCMRZPinQPrimeAux ::validParams()
