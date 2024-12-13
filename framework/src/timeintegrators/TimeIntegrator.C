@@ -30,13 +30,11 @@ TimeIntegrator::validParams()
 TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(this, "TimeIntegrators"),
+    NonlinearTimeIntegratorInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
+                                     *getCheckedPointerParam<SystemBase *>("_sys")),
+    LinearTimeIntegratorInterface(*getCheckedPointerParam<SystemBase *>("_sys")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _nl(_fe_problem.getNonlinearSystemBase(
-        dynamic_cast<NonlinearSystemBase *>(&_sys) ? _sys.number() : 0)),
-    _nonlinear_implicit_system(dynamic_cast<NonlinearImplicitSystem *>(&_sys.system())),
-    _Re_time(_nl.getResidualTimeVector()),
-    _Re_non_time(_nl.getResidualNonTimeVector()),
     _du_dot_du(_sys.duDotDus()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionState(1)),
@@ -50,8 +48,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0),
     _is_lumped(false),
-    _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
-    _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION)),
     _var_restriction(declareRestartableData<bool>(
         "var_restriction", !getParam<std::vector<VariableName>>("variables").empty())),
     _local_indices(declareRestartableData<std::vector<dof_id_type>>("local_indices")),

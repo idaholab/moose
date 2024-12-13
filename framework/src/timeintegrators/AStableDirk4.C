@@ -42,7 +42,7 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters)
   {
     std::ostringstream oss;
     oss << "residual_stage" << stage + 1;
-    _stage_residuals[stage] = &(_nl.addVector(oss.str(), false, GHOSTED));
+    _stage_residuals[stage] = addVector(oss.str(), false, GHOSTED);
   }
 
   // Initialize parameters
@@ -148,14 +148,14 @@ AStableDirk4::solve()
       }
 
       // Do the solve
-      _nl.system().solve();
+      _nl->system().solve();
 
       // Update the iteration counts
       _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
       _n_linear_iterations += getNumLinearIterationsLastSolve();
 
       // Abort time step immediately on stage failure - see TimeIntegrator doc page
-      if (!_fe_problem.converged(_nl.number()))
+      if (!_fe_problem.converged(_nl->number()))
         return;
     }
   }
@@ -188,10 +188,10 @@ AStableDirk4::postResidual(NumericVector<Number> & residual)
 
       // Store this stage's non-time residual.  We are calling operator=
       // here, and that calls close().
-      *_stage_residuals[_stage - 1] = _Re_non_time;
+      *_stage_residuals[_stage - 1] = *_Re_non_time;
 
       // Build up the residual for this stage.
-      residual.add(1., _Re_time);
+      residual.add(1., *_Re_time);
       for (unsigned int j = 0; j < _stage; ++j)
         residual.add(_a[_stage - 1][j], *_stage_residuals[j]);
       residual.close();
@@ -206,7 +206,7 @@ AStableDirk4::postResidual(NumericVector<Number> & residual)
       // just do one more stage, but I think handling it separately like
       // this is easier to understand and doesn't create too much code
       // repitition.
-      residual.add(1., _Re_time);
+      residual.add(1., *_Re_time);
       for (unsigned int j = 0; j < 3; ++j)
         residual.add(_b[j], *_stage_residuals[j]);
       residual.close();

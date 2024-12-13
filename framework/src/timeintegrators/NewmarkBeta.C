@@ -114,8 +114,8 @@ NewmarkBeta::computeADTimeDerivatives(ADReal & ad_u_dot,
 void
 NewmarkBeta::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
+  residual += *_Re_time;
+  residual += *_Re_non_time;
   residual.close();
 }
 

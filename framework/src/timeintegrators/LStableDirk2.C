@@ -28,8 +28,8 @@ LStableDirk2::validParams()
 LStableDirk2::LStableDirk2(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
-    _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
+    _residual_stage1(addVector("residual_stage1", false, GHOSTED)),
+    _residual_stage2(addVector("residual_stage2", false, GHOSTED)),
     _alpha(1. - 0.5 * std::sqrt(2))
 {
   mooseInfo("LStableDirk2 and other multistage TimeIntegrators are known not to work with "
@@ -82,13 +82,13 @@ LStableDirk2::solve()
   _console << "1st stage" << std::endl;
   _stage = 1;
   _fe_problem.time() = time_stage1;
-  _nl.system().solve();
-  _nl.destroyColoring();
+  _nl->system().solve();
+  _nl->destroyColoring();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged(_nl.number()))
+  if (!_fe_problem.converged(_nl->number()))
     return;
 
   // Compute second stage
@@ -97,8 +97,8 @@ LStableDirk2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;
   _fe_problem.time() = time_new;
-  _nl.potentiallySetupFiniteDifferencing();
-  _nl.system().solve();
+  _nl->potentiallySetupFiniteDifferencing();
+  _nl->system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
@@ -122,11 +122,11 @@ LStableDirk2::postResidual(NumericVector<Number> & residual)
     // .) (Y_1 - y_n)/dt corresponds to the residual of the time kernels.
     // .) The minus sign in front of alpha is already "baked in" to
     //    the non-time residuals, so it does not appear here.
-    _residual_stage1 = _Re_non_time;
-    _residual_stage1.close();
+    *_residual_stage1 = *_Re_non_time;
+    _residual_stage1->close();
 
-    residual.add(1., _Re_time);
-    residual.add(_alpha, _residual_stage1);
+    residual.add(1., *_Re_time);
+    residual.add(_alpha, *_residual_stage1);
     residual.close();
   }
   else if (_stage == 2)
@@ -143,12 +143,12 @@ LStableDirk2::postResidual(NumericVector<Number> & residual)
     //    residuals, so they do not appear here.
     //
     // The solution at the end of stage 2, i.e. Y_2, is also the final solution.
-    _residual_stage2 = _Re_non_time;
-    _residual_stage2.close();
+    *_residual_stage2 = *_Re_non_time;
+    _residual_stage2->close();
 
-    residual.add(1., _Re_time);
-    residual.add(1. - _alpha, _residual_stage1);
-    residual.add(_alpha, _residual_stage2);
+    residual.add(1., *_Re_time);
+    residual.add(1. - _alpha, *_residual_stage1);
+    residual.add(_alpha, *_residual_stage2);
     residual.close();
   }
   else

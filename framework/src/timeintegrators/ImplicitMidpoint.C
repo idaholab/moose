@@ -25,7 +25,7 @@ ImplicitMidpoint::validParams()
 ImplicitMidpoint::ImplicitMidpoint(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_stage1(_nl.addVector("residual_stage1", false, libMesh::GHOSTED))
+    _residual_stage1(addVector("residual_stage1", false, libMesh::GHOSTED))
 {
   mooseInfo("ImplicitMidpoint and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
@@ -72,12 +72,12 @@ ImplicitMidpoint::solve()
   _console << "1st stage" << std::endl;
   _stage = 1;
   _fe_problem.time() = time_half;
-  _nl.system().solve();
+  _nl->system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged(_nl.number()))
+  if (!_fe_problem.converged(_nl->number()))
     return;
 
   // Compute second stage
@@ -85,7 +85,7 @@ ImplicitMidpoint::solve()
   _console << "2nd stage" << std::endl;
   _stage = 2;
   _fe_problem.time() = time_new;
-  _nl.system().solve();
+  _nl->system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 }
@@ -103,11 +103,11 @@ ImplicitMidpoint::postResidual(NumericVector<Number> & residual)
     // .) M is the mass matrix
     // .) f(t_n + dt/2, Y_1) is saved in _residual_stage1
     // .) The minus sign is baked in to the non-time residuals, so it does not appear here.
-    _residual_stage1 = _Re_non_time;
-    _residual_stage1.close();
+    *_residual_stage1 = *_Re_non_time;
+    _residual_stage1->close();
 
-    residual.add(1., _Re_time);
-    residual.add(0.5, _Re_non_time);
+    residual.add(1., *_Re_time);
+    residual.add(0.5, *_Re_non_time);
     residual.close();
   }
   else if (_stage == 2)
@@ -123,8 +123,8 @@ ImplicitMidpoint::postResidual(NumericVector<Number> & residual)
     //    been saved as _residual_stage1.
     // .) The minus signs are "baked in" to the non-time residuals, so
     //    they do not appear here.
-    residual.add(1., _Re_time);
-    residual.add(1., _residual_stage1);
+    residual.add(1., *_Re_time);
+    residual.add(1., *_residual_stage1);
     residual.close();
   }
   else

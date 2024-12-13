@@ -61,10 +61,10 @@ CentralDifference::initialSetup()
   ActuallyExplicitEuler::initialSetup();
 
   // _nl here so that we don't create this vector in the aux system time integrator
-  _nl.disassociateVectorFromTag(*_nl.solutionUDot(), _u_dot_factor_tag);
-  _nl.addVector(_u_dot_factor_tag, true, GHOSTED);
-  _nl.disassociateVectorFromTag(*_nl.solutionUDotDot(), _u_dotdot_factor_tag);
-  _nl.addVector(_u_dotdot_factor_tag, true, GHOSTED);
+  _nl->disassociateVectorFromTag(*_nl->solutionUDot(), _u_dot_factor_tag);
+  _nl->addVector(_u_dot_factor_tag, true, GHOSTED);
+  _nl->disassociateVectorFromTag(*_nl->solutionUDotDot(), _u_dotdot_factor_tag);
+  _nl->addVector(_u_dotdot_factor_tag, true, GHOSTED);
 }
 
 void

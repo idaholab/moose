@@ -26,7 +26,7 @@ ExplicitTVDRK2::validParams()
 ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_old(_nl.addVector("residual_old", false, libMesh::GHOSTED)),
+    _residual_old(addVector("residual_old", false, libMesh::GHOSTED)),
     _solution_older(_sys.solutionState(2))
 {
   mooseInfo("ExplicitTVDRK2 and other multistage TimeIntegrators are known not to work with "
@@ -88,12 +88,12 @@ ExplicitTVDRK2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_old;
   _fe_problem.time() = time_stage2;
-  _nl.system().solve();
+  _nl->system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged(_nl.number()))
+  if (!_fe_problem.converged(_nl->number()))
     return;
 
   // Advance solutions old->older, current->old.  Also moves Material
@@ -107,7 +107,7 @@ ExplicitTVDRK2::solve()
   _stage = 3;
   _fe_problem.timeOld() = time_stage2;
   _fe_problem.time() = time_new;
-  _nl.system().solve();
+  _nl->system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
@@ -138,11 +138,11 @@ ExplicitTVDRK2::postResidual(NumericVector<Number> & residual)
     // .) The minus signs are "baked in" to the non-time residuals, so
     //    they do not appear here.
     // .) The current non-time residual is saved for the next stage.
-    _residual_old = _Re_non_time;
-    _residual_old.close();
+    *_residual_old = *_Re_non_time;
+    _residual_old->close();
 
-    residual.add(1.0, _Re_time);
-    residual.add(1.0, _residual_old);
+    residual.add(1.0, *_Re_time);
+    residual.add(1.0, *_residual_old);
     residual.close();
   }
   else if (_stage == 3)
@@ -158,8 +158,8 @@ ExplicitTVDRK2::postResidual(NumericVector<Number> & residual)
     //    residuals, so it does not appear here.
     // .) Although this is an update step, we have to do a "solve"
     //    using the mass matrix.
-    residual.add(1.0, _Re_time);
-    residual.add(0.5, _Re_non_time);
+    residual.add(1.0, *_Re_time);
+    residual.add(0.5, *_Re_non_time);
     residual.close();
   }
   else

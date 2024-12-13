@@ -35,10 +35,11 @@ public:
    * Set the current ElemInfo object.
    * @param elem_info The new ElemInfo which will be used as the current
    */
-  void setCurrentElemInfo(const ElemInfo * elem_info) { _current_elem_info = elem_info; }
+  virtual void setCurrentElemInfo(const ElemInfo * elem_info);
 
   /**
-   * Set the coordinate system specific volume
+   * Set the coordinate system specific volume, the multiplication with
+   * the transformation factor is done outside of the kernel.
    * @param volume the new coordinate specific volume
    */
   void setCurrentElemVolume(const Real volume) { _current_elem_volume = volume; }
@@ -55,4 +56,7 @@ protected:
 
   /// The coordinate-specific element volume
   Real _current_elem_volume;
+
+  /// The dof index for the current variable associated with the element
+  dof_id_type _dof_id;
 };
