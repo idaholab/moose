@@ -71,7 +71,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
     velocity(2) = (*_w_var)(current_argument, old_state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const auto parallel_speed = NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
+  const auto parallel_speed = NS::computeSpeed<ADReal>(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
@@ -82,7 +82,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-    const auto u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    const auto u_tau = NS::findUStar<ADReal>(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
@@ -90,7 +90,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;
