@@ -72,7 +72,7 @@ LinearFrictionFactorFunctorMaterial::LinearFrictionFactorFunctorMaterial(
         // see PINSFVSpeedFunctorMaterial.C for explanation
         const ADRealVectorValue superficial_vel(
             _superficial_vel_x(r, t), _superficial_vel_y(r, t), _superficial_vel_z(r, t));
-        const auto speed = NS::computeSpeed(superficial_vel) / _eps(r, t);
+        const auto speed = NS::computeSpeed<ADReal>(superficial_vel) / _eps(r, t);
 
         return _A * _f(r, t) + _B * _g(r, t) * speed;
       });

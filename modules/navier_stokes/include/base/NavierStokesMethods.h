@@ -99,7 +99,8 @@ Real prandtlPropertyDerivative(const Real & mu,
  * @param dist the element centroid distance to the wall
  * @return the velocity at the wall
  */
-ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+template <typename T>
+T findUStar(const T & mu, const T & rho, const T & u, Real dist);
 
 /**
  * Finds the non-dimensional wall distance normalized with the friction velocity
@@ -110,14 +111,26 @@ ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real d
  * @param dist the element centroid distance to the wall
  * @return the non-dimensional wall distance
  */
-ADReal findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+template <typename T>
+T findyPlus(const T & mu, const T & rho, const T & u, Real dist);
 
 using MooseUtils::isZero;
 
 /**
  * Compute the speed (velocity norm) given the supplied velocity
  */
-ADReal computeSpeed(const ADRealVectorValue & velocity);
+template <typename T>
+T computeSpeed(const libMesh::VectorValue<T> & velocity);
+
+/**
+ * Utility function to compute the shear strain rate
+ */
+template <typename T>
+T computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
+                                    const Moose::Functor<T> * v,
+                                    const Moose::Functor<T> * w,
+                                    const Moose::ElemArg & elem_arg,
+                                    const Moose::StateArg & state);
 
 /**
  * Map marking wall bounded elements
@@ -184,4 +197,25 @@ wallHeatTransferCoefficient(const T1 & Nu, const T2 & k, const T3 & D_h)
 {
   return Nu * k / D_h;
 }
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template Real findUStar<Real>(const Real & mu, const Real & rho, const Real & u, const Real dist);
+extern template ADReal findUStar<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist);
+
+extern template Real findyPlus<Real>(const Real & mu, const Real & rho, const Real & u, Real dist);
+extern template ADReal findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+
+extern template Real computeSpeed<Real>(const libMesh::VectorValue<Real> & velocity);
+extern template ADReal computeSpeed<ADReal>(const libMesh::VectorValue<ADReal> & velocity);
+
+extern template Real computeShearStrainRateNormSquared<Real>(const Moose::Functor<Real> & u,
+                                                             const Moose::Functor<Real> * v,
+                                                             const Moose::Functor<Real> * w,
+                                                             const Moose::ElemArg & elem_arg,
+                                                             const Moose::StateArg & state);
+extern template ADReal computeShearStrainRateNormSquared<ADReal>(const Moose::Functor<ADReal> & u,
+                                                                 const Moose::Functor<ADReal> * v,
+                                                                 const Moose::Functor<ADReal> * w,
+                                                                 const Moose::ElemArg & elem_arg,
+                                                                 const Moose::StateArg & state);
 }

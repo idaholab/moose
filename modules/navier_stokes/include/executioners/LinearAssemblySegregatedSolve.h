@@ -85,6 +85,9 @@ protected:
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<LinearSystem *> _passive_scalar_systems;
 
+  /// Pointer(s) to the system(s) corresponding to the turbulence equation(s)
+  std::vector<LinearSystem *> _turbulence_systems;
+
   /// Pointer to the segregated RhieChow interpolation object
   RhieChowMassFlux * _rc_uo;
 

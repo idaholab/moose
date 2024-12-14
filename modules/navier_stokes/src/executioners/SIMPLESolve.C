@@ -45,6 +45,10 @@ SIMPLESolve::checkIntegrity()
   if (_has_energy_system)
     checkTimeKernels(*_energy_system);
 
+  if (_has_turbulence_systems)
+  for (const auto system : _turbulence_systems)
+    checkTimeKernels(*system);
+
   if (_has_passive_scalar_systems)
     for (const auto system : _passive_scalar_systems)
       checkTimeKernels(*system);
