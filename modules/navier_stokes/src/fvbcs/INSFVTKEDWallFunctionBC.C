@@ -73,10 +73,10 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi, const Moose::StateAr
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   const ADReal parallel_speed =
-      NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
+      NS::computeSpeed<ADReal>(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Get friction velocity
-  const ADReal u_star = NS::findUStar(mu, rho, parallel_speed, dist);
+  const ADReal u_star = NS::findUStar<ADReal>(mu, rho, parallel_speed, dist);
 
   // Get associated non-dimensional wall distance
   const ADReal y_plus = dist * u_star * rho / mu;

@@ -95,7 +95,7 @@ RANSYPlusAux::computeValue()
 
     for (unsigned int i = 0; i < distance_vec.size(); i++)
     {
-      const auto parallel_speed = NS::computeSpeed(
+      const auto parallel_speed = NS::computeSpeed<ADReal>(
           velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
       const auto distance = distance_vec[i];
 
@@ -104,7 +104,7 @@ RANSYPlusAux::computeValue()
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
       else
         // Equilibrium / Iterative
-        y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
+        y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
       y_plus_vec.push_back(raw_value(y_plus));
     }

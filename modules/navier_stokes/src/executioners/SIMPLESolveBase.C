@@ -29,6 +29,8 @@ SIMPLESolveBase::validParams()
                                     "The solver system for the solid energy equation.");
   params.addParam<std::vector<SolverSystemName>>(
       "passive_scalar_systems", {}, "The solver system for each scalar advection equation.");
+  params.addParam<std::vector<SolverSystemName>>(
+      "turbulence_systems", {}, "The solver system for each surrogate turbulence equation.");
 
   /*
    * Parameters to control the solution of the momentum equation
@@ -284,6 +286,53 @@ SIMPLESolveBase::validParams()
       "passive_scalar Equation");
 
   /*
+   * Parameters to control the solution of each turbulence system
+   */
+  params.addParam<std::vector<Real>>("turbulence_equation_relaxation",
+                                     std::vector<Real>(),
+                                     "The relaxation which should be used for the turbulence "
+                                     "equations. (=1 for no relaxation, "
+                                     "diagonal dominance will still be enforced)");
+
+  params.addParam<MultiMooseEnum>("turbulence_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the turbulence equation(s)");
+  params.addParam<MultiMooseEnum>(
+      "turbulence_petsc_options_iname",
+      Moose::PetscSupport::getCommonPetscKeys(),
+      "Names of PETSc name/value pairs for the turbulence equation(s)");
+  params.addParam<std::vector<std::string>>(
+      "turbulence_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "turbulence equation(s)");
+  params.addParam<std::vector<Real>>(
+      "turbulence_absolute_tolerance",
+      std::vector<Real>(),
+      "The absolute tolerance(s) on the normalized residual(s) of the turbulence equation(s).");
+  params.addRangeCheckedParam<Real>("turbulence_l_tol",
+                                    1e-5,
+                                    "0.0<=turbulence_l_tol & turbulence_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the turbulence equation(s).");
+  params.addRangeCheckedParam<Real>("turbulence_l_abs_tol",
+                                    1e-10,
+                                    "0.0<turbulence_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the turbulence equation(s).");
+  params.addParam<unsigned int>(
+      "turbulence_l_max_its",
+      10000,
+      "The maximum allowed iterations in the linear solver of the turbulence equation.");
+
+  params.addParamNamesToGroup(
+      "turbulence_systems turbulence_equation_relaxation turbulence_petsc_options "
+      "turbulence_petsc_options_iname "
+      "turbulence_petsc_options_value turbulence_petsc_options_value "
+      "turbulence_absolute_tolerance "
+      "turbulence_l_tol turbulence_l_abs_tol turbulence_l_max_its",
+      "turbulence Equation");
+
+  /*
    * SIMPLE iteration control
    */
 
@@ -322,12 +371,19 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _passive_scalar_equation_relaxation(
         getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
     _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
+    _turbulence_system_names(getParam<std::vector<SolverSystemName>>("turbulence_systems")),
+    _has_turbulence_systems(!_turbulence_system_names.empty()),
+    _turbulence_equation_relaxation(
+        getParam<std::vector<Real>>("turbulence_equation_relaxation")),
+    _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
     _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
     _passive_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
+    _turbulence_absolute_tolerance(
+        getParam<std::vector<Real>>("turbulence_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
@@ -471,6 +527,50 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "passive_scalar_l_max_its",
                                   "passive_scalar_equation_relaxation",
                                   "passive_scalar_absolute_tolerance"},
+                                 false);
+  
+  // We check for input errors with regards to the surrogate turbulence equations. At the same time, we
+  // set up the corresponding system numbers
+  if (_has_turbulence_systems)
+  {
+    if (_turbulence_system_names.size() != _turbulence_equation_relaxation.size())
+      paramError("turbulence_equation_relaxation",
+                 "The number of equation relaxation parameters does not match the number of "
+                 "passive scalar equations!");
+    if (_turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
+      paramError("turbulence_absolute_tolerance",
+                 "The number of absolute tolerances does not match the number of "
+                 "passive scalar equations!");
+
+    const auto & turbulence_petsc_options =
+        getParam<MultiMooseEnum>("turbulence_petsc_options");
+    const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "turbulence_petsc_options_iname", "turbulence_petsc_options_value");
+    Moose::PetscSupport::addPetscFlagsToPetscOptions(
+        turbulence_petsc_options, "-", *this, _turbulence_petsc_options);
+    Moose::PetscSupport::addPetscPairsToPetscOptions(turbulence_petsc_pair_options,
+                                                     _problem.mesh().dimension(),
+                                                     "-",
+                                                     *this,
+                                                     _turbulence_petsc_options);
+
+    _turbulence_linear_control.real_valued_data["rel_tol"] =
+        getParam<Real>("turbulence_l_tol");
+    _turbulence_linear_control.real_valued_data["abs_tol"] =
+        getParam<Real>("turbulence_l_abs_tol");
+    _turbulence_linear_control.int_valued_data["max_its"] =
+        getParam<unsigned int>("turbulence_l_max_its");
+  }
+  else
+    checkDependentParameterError("turbulence_systems",
+                                 {"turbulence_petsc_options",
+                                  "turbulence_petsc_options_iname",
+                                  "turbulence_petsc_options_value",
+                                  "turbulence_l_tol",
+                                  "turbulence_l_abs_tol",
+                                  "turbulence_l_max_its",
+                                  "turbulence_equation_relaxation",
+                                  "turbulence_absolute_tolerance"},
                                  false);
 }
 

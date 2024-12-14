@@ -84,7 +84,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   const ADReal parallel_speed =
-      NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
+      NS::computeSpeed<ADReal>(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Computing friction velocity and y+
   ADReal u_tau, y_plus;
@@ -92,13 +92,13 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   if (_wall_treatment == "eq_newton")
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-    u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    u_tau = NS::findUStar<ADReal>(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
   }
   else if (_wall_treatment == "eq_incremental")
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
     u_tau = parallel_speed / (std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) /
                               NS::von_karman_constant);
   }

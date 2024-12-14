@@ -169,7 +169,7 @@ PorousMixedVarMaterial::computeQpProperties()
   _mom_z[_qp] = _sup_mom_z[_qp] / _epsilon[_qp];
   _mom[_qp] = {_mom_x[_qp], _mom_y[_qp], _mom_z[_qp]};
 
-  _speed[_qp] = NS::computeSpeed(_velocity[_qp]);
+  _speed[_qp] = NS::computeSpeed<ADReal>(_velocity[_qp]);
 
   _rho_et[_qp] = _rho[_qp] * et;
   _ht[_qp] = et + _pressure[_qp] / _rho[_qp];

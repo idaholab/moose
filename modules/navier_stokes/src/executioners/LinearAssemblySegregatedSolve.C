@@ -109,6 +109,15 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 
   if (_has_solid_energy_system)
     _systems_to_solve.push_back(_solid_energy_system);
+  // and for the turbulence surrogate equations
+  if (_has_turbulence_systems)
+    for (auto system_i : index_range(_turbulence_system_names))
+    {
+      _turbulence_system_numbers.push_back(
+          _problem.linearSysNum(_turbulence_system_names[system_i]));
+      _turbulence_systems.push_back(
+          &_problem.getLinearSystem(_turbulence_system_numbers[system_i]));
+    }
 
   // and for the passive scalar equations
   if (_has_passive_scalar_systems)
@@ -527,10 +536,13 @@ LinearAssemblySegregatedSolve::solve()
 
   // Assign residuals to general residual vector
   const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system +
-                                  _has_solid_energy_system + _active_scalar_system_names.size();
+                                  _has_solid_energy_system + _turbulence_systems.size();
+
   std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
   std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
+
+  // Push back energy tolerances
   if (_has_energy_system)
     ns_abs_tols.push_back(_energy_absolute_tolerance);
   if (_has_solid_energy_system)
@@ -538,6 +550,11 @@ LinearAssemblySegregatedSolve::solve()
   if (_has_active_scalar_systems)
     for (const auto scalar_tol : _active_scalar_absolute_tolerance)
       ns_abs_tols.push_back(scalar_tol);
+
+  // Push back turbulence tolerances
+  if (_has_turbulence_systems)
+    for (const auto turbulence_tol : _turbulence_absolute_tolerance)
+      ns_abs_tols.push_back(turbulence_tol);
 
   bool converged = false;
   // Loop until converged or hit the maximum allowed iteration number
@@ -589,6 +606,7 @@ LinearAssemblySegregatedSolve::solve()
       ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
           solveSolidEnergy();
     }
+
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with pressure
     // and velocity
@@ -607,8 +625,24 @@ LinearAssemblySegregatedSolve::solve()
                                 _active_scalar_linear_control,
                                 _active_scalar_l_abs_tol);
     }
-    else
-      _problem.execute(EXEC_NONLINEAR);
+
+    // If we have an turbulence equations, solve it here.
+    // The turbulent viscosity depends on the value of the turbulence surrogate variables
+    if (_has_turbulence_systems)
+    {
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
+      for (const auto i : index_range(_turbulence_system_names))
+        ns_residuals[momentum_residual.size() + _has_energy_system + i] =
+            solveAdvectedSystem(_turbulence_system_numbers[i],
+                                *_turbulence_systems[i],
+                                _turbulence_equation_relaxation[i],
+                                _turbulence_linear_control,
+                                _turbulence_l_abs_tol);
+    }
+
+    _problem.execute(EXEC_NONLINEAR);
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
