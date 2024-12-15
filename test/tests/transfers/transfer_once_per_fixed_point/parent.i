@@ -80,7 +80,7 @@
   [num_fixed_point_end]
     type = TestPostprocessor
     test_type = 'grow'
-    execute_on = 'MULTIAPP_FIXED_POINT_END'
+    execute_on = 'FIXEDPOINT_END'
   []
   [subapp_fp_its]
     type = Receiver
@@ -95,6 +95,6 @@
   [fp_end]
     type = CSV
     file_base = 'fp_end'
-    execute_on = 'MULTIAPP_FIXED_POINT_END'
+    execute_on = 'FIXEDPOINT_END'
   []
 []
