@@ -10,6 +10,7 @@
 #include "LinearFVTKEDSourceSink.h"
 #include "Assembly.h"
 #include "SubProblem.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("MooseApp", LinearFVTKEDSourceSink);
 
