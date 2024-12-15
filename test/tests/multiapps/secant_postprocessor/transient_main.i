@@ -50,7 +50,7 @@
     type = SideAverageValue
     variable = u
     boundary = right
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
   [average]
     type = ElementAverageValue
@@ -85,7 +85,7 @@
     positions = '0 0 0'
     input_files = 'transient_sub.i'
     clone_parent_mesh = true
-    execute_on = 'fixedpoint_begin'
+    execute_on = 'multiapp_fixed_point_begin'
     # The input was originally created with effectively no restore
     # see the changes made for #5554 then reverted in #28115
     no_restore = true

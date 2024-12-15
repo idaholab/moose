@@ -85,7 +85,7 @@
     app_type = MooseTestApp
     positions = '1 1 1'
     input_files = picard_sub.i
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []
 

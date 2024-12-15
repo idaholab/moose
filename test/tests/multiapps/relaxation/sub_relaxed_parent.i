@@ -88,7 +88,7 @@
   [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = fixedpoint_begin
+    execute_on = multiapp_fixed_point_begin
     positions = '0 0 0'
     input_files = sub_relaxed_sub.i
     transformed_variables = v

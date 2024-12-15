@@ -20,7 +20,7 @@
 [AuxKernels]
   [increment_v]
     type = ParsedAux
-    execute_on = FIXEDPOINT_BEGIN
+    execute_on = MULTIAPP_FIXED_POINT_BEGIN
     expression = 'v + 1'
     coupled_variables = v
     variable = 'v'
@@ -57,7 +57,7 @@
 [Postprocessors]
   [picard_its]
     type = NumFixedPointIterations
-    execute_on = 'initial fixedpoint_end'
+    execute_on = 'initial multiapp_fixed_point_end'
   []
 []
 

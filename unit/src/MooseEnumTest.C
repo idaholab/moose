@@ -234,12 +234,10 @@ TEST(MultiMooseEnum, testExecuteOn)
 
   // Checks that names are added and removed
   EXPECT_EQ(exec_enum.getRawNames(),
-            "FIXEDPOINT_BEGIN FIXEDPOINT_END NONE INITIAL LINEAR NONLINEAR_CONVERGENCE NONLINEAR "
+            "NONE INITIAL LINEAR NONLINEAR_CONVERGENCE NONLINEAR "
             "POSTCHECK TIMESTEP_END "
             "TIMESTEP_BEGIN MULTIAPP_FIXED_POINT_END MULTIAPP_FIXED_POINT_BEGIN FINAL CUSTOM");
-  std::vector<std::string> opts = {"FIXEDPOINT_BEGIN",
-                                   "FIXEDPOINT_END",
-                                   "NONE",
+  std::vector<std::string> opts = {"NONE",
                                    "INITIAL",
                                    "LINEAR",
                                    "NONLINEAR_CONVERGENCE",

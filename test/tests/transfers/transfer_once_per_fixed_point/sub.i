@@ -13,7 +13,7 @@
   [sub]
     type = TransientMultiApp
     input_files = sub.i
-    execute_on = 'INITIAL FIXEDPOINT_END'
+    execute_on = 'INITIAL MULTIAPP_FIXED_POINT_END'
     cli_args = "MultiApps/active='';Outputs/active=''"
   []
 []
@@ -32,7 +32,7 @@
 [Postprocessors]
   [num_fixed_point_its]
     type = NumFixedPointIterations
-    execute_on = 'FIXEDPOINT_END'
+    execute_on = 'MULTIAPP_FIXED_POINT_END'
   []
   [parent_fp_its]
     type = Receiver

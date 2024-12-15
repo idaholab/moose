@@ -52,7 +52,7 @@
   [nonlinear]
     type = FullSolveMultiApp
     input_files = nonlinearfv.i
-    execute_on = fixedpoint_begin
+    execute_on = multiapp_fixed_point_begin
     no_restore = true
   []
 []
@@ -64,14 +64,14 @@
     from_multi_app = nonlinear
     source_variable = 'v'
     variable = 'diff_var'
-    execute_on = fixedpoint_begin
+    execute_on = multiapp_fixed_point_begin
   []
   [to_nonlinear]
     type = MultiAppCopyTransfer
     to_multi_app = nonlinear
     source_variable = 'u'
     variable = 'diff_var'
-    execute_on = fixedpoint_begin
+    execute_on = multiapp_fixed_point_begin
   []
 []
 

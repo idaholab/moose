@@ -48,25 +48,25 @@
   [unorm_begin]
     type = ElementL2Norm
     variable = u
-    execute_on = 'initial fixedpoint_begin'
+    execute_on = 'initial multiapp_fixed_point_begin'
     outputs = none
   []
   [unorm]
     type = ElementL2Norm
     variable = u
-    execute_on = 'initial fixedpoint_end'
+    execute_on = 'initial multiapp_fixed_point_end'
   []
   [unorm_err]
     type = RelativeDifferencePostprocessor
     value1 = unorm
     value2 = unorm_begin
     outputs = none
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
   [vnorm]
     type = ElementL2Norm
     variable = v
-    execute_on = 'initial fixedpoint_end'
+    execute_on = 'initial multiapp_fixed_point_end'
   []
 []
 

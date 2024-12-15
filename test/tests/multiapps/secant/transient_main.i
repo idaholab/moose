@@ -82,7 +82,7 @@
     positions = '0 0 0'
     input_files = 'transient_sub.i'
     clone_parent_mesh = true
-    execute_on = 'fixedpoint_begin'
+    execute_on = 'multiapp_fixed_point_begin'
     # The input was originally created with effectively no restore
     # see the changes made for #5554 then reverted in #28115
     no_restore = true
@@ -95,13 +95,13 @@
     from_multi_app = sub
     source_variable = v
     variable = v
-    execute_on = 'fixedpoint_begin'
+    execute_on = 'multiapp_fixed_point_begin'
   []
   [u_to_sub]
     type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = u
-    execute_on = 'fixedpoint_begin'
+    execute_on = 'multiapp_fixed_point_begin'
   []
 []

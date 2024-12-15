@@ -40,18 +40,18 @@
 [Postprocessors]
   [num_coupling]
     type = NumFixedPointIterations
-    execute_on = 'initial fixedpoint_begin fixedpoint_end'
+    execute_on = 'initial multiapp_fixed_point_begin multiapp_fixed_point_end'
   []
   [norm]
     type = ElementL2Norm
     variable = u
-    execute_on = 'initial fixedpoint_begin fixedpoint_end'
+    execute_on = 'initial multiapp_fixed_point_begin multiapp_fixed_point_end'
   []
   [change_over_fixed_point]
     type = ChangeOverFixedPointPostprocessor
     postprocessor = norm
     change_with_respect_to_initial = false
-    execute_on = 'initial fixedpoint_end'
+    execute_on = 'initial multiapp_fixed_point_end'
   []
 []
 

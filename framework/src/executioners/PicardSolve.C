@@ -25,7 +25,7 @@ PicardSolve::validParams()
       1,
       "Specifies the maximum number of Picard iterations. "
       "Mainly used when wanting to do Picard iterations with MultiApps "
-      "that are set to execute_on fixedpoint_end or fixedpoint_begin. "
+      "that are set to execute_on multiapp_fixed_point_end or multiapp_fixed_point_begin. "
       "Setting this parameter to 1 turns off the Picard iterations.",
       "Deprecated, use fixed_point_max_its");
   params.addDeprecatedParam<bool>(
@@ -60,7 +60,8 @@ PicardSolve::validParams()
   params.addDeprecatedParam<bool>(
       "picard_force_norms",
       false,
-      "Force the evaluation of both the FIXEDPOINT_BEGIN and FIXEDPOINT_END norms regardless of "
+      "Force the evaluation of both the MULTIAPP_FIXED_POINT_BEGIN and MULTIAPP_FIXED_POINT_END "
+      "norms regardless of "
       "the existence of active MultiApps with those execute_on flags, default: false.",
       "Deprecated, use fixed_point_force_norms");
 

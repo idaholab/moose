@@ -592,14 +592,20 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
       ex->postStep();
       if (recurse_through_multiapp_levels)
       {
-        ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_BEGIN,
-                                           /*recurse_through_multiapp_levels=*/true);
-        ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_END,
-                                           /*recurse_through_multiapp_levels=*/true);
-        ex->feProblem().finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN,
-                                           /*recurse_through_multiapp_levels=*/true);
-        ex->feProblem().finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_END,
-                                           /*recurse_through_multiapp_levels=*/true);
+        if (ex->legacyTimeExecution())
+        {
+          ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_BEGIN,
+                                             /*recurse_through_multiapp_levels=*/true);
+          ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_END,
+                                             /*recurse_through_multiapp_levels=*/true);
+        }
+        else
+        {
+          ex->feProblem().finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
+                                             /*recurse_through_multiapp_levels=*/true);
+          ex->feProblem().finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END,
+                                             /*recurse_through_multiapp_levels=*/true);
+        }
       }
     }
   }

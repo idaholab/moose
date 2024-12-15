@@ -23,10 +23,6 @@ public:
 
   static InputParameters validParams();
 
-  /// Custom execute flags for fixed point iterations
-  static const ExecFlagType EXEC_FIXEDPOINT_BEGIN;
-  static const ExecFlagType EXEC_FIXEDPOINT_END;
-
   /**
    * Iteratively solves the FEProblem.
    * @return True if solver is converged.
@@ -147,8 +143,8 @@ protected:
   /**
    * Perform one fixed point iteration or a full solve.
    *
-   * @param begin_norm       Residual norm after fixedpoint_begin execution
-   * @param end_norm         Residual norm after fixedpoint_end execution
+   * @param begin_norm       Residual norm after multiapp_fixed_point_begin execution
+   * @param end_norm         Residual norm after multiapp_fixed_point_end execution
    * @param transformed_dofs DoFs targetted by the fixed point algorithm
    *
    * @return True if both nonlinear solve and the execution of multiapps are successful.
@@ -245,9 +241,9 @@ protected:
   unsigned int _main_fixed_point_it;
   /// Initial residual norm
   Real _fixed_point_initial_norm;
-  /// Full history of residual norm after evaluation of fixedpoint_begin
+  /// Full history of residual norm after evaluation of multiapp_fixed_point_begin
   std::vector<Real> _fixed_point_begin_norm;
-  /// Full history of residual norm after evaluation of fixedpoint_end
+  /// Full history of residual norm after evaluation of multiapp_fixed_point_end
   std::vector<Real> _fixed_point_end_norm;
   /// Status of fixed point solve
   MooseFixedPointConvergenceReason _fixed_point_status;

@@ -77,7 +77,7 @@
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = sub_level1.i
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
     keep_solution_during_restore = true
   []
 []
@@ -88,14 +88,14 @@
     source_variable = u
     variable = u
     to_multi_app = level1-
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
   [v_from_sub]
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     source_variable = v
     variable = v
     from_multi_app = level1-
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []
 

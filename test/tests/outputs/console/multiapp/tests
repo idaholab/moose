@@ -15,23 +15,23 @@
   [./ts_begin_multi_output]
     type = 'RunApp'
     input = 'picard_parent.i'
-    absent_out = "Fixed point residual norm after FIXEDPOINT_END"
+    absent_out = "Fixed point residual norm after MULTIAPP_FIXED_POINT_END"
 
-    requirement = "The system shall only output the coupling iteration residual FIXEDPOINT_BEGIN norms when there are no FIXEDPOINT_END Multiapps."
+    requirement = "The system shall only output the coupling iteration residual MULTIAPP_FIXED_POINT_BEGIN norms when there are no MULTIAPP_FIXED_POINT_END Multiapps."
   [../]
   [./ts_end_multi_output]
     type = 'RunApp'
     input = 'picard_parent.i'
-    absent_out = "Fixed point residual norm after FIXEDPOINT_BEGIN"
+    absent_out = "Fixed point residual norm after MULTIAPP_FIXED_POINT_BEGIN"
     cli_args = 'MultiApps/sub/execute_on=timestep_end'
 
-    requirement = "The system shall only output the coupling iteration FIXEDPOINT_END norms when there are no FIXEDPOINT_BEGIN Multiapps."
+    requirement = "The system shall only output the coupling iteration MULTIAPP_FIXED_POINT_END norms when there are no MULTIAPP_FIXED_POINT_BEGIN Multiapps."
   [../]
   [./ts_both_multi_output]
     type = 'RunApp'
     input = 'picard_parent_both.i'
-    expect_out = "Fixed point residual norm after FIXEDPOINT_BEGIN.*Fixed point residual norm after FIXEDPOINT_END"
+    expect_out = "Fixed point residual norm after MULTIAPP_FIXED_POINT_BEGIN.*Fixed point residual norm after MULTIAPP_FIXED_POINT_END"
 
-    requirement = "The system shall output the coupling iteration residual norm for FIXEDPOINT_BEGIN and FIXEDPOINT_END Multiapps when both exist in the simulation."
+    requirement = "The system shall output the coupling iteration residual norm for MULTIAPP_FIXED_POINT_BEGIN and MULTIAPP_FIXED_POINT_END Multiapps when both exist in the simulation."
   [../]
 []

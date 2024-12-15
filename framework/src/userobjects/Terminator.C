@@ -171,8 +171,8 @@ Terminator::execute()
           executioner->fixedPointSolve().failStep();
         else
         {
-          if (_fe_problem.getCurrentExecuteOnFlag() == FixedPointSolve::EXEC_FIXEDPOINT_BEGIN ||
-              _fe_problem.getCurrentExecuteOnFlag() == FixedPointSolve::EXEC_FIXEDPOINT_END)
+          if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_MULTIAPP_FIXED_POINT_BEGIN ||
+              _fe_problem.getCurrentExecuteOnFlag() == EXEC_MULTIAPP_FIXED_POINT_END)
             executioner->fixedPointSolve().failStep();
           else
           {

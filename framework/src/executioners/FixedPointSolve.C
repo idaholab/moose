@@ -18,10 +18,6 @@
 #include "EigenExecutionerBase.h"
 #include "ExecFlagRegistry.h"
 
-const ExecFlagType FixedPointSolve::EXEC_FIXEDPOINT_BEGIN =
-    registerDefaultExecFlag("FIXEDPOINT_BEGIN");
-const ExecFlagType FixedPointSolve::EXEC_FIXEDPOINT_END = registerDefaultExecFlag("FIXEDPOINT_END");
-
 InputParameters
 FixedPointSolve::validParams()
 {
@@ -220,8 +216,6 @@ FixedPointSolve::solve()
     _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
     _problem.backupMultiApps(EXEC_TIMESTEP_END);
   }
-  _problem.backupMultiApps(EXEC_FIXEDPOINT_BEGIN);
-  _problem.backupMultiApps(EXEC_FIXEDPOINT_END);
   _problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
 
   // Prepare to relax variables as a main app
@@ -290,8 +284,6 @@ FixedPointSolve::solve()
           _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
           _problem.restoreMultiApps(EXEC_TIMESTEP_END);
         }
-        _problem.restoreMultiApps(EXEC_FIXEDPOINT_BEGIN);
-        _problem.restoreMultiApps(EXEC_FIXEDPOINT_END);
         _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
@@ -335,7 +327,7 @@ FixedPointSolve::solve()
       break;
     }
 
-    if (converged)
+    if (converged && _legacy_execute_on)
     {
       // Fixed point iteration loop ends right above
       _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
@@ -401,38 +393,46 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   _executioner.preSolve();
   if (_legacy_execute_on)
-    _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-  _problem.execTransfers(EXEC_FIXEDPOINT_BEGIN);
-
-  if (_fixed_point_it == 0)
   {
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-    if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, autoAdvance()))
+    _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+
+    if (_fixed_point_it == 0)
+    {
+      _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+      if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, autoAdvance()))
+      {
+        _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+        return false;
+      }
+      _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+      _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+    }
+
+    if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
       return false;
     }
-    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-  }
 
-  if (_legacy_execute_on && !_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-    return false;
-  }
-  if (!_problem.execMultiApps(EXEC_FIXEDPOINT_BEGIN, auto_advance))
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-    return false;
-  }
+    if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
+      _problem.updateMeshXFEM();
 
-  if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
-    _problem.updateMeshXFEM();
-
-  if (_legacy_execute_on)
     _problem.execute(EXEC_TIMESTEP_BEGIN);
-  _problem.execute(EXEC_FIXEDPOINT_BEGIN);
+  }
+  else
+  {
+    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+    if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, auto_advance))
+    {
+      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+      return false;
+    }
+
+    if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
+      _problem.updateMeshXFEM();
+
+    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  }
 
   // Transform the fixed point postprocessors before solving, but after the fixedpoint_begin
   // transfers have been received
@@ -444,18 +444,20 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   if (_has_fixed_point_its && _has_fixed_point_norm)
     if ((_legacy_execute_on && _problem.hasMultiApps(EXEC_TIMESTEP_BEGIN)) ||
-        _problem.hasMultiApps(EXEC_FIXEDPOINT_BEGIN) || _fixed_point_force_norms)
+        _problem.hasMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN) || _fixed_point_force_norms)
     {
       begin_norm = _problem.computeResidualL2Norm();
 
-      _console << COLOR_MAGENTA << "Fixed point residual norm after FIXEDPOINT_BEGIN MultiApps: "
+      _console << COLOR_MAGENTA
+               << "Fixed point residual norm after MULTIAPP_FIXED_POINT_BEGIN MultiApps: "
                << Console::outputNorm(begin_norm_old, begin_norm) << std::endl;
     }
 
   // Perform output for timestep begin
   if (_legacy_execute_on)
     _problem.outputStep(EXEC_TIMESTEP_BEGIN);
-  _problem.outputStep(EXEC_FIXEDPOINT_BEGIN);
+  else
+    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
 
   // Update warehouse active objects
   _problem.updateActiveObjects();
@@ -495,15 +497,6 @@ FixedPointSolve::solveStep(Real & begin_norm,
       _console << "\nXFEM did not modify mesh, continuing" << std::endl;
     }
 
-    _problem.execute(EXEC_FIXEDPOINT_END);
-
-    _problem.execTransfers(EXEC_FIXEDPOINT_END);
-    if (!_problem.execMultiApps(EXEC_FIXEDPOINT_END, auto_advance))
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-      return false;
-    }
-
     if (_legacy_execute_on)
     {
       _problem.onTimestepEnd();
@@ -516,7 +509,19 @@ FixedPointSolve::solveStep(Real & begin_norm,
         return false;
       }
     }
-    _problem.outputStep(EXEC_FIXEDPOINT_END);
+    else
+    {
+      _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+
+      _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+      if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, auto_advance))
+      {
+        _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+        return false;
+      }
+
+      _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+    }
   }
 
   if (_fail_step)
@@ -529,11 +534,12 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   if (_has_fixed_point_its && _has_fixed_point_norm)
     if ((_legacy_execute_on && _problem.hasMultiApps(EXEC_TIMESTEP_END)) ||
-        _problem.hasMultiApps(EXEC_FIXEDPOINT_END) || _fixed_point_force_norms)
+        _problem.hasMultiApps(EXEC_MULTIAPP_FIXED_POINT_END) || _fixed_point_force_norms)
     {
       end_norm = _problem.computeResidualL2Norm();
 
-      _console << COLOR_MAGENTA << "Fixed point residual norm after FIXEDPOINT_END MultiApps: "
+      _console << COLOR_MAGENTA
+               << "Fixed point residual norm after MULTIAPP_FIXED_POINT_END MultiApps: "
                << Console::outputNorm(end_norm_old, end_norm) << std::endl;
     }
 

@@ -56,7 +56,7 @@
     normalization = unorm
     # this coefficient will affect the eigenvalue.
     normal_factor = 10
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   [../]
 []
 
@@ -119,7 +119,7 @@
   [./sub]
     type = FullSolveMultiApp
     input_files = ne_coupled_picard_sub.i
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   [../]
 []
 

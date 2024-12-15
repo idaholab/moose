@@ -62,7 +62,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_begin_transfer_end.csv app_begin_transfer_end_sub0_csv.csv'
       allow_warnings = true
-      cli_args = 'Transfers/v_from_sub/execute_on=fixedpoint_end Transfers/u_to_sub/execute_on=fixedpoint_end Outputs/file_base=app_begin_transfer_end'
+      cli_args = 'Transfers/v_from_sub/execute_on=multiapp_fixed_point_end Transfers/u_to_sub/execute_on=multiapp_fixed_point_end Outputs/file_base=app_begin_transfer_end'
       detail = 'with the sub-app executed at the beginning of each time step and variable transfers executed at the end of each timestep,'
     []
 
@@ -71,7 +71,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_begin.csv app_end_transfer_begin_sub0_csv.csv'
       allow_warnings = true
-      cli_args = 'MultiApps/sub/execute_on=fixedpoint_end Transfers/v_from_sub/execute_on=fixedpoint_begin Transfers/u_to_sub/execute_on=fixedpoint_begin Outputs/file_base=app_end_transfer_begin'
+      cli_args = 'MultiApps/sub/execute_on=multiapp_fixed_point_end Transfers/v_from_sub/execute_on=multiapp_fixed_point_begin Transfers/u_to_sub/execute_on=multiapp_fixed_point_begin Outputs/file_base=app_end_transfer_begin'
       detail = 'with the sub-app executed at the end of each time step and variable transfers executed at the beginning of each timestep,'
     []
 
@@ -79,7 +79,7 @@
       type = 'CSVDiff'
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_end.csv app_end_transfer_end_sub0_csv.csv'
-      cli_args = 'MultiApps/sub/execute_on=fixedpoint_end Transfers/v_from_sub/execute_on=fixedpoint_end Transfers/u_to_sub/execute_on=fixedpoint_end Outputs/file_base=app_end_transfer_end'
+      cli_args = 'MultiApps/sub/execute_on=multiapp_fixed_point_end Transfers/v_from_sub/execute_on=multiapp_fixed_point_end Transfers/u_to_sub/execute_on=multiapp_fixed_point_end Outputs/file_base=app_end_transfer_end'
       detail = 'with the sub-app and the variable transfers executed at the end of each time step.'
     []
 
@@ -96,7 +96,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_begin_transfer_end_secant_sub.csv app_begin_transfer_end_secant_sub_sub0_csv.csv'
       allow_warnings = true
-      cli_args = "Transfers/v_from_sub/execute_on=fixedpoint_end Transfers/u_to_sub/execute_on=fixedpoint_end Executioner/transformed_variables='' MultiApps/sub/transformed_variables='v' Outputs/file_base=app_begin_transfer_end_secant_sub"
+      cli_args = "Transfers/v_from_sub/execute_on=multiapp_fixed_point_end Transfers/u_to_sub/execute_on=multiapp_fixed_point_end Executioner/transformed_variables='' MultiApps/sub/transformed_variables='v' Outputs/file_base=app_begin_transfer_end_secant_sub"
       detail = 'for when updating the subapp variables with the sub-app executed at the beginning of each time step and variable transfers executed at the end of each timestep,'
     []
 
@@ -105,7 +105,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_begin_secant_sub.csv'
       allow_warnings = true
-      cli_args = "MultiApps/sub/execute_on=fixedpoint_end Transfers/v_from_sub/execute_on=fixedpoint_begin Transfers/u_to_sub/execute_on=fixedpoint_begin Executioner/transformed_variables='' MultiApps/sub/transformed_variables='v' Outputs/file_base=app_end_transfer_begin_secant_sub"
+      cli_args = "MultiApps/sub/execute_on=multiapp_fixed_point_end Transfers/v_from_sub/execute_on=multiapp_fixed_point_begin Transfers/u_to_sub/execute_on=multiapp_fixed_point_begin Executioner/transformed_variables='' MultiApps/sub/transformed_variables='v' Outputs/file_base=app_end_transfer_begin_secant_sub"
       detail = 'for updating the subapp variables with the sub-app executed at the end of each time step and variable transfers executed at the beginning of each timestep,'
     []
 
@@ -113,7 +113,7 @@
       type = 'CSVDiff'
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_end_secant_sub.csv'
-      cli_args = "MultiApps/sub/execute_on=fixedpoint_end Transfers/v_from_sub/execute_on=fixedpoint_end Transfers/u_to_sub/execute_on=fixedpoint_end Executioner/transformed_variables='' MultiApps/sub/transformed_variables='v' Outputs/file_base=app_end_transfer_end_secant_sub"
+      cli_args = "MultiApps/sub/execute_on=multiapp_fixed_point_end Transfers/v_from_sub/execute_on=multiapp_fixed_point_end Transfers/u_to_sub/execute_on=multiapp_fixed_point_end Executioner/transformed_variables='' MultiApps/sub/transformed_variables='v' Outputs/file_base=app_end_transfer_end_secant_sub"
       detail = 'and for updating the subapp variables with the sub-app and the variable transfers executed at the end of each time step.'
     []
   []

@@ -60,7 +60,7 @@
     type = FullSolveMultiApp
     keep_solution_during_restore = true
     input_files = ne_coupled_picard_subT_sub.i
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   [../]
 []
 
@@ -70,14 +70,14 @@
     to_multi_app = sub
     source_variable = T
     variable = T
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   [../]
   [./power_from_sub]
     type = MultiAppShapeEvaluationTransfer
     from_multi_app = sub
     source_variable = power
     variable = power
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   [../]
 []
 

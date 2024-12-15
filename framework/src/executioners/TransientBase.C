@@ -305,10 +305,6 @@ TransientBase::execute()
                                   /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
-      _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN,
-                                  /*recurse_through_multiapp_levels=*/true);
-      _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_END,
-                                  /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END,
                                   /*recurse_through_multiapp_levels=*/true);
     }
@@ -368,8 +364,6 @@ TransientBase::incrementStepOrReject()
         _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
-        _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN);
-        _problem.finishMultiAppStep(FixedPointSolve::EXEC_FIXEDPOINT_END);
         _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
@@ -381,8 +375,6 @@ TransientBase::incrementStepOrReject()
       _problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
       _problem.incrementMultiAppTStep(EXEC_TIMESTEP_BEGIN);
       _problem.incrementMultiAppTStep(EXEC_TIMESTEP_END);
-      _problem.incrementMultiAppTStep(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN);
-      _problem.incrementMultiAppTStep(FixedPointSolve::EXEC_FIXEDPOINT_END);
       _problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_END);
     }
   }
@@ -391,8 +383,6 @@ TransientBase::incrementStepOrReject()
     _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
-    _problem.restoreMultiApps(FixedPointSolve::EXEC_FIXEDPOINT_BEGIN, true);
-    _problem.restoreMultiApps(FixedPointSolve::EXEC_FIXEDPOINT_END, true);
     _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
     _time_stepper->rejectStep();
     _time = _time_old;
@@ -592,8 +582,6 @@ TransientBase::computeConstrainedDT()
   constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_BEGIN);
   constrainDTFromMultiApp(dt_cur, diag, EXEC_TIMESTEP_BEGIN);
   constrainDTFromMultiApp(dt_cur, diag, EXEC_TIMESTEP_END);
-  constrainDTFromMultiApp(dt_cur, diag, FixedPointSolve::EXEC_FIXEDPOINT_BEGIN);
-  constrainDTFromMultiApp(dt_cur, diag, FixedPointSolve::EXEC_FIXEDPOINT_END);
   constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_END);
 
   if (_verbose)

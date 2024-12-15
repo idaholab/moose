@@ -5141,7 +5141,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 
   if (!_app.parameters().get<bool>("use_legacy_fixed_point_execute_on") &&
       !parameters.isParamSetByUser("execute_on"))
-    parameters.set<ExecFlagEnum>("execute_on", true) = FixedPointSolve::EXEC_FIXEDPOINT_BEGIN;
+    parameters.set<ExecFlagEnum>("execute_on", true) = EXEC_MULTIAPP_FIXED_POINT_BEGIN;
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
   logAdd("MultiApp", name, multi_app_name, parameters);
@@ -5511,7 +5511,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   {
     if (!_app.parameters().get<bool>("use_legacy_fixed_point_execute_on") &&
         !parameters.isParamSetByUser("execute_on"))
-      parameters.set<ExecFlagEnum>("execute_on", true) = FixedPointSolve::EXEC_FIXEDPOINT_BEGIN;
+      parameters.set<ExecFlagEnum>("execute_on", true) = EXEC_MULTIAPP_FIXED_POINT_BEGIN;
   }
 
   // Create the Transfer objects

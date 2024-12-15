@@ -25,7 +25,7 @@
     variable = w
     source_variable = v
     normal_factor = 0.1
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []
 
@@ -87,11 +87,11 @@
   []
   [time]
     type = TimePostprocessor
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
   [dt]
     type = TimestepSize
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []
 
@@ -112,7 +112,7 @@
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = picard_sub2.i
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   []
 []
 

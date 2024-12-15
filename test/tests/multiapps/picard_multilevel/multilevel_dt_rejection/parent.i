@@ -71,7 +71,7 @@
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = picard_sub.i
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []
 
@@ -99,10 +99,10 @@
 [Postprocessors]
   [time]
     type = TimePostprocessor
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
   [dt]
     type = TimestepSize
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []

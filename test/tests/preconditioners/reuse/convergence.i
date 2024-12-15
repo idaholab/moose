@@ -97,7 +97,7 @@
 
 [Reporters/iteration_info]
   type = IterationInfo
-  execute_on = fixedpoint_end
+  execute_on = multiapp_fixed_point_end
 []
 
 [Outputs]

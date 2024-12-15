@@ -52,7 +52,7 @@
   [cumulative_picard_its_pp]
     type = TestPostprocessor
     test_type = custom_execute_on
-    execute_on = 'fixedpoint_end'
+    execute_on = 'multiapp_fixed_point_end'
   []
 []
 
@@ -81,7 +81,7 @@
     positions = '0 0 0'
     input_files = picard_sub2.i
     sub_cycling = true
-    execute_on = fixedpoint_end
+    execute_on = multiapp_fixed_point_end
   []
 []
 
