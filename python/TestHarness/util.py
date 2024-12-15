@@ -726,7 +726,10 @@ def checkInstalled(executable, app_name):
     Read resource file and determine if binary was relocated
     """
     option_set = set(['ALL'])
-    resource_content = readResourceFile(executable, app_name)
+    if executable:
+        resource_content = readResourceFile(executable, app_name)
+    else:
+        resource_content = {}
     option_set.add(resource_content.get('installation_type', 'ALL').upper())
     return option_set
 

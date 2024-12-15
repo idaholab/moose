@@ -27,6 +27,9 @@ import pyhit
 
 import argparse
 
+# Directory the test harness is in
+testharness_dir = os.path.dirname(os.path.realpath(__file__))
+
 def readTestRoot(fname):
 
     root = pyhit.load(fname)
@@ -1002,27 +1005,28 @@ class TestHarness:
         # Now that the scheduler is setup, initialize the results storage
         # Save executable-under-test name to self.executable
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
-        self.executable = app_name + '-' + self.options.method + exec_suffix
+        executable = f'{app_name}-{self.options.method}{exec_suffix}'
         self.app_name = app_name
 
-        # if the executable has a slash - assume it is a file path
-        if '/' in app_name:
-            self.executable = os.path.abspath(self.executable)
-        # look for executable in PATH - if not there, check other places.
-        elif os.path.exists(os.path.join(os.getcwd(), self.executable)):
-            # it's in the current working directory
-            self.executable = os.getcwd() + '/' + self.executable
-        elif os.path.exists(os.path.join(self._rootdir, self.executable)):
-            # it's in the testroot file's directory
-            self.executable = self.executable
-            # we may be hopping around between multiple (module)
-            # subdirectories of tests - so the executable needs to be an
-            # absolute path.
-            self.executable = os.path.abspath(os.path.join(self._rootdir, self.executable))
+        # Find the app executable
+        self.executable = None
+        if os.path.isabs(executable):
+            self.executable = executable
         else:
-            # it's (hopefully) in an installed location
-            mydir = os.path.dirname(os.path.realpath(__file__))
-            self.executable = os.path.join(mydir, '../../../..', 'bin', self.executable)
+            # Directories to search in
+            dirs = [self._orig_cwd, os.getcwd(), self._rootdir,
+                    os.path.join(testharness_dir, '../../../../bin')]
+            dirs = list(dict.fromkeys(dirs)) # remove duplicates
+            for dir in dirs:
+                path = os.path.join(dir, executable)
+                if os.path.exists(path):
+                    self.executable = path
+                    break
+            if self.executable is None and shutil.which(executable):
+                self.executable = shutil.which(executable)
+
+        if self.executable is not None:
+            self.executable = os.path.normpath(self.executable)
 
         # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
         if self.options.output_dir:
