@@ -11,7 +11,7 @@
 
 #include "libmesh/libmesh.h"
 
-#include "libmesh/petsc_macro.h"
+#include "libmesh/petsc_solver_exception.h"
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscts.h>

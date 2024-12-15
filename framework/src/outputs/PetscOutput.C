@@ -238,17 +238,16 @@ PetscOutput::solveSetup()
   NonlinearSystemBase & nl = _problem_ptr->currentNonlinearSystem();
   SNES snes = nl.getSNES();
   KSP ksp;
-  auto ierr = SNESGetKSP(snes, &ksp);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(), SNESGetKSP(snes, &ksp));
 
   // Set the PETSc monitor functions (register the nonlinear callback so that linear outputs
   // get an updated nonlinear iteration number)
   // Not every Output should register its own DM monitor! Just register one each of nonlinear
   // and linear and dispatch all Outputs from there!
-  ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(),
+                    SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR));
+  LibmeshPetscCallA(_communicator.get(),
+                    KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR));
 }
 
 Real

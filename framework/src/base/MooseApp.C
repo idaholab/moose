@@ -1157,9 +1157,7 @@ MooseApp::executeExecutioner()
   // run the simulation
   if (_use_executor && _executor)
   {
-    auto ierr = Moose::PetscSupport::petscSetupOutput(_command_line.get());
-    LIBMESH_CHKERR(ierr);
-
+    LibmeshPetscCall(Moose::PetscSupport::petscSetupOutput(_command_line.get()));
     _executor->init();
     errorCheck();
     auto result = _executor->exec();
@@ -1168,8 +1166,7 @@ MooseApp::executeExecutioner()
   }
   else if (_executioner)
   {
-    auto ierr = Moose::PetscSupport::petscSetupOutput(_command_line.get());
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCall(Moose::PetscSupport::petscSetupOutput(_command_line.get()));
     _executioner->init();
     errorCheck();
     _executioner->execute();

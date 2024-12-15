@@ -230,10 +230,7 @@ NonlinearSystem::solve()
   checkInvalidSolution();
 
   if (_use_coloring_finite_difference)
-  {
-    auto ierr = MatFDColoringDestroy(&_fdcoloring);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(MatFDColoringDestroy(&_fdcoloring));
 }
 
 void
@@ -293,12 +290,11 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   PetscMatrix<Number> * petsc_mat =
       static_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
-  auto ierr = SNESSetJacobian(petsc_nonlinear_solver->snes(),
-                              petsc_mat->mat(),
-                              petsc_mat->mat(),
-                              SNESComputeJacobianDefault,
-                              nullptr);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(SNESSetJacobian(petsc_nonlinear_solver->snes(),
+                                   petsc_mat->mat(),
+                                   petsc_mat->mat(),
+                                   SNESComputeJacobianDefault,
+                                   nullptr));
 }
 
 void
@@ -321,44 +317,35 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 
   petsc_mat->close();
 
-  auto ierr = (PetscErrorCode)0;
   ISColoring iscoloring;
 
   // PETSc 3.5.x
   MatColoring matcoloring;
-  ierr = MatColoringCreate(petsc_mat->mat(), &matcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = MatColoringSetType(matcoloring, MATCOLORINGLF);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = MatColoringSetFromOptions(matcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = MatColoringApply(matcoloring, &iscoloring);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = MatColoringDestroy(&matcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(), MatColoringCreate(petsc_mat->mat(), &matcoloring));
+  LibmeshPetscCallA(_communicator.get(), MatColoringSetType(matcoloring, MATCOLORINGLF));
+  LibmeshPetscCallA(_communicator.get(), MatColoringSetFromOptions(matcoloring));
+  LibmeshPetscCallA(_communicator.get(), MatColoringApply(matcoloring, &iscoloring));
+  LibmeshPetscCallA(_communicator.get(), MatColoringDestroy(&matcoloring));
 
-  ierr = MatFDColoringCreate(petsc_mat->mat(), iscoloring, &_fdcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = MatFDColoringSetFromOptions(_fdcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(),
+                    MatFDColoringCreate(petsc_mat->mat(), iscoloring, &_fdcoloring));
+  LibmeshPetscCallA(_communicator.get(), MatFDColoringSetFromOptions(_fdcoloring));
   // clang-format off
-  ierr =MatFDColoringSetFunction(_fdcoloring,
-                           (PetscErrorCode(*)(void))(void (*)(void)) &
-                               libMesh::libmesh_petsc_snes_fd_residual,
-                           &petsc_nonlinear_solver);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(), MatFDColoringSetFunction(_fdcoloring,
+                                                                  (PetscErrorCode(*)(void))(void (*)(void)) &
+                                                                      libMesh::libmesh_petsc_snes_fd_residual,
+                                                                  &petsc_nonlinear_solver));
   // clang-format on
-  ierr = MatFDColoringSetUp(petsc_mat->mat(), iscoloring, _fdcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
-  ierr = SNESSetJacobian(petsc_nonlinear_solver.snes(),
-                         petsc_mat->mat(),
-                         petsc_mat->mat(),
-                         SNESComputeJacobianDefaultColor,
-                         _fdcoloring);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(),
+                    MatFDColoringSetUp(petsc_mat->mat(), iscoloring, _fdcoloring));
+  LibmeshPetscCallA(_communicator.get(),
+                    SNESSetJacobian(petsc_nonlinear_solver.snes(),
+                                    petsc_mat->mat(),
+                                    petsc_mat->mat(),
+                                    SNESComputeJacobianDefaultColor,
+                                    _fdcoloring));
   // PETSc >=3.3.0
-  ierr = ISColoringDestroy(&iscoloring);
-  CHKERRABORT(_communicator.get(), ierr);
+  LibmeshPetscCallA(_communicator.get(), ISColoringDestroy(&iscoloring));
 }
 
 bool

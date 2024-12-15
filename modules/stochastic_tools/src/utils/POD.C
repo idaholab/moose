@@ -71,14 +71,17 @@ POD::computePOD(const VariableName & vname,
   _communicator.max(snapshot_size);
 
   // Generally snapshot matrices are dense.
-  LIBMESH_CHKERR(MatCreateDense(
-      _communicator.get(), local_rows, PETSC_DECIDE, global_rows, snapshot_size, NULL, &mat));
+  LibmeshPetscCallA(
+      _communicator.get(),
+      MatCreateDense(
+          _communicator.get(), local_rows, PETSC_DECIDE, global_rows, snapshot_size, NULL, &mat));
 
   // Check where the local rows begin in the matrix, we use these to convert from local to
   // global indices
   dof_id_type local_beg = 0;
   dof_id_type local_end = 0;
-  LIBMESH_CHKERR(
+  LibmeshPetscCallA(
+      _communicator.get(),
       MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end)));
 
   unsigned int counter = 0;
@@ -95,61 +98,67 @@ POD::computePOD(const VariableName & vname,
         std::iota(std::begin(columns), std::end(columns), 0);
 
         // Set the rows in the "sparse" matrix
-        LIBMESH_CHKERR(MatSetValues(mat,
-                                    1,
-                                    rows.data(),
-                                    snapshot_size,
-                                    columns.data(),
-                                    snap.get_values().data(),
-                                    INSERT_VALUES));
+        LibmeshPetscCallA(_communicator.get(),
+                          MatSetValues(mat,
+                                       1,
+                                       rows.data(),
+                                       snapshot_size,
+                                       columns.data(),
+                                       snap.get_values().data(),
+                                       INSERT_VALUES));
       }
     }
 
   // Assemble the matrix
-  LIBMESH_CHKERR(MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY));
-  LIBMESH_CHKERR(MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallA(_communicator.get(), MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallA(_communicator.get(), MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY));
 
   SVD svd;
-  LIBMESH_CHKERR(SVDCreate(_communicator.get(), &svd));
+  LibmeshPetscCallA(_communicator.get(), SVDCreate(_communicator.get(), &svd));
   // Now we set the operators for our SVD objects
-  LIBMESH_CHKERR(SVDSetOperators(svd, mat, NULL));
+  LibmeshPetscCallA(_communicator.get(), SVDSetOperators(svd, mat, NULL));
 
   // Set the parallel operation mode to "DISTRIBUTED", default is "REDUNDANT"
   DS ds;
-  LIBMESH_CHKERR(SVDGetDS(svd, &ds));
-  LIBMESH_CHKERR(DSSetParallel(ds, DS_PARALLEL_DISTRIBUTED));
+  LibmeshPetscCallA(_communicator.get(), SVDGetDS(svd, &ds));
+  LibmeshPetscCallA(_communicator.get(), DSSetParallel(ds, DS_PARALLEL_DISTRIBUTED));
 
   // We want the Lanczos method, might give the choice to the user
   // at some point
-  LIBMESH_CHKERR(SVDSetType(svd, SVDTRLANCZOS));
+  LibmeshPetscCallA(_communicator.get(), SVDSetType(svd, SVDTRLANCZOS));
 
   // Default is the transpose is explicitly created. This method is less efficient
   // computationally but better for storage
-  LIBMESH_CHKERR(SVDSetImplicitTranspose(svd, PETSC_TRUE));
+  LibmeshPetscCallA(_communicator.get(), SVDSetImplicitTranspose(svd, PETSC_TRUE));
 
-  LIBMESH_CHKERR(PetscOptionsInsertString(NULL, _extra_slepc_options.c_str()));
+  LibmeshPetscCallA(_communicator.get(),
+                    PetscOptionsInsertString(NULL, _extra_slepc_options.c_str()));
 
   // Set the subspace size for the Lanczos method, we take twice as many
   // basis vectors as the requested number of POD modes. This guarantees in most of the case the
   // convergence of the singular triplets.
-  LIBMESH_CHKERR(SVDSetDimensions(
-      svd, num_modes, std::min(2 * num_modes, global_rows), std::min(2 * num_modes, global_rows)));
+  LibmeshPetscCallA(_communicator.get(),
+                    SVDSetDimensions(svd,
+                                     num_modes,
+                                     std::min(2 * num_modes, global_rows),
+                                     std::min(2 * num_modes, global_rows)));
 
   // Gives the user the ability to override any option set before the solve.
-  LIBMESH_CHKERR(SVDSetFromOptions(svd));
+  LibmeshPetscCallA(_communicator.get(), SVDSetFromOptions(svd));
 
   // Compute the singular value triplets
-  LIBMESH_CHKERR(SVDSolve(svd));
+  LibmeshPetscCallA(_communicator.get(), SVDSolve(svd));
 
   // Check how many singular triplets converged
   PetscInt nconv;
-  LIBMESH_CHKERR(SVDGetConverged(svd, &nconv));
+  LibmeshPetscCallA(_communicator.get(), SVDGetConverged(svd, &nconv));
 
   // We start extracting the basis functions and the singular values.
 
   // Find the local size needed for u
   dof_id_type local_snapsize = 0;
-  LIBMESH_CHKERR(MatGetLocalSize(mat, NULL, numeric_petsc_cast(&local_snapsize)));
+  LibmeshPetscCallA(_communicator.get(),
+                    MatGetLocalSize(mat, NULL, numeric_petsc_cast(&local_snapsize)));
 
   PetscVector<Real> u(_communicator);
   u.init(snapshot_size, local_snapsize, false, PARALLEL);
@@ -164,7 +173,8 @@ POD::computePOD(const VariableName & vname,
   singular_values.resize(nconv);
   // Fetch the singular value triplet and immediately save the singular value
   for (PetscInt j = 0; j < nconv; ++j)
-    LIBMESH_CHKERR(SVDGetSingularTriplet(svd, j, &singular_values[j], NULL, NULL));
+    LibmeshPetscCallA(_communicator.get(),
+                      SVDGetSingularTriplet(svd, j, &singular_values[j], NULL, NULL));
 
   // Determine how many modes we need
   unsigned int num_requested_modes = determineNumberOfModes(singular_values, num_modes, energy);
@@ -174,12 +184,12 @@ POD::computePOD(const VariableName & vname,
   right_basis_functions.resize(num_requested_modes);
   for (PetscInt j = 0; j < cast_int<PetscInt>(num_requested_modes); ++j)
   {
-    LIBMESH_CHKERR(SVDGetSingularTriplet(svd, j, NULL, v.vec(), u.vec()));
+    LibmeshPetscCallA(_communicator.get(), SVDGetSingularTriplet(svd, j, NULL, v.vec(), u.vec()));
     u.localize(left_basis_functions[j].get_values());
     v.localize(right_basis_functions[j].get_values());
   }
-  LIBMESH_CHKERR(MatDestroy(&mat));
-  LIBMESH_CHKERR(SVDDestroy(&svd));
+  LibmeshPetscCallA(_communicator.get(), MatDestroy(&mat));
+  LibmeshPetscCallA(_communicator.get(), SVDDestroy(&svd));
 #else
   // These variables would otherwise be unused
   libmesh_ignore(vname);

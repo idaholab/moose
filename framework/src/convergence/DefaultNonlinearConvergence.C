@@ -103,38 +103,32 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
 
   SNES snes = system.getSNES();
 
-  PetscErrorCode ierr;
-
   // ||u||
   PetscReal xnorm;
-  ierr = SNESGetSolutionNorm(snes, &xnorm);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetSolutionNorm(snes, &xnorm));
 
   // ||r||
   PetscReal fnorm;
-  ierr = SNESGetFunctionNorm(snes, &fnorm);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetFunctionNorm(snes, &fnorm));
 
   // ||du||
   PetscReal snorm;
-  ierr = SNESGetUpdateNorm(snes, &snorm);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetUpdateNorm(snes, &snorm));
 
   // Get current number of function evaluations done by SNES
   PetscInt nfuncs;
-  ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetNumberFunctionEvals(snes, &nfuncs));
 
   // Get tolerances from SNES
   PetscReal abs_tol, rel_tol, rel_step_tol;
   PetscInt max_its, max_funcs;
-  ierr = SNESGetTolerances(snes, &abs_tol, &rel_tol, &rel_step_tol, &max_its, &max_funcs);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(
+      _fe_problem.comm().get(),
+      SNESGetTolerances(snes, &abs_tol, &rel_tol, &rel_step_tol, &max_its, &max_funcs));
 
 #if !PETSC_VERSION_LESS_THAN(3, 8, 4)
   PetscBool force_iteration = PETSC_FALSE;
-  ierr = SNESGetForceIteration(snes, &force_iteration);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetForceIteration(snes, &force_iteration));
 
   // if PETSc says to force iteration, then force at least one iteration
   if (force_iteration && !(_nl_forced_its))
@@ -143,8 +137,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   // if specified here to force iteration, but PETSc doesn't know, tell it
   if (!force_iteration && (_nl_forced_its))
   {
-    ierr = SNESSetForceIteration(snes, PETSC_TRUE);
-    CHKERRABORT(_fe_problem.comm().get(), ierr);
+    LibmeshPetscCallA(_fe_problem.comm().get(), SNESSetForceIteration(snes, PETSC_TRUE));
   }
 #endif
 
@@ -152,8 +145,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   // SNESSetFunctionDomainError() and SNESGetFunctionDomainError()
   // were added in different releases of PETSc.
   PetscBool domainerror;
-  ierr = SNESGetFunctionDomainError(snes, &domainerror);
-  CHKERRABORT(_fe_problem.comm().get(), ierr);
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetFunctionDomainError(snes, &domainerror));
   if (domainerror)
     status = MooseConvergenceStatus::DIVERGED;
 
@@ -240,9 +232,9 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
     MooseUtils::indentMessage(_app.name(), msg);
   if (msg.length() > 0)
 #if !PETSC_VERSION_LESS_THAN(3, 17, 0)
-    ierr = PetscInfo(snes, "%s", msg.c_str());
+    LibmeshPetscCallA(_fe_problem.comm().get(), PetscInfo(snes, "%s", msg.c_str()));
 #else
-    ierr = PetscInfo(snes, msg.c_str());
+    LibmeshPetscCallA(_fe_problem.comm().get(), PetscInfo(snes, msg.c_str()));
 #endif
 
   verboseOutput(oss);

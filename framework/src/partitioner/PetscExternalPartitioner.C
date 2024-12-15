@@ -16,6 +16,7 @@
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/petsc_solver_exception.h"
 
 using namespace libMesh;
 
@@ -203,7 +204,6 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
                                          const std::string & part_package,
                                          std::vector<dof_id_type> & partition)
 {
-  PetscErrorCode ierr;
   Mat dual;
   PetscInt num_local_elems, num_elems, *xadj = nullptr, *adjncy = nullptr, i, *values = nullptr,
                                        *petsc_elem_weights = nullptr;
@@ -216,8 +216,7 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   // Figure out the total of elements
   comm.sum(num_elems);
 
-  ierr = PetscCalloc1(num_local_elems + 1, &xadj);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), PetscCalloc1(num_local_elems + 1, &xadj));
 
   num_local_elems = 0;
   xadj[0] = 0;
@@ -227,8 +226,7 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
     xadj[num_local_elems] = xadj[num_local_elems - 1] + row.size();
   }
 
-  ierr = PetscCalloc1(xadj[num_local_elems], &adjncy);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), PetscCalloc1(xadj[num_local_elems], &adjncy));
 
   // Fill up adjacency
   i = 0;
@@ -249,24 +247,21 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
     mooseAssert((PetscInt)side_weights.size() == i,
                 "Side weight size " << side_weights.size()
                                     << " does not match with adjacency matrix size " << i);
-    ierr = PetscCalloc1(side_weights.size(), &values);
-    CHKERRABORT(comm.get(), ierr);
+    LibmeshPetscCallA(comm.get(), PetscCalloc1(side_weights.size(), &values));
     i = 0;
     for (auto weight : side_weights)
       values[i++] = weight;
   }
 
-  ierr = MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(
+      comm.get(),
+      MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
-  ierr = MatPartitioningCreate(comm.get(), &part);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
 #if !PETSC_VERSION_LESS_THAN(3, 12, 3)
-  ierr = MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
 #endif
-  ierr = MatPartitioningSetAdjacency(part, dual);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), MatPartitioningSetAdjacency(part, dual));
 
   if (!num_local_elems)
   {
@@ -282,51 +277,39 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
                                        << " does not match with the number of local elements"
                                        << num_local_elems);
 
-    ierr = PetscCalloc1(elem_weights.size(), &petsc_elem_weights);
-    CHKERRABORT(comm.get(), ierr);
+    LibmeshPetscCallA(comm.get(), PetscCalloc1(elem_weights.size(), &petsc_elem_weights));
     i = 0;
     for (auto weight : elem_weights)
       petsc_elem_weights[i++] = weight;
 
-    ierr = MatPartitioningSetVertexWeights(part, petsc_elem_weights);
-    CHKERRABORT(comm.get(), ierr);
+    LibmeshPetscCallA(comm.get(), MatPartitioningSetVertexWeights(part, petsc_elem_weights));
   }
 
-  ierr = MatPartitioningSetNParts(part, num_parts);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), MatPartitioningSetNParts(part, num_parts));
 #if PETSC_VERSION_LESS_THAN(3, 9, 2)
   mooseAssert(part_package != "party", "PETSc-3.9.3 or higher is required for using party");
 #endif
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
   mooseAssert(part_package != "chaco", "PETSc-3.9.0 or higher is required for using chaco");
 #endif
-  ierr = MatPartitioningSetType(part, part_package.c_str());
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), MatPartitioningSetType(part, part_package.c_str()));
   if (part_package == "hierarch")
-  {
-    ierr = MatPartitioningHierarchicalSetNfineparts(part, num_parts_per_compute_node);
-    CHKERRABORT(comm.get(), ierr);
-  }
-  ierr = MatPartitioningSetFromOptions(part);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningApply(part, &is);
-  CHKERRABORT(comm.get(), ierr);
+    LibmeshPetscCallA(comm.get(),
+                      MatPartitioningHierarchicalSetNfineparts(part, num_parts_per_compute_node));
 
-  ierr = ISGetIndices(is, &parts);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), MatPartitioningSetFromOptions(part));
+  LibmeshPetscCallA(comm.get(), MatPartitioningApply(part, &is));
+
+  LibmeshPetscCallA(comm.get(), ISGetIndices(is, &parts));
 
   partition.resize(num_local_elems);
   for (i = 0; i < num_local_elems; i++)
     partition[i] = parts[i];
 
-  ierr = ISRestoreIndices(is, &parts);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatPartitioningDestroy(&part);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = MatDestroy(&dual);
-  CHKERRABORT(comm.get(), ierr);
-  ierr = ISDestroy(&is);
-  CHKERRABORT(comm.get(), ierr);
+  LibmeshPetscCallA(comm.get(), ISRestoreIndices(is, &parts));
+  LibmeshPetscCallA(comm.get(), MatPartitioningDestroy(&part));
+  LibmeshPetscCallA(comm.get(), MatDestroy(&dual));
+  LibmeshPetscCallA(comm.get(), ISDestroy(&is));
 }
 
 dof_id_type
