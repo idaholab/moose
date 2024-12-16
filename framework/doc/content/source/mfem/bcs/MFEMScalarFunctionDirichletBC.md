@@ -14,8 +14,8 @@ scalar function on the boundary.
 
 !listing test/tests/kernels/graddiv.i block=BCs
 
-!syntax parameters/BCs/MFEMScalarFunctionDirichletBC
+!syntax parameters /BCs/MFEMScalarFunctionDirichletBC
 
-!syntax inputs/BCs/MFEMScalarFunctionDirichletBC
+!syntax inputs /BCs/MFEMScalarFunctionDirichletBC
 
-!syntax children/BCs/MFEMScalarFunctionDirichletBC
+!syntax children /BCs/MFEMScalarFunctionDirichletBC
