@@ -12,8 +12,6 @@ scalar function on the boundary.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/graddiv.i block=BCs
-
 !syntax parameters /BCs/MFEMScalarFunctionDirichletBC
 
 !syntax inputs /BCs/MFEMScalarFunctionDirichletBC
