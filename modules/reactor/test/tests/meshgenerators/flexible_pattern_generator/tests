@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/FlexiblePatternGenerator.md'
-  issues = '#24938 #26776 #27471'
+  issues = '#24938 #26776 #27471 #29529'
   [test]
     requirement = "The system shall generate "
     [single_hex_pattern_hex]
@@ -88,6 +88,23 @@
       csvdiff = mixed_pattern.csv
       recover = false
       detail = "a mixed patterned mesh with hexagonal background."
+    []
+    [eeid_cell]
+      type = CSVDiff
+      input = fp_eeid.i
+      csvdiff = fp_eeid_cell.csv
+      cli_args = "Mesh/fpg/cell_id_name='pin_id'
+                  Mesh/fpg/cell_id_shift=1
+                  Outputs/csv/file_base=fp_eeid_cell"
+      recover = false
+      detail = "a patterned mesh with an extra element id assigned to each component mesh (cell mode)."
+    []
+    [eeid_pattern]
+      type = CSVDiff
+      input = fp_eeid_pattern.i
+      csvdiff = fp_eeid_pattern.csv
+      recover = false
+      detail = "a patterned mesh with an extra element id assigned to each input mesh (pattern mode)."
     []
     [patterned_assm]
       type = CSVDiff
@@ -332,6 +349,34 @@
                   --mesh-only err.e"
       expect_err = "this parameter must be provided for non-CUSTOM"
       detail = "if the boundary pitch value is not provided when the boundary type is not custom."
+    []
+    [error_empty_cell_eeid_name]
+      type = RunException
+      input = fp_eeid.i
+      cli_args = "Mesh/fpg/cell_id_name=''"
+      expect_err = "This parameter must be non empty if provided."
+      detail = "if an empty cell type id name is provided."
+    []
+    [error_standalone_cell_eeid_shift]
+      type = RunException
+      input = fp_eeid.i
+      cli_args = "Mesh/fpg/cell_id_shift=1"
+      expect_err = "This parameter must be provided if cell_id_shift is set."
+      detail = "if a cell type id shift is set without specifying the unit mesh id name."
+    []
+    [error_empty_pattern_eeid_name]
+      type = RunException
+      input = fp_eeid.i
+      cli_args = "Mesh/fpg/pattern_id_name=''"
+      expect_err = "This parameter must be non empty if provided."
+      detail = "if an empty pattern id name is provided."
+    []
+    [error_standalone_pattern_eeid_shift]
+      type = RunException
+      input = fp_eeid.i
+      cli_args = "Mesh/fpg/pattern_id_shift=1"
+      expect_err = "This parameter must be provided if pattern_id_shift is set."
+      detail = "if a pattern id shift is set without specifying the unit mesh id name."
     []
   []
 []

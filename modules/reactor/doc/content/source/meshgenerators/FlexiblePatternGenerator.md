@@ -91,6 +91,12 @@ In both [!param](/Mesh/FlexiblePatternGenerator/hex_patterns) and [!param](/Mesh
       id=mixed_pattern_m
       caption=Output example of mixed patterning with dummy unit meshes.
 
+## Extra Element ID Assignment for Unit Meshes
+
+For each unit mesh involved in the patterning, two types of extra element IDs can be automatically assigned to facilitate subsequent data analysis, using different assignment modes.
+
+The `cell` style extra element ID can be specified using the [!param](/Mesh/FlexiblePatternGenerator/cell_id_name) parameter. It is similar to the `cell` option in [`PatternedHexMeshGenerator`](/PatternedHexMeshGenerator.md)'s [!param](/Mesh/PatternedHexMeshGenerator/assign_type) parameter, which assigns a unique extra element ID for each component unit mesh in sequential order. On the other hand, the `pattern` style extra element ID can be specified using the [!param](/Mesh/FlexiblePatternGenerator/pattern_id_name) parameter. It is similar to the `pattern` option in [`PatternedHexMeshGenerator`](/PatternedHexMeshGenerator.md)'s [!param](/Mesh/PatternedHexMeshGenerator/assign_type) parameter, which assigns the extra element ID based on the IDs (i.e., sequential order) of the input meshes defined in [!param](/Mesh/FlexiblePatternGenerator/inputs). By default, both assigned extra element IDs begin with 0 and increment by 1. Alternatively, these generated extra element IDs can be shifted using the [!param](/Mesh/FlexiblePatternGenerator/cell_id_shift) and [!param](/Mesh/FlexiblePatternGenerator/pattern_id_shift), respectively.
+
 !syntax parameters /Mesh/FlexiblePatternGenerator
 
 !syntax inputs /Mesh/FlexiblePatternGenerator
