@@ -587,10 +587,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Main app should hold the default database to handle system petsc options
   if (!_app.isUltimateMaster())
-  {
-    auto ierr = PetscOptionsCreate(&_petsc_option_data_base);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(PetscOptionsCreate(&_petsc_option_data_base));
 #endif
 
   if (!_solve)
@@ -6221,10 +6218,8 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
-  {
-    auto ierr = PetscOptionsPush(_petsc_option_data_base);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
+
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
@@ -6261,10 +6256,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-  {
-    auto ierr = PetscOptionsPop();
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(PetscOptionsPop());
 #endif
 }
 
@@ -6378,17 +6370,14 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   solver_params._line_search = Moose::LineSearchType::LS_NONE;
 
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  auto ierr = Moose::PetscSupport::petscSetOptions(
-      options, solver_params); // Make sure the PETSc options are setup for this app
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
+      options, solver_params)); // Make sure the PETSc options are setup for this app
 #else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
-  {
-    auto ierr = PetscOptionsPush(_petsc_option_data_base);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
+
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
@@ -6402,10 +6391,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-  {
-    auto ierr = PetscOptionsPop();
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(PetscOptionsPop());
 #endif
 }
 

@@ -49,11 +49,8 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters) : MooseMesh(par
   ExternalPetscSolverApp * petsc_app = dynamic_cast<ExternalPetscSolverApp *>(&_app);
 
   if (petsc_app && petsc_app->getPetscTS())
-  {
     // Retrieve mesh from TS
-    auto ierr = TSGetDM(petsc_app->getPetscTS(), &_dmda);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(TSGetDM(petsc_app->getPetscTS(), &_dmda));
   else
     mooseError(" PETSc external solver TS does not exist or this is not a petsc external solver");
 }
@@ -94,38 +91,36 @@ add_element_Quad4(DM da,
   // xp: number of processors in x direction
   // yp: number of processors in y direction
   PetscInt Mx, My, xp, yp;
-  auto ierr = DMDAGetInfo(da,
-                          PETSC_IGNORE,
-                          &Mx,
-                          &My,
-                          PETSC_IGNORE,
-                          &xp,
-                          &yp,
-                          PETSC_IGNORE,
-                          PETSC_IGNORE,
-                          PETSC_IGNORE,
-                          PETSC_IGNORE,
-                          PETSC_IGNORE,
-                          PETSC_IGNORE,
-                          PETSC_IGNORE);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(),
+                    DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                &xp,
+                                &yp,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
 
   const PetscInt *lx, *ly;
   PetscInt *lxo, *lyo;
   // PETSc-3.8.x or older use PetscDataType
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
-  ierr = DMGetWorkArray(da, xp + yp + 2, PETSC_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMGetWorkArray(da, xp + yp + 2, PETSC_INT, &lxo));
 #else
   // PETSc-3.9.x or newer use MPI_DataType
-  ierr = DMGetWorkArray(da, xp + yp + 2, MPIU_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMGetWorkArray(da, xp + yp + 2, MPIU_INT, &lxo));
 #endif
-  LIBMESH_CHKERR(ierr);
 
   // Gets the ranges of indices in the x, y and z direction that are owned by each process
   // Ranges here are different from what we have in Mat and Vec.
   // It means how many points each processor holds
-  ierr = DMDAGetOwnershipRanges(da, &lx, &ly, NULL);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(), DMDAGetOwnershipRanges(da, &lx, &ly, NULL));
   lxo[0] = 0;
   for (PetscInt i = 0; i < xp; i++)
     lxo[i + 1] = lxo[i] + lx[i];
@@ -140,31 +135,26 @@ add_element_Quad4(DM da,
   // Finds integer in a sorted array of integers
   // Loc:  the location if found, otherwise -(slot+1)
   // where slot is the place the value would go
-  ierr = PetscFindInt(i, xp + 1, lxo, &xpid);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(i, xp + 1, lxo, &xpid));
 
   xpid = xpid < 0 ? -xpid - 1 - 1 : xpid;
 
-  ierr = PetscFindInt(i + 1, xp + 1, lxo, &xpidplus);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(i + 1, xp + 1, lxo, &xpidplus));
 
   xpidplus = xpidplus < 0 ? -xpidplus - 1 - 1 : xpidplus;
 
-  ierr = PetscFindInt(j, yp + 1, lyo, &ypid);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(j, yp + 1, lyo, &ypid));
 
   ypid = ypid < 0 ? -ypid - 1 - 1 : ypid;
 
-  ierr = PetscFindInt(j + 1, yp + 1, lyo, &ypidplus);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(j + 1, yp + 1, lyo, &ypidplus));
 
   ypidplus = ypidplus < 0 ? -ypidplus - 1 - 1 : ypidplus;
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
-  ierr = DMRestoreWorkArray(da, xp + yp + 2, PETSC_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMRestoreWorkArray(da, xp + yp + 2, PETSC_INT, &lxo));
 #else
-  ierr = DMRestoreWorkArray(da, xp + yp + 2, MPIU_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMRestoreWorkArray(da, xp + yp + 2, MPIU_INT, &lxo));
 #endif
-  LIBMESH_CHKERR(ierr);
 
   // Bottom Left
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
@@ -350,23 +340,23 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da)
   PetscInt xs, ys, xm, ym, Mx, My, xp, yp;
 
   /* Get local grid boundaries */
-  auto ierr = DMDAGetCorners(da, &xs, &ys, PETSC_IGNORE, &xm, &ym, PETSC_IGNORE);
-  LIBMESH_CHKERR(ierr);
-  ierr = DMDAGetInfo(da,
-                     PETSC_IGNORE,
-                     &Mx,
-                     &My,
-                     PETSC_IGNORE,
-                     &xp,
-                     &yp,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE,
-                     PETSC_IGNORE);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(mesh.comm().get(),
+                    DMDAGetCorners(da, &xs, &ys, PETSC_IGNORE, &xm, &ym, PETSC_IGNORE));
+  LibmeshPetscCallA(mesh.comm().get(),
+                    DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                &xp,
+                                &yp,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
 
   for (PetscInt j = ys; j < ys + ym; j++)
     for (PetscInt i = xs; i < xs + xm; i++)

@@ -30,7 +30,7 @@ require_total = 37
 require_total = 94
 
 [external_petsc_solver]
-require_total = 85
+require_total = 84
 
 [fluid_properties]
 require_total = 84

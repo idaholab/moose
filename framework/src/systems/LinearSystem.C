@@ -196,15 +196,12 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     // Necessary for speed
     if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&matrix))
     {
-      auto ierr = MatSetOption(petsc_matrix->mat(),
-                               MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                               PETSC_TRUE);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatSetOption(petsc_matrix->mat(),
+                                    MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                                    PETSC_TRUE));
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-      {
-        ierr = MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-        LIBMESH_CHKERR(ierr);
-      }
+        LibmeshPetscCall(
+            MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
     }
   }
 

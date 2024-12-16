@@ -344,8 +344,6 @@ VariableCondensationPreconditioner::init()
 void
 VariableCondensationPreconditioner::condenseSystem()
 {
-  PetscErrorCode ierr = (PetscErrorCode)0;
-
   // extract _M from the original matrix
   _matrix->create_submatrix(*_M, _rows, _lm_dofs);
 
@@ -353,8 +351,8 @@ VariableCondensationPreconditioner::condenseSystem()
   _K->init(_global_primary_dofs.size(), _global_cols.size(), _primary_dofs.size(), _cols.size());
   // Note: enabling nonzero allocation may be expensive. Improved memeory pre-allocation will be
   // investigated in the future
-  ierr = MatSetOption(_K->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatSetOption(_K->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
   // here the _global_cols may not be sorted
   _matrix->create_submatrix_nosort(*_K, _global_primary_dofs, _global_cols);
 
@@ -363,8 +361,7 @@ VariableCondensationPreconditioner::condenseSystem()
   // clean dinv
   if (_dinv)
   {
-    ierr = MatDestroy(&_dinv);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&_dinv));
     _dinv = nullptr;
   }
 
@@ -380,8 +377,9 @@ VariableCondensationPreconditioner::condenseSystem()
 
   Mat MdinvK;
   // calculate MdinvK
-  ierr = MatMatMatMult(_M->mat(), _dinv, _K->mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &MdinvK);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(
+      this->MoosePreconditioner::comm().get(),
+      MatMatMatMult(_M->mat(), _dinv, _K->mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &MdinvK));
   PetscMatrix<Number> MDinv_K(MdinvK, MoosePreconditioner::_communicator);
 
   // Preallocate memory for _J_condensed
@@ -395,8 +393,7 @@ VariableCondensationPreconditioner::condenseSystem()
   computeCondensedJacobian(*_J_condensed, *pc_original_mat, _global_rows, MDinv_K);
 
   // Destroy MdinvK here otherwise we will have memory leak
-  ierr = MatDestroy(&MdinvK);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&MdinvK));
 }
 
 void
@@ -405,8 +402,6 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
                                                              const std::vector<dof_id_type> & grows,
                                                              PetscMatrix<Number> & block_mat)
 {
-  PetscErrorCode ierr = (PetscErrorCode)0;
-
   // obtain entries from the original matrix
   PetscInt pc_ncols = 0, block_ncols = 0;
   const PetscInt *pc_cols, *block_cols;
@@ -423,11 +418,11 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
     if (grows[i] >= original_mat.row_start() && grows[i] < original_mat.row_stop())
     {
       // get one row of data from the original matrix
-      ierr = MatGetRow(original_mat.mat(), rid, &pc_ncols, &pc_cols, &pc_vals);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                        MatGetRow(original_mat.mat(), rid, &pc_ncols, &pc_cols, &pc_vals));
       // get corresponding row of data from the block matrix
-      ierr = MatGetRow(block_mat.mat(), i, &block_ncols, &block_cols, &block_vals);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                        MatGetRow(block_mat.mat(), i, &block_ncols, &block_cols, &block_vals));
       // extract data from certain cols, subtract the value from the block mat, and save the indices
       // and entries sub_cols and sub_vals
       // First, save the submatrix col index and value as a map
@@ -461,18 +456,18 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
       }
 
       // Then, set values
-      ierr = MatSetValues(condensed_mat.mat(),
-                          1,
-                          sub_rid,
-                          sub_vals.size(),
-                          sub_cols.data(),
-                          sub_vals.data(),
-                          INSERT_VALUES);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatRestoreRow(original_mat.mat(), rid, &pc_ncols, &pc_cols, &pc_vals);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatRestoreRow(block_mat.mat(), i, &block_ncols, &block_cols, &block_vals);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                        MatSetValues(condensed_mat.mat(),
+                                     1,
+                                     sub_rid,
+                                     sub_vals.size(),
+                                     sub_cols.data(),
+                                     sub_vals.data(),
+                                     INSERT_VALUES));
+      LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                        MatRestoreRow(original_mat.mat(), rid, &pc_ncols, &pc_cols, &pc_vals));
+      LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                        MatRestoreRow(block_mat.mat(), i, &block_ncols, &block_cols, &block_vals));
       // clear data for this row
       sub_cols.clear();
       sub_vals.clear();
@@ -507,14 +502,12 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
   // condensed matrix
   std::vector<dof_id_type> n_nz, n_oz;
 
-  PetscErrorCode ierr = (PetscErrorCode)0;
-
   // Get number of nonzeros from original_mat and block_mat for each row
   for (const auto & row_id : _rows)
   {
     // get number of non-zeros in the original matrix
-    ierr = MatGetRow(original_mat.mat(), row_id, &ncols, &col_vals, &vals);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                      MatGetRow(original_mat.mat(), row_id, &ncols, &col_vals, &vals));
 
     // get number of non-zeros in the block matrix
     dof_id_type block_row_id; // row id in the block matrix
@@ -524,8 +517,9 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
     else
       mooseError("DoF ", row_id, " does not exist in the rows of condensed_mat");
 
-    ierr = MatGetRow(block_mat.mat(), block_row_id, &block_ncols, &block_col_vals, &block_vals);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(
+        this->MoosePreconditioner::comm().get(),
+        MatGetRow(block_mat.mat(), block_row_id, &block_ncols, &block_col_vals, &block_vals));
 
     // make sure the block index is transformed in terms of the original mat
     block_cols_to_org.clear();
@@ -539,11 +533,12 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
     // merge `col_vals` and `block_cols_to_org` and save the common indices in `merged_cols`.
     mergeArrays(col_vals, block_cols_to_org.data(), ncols, block_ncols, merged_cols);
 
-    ierr = MatRestoreRow(block_mat.mat(), block_row_id, &block_ncols, &block_col_vals, &block_vals);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(
+        this->MoosePreconditioner::comm().get(),
+        MatRestoreRow(block_mat.mat(), block_row_id, &block_ncols, &block_col_vals, &block_vals));
 
-    ierr = MatRestoreRow(original_mat.mat(), row_id, &ncols, &col_vals, &vals);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                      MatRestoreRow(original_mat.mat(), row_id, &ncols, &col_vals, &vals));
 
     // Count the nnz for DIAGONAL and OFF-DIAGONAL parts
     PetscInt row_n_nz = 0, row_n_oz = 0;
@@ -654,10 +649,9 @@ VariableCondensationPreconditioner::getCondensedXY(const NumericVector<Number> &
                                                    NumericVector<Number> & x)
 {
   Mat mdinv;
-  PetscErrorCode ierr = (PetscErrorCode)0;
   // calculate mdinv
-  ierr = MatMatMult(_M->mat(), _dinv, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &mdinv);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatMatMult(_M->mat(), _dinv, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &mdinv));
   PetscMatrix<Number> MDinv(mdinv, MoosePreconditioner::_communicator);
 
   _x_hat->init(_J_condensed->n(), _J_condensed->local_n(), false, PARALLEL);
@@ -683,8 +677,7 @@ VariableCondensationPreconditioner::getCondensedXY(const NumericVector<Number> &
   _y_hat->close();
   _x_hat->close();
 
-  ierr = MatDestroy(&mdinv);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&mdinv));
 }
 
 void
@@ -739,121 +732,111 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
 {
   indices.clear();
   IS zerodiags, zerodiags_all;
-  PetscErrorCode ierr;
   const PetscInt * petsc_idx;
   PetscInt nrows;
   // make sure we have a PETSc matrix
   PetscMatrix<Number> * petsc_mat = cast_ptr<PetscMatrix<Number> *>(&mat);
-  ierr = MatFindZeroDiagonals(petsc_mat->mat(), &zerodiags);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatFindZeroDiagonals(petsc_mat->mat(), &zerodiags));
   // synchronize all indices
-  ierr = ISAllGather(zerodiags, &zerodiags_all);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISGetIndices(zerodiags_all, &petsc_idx);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISGetSize(zerodiags_all, &nrows);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    ISAllGather(zerodiags, &zerodiags_all));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    ISGetIndices(zerodiags_all, &petsc_idx));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), ISGetSize(zerodiags_all, &nrows));
 
   for (PetscInt i = 0; i < nrows; ++i)
     indices.push_back(petsc_idx[i]);
 
-  ierr = ISRestoreIndices(zerodiags_all, &petsc_idx);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISDestroy(&zerodiags);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISDestroy(&zerodiags_all);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    ISRestoreIndices(zerodiags_all, &petsc_idx));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), ISDestroy(&zerodiags));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), ISDestroy(&zerodiags_all));
 }
 
 void
 VariableCondensationPreconditioner::clear()
 {
-  PetscErrorCode ierr;
   if (_dinv != nullptr)
-  {
-    ierr = MatDestroy(&_dinv);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&_dinv));
 }
 
 void
 VariableCondensationPreconditioner::computeDInverse(Mat & dinv)
 {
-  PetscErrorCode ierr;
   Mat F, I, dinv_dense;
   IS perm, iperm;
   MatFactorInfo info;
 
-  ierr = MatCreateDense(
-      PETSC_COMM_WORLD, _D->local_n(), _D->local_m(), _D->n(), _D->m(), NULL, &dinv_dense);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(
+      this->MoosePreconditioner::comm().get(),
+      MatCreateDense(
+          PETSC_COMM_WORLD, _D->local_n(), _D->local_m(), _D->n(), _D->m(), NULL, &dinv_dense));
 
   // Create an identity matrix as the right-hand-side
-  ierr = MatCreateDense(PETSC_COMM_WORLD, _D->local_m(), _D->local_m(), _D->m(), _D->m(), NULL, &I);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(
+      this->MoosePreconditioner::comm().get(),
+      MatCreateDense(PETSC_COMM_WORLD, _D->local_m(), _D->local_m(), _D->m(), _D->m(), NULL, &I));
 
   for (unsigned int i = 0; i < _D->m(); ++i)
-  {
-    ierr = MatSetValue(I, i, i, 1.0, INSERT_VALUES);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                      MatSetValue(I, i, i, 1.0, INSERT_VALUES));
 
-  ierr = MatAssemblyBegin(I, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatAssemblyEnd(I, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatAssemblyBegin(I, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatAssemblyEnd(I, MAT_FINAL_ASSEMBLY));
 
   // Factorize D
-  ierr = MatGetOrdering(_D->mat(), MATORDERINGND, &perm, &iperm);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatGetOrdering(_D->mat(), MATORDERINGND, &perm, &iperm));
 
-  ierr = MatFactorInfoInitialize(&info);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatFactorInfoInitialize(&info));
 
-  ierr = MatGetFactor(_D->mat(), MATSOLVERSUPERLU_DIST, MAT_FACTOR_LU, &F);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatGetFactor(_D->mat(), MATSOLVERSUPERLU_DIST, MAT_FACTOR_LU, &F));
 
-  ierr = MatLUFactorSymbolic(F, _D->mat(), perm, iperm, &info);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatLUFactorSymbolic(F, _D->mat(), perm, iperm, &info));
 
-  ierr = MatLUFactorNumeric(F, _D->mat(), &info);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatLUFactorNumeric(F, _D->mat(), &info));
 
   // Solve for Dinv
-  ierr = MatMatSolve(F, I, dinv_dense);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatMatSolve(F, I, dinv_dense));
 
-  ierr = MatAssemblyBegin(dinv_dense, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatAssemblyEnd(dinv_dense, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatAssemblyBegin(dinv_dense, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatAssemblyEnd(dinv_dense, MAT_FINAL_ASSEMBLY));
 
   // copy value to dinv
-  ierr = MatConvert(dinv_dense, MATAIJ, MAT_INITIAL_MATRIX, &dinv);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatConvert(dinv_dense, MATAIJ, MAT_INITIAL_MATRIX, &dinv));
 
-  ierr = MatDestroy(&dinv_dense);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&dinv_dense));
 
-  ierr = MatDestroy(&I);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatDestroy(&F);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISDestroy(&perm);
-  LIBMESH_CHKERR(ierr);
-  ierr = ISDestroy(&iperm);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&I));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), MatDestroy(&F));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), ISDestroy(&perm));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(), ISDestroy(&iperm));
 }
 
 void
 VariableCondensationPreconditioner::computeDInverseDiag(Mat & dinv)
 {
-  PetscErrorCode ierr;
   auto diag_D = NumericVector<Number>::build(MoosePreconditioner::_communicator);
   // Initialize dinv
-  ierr = MatCreateAIJ(
-      PETSC_COMM_WORLD, _D->local_n(), _D->local_m(), _D->n(), _D->m(), 1, NULL, 0, NULL, &dinv);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatCreateAIJ(PETSC_COMM_WORLD,
+                                 _D->local_n(),
+                                 _D->local_m(),
+                                 _D->n(),
+                                 _D->m(),
+                                 1,
+                                 NULL,
+                                 0,
+                                 NULL,
+                                 &dinv));
   // Allocate storage
   diag_D->init(_D->m(), _D->local_m(), false, PARALLEL);
   // Fill entries
@@ -868,16 +851,16 @@ VariableCondensationPreconditioner::computeDInverseDiag(Mat & dinv)
   {
     if (MooseUtils::absoluteFuzzyEqual((*diag_D)(i), 0.0))
       mooseError("Trying to compute reciprocal of 0.");
-    ierr = MatSetValue(dinv,
-                       i,
-                       _map_global_primary_order.at(_global_primary_dofs[i]),
-                       1.0 / (*diag_D)(i),
-                       INSERT_VALUES);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                      MatSetValue(dinv,
+                                  i,
+                                  _map_global_primary_order.at(_global_primary_dofs[i]),
+                                  1.0 / (*diag_D)(i),
+                                  INSERT_VALUES));
   }
 
-  ierr = MatAssemblyBegin(dinv, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
-  ierr = MatAssemblyEnd(dinv, MAT_FINAL_ASSEMBLY);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatAssemblyBegin(dinv, MAT_FINAL_ASSEMBLY));
+  LibmeshPetscCallA(this->MoosePreconditioner::comm().get(),
+                    MatAssemblyEnd(dinv, MAT_FINAL_ASSEMBLY));
 }

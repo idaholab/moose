@@ -28,41 +28,41 @@ SlepcEigenSolverConfiguration::SlepcEigenSolverConfiguration(
 void
 SlepcEigenSolverConfiguration::configure_solver()
 {
-  auto ierr = (PetscErrorCode)0;
-
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
     // Set custom monitors for SNES and KSP
     _eigen_problem.initPetscOutputAndSomeSolverSettings();
     // Let us remove extra "eps_power" from SNES since users do not like it
-    ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetUpOptionPrefix(_slepc_solver.eps());
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(_eigen_problem.comm().get(),
+                      Moose::SlepcSupport::mooseSlepcEPSSNESSetUpOptionPrefix(_slepc_solver.eps()));
     // Let us hook up a customize PC if users ask. Users still can use PETSc options to override
     // this setting
     if (_eigen_problem.solverParams()._customized_pc_for_eigen)
-    {
-      ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetCustomizePC(_slepc_solver.eps());
-      LIBMESH_CHKERR(ierr);
-    }
+      LibmeshPetscCallA(_eigen_problem.comm().get(),
+                        Moose::SlepcSupport::mooseSlepcEPSSNESSetCustomizePC(_slepc_solver.eps()));
+
     // Let set a default PC side. I would like to have the setting be consistent with
     // what we do in regular nonlinear executioner. Petsc options are able to override
     // this setting
-    ierr = Moose::SlepcSupport::mooseSlepcEPSSNESKSPSetPCSide(_eigen_problem, _slepc_solver.eps());
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(
+        _eigen_problem.comm().get(),
+        Moose::SlepcSupport::mooseSlepcEPSSNESKSPSetPCSide(_eigen_problem, _slepc_solver.eps()));
     // A customized stopping test for nonlinear free power iterations.
     // Nonlinear power iterations need to be marked as converged in EPS to
     // retrieve solution from SLEPc EPS.
-    ierr = EPSSetStoppingTestFunction(
-        _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcStoppingTest, &_eigen_problem, NULL);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(_eigen_problem.comm().get(),
+                      EPSSetStoppingTestFunction(_slepc_solver.eps(),
+                                                 Moose::SlepcSupport::mooseSlepcStoppingTest,
+                                                 &_eigen_problem,
+                                                 NULL));
 
     // Remove all SLEPc monitors.
-    ierr = EPSMonitorCancel(_slepc_solver.eps());
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(_eigen_problem.comm().get(), EPSMonitorCancel(_slepc_solver.eps()));
     // A customized EPS monitor in moose. We need to print only eigenvalue
-    ierr = EPSMonitorSet(
-        _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcEPSMonitor, &_eigen_problem, NULL);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(
+        _eigen_problem.comm().get(),
+        EPSMonitorSet(
+            _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcEPSMonitor, &_eigen_problem, NULL));
   }
 }
 
