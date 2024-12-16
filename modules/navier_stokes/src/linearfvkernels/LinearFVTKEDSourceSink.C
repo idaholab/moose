@@ -91,7 +91,7 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
 { 
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
     // TKED value for near wall element will be directly assigned for this cell
-    return 1.0;
+    return _current_elem_volume;
   else
   {
     // Convenient definitions
@@ -118,7 +118,7 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
     destruction = _C2_eps * rho * _var.getElemValue(*_current_elem_info, state) / TKE;
 
     // Assign to matrix (term gets multiplied by TKED)
-    return destruction - production;
+    return (destruction - production*0.0) * _current_elem_volume;
   }
 }
 
@@ -194,9 +194,34 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     }
 
     // Assign the computed value of TKED for element near the wall
-    return destruction;
+    return destruction * _current_elem_volume;
   }
   else
     // Do nothing
-    return 0.0;
+    // return 0.0;
+  {
+    // Convenient definitions
+    const auto state = determineState();
+    const auto elem_arg = makeElemArg(_current_elem_info->elem());
+    const Real rho = _rho(elem_arg, state);
+    const Real TKE = _k(elem_arg, state);
+
+    // Convenient variables
+    Real production = 0.0;
+
+    // Compute production of TKE
+    const auto symmetric_strain_tensor_sq_norm = 
+              NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
+    Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+
+    // Limit TKE production (needed for flows with stagnation zones)
+    const Real production_limit = _C_pl * rho * _var.getElemValue(*_current_elem_info, state);
+    production_k = std::min(production_k, production_limit);
+
+    // Compute production and destruction
+    production = _C1_eps * production_k / TKE * _var.getElemValue(*_current_elem_info, state);
+
+    // Assign to matrix (term gets multiplied by TKED)
+    return production * _current_elem_volume;
+  }
 }
