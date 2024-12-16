@@ -52,7 +52,7 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorNormalDirichletBC
+    type = MFEMVectorNormalDirichletFunctionBC
     variable = F
     boundary = '1 2 3'
     function = F_exact
