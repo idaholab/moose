@@ -23,13 +23,9 @@ public:
   static InputParameters validParams();
   LinearFVTurbulentLimitedAdvection(const InputParameters & params);
 
-  virtual Real computeElemMatrixContribution() override;
+  virtual void addMatrixContribution() override;
 
-  virtual Real computeNeighborMatrixContribution() override;
-
-  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc) override;
-
-  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) override;
+  virtual void addRightHandSideContribution() override;
 
   virtual void initialSetup() override;
 

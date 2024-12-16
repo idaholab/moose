@@ -45,61 +45,136 @@ LinearFVTurbulentLimitedAdvection::initialSetup()
       _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
 }
 
-Real
-LinearFVTurbulentLimitedAdvection::computeElemMatrixContribution()
+void
+LinearFVTurbulentLimitedAdvection::addMatrixContribution()
 {
+  // Coumputing bounding map
   const Elem * elem = _current_face_info->elemPtr();
   const auto bounded_elem = _wall_bounded.find(elem) != _wall_bounded.end();
-  return bounded_elem ? _advected_interp_coeffs.first * _face_mass_flux * _current_face_area : 0.0;
-}
-
-Real
-LinearFVTurbulentLimitedAdvection::computeNeighborMatrixContribution()
-{
   const Elem * neighbor = _current_face_info->neighborPtr();
   const auto bounded_neigh = _wall_bounded.find(neighbor) != _wall_bounded.end();
-  return bounded_neigh ? _advected_interp_coeffs.second * _face_mass_flux * _current_face_area : 0.0;
+
+  // If we are on an internal face, we populate the four entries in the system matrix
+  // which touch the face
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    // The dof ids of the variable corresponding to the element and neighbor
+    _dof_indices(0) = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
+    _dof_indices(1) = _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
+
+    // Compute the entries which will go to the neighbor (offdiagonal) and element
+    // (diagonal).
+    const auto elem_matrix_contribution = computeElemMatrixContribution();
+    const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
+
+    // Populate matrix
+    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()) && !(bounded_elem))
+    {
+      _matrix_contribution(0, 0) = elem_matrix_contribution;
+      _matrix_contribution(0, 1) = neighbor_matrix_contribution;
+    }
+
+    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()) && !(bounded_neigh))
+    {
+      _matrix_contribution(1, 0) = -elem_matrix_contribution;
+      _matrix_contribution(1, 1) = -neighbor_matrix_contribution;
+    }
+    (*_linear_system.matrix).add_matrix(_matrix_contribution, _dof_indices.get_values());
+  }
+  // We are at a block boundary where the variable is not defined on one of the adjacent cells.
+  // We check if we have a boundary condition here
+  else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+           _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+  {
+    mooseAssert(_current_face_info->boundaryIDs().size() == 1,
+                "We should only have one boundary on every face.");
+
+    LinearFVBoundaryCondition * bc_pointer =
+        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
+
+    if (bc_pointer || _force_boundary_execution)
+    {
+      if (bc_pointer)
+        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
+      const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
+
+      // We allow internal (for the mesh) boundaries too, so we have to check on which side we
+      // are on (assuming that this is a boundary for the variable)
+      if ((_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) && !(bounded_elem))
+      {
+        const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
+        (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
+      }
+      else if ((_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR) && !(bounded_neigh))
+      {
+        const auto dof_id_neighbor =
+            _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
+        (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
+      }
+    }
+  }
 }
 
-Real
-LinearFVTurbulentLimitedAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
+void
+LinearFVTurbulentLimitedAdvection::addRightHandSideContribution()
 {
+  // Coumputing bounding map
   const Elem * elem = _current_face_info->elemPtr();
   const auto bounded_elem = _wall_bounded.find(elem) != _wall_bounded.end();
+  const Elem * neighbor = _current_face_info->neighborPtr();
+  const auto bounded_neigh = _wall_bounded.find(neighbor) != _wall_bounded.end();
 
-  if (!bounded_elem)
+  // If we are on an internal face, we populate the two entries in the right hand side
+  // which touch the face
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
-    const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
-    mooseAssert(adv_bc, "This should be a valid BC!");
+    // The dof ids of the variable corresponding to the element and neighbor
+    _dof_indices(0) = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
+    _dof_indices(1) = _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
 
-    const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
+    // Compute the entries which will go to the neighbor and element positions.
+    const auto elem_rhs_contribution = computeElemRightHandSideContribution();
+    const auto neighbor_rhs_contribution = computeNeighborRightHandSideContribution();
 
-    // We support internal boundaries too so we have to make sure the normal points always outward
-    const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+    // Populate right hand side
+    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()) && !(bounded_elem))
+      _rhs_contribution(0) = elem_rhs_contribution;
+    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()) && !(bounded_neigh))
+      _rhs_contribution(1) = neighbor_rhs_contribution;
 
-    return boundary_value_matrix_contrib * factor * _face_mass_flux * _current_face_area;
+    (*_linear_system.rhs)
+        .add_vector(_rhs_contribution.get_values().data(), _dof_indices.get_values());
   }
-  else
-    return 0.0;
-}
-
-Real
-LinearFVTurbulentLimitedAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
-{
-  const Elem * elem = _current_face_info->elemPtr();
-  const auto bounded_elem = _wall_bounded.find(elem) != _wall_bounded.end();
-
-  if (!bounded_elem)
+  // We are at a block boundary where the variable is not defined on one of the adjacent cells.
+  // We check if we have a boundary condition here
+  else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+           _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
-    mooseAssert(adv_bc, "This should be a valid BC!");
+    mooseAssert(_current_face_info->boundaryIDs().size() == 1,
+                "We should only have one boundary on every face.");
+    LinearFVBoundaryCondition * bc_pointer =
+        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
 
-    // We support internal boundaries too so we have to make sure the normal points always outward
-    const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
+    if (bc_pointer || _force_boundary_execution)
+    {
+      if (bc_pointer)
+        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
 
-    const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-    return -boundary_value_rhs_contrib * factor * _face_mass_flux * _current_face_area;
+      const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
+
+      // We allow internal (for the mesh) boundaries too, so we have to check on which side we
+      // are on (assuming that this is a boundary for the variable)
+      if ((_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) && !(bounded_elem))
+      {
+        const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
+        (*_linear_system.rhs).add(dof_id_elem, rhs_contribution);
+      }
+      else if ((_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR) && !(bounded_neigh))
+      {
+        const auto dof_id_neighbor =
+            _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
+        (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
+      }
+    }
   }
-  else
-    return 0.0;
 }

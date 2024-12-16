@@ -40,6 +40,10 @@ public:
 
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) override;
 
+  virtual void addMatrixContribution() override;
+
+  virtual void addRightHandSideContribution() override;
+
 protected:
 
   /// The functor for the scaling coefficient for the diffusion term
