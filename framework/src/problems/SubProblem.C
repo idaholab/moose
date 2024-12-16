@@ -1155,7 +1155,10 @@ SubProblem::automaticScaling() const
 {
   // Currently going to assume that we are applying or not applying automatic scaling consistently
   // across nonlinear systems
-  return systemBaseNonlinear(0).automaticScaling();
+  if (numNonlinearSystems())
+    return systemBaseNonlinear(0).automaticScaling();
+
+  return false;
 }
 
 void
