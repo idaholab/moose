@@ -13,20 +13,27 @@ class MFEMEssentialBCTest : public MFEMObjectUnitTest
 {
 public:
   mfem::common::H1_FESpace _scalar_fes;
-  // mfem::common::ND_FESpace _vector_fes;
-  mfem::common::H1_FESpace _vector_fes;
-  mfem::GridFunction _scalar_gridfunc, _vector_gridfunc;
+  // mfem::common::ND_FESpace _vector_h1_fes;
+  mfem::common::H1_FESpace _vector_h1_fes;
+  mfem::common::ND_FESpace _vector_hcurl_fes;
+  mfem::common::RT_FESpace _vector_hdiv_fes;
+  mfem::GridFunction _scalar_gridfunc, _vector_h1_gridfunc, _vector_hcurl_gridfunc,
+      _vector_hdiv_gridfunc;
   mfem::ConstantCoefficient _scalar_zero;
   mfem::VectorConstantCoefficient _vector_zero;
 
   MFEMEssentialBCTest()
     : MFEMObjectUnitTest("PlatypusApp"),
       _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
-      //_vector_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
-      _vector_fes(
+      //_vector_h1_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
+      _vector_h1_fes(
           _mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, mfem::BasisType::GaussLobatto, 3),
+      _vector_hcurl_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
+      _vector_hdiv_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
       _scalar_gridfunc(&_scalar_fes),
-      _vector_gridfunc(&_vector_fes),
+      _vector_h1_gridfunc(&_vector_h1_fes),
+      _vector_hcurl_gridfunc(&_vector_hcurl_fes),
+      _vector_hdiv_gridfunc(&_vector_hdiv_fes),
       _scalar_zero(0.),
       _vector_zero(mfem::Vector({0., 0., 0.}))
   {
@@ -41,7 +48,7 @@ public:
     _mfem_problem->addFunction("ParsedVectorFunction", "func2", vecfunc_params);
     _mfem_problem->getFunction("func2").initialSetup();
     _scalar_gridfunc.ProjectCoefficient(_scalar_zero);
-    _vector_gridfunc.ProjectCoefficient(_vector_zero);
+    _vector_h1_gridfunc.ProjectCoefficient(_vector_zero);
   }
 
   void check_boundary(int bound,
@@ -154,10 +161,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_h1_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
   mfem::Vector expected({1., 2., 3.});
   check_boundary(
       1,
@@ -189,10 +196,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_h1_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
   std::shared_ptr<mfem::VectorFunctionCoefficient> function =
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
@@ -226,10 +233,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_h1_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
   mfem::Vector assigned_val({1., 2., 3.});
   check_boundary(
       1,
@@ -266,10 +273,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_h1_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
   std::shared_ptr<mfem::VectorFunctionCoefficient> function =
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
@@ -304,9 +311,9 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_hcurl_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_hcurl_gridfunc);
   mfem::Vector expected({1., 2., 3.});
   check_boundary(
       1,
@@ -348,10 +355,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_hcurl_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_hcurl_gridfunc);
   std::shared_ptr<mfem::VectorFunctionCoefficient> function =
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
