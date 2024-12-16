@@ -10,7 +10,7 @@
 ##########################################################
 
 H = 1 #halfwidth of the channel
-L = 30
+L = 100
 
 Re = 13700
 
@@ -32,24 +32,42 @@ C_mu = 0.09
 ### Initial and Boundary Conditions ###
 intensity = 0.01
 k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
+eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
 
 ### Modeling parameters ###
 bulk_wall_treatment = false
-walls = 'top'
+walls = 'top bottom'
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
-  [gen]
+  [block_1]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
     xmax = ${L}
     ymin = 0
     ymax = ${H}
-    nx = 20
-    ny = 5
+    nx = 4
+    ny = 3
     bias_y = 0.7
+  []
+  [block_2]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = ${L}
+    ymin = ${fparse -H}
+    ymax = 0
+    nx = 4
+    ny = 3
+    bias_y = ${fparse 1/0.7}
+  []
+  [smg]
+    type = StitchedMeshGenerator
+    inputs = 'block_1 block_2'
+    clear_stitched_boundary_ids = true
+    stitch_boundaries_pairs = 'bottom top'
+    merge_boundaries_with_same_name = true
   []
 []
 
@@ -123,7 +141,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = vel_x
     mu = 'mu_t'
     momentum_component = 'x'
-    complete_expansion = true
+    complete_expansion = no
     u = vel_x
     v = vel_y
   []
@@ -152,7 +170,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = vel_y
     mu = 'mu_t'
     momentum_component = 'y'
-    complete_expansion = true
+    complete_expansion = no
     u = vel_x
     v = vel_y
   []
@@ -204,6 +222,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     mu_t = 'mu_t'
     walls = ${walls}
     wall_treatment = ${wall_treatment}
+    C_pl = 1e10
   []
 
   [TKED_advection]
@@ -238,6 +257,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
+    C_pl = 1e10
   []
 []
 
@@ -256,13 +276,13 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
   [walls-u]
     type = FVDirichletBC
-    boundary = 'top'
+    boundary = 'bottom top'
     variable = vel_x
     value = 0
   []
   [walls-v]
     type = FVDirichletBC
-    boundary = 'top'
+    boundary = 'bottom top'
     variable = vel_y
     value = 0
   []
@@ -272,24 +292,37 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = pressure
     function = 0
   []
+
   [inlet_TKE]
-    type = INSFVInletIntensityTKEBC
+    type = FVDirichletBC
     boundary = 'left'
     variable = TKE
-    u = vel_x
-    v = vel_y
-    intensity = ${intensity}
+    value = '${k_init}'
   []
   [inlet_TKED]
-    type = INSFVMixingLengthTKEDBC
+    type = FVDirichletBC
     boundary = 'left'
     variable = TKED
-    k = TKE
-    characteristic_length = '${fparse 2*H}'
+    value = '${eps_init}'
   []
+  # [inlet_TKE]
+  #   type = INSFVInletIntensityTKEBC
+  #   boundary = 'left'
+  #   variable = TKE
+  #   u = vel_x
+  #   v = vel_y
+  #   intensity = ${intensity}
+  # []
+  # [inlet_TKED]
+  #   type = INSFVMixingLengthTKEDBC
+  #   boundary = 'left'
+  #   variable = TKED
+  #   k = TKE
+  #   characteristic_length = '${fparse 2*H}'
+  # []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
-    boundary = 'top'
+    boundary = 'bottom top'
     variable = mu_t
     u = vel_x
     v = vel_y
@@ -299,39 +332,39 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     k = TKE
     wall_treatment = ${wall_treatment}
   []
-  [sym-u]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    mu = 'mu_t'
-    momentum_component = x
-  []
-  [sym-v]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    mu = 'mu_t'
-    momentum_component = y
-  []
-  [symmetry_pressure]
-    type = INSFVSymmetryPressureBC
-    boundary = 'bottom'
-    variable = pressure
-  []
-  [symmetry_TKE]
-    type = INSFVSymmetryScalarBC
-    boundary = 'bottom'
-    variable = TKE
-  []
-  [symmetry_TKED]
-    type = INSFVSymmetryScalarBC
-    boundary = 'bottom'
-    variable = TKED
-  []
+  # [sym-u]
+  #   type = INSFVSymmetryVelocityBC
+  #   boundary = 'bottom'
+  #   variable = vel_x
+  #   u = vel_x
+  #   v = vel_y
+  #   mu = 'mu_t'
+  #   momentum_component = x
+  # []
+  # [sym-v]
+  #   type = INSFVSymmetryVelocityBC
+  #   boundary = 'bottom'
+  #   variable = vel_y
+  #   u = vel_x
+  #   v = vel_y
+  #   mu = 'mu_t'
+  #   momentum_component = y
+  # []
+  # [symmetry_pressure]
+  #   type = INSFVSymmetryPressureBC
+  #   boundary = 'bottom'
+  #   variable = pressure
+  # []
+  # [symmetry_TKE]
+  #   type = INSFVSymmetryScalarBC
+  #   boundary = 'bottom'
+  #   variable = TKE
+  # []
+  # [symmetry_TKED]
+  #   type = INSFVSymmetryScalarBC
+  #   boundary = 'bottom'
+  #   variable = TKED
+  # []
 []
 
 [AuxVariables]
@@ -361,6 +394,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
+    mu_t_ratio_max = 1e20
   []
   [compute_y_plus]
     type = RANSYPlusAux
@@ -381,12 +415,12 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  turbulence_systems = 'TKED_system TKE_system'
+  turbulence_systems = 'TKE_system TKED_system'
 
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.25 0.25'
+  turbulence_equation_relaxation = '0.2 0.2'
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
@@ -404,6 +438,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   momentum_l_tol = 0.0
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
+
   print_fields = false
   continue_on_max_its = true
 []
