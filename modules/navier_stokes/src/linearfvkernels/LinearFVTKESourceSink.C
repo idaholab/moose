@@ -192,5 +192,5 @@ LinearFVTKESourceSink::computeRightHandSideContribution()
   production = std::min(production, production_limit);
 
   // Assign production to RHS
-  return production;
+  return production * _current_elem_volume;
 }

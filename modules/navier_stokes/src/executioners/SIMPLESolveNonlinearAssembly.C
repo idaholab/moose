@@ -487,6 +487,7 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   {
     _console << system.name() << " system matrix" << std::endl;
     mmat.print();
+    rhs.print();
   }
 
   // We compute the normalization factors based on the fluxes
