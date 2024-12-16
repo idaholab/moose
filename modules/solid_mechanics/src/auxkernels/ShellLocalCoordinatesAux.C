@@ -17,8 +17,9 @@ InputParameters
 ShellLocalCoordinatesAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Stores a specific component of a shell element's local coordinate "
-                             "vector in an auxiliary variable.");
+  params.addClassDescription(
+      "This AuxKernel stores a specific component of a shell element's local coordinate "
+      "vector in an auxiliary variable.");
   params.addParam<std::string>("base_name", "Mechanical property base name");
   MooseEnum property("first_local_vector second_local_vector normal_local_vector");
   params.addRequiredParam<MooseEnum>(

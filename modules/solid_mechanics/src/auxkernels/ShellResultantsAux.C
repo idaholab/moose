@@ -23,7 +23,7 @@ ShellResultantsAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
-      "Compute the local forces, bending moments and shear forces on shell elements");
+      "Computes the local forces, bending moments and shear forces acting on shell elements");
   params.addParam<std::string>("base_name", "Mechanical property base name");
   params.addRequiredCoupledVar(
       "thickness",
@@ -31,12 +31,12 @@ ShellResultantsAux::validParams()
   params.addRequiredParam<std::string>("through_thickness_order",
                                        "Quadrature order in out of plane direction");
   MooseEnum output_resultant(
-      "axial_force_1 axial_force_2 normal_force bending_moment_00 bending_moment_11 "
+      "axial_force_0 axial_force_1 normal_force bending_moment_0 bending_moment_1 "
       "bending_moment_01 shear_force_01 shear_force_02 shear_force_12");
   params.addRequiredParam<MooseEnum>(
       "output_resultant",
       output_resultant,
-      "The resultant type to output, calculated on the shell element.");
+      "The stress resultant type to output, calculated on the shell element.");
 
   return params;
 }
@@ -66,7 +66,7 @@ ShellResultantsAux::computeValue()
 
   switch (_resultant)
   {
-    case 0: // Corresponds to "axial_force_1", normal force along the first local axis
+    case 0: // Corresponds to "axial_force_0", in-plane force along the first local axis
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -74,7 +74,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 1: // Corresponds to "axial_force_2", normal force along the second local axis
+    case 1: // Corresponds to "axial_force_1", in-plane force along the second local axis
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -91,7 +91,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 3: // Corresponds to "bending_moment_00", bending moment around first local axis
+    case 3: // Corresponds to "bending_moment_0", bending moment around first local axis
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant -= (*_local_stress_t_points[i])[_qp](1, 1) * _t_points[i](0) *
@@ -99,7 +99,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 4: // Corresponds to "bending_moment_11", bending moment around second local axis
+    case 4: // Corresponds to "bending_moment_1", bending moment around second local axis
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant -= (*_local_stress_t_points[i])[_qp](0, 0) * _t_points[i](0) *
@@ -123,7 +123,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 7: // Corresponds to "shear_force_02", out of plane shear force
+    case 7: // Corresponds to "shear_force_02", transverse shear force
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -131,7 +131,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 8: // Corresponds to "shear_force_12", out of plane shear force
+    case 8: // Corresponds to "shear_force_12", transverse shear force
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=

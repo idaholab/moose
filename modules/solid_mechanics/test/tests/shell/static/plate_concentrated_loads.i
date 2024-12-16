@@ -221,7 +221,7 @@
   [moment_11]
     type = ShellResultantsAux
     variable = moment_11
-    output_resultant = bending_moment_00
+    output_resultant = bending_moment_0
     thickness = 0.133887
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
