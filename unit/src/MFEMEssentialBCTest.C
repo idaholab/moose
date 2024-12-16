@@ -42,16 +42,19 @@ public:
     _mfem_problem->addFunction("ParsedFunction", "func1", func_params);
     _mfem_problem->getFunction("func1").initialSetup();
     InputParameters vecfunc_params = _factory.getValidParams("ParsedVectorFunction");
-    vecfunc_params.set<std::string>("expression_x") = "x + y";
-    vecfunc_params.set<std::string>("expression_y") = "x + y + 1";
-    vecfunc_params.set<std::string>("expression_z") = "x + y + 2";
+    vecfunc_params.set<std::string>("expression_x") = "3";
+    vecfunc_params.set<std::string>("expression_y") = "4";
+    vecfunc_params.set<std::string>("expression_z") = "5";
     _mfem_problem->addFunction("ParsedVectorFunction", "func2", vecfunc_params);
     _mfem_problem->getFunction("func2").initialSetup();
     _scalar_gridfunc.ProjectCoefficient(_scalar_zero);
     _vector_h1_gridfunc.ProjectCoefficient(_vector_zero);
+    _vector_hcurl_gridfunc.ProjectCoefficient(_vector_zero);
+    _vector_hdiv_gridfunc.ProjectCoefficient(_vector_zero);
   }
 
   void check_boundary(int bound,
+                      mfem::FiniteElementSpace & fespace,
                       std::function<double(mfem::ElementTransformation *,
                                            const mfem::IntegrationPoint &)> error_func,
                       double tolerance)
@@ -63,7 +66,7 @@ public:
         continue;
       mfem::ElementTransformation * transform =
           _mfem_mesh_ptr->getMFEMParMeshPtr()->GetBdrElementTransformation(be);
-      const mfem::FiniteElement * fe = _scalar_fes.GetBE(be);
+      const mfem::FiniteElement * fe = fespace.GetBE(be);
       const mfem::IntegrationRule & ir =
           mfem::IntRules.Get(fe->GetGeomType(), 2 * fe->GetOrder() + 2);
       double total_error = 0.0;
@@ -108,6 +111,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
   mfem::GridFunctionCoefficient scalar_variable(&_scalar_gridfunc);
   check_boundary(
       1,
+      _scalar_fes,
       [&scalar_variable](mfem::ElementTransformation * transform,
                          const mfem::IntegrationPoint & point)
       { return scalar_variable.Eval(*transform, point) - 1.; },
@@ -139,6 +143,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
       _mfem_problem->getScalarFunctionCoefficient("func1");
   check_boundary(
       1,
+      _scalar_fes,
       [&scalar_variable, expected](mfem::ElementTransformation * transform,
                                    const mfem::IntegrationPoint & point)
       { return scalar_variable.Eval(*transform, point) - expected->Eval(*transform, point); },
@@ -168,6 +173,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
   mfem::Vector expected({1., 2., 3.});
   check_boundary(
       1,
+      _scalar_fes,
       [&variable, &expected](mfem::ElementTransformation * transform,
                              const mfem::IntegrationPoint & point)
       {
@@ -204,6 +210,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
       1,
+      _scalar_fes,
       [&variable, &function](mfem::ElementTransformation * transform,
                              const mfem::IntegrationPoint & point)
       {
@@ -233,25 +240,24 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_h1_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_hdiv_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_hdiv_gridfunc);
   mfem::Vector assigned_val({1., 2., 3.});
   check_boundary(
       1,
+      _vector_hdiv_fes,
       [this, &variable, &assigned_val](mfem::ElementTransformation * transform,
                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable.Eval(actual, *transform, point);
         std::cout << "[" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]" << std::endl;
-        // Project the assigned BC val into the direction of the normal
-        expected = normal;
-        expected *= (assigned_val * normal) / (normal * normal);
+        expected = assigned_val;
         actual -= expected;
         // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
-        return actual.Norml2();
+        return normal[0] * actual[0] + normal[1] * actual[1] + normal[2] * actual[2];
       },
       1e-8);
 }
@@ -273,14 +279,15 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
 
   // Test applying the BC
-  essential_bc.ApplyBC(_vector_h1_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
+  essential_bc.ApplyBC(_vector_hdiv_gridfunc, _mfem_mesh_ptr->getMFEMParMeshPtr().get());
 
   // Check the correct boundary values have been applied
-  mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
+  mfem::VectorGridFunctionCoefficient variable(&_vector_hdiv_gridfunc);
   std::shared_ptr<mfem::VectorFunctionCoefficient> function =
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
       1,
+      _vector_hdiv_fes,
       [this, &variable, &function](mfem::ElementTransformation * transform,
                                    const mfem::IntegrationPoint & point)
       {
@@ -317,6 +324,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
   mfem::Vector expected({1., 2., 3.});
   check_boundary(
       1,
+      _vector_hcurl_fes,
       [this, &variable, &expected](mfem::ElementTransformation * transform,
                                    const mfem::IntegrationPoint & point)
       {
@@ -363,6 +371,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
       1,
+      _vector_hcurl_fes,
       [this, &variable, &function](mfem::ElementTransformation * transform,
                                    const mfem::IntegrationPoint & point)
       {
