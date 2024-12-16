@@ -13,7 +13,6 @@ class MFEMEssentialBCTest : public MFEMObjectUnitTest
 {
 public:
   mfem::common::H1_FESpace _scalar_fes;
-  // mfem::common::ND_FESpace _vector_h1_fes;
   mfem::common::H1_FESpace _vector_h1_fes;
   mfem::common::ND_FESpace _vector_hcurl_fes;
   mfem::common::RT_FESpace _vector_hdiv_fes;
@@ -25,7 +24,6 @@ public:
   MFEMEssentialBCTest()
     : MFEMObjectUnitTest("PlatypusApp"),
       _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
-      //_vector_h1_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, 3),
       _vector_h1_fes(
           _mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, mfem::BasisType::GaussLobatto, 3),
       _vector_hcurl_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
@@ -42,9 +40,9 @@ public:
     _mfem_problem->addFunction("ParsedFunction", "func1", func_params);
     _mfem_problem->getFunction("func1").initialSetup();
     InputParameters vecfunc_params = _factory.getValidParams("ParsedVectorFunction");
-    vecfunc_params.set<std::string>("expression_x") = "3";
-    vecfunc_params.set<std::string>("expression_y") = "4";
-    vecfunc_params.set<std::string>("expression_z") = "5";
+    vecfunc_params.set<std::string>("expression_x") = "x + y";
+    vecfunc_params.set<std::string>("expression_y") = "x + y + 1";
+    vecfunc_params.set<std::string>("expression_z") = "x + y + 2";
     _mfem_problem->addFunction("ParsedVectorFunction", "func2", vecfunc_params);
     _mfem_problem->getFunction("func2").initialSetup();
     _scalar_gridfunc.ProjectCoefficient(_scalar_zero);
@@ -173,7 +171,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
   mfem::Vector expected({1., 2., 3.});
   check_boundary(
       1,
-      _scalar_fes,
+      _vector_h1_fes,
       [&variable, &expected](mfem::ElementTransformation * transform,
                              const mfem::IntegrationPoint & point)
       {
@@ -210,7 +208,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
       _mfem_problem->getVectorFunctionCoefficient("func2");
   check_boundary(
       1,
-      _scalar_fes,
+      _vector_h1_fes,
       [&variable, &function](mfem::ElementTransformation * transform,
                              const mfem::IntegrationPoint & point)
       {
@@ -253,7 +251,6 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable.Eval(actual, *transform, point);
-        std::cout << "[" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]" << std::endl;
         expected = assigned_val;
         actual -= expected;
         // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
@@ -294,6 +291,12 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable.Eval(actual, *transform, point);
         function->Eval(expected, *transform, point);
+        std::cout << "Normal [" << normal[0] << ", " << normal[1] << ", " << normal[2] << "]"
+                  << std::endl;
+        std::cout << "Actual [" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]"
+                  << std::endl;
+        std::cout << "Expected [" << expected[0] << ", " << expected[1] << ", " << expected[2]
+                  << "]" << std::endl;
         actual -= expected;
         // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
         return normal[0] * actual[0] + normal[1] * actual[1] + normal[2] * actual[2];
@@ -330,12 +333,6 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
       {
         mfem::Vector actual(3), normal = calc_normal(transform), cross_prod(3);
         variable.Eval(actual, *transform, point);
-        std::cout << "Normal [" << normal[0] << ", " << normal[1] << ", " << normal[2] << "]"
-                  << std::endl;
-        std::cout << "Actual [" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]"
-                  << std::endl;
-        std::cout << "Expected [" << expected[0] << ", " << expected[1] << ", " << expected[2]
-                  << "]" << std::endl;
         actual -= expected;
         // (actual - expected) should be parallel to the normal and have a cross product of 0.
         cross_prod = normal[1] * actual[2] - normal[2] * actual[1];
