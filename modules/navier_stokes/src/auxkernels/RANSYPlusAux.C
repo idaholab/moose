@@ -103,8 +103,15 @@ RANSYPlusAux::computeValue()
         // Non-equilibrium / Non-iterative
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
       else
+      {
         // Equilibrium / Iterative
         y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), distance);
+        // _console << "parallel_speed: " << parallel_speed << std::endl;
+        // _console << "mu: " << mu << std::endl;
+        // _console << "rho: " << rho << std::endl;
+        // _console << "distance: " << distance << std::endl;
+        // _console << "y_plus: " << y_plus << std::endl;
+      }
 
       y_plus_vec.push_back(raw_value(y_plus));
     }
