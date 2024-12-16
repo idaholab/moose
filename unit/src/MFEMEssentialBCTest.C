@@ -291,12 +291,6 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable.Eval(actual, *transform, point);
         function->Eval(expected, *transform, point);
-        std::cout << "Normal [" << normal[0] << ", " << normal[1] << ", " << normal[2] << "]"
-                  << std::endl;
-        std::cout << "Actual [" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]"
-                  << std::endl;
-        std::cout << "Expected [" << expected[0] << ", " << expected[1] << ", " << expected[2]
-                  << "]" << std::endl;
         actual -= expected;
         // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
         return normal[0] * actual[0] + normal[1] * actual[1] + normal[2] * actual[2];
@@ -375,12 +369,6 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform), cross_prod(3);
         variable.Eval(actual, *transform, point);
         function->Eval(expected, *transform, point);
-        std::cout << "Normal [" << normal[0] << ", " << normal[1] << ", " << normal[2] << "]"
-                  << std::endl;
-        std::cout << "Actual [" << actual[0] << ", " << actual[1] << ", " << actual[2] << "]"
-                  << std::endl;
-        std::cout << "Expected [" << expected[0] << ", " << expected[1] << ", " << expected[2]
-                  << "]" << std::endl;
         actual -= expected;
         // (actual - expected) should be parallel to the normal and have a cross product of 0.
         cross_prod = normal[1] * actual[2] - normal[2] * actual[1];
