@@ -119,7 +119,6 @@
     v = u
     block = 0
     vector_tag = vec_tag2
-    execute_on = timestep_end
   [../]
 
   [./TagVectorAux2]
@@ -128,7 +127,6 @@
     v = v
     block = 1
     matrix_tag = mat_tag2
-    execute_on = timestep_end
   [../]
 []
 

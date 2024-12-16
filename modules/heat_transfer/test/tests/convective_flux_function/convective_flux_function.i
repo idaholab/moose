@@ -43,7 +43,6 @@
     variable = flux
     v = temp
     vector_tag = 'bcs'
-    execute_on = timestep_end
   []
 []
 

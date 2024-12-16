@@ -52,35 +52,30 @@ dt=1
     variable = positive
     v = lm
     vector_tag = positive
-    execute_on = timestep_end
   []
   [diffusion_lm]
     type = TagVectorAux
     variable = diffusion_lm
     v = lm
     vector_tag = diffusion
-    execute_on = timestep_end
   []
   [rest_lm]
     type = TagVectorAux
     variable = rest_lm
     v = lm
     vector_tag = rest
-    execute_on = timestep_end
   []
   [diffusion_primal]
     type = TagVectorAux
     variable = diffusion_primal
     v = u
     vector_tag = diffusion
-    execute_on = timestep_end
   []
   [rest_primal]
     type = TagVectorAux
     variable = rest_primal
     v = u
     vector_tag = rest
-    execute_on = timestep_end
   []
 []
 

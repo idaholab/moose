@@ -55,7 +55,6 @@
     variable = tag_variable
     v = u
     matrix_tag = mat_tag2
-    execute_on = timestep_end
   [../]
 []
 
