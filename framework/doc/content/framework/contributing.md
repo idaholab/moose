@@ -103,7 +103,28 @@ in a manner to shield day-to-day development from any associated burdens. Howeve
 that all new code is documented in a specific manner to meet the guidelines, please refer to
 [framework/documenting.md] for additional information.
 
-### 5. Push Modifications Back to GitHub
+### 5. Consider Adding a MOOSE Newsletter Entry
+
+The [MOOSE Newsletter](newsletter/index.md optional=True) is a monthly digest of MOOSE bugfixes, changes, updates,
+and new features. We encourage all developers who create MOOSE PRs to add a notice of this change to
+the newsletter as part of the PR creation and review process. This helps advertise your change to
+other developers and users who want to keep up-to-date, as each news update is also posted to our
+[GitHub Discussions board](https://github.com/idaholab/moose/discussions)!
+
+To contribute to the newsletter, edit the file corresponding to the current month located in the
+newsletter directory. For example, if a PR will be merged in during the month of December 2024,
+the PR developer would make this change at the following location:
+
+```
+MOOSE_DIR/modules/doc/content/newsletter/2024/2024_12.md
+```
+
+In this file, there are sections related to MOOSE framework changes, MOOSE module changes, PETSc and
+libMesh updates, as well as minor (i.e., requiring a one-line description, rather than a paragraph)
+bugfixes and updates. Each newsletter is made fully public early in the proceeding month; so, for
+example, the newsletter for December 2024 would be posted in January 2025.
+
+### 6. Push Modifications Back to GitHub
 
 Push your branch back into your fork on GitHub:
 
@@ -111,11 +132,15 @@ Push your branch back into your fork on GitHub:
 git push origin branch_name
 ```
 
-## Create a Pull Request
+## 7. Create a Pull Request
 
-GitHub utilizes Pull Requests (PRs) to allow you to submit changes stored in your Fork back to the main MOOSE repository.  If you are generally interested in how PRs work you can look at the [official GitHub documentation](https://help.github.com/articles/using-pull-requests).  MOOSE utilizes the "Fork & Pull" collaborative development model.
+GitHub utilizes Pull Requests (PRs) to allow you to submit changes stored in your Fork back to the
+main MOOSE repository.  If you are generally interested in how PRs work you can look at the
+[official GitHub documentation](https://help.github.com/articles/using-pull-requests).  MOOSE
+utilizes the "Fork & Pull" collaborative development model.
 
-The main thing to remember when issuing a PR for MOOSE is that all PRs should be specified to go to the `next` branch.
+The main thing to remember when issuing a PR for MOOSE is that all PRs should be specified to go to
+the `next` branch.
 
 ## Pull Request Assignee
 
@@ -129,7 +154,8 @@ MOOSE developers should expect to be assigned to their own PRs, as they should k
 
 ## What Now?
 
-The next phase is covered in [How a Patch Becomes Code](framework/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
+The next phase is covered in [How a Patch Becomes Code](framework/patch_to_code.md)... that will
+take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
 
 ## Autotools
 
