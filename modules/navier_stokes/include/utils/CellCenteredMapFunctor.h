@@ -65,6 +65,7 @@ public:
 
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return false; }
+  bool mayRequireGhosting() const override final { return true; }
 
 private:
   /// The mesh that this functor lives on
