@@ -172,7 +172,7 @@ FlexiblePatternGenerator::validParams()
       "delete_default_external_boundary_from_inputs external_boundary_id external_boundary_name",
       "Boundary");
   params.addParamNamesToGroup("cell_id_name cell_id_shift pattern_id_name pattern_id_shift",
-                              "Reporting Id Parameters");
+                              "Reporting Id");
 
   return params;
 }
