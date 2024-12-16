@@ -67,6 +67,18 @@ Note that letters shown upper case in commands do not mean literal upper case. Y
 - +`Ctrl+Y`+ Redo last undone action (not yank like in emacs)
 - +`Ctrl+F`+ Move cursor to next character
 - +`Ctrl+B`+ Move cursor to previous character
+- +`Cmd+B`+ Toggle left sidebar visibility
+- +`Cmd+Left/Right Arrow`+ Move cursor to beginning/end of line
+- +`Option+Left/Right Arrow`+ Move cursor over one word to left/right
+- +`Cmd+K Cmd+M`+ Maximize/Unmaximize current editor group
+- +`Cmd+Up/Down Arrow`+ Go to beginning/end of file
+- +`Fn+Up/Down Arrow`+ Page Up/Down in file
+- +`Cmd+Shift+\`+ Go to matching brace
+- +`Ctrl+-`+ Go to previous cursor location (useful after doing things like +`Cmd+Click`+)
+- +`Cmd+L`+ Select current line
+- +`Cmd+D`+ Select current word. Repeated invocations will also select next matches of that word.
+  This is useful if wanting to edit multiple occurrences of the word without going through the
+  Find/Replace focus.
 
 ### Focuses
 
