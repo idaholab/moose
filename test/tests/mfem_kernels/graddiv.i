@@ -68,17 +68,6 @@
   []
 []
 
-[VectorCoefficients]
-  [f]
-    type = MFEMVectorFunctionCoefficient
-    function = f
-  []
-  [F_exact]
-    type = MFEMVectorFunctionCoefficient
-    function = F_exact
-  []
-[]
-
 [Kernels]
   [divdiv]
     type = MFEMDivDivKernel
