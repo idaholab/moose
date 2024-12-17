@@ -7,8 +7,9 @@ InputParameters
 MFEMVectorFunctionDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<FunctionName>("function",
-                                        "The values the components must take on the boundary.");
+  params.addRequiredParam<std::string>(
+      "vector_coefficient",
+      "The vector coefficient specifying the values variable takes on the boundary.");
   return params;
 }
 
@@ -16,8 +17,8 @@ MFEMVectorFunctionDirichletBCBase::validParams()
 MFEMVectorFunctionDirichletBCBase::MFEMVectorFunctionDirichletBCBase(
     const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _vec_coef(
-        getMFEMProblem().getProperties().getVectorProperty(getParam<FunctionName>("function")))
+    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(
+        getParam<std::string>("vector_coefficient")))
 {
 }
 

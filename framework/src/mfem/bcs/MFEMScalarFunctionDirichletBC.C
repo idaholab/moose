@@ -9,13 +9,14 @@ InputParameters
 MFEMScalarFunctionDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<FunctionName>("function", "The forcing function.");
+  params.addRequiredParam<std::string>(
+      "coefficient", "The coefficient setting the values on the essential boundary.");
   return params;
 }
 
 MFEMScalarFunctionDirichletBC::MFEMScalarFunctionDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef_name(getParam<FunctionName>("function")),
+    _coef_name(getParam<std::string>("coefficient")),
     _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }

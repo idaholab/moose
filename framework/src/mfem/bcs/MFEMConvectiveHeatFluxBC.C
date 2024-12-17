@@ -14,9 +14,9 @@ MFEMConvectiveHeatFluxBC::validParams()
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties to add to MFEM problems.");
-  params.addRequiredParam<FunctionName>("T_infinity", "Function for far-field temperature");
-  params.addRequiredParam<FunctionName>("heat_transfer_coefficient",
-                                        "Function for heat transfer coefficient");
+  params.addRequiredParam<std::string>("T_infinity", "Name of far-field temperature coefficient");
+  params.addRequiredParam<std::string>("heat_transfer_coefficient",
+                                       "Name of heat transfer coefficient");
   return params;
 }
 
@@ -24,9 +24,9 @@ MFEMConvectiveHeatFluxBC::validParams()
 MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _heat_transfer_coef(getMFEMProblem().getProperties().getScalarProperty(
-        getParam<FunctionName>("heat_transfer_coefficient"))),
+        getParam<std::string>("heat_transfer_coefficient"))),
     _T_inf_coef(
-        getMFEMProblem().getProperties().getScalarProperty(getParam<FunctionName>("T_infinity"))),
+        getMFEMProblem().getProperties().getScalarProperty(getParam<std::string>("T_infinity"))),
     _external_heat_flux_coef(getMFEMProblem().makeScalarCoefficient<mfem::ProductCoefficient>(
         _heat_transfer_coef, _T_inf_coef))
 {

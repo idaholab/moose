@@ -15,7 +15,7 @@ MFEMCurlCurlKernel::validParams()
       "arising from the weak form of the curl curl operator "
       "$-k\\vec\\nabla \\times \\vec\\nabla \\times \\vec u$.");
   params.addParam<std::string>("coefficient",
-                               "Name of scalar property k to multiply the integrator by.");
+                               "Name of scalar coefficient k to multiply the integrator by.");
   return params;
 }
 

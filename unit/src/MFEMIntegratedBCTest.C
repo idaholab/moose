@@ -51,7 +51,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
   _mfem_problem->addFunction("ParsedVectorFunction", "func1", func_params);
   InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionNormalIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<FunctionName>("function") = "func1";
+  bc_params.set<std::string>("vector_coefficient") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   MFEMVectorFunctionNormalIntegratedBC & integrated_bc =
       addObject<MFEMVectorFunctionNormalIntegratedBC>(
@@ -115,8 +115,8 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMConvectiveHeatFluxBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<FunctionName>("heat_transfer_coefficient") = "htc";
-  bc_params.set<FunctionName>("T_infinity") = "Tinf";
+  bc_params.set<std::string>("heat_transfer_coefficient") = "htc";
+  bc_params.set<std::string>("T_infinity") = "Tinf";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   MFEMConvectiveHeatFluxBC & integrated_bc =
       addObject<MFEMConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", bc_params);
@@ -166,7 +166,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionBoundaryIntegratedBC)
   InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  bc_params.set<FunctionName>("function") = "func1";
+  bc_params.set<std::string>("vector_coefficient") = "func1";
   auto & bc = addObject<MFEMVectorFunctionBoundaryIntegratedBC>(
       "MFEMVectorFunctionBoundaryIntegratedBC", "bc1", bc_params);
 

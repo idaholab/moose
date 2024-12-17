@@ -179,7 +179,7 @@ TEST_F(MFEMKernelTest, MFEMVectorFEDomainLFKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEDomainLFKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<FunctionName>("function") = "vec_coef1";
+  kernel_params.set<std::string>("vector_coefficient") = "vec_coef1";
   MFEMVectorFEDomainLFKernel & kernel =
       addObject<MFEMVectorFEDomainLFKernel>("MFEMVectorFEDomainLFKernel", "kernel1", kernel_params);
 

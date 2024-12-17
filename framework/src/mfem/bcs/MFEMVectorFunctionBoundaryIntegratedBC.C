@@ -9,8 +9,8 @@ InputParameters
 MFEMVectorFunctionBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
-  params.addRequiredParam<FunctionName>("function",
-                                        "The values the components must take on the boundary.");
+  params.addRequiredParam<std::string>("vector_coefficient",
+                                       "Vector coefficient used in the boundary integrator.");
   return params;
 }
 
@@ -18,8 +18,8 @@ MFEMVectorFunctionBoundaryIntegratedBC::validParams()
 MFEMVectorFunctionBoundaryIntegratedBC::MFEMVectorFunctionBoundaryIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef(
-        getMFEMProblem().getProperties().getVectorProperty(getParam<FunctionName>("function")))
+    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(
+        getParam<std::string>("vector_coefficient")))
 {
 }
 
