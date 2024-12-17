@@ -38,6 +38,8 @@ public:
    */
   const std::string & getMooseObjectType() const { return _type; }
 
+  virtual void timedAct() override;
+
 protected:
   /// The Object type that is being created
   std::string _type;

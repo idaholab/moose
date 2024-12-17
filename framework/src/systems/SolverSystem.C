@@ -142,7 +142,8 @@ SolverSystem::compute(const ExecFlagType type)
     if (_fe_problem.computingScalingJacobian() || matrixFromColoring())
       compute_tds = true;
   }
-  else if ((type == EXEC_TIMESTEP_END) || (type == EXEC_FINAL))
+  else if ((type == EXEC_TIMESTEP_END) || (type == EXEC_MULTIAPP_FIXED_POINT_END) ||
+           (type == EXEC_FINAL))
   {
     if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
       // We likely don't have a final residual evaluation upon which we compute the time derivatives

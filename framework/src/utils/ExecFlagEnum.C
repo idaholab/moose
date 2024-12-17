@@ -36,6 +36,14 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag)
   _items.erase(flag);
 }
 
+void
+ExecFlagEnum::findReplaceFlag(const ExecFlagType & flag1, const ExecFlagType & flag2)
+{
+  for (auto & item : _current_values)
+    if (item == flag1)
+      item = flag2;
+}
+
 std::string
 ExecFlagEnum::getDocString() const
 {

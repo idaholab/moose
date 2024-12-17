@@ -399,10 +399,20 @@ MaterialOutputAction::getParams(const std::string & type,
     mooseError("Internal error. AuxKernel has neither a `functor` nor a `property` parameter.");
 
   params.set<AuxVariableName>("variable") = variable_name;
-  if (_output_only_on_timestep_end)
-    params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  if (!_app.parameters().get<bool>("use_legacy_fixed_point_execute_on"))
+  {
+    if (_output_only_on_timestep_end)
+      params.set<ExecFlagEnum>("execute_on") = EXEC_MULTIAPP_FIXED_POINT_END;
+    else
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_MULTIAPP_FIXED_POINT_END};
+  }
   else
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  {
+    if (_output_only_on_timestep_end)
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+    else
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  }
 
   if (material.boundaryRestricted())
     params.set<std::vector<BoundaryName>>("boundary") = material.boundaryNames();

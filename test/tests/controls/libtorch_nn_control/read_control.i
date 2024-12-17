@@ -84,12 +84,12 @@ cp = 1.0
   [T_max]
     type = NodalExtremeValue
     variable = T
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL MULTIAPP_FIXED_POINT_END'
   []
   [control_value]
     type = LibtorchControlValuePostprocessor
     control_name = src_control
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL MULTIAPP_FIXED_POINT_END'
   []
 []
 

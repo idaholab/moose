@@ -169,7 +169,8 @@ PseudoTimestep::execute()
     _dt = _initial_dt;
 
   // at the end of each timestep call the postprocessor to set values for dt
-  if (_current_execute_flag == EXEC_TIMESTEP_END)
+  if (_current_execute_flag == EXEC_TIMESTEP_END ||
+      _current_execute_flag == EXEC_MULTIAPP_FIXED_POINT_END)
   {
     res_norm = currentResidualNorm();
     _residual_norms_sequence.push_back(res_norm);

@@ -115,8 +115,12 @@ DiffusionPhysicsBase::addPostprocessors()
       params.set<MooseFunctorName>("functor_diffusivity") = "1";
     params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
     // Default to maximum computation
-    params.set<ExecFlagEnum>("execute_on") = {
-        EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR, EXEC_LINEAR};
+    if (_app.parameters().get<bool>("use_legacy_fixed_point_execute_on"))
+      params.set<ExecFlagEnum>("execute_on") = {
+          EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR, EXEC_LINEAR};
+    else
+      params.set<ExecFlagEnum>("execute_on") = {
+          EXEC_INITIAL, EXEC_MULTIAPP_FIXED_POINT_END, EXEC_NONLINEAR, EXEC_LINEAR};
     getProblem().addPostprocessor(pp_type, prefix() + "diffusive_flux_" + boundary_name, params);
   }
 }

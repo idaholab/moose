@@ -32,7 +32,7 @@
   [./max_c]
     type = NodalExtremeValue
     variable = c
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial multiapp_fixed_point_end'
   [../]
 []
 

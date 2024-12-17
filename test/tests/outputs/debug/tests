@@ -247,14 +247,14 @@
     [user_objects_timestep_begin_end]
       type = RunApp
       input = 'show_execution_userobjects.i'
-      cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END'"
+      cli_args = "Debug/show_execution_order='MULTIAPP_FIXED_POINT_BEGIN MULTIAPP_FIXED_POINT_END'"
       expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral (int_v int_v_elem |)elem_sample'
       detail = 'user objects, including postprocessors, executed at the beginning and end of each time step,'
     []
     [nodal_user_objects]
       type = RunApp
       input = 'show_execution_userobjects.i'
-      cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END' --color off"
+      cli_args = "Debug/show_execution_order='MULTIAPP_FIXED_POINT_BEGIN MULTIAPP_FIXED_POINT_END' --color off"
       expect_out = '\[DBG\] find_node nodal_sampler_y nodal_sampler_x'
       detail = 'nodal user objects,'
     []
@@ -273,16 +273,16 @@
       input = 'show_execution_userobjects.i'
       cli_args = "--color off"
       expect_out = "\[DBG\] Initializing, executing & finalizing general UO 'dofs' on "
-                   "TIMESTEP_END\n\[DBG\] Initializing, executing & finalizing general UO 'memory' "
-                   "on TIMESTEP_END\n\[DBG\] Initializing, executing & finalizing general UO 'line' "
-                   "on TIMESTEP_END"
+                   "MULTIAPP_FIXED_POINT_END\n\[DBG\] Initializing, executing & finalizing general UO 'memory' "
+                   "on MULTIAPP_FIXED_POINT_END\n\[DBG\] Initializing, executing & finalizing general UO 'line' "
+                   "on MULTIAPP_FIXED_POINT_END"
       detail = 'general user objects,'
     []
     [threaded_general_user_objects]
       type = RunApp
       input = 'show_execution_userobjects.i'
       cli_args = "--color off UserObjects/inactive=''"
-      expect_out = '\[DBG\] Executing Threaded General User Object prime_2 on TIMESTEP_END'
+      expect_out = '\[DBG\] Executing Threaded General User Object prime_2 on MULTIAPP_FIXED_POINT_END'
       detail = 'threaded general user objects,'
       # The print is not thread-safe, because those objects don't know their thread id
       max_threads = 1

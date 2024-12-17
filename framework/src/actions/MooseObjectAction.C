@@ -14,6 +14,7 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 #include "MooseApp.h"
+#include "EigenExecutionerBase.h"
 
 InputParameters
 MooseObjectAction::validParams()
@@ -44,4 +45,39 @@ void
 MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   addRelationshipManagers(input_rm_type, _moose_object_pars);
+}
+
+void
+MooseObjectAction::timedAct()
+{
+  TIME_SECTION(_act_timer);
+
+  // we reset the default values of execute_on parameter for objects
+  // when legacy fixed-point iteration execute_on is not used
+  // Note: this code should be removed once the legacy flag is removed
+  //       and the default values should be set in validParams of individual
+  //       objects.
+  if (!_app.parameters().get<bool>("use_legacy_fixed_point_execute_on"))
+  {
+    // This resetting should only for objects that have the execute_on parameter and
+    // the parameter is not private and is not changed by users.
+    // Note: executioners based on EigenExecutionerBase do not have fixed-point iteration,
+    //       thus we need to skip the resetting.
+    if (_moose_object_pars.have_parameter<ExecFlagEnum>("execute_on") &&
+        !_moose_object_pars.isParamSetByUser("execute_on") &&
+        !_moose_object_pars.isPrivate("execute_on") &&
+        !dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner()))
+    {
+      // The resetting must be in the quiet mode, which is important for Outputs
+      // to allow FEProblemBase::addOutput to override this parameter
+      auto & exec_enum = _moose_object_pars.set<ExecFlagEnum>("execute_on", true);
+      exec_enum.findReplaceFlag(EXEC_TIMESTEP_BEGIN, EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+
+      // The output should still be defaulting to timestep end
+      if (_moose_object_pars.getBase().value_or("") != "Output")
+        exec_enum.findReplaceFlag(EXEC_TIMESTEP_END, EXEC_MULTIAPP_FIXED_POINT_END);
+    }
+  }
+
+  act();
 }

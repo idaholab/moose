@@ -42,7 +42,7 @@ public:
   /**
    * The method called externally that causes the action to act()
    */
-  void timedAct();
+  virtual void timedAct();
 
 private:
   /**

@@ -61,6 +61,11 @@ public:
   ///@}
 
   /**
+   * Find/replace a flag with another
+   */
+  void findReplaceFlag(const ExecFlagType & flag1, const ExecFlagType & flag2);
+
+  /**
    * Generate a documentation string for the "execute_on" parameter.
    */
   std::string getDocString() const;
