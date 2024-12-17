@@ -48,7 +48,7 @@ public:
   virtual void addExternalVariables() {}
 
   /**
-   * Method to initialize variable before starting the simulation
+   * Method to initialize variables before starting the simulation
    */
-  virtual void initializeVariable() {}
+  virtual void initializeVariables();
 };
