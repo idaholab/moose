@@ -140,7 +140,7 @@ these two methods: the `_u[_qp]` is the value of the variable at the current nod
 from a shared base class and  `_sum` and `_n` are a member variables defined within class for
 performing the calculation.
 
-!listing AverageNodalVariableValue.C start=doco-execute-get-start end=doco-execute-get-end include-start=false
+!listing postprocessors/AverageNodalVariableValue.C start=doco-execute-get-start end=doco-execute-get-end include-start=false
 
 In parallel, the calls to the execute method occur on each process or thread on a subset of the
 domain, in this case nodes. Therefore, the computed values must be combined to get the actual
@@ -148,14 +148,14 @@ summations required to compute the average value. The first step is to setup the
 of this calculation within the initialize method, which in this example sets the
 `_sum` and `_n` member variables to zero.
 
-!listing AverageNodalVariableValue.C start=doco-init-start end=doco-init-end include-start=false
+!listing postprocessors/AverageNodalVariableValue.C start=doco-init-start end=doco-init-end include-start=false
 
 After the aforementioned execute method is called for each node the computed values for `_sum` and
 `_n` must be aggregated from across processes to the root processes. For this problem a gather
 operation is required to collect the values computed on all processes to the root process. This is
 accomplished via the `gatherSum` method.
 
-!listing AverageNodalVariableValue.C start=doco-final-start end=doco-final-end include-start=false
+!listing postprocessors/AverageNodalVariableValue.C start=doco-final-start end=doco-final-end include-start=false
 
 Of course, the type of communication necessary depends on the calculation being performed. The
 [UserObject.md] base class includes helper methods for common parallel communications functions.
@@ -169,7 +169,7 @@ threads to the object on the root thread. For the AverageNodalVariableValue post
 values for `_sum` and `_n` on the root process object are updated to include the these same values
 from the other threads.
 
-!listing AverageNodalVariableValue.C start=doco-thread-start end=doco-thread-end include-start=false
+!listing postprocessors/AverageNodalVariableValue.C start=doco-thread-start end=doco-thread-end include-start=false
 
 ## Execute On... id=execute-on
 
