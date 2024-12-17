@@ -1,0 +1,13 @@
+diff --git a/pyhit/mooseutils/message.py b/pyhit/mooseutils/message.py
+index 98cfc029c7..fc89230e74 100644
+--- a/pyhit/mooseutils/message.py
++++ b/pyhit/mooseutils/message.py
+@@ -8,7 +8,7 @@
+ #* https://www.gnu.org/licenses/lgpl-2.1.html
+ import os
+ import traceback
+-from mooseutils import colorText
++from . import colorText
+ 
+ try:
+     from PyQt5 import QtWidgets, QtCore
