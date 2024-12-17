@@ -21,8 +21,9 @@ InputParameters
 PIMPLE::validParams()
 {
   InputParameters params = TransientBase::validParams();
-  params.addClassDescription("Solves the transient Navier-Stokes equations using the PIMPLE algorithm and "
-                             "linear finite volume variables.");
+  params.addClassDescription(
+      "Solves the transient Navier-Stokes equations using the PIMPLE algorithm and "
+      "linear finite volume variables.");
   params += PIMPLESolve::validParams();
 
   return params;

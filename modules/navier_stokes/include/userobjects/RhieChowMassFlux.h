@@ -85,7 +85,8 @@ public:
 
 protected:
   /// Select the right pressure gradient field and return a reference to the container
-  std::vector<std::unique_ptr<NumericVector<Number>>> & selectPressureGradient(const bool updated_pressure);
+  std::vector<std::unique_ptr<NumericVector<Number>>> &
+  selectPressureGradient(const bool updated_pressure);
 
   /// Compute the cell volumes on the mesh
   void setupCellVolumes();

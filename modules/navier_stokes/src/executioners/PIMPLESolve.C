@@ -18,7 +18,10 @@ InputParameters
 PIMPLESolve::validParams()
 {
   InputParameters params = SIMPLESolveBase::validParams();
-  params.addParam<unsigned int>("num_piso_iterations", 0, "The number of PISO iterations without recomputing the momentum matrix.");
+  params.addParam<unsigned int>(
+      "num_piso_iterations",
+      0,
+      "The number of PISO iterations without recomputing the momentum matrix.");
 
   return params;
 }
@@ -148,12 +151,11 @@ PIMPLESolve::solveMomentumPredictor()
 
     // Printing residuals
     _console << " Momentum equation:"
-               << (_momentum_systems.size() > 1
-                       ? std::string(" Component ") + std::to_string(system_i + 1) +
-                             std::string(" ")
-                       : std::string(" "))
-               << COLOR_GREEN << its_normalized_residuals[system_i].second << COLOR_DEFAULT
-               << " Linear its: " << its_normalized_residuals[system_i].first << std::endl;
+             << (_momentum_systems.size() > 1
+                     ? std::string(" Component ") + std::to_string(system_i + 1) + std::string(" ")
+                     : std::string(" "))
+             << COLOR_GREEN << its_normalized_residuals[system_i].second << COLOR_DEFAULT
+             << " Linear its: " << its_normalized_residuals[system_i].first << std::endl;
   }
 
   for (const auto system_i : index_range(_momentum_systems))
@@ -222,11 +224,11 @@ PIMPLESolve::solvePressureCorrector()
 
   _pressure_system.setSolution(current_local_solution);
 
-  const auto residuals = std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
+  const auto residuals =
+      std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
 
-  _console << " Pressure equation: " << COLOR_GREEN
-             << residuals.second << COLOR_DEFAULT
-             << " Linear its: " << residuals.first << std::endl;
+  _console << " Pressure equation: " << COLOR_GREEN << residuals.second << COLOR_DEFAULT
+           << " Linear its: " << residuals.first << std::endl;
 
   return residuals;
 }
@@ -293,11 +295,11 @@ PIMPLESolve::solveAdvectedSystem(const unsigned int system_num,
 
   system.setSolution(current_local_solution);
 
-  const auto residuals = std::make_pair(its_res_pair.first, linear_solver.get_initial_residual() / norm_factor);
+  const auto residuals =
+      std::make_pair(its_res_pair.first, linear_solver.get_initial_residual() / norm_factor);
 
-  _console << " Advected system: " << system.name() << " " << COLOR_GREEN
-           << residuals.second << COLOR_DEFAULT
-           << " Linear its: " << residuals.first << std::endl;
+  _console << " Advected system: " << system.name() << " " << COLOR_GREEN << residuals.second
+           << COLOR_DEFAULT << " Linear its: " << residuals.first << std::endl;
 
   return residuals;
 }
@@ -415,7 +417,8 @@ PIMPLESolve::solve()
     bool passive_scalar_converged = false;
     unsigned int ps_iteration_counter = 0;
 
-    _console << "Passive scalar iteration " << ps_iteration_counter << " Initial residual norms:" << std::endl;
+    _console << "Passive scalar iteration " << ps_iteration_counter
+             << " Initial residual norms:" << std::endl;
 
     while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
     {

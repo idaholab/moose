@@ -25,10 +25,7 @@ SIMPLESolve::validParams()
   return params;
 }
 
-SIMPLESolve::SIMPLESolve(Executioner & ex)
-  : PIMPLESolve(ex)
-{
-}
+SIMPLESolve::SIMPLESolve(Executioner & ex) : PIMPLESolve(ex) {}
 
 void
 SIMPLESolve::checkTimeKernels(LinearSystem & system)
@@ -36,7 +33,8 @@ SIMPLESolve::checkTimeKernels(LinearSystem & system)
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   if (system.containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation in system",
-               system.name(), ", SIMPLE is a steady-state solver!");
+               system.name(),
+               ", SIMPLE is a steady-state solver!");
 }
 
 void
