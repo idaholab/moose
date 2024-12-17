@@ -536,14 +536,14 @@ storePetscOptionsFromParams(PetscOptions & po,
       params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
 
   // First process the single petsc options/flags
-  AddPetscFlagsToPetscOptions(petsc_options, po);
+  addPetscFlagsToPetscOptions(petsc_options, po);
 
   // Then process the option-value pairs
-  AddPetscPairsToPetscOptions(petsc_pair_options, mesh_dimension, po);
+  addPetscPairsToPetscOptions(petsc_pair_options, mesh_dimension, po);
 }
 
 void
-AddPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & po)
+addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & po)
 {
   // Update the PETSc single flags
   for (const auto & option : petsc_flags)
@@ -586,7 +586,7 @@ AddPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & p
 }
 
 void
-AddPetscPairsToPetscOptions(
+addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
     const unsigned int mesh_dimension,
     PetscOptions & po)

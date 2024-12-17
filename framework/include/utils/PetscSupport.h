@@ -138,7 +138,7 @@ void storePetscOptionsFromParams(PetscOptions & po,
  * @param petsc_flags Container holding the flags of the petsc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void AddPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
+void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
 
 /**
  * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
@@ -146,7 +146,7 @@ void AddPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOption
  * @param mesh_dimension The mesh dimension, needed for multigrid settings
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void AddPetscPairsToPetscOptions(
+void addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
     const unsigned int mesh_dimension,
     PetscOptions & petsc_options);
