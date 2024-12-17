@@ -157,20 +157,61 @@
   []
 []
 
+[Postprocessors]
+  [drag_force]
+    type = IntegralDirectedSurfaceForce
+    vel_x = vel_x
+    vel_y = vel_y
+    mu = ${mu}
+    pressure = pressure
+    principal_direction = '1 0 0'
+    boundary = 'circle'
+    outputs = none
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [drag_coeff]
+    type = ParsedPostprocessor
+    expression = '2*drag_force/rho/(avgvel*avgvel)/D'
+    constant_names = 'rho avgvel D'
+    constant_expressions = '${rho} ${fparse 2/3*inlet_velocity} ${fparse 2*circle_radius}'
+    pp_names = 'drag_force'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [lift_force]
+    type = IntegralDirectedSurfaceForce
+    vel_x = vel_x
+    vel_y = vel_y
+    mu = ${mu}
+    pressure = pressure
+    principal_direction = '0 1 0'
+    boundary = 'circle'
+    outputs = none
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [lift_coeff]
+    type = ParsedPostprocessor
+    expression = '2*lift_force/rho/(avgvel*avgvel)/D'
+    constant_names = 'rho avgvel D'
+    constant_expressions = '${rho} ${fparse 2/3*inlet_velocity} ${fparse 2*circle_radius}'
+    pp_names = 'lift_force'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+[]
+
 [Executioner]
   type = PIMPLE
-  momentum_l_abs_tol = 1e-6
-  pressure_l_abs_tol = 1e-6
-  momentum_l_tol = 1e-6
-  pressure_l_tol = 1e-6
+  momentum_l_abs_tol = 1e-12
+  pressure_l_abs_tol = 1e-12
+  momentum_l_tol = 1e-12
+  pressure_l_tol = 1e-12
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.90
   pressure_variable_relaxation = 0.4
-  num_iterations = 20
-  pressure_absolute_tolerance = 1e-5
-  momentum_absolute_tolerance = 1e-5
+  num_iterations = 100
+  pressure_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-10
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -183,4 +224,5 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []
