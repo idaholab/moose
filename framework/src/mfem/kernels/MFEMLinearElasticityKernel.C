@@ -19,20 +19,20 @@ MFEMLinearElasticityKernel::validParams()
       "$\\mu$ is the second Lame parameter, $\\mu = \\frac{E}{2(1+\\nu)}$, "
       "where $E$ is Young's modulus and $\\nu$ is Poisson's ratio.");
 
-  params.addParam<std::string>(
+  params.addParam<platypus::MFEMScalarCoefficientName>(
       "lambda", "Name of MFEM Lame constant lambda to multiply the div(u)*I term by");
-  params.addParam<std::string>("mu",
-                               "Name of MFEM Lame constant mu to multiply the gradients term by");
+  params.addParam<platypus::MFEMScalarCoefficientName>(
+      "mu", "Name of MFEM Lame constant mu to multiply the gradients term by");
 
   return params;
 }
 
 MFEMLinearElasticityKernel::MFEMLinearElasticityKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _lambda_name(getParam<std::string>("lambda")),
-    _mu_name(getParam<std::string>("mu")),
-    _lambda(getMFEMProblem().getProperties().getScalarProperty(_lambda_name)),
-    _mu(getMFEMProblem().getProperties().getScalarProperty(_mu_name))
+    _lambda_name(getParam<platypus::MFEMScalarCoefficientName>("lambda")),
+    _mu_name(getParam<platypus::MFEMScalarCoefficientName>("mu")),
+    _lambda(getScalarProperty(_lambda_name)),
+    _mu(getScalarProperty(_mu_name))
 {
 }
 

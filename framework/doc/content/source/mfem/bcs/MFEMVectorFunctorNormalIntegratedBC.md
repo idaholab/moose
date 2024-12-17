@@ -1,8 +1,8 @@
-# MFEMVectorFunctionNormalIntegratedBC
+# MFEMVectorFunctorNormalIntegratedBC
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctionNormalIntegratedBC
+!syntax description /BCs/MFEMVectorFunctorNormalIntegratedBC
 
 ## Overview
 
@@ -14,8 +14,8 @@ Adds the boundary integrator for integrating the linear form
 where $v \in H^1$, $\vec f$ is a vector function, and $\hat n$ is the outward facing unit normal
 vector on the boundary.
 
-!syntax parameters /BCs/MFEMVectorFunctionNormalIntegratedBC
+!syntax parameters /BCs/MFEMVectorFunctorNormalIntegratedBC
 
-!syntax inputs /BCs/MFEMVectorFunctionNormalIntegratedBC
+!syntax inputs /BCs/MFEMVectorFunctorNormalIntegratedBC
 
-!syntax children /BCs/MFEMVectorFunctionNormalIntegratedBC
+!syntax children /BCs/MFEMVectorFunctorNormalIntegratedBC

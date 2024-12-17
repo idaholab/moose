@@ -3,12 +3,12 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
 
-class MFEMScalarBoundaryIntegratedBC : public MFEMIntegratedBC
+class MFEMVectorFunctorBoundaryIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarBoundaryIntegratedBC(const InputParameters & parameters);
+  MFEMVectorFunctorBoundaryIntegratedBC(const InputParameters & parameters);
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
@@ -18,8 +18,7 @@ public:
   virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
 
 protected:
-  std::string _coef_name;
-  mfem::Coefficient & _coef;
+  mfem::VectorCoefficient & _vec_coef;
 };
 
 #endif

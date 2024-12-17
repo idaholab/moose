@@ -18,4 +18,22 @@ MFEMGeneralUserObject::MFEMGeneralUserObject(const InputParameters & parameters)
 {
 }
 
+mfem::Coefficient &
+MFEMGeneralUserObject::getScalarProperty(const std::string & name)
+{
+  return getMFEMProblem().getProperties().getScalarProperty(name);
+}
+
+mfem::VectorCoefficient &
+MFEMGeneralUserObject::getVectorProperty(const std::string & name)
+{
+  return getMFEMProblem().getProperties().getVectorProperty(name);
+}
+
+mfem::MatrixCoefficient &
+MFEMGeneralUserObject::getMatrixProperty(const std::string & name)
+{
+  return getMFEMProblem().getProperties().getMatrixProperty(name);
+}
+
 #endif

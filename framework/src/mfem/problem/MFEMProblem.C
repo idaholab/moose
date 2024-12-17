@@ -260,23 +260,24 @@ MFEMProblem::addFunction(const std::string & type,
   // are only of space or only of time.
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
   {
-    // FIXME: Ideally this would support arbitrary spatial dimensions
-    _scalar_functions[name] = makeScalarCoefficient<mfem::FunctionCoefficient>(
-        [&func](const mfem::Vector & p, double t) -> mfem::real_t
-        { return func.value(t, pointFromMFEMVector(p)); });
+    getProperties().declareScalar(name,
+                                  std::make_shared<mfem::FunctionCoefficient>(
+                                      [&func](const mfem::Vector & p, double t) -> mfem::real_t
+                                      { return func.value(t, pointFromMFEMVector(p)); }));
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
-    // FIXME: Ideally this would support arbitrary spatial and vector dimensions
-    _vector_functions[name] = makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
-        3,
-        [&func](const mfem::Vector & p, double t, mfem::Vector & u)
-        {
-          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-          u[0] = vector_value(0);
-          u[1] = vector_value(1);
-          u[2] = vector_value(2);
-        });
+    getProperties().declareVector(name,
+                                  std::make_shared<mfem::VectorFunctionCoefficient>(
+                                      3,
+                                      [&func](const mfem::Vector & p, double t, mfem::Vector & u)
+                                      {
+                                        libMesh::RealVectorValue vector_value =
+                                            func.vectorValue(t, pointFromMFEMVector(p));
+                                        u[0] = vector_value(0);
+                                        u[1] = vector_value(1);
+                                        u[2] = vector_value(2);
+                                      }));
   }
   else
   {
@@ -372,32 +373,6 @@ std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {
   return systemBaseAuxiliary().getVariableNames();
-}
-
-std::shared_ptr<mfem::FunctionCoefficient>
-MFEMProblem::getScalarFunctionCoefficient(const std::string & name)
-{
-  try
-  {
-    return this->_scalar_functions.at(name);
-  }
-  catch (const std::out_of_range &)
-  {
-    mooseError("No scalar function with name '" + name + "'.");
-  }
-}
-
-std::shared_ptr<mfem::VectorFunctionCoefficient>
-MFEMProblem::getVectorFunctionCoefficient(const std::string & name)
-{
-  try
-  {
-    return this->_vector_functions.at(name);
-  }
-  catch (const std::out_of_range &)
-  {
-    mooseError("No vector function with name '" + name + "'.");
-  }
 }
 
 MFEMMesh &

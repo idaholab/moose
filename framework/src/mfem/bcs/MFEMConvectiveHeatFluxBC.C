@@ -14,21 +14,21 @@ MFEMConvectiveHeatFluxBC::validParams()
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties to add to MFEM problems.");
-  params.addRequiredParam<FunctionName>("T_infinity", "Function for far-field temperature");
-  params.addRequiredParam<FunctionName>("heat_transfer_coefficient",
-                                        "Function for heat transfer coefficient");
+  params.addRequiredParam<platypus::MFEMScalarCoefficientName>(
+      "T_infinity", "Name of far-field temperature coefficient");
+  params.addRequiredParam<platypus::MFEMScalarCoefficientName>("heat_transfer_coefficient",
+                                                               "Name of heat transfer coefficient");
   return params;
 }
 
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _heat_transfer_coef(getMFEMProblem().getScalarFunctionCoefficient(
-        getParam<FunctionName>("heat_transfer_coefficient"))),
-    _T_inf_coef(
-        getMFEMProblem().getScalarFunctionCoefficient(getParam<FunctionName>("T_infinity"))),
+    _heat_transfer_coef(getScalarProperty(
+        getParam<platypus::MFEMScalarCoefficientName>("heat_transfer_coefficient"))),
+    _T_inf_coef(getScalarProperty(getParam<platypus::MFEMScalarCoefficientName>("T_infinity"))),
     _external_heat_flux_coef(getMFEMProblem().makeScalarCoefficient<mfem::ProductCoefficient>(
-        *_heat_transfer_coef, *_T_inf_coef))
+        _heat_transfer_coef, _T_inf_coef))
 {
 }
 
@@ -44,7 +44,7 @@ MFEMConvectiveHeatFluxBC::createLinearFormIntegrator()
 mfem::BilinearFormIntegrator *
 MFEMConvectiveHeatFluxBC::createBilinearFormIntegrator()
 {
-  return new mfem::BoundaryMassIntegrator(*_heat_transfer_coef);
+  return new mfem::BoundaryMassIntegrator(_heat_transfer_coef);
 }
 
 #endif

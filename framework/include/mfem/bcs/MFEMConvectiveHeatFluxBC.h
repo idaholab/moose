@@ -21,8 +21,8 @@ public:
   virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
 
 protected:
-  std::shared_ptr<mfem::FunctionCoefficient> _heat_transfer_coef;
-  std::shared_ptr<mfem::Coefficient> _T_inf_coef;
+  mfem::Coefficient & _heat_transfer_coef;
+  mfem::Coefficient & _T_inf_coef;
   std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
 };
 

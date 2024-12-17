@@ -186,6 +186,11 @@ GetTimeDerivativeName(std::string name)
   return std::string("d") + name + std::string("_dt");
 }
 
+// TODO: Convert coefficient names to MOOSE derived string types
+using MFEMScalarCoefficientName = std::string;
+using MFEMVectorCoefficientName = std::string;
+using MFEMMatrixCoefficientName = std::string;
+
 using FECollections = platypus::NamedFieldsMap<mfem::FiniteElementCollection>;
 using FESpaces = platypus::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = platypus::NamedFieldsMap<mfem::ParGridFunction>;

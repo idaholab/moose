@@ -52,10 +52,10 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorFunctionNormalDirichletBC
+    type = MFEMVectorFunctorNormalDirichletBC
     variable = F
     boundary = '1 2 3'
-    function = F_exact
+    vector_coefficient = F_exact
   []
 []
 
@@ -82,7 +82,7 @@
   [source]
     type = MFEMVectorFEDomainLFKernel
     variable = F
-    function = f
+    vector_coefficient = f
   []
 []
 

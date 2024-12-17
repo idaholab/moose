@@ -1,8 +1,8 @@
-# MFEMVectorFunctionTangentialDirichletBC
+# MFEMVectorFunctorTangentialDirichletBC
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax description /BCs/MFEMVectorFunctorTangentialDirichletBC
 
 ## Overview
 
@@ -14,8 +14,8 @@ a function of space and/or time.
 
 !listing test/tests/kernels/curlcurl.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax parameters /BCs/MFEMVectorFunctorTangentialDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax inputs /BCs/MFEMVectorFunctorTangentialDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax children /BCs/MFEMVectorFunctorTangentialDirichletBC
