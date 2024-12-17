@@ -82,7 +82,6 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   // not support this
   auto action_params = _app.getActionFactory().getValidParams("DumpObjectsAction");
   action_params.applyParameters(parameters);
-  // action_params.finalize("");
   auto dump_objects_action =
       _app.getActionFactory().create("DumpObjectsAction", "dump_objects", action_params);
   _app.actionWarehouse().addActionBlock(dump_objects_action);
@@ -177,18 +176,6 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
       +      param_text
       + "  []\n";
   // clang-format on
-}
-
-void
-DumpObjectsProblem::solve(unsigned int)
-{
-  printObjects();
-}
-
-void
-DumpObjectsProblem::solveLinearSystem(unsigned int, const Moose::PetscSupport::PetscOptions *)
-{
-  printObjects();
 }
 
 void

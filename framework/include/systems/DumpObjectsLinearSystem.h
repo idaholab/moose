@@ -10,7 +10,6 @@
 #pragma once
 
 #include "LinearSystem.h"
-#include "libmesh/nonlinear_solver.h"
 
 namespace libMesh
 {
