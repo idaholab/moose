@@ -11,7 +11,7 @@ Adds the boundary integrator for integrating the linear form
 !equation
 (\vec f, \vec v)_{\partial\Omega} \,\,\, \forall \vec v \in V
 
-where $v \in \vec H^1$ and $\vec f$ is a constant vector of the same dimension.
+where $\vec v \in \vec H^1$ and $\vec f$ is a constant vector of the same dimension.
 
 ## Example Input File Syntax
 
