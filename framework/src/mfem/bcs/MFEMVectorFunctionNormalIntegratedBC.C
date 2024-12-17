@@ -18,7 +18,8 @@ MFEMVectorFunctionNormalIntegratedBC::validParams()
 MFEMVectorFunctionNormalIntegratedBC::MFEMVectorFunctionNormalIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef(getMFEMProblem().getVectorFunctionCoefficient(getParam<FunctionName>("function")))
+    _vec_coef(
+        getMFEMProblem().getProperties().getVectorProperty(getParam<FunctionName>("function")))
 {
 }
 
@@ -27,7 +28,7 @@ MFEMVectorFunctionNormalIntegratedBC::MFEMVectorFunctionNormalIntegratedBC(
 mfem::LinearFormIntegrator *
 MFEMVectorFunctionNormalIntegratedBC::createLFIntegrator()
 {
-  return new mfem::BoundaryNormalLFIntegrator(*_vec_coef);
+  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.

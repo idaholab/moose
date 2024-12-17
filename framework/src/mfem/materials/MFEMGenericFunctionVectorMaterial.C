@@ -29,9 +29,10 @@ MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
     paramError("prop_names", "Must match the size of prop_values");
 
   for (const auto i : index_range(_prop_names))
-    _properties.declareVector(_prop_names[i],
-                              subdomainsToStrings(_block_ids),
-                              getMFEMProblem().getVectorFunctionCoefficient(_prop_values[i]));
+    _properties.declareVector(
+        _prop_names[i],
+        subdomainsToStrings(_block_ids),
+        getMFEMProblem().getProperties().getVectorPropertyPtr(_prop_values[i]));
 }
 
 MFEMGenericFunctionVectorMaterial::~MFEMGenericFunctionVectorMaterial() {}

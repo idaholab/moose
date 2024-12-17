@@ -28,9 +28,10 @@ MFEMGenericFunctionMaterial::MFEMGenericFunctionMaterial(const InputParameters &
     paramError("prop_names", "Must match the size of prop_values");
 
   for (const auto i : index_range(_prop_names))
-    _properties.declareScalar(_prop_names[i],
-                              subdomainsToStrings(_block_ids),
-                              getMFEMProblem().getScalarFunctionCoefficient(_prop_values[i]));
+    _properties.declareScalar(
+        _prop_names[i],
+        subdomainsToStrings(_block_ids),
+        getMFEMProblem().getProperties().getScalarPropertyPtr(_prop_values[i]));
 }
 
 MFEMGenericFunctionMaterial::~MFEMGenericFunctionMaterial() {}

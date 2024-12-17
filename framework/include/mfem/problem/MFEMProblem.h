@@ -199,18 +199,6 @@ public:
   }
 
   /**
-   * Method to get the MFEM scalar coefficient object corresponding to the named function.
-   */
-  virtual std::shared_ptr<mfem::FunctionCoefficient>
-  getScalarFunctionCoefficient(const std::string & name);
-
-  /**
-   * Method to get the MFEM vector coefficient object corresponding to the named function.
-   */
-  virtual std::shared_ptr<mfem::VectorFunctionCoefficient>
-  getVectorFunctionCoefficient(const std::string & name);
-
-  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();
@@ -223,8 +211,6 @@ public:
 
 protected:
   MFEMProblemData _problem_data;
-  std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;
-  std::map<std::string, std::shared_ptr<mfem::VectorFunctionCoefficient>> _vector_functions;
 };
 
 #endif

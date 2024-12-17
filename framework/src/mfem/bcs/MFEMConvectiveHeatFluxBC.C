@@ -23,12 +23,12 @@ MFEMConvectiveHeatFluxBC::validParams()
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _heat_transfer_coef(getMFEMProblem().getScalarFunctionCoefficient(
+    _heat_transfer_coef(getMFEMProblem().getProperties().getScalarProperty(
         getParam<FunctionName>("heat_transfer_coefficient"))),
     _T_inf_coef(
-        getMFEMProblem().getScalarFunctionCoefficient(getParam<FunctionName>("T_infinity"))),
+        getMFEMProblem().getProperties().getScalarProperty(getParam<FunctionName>("T_infinity"))),
     _external_heat_flux_coef(getMFEMProblem().makeScalarCoefficient<mfem::ProductCoefficient>(
-        *_heat_transfer_coef, *_T_inf_coef))
+        _heat_transfer_coef, _T_inf_coef))
 {
 }
 
@@ -44,7 +44,7 @@ MFEMConvectiveHeatFluxBC::createLFIntegrator()
 mfem::BilinearFormIntegrator *
 MFEMConvectiveHeatFluxBC::createBFIntegrator()
 {
-  return new mfem::BoundaryMassIntegrator(*_heat_transfer_coef);
+  return new mfem::BoundaryMassIntegrator(_heat_transfer_coef);
 }
 
 #endif

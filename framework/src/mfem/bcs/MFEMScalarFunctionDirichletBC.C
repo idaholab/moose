@@ -15,7 +15,8 @@ MFEMScalarFunctionDirichletBC::validParams()
 
 MFEMScalarFunctionDirichletBC::MFEMScalarFunctionDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef(getMFEMProblem().getScalarFunctionCoefficient(getParam<FunctionName>("function")))
+    _coef_name(getParam<FunctionName>("function")),
+    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }
 
@@ -24,7 +25,7 @@ MFEMScalarFunctionDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh
 {
   mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
   ess_bdrs = getBoundaries();
-  gridfunc.ProjectBdrCoefficient(*_coef, ess_bdrs);
+  gridfunc.ProjectBdrCoefficient(_coef, ess_bdrs);
 }
 
 #endif

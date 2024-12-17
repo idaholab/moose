@@ -14,8 +14,6 @@ declareCoefficient(PropertyMap<T, Tpw> & map,
                    std::shared_ptr<T> coef,
                    const ObjectManager<T> & libmesh_dbg_var(manager))
 {
-  mooseAssert(std::find(manager.cbegin(), manager.cend(), coef) != manager.cend(),
-              "Coefficient object was not created by the appropriate coefficient manager.");
   if (blocks.empty())
   {
     map.addProperty(name, coef);
@@ -110,6 +108,24 @@ mfem::MatrixCoefficient &
 PropertyManager::getMatrixProperty(const std::string name)
 {
   return this->_matrix_coeffs.getCoefficient(name);
+}
+
+std::shared_ptr<mfem::Coefficient>
+PropertyManager::getScalarPropertyPtr(const std::string name)
+{
+  return this->_scalar_coeffs.getCoefficientPtr(name);
+}
+
+std::shared_ptr<mfem::VectorCoefficient>
+PropertyManager::getVectorPropertyPtr(const std::string name)
+{
+  return this->_vector_coeffs.getCoefficientPtr(name);
+}
+
+std::shared_ptr<mfem::MatrixCoefficient>
+PropertyManager::getMatrixPropertyPtr(const std::string name)
+{
+  return this->_matrix_coeffs.getCoefficientPtr(name);
 }
 
 bool

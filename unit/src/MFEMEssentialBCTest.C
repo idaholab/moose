@@ -141,14 +141,13 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::GridFunctionCoefficient scalar_variable(&_scalar_gridfunc);
-  std::shared_ptr<mfem::FunctionCoefficient> expected =
-      _mfem_problem->getScalarFunctionCoefficient("func1");
+  mfem::Coefficient & expected(_mfem_problem->getProperties().getScalarProperty("func1"));
   check_boundary(
       1,
       _scalar_fes,
-      [&scalar_variable, expected](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
-      { return scalar_variable.Eval(*transform, point) - expected->Eval(*transform, point); },
+      [&scalar_variable, &expected](mfem::ElementTransformation * transform,
+                                    const mfem::IntegrationPoint & point)
+      { return scalar_variable.Eval(*transform, point) - expected.Eval(*transform, point); },
       1e-8);
 }
 
@@ -208,8 +207,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
-  std::shared_ptr<mfem::VectorFunctionCoefficient> function =
-      _mfem_problem->getVectorFunctionCoefficient("func2");
+  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorProperty("func2"));
   check_boundary(
       1,
       _vector_h1_fes,
@@ -218,7 +216,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
       {
         mfem::Vector actual(3), expected(3);
         variable.Eval(actual, *transform, point);
-        function->Eval(expected, *transform, point);
+        function.Eval(expected, *transform, point);
         actual -= expected;
         return actual.Norml2();
       },
@@ -284,8 +282,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::VectorGridFunctionCoefficient variable(&_vector_hdiv_gridfunc);
-  std::shared_ptr<mfem::VectorFunctionCoefficient> function =
-      _mfem_problem->getVectorFunctionCoefficient("func2");
+  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorProperty("func2"));
   check_boundary(
       1,
       _vector_hdiv_fes,
@@ -294,7 +291,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable.Eval(actual, *transform, point);
-        function->Eval(expected, *transform, point);
+        function.Eval(expected, *transform, point);
         actual -= expected;
         // (actual - expected) should be perpendicular to the normal and have a dot product of 0.
         return normal[0] * actual[0] + normal[1] * actual[1] + normal[2] * actual[2];
@@ -362,8 +359,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::VectorGridFunctionCoefficient variable(&_vector_hcurl_gridfunc);
-  std::shared_ptr<mfem::VectorFunctionCoefficient> function =
-      _mfem_problem->getVectorFunctionCoefficient("func2");
+  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorProperty("func2"));
   check_boundary(
       1,
       _vector_hcurl_fes,
@@ -372,7 +368,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform), cross_prod(3);
         variable.Eval(actual, *transform, point);
-        function->Eval(expected, *transform, point);
+        function.Eval(expected, *transform, point);
         actual -= expected;
         // (actual - expected) should be parallel to the normal and have a cross product of 0.
         cross_prod = normal[1] * actual[2] - normal[2] * actual[1];

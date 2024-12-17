@@ -94,6 +94,26 @@ public:
     }
   }
 
+  std::shared_ptr<T> getCoefficientPtr(const std::string & name)
+  {
+    try
+    {
+      auto & coeff = this->_properties.at(name);
+      try
+      {
+        return std::get<std::shared_ptr<T>>(coeff);
+      }
+      catch (std::bad_variant_access)
+      {
+        throw MooseException("Property with name '" + name + "' is piecewise.");
+      }
+    }
+    catch (std::out_of_range)
+    {
+      throw MooseException("Property with name '" + name + "' has not been declared.");
+    }
+  }
+
   bool hasCoefficient(const std::string & name) const { return this->_properties.count(name) > 0; }
 
   bool coefficientDefinedOnBlock(const std::string & name, const std::string & block) const
