@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#21133'
-  design = 'insfv.md'
+  issues = '#21133 #29150'
+  design = 'insfv.md linear_fv_design.md'
   [vortex_shedding]
     type = 'CSVDiff'
     input = 'header.i mesh.i flow_over_circle.i executioner_postprocessor.i'
@@ -18,5 +18,15 @@
     cli_args = 'refinement=2 Executioner/end_time=2e-3 Outputs/file_base=flow_over_circle-action_out'
     mesh_mode = replicated
     valgrind = 'none'
+  []
+  [vortex_shedding-linearfv]
+    type = 'CSVDiff'
+    input = 'header.i mesh.i flow_over_circle_linearfv.i'
+    csvdiff = 'flow_over_circle_linearfv_out.csv'
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the PIMPLE solution algorithm and the finite volume method'
+    cli_args = 'refinement=2 Executioner/dt=1e-3 Executioner/num_steps=2'
+    mesh_mode = replicated
+    valgrind = 'none'
+    max_threads = 1 # see libmesh issue #3808
   []
 []
