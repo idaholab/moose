@@ -229,7 +229,7 @@
   [force_1]
     type = ShellResultantsAux
     variable = force_1
-    output_resultant = axial_force_0
+    stress_resultant = axial_force_0
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -237,7 +237,7 @@
   [force_2]
     type = ShellResultantsAux
     variable = force_2
-    output_resultant = axial_force_1
+    stress_resultant = axial_force_1
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -245,7 +245,7 @@
   [moment_11]
     type = ShellResultantsAux
     variable = moment_11
-    output_resultant = bending_moment_0
+    stress_resultant = bending_moment_0
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -253,7 +253,7 @@
   [moment_22]
     type = ShellResultantsAux
     variable = moment_22
-    output_resultant = bending_moment_1
+    stress_resultant = bending_moment_1
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -262,7 +262,7 @@
   [moment_12]
     type = ShellResultantsAux
     variable = moment_12
-    output_resultant = bending_moment_01
+    stress_resultant = bending_moment_01
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -270,7 +270,7 @@
   [shear_12]
     type = ShellResultantsAux
     variable = shear_12
-    output_resultant = shear_force_01
+    stress_resultant = shear_force_01
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -278,7 +278,7 @@
   [shear_13]
     type = ShellResultantsAux
     variable = shear_13
-    output_resultant = shear_force_02
+    stress_resultant = shear_force_02
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -286,7 +286,7 @@
   [shear_23]
     type = ShellResultantsAux
     variable = shear_23
-    output_resultant = shear_force_12
+    stress_resultant = shear_force_12
     thickness = 0.01
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END

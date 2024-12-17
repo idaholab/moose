@@ -221,7 +221,7 @@
   [moment_11]
     type = ShellResultantsAux
     variable = moment_11
-    output_resultant = bending_moment_0
+    stress_resultant = bending_moment_0
     thickness = 0.133887
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
@@ -230,7 +230,7 @@
   [shear_23]
     type = ShellResultantsAux
     variable = shear_23
-    output_resultant = shear_force_12
+    stress_resultant = shear_force_12
     thickness = 0.133887
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END

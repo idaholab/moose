@@ -30,12 +30,12 @@ ShellResultantsAux::validParams()
       "Thickness of the shell. Can be supplied as either a number or a variable name.");
   params.addRequiredParam<std::string>("through_thickness_order",
                                        "Quadrature order in out of plane direction");
-  MooseEnum output_resultant(
+  MooseEnum stress_resultant(
       "axial_force_0 axial_force_1 normal_force bending_moment_0 bending_moment_1 "
       "bending_moment_01 shear_force_01 shear_force_02 shear_force_12");
   params.addRequiredParam<MooseEnum>(
-      "output_resultant",
-      output_resultant,
+      "stress_resultant",
+      stress_resultant,
       "The stress resultant type to output, calculated on the shell element.");
 
   return params;
@@ -45,7 +45,7 @@ ShellResultantsAux::ShellResultantsAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _thickness(coupledValue("thickness")),
-    _resultant(getParam<MooseEnum>("output_resultant"))
+    _resultant(getParam<MooseEnum>("stress_resultant"))
 {
   _t_qrule = std::make_unique<QGauss>(
       1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
@@ -141,7 +141,9 @@ ShellResultantsAux::computeValue()
       // Add other cases as needed
 
     default:
-      mooseError("Unsupported output_resultant option: " + _resultant);
+      mooseError("Unsupported stress_resultant option: valid options are: axial_force_0 "
+                 "axial_force_1 normal_force bending_moment_0 bending_moment_1 bending_moment_01 "
+                 "shear_force_01 shear_force_02 shear_force_12");
   }
 
   return _shell_resultant;

@@ -71,10 +71,8 @@ ShellLocalCoordinatesAux::computeValue()
       // Add other cases as needed
 
     default:
-      mooseError(
-          "Invalid definition of the shell's local axis: ",
-          _property,
-          ". Valid options are : first_local_vector, second_local_vector, normal_local_vector");
+      mooseError("Invalid definition of the shell's local axis: valid options are : "
+                 "first_local_vector, second_local_vector, normal_local_vector");
   }
 
   return output_value;
