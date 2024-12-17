@@ -2,7 +2,6 @@
 
 #include <mfem.hpp>
 #include "MFEMGeneralUserObject.h"
-#include "MFEMCoefficient.h"
 #include "PropertyManager.h"
 
 class MFEMMaterial : public MFEMGeneralUserObject
