@@ -91,7 +91,8 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
   }
 
-  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()) && !dynamic_cast<PIMPLE *>(getMooseApp().getExecutioner()))
+  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()) &&
+      !dynamic_cast<PIMPLE *>(getMooseApp().getExecutioner()))
     mooseError(this->name(),
                " should only be used with a linear segregated thermal-hydraulics solver!");
 }
@@ -580,7 +581,7 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 {
   if (updated_pressure)
   {
-     _grad_p_current.clear();
+    _grad_p_current.clear();
     for (const auto & component : _pressure_system->gradientContainer())
       _grad_p_current.push_back(component->clone());
   }

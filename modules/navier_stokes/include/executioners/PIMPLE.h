@@ -14,7 +14,8 @@
 
 /**
  * Executioner set up to solve a transient thermal-hydraulics problem using the PIMPLE algorithm.
- * It utilizes segregated linear systems which are solved using a fixed-point iteration within time steps.
+ * It utilizes segregated linear systems which are solved using a fixed-point iteration within time
+ * steps.
  */
 class PIMPLE : public TransientBase
 {

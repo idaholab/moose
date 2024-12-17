@@ -1245,8 +1245,8 @@ SystemBase::copyPreviousNonlinearSolutions()
   const auto states = _solution_states[1].size();
   if (states > 1)
     for (unsigned int i = states - 1; i > 0; --i)
-        solutionState(i, Moose::SolutionIterationType::Nonlinear) =
-            solutionState(i - 1, Moose::SolutionIterationType::Nonlinear);
+      solutionState(i, Moose::SolutionIterationType::Nonlinear) =
+          solutionState(i - 1, Moose::SolutionIterationType::Nonlinear);
 
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = *currentSolution();
@@ -1263,8 +1263,7 @@ SystemBase::copyOldSolutions()
   const auto states = _solution_states[0].size();
   if (states > 1)
     for (unsigned int i = states - 1; i > 0; --i)
-      solutionState(i) =
-          solutionState(i - 1);
+      solutionState(i) = solutionState(i - 1);
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
