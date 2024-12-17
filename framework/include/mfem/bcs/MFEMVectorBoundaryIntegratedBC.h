@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
-#include "MFEMVectorFunctionCoefficient.h"
 
 class MFEMVectorBoundaryIntegratedBC : public MFEMIntegratedBC
 {
@@ -17,6 +16,6 @@ public:
   virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
 
 protected:
-  std::string _vec_coef_name;
-  MFEMVectorCoefficient * _vec_coef;
+  std::vector<Real> _vec_value;
+  std::shared_ptr<mfem::VectorCoefficient> _vec_coef;
 };

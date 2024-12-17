@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMEssentialBC.h"
-#include "MFEMFunctionCoefficient.h"
 
 class MFEMScalarDirichletBC : public MFEMEssentialBC
 {
@@ -12,5 +11,5 @@ public:
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) override;
 
 protected:
-  MFEMCoefficient * _coef{nullptr};
+  std::shared_ptr<mfem::ConstantCoefficient> _coef{nullptr};
 };

@@ -24,16 +24,13 @@
 []
 
 [Functions]
-  [value_bottom]
+  [reservoir_far_temperature]
     type = ParsedFunction
-    expression = 1.0
+    expression = 0.5
   []
-[]
-
-[Coefficients]
-  [BottomValue]
-    type = MFEMFunctionCoefficient
-    function = value_bottom
+  [heat_transfer_coefficient]
+    type = ParsedFunction
+    expression = 5.0
   []
 []
 
@@ -55,14 +52,14 @@
     type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '1'
-    coefficient = BottomValue
+    value = 1.0
   []
   [top]
     type = MFEMConvectiveHeatFluxBC
     variable = temperature
     boundary = '2'
-    T_infinity = 'reservoir_far_temperature'
-    heat_transfer_coefficient = 'heat_transfer_coefficient'
+    T_infinity = reservoir_far_temperature
+    heat_transfer_coefficient = heat_transfer_coefficient
   []
 []
 
@@ -71,11 +68,6 @@
     type = MFEMGenericConstantMaterial
     prop_names = 'thermal_conductivity volumetric_heat_capacity'
     prop_values = '1.0 1.0'
-  []
-  [Boundary]
-    type = MFEMGenericConstantMaterial
-    prop_names = 'heat_transfer_coefficient reservoir_far_temperature'
-    prop_values = '5.0 0.5'
   []
 []
 

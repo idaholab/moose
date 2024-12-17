@@ -52,10 +52,10 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorNormalDirichletBC
+    type = MFEMVectorFunctionNormalDirichletBC
     variable = F
     boundary = '1 2 3'
-    vector_coefficient = F_exact
+    function = F_exact
   []
 []
 
@@ -65,17 +65,6 @@
     prop_names = 'alpha beta'
     prop_values = '1.0 1.0'
     block = '1 2'
-  []
-[]
-
-[VectorCoefficients]
-  [f]
-    type = MFEMVectorFunctionCoefficient
-    function = f
-  []
-  [F_exact]
-    type = MFEMVectorFunctionCoefficient
-    function = F_exact
   []
 []
 

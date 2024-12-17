@@ -7,11 +7,10 @@
 ## Overview
 
 Boundary condition for enforcing an essential (Dirichlet) boundary condition on the tangential
-components of a $H(\mathrm{curl})$ conforming vector FE at a boundary.
+components of a $H(\mathrm{curl})$ conforming vector FE at a boundary. The boundary value is
+constant in space and time.
 
 ## Example Input File Syntax
-
-!listing test/tests/kernels/curlcurl.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorTangentialDirichletBC
 
