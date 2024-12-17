@@ -32,7 +32,6 @@
 [UserObjects]
   [./prime_product]
     type = PrimeProductUserObject
-    execute_on = timestep_end
   [../]
 []
 

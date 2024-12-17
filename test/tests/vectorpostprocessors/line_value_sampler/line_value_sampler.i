@@ -76,6 +76,7 @@
     end_point = '1 0.5 0'
     num_points = 11
     sort_by = id
+    execute_on = 'timestep_end'
   [../]
 []
 

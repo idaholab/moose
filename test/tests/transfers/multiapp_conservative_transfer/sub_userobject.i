@@ -25,6 +25,7 @@
   [from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = layered_average_value
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -75,6 +76,7 @@
     variable = u
     direction = y
     num_layers = 4
+    execute_on = 'TIMESTEP_END'
   []
 []
 

@@ -57,11 +57,13 @@
     type = SpatialUserObjectAux
     variable = Layered_Average
     user_object = Tfuel_UO
+    execute_on = 'TIMESTEP_END'
   []
   [Layered_Average_User_Object_elem]
     type = SpatialUserObjectAux
     variable = Layered_Average_elem
     user_object = Tfuel_UO
+    execute_on = 'TIMESTEP_END'
   []
 []
 

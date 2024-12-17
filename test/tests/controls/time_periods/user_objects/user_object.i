@@ -56,11 +56,13 @@
   [../]
   [./internal_side]
     type = NumInternalSides
+    execute_on = 'TIMESTEP_END'
   [../]
   [./side]
     type = SideAverageValue
     boundary = right
     variable = u
+    execute_on = 'TIMESTEP_END'
   [../]
 []
 

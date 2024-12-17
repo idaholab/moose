@@ -29,10 +29,12 @@
   [t_pp1]
     type = FunctionValuePostprocessor
     function = t_func
+    execute_on = timestep_end
   []
 
   [ptime_pp]
     type = TimePostprocessor
+    execute_on = timestep_end
   []
 
   # This FunctionValuePostprocessor uses the current value for ptime
@@ -40,6 +42,7 @@
   [t_pp2]
     type = FunctionValuePostprocessor
     function = t_func
+    execute_on = timestep_end
   []
 []
 

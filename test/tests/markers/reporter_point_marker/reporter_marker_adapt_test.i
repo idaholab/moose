@@ -34,7 +34,6 @@
   [xfcn_pp]
     type = FunctionValuePostprocessor
     function = xfcn
-    execute_on = timestep_end
     outputs = none
   []
   [x_pp]

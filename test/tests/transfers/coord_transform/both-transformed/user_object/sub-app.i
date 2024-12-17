@@ -28,7 +28,9 @@
     type = SpatialUserObjectAux
     variable = check
     user_object = 'sub_app_uo'
-  [][]
+    execute_on = TIMESTEP_END
+  []
+[]
 
 [UserObjects]
   [sub_app_uo]

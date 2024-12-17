@@ -25,7 +25,6 @@
     prop_file_names_csv = 'data_files.csv'
     read_type = 'element'
     nprop = 3  # number of columns in CSV
-    execute_on = TIMESTEP_END
   []
 []
 

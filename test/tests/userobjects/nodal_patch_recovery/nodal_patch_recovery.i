@@ -61,6 +61,7 @@
     variable = u_diff
     expression = u_nodal-u_recovered
     coupled_variables = 'u_nodal u_recovered'
+    execute_on = 'TIMESTEP_END'
   []
 []
 

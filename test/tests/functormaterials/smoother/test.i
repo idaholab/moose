@@ -33,7 +33,6 @@
     type = FunctorAux
     variable = smooth
     functor = 'smoothed_functor'
-    execute_on = 'TIMESTEP_END'
   []
 []
 

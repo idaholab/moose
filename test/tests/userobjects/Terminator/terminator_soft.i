@@ -30,6 +30,7 @@
 [Postprocessors]
   [dt]
     type = TimestepSize
+    execute_on = TIMESTEP_END
   []
 []
 

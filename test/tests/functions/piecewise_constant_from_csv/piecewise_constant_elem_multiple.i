@@ -25,7 +25,6 @@
     prop_file_name = 'data_element.csv data_element_t2.csv'
     read_type = 'element'
     nprop = 3  # number of columns in CSV
-    execute_on = TIMESTEP_END
   []
 []
 
