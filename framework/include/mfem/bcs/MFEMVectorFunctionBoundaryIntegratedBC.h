@@ -1,15 +1,12 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
 
-/*
-(h (T-T_inf), T')
-*/
-class MFEMConvectiveHeatFluxBC : public MFEMIntegratedBC
+class MFEMVectorFunctionBoundaryIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMConvectiveHeatFluxBC(const InputParameters & parameters);
+  MFEMVectorFunctionBoundaryIntegratedBC(const InputParameters & parameters);
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
@@ -19,7 +16,5 @@ public:
   virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
 
 protected:
-  std::shared_ptr<mfem::FunctionCoefficient> _heat_transfer_coef;
-  std::shared_ptr<mfem::Coefficient> _T_inf_coef;
-  std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
+  std::shared_ptr<mfem::VectorCoefficient> _vec_coef{nullptr};
 };
