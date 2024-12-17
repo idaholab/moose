@@ -41,7 +41,8 @@ CombineComponentsMeshes::act()
       // Keep track of all mesh generators used in components
       for (const auto & mg_name : comp->meshGeneratorNames())
         all_components_mgs.push_back(mg_name);
-      mgs_to_combine.push_back(comp->meshGeneratorNames().back());
+      if (comp->meshGeneratorNames().size())
+        mgs_to_combine.push_back(comp->meshGeneratorNames().back());
     }
 
     // TODO once we have junctions
@@ -94,5 +95,5 @@ CombineComponentsMeshes::act()
     }
   }
   else
-    mooseError("Registered to a task but not doing anything on that task");
+    mooseAssert(false, "Registered to a task but not doing anything on that task");
 }
