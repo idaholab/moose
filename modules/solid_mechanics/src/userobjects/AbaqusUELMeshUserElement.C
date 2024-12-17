@@ -159,21 +159,44 @@ AbaqusUELMeshUserElement::execute()
 
   // debug stuff
   {
-    const auto i1 = _sys.currentSolution()->first_local_index();
-    const auto i2 = _sys.currentSolution()->last_local_index();
     for (const auto & node_elem : _uel_mesh.getMesh().element_ptr_range())
     {
       bool is_local = false;
 
       _variables[0][0]->getDofIndices(node_elem, var_dof_indices); // 1
-      is_local = is_local || (var_dof_indices.size() && (var_dof_indices[0] >= i1 && var_dof_indices[0] < i2));
+      try
+      {
+        if (!var_dof_indices.empty())
+        {
+          (*_sys.currentSolution())(var_dof_indices[0]);
+          is_local = true;
+        }
+      }
+      catch (...)
+      {
+      }
+
       _variables[8][0]->getDofIndices(node_elem, var_dof_indices); // 4
-      is_local = is_local || (var_dof_indices.size() && (var_dof_indices[0] >= i1 && var_dof_indices[0] < i2));
+      try
+      {
+        if (!var_dof_indices.empty())
+        {
+          (*_sys.currentSolution())(var_dof_indices[0]);
+          is_local = true;
+        }
+      }
+      catch (...)
+      {
+      }
 
       if (is_local)
-         std::cout << "UELDBG " << node_elem->point(0)(0) << ' ' << node_elem->point(0)(1) << ' ' << node_elem->processor_id() << '\n';
+        std::cout << "UELDBG " << node_elem->point(0)(0) << ' ' << node_elem->point(0)(1) << ' '
+                  << node_elem->processor_id() << '\n';
     }
-    mooseInfoRepeated("First/last ",   _sys.currentSolution()->first_local_index(), ' ',_sys.currentSolution()->last_local_index());
+    mooseInfoRepeated("First/last ",
+                      _sys.currentSolution()->first_local_index(),
+                      ' ',
+                      _sys.currentSolution()->last_local_index());
   }
 
   mooseInfoRepeated("END");
