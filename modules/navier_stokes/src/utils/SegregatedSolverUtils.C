@@ -78,7 +78,7 @@ relaxMatrix(SparseMatrix<Number> & matrix,
   diff_diag->insert(new_diagonal, indices);
 
   // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
-  LIBMESH_CHKERR(MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES));
+  LibmeshPetscCallA(mat->comm().get(), MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES));
   mat->close();
   diff_diag->close();
 
