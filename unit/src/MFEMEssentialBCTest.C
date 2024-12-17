@@ -26,8 +26,8 @@ public:
       _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
       _vector_h1_fes(
           _mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, mfem::BasisType::GaussLobatto, 3),
-      _vector_hcurl_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 2, 3, 3),
-      _vector_hdiv_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 2, 3, 3),
+      _vector_hcurl_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 2, 3),
+      _vector_hdiv_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 2, 3),
       _scalar_gridfunc(&_scalar_fes),
       _vector_h1_gridfunc(&_vector_h1_fes),
       _vector_hcurl_gridfunc(&_vector_hcurl_fes),
