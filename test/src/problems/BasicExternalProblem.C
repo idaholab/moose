@@ -54,7 +54,7 @@ BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
       for (const auto elem_ptr : mesh.element_ptr_range())
       {
         auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
-        solution.set(dof_idx, 12345*time());
+        solution.set(dof_idx, 12345 * time());
       }
 
       // close the parallel solution

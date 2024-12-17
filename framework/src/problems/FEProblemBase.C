@@ -6140,7 +6140,7 @@ FEProblemBase::init()
     _displaced_problem->init();
 
   // check for external variable to initialize
-  auto external_problem_ptr = dynamic_cast<ExternalProblem*>(this);
+  auto external_problem_ptr = dynamic_cast<ExternalProblem *>(this);
   if (external_problem_ptr)
     external_problem_ptr->initializeVariables();
 
