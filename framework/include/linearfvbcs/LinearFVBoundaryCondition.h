@@ -134,9 +134,6 @@ protected:
   /// Reference to system base class in MOOSE
   SystemBase & _sys;
 
-  /// Reference to the libmesh linear system this object contributes to
-  libMesh::LinearImplicitSystem & _linear_system;
-
   /// Pointer to the face info we are operating on right now
   const FaceInfo * _current_face_info;
 
