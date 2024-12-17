@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#27280 #28951'
-  design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+  issues = '#27280 #28951 #29150'
+  design = 'SIMPLE.md PIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
   [momentum-pressure]
     type = 'Exodiff'
     input = 2d-velocity-pressure.i
