@@ -1,7 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMObjectUnitTest.h"
-#include "MFEMScalarBoundaryIntegratedBC.h"
+#include "MFEMScalarFunctorBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMVectorNormalIntegratedBC.h"
 #include "MFEMVectorFunctorBoundaryIntegratedBC.h"
@@ -69,9 +69,10 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorNormalIntegratedBC)
 }
 
 /**
- * Test MFEMScalarBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator successfully.
+ * Test MFEMScalarFunctorBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator
+ * successfully.
  */
-TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMScalarFunctorBoundaryIntegratedBC)
 {
   // Build required BC inputs
   InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
@@ -80,14 +81,15 @@ TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
   _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
 
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMScalarBoundaryIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctorBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::string>("coefficient") = "coef1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMScalarBoundaryIntegratedBC & integrated_bc =
-      addObject<MFEMScalarBoundaryIntegratedBC>("MFEMScalarBoundaryIntegratedBC", "bc1", bc_params);
+  MFEMScalarFunctorBoundaryIntegratedBC & integrated_bc =
+      addObject<MFEMScalarFunctorBoundaryIntegratedBC>(
+          "MFEMScalarFunctorBoundaryIntegratedBC", "bc1", bc_params);
 
-  // Test MFEMScalarBoundaryIntegratedBC returns an integrator of the expected type
+  // Test MFEMScalarFunctorBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
