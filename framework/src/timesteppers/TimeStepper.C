@@ -165,58 +165,10 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _converged = true;
-
-  if (!_executioner.legacyTimeExecution())
-  {
-    _fe_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-    if (!_fe_problem.execMultiApps(EXEC_TIMESTEP_BEGIN))
-    {
-      _converged = false;
-      _failure_count++;
-      _console << "Aborting as executing multiapps on timestep_begin failed" << std::endl;
-      return;
-    }
-
-    _fe_problem.execute(EXEC_TIMESTEP_BEGIN);
-    if (!_converged)
-    {
-      _failure_count++;
-      _console << "Aborting by a Terminator" << std::endl;
-      return;
-    }
-    _fe_problem.outputStep(EXEC_TIMESTEP_BEGIN);
-  }
-
   _converged = _executioner.timeStepSolveObject()->solve();
 
   if (!_converged)
-  {
-    _console << "Aborting as solve did not converge" << std::endl;
     _failure_count++;
-    return;
-  }
-
-  if (!_executioner.legacyTimeExecution())
-  {
-    _fe_problem.onTimestepEnd();
-    _fe_problem.execute(EXEC_TIMESTEP_END);
-    if (!_converged)
-    {
-      _failure_count++;
-      _console << "Aborting by a Terminator" << std::endl;
-      return;
-    }
-
-    _fe_problem.execTransfers(EXEC_TIMESTEP_END);
-    if (!_fe_problem.execMultiApps(EXEC_TIMESTEP_END))
-    {
-      _converged = false;
-      _failure_count++;
-      _console << "Aborting as executing multiapps on timestep_end failed" << std::endl;
-      return;
-    }
-  }
 }
 
 void

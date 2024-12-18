@@ -424,13 +424,45 @@ TransientBase::takeStep(Real input_dt)
 
   _problem.onTimestepBegin();
 
+  _last_solve_converged = true;
+  if (!_legacy_execute_on)
+  {
+    _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+    if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN))
+    {
+      _console << "Aborting as executing multiapps on timestep_begin failed" << std::endl;
+      _last_solve_converged = false;
+      return;
+    }
+
+    _fe_problem.execute(EXEC_TIMESTEP_BEGIN);
+    _fe_problem.outputStep(EXEC_TIMESTEP_BEGIN);
+  }
+
   _time_stepper->step();
   _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
 
   _last_solve_converged = _time_stepper->converged();
 
   if (!lastSolveConverged())
+  {
+    _console << "Aborting as solve did not converge" << std::endl;
     return;
+  }
+
+  if (!_legacy_execute_on)
+  {
+    _problem.onTimestepEnd();
+    _problem.execute(EXEC_TIMESTEP_END);
+
+    _problem.execTransfers(EXEC_TIMESTEP_END);
+    if (!_problem.execMultiApps(EXEC_TIMESTEP_END))
+    {
+      _console << "Aborting as executing multiapps on timestep_end failed" << std::endl;
+      _last_solve_converged = false;
+      return;
+    }
+  }
 
   if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
   {
