@@ -84,7 +84,7 @@
     requirement = "The system shall perform all operations required of the TestHarness except executing a test"
     issues = "#8637"
   []
-  [dislpay_required]
+  [display_required]
     type = PythonUnitTest
     input = test_DisplayRequired.py
     requirement = "The system shall run only tests designated with display_required."
