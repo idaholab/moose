@@ -60,6 +60,11 @@ public:
    */
   virtual bool lastSolveConverged() const override;
 
+  /**
+   * Called by Terminator to fail a time step
+   */
+  virtual void failTimeStep() { _last_solve_converged = false; }
+
   virtual void preExecute() override;
 
   virtual void postExecute() override;

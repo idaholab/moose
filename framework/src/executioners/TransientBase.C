@@ -424,7 +424,6 @@ TransientBase::takeStep(Real input_dt)
 
   _problem.onTimestepBegin();
 
-  _last_solve_converged = true;
   if (!_legacy_execute_on)
   {
     _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
@@ -432,10 +431,18 @@ TransientBase::takeStep(Real input_dt)
     {
       _console << "Aborting as executing multiapps on timestep_begin failed" << std::endl;
       _last_solve_converged = false;
+      _time_stepper->failTimeStep();
       return;
     }
 
+    _last_solve_converged = true;
     _fe_problem.execute(EXEC_TIMESTEP_BEGIN);
+    if (!lastSolveConverged())
+    {
+      _console << "Aborting by a Terminator at timestep_begin" << std::endl;
+      _time_stepper->failTimeStep();
+      return;
+    }
     _fe_problem.outputStep(EXEC_TIMESTEP_BEGIN);
   }
 
@@ -453,13 +460,21 @@ TransientBase::takeStep(Real input_dt)
   if (!_legacy_execute_on)
   {
     _problem.onTimestepEnd();
+    _last_solve_converged = true;
     _problem.execute(EXEC_TIMESTEP_END);
+    if (!lastSolveConverged())
+    {
+      _console << "Aborting by a Terminator at timestep_end" << std::endl;
+      _time_stepper->failTimeStep();
+      return;
+    }
 
     _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END))
     {
       _console << "Aborting as executing multiapps on timestep_end failed" << std::endl;
       _last_solve_converged = false;
+      _time_stepper->failTimeStep();
       return;
     }
   }

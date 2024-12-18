@@ -101,6 +101,9 @@ public:
   void addSyncTime(const std::set<Real> & times);
   ///@}
 
+  /// Mark the current time step as failed due to external conditions
+  void failTimeStep() { _converged = false; }
+
 protected:
   /**
    * Computes time step size for the initial time step
