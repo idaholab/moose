@@ -14,6 +14,7 @@
 
 #ifdef NEML2_ENABLED
 #include "neml2/base/Factory.h"
+#include "neml2/misc/parser_utils.h"
 #endif
 
 registerMooseAction("SolidMechanicsApp", NEML2ActionCommon, "parse_neml2");
@@ -111,6 +112,21 @@ NEML2ActionCommon::commonParams()
                         true,
                         NEML2Utils::docstring("Whether to print additional information about the "
                                               "NEML2 model at the beginning of the simulation"));
+
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "initialize_outputs",
+      {},
+      "List of MOOSE material properties to be initialized. Each these properties must correspond "
+      "to a stateful NEML2 variable (which appears on both the input old state sub-axis and the "
+      "output state sub-axis). These MOOSE material properties will be initialized with the values "
+      "of properties specified in the initialize_output_values list.");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "initialize_output_values",
+      {},
+      "List of MOOSE material properties whose initial values (evaluated at the 0th time step) "
+      "will be used to initialize stateful properties. See the description of initialize_outputs "
+      "for more details.");
+
   params.addParam<std::vector<MaterialPropertyName>>(
       "export_outputs",
       {},
@@ -122,6 +138,7 @@ NEML2ActionCommon::commonParams()
       {},
       "The export targets corresponding to each MOOSE material property specified in "
       "export_outputs.");
+
   return params;
 }
 
@@ -133,28 +150,26 @@ NEML2ActionCommon::validParams()
   params.addRequiredParam<DataFileName>(
       "input",
       NEML2Utils::docstring("Path to the NEML2 input file containing the NEML2 model(s)."));
+  params.addParam<std::vector<std::string>>(
+      "cli_args",
+      {},
+      "Additional command line arguments to use when parsing the NEML2 input file.");
   return params;
 }
 
 NEML2ActionCommon::NEML2ActionCommon(const InputParameters & params)
-  : Action(params), _fname(getDataFileName("input"))
+  : Action(params),
+    _fname(getParam<DataFileName>("input")),
+    _cli_args(getParam<std::vector<std::string>>("cli_args"))
 {
   NEML2Utils::assertNEML2Enabled();
 }
 
-#ifndef NEML2_ENABLED
-
 void
 NEML2ActionCommon::act()
 {
-}
-
-#else
-
-void
-NEML2ActionCommon::act()
-{
+#ifdef NEML2_ENABLED
   if (_current_task == "parse_neml2")
-    neml2::load_input(std::string(_fname));
-}
+    neml2::load_input(std::string(_fname), neml2::utils::join(_cli_args, " "));
 #endif
+}

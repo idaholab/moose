@@ -47,13 +47,19 @@ public:
   /// Parameters that can be specified EITHER under the common area OR under sub-blocks
   static InputParameters commonParams();
 
+  /// Parameters that can ONLY be specified under the common area
   static InputParameters validParams();
 
   NEML2ActionCommon(const InputParameters &);
 
   virtual void act() override;
 
+  const FileName & fname() const { return _fname; }
+
 protected:
   /// Name of the NEML2 input file
   const FileName _fname;
+
+  /// List of cli-args
+  const std::vector<std::string> _cli_args;
 };

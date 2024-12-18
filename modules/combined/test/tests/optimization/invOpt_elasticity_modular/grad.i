@@ -69,7 +69,6 @@
   verbose = true
   device = 'cpu'
   [forward]
-    enable_AD = true
     model = 'forward_elasticity_model'
 
     moose_input_types = 'MATERIAL'

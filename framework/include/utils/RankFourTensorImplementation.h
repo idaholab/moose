@@ -121,15 +121,6 @@ RankFourTensorTempl<T>::zero()
 }
 
 template <typename T>
-RankFourTensorTempl<T> &
-RankFourTensorTempl<T>::operator=(const RankFourTensorTempl<T> & a)
-{
-  for (auto i : make_range(N4))
-    _vals[i] = a._vals[i];
-  return *this;
-}
-
-template <typename T>
 template <template <typename> class Tensor, typename T2>
 auto
 RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->

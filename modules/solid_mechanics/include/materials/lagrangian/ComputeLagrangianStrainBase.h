@@ -88,6 +88,9 @@ protected:
   /// Strain increment
   MaterialProperty<RankTwoTensor> & _strain_increment;
 
+  /// Spatial velocity gradient increment
+  MaterialProperty<RankTwoTensor> & _spatial_velocity_increment;
+
   /// Vorticity increment
   MaterialProperty<RankTwoTensor> & _vorticity_increment;
 

@@ -189,7 +189,7 @@ public:
   void printReal(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
-  SymmetricRankFourTensorTempl<T> & operator=(const SymmetricRankFourTensorTempl<T> & a);
+  SymmetricRankFourTensorTempl<T> & operator=(const SymmetricRankFourTensorTempl<T> & a) = default;
 
   /**
    * Assignment-from-scalar operator.  Used only to zero out the tensor.
