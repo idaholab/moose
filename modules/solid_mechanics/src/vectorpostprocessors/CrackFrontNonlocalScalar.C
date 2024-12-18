@@ -7,30 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrackFrontNonlocalStress.h"
+#include "CrackFrontNonlocalScalar.h"
 #include "Moose.h"
 #include "RankTwoTensor.h"
 #include "libmesh/quadrature.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalStress);
+registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalScalar);
 
 InputParameters
-CrackFrontNonlocalStress::validParams()
+CrackFrontNonlocalScalar::validParams()
 {
   InputParameters params = CrackFrontNonlocalMaterialBase::validParams();
-  params.addClassDescription("Computes the average stress normal to the crack face.");
+  params.addClassDescription("Computes the average material normal to the crack face.");
   return params;
 }
 
-CrackFrontNonlocalStress::CrackFrontNonlocalStress(const InputParameters & parameters)
+CrackFrontNonlocalScalar::CrackFrontNonlocalScalar(const InputParameters & parameters)
   : CrackFrontNonlocalMaterialBase(parameters),
-    _stress(getMaterialProperty<RankTwoTensor>(_base_name + getParam<std::string>("material_name")))
+    _scalar(getMaterialProperty<Real>(_base_name + getParam<std::string>("material_name")))
 {
 }
 
 Real
-CrackFrontNonlocalStress::getQPCrackFrontScalar(const unsigned int qp, Point direction) const
+CrackFrontNonlocalScalar::getQPCrackFrontScalar(const unsigned int qp, Point /*direction*/) const
 {
-  return RankTwoScalarTools::directionValueTensor(_stress[qp], direction);
+  return _scalar[qp];
 }

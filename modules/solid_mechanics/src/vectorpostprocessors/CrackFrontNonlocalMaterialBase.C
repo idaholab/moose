@@ -94,7 +94,7 @@ CrackFrontNonlocalMaterialBase::execute()
       if (q == 0)
         continue;
 
-      Real scalar = getCrackFrontScalar(qp, direction);
+      Real scalar = getQPCrackFrontScalar(qp, direction);
       _avg_crack_tip_scalar[icfp] += _JxW[qp] * _coord[qp] * scalar * q;
       _volume[icfp] += _JxW[qp] * _coord[qp] * q;
     }

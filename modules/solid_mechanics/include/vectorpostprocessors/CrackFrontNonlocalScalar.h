@@ -12,19 +12,19 @@
 #include "CrackFrontNonlocalMaterialBase.h"
 
 /**
- * This vectorpostprocessor computes the average stress scalar normal to the crack front at points
+ * This vectorpostprocessor computes the average scalar material normal to the crack front at points
  * along the crack front.
  */
-class CrackFrontNonlocalStress : public CrackFrontNonlocalMaterialBase
+class CrackFrontNonlocalScalar : public CrackFrontNonlocalMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  CrackFrontNonlocalStress(const InputParameters & parameters);
+  CrackFrontNonlocalScalar(const InputParameters & parameters);
 
 protected:
-  /// The stress tensor
-  const MaterialProperty<RankTwoTensor> & _stress;
+  /// The scalar material property
+  const MaterialProperty<Real> & _scalar;
 
-  Real getQPCrackFrontScalar(const unsigned int qp, Point direction) const override;
+  Real getQPCrackFrontScalar(const unsigned int qp, Point /*direction*/) const override;
 };

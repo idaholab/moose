@@ -70,5 +70,5 @@ protected:
    */
   Real BoxWeightingFunction(std::size_t crack_front_point_index, const Point & qp_coord) const;
 
-  virtual Real getCrackFrontScalar(const unsigned int qp, Point direction) const = 0;
+  virtual Real getQPCrackFrontScalar(const unsigned int qp, Point direction) const = 0;
 };
