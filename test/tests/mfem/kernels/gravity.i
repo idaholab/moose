@@ -27,21 +27,12 @@
   []
 []
 
-[VectorCoefficients]
-  [FixedValue]
-    type = MFEMVectorConstantCoefficient
-    value_x = 0.0
-    value_y = 0.0
-    value_z = 0.0
-  []
-[]
-
 [BCs]
   [dirichlet]
     type = MFEMVectorDirichletBC
     variable = displacement
     boundary = '1'
-    vector_coefficient = FixedValue
+    values = '0.0 0.0 0.0'
   []
 []
 

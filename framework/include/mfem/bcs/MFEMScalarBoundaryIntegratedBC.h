@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
-#include "MFEMFunctionCoefficient.h"
 
 class MFEMScalarBoundaryIntegratedBC : public MFEMIntegratedBC
 {
