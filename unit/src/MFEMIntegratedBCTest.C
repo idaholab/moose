@@ -1,4 +1,5 @@
 #include "MFEMObjectUnitTest.h"
+#include "MFEMScalarBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMVectorNormalIntegratedBC.h"
 #include "MFEMVectorFunctionBoundaryIntegratedBC.h"
@@ -57,6 +58,36 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
+  ASSERT_NE(lf_integrator, nullptr);
+  delete lf_integrator;
+
+  auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
+  ASSERT_EQ(blf_integrator, nullptr);
+  delete blf_integrator;
+}
+
+/**
+ * Test MFEMScalarBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator successfully.
+ */
+TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
+{
+  // Build required BC inputs
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
+  coef_params.set<std::vector<double>>("prop_values") = {3.0};
+  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+
+  // Construct boundary condition
+  InputParameters bc_params = _factory.getValidParams("MFEMScalarBoundaryIntegratedBC");
+  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<std::string>("coefficient") = "coef1";
+  bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+  MFEMScalarBoundaryIntegratedBC & integrated_bc =
+      addObject<MFEMScalarBoundaryIntegratedBC>("MFEMScalarBoundaryIntegratedBC", "bc1", bc_params);
+
+  // Test MFEMScalarBoundaryIntegratedBC returns an integrator of the expected type
+  auto lf_integrator =
+      dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
   delete lf_integrator;
 
