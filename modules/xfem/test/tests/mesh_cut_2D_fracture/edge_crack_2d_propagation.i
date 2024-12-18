@@ -49,6 +49,7 @@
 [VectorPostprocessors]
   [CrackFrontNonlocalStressVpp]
     type = CrackFrontNonlocalStress
+    material_name = stress
     crack_front_definition = crackFrontDefinition
     box_length = 0.05
     box_height = 0.1
