@@ -17,17 +17,13 @@ already used in [SIMPLE.md], the PISO iteration is the following:
    a different quess so this operation is just a matrix-vector multiplication and a vector-vector addition.
 2. Use $H(u^n)$ and the diagonal of the momentum matrix $A$ to solve the pressure equation:
 
-   !equation id=pressure-eq-poisson
+   !equation
    \nabla \cdot \left(A^{-1}H(\vec{u}^{n})\right) = -\nabla \cdot \left(A^{-1}\nabla p^n\right).
-
-   !alert! note
 
    The pressure solution might have to be relaxed in this iteration:
 
-   !equation id=pressure-relaxation
-    p^{n,*} = p^n + \lambda_p (p^{n}-p^{n-1})
-
-   !alert-end!
+   !equation
+   p^{n,*} = p^n + \lambda_p (p^{n}-p^{n-1}).
 
 3. Once the pressure solution is obtained, update the velocity to the next guess:
 
@@ -35,7 +31,7 @@ already used in [SIMPLE.md], the PISO iteration is the following:
    \vec{u}^{n+1} = - A^{-1}H(\vec{u}^{n}) -A^{-1}\nabla p^{n,*},
 
    and return to (1) until the maximum number of itrations is reached which can be set
-   using the [!param](Executioners/PIMPLE/num_piso_iterations) parameter.
+   using the [!param](/Executioner/PIMPLE/num_piso_iterations) parameter.
 
 ## Example Input Syntax
 
