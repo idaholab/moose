@@ -12,5 +12,6 @@ public:
 
 protected:
   MFEMVectorFunctorDirichletBCBase(const InputParameters & parameters);
+  const MFEMVectorCoefficientName & _vec_coef_name;
   mfem::VectorCoefficient & _vec_coef;
 };
