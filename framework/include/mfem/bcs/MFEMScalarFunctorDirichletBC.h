@@ -13,7 +13,7 @@ public:
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
 
 protected:
-  std::string _coef_name;
+  const MFEMScalarCoefficientName & _coef_name;
   mfem::Coefficient & _coef;
 };
 

@@ -14,14 +14,14 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
       "$(-k\\vec u, \\vec\\nabla v)_\\Omega$ "
       "arising from the weak form of the divergence operator "
       "$\\vec \\nabla \\cdot (k\\vec u)$.");
-  params.addParam<std::string>("coefficient", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>("coefficient", "Name of property k to use.");
   return params;
 }
 
 MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
     const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _coef_name(getParam<std::string>("coefficient")),
+    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
 {
 }

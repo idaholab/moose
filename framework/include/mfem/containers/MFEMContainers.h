@@ -191,4 +191,9 @@ using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
 } // namespace Moose::MFEM
 
+// TODO: Convert coefficient names to MOOSE derived string types
+using MFEMScalarCoefficientName = std::string;
+using MFEMVectorCoefficientName = std::string;
+using MFEMMatrixCoefficientName = std::string;
+
 #endif

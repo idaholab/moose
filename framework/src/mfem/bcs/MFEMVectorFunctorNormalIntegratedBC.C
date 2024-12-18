@@ -8,7 +8,7 @@ InputParameters
 MFEMVectorFunctorNormalIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
-  params.addRequiredParam<std::string>(
+  params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
       "The vector function whose normal component will be used in the integrated BC");
   return params;
@@ -19,7 +19,7 @@ MFEMVectorFunctorNormalIntegratedBC::MFEMVectorFunctorNormalIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _vec_coef(getMFEMProblem().getProperties().getVectorProperty(
-        getParam<std::string>("vector_coefficient")))
+        getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 
