@@ -9,6 +9,7 @@
 
 #include "INSFVEnthalpyFunctorMaterial.h"
 #include "NS.h"
+#include "SinglePhaseFluidProperties.h"
 
 registerMooseObjectRenamed("NavierStokesApp",
                            INSFVEnthalpyMaterial,
@@ -23,7 +24,7 @@ INSFVEnthalpyFunctorMaterial::validParams()
   params.addClassDescription(
       "This is the material class used to compute enthalpy for the "
       "incompressible/weakly-compressible finite-volume implementation of the Navier-Stokes "
-      "equations. Note that this class assumes that cp is a constant");
+      "equations.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
   params.addRequiredParam<MooseFunctorName>("temperature", "the temperature");
   params.addParam<MooseFunctorName>(
@@ -32,31 +33,83 @@ INSFVEnthalpyFunctorMaterial::validParams()
       NS::enthalpy_density, NS::enthalpy_density, "the name of the (extensive) enthalpy");
   params.addParam<MooseFunctorName>(
       NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
+
+  // To handle non constant cp
+  params.addParam<bool>("assume_constant_cp", true, "Whether to assume cp is constant");
+  params.addParam<UserObjectName>(
+      NS::fluid, "Fluid properties, to be used when cp is not constant to compute enthalpy");
+  params.addParam<MooseFunctorName>(
+      NS::pressure, "Pressure functor, to be used when cp is not constant to compute enthalpy");
+
   return params;
 }
 
 INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
+    _assume_constant_cp(getParam<bool>("assume_constant_cp")),
+    _fp(isParamValid(NS::fluid)
+            ? &UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)
+            : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _temperature(getFunctor<ADReal>("temperature")),
+    _pressure(isParamValid("pressure") ? &getFunctor<ADReal>("pressure") : nullptr),
     _cp(getFunctor<ADReal>(NS::cp))
 {
-  const auto & rho_h =
-      addFunctorProperty<ADReal>(NS::enthalpy_density,
-                                 [this](const auto & r, const auto & t)
-                                 { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
+  // We have to use a warning because fp is often in the global parameters
+  if (_assume_constant_cp && _fp)
+    paramWarning(
+        "fp", "No need to specify fluid properties if assuming the specific enthalpy is constant");
+  if (!_assume_constant_cp && (!_fp || !_pressure))
+    paramError("fp",
+               "Must specify fluid properties if not assuming the specific enthalpy is constant");
 
-  const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy,
-                                              [this](const auto & r, const auto & t)
-                                              { return _cp(r, t) * _temperature(r, t); });
+  if (_assume_constant_cp)
+  {
+    const auto & rho_h =
+        addFunctorProperty<ADReal>(NS::enthalpy_density,
+                                   [this](const auto & r, const auto & t)
+                                   { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
 
-  addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
-                             [this](const auto & r, const auto & t)
-                             { return _cp(r, t) * _temperature.dot(r, t); });
+    const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy,
+                                                [this](const auto & r, const auto & t)
+                                                { return _cp(r, t) * _temperature(r, t); });
 
-  addFunctorProperty<ADReal>(
-      "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
+    addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
+                               [this](const auto & r, const auto & t)
+                               { return _cp(r, t) * _temperature.dot(r, t); });
 
-  addFunctorProperty<ADReal>("cp_temp",
-                             [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
+    addFunctorProperty<ADReal>(
+        "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
+
+    addFunctorProperty<ADReal>("cp_temp",
+                               [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
+  }
+  else
+  {
+    const auto & rho_h = addFunctorProperty<ADReal>(
+        NS::enthalpy_density,
+        [this](const auto & r, const auto & t)
+        { return _rho(r, t) * _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t)); });
+
+    const auto & h =
+        addFunctorProperty<ADReal>(NS::specific_enthalpy,
+                                   [this](const auto & r, const auto & t) {
+                                     return _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t));
+                                   });
+
+    addFunctorProperty<ADReal>(
+        NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
+        [this](const auto & r, const auto & t)
+        {
+          Real h, dh_dp, dh_dT;
+          _fp->h_from_p_T((*_pressure)(r, t).value(), _temperature(r, t).value(), h, dh_dp, dh_dT);
+          return dh_dT * _temperature.dot(r, t) + dh_dp * _pressure->dot(r, t);
+        });
+
+    addFunctorProperty<ADReal>(
+        "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
+
+    addFunctorProperty<ADReal>("cp_temp",
+                               [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
+  }
 }
