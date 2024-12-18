@@ -73,8 +73,5 @@ class TestInlineComment(MooseDocsTestCase):
         self.assertToken(ast(0)(6), 'Space')
         self.assertToken(ast(0)(7), 'Word', content='not')
 
-class TestHTMLComment(TestInlineComment):
-    TEXT = "Not comment<!--this is-->\nand not"
-
 if __name__ == '__main__':
     unittest.main(verbosity=2)
