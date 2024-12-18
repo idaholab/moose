@@ -4,6 +4,7 @@
 
 // MOOSE includes
 #include "GeneralUserObject.h"
+#include "mfem.hpp"
 
 // Forwards declaration.
 class MFEMProblem;
@@ -21,6 +22,11 @@ public:
   /// Returns a reference to the MFEMProblem instance.
   MFEMProblem & getMFEMProblem() { return _mfem_problem; }
   const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
+
+  /// Returns references to coefficients stored in the MFEMProblem PropertiesManager.
+  mfem::Coefficient & getScalarProperty(const std::string & name);
+  mfem::VectorCoefficient & getVectorProperty(const std::string & name);
+  mfem::MatrixCoefficient & getMatrixProperty(const std::string & name);
 
   void execute() override {}
 

@@ -23,7 +23,7 @@ MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
     _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     // FIXME: The MFEM bilinear form can also handle vector and matrix
     // coefficients, so ideally we'd handle all three too.
-    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
+    _coef(getScalarProperty(_coef_name))
 {
 }
 

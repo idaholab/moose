@@ -18,8 +18,7 @@ MFEMVectorFunctorNormalIntegratedBC::validParams()
 MFEMVectorFunctorNormalIntegratedBC::MFEMVectorFunctorNormalIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(
-        getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    _vec_coef(getVectorProperty(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 

@@ -20,8 +20,7 @@ MFEMVectorFEDomainLFKernel::validParams()
 
 MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _vec_coef(getMFEMProblem().getProperties().getVectorProperty(
-        getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    _vec_coef(getVectorProperty(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 
