@@ -14,7 +14,9 @@
 #include "Terminator.h"
 #include "MooseApp.h"
 #include "MooseEnum.h"
-#include "Executioner.h"
+#include "Transient.h"
+#include "FixedPointSolve.h"
+#include "TimeStepper.h"
 
 registerMooseObject("MooseApp", Terminator);
 
@@ -164,7 +166,25 @@ Terminator::execute()
         _fe_problem.setFailNextNonlinearConvergenceCheck();
       // Outside of a solve, trigger a time step fail
       else
-        getMooseApp().getExecutioner()->fixedPointSolve().failStep();
+      {
+        auto executioner = getMooseApp().getExecutioner();
+        if (executioner->legacyTimeExecution())
+          executioner->fixedPointSolve().failStep();
+        else
+        {
+          if (_fe_problem.getCurrentExecuteOnFlag() == FixedPointSolve::EXEC_FIXEDPOINT_BEGIN ||
+              _fe_problem.getCurrentExecuteOnFlag() == FixedPointSolve::EXEC_FIXEDPOINT_END)
+            executioner->fixedPointSolve().failStep();
+          else
+          {
+            Transient * transient = dynamic_cast<Transient *>(executioner);
+            if (transient)
+              transient->getTimeStepper()->failTimeStep();
+            else
+              mooseError("Terminator must be used with Transient executioner.");
+          }
+        }
+      }
     }
   }
 }
