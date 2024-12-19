@@ -31,4 +31,22 @@ ProblemOperatorInterface::Init(mfem::BlockVector & X)
   }
 }
 
+void
+ProblemOperatorInterface::SetTestVariablesFromTrueVectors()
+{
+  for (unsigned int ind = 0; ind < _test_variables.size(); ++ind)
+  {
+    _test_variables.at(ind)->SetFromTrueVector();
+  }
+}
+
+void
+ProblemOperatorInterface::SetTrialVariablesFromTrueVectors()
+{
+  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
+  {
+    _trial_variables.at(ind)->SetFromTrueVector();
+  }
+}
+
 }

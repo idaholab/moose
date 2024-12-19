@@ -11,6 +11,8 @@ public:
   virtual ~ProblemOperatorInterface() = default;
 
   virtual void SetGridFunctions();
+  virtual void SetTestVariablesFromTrueVectors();
+  virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
 
   mfem::Array<int> _block_true_offsets;
