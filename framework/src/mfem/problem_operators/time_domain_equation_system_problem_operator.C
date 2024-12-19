@@ -27,6 +27,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
                                                        mfem::Vector & dX_dt)
 {
   dX_dt = 0.0;
+  SetTestVariablesFromTrueVectors();
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
   {
     _trial_variables.at(ind)->MakeTRef(
@@ -50,6 +51,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
   _problem._nonlinear_solver->SetSolver(*_problem._jacobian_solver);
   _problem._nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem._nonlinear_solver->Mult(_true_rhs, dX_dt);
+  SetTrialVariablesFromTrueVectors();
 }
 
 void
