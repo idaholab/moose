@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 5
+  ny = 5
 []
 
 [Variables]
@@ -41,9 +41,9 @@
   type = Transient
   num_steps = 20
   dt = 0.1
-  solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  solve_type = Newton
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 # This object will behave different on different invocations if
