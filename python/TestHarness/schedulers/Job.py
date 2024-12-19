@@ -676,6 +676,12 @@ class Job(OutputInterface):
             return self.timer.totalTime()
         return 0.0
 
+    def getMaxMemoryUsage(self):
+        """ Return max memory usage of the runner process, if available """
+        if self._runner is not None:
+            return self._runner.getMaxMemoryUsage()
+        return None
+
     def getStatus(self):
         return self.job_status.getStatus()
 

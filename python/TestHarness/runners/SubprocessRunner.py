@@ -7,11 +7,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, platform, subprocess, shlex, time
+import copy, os, platform, subprocess, shlex, time, threading
 from tempfile import SpooledTemporaryFile
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
-from TestHarness import util
 
 class SubprocessRunner(Runner):
     """
@@ -26,6 +25,11 @@ class SubprocessRunner(Runner):
         self.errfile = None
         # The underlying subprocess
         self.process = None
+
+        # List of resource usage over time, if enabled
+        self.resource_usage = None
+        # Lock for accessing self.resource_usage
+        self.resource_usage_lock = threading.Lock()
 
     def spawn(self, timer):
         tester = self.job.getTester()
@@ -73,15 +77,56 @@ class SubprocessRunner(Runner):
         timer.start('runner_run')
 
     def wait(self, timer):
-        self.process.wait()
+        # If psutil is available, track resources over time for this job.
+        # This replaces the traditional self.process.wait() call with
+        # a loop that polls for resources in an interval
+        try:
+            import psutil
+        except ModuleNotFoundError:
+            pass
+        else:
+            poll_time = 0.1 # sec
+            psutil_process = psutil.Process(self.process.pid)
+            self.resource_usage = []
+            start_poll_time = time.time()
+            last_poll_time = None
+            while True:
+                if last_poll_time is not None:
+                    sleep_time = poll_time - (time.time() - last_poll_time)
+                    if sleep_time > 0:
+                        time.sleep(sleep_time)
+                last_poll_time = time.time()
 
+                # Get RSS memory usage for the top level process
+                # and all of its children
+                try:
+                    total_memory = psutil_process.memory_info().rss
+                    children = psutil_process.children(recursive=True)
+                except psutil.NoSuchProcess:
+                    break
+                for child in children:
+                    try:
+                        total_memory += child.memory_info().rss
+                    except psutil.NoSuchProcess:
+                        pass
+
+                # Store the usage and make sure that the usage
+                # doesn't oversubscribe any requirements
+                usage = self.ResourceUsage(time=last_poll_time - start_poll_time,
+                                            mem_bytes=total_memory)
+                self.checkResourceUsage(usage)
+                with self.resource_usage_lock:
+                    self.resource_usage.append(usage)
+
+                # Process has ended
+                if self.process.poll() is not None:
+                    break
+
+        self.process.wait()
         timer.stop('runner_run')
 
         self.exit_code = self.process.poll()
-
-        # This should have been cleared before the job started
-        if self.getRunOutput().hasOutput():
-            raise Exception('Runner run output was not cleared')
+        self.process = None
 
         # Load combined output
         for file in [self.outfile, self.errfile]:
@@ -98,6 +143,12 @@ class SubprocessRunner(Runner):
                 output = output[:-3]
 
             self.getRunOutput().appendOutput(output)
+
+    def getResourceUsage(self):
+        with self.resource_usage_lock:
+            if self.resource_usage is None:
+                return None
+            return copy.deepcopy(self.resource_usage)
 
     def kill(self):
         if self.process is not None:

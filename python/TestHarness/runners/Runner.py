@@ -7,10 +7,14 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, json
+import os, threading, time, traceback
+from collections import namedtuple
 from TestHarness import OutputInterface, util
 
 class Runner(OutputInterface):
+    # Helper struct for storing information about sampled resource usage
+    ResourceUsage = namedtuple('ResourceUsage', 'time mem_bytes')
+
     """
     Base class for running a process via a command.
 
@@ -19,7 +23,8 @@ class Runner(OutputInterface):
     or externally (i.e., PBS, slurm, etc on HPC)
     """
     def __init__(self, job, options):
-        OutputInterface.__init__(self)
+        # Output is locking so that the resource thread can concurrently write
+        OutputInterface.__init__(self, locking=True)
 
         # The job that this runner is for
         self.job = job
@@ -109,3 +114,47 @@ class Runner(OutputInterface):
         if output and output[-1] != '\n':
             output += '\n'
         return output
+
+    def getResourceUsage(self):
+        """
+        To be overridden by derived Runners that support resource usage collection
+
+        Should return a list of ResourceUsage objects
+        """
+        return None
+
+    def getMaxMemoryUsage(self):
+        """
+        Get the max memory usage (in bytes) of the spawned process if it was
+        able to be captured
+        """
+        resource_usage = self.getResourceUsage()
+        if not resource_usage: # runner doesn't support it
+            return None
+        max_mem = 0
+        for usage in resource_usage:
+            max_mem = max(max_mem, usage.mem_bytes)
+        return max_mem
+
+    def checkResourceUsage(self, usage):
+        """
+        Checks the resource usage to ensure that it does not go over
+        limits. Will kill the job if so.
+
+        Usage should be a ResourceUsage object
+        """
+        # Scale all of the requirements on a per-slot basis
+        slots = self.job.getSlots()
+
+        # Check for memory overrun if max is set
+        if self.options.max_memory is not None:
+            allowed_mem = slots * self.options.max_memory
+            if usage.mem_bytes > allowed_mem:
+                usage_human = util.humanMemory(usage.mem_bytes)
+                allowed_human = util.humanMemory(allowed_mem)
+                output = util.outputHeader('Process killed due to resource oversubscription')
+                output += f'Memory usage {usage_human} exceeded {allowed_human}'
+                self.appendOutput(output)
+                self.job.setStatus(self.job.error, 'EXCEEDED MEM')
+                self.kill()
+                return

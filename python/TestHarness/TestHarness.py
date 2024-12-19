@@ -729,6 +729,10 @@ class TestHarness:
             summary += fatal_error
             print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
         else:
+            # Fill summary footer
+            summary = ''
+
+            # Number of tests, their status, and timing
             num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
             if num_nonzero_timing > 0:
                 timing_max = max(float(tup[0].getTiming()) for tup in self.test_table)
@@ -739,6 +743,13 @@ class TestHarness:
             summary = f'Ran {self.num_passed + self.num_failed} tests in {stats["time_total"]:.1f} seconds.'
             summary += f' Average test time {timing_avg:.1f} seconds,'
             summary += f' maximum test time {timing_max:.1f} seconds.'
+            # Memory usage, if available
+            max_memory = [tup[0].getMaxMemoryUsage() for tup in self.test_table if tup[0].getMaxMemoryUsage() not in [None, 0]]
+            if max_memory:
+                max_max_memory = max(max_memory)
+                avg_max_memory = sum(max_memory) / len(max_memory)
+                summary += f'\nEstimated maximum test memory usage maximum {util.humanMemory(max_max_memory)}, '
+                summary += f'average {util.humanMemory(avg_max_memory)}.'
             print(summary)
 
             # Get additional results from the scheduler
@@ -808,6 +819,25 @@ class TestHarness:
                     for group in sorted_table[0:self.options.longest_jobs]:
                         print(str(group[0]).ljust((self.options.term_cols - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
                     print('\n')
+
+            if self.options.largest_jobs:
+                valued_tups = [tup for tup in self.test_table if tup[0].getMaxMemoryUsage() not in [None, 0]]
+                sorted_tups = sorted(valued_tups, key=lambda tup: tup[0].getMaxMemoryUsage(), reverse=True)
+
+                print('\n%d largest jobs:' % self.options.largest_jobs)
+                print(('-' * (self.options.term_cols)))
+
+                # Copy the current options and force timing to be true so that
+                # we get memory when we call formatResult() below
+                options_with_timing = copy.deepcopy(self.options)
+                options_with_timing.timing = True
+
+                for tup in sorted_tups[0:self.options.largest_jobs]:
+                    job = tup[0]
+                    if not job.isSkip() and job.getMaxMemoryUsage() > 0:
+                        print(util.formatResult(job, options_with_timing, caveats=True))
+                if len(sorted_tups) == 0:
+                    print('No jobs were completed or no jobs contained resource usage.')
 
             all_jobs = self.scheduler.retrieveJobs()
 
@@ -1065,6 +1095,7 @@ class TestHarness:
         parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', help='Do not run additional tests if the load average is at least LOAD')
         parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
         parser.add_argument('--longest-jobs', action='store', dest='longest_jobs', type=int, default=0, help='Print the longest running jobs upon completion')
+        parser.add_argument('--largest-jobs', action='store', dest='largest_jobs', type=int, default=0, help='Print the largest (by max memory usage) jobs upon completion')
         parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
         parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', help='The test specification file to look for (default: tests)')
         parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
@@ -1131,6 +1162,10 @@ class TestHarness:
         hpcgroup.add_argument('--hpc-no-hold', nargs=1, action='store', type=bool, default=False, dest='hpc_no_hold', help='Do not pre-create hpc jobs to be held')
         hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
 
+        # Options for resource limits
+        resourcegroup = parser.add_argument_group('Resource Options', 'Options for controlling resource limits')
+        resourcegroup.add_argument('--max-memory', dest='max_memory', action='store', type=str, default=None, help='Set maximum memory allowed per slot (default none, ex: 100MB)')
+
         # Try to find the terminal size if we can
         # Try/except here because the terminal size could fail w/o a display
         term_cols = None
@@ -1142,7 +1177,7 @@ class TestHarness:
 
         # Optionally load in the environment controlled values
         term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
-        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
+        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcsmt')
 
         # Terminal options
         termgroup = parser.add_argument_group('Terminal Options', 'Options for controlling the formatting of terminal output')
@@ -1233,6 +1268,22 @@ class TestHarness:
         # Set default
         if not self.options.input_file_name:
             self.options.input_file_name = 'tests'
+
+        # Resource usage collection
+        has_psutil = True
+        try:
+            import psutil
+        except:
+            has_psutil = False
+        # Set max_memory in bytes if set
+        if self.options.max_memory is not None:
+            try:
+                self.options.max_memory = util.convertMemoryToBytes(self.options.max_memory)
+            except:
+                print(f'ERROR: Failed to parse --max-memory="{self.options.max_memory}"')
+                sys.exit(1)
+            if not has_psutil:
+                print(f'ERROR: --max-memory cannot be used because the python module "psutil" is not available')
 
     def postRun(self, specs, timing):
         return

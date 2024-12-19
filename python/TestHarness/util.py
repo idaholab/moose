@@ -307,6 +307,23 @@ def formatResult(job, options, result='', color=True, **kwargs):
             f_time = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
             formatCase(f_key, (f_time, None), formatted_results)
 
+        if str(f_key).lower() == 'm' and options.timing:
+            value = 0
+            suffix = 'MB'
+            if not job.isSkip():
+                max_mem = job.getMaxMemoryUsage()
+                if max_mem is None or max_mem == 0:
+                    value = None
+                else:
+                    value, suffix = humanMemory(max_mem, split=True)
+            if isinstance(value, (float, int)):
+                int_len = len(str(int(value)))
+                precision = min(3, max(0,(4-int_len)))
+                f_max_mem = f'[{value:<5.{precision}f}{suffix}]'
+            else:
+                f_max_mem = f'[?????{suffix}]'
+            formatCase(f_key, (f_max_mem, None), formatted_results)
+
     # Decorate Caveats
     if job.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
         caveats = ','.join(job.getCaveats())
@@ -890,3 +907,40 @@ def outputHeader(header, ending=True):
     begin_sep = '#' * 80
     end_sep = f'{begin_sep}\n' if ending else ''
     return f'{begin_sep}\n{header}\n{end_sep}'
+
+# Conversions for memory sizes
+byte_conversions = {'B': 1,
+                    'KB': 1024,
+                    'MB':1024**2,
+                    'GB':1024**3,
+                    'TB':1024**4}
+
+def convertMemoryToBytes(size_str: str) -> int:
+    """
+    Converts the given size string (100B, 100MB, etc)
+    into an integer number of bytes
+    """
+    search = re.fullmatch(r'(\d+(?:.\d+)?)([A-Z]+)', size_str)
+    if search is None:
+        raise ValueError(f'Failed to parse memory size from "{size_str}"')
+    value = search.group(1)
+    unit = search.group(2)
+    if unit not in byte_conversions:
+        raise ValueError(f'Unknown memory unit "{unit}"')
+    return float(value) * byte_conversions[unit]
+
+def humanMemory(bytes: int, digits=2, split=False) -> str:
+    """
+    Convert the given size in bytes to a human readable memory value
+
+    The split option returns the value and unit separately.
+    """
+    value = f'{bytes}B'
+    for unit, conversion in byte_conversions.items():
+        scaled_value = float(bytes) / float(conversion)
+        value = f'{scaled_value:.{digits}f}{unit}'
+        if scaled_value < 999:
+            break
+    if split:
+        return scaled_value, unit
+    return value
