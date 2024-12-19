@@ -15,7 +15,7 @@ public:
   void SetGridFunctions() override;
 
   virtual void Solve(mfem::Vector & X) {}
-  void Mult(const mfem::Vector & x, mfem::Vector & y) const override {}
+  void Mult(const mfem::Vector &, mfem::Vector &) const override {}
 };
 
 } // namespace platypus
