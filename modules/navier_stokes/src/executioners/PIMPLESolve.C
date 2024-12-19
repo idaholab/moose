@@ -167,7 +167,8 @@ PIMPLESolve::solveMomentumPredictor()
     _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
 
-  // We reset this to ensure the preconditioner is recomputed new time we go to the momentum predictor
+  // We reset this to ensure the preconditioner is recomputed new time we go to the momentum
+  // predictor
   momentum_solver.reuse_preconditioner(false);
 
   return its_normalized_residuals;

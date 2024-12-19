@@ -1,0 +1,37 @@
+[Tests]
+  issues = '#29150'
+  design = 'SIMPLE.md PIMPLE.md'
+  [compare]
+    requirement = "The system shall reach the same steady solution by using "
+    [simple]
+      type = 'Exodiff'
+      input = 'common-blocks.i simple.i'
+      exodiff = simple_out.e
+      recover = false # we don't support recovery for SIMPLE
+      max_threads = 1 # see libmesh issue #3808
+      abs_zero = 1e-6
+      detail = "the SIMPLE algorithm;"
+    []
+    [pimple]
+      type = 'Exodiff'
+      input = 'common-blocks.i pimple.i'
+      exodiff = pimple_out.e
+      max_threads = 1 # see libmesh issue #3808
+      custom_cmp = "compare.cmp"
+      recover = false # we only output on FINAL
+
+      detail = "the PIMPLE algorithm;"
+    []
+    [piso]
+      type = 'Exodiff'
+      input = 'common-blocks.i pimple.i'
+      exodiff = piso_out.e
+      max_threads = 1 # see libmesh issue #3808
+      cli_args = "Outputs/file_base=piso_out Executioner/num_piso_iterations=100 Executioner/num_iterations=1 Executioner/continue_on_max_its=true"
+      custom_cmp = "compare.cmp"
+      recover = false # we only output on FINAL
+
+      detail = "the PISO algorithm."
+    []
+  []
+[]
