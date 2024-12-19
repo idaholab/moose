@@ -29,8 +29,8 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
   dX_dt = 0.0;
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
   {
-    _trial_variables.at(ind)->MakeRef(
-        _trial_variables.at(ind)->ParFESpace(), dX_dt, _true_offsets[ind]);
+    _trial_variables.at(ind)->MakeTRef(
+        _trial_variables.at(ind)->ParFESpace(), dX_dt, _block_true_offsets[ind]);
   }
   const double time = GetTime();
   for (auto & coef : _problem._scalar_manager)
