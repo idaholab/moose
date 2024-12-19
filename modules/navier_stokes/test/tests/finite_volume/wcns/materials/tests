@@ -57,6 +57,13 @@
     requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat.'
     recover = false
   []
+  [validation_nonconstant_cp]
+    type = 'CSVDiff'
+    input = 1d_test_cpT.i
+    csvdiff = 1d_test_cpT_out.csv
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat, and show near perfect energy conservation.'
+    recover = false
+  []
 
   [exceptions]
     requirement = "The system shall throw an error if"
