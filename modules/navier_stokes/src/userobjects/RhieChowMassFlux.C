@@ -7,24 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+// MOOSE includes
 #include "RhieChowMassFlux.h"
-#include "INSFVAttributes.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "NS.h"
-#include "Assembly.h"
-#include "INSFVVelocityVariable.h"
-#include "INSFVPressureVariable.h"
-#include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
+#include "LinearSystem.h"
 
+// libMesh includes
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
-
-#include "LinearSystem.h"
 #include "libmesh/petsc_matrix.h"
 
 using namespace libMesh;
@@ -34,8 +29,7 @@ registerMooseObject("NavierStokesApp", RhieChowMassFlux);
 InputParameters
 RhieChowMassFlux::validParams()
 {
-  auto params = GeneralUserObject::validParams();
-  params += BlockRestrictable::validParams();
+  auto params = RhieChowFaceFluxProvider::validParams();
   params += NonADFunctorInterface::validParams();
 
   params.addClassDescription("Computes H/A and 1/A together with face mass fluxes for segregated "
@@ -61,8 +55,7 @@ RhieChowMassFlux::validParams()
 }
 
 RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
-  : GeneralUserObject(params),
-    BlockRestrictable(this),
+  : RhieChowFaceFluxProvider(params),
     NonADFunctorInterface(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
@@ -245,6 +238,21 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
                                 /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
   return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
+}
+
+Real
+RhieChowMassFlux::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
+                                        const FaceInfo & fi,
+                                        const Moose::StateArg & time,
+                                        const THREAD_ID /*tid*/,
+                                        bool /*subtract_mesh_velocity*/) const
+{
+  if (m != Moose::FV::InterpMethod::RhieChow)
+    mooseError("Interpolation methods other than Rhie-Chow are not supported!");
+  if (time.state != Moose::currentState().state)
+    mooseError("Older interpolation times are not supported!");
+
+  return getVolumetricFaceFlux(fi);
 }
 
 void
@@ -572,13 +580,4 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     _console << "DONE Computing HbyA " << std::endl;
     _console << "************************************" << std::endl;
   }
-}
-
-bool
-RhieChowMassFlux::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  if (fi_elem_side)
-    return hasBlocks(fi.elem().subdomain_id());
-  else
-    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }
