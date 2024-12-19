@@ -1,7 +1,6 @@
 Content:
     - framework/doc/content
     - modules/thermal_hydraulics/doc/content
-    - modules/thermal_hydraulics/test/doc/content
     - modules/fluid_properties/doc/content
     - modules/heat_transfer/doc/content
     - modules/misc/doc/content
@@ -26,7 +25,6 @@ Extensions:
         home: /modules/thermal_hydraulics/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/thermal_hydraulics
-        allow-test-objects: True
         unregister:
             framework: !include ${MOOSE_DIR}/framework/doc/unregister.yml
             thermal_hydraulics:
