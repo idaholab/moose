@@ -35,8 +35,7 @@ RhieChowFaceFluxProvider::validParams()
 }
 
 RhieChowFaceFluxProvider::RhieChowFaceFluxProvider(const InputParameters & params)
-  : GeneralUserObject(params),
-    BlockRestrictable(this)
+  : GeneralUserObject(params), BlockRestrictable(this)
 {
 }
 

@@ -142,10 +142,10 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
 
 Real
 RhieChowInterpolatorBase::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
-                                        const FaceInfo & fi,
-                                        const Moose::StateArg & time,
-                                        const THREAD_ID tid,
-                                        bool subtract_mesh_velocity) const
+                                                const FaceInfo & fi,
+                                                const Moose::StateArg & time,
+                                                const THREAD_ID tid,
+                                                bool subtract_mesh_velocity) const
 {
   return raw_value(this->getVelocity(m, fi, time, tid, subtract_mesh_velocity)) * fi.normal();
 }

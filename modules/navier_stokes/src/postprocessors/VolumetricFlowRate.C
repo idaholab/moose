@@ -90,7 +90,8 @@ void
 VolumetricFlowRate::initialSetup()
 {
   const auto * rc_base = dynamic_cast<const RhieChowInterpolatorBase *>(_rc_uo);
-  if (_rc_uo && rc_base && rc_base->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
+  if (_rc_uo && rc_base &&
+      rc_base->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
       !rc_base->segregated())
   {
     // We must make sure the A coefficients in the Rhie Chow interpolator are present on

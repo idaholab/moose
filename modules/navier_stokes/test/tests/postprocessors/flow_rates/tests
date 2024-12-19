@@ -1,6 +1,6 @@
 [Tests]
   design = 'VolumetricFlowRate.md'
-  issues = '#16169 #16585'
+  issues = '#16169 #16585 #29582'
   [fe]
     type = CSVDiff
     input = conservation_INSFE.i
@@ -24,6 +24,15 @@
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
+  [linearfv]
+    type = CSVDiff
+    input = conservation_LinearFV.i
+    csvdiff =  conservation_LinearFV_out.csv
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to compute flow rates and prove mass conservation at external boundaries.'
+    max_threads = 1 # see libmesh issue #3808
+    recover = false # SIMPLE is a steady solver
   []
   [insfv_diverging]
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'

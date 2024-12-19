@@ -33,8 +33,7 @@ class MeshBase;
  * User object responsible for determining the face fluxes using the Rhie-Chow interpolation in a
  * segregated solver that uses the linear FV formulation.
  */
-class RhieChowMassFlux : public RhieChowFaceFluxProvider,
-                         public NonADFunctorInterface
+class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
