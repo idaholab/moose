@@ -34,7 +34,7 @@ SIMPLESolve::checkTimeKernels(LinearSystem & system)
   if (system.containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation in system",
                system.name(),
-               ", SIMPLE is a steady-state solver!");
+               ", SIMPLE is a steady-state solver! Use the PIMPLE executioner instead.");
 }
 
 void

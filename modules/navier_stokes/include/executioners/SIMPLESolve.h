@@ -15,7 +15,7 @@
 /**
  * Implementation of Semi-Implicit Method for Pressure-Linked Equations (SIMPLE)
  * with MOOSE-based applications. It is a slightly restricted version of
- * the PIMPLE algorithm: (i) no PISO iterations are allowed, (ii) not time
+ * the PIMPLE algorithm: (i) no PISO iterations are allowed, (ii) no time
  * kernels are allowed.
  */
 class SIMPLESolve : public PIMPLESolve

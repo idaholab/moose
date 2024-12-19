@@ -35,9 +35,7 @@ PIMPLESolve::PIMPLESolve(Executioner & ex)
                            : libMesh::invalid_uint),
     _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr),
     _num_piso_iterations(getParam<unsigned int>("num_piso_iterations"))
-
 {
-
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
   {
@@ -90,8 +88,6 @@ PIMPLESolve::solveMomentumPredictor()
   PetscLinearSolver<Real> & momentum_solver =
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
 
-  momentum_solver.reuse_preconditioner(true);
-
   // Solve the momentum equations.
   // TO DO: These equations are VERY similar. If we can store the differences (things coming from
   // BCs for example) separately, it is enough to construct one matrix.
@@ -109,7 +105,7 @@ PIMPLESolve::solveMomentumPredictor()
 
     auto diff_diagonal = solution.zero_clone();
 
-    // We plug zero in this to get the system matrix and the right hand side of the linear problem
+    // We assemble the matrix and the right hand side
     _problem.computeLinearSystemSys(momentum_system, mmat, rhs);
 
     // Still need to relax the right hand side with the same vector
@@ -128,12 +124,13 @@ PIMPLESolve::solveMomentumPredictor()
     _momentum_linear_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
     momentum_solver.set_solver_configuration(_momentum_linear_control);
 
-    _console << " solution after solve " << std::endl;
-    solution.print();
-
     // We solve the equation
     auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
+
+    // We will reuse the preconditioner for every momentum system
+    if (system_i == 0)
+      momentum_solver.reuse_preconditioner(true);
 
     // Save the normalized residual
     its_normalized_residuals.push_back(
@@ -169,6 +166,9 @@ PIMPLESolve::solveMomentumPredictor()
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
     _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
+
+  // We reset this to ensure the preconditioner is recomputed new time we go to the momentum predictor
+  momentum_solver.reuse_preconditioner(false);
 
   return its_normalized_residuals;
 }

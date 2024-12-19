@@ -57,7 +57,7 @@ public:
   /// Setup pressure pin if there is need for one
   void setupPressurePin();
 
-  /// Check if the user defined time kernels, if yes error out
+  /// Check if the user defined time kernels
   virtual void checkIntegrity() {}
 
 protected:

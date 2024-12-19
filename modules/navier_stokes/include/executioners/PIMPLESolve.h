@@ -14,8 +14,9 @@
 #include "SIMPLESolveBase.h"
 
 /**
- * PIMPLE-based (PISO + PIMPLE) for transient solution object with
- * linear FV system assembly. A detailed discussion is available in
+ * PIMPLE-based (PISO + SIMPLE) for transient solution object with
+ * linear FV system assembly. A detailed discussion of the algorithm
+ * is available in
  * @book{
  *   greenshieldsweller2022,
  *   title     = "Notes on Computational Fluid Dynamics: General Principles",
@@ -25,7 +26,7 @@
  *   address   = "Reading, UK"
  * }
  * This will be the basis for the SIMPLE algorithm as well, we just
- * fix the PISO iterations to 0.
+ * set the PISO iterations to 0.
  */
 class PIMPLESolve : public SIMPLESolveBase
 {
