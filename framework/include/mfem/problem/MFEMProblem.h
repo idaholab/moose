@@ -25,9 +25,9 @@ public:
   virtual ~MFEMProblem() {};
 
   virtual void initialSetup() override;
-  virtual void externalSolve() override {};
-  virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
-  virtual void syncSolutions(Direction direction) override {};
+  virtual void externalSolve() override {}
+  virtual bool nlConverged(const unsigned int) override { return true; }
+  virtual void syncSolutions(Direction) override {}
 
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
