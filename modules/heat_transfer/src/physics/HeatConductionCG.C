@@ -182,6 +182,19 @@ HeatConductionCG::addFEBCs()
     }
     else
     {
+      // Check sizes
+      if (convective_boundaries.size() != boundary_T_fluid.size())
+        paramError("fixed_convection_T_fluid",
+                   "Should be as many convection boundaries (" +
+                       std::to_string(convective_boundaries.size()) +
+                       ") as fixed convection temperatures (" +
+                       std::to_string(boundary_T_fluid.size()) + ")");
+      if (convective_boundaries.size() != boundary_htc.size())
+        paramError("fixed_convection_htc",
+                   "Should be as many convection boundaries (" +
+                       std::to_string(convective_boundaries.size()) +
+                       ") as fixed convection heat exchange coefficients (" +
+                       std::to_string(boundary_htc.size()) + ")");
       for (const auto i : index_range(convective_boundaries))
       {
         params.set<std::vector<BoundaryName>>("boundary") = {convective_boundaries[i]};
