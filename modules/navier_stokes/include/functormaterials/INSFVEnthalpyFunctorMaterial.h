@@ -42,4 +42,7 @@ protected:
 
   /// the specific heat capacity
   const Moose::Functor<ADReal> & _cp;
+
+  /// the specific enthalpy
+  const Moose::Functor<ADReal> * _h;
 };
