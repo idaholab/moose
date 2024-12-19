@@ -81,6 +81,10 @@ MeshCut2DFractureUserObject::MeshCut2DFractureUserObject(const InputParameters &
     paramError("k_critical",
                "Must set crack extension criterion with k_critical, k_critical_vectorpostprocessor "
                "or stress_threshold.");
+  if (isParamValid("k_critical") && _k_critical_vpp)
+    paramWarning("k_critical",
+                 "k_critical and k_critical_vectorpostprocessor are both set, crack growth will "
+                 "use whichever value is lowest.");
 }
 
 void
