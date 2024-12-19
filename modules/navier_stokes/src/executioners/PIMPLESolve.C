@@ -72,7 +72,8 @@ PIMPLESolve::linkRhieChowUserObject()
       _momentum_systems, _pressure_system, _momentum_system_numbers);
 
   // Initialize the face velocities in the RC object
-  _rc_uo->initFaceMassFlux();
+  if (!_app.isRecovering())
+    _rc_uo->initFaceMassFlux();
   _rc_uo->initCouplingField();
 }
 
@@ -127,6 +128,9 @@ PIMPLESolve::solveMomentumPredictor()
     _momentum_linear_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
     momentum_solver.set_solver_configuration(_momentum_linear_control);
 
+    _console << " solution after solve " << std::endl;
+    solution.print();
+
     // We solve the equation
     auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
@@ -137,7 +141,7 @@ PIMPLESolve::solveMomentumPredictor()
 
     if (_print_fields)
     {
-      _console << " solution before solve " << std::endl;
+      _console << " solution after solve " << std::endl;
       solution.print();
       _console << " matrix when we solve " << std::endl;
       mmat.print();

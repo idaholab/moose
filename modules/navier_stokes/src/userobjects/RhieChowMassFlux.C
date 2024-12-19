@@ -66,7 +66,9 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _vel(_dim, nullptr),
     _HbyA_flux(_moose_mesh, blockIDs(), "HbyA_flux"),
     _Ainv(_moose_mesh, blockIDs(), "Ainv"),
-    _face_mass_flux(_moose_mesh, blockIDs(), "face_values"),
+    _face_mass_flux(
+        declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
+            "face_flux", _moose_mesh, blockIDs(), "face_values")),
     _rho(getFunctor<Real>(NS::density))
 {
   if (!_p)
