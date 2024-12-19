@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#28977'
+  design = 'InterfaceKernels/index.md'
+  [aux]
+    requirement = 'The system shall be able to solve problems with auxiliary variables coupled through interface kernels'
+    [fe]
+      type = CSVDiff
+      input = 'reaction_1D_steady.i'
+      csvdiff= 'reaction_1D_steady_out.csv'
+      detail = 'to finite element variables,'
+    []
+    [fe_res_jac]
+      type = CSVDiff
+      input = 'reaction_1D_steady.i'
+      csvdiff= 'reaction_1D_steady_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      detail = 'to finite element variables when computing the residual and Jacobian together,'
+    []
+  []
+[]

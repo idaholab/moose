@@ -303,7 +303,7 @@ PropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
                jelem,
                " greater than than total number of element in mesh: ",
                _mesh.nElem(),
-               ". Elements should be numbered consecutively.");
+               ". Elements should be numbered consecutively, and ids should start from 0.");
   return _reader.getData(jelem)[prop_num];
 }
 
@@ -316,7 +316,7 @@ PropertyReadFile::getNodeData(const Node * const node, const unsigned int prop_n
                jnode,
                " greater than than total number of nodes in mesh: ",
                _mesh.nNodes(),
-               ". Nodes should be numbered consecutively.");
+               ". Nodes should be numbered consecutively, with ids starting from 0.");
   return _reader.getData(jnode)[prop_num];
 }
 
@@ -334,7 +334,7 @@ PropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
                elem_subdomain_id,
                " greater than than total number of blocks in mesh: ",
                _nblock,
-               ". Blocks should be numbered consecutively.");
+               ". Blocks should be numbered consecutively, starting from 0.");
   return _reader.getData(elem_subdomain_id - offset)[prop_num];
 }
 
