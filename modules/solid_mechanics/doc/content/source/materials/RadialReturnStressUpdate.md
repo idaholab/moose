@@ -140,6 +140,4 @@ the MOOSE `Material` class.
 More details on how to write the equivalent yield surface equation for a creep
 model are given in Dunne and Petrinic.
 
-<!-- !syntax children /Materials/RadialReturnStressUpdate -->
-
 !bibtex bibliography
