@@ -9,7 +9,7 @@
 
 #include "VolumetricFlowRate.h"
 #include "MathFVUtils.h"
-#include "INSFVRhieChowInterpolator.h"
+#include "RhieChowInterpolatorBase.h"
 #include "NSFVUtils.h"
 
 #include <cmath>
@@ -53,7 +53,7 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _adv_quant(isParamValid("advected_quantity") ? &getFunctor<ADReal>("advected_quantity")
                                                  : nullptr),
     _rc_uo(isParamValid("rhie_chow_user_object")
-               ? &getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object")
+               ? &getUserObject<RhieChowFaceFluxProvider>("rhie_chow_user_object")
                : nullptr)
 {
   // Check that at most one advected quantity has been provided
@@ -89,13 +89,14 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
 void
 VolumetricFlowRate::initialSetup()
 {
-  if (_rc_uo && _rc_uo->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
-      !_rc_uo->segregated())
+  const auto * rc_base = dynamic_cast<const RhieChowInterpolatorBase *>(_rc_uo);
+  if (_rc_uo && rc_base && rc_base->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
+      !rc_base->segregated())
   {
     // We must make sure the A coefficients in the Rhie Chow interpolator are present on
     // both sides of the boundaries so that interpolation coefficients may be computed
     for (const auto bid : boundaryIDs())
-      const_cast<RhieChowInterpolatorBase *>(_rc_uo)->ghostADataOnBoundary(bid);
+      const_cast<RhieChowInterpolatorBase *>(rc_base)->ghostADataOnBoundary(bid);
 
     // On INITIAL, we cannot compute Rhie Chow coefficients on internal surfaces because
     // - the time integrator is not ready to compute time derivatives
@@ -104,7 +105,7 @@ VolumetricFlowRate::initialSetup()
     if (getExecuteOnEnum().isValueSet(EXEC_INITIAL))
       for (const auto bid : boundaryIDs())
       {
-        if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, _rc_uo->blockIDs()))
+        if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, rc_base->blockIDs()))
           paramError(
               "execute_on",
               "Boundary '",
@@ -131,7 +132,7 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   const auto state = determineState();
 
   // Get face value for velocity
-  const auto vel = MetaPhysicL::raw_value(_rc_uo->getVelocity(
+  const auto face_flux = MetaPhysicL::raw_value(_rc_uo->getVolumetricFaceFlux(
       _velocity_interp_method, *fi, state, _tid, /*subtract_mesh_velocity=*/true));
 
   const bool correct_skewness =
@@ -145,12 +146,12 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   const auto adv_quant_face = MetaPhysicL::raw_value(
       (*_adv_quant)(Moose::FaceArg({fi,
                                     Moose::FV::limiterType(_advected_interp_method),
-                                    MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                                    face_flux > 0,
                                     correct_skewness,
                                     elem,
                                     nullptr}),
                     state));
-  return fi->normal() * adv_quant_face * vel;
+  return face_flux * adv_quant_face;
 }
 
 Real

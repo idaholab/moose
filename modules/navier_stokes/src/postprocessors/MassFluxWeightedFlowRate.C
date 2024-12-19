@@ -53,7 +53,7 @@ MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInf
   const auto state = determineState();
 
   // Get face value for velocity
-  const auto vel = MetaPhysicL::raw_value(_rc_uo->getVelocity(
+  const auto face_flux = MetaPhysicL::raw_value(_rc_uo->getVolumetricFaceFlux(
       _velocity_interp_method, *fi, state, _tid, /*subtract_mesh_velocity=*/true));
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
@@ -68,14 +68,14 @@ MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInf
   const auto face_arg =
       Moose::FaceArg({fi,
                       Moose::FV::limiterType(_advected_interp_method),
-                      MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                      face_flux > 0,
                       correct_skewness,
                       _adv_quant->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr(),
                       nullptr});
   auto dens = _density(face_arg, state);
   const auto adv_quant_face = MetaPhysicL::raw_value(dens * (*_adv_quant)(face_arg, state));
-  _mdot += fi->faceArea() * fi->faceCoord() * MetaPhysicL::raw_value(dens) * fi->normal() * vel;
-  return fi->normal() * adv_quant_face * vel;
+  _mdot += fi->faceArea() * fi->faceCoord() * MetaPhysicL::raw_value(dens) * face_flux;
+  return face_flux * adv_quant_face;
 }
 
 void
