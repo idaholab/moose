@@ -18,7 +18,7 @@ public:
 
   void SetGridFunctions() override;
 
-  void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override {}
+  void ImplicitSolve(const double, const mfem::Vector &, mfem::Vector &) override {}
 };
 
 } // namespace platypus
