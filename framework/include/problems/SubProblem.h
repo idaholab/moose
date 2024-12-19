@@ -251,6 +251,12 @@ public:
   /// Whether or not this problem has the variable
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
+  /// Whether or not this problem has this linear variable
+  virtual bool hasLinearVariable(const std::string & var_name) const;
+
+  /// Whether or not this problem has this auxiliary variable
+  virtual bool hasAuxiliaryVariable(const std::string & var_name) const;
+
   /**
    * Returns the variable reference for requested variable which must
    * be of the expected_var_type (Nonlinear vs. Auxiliary) and
@@ -1252,8 +1258,10 @@ SubProblem::getFunctor(const std::string & name,
         mooseError("We already have the functor; it should not be unset");
 
       // Check for whether this is a valid request
+      // We allow auxiliary variables and linear variables to be retrieved as non AD
       if (!requested_functor_is_ad && requestor_is_ad &&
-          true_functor_is == SubProblem::TrueFunctorIs::AD)
+          true_functor_is == SubProblem::TrueFunctorIs::AD &&
+          !(hasAuxiliaryVariable(name) || hasLinearVariable(name)))
         mooseError("The AD object '",
                    requestor_name,
                    "' is requesting the functor '",
