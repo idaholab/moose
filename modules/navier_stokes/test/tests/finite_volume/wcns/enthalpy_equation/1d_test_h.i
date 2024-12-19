@@ -1,7 +1,12 @@
 L = 30
+nx = 600
 bulk_u = 0.01
+q_source = 50000.
+A_cp = 976.78
+B_cp = 1.0634
+T_in = 860.
 p_ref = 101325.0
-
+rho = 2000.
 advected_interp_method = 'upwind'
 
 [Mesh]
@@ -10,7 +15,7 @@ advected_interp_method = 'upwind'
     dim = 1
     xmin = 0
     xmax = ${L}
-    nx = 400
+    nx = ${nx}
   []
 []
 
@@ -107,14 +112,10 @@ advected_interp_method = 'upwind'
     force_boundary_execution = true
   []
 
-  [temp_conduction]
-    type = LinearFVDiffusion
-    diffusion_coeff = 'alpha'
-    variable = h
-  []
   [temp_advection]
     type = LinearFVEnergyAdvection
     variable = h
+    cp = 1.
   []
   [source]
     type = LinearFVSource
@@ -140,7 +141,7 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
     boundary = 'left'
-    functor = 860.
+    functor = ${T_in}
   []
 
   [outlet_p]
@@ -163,76 +164,61 @@ advected_interp_method = 'upwind'
   []
 []
 
-[Materials]
-  [converter_to_regular_T]
-    type = FunctorADConverter
-    ad_props_in = 'T'
-    reg_props_out = 'T_nAD'
+[Functions]
+  [source_func]
+    type = ParsedFunction
+    expression = ${q_source}
   []
-  [converter_to_regular_h]
-    type = FunctorADConverter
-    ad_props_in = 'h'
-    reg_props_out = 'h_nAD'
+  [T_analytical]
+    type = ParsedFunction
+    expression = ${fparse (-A_cp+sqrt(A_cp^2-2*B_cp*(-q_source/rho/bulk_u*L-A_cp*T_in-B_cp/2*T_in*T_in)))/B_cp}
   []
 []
 
 [FunctorMaterials]
-  [source_func]
-    type = ADParsedFunctorMaterial
-    property_name = source_func
-    functor_names = 'rho'
-    expression = '10.'
-  []
-  [alpha]
-    type = ADParsedFunctorMaterial
-    property_name = 'alpha'
-    functor_names = 'k cp'
-    expression = 'k/cp'
-  []
   [enthalpy_material]
     type = LinearFVEnthalpyFunctorMaterial
     pressure = ${p_ref}
     T_fluid = T
     h = h
-    #fp = salt
     h_from_p_T_functor = h_from_p_T_functor
     T_from_p_h_functor = T_from_p_h_functor
   []
   [h_from_p_T_functor]
     type = ParsedFunctorMaterial
     property_name = 'h_from_p_T_functor'
-    functor_names = 'T_nAD'
-    expression = '976.78*T_nAD+1.0634/2*(T_nAD^2)'
+    functor_names = 'T'
+    expression = '${A_cp}*T+${B_cp}/2*(T^2)'
   []
   [T_from_p_h_functor]
     type = ParsedFunctorMaterial
     property_name = 'T_from_p_h_functor'
-    functor_names = 'h_nAD'
-    expression = '(-976.78+sqrt(976.78^2+2*h_nAD*1.0634))/1.0634'
+    functor_names = 'h'
+    expression = '(-${A_cp}+sqrt(${A_cp}^2+2*h*${B_cp}))/${B_cp}'
   []
   [rho]
     type = ADParsedFunctorMaterial
     property_name = 'rho'
     functor_names = 'T'
-    expression = '2000' #'2579.-0.624*T'
+    expression = ${rho}
   []
   [cp]
     type = ADParsedFunctorMaterial
     property_name = 'cp'
     functor_names = 'T'
-    expression = '976.78+1.0634*T'
+    expression = '${A_cp}+${B_cp}*T'
   []
   [mu]
     type = ADParsedFunctorMaterial
     property_name = 'mu'
     functor_names = 'T'
-    expression = '4.5e-3' #'4.e-5*exp(4170/T)'
+    expression = '4.5e-3'
   []
   [k]
     type = ADParsedFunctorMaterial
     property_name = 'k'
     functor_names = 'T'
-    expression = 0.7 #'1.24-0.000538*T'
+    expression = 0.7
   []
 []
 
@@ -249,6 +235,18 @@ advected_interp_method = 'upwind'
     variable = 'cp_var'
     execute_on = 'NONLINEAR'
   []
+  [mu_out]
+    type = FunctorAux
+    functor = 'mu'
+    variable = 'mu_var'
+    execute_on = 'NONLINEAR'
+  []
+  [k_out]
+    type = FunctorAux
+    functor = 'k'
+    variable = 'k_var'
+    execute_on = 'NONLINEAR'
+  []
   [T_from_h_functor_aux]
     type = FunctorAux
     functor = 'T_from_p_h'
@@ -260,6 +258,18 @@ advected_interp_method = 'upwind'
     functor = 'h_from_p_T'
     variable = 'h_aux'
     execute_on = 'NONLINEAR'
+  []
+[]
+
+[Postprocessors]
+  [T_out_sim]
+    type = ElementalVariableValue
+    variable = T
+    elementid = ${fparse nx-1}
+  [../]
+  [T_out_analytic]
+    type = FunctionValuePostprocessor
+    function = T_analytical
   []
 []
 
@@ -295,7 +305,6 @@ advected_interp_method = 'upwind'
   energy_petsc_options_value = 'hypre boomeramg'
   continue_on_max_its = true
 []
-
 
 [Outputs]
   [csv]
