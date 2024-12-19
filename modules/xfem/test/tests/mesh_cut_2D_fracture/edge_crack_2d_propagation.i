@@ -55,6 +55,14 @@
     box_height = 0.1
     execute_on = NONLINEAR
   []
+  [CrackFrontNonlocalScalarVpp]
+    type = CrackFrontNonlocalScalar
+    material_name = k_crit_mat
+    crack_front_definition = crackFrontDefinition
+    box_length = 0.05
+    box_height = 0.1
+    execute_on = NONLINEAR
+  []
 []
 [UserObjects]
   [cut_mesh2]
@@ -64,6 +72,8 @@
     ki_vectorpostprocessor = "II_KI_1"
     kii_vectorpostprocessor = "II_KII_1"
     k_critical = 100
+    k_critical_vectorpostprocessor=CrackFrontNonlocalScalarVpp
+    k_critical_vector_name = "crack_tip_k_crit_mat"
     # stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
     # stress_vector_name = "crack_tip_stress"
     # stress_threshold = 120
@@ -116,6 +126,12 @@
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
+  []
+  [k_critical]
+    type = ParsedMaterial
+    property_name = k_crit_mat
+    extra_symbols = 'x'
+    expression = 'if(x > -0.4,100,90)'
   []
 []
 
