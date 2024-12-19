@@ -19,6 +19,7 @@
       input = edge_crack_2d_propagation.i
       cli_args = 'Outputs/file_base=k_stress_growth '
                  'UserObjects/cut_mesh2/stress_vectorpostprocessor=CrackFrontNonlocalStressVpp '
+                 'UserObjects/cut_mesh2/stress_vector_name="crack_tip_stress" '
                  'UserObjects/cut_mesh2/stress_threshold=120'
       exodiff = 'k_stress_growth.e-s003 k_stress_growth_XFEMCutMeshOutput.e-s0004'
       abs_zero = 1e-8

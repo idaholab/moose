@@ -65,6 +65,7 @@
     kii_vectorpostprocessor = "II_KII_1"
     k_critical = 100
     # stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
+    # stress_vector_name = "crack_tip_stress"
     # stress_threshold = 120
   []
 []

@@ -59,4 +59,6 @@ private:
   const std::vector<Real> * const _kii_vpp;
   /// Pointer to crack front stress if available
   const std::vector<Real> * const _stress_vpp;
+  /// Pointer to crack front critical k if available
+  const std::vector<Real> * const _k_critical_vpp;
 };
