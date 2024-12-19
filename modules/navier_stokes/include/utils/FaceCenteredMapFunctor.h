@@ -120,3 +120,19 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const NodeArg &, const StateArg &) cons
 {
   mooseError("not implemented");
 }
+
+template <typename T, typename Map>
+inline void
+dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+{
+  Map & m_map = m;
+  dataStore(stream, m_map, context);
+}
+
+template <typename T, typename Map>
+inline void
+dataLoad(std::istream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+{
+  Map & m_map = m;
+  dataLoad(stream, m_map, context);
+}

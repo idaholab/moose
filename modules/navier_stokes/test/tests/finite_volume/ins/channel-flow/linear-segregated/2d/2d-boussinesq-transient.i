@@ -234,7 +234,7 @@ alpha_b = 1e-4
 
 [Executioner]
   type = PIMPLE
-  momentum_l_abs_tol = 1e-2
+  momentum_l_abs_tol = 1e-12
   pressure_l_abs_tol = 1e-12
   energy_l_abs_tol = 1e-12
   momentum_l_tol = 1e-12

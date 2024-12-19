@@ -149,7 +149,7 @@ protected:
   /**
    * A map functor from faces to mass fluxes which are used in the advection terms.
    */
-  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _face_mass_flux;
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
