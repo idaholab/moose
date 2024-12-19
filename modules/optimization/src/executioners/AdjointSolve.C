@@ -189,8 +189,9 @@ AdjointSolve::checkIntegrity()
     // If the user supplies any scaling factors for individual variables the
     // adjoint system won't be consistent.
     if (!absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
-      mooseError("User supplied scaling factors for adjoint variables. Adjoint system is scaled "
-                 "automatically by the forward system.");
+      mooseError(
+          "User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled "
+          "automatically by the forward system.");
 
   // This is to prevent automatic scaling of the adjoint system. Scaling is
   // taken from the forward system

@@ -8,6 +8,7 @@
       input = main.i
       jsondiff = main_out.json
       recover = false
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = "by manually providing scaling factors for the forward problem variables,"
     []
     [automatic_scaling]
@@ -15,6 +16,7 @@
       input = main.i
       jsondiff = main_out.json
       recover = false
+      max_threads = 1 # Optimize executioner does not support multiple threads
       cli_args = "MultiApps/forward/cli_args='Executioner/automatic_scaling=true'"
       detail = "or by using the automatic scaling option."
     []
@@ -23,6 +25,7 @@
     [scaling_factor_for_adjoint_variables]
       type = 'RunException'
       input = main.i
+      max_threads = 1 # Optimize executioner does not support multiple threads
       cli_args = "MultiApps/forward/cli_args='Variables/T_real_adj/scaling=5'"
       expect_err = 'User supplied scaling factors for adjoint variables. Adjoint system is scaled automatically by the forward system.'
       requirement = "The system shall throw out an error when scalings are manually assigned to "
