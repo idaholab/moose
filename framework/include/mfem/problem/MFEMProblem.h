@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
 
   MFEMProblem(const InputParameters & params);
-  virtual ~MFEMProblem() {};
+  virtual ~MFEMProblem() {}
 
   virtual void initialSetup() override;
   virtual void externalSolve() override {}
