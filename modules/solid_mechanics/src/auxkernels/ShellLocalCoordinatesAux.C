@@ -21,12 +21,12 @@ ShellLocalCoordinatesAux::validParams()
       "This AuxKernel stores a specific component of a shell element's local coordinate "
       "vector in an auxiliary variable.");
   params.addParam<std::string>("base_name", "Mechanical property base name");
+
   MooseEnum property("first_local_vector second_local_vector normal_local_vector");
   params.addRequiredParam<MooseEnum>(
       "property",
       property,
-      "The local axis to output, calculated on the shell element. Valid options are: "
-      "first_local_vector, second_local_vector and normal_local_vector");
+      "The local axis to output: first_local_vector, second_local_vector or normal_local_vector");
   params.addRequiredParam<unsigned int>(
       "component", "The vector component of the local coordinate vector: 0, 1 or 2");
 
@@ -36,7 +36,7 @@ ShellLocalCoordinatesAux::validParams()
 ShellLocalCoordinatesAux::ShellLocalCoordinatesAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _property(getParam<MooseEnum>("property")),
+    _property(getParam<MooseEnum>("property").getEnum<PropertyType>()),
     _component(getParam<unsigned int>("component"))
 
 {
@@ -56,23 +56,15 @@ ShellLocalCoordinatesAux::computeValue()
 
   switch (_property)
   {
-    case 0: // Corresponds to the first local axis
+    case PropertyType::first_local_vector:
       output_value = (*_local_coordinates)[_qp](0, _component);
       break;
-
-    case 1: // Corresponds to the second local axis
+    case PropertyType::second_local_vector:
       output_value = (*_local_coordinates)[_qp](1, _component);
       break;
-
-    case 2: // Corresponds to the normal vector to the shell element
+    case PropertyType::normal_local_vector:
       output_value = (*_local_coordinates)[_qp](2, _component);
       break;
-
-      // Add other cases as needed
-
-    default:
-      mooseError("Invalid definition of the shell's local axis: valid options are : "
-                 "first_local_vector, second_local_vector, normal_local_vector");
   }
 
   return output_value;

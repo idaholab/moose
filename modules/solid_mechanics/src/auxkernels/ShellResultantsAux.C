@@ -45,18 +45,17 @@ ShellResultantsAux::ShellResultantsAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _thickness(coupledValue("thickness")),
-    _resultant(getParam<MooseEnum>("stress_resultant"))
+    _resultant(getParam<MooseEnum>("stress_resultant").getEnum<ResultantType>())
 {
   _t_qrule = std::make_unique<QGauss>(
       1, Utility::string_to_enum<Order>(getParam<std::string>("through_thickness_order")));
   _t_points = _t_qrule->get_points();
   _t_weights = _t_qrule->get_weights();
   _local_stress_t_points.resize(_t_points.size());
-  for (unsigned int t = 0; t < _t_points.size(); ++t)
-  {
+
+  for (const auto t : index_range(_t_points))
     _local_stress_t_points[t] = &getMaterialProperty<RankTwoTensor>(
         _base_name + "local_stress_t_points_" + std::to_string(t));
-  }
 }
 
 Real
@@ -66,7 +65,7 @@ ShellResultantsAux::computeValue()
 
   switch (_resultant)
   {
-    case 0: // Corresponds to "axial_force_0", in-plane force along the first local axis
+    case ResultantType::axial_force_0:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -74,7 +73,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 1: // Corresponds to "axial_force_1", in-plane force along the second local axis
+    case ResultantType::axial_force_1:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -82,8 +81,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 2: // Corresponds to "normal force", normal force to the shell plane, it should be
-            // always zero (plane stress condition)
+    case ResultantType::normal_force:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -91,7 +89,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 3: // Corresponds to "bending_moment_0", bending moment around first local axis
+    case ResultantType::bending_moment_0:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant -= (*_local_stress_t_points[i])[_qp](1, 1) * _t_points[i](0) *
@@ -99,7 +97,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 4: // Corresponds to "bending_moment_1", bending moment around second local axis
+    case ResultantType::bending_moment_1:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant -= (*_local_stress_t_points[i])[_qp](0, 0) * _t_points[i](0) *
@@ -107,7 +105,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 5: // Corresponds to "bending_moment_01", in-plane bending moment
+    case ResultantType::bending_moment_01:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant -= (*_local_stress_t_points[i])[_qp](0, 1) * _t_points[i](0) *
@@ -115,7 +113,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 6: // Corresponds to "shear_force_01", in-plane shear force
+    case ResultantType::shear_force_01:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -123,7 +121,7 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 7: // Corresponds to "shear_force_02", transverse shear force
+    case ResultantType::shear_force_02:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
@@ -131,19 +129,13 @@ ShellResultantsAux::computeValue()
       }
       break;
 
-    case 8: // Corresponds to "shear_force_12", transverse shear force
+    case ResultantType::shear_force_12:
       for (unsigned int i = 0; i < _t_points.size(); ++i)
       {
         _shell_resultant +=
             (*_local_stress_t_points[i])[_qp](1, 2) * _t_weights[i] * (_thickness[_qp] / 2);
       }
       break;
-      // Add other cases as needed
-
-    default:
-      mooseError("Unsupported stress_resultant option: valid options are: axial_force_0 "
-                 "axial_force_1 normal_force bending_moment_0 bending_moment_1 bending_moment_01 "
-                 "shear_force_01 shear_force_02 shear_force_12");
   }
 
   return _shell_resultant;

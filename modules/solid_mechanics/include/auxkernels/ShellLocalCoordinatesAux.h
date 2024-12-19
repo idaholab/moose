@@ -13,15 +13,12 @@
 #include "RankTwoTensor.h"
 #include "MooseEnum.h"
 
-// Forward declarations
-
 class ShellLocalCoordinatesAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
   ShellLocalCoordinatesAux(const InputParameters & parameters);
-  virtual ~ShellLocalCoordinatesAux() {}
 
 protected:
   virtual Real computeValue() override;
@@ -29,7 +26,12 @@ protected:
   /// Base name of the material system used to calculate the elastic energy
   const std::string _base_name;
 
-  MooseEnum _property;
+  enum class PropertyType
+  {
+    first_local_vector,
+    second_local_vector,
+    normal_local_vector
+  } _property;
   unsigned int _component;
 
   /// The local stress tensor

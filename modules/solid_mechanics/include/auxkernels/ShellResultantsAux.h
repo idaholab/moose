@@ -13,12 +13,11 @@
 #include "RankTwoTensor.h"
 #include "MooseEnum.h"
 
+// Forward declarations
 namespace libMesh
 {
 class QGauss;
 }
-
-// Forward declarations
 
 class ShellResultantsAux : public AuxKernel
 {
@@ -26,7 +25,6 @@ public:
   static InputParameters validParams();
 
   ShellResultantsAux(const InputParameters & parameters);
-  virtual ~ShellResultantsAux() {}
 
 protected:
   virtual Real computeValue();
@@ -37,8 +35,18 @@ protected:
   /// Coupled variable for the shell thickness
   const VariableValue & _thickness;
 
-  MooseEnum _resultant;
-
+  enum class ResultantType
+  {
+    axial_force_0,
+    axial_force_1,
+    normal_force,
+    bending_moment_0,
+    bending_moment_1,
+    bending_moment_01,
+    shear_force_01,
+    shear_force_02,
+    shear_force_12
+  } _resultant;
   /// Quadrature rule in the out of plane direction
   std::unique_ptr<QGauss> _t_qrule;
 
