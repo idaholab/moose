@@ -12,8 +12,8 @@
 #include "CrackFrontNonlocalMaterialBase.h"
 
 /**
- * This vectorpostprocessor computes the average scalar material normal to the crack front at points
- * along the crack front.
+ * Computes the average material at points provided by the crack_front_definition
+ * vectorpostprocessor.
  */
 class CrackFrontNonlocalScalar : public CrackFrontNonlocalMaterialBase
 {
@@ -26,5 +26,6 @@ protected:
   /// The scalar material property
   const MaterialProperty<Real> & _scalar;
 
-  Real getQPCrackFrontScalar(const unsigned int qp, Point /*direction*/) const override;
+  Real getQPCrackFrontScalar(const unsigned int qp,
+                             const Point /*crack_face_normal*/) const override;
 };

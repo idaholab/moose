@@ -8,9 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrackFrontNonlocalStress.h"
-#include "Moose.h"
-#include "RankTwoTensor.h"
-#include "libmesh/quadrature.h"
 #include "RankTwoScalarTools.h"
 
 registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalStress);
@@ -30,7 +27,8 @@ CrackFrontNonlocalStress::CrackFrontNonlocalStress(const InputParameters & param
 }
 
 Real
-CrackFrontNonlocalStress::getQPCrackFrontScalar(const unsigned int qp, Point direction) const
+CrackFrontNonlocalStress::getQPCrackFrontScalar(const unsigned int qp,
+                                                const Point crack_face_normal) const
 {
-  return RankTwoScalarTools::directionValueTensor(_stress[qp], direction);
+  return RankTwoScalarTools::directionValueTensor(_stress[qp], crack_face_normal);
 }

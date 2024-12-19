@@ -8,14 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrackFrontNonlocalMaterialBase.h"
-#include "Moose.h"
-#include "MooseEnum.h"
-#include "Conversion.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/utility.h"
 #include "CrackFrontDefinition.h"
-#include "libmesh/utility.h"
 
 InputParameters
 CrackFrontNonlocalMaterialBase::validParams()
@@ -87,14 +80,14 @@ CrackFrontNonlocalMaterialBase::execute()
   // icfp crack front point index
   for (std::size_t icfp = 0; icfp < _avg_crack_tip_scalar.size(); icfp++)
   {
-    Point direction = _crack_front_definition->getCrackFrontNormal(icfp);
+    Point crack_face_normal = _crack_front_definition->getCrackFrontNormal(icfp);
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     {
       Real q = BoxWeightingFunction(icfp, _q_point[qp]);
       if (q == 0)
         continue;
 
-      Real scalar = getQPCrackFrontScalar(qp, direction);
+      Real scalar = getQPCrackFrontScalar(qp, crack_face_normal);
       _avg_crack_tip_scalar[icfp] += _JxW[qp] * _coord[qp] * scalar * q;
       _volume[icfp] += _JxW[qp] * _coord[qp] * q;
     }
@@ -143,8 +136,8 @@ CrackFrontNonlocalMaterialBase::BoxWeightingFunction(std::size_t crack_front_poi
 
   // crackfront coordinates are:
   // crack_node_to_current_node_rot[0]= crack direction
-  // crack_node_to_current_node_rot[0]= normal to crack face
-  // crack_node_to_current_node_rot[0]= tangent to crack face along crack front (not used in 2D)
+  // crack_node_to_current_node_rot[1]= normal to crack face
+  // crack_node_to_current_node_rot[2]= tangent to crack face along crack front (not used in 2D)
   RealVectorValue crack_node_to_current_node_rot =
       _crack_front_definition->rotateToCrackFrontCoords(crack_node_to_current_node,
                                                         crack_front_point_index);

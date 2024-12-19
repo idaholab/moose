@@ -14,9 +14,10 @@
 // Forward Declarations
 class CrackFrontDefinition;
 /**
- * This vectorpostprocessor computes the average stress scalar normal to the crack front at points
- * along the crack front.
+ * Computes the average material property at points provided by the
+ * crack_front_definition vectorpostprocessor.
  */
+
 class CrackFrontNonlocalMaterialBase : public ElementVectorPostprocessor
 {
 public:
@@ -69,6 +70,12 @@ protected:
    * @return  1 if point is within the box, 0 otherwise
    */
   Real BoxWeightingFunction(std::size_t crack_front_point_index, const Point & qp_coord) const;
-
-  virtual Real getQPCrackFrontScalar(const unsigned int qp, Point direction) const = 0;
+  /**
+   * Determine whether a point is located within a specified crack front oriented box
+   * @param qp quardature point to get material properties at
+   * @param crack_face_normal normal direction to crack face
+   * @return  Value of material property at this qp and direction
+   */
+  virtual Real getQPCrackFrontScalar(const unsigned int qp,
+                                     const Point crack_face_normal) const = 0;
 };

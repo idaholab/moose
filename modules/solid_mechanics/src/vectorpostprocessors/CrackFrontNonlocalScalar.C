@@ -8,10 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrackFrontNonlocalScalar.h"
-#include "Moose.h"
-#include "RankTwoTensor.h"
-#include "libmesh/quadrature.h"
-#include "RankTwoScalarTools.h"
 
 registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalScalar);
 
@@ -19,7 +15,8 @@ InputParameters
 CrackFrontNonlocalScalar::validParams()
 {
   InputParameters params = CrackFrontNonlocalMaterialBase::validParams();
-  params.addClassDescription("Computes the average material normal to the crack face.");
+  params.addClassDescription("Computes the average material at points provided by the "
+                             "crack_front_definition vectorpostprocessor.");
   return params;
 }
 
@@ -30,7 +27,8 @@ CrackFrontNonlocalScalar::CrackFrontNonlocalScalar(const InputParameters & param
 }
 
 Real
-CrackFrontNonlocalScalar::getQPCrackFrontScalar(const unsigned int qp, Point /*direction*/) const
+CrackFrontNonlocalScalar::getQPCrackFrontScalar(const unsigned int qp,
+                                                const Point /*crack_face_normal*/) const
 {
   return _scalar[qp];
 }
