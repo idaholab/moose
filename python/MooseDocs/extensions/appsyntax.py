@@ -100,7 +100,6 @@ class AppSyntaxExtension(command.CommandExtension):
         config['inputs'] = ([],
                             "List of directories to interrogate for input files using an object.")
         config['allow-test-objects'] = (False, "Enable documentation for test objects.");
-        config['hide'] = (None, "DEPRECATED")
         config['remove'] = (None, "List or Dictionary of lists of syntax to remove.")
         config['visible'] = (['required', 'optional'],
                              "Parameter groups to show as un-collapsed.")
@@ -124,9 +123,6 @@ class AppSyntaxExtension(command.CommandExtension):
         self._object_cache = dict()
         self._syntax_cache = dict()
         self._external_missing_syntax = set() # page.uid
-
-        if self['hide'] is not None:
-            LOG.warning("The 'hide' option is no longer being used.")
 
     def preExecute(self):
         """Populate the application syntax tree."""
