@@ -288,7 +288,7 @@ advected_interp_method = 'upwind'
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.95
-  num_iterations = 1000
+  num_iterations = 400
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   energy_absolute_tolerance = 1e-6
@@ -307,8 +307,7 @@ advected_interp_method = 'upwind'
 []
 
 [Outputs]
-  [csv]
-    type = Exodus
-    execute_on = FINAL
+  [out]
+    type = CSV
   []
 []

@@ -1,4 +1,5 @@
 L = 30
+nx = 600
 bulk_u = 0.01
 p_ref = 101325.0
 T_in = 860.
@@ -11,7 +12,7 @@ advected_interp_method = 'upwind'
     dim = 1
     xmin = 0
     xmax = ${L}
-    nx = 600
+    nx = ${nx}
   []
 []
 
@@ -229,6 +230,14 @@ advected_interp_method = 'upwind'
   []
 []
 
+[Postprocessors]
+  [T_out_sim]
+    type = ElementalVariableValue
+    variable = T
+    elementid = ${fparse nx-1}
+  [../]
+[]
+
 [Executioner]
   type = SIMPLE
   momentum_l_abs_tol = 1e-12
@@ -244,7 +253,7 @@ advected_interp_method = 'upwind'
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.95
-  num_iterations = 1000
+  num_iterations = 400
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   energy_absolute_tolerance = 1e-6
@@ -263,8 +272,7 @@ advected_interp_method = 'upwind'
 []
 
 [Outputs]
-  [csv]
-    type = Exodus
-    execute_on = FINAL
+  [out]
+    type = CSV
   []
 []
