@@ -46,39 +46,17 @@
   used_by_xfem_to_grow_crack = true
 []
 
-[VectorPostprocessors]
-  [CrackFrontNonlocalStressVpp]
-    type = CrackFrontNonlocalStress
-    material_name = stress
-    crack_front_definition = crackFrontDefinition
-    box_length = 0.05
-    box_height = 0.1
-    execute_on = NONLINEAR
-  []
-  [CrackFrontNonlocalScalarVpp]
-    type = CrackFrontNonlocalScalar
-    material_name = k_crit_mat
-    crack_front_definition = crackFrontDefinition
-    box_length = 0.05
-    box_height = 0.1
-    execute_on = NONLINEAR
-  []
-[]
-[UserObjects]
-  [cut_mesh2]
-    type = MeshCut2DFractureUserObject
-    mesh_file = make_edge_crack_in.e
-    growth_increment = 0.05
-    ki_vectorpostprocessor = "II_KI_1"
-    kii_vectorpostprocessor = "II_KII_1"
-    k_critical = 100
-    k_critical_vectorpostprocessor=CrackFrontNonlocalScalarVpp
-    k_critical_vector_name = "crack_tip_k_crit_mat"
-    # stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
-    # stress_vector_name = "crack_tip_stress"
-    # stress_threshold = 120
-  []
-[]
+# MeshCut2DFractureUserObject are included in seperate input files
+# [UserObjects]
+#   [cut_mesh2]
+#     type = MeshCut2DFractureUserObject
+#     mesh_file = make_edge_crack_in.e
+#     growth_increment = 0.05
+#     ki_vectorpostprocessor = "II_KI_1"
+#     kii_vectorpostprocessor = "II_KII_1"
+#     k_critical = 100
+#   []
+# []
 
 [Physics/SolidMechanics/QuasiStatic]
   [all]
@@ -127,12 +105,6 @@
   [stress]
     type = ComputeFiniteStrainElasticStress
   []
-  [k_critical]
-    type = ParsedMaterial
-    property_name = k_crit_mat
-    extra_symbols = 'x'
-    expression = 'if(x > -0.4,100,90)'
-  []
 []
 
 [Executioner]
@@ -141,6 +113,7 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = ' lu       superlu_dist                 NONZERO               1e-20'
   line_search = 'none'
+  nl_abs_tol = 1e-7
   [Predictor]
     type = SimplePredictor
     scale = 1.0
@@ -153,7 +126,6 @@
 []
 
 [Outputs]
-  exodus = true
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh2
