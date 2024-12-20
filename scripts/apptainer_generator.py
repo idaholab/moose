@@ -599,11 +599,11 @@ class ApptainerGenerator:
             jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
             jinja_data['BINARY_NAME'] = app_name
 
-        # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
+        # Set MOOSE_[TOOLS, TEST_TOOLS, WASP]_VERSION
         if self.args.library == 'moose-dev':
             # test-tools is deprecated, but leave it here, so this scripts continues
             # to function properly against older hashes.
-            for package in ['tools']:
+            for package in ['tools', 'wasp']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
                 if os.path.exists(meta_yaml):
                     with open(meta_yaml, 'r') as meta_contents:
