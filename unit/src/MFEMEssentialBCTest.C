@@ -1,4 +1,4 @@
-#include "mfem-common.hpp"
+#include "mfem/miniapps/common/mfem-common.hpp"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarDirichletBC.h"
 #include "MFEMScalarFunctionDirichletBC.h"

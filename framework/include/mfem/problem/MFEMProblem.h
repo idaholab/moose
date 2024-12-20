@@ -1,6 +1,6 @@
 #pragma once
 #include <map>
-#include "../common/pfem_extras.hpp"
+#include "mfem/miniapps/common/pfem_extras.hpp"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
@@ -22,12 +22,12 @@ public:
   static InputParameters validParams();
 
   MFEMProblem(const InputParameters & params);
-  virtual ~MFEMProblem(){};
+  virtual ~MFEMProblem() {}
 
   virtual void initialSetup() override;
-  virtual void externalSolve() override{};
-  virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
-  virtual void syncSolutions(Direction direction) override{};
+  virtual void externalSolve() override {}
+  virtual bool nlConverged(const unsigned int) override { return true; }
+  virtual void syncSolutions(Direction) override {}
 
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
