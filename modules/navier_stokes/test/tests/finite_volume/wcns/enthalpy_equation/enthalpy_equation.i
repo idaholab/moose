@@ -205,12 +205,6 @@ advected_interp_method = 'upwind'
     variable = pressure
     functor = ${p_ref}
   []
-  # [outlet_T]
-  #   type = LinearFVAdvectionDiffusionOutflowBC
-  #   variable = T
-  #   use_two_term_expansion = false
-  #   boundary = 'right'
-  # []
   [outlet_h]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = h
@@ -233,7 +227,6 @@ advected_interp_method = 'upwind'
 
 [FluidProperties]
   [salt]
-    # type = FlibeFluidProperties
     type = LeadFluidProperties
   []
 []

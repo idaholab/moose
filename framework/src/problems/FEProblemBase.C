@@ -4144,11 +4144,10 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto sys_num =
-      parameters.isParamValid(var_param_name) &&
-              &getSystem(parameters.varName(var_param_name, object_name))
-          ? getSystem(parameters.varName(var_param_name, object_name)).number()
-          : (unsigned int)0;
+  const auto sys_num = parameters.isParamValid(var_param_name) &&
+                               &getSystem(parameters.varName(var_param_name, object_name))
+                           ? getSystem(parameters.varName(var_param_name, object_name)).number()
+                           : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))

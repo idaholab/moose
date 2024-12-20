@@ -1,6 +1,6 @@
 # LinearFVEnthalpyFunctorMaterial
 
-This Functor Material class is needed when the user wants to solve for the enthalpy conservation equation for the incompressible/weakly-compressible finite-volume implementation of the Navier-Stokes equations in the LinearFV solver.
+This Functor Material class is needed when the user wants to solve for the enthalpy conservation for the incompressible/weakly-compressible linear finite-volume implementation of the Navier-Stokes equations.
 
 This material class defines the functors to convert from specific enthalpy and pressure to temperature ('T_from_p_h') and to convert from temperature and pressure to specific enthalpy ('h_from_p_T').
 

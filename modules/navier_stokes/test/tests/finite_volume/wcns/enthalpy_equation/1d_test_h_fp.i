@@ -235,7 +235,7 @@ advected_interp_method = 'upwind'
     type = ElementalVariableValue
     variable = T
     elementid = ${fparse nx-1}
-  [../]
+  []
 []
 
 [Executioner]

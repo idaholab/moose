@@ -10,7 +10,7 @@
       detail = 'outlet temperature compared with analytical solution'
       abs_zero = 1e-6
     []
-    [Analytical_Outlet_Temperature_fp]
+    [analytical_outlet_temperature_fp]
       type = CSVDiff
       input = 1d_test_h_fp.i
       csvdiff = 1d_test_h_fp_out.csv
