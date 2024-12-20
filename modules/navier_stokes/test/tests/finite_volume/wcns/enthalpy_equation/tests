@@ -1,0 +1,21 @@
+[Tests]
+  design = 'LinearFVEnthalpyFunctorMaterial.md'
+  issues = '#29531'
+  [enthalpy_equation]
+    requirement = 'The system shall be able to solve a one and two-dimensional enthalpy conservation equation using fluidProperties and user-defined properties'
+    [Analytical_Outlet_Temperature_userdefined]
+      type = CSVDiff
+      input = 1d_test_h.i
+      csvdiff = 1d_test_h_out.csv
+      detail = 'outlet temperature compared with analytical solution'
+      abs_zero = 1e-6
+    []
+    [Analytical_Outlet_Temperature_fp]
+      type = CSVDiff
+      input = 1d_test_h_fp.i
+      csvdiff = 1d_test_h_fp_out.csv
+      detail = 'outlet temperature compared with simulation solution'
+      abs_zero = 1e-4
+    []
+  []
+[]
