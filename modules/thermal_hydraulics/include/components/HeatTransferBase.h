@@ -93,8 +93,9 @@ protected:
   /// flag that the heated perimeter was specified via an input parameter
   const bool _P_hf_provided;
 
-  /// Used closures
+  /// Used closures object(s)
   std::shared_ptr<ClosuresBase> _closures;
+  std::vector<std::shared_ptr<ClosuresBase>> _closures_objects;
 
   /// heated perimeter name
   VariableName _P_hf_name;
