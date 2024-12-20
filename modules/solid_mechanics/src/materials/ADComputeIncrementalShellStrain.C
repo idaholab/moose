@@ -411,7 +411,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
 
       // calculate the local transformation matrix to be used to map the global stresses to the
       // local element coordinate
-      ADRankTwoTensor local_rotation_mat(_e1, _e2, _e3);
+      const auto local_rotation_mat = ADRankTwoTensor::initializeFromRows(_e1, _e2, _e3);
 
       for (const auto ii : make_range(Moose::dim))
         for (const auto jj : make_range(Moose::dim))
