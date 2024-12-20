@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel1Phase.h"
+#include "FlowChannelBase.h"
 #include "THMNames.h"
 
 const std::string FlowModelSinglePhase::DENSITY = THM::DENSITY;
@@ -40,10 +40,7 @@ const std::string FlowModelSinglePhase::REYNOLDS_NUMBER = THM::REYNOLDS_NUMBER;
 InputParameters
 FlowModelSinglePhase::validParams()
 {
-  InputParameters params = FlowModel::validParams();
-  params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
-  params.addRequiredParam<MooseEnum>("rdg_slope_reconstruction",
-                                     "Slope reconstruction type for rDG");
+  InputParameters params = FlowModel1PhaseBase::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "scaling_factor_1phase",
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
@@ -53,163 +50,33 @@ FlowModelSinglePhase::validParams()
 registerMooseObject("ThermalHydraulicsApp", FlowModelSinglePhase);
 
 FlowModelSinglePhase::FlowModelSinglePhase(const InputParameters & params)
-  : FlowModel(params),
-    _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
-    _numerical_flux_name(params.get<UserObjectName>("numerical_flux")),
+  : FlowModel1PhaseBase(params),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase"))
 {
 }
 
-void
-FlowModelSinglePhase::init()
+Real
+FlowModelSinglePhase::getScalingFactorRhoA() const
 {
+  return _scaling_factors[0];
 }
 
-void
-FlowModelSinglePhase::addVariables()
+Real
+FlowModelSinglePhase::getScalingFactorRhoUA() const
 {
-  FlowModel::addCommonVariables();
+  return _scaling_factors[1];
+}
 
-  const std::vector<SubdomainName> & subdomains = _flow_channel.getSubdomainNames();
-
-  // Nonlinear variables
-  _sim.addSimVariable(true, RHOA, _fe_type, subdomains, _scaling_factors[0]);
-  _sim.addSimVariable(true, RHOUA, _fe_type, subdomains, _scaling_factors[1]);
-  _sim.addSimVariable(true, RHOEA, _fe_type, subdomains, _scaling_factors[2]);
-
-  _solution_vars = solutionVariableNames();
-  _derivative_vars = solutionVariableNames();
-
-  // Auxiliary
-  _sim.addSimVariable(false, DENSITY, _fe_type, subdomains);
-  if (_output_vector_velocity)
-  {
-    _sim.addSimVariable(false, VELOCITY_X, _fe_type, subdomains);
-    _sim.addSimVariable(false, VELOCITY_Y, _fe_type, subdomains);
-    _sim.addSimVariable(false, VELOCITY_Z, _fe_type, subdomains);
-  }
-  else
-    _sim.addSimVariable(false, VELOCITY, _fe_type, subdomains);
-  _sim.addSimVariable(false, PRESSURE, _fe_type, subdomains);
-  _sim.addSimVariable(false, SPECIFIC_VOLUME, _fe_type, subdomains);
-  _sim.addSimVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomains);
-  _sim.addSimVariable(false, TEMPERATURE, _fe_type, subdomains);
-  _sim.addSimVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomains);
+Real
+FlowModelSinglePhase::getScalingFactorRhoEA() const
+{
+  return _scaling_factors[2];
 }
 
 std::vector<VariableName>
 FlowModelSinglePhase::solutionVariableNames() const
 {
   return {RHOA, RHOUA, RHOEA};
-}
-
-void
-FlowModelSinglePhase::addInitialConditions()
-{
-  FlowModel::addCommonInitialConditions();
-
-  const auto & flow_channel_1phase = dynamic_cast<const FlowChannel1Phase &>(_flow_channel);
-
-  bool ic_params_valid = true;
-  for (const auto & ic_param : flow_channel_1phase.ICParameters())
-    if (!_flow_channel.isParamValid(ic_param))
-      ic_params_valid = false;
-
-  if (ic_params_valid)
-  {
-    const std::vector<SubdomainName> & block = _flow_channel.getSubdomainNames();
-
-    const FunctionName & p_fn = getVariableFn("initial_p");
-    _sim.addFunctionIC(PRESSURE, p_fn, block);
-
-    const FunctionName & T_fn = getVariableFn("initial_T");
-    _sim.addFunctionIC(TEMPERATURE, T_fn, block);
-
-    const FunctionName & vel_fn = getVariableFn("initial_vel");
-    if (_output_vector_velocity)
-    {
-      std::vector<VariableName> var_name = {VELOCITY_X, VELOCITY_Y, VELOCITY_Z};
-      for (const auto i : make_range(Moose::dim))
-      {
-        std::string class_name = "VectorVelocityIC";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<VariableName>("variable") = var_name[i];
-        params.set<FunctionName>("vel_fn") = vel_fn;
-        params.set<std::vector<SubdomainName>>("block") = block;
-        params.set<unsigned int>("component") = i;
-        _sim.addSimInitialCondition(class_name, genName(_comp_name, "vel_ic", i), params);
-      }
-    }
-    else
-      _sim.addFunctionIC(VELOCITY, vel_fn, block);
-
-    addDensityIC();
-
-    {
-      std::string class_name = "VariableProductIC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<VariableName>("variable") = RHOA;
-      params.set<std::vector<SubdomainName>>("block") = block;
-      params.set<std::vector<VariableName>>("values") = {DENSITY, FlowModel::AREA};
-      _sim.addSimInitialCondition(class_name, genName(_comp_name, "rhoA_ic"), params);
-    }
-
-    {
-      std::string class_name = "VariableFunctionProductIC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<VariableName>("variable") = RHOUA;
-      params.set<std::vector<SubdomainName>>("block") = block;
-      params.set<std::vector<VariableName>>("var") = {RHOA};
-      params.set<FunctionName>("fn") = vel_fn;
-      _sim.addSimInitialCondition(class_name, genName(_comp_name, "rhouA_ic"), params);
-    }
-
-    addRhoEAIC();
-
-    {
-      std::string class_name = "SpecificVolumeIC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<VariableName>("variable") = SPECIFIC_VOLUME;
-      params.set<std::vector<SubdomainName>>("block") = block;
-      params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-      params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      _sim.addSimInitialCondition(class_name, genName(_comp_name, "v_ic"), params);
-    }
-    {
-      std::string class_name = "SpecificInternalEnergyIC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<VariableName>("variable") = SPECIFIC_INTERNAL_ENERGY;
-      params.set<std::vector<SubdomainName>>("block") = block;
-      params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-      params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-      params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-      _sim.addSimInitialCondition(class_name, genName(_comp_name, "u_ic"), params);
-    }
-    {
-      std::string class_name = "SpecificTotalEnthalpyIC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<VariableName>("variable") = SPECIFIC_TOTAL_ENTHALPY;
-      params.set<std::vector<SubdomainName>>("block") = block;
-      params.set<std::vector<VariableName>>("p") = {PRESSURE};
-      params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-      params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-      params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      _sim.addSimInitialCondition(class_name, genName(_comp_name, "H_ic"), params);
-    }
-  }
-}
-
-void
-FlowModelSinglePhase::addDensityIC()
-{
-  const std::string class_name = "RhoFromPressureTemperatureIC";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<VariableName>("variable") = DENSITY;
-  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-  params.set<std::vector<VariableName>>("p") = {PRESSURE};
-  params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
-  params.set<UserObjectName>("fp") = _fp_name;
-  _sim.addSimInitialCondition(class_name, genName(_comp_name, "rho_ic"), params);
 }
 
 void
@@ -228,219 +95,16 @@ FlowModelSinglePhase::addRhoEAIC()
 }
 
 void
-FlowModelSinglePhase::addMooseObjects()
+FlowModelSinglePhase::addDensityIC()
 {
-  FlowModel::addCommonMooseObjects();
-
-  addFluidPropertiesMaterials();
-  addNumericalFluxUserObject();
-  addRDGMooseObjects();
-
-  ////////////////////////////////////////////////////////
-  // Adding kernels
-  ////////////////////////////////////////////////////////
-
-  // Density equation (transient term + advection term)
-  if (_flow_channel.problemIsTransient())
-  {
-    std::string class_name = "ADTimeDerivative";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    if (_lump_mass_matrix)
-      params.set<bool>("lumping") = true;
-    _sim.addKernel(class_name, genName(_comp_name, "rho_ie"), params);
-  }
-
-  // Momentum equation, for 1-D flow channel, x-momentum equation only
-  // (transient term + remaining terms[advection, pressure, body force, etc])
-  if (_flow_channel.problemIsTransient())
-  {
-    std::string class_name = "ADTimeDerivative";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    if (_lump_mass_matrix)
-      params.set<bool>("lumping") = true;
-    _sim.addKernel(class_name, genName(_comp_name, "rhou_ie"), params);
-  }
-  {
-    std::string class_name = "ADOneD3EqnMomentumAreaGradient";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {AREA_LINEAR};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("p") = PRESSURE;
-    _sim.addKernel(class_name, genName(_comp_name, "rhou_ps"), params);
-  }
-  {
-    std::string class_name = "ADOneD3EqnMomentumFriction";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    params.set<MaterialPropertyName>("D_h") = {HYDRAULIC_DIAMETER};
-    params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
-    _sim.addKernel(class_name, genName(_comp_name, "rhou_friction"), params);
-  }
-  {
-    std::string class_name = "ADOneD3EqnMomentumGravity";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
-    _sim.addKernel(class_name, genName(_comp_name, "rhou_gravity"), params);
-  }
-
-  // Total energy equation
-  // (transient term + remaining terms[advection, wall heating, work from body force, etc])
-  if (_flow_channel.problemIsTransient())
-  {
-    std::string class_name = "ADTimeDerivative";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOEA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    if (_lump_mass_matrix)
-      params.set<bool>("lumping") = true;
-    _sim.addKernel(class_name, genName(_comp_name, "rhoE_ie"), params);
-  }
-  {
-    std::string class_name = "ADOneD3EqnEnergyGravity";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOEA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
-    _sim.addKernel(class_name, genName(_comp_name, "rhoE_gravity"), params);
-  }
-
-  //////////////////////////////////////
-  // Adding auxiliary kernels
-  //////////////////////////////////////
-
-  if (_output_vector_velocity)
-  {
-    // Vector-valued velocity
-    {
-      ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
-      execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-
-      std::vector<AuxVariableName> var_names = {VELOCITY_X, VELOCITY_Y, VELOCITY_Z};
-      for (const auto i : make_range(Moose::dim))
-      {
-        std::string class_name = "ADVectorVelocityComponentAux";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<AuxVariableName>("variable") = var_names[i];
-        params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-        params.set<std::vector<VariableName>>("arhoA") = {RHOA};
-        params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
-        params.set<MaterialPropertyName>("direction") = DIRECTION;
-        params.set<unsigned int>("component") = i;
-        params.set<ExecFlagEnum>("execute_on") = execute_on;
-        _sim.addAuxKernel(class_name, genName(_comp_name, i, "vel_vec"), params);
-      }
-    }
-  }
-  else
-  {
-    ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
-    execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-
-    // Velocity auxiliary kernel
-    {
-      std::string class_name = "QuotientAux";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<AuxVariableName>("variable") = VELOCITY;
-      params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-      params.set<std::vector<VariableName>>("numerator") = {RHOUA};
-      params.set<std::vector<VariableName>>("denominator") = {RHOA};
-      params.set<ExecFlagEnum>("execute_on") = execute_on;
-      _sim.addAuxKernel(class_name, genName(_comp_name, "vel"), params);
-    }
-  }
-
-  ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  ts_execute_on = EXEC_TIMESTEP_BEGIN;
-
-  {
-    // Computes rho = (rho*A)/A
-    InputParameters params = _factory.getValidParams("QuotientAux");
-    params.set<AuxVariableName>("variable") = DENSITY;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("numerator") = {RHOA};
-    params.set<std::vector<VariableName>>("denominator") = {AREA};
-    _sim.addAuxKernel("QuotientAux", genName(_comp_name, "rho_auxkernel"), params);
-  }
-
-  {
-    std::string class_name = "THMSpecificVolumeAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = SPECIFIC_VOLUME;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    _sim.addAuxKernel(class_name, genName(_comp_name, "v_aux"), params);
-  }
-  {
-    std::string class_name = "THMSpecificInternalEnergyAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = SPECIFIC_INTERNAL_ENERGY;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    _sim.addAuxKernel(class_name, genName(_comp_name, "e_aux"), params);
-  }
-
-  addPressureAux();
-  addTemperatureAux();
-
-  {
-    std::string class_name = "SpecificTotalEnthalpyAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = SPECIFIC_TOTAL_ENTHALPY;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    params.set<std::vector<VariableName>>("p") = {PRESSURE};
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    _sim.addAuxKernel(class_name, genName(_comp_name, "H_auxkernel"), params);
-  }
-}
-
-void
-FlowModelSinglePhase::addFluidPropertiesMaterials()
-{
-  {
-    std::string class_name = "ADFluidProperties3EqnMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<UserObjectName>("fp") = _fp_name;
-    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    _sim.addMaterial(class_name, genName(_comp_name, "fp_mat"), params);
-  }
-  {
-    const std::string class_name = "ADDynamicViscosityMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<UserObjectName>("fp_1phase") = _fp_name;
-    params.set<MaterialPropertyName>("mu") = {DYNAMIC_VISCOSITY};
-    params.set<MaterialPropertyName>("v") = {SPECIFIC_VOLUME};
-    params.set<MaterialPropertyName>("e") = {SPECIFIC_INTERNAL_ENERGY};
-    _sim.addMaterial(class_name, genName(_comp_name, "mu_mat"), params);
-  }
+  const std::string class_name = "RhoFromPressureTemperatureIC";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<VariableName>("variable") = DENSITY;
+  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  params.set<std::vector<VariableName>>("p") = {PRESSURE};
+  params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
+  params.set<UserObjectName>("fp") = _fp_name;
+  _sim.addSimInitialCondition(class_name, genName(_comp_name, "rho_ic"), params);
 }
 
 void
@@ -470,6 +134,32 @@ FlowModelSinglePhase::addTemperatureAux()
 }
 
 void
+FlowModelSinglePhase::addFluidPropertiesMaterials()
+{
+  {
+    const std::string class_name = "ADFluidProperties3EqnMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+    params.set<UserObjectName>("fp") = _fp_name;
+    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    _sim.addMaterial(class_name, genName(_comp_name, "fp_mat"), params);
+  }
+  {
+    const std::string class_name = "ADDynamicViscosityMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+    params.set<UserObjectName>("fp_1phase") = _fp_name;
+    params.set<MaterialPropertyName>("mu") = {DYNAMIC_VISCOSITY};
+    params.set<MaterialPropertyName>("v") = {SPECIFIC_VOLUME};
+    params.set<MaterialPropertyName>("e") = {SPECIFIC_INTERNAL_ENERGY};
+    _sim.addMaterial(class_name, genName(_comp_name, "mu_mat"), params);
+  }
+}
+
+void
 FlowModelSinglePhase::addNumericalFluxUserObject()
 {
   const std::string class_name = "ADNumericalFlux3EqnHLLC";
@@ -481,26 +171,21 @@ FlowModelSinglePhase::addNumericalFluxUserObject()
 }
 
 void
-FlowModelSinglePhase::addRDGMooseObjects()
+FlowModelSinglePhase::addSlopeReconstructionMaterial()
 {
-  // slope reconstruction material
-  {
-    const std::string class_name = "ADRDG3EqnMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
-    params.set<std::vector<VariableName>>("A_elem") = {AREA};
-    params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
-    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<UserObjectName>("fluid_properties") = _fp_name;
-    params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-    _sim.addMaterial(class_name, genName(_comp_name, "rdg_3egn_mat"), params);
-  }
-
-  addRDGAdvectionDGKernels();
+  const std::string class_name = "ADRDG3EqnMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
+  params.set<std::vector<VariableName>>("A_elem") = {AREA};
+  params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
+  params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+  params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+  params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+  params.set<MaterialPropertyName>("direction") = DIRECTION;
+  params.set<UserObjectName>("fluid_properties") = _fp_name;
+  params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
+  _sim.addMaterial(class_name, genName(_comp_name, "rdg_3egn_mat"), params);
 }
 
 void
