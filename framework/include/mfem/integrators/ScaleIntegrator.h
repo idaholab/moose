@@ -1,6 +1,6 @@
 #pragma once
 #include "MFEMGeneralUserObject.h"
-#include "../common/pfem_extras.hpp"
+#include "mfem/miniapps/common/pfem_extras.hpp"
 
 namespace platypus
 {
