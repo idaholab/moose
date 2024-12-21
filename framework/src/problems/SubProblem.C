@@ -796,6 +796,21 @@ SubProblem::getAxisymmetricRadialCoord() const
   return mesh().getAxisymmetricRadialCoord();
 }
 
+bool
+SubProblem::hasLinearVariable(const std::string & var_name) const
+{
+  for (const auto i : make_range(numLinearSystems()))
+    if (systemBaseLinear(i).hasVariable(var_name))
+      return true;
+  return false;
+}
+
+bool
+SubProblem::hasAuxiliaryVariable(const std::string & var_name) const
+{
+  return systemBaseAuxiliary().hasVariable(var_name);
+}
+
 template <typename T>
 MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,
