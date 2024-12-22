@@ -49,18 +49,33 @@
     [../]
   [../]
   [./symmetric_ranktwotensor]
-    requirement = 'The system shall shall be able to compute a SymmetricRankTwoTensor material object'
+    requirement = 'The system shall be able to compute a SymmetricRankTwoTensor material object'
     [./constant]
       type = 'CSVDiff'
       input = 'generic_constant_symmetric_rank_two_tensor.i'
       csvdiff = 'generic_constant_symmetric_rank_two_tensor_out.csv'
       detail = 'with constant values.'
     [../]
-      [./ad_constant]
-        type = 'CSVDiff'
-        input = 'ad_generic_constant_symmetric_rank_two_tensor.i'
-        csvdiff = 'ad_generic_constant_symmetric_rank_two_tensor_out.csv'
-        detail = 'with constant values using automatic differentiation.'
-      [../]
+    [./ad_constant]
+      type = 'CSVDiff'
+      input = 'ad_generic_constant_symmetric_rank_two_tensor.i'
+      csvdiff = 'ad_generic_constant_symmetric_rank_two_tensor_out.csv'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
+  [../]
+  [./symmetric_realvectorvalue]
+    requirement = 'The system shall be able to compute a RealVectorValue material property'
+    [./constant]
+      type = 'Exodiff'
+      input = 'generic_constant_real_vector_value.i'
+      exodiff = 'generic_constant_real_vector_value_out.e'
+      detail = 'with constant values.'
+    [../]
+    [./ad_constant]
+      type = 'Exodiff'
+      input = 'ad_generic_constant_real_vector_value.i'
+      exodiff = 'ad_generic_constant_real_vector_value_out.e'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
   [../]
 []
