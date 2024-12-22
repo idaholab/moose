@@ -27,13 +27,6 @@ PressureAction::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
-  params.addParam<std::vector<AuxVariableName>>(
-      "save_in_disp_x", {}, "The save_in variables for x displacement");
-  params.addParam<std::vector<AuxVariableName>>(
-      "save_in_disp_y", {}, "The save_in variables for y displacement");
-  params.addParam<std::vector<AuxVariableName>>(
-      "save_in_disp_z", {}, "The save_in variables for z displacement");
-
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
   params.addParam<Real>("hht_alpha",
@@ -46,12 +39,31 @@ PressureAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
+
+  // To make controlling the Pressure BCs easier
+  params.addParam<bool>(
+      "enable",
+      true,
+      "Set the enabled status of the BCs created by the Pressure action (defaults to true).");
+  params.declareControllable("enable");
+
+  // Residual output
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in_disp_x", {}, "The save_in variables for x displacement");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in_disp_y", {}, "The save_in variables for y displacement");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in_disp_z", {}, "The save_in variables for z displacement");
   params.addParam<std::vector<TagName>>("extra_vector_tags",
                                         "The extra tags for the vectors this Kernel should fill");
   params.addParam<std::vector<TagName>>(
       "absolute_value_vector_tags",
       "The tags for the vectors this residual object should fill with the "
       "absolute value of the residual contribution");
+
+  params.addParamNamesToGroup(
+      "save_in_disp_x save_in_disp_y save_in_disp_z extra_vector_tags absolute_value_vector_tags",
+      "Residual output");
   return params;
 }
 
@@ -89,6 +101,14 @@ PressureAction::act()
     params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
     params.set<Real>("alpha") =
         isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha");
+
+    // Forward control parameters
+    if (isParamValid("control_tags"))
+      params.set<std::vector<std::string>>("control_tags") =
+          getParam<std::vector<std::string>>("control_tags");
+    // Setting a reference like this in three BCs is dangerous (the three BCs can no longer
+    // be controlled independently). So we only do this if "enable" is set explicitly
+    params.set<bool>("enable") = getParam<bool>("enable");
 
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
