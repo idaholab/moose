@@ -40,7 +40,7 @@ If you specify `positions` then the number of `positions` must match the number 
 
 Will generate a mesh that looks like:
 
-!media media/meshgenerators/combiner_multi_translate.png style=width:75%;
+!media framework/meshgenerators/combiner_multi_translate.png style=width:75%;
 
 Alternatively, the same displacement vectors can be supplied in a file with the `positions_file` option. The above mesh can equivalently be generated with the following.
 
