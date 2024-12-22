@@ -141,6 +141,7 @@ protected:
   std::map<MaterialPropertyName, std::vector<OutputName>> _export_output_targets;
 
 private:
+#ifdef NEML2_ENABLED
   /// Get parameter lists for mapping between MOOSE and NEML2 quantities
   template <typename EnumType, typename T1, typename T2>
   std::tuple<std::vector<EnumType>, std::vector<T1>, std::vector<T2>>
@@ -162,6 +163,7 @@ private:
 
   /// Print a summary of the NEML2 model
   void printSummary(const neml2::Model &) const;
+#endif
 
   /// Get the maximum length of all MOOSE names (for printing purposes)
   std::size_t getLongestMOOSEName() const;
