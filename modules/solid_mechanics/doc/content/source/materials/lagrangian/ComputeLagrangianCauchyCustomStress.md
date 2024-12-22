@@ -1,9 +1,9 @@
-# ComputeLagrangianCauchyCustomSymmetricStress
+# ComputeLagrangianCauchyCustomStress
 
 Wrapper for constitutive model with a user-defined Cauchy stress and Cauchy stress Jacobian, useful for coupling with 3rd party libraries which define custom stress-strain relations.
 
-!syntax description /Materials/ComputeLagrangianCauchyCustomSymmetricStress
+!syntax description /Materials/ComputeLagrangianCauchyCustomStress
 
-!syntax parameters /Materials/ComputeLagrangianCauchyCustomSymmetricStress
+!syntax parameters /Materials/ComputeLagrangianCauchyCustomStress
 
-!syntax inputs /Materials/ComputeLagrangianCauchyCustomSymmetricStress
+!syntax inputs /Materials/ComputeLagrangianCauchyCustomStress
