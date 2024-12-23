@@ -53,7 +53,7 @@
     box_height = 0.05
   []
   [CrackFrontNonlocalKcrit]
-    type = CrackFrontNonlocalScalar
+    type = CrackFrontNonlocalScalarMaterial
     material_name = kcrit
     base_name = scalar
     crack_front_definition = crack

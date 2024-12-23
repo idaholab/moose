@@ -1,5 +1,5 @@
 [Tests]
-  design = 'CrackFrontNonlocalStress.md CrackFrontNonlocalScalar.md'
+  design = 'CrackFrontNonlocalStress.md CrackFrontNonlocalScalarMaterial.md'
   issues = '#27659 #29575'
   [crack_front_materials]
     type = 'CSVDiff'

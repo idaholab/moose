@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrackFrontNonlocalScalar.h"
+#include "CrackFrontNonlocalScalarMaterial.h"
 
-registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalScalar);
+registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalScalarMaterial);
 
 InputParameters
-CrackFrontNonlocalScalar::validParams()
+CrackFrontNonlocalScalarMaterial::validParams()
 {
   InputParameters params = CrackFrontNonlocalMaterialBase::validParams();
   params.addClassDescription("Computes the average material at points provided by the "
@@ -20,14 +20,14 @@ CrackFrontNonlocalScalar::validParams()
   return params;
 }
 
-CrackFrontNonlocalScalar::CrackFrontNonlocalScalar(const InputParameters & parameters)
+CrackFrontNonlocalScalarMaterial::CrackFrontNonlocalScalarMaterial(const InputParameters & parameters)
   : CrackFrontNonlocalMaterialBase(parameters),
     _scalar(getMaterialProperty<Real>(_base_name + getParam<std::string>("material_name")))
 {
 }
 
 Real
-CrackFrontNonlocalScalar::getQPCrackFrontScalar(const unsigned int qp,
+CrackFrontNonlocalScalarMaterial::getQPCrackFrontScalar(const unsigned int qp,
                                                 const Point /*crack_face_normal*/) const
 {
   return _scalar[qp];

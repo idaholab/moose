@@ -15,12 +15,12 @@
  * Computes the average material at points provided by the crack_front_definition
  * vectorpostprocessor.
  */
-class CrackFrontNonlocalScalar : public CrackFrontNonlocalMaterialBase
+class CrackFrontNonlocalScalarMaterial : public CrackFrontNonlocalMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  CrackFrontNonlocalScalar(const InputParameters & parameters);
+  CrackFrontNonlocalScalarMaterial(const InputParameters & parameters);
 
 protected:
   /// The scalar material property
