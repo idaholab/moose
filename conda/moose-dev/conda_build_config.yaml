@@ -10,7 +10,7 @@ moose_wasp:
   - moose-wasp 2024.11.13
 
 moose_tools:
-  - moose-tools 2024.11.13
+  - moose-tools 2024.12.20
 
 moose_peacock:
   - moose-peacock 2024.11.13
