@@ -25,6 +25,7 @@ requirements:
     - pandas
     - pyqt
     - matplotlib !=3.9.0
+    - libgl                           # [linux]
     - vtk
   run_constrained:
     # Python max constraints
