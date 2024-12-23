@@ -47,6 +47,8 @@ MeshGenerator::validParams()
   params.addPrivateParam<bool>("_has_generate_data", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
   params.addPrivateParam<bool>(data_only_param, false);
+  // Controls are not created early enough
+  params.suppressParameter<std::vector<std::string>>("control_tags");
 
   return params;
 }
