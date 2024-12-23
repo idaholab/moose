@@ -23,8 +23,6 @@
 #endif
 
 #include "InputParameters.h"
-#include "MooseArray.h"
-#include <type_traits>
 
 class MooseObject;
 class Action;
@@ -85,11 +83,15 @@ struct Layout<SymmetricRankFourTensor>
 };
 
 /**
- * @brief Map from MooseArray to neml2::Tensor without copying the data
+ * @brief Map from std::vector<T> to neml2::Tensor without copying the data
  *
  * This method is used in gatherers which gather data from MOOSE as input variables to the NEML2
- * material model. So in theory, we only need to overload MOOSE types that can potentially be used
- * as input variables.
+ * material model. So in theory, we only need to provide Layout specializations for MOOSE types that
+ * can potentially be used as NEML2 input variables.
+ *
+ * For this method to work, the underlying data in \p data must be reinterpretable as Real
+ * (torch::kFloat64). The data class T must also be aligned and follow the striding implied by
+ * Layout<T>::shape. The data class T must also have no padding or overhead.
  */
 template <typename T>
 neml2::Tensor
