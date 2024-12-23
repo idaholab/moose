@@ -131,13 +131,12 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
                _original_and_current_front_node_ids.size());
 
   if (_k_critical_vpp && ((_k_critical_vpp->size() != _original_and_current_front_node_ids.size())))
-    mooseError(
-        "k_critical_vectorpostprocessor must have the same number of crack front points as "
-        "CrackFrontDefinition.",
-        "\n  k_critical_vectorpostprocessor size = ",
-        _k_critical_vpp->size(),
-        "\n  cracktips in MeshCut2DFractureUserObject = ",
-        _original_and_current_front_node_ids.size());
+    mooseError("k_critical_vectorpostprocessor must have the same number of crack front points as "
+               "CrackFrontDefinition.",
+               "\n  k_critical_vectorpostprocessor size = ",
+               _k_critical_vpp->size(),
+               "\n  cracktips in MeshCut2DFractureUserObject = ",
+               _original_and_current_front_node_ids.size());
 
   _active_front_node_growth_vectors.clear();
   for (unsigned int i = 0; i < _original_and_current_front_node_ids.size(); ++i)

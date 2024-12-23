@@ -1,7 +1,7 @@
 [VectorPostprocessors]
   [CrackFrontNonlocalScalarVpp]
     type = CrackFrontNonlocalScalarMaterial
-    material_name = k_crit_mat
+    property_name = k_crit_mat
     crack_front_definition = crackFrontDefinition
     box_length = 0.05
     box_height = 0.1

@@ -23,7 +23,8 @@ class CrackFrontNonlocalMaterialBase : public ElementVectorPostprocessor
 public:
   static InputParameters validParams();
 
-  CrackFrontNonlocalMaterialBase(const InputParameters & parameters);
+  CrackFrontNonlocalMaterialBase(const InputParameters & parameters,
+                                 const std::string & property_name);
 
   virtual void initialSetup() override;
   virtual void initialize() override;
@@ -32,6 +33,8 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+  /// Material property name from derived class
+  const std::string _property_name;
   /** dimensions of the box in front of the crack tip that the stress is averaged over
    * The box is centered in front of the crack tip
    * _box_length distance box extends in front of the crack tip

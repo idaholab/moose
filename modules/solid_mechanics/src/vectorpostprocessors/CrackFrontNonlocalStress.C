@@ -17,12 +17,14 @@ CrackFrontNonlocalStress::validParams()
 {
   InputParameters params = CrackFrontNonlocalMaterialBase::validParams();
   params.addClassDescription("Computes the average stress normal to the crack face.");
+  params.addRequiredParam<MaterialPropertyName>(
+      "stress_name", "Get name of stress tensor to compute at crack front");
   return params;
 }
 
 CrackFrontNonlocalStress::CrackFrontNonlocalStress(const InputParameters & parameters)
-  : CrackFrontNonlocalMaterialBase(parameters),
-    _stress(getMaterialProperty<RankTwoTensor>(_base_name + getParam<std::string>("material_name")))
+  : CrackFrontNonlocalMaterialBase(parameters, parameters.get<MaterialPropertyName>("stress_name")),
+    _stress(getMaterialProperty<RankTwoTensor>(_base_name + _property_name))
 {
 }
 

@@ -45,7 +45,7 @@
 [VectorPostprocessors]
   [CrackFrontNonlocalStress]
     type = CrackFrontNonlocalStress
-    material_name = stress
+    stress_name = stress
     base_name = generic
     crack_front_definition = crack
     box_length = 0.1
@@ -54,7 +54,7 @@
   []
   [CrackFrontNonlocalKcrit]
     type = CrackFrontNonlocalScalarMaterial
-    material_name = kcrit
+    property_name = kcrit
     base_name = scalar
     crack_front_definition = crack
     box_length = 0.1

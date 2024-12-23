@@ -19,8 +19,6 @@ CrackFrontNonlocalMaterialBase::validParams()
   params.addRequiredParam<Real>("box_length", "Distance in front of crack front.");
   params.addRequiredParam<Real>("box_height", "Distance normal to front of crack front.");
   params.addParam<Real>("box_width", "Distance tangent to front of crack front.");
-  params.addRequiredParam<std::string>("material_name",
-                                       "Get name of material property to compute at crack front");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
@@ -31,8 +29,10 @@ CrackFrontNonlocalMaterialBase::validParams()
   return params;
 }
 
-CrackFrontNonlocalMaterialBase::CrackFrontNonlocalMaterialBase(const InputParameters & parameters)
+CrackFrontNonlocalMaterialBase::CrackFrontNonlocalMaterialBase(const InputParameters & parameters,
+                                                               const std::string & property_name)
   : ElementVectorPostprocessor(parameters),
+    _property_name(property_name),
     _box_length(getParam<Real>("box_length")),
     _box_width(isParamValid("box_width") ? getParam<Real>("box_width") : 1),
     _box_height(getParam<Real>("box_height")),
@@ -41,8 +41,8 @@ CrackFrontNonlocalMaterialBase::CrackFrontNonlocalMaterialBase(const InputParame
     _y(declareVector("y")),
     _z(declareVector("z")),
     _position(declareVector("id")),
-    _avg_crack_tip_scalar(
-        declareVector("crack_tip_" + _base_name + getParam<std::string>("material_name")))
+    // get the property name instead of materialname
+    _avg_crack_tip_scalar(declareVector("crack_tip_" + _base_name + _property_name))
 {
   if (_mesh.dimension() == 3 && !isParamSetByUser("box_width"))
     paramError("box_width", "Must define box_width in 3D problems.");

@@ -49,6 +49,7 @@
       input = 'edge_crack_2d_propagation.i kvpp_based_meshCut_uo.i'
       cli_args = "UserObjects/cut_mesh2/k_critical=100"
       expect_err = 'Fracture toughness cannot be specified by both k_critical and k_critical_vectorpostprocessor.'
+      detail = ' and produce an error when fracture toughness is specified by more than one input source.'
     []
     [stress_check]
       type = CSVDiff
