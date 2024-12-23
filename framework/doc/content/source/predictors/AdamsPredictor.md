@@ -22,7 +22,7 @@ B = - \dfrac{\Delta t}{\Delta t_{old}} (1 + \dfrac{\Delta t}{2\Delta t_{old}} + 
 !equation
 C = \dfrac{\Delta t}{\Delta t_{old}} \dfrac{\Delta t}{2\Delta t_{older}}
 
-with $\dfrac{\Delta t}$, $\dfrac{\Delta t_{old}}$ and $\dfrac{\Delta t_{older}}$
+with $\Delta t$, $\Delta t_{old}$ and $\Delta t_{older}$
 being the current, previous and antepenultimate time steps sizes.
 
 ## Example input syntax

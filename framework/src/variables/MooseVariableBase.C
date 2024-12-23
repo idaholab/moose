@@ -71,11 +71,10 @@ MooseVariableBase::validParams()
                                     "nl0",
                                     "If this variable is a solver variable, this is the "
                                     "solver system to which it should be added.");
-  params.addParamNamesToGroup("scaling eigen", "Advanced");
-
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
   params.transferParam<std::vector<Real>>(AddVariableAction::validParams(), "initial_condition");
   params.transferParam<std::string>(AddVariableAction::validParams(), "initial_from_file_var");
+  params.addParamNamesToGroup("scaling eigen use_dual", "Advanced");
 
   params.registerBase("MooseVariableBase");
   params.addPrivateParam<SystemBase *>("_system_base");
@@ -213,12 +212,12 @@ MooseVariableBase::initialSetup()
 {
   // Currently the scaling vector is only used through AD residual computing objects
   if ((_var_kind == Moose::VAR_SOLVER) && _subproblem.haveADObjects() &&
-      (_subproblem.automaticScaling() || (std::find_if(_scaling_factor.begin(),
-                                                       _scaling_factor.end(),
-                                                       [](const Real element) {
-                                                         return !MooseUtils::absoluteFuzzyEqual(
-                                                             element, 1.);
-                                                       }) != _scaling_factor.end())))
+      (_subproblem.automaticScaling() ||
+       (std::find_if(_scaling_factor.begin(),
+                     _scaling_factor.end(),
+                     [](const Real element)
+                     { return !MooseUtils::absoluteFuzzyEqual(element, 1.); }) !=
+        _scaling_factor.end())))
 
     _sys.addScalingVector();
 }
