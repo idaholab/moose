@@ -367,8 +367,9 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
       "Null space removal");
-  params.addParamNamesToGroup("extra_tag_vectors extra_tag_matrices extra_tag_solutions",
-                              "Tagging");
+  params.addParamNamesToGroup(
+      "extra_tag_vectors extra_tag_matrices extra_tag_solutions not_zeroed_tag_vectors",
+      "Contribution to tagged field data");
   params.addParamNamesToGroup(
       "allow_invalid_solution show_invalid_solution_console immediately_print_invalid_solution",
       "Solution validity control");

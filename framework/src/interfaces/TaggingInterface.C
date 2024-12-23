@@ -47,7 +47,7 @@ TaggingInterface::validParams()
 
   params.addParamNamesToGroup(
       "vector_tags matrix_tags extra_vector_tags extra_matrix_tags absolute_value_vector_tags",
-      "Tagging");
+      "Contribution to tagged field data");
 
   return params;
 }
