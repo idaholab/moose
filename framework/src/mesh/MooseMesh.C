@@ -104,15 +104,6 @@ MooseMesh::validParams()
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
                         "where N = # CPUs, with NemesisIO.");
 
-  //TODO: this parameter does not belong here, it's only for FileMesh
-  MooseEnum dims("1=1 2 3", "1");
-  params.addParam<MooseEnum>("dim",
-                             dims,
-                             "This is only required for certain mesh formats where "
-                             "the dimension of the mesh cannot be autodetected. "
-                             "In particular you must supply this for GMSH meshes. "
-                             "Note: This is completely ignored for ExodusII meshes!");
-
   params.addParam<MooseEnum>(
       "partitioner",
       partitioning(),
@@ -208,7 +199,7 @@ MooseMesh::validParams()
 
   // groups
   params.addParamNamesToGroup("patch_update_strategy patch_size max_leaf_size", "Geometric search");
-  params.addParamNamesToGroup("dim nemesis", "Advanced");
+  params.addParamNamesToGroup("nemesis", "Advanced");
   params.addParamNamesToGroup(
       "add_subdomain_ids add_subdomain_names add_sideset_ids add_sideset_names",
       "Pre-declaration of future mesh sub-entities");
@@ -2818,9 +2809,6 @@ MooseMesh::determineUseDistributedMesh()
 std::unique_ptr<MeshBase>
 MooseMesh::buildMeshBaseObject(unsigned int dim)
 {
-  if (dim == libMesh::invalid_uint)
-    dim = getParam<MooseEnum>("dim");
-
   std::unique_ptr<MeshBase> mesh;
   if (_use_distributed_mesh)
     mesh = buildTypedMesh<DistributedMesh>(dim);
