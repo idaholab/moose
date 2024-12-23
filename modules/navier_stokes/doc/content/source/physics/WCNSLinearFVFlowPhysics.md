@@ -1,4 +1,4 @@
-# Navier Stokes Flow / WCNSLinearFVFlowPhysics
+# Navier Stokes Flow Segregated / WCNSLinearFVFlowPhysics
 
 !syntax description /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics
 
