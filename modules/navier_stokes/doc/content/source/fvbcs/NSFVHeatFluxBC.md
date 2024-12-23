@@ -70,7 +70,7 @@ must be provided:
 - `splitting = effective_thermal_conductivity`, `locality = global`: `average_kappa` and `average_kappa_solid` postprocessors,
    as well as `average_eps` postprocessor due to internal representation of $\kappa_f$ as $\epsilon\tilde{\kappa}_f$.
 
-! alert note
+!alert note
 To protect against cases where at the first time step
 the thermal conductivity or effective thermal conductivity might not have yet
 been initialized, or cases where the coupled postprocessors have not yet been

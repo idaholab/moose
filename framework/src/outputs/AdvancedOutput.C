@@ -484,7 +484,7 @@ AdvancedOutput::initAvailableLists()
 void
 AdvancedOutput::initExecutionTypes(const std::string & name, ExecFlagEnum & input)
 {
-  // Build the input paramemter name
+  // Build the input parameter name
   std::string param_name = "execute_";
   param_name += name + "_on";
 
