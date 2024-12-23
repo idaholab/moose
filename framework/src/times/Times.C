@@ -26,6 +26,12 @@ Times::validParams()
   params.addRequiredParam<bool>("auto_broadcast",
                                 "Wether Times should be broadcasted across all ranks");
   params.addParamNamesToGroup("auto_broadcast auto_sort unique_times unique_tolerance", "Advanced");
+
+  // Unlikely to ever be used as Times do not loop over the mesh and use material properties,
+  // let alone stateful
+  params.suppressParameter<MaterialPropertyName>("prop_getter_suffix");
+  params.suppressParameter<bool>("use_interpolated_state");
+
   params.registerBase("Times");
   return params;
 }
