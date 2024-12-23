@@ -29,6 +29,13 @@ FileMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
+  MooseEnum dims("1=1 2 3", "1");
+  params.addParam<MooseEnum>("dim",
+                             dims,
+                             "This is only required for certain mesh formats where "
+                             "the dimension of the mesh cannot be autodetected. "
+                             "In particular you must supply this for GMSH meshes. "
+                             "Note: This is completely ignored for ExodusII meshes!");
   params.addParam<bool>("clear_spline_nodes",
                         false,
                         "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
@@ -39,14 +46,12 @@ FileMesh::validParams()
 }
 
 FileMesh::FileMesh(const InputParameters & parameters)
-  : MooseMesh(parameters),
-    _file_name(getParam<MeshFileName>("file")),
-    _dim(getParam<MooseEnum>("dim"))
+  : MooseMesh(parameters), _file_name(getParam<MeshFileName>("file"))
 {
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh)
-  : MooseMesh(other_mesh), _file_name(other_mesh._file_name), _dim(other_mesh._dim)
+  : MooseMesh(other_mesh), _file_name(other_mesh._file_name)
 {
 }
 
@@ -63,6 +68,7 @@ FileMesh::buildMesh()
 {
   TIME_SECTION("buildMesh", 2, "Reading Mesh");
 
+  // This dimension should get overriden if the mesh reader can determine the dimension
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 
   if (_is_nemesis)
