@@ -72,6 +72,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   if (_save_with_name == system.mainMeshGeneratorName())
     paramError(
         "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
+  if (getParam<bool>("nemesis") && !getParam<bool>("output"))
+    paramError("nemesis", "Should only be set to true if 'output=true'");
 }
 
 void
