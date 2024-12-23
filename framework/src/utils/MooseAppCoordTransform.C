@@ -247,7 +247,8 @@ MooseAppCoordTransform::validParams()
       "than this, please use the 'alpha_rotation', 'beta_rotation', and 'gamma_rotation' "
       "parameters.");
   params.addParamNamesToGroup(
-      "block coord_type rz_coord_axis rz_coord_blocks rz_coord_origins rz_coord_directions",
+      "block coord_type coord_block rz_coord_axis rz_coord_blocks rz_coord_origins "
+      "rz_coord_directions",
       "Coordinate system");
   params.addParamNamesToGroup(
       "length_unit alpha_rotation beta_rotation gamma_rotation up_direction",

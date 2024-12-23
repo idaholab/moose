@@ -97,12 +97,14 @@ MooseMesh::validParams()
       true,
       "If allow_renumbering=false, node and element numbers are kept fixed until deletion");
 
+  // TODO: this parameter does not belong here, it's only for FileMesh
   params.addParam<bool>("nemesis",
                         false,
                         "If nemesis=true and file=foo.e, actually reads "
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
                         "where N = # CPUs, with NemesisIO.");
 
+  //TODO: this parameter does not belong here, it's only for FileMesh
   MooseEnum dims("1=1 2 3", "1");
   params.addParam<MooseEnum>("dim",
                              dims,
@@ -205,9 +207,13 @@ MooseMesh::validParams()
   params.registerBase("MooseMesh");
 
   // groups
+  params.addParamNamesToGroup("patch_update_strategy patch_size max_leaf_size", "Geometric search");
+  params.addParamNamesToGroup("dim nemesis", "Advanced");
   params.addParamNamesToGroup(
-      "dim nemesis patch_update_strategy construct_node_list_from_side_list patch_size",
-      "Advanced");
+      "add_subdomain_ids add_subdomain_names add_sideset_ids add_sideset_names",
+      "Pre-declaration of future mesh sub-entities");
+  params.addParamNamesToGroup("construct_node_list_from_side_list build_all_side_lowerd_mesh",
+                              "Automatic definition of mesh element sides entities");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
