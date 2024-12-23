@@ -13,7 +13,7 @@
 #include "RankTwoTensor.h"
 
 /**
- * Computes the average stress magnitude normal to the crack face at points provided by the
+ * Computes the average stress magnitude in the direction normal to the crack font at points provided by the
  * crack_front_definition vectorpostprocessor.
  */
 

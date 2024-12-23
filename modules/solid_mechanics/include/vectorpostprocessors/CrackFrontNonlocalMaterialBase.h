@@ -14,7 +14,7 @@
 // Forward Declarations
 class CrackFrontDefinition;
 /**
- * Computes the average material property at points provided by the
+ * Computes the average material property in regions near points provided by the
  * crack_front_definition vectorpostprocessor.
  */
 

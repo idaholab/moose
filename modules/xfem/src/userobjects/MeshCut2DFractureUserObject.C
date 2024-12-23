@@ -132,7 +132,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
 
   if (_k_critical_vpp && ((_k_critical_vpp->size() != _original_and_current_front_node_ids.size())))
     mooseError(
-        "k_critical_vectorpostprocessor should have the same number of crack front points as "
+        "k_critical_vectorpostprocessor must have the same number of crack front points as "
         "CrackFrontDefinition.",
         "\n  k_critical_vectorpostprocessor size = ",
         _k_critical_vpp->size(),

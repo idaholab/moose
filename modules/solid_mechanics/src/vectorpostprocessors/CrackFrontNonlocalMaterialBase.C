@@ -26,7 +26,6 @@ CrackFrontNonlocalMaterialBase::validParams()
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
   params.set<bool>("use_displaced_mesh") = false;
-  // EXEC_NONLINEAR to work with xfem_udpates
   params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_BEGIN};
   params.addClassDescription("Computes the average material property at a crack front.");
   return params;
@@ -80,14 +79,14 @@ CrackFrontNonlocalMaterialBase::execute()
   // icfp crack front point index
   for (std::size_t icfp = 0; icfp < _avg_crack_tip_scalar.size(); icfp++)
   {
-    Point crack_face_normal = _crack_front_definition->getCrackFrontNormal(icfp);
+    Point crack_front_normal = _crack_front_definition->getCrackFrontNormal(icfp);
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     {
       Real q = BoxWeightingFunction(icfp, _q_point[qp]);
       if (q == 0)
         continue;
 
-      Real scalar = getQPCrackFrontScalar(qp, crack_face_normal);
+      Real scalar = getQPCrackFrontScalar(qp, crack_front_normal);
       _avg_crack_tip_scalar[icfp] += _JxW[qp] * _coord[qp] * scalar * q;
       _volume[icfp] += _JxW[qp] * _coord[qp] * q;
     }

@@ -46,7 +46,7 @@
   used_by_xfem_to_grow_crack = true
 []
 
-# MeshCut2DFractureUserObject are included in seperate input files
+# MeshCut2DFractureUserObject are included in separate input files
 # [UserObjects]
 #   [cut_mesh2]
 #     type = MeshCut2DFractureUserObject
