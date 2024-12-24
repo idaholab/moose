@@ -48,4 +48,8 @@ SIMPLESolve::checkIntegrity()
   if (_has_passive_scalar_systems)
     for (const auto system : _passive_scalar_systems)
       checkTimeKernels(*system);
+
+  if (_has_passive_scalar_systems)
+    for (const auto system : _active_scalar_systems)
+      checkTimeKernels(*system);
 }
