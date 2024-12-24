@@ -41,6 +41,7 @@ public:
 
   bool supportsFaceArg() const override final { return _vector.supportsFaceArg(); }
   bool supportsElemSideQpArg() const override final { return _vector.supportsElemSideQpArg(); }
+  bool mayRequireGhosting() const override final { return _vector.mayRequireGhosting(); }
 
 private:
   /// The parent vector functor

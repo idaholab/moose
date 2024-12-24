@@ -51,6 +51,7 @@ public:
   {
     return _non_ad_functor.supportsElemSideQpArg();
   }
+  bool mayRequireGhosting() const override final { return _non_ad_functor.mayRequireGhosting(); }
 
 protected:
   ///@{

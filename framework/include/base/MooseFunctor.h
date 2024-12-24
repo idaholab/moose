@@ -283,6 +283,11 @@ public:
    */
   virtual bool supportsElemSideQpArg() const = 0;
 
+  /**
+   * Whether this functor may require parallel ghosting to be evaluated in parallel simulations
+   */
+  virtual bool mayRequireGhosting() const = 0;
+
 protected:
   /** @name Functor evaluation routines
    * These methods are all for evaluating functors with different kinds of spatial arguments. Each
@@ -1139,6 +1144,7 @@ public:
 
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return true; }
+  bool mayRequireGhosting() const override { return _wrapped->mayRequireGhosting(); }
 
 protected:
   ///@{
@@ -1286,6 +1292,7 @@ public:
 
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return true; }
+  bool mayRequireGhosting() const override final { return false; }
 
 private:
   ValueType evaluate(const ElemArg &, const StateArg &) const override { return _value; }
@@ -1343,6 +1350,7 @@ public:
 
   bool supportsFaceArg() const override final { return false; }
   bool supportsElemSideQpArg() const override final { return false; }
+  bool mayRequireGhosting() const override final { return false; }
 
 private:
   ValueType evaluate(const ElemArg &, const StateArg &) const override
