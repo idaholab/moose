@@ -9,6 +9,7 @@
 
 #include "WCNSFV2PSlipVelocityFunctorMaterial.h"
 #include "INSFVVelocityVariable.h"
+#include "MooseLinearVariableFV.h"
 #include "Function.h"
 #include "NS.h"
 #include "FVKernel.h"
@@ -63,12 +64,12 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
     const InputParameters & params)
   : FunctorMaterial(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
+    _u_var(dynamic_cast<const MooseVariableField<Real> *>(getFieldVar("u", 0))),
     _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
+               ? dynamic_cast<const MooseVariableField<Real> *>(getFieldVar("v", 0))
                : nullptr),
     _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
+               ? dynamic_cast<const MooseVariableField<Real> *>(getFieldVar("w", 0))
                : nullptr),
     _rho_mixture(getFunctor<ADReal>(NS::density)),
     _rho_d(getFunctor<ADReal>("rho_d")),
@@ -82,15 +83,18 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
     _particle_diameter(getFunctor<ADReal>("particle_diameter")),
     _index(getParam<MooseEnum>("momentum_component"))
 {
-  if (!_u_var)
-    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
+  if (!dynamic_cast<const INSFVVelocityVariable *>(_u_var) &&
+      !dynamic_cast<const MooseLinearVariableFV<Real> *>(_u_var))
+    paramError("u", "the u velocity must be an INSFVVelocityVariable or a .");
 
-  if (_dim >= 2 && !_v_var)
+  if (_dim >= 2 && (!dynamic_cast<const INSFVVelocityVariable *>(_v_var) &&
+                    !dynamic_cast<const MooseLinearVariableFV<Real> *>(_v_var)))
     paramError("v",
                "In two or more dimensions, the v velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
 
-  if (_dim >= 3 && !_w_var)
+  if (_dim >= 3 && (!dynamic_cast<const INSFVVelocityVariable *>(_w_var) &&
+                    !dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var)))
     paramError("w",
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
