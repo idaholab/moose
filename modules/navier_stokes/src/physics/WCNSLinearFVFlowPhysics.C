@@ -261,9 +261,9 @@ WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
       if (gravity_vector(d) != 0)
       {
         params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
-        params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+        params.set<LinearVariableName>("variable") = _velocity_names[d];
 
-        getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+        getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
       }
   }
 }
