@@ -4084,17 +4084,19 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto solver_sys_num =
-      parameters.isParamValid(var_param_name) &&
-              determineSolverSystem(parameters.varName(var_param_name, object_name)).first
-          ? determineSolverSystem(parameters.varName(var_param_name, object_name)).second
-          : (unsigned int)0;
+  const auto sys_num = parameters.isParamValid(var_param_name) &&
+                               &getSystem(parameters.varName(var_param_name, object_name))
+                           ? getSystem(parameters.varName(var_param_name, object_name)).number()
+                           : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(solver_sys_num);
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = _aux.get();
+    else
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
   }
   else
   {
@@ -4106,7 +4108,11 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _solver_systems[solver_sys_num].get();
+
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = _aux.get();
+    else
+      parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
   }
 }
 
