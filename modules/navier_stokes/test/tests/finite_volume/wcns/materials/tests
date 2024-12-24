@@ -57,11 +57,18 @@
     requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat.'
     recover = false
   []
-  [validation_nonconstant_cp]
+  [verification_nonconstant_cp_1d_analytical]
     type = 'CSVDiff'
     input = 1d_test_cpT.i
     csvdiff = 1d_test_cpT_out.csv
-    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat, and show near perfect energy conservation.'
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat, and show near perfect energy conservation in a 1D case with a volumetric source.'
+    recover = false
+  []
+  [verification_nonconstant_cp_2d_balance]
+    type = 'CSVDiff'
+    input = 2d-steady-wall-balance.i
+    csvdiff = 2d-steady-wall-balance_out.csv
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat, and show near perfect energy conservation in a 2D case with wall heating.'
     recover = false
   []
 
