@@ -22,6 +22,8 @@ class WCNSFVTwoPhaseMixturePhysics final : public WCNSFVScalarTransportPhysics
 {
 public:
   static InputParameters validParams();
+  static InputParameters commonMixtureParams();
+  static void renamePassiveScalarToMixtureParams(InputParameters & params);
 
   WCNSFVTwoPhaseMixturePhysics(const InputParameters & parameters);
 
