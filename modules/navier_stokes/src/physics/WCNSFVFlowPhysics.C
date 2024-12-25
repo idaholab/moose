@@ -34,8 +34,17 @@ WCNSFVFlowPhysics::validParams()
       true,
       "Whether the time derivative term should contribute to the Rhie Chow coefficients. This adds "
       "stabilization, but makes the solution dependent on the time step size");
-  params.addParamNamesToGroup("time_derivative_contributes_to_RC_coefficients characteristic_speed",
-                              "Numerical scheme");
+  params.addParam<Real>(
+      "time_derivative_rc_coef_fixed_dt",
+      "Fixed dt used to make Rhie Chow coefficients independent of the time step before restarts");
+  params.addParam<Real>("time_derivative_rc_coef_fixed_dt_start",
+                        "Time after which to start leveraging the fixed dt to make Rhie Chow "
+                        "coefficients independent of the time step before restarts");
+  params.addParamNamesToGroup("characteristic_speed", "Numerical scheme");
+  params.addParamNamesToGroup("time_derivative_contributes_to_RC_coefficients "
+                              "time_derivative_rc_coef_fixed_dt "
+                              "time_derivative_rc_coef_fixed_dt_start",
+                              "Restart");
 
   // Used for flow mixtures, where one phase is solid / not moving under the action of gravity
   params.addParam<MooseFunctorName>(
@@ -375,6 +384,12 @@ WCNSFVFlowPhysics::addINSMomentumTimeKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<bool>("contribute_to_rc") =
       getParam<bool>("time_derivative_contributes_to_RC_coefficients");
+  if (isParamValid("time_derivative_rc_coef_fixed_dt"))
+    params.set<Real>("fixed_dt_contribution_to_RC") =
+        getParam<Real>("time_derivative_rc_coef_fixed_dt");
+  if (isParamValid("time_derivative_rc_coef_fixed_dt_start"))
+    params.set<Real>("start_fixed_dt_contribution_to_RC") =
+        getParam<Real>("time_derivative_rc_coef_fixed_dt_start");
 
   for (const auto d : make_range(dimension()))
   {
