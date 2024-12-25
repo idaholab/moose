@@ -64,4 +64,24 @@
       allow_unused = true
     []
   []
+  [restart_different_dt]
+    requirement = 'The system shall be able to'
+    [init]
+      type = CSVDiff
+      input = '2d_channel_init.i'
+      csvdiff = 2d_channel_init_out.csv'
+      detail = 'initialize a solution for a restart simulation using a fixed time step for the contribution to Rhie Chow coefficients,'
+    []
+    [flat_restart_different_dt]
+      type = CSVDiff
+      input = '2d_channel_init.i'
+      csvdiff = 'transient_from_restart.csv'
+      cli_args = "Physics/NavierStokes/Flow/all_flow/time_derivative_rc_coef_fixed_dt_start=1e8
+                  Mesh/active=fmg_restart
+                  Physics/NavierStokes/Flow/all_flow/initialize_variables_from_mesh_file=true
+                  Outputs/file_base=transient_from_restart
+                  Executioner/TimeStepper/function=constant Executioner/end_time=10"
+      detail = 'and restarting from such solution with a perfect, zero-residual restart.'
+    []
+  []
 []
