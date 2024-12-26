@@ -217,6 +217,24 @@ HelmholtzFluidProperties::h_from_p_T(
 }
 
 Real
+HelmholtzFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
+{
+  auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+               .first;
+  // check for nans
+  if (std::isnan(T))
+    mooseError("Conversion from enthalpy (h = ",
+               enthalpy,
+               ") and pressure (p = ",
+               pressure,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+Real
 HelmholtzFluidProperties::p_from_rho_T(Real density, Real temperature) const
 {
   // Scale the input density and temperature
