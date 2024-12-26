@@ -34,6 +34,7 @@
                   Physics/NavierStokes/Turbulence/keps/initial_mu_t=${mu_t_init}
                   Outputs/file_base=user_ics"
       detail = 'with user-defined initial conditions,'
+      prereq = 'restart/default'
     []
     [restart_with_user_ics]
       type = CSVDiff
@@ -50,6 +51,7 @@
                   Problem/restart_file_base=default_cp/LATEST Problem/allow_initial_conditions_with_restart=true
                   Outputs/file_base=restart_user_ics"
       detail = 'when performing a regular checkpoint restart, but still obeying the user-defined initial conditions,'
+      prereq = 'restart/default'
     []
     [restart_from_file]
       type = CSVDiff
@@ -62,6 +64,7 @@
                   Physics/NavierStokes/Turbulence/keps/initialize_variables_from_mesh_file=true"
       detail = 'when performing manual restart from a mesh file, ignoring the default initial conditions.'
       allow_unused = true
+      prereq = 'restart/default'
     []
   []
 []
