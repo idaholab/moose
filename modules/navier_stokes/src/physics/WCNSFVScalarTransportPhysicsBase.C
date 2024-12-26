@@ -33,7 +33,8 @@ WCNSFVScalarTransportPhysicsBase::validParams()
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_inlet_function",
       std::vector<std::vector<MooseFunctorName>>(),
-      "Functors for inlet boundaries in the passive scalar equations.");
+      "Functors for inlet boundaries in the passive scalar equations. "
+      "Major (outer) ordering by equation, inner indexing by inlet boundary.");
 
   // New functor boundary conditions
   params.deprecateParam(
@@ -98,6 +99,8 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
       "passive_scalar_names", "initial_scalar_variables", true);
   checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
       "passive_scalar_names", "passive_scalar_inlet_functors", true);
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, MooseEnum>(
+      "passive_scalar_names", "passive_scalar_inlet_types", true);
 
   if (_passive_scalar_coupled_sources_coefs.size())
     checkTwoDVectorParamsSameLength<MooseFunctorName, MooseFunctorName>(
@@ -114,7 +117,7 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
   _passive_scalar_inlet_functors.resize(_passive_scalar_names.size());
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
   // Re-organize data from (inlet, scalar) indexing to (scalar, inlet) indexing
-  if (isParamValid("passive_scalar_inlet_types"))
+  if (isParamSetByUser("passive_scalar_inlet_types"))
   {
     const auto & all_inlet_types = getParam<std::vector<MooseEnum>>("passive_scalar_inlet_types");
     const auto num_scalars = _passive_scalar_names.size();
@@ -137,6 +140,20 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
       {
         const auto & all_inlet_functors =
             getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors");
+
+        if (num_scalars != all_inlet_functors.size())
+          paramError("passive_scalar_inlet_functors",
+                     "The number of vectors of scalar inlet functors (" +
+                         std::to_string(all_inlet_functors.size()) +
+                         ") is not equal to the number of scalars being advected (" +
+                         std::to_string(num_scalars) + ")");
+        if (num_inlets != all_inlet_functors[scalar_i].size())
+          paramError("passive_scalar_inlet_functors",
+                     "The number of scalar inlet functors (" +
+                         std::to_string(all_inlet_functors[scalar_i].size()) +
+                         ") for scalars of index (" + std::to_string(scalar_i) +
+                         ") is not equal to the number of inlet boundaries (" +
+                         std::to_string(num_inlets) + ")");
         auto inlet_functors = std::vector<MooseFunctorName>();
         for (const auto i : index_range(inlet_boundaries))
           inlet_functors.push_back(all_inlet_functors[scalar_i][i]);

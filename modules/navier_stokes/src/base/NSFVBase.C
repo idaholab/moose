@@ -290,7 +290,8 @@ NSFVBase::commonScalarFieldAdvectionParams()
   params.addParam<std::vector<MooseEnum>>(
       "passive_scalar_inlet_types",
       {scalar_inlet_types},
-      "Types for the inlet boundaries for the passive scalar equation.");
+      "Types for the inlet boundaries for the passive scalar equation. Indexing by inlet boundary, "
+      "the type is shared for all equations.");
 
   params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
                               "passive_scalar_source passive_scalar_coupled_source "

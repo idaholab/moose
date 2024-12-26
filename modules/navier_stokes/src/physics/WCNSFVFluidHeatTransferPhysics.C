@@ -106,20 +106,6 @@ WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParame
       getParam<std::vector<SubdomainName>>("external_heat_sources_blocks"),
       getParam<std::vector<MooseFunctorName>>("external_heat_sources_functors"));
 
-  // Set boundary condition maps
-  _energy_inlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
-      _flow_equations_physics->getInletBoundaries(),
-      getParam<MultiMooseEnum>("energy_inlet_types"));
-  if (isParamSetByUser("energy_inlet_functors"))
-    _energy_inlet_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
-        _flow_equations_physics->getInletBoundaries(),
-        getParam<std::vector<MooseFunctorName>>("energy_inlet_functors"));
-  _energy_wall_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
-      _flow_equations_physics->getWallBoundaries(), getParam<MultiMooseEnum>("energy_wall_types"));
-  _energy_wall_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
-      _flow_equations_physics->getWallBoundaries(),
-      getParam<std::vector<MooseFunctorName>>("energy_wall_functors"));
-
   // Parameter checks
   checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
                                                                        "ambient_temperature");
@@ -128,12 +114,64 @@ WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParame
   // Check boundary parameters if provided.
   // The boundaries are checked again when the boundary conditions are added as we want
   // to be able to more boundary conditions to a Physics dynamically
-  if (isParamValid("energy_inlet_types"))
+  if (isParamValid("energy_inlet_types") || isParamValid("energy_inlet_functors"))
+  {
     checkVectorParamAndMultiMooseEnumLength<MooseFunctorName>("energy_inlet_functors",
                                                               "energy_inlet_types");
-  if (isParamValid("energy_wall_types"))
+    const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
+    if (inlet_boundaries.size() != getParam<MultiMooseEnum>("energy_inlet_types").size())
+      paramError("energy_inlet_types",
+                 "Energy inlet types (size " +
+                     std::to_string(getParam<MultiMooseEnum>("energy_inlet_types").size()) +
+                     ") should be the same size as inlet_boundaries (size " +
+                     std::to_string(inlet_boundaries.size()) + ")");
+    if (inlet_boundaries.size() !=
+        getParam<std::vector<MooseFunctorName>>("energy_inlet_functors").size())
+      paramError("energy_inlet_functors",
+                 "Energy inlet functors (size " +
+                     std::to_string(
+                         getParam<std::vector<MooseFunctorName>>("energy_inlet_functors").size()) +
+                     ") should be the same size as inlet_boundaries (size " +
+                     std::to_string(inlet_boundaries.size()) + ")");
+  }
+  if (isParamValid("energy_wall_types") || isParamValid("energy_wall_functors"))
+  {
     checkVectorParamAndMultiMooseEnumLength<MooseFunctorName>("energy_wall_functors",
                                                               "energy_wall_types");
+    const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
+    if (wall_boundaries.size() != getParam<MultiMooseEnum>("energy_wall_types").size())
+      paramError("energy_wall_types",
+                 "Energy wall types (size " +
+                     std::to_string(getParam<MultiMooseEnum>("energy_wall_types").size()) +
+                     ") should be the same size as wall_boundaries (size " +
+                     std::to_string(wall_boundaries.size()) + ")");
+    if (wall_boundaries.size() !=
+        getParam<std::vector<MooseFunctorName>>("energy_wall_functors").size())
+      paramError("energy_wall_functors",
+                 "Energy wall functors (size " +
+                     std::to_string(
+                         getParam<std::vector<MooseFunctorName>>("energy_wall_functors").size()) +
+                     ") should be the same size as wall_boundaries (size " +
+                     std::to_string(wall_boundaries.size()) + ")");
+  }
+
+  // Set boundary condition maps
+  if (isParamSetByUser("energy_inlet_types"))
+    _energy_inlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+        _flow_equations_physics->getInletBoundaries(),
+        getParam<MultiMooseEnum>("energy_inlet_types"));
+  if (isParamSetByUser("energy_inlet_functors"))
+    _energy_inlet_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
+        _flow_equations_physics->getInletBoundaries(),
+        getParam<std::vector<MooseFunctorName>>("energy_inlet_functors"));
+  if (isParamSetByUser("energy_wall_types"))
+    _energy_wall_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+        _flow_equations_physics->getWallBoundaries(),
+        getParam<MultiMooseEnum>("energy_wall_types"));
+  if (isParamSetByUser("energy_wall_functors"))
+    _energy_wall_functors = Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(
+        _flow_equations_physics->getWallBoundaries(),
+        getParam<std::vector<MooseFunctorName>>("energy_wall_functors"));
 }
 
 void
