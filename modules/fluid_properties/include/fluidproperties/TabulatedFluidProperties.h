@@ -153,7 +153,6 @@ public:
   virtual Real T_from_h_s(Real h, Real s) const;
   virtual Real T_from_p_s(Real p, Real s) const;
   virtual void T_from_p_s(Real p, Real s, Real & T, Real & dT_dp, Real & dT_ds) const;
-  virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_v_e(Real v, Real e) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
   virtual void

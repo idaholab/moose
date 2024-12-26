@@ -1021,24 +1021,6 @@ TabulatedFluidProperties::criticalDensity() const
 }
 
 Real
-TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
-{
-  if (_fp)
-    return _fp->T_from_p_h(pressure, enthalpy);
-  else
-    FluidPropertiesForwardError("T_from_p_h");
-}
-
-ADReal
-TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
-{
-  if (_fp)
-    return _fp->T_from_p_h(pressure, enthalpy);
-  else
-    FluidPropertiesForwardError("T_from_p_h");
-}
-
-Real
 TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 {
   if (_interpolate_pressure && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
@@ -1421,27 +1403,62 @@ TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
 }
 
 Real
-TabulatedFluidProperties::T_from_h_p(Real h, Real pressure) const
+TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
-  auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_h_p")
-               .first;
-  // check for nans
-  if (std::isnan(T))
-    mooseError("Conversion from enthalpy (h = ",
-               h,
-               ") and pressure (p = ",
-               pressure,
-               ") to temperature failed to converge.");
-  return T;
+  if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+  {
+    auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
+    { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
+    Real T = FluidPropertiesUtils::NewtonSolve(
+                 pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+                 .first;
+    // check for nans
+    if (std::isnan(T))
+      mooseError("Conversion from enthalpy (h = ",
+                 enthalpy,
+                 ") and pressure (p = ",
+                 pressure,
+                 ") to temperature failed to converge.");
+    return T;
+  }
+}
+
+ADReal
+TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
+{
+  if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+  {
+    auto lambda =
+        [&](ADReal pressure, ADReal current_T, ADReal & new_h, ADReal & dh_dp, ADReal & dh_dT)
+    {
+      h_from_p_T(pressure.value(), current_T.value(), new_h.value(), dh_dp.value(), dh_dT.value());
+      // Reconstruct derivatives
+      new_h.derivatives() =
+          dh_dp.value() * pressure.derivatives() + dh_dT.value() * current_T.derivatives();
+    };
+    ADReal T =
+        FluidPropertiesUtils::NewtonSolve(
+            pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+            .first;
+    // check for nans
+    if (std::isnan(T))
+      mooseError("Conversion from enthalpy (h = ",
+                 enthalpy,
+                 ") and pressure (p = ",
+                 pressure,
+                 ") to temperature failed to converge.");
+    return T;
+  }
 }
 
 Real
-TabulatedFluidProperties::s_from_h_p(Real h, Real pressure) const
+TabulatedFluidProperties::s_from_h_p(Real enthalpy, Real pressure) const
 {
-  Real T = T_from_h_p(h, pressure);
+  Real T = T_from_p_h(pressure, enthalpy);
   return s_from_p_T(pressure, T);
 }
 
