@@ -28,9 +28,7 @@ WCNSFVScalarTransportPhysics::validParams()
 }
 
 WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters & parameters)
-  : PhysicsBase(parameters),
-    WCNSFVScalarTransportPhysicsBase(parameters)
-    WCNSFVCoupledAdvectionPhysicsHelper(this)
+  : PhysicsBase(parameters), WCNSFVScalarTransportPhysicsBase(parameters)
 {
 }
 
@@ -134,15 +132,24 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
   // Check the size of the scalar sources inputs
   for (const auto scalar_i : index_range(_passive_scalar_names))
   {
-    if (_passive_scalar_coupled_sources_blocks.size() != _passive_scalar_coupled_sources[scalar_i].size())
-      paramError("passive_scalar_coupled_source",
-                 "Number of coupled sources does not match the number of groups of blocks "
-                 "specified for the coupled sources");
-    if (_passive_scalar_coupled_sources_coefs[scalar_i].size() !=
-        _passive_scalar_coupled_sources[scalar_i].size())
-      paramError(
-          "passive_scalar_coupled_source_coeff",
-          "Number of coupled sources does not match the number of coupled sources coefficients");
+    if (_passive_scalar_coupled_sources_blocks.size())
+      if (_passive_scalar_coupled_sources_blocks.size() !=
+          _passive_scalar_coupled_sources[scalar_i].size())
+        paramError("passive_scalar_coupled_source",
+                   "Number of coupled sources (" +
+                       std::to_string(_passive_scalar_coupled_sources[scalar_i].size()) +
+                       ") does not match the number of groups of blocks "
+                       "specified for the coupled sources (" +
+                       std::to_string(_passive_scalar_coupled_sources_blocks.size()) + ")");
+    if (_passive_scalar_coupled_sources_coefs.size())
+      if (_passive_scalar_coupled_sources_coefs[scalar_i].size() !=
+          _passive_scalar_coupled_sources[scalar_i].size())
+        paramError("passive_scalar_coupled_source_coeff",
+                   "Number of coupled sources (" +
+                       std::to_string(_passive_scalar_coupled_sources[scalar_i].size()) +
+                       ") does not match the number of coupled sources coefficients (" +
+                       std::to_string(_passive_scalar_coupled_sources_coefs[scalar_i].size()) +
+                       ")");
   }
 
   for (const auto scalar_i : index_range(_passive_scalar_names))
@@ -212,7 +219,8 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
     unsigned int flux_bc_counter = 0;
     for (const auto & boundary : inlet_boundaries)
     {
-      if (libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "fixed-value")
+      const auto & boundary_type = libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary);
+      if (boundary_type == "fixed-value")
       {
         const std::string bc_type = "FVFunctionDirichletBC";
         InputParameters params = getFactory().getValidParams(bc_type);
@@ -222,8 +230,7 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
 
         getProblem().addFVBC(bc_type, _passive_scalar_names[name_i] + "_" + boundary, params);
       }
-      else if (libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "flux-mass" ||
-               libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "flux-velocity")
+      else if (boundary_type == "flux-mass" || boundary_type == "flux-velocity")
       {
         const auto flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
         const auto flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
@@ -234,7 +241,7 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
         params.set<MooseFunctorName>("passive_scalar") = _passive_scalar_names[name_i];
         if (flux_inlet_directions.size())
           params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
-        if (libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary) == "flux-mass")
+        if (boundary_type == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + boundary;

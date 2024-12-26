@@ -30,7 +30,7 @@ THMWCNSFVScalarTransportPhysics::validParams()
 
   // Suppress direct setting of boundary parameters from the physics, since these will be set by
   // flow boundary components
-  params.suppressParameter<MultiMooseEnum>("passive_scalar_inlet_types");
+  params.suppressParameter<std::vector<MooseEnum>>("passive_scalar_inlet_types");
   params.suppressParameter<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_inlet_functors");
 

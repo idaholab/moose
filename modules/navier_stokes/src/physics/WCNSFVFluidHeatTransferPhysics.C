@@ -517,6 +517,7 @@ WCNSFVFluidHeatTransferPhysics::actOnAdditionalTasks()
     _turbulence_physics = getCoupledTurbulencePhysics();
 }
 
+void
 WCNSFVFluidHeatTransferPhysics::addWallBoundary(const BoundaryName & boundary_name,
                                                 const MooseEnum & wall_type,
                                                 const MooseFunctorName & wall_functor)

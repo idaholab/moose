@@ -286,10 +286,10 @@ NSFVBase::commonScalarFieldAdvectionParams()
       "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
       " sources for each equation are specified, major (outer) ordering by equation.");
 
-  MultiMooseEnum scalar_inlet_types(NSFVBase::getValidScalarInletTypes());
-  params.addParam<MultiMooseEnum>(
+  MooseEnum scalar_inlet_types(NSFVBase::getValidScalarInletTypes());
+  params.addParam<std::vector<MooseEnum>>(
       "passive_scalar_inlet_types",
-      scalar_inlet_types,
+      {scalar_inlet_types},
       "Types for the inlet boundaries for the passive scalar equation.");
 
   params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "

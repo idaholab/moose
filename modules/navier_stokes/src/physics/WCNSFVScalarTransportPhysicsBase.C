@@ -71,14 +71,11 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
                                                              : !usingNavierStokesFVSyntax()),
-    _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
-    _passive_scalar_inlet_functors(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors")),
     _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_sources(
         getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
-    _passive_scalar_sources_coef(
-        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff"))
+    _passive_scalar_coupled_sources_coefs(
+        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source_coeff"))
 {
   if (_has_scalar_equation)
     for (const auto & scalar_name : _passive_scalar_names)
@@ -101,9 +98,6 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
       "passive_scalar_names", "initial_scalar_variables", true);
   checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
       "passive_scalar_names", "passive_scalar_inlet_functors", true);
-  if (_passive_scalar_inlet_functors.size())
-    checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
-        "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
 
   if (_passive_scalar_coupled_sources_coefs.size())
     checkTwoDVectorParamsSameLength<MooseFunctorName, MooseFunctorName>(
@@ -115,7 +109,6 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
     _flow_equations_physics->paramError("porous_medium_treatment",
                                         "Porous media scalar advection is currently unimplemented");
 
-
   // Create maps for boundary-restricted parameters
   _passive_scalar_inlet_types.resize(_passive_scalar_names.size());
   _passive_scalar_inlet_functors.resize(_passive_scalar_names.size());
@@ -123,7 +116,7 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
   // Re-organize data from (inlet, scalar) indexing to (scalar, inlet) indexing
   if (isParamValid("passive_scalar_inlet_types"))
   {
-    const auto & all_inlet_types = getParam<MultiMooseEnum>("passive_scalar_inlet_types");
+    const auto & all_inlet_types = getParam<std::vector<MooseEnum>>("passive_scalar_inlet_types");
     const auto num_scalars = _passive_scalar_names.size();
     const auto num_inlets = inlet_boundaries.size();
     if (num_scalars * num_inlets != all_inlet_types.size())
@@ -146,7 +139,7 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
             getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors");
         auto inlet_functors = std::vector<MooseFunctorName>();
         for (const auto i : index_range(inlet_boundaries))
-          inlet_functors.push_back(all_inlet_functors[i][scalar_i]);
+          inlet_functors.push_back(all_inlet_functors[scalar_i][i]);
         _passive_scalar_inlet_functors[scalar_i] =
             Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(inlet_boundaries,
                                                                         inlet_functors);
