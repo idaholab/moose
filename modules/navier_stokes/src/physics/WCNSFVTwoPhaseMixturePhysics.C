@@ -112,7 +112,8 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.suppressParameter<std::vector<MooseFunctorName>>("passive_scalar_source");
   params.suppressParameter<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source");
-  params.suppressParameter<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff");
+  params.suppressParameter<std::vector<std::vector<MooseFunctorName>>>(
+      "passive_scalar_coupled_source_coeff");
 
   // Boundary conditions
   params.renameParam("passive_scalar_inlet_types",
