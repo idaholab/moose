@@ -23,9 +23,9 @@ Closures1PhaseBase::Closures1PhaseBase(const InputParameters & params) : Closure
 void
 Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannelBase & flow_channel) const
 {
+  const FunctionName & f_D_fn_name = flow_channel.getParam<FunctionName>("f");
   if (_add_regular_materials)
   {
-    const FunctionName & f_D_fn_name = flow_channel.getParam<FunctionName>("f");
     flow_channel.makeFunctionControllableIfConstant(f_D_fn_name, "f");
 
     const std::string class_name = "ADWallFrictionFunctionMaterial";
@@ -36,7 +36,20 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannelBase & flow
     params.applyParameter(parameters(), "outputs");
     _sim.addMaterial(class_name, genName(flow_channel.name(), "f_wall_fn_mat"), params);
   }
-  // Nothing to do for functor materials, f is a function and can be used a functor directly
+  if (_add_functor_materials)
+  {
+    const std::string class_name = "ADGenericVectorFunctorMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+    params.set<std::vector<std::string>>("prop_names") = {f_D_fn_name + "_vec"};
+    params.set<std::vector<MooseFunctorName>>("prop_values") = {
+        f_D_fn_name, f_D_fn_name, f_D_fn_name};
+    params.applyParameter(parameters(), "outputs");
+    _sim.addFunctorMaterial(
+        class_name,
+        genName(flow_channel.name(), "vector_functor_friction_", flow_channel.name()),
+        params);
+  }
 }
 
 void

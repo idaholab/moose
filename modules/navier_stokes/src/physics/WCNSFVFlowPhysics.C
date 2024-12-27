@@ -637,12 +637,19 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
         if (upper_name == "DARCY")
         {
           params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
-          params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
+          if (MooseUtils::parsesToReal(_friction_coeffs[block_i][type_i]))
+            params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i] + "_vec";
+          else
+            params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
         }
         else if (upper_name == "FORCHHEIMER")
         {
           params.set<MooseFunctorName>(NS::speed) = NS::speed;
-          params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
+          if (MooseUtils::parsesToReal(_friction_coeffs[block_i][type_i]))
+            params.set<MooseFunctorName>("Forchheimer_name") =
+                _friction_coeffs[block_i][type_i] + "_vec";
+          else
+            params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
         }
       }
 

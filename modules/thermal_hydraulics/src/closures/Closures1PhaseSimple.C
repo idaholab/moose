@@ -113,12 +113,15 @@ Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_
   }
   if (_add_functor_materials)
   {
+    // do we really need this?
     if (MooseUtils::parsesToReal(Hw_fn_name))
     {
       const std::string class_name = "ADGenericFunctorMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-      params.set<std::vector<std::string>>("prop_names") = {};
+      // TODO: figure out what to do with these functors
+      // Or make sure the constant functors are created
+      params.set<std::vector<std::string>>("prop_names") = {"Hw"};
       params.set<std::vector<MooseFunctorName>>("prop_values") = {Hw_fn_name};
       params.applyParameter(parameters(), "outputs");
       _sim.addFunctorMaterial(
