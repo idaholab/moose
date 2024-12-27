@@ -40,7 +40,7 @@ private:
   virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
 
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addAuxiliaryVariables() override;
   virtual void addTHMInitialConditions();
   virtual void addFEKernels() override;

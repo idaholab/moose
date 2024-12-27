@@ -64,10 +64,10 @@ THMWCNSFVScalarTransportPhysics::actOnAdditionalTasks()
 }
 
 void
-THMWCNSFVScalarTransportPhysics::addNonlinearVariables()
+THMWCNSFVScalarTransportPhysics::addSolverVariables()
 {
   // Use this for pressure only. Since we are using functors for the velocity variables
-  WCNSFVScalarTransportPhysics::addNonlinearVariables();
+  WCNSFVScalarTransportPhysics::addSolverVariables();
 }
 
 void

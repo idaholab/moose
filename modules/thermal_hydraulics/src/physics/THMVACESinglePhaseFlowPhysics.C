@@ -100,7 +100,7 @@ THMVACESinglePhaseFlowPhysics::actOnAdditionalTasks()
 }
 
 void
-THMVACESinglePhaseFlowPhysics::addNonlinearVariables()
+THMVACESinglePhaseFlowPhysics::addSolverVariables()
 {
   ThermalHydraulicsFlowPhysics::addCommonVariables();
 
@@ -113,9 +113,9 @@ THMVACESinglePhaseFlowPhysics::addNonlinearVariables()
     _sim->addSimVariable(true, RHOEA, _fe_type, subdomains, _scaling_factors[2]);
   }
 
-  saveNonlinearVariableName(RHOA);
-  saveNonlinearVariableName(RHOUA);
-  saveNonlinearVariableName(RHOEA);
+  saveSolverVariableName(RHOA);
+  saveSolverVariableName(RHOUA);
+  saveSolverVariableName(RHOEA);
   _derivative_vars = {RHOA, RHOUA, RHOEA};
 }
 
@@ -708,7 +708,7 @@ THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(const PhysicsFlowBoundary & com
   params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
   params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
 
-  for (const auto & var : nonlinearVariableNames())
+  for (const auto & var : solverVariableNames())
   {
     params.set<NonlinearVariableName>("variable") = var;
     _sim->addBoundaryCondition(class_name, genName(comp.name(), var, "bnd_flux_3eqn_bc"), params);
@@ -757,7 +757,7 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
       }
 
       // Add BC to each of the connected flow channels
-      const auto var_names = nonlinearVariableNames();
+      const auto var_names = solverVariableNames();
       for (std::size_t i = 0; i < boundary_names.size(); i++)
         for (std::size_t j = 0; j < var_names.size(); j++)
         {

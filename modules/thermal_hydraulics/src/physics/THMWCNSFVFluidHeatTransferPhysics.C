@@ -77,10 +77,10 @@ THMWCNSFVFluidHeatTransferPhysics::actOnAdditionalTasks()
 }
 
 void
-THMWCNSFVFluidHeatTransferPhysics::addNonlinearVariables()
+THMWCNSFVFluidHeatTransferPhysics::addSolverVariables()
 {
   // Use this for pressure only. Since we are using functors for the velocity variables
-  WCNSFVFluidHeatTransferPhysics::addNonlinearVariables();
+  WCNSFVFluidHeatTransferPhysics::addSolverVariables();
 }
 
 void

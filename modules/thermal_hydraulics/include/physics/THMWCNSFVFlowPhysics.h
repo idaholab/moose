@@ -26,7 +26,7 @@ private:
   virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
 
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addAuxiliaryVariables() override;
   virtual void addTHMInitialConditions();
   // For nonlinear variables, we use the traditional method of adding initial conditions instead of

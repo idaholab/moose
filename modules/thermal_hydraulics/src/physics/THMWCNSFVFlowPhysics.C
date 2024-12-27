@@ -121,7 +121,7 @@ THMWCNSFVFlowPhysics::actOnAdditionalTasks()
 }
 
 void
-THMWCNSFVFlowPhysics::addNonlinearVariables()
+THMWCNSFVFlowPhysics::addSolverVariables()
 {
   ThermalHydraulicsFlowPhysics::addCommonVariables();
 
@@ -136,7 +136,7 @@ THMWCNSFVFlowPhysics::addNonlinearVariables()
   //   params.set<bool>("two_term_boundary_expansion") =
   //       getParam<bool>("momentum_two_term_bc_expansion");
   //   getProblem().addVariable(variable_type, "vel_1d", params);
-  //   saveNonlinearVariableName("vel_1d");
+  //   saveSolverVariableName("vel_1d");
   // }
 
   // Add functors that forward to the nonlinear variables
@@ -158,7 +158,7 @@ THMWCNSFVFlowPhysics::addNonlinearVariables()
   // }
 
   // Use this for pressure only. Since we are using functors for the velocity variables
-  WCNSFVFlowPhysics::addNonlinearVariables();
+  WCNSFVFlowPhysics::addSolverVariables();
 }
 
 void
