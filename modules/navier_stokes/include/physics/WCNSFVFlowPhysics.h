@@ -15,7 +15,7 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
  */
-class WCNSFVFlowPhysics final : public WCNSFVFlowPhysicsBase
+class WCNSFVFlowPhysics : public WCNSFVFlowPhysicsBase
 {
 public:
   static InputParameters validParams();

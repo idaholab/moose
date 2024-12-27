@@ -37,9 +37,10 @@ public:
                                 std::vector<MooseFunctorName> scalar_sources,
                                 std::vector<MooseFunctorName> scalar_sources_coefs);
 
-private:
+protected:
   virtual void addSolverVariables() override;
 
+private:
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport
    * equation

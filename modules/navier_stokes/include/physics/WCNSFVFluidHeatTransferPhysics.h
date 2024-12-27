@@ -50,8 +50,6 @@ public:
   bool hasEnergyEquation() const { return _has_energy_equation; }
 
 protected:
-private:
-  void actOnAdditionalTasks() override;
   void addSolverVariables() override;
   void addInletBoundary(const BoundaryName & boundary_name,
                         const MooseEnum & inlet_type,
@@ -71,6 +69,7 @@ private:
   void addMaterials() override;
 
 private:
+  void actOnAdditionalTasks() override;
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
   /**

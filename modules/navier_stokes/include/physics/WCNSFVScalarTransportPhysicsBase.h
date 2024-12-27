@@ -83,9 +83,9 @@ protected:
   /// Coefficients multiplying for the passive scalar sources. Inner indexing is scalar variable index
   std::vector<std::vector<MooseFunctorName>> _passive_scalar_coupled_sources_coefs;
 
-private:
   virtual void addInitialConditions() override;
 
+private:
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport
    * equation
