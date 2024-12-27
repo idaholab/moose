@@ -645,9 +645,6 @@ Simulation::addVariables()
       _implicit_time_integration = false;
   }
 
-  if (_components.size() == 0)
-    return;
-
   // Cache the variables that components request to add
   for (auto && comp : _components)
     comp->addVariables();
