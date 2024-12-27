@@ -47,7 +47,7 @@
 
 [Components]
   [inlet]
-    type = PhysicsGeneralFlowBoundary
+    type = GeneralFlowBoundary
     input = 'pipe:in'
     fixed_values_variables = 'T_fluid c1 c2'
     fixed_values_functors = '500 0.1 0.01'
@@ -58,7 +58,7 @@
   []
 
   [pipe]
-    type = PhysicsFlowChannel
+    type = FlowChannel
 
     # pipe geometry and discretization
     position = '0 0 0'
@@ -80,7 +80,7 @@
   []
 
   [outlet]
-    type = PhysicsOutlet
+    type = Outlet
     input = 'pipe:out'
     p = 2e5
   []

@@ -33,14 +33,12 @@
   [ThermalHydraulics]
     [WeaklyCompressibleFlow]
       [flow]
-        fp = fp
       []
     []
 
     [WeaklyCompressibleScalar]
       [scalar]
         passive_scalar_names = 'c1 c2'
-        fp = fp
       []
     []
   []
@@ -65,7 +63,7 @@
 
 [Components]
   [inlet]
-    type = PhysicsGeneralFlowBoundary
+    type = GeneralFlowBoundary
     input = 'pipe:in'
     fixed_values_variables = 'T_fluid c1 c2'
     fixed_values_functors = '500 0.1 0.01'
@@ -76,7 +74,7 @@
   []
 
   [pipe]
-    type = PhysicsFlowChannel
+    type = FlowChannel
 
     # pipe geometry and discretization
     position = '1 1 0'
@@ -100,7 +98,7 @@
 
   # Uses the functors defined by the materials extracting the values from the file mesh physics component
   [scalar_transfer]
-    type = PhysicsScalarTransferFromFunctors
+    type = ScalarTransferFromFunctors
     flow_channel = pipe
     passive_scalar_names = 'c1 c2'
     wall_scalar_values = 'from_struct_u1 3'
@@ -117,7 +115,7 @@
   []
 
   [outlet]
-    type = PhysicsOutlet
+    type = Outlet
     input = 'pipe:out'
     p = 2e5
   []

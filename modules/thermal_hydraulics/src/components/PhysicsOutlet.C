@@ -10,7 +10,7 @@
 #include "PhysicsOutlet.h"
 #include "ThermalHydraulicsFlowPhysics.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsOutlet);
+registerMooseObjectAliased("ThermalHydraulicsApp", PhysicsOutlet, "Outlet");
 
 InputParameters
 PhysicsOutlet::validParams()

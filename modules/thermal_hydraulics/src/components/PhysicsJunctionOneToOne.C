@@ -11,7 +11,7 @@
 #include "PhysicsFlowChannel.h"
 #include "THMMesh.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsJunctionOneToOne);
+registerMooseObjectAliased("ThermalHydraulicsApp", PhysicsJunctionOneToOne, "JunctionOneToOne");
 
 InputParameters
 PhysicsJunctionOneToOne::validParams()

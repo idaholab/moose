@@ -48,14 +48,14 @@
 
 [Components]
   [inlet]
-    type = PhysicsInletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature
     input = 'pipe:in'
     m_dot = 2
     T = 500
   []
 
   [pipe]
-    type = PhysicsFlowChannel
+    type = FlowChannel
     position = '0 0 0'
     orientation = '1 0 0'
     gravity_vector = '-9000 0 0'
@@ -73,14 +73,14 @@
     fp = fp
   []
  [ht]
-   type = PhysicsHeatTransferFromTemperature
+   type = HeatTransferFromTemperature
    flow_channel = pipe
    P_hf = 1
    Hw = 1e2
  []
 
   [outlet]
-    type = PhysicsOutlet
+    type = Outlet
     input = 'pipe:out'
     p = 2e5
   []

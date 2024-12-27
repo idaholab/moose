@@ -10,7 +10,9 @@
 #include "PhysicsInletMassFlowRateTemperature.h"
 #include "ThermalHydraulicsFlowPhysics.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsInletMassFlowRateTemperature);
+registerMooseObjectAliased("ThermalHydraulicsApp",
+                           PhysicsInletMassFlowRateTemperature,
+                           "InletMassFlowRateTemperature");
 
 InputParameters
 PhysicsInletMassFlowRateTemperature::validParams()

@@ -55,12 +55,12 @@
 
 [Components]
   [left_boundary]
-    type = PhysicsFreeBoundary
+    type = FreeBoundary
     input = 'left_channel:in'
   []
 
   [left_channel]
-    type = PhysicsFlowChannel
+    type = FlowChannel
 
     physics = 'all'
     fp = fp
@@ -79,12 +79,12 @@
   []
 
   [junction]
-    type = PhysicsJunctionOneToOne
+    type = JunctionOneToOne
     connections = 'left_channel:out right_channel:in'
   []
 
   [right_channel]
-    type = PhysicsFlowChannel
+    type = FlowChannel
 
     physics = 'all'
     fp = fp
@@ -103,7 +103,7 @@
   []
 
   [right_boundary]
-    type = PhysicsFreeBoundary
+    type = FreeBoundary
     input = 'right_channel:out'
   []
 []

@@ -10,7 +10,9 @@
 #include "PhysicsHeatTransferFromTemperature.h"
 #include "FlowModelSinglePhase.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsHeatTransferFromTemperature);
+registerMooseObjectAliased("ThermalHydraulicsApp",
+                           PhysicsHeatTransferFromTemperature,
+                           "HeatTransferFromTemperature");
 
 InputParameters
 PhysicsHeatTransferFromTemperature::validParams()

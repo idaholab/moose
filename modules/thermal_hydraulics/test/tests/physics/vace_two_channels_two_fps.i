@@ -37,14 +37,14 @@
 
 [Components]
   [inlet1]
-    type = PhysicsInletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature
     input = 'pipe1:in'
     m_dot = 2
     T = 500
   []
 
   [pipe1]
-    type = PhysicsFlowChannel
+    type = FlowChannel
     position = '0 0 0'
     orientation = '1 0 0'
     gravity_vector = '0 0 0'
@@ -63,13 +63,13 @@
   []
 
   [outlet1]
-    type = PhysicsOutlet
+    type = Outlet
     input = 'pipe1:out'
     p = 2e5
   []
 
   [inlet2]
-    type = PhysicsInletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature
     input = 'pipe2:in'
     m_dot = 2
     T = 500
@@ -96,7 +96,7 @@
   []
 
   [outlet2]
-    type = PhysicsOutlet
+    type = Outlet
     input = 'pipe2:out'
     p = 2e5
   []

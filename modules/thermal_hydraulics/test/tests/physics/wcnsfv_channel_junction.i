@@ -75,14 +75,14 @@ p_outlet = 2e5
 
 [Components]
   [left_boundary]
-    type = PhysicsInletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature
     input = 'left_channel:in'
     m_dot = 2
     T = ${T_inlet}
   []
 
   [left_channel]
-    type = PhysicsFlowChannel
+    type = FlowChannel
 
     physics = 'all'
     fp = fp
@@ -101,13 +101,13 @@ p_outlet = 2e5
   []
 
   [junction]
-    type = PhysicsJunctionOneToOne
+    type = JunctionOneToOne
     # this order matters for the problem setup
     connections = 'left_channel:out right_channel:in'
   []
 
   [right_channel]
-    type = PhysicsFlowChannel
+    type = FlowChannel
 
     physics = 'all'
     fp = fp
@@ -126,7 +126,7 @@ p_outlet = 2e5
   []
 
   [right_boundary]
-    type = PhysicsOutlet
+    type = Outlet
     input = 'right_channel:out'
     p = ${p_outlet}
   []

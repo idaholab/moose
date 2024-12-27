@@ -9,7 +9,9 @@
 
 #include "PhysicsScalarTransferFromFunctors.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsScalarTransferFromFunctors);
+registerMooseObjectAliased("ThermalHydraulicsApp",
+                           PhysicsScalarTransferFromFunctors,
+                           "ScalarTransferFromFunctors");
 
 InputParameters
 PhysicsScalarTransferFromFunctors::validParams()

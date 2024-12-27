@@ -11,7 +11,9 @@
 #include "ThermalHydraulicsFlowPhysics.h"
 #include "MapConversionUtils.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsGeneralFlowBoundary);
+registerMooseObjectAliased("ThermalHydraulicsApp",
+                           PhysicsGeneralFlowBoundary,
+                           "GeneralFlowBoundary");
 
 InputParameters
 PhysicsGeneralFlowBoundary::validParams()

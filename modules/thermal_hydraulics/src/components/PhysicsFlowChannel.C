@@ -12,7 +12,7 @@
 #include "PhysicsHeatTransferBase.h"
 #include "ThermalHydraulicsApp.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsFlowChannel);
+registerMooseObjectAliased("ThermalHydraulicsApp", PhysicsFlowChannel, "FlowChannel");
 
 InputParameters
 PhysicsFlowChannel::validParams()

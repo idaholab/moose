@@ -10,7 +10,7 @@
 #include "PhysicsFreeBoundary.h"
 #include "FlowModelSinglePhase.h"
 
-registerMooseObject("ThermalHydraulicsApp", PhysicsFreeBoundary);
+registerMooseObjectAliased("ThermalHydraulicsApp", PhysicsFreeBoundary, "FreeBoundary");
 
 InputParameters
 PhysicsFreeBoundary::validParams()
