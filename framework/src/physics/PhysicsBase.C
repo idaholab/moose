@@ -71,6 +71,7 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
   addRequiredPhysicsTask("init_physics");
   addRequiredPhysicsTask("copy_vars_physics");
   addRequiredPhysicsTask("check_integrity_early_physics");
+  addRequiredPhysicsTask("check_integrity");
 }
 
 void
@@ -147,6 +148,8 @@ PhysicsBase::act()
     addExecutors();
   else if (_current_task == "check_integrity_early_physics")
     checkIntegrityEarly();
+  else if (_current_task == "check_integrity")
+    checkIntegrity();
 
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
@@ -310,7 +313,11 @@ PhysicsBase::checkIntegrityEarly() const
                "single system name for all variables. Current you have '" +
                    std::to_string(_system_names.size()) + "' systems specified for '" +
                    std::to_string(_solver_var_names.size()) + "' solver variables.");
+}
 
+void
+PhysicsBase::checkIntegrity() const
+{
   // Check that each variable is present in the expected system
   unsigned int var_i = 0;
   for (const auto & var_name : _solver_var_names)

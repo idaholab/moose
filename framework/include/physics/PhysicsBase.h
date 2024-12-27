@@ -22,7 +22,8 @@
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
   registerMooseAction(app_name, derived_name, "init_physics");                                     \
   registerMooseAction(app_name, derived_name, "copy_vars_physics");                                \
-  registerMooseAction(app_name, derived_name, "check_integrity_early_physics")
+  registerMooseAction(app_name, derived_name, "check_integrity_early_physics");                    \
+  registerMooseAction(app_name, derived_name, "check_integrity")
 
 /**
  * Base class to help creating an entire physics
@@ -210,6 +211,8 @@ private:
   void initializePhysics();
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
+  /// Additional checks performed once ----
+  virtual void checkIntegrity() const;
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
