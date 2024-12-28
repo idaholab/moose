@@ -245,8 +245,10 @@ RhieChowMassFlux::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                         const FaceInfo & fi,
                                         const Moose::StateArg & time,
                                         const THREAD_ID /*tid*/,
-                                        bool /*subtract_mesh_velocity*/) const
+                                        bool libmesh_dbg_var(subtract_mesh_velocity)) const
 {
+  mooseAssert(!subtract_mesh_velocity, "RhieChowMassFlux does not support moving meshes yet!");
+
   if (m != Moose::FV::InterpMethod::RhieChow)
     mooseError("Interpolation methods other than Rhie-Chow are not supported!");
   if (time.state != Moose::currentState().state)
