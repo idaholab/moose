@@ -312,14 +312,6 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     // We clear the gradient caches of the velocity variables since the deviatoric terms will
     // need the updated cell gradients. This will also help the turbulence routines which will
     // need the latest cell gradients.
-    for (auto system_i : index_range(_momentum_systems))
-      _momentum_systems[system_i]->residualSetup();
-  }
-
-  for (const auto system_i : index_range(_momentum_systems))
-  {
-    NonlinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
     _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
