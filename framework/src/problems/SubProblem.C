@@ -1221,12 +1221,15 @@ SubProblem::initialSetup()
       mooseAssert(non_ad_functor->wrapsNull() == ad_functor->wrapsNull(), "These must agree");
       const auto functor_name = removeSubstring(functor_wrapper_name, "wraps_");
       if (non_ad_functor->wrapsNull())
+      {
+        showFunctors(true);
         mooseError(
             "No functor ever provided with name '",
             functor_name,
             "', which was requested by '",
             MooseUtils::join(libmesh_map_find(_functor_to_requestors, functor_wrapper_name), ","),
             "'.");
+      }
       if (true_functor_type == TrueFunctorIs::NONAD ? non_ad_functor->ownsWrappedFunctor()
                                                     : ad_functor->ownsWrappedFunctor())
         mooseError("Functor envelopes should not own the functors they wrap, but '",
@@ -1236,15 +1239,29 @@ SubProblem::initialSetup()
 }
 
 void
-SubProblem::showFunctors() const
+SubProblem::showFunctors(bool show_actual_only) const
 {
-  _console << "[DBG] Wrapped functors found in Subproblem" << std::endl;
-  std::string functor_names = "[DBG] ";
+  if (!show_actual_only)
+  {
+    _console << "[DBG] Wrapped functors found in Subproblem" << std::endl;
+    std::string functor_names = "";
+    for (const auto & functor_pair : _functors[0])
+      functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
+    if (functor_names.size())
+      functor_names.pop_back();
+    _console << ConsoleUtils::formatString(functor_names, "[DBG] ") << std::endl;
+  }
+  _console << "[DBG] Actual functors found in Subproblem" << std::endl;
+  std::string functor_names = "";
   for (const auto & functor_pair : _functors[0])
-    functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
+  {
+    const auto & [true_functor_type, non_ad_functor, ad_functor] = functor_pair.second;
+    if (!non_ad_functor->wrapsNull())
+      functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
+  }
   if (functor_names.size())
     functor_names.pop_back();
-  _console << functor_names << std::endl;
+  _console << ConsoleUtils::formatString(functor_names, "[DBG] ") << std::endl;
 }
 
 void
