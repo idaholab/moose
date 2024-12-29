@@ -1,0 +1,228 @@
+# Tests that a flow channel can run with Steady executioner and be set up using Physics
+#
+# Note that this solve may fail to converge based on initial guess. For example,
+# having a guess with velocity set to zero will fail to converge.
+
+[FluidProperties]
+  [fp1]
+    type = IdealGasFluidProperties
+    gamma = 1.4
+  []
+  [fp2]
+    type = StiffenedGasFluidProperties
+    gamma = 2.35
+    cv = 1816.0
+    q = -1.167e6
+    p_inf = 1.0e9
+    q_prime = 0
+  []
+[]
+
+[FunctorMaterials]
+  [functor_fluid_props_1]
+    type = GeneralFunctorFluidProps
+    fp = fp1
+    T_fluid = 500
+    pressure = 'pressure'
+    characteristic_length = 1
+    porosity = 1
+    speed = 1 # Re unused
+    block = 'pipe1'
+  []
+  [functor_fluid_props_2]
+    type = GeneralFunctorFluidProps
+    fp = fp2
+    T_fluid = 500
+    pressure = 'pressure'
+    characteristic_length = 1
+    porosity = 1
+    speed = 1 # Re unused
+    block = 'pipe2'
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+    add_functor_materials = true
+    add_regular_materials = false
+  []
+[]
+
+
+[Physics]
+  [ThermalHydraulics]
+    [WeaklyCompressibleFlow]
+      [all]
+        velocity_interpolation = 'average'
+      []
+    []
+  []
+[]
+
+[Components]
+  [inlet1]
+    type = InletMassFlowRateTemperature
+    input = 'pipe1:in'
+    m_dot = 2
+    T = 500
+  []
+
+  [pipe1]
+    type = FlowChannel
+    position = '0 0 0'
+    orientation = '1 0 0'
+    gravity_vector = '0 0 0'
+    length = 1.0
+    n_elems = 50
+    A = 1.0
+
+    initial_T = 300
+    initial_p = 1e5
+    initial_vel = 1
+
+    physics = 'all'
+    f = 10.0
+    closures = simple_closures
+    fp = fp1
+  []
+
+  [outlet1]
+    type = Outlet
+    input = 'pipe1:out'
+    p = 2e5
+  []
+
+  [inlet2]
+    type = InletMassFlowRateTemperature
+    input = 'pipe2:in'
+    m_dot = 2
+    T = 500
+  []
+
+  [pipe2]
+    type = FlowChannel
+    position = '0 1 0'
+    orientation = '1 0 0'
+    gravity_vector = '0 0 0'
+    length = 1.0
+    n_elems = 50
+    A = 1.0
+
+    # easier initial guess
+    initial_T = 480
+    initial_p = 1.8e5
+    initial_vel = 0.1
+
+    physics = 'all'
+    f = 10.0
+    closures = simple_closures
+    fp = fp2
+  []
+
+  [outlet2]
+    type = Outlet
+    input = 'pipe2:out'
+    p = 2e5
+  []
+[]
+
+[Preconditioning]
+  [pc]
+    type = SMP
+    full = true
+  []
+[]
+
+[Executioner]
+  type = Transient
+
+  num_steps = 3
+
+  solve_type = NEWTON
+  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-7
+  nl_max_its = 15
+
+  l_tol = 1e-3
+  l_max_its = 10
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
+  [Quadrature]
+    type = GAUSS
+    order = SECOND
+  []
+[]
+
+[Outputs]
+  exodus = true
+[]
+
+
+[Postprocessors]
+  [pressure_left]
+    type = SideAverageValue
+    variable = pressure
+    boundary = pipe1:out
+    execute_on = 'initial timestep_end'
+  []
+  [pressure_right]
+    type = SideAverageValue
+    variable = pressure
+    boundary = pipe1:in
+    execute_on = 'initial timestep_end'
+  []
+  [mass_right]
+    type = VolumetricFlowRate
+    boundary = pipe1:out
+    vel_x = vel_x
+    advected_quantity = 'rho'
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    execute_on = 'initial timestep_end'
+  []
+  [vel_right]
+    type = SideAverageValue
+    variable = 'vel_x'
+    boundary = 'pipe1:in'
+  []
+  # wont match vel_right because of pressure difference
+  [vel_left]
+    type = SideAverageValue
+    variable = 'vel_x'
+    boundary = 'pipe1:out'
+  []
+
+  [pressure_left_2]
+    type = SideAverageValue
+    variable = pressure
+    boundary = pipe2:out
+    execute_on = 'initial timestep_end'
+  []
+  [pressure_right_2]
+    type = SideAverageValue
+    variable = pressure
+    boundary = pipe2:in
+    execute_on = 'initial timestep_end'
+  []
+  [mass_right_2]
+    type = VolumetricFlowRate
+    boundary = pipe2:out
+    vel_x = vel_x
+    advected_quantity = 'rho'
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    execute_on = 'initial timestep_end'
+  []
+  [vel_right_2]
+    type = SideAverageValue
+    variable = 'vel_x'
+    boundary = 'pipe2:in'
+  []
+  # wont match vel_right because of pressure difference
+  [vel_left_2]
+    type = SideAverageValue
+    variable = 'vel_x'
+    boundary = 'pipe2:out'
+  []
+[]
