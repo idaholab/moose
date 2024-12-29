@@ -338,7 +338,8 @@ THMWCNSFVFluidHeatTransferPhysics::addHeatTransferKernels()
     else if (heat_flux_type == THMWCNSFVFluidHeatTransferPhysics::FixedHeatFlux)
     {
       for (const auto & block : component.getFlowChannelSubdomains())
-        addExternalHeatSource(block, component.getWallHeatFluxName(), volume_surface_adjustment);
+        addExternalHeatSource(
+            block, component.getParam<MooseFunctorName>("q_wall"), volume_surface_adjustment);
     }
     else
       mooseAssert(false, "Heat flux type not implemented");

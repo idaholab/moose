@@ -330,6 +330,23 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       _sim->addMaterial(class_name, genName(comp_name, "rdg_3egn_mat"), params);
     }
   }
+
+  // Convert functor from heat flux boundaries to expected material properties
+  for (const auto & [comp_name, heat_flux_type] : _heat_transfer_types)
+  {
+    const auto & comp = _sim->getComponentByName<PhysicsHeatTransferBase>(comp_name);
+
+    if (heat_flux_type == ThermalHydraulicsFlowPhysics::FixedHeatFlux)
+    {
+      const std::string class_name = "MaterialFunctorConverter";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
+      params.set<std::vector<MooseFunctorName>>("functors_in") = {
+          comp.getParam<MooseFunctorName>("q_wall")};
+      params.set<std::vector<MaterialPropertyName>>("ad_props_out") = {comp.getWallHeatFluxName()};
+      _sim->addMaterial(class_name, genName(name(), comp.name(), "q_wall_material"), params);
+    }
+  }
 }
 
 void
@@ -772,8 +789,11 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
           params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
           params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
           params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
+          // TODO check real naming convention
           _sim->addBoundaryCondition(
-              class_name, genName(name(), i, var_names[j] + ":" + class_name), params);
+              class_name,
+              genName(name() + ":" + boundary_names[i], i, var_names[j] + ":" + class_name),
+              params);
         }
     }
   }
