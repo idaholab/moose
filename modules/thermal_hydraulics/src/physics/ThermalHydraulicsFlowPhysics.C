@@ -85,7 +85,7 @@ ThermalHydraulicsFlowPhysics::addCommonInitialConditions()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto & comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
     if (flow_channel->isParamValid("A") && !_app.isRestarting())
     {
       const std::vector<SubdomainName> & block = flow_channel->getSubdomainNames();
@@ -122,7 +122,7 @@ ThermalHydraulicsFlowPhysics::addCommonMaterials()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto & comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
     // add material property equal to one, useful for dummy multiplier values
     {
       const std::string class_name = "ConstantMaterial";

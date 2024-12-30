@@ -600,3 +600,18 @@ THMWCNSFVFlowPhysics::changeMeshFaceAndElemInfo()
     }
   }
 }
+
+void
+THMWCNSFVFlowPhysics::checkIntegrity() const
+{
+  // Check that closures on components are creating the materials we need
+  // Not all components have closures: check every type supported
+  for (const auto flow_channel : _flow_channels)
+  {
+    const auto & closures = flow_channel->getClosures();
+    if (!closures->createsFunctorMaterials())
+      closures->paramError("add_functor_materials",
+                           "Should add functor materials for this closure to work with Physics '" +
+                               name() + "'");
+  }
+}

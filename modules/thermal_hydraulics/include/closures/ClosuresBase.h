@@ -29,6 +29,8 @@ class Factory;
 class ClosuresBase : public MooseObject, public LoggingInterface, public NamingInterface
 {
 public:
+  static InputParameters validParams();
+
   ClosuresBase(const InputParameters & params);
 
   /**
@@ -85,6 +87,11 @@ public:
   {
   }
 
+  /// Return whether this closure is set to create regular materials
+  bool createsRegularMaterials() const { return _add_regular_materials; }
+  /// Return whether this closure is set to create functors materials
+  bool createsFunctorMaterials() const { return _add_functor_materials; }
+
 protected:
   /**
    * Adds an arbitrary zero-value material
@@ -127,7 +134,4 @@ protected:
   bool _add_regular_materials;
   /// Whether to add functor materials for every material used in the closure
   bool _add_functor_materials;
-
-public:
-  static InputParameters validParams();
 };

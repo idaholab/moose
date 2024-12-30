@@ -25,6 +25,7 @@ public:
 private:
   virtual void initializePhysicsAdditional() override;
   virtual void actOnAdditionalTasks() override;
+  virtual void checkIntegrity() const override;
 
   virtual void addSolverVariables() override;
   virtual void addAuxiliaryVariables() override;

@@ -10,6 +10,7 @@
 #include "THMVACESinglePhaseFlowPhysics.h"
 #include "THMProblem.h"
 #include "SlopeReconstruction1DInterface.h"
+#include "ClosuresBase.h"
 
 // For implementing component-specific behavior
 #include "FlowChannelBase.h"
@@ -150,7 +151,7 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
 
     if (flow_channel->isParamValid("initial_p") && flow_channel->isParamValid("initial_T") &&
         flow_channel->isParamValid("initial_vel"))
@@ -291,7 +292,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
     {
       std::string class_name = "ADFluidProperties3EqnMaterial";
       InputParameters params = _factory.getValidParams(class_name);
@@ -356,7 +357,7 @@ THMVACESinglePhaseFlowPhysics::addFEKernels()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
     // Density equation (transient term + advection term)
     if (flow_channel->problemIsTransient())
     {
@@ -452,7 +453,7 @@ THMVACESinglePhaseFlowPhysics::addDGKernels()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
     // mass
     const std::string class_name = "ADNumericalFlux3EqnDGKernel";
     InputParameters params = _factory.getValidParams(class_name);
@@ -484,7 +485,7 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
-    const auto comp_name = _component_names[i];
+    const auto & comp_name = flow_channel->name();
     if (_output_vector_velocity)
     {
       // Vector-valued velocity
@@ -837,5 +838,20 @@ THMVACESinglePhaseFlowPhysics::addHeatTransferKernels()
     }
     else
       mooseAssert(false, "Heat flux type not implemented");
+  }
+}
+
+void
+THMVACESinglePhaseFlowPhysics::checkIntegrity() const
+{
+  // Check that closures on components are creating the materials we need
+  // Not all components have closures: check every type supported
+  for (const auto flow_channel : _flow_channels)
+  {
+    const auto & closures = flow_channel->getClosures();
+    if (!closures->createsRegularMaterials())
+      closures->paramError("add_regular_materials",
+                           "Should add regular materials for this closure to work with Physics '" +
+                               name() + "'");
   }
 }
