@@ -1,0 +1,125 @@
+[Tests]
+    issues = ''
+    design = 'Pipe.md'
+    [wcnsfv]
+        requirement = 'The system shall be able to model flow along a pipe '
+        [g_not_aligned_plus_x]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='1 0 0'
+                        Components/pipe/gravity_vector='0 0 10'
+                        Outputs/file_base='wcnsfv_grav_disaligned'"
+            csvdiff = 'wcnsfv_grav_disaligned.csv'
+            detail = 'oriented along the positive X axis, and not aligned with the gravity vector'
+        []
+        [g_not_aligned_minux_x]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='-1 0 0'
+                        Components/pipe/gravity_vector='0 0 10'
+                        Outputs/file_base='wcnsfv_grav_disaligned'"
+            csvdiff = 'wcnsfv_grav_disaligned.csv'
+            detail = 'oriented along the negative X axis, and not aligned with the gravity vector'
+            recover = false
+        []
+        [g_not_aligned_plus_y]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 1 0'
+                        Components/pipe/gravity_vector='0 0 10'
+                        Outputs/file_base='wcnsfv_grav_disaligned'"
+            csvdiff = 'wcnsfv_grav_disaligned.csv'
+            detail = 'oriented along the positive Y axis, and not aligned with the gravity vector'
+            recover = false
+        []
+        [g_not_aligned_minux_y]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 -1 0'
+                        Components/pipe/gravity_vector='0 0 10'
+                        Outputs/file_base='wcnsfv_grav_disaligned'"
+            csvdiff = 'wcnsfv_grav_disaligned.csv'
+            detail = 'oriented along the negative Y axis, and not aligned with the gravity vector'
+            recover = false
+        []
+        [g_not_aligned_plus_z]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 0 1'
+                        Components/pipe/gravity_vector='0 10 0'
+                        Outputs/file_base='wcnsfv_grav_disaligned'"
+            csvdiff = 'wcnsfv_grav_disaligned.csv'
+            detail = 'oriented along the positive Z axis, and not aligned with the gravity vector'
+            recover = false
+        []
+        [g_not_aligned_minux_z]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 0 -1'
+                        Components/pipe/gravity_vector='0 10 0'
+                        Outputs/file_base='wcnsfv_grav_disaligned'"
+            csvdiff = 'wcnsfv_grav_disaligned.csv'
+            detail = 'oriented along the negative Z axis, and not aligned with the gravity vector'
+            recover = false
+        []
+        [g_aligned_plus_x]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='1 0 0'
+                        Components/pipe/gravity_vector='-10 0 0'
+                        Outputs/file_base='wcnsfv_grav_aligned'"
+            csvdiff = 'wcnsfv_grav_aligned.csv'
+            detail = 'oriented along the positive X axis, opposite the gravity vector'
+        []
+        [g_aligned_minux_x]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='-1 0 0'
+                        Components/pipe/gravity_vector='10 0 0'
+                        Outputs/file_base='wcnsfv_grav_aligned'"
+            csvdiff = 'wcnsfv_grav_aligned.csv'
+            detail = 'oriented along the negative X axis, opposite the gravity vector'
+            recover = false
+        []
+        [g_aligned_plus_y]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 1 0'
+                        Components/pipe/gravity_vector='0 -10 0'
+                        Outputs/file_base='wcnsfv_grav_aligned'"
+            csvdiff = 'wcnsfv_grav_aligned.csv'
+            detail = 'oriented along the positive Y axis, opposite the gravity vector'
+            recover = false
+        []
+        [g_aligned_minux_y]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 -1 0'
+                        Components/pipe/gravity_vector='0 10 0'
+                        Outputs/file_base='wcnsfv_grav_aligned'"
+            csvdiff = 'wcnsfv_grav_aligned.csv'
+            detail = 'oriented along the negative Y axis, opposite the gravity vector'
+            recover = false
+        []
+        [g_aligned_plus_z]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 0 1'
+                        Components/pipe/gravity_vector='0 0 -10'
+                        Outputs/file_base='wcnsfv_grav_aligned'"
+            csvdiff = 'wcnsfv_grav_aligned.csv'
+            detail = 'oriented along the positive Z axis, opposite the gravity vector'
+            recover = false
+        []
+        [g_aligned_minux_z]
+            type = CSVDiff
+            input = 'wcnsfv_single_channel.i'
+            cli_args = "Components/pipe/orientation='0 0 -1'
+                        Components/pipe/gravity_vector='0 0 10'
+                        Outputs/file_base='wcnsfv_grav_aligned'"
+            csvdiff = 'wcnsfv_grav_aligned.csv'
+            detail = 'oriented along the negativee Z axis, opposite the gravity vector'
+            recover = false
+        []
+    []
+[]
