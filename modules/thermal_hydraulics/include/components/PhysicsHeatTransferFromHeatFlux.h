@@ -25,4 +25,6 @@ public:
   virtual void addMooseObjects() override;
 
   virtual bool isTemperatureType() const override;
+
+  const MooseFunctorName getWallHeatFluxFunctorName() const override;
 };

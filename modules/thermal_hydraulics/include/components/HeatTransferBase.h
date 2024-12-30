@@ -52,6 +52,14 @@ public:
   const MaterialPropertyName & getWallHeatFluxName() const;
 
   /**
+   * Returns the name of a functor that can provide the wall heat flux
+   *
+   * @return The name of wall heat flux functor
+   * Returns a copy because we might need a conversion
+   */
+  virtual const MooseFunctorName getWallHeatFluxFunctorName() const;
+
+  /**
    * Returns whether this heat transfer is specified by temperature, rather than heat flux
    *
    * @return true if the heat transfer is specified by temperature, false otherwise

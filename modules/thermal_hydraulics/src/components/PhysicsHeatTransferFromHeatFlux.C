@@ -49,3 +49,9 @@ PhysicsHeatTransferFromHeatFlux::isTemperatureType() const
 {
   return false;
 }
+
+const MooseFunctorName
+PhysicsHeatTransferFromHeatFlux::getWallHeatFluxFunctorName() const
+{
+  return getParam<MooseFunctorName>("q_wall");
+}

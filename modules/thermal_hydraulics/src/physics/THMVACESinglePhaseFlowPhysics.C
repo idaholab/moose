@@ -343,7 +343,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<SubdomainName>>("block") = comp.getFlowChannelSubdomains();
       params.set<std::vector<MooseFunctorName>>("functors_in") = {
-          comp.getParam<MooseFunctorName>("q_wall")};
+          comp.getWallHeatFluxFunctorName()};
       params.set<std::vector<MaterialPropertyName>>("ad_props_out") = {comp.getWallHeatFluxName()};
       _sim->addMaterial(class_name, genName(name(), comp.name(), "q_wall_material"), params);
     }

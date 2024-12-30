@@ -174,6 +174,12 @@ HeatTransferBase::getWallHeatFluxName() const
   return _q_wall_name;
 }
 
+const MooseFunctorName
+HeatTransferBase::getWallHeatFluxFunctorName() const
+{
+  mooseError("Not implemented for this component type. Maybe it does not leverage functors?");
+}
+
 const UserObjectName &
 HeatTransferBase::getFluidPropertiesName() const
 {

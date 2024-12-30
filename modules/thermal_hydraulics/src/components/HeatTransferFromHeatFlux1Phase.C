@@ -58,3 +58,9 @@ HeatTransferFromHeatFlux1Phase::isTemperatureType() const
 {
   return false;
 }
+
+const MooseFunctorName
+HeatTransferFromHeatFlux1Phase::getWallHeatFluxFunctorName() const
+{
+  return _q_wall_fn_name;
+}
