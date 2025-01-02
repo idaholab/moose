@@ -1,7 +1,7 @@
 #include "AddMFEMPreconditionerAction.h"
 #include "MFEMProblem.h"
 
-registerMooseAction("PlatypusApp", AddMFEMPreconditionerAction, "add_mfem_preconditioner");
+registerMooseAction("MooseApp", AddMFEMPreconditionerAction, "add_mfem_preconditioner");
 
 InputParameters
 AddMFEMPreconditionerAction::validParams()
