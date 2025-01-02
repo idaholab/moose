@@ -405,6 +405,38 @@ addActionTypes(Syntax & syntax)
                            "(check_integrity)"
                            "(create_application_block)");
   // clang-format on
+
+#ifdef MOOSE_MFEM_ENABLED
+  registerTask("add_mfem_problem_operator", true);
+  addTaskDependency("add_mfem_problem_operator", "init_mesh");
+  addTaskDependency("add_variable", "add_mfem_problem_operator");
+  addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
+  addTaskDependency("add_kernel", "add_mfem_problem_operator");
+
+  // add FESpaces
+  registerMooseObjectTask("add_mfem_fespaces", MFEMFESpace, false);
+  appendMooseObjectTask("add_mfem_fespaces", MFEMFECollection);
+  addTaskDependency("add_variable", "add_mfem_fespaces");
+  addTaskDependency("add_aux_variable", "add_mfem_fespaces");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
+  addTaskDependency("add_kernel", "add_mfem_fespaces");
+
+  // set mesh FE space
+  registerTask("set_mesh_fe_space", true);
+  addTaskDependency("set_mesh_fe_space", "add_variable");
+  addTaskDependency("set_mesh_fe_space", "init_mesh");
+
+  // add preconditioning.
+  registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
+  addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_operator");
+  addTaskDependency("add_mfem_preconditioner", "add_variable");
+
+  // add solver.
+  registerMooseObjectTask("add_mfem_solver", MFEMSolverBase, true);
+  addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
+  addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
+#endif
 }
 
 /**
@@ -658,6 +690,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // Application Block System
   registerSyntax("CreateApplicationBlockAction", "Application");
+
+#ifdef MOOSE_MFEM_ENABLED
+  registerSyntaxTask("AddFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
+  registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
+  registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
+#endif
 
   addActionTypes(syntax);
 }
