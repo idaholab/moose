@@ -621,6 +621,8 @@ LIBPNG_INCLUDES
 LIBPNG_LIBS
 LIBPNG
 PKG_CONFIG
+mfem_library
+mfem_support
 libtorch_library
 libtorch_support
 target_alias
@@ -667,6 +669,7 @@ ac_user_opts='
 enable_option_checking
 with_derivative_size
 with_libtorch
+with_mfem
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1292,6 +1295,8 @@ Optional Packages:
                           Specify the size of the derivative backing array
   --with-libtorch[=ARG]   Specify if libtorch support should be enabled
                           [ARG=yes or libtorch directory]
+  --with-mfem[=ARG]       Specify if mfem support should be enabled [ARG=yes
+                          or mfem directory]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
 moose home page: <https://mooseframework.inl.gov>.
@@ -1824,6 +1829,47 @@ printf "%s\n" "#define LIBTORCH_DIR $libtorch_library" >>confdefs.h
 
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Libtorch library path: $libtorch_library" >&5
 printf "%s\n" "Libtorch library path: $libtorch_library" >&6; }
+
+fi
+
+
+# Check whether --with-mfem was given.
+if test ${with_mfem+y}
+then :
+  withval=$with_mfem; mfem_support=yes mfem_library="$withval"
+else $as_nop
+  mfem_support=no
+fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: configuring with mfem support: $mfem_support" >&5
+printf "%s\n" "configuring with mfem support: $mfem_support" >&6; }
+
+if test "$mfem_support" = yes
+then :
+
+
+printf "%s\n" "#define MFEM_ENABLED 1" >>confdefs.h
+
+        mfem_support=true
+
+        if test "$mfem_library" = yes
+then :
+
+                    if test "${MFEM_DIR+set}" = set
+then :
+  mfem_library="${MFEM_DIR}"
+else $as_nop
+  mfem_library="$ac_pwd/framework/contrib/mfem"
+fi
+
+fi
+
+printf "%s\n" "#define MFEM_DIR $mfem_library" >>confdefs.h
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: MFEM library path: $mfem_library" >&5
+printf "%s\n" "MFEM library path: $mfem_library" >&6; }
 
 fi
 
