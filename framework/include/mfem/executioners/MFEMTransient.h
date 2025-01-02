@@ -7,7 +7,6 @@ class MFEMTransient : public MFEMExecutioner
 public:
   static InputParameters validParams();
 
-  MFEMTransient() = default;
   explicit MFEMTransient(const InputParameters & params);
   ~MFEMTransient() override = default;
 
