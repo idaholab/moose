@@ -1,4 +1,5 @@
 #include "equation_system.h"
+#include "libmesh/int_range.h"
 
 namespace platypus
 {
@@ -93,7 +94,7 @@ void
 EquationSystem::ApplyBoundaryConditions(platypus::BCMap & bc_map)
 {
   _ess_tdof_lists.resize(_test_var_names.size());
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
     // Set default value of gridfunction used in essential BC. Values
@@ -156,7 +157,7 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   _h_blocks.DeleteAll();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
   // Form diagonal blocks.
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
     auto blf = _blfs.Get(test_var_name);
@@ -171,10 +172,10 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   }
 
   // Form off-diagonal blocks
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    for (int j = 0; j < _test_var_names.size(); j++)
+    for (const auto j : index_range(_test_var_names))
     {
       auto trial_var_name = _test_var_names.at(j);
 
@@ -199,10 +200,10 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     }
   }
   // Sync memory
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
-    trueX.GetBlock(0).SyncAliasMemory(trueX);
-    trueRHS.GetBlock(0).SyncAliasMemory(trueRHS);
+    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
   }
 
   // Create monolithic matrix
@@ -226,7 +227,7 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 }
 
 mfem::Operator &
-EquationSystem::GetGradient(const mfem::Vector & u) const
+EquationSystem::GetGradient(const mfem::Vector &) const
 {
   return *_jacobian;
 }
@@ -235,7 +236,7 @@ void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    platypus::GridFunctions & gridfunctions)
 {
-  for (int i = 0; i < _trial_var_names.size(); i++)
+  for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
@@ -245,8 +246,8 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 
 void
 EquationSystem::Init(platypus::GridFunctions & gridfunctions,
-                     const platypus::FESpaces & fespaces,
-                     platypus::BCMap & bc_map,
+                     const platypus::FESpaces &,
+                     platypus::BCMap &,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -274,7 +275,7 @@ void
 EquationSystem::BuildLinearForms(platypus::BCMap & bc_map)
 {
   // Register linear forms
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
     _lfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
@@ -306,7 +307,7 @@ void
 EquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
 {
   // Register bilinear forms
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
@@ -337,11 +338,11 @@ EquationSystem::BuildMixedBilinearForms()
   // have a kernel
 
   // Create mblf for each test/trial pair
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
     auto test_mblfs = std::make_shared<platypus::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
-    for (int j = 0; j < _test_var_names.size(); j++)
+    for (const auto j : index_range(_test_var_names))
     {
       auto trial_var_name = _test_var_names.at(j);
 
@@ -432,7 +433,7 @@ TimeDependentEquationSystem::BuildBilinearForms(platypus::BCMap & bc_map)
   EquationSystem::BuildBilinearForms(bc_map);
 
   // Build and assemble bilinear forms acting on time derivatives
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
 
@@ -493,7 +494,7 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   _h_blocks.DeleteAll();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
   // Form diagonal blocks.
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
     auto td_blf = _td_blfs.Get(test_var_name);

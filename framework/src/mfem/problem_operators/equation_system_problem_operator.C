@@ -18,7 +18,7 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 }
 
 void
-EquationSystemProblemOperator::Solve(mfem::Vector & X)
+EquationSystemProblemOperator::Solve(mfem::Vector &)
 {
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 

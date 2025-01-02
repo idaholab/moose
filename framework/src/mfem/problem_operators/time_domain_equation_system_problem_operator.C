@@ -23,7 +23,7 @@ TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 
 void
 TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
-                                                       const mfem::Vector & X,
+                                                       const mfem::Vector & /*X*/,
                                                        mfem::Vector & dX_dt)
 {
   dX_dt = 0.0;

@@ -19,7 +19,7 @@ MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : MFEMSolverBase(pa
 }
 
 void
-MFEMSuperLU::constructSolver(const InputParameters & parameters)
+MFEMSuperLU::constructSolver(const InputParameters &)
 {
   _solver =
       std::make_shared<platypus::SuperLUSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());

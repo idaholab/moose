@@ -7,7 +7,6 @@ class MFEMSteady : public MFEMExecutioner
 public:
   static InputParameters validParams();
 
-  MFEMSteady() = default;
   explicit MFEMSteady(const InputParameters & params);
   ~MFEMSteady() override = default;
 
@@ -26,6 +25,5 @@ protected:
   unsigned int _output_iteration_number;
 
 private:
-  bool _last_solve_converged;
   std::unique_ptr<platypus::ProblemOperator> _problem_operator{nullptr};
 };
