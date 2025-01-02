@@ -345,3 +345,16 @@ share/
 
 # clangd cache data
 .cache
+
+# MFEM output
+OutputData
+!**/gold/**/OutputData
+!**/gold/**/OutputData/**/*.e
+!**/gold/**/OutputData/**/*.e-s*
+!**/gold/**/OutputData/**/*.csv
+!**/gold/**/OutputData/**/*.csv.*
+!**/gold/**/OutputData/**/*.vtk
+!**/gold/**/OutputData/**/*.vtu
+!**/gold/**/OutputData/**/*.pvtu
+!**/gold/**/OutputData/**/*.xml*
+!**/gold/**/OutputData/**/*.json*
