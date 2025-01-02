@@ -51,3 +51,7 @@
 	path = framework/contrib/mfem
     url = ../../mfem/mfem.git
     update = none
+[submodule "framework/contrib/conduit"]
+	path = framework/contrib/conduit
+	url = https://github.com/LLNL/conduit.git
+    update = none
