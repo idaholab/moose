@@ -31,7 +31,7 @@
 
 [Models]
   [spatial_velocity_gradient]
-    type = R2IncrementalRate
+    type = R2IncrementToRate
     variable = 'forces/spatial_velocity_increment'
     time = 'forces/t'
     rate = 'forces/spatial_velocity_gradient'
