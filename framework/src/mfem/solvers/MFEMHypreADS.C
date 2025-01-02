@@ -21,7 +21,7 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreADS::constructSolver(const InputParameters & parameters)
+MFEMHypreADS::constructSolver(const InputParameters &)
 {
   _preconditioner = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   _preconditioner->SetPrintLevel(getParam<int>("print_level"));

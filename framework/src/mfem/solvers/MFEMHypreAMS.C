@@ -25,7 +25,7 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreAMS::constructSolver(const InputParameters & parameters)
+MFEMHypreAMS::constructSolver(const InputParameters &)
 {
   _preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
