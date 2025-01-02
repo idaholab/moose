@@ -1,5 +1,7 @@
 #include "MFEMBoundaryCondition.h"
+#include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mesh_extras.hpp"
+#include "libmesh/restore_warnings.h"
 
 InputParameters
 MFEMBoundaryCondition::validParams()

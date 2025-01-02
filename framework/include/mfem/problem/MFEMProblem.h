@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
+#include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
+#include "libmesh/restore_warnings.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
