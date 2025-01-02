@@ -4,8 +4,9 @@ MOOSE_HEADER_SYMLINKS ?= true
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch
+IGNORE_CONTRIB_INC ?= libtorch mfem
 ENABLE_LIBTORCH ?= false
+ENABLE_MFEM ?= false
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -120,6 +121,34 @@ ifeq ($(ENABLE_LIBTORCH),true)
 
   else
     $(error ERROR! Cannot locate any dynamic libraries of libtorch. Make sure to install libtorch (manually or using scripts/setup_libtorch.sh) and to run the configure --with-libtorch before compiling moose!)
+  endif
+endif
+
+#
+# Conditional parts if the user wants to compile MOOSE with mfem
+#
+ifeq ($(ENABLE_MFEM),true)
+	MFEM_LIB := libmfem.$(lib_suffix)
+	MFEM_COMMON_LIB := libmfem-common.$(lib_suffix)
+
+  ifneq ($(and $(wildcard $(MFEM_DIR)/lib/$(MFEM_LIB)), $(wildcard $(MFEM_DIR)/lib/$(MFEM_COMMON_LIB))),)
+    # Enabling parts that have MFEM dependencies
+    libmesh_CXXFLAGS += -DMFEM_ENABLED
+
+    # Adding the include directories
+	libmesh_CXXFLAGS += -I$(MFEM_DIR)/include
+
+    # Dynamically linking with the available MFEM library
+	ifeq ($(shell uname -s),Darwin)
+		libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
+	else
+	  libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
+	endif
+
+    libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
+
+  else
+    $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem and to run the configure --with-mfem before compiling moose!)
   endif
 endif
 
