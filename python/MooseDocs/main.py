@@ -22,7 +22,7 @@ from .common import log
 def command_line_options():
     """
     The main command line parser, this creates the main parser and calls the
-    calls the command_line_options method for each command.
+    command_line_options method for each command.
     """
     desc = "MooseDocs: A utility to build MOOSE documentation from a single source."
     parser = argparse.ArgumentParser(description=desc)
