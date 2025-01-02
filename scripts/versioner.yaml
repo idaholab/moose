@@ -77,7 +77,9 @@ packages:
       - conda/tools/conda_build_config.yaml
       - conda/moose-dev/meta.yaml
       - conda/moose-dev/conda_build_config.yaml
+      - framework/contrib/mfem
       - scripts/setup_libtorch.sh
+      - scripts/update_and_rebuild_mfem.sh
   libmesh-vtk:
     dependencies:
       - mpi
