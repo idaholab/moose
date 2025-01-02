@@ -1,6 +1,6 @@
 #include "MFEMVectorDomainLFKernel.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorDomainLFKernel);
+registerMooseObject("MooseApp", MFEMVectorDomainLFKernel);
 
 InputParameters
 MFEMVectorDomainLFKernel::validParams()

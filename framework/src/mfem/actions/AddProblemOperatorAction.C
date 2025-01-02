@@ -1,6 +1,6 @@
 #include "AddProblemOperatorAction.h"
 
-registerMooseAction("PlatypusApp", AddProblemOperatorAction, "add_mfem_problem_operator");
+registerMooseAction("MooseApp", AddProblemOperatorAction, "add_mfem_problem_operator");
 
 InputParameters
 AddProblemOperatorAction::validParams()

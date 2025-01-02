@@ -1,6 +1,6 @@
 #include "MFEMVectorFunctionNormalIntegratedBC.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorFunctionNormalIntegratedBC);
+registerMooseObject("MooseApp", MFEMVectorFunctionNormalIntegratedBC);
 
 InputParameters
 MFEMVectorFunctionNormalIntegratedBC::validParams()

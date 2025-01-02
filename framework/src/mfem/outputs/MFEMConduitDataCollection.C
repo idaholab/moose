@@ -1,6 +1,6 @@
 #include "MFEMConduitDataCollection.h"
 
-registerMooseObject("PlatypusApp", MFEMConduitDataCollection);
+registerMooseObject("MooseApp", MFEMConduitDataCollection);
 
 InputParameters
 MFEMConduitDataCollection::validParams()
