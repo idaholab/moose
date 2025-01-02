@@ -1,5 +1,5 @@
 AC_INIT([moose], [0.9.0], [https://github.com/idaholab/moose/discussions], [moose], [https://mooseframework.inl.gov])
-AC_PREREQ([2.69])
+AC_PREREQ([2.71])
 
 # Infer the source directory as the path to the ./configure script
 srcdir=`dirname $0`
@@ -23,7 +23,7 @@ AC_MSG_RESULT(---------------------------------------------)
 AC_CONFIG_MACRO_DIR([m4])
 
 # Create a temporary file with e.g. SPARSE_AD
-AC_CONFIG_HEADER(framework/include/base/MooseConfig.h.tmp:framework/include/base/MooseConfig.h.in)
+AC_CONFIG_HEADERS([framework/include/base/MooseConfig.h.tmp:framework/include/base/MooseConfig.h.in])
 # Prefixes everything in the temporary file with MOOSE_, e.g. MOOSE_SPARSE_AD
 AX_PREFIX_CONFIG_H(framework/include/base/MooseConfig.h,MOOSE,framework/include/base/MooseConfig.h.tmp)
 
