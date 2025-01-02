@@ -1,5 +1,7 @@
 #pragma once
+#include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
+#include "libmesh/restore_warnings.h"
 #include "MFEMProblemData.h"
 #include "problem_operator_interface.h"
 

@@ -10,7 +10,9 @@
 #pragma once
 #include "FileMesh.h"
 #include "libmesh/face_quad4.h"
-#include "mfem.hpp"
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
 
 /**
  * MFEMMesh
