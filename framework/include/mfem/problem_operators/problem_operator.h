@@ -16,7 +16,7 @@ public:
 
   void SetGridFunctions() override;
 
-  virtual void Solve(mfem::Vector & X) {}
+  virtual void Solve(mfem::Vector & /*X*/) {}
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}
 };
 

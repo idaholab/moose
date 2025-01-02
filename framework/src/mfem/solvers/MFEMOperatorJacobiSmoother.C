@@ -19,7 +19,7 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 }
 
 void
-MFEMOperatorJacobiSmoother::constructSolver(const InputParameters & parameters)
+MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 {
   _preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
 }

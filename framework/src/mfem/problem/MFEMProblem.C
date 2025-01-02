@@ -108,7 +108,7 @@ MFEMProblem::addMaterial(const std::string & kernel_name,
                          InputParameters & parameters)
 {
   FEProblemBase::addUserObject(kernel_name, name, parameters);
-  MFEMMaterial & mfem_material(getUserObject<MFEMMaterial>(name));
+  getUserObject<MFEMMaterial>(name);
 }
 
 void
