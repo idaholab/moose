@@ -60,7 +60,7 @@
     prop_names = 'gravitational_force_density'
     prop_values = '0.0 0.0 -5e-3'
     block = 2
-  []  
+  []
 []
 
 [Kernels]
@@ -74,7 +74,7 @@
     type = MFEMVectorDomainLFKernel
     variable = displacement
     vector_coefficient = gravitational_force_density
-  []  
+  []
 []
 
 [Preconditioner]
