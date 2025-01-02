@@ -56,7 +56,7 @@
     type = MFEMTimeDerivativeMassKernel
     variable = temperature
     coefficient = volumetric_heat_capacity
-  []  
+  []
 []
 
 [Preconditioner]
