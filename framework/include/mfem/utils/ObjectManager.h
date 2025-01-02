@@ -3,7 +3,9 @@
 #include <memory>
 #include <tuple>
 
-#include "mfem.hpp"
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
 
 namespace platypus
 {

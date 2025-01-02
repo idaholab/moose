@@ -1,6 +1,8 @@
 #include "MFEMVariable.h"
 #include "MooseVariableBase.h"
-#include "mfem.hpp"
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
 
 registerMooseObject("PlatypusApp", MFEMVariable);
 
