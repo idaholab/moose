@@ -58,6 +58,28 @@ AS_IF([test "$libtorch_support" = yes],
         AC_MSG_RESULT([Libtorch library path: $libtorch_library])
       ])
 
+AC_ARG_WITH(mfem,
+            AS_HELP_STRING([--with-mfem@<:@=ARG@:>@],[Specify if mfem support should be enabled @<:@ARG=yes or mfem directory@:>@]),
+            [mfem_support=yes mfem_library="$withval"],
+            [mfem_support=no])
+
+AC_MSG_RESULT([configuring with mfem support: $mfem_support])
+
+AS_IF([test "$mfem_support" = yes],
+      [
+        AC_DEFINE(MFEM_ENABLED, 1, [Whether to use mfem-related code or not])
+        AC_SUBST([mfem_support],[true])
+        AS_IF([test "$mfem_library" = yes],
+              [
+                    AS_IF([test "${MFEM_DIR+set}" = set],
+                          [mfem_library="${MFEM_DIR}"],
+                          [mfem_library="$ac_pwd/framework/contrib/mfem"])
+              ])
+        AC_DEFINE_UNQUOTED(MFEM_DIR, [$mfem_library], [The directory where mfem is installed])
+        AC_SUBST([mfem_library])
+        AC_MSG_RESULT([MFEM library path: $mfem_library])
+      ])
+
 AC_PATH_TOOL(PKG_CONFIG,pkg-config)
 if test x$PKG_CONFIG != x; then
   AC_SUBST(LIBPNG)

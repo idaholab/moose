@@ -3,3 +3,5 @@ libPNG_INCLUDE := @LIBPNG_INCLUDES@
 PREFIX         := @prefix@
 ENABLE_LIBTORCH := @libtorch_support@
 LIBTORCH_DIR := @libtorch_library@
+ENABLE_MFEM := @mfem_support@
+MFEM_DIR := @mfem_library@
