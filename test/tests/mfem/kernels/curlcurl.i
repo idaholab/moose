@@ -1,5 +1,5 @@
 # Definite Maxwell problem solved with Nedelec elements of the first kind
-# based on MFEM Example 3.  
+# based on MFEM Example 3.
 
 [Mesh]
   type = MFEMMesh
@@ -67,7 +67,7 @@
 
     symbol_names = kappa
     symbol_values = 3.1415926535
-  []  
+  []
 []
 
 [BCs]
@@ -102,7 +102,7 @@
     type = MFEMVectorFEDomainLFKernel
     variable = e_field
     function = forcing_field
-  []    
+  []
 []
 
 [Preconditioner]
@@ -115,7 +115,7 @@
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = ams
-  l_tol = 1e-6  
+  l_tol = 1e-6
 []
 
 [Executioner]
