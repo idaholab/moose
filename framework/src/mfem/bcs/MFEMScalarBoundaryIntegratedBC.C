@@ -1,6 +1,6 @@
 #include "MFEMScalarBoundaryIntegratedBC.h"
 
-registerMooseObject("PlatypusApp", MFEMScalarBoundaryIntegratedBC);
+registerMooseObject("MooseApp", MFEMScalarBoundaryIntegratedBC);
 
 InputParameters
 MFEMScalarBoundaryIntegratedBC::validParams()

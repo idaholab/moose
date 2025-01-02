@@ -2,7 +2,7 @@
 #include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMOperatorJacobiSmoother);
+registerMooseObject("MooseApp", MFEMOperatorJacobiSmoother);
 
 InputParameters
 MFEMOperatorJacobiSmoother::validParams()

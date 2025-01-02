@@ -1,6 +1,6 @@
 #include "SetMeshFESpaceAction.h"
 
-registerMooseAction("PlatypusApp", SetMeshFESpaceAction, "set_mesh_fe_space");
+registerMooseAction("MooseApp", SetMeshFESpaceAction, "set_mesh_fe_space");
 
 InputParameters
 SetMeshFESpaceAction::validParams()

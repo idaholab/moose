@@ -1,6 +1,6 @@
 #include "MFEMSteady.h"
 
-registerMooseObject("PlatypusApp", MFEMSteady);
+registerMooseObject("MooseApp", MFEMSteady);
 
 InputParameters
 MFEMSteady::validParams()

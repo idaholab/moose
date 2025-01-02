@@ -1,6 +1,6 @@
 #include "MFEMVisItDataCollection.h"
 
-registerMooseObject("PlatypusApp", MFEMVisItDataCollection);
+registerMooseObject("MooseApp", MFEMVisItDataCollection);
 
 InputParameters
 MFEMVisItDataCollection::validParams()
