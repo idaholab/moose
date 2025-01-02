@@ -110,13 +110,14 @@ private:
   std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _properties;
   ObjectManager<T> & _manager;
 
-  PWData emptyPWData(std::shared_ptr<T> coeff)
+  PWData emptyPWData(std::shared_ptr<T> /*coeff*/)
   {
     return std::make_tuple(this->_manager.template make<Tpw>(),
                            std::map<const std::string, std::shared_ptr<T>>());
   }
-  void
-  checkPWData(std::shared_ptr<T> coeff, std::shared_ptr<Tpw> existing_pw, const std::string & name)
+  void checkPWData(std::shared_ptr<T> /*coeff*/,
+                   std::shared_ptr<Tpw> /* existing_pw*/,
+                   const std::string & /*name*/)
   {
   }
 };

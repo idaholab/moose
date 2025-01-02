@@ -30,7 +30,7 @@ MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
 }
 
 void
-MFEMCGSolver::constructSolver(const InputParameters & parameters)
+MFEMCGSolver::constructSolver(const InputParameters &)
 {
   auto preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_preconditioner);
 

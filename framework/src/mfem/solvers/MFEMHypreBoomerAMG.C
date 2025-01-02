@@ -30,7 +30,7 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 }
 
 void
-MFEMHypreBoomerAMG::constructSolver(const InputParameters & parameters)
+MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 {
   _solver = std::make_shared<mfem::HypreBoomerAMG>();
 

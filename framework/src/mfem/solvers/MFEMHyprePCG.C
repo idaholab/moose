@@ -30,7 +30,7 @@ MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
 }
 
 void
-MFEMHyprePCG::constructSolver(const InputParameters & parameters)
+MFEMHyprePCG::constructSolver(const InputParameters &)
 {
   auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner);
 

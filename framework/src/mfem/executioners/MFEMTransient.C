@@ -41,7 +41,7 @@ MFEMTransient::constructProblemOperator()
 }
 
 void
-MFEMTransient::step(double dt, int it) const
+MFEMTransient::step(double dt, int) const
 {
   // Check if current time step is final
   if (_t + dt >= _t_final - dt / 2)

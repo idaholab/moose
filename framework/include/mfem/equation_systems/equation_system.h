@@ -96,6 +96,7 @@ public:
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
 
   // Update variable from solution vector after solve
+  using mfem::Operator::RecoverFEMSolution;
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   platypus::GridFunctions & gridfunctions);
 
