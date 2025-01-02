@@ -1,7 +1,7 @@
 #include "MFEMConvectiveHeatFluxBC.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMConvectiveHeatFluxBC);
+registerMooseObject("MooseApp", MFEMConvectiveHeatFluxBC);
 
 InputParameters
 MFEMConvectiveHeatFluxBC::validParams()

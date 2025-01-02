@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 
-registerMooseObject("PlatypusApp", MFEMProblem);
+registerMooseObject("MooseApp", MFEMProblem);
 
 InputParameters
 MFEMProblem::validParams()

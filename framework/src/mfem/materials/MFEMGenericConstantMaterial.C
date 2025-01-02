@@ -1,6 +1,6 @@
 #include "MFEMGenericConstantMaterial.h"
 
-registerMooseObject("PlatypusApp", MFEMGenericConstantMaterial);
+registerMooseObject("MooseApp", MFEMGenericConstantMaterial);
 
 InputParameters
 MFEMGenericConstantMaterial::validParams()

@@ -1,6 +1,6 @@
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorFEWeakDivergenceKernel);
+registerMooseObject("MooseApp", MFEMVectorFEWeakDivergenceKernel);
 
 InputParameters
 MFEMVectorFEWeakDivergenceKernel::validParams()

@@ -1,7 +1,7 @@
 #include "AddMFEMSolverAction.h"
 #include "MFEMProblem.h"
 
-registerMooseAction("PlatypusApp", AddMFEMSolverAction, "add_mfem_solver");
+registerMooseAction("MooseApp", AddMFEMSolverAction, "add_mfem_solver");
 
 InputParameters
 AddMFEMSolverAction::validParams()

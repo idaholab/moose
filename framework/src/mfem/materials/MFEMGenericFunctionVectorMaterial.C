@@ -1,7 +1,7 @@
 #include "MFEMGenericFunctionVectorMaterial.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMGenericFunctionVectorMaterial);
+registerMooseObject("MooseApp", MFEMGenericFunctionVectorMaterial);
 
 InputParameters
 MFEMGenericFunctionVectorMaterial::validParams()

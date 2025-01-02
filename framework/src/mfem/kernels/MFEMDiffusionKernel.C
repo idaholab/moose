@@ -1,7 +1,7 @@
 #include "MFEMDiffusionKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMDiffusionKernel);
+registerMooseObject("MooseApp", MFEMDiffusionKernel);
 
 InputParameters
 MFEMDiffusionKernel::validParams()

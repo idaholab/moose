@@ -1,6 +1,6 @@
 #include "MFEMLinearElasticityKernel.h"
 
-registerMooseObject("PlatypusApp", MFEMLinearElasticityKernel);
+registerMooseObject("MooseApp", MFEMLinearElasticityKernel);
 
 InputParameters
 MFEMLinearElasticityKernel::validParams()

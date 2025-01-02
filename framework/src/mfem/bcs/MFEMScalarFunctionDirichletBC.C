@@ -1,6 +1,6 @@
 #include "MFEMScalarFunctionDirichletBC.h"
 
-registerMooseObject("PlatypusApp", MFEMScalarFunctionDirichletBC);
+registerMooseObject("MooseApp", MFEMScalarFunctionDirichletBC);
 
 InputParameters
 MFEMScalarFunctionDirichletBC::validParams()

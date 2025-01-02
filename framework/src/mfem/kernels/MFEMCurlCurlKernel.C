@@ -1,7 +1,7 @@
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMCurlCurlKernel);
+registerMooseObject("MooseApp", MFEMCurlCurlKernel);
 
 InputParameters
 MFEMCurlCurlKernel::validParams()

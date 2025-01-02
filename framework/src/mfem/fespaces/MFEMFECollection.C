@@ -1,6 +1,6 @@
 #include "MFEMFECollection.h"
 
-registerMooseObject("PlatypusApp", MFEMFECollection);
+registerMooseObject("MooseApp", MFEMFECollection);
 
 InputParameters
 MFEMFECollection::validParams()

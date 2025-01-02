@@ -4,7 +4,7 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 
-registerMooseObject("PlatypusApp", MFEMVariable);
+registerMooseObject("MooseApp", MFEMVariable);
 
 InputParameters
 MFEMVariable::validParams()

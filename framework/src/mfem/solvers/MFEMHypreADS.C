@@ -1,7 +1,7 @@
 #pragma once
 #include "MFEMHypreADS.h"
 
-registerMooseObject("PlatypusApp", MFEMHypreADS);
+registerMooseObject("MooseApp", MFEMHypreADS);
 
 InputParameters
 MFEMHypreADS::validParams()

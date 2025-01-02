@@ -1,7 +1,7 @@
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMFESpace);
+registerMooseObject("MooseApp", MFEMFESpace);
 
 InputParameters
 MFEMFESpace::validParams()

@@ -1,6 +1,6 @@
 #include "MFEMParaViewDataCollection.h"
 
-registerMooseObject("PlatypusApp", MFEMParaViewDataCollection);
+registerMooseObject("MooseApp", MFEMParaViewDataCollection);
 
 InputParameters
 MFEMParaViewDataCollection::validParams()

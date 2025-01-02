@@ -1,6 +1,6 @@
 #include "MFEMTimeDerivativeMassKernel.h"
 
-registerMooseObject("PlatypusApp", MFEMTimeDerivativeMassKernel);
+registerMooseObject("MooseApp", MFEMTimeDerivativeMassKernel);
 
 InputParameters
 MFEMTimeDerivativeMassKernel::validParams()
