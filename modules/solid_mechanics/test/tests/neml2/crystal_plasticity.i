@@ -64,6 +64,7 @@ N = 2
     type = ComputeLagrangianCauchyCustomStress
     custom_cauchy_stress = 'neml2_cauchy_stress'
     custom_cauchy_jacobian = 'neml2_cauchy_jacobian'
+    large_kinematics = true
   []
   [initial_orientation]
     type = GenericConstantRealVectorValue
