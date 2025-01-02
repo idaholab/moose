@@ -2,7 +2,7 @@
 #include "MFEMCGSolver.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMCGSolver);
+registerMooseObject("MooseApp", MFEMCGSolver);
 
 InputParameters
 MFEMCGSolver::validParams()

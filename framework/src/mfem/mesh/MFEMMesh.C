@@ -9,7 +9,7 @@
 
 #include "MFEMMesh.h"
 
-registerMooseObject("PlatypusApp", MFEMMesh);
+registerMooseObject("MooseApp", MFEMMesh);
 
 InputParameters
 MFEMMesh::validParams()

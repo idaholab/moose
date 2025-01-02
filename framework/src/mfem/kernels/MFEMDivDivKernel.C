@@ -1,7 +1,7 @@
 #include "MFEMDivDivKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMDivDivKernel);
+registerMooseObject("MooseApp", MFEMDivDivKernel);
 
 InputParameters
 MFEMDivDivKernel::validParams()

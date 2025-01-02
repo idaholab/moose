@@ -1,6 +1,6 @@
 #include "AddFESpaceAction.h"
 
-registerMooseAction("PlatypusApp", AddFESpaceAction, "add_mfem_fespaces");
+registerMooseAction("MooseApp", AddFESpaceAction, "add_mfem_fespaces");
 
 InputParameters
 AddFESpaceAction::validParams()

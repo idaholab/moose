@@ -1,7 +1,7 @@
 #include "MFEMMaterial.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMMaterial);
+registerMooseObject("MooseApp", MFEMMaterial);
 
 InputParameters
 MFEMMaterial::validParams()

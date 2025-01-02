@@ -2,7 +2,7 @@
 #include "MFEMHypreFGMRES.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMHypreFGMRES);
+registerMooseObject("MooseApp", MFEMHypreFGMRES);
 
 InputParameters
 MFEMHypreFGMRES::validParams()

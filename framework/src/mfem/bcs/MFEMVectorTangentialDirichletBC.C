@@ -1,6 +1,6 @@
 #include "MFEMVectorTangentialDirichletBC.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorTangentialDirichletBC);
+registerMooseObject("MooseApp", MFEMVectorTangentialDirichletBC);
 
 InputParameters
 MFEMVectorTangentialDirichletBC::validParams()

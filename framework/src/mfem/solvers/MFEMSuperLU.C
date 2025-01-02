@@ -2,7 +2,7 @@
 #include "MFEMSuperLU.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMSuperLU);
+registerMooseObject("MooseApp", MFEMSuperLU);
 
 InputParameters
 MFEMSuperLU::validParams()

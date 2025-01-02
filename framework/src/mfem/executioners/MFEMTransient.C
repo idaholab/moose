@@ -1,6 +1,6 @@
 #include "MFEMTransient.h"
 
-registerMooseObject("PlatypusApp", MFEMTransient);
+registerMooseObject("MooseApp", MFEMTransient);
 
 InputParameters
 MFEMTransient::validParams()

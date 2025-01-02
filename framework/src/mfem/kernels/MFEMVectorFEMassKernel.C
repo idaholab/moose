@@ -1,6 +1,6 @@
 #include "MFEMVectorFEMassKernel.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorFEMassKernel);
+registerMooseObject("MooseApp", MFEMVectorFEMassKernel);
 
 InputParameters
 MFEMVectorFEMassKernel::validParams()

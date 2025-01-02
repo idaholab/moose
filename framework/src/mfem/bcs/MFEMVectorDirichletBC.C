@@ -1,6 +1,6 @@
 #include "MFEMVectorDirichletBC.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorDirichletBC);
+registerMooseObject("MooseApp", MFEMVectorDirichletBC);
 
 InputParameters
 MFEMVectorDirichletBC::validParams()

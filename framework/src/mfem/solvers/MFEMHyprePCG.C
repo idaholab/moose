@@ -2,7 +2,7 @@
 #include "MFEMHyprePCG.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMHyprePCG);
+registerMooseObject("MooseApp", MFEMHyprePCG);
 
 InputParameters
 MFEMHyprePCG::validParams()

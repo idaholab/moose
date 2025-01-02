@@ -2,7 +2,7 @@
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMHypreBoomerAMG);
+registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
 
 InputParameters
 MFEMHypreBoomerAMG::validParams()
