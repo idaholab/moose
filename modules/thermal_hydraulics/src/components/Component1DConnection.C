@@ -162,3 +162,11 @@ Component1DConnection::getBoundaryNormals() const
 
   return _normals;
 }
+
+const std::vector<RealVectorValue> &
+Component1DConnection::getConnectedComponentDirections() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _directions;
+}

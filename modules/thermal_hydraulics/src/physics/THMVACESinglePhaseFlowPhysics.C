@@ -143,7 +143,8 @@ THMVACESinglePhaseFlowPhysics::addSolverVariables()
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
     if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
-        junction_type == ThermalHydraulicsFlowPhysics::Pump)
+        junction_type == ThermalHydraulicsFlowPhysics::Pump ||
+        junction_type == ThermalHydraulicsFlowPhysics::ParallelChannels)
     {
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
@@ -187,7 +188,8 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryVariables()
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
     if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
-        junction_type == ThermalHydraulicsFlowPhysics::Pump)
+        junction_type == ThermalHydraulicsFlowPhysics::Pump ||
+        junction_type == ThermalHydraulicsFlowPhysics::ParallelChannels)
     {
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
@@ -346,7 +348,8 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
     if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
-        junction_type == ThermalHydraulicsFlowPhysics::Pump)
+        junction_type == ThermalHydraulicsFlowPhysics::Pump ||
+        junction_type == ThermalHydraulicsFlowPhysics::ParallelChannels)
     {
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
@@ -435,6 +438,8 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       params.set<std::vector<MaterialPropertyName>>("ad_props_out") = {comp.getWallHeatFluxName()};
       _sim->addMaterial(class_name, genName(name(), comp.name(), "q_wall_material"), params);
     }
+    else
+      mooseError("Unsupported heat transfer type ", heat_flux_type);
   }
 
   // Junctions
@@ -444,7 +449,8 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
     if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
-        junction_type == ThermalHydraulicsFlowPhysics::Pump)
+        junction_type == ThermalHydraulicsFlowPhysics::Pump ||
+        junction_type == ThermalHydraulicsFlowPhysics::ParallelChannels)
     {
       // An error message results if there is any block without a material, so
       // until this restriction is removed, we must add a dummy material that
@@ -715,7 +721,10 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
     const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
     const auto & junction_type = _junction_types[i];
 
-    if (junction_type == Volume)
+    if (junction_type == OneToOne)
+    {
+    }
+    else if (junction_type == Volume || junction_type == Pump || junction_type == ParallelChannels)
     {
       const std::vector<std::pair<std::string, VariableName>> quantities = {
           {"pressure", VACE1P::PRESSURE},
@@ -758,7 +767,7 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
     if (!_numerical_flux_names.count(flow_channel->getFluidPropertiesName()))
     {
       _numerical_flux_names[flow_channel->getFluidPropertiesName()] =
-          name() + "_HLLC_3eqn_UO_" + flow_channel->getFluidPropertiesName();
+          genName(name(), "HLLC_3eqn_UO", flow_channel->getFluidPropertiesName());
       _sim->addUserObject(
           class_name,
           libmesh_map_find(_numerical_flux_names, flow_channel->getFluidPropertiesName()),
@@ -803,13 +812,15 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
       params.set<ExecFlagEnum>("execute_on") = junction_execute_on;
       _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
     }
-    else if (junction_type == Volume || junction_type == Pump)
+    else if (junction_type == Volume || junction_type == Pump || junction_type == ParallelChannels)
     {
       std::string class_name;
       if (junction_type == Volume)
         class_name = "ADVolumeJunction1PhaseUserObject";
-      else
+      else if (junction_type == Pump)
         class_name = "ADPump1PhaseUserObject";
+      else if (junction_type == ParallelChannels)
+        class_name = "ADJunctionParallelChannels1PhaseUserObject";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<bool>("use_scalar_variables") = false;
       mooseAssert(comp.getSubdomainNames().size() == 1, "Should have 1 subdomain on that junction");
@@ -839,6 +850,11 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
       {
         params.set<Real>("head") = comp.getParam<Real>("head");
         params.set<Real>("gravity_magnitude") = THM::gravity_const;
+      }
+      else if (junction_type == ParallelChannels)
+      {
+        params.set<std::string>("component_name") = comp.name();
+        params.set<RealVectorValue>("dir_c0") = comp.getConnectedComponentDirections()[0];
       }
       _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
       comp.connectObject(params, comp.getJunctionUOName(), "K");
@@ -920,6 +936,8 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
       comp.connectObject(params, comp.getBoundaryUOName(), "p0");
       comp.connectObject(params, comp.getBoundaryUOName(), "T0");
     }
+    else
+      mooseError("Unsupported inlet boundary type ", boundary_type);
 
     // Boundary flux BC
     addBoundaryFluxBC(comp, comp.getBoundaryUOName());
@@ -974,7 +992,7 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
       _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
     }
     else
-      mooseError("Unimplemented boundary type", boundary_type);
+      mooseError("Unimplemented outlet boundary type", boundary_type);
 
     // Boundary flux BC
     addBoundaryFluxBC(comp, comp.getBoundaryUOName());
@@ -1027,7 +1045,8 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctionBCs()
         std::string class_name;
         if (junction_type == OneToOne)
           class_name = "ADJunctionOneToOne1PhaseBC";
-        else if (junction_type == Volume)
+        else if (junction_type == Volume || junction_type == Pump ||
+                 junction_type == ParallelChannels)
           class_name = "ADVolumeJunction1PhaseBC";
         else
           mooseAssert(false, "Not implemented");
@@ -1037,7 +1056,8 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctionBCs()
         params.set<NonlinearVariableName>("variable") = var_names[j];
         if (junction_type == OneToOne)
           params.set<UserObjectName>("junction_uo") = comp.getJunctionUOName();
-        else if (junction_type == Volume)
+        else if (junction_type == Volume || junction_type == Pump ||
+                 junction_type == ParallelChannels)
         {
           params.set<UserObjectName>("volume_junction_uo") = comp.getJunctionUOName();
           params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
@@ -1108,7 +1128,10 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctionsKernels()
     const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
     const auto & junction_type = _junction_types[i];
 
-    if (junction_type == Volume)
+    if (junction_type == OneToOne)
+    {
+    }
+    else if (junction_type == Volume || junction_type == Pump || junction_type == ParallelChannels)
     {
       // Add scalar kernels for the junction
       std::vector<NonlinearVariableName> var_names = {RHOV, RHOUV, RHOVV, RHOWV, RHOEV};
@@ -1134,6 +1157,8 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctionsKernels()
         }
       }
     }
+    else
+      mooseError("Unsupported junction type ", junction_type);
   }
 }
 

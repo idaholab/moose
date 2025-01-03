@@ -78,7 +78,8 @@ public:
   {
     OneToOne,
     Volume,
-    Pump
+    Pump,
+    ParallelChannels
   };
 
   /**
@@ -105,8 +106,8 @@ public:
 
   enum ScalarFluxWallEnum
   {
-    FixedScalarFlux,
-    FixedScalarValue
+    FixedScalarValue,
+    FixedScalarFlux
   };
 
   /**
