@@ -2,8 +2,10 @@
 #include "MFEMKernel.h"
 
 /*
-(α∇×u, ∇×u')
-*/
+ * \f[
+ * (\alpha \nabla \times u, \nabla \times u')
+ * \f]
+ */
 class MFEMCurlCurlKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:

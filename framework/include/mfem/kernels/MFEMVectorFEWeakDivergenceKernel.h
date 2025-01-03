@@ -2,8 +2,10 @@
 #include "MFEMKernel.h"
 
 /*
-(σ u, ∇ V')
-*/
+ * \f[
+ * (\sigma u, \nabla V')
+ * \f]
+ */
 class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
