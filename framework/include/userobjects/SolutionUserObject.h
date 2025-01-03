@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "GeneralUserObject.h"
+#include "FunctionParserUtils.h"
 
 // Forward declarations
 namespace libMesh
@@ -22,12 +23,13 @@ class MeshFunction;
 template <class T>
 class NumericVector;
 }
+class Function;
 
 /**
  * User object that reads an existing solution from an input file and
  * uses it in the current simulation.
  */
-class SolutionUserObject : public GeneralUserObject
+class SolutionUserObject : public GeneralUserObject, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -321,15 +323,13 @@ protected:
 
   /**
    * Updates the times for interpolating ExodusII data
-   * @param time The new time
    */
-  void updateExodusTimeInterpolation(Real time);
+  void updateExodusTimeInterpolation();
 
   /**
    * Updates the time indices to interpolate between for ExodusII data
-   * @param time The new time
    */
-  bool updateExodusBracketingTimeIndices(Real time);
+  bool updateExodusBracketingTimeIndices();
 
   /**
    * A wrapper method for calling the various MeshFunctions used for reading the data
@@ -453,7 +453,7 @@ protected:
   /// Pointer to second serial solution, used for interpolation
   std::unique_ptr<NumericVector<Number>> _serialized_solution2;
 
-  /// Interpolation time
+  /// Time in the current simulation at which the solution interpolation was last updated
   Real _interpolation_time;
 
   /// Interpolation weight factor
@@ -506,6 +506,12 @@ protected:
 
   /// Map from block names to block IDs. Read from the ExodusII file
   std::map<SubdomainID, SubdomainName> _block_id_to_name;
+
+  /// function parser object for the resudual and on-diagonal Jacobian
+  SymFunctionPtr _time_transformation;
+
+  /// Time at which to sample the solution
+  Real _solution_time;
 
 private:
   static Threads::spin_mutex _solution_user_object_mutex;

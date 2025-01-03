@@ -16,6 +16,7 @@
 #include "MooseUtils.h"
 #include "MooseVariableFE.h"
 #include "RotationMatrix.h"
+#include "Function.h"
 
 // libMesh includes
 #include "libmesh/equation_systems.h"
@@ -36,6 +37,7 @@ SolutionUserObject::validParams()
 {
   // Get the input parameters from the parent class
   InputParameters params = GeneralUserObject::validParams();
+  params += FunctionParserUtils<false>::validParams();
 
   // Add required parameters
   params.addRequiredParam<MeshFileName>(
@@ -86,6 +88,13 @@ SolutionUserObject::validParams()
       0.0,
       "Anticlockwise rotation angle (in degrees) to use for rotation about rotation1_vector.");
 
+  params.addCustomTypeParam<std::string>(
+      "time_transformation",
+      "t",
+      "FunctionExpression",
+      "Expression to transform from current simulation time to time at "
+      "which to sample the solution.");
+
   // following lines build the default_transformation_order
   MultiMooseEnum default_transformation_order(
       "rotation0 translation scale rotation1 scale_multiplier", "translation scale");
@@ -110,6 +119,7 @@ Threads::spin_mutex SolutionUserObject::_solution_user_object_mutex;
 
 SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
+    FunctionParserUtils<false>(parameters),
     _file_type(MooseEnum("xda=0 exodusII=1 xdr=2")),
     _mesh_file(getParam<MeshFileName>("mesh")),
     _es_file(getParam<FileName>("es")),
@@ -137,12 +147,12 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
     _initialized(false)
 {
   // form rotation matrices with the specified angles
-  Real halfPi = std::acos(0.0);
+  Real halfPi = libMesh::pi / 2.0;
   Real a;
   Real b;
 
-  a = std::cos(halfPi * -_rotation0_angle / 90);
-  b = std::sin(halfPi * -_rotation0_angle / 90);
+  a = std::cos(halfPi * -_rotation0_angle / 90.0);
+  b = std::sin(halfPi * -_rotation0_angle / 90.0);
   // the following is an anticlockwise rotation about z
   RealTensorValue rot0_z(a, -b, 0, b, a, 0, 0, 0, 1);
   // form the rotation matrix that will take rotation0_vector to the z axis
@@ -151,8 +161,8 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   // back
   _r0 = vec0_to_z.transpose() * (rot0_z * vec0_to_z);
 
-  a = std::cos(halfPi * -_rotation1_angle / 90);
-  b = std::sin(halfPi * -_rotation1_angle / 90);
+  a = std::cos(halfPi * -_rotation1_angle / 90.0);
+  b = std::sin(halfPi * -_rotation1_angle / 90.0);
   // the following is an anticlockwise rotation about z
   RealTensorValue rot1_z(a, -b, 0, b, a, 0, 0, 0, 1);
   // form the rotation matrix that will take rotation1_vector to the z axis
@@ -164,6 +174,18 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   if (isParamValid("timestep") && getParam<std::string>("timestep") == "-1")
     mooseError("A \"timestep\" of -1 is no longer supported for interpolation. Instead simply "
                "remove this parameter altogether for interpolation");
+
+  // setup parsed expression for the time transformation
+  _time_transformation = std::make_shared<SymFunction>();
+  setParserFeatureFlags(_time_transformation);
+
+  // parse function
+  const auto & expression = getParam<std::string>("time_transformation");
+  if (_time_transformation->Parse(expression, "t") >= 0)
+    mooseError("Invalid parsed function\n", expression, "\n", _time_transformation->ErrorMsg());
+
+  // only parameter is time
+  _func_params.resize(1);
 }
 
 SolutionUserObject::~SolutionUserObject() {}
@@ -344,7 +366,7 @@ SolutionUserObject::readExodusII()
     _es2->init();
 
     // Update the times for interpolation (initially start at 0)
-    updateExodusBracketingTimeIndices(0.0);
+    updateExodusBracketingTimeIndices();
 
     // Copy the solutions from the first system
     for (const auto & var_name : _nodal_variables)
@@ -452,7 +474,7 @@ SolutionUserObject::timestepSetup()
 {
   // Update time interpolation for ExodusII solution
   if (_file_type == 1 && _interpolate_times)
-    updateExodusTimeInterpolation(_t);
+    updateExodusTimeInterpolation();
 }
 
 void
@@ -572,11 +594,11 @@ SolutionUserObject::getSolutionFileType() const
 }
 
 void
-SolutionUserObject::updateExodusTimeInterpolation(Real time)
+SolutionUserObject::updateExodusTimeInterpolation()
 {
-  if (time != _interpolation_time)
+  if (_t != _interpolation_time)
   {
-    if (updateExodusBracketingTimeIndices(time))
+    if (updateExodusBracketingTimeIndices())
     {
 
       for (const auto & var_name : _nodal_variables)
@@ -603,12 +625,12 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
       _es2->update();
       _system2->solution->localize(*_serialized_solution2);
     }
-    _interpolation_time = time;
+    _interpolation_time = _t;
   }
 }
 
 bool
-SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
+SolutionUserObject::updateExodusBracketingTimeIndices()
 {
   if (_file_type != 1)
     mooseError(
@@ -619,7 +641,10 @@ SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
 
   int num_exo_times = _exodus_times->size();
 
-  if (time < (*_exodus_times)[0])
+  _func_params[0] = _t;
+  Real solution_time = evaluate(_time_transformation);
+
+  if (solution_time < (*_exodus_times)[0])
   {
     _exodus_index1 = 0;
     _exodus_index2 = 0;
@@ -629,12 +654,12 @@ SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
   {
     for (int i = 0; i < num_exo_times - 1; ++i)
     {
-      if (time <= (*_exodus_times)[i + 1])
+      if (solution_time <= (*_exodus_times)[i + 1])
       {
         _exodus_index1 = i;
         _exodus_index2 = i + 1;
         _interpolation_factor =
-            (time - (*_exodus_times)[i]) / ((*_exodus_times)[i + 1] - (*_exodus_times)[i]);
+            (solution_time - (*_exodus_times)[i]) / ((*_exodus_times)[i + 1] - (*_exodus_times)[i]);
         break;
       }
       else if (i == num_exo_times - 2)
