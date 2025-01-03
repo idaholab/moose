@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "MoosePassKey.h"
 
+#include <list>
 #include <stdexcept>
 
 /**
@@ -144,7 +145,7 @@ protected:
   std::map<std::string, std::vector<std::size_t>> _element_set;
 
   /// float and int property storage. elements will point to their respective entries in this vector
-  std::vector<std::pair<std::vector<Real>, std::vector<int>>> _properties;
+  std::list<std::pair<std::vector<Real>, std::vector<int>>> _properties;
 
   /// initial condition data
   std::vector<AbaqusInputBlock> _abaqus_ics;
