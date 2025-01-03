@@ -63,7 +63,8 @@ public:
   enum OutletTypeEnum
   {
     FixedPressure,
-    FreeBoundary
+    FreeBoundary,
+    SolidWall
   };
 
   /**

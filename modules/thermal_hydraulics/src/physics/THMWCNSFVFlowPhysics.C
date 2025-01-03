@@ -468,6 +468,14 @@ THMWCNSFVFlowPhysics::addOutletBoundaries()
       for (const auto & boundary_name : comp.getBoundaryNames())
         addOutletBoundary(boundary_name, free_boundary, "");
     }
+    else if (boundary_type == OutletTypeEnum::SolidWall)
+    {
+      // We are trying a Dirichlet of 0 here. An alternative could be one of the wall BCs
+      MooseEnum inlet_type(NSFVBase::getValidEnergyInletTypes(), "fixed-velocity");
+      MooseFunctorName inlet_v = "0";
+      for (const auto & boundary_name : comp.getBoundaryNames())
+        addInletBoundary(boundary_name, inlet_type, inlet_v);
+    }
     else
       mooseError("Unsupported outlet boundary type ", boundary_type);
   }

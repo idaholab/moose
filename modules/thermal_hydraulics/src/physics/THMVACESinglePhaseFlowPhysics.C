@@ -963,6 +963,16 @@ THMVACESinglePhaseFlowPhysics::addOutletBoundaries()
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
     }
+    else if (boundary_type == OutletTypeEnum::SolidWall)
+    {
+      const std::string class_name = "ADBoundaryFlux3EqnGhostWall";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<UserObjectName>("numerical_flux") =
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
+      params.set<Real>("normal") = comp.getNormal();
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
+    }
     else
       mooseError("Unimplemented boundary type", boundary_type);
 
