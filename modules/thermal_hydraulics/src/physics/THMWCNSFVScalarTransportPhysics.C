@@ -199,7 +199,7 @@ THMWCNSFVScalarTransportPhysics::addFVBCs()
   // NOTE: This routine will likely move to the derived class if we implement finite volume
   addInletBoundaries();
   addOutletBoundaries();
-  addFlowJunctions();
+  addFlowJunctionsBCs();
 
   WCNSFVScalarTransportPhysics::addFVBCs();
 }
@@ -249,7 +249,7 @@ THMWCNSFVScalarTransportPhysics::addOutletBoundaries()
 }
 
 void
-THMWCNSFVScalarTransportPhysics::addFlowJunctions()
+THMWCNSFVScalarTransportPhysics::addFlowJunctionsBCs()
 {
   if (_verbose)
     _console << "Adding junction objects for junctions: " << Moose::stringify(_junction_components)

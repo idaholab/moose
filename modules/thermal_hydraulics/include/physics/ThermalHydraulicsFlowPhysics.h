@@ -73,7 +73,8 @@ public:
 
   enum JunctionTypeEnum
   {
-    OneToOne
+    OneToOne,
+    Volume
   };
 
   /**
@@ -137,7 +138,7 @@ protected:
   /// The THM problem
   THMProblem * _sim;
 
-  /// The flow channel component that built this class
+  /// All the flow channel components that this Physics is defined on
   std::vector<const FlowChannelBase *> _flow_channels;
 
   /// The name of the flow components
@@ -177,8 +178,6 @@ private:
   virtual void addInletBoundaries() = 0;
   /// Create the objects for the outlet boundary conditions
   virtual void addOutletBoundaries() = 0;
-  /// Create the objects for the flow junctions
-  virtual void addFlowJunctions() = 0;
 
 public:
   static const std::string AREA;

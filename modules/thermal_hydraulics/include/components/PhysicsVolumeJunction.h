@@ -12,7 +12,7 @@
 #include "PhysicsFlowJunction.h"
 
 /**
- * Junction between 1-phase flow channels that has a non-zero volume, using a Physics-based
+ * Junction between flow channels that has a non-zero volume, using a Physics-based
  * implementation
  */
 class PhysicsVolumeJunction : public PhysicsFlowJunction

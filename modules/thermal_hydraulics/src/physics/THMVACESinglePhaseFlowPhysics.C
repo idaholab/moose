@@ -16,6 +16,7 @@
 #include "FlowChannelBase.h"
 #include "PhysicsFlowBoundary.h"
 #include "PhysicsFlowJunction.h"
+#include "PhysicsVolumeJunction.h"
 #include "PhysicsHeatTransferBase.h"
 
 // TODO: consolidate those at the THMPhysics parent class level
@@ -29,6 +30,11 @@ const std::string VACE1P::PRESSURE = "p";
 const std::string VACE1P::RHOA = "rhoA";
 const std::string VACE1P::RHOEA = "rhoEA";
 const std::string VACE1P::RHOUA = "rhouA";
+const std::string VACE1P::RHOV = "rhoV";
+const std::string VACE1P::RHOEV = "rhoEV";
+const std::string VACE1P::RHOUV = "rhouV";
+const std::string VACE1P::RHOVV = "rhovV";
+const std::string VACE1P::RHOWV = "rhowV";
 const std::string VACE1P::SOUND_SPEED = "c";
 const std::string VACE1P::SPECIFIC_HEAT_CONSTANT_PRESSURE = "cp";
 const std::string VACE1P::SPECIFIC_HEAT_CONSTANT_VOLUME = "cv";
@@ -62,9 +68,16 @@ THMVACESinglePhaseFlowPhysics::validParams()
       "rdg_slope_reconstruction",
       SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
       "Slope reconstruction type for rDG");
-  params.addRequiredParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "scaling_factor_1phase",
+      {1, 1, 1},
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
+  // Note that these are single phase volume-integrated variables (as opposed to area-integrated)
+  // They could be more general than volume junctions
+  params.addParam<std::vector<Real>>(
+      "scaling_factor_volume_junctions",
+      {1, 1, 1, 1, 1},
+      "Scaling factors for the volume junction variables (rhoU, rhouV, rhovV, rhowV, rhoEV)");
 
   params.addRequiredParam<bool>("output_vector_velocity",
                                 "True if velocity is output as a vector field.");
@@ -76,6 +89,8 @@ THMVACESinglePhaseFlowPhysics::THMVACESinglePhaseFlowPhysics(const InputParamete
     ThermalHydraulicsFlowPhysics(params),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase")),
+    _scaling_factors_volume_junctions(
+        getParam<std::vector<Real>>("scaling_factor_volume_junctions")),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
 }
@@ -105,6 +120,7 @@ THMVACESinglePhaseFlowPhysics::addSolverVariables()
 {
   ThermalHydraulicsFlowPhysics::addCommonVariables();
 
+  // Flow channels
   for (const auto flow_channel : _flow_channels)
   {
     const std::vector<SubdomainName> & subdomains = flow_channel->getSubdomainNames();
@@ -118,11 +134,36 @@ THMVACESinglePhaseFlowPhysics::addSolverVariables()
   saveSolverVariableName(RHOUA);
   saveSolverVariableName(RHOEA);
   _derivative_vars = {RHOA, RHOUA, RHOEA};
+
+  // Junctions
+  for (const auto i : index_range(_junction_components))
+  {
+    const auto & junc_name = _junction_components[i];
+    const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
+    const auto & junction_type = _junction_types[i];
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    {
+      const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
+      const auto & subdomains = junc.getSubdomainNames();
+
+      _sim->addSimVariable(
+          true, VACE1P::RHOV, fe_type, subdomains, _scaling_factors_volume_junctions[0]);
+      _sim->addSimVariable(
+          true, VACE1P::RHOUV, fe_type, subdomains, _scaling_factors_volume_junctions[1]);
+      _sim->addSimVariable(
+          true, VACE1P::RHOVV, fe_type, subdomains, _scaling_factors_volume_junctions[2]);
+      _sim->addSimVariable(
+          true, VACE1P::RHOWV, fe_type, subdomains, _scaling_factors_volume_junctions[3]);
+      _sim->addSimVariable(
+          true, VACE1P::RHOEV, fe_type, subdomains, _scaling_factors_volume_junctions[4]);
+    }
+  }
 }
 
 void
 THMVACESinglePhaseFlowPhysics::addAuxiliaryVariables()
 {
+  // Flow channels
   for (const auto flow_channel : _flow_channels)
   {
     const std::vector<SubdomainName> & subdomains = flow_channel->getSubdomainNames();
@@ -141,6 +182,23 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryVariables()
     _sim->addSimVariable(false, TEMPERATURE, _fe_type, subdomains);
     _sim->addSimVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomains);
   }
+
+  // Junctions
+  for (const auto i : index_range(_junction_components))
+  {
+    const auto & junc_name = _junction_components[i];
+    const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
+    const auto & junction_type = _junction_types[i];
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    {
+      const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
+      const auto & subdomains = junc.getSubdomainNames();
+
+      _sim->addSimVariable(false, VACE1P::PRESSURE, fe_type, subdomains);
+      _sim->addSimVariable(false, VACE1P::TEMPERATURE, fe_type, subdomains);
+      _sim->addSimVariable(false, VACE1P::VELOCITY, fe_type, subdomains);
+    }
+  }
 }
 
 void
@@ -148,6 +206,7 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
 {
   ThermalHydraulicsFlowPhysics::addCommonInitialConditions();
 
+  // Flow channels
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
@@ -281,6 +340,34 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
       }
     }
   }
+
+  // Junctions
+  for (const auto i : index_range(_junction_components))
+  {
+    const auto & junc_name = _junction_components[i];
+    const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
+    const auto & junction_type = _junction_types[i];
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    {
+      const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
+      const auto & subdomains = junc.getSubdomainNames();
+      const auto & volume = junc.getParam<Real>("volume");
+      Real initial_pressure, initial_temperature, initial_rho, initial_E;
+      RealVectorValue initial_vel;
+      dynamic_cast<const PhysicsVolumeJunction &>(junc).getInitialConditions(
+          initial_pressure, initial_temperature, initial_rho, initial_E, initial_vel);
+
+      _sim->addConstantIC(VACE1P::RHOV, initial_rho * volume, subdomains);
+      _sim->addConstantIC(VACE1P::RHOUV, initial_rho * initial_vel(0) * volume, subdomains);
+      _sim->addConstantIC(VACE1P::RHOVV, initial_rho * initial_vel(1) * volume, subdomains);
+      _sim->addConstantIC(VACE1P::RHOWV, initial_rho * initial_vel(2) * volume, subdomains);
+      _sim->addConstantIC(VACE1P::RHOEV, initial_rho * initial_E * volume, subdomains);
+
+      _sim->addConstantIC(VACE1P::PRESSURE, initial_pressure, subdomains);
+      _sim->addConstantIC(VACE1P::TEMPERATURE, initial_temperature, subdomains);
+      _sim->addConstantIC(VACE1P::VELOCITY, initial_vel.norm(), subdomains);
+    }
+  }
 }
 
 void
@@ -288,6 +375,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
 {
   ThermalHydraulicsFlowPhysics::addCommonMaterials();
 
+  // Flow channels
   // TODO: unroll the loop and create one material for all flow channels
   for (const auto i : index_range(_flow_channels))
   {
@@ -332,6 +420,7 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
     }
   }
 
+  // Heat transfer components
   // Convert functor from heat flux boundaries to expected material properties
   for (const auto & [comp_name, heat_flux_type] : _heat_transfer_types)
   {
@@ -348,11 +437,33 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       _sim->addMaterial(class_name, genName(name(), comp.name(), "q_wall_material"), params);
     }
   }
+
+  // Junctions
+  for (const auto i : index_range(_junction_components))
+  {
+    const auto & junc_name = _junction_components[i];
+    const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
+    const auto & junction_type = _junction_types[i];
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    {
+      // An error message results if there is any block without a material, so
+      // until this restriction is removed, we must add a dummy material that
+      // computes no material properties.
+
+      const std::string class_name = "GenericConstantMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = junc.getSubdomainNames();
+      params.set<std::vector<std::string>>("prop_names") = {};
+      params.set<std::vector<Real>>("prop_values") = {};
+      _sim->addMaterial(class_name, genName(junc.name(), "dummy_mat"), params);
+    }
+  }
 }
 
 void
 THMVACESinglePhaseFlowPhysics::addFEKernels()
 {
+  // Flow channels
   // TODO: unroll the loop and create one material for all flow channels
   for (const auto i : index_range(_flow_channels))
   {
@@ -444,12 +555,13 @@ THMVACESinglePhaseFlowPhysics::addFEKernels()
   }
 
   addHeatTransferKernels();
+  addFlowJunctionsKernels();
 }
 
 void
 THMVACESinglePhaseFlowPhysics::addDGKernels()
 {
-  // TODO: unroll the loop and create one material for all flow channels
+  // TODO: unroll the loop and create one DG kernel for all flow channels
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
@@ -481,7 +593,8 @@ THMVACESinglePhaseFlowPhysics::addDGKernels()
 void
 THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
 {
-  // TODO: unroll the loop and create one material for all flow channels
+  // Flow channels
+  // TODO: unroll the loop and create one object for all flow channels
   for (const auto i : index_range(_flow_channels))
   {
     const auto flow_channel = _flow_channels[i];
@@ -593,11 +706,46 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryKernels()
       _sim->addAuxKernel(class_name, genName(comp_name, "H_auxkernel"), params);
     }
   }
+
+  // Junctions
+  for (const auto i : index_range(_junction_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _junction_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
+    const auto & junction_type = _junction_types[i];
+
+    if (junction_type == Volume)
+    {
+      const std::vector<std::pair<std::string, VariableName>> quantities = {
+          {"pressure", VACE1P::PRESSURE},
+          {"temperature", VACE1P::TEMPERATURE},
+          {"speed", VACE1P::VELOCITY}};
+      for (const auto & quantity_and_name : quantities)
+      {
+        const std::string class_name = "VolumeJunction1PhaseAux";
+        InputParameters params = _factory.getValidParams(class_name);
+        params.set<AuxVariableName>("variable") = quantity_and_name.second;
+        params.set<MooseEnum>("quantity") = quantity_and_name.first;
+        params.set<Real>("volume") = comp.getParam<Real>("volume");
+        params.set<std::vector<VariableName>>("rhoV") = {VACE1P::RHOV};
+        params.set<std::vector<VariableName>>("rhouV") = {VACE1P::RHOUV};
+        params.set<std::vector<VariableName>>("rhovV") = {VACE1P::RHOVV};
+        params.set<std::vector<VariableName>>("rhowV") = {VACE1P::RHOWV};
+        params.set<std::vector<VariableName>>("rhoEV") = {VACE1P::RHOEV};
+        params.set<UserObjectName>("fp") = comp.getFluidPropertiesName();
+        const std::string obj_name = genName(comp.name(), quantity_and_name.first + "_aux");
+        params.set<std::vector<SubdomainName>>("block") = comp.getSubdomainNames();
+        _sim->addAuxKernel(class_name, obj_name, params);
+      }
+    }
+  }
 }
 
 void
 THMVACESinglePhaseFlowPhysics::addUserObjects()
 {
+  // Flow channels
   // Keep track of which fluid properties we added a flux UO for
   for (const auto i : index_range(_flow_channels))
   {
@@ -617,15 +765,83 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
           params);
     }
   }
+
+  // Junctions
+  for (const auto i : index_range(_junction_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _junction_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
+    const auto & junction_type = _junction_types[i];
+    const auto & boundary_names = comp.getBoundaryNames();
+    const auto & normals = comp.getBoundaryNormals();
+
+    // Junction fluxes should be updated as often as possible
+    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
+    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+    // Add user object for computing and storing the fluxes
+    if (junction_type == OneToOne)
+    {
+      const std::string class_name = "ADJunctionOneToOne1PhaseUserObject";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+      params.set<std::vector<Real>>("normals") = normals;
+      params.set<std::vector<processor_id_type>>("processor_ids") = comp.getProcIds();
+      params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
+      // It is assumed that each channel should have the same numerical flux, so
+      // just use the first one.
+      params.set<UserObjectName>("numerical_flux") =
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
+      params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
+      params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
+      params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
+      params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
+      params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
+      params.set<std::string>("junction_name") = comp_name;
+      params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
+    }
+    else if (junction_type == Volume)
+    {
+      const std::string class_name = "ADVolumeJunction1PhaseUserObject";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<bool>("use_scalar_variables") = false;
+      mooseAssert(comp.getSubdomainNames().size() == 1, "Should have 1 subdomain on that junction");
+      params.set<subdomain_id_type>("junction_subdomain_id") =
+          MooseMeshUtils::getSubdomainID(comp.getSubdomainNames()[0], _mesh->getMesh());
+      params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+      params.set<std::vector<Real>>("normals") = normals;
+      params.set<std::vector<processor_id_type>>("processor_ids") = comp.getConnectedProcessorIDs();
+      params.set<std::vector<UserObjectName>>("numerical_flux_names") = {
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName())};
+      params.set<Real>("volume") = comp.getParam<Real>("volume");
+      params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+      params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
+      params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
+      params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
+      params.set<std::vector<VariableName>>("rhoV") = {VACE1P::RHOV};
+      params.set<std::vector<VariableName>>("rhouV") = {VACE1P::RHOUV};
+      params.set<std::vector<VariableName>>("rhovV") = {VACE1P::RHOVV};
+      params.set<std::vector<VariableName>>("rhowV") = {VACE1P::RHOWV};
+      params.set<std::vector<VariableName>>("rhoEV") = {VACE1P::RHOEV};
+      params.set<Real>("K") = getParam<Real>("K");
+      params.set<Real>("A_ref") = getParam<Real>("A_ref");
+      params.set<UserObjectName>("fp") = comp.getFluidPropertiesName();
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
+      comp.connectObject(params, comp.getJunctionUOName(), "K");
+    }
+  }
 }
 
 void
 THMVACESinglePhaseFlowPhysics::addFEBCs()
 {
-  // NOTE: This routine will likely move to the derived class if we implement finite volume
   addInletBoundaries();
   addOutletBoundaries();
-  addFlowJunctions();
+  addFlowJunctionBCs();
 }
 
 void
@@ -734,7 +950,7 @@ THMVACESinglePhaseFlowPhysics::addBoundaryFluxBC(const PhysicsFlowBoundary & com
 }
 
 void
-THMVACESinglePhaseFlowPhysics::addFlowJunctions()
+THMVACESinglePhaseFlowPhysics::addFlowJunctionBCs()
 {
   for (const auto i : index_range(_junction_components))
   {
@@ -749,54 +965,41 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctions()
     ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
     userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-    // Add user object for computing and storing the fluxes
-    if (junction_type == OneToOne)
-    {
+    // Add BC to each of the connected flow channels
+    const auto var_names = solverVariableNames();
+    for (std::size_t i = 0; i < boundary_names.size(); i++)
+      for (std::size_t j = 0; j < var_names.size(); j++)
       {
-        const std::string class_name = "ADJunctionOneToOne1PhaseUserObject";
+        std::string class_name;
+        if (junction_type == OneToOne)
+          class_name = "ADJunctionOneToOne1PhaseBC";
+        else if (junction_type == Volume)
+          class_name = "ADVolumeJunction1PhaseBC";
+        else
+          mooseAssert(false, "Not implemented");
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
-        params.set<std::vector<Real>>("normals") = normals;
-        params.set<std::vector<processor_id_type>>("processor_ids") = comp.getProcIds();
-        params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
-        // It is assumed that each channel should have the same numerical flux, so
-        // just use the first one.
-        params.set<UserObjectName>("numerical_flux") =
-            libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
-        params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
-        params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary_names[i]};
+        params.set<Real>("normal") = normals[i];
+        params.set<NonlinearVariableName>("variable") = var_names[j];
+        if (junction_type == OneToOne)
+          params.set<UserObjectName>("junction_uo") = comp.getJunctionUOName();
+        else if (junction_type == Volume)
+        {
+          params.set<UserObjectName>("volume_junction_uo") = comp.getJunctionUOName();
+          params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
+          params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
+        }
+        params.set<unsigned int>("connection_index") = i;
         params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
         params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
         params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
-        params.set<std::string>("junction_name") = comp_name;
-        params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
-        params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-        _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
+        params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
+        // TODO check real naming convention
+        _sim->addBoundaryCondition(
+            class_name,
+            genName(name() + "_" + boundary_names[i], i, var_names[j] + "_" + class_name),
+            params);
       }
-
-      // Add BC to each of the connected flow channels
-      const auto var_names = solverVariableNames();
-      for (std::size_t i = 0; i < boundary_names.size(); i++)
-        for (std::size_t j = 0; j < var_names.size(); j++)
-        {
-          const std::string class_name = "ADJunctionOneToOne1PhaseBC";
-          InputParameters params = _factory.getValidParams(class_name);
-          params.set<std::vector<BoundaryName>>("boundary") = {boundary_names[i]};
-          params.set<Real>("normal") = normals[i];
-          params.set<NonlinearVariableName>("variable") = var_names[j];
-          params.set<UserObjectName>("junction_uo") = comp.getJunctionUOName();
-          params.set<unsigned int>("connection_index") = i;
-          params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
-          params.set<std::vector<VariableName>>("rhouA") = {VACE1P::RHOUA};
-          params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
-          params.set<bool>("implicit") = _sim->getImplicitTimeIntegrationFlag();
-          // TODO check real naming convention
-          _sim->addBoundaryCondition(
-              class_name,
-              genName(name() + ":" + boundary_names[i], i, var_names[j] + ":" + class_name),
-              params);
-        }
-    }
   }
 }
 
@@ -838,6 +1041,45 @@ THMVACESinglePhaseFlowPhysics::addHeatTransferKernels()
     }
     else
       mooseAssert(false, "Heat flux type not implemented");
+  }
+}
+
+void
+THMVACESinglePhaseFlowPhysics::addFlowJunctionsKernels()
+{
+  for (const auto i : index_range(_junction_components))
+  {
+    // Get component, which has reference to the controllable parameters
+    const auto & comp_name = _junction_components[i];
+    const auto & comp = _sim->getComponentByName<PhysicsFlowJunction>(comp_name);
+    const auto & junction_type = _junction_types[i];
+
+    if (junction_type == Volume)
+    {
+      // Add scalar kernels for the junction
+      const auto var_names = solverVariableNames();
+      for (std::size_t i = 0; i < 5; i++)
+      {
+        {
+          const std::string class_name = "ADTimeDerivative";
+          InputParameters params = _factory.getValidParams(class_name);
+          params.set<NonlinearVariableName>("variable") = var_names[i];
+          const std::string obj_name = genName(comp.name(), var_names[i], "td");
+          params.set<std::vector<SubdomainName>>("block") = comp.getSubdomainNames();
+          _sim->addKernel(class_name, obj_name, params);
+        }
+        {
+          const std::string class_name = "ADVolumeJunctionAdvectionKernel";
+          InputParameters params = _factory.getValidParams(class_name);
+          params.set<NonlinearVariableName>("variable") = var_names[i];
+          params.set<UserObjectName>("volume_junction_uo") = comp.getJunctionUOName();
+          params.set<unsigned int>("equation_index") = i;
+          const std::string obj_name = genName(comp.name(), var_names[i], "vja_sk");
+          params.set<std::vector<SubdomainName>>("block") = comp.getSubdomainNames();
+          _sim->addKernel(class_name, obj_name, params);
+        }
+      }
+    }
   }
 }
 

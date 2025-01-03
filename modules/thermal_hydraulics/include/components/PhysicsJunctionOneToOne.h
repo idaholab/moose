@@ -29,6 +29,7 @@ public:
   virtual void init() override;
   virtual void check() const override;
   virtual void addMooseObjects() override{};
+  virtual bool hasInitialConditions() const override { return false; }
 
 protected:
   virtual void setupMesh() override;

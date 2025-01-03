@@ -33,6 +33,9 @@ protected:
   /// Scaling factors for each solution variable (rhoA, rhouA, rhoEA)
   const std::vector<Real> _scaling_factors;
 
+  /// Scaling factors for each volume junction variable (rhou, rhouV, rhovV, rhowV, rhoEV)
+  const std::vector<Real> _scaling_factors_volume_junctions;
+
   /// True if we output velocity as a vector-value field, false for outputting velocity as a scalar
   const bool & _output_vector_velocity;
 
@@ -53,13 +56,15 @@ private:
 
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;
-  virtual void addFlowJunctions() override;
+  virtual void addFlowJunctionBCs();
 
   /// Adds the boundary flux boundary condition, which uses the boundary flux user object
   void addBoundaryFluxBC(const PhysicsFlowBoundary & comp,
                          const UserObjectName & boundary_numerical_flux_name);
   /// Adds the kernels to represent a heat transfer term
   void addHeatTransferKernels();
+  /// Adds the kernels to represent a flow junction (volume)
+  void addFlowJunctionsKernels();
 
   virtual void addWallHeatFlux(const std::string & heat_transfer_component,
                                const HeatFluxWallEnum & heat_flux_type) override;
@@ -74,6 +79,11 @@ public:
   static const std::string RHOA;
   static const std::string RHOEA;
   static const std::string RHOUA;
+  static const std::string RHOV;
+  static const std::string RHOEV;
+  static const std::string RHOUV;
+  static const std::string RHOVV;
+  static const std::string RHOWV;
   static const std::string SOUND_SPEED;
   static const std::string SPECIFIC_HEAT_CONSTANT_PRESSURE;
   static const std::string SPECIFIC_HEAT_CONSTANT_VOLUME;

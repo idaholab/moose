@@ -37,7 +37,7 @@ private:
 
   virtual void addInletBoundaries() override;
   virtual void addOutletBoundaries() override;
-  virtual void addFlowJunctions() override;
+  virtual void addFlowJunctionsBCs();
 
   virtual void addWallScalarFlux(const std::string & heat_transfer_component,
                                  const ScalarFluxWallEnum & heat_flux_type) override;

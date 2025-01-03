@@ -22,6 +22,9 @@ public:
 
   PhysicsFlowJunction(const InputParameters & params);
 
+  /// Return whether the flow junction has known initial conditions
+  virtual bool hasInitialConditions() const = 0;
+
 protected:
   virtual void init() override;
   virtual void check() const override;
