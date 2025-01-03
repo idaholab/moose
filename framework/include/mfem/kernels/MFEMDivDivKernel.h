@@ -2,8 +2,10 @@
 #include "MFEMKernel.h"
 
 /*
-(α∇.u, ∇.u')
-*/
+ * \f[
+ * (\alpha \nabla \cdot u, \nabla \cdot u')
+ * \f]
+ */
 class MFEMDivDivKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:

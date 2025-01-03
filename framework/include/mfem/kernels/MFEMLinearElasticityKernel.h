@@ -1,14 +1,18 @@
 #pragma once
 #include "MFEMKernel.h"
 
+// clang-format off
 /*
-(cᵢₖⱼₗ∇uⱼ, ∇vᵢ),
-cᵢₖⱼₗ = λ δᵢₖδⱼₗ + μ (δᵢⱼδₖₗ + δᵢₗδⱼₖ),
-λ = (Eν)/((1-2ν)(1+ν)),
-μ = E/(2(1+ν)),
-E is Young's modulus,
-ν is Poisson's ratio
+ * \f[
+ * (c_{ikjl} \nabla u_j, \nabla v_i),
+ * c_{ikjl} = \lamba \delta_{ik} \delta_{jl} + \mu (\delta_{ij} \delta_{kl} + \delta_{il} \delta_{jk}),
+ * \lambda = (E\nu)/((1-2\nu)(1+\nu)),
+ * \mu = E/(2(1+\nu)),
+ * E is Young's modulus,
+ * \nu is Poisson's ratio
+ * \f]
 */
+// clang-format on
 class MFEMLinearElasticityKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:

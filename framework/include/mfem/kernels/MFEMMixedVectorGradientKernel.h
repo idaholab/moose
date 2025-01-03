@@ -2,8 +2,10 @@
 #include "MFEMKernel.h"
 
 /*
-(σ ∇ V, u')
-*/
+ * \f[
+ * (\sigma \nabla V, u')
+ * \f]
+ */
 class MFEMMixedVectorGradientKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
