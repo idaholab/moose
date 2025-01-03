@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MFEMEssentialBC.h"
-#include "MFEMVectorFunctionCoefficient.h"
 #include "boundary_conditions.h"
 
 class MFEMVectorDirichletBCBase : public MFEMEssentialBC
@@ -13,5 +12,6 @@ public:
 
 protected:
   MFEMVectorDirichletBCBase(const InputParameters & parameters);
-  MFEMVectorCoefficient * _vec_coef{nullptr};
+  std::vector<Real> _vec_value;
+  std::shared_ptr<mfem::VectorCoefficient> _vec_coef{nullptr};
 };

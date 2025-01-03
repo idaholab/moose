@@ -4,15 +4,16 @@ InputParameters
 MFEMVectorDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<UserObjectName>(
-      "vector_coefficient", "The vector MFEM coefficient to use in the Dirichlet condition");
+  params.addRequiredParam<std::vector<Real>>("values",
+                                             "The vector which will be used in the integrated BC");
   return params;
 }
 
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _vec_coef(const_cast<MFEMVectorCoefficient *>(
-        &getUserObject<MFEMVectorCoefficient>("vector_coefficient")))
+    _vec_value(getParam<std::vector<Real>>("values")),
+    _vec_coef(getMFEMProblem().makeVectorCoefficient<mfem::VectorConstantCoefficient>(
+        mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }

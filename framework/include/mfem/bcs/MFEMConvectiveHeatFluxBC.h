@@ -1,6 +1,5 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
-#include "MFEMCoefficient.h"
 
 /*
 (h (T-T_inf), T')
@@ -20,9 +19,7 @@ public:
   virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
 
 protected:
-  std::string _heat_transfer_coef_name;
-  std::string _T_inf_coef_name;
-  mfem::Coefficient & _heat_transfer_coef;
-  mfem::Coefficient & _T_inf_coef;
-  mfem::ProductCoefficient _external_heat_flux_coef;
+  std::shared_ptr<mfem::FunctionCoefficient> _heat_transfer_coef;
+  std::shared_ptr<mfem::Coefficient> _T_inf_coef;
+  std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
 };

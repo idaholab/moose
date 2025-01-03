@@ -1,5 +1,5 @@
 #pragma once
-#include "../common/pfem_extras.hpp"
+#include "mfem/miniapps/common/pfem_extras.hpp"
 #include "MFEMProblemData.h"
 #include "problem_operator_interface.h"
 
@@ -15,7 +15,7 @@ public:
   void SetGridFunctions() override;
 
   virtual void Solve(mfem::Vector & X) {}
-  void Mult(const mfem::Vector & x, mfem::Vector & y) const override {}
+  void Mult(const mfem::Vector &, mfem::Vector &) const override {}
 };
 
 } // namespace platypus

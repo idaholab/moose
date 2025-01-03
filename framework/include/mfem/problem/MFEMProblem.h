@@ -1,11 +1,9 @@
 #pragma once
 #include <map>
-#include "../common/pfem_extras.hpp"
+#include "mfem/miniapps/common/pfem_extras.hpp"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
-#include "MFEMCoefficient.h"
-#include "MFEMVectorCoefficient.h"
 #include "MFEMMaterial.h"
 #include "MFEMVariable.h"
 #include "MFEMBoundaryCondition.h"
@@ -24,12 +22,12 @@ public:
   static InputParameters validParams();
 
   MFEMProblem(const InputParameters & params);
-  virtual ~MFEMProblem(){};
+  virtual ~MFEMProblem() {}
 
   virtual void initialSetup() override;
-  virtual void externalSolve() override{};
-  virtual bool nlConverged(const unsigned int nl_sys_num) override { return true; };
-  virtual void syncSolutions(Direction direction) override{};
+  virtual void externalSolve() override {}
+  virtual bool nlConverged(const unsigned int) override { return true; }
+  virtual void syncSolutions(Direction) override {}
 
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
@@ -49,21 +47,8 @@ public:
 
   void addMaterial(const std::string & kernel_name,
                    const std::string & name,
-                   InputParameters & parameters);
+                   InputParameters & parameters) override;
 
-  /**
-   * Add an MFEM coefficient to the problem.
-   */
-  void addCoefficient(const std::string & user_object_name,
-                      const std::string & name,
-                      InputParameters & parameters);
-
-  /**
-   * Add an MFEM vector coefficient to the problem.
-   */
-  void addVectorCoefficient(const std::string & user_object_name,
-                            const std::string & name,
-                            InputParameters & parameters);
   /**
    * Add an MFEM FESpace to the problem.
    */

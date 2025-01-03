@@ -6,17 +6,19 @@ InputParameters
 MFEMVectorBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
-  params.addRequiredParam<std::string>(
-      "vector_coefficient", "The vector MFEM coefficient which will be used in the integrated BC");
+  params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
+                             "$(\\vec f, \\vec v)_{\\partial\\Omega}$");
+  params.addRequiredParam<std::vector<Real>>(
+      "values", "The vector whose components will be used in the integrated BC");
   return params;
 }
 
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef_name(getParam<std::string>("vector_coefficient")),
-    _vec_coef(const_cast<MFEMVectorCoefficient *>(
-        &getUserObject<MFEMVectorCoefficient>("vector_coefficient")))
+    _vec_value(getParam<std::vector<Real>>("values")),
+    _vec_coef(getMFEMProblem().makeVectorCoefficient<mfem::VectorConstantCoefficient>(
+        mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }
 
@@ -25,7 +27,7 @@ MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParame
 mfem::LinearFormIntegrator *
 MFEMVectorBoundaryIntegratedBC::createLinearFormIntegrator()
 {
-  return new mfem::VectorBoundaryLFIntegrator(*_vec_coef->getVectorCoefficient());
+  return new mfem::VectorBoundaryLFIntegrator(*_vec_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.

@@ -3,6 +3,7 @@
 #include "MFEMHypreFGMRES.h"
 #include "MFEMHyprePCG.h"
 #include "MFEMHypreBoomerAMG.h"
+#include "MFEMHypreADS.h"
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
 #include "MFEMGMRESSolver.h"
@@ -189,6 +190,32 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
   solver_downcast->SetErrorMode(mfem::HypreSolver::ErrorMode::IGNORE_HYPRE_ERRORS);
   ASSERT_NE(solver_downcast.get(), nullptr);
   testDiffusionSolve(*solver_downcast.get(), 1e-5);
+}
+
+/**
+ * Test MFEMHypreADS creates an mfem::HypreADS solver successfully.
+ */
+TEST_F(MFEMSolverTest, MFEMHypreADS)
+{
+  // Build required FESpace
+  InputParameters fespace_params = _factory.getValidParams("MFEMFESpace");
+
+  fespace_params.set<MooseEnum>("fec_order") = "CONSTANT";
+  fespace_params.set<MooseEnum>("fec_type") = "RT";
+
+  // Construct fespace
+  MFEMFESpace & fespace = addObject<MFEMFESpace>("MFEMFESpace", "HDivFESpace", fespace_params);
+
+  // Build required solver inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMHypreADS");
+  solver_params.set<UserObjectName>("fespace") = "HDivFESpace";
+
+  // Construct solver
+  MFEMHypreADS & solver = addObject<MFEMHypreADS>("MFEMHypreADS", "solver1", solver_params);
+
+  // Test MFEMSolver returns a solver of the expected type
+  auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreADS>(solver.getSolver());
+  ASSERT_NE(solver_downcast.get(), nullptr);
 }
 
 /**

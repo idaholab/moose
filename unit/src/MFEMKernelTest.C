@@ -1,8 +1,10 @@
 #include "MFEMObjectUnitTest.h"
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMDiffusionKernel.h"
+#include "MFEMDivDivKernel.h"
 #include "MFEMLinearElasticityKernel.h"
 #include "MFEMMixedVectorGradientKernel.h"
+#include "MFEMVectorDomainLFKernel.h"
 #include "MFEMVectorFEDomainLFKernel.h"
 #include "MFEMVectorFEMassKernel.h"
 #include "MFEMVectorFEWeakDivergenceKernel.h"
@@ -62,6 +64,29 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
 }
 
 /**
+ * Test MFEMDiffusionKernel creates an mfem::DiffusionIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMDivDivKernel)
+{
+  // Build required kernel inputs
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
+  coef_params.set<std::vector<double>>("prop_values") = {2.0};
+  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMDivDivKernel");
+  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<std::string>("coefficient") = "coef1";
+  auto & kernel = addObject<MFEMDivDivKernel>("MFEMDivDivKernel", "kernel1", kernel_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator = dynamic_cast<mfem::DivDivIntegrator *>(kernel.createIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
  * Test MFEMLinearElasticityKernel creates an mfem::ElasticityIntegrator successfully.
  */
 TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
@@ -106,6 +131,30 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::MixedVectorGradientIntegrator *>(kernel.createIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
+ * Test MFEMVectorDomainLFKernel creates an mfem::VectorDomainLFIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMVectorDomainLFKernel)
+{
+  mfem::Vector expected1({2.0, 1.0, 0.0});
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantVectorMaterial");
+  coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
+  coef_params.set<std::vector<Real>>("prop_values") = {expected1[0], expected1[1], expected1[2]};
+  _mfem_problem->addMaterial("MFEMGenericConstantVectorMaterial", "material1", coef_params);
+
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMVectorDomainLFKernel");
+  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<std::string>("vector_coefficient") = "coef1";
+  MFEMVectorDomainLFKernel & kernel =
+      addObject<MFEMVectorDomainLFKernel>("MFEMVectorDomainLFKernel", "kernel1", kernel_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator = dynamic_cast<mfem::VectorDomainLFIntegrator *>(kernel.createIntegrator());
   ASSERT_NE(integrator, nullptr);
   delete integrator;
 }
