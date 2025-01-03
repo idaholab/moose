@@ -148,16 +148,11 @@ THMVACESinglePhaseFlowPhysics::addSolverVariables()
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
 
-      _sim->addSimVariable(
-          true, VACE1P::RHOV, fe_type, subdomains, _scaling_factors_volume_junctions[0]);
-      _sim->addSimVariable(
-          true, VACE1P::RHOUV, fe_type, subdomains, _scaling_factors_volume_junctions[1]);
-      _sim->addSimVariable(
-          true, VACE1P::RHOVV, fe_type, subdomains, _scaling_factors_volume_junctions[2]);
-      _sim->addSimVariable(
-          true, VACE1P::RHOWV, fe_type, subdomains, _scaling_factors_volume_junctions[3]);
-      _sim->addSimVariable(
-          true, VACE1P::RHOEV, fe_type, subdomains, _scaling_factors_volume_junctions[4]);
+      _sim->addSimVariable(true, RHOV, fe_type, subdomains, _scaling_factors_volume_junctions[0]);
+      _sim->addSimVariable(true, RHOUV, fe_type, subdomains, _scaling_factors_volume_junctions[1]);
+      _sim->addSimVariable(true, RHOVV, fe_type, subdomains, _scaling_factors_volume_junctions[2]);
+      _sim->addSimVariable(true, RHOWV, fe_type, subdomains, _scaling_factors_volume_junctions[3]);
+      _sim->addSimVariable(true, RHOEV, fe_type, subdomains, _scaling_factors_volume_junctions[4]);
     }
   }
 }
@@ -893,6 +888,38 @@ THMVACESinglePhaseFlowPhysics::addInletBoundaries()
       comp.connectObject(params, comp.getBoundaryUOName(), "m_dot", "mass_flow_rate");
       comp.connectObject(params, comp.getBoundaryUOName(), "T");
     }
+    else if (boundary_type == InletTypeEnum::VelocityTemperature)
+    {
+      const std::string class_name = "ADBoundaryFlux3EqnGhostVelocityTemperature";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<Real>("vel") = comp.getParam<Real>("vel");
+      params.set<Real>("T") = comp.getParam<Real>("T");
+      params.set<Real>("normal") = comp.getNormal();
+      params.set<bool>("reversible") = comp.isReversible();
+      params.set<UserObjectName>("numerical_flux") =
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
+      params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
+      comp.connectObject(params, comp.getBoundaryUOName(), "vel");
+      comp.connectObject(params, comp.getBoundaryUOName(), "T");
+    }
+    else if (boundary_type == InletTypeEnum::StagnationPressureTemperature)
+    {
+      const std::string class_name = "ADBoundaryFlux3EqnGhostStagnationPressureTemperature";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<Real>("p0") = comp.getParam<Real>("p0");
+      params.set<Real>("T0") = comp.getParam<Real>("T0");
+      params.set<Real>("normal") = comp.getNormal();
+      params.set<bool>("reversible") = comp.isReversible();
+      params.set<UserObjectName>("numerical_flux") =
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName());
+      params.set<UserObjectName>("fluid_properties") = comp.getFluidPropertiesName();
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim->addUserObject(class_name, comp.getBoundaryUOName(), params);
+      comp.connectObject(params, comp.getBoundaryUOName(), "p0");
+      comp.connectObject(params, comp.getBoundaryUOName(), "T0");
+    }
 
     // Boundary flux BC
     addBoundaryFluxBC(comp, comp.getBoundaryUOName());
@@ -1074,7 +1101,7 @@ THMVACESinglePhaseFlowPhysics::addFlowJunctionsKernels()
     if (junction_type == Volume)
     {
       // Add scalar kernels for the junction
-      const auto var_names = solverVariableNames();
+      std::vector<NonlinearVariableName> var_names = {RHOV, RHOUV, RHOVV, RHOWV, RHOEV};
       for (std::size_t i = 0; i < 5; i++)
       {
         {

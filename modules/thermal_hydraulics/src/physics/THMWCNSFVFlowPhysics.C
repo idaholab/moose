@@ -434,6 +434,9 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
                    comp.name(),
                    "' does not set boundary conditions for the mass and momentum equations");
     }
+    else if (boundary_type == InletTypeEnum::InletStagnationPressureTemperature)
+      mooseError("Stagnation boundaries are not supported by WCNSFV as the kinetic energy "
+                 "term is neglected. Use a GeneralFlowBoundary instead.");
     else
       mooseError("Unsupported inlet boundary type ", boundary_type);
   }

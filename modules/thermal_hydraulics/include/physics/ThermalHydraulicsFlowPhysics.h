@@ -47,6 +47,8 @@ public:
   enum InletTypeEnum
   {
     MdotTemperature,
+    VelocityTemperature,
+    StagnationPressureTemperature,
     GeneralBoundary
   };
 
