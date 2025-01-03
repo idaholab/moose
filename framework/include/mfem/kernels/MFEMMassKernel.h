@@ -2,8 +2,10 @@
 #include "MFEMKernel.h"
 
 /*
-(βu, u')
-*/
+ * \f[
+ * (\beta u, u')
+ * \f]
+ */
 class MFEMMassKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:

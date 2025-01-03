@@ -2,8 +2,10 @@
 #include "MFEMMassKernel.h"
 
 /*
-(β du/dt, u')
-*/
+ * \f[
+ * (\beta du/dt, u')
+ * \f]
+ */
 class MFEMTimeDerivativeMassKernel : public MFEMMassKernel
 {
 public:
