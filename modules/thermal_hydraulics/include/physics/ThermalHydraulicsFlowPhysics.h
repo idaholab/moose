@@ -74,7 +74,8 @@ public:
   enum JunctionTypeEnum
   {
     OneToOne,
-    Volume
+    Volume,
+    Pump
   };
 
   /**

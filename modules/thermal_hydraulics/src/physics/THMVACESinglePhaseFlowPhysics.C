@@ -11,6 +11,7 @@
 #include "THMProblem.h"
 #include "SlopeReconstruction1DInterface.h"
 #include "ClosuresBase.h"
+#include "Numerics.h"
 
 // For implementing component-specific behavior
 #include "FlowChannelBase.h"
@@ -141,7 +142,8 @@ THMVACESinglePhaseFlowPhysics::addSolverVariables()
     const auto & junc_name = _junction_components[i];
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
-    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
+        junction_type == ThermalHydraulicsFlowPhysics::Pump)
     {
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
@@ -189,7 +191,8 @@ THMVACESinglePhaseFlowPhysics::addAuxiliaryVariables()
     const auto & junc_name = _junction_components[i];
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
-    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
+        junction_type == ThermalHydraulicsFlowPhysics::Pump)
     {
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
@@ -347,7 +350,8 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
     const auto & junc_name = _junction_components[i];
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
-    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
+        junction_type == ThermalHydraulicsFlowPhysics::Pump)
     {
       const libMesh::FEType fe_type(CONSTANT, MONOMIAL);
       const auto & subdomains = junc.getSubdomainNames();
@@ -444,7 +448,8 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
     const auto & junc_name = _junction_components[i];
     const auto & junc = _sim->getComponentByName<PhysicsFlowJunction>(junc_name);
     const auto & junction_type = _junction_types[i];
-    if (junction_type == ThermalHydraulicsFlowPhysics::Volume)
+    if (junction_type == ThermalHydraulicsFlowPhysics::Volume ||
+        junction_type == ThermalHydraulicsFlowPhysics::Pump)
     {
       // An error message results if there is any block without a material, so
       // until this restriction is removed, we must add a dummy material that
@@ -777,8 +782,8 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
     const auto & normals = comp.getBoundaryNormals();
 
     // Junction fluxes should be updated as often as possible
-    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+    ExecFlagEnum junction_execute_on(MooseUtils::getDefaultExecFlagEnum());
+    junction_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
     // Add user object for computing and storing the fluxes
     if (junction_type == OneToOne)
@@ -800,12 +805,16 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
       params.set<std::vector<VariableName>>("rhoEA") = {VACE1P::RHOEA};
       params.set<std::string>("junction_name") = comp_name;
       params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
-      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      params.set<ExecFlagEnum>("execute_on") = junction_execute_on;
       _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
     }
-    else if (junction_type == Volume)
+    else if (junction_type == Volume || junction_type == Pump)
     {
-      const std::string class_name = "ADVolumeJunction1PhaseUserObject";
+      std::string class_name;
+      if (junction_type == Volume)
+        class_name = "ADVolumeJunction1PhaseUserObject";
+      else
+        class_name = "ADPump1PhaseUserObject";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<bool>("use_scalar_variables") = false;
       mooseAssert(comp.getSubdomainNames().size() == 1, "Should have 1 subdomain on that junction");
@@ -814,8 +823,9 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
       params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
       params.set<std::vector<Real>>("normals") = normals;
       params.set<std::vector<processor_id_type>>("processor_ids") = comp.getConnectedProcessorIDs();
-      params.set<std::vector<UserObjectName>>("numerical_flux_names") = {
-          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName())};
+      params.set<std::vector<UserObjectName>>("numerical_flux_names") = std::vector<UserObjectName>(
+          boundary_names.size(),
+          libmesh_map_find(_numerical_flux_names, comp.getFluidPropertiesName()));
       params.set<Real>("volume") = comp.getParam<Real>("volume");
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
       params.set<std::vector<VariableName>>("rhoA") = {VACE1P::RHOA};
@@ -826,12 +836,19 @@ THMVACESinglePhaseFlowPhysics::addUserObjects()
       params.set<std::vector<VariableName>>("rhovV") = {VACE1P::RHOVV};
       params.set<std::vector<VariableName>>("rhowV") = {VACE1P::RHOWV};
       params.set<std::vector<VariableName>>("rhoEV") = {VACE1P::RHOEV};
-      params.set<Real>("K") = getParam<Real>("K");
-      params.set<Real>("A_ref") = getParam<Real>("A_ref");
+      params.set<Real>("K") = comp.getParam<Real>("K");
+      params.set<Real>("A_ref") = comp.isParamValid("A_ref") ? comp.getParam<Real>("A_ref") : 0;
       params.set<UserObjectName>("fp") = comp.getFluidPropertiesName();
-      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      params.set<ExecFlagEnum>("execute_on") = junction_execute_on;
+      if (junction_type == Pump)
+      {
+        params.set<Real>("head") = comp.getParam<Real>("head");
+        params.set<Real>("gravity_magnitude") = THM::gravity_const;
+      }
       _sim->addUserObject(class_name, comp.getJunctionUOName(), params);
       comp.connectObject(params, comp.getJunctionUOName(), "K");
+      if (junction_type == Pump)
+        comp.connectObject(params, comp.getJunctionUOName(), "head");
     }
   }
 }
