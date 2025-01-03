@@ -485,7 +485,9 @@ AbaqusUELMesh::readProperties(const std::string & header)
   const auto & elset = getElementSet(map.get<std::string>("elset"));
 
   // read data lines
-  std::pair<std::vector<Real>, std::vector<int>> props;
+  _properties.emplace_back();
+  auto & props = _properties.back();
+
   std::string s;
   while (readDataLine(s))
   {
