@@ -129,7 +129,8 @@ NEML2Action::act()
   if (_current_task == "add_user_object")
   {
     // Get the NEML2 model so that we can introspect variable tensor types
-    const auto & model = neml2::get_model(getParam<std::string>("model"));
+    auto & model = neml2::get_model(getParam<std::string>("model"));
+    model.to(getParam<std::string>("device"));
 
     setupInputMappings(model);
     setupParameterMappings(model);

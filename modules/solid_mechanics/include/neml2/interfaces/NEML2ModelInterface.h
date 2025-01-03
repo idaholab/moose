@@ -95,6 +95,7 @@ NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&
     _model(neml2::get_model(params.get<std::string>("model"))),
     _device(params.get<std::string>("device"))
 {
+  _model.to(_device);
 }
 
 template <class T>

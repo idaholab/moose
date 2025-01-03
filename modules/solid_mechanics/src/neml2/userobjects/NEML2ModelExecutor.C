@@ -248,6 +248,12 @@ NEML2ModelExecutor::fillInputs()
   for (const auto & uo : _gatherers)
     uo->insertInto(_in, _model_params);
 
+  // Send input variables and parameters to device
+  for (auto & [var, val] : _in)
+    val = val.to(device());
+  for (auto & [param, pval] : _model_params)
+    pval = pval.to(device());
+
   // Update model parameters
   model().set_parameters(_model_params);
   _model_params.clear();
