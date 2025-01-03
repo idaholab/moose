@@ -32,5 +32,5 @@ MFEMExecutioner::setDevice()
   if (_device.IsConfigured())
     return;
   _device.Configure(getParam<std::string>("device"));
-  _device.Print(std::cout);
+  _device.Print(Moose::out);
 }

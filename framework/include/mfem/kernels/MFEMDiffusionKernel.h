@@ -2,8 +2,10 @@
 #include "MFEMKernel.h"
 
 /*
-(σ ∇ q, ∇ q')
-*/
+ * \f[
+ * (\sigma \nabla q, \nabla q')
+ * \f]
+ */
 class MFEMDiffusionKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
 {
 public:
