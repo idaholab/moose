@@ -12,12 +12,31 @@ functions. The following relations hold true:
   \rho = \rho^{user}(time=0, (x=T, y=P, z=0)) \\
   \mu = \mu^{user}(time=0, (x=T, y=P, z=0)) \\
   k = k^{user}(time=0, (x=T, y=P, z=0)) \\
-  c_v = c_v^{user} \\
-  e = c_v * T
 \end{aligned}
 \end{equation}
 
-with $T$ the temperature, $P$ the pressure, $\rho$ the density, $\mu$ the dynamic viscosity, $k$ the thermal conductivity, $c_v$ the specific isochoric heat capacity, $e$ the specific energy and the $user$ exponent indicating a user-passed parameter.
+There are two options for specific heat. Either the user sets a constant specific isochoric heat capacity
+
+\begin{equation}
+\begin{aligned}
+  c_v = c_v^{user} \\
+  e = e_{ref} + c_v * (T - T_{ref})
+\end{aligned}
+\end{equation}
+
+Or, the user uses a function of temperature and pressure (same arguments as for density)
+
+\begin{equation}
+\begin{aligned}
+  x = T \\
+  y = P \\
+  cp = cp^{user}(time=0, (x=T, y=P, z=0))
+  cv = cp - \dfrac{\alpha ^ 2 T}{\rho \beta_T}
+\end{aligned}
+\end{equation}
+
+with $T$ the temperature, $P$ the pressure, $\rho$ the density, $\mu$ the dynamic viscosity, $k$ the thermal conductivity, $c_v$ the specific isochoric heat capacity, $e$ the specific energy, $\alpha$ the coefficient of thermal expansion, $\beta_T$ the isothermal
+compressibility, and the $user$ exponent indicating a user-passed parameter.
 
 The derivatives of the fluid properties are obtained using the `Function`(s) gradient components
 and the appropriate derivative chaining for derived properties.
@@ -31,9 +50,9 @@ Support for the conservative (specific volume, internal energy) variable set is 
 partial. Notable missing implementations are routines for entropy, the speed of sound, and some
 conversions between specific enthalpy and specific energy.
 
-!alert warning
-Due to the approximations made when computing the isobaric heat capacity from the constant
-isochoric heat capacity, this material should only be used for nearly-incompressible fluids.
+!alert note
+When using a function for the isobaric specific heat capacity, Simpson's rule is used to compute
+the specific energy from the isochoric specific heat capacity. This limits the accuracy of the calculation.
 
 ## Example Input File Syntax
 
