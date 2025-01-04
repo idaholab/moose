@@ -389,6 +389,13 @@ THMWCNSFVFlowPhysics::addInletBoundaries()
       for (const auto & boundary_name : comp.getBoundaryNames())
         addInletBoundary(boundary_name, flux_mass, mdot);
     }
+    else if (boundary_type == InletTypeEnum::VelocityTemperature)
+    {
+      MooseEnum inlet_type(NSFVBase::getValidMomentumInletTypes(), "fixed-velocity");
+      MooseFunctorName vel = std::to_string(comp.getParam<Real>("vel"));
+      for (const auto & boundary_name : comp.getBoundaryNames())
+        addInletBoundary(boundary_name, inlet_type, vel);
+    }
     else if (boundary_type == InletTypeEnum::GeneralBoundary)
     {
       // Boundary condition set for pressure equation: mass
