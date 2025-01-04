@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.11.13" %}
+{% set version = "2024.12.23" %}
 
 package:
   name: moose-peacock
@@ -25,6 +25,7 @@ requirements:
     - pandas
     - pyqt
     - matplotlib !=3.9.0
+    - libgl                           # [linux]
     - vtk
   run_constrained:
     # Python max constraints

@@ -20,7 +20,7 @@ import hashlib
 import subprocess
 import platform
 import json
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import yaml
 import jinja2
 
@@ -29,24 +29,23 @@ MOOSE_DIR = os.environ.get('MOOSE_DIR',
                                os.path.realpath(__file__)), '..')))
 
 ### Unittest Tracking Libraries (versioner_hashes.yaml)
-# note: Order is important only for historical lookups; git_ancestor(commit) == True
+# note: Order is important
 TRACKING_LIBRARIES = ['tools', 'mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
 
-### All Libraries (versioner.yaml)
-# note: If adding to this list, see line 64 in
+### Additional libraries for tracking_libraries, necessary to build the moose-dev Conda stack
+# This allows returning a proper verification
+# note: If adding to the following list below, see line 64 in
 # python/MooseDocs/test/extensions/test_versioner.py
-LIBRARIES = ['libmesh-vtk',
-             'peacock',
-             'pprof',
-             'pyhit',
-             'seacas',
-             'tools',
-             'mpi',
-             'petsc',
-             'libmesh',
-             'wasp',
-             'moose-dev',
-             'app']
+MOOSE_DEV_STACK = set(['libmesh-vtk',
+                       'peacock']).union(set(TRACKING_LIBRARIES))
+
+### All Libraries (versioner.yaml)
+# This allows returning a hash for any library
+# note: If adding to the following list below, see line 64 in
+# python/MooseDocs/test/extensions/test_versioner.py
+LIBRARIES = set(['seacas',
+                 'pyhit',
+                 'pprof']).union(set(TRACKING_LIBRARIES).union(MOOSE_DEV_STACK))
 
 ### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
 # pylint: disable=unused-argument
@@ -82,23 +81,119 @@ class Versioner:
         self.entities = LIBRARIES
         self.yaml_file = None
 
+    def verify_recipes(self, args) ->str:
+        """ provide hints as to version and build information for all conda stack libraries """
+        red    = '\033[91m'
+        yellow = '\033[93m'
+        green  = '\033[92m'
+        bright = '\033[1m'
+        reset  = '\033[0m'
+        empty  = {'version' : 'not yet tracked', 'build': 'n/a'}
+        head = self.version_meta('HEAD')
+        base = self.version_meta(args.verify[0])
+        formatted_output = ''
+        warn_moose = ''
+        name_fill = 10
+        version_fill = 13
+        for package in head:
+            name_fill = max(name_fill, len(head[package]['conda'].get('name', '')))
+            version_fill = max(version_fill, len(base[package]['conda'].get('version', '')))
+
+        for package in head:
+            # we do not care about app
+            if package == 'app':
+                continue
+
+            # libraries without a meta.yaml (pyhit for example, which is now wasp)
+            if not head[package].get('conda', False):
+                continue
+
+            # create shorter dictionaries with only the things we need
+            _hc = head[package]['conda']
+            _hc['hash'] = head[package]['hash']
+            _bc = base[package]['conda']
+
+            # new libraries being added or tracked in this PR
+            if not _bc:
+                _bc = dict(empty)
+            _bc['hash'] = base[package]['hash']
+
+            # string formatting shenanigans
+            n_fill = f'{"".rjust((name_fill - len(_hc["name"])) + 2," ")}'
+            v_fill = f'{"".rjust((version_fill - len(_hc["version"])) + 2," ")}'
+            if _bc['build'] == 'n/a':
+                v_fill = f'{"".rjust((version_fill - len(_bc["version"]))," ")}'
+
+            # HASH MATCH, nothing to do
+            if _hc['hash'] == _bc['hash']:
+                print(f'{_hc["name"]}:{n_fill}no changes')
+                continue
+
+            # version/build has not changed, yet some influential file suggests it should
+            conda_base=f'conda{os.path.sep}{package}{os.path.sep}'
+            if (_hc['version'], _hc['build']) == (_bc['version'], _bc['build']):
+                formatted_output+=(f'{_hc["name"]}:{n_fill}{red}'
+                                   f'{_hc["version"]}{reset} build: '
+                                   f'{red}{_hc["build"]}{reset}\n')
+
+            # a combo issue of having versioner begin tracking an existing library while
+            # also mucking with its influentials files, but forgetting to update the
+            # version/build.
+            elif not (self.git_is_diff(commit=args.verify[0],
+                                   file=f'{conda_base}meta.yaml') or
+                  self.git_is_diff(commit=args.verify[0],
+                                   file=f'{conda_base}conda_build_config.yaml')):
+                formatted_output+=(f'{_hc["name"]}:{n_fill}{red}'
+                                   f'{_hc["version"]}{reset} build: '
+                                   f'{red}{_hc["build"]}{reset} '
+                                   f'{v_fill}{v_fill} {red}update required{reset}\n')
+
+            # things seem correct, highlight the changed bits in green to aid the user.
+            else:
+                print(f'{_hc["name"]}:{n_fill}'
+                      f'{bright}{_bc["version"]}{reset} build: '
+                      f'{bright}{_bc["build"]}{reset}{v_fill}to '
+                      f'{green if _hc["version"] != _bc["version"] else bright}'
+                      f'{_hc["version"]}{reset} build: '
+                      f'{green if _hc["build"] != _bc["build"] else bright}{_hc["build"]}{reset}')
+
+            # Anything depending on `moose-dev` should go here. Like `moose`.
+            if package == 'moose-dev':
+                warn_moose = (f'moose: ({yellow}templated{reset}. Please verify '
+                              'conda/moose/conda_build_conda.yaml has been updated)')
+
+        if formatted_output:
+            formatted_output+=f'{warn_moose}\n{red}FAIL{reset}'
+            print(formatted_output)
+            sys.exit(1)
+        elif warn_moose:
+            print(warn_moose)
+        return f'{green}\nOK{reset}'
+
     def output_summary(self, args):
+        """ generate summary report that can be used to generate versioner_hash blocks """
         head = self.version_meta(args.commit, full_hash=True)["app"]["hash"]
         formatted_output = f'{head}: #PR\n'
         for library in TRACKING_LIBRARIES:
             if library == 'app':
                 continue
             meta = self.version_meta(args.commit).get(library, {})
-            hash = meta['hash']
-            formatted_output+=f'  {library}: {hash}\n'
+            meta_hash = meta['hash']
+            formatted_output+=f'  {library}: {meta_hash}\n'
         return formatted_output
 
     def output_cli(self, args):
         """ performs command line actions """
         args = self.parse_args(args, self.entities)
         self.check_args(args)
-        if args.summary:
-            return self.output_summary(args)
+        if args.summary or args.verify:
+            if self.git_is_diff():
+                print('\033[91mWarning\033[0m: you have changes not yet committed. Information'
+                      ' displayed may be inaccurate\n')
+            if args.summary:
+                return self.output_summary(args)
+            if args.verify:
+                return self.verify_recipes(args)
 
         meta = self.version_meta(args.commit).get(args.library, {})
         if not meta:
@@ -150,6 +245,9 @@ class Versioner:
                             help='Output in YAML format (itemized information)')
         parser.add_argument('-s','--summary',action='store_true', default=False,
                             help='Output summary as should be entered in versioner_hashes.yaml')
+        parser.add_argument('-v', '--verify', nargs=1, metavar='base_ref hash', default=None,
+                            help='Output version/build number hints against supplied base reference'
+                            ' hash')
         return parser.parse_args(argv)
 
     @staticmethod
@@ -159,9 +257,31 @@ class Versioner:
             print('Cannot use --json and --yaml together')
             sys.exit(1)
 
+        if args.verify and args.verify == 'HEAD':
+            print('You cannot verify against HEAD. You must choose a hash'
+                  ' (preferably something like upstream/master)')
+            sys.exit(1)
+
         if not Versioner.is_git_object(args.commit):
             print(f'{args.commit} is not a commit in {MOOSE_DIR}')
             sys.exit(1)
+
+    @staticmethod
+    def git_is_diff(repo_dir=MOOSE_DIR, commit=None, file=None) ->bool:
+        """ returns bool on diff changes present in MOOSE_DIR """
+        command = ['git', 'diff']
+        if commit is not None:
+            command.append(commit)
+        if file is not None:
+            command.append(file)
+        try:
+            diff = subprocess.run(command, stdout=subprocess.PIPE,
+                                  stderr=subprocess.DEVNULL, check=True, cwd=repo_dir)
+        except Exception as ex:
+            raise ex
+        if len(diff.stdout):
+            return True
+        return False
 
     @staticmethod
     def is_git_object(commit_like, repo_dir=MOOSE_DIR):
@@ -248,45 +368,23 @@ class Versioner:
             return True
         return False
 
-    def influential_dict(self, packages_yaml, parent=None, library=None, recursive_meta=None):
-        """ build and return influential dictionary """
-        # key descriptors to be treated as control identifiers
-        key_descriptors = ['dependencies', 'influential']
-        # key name for infuential file list value
-        dep_key = 'influential'
-        if recursive_meta is None:
-            recursive_meta = {}
-        for descriptor, values in packages_yaml.items():
-            # 'values' is a dictionary with more items to discover (recurse into)
-            if isinstance(values, dict):
-                # 'descriptor' is actually a library we wish to track
-                if descriptor not in key_descriptors:
-                    recursive_meta[descriptor] = {}
-                # recursive inspection of descriptors_yaml[library], preserve history (grow)
-                self.influential_dict(packages_yaml[descriptor],
-                                      parent=library,
-                                      library=descriptor,
-                                      recursive_meta=recursive_meta)
-            # no more dictionaries to recurse into
-            elif descriptor in key_descriptors:
-                # recursive descriptor dictionary (apptainer meta)
-                if parent is not None:
-                    _lib_dict = recursive_meta[parent]
-                else:
-                    _lib_dict = recursive_meta[library]
-                # we are inside a library with dependency(s)
-                if descriptor == 'dependencies':
-                    for dep in packages_yaml[descriptor]:
-                        if dep in recursive_meta.keys():
-                            _lib_dict[dep_key] = recursive_meta[library].get(dep_key, [])
-                            _lib_dict[descriptor] = recursive_meta[library].get(descriptor, [])
-                            _lib_dict[dep_key].extend(recursive_meta[dep][dep_key])
-                            _lib_dict[descriptor].append(dep)
-                # anything else (influential files at time of writing)
-                else:
-                    _lib_dict[descriptor] = recursive_meta[library].get(descriptor, [])
-                    _lib_dict[descriptor].extend(packages_yaml[descriptor])
-        return recursive_meta
+    @staticmethod
+    def influential_dict(packages_yaml, library=None, build_dict=None) ->dict:
+        _d = defaultdict(dict) if build_dict == None else build_dict
+        if library is not None and not len(_d[library]['influential']):
+            _d[library]['influential'].extend(packages_yaml[library].get('influential', []))
+            _d[library]['dependencies'].extend(packages_yaml[library].get('dependencies', []))
+            for dep_package in packages_yaml[library].get('dependencies', []):
+                if dep_package not in _d:
+                    _d.update({ dep_package : {'influential' : [], 'dependencies' : []} })
+                _tmp = Versioner.influential_dict(packages_yaml, dep_package, _d)
+                _d[library]['influential'].extend(_tmp[dep_package]['influential'])
+        if library == None:
+            for package in packages_yaml:
+                _d.update({ package : {'influential' : [], 'dependencies' : [] } })
+                _d.update(Versioner.influential_dict(packages_yaml, package, _d))
+            return _d
+        return _d
 
     @staticmethod
     def augment_dictionaries(base_meta, library):
@@ -354,9 +452,9 @@ class Versioner:
                 file_hash = git_hash_cache[influential_file]
                 package_meta['hash_table'][influential_file] = file_hash
                 package_meta['hash_list'].append(file_hash)
-                # If this is the package/meta.yaml file, render the jinja template
+                # If this is the */meta.yaml file, render the jinja template
                 if influential_file.find(f'{package}{os.path.sep}meta.yaml') != -1:
-                    package_meta['conda'] = self.conda_meta(package, influential_file, commit)
+                    package_meta['conda'] = self.conda_meta(influential_file, commit)
 
             package_hash = app_hash if is_app else self.get_hash(package_meta['hash_list'])
             package_meta['hash'] = package_hash
@@ -400,7 +498,7 @@ class Versioner:
         return name, version, build_string, build_number, meta
 
     @staticmethod
-    def conda_meta(package, influential, commit):
+    def conda_meta(influential, commit):
         """ produces the conda meta entry """
         # Read the conda-build jinja2 styled template
         contents = Versioner.git_file(influential, commit)

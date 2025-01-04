@@ -27,6 +27,8 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+# MOOSE-NCRC key
+Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 %environment
     # From moose-libmesh

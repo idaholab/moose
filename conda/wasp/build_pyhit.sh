@@ -5,6 +5,7 @@ do_build(){
     rm -rf "${SP_DIR:?}/pyhit/"
     cp -R pyhit "${SP_DIR:?}/"
     cd "${SRC_DIR:?}/src"
+    make clean
     make bindings
     install hit.so "${SP_DIR:?}/pyhit/" || return 1
     cat > "${SP_DIR:?}/pyhit-${PKG_VERSION:?}.egg-info" <<FAKE_EGG || exit 1

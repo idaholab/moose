@@ -27,14 +27,14 @@
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
 
+Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-Bootstrap: docker
-From: rockylinux:8.9.20231119
+From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-0
 {%- else %}
-BootStrap: oras
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.9-0
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-0
 {%- endif %}
-
+# Logan Harbour
+Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
 %environment
     # Fix locale warnings
     export LC_ALL=C
@@ -102,13 +102,10 @@ EOF
 {%- endif %}
 
     # Additional installs
-    dnf install -y vim tmux emacs wget rsync hostname python3-pyyaml python3-devel python39 \
-                   make cmake bzip2 diffutils bison flex perl-IO-Compress perl-JSON perl-JSON-PP \
-                   libtirpc libtirpc-devel zlib-devel patch patchutils epel-release file \
-                   libpng libpng-devel unzip jq valgrind cppunit doxygen fftw-devel gsl-devel \
-                   libtool autoconf automake cppunit-devel tar git
-    # After epel-release
-    dnf install -y glpk-devel patchelf lcov
+    dnf install -y tmux emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
+        perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
+        libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
+        automake cppunit-devel glpk-devel patchelf lcov
 
 {%- if ALTERNATE_FROM == "clang" %}
     # Installing system Clang, and its GCC GNU dependencies
@@ -130,18 +127,6 @@ EOF
     # Set alternative gcc-toolchain paths required by Clang
     source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
 {%- endif %}
-
-    # Make python default to python3.9
-    alternatives --set python /usr/bin/python3.9
-    alternatives --set python3 /usr/bin/python3.9
-
-    # We need git lfs
-    mkdir ${ROOT_BUILD_DIR}/gitlfs
-    cd ${ROOT_BUILD_DIR}/gitlfs
-    curl -L -O https://github.com/git-lfs/git-lfs/releases/download/v3.2.0/git-lfs-linux-amd64-v3.2.0.tar.gz
-    tar -xf git-lfs-linux-amd64-v3.2.0.tar.gz
-    cd git-lfs-3.2.0
-    ./install.sh
 
 {%- if ALTERNATE_FROM == "clang_min" %}
     # Build minimum Clang {{ MIN_CLANG_VERSION }} from source
@@ -229,4 +214,4 @@ EOF
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
     {{ FILES_DIR }}/.singularity.d/env/01-fix-exec.sh /.singularity.d/env/01-fix-exec.sh
-    {{ FILES_DIR }}/.singularity.d/env/99-user-overrides.sh /.singularity.d/env/99-user-overrides.sh
+    {{ FILES_DIR }}/.singularity.d/env/89-user-overrides.sh /.singularity.d/env/89-user-overrides.sh

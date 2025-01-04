@@ -1,5 +1,5 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "1" %}
+{% set build = "2" %}
 {% set seacas_version = "2024.08.15" %}
 {% set seacas_git_rev = "v2024-08-15" %}
 {% set strbuild = "build_" + build|string %}
@@ -26,7 +26,7 @@ requirements:
     - {{ moose_gfortran }}
     - {{ moose_ccompiler }}
     - {{ moose_cxxcompiler }}
-    - xorg-libx11
+    - xorg-libx11 1.8.9
     - cmake
     - make
     - automake

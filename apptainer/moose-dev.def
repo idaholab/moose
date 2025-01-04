@@ -23,9 +23,6 @@
 {#- Location to install miniforge3                                                            -#}
 {%- set MOOSE_MINIFORGE = '/opt/miniforge3' -%}
 
-{#- Name of the environment to create in conda                                                -#}
-{%- set MOOSE_CONDA_ENV_NAME = 'moose' -%}
-
 {#- The installation location for wasp                                                        -#}
 {%- set WASP_DIR = '/opt/wasp' -%}
 {#- The installation location for gperftools                                                  -#}
@@ -43,10 +40,12 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+# MOOSE-NCRC key
+Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 %environment
     export PATH={{ MOOSE_MINIFORGE }}/bin:/opt/code-server/bin:$PATH
-    source activate {{ MOOSE_MINIFORGE }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
+    source activate {{ MOOSE_MINIFORGE }}
 
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
@@ -153,10 +152,7 @@ From: {{ APPTAINER_FROM }}
     # Create list of Conda Packages to install
     MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
-    mamba create -yq -n ${MOOSE_CONDA_ENV_NAME} python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
-
-    # Activate the new environment
-    source activate ${MOOSE_MINIFORGE}/envs/${MOOSE_CONDA_ENV_NAME}
+    conda install -yq python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
     # Needed for coverage
     pip3 --no-cache install lcov-cobertura
 
