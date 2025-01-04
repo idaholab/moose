@@ -220,6 +220,10 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     Real h = _tab_ve_from_pT->h_from_p_T(p, T);
     Real Ts = _tab_ve_from_pT->T_from_p_h(p, h);
     REL_TEST(T, Ts, 1e-4);
+
+    // to keep coverage on the default definition in SinglePhaseFP
+    Ts = dynamic_cast<const SinglePhaseFluidProperties *>(_tab_ve_from_pT)->T_from_p_h(p, h);
+    REL_TEST(T, Ts, 1e-4);
   }
 
   // are the two version of functions equivalent
