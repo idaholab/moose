@@ -356,7 +356,7 @@ THMVACESinglePhaseFlowPhysics::addTHMInitialConditions()
       const auto & volume = junc.getParam<Real>("volume");
       Real initial_pressure, initial_temperature, initial_rho, initial_E;
       RealVectorValue initial_vel;
-      dynamic_cast<const PhysicsVolumeJunction &>(junc).getInitialConditions(
+      _sim->getComponentByName<PhysicsVolumeJunction>(junc_name).getInitialConditions(
           initial_pressure, initial_temperature, initial_rho, initial_E, initial_vel);
 
       _sim->addConstantIC(VACE1P::RHOV, initial_rho * volume, subdomains);
@@ -438,8 +438,6 @@ THMVACESinglePhaseFlowPhysics::addMaterials()
       params.set<std::vector<MaterialPropertyName>>("ad_props_out") = {comp.getWallHeatFluxName()};
       _sim->addMaterial(class_name, genName(name(), comp.name(), "q_wall_material"), params);
     }
-    else
-      mooseError("Unsupported heat transfer type ", heat_flux_type);
   }
 
   // Junctions

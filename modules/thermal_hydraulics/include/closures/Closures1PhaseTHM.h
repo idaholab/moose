@@ -52,7 +52,7 @@ protected:
    *
    * @param[in] flow_channel   Flow channel component
    */
-  void addWallFFMaterial(const FlowChannel1Phase & flow_channel) const;
+  void addWallFFMaterial(const FlowChannelBase & flow_channel) const;
 
   /**
    * Adds wall heat transfer coefficient material
@@ -60,7 +60,7 @@ protected:
    * @param[in] flow_channel   Flow channel component
    * @param[in] i   Heat transfer index
    */
-  void addWallHTCMaterial(const FlowChannel1Phase & flow_channel, unsigned int i) const;
+  void addWallHTCMaterial(const FlowChannelBase & flow_channel, unsigned int i) const;
 
   /**
    * Adds computation of wall temperature when heat flux is specified
@@ -68,7 +68,7 @@ protected:
    * @param[in] flow_channel   Flow channel component
    * @param[in] i   Heat transfer index
    */
-  void addTemperatureWallFromHeatFluxMaterial(const FlowChannel1Phase & flow_channel,
+  void addTemperatureWallFromHeatFluxMaterial(const FlowChannelBase & flow_channel,
                                               unsigned int i) const;
   /// Wall heat transfer coefficient closure
   const WallHTCClosureType _wall_htc_closure;

@@ -9,7 +9,7 @@
 
 #include "Closures1PhaseTHM.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel1Phase.h"
+#include "FlowChannelBase.h"
 #include "HeatTransfer1PhaseBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", Closures1PhaseTHM);
@@ -51,34 +51,31 @@ Closures1PhaseTHM::checkHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
 void
 Closures1PhaseTHM::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
 {
-  const FlowChannel1Phase & flow_channel_1phase =
-      dynamic_cast<const FlowChannel1Phase &>(flow_channel);
-
   // wall friction material
   if (flow_channel.isParamValid("f"))
-    addWallFrictionFunctionMaterial(flow_channel_1phase);
+    addWallFrictionFunctionMaterial(flow_channel);
   else
-    addWallFFMaterial(flow_channel_1phase);
+    addWallFFMaterial(flow_channel);
 
-  const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
+  const unsigned int n_ht_connections = flow_channel.getNumberOfHeatTransferConnections();
   if (n_ht_connections > 0)
   {
 
     for (unsigned int i = 0; i < n_ht_connections; i++)
     {
       // wall heat transfer coefficient material
-      addWallHTCMaterial(flow_channel_1phase, i);
+      addWallHTCMaterial(flow_channel, i);
 
       // wall temperature material
       if (flow_channel.getTemperatureMode())
-        addWallTemperatureFromAuxMaterial(flow_channel_1phase, i);
+        addWallTemperatureFromAuxMaterial(flow_channel, i);
       else
-        addTemperatureWallFromHeatFluxMaterial(flow_channel_1phase, i);
+        addTemperatureWallFromHeatFluxMaterial(flow_channel, i);
     }
   }
 }
 void
-Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) const
+Closures1PhaseTHM::addWallFFMaterial(const FlowChannelBase & flow_channel) const
 {
   switch (_wall_ff_closure)
   {
@@ -132,7 +129,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
         {
@@ -179,7 +176,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
         {
@@ -222,7 +219,7 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
 }
 
 void
-Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, unsigned int i) const
+Closures1PhaseTHM::addWallHTCMaterial(const FlowChannelBase & flow_channel, unsigned int i) const
 {
 
   switch (_wall_htc_closure)
@@ -233,7 +230,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
         params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
         params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
@@ -252,7 +250,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
         const std::string class_name =
             "ADWallHeatTransferCoefficient3EqnDittusBoelterFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
         params.set<MooseFunctorName>("rho") = FlowModelSinglePhase::DENSITY;
         params.set<MooseFunctorName>("vel") = FlowModelSinglePhase::VELOCITY;
@@ -273,7 +271,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientWolfMcCarthyMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.applyParameter(parameters(), "outputs");
@@ -283,7 +282,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientWolfMcCarthyFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.applyParameter(parameters(), "outputs");
@@ -297,7 +296,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientWeismanMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -306,7 +306,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
 
         if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
@@ -333,7 +333,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientWeismanFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -342,7 +342,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
 
         if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
@@ -373,7 +373,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientLyonMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.applyParameter(parameters(), "outputs");
@@ -383,7 +384,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientLyonFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.applyParameter(parameters(), "outputs");
@@ -397,7 +398,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientKazimiMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -406,7 +408,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
@@ -415,7 +417,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientKazimiFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -424,7 +426,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
@@ -437,7 +439,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientMikityukMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -446,7 +449,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
@@ -455,7 +458,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientMikityukFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -464,7 +467,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
@@ -477,7 +480,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientSchadMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -486,7 +490,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         params.applyParameter(parameters(), "outputs");
         _sim.addMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
@@ -495,7 +499,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientSchadFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.set<Real>("PoD") = flow_channel.getParam<Real>("PoD");
@@ -504,7 +508,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
           mooseDoOnce(mooseWarning(
               "You are using a rod bundle correlation with the default Pitch-to-Diameter "
               "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
-              "FlowChannel1Phase component"));
+              "FlowChannel(1Phase) component"));
         }
         params.applyParameter(parameters(), "outputs");
         _sim.addFunctorMaterial(class_name, genName(flow_channel.name(), "whtc_mat", i), params);
@@ -517,7 +521,8 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientGnielinskiMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MaterialPropertyName>("Hw") =
+            flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.applyParameter(parameters(), "outputs");
@@ -527,7 +532,7 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
       {
         const std::string class_name = "ADWallHeatTransferCoefficientGnielinskiFunctorMaterial";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHTCNames1Phase()[i];
+        params.set<MooseFunctorName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
         params.set<MooseFunctorName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
         params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
         params.applyParameter(parameters(), "outputs");
@@ -540,20 +545,21 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
   }
 }
 void
-Closures1PhaseTHM::addTemperatureWallFromHeatFluxMaterial(const FlowChannel1Phase & flow_channel,
+Closures1PhaseTHM::addTemperatureWallFromHeatFluxMaterial(const FlowChannelBase & flow_channel,
                                                           unsigned int i) const
 {
-  const std::string class_name = "TemperatureWallFromHeatFlux3EqnTHMMaterial";
+  const std::string class_name = "ADTemperatureWall3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-  params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
-  params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
-  params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
-  params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
+  // params.set<MaterialPropertyName>("T_wall") = flow_channel.getWallTemperatureNames()[i];
+  params.set<MaterialPropertyName>("Hw") = flow_channel.getWallHeatTransferCoefficientNames()[i];
+  // params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
+  // params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
+  // params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
   params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-  params.set<MaterialPropertyName>("k") = FlowModelSinglePhase::THERMAL_CONDUCTIVITY;
-  params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
-  params.set<MaterialPropertyName>("cp") = FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE;
+  // params.set<MaterialPropertyName>("k") = FlowModelSinglePhase::THERMAL_CONDUCTIVITY;
+  // params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
+  // params.set<MaterialPropertyName>("cp") = FlowModelSinglePhase::SPECIFIC_HEAT_CONSTANT_PRESSURE;
   params.set<MaterialPropertyName>("q_wall") = flow_channel.getWallHeatFluxNames()[i];
   params.applyParameter(parameters(), "outputs");
   _sim.addMaterial(class_name, genName(flow_channel.name(), "T_from_q_wall_mat", i), params);
