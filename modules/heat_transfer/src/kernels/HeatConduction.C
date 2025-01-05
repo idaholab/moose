@@ -16,9 +16,11 @@ InputParameters
 HeatConductionKernel::validParams()
 {
   InputParameters params = Diffusion::validParams();
-  params.addClassDescription("Diffusive heat conduction term $-\\nabla\\cdot(k\\nabla T)$ of the thermal energy conservation equation");
-  params.addParam<MaterialPropertyName>(
-      "diffusion_coefficient", "thermal_conductivity", "Property name of the diffusion coefficient");
+  params.addClassDescription("Diffusive heat conduction term $-\\nabla\\cdot(k\\nabla T)$ of the "
+                             "thermal energy conservation equation");
+  params.addParam<MaterialPropertyName>("diffusion_coefficient",
+                                        "thermal_conductivity",
+                                        "Property name of the diffusion coefficient");
   params.addParam<MaterialPropertyName>(
       "diffusion_coefficient_dT",
       "thermal_conductivity_dT",

@@ -15,8 +15,8 @@ InputParameters
 AnisoHeatConduction::validParams()
 {
   InputParameters params = DerivativeMaterialInterface<Kernel>::validParams();
-  params.addClassDescription(
-      "Anisotropic diffusive heat conduction term $\\nabla \\cdot -\\mathbf{k} \\nabla T$ of the thermal energy conservation equation");
+  params.addClassDescription("Anisotropic diffusive heat conduction term $\\nabla \\cdot "
+                             "-\\mathbf{k} \\nabla T$ of the thermal energy conservation equation");
   params.addParam<MaterialPropertyName>(
       "thermal_conductivity",
       "thermal_conductivity",
