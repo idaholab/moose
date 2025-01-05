@@ -12,7 +12,7 @@ features tailored to documenting MOOSE code:
 - C++ [`MooseObject`](MooseObject.md) descriptions and input parameters tables may be automatically generated from
   applications (see [/appsyntax.md]).
 - Cross-referencing links to examples and source code may be created (see [/autolink.md]).
-- Dynamic source code listings allow source to displayed without duplication and update
+- Dynamic source code listings allow source to be displayed without duplication and update
   automatically with code changes (see [/listing.md]).
 
 The single-source markdown files may be converted into various media forms, including web-sites (like

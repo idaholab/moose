@@ -79,7 +79,7 @@ class ReaderComponent(Component, mixins.ReaderObject):
         settings = dict()
         settings['style'] = (None, "The style settings that are passed to rendered HTML tag.")
         settings['class'] = (None, "The class settings to be passed to rendered HTML tag.")
-        settings['id'] = (None, "The class settings to be passed to the rendered tag.")
+        settings['id'] = (None, "Identifier to link against this object.")
         return settings
 
     def __init__(self):

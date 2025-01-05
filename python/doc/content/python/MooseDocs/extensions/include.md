@@ -4,7 +4,7 @@ A primary driver behind developing the MooseDocs system was to create a single s
 for all documentation and allow the same piece of text to be reused in multiple locations and in
 multiple formats. Therefore, it is possible to include markdown within markdown using the
 `!include` command.  The available
-setting for the `!include` command is given in [include-settings].
+settings for the `!include` command is given in [include-settings].
 
 !devel settings id=include-settings
                 caption=Settings for the `!include` command.
