@@ -1,10 +1,10 @@
 # Software Quality Assurance Extension
 
-The [!ac](SQA) extension is design to aid in tracking documentation for satisfying the NQA-1 standard for
+The [!ac](SQA) extension is designed to aid in tracking documentation for satisfying the NQA-1 standard for
 software quality. It is simply a tool to aid MOOSE-based software projects for being sure that all
 the necessary information exists to meet this standard. The first section details the use of
 templates for building software quality documentation, the second explains the extension level
-configuration, and the final section briefly discuss each of the available extension commands and
+configuration, and the final section briefly discusses each of the available extension commands and
 the intended purpose. For a working example please refer to the
 [MOOSE SQA](sqa/index.md exact=True optional=True) documentation.
 
@@ -88,7 +88,7 @@ they follow the framework versions of the [framework_cci.md] and [framework_scs.
 
 The available general SQA templates are listed below. Unlike the MOOSE-based application or module
 versions above, a landing page template does not exist and there is no naming convention required for
-loading these templates. These templates based on the [!ac](INL) templates and are stand-alone to
+loading these templates. These templates are based on the [!ac](INL) templates and are stand-alone to
 aid in creating SQA documentation for unique non-MOOSE applications. They are also used for the
 framework documents on which all MOOSE-based applications depend.
 
@@ -134,7 +134,7 @@ applications should specify this option with the correct repository as the defau
 [example-repo-config] sets the default URL. This example also demonstrates how to add
 additional URLs (i.e., pika) to the list of available URLs.
 
-!listing caption=Example use of "repos" configuration option. id=example-repo-config
+!listing caption=Example use of "repos" configuration option. id=example-repo-config language=yaml
 MooseDocs.extensions.sqa:
     repos:
         default: https://github.com/idaholab/mastodon
@@ -175,7 +175,7 @@ dictionary used for this option. These sub-options are detailed as follows.
 - `reports`: Options for SQA report generation, see [python/moosesqa/index.md] for additional
   details.
 
-!listing caption=Example use of "categories" configuration option. id=example-categories-config
+!listing caption=Example use of "categories" configuration option. id=example-categories-config language=yaml
 MooseDocs.extensions.sqa:
     categories:
         framework:
@@ -203,7 +203,7 @@ configuration option (see [#categories-config]). When listed this group is used 
 the requirements. The "requirement-groups" allows the group name to
 be modified. For example, [example-req-groups] demonstrates the use of this option.
 
-!listing caption=Example use of "requirement-groups" configuration option. id=example-req-groups
+!listing caption=Example use of "requirement-groups" configuration option. id=example-req-groups language=yaml
 MooseDocs.extensions.sqa:
     requirement-groups:
         dgkernels: DGKernel Objects
@@ -211,7 +211,7 @@ MooseDocs.extensions.sqa:
 
 ### +`reports`+
 
-This option provides information for generating of an application level set of SQA reports; please
+This option provides information for generating an application level set of SQA reports; please
 refer to [python/moosesqa/index.md] for additional details.
 
 ### +`default_collection`+
