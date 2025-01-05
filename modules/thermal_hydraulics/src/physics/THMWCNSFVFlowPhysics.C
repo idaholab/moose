@@ -65,13 +65,14 @@ THMWCNSFVFlowPhysics::validParams()
   InputParameters params = ThermalHydraulicsFlowPhysics::validParams();
   params += WCNSFVFlowPhysics::validParams();
 
+  // Change the default because that of the name of the syntax
+  MooseEnum comp_type("incompressible weakly-compressible", "weakly-compressible");
+  params.addParam<MooseEnum>(
+      "compressibility", comp_type, "Compressibility constraint for the Navier-Stokes equations.");
+
   params.addParam<bool>("output_inlet_areas",
                         false,
                         "Whether to output the postprocessors measuring the inlet areas");
-
-  // Prepare to forward velocity components to the main velocity variable
-  // params.set<std::vector<std::string>>("velocity_variable") = {
-  //     "vel_x_channel", "vel_y_channel", "vel_z_channel"};
 
   // Suppress direct setting of boundary parameters from the physics, since these will be set by
   // flow boundary components
@@ -83,7 +84,7 @@ THMWCNSFVFlowPhysics::validParams()
   params.suppressParameter<std::vector<MooseFunctorName>>("pressure_functors");
   params.suppressParameter<std::vector<BoundaryName>>("wall_boundaries");
   params.suppressParameter<MultiMooseEnum>("momentum_wall_types");
-  // params.suppressParameter<std::vector<MooseFunctorName>>("momentum_wall_functors");
+  params.suppressParameter<std::vector<MooseFunctorName>>("momentum_wall_functors");
 
   // Suppress misc parameters we do not expect we will need for now
   params.suppressParameter<bool>("add_flow_equations");
@@ -124,38 +125,6 @@ void
 THMWCNSFVFlowPhysics::addSolverVariables()
 {
   ThermalHydraulicsFlowPhysics::addCommonVariables();
-
-  // Add the channel velocity variable
-  // {
-  //   const auto variable_type = "INSFVVelocityVariable";
-  //   auto params = getFactory().getValidParams(variable_type);
-  //   assignBlocks(params, _blocks);
-  //   params.set<std::vector<Real>>("scaling") = {getParam<Real>("momentum_scaling")};
-  //   params.set<MooseEnum>("face_interp_method") =
-  //       getParam<MooseEnum>("momentum_face_interpolation");
-  //   params.set<bool>("two_term_boundary_expansion") =
-  //       getParam<bool>("momentum_two_term_bc_expansion");
-  //   getProblem().addVariable(variable_type, "vel_1d", params);
-  //   saveSolverVariableName("vel_1d");
-  // }
-
-  // Add functors that forward to the nonlinear variables
-  // {
-  //   std::vector<std::string> velocity_name = {"vel_x_channel", "vel_y_channel", "vel_z_channel"};
-  //   std::vector<std::string> channel_direction = {"direction_x", "direction_y", "direction_z"};
-
-  //   std::string class_name = "ADParsedFunctorMaterial";
-  //   InputParameters params = _factory.getValidParams(class_name);
-  //   assignBlocks(params, _blocks);
-  //   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-  //   for (const auto d : make_range(dimension()))
-  //   {
-  //     params.set<std::string>("property_name") = velocity_name[d];
-  //     params.set<std::vector<std::string>>("functor_names") = {"vel_1d ", channel_direction[d]};
-  //     params.set<std::string>("expression") = "vel_1d * " + channel_direction[d];
-  //     _sim->addFunctorMaterial(class_name, "compute_" + velocity_name[d], params);
-  //   }
-  // }
 
   // Use this for pressure only. Since we are using functors for the velocity variables
   WCNSFVFlowPhysics::addSolverVariables();
