@@ -2,15 +2,17 @@
 
 ## Description
 
-`BodyForce` implements a force term in momentum transport or structural
-mechanics or a source term in species/mass transport. The strong form, given a
-domain $\Omega$ is defined as
+`BodyForce` implements a force term, such as a heat generation/sink term for heat
+conduction, a momentum source/sink for momentum transport or structural mechanics, or
+a source/sink term in species/mass transport. The context of this kernel depends
+on the differential equation of interest, but shares the strong form on a domain
+$\Omega$ as
 
 \begin{equation}
-\underbrace{-f}_{\textrm{BodyForce}} + \sum_{i=1}^n \beta_i = 0 \in \Omega
+\underbrace{-f}_{\textrm{BodyForce}} + \text{other kernels} = 0 \in \Omega
 \end{equation}
 where $f$ is the source term (negative if a sink) and the second term on the
-left hand side represents the strong forms of other kernels. The `BodyForce`
+left hand side represents the strong forms of other kernels which may be present in the equation. The `BodyForce`
 weak form, in inner-product notation, is defined as
 
 \begin{equation}
@@ -32,7 +34,7 @@ through the input parameters `value`, `function`, and `postprocessor`
 respectively. Not supplying $c$, $f$, or $p$ through its corresponding
 parameter is equivalent to setting its value to unity.
 
-## Example Syntax
+## Example Input File Syntax
 
 The case below demonstrates the use of `BodyForce` where the force term is
 supplied based upon a function form:
