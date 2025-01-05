@@ -41,7 +41,7 @@ density and specific heat are defined by a [HeatConductionMaterial](/HeatConduct
 !listing modules/heat_transfer/test/tests/transient_heat/transient_heat_derivatives.i
   start=Kernels
   end=Executioner
-  remove=BCs;Functions
+  remove=BCs
 
 !syntax parameters /Kernels/HeatConductionTimeDerivative
 

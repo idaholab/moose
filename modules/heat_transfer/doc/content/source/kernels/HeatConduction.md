@@ -26,7 +26,7 @@ The Jacobian will account for partial derivatives of the diffusion coefficient
 with respect to the unknown variable if the `diffusion_coefficient_dT` property
 name is provided. These particular names are the defaults because they
 are the names used by [HeatConductionMaterial](HeatConductionMaterial.md),
-though you can also define these materials using other [Material](Material.md) objects.
+though you can also define these materials using other [Material](Materials/index.md) objects.
 
 ## Example Input File Syntax
 
