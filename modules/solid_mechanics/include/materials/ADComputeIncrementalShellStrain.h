@@ -184,7 +184,7 @@ protected:
   ADRealVectorValue _x3;
   const NumericVector<Number> * const & _sol;
   const NumericVector<Number> & _sol_old;
-  const bool _is_v1_defined;
+  const RealVectorValue _ref_first_local_dir;
   ADRealVectorValue _g3_a;
   ADRealVectorValue _g3_c;
   ADRealVectorValue _g3_b;

@@ -4,17 +4,17 @@
 # Analytical solution: maximum diplacement at the center= 6.469e-3
 # Numerical model: maximum diplacement at the center=6.436e-3
 
-# Analytical solution: maximum bending moment (m11) at the center =30000
-# Numerical model: maximum bending moment (m11) at the center =30000
+# Analytical solution: maximum bending moment (m22) at the center =30000
+# Numerical model: maximum bending moment (m22) at the center =30000
 
-# Analytical solution: out of plane shear force (q23) for 0<x<3 =10000
-# Numerical model: out of plane shear force (q23) for 0<x<3 =10000
+# Analytical solution: out of plane shear force (q13) for 0<x<3 =10000
+# Numerical model: out of plane shear force (q13) for 0<x<3 =10000
 
-# Analytical solution: out of plane shear force (q23) for 3<x<6 =0
-# Numerical model: out of plane shear force (q23) at for 3<x<6 =0
+# Analytical solution: out of plane shear force (q13) for 3<x<6 =0
+# Numerical model: out of plane shear force (q13) at for 3<x<6 =0
 
-# Analytical solution: out of plane shear force (q23) for 6<x<9 =-10000
-# Numerical model: out of plane shear force (q23) for 6<x<9 =-10000
+# Analytical solution: out of plane shear force (q13) for 6<x<9 =-10000
+# Numerical model: out of plane shear force (q13) for 6<x<9 =-10000
 
 [Mesh]
   [gmg]
@@ -170,11 +170,11 @@
 
 [AuxVariables]
 
-  [moment_11]
+  [moment_22]
     order = CONSTANT
     family = MONOMIAL
   []
-  [shear_23]
+  [shear_13]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -218,19 +218,19 @@
 
 [AuxKernels]
 
-  [moment_11]
+  [moment_22]
     type = ShellResultantsAux
-    variable = moment_11
-    stress_resultant = bending_moment_0
+    variable = moment_22
+    stress_resultant = bending_moment_1
     thickness = 0.133887
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END
   []
 
-  [shear_23]
+  [shear_13]
     type = ShellResultantsAux
-    variable = shear_23
-    stress_resultant = shear_force_12
+    variable = shear_13
+    stress_resultant = shear_force_02
     thickness = 0.133887
     through_thickness_order = SECOND
     execute_on = TIMESTEP_END

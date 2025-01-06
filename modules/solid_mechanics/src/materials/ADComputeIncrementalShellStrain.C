@@ -42,6 +42,7 @@ ADComputeIncrementalShellStrain::validParams()
   params.addParam<bool>(
       "large_strain", false, "Set to true to turn on finite strain calculations.");
   params.addParam<RealVectorValue>("reference_first_local_direction",
+                                   RealVectorValue(1, 0, 0),
                                    "Vector that is projected onto an element to define the "
                                    "direction for the first local coordinate direction e1.");
   return params;
@@ -89,7 +90,8 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     _total_global_strain(),
     _sol(_nonlinear_sys.currentSolution()),
     _sol_old(_nonlinear_sys.solutionOld()),
-    _is_v1_defined(isParamValid("reference_first_local_direction"))
+    _ref_first_local_dir(getParam<RealVectorValue>("reference_first_local_direction"))
+
 {
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != 3 || _nrot != 2)
@@ -100,6 +102,11 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   if (_mesh.hasSecondOrderElements())
     mooseError(
         "ADComputeIncrementalShellStrain: Shell element is implemented only for linear elements.");
+
+  // Checking if the size of the first local vector is within an acceptable range
+  if (MooseUtils::absoluteFuzzyEqual(_ref_first_local_dir.norm(), 0.0, 1e-3))
+    mooseError(
+        "The norm of the defined first local axis is less than the acceptable telerance (1e-3)");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -203,6 +210,7 @@ ADComputeIncrementalShellStrain::initQpStatefulProperties()
   if (_qrule->get_points().size() != 4)
     mooseError("ADComputeIncrementalShellStrain: Shell element needs to have exactly four "
                "quadrature points.");
+
   computeGMatrix();
   computeBMatrix();
 }
@@ -449,49 +457,33 @@ ADComputeIncrementalShellStrain::computeGMatrix()
 void
 ADComputeIncrementalShellStrain::computeLocalCoordinates()
 {
-  // default option:the convention used to calculate the local nodal coordinates is also adopted for
-  // calculating the element's local coordinates
-  // the first local vector can be also defined by the user
+  // default option for the first local vector:the global X-axis is projected on the shell plane
+  // alternatively the reference first local vector provided by the user can be used to define the
+  // 1st local axis
 
   // All nodes in an element have the same normal vector. Therefore, here, we use only the normal
   // vecor of the first node as "the element's normal vector"
   _e3 = _node_normal[0];
 
-  if (_is_v1_defined)
-  {
-    _e1 = getParam<RealVectorValue>("reference_first_local_direction");
-
-    if (MooseUtils::absoluteFuzzyEqual(_e1.norm(), 0.0, 1e-3))
-      mooseError(
-          "The norm of the defined first local axis is less than the acceptable telerance (1e-3)");
-
-    _e1 /= _e1.norm();
-
-    // vector v1 and the normal are considered parallel if the angle between them is less
-    // than libMesh::TOLERANCE
-    if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, libMesh::TOLERANCE))
-    {
-      mooseError("The defined first local axis must not be perpendicular to any of the shell "
-                 "elements ");
-    }
-    else
-    {
-      // we project the user-defined vector on the shell element
-      _e1 = (_e1 - (_e1 * _e3) * _e3);
-    }
-  }
-  else
-  {
-    _e1 = _x2.cross(_e3);
-    // If x2 is parallel to the element's normal, set e1 to x3 (less than libMesh::TOLERANCE is
-    // considered parallel)
-    if (MooseUtils::absoluteFuzzyEqual(std::abs(_x2 * _e3), 1.0, libMesh::TOLERANCE))
-      _e1 = _x3;
-  }
+  _e1 = _ref_first_local_dir;
 
   _e1 /= _e1.norm();
+
+  // The reference first local axis and the normal are considered parallel if the angle between them
+  // is less than 0.05 degrees
+  if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
+  {
+    mooseError("The reference first local axis must not be perpendicular to any of the shell "
+               "elements ");
+  }
+
+  // we project the reference first local vector on the shell element and calculate the in-plane e1
+  // and e2 vectors
   _e2 = _e3.cross(_e1);
   _e2 /= _e2.norm();
+
+  _e1 = _e2.cross(_e3);
+  _e1 /= _e1.norm();
 }
 
 void
