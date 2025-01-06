@@ -38,6 +38,8 @@ VolumetricFlowRate::validParams()
                                     "set the advected quantity when finite volume is being used.");
   params += Moose::FV::interpolationParameters();
   params.addParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
+  params.addParam<bool>(
+      "subtract_mesh_velocity", true, "To subract the velocity of the potentially moving mesh.");
   return params;
 }
 
@@ -54,7 +56,8 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
                                                  : nullptr),
     _rc_uo(isParamValid("rhie_chow_user_object")
                ? &getUserObject<RhieChowFaceFluxProvider>("rhie_chow_user_object")
-               : nullptr)
+               : nullptr),
+    _subtract_mesh_velocity(getParam<bool>("subtract_mesh_velocity"))
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -134,7 +137,7 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
 
   // Get face value for velocity
   const auto face_flux = MetaPhysicL::raw_value(_rc_uo->getVolumetricFaceFlux(
-      _velocity_interp_method, *fi, state, _tid, /*subtract_mesh_velocity=*/true));
+      _velocity_interp_method, *fi, state, _tid, _subtract_mesh_velocity));
 
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;

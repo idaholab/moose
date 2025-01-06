@@ -61,4 +61,7 @@ protected:
 
   /// The Rhie-Chow interpolation user object
   const RhieChowFaceFluxProvider * const _rc_uo;
+
+  /// If the velocity of the potentially moving mesh should be subtracted or not
+  const bool _subtract_mesh_velocity;
 };

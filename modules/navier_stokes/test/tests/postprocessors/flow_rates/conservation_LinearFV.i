@@ -170,6 +170,7 @@ advected_interp_method='average'
     advected_quantity = ${rho}
     vel_x = vel_x
     vel_y = vel_y
+    subtract_mesh_velocity = false
   []
   [outlet_mass]
     type = VolumetricFlowRate
@@ -178,6 +179,7 @@ advected_interp_method='average'
     advected_quantity = ${rho}
     vel_x = vel_x
     vel_y = vel_y
+    subtract_mesh_velocity = false
   []
 []
 
