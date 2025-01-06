@@ -20,7 +20,7 @@ as shown in [katex-numbered].
 !devel! example id=katex-numbered
                 caption=Example of syntax for creating numbered equations with [KaTeX].
 \begin{equation}
-\label{line-eq}
+\label{line-eq2}
 y = a\cdot x + b
 \end{equation}
 !devel-end!
