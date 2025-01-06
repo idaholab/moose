@@ -10,21 +10,20 @@ subchannel simulations, for bare rod, square lattice bundles or wire-wrapped/bar
 
 ## General Information class=center style=font-weight:200;
 
-Familiarize yourself with the theory behind SCM and some important user notes. Browse through the following information:
+Familiarize yourself with the theory behind SCM, some important user notes and how to run the SCM input file. Browse through the following information:
 
-- [Theory](theory/subchannel_theory.md)
-- [User Notes](theory/user_notes.md)
-- [Publication List](theory/publication_list.md)
+- [Theory](general/subchannel_theory.md)
+- [Running SCM input file](general/user_notes.md)
+- [User Notes](general/user_notes.md)
+- [Publication List](general/publication_list.md)
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=settings
 
-## [Code Reference](modules/subchannel/syntax/index.md) class=center style=font-weight:200;font-size:150%
+## [SCM Kernels](modules/subchannel/syntax.md) class=center style=font-weight:200;font-size:150%
 
 !style halign=center
-SCM provides capabilities that can be applied to a wide variety of problems.
-The Code Reference provides detailed documentation of specific code features.
-General user notes on SCM can also be found [here](theory/user_notes.md).
+SCM specific Kernel syntax.
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=assessment
@@ -32,8 +31,7 @@ General user notes on SCM can also be found [here](theory/user_notes.md).
 ## [Verification & Validation](modules/subchannel/v&v/v&v-list.md) class=center style=font-weight:200;font-size:150%
 
 !style halign=center
-Several problems originally developed for thermal-hydraulic subchannel codes have been used for the
-validation and verification of SCM. These cases can be found [here](modules/subchannel/v&v/v&v-list.md).
+Several problems originally developed for thermal-hydraulic subchannel codes have been used for the validation and verification of SCM. These cases can be found [here](modules/subchannel/v&v/v&v-list.md).
 !col-end!
 !row-end!
 

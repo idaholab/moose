@@ -1,6 +1,13 @@
 Content:
     - framework/doc/content
     - modules/subchannel/doc/content
+    - doc/content
+    - framework/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/heat_transfer/doc/content
+    - modules/ray_tracing/doc/content
+    - modules/navier_stokes/doc/content
+    - modules/reactor/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
