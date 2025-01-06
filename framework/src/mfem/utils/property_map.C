@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include <property_map.h>
 
 namespace platypus
@@ -51,3 +53,5 @@ MatrixMap::checkPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff,
   }
 }
 }
+
+#endif

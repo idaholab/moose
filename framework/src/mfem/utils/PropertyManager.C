@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "PropertyManager.h"
 #include "MooseError.h"
 #include <algorithm>
@@ -130,3 +132,5 @@ PropertyManager::matrixIsDefined(const std::string & name, const std::string & b
   return this->_matrix_coeffs.coefficientDefinedOnBlock(name, block);
 }
 }
+
+#endif

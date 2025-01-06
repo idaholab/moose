@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMConduitDataCollection.h"
 
 registerMooseObject("MooseApp", MFEMConduitDataCollection);
@@ -23,3 +25,5 @@ MFEMConduitDataCollection::MFEMConduitDataCollection(const InputParameters & par
   _conduit_dc.SetProtocol(_protocol);
   registerFields();
 }
+
+#endif

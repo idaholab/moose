@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMMaterial.h"
 
@@ -20,3 +22,5 @@ protected:
   unsigned int _num_props;
   int _prop_dims;
 };
+
+#endif

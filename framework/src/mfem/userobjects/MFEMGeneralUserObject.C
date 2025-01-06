@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMGeneralUserObject.h"
 #include "MFEMProblem.h"
 
@@ -15,3 +17,5 @@ MFEMGeneralUserObject::MFEMGeneralUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters), _mfem_problem(static_cast<MFEMProblem &>(_fe_problem))
 {
 }
+
+#endif

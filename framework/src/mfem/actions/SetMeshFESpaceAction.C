@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "SetMeshFESpaceAction.h"
 
 registerMooseAction("MooseApp", SetMeshFESpaceAction, "set_mesh_fe_space");
@@ -34,3 +36,5 @@ SetMeshFESpaceAction::act()
 
   mesh.SetNodalFESpace(displacement.value().get().ParFESpace());
 }
+
+#endif

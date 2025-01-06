@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "ScaleIntegrator.h"
 
 namespace platypus
@@ -117,3 +119,5 @@ ScaleIntegrator::~ScaleIntegrator()
 }
 
 } // namespace platypus
+
+#endif

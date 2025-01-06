@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVariable.h"
 #include "MooseVariableBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -34,3 +36,5 @@ MFEMVariable::buildGridFunction()
 {
   return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
 }
+
+#endif

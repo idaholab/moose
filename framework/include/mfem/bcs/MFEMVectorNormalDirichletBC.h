@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMVectorDirichletBCBase.h"
@@ -10,3 +12,5 @@ public:
   ~MFEMVectorNormalDirichletBC() override = default;
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) override;
 };
+
+#endif

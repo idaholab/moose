@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
@@ -45,3 +47,5 @@ private:
 };
 
 } // namespace platypus
+
+#endif

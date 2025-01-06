@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorFunctionNormalIntegratedBC.h"
 
 registerMooseObject("MooseApp", MFEMVectorFunctionNormalIntegratedBC);
@@ -33,3 +35,5 @@ MFEMVectorFunctionNormalIntegratedBC::createBilinearFormIntegrator()
 {
   return nullptr;
 }
+
+#endif

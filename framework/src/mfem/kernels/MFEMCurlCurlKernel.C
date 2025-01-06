@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMProblem.h"
 
@@ -31,3 +33,5 @@ MFEMCurlCurlKernel::createIntegrator()
 {
   return new mfem::CurlCurlIntegrator(_coef);
 }
+
+#endif

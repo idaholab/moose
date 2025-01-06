@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMProblemData.h"
 
@@ -18,3 +20,5 @@ public:
   [[nodiscard]] virtual platypus::EquationSystem * GetEquationSystem() const = 0;
 };
 }
+
+#endif

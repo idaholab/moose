@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "boundary_conditions.h"
 
 namespace platypus
@@ -105,3 +107,5 @@ BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::BilinearForm & blf, m
 };
 
 } // namespace platypus
+
+#endif

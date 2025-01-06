@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMGenericFunctionMaterial.h"
 #include "MFEMProblem.h"
 
@@ -39,3 +41,5 @@ MFEMGenericFunctionMaterial::MFEMGenericFunctionMaterial(const InputParameters &
 }
 
 MFEMGenericFunctionMaterial::~MFEMGenericFunctionMaterial() {}
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSolverBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -26,3 +28,5 @@ private:
   mfem::real_t _strength_threshold;
   std::shared_ptr<mfem::HypreBoomerAMG> _solver{nullptr};
 };
+
+#endif

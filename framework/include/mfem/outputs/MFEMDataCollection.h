@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "FileOutput.h"
 #include "MFEMProblem.h"
@@ -18,3 +20,5 @@ protected:
 
   MFEMProblemData & _problem_data;
 };
+
+#endif

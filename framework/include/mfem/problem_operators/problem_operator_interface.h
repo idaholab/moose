@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMProblemData.h"
 
@@ -35,3 +37,5 @@ protected:
   std::vector<mfem::ParGridFunction *> _trial_variables;
 };
 }
+
+#endif

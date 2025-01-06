@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMExecutioner.h"
 #include "time_domain_equation_system_problem_operator.h"
@@ -26,3 +28,5 @@ private:
   mutable bool _last_step; // Flag to check if current step is final
   std::unique_ptr<platypus::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
+
+#endif

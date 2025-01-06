@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "AddProblemOperatorAction.h"
 
 registerMooseAction("MooseApp", AddProblemOperatorAction, "add_mfem_problem_operator");
@@ -23,3 +25,5 @@ AddProblemOperatorAction::act()
   if (mfem_problem)
     mfem_problem->initProblemOperator();
 }
+
+#endif

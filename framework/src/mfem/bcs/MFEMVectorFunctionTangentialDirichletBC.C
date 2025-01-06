@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorFunctionTangentialDirichletBC.h"
 
 registerMooseObject("MooseApp", MFEMVectorFunctionTangentialDirichletBC);
@@ -15,3 +17,5 @@ MFEMVectorFunctionTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, 
   ess_bdrs = GetMarkers(*mesh_);
   gridfunc.ProjectBdrCoefficientTangent(*_vec_coef, ess_bdrs);
 }
+
+#endif

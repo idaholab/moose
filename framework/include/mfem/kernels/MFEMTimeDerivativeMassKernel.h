@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMMassKernel.h"
 
@@ -22,3 +24,5 @@ protected:
   // Name of variable (gridfunction) representing time derivative of variable.
   std::string _var_dot_name;
 };
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMHyprePCG.h"
 #include "MFEMProblem.h"
@@ -43,3 +45,5 @@ MFEMHyprePCG::constructSolver(const InputParameters &)
   if (hypre_preconditioner)
     _solver->SetPreconditioner(*hypre_preconditioner);
 }
+
+#endif

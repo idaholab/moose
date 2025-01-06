@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMTimeDerivativeMassKernel.h"
 
 registerMooseObject("MooseApp", MFEMTimeDerivativeMassKernel);
@@ -17,3 +19,5 @@ MFEMTimeDerivativeMassKernel::MFEMTimeDerivativeMassKernel(const InputParameters
   : MFEMMassKernel(parameters), _var_dot_name(platypus::GetTimeDerivativeName(_test_var_name))
 {
 }
+
+#endif

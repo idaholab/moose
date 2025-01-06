@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMProblem.h"
@@ -44,3 +46,5 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
     _solver->SetElasticityOptions(_mfem_fespace.get());
   }
 }
+
+#endif

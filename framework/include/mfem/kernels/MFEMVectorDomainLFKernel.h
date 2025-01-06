@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMKernel.h"
 
@@ -18,3 +20,5 @@ protected:
   std::string _vec_coef_name;
   mfem::VectorCoefficient & _vec_coef;
 };
+
+#endif

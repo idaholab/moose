@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include <memory>
@@ -30,3 +32,5 @@ dynamic_const_cast(std::shared_ptr<Ts> source_pointer)
 }
 
 } // namespace PlatypusUtils
+
+#endif

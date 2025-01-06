@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMBoundaryCondition.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mesh_extras.hpp"
@@ -35,3 +37,5 @@ MFEMBoundaryCondition::GetMarkers(mfem::Mesh & mesh)
   mfem::common::AttrToMarker(mesh.bdr_attributes.Max(), _bdr_attributes, _bdr_markers);
   return _bdr_markers;
 }
+
+#endif

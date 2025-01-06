@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSolverBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -24,3 +26,5 @@ protected:
 private:
   std::shared_ptr<mfem::OperatorJacobiSmoother> _preconditioner{nullptr};
 };
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMMaterial.h"
 #include "MFEMProblem.h"
 
@@ -49,3 +51,5 @@ MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
 }
 
 MFEMMaterial::~MFEMMaterial() {}
+
+#endif

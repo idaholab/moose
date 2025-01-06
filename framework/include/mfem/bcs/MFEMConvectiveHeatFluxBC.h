@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMIntegratedBC.h"
 
@@ -23,3 +25,5 @@ protected:
   std::shared_ptr<mfem::Coefficient> _T_inf_coef;
   std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
 };
+
+#endif
