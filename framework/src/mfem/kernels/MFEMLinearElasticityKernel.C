@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMLinearElasticityKernel.h"
 
 registerMooseObject("MooseApp", MFEMLinearElasticityKernel);
@@ -38,3 +40,5 @@ MFEMLinearElasticityKernel::createIntegrator()
 {
   return new mfem::ElasticityIntegrator(_lambda, _mu);
 }
+
+#endif

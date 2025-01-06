@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "mfem.hpp"
 #include "MFEMGeneralUserObject.h"
@@ -60,3 +62,5 @@ private:
   /// Stores the constructed fespace.
   mutable std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 };
+
+#endif

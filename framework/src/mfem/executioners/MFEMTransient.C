@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMTransient.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
@@ -114,3 +116,5 @@ MFEMTransient::execute()
 
   postExecute();
 }
+
+#endif

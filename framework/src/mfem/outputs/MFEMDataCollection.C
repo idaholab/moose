@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMDataCollection.h"
 
 InputParameters
@@ -34,3 +36,5 @@ MFEMDataCollection::output()
   dc.Save();
   _file_num++;
 }
+
+#endif

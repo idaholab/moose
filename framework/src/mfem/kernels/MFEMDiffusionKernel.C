@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMDiffusionKernel.h"
 #include "MFEMProblem.h"
 
@@ -29,3 +31,5 @@ MFEMDiffusionKernel::createIntegrator()
 {
   return new mfem::DiffusionIntegrator(_coef);
 }
+
+#endif

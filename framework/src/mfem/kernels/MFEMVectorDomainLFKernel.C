@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorDomainLFKernel.h"
 
 registerMooseObject("MooseApp", MFEMVectorDomainLFKernel);
@@ -25,3 +27,5 @@ MFEMVectorDomainLFKernel::createIntegrator()
 {
   return new mfem::VectorDomainLFIntegrator(_vec_coef);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMExecutioner.h"
 #include "equation_system_problem_operator.h"
@@ -27,3 +29,5 @@ protected:
 private:
   std::unique_ptr<platypus::ProblemOperator> _problem_operator{nullptr};
 };
+
+#endif
