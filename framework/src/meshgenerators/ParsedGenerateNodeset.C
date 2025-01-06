@@ -95,11 +95,8 @@ ParsedGenerateNodeset::generate()
   mooseAssert(nodeset_ids.size() == 1, "Length of nodeset_ids should be one");
 
   // Loop over nodes
-  for (const auto node_id : make_range(mesh->n_nodes()))
+  for (const auto curr_node : as_range(mesh->active_nodes_begin(), mesh->active_nodes_end()))
   {
-    // Get a pointer to the node
-    const auto curr_node = mesh->query_node_ptr(node_id);
-
     // Get all nodesets the node is currently a part of
     const auto & node_nodesets_iters = nodeset_map.equal_range(curr_node);
 
