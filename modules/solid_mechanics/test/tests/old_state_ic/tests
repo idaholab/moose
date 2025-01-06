@@ -1,5 +1,6 @@
 [Tests]
   issues = '#28073'
+  design = "syntax/ICs/index.md"
   [old_state_ic]
     type = CSVDiff
     input = 'old_state_ic.i'
@@ -22,6 +23,6 @@
     type = RunException
     input = 'error_same_ic.i'
     expect_err = "The initial condition 'old' is being defined on a block that already has an initial condition defined with the same variable and state."
-    detail = 'Should throw error for same IC.'
+    requirement = 'Should throw error for same IC.'
   []
 []

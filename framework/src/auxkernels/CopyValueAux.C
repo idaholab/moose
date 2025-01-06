@@ -31,9 +31,9 @@ CopyValueAux::validParams()
 CopyValueAux::CopyValueAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _state(getParam<MooseEnum>("state")),
-    _v(coupledValue("source")),
-    _v_old(_state == 1 ? coupledValueOld("source") : _v),
-    _v_older(_state == 2 ? coupledValueOlder("source") : _v),
+    _v(_state == 0   ? coupledValue("source")
+       : _state == 1 ? coupledValueOld("source")
+                     : coupledValueOlder("source")),
     _source_variable(*getVar("source", 0))
 {
   if (_var.feType().family != _source_variable.feType().family)
@@ -53,21 +53,5 @@ CopyValueAux::CopyValueAux(const InputParameters & parameters)
 Real
 CopyValueAux::computeValue()
 {
-
-  if (_state == 2)
-  {
-    return _v_older[_qp];
-  }
-  else if (_state == 1)
-  {
-    return _v_old[_qp];
-  }
-  else if (_state == 0)
-  {
-    return _v[_qp];
-  }
-  else
-  {
-    mooseError("state parameter only supports up to state 2");
-  }
+  return _v[_qp];
 }

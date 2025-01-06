@@ -29,8 +29,6 @@ protected:
 
   /// The variable to project from
   const VariableValue & _v;
-  const VariableValue & _v_old;
-  const VariableValue & _v_older;
 
   /// A reference to the variable to project from
   const MooseVariable & _source_variable;
