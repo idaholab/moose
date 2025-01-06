@@ -477,7 +477,7 @@ def getSlepcVersion(libmesh_dir):
     major_version = getLibMeshConfigOption(libmesh_dir, 'slepc_major')
     minor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_minor')
     subminor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
+    if len(major_version) != 1 or len(minor_version) != 1 or len(subminor_version) != 1:
       return None
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
@@ -494,7 +494,7 @@ def getVTKVersion(libmesh_dir):
     major_version = getLibMeshConfigOption(libmesh_dir, 'vtk_major')
     minor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_minor')
     subminor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
+    if len(major_version) != 1 or len(minor_version) != 1 or len(subminor_version) != 1:
       return None
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
@@ -509,7 +509,7 @@ def getLibtorchVersion(moose_dir):
     major_version = getConfigOption(filenames, 'libtorch_major', LIBTORCH_OPTIONS)
     minor_version = getConfigOption(filenames, 'libtorch_minor', LIBTORCH_OPTIONS)
 
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
+    if len(major_version) != 1 or len(minor_version) != 1:
       return None
 
     return major_version.pop() + '.' + minor_version.pop()
