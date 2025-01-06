@@ -195,8 +195,14 @@ MeshGeneratorSystem::createAddedMeshGenerators()
                              "' does not exist");
   }
 
-  // Construct all of the mesh generators that we know exist
+  // Check compatibility for CLI / meshing options with csg_only
   const bool csg_only = getCSGOnly();
+  if (csg_only && _data_driven_generator_name)
+    moose_mesh->paramError(data_driven_generator_param, "This parameter should not be set in conjunction with --csg-only");
+  if (libMesh::n_threads() > 1)
+    mooseWarning("--csg-only option does not currently support multi-threading");
+
+  // Construct all of the mesh generators that we know exist
   for (const auto & generator_names : ordered_generators)
     for (const auto & generator_name : generator_names)
       if (auto it = _mesh_generator_params.find(generator_name); it != _mesh_generator_params.end())
@@ -398,6 +404,8 @@ MeshGeneratorSystem::executeMeshGenerators()
         if (_final_generator_name == generator->name())
           generator->paramError("save_with_name",
                                 "Cannot use the save in capability with the final mesh generator");
+        if (getCSGOnly())
+          generator->paramError("save_with_name", "Cannot use in conjunction with --csg-only");
         to_save_in_meshes.emplace(generator->getSavedMeshName(),
                                   &getMeshGeneratorOutput(generator->name()));
       }
