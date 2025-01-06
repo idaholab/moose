@@ -53,12 +53,12 @@ AdjointSolve::AdjointSolve(Executioner & ex)
     paramError("forward_system", "Forward system does not appear to be a 'NonlinearSystem'.");
   if (!dynamic_cast<NonlinearSystem *>(&_nl_adjoint))
     paramError("adjoint_system", "Adjoint system does not appear to be a 'NonlinearSystem'.");
-  // Adjoint system should never perform it's own automatic scaling. Scaling is
-  // taken from the forward system
+  // Adjoint system should never perform its own automatic scaling. Scaling factors from the forward
+  // system are applied.
   _nl_adjoint.automaticScaling(false);
 
   // We need to force the forward system to have a scaling vector. This is
-  // incase a user provides scaling for an individual variables but doesn't have any
+  // in case a user provides scaling for an individual variables but doesn't have any
   // AD objects.
   _nl_forward.addScalingVector();
 }
