@@ -28,7 +28,7 @@ description of the object. To display this text the `!syntax description` comman
 the MOOSE input file syntax for the object as in [appsyntax-description].
 
 !devel! example id=appsyntax-description caption=Example use of the `!syntax description` command.
-!syntax description /Mesh/FileMesh style=color:green;
+!syntax description /Mesh/FileMesh
 !devel-end!
 
 !listing framework/src/mesh/FileMesh.C start=template
