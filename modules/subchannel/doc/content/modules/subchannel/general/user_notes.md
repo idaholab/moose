@@ -25,7 +25,7 @@ index, white is the fuel-pin index and red is the gap index.
 
 In order for the user to print out the index notaion for subchannels and pins in a triangualar lattice arrangement they are invited to run the following Python script:
 
-!listing /scripts/Geometries_script.ipynb  language=python
+!listing /scripts/Geometries_script.ipynb
 
 ## Pressure boundary condition caveat
 
