@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMSteady.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
@@ -97,3 +99,5 @@ MFEMSteady::execute()
 
   postExecute();
 }
+
+#endif

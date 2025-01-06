@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMFECollection.h"
 
 registerMooseObject("MooseApp", MFEMFECollection);
@@ -46,3 +48,5 @@ MFEMFECollection::buildFEC()
   auto * fec_ptr = mfem::FiniteElementCollection::New(_fec_name.c_str());
   return std::shared_ptr<mfem::FiniteElementCollection>(fec_ptr);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMScalarBoundaryIntegratedBC.h"
 
 registerMooseObject("MooseApp", MFEMScalarBoundaryIntegratedBC);
@@ -35,3 +37,5 @@ MFEMScalarBoundaryIntegratedBC::createBilinearFormIntegrator()
 {
   return nullptr;
 }
+
+#endif

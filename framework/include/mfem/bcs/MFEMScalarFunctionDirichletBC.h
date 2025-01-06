@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMEssentialBC.h"
 
@@ -13,3 +15,5 @@ public:
 protected:
   std::shared_ptr<mfem::FunctionCoefficient> _coef{nullptr};
 };
+
+#endif

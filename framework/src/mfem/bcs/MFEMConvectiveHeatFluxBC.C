@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMConvectiveHeatFluxBC.h"
 #include "MFEMProblem.h"
 
@@ -44,3 +46,5 @@ MFEMConvectiveHeatFluxBC::createBilinearFormIntegrator()
 {
   return new mfem::BoundaryMassIntegrator(*_heat_transfer_coef);
 }
+
+#endif

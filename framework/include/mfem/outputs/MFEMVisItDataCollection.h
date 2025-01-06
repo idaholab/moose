@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMDataCollection.h"
 
@@ -17,3 +19,5 @@ protected:
   mfem::VisItDataCollection _visit_dc;
   unsigned int _refinements;
 };
+
+#endif

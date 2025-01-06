@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMHypreGMRES.h"
 #include "MFEMProblem.h"
@@ -45,3 +47,5 @@ MFEMHypreGMRES::constructSolver(const InputParameters &)
   if (hypre_preconditioner)
     _solver->SetPreconditioner(*hypre_preconditioner);
 }
+
+#endif

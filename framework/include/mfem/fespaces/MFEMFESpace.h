@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMGeneralUserObject.h"
 #include "MFEMFECollection.h"
@@ -36,3 +38,5 @@ private:
   /// Stores the constructed fespace.
   const std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 };
+
+#endif

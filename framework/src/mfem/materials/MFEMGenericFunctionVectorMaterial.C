@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMGenericFunctionVectorMaterial.h"
 #include "MFEMProblem.h"
 
@@ -41,3 +43,5 @@ MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
 }
 
 MFEMGenericFunctionVectorMaterial::~MFEMGenericFunctionVectorMaterial() {}
+
+#endif

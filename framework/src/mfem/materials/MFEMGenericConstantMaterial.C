@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMGenericConstantMaterial.h"
 
 registerMooseObject("MooseApp", MFEMGenericConstantMaterial);
@@ -38,3 +40,5 @@ MFEMGenericConstantMaterial::MFEMGenericConstantMaterial(const InputParameters &
 }
 
 MFEMGenericConstantMaterial::~MFEMGenericConstantMaterial() {}
+
+#endif

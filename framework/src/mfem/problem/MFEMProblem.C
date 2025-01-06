@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMProblem.h"
 
 #include <vector>
@@ -405,3 +407,5 @@ MFEMProblem::mesh()
               "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
   return (MFEMMesh &)_mesh;
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMSolverBase.h"
 
 InputParameters
@@ -14,3 +16,5 @@ MFEMSolverBase::MFEMSolverBase(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters)
 {
 }
+
+#endif

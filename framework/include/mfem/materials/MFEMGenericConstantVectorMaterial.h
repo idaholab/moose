@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMMaterial.h"
 
@@ -19,3 +21,5 @@ protected:
   const std::vector<Real> & _prop_values;
   unsigned int _num_props;
 };
+
+#endif

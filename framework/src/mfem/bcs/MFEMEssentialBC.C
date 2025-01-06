@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMEssentialBC.h"
 
 InputParameters
@@ -11,3 +13,5 @@ MFEMEssentialBC::MFEMEssentialBC(const InputParameters & parameters)
   : MFEMBoundaryCondition(parameters)
 {
 }
+
+#endif

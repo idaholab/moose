@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include <vector>
 #include <memory>
@@ -50,3 +52,5 @@ using VectorCoefficientManager = ObjectManager<mfem::VectorCoefficient>;
 using MatrixCoefficientManager = ObjectManager<mfem::MatrixCoefficient>;
 
 }
+
+#endif

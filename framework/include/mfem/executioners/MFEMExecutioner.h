@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
@@ -27,3 +29,5 @@ protected:
   MFEMProblemData & _problem_data;
   mfem::Device _device;
 };
+
+#endif
