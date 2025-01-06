@@ -331,7 +331,7 @@ class TestHarness:
         # want to probe for configuration options
         if self.options.no_capabilities:
             checks['compiler'] = set(['ALL'])
-            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch']:
+            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch', 'mfem']:
                 checks[f'{prefix}_version'] = 'N/A'
             for var in ['library_mode', 'mesh_mode', 'unique_ids', 'vtk',
                         'tecplot', 'dof_id_bytes', 'petsc_debug', 'curl',
@@ -339,7 +339,7 @@ class TestHarness:
                         'parmetis', 'chaco', 'party', 'ptscotch',
                         'slepc', 'unique_id', 'boost', 'fparser_jit',
                         'libpng', 'libtorch', 'libtorch_version',
-                        'installation_type']:
+                        'installation_type', 'mfem']:
                 checks[var] = set(['ALL'])
         else:
             def get_option(*args, **kwargs):
@@ -377,6 +377,8 @@ class TestHarness:
 
             checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
             checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
+            checks['mfem'] = get_option('mfem', from_version=True, to_set=True, to_bool=True)
+            checks['mfem_version'] = get_option('mfem', from_version=True, to_none=True)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.

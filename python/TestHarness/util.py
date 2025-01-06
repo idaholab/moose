@@ -38,7 +38,18 @@ MOOSE_OPTIONS = {
     },
 
     'libtorch_dir' : { 're_option' : r'#define\s+MOOSE_LIBTORCH_DIR\s+(.*)',
-                       'default'  : '/framework/contrib/libtorch'}
+                       'default'  : '/framework/contrib/libtorch'},
+
+    'mfem' :    { 're_option' : r'#define\s+MOOSE_MFEM_ENABLED\s+(\d+)',
+                    'default'   : 'FALSE',
+                    'options'   :
+                    { 'TRUE'    : '1',
+                      'FALSE'   : '0'
+                    }
+    },
+
+    'mfem_dir' : { 're_option' : r'#define\s+MOOSE_MFEM_DIR\s+(.*)',
+                       'default'  : '/framework/contrib/mfem'}
 }
 
 
@@ -204,9 +215,13 @@ LIBTORCH_OPTIONS = {
       'libtorch_minor' :  { 're_option' : r'#define\s+TORCH_VERSION_MINOR\s+(\d+)',
                    'default'   : '10'
                  }
-
 }
 
+MFEM_OPTIONS = {
+      'mfem_version' :  { 're_option' : r'#define\s+MFEM_VERSION\s+(\d+)',
+                   'default'   : '40701'
+                 }
+}
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd, cwd=None):
