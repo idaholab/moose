@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSuperLU.h"
 #include "MFEMProblem.h"
@@ -24,3 +26,5 @@ MFEMSuperLU::constructSolver(const InputParameters &)
   _solver =
       std::make_shared<platypus::SuperLUSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 }
+
+#endif

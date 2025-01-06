@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMGeneralUserObject.h"
 #include "libmesh/ignore_warnings.h"
@@ -22,3 +24,5 @@ protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver(const InputParameters & parameters) = 0;
 };
+
+#endif

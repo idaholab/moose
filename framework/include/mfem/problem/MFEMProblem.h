@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include <map>
 #include "libmesh/ignore_warnings.h"
@@ -245,3 +247,5 @@ protected:
   std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;
   std::map<std::string, std::shared_ptr<mfem::VectorFunctionCoefficient>> _vector_functions;
 };
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMBoundaryCondition.h"
 
@@ -16,3 +18,5 @@ public:
   // Apply the essential BC, overwritign the values of gridfunc on the boundary as desired.
   virtual void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) = 0;
 };
+
+#endif

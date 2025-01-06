@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMDataCollection.h"
 
@@ -19,3 +21,5 @@ protected:
   unsigned int _refinements;
   const mfem::VTKFormat _vtk_format;
 };
+
+#endif

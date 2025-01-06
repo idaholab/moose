@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorDirichletBCBase.h"
 
 InputParameters
@@ -17,3 +19,5 @@ MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & par
         mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }
+
+#endif

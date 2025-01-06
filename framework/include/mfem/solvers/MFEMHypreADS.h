@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSolverBase.h"
 #include "MFEMFESpace.h"
@@ -22,3 +24,5 @@ private:
   const MFEMFESpace & _mfem_fespace;
   std::shared_ptr<mfem::HypreADS> _preconditioner{nullptr};
 };
+
+#endif

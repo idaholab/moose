@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMHypreAMS.h"
 
@@ -34,3 +36,5 @@ MFEMHypreAMS::constructSolver(const InputParameters &)
   }
   _preconditioner->SetPrintLevel(getParam<int>("print_level"));
 }
+
+#endif

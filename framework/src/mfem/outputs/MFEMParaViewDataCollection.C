@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMParaViewDataCollection.h"
 
 registerMooseObject("MooseApp", MFEMParaViewDataCollection);
@@ -41,3 +43,5 @@ MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & p
   _pv_dc.SetDataFormat(_vtk_format);
   registerFields();
 }
+
+#endif

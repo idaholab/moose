@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMKernel.h"
 
@@ -28,3 +30,5 @@ protected:
   mfem::Coefficient & _lambda;
   mfem::Coefficient & _mu;
 };
+
+#endif
