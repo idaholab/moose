@@ -12,7 +12,7 @@ available configure options for the extension.
 !devel settings module=MooseDocs.extensions.listing object=ListingExtension
 
 The `!listing` command has the capability to include text from local content and arbitrary files
-(such as source code) files. There is a wide range of settings that are available to specialize how
+(such as source code files). There is a wide range of settings that are available to specialize how
 the code is imported.  The complete list of available settings are provided in [moose-listing] and
 the sections below provide various examples of using some of these settings.
 

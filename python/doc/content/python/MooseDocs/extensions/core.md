@@ -165,7 +165,7 @@ item by two spaces, as shown in [unordered-nested-example].
 
 As mentioned above, lists can contain lists, which can contain lists, etc. A sub-list, which is a
 list in a list, is created by indenting at the level of the list item within which it
-should contained. Since lists are block items, it must be begin and end with empty lines. And, since
+should be contained. Since lists are block items, it must be begin and end with empty lines. And, since
 this is a list it also follows the aforementioned rules for list continuation.
 [unordered-sublist-example] demonstrates the syntax for creating nested lists.
 

@@ -12,7 +12,7 @@ is a proposed standard. However, this specification is syntactically loose. For 
 defining lists the spacing can be misleading;
 [Example 273](http://spec.commonmark.org/0.28/#example-273) and
 [Example 268](http://spec.commonmark.org/0.28/#example-268) shows that some poorly defined behavior
-still exists and it is stated that the associated rule "should prevent most spurious list captures,"
+still exists. It is stated in the specification that the associated rule "should prevent most spurious list captures,"
 which is inadequate for a language.
 
 Additionally, most parsers of this specification do not support custom extensions or adding them is
