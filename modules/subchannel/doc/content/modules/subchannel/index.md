@@ -1,4 +1,4 @@
-# SCM class=center style=font-weight:600;font-size:350%
+# SCM: SubChannel Module class=center style=font-weight:600;font-size:350%
 
 !style halign=center
 SCM is a Subchannel Module for performing reactor core, single-phase thermal-hydraulic
@@ -8,12 +8,13 @@ subchannel simulations, for bare rod, square lattice bundles or wire-wrapped/bar
 
 !col! small=12 medium=4 large=4 icon=school
 
-## General Information class=center style=font-weight:200;
+## [General Information](general/subchannel_theory.md) class=center style=font-weight:200;
 
+!style halign=center
 Familiarize yourself with the theory behind SCM, some important user notes and how to run the SCM input file. Browse through the following information:
 
 - [Theory](general/subchannel_theory.md)
-- [Running SCM input file](general/user_notes.md)
+- [Running SCM input file](general/using_SubChannel.md)
 - [User Notes](general/user_notes.md)
 - [Publication List](general/publication_list.md)
 !col-end!
@@ -31,11 +32,11 @@ SCM specific Kernel syntax.
 ## [Verification & Validation](modules/subchannel/v&v/v&v-list.md) class=center style=font-weight:200;font-size:150%
 
 !style halign=center
-Several problems originally developed for thermal-hydraulic subchannel codes have been used for the validation and verification of SCM. These cases can be found [here](modules/subchannel/v&v/v&v-list.md).
+Several problems that are ideal for thermal-hydraulic subchannel analysis have been used for the validation and verification of SCM. These problems can be found [here](modules/subchannel/v&v/v&v-list.md).
 !col-end!
 !row-end!
 
-## `SCM` is a `MOOSE` module style=clear:both
+## `MOOSE` style=clear:both
 
 !style halign=left
 SCM is a [MOOSE] thermal hydraulic subchannel analysis module. It leverages the [PETSc](https://petsc.org/release/) library capabilities to solve the subchannel equations using an Newton non-linear solver. It permits seamless coupling with other [MOOSE] applications/modules like [BISON](https://mooseframework.inl.gov/bison/)/[heat-conduction](https://mooseframework.inl.gov/modules/heat_conduction/index.html). This affords the solution of coupled physics problems of varying size and dimensionality. These can be solved using computer hardware appropriate for the model size, ranging from
@@ -54,3 +55,7 @@ computer scientists and engineers and is supported by various funding agencies,
 including the [United States Department of Energy](http://energy.gov).  Development
 of these codes is ongoing at [INL](https://www.inl.gov) and by collaborators
 throughout the world.
+
+## Tutorial style=clear:both
+
+Tutorial can be found [here](modules/subchannel/tutorial/index.md)

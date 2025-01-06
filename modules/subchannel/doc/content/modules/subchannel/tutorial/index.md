@@ -38,4 +38,4 @@
 
 !---
 
-!include examples.md
+!include modules/subchannel/tutorial/subchannel_examples.md
