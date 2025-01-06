@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVisItDataCollection.h"
 
 registerMooseObject("MooseApp", MFEMVisItDataCollection);
@@ -24,3 +26,5 @@ MFEMVisItDataCollection::MFEMVisItDataCollection(const InputParameters & paramet
   _visit_dc.SetLevelsOfDetail(_refinements + 1);
   registerFields();
 }
+
+#endif

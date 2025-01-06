@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMProblem.h"
@@ -23,3 +25,5 @@ MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 {
   _preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
 }
+
+#endif

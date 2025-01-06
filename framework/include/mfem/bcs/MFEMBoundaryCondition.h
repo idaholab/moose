@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMGeneralUserObject.h"
 #include "MFEMContainers.h"
@@ -23,3 +25,5 @@ protected:
   std::vector<BoundaryName> _boundary_names;
   mfem::Array<int> _bdr_attributes;
 };
+
+#endif

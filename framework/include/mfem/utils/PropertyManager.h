@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include <map>
 #include <memory>
@@ -114,3 +116,5 @@ private:
   MatrixMap _matrix_coeffs;
 };
 }
+
+#endif

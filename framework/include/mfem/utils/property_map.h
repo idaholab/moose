@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include <map>
 #include <memory>
@@ -142,3 +144,5 @@ void MatrixMap::checkPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff,
                             std::shared_ptr<mfem::PWMatrixCoefficient> existing_pw,
                             const std::string & name);
 } // namespace platypus
+
+#endif

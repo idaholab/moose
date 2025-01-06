@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -111,3 +113,5 @@ MFEMMesh::safeClone() const
 {
   return _app.getFactory().copyConstruct(*this);
 }
+
+#endif

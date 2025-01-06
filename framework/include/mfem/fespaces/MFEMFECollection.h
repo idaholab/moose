@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMGeneralUserObject.h"
 #include "libmesh/ignore_warnings.h"
@@ -36,3 +38,5 @@ private:
   /// Stores the constructed fec.
   const std::shared_ptr<mfem::FiniteElementCollection> _fec{nullptr};
 };
+
+#endif

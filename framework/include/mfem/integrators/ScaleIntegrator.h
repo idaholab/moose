@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMGeneralUserObject.h"
 #include "libmesh/ignore_warnings.h"
@@ -84,3 +86,5 @@ public:
   virtual ~ScaleIntegrator();
 };
 } // namespace platypus
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "AddMFEMPreconditionerAction.h"
 #include "MFEMProblem.h"
 
@@ -23,3 +25,5 @@ AddMFEMPreconditionerAction::act()
 
   mfem_problem.addMFEMPreconditioner(_type, _name, _moose_object_pars);
 }
+
+#endif

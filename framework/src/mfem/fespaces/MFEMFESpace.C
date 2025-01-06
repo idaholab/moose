@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
@@ -34,3 +36,5 @@ MFEMFESpace::buildFESpace()
 
   return std::make_shared<mfem::ParFiniteElementSpace>(&pmesh, &fec, _vdim, _ordering);
 }
+
+#endif

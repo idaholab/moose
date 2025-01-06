@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "equation_system_problem_operator.h"
 
 namespace platypus
@@ -30,3 +32,5 @@ EquationSystemProblemOperator::Solve(mfem::Vector &)
 }
 
 } // namespace platypus
+
+#endif

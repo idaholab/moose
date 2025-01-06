@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
@@ -22,3 +24,5 @@ public:
 };
 
 } // namespace platypus
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "libmesh/ignore_warnings.h"
@@ -22,3 +24,5 @@ protected:
   std::vector<SubdomainName> _block_ids;
   platypus::PropertyManager & _properties;
 };
+
+#endif

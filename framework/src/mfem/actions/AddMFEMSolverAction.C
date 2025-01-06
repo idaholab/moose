@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "AddMFEMSolverAction.h"
 #include "MFEMProblem.h"
 
@@ -23,3 +25,5 @@ AddMFEMSolverAction::act()
 
   mfem_problem.addMFEMSolver(_type, _name, _moose_object_pars);
 }
+
+#endif

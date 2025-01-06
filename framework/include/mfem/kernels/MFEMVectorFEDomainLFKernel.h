@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMKernel.h"
 
@@ -17,3 +19,5 @@ public:
 protected:
   std::shared_ptr<mfem::VectorCoefficient> _vec_coef{nullptr};
 };
+
+#endif

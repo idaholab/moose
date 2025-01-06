@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMIntegratedBC.h"
 
@@ -19,3 +21,5 @@ protected:
   std::vector<Real> _vec_value;
   std::shared_ptr<mfem::VectorConstantCoefficient> _vec_coef{nullptr};
 };
+
+#endif

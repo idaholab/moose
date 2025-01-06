@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "time_domain_problem_operator.h"
 
 namespace platypus
@@ -21,3 +23,5 @@ TimeDomainProblemOperator::SetGridFunctions()
 }
 
 } // namespace platypus
+
+#endif

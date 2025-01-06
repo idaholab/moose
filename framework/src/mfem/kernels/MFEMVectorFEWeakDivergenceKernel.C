@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 
 registerMooseObject("MooseApp", MFEMVectorFEWeakDivergenceKernel);
@@ -28,3 +30,5 @@ MFEMVectorFEWeakDivergenceKernel::createIntegrator()
 {
   return new mfem::VectorFEWeakDivergenceIntegrator(_coef);
 }
+
+#endif

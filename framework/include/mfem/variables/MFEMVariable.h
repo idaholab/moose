@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMFESpace.h"
@@ -26,3 +28,5 @@ private:
   /// Stores the constructed gridfunction.
   const std::shared_ptr<mfem::ParGridFunction> _gridfunction{nullptr};
 };
+
+#endif

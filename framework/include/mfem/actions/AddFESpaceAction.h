@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MooseObjectAction.h"
@@ -18,3 +20,5 @@ public:
 
   virtual void act() override;
 };
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSolverBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -25,3 +27,5 @@ private:
   std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
   std::shared_ptr<mfem::CGSolver> _solver{nullptr};
 };
+
+#endif

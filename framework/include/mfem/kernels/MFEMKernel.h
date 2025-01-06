@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
@@ -41,3 +43,5 @@ protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
   std::string _test_var_name;
 };
+
+#endif

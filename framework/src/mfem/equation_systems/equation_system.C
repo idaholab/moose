@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "equation_system.h"
 #include "libmesh/int_range.h"
 
@@ -572,3 +574,5 @@ TimeDependentEquationSystem::UpdateEquationSystem(platypus::BCMap & bc_map)
 }
 
 } // namespace platypus
+
+#endif

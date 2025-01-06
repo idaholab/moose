@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMBoundaryCondition.h"
 
@@ -20,3 +22,5 @@ public:
   // Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 };
+
+#endif

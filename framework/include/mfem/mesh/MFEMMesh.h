@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -92,3 +94,5 @@ private:
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
 };
+
+#endif

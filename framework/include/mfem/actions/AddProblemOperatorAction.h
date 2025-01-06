@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "Action.h"
@@ -15,3 +17,5 @@ public:
 
   virtual void act() override;
 };
+
+#endif

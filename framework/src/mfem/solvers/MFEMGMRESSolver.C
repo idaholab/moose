@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMGMRESSolver.h"
 #include "MFEMProblem.h"
@@ -43,3 +45,5 @@ MFEMGMRESSolver::constructSolver(const InputParameters &)
   if (preconditioner)
     _solver->SetPreconditioner(*preconditioner);
 }
+
+#endif

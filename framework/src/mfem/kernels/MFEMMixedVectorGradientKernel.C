@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMMixedVectorGradientKernel.h"
 
 registerMooseObject("MooseApp", MFEMMixedVectorGradientKernel);
@@ -29,3 +31,5 @@ MFEMMixedVectorGradientKernel::createIntegrator()
 {
   return new mfem::MixedVectorGradientIntegrator(_coef);
 }
+
+#endif

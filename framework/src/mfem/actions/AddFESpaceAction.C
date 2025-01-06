@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "AddFESpaceAction.h"
 
 registerMooseAction("MooseApp", AddFESpaceAction, "add_mfem_fespaces");
@@ -22,3 +24,5 @@ AddFESpaceAction::act()
   if (mfem_problem)
     mfem_problem->addFESpace(_type, _name, _moose_object_pars);
 }
+
+#endif

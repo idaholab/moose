@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "problem_operator_interface.h"
 
 namespace platypus
@@ -50,3 +52,5 @@ ProblemOperatorInterface::SetTrialVariablesFromTrueVectors()
 }
 
 }
+
+#endif

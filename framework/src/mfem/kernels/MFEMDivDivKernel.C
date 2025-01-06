@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMDivDivKernel.h"
 #include "MFEMProblem.h"
 
@@ -32,3 +34,5 @@ MFEMDivDivKernel::createIntegrator()
 {
   return new mfem::DivDivIntegrator(_coef);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorFunctionDirichletBCBase.h"
 
 InputParameters
@@ -16,3 +18,5 @@ MFEMVectorFunctionDirichletBCBase::MFEMVectorFunctionDirichletBCBase(
     _vec_coef(getMFEMProblem().getVectorFunctionCoefficient(getParam<FunctionName>("function")))
 {
 }
+
+#endif

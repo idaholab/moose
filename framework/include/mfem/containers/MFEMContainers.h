@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include <map>
 #include <set>
@@ -188,3 +190,5 @@ using FECollections = platypus::NamedFieldsMap<mfem::FiniteElementCollection>;
 using FESpaces = platypus::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = platypus::NamedFieldsMap<mfem::ParGridFunction>;
 } // namespace platypus
+
+#endif

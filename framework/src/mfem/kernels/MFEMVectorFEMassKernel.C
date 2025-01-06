@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorFEMassKernel.h"
 
 registerMooseObject("MooseApp", MFEMVectorFEMassKernel);
@@ -28,3 +30,5 @@ MFEMVectorFEMassKernel::createIntegrator()
 {
   return new mfem::VectorFEMassIntegrator(_coef);
 }
+
+#endif

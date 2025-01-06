@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMScalarDirichletBC.h"
 
 registerMooseObject("MooseApp", MFEMScalarDirichletBC);
@@ -25,3 +27,5 @@ MFEMScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_
   ess_bdrs = GetMarkers(*mesh_);
   gridfunc.ProjectBdrCoefficient(*_coef, ess_bdrs);
 }
+
+#endif

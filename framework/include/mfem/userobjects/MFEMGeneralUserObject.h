@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 // MOOSE includes
@@ -29,3 +31,5 @@ public:
 private:
   MFEMProblem & _mfem_problem;
 };
+
+#endif

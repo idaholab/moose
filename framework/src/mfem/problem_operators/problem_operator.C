@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "problem_operator.h"
 
 namespace platypus
@@ -11,3 +13,5 @@ ProblemOperator::SetGridFunctions()
 };
 
 } // namespace platypus
+
+#endif

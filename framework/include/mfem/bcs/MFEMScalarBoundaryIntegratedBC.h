@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMIntegratedBC.h"
 
@@ -19,3 +21,5 @@ protected:
   std::string _coef_name;
   mfem::Coefficient & _coef;
 };
+
+#endif

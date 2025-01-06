@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "time_domain_equation_system_problem_operator.h"
 
 namespace platypus
@@ -63,3 +65,5 @@ TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(double dt)
 }
 
 } // namespace platypus
+
+#endif

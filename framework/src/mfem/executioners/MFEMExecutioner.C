@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMExecutioner.h"
 #include "MFEMProblem.h"
 
@@ -30,3 +32,5 @@ MFEMExecutioner::setDevice()
   _device.Configure(getParam<std::string>("device"));
   _device.Print(Moose::out);
 }
+
+#endif

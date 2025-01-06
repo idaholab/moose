@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "equation_system.h"
 #include "MFEMContainers.h"
@@ -37,3 +39,5 @@ public:
   int _myid;
   int _num_procs;
 };
+
+#endif
