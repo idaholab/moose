@@ -6,6 +6,7 @@
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind and produce results consistent with MFEM Example 3'
+    mfem = true
   []
   [./MFEMDiffusion]
     type = XMLDiff
@@ -13,20 +14,23 @@
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a diffusion problem set up from MOOSE and produce the same result as a native run.'
+    mfem = true
   []
   [./MFEMDiffusionPartial]
-  type = XMLDiff
-  input = diffusion_partial.i
-  xmldiff = 'OutputData/DiffusionPartial/Run0/Run0.pvd
-              OutputData/DiffusionPartial/Run0/Cycle000001/proc000000.vtu'
-  requirement = 'Platypus shall have the ability to solve a diffusion problem with partial assembly set up from MOOSE and produce the same result as a native run.'
+    type = XMLDiff
+    input = diffusion_partial.i
+    xmldiff = 'OutputData/DiffusionPartial/Run0/Run0.pvd
+                OutputData/DiffusionPartial/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Platypus shall have the ability to solve a diffusion problem with partial assembly set up from MOOSE and produce the same result as a native run.'
+    mfem = true
   []
   [./MFEMGradDiv]
-  type = XMLDiff
-  input = graddiv.i
-  xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
-              OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
-  requirement = 'Platypus shall have the ability to solve a grad-div problem with Raviart-Thomas elements set up from MOOSE and produce the same result as a native run.'
+    type = XMLDiff
+    input = graddiv.i
+    xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
+                OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'Platypus shall have the ability to solve a grad-div problem with Raviart-Thomas elements set up from MOOSE and produce the same result as a native run.'
+    mfem = true
   []
   [./MFEMHeatConduction]
     type = XMLDiff
@@ -35,6 +39,7 @@
                 OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu
                 OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem set up from MOOSE and produce the same result as a native run.'
+    mfem = true
   []
   [./MFEMHeatConductionElement]
     type = XMLDiff
@@ -43,6 +48,7 @@
                 OutputData/HeatConductionElement/Run0/Cycle000001/proc000000.vtu
                 OutputData/HeatConductionElement/Run0/Cycle000004/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem with element assembly set up from MOOSE and produce the same result as a native run.'
+    mfem = true
   []
   [./MFEMHeatTransfer]
     type = XMLDiff
@@ -50,6 +56,7 @@
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
                 OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary set up from MOOSE.'
+    mfem = true
   []
   [./MFEMLinearElasticity]
     type = XMLDiff
@@ -57,6 +64,7 @@
     xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem set up from MOOSE and produce the same result as a native run.'
+    mfem = true
   []
   [./MFEMGravity]
     type = XMLDiff
@@ -64,6 +72,7 @@
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
+    mfem = true
   []
   [./MFEMIrrotational]
     type = CSVDiff
@@ -71,5 +80,6 @@
     csvdiff = 'OutputData/Irrotational.csv'
     requirement = 'Platypus shall have the ability to solve for an irrotational vortext in two dimensions.'
     abs_zero = 1e-6
+    mfem = true
   []
 []
