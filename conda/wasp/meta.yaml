@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.11.13" %}
+{% set version = "2024.12.23" %}
 
 package:
   name: moose-wasp
@@ -25,8 +25,13 @@ source:
   - path: ../../python/pyhit/pyhit.py
     folder: pyhit
   - path: ../functions/retry_build.sh
+  - path: pyhit/__init__.py
+    folder: pyhit
+  - path: pyhit/mooseutils/__init__.py
+    folder: pyhit/mooseutils
   - patches:
       - pyhit.patch
+      - message.patch
 
 build:
   number: 0
@@ -72,14 +77,13 @@ outputs:
         - make
         - cython
         - setuptools
-      host:
-        - {{ moose_python }}
       run:
         - {{ moose_python }}
         - {{ pin_subpackage("moose-wasp-base", exact=True) }}
     test:
       imports:
         - pyhit
+      script: test_pyhit.py
 
   - name: moose-wasp
     requirements:

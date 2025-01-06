@@ -390,3 +390,10 @@ cece3f711bd9c235af31c9d5a4c54e292400ecc1: #29074
   libmesh: d060615
   wasp: 0b6b0db
   moose-dev: a1e01c7
+2d96c03b18667fc623198e73e1ad1f2a8727232a: #29103 #29090
+  tools: 5abb5f2
+  mpi: 82bbd28
+  petsc: e78a9a4
+  libmesh: b8b3d69
+  wasp: 2fbcef5
+  moose-dev: 5e9be02
