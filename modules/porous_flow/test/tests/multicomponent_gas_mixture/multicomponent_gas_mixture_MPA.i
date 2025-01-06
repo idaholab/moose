@@ -83,9 +83,9 @@
 []
 
 [Executioner]
-  type = Transient
-  end_time = 1
-  nl_abs_tol = 1e-12
+  type = Steady
+  solve_type = NEWTON
+  nl_abs_tol = 1e-10
 []
 
 [Postprocessors]

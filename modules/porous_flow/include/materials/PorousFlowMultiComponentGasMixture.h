@@ -25,18 +25,25 @@ protected:
   virtual void computeQpProperties() override;
 
   /**
+   * Compute mixture properties (density, viscosity, enthalpy etc)
+   * @param p Fluid pressure
+   * @param T Fluid temperature
+   * @param X Mass fraction of each gas component (-)
+   * @return mole fractions (-)
+   */
+  virtual ADReal mixtureDensity(const ADReal & p, const ADReal & T, const std::vector<ADReal> & x);
+  virtual ADReal
+  mixtureViscosity(const ADReal & p, const ADReal & T, const std::vector<ADReal> & x);
+  virtual ADReal mixtureEnthalpy(const ADReal & p, const ADReal & T, const std::vector<ADReal> & x);
+  virtual ADReal
+  mixtureInternalEnergy(const ADReal & p, const ADReal & T, const std::vector<ADReal> & x);
+
+  /**
    * Convert mixture mass fractions to mole fractions
    * @param X Mass fraction of each gas component (-)
    * @return mole fractions (-)
    */
-  std::vector<GenericReal<is_ad>> massFractionsToMoleFractions(std::vector<GenericReal<is_ad>> & X);
-
-  /**
-   * Scaling for derivative of mole fraction wrt mass fraction
-   * @param X Mass fraction of each gas component (-)
-   * @return derivative of mole fractions wrt mass fractions (-)
-   */
-  std::vector<Real> dMoleFraction(std::vector<GenericReal<is_ad>> & X);
+  std::vector<ADReal> massFractionsToMoleFractions(std::vector<ADReal> & X);
 
   /// Fluid properties UserObject
   std::vector<const SinglePhaseFluidProperties *> _fp;
@@ -61,7 +68,7 @@ protected:
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_dviscosity_dX;
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_dinternal_energy_dX;
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_denthalpy_dX;
-  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_console;
 };
+
 typedef PorousFlowMultiComponentGasMixtureTempl<false> PorousFlowMultiComponentGasMixture;
 typedef PorousFlowMultiComponentGasMixtureTempl<true> ADPorousFlowMultiComponentGasMixture;
