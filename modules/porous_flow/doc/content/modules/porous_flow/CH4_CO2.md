@@ -35,28 +35,25 @@ After the mesh has been specified, we need to provide the fluid properties that 
 
 ### Variables declaration
 
-Then, we need to declare what type of unknown we are solving. This can be done in the variable code block. Since we are focusing on the variation of the mass fraction of each gas, mass_frac_CH4 is a desired variable. pp_CO2 is also used for the fluid motion.
+As we have a single gas phase with two components, the two nonlinear variables are the gas pressure (`pp_CO2`) and the mass fraction of one component of the gas (in this case, the mass fraction of methane `mass_frac_CH4`).
 
 !listing modules/porous_flow/examples/CH4_CO2/CH4_CO2_vertical.i block=Variables
 
 ### Kernel declaration
 
-This section describes the physics we need to solve. To do so, some kernels are declared. In MOOSE, the required kernels depend on the terms in the governing equations. For this problem, six kernels were declared. The code block is shown below:
+This section describes the physics we need to solve. For this problem, six kernels were required: a mass balance and advective and diffusive flux kernels for each gas component. The code block is shown below:
 
 !listing modules/porous_flow/examples/CH4_CO2/CH4_CO2_vertical.i block=Kernels
 
-
 ### Material setup
 
-Additional material properties are required, which are declared here:
+Additional material properties are required. These are typical of porous flow simulations. Of most interest is the [PorousFlowMultiComponentGasMixture](PorousFlowMultiComponentGasMixture.md) which computes the thermophysical properties of the gas mixture.
 
 !listing modules/porous_flow/examples/CH4_CO2/CH4_CO2_vertical.i block=Materials
 
 ### Boundary Conditions
 
 The next step is to supply the boundary conditions. For this problem, since all boundaries are wall, no boundary condition needs to be supplied.
-
-!listing modules/porous_flow/examples/CH4_CO2/CH4_CO2_vertical.i block=BCs
 
 ### Initial Conditions
 
@@ -73,7 +70,7 @@ To save time and computational resources, [`IterationAdaptiveDT`](IterationAdapt
 
 ## Result
 
-The simulated mixing process is shown in [!ref](mixing_video), it can be seen that the density is gradually smoothened over time and the mixing occurs with the highest rate in the middle due to the stiff density gradient. The $CO_2$ molar fraction distribution is provided in [!ref](Result_1D) and it shows a strong agreement with other software as shown in [!ref](benchmark). This highlights MOOSE's capability of accurately simulating the density-driven diffusive mixing of multiple gases.
+The simulated mixing process is shown in [!ref](mixing_video), it can be seen that the density is gradually smoothened over time and the mixing occurs with the highest rate in the middle due to the stiff density gradient. The $CO_2$ molar fraction distribution is provided in [!ref](Result_1D) and it shows good agreement with other software as shown in [!ref](benchmark). This highlights MOOSE's capability of accurately simulating the density-driven diffusive mixing of multiple gases.
 
 
 !media porous_flow/CH4_CO2.mp4 caption= The mixing process of $CO_2$ and $CH_4$.  id=mixing_video

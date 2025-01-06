@@ -26,5 +26,14 @@
     design = 'PorousFlowMultiComponentGasMixture.md'
     issues = '#26795'
   []
+  [multicomponent_gas_mixture_3comp]
+    type = 'CSVDiff'
+    input = 'multicomponent_gas_mixture_3comp.i'
+    csvdiff = 'multicomponent_gas_mixture_3comp_out.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to model a multiple gas mixture problem in porous media with more than two components.'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
 []
 

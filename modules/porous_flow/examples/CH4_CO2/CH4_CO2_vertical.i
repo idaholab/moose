@@ -1,4 +1,4 @@
-time = 3153600000
+time = 3.1536e8 # 10 years
 
 [Mesh]
   [gen]
@@ -177,15 +177,16 @@ time = 3153600000
   [basic]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
-    petsc_options_value = ' asm      lu           NONZERO                   2'
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = ' lu       NONZERO'
   []
 []
 
 [Executioner]
   type = Transient
+  solve_type = NEWTON
   end_time = ${time}
-  dtmax = 1e6
+  dtmax = 1e7
   nl_rel_tol = 1e-4
   nl_abs_tol = 1e-8
   [TimeStepper]
@@ -195,30 +196,20 @@ time = 3153600000
 []
 
 [VectorPostprocessors]
-  [mass_frac_CH4]
+  [props]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '0 -100 0'
-    variable = mass_frac_CH4
+    variable = 'density mass_frac_CH4'
     sort_by = y
-    num_points = 500
-  []
-  [density]
-    type = LineValueSampler
-    start_point = '0 0 0'
-    end_point = '0 -100 0'
-    variable = density
-    sort_by = y
-    num_points = 500
+    num_points = 100
   []
 []
 
 [Outputs]
-  # sync_times = '0 315360000 3153600000'
-  file_base = CO2_CH4_${time}
+  sync_times = '0 315360000 3153600000'
   [CSV]
     type = CSV
     sync_only = true
   []
-  exodus = true
 []
