@@ -98,6 +98,7 @@ protected:
 };
 
 #define usingPorousFlowFluidPropertiesMembers                                                      \
+  using PorousFlowFluidPropertiesBaseTempl<is_ad>::_dictator;                                      \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_nodal_material;                                \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_phase;                                         \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_phase_num;                                     \
@@ -125,11 +126,12 @@ protected:
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_enthalpy;                                      \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_denthalpy_dp;                                  \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_denthalpy_dT;                                  \
-  using Coupleable::getFieldVar;                                                                   \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::name;                                           \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_fe_problem;                                    \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_app;                                           \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_tid;                                           \
+  using Coupleable::getFieldVar;                                                                   \
+  using Coupleable::coupled;                                                                       \
   using Coupleable::isCoupled
 
 typedef PorousFlowFluidPropertiesBaseTempl<false> PorousFlowFluidPropertiesBase;

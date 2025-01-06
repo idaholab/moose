@@ -20,8 +20,8 @@ PorousFlowMultiComponentFluidTempl<is_ad>::validParams()
   InputParameters params = PorousFlowMultiComponentFluidBaseTempl<is_ad>::validParams();
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addCoupledVar("x", 0, "The mass fraction variable");
-  params.addClassDescription(
-      "This Material calculates fluid properties for a multicomponent fluid");
+  params.addClassDescription("This Material calculates fluid properties for a multicomponent fluid "
+                             "(for only two components at the moment)");
   return params;
 }
 
