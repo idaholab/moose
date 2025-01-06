@@ -1,22 +1,15 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
 ###################################################
-#Steady state subchannel calcultion
+# Steady state subchannel calcultion
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 624.70556 #Kelvin
 Total_Surface_Area = 0.000854322 #m2
-Mass_In = 2.45 #kg # 2.6923
+Mass_In = 2.45 #kg/sec
 mass_flux_in = '${fparse Mass_In / Total_Surface_Area}' #kg/m2
-#P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
-P_out = 2.0e5
+P_out = 2.0e5 #Pa
 Power_initial = 486200 #W (Page 26,35 of ANL document)
-# T_in = 616.4 #Kelvin
-# Total_Surface_Area = 0.000854322 #m3
-# mass_flux_in = ${fparse 2.667 / Total_Surface_Area} #${fparse 2.427 / Total_Surface_Area}
-# #P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
-# P_out = 2.0e5
-# Power_initial = 379800 #W (Page 26,35 of ANL document)
 ###################################################
 # Geometric parameters
 ###################################################
@@ -72,16 +65,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)'
-    vars = 'L'
-    vals = '${heated_length}'
+    value = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
+    vars = 'L alpha'
+    vals = '${heated_length} 1.8012'
   []
-  # [axial_heat_rate]
-  #   type = ParsedFunction
-  #   value = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
-  #   vars = 'L alpha'
-  #   vals = '${heated_length} 1.8012'
-  # []
 []
 
 [AuxVariables]
@@ -173,7 +160,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     variable = q_prime
     power = ${Power_initial}
     filename = "pin_power_profile61.txt"
-    # axial_heat_rate = axial_heat_rate
+    axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -394,7 +381,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = '3d_SC_ss.i'
+    input_files = '3d_SCM_SS.i'
     execute_on = 'FINAL'
   []
 []

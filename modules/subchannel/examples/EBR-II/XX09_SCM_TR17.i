@@ -4,11 +4,11 @@
 ###################################################
 # Thermal-hydraulics parameters
 ###################################################
-T_in = 616.4 #Kelvin
+T_in = 624.7 #Kelvin
 Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = '${fparse 2.427 / Total_Surface_Area}'
+mass_flux_in = '${fparse 2.45 / Total_Surface_Area}'
 P_out = 2.0e5
-Power_initial = 379800 #W (Page 26,35 of ANL document)
+Power_initial = 486200 #W (Page 26,35 of ANL document)
 ###################################################
 # Geometric parameters
 ###################################################
@@ -199,15 +199,15 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [Functions]
   [power_func]
     type = PiecewiseLinear
-    data_file = 'power_history_SHRT45.csv'
+    data_file = 'power_history_SHRT17.csv'
     format = "columns"
     scale_factor = 1.0
   []
   [mass_flux_in]
     type = PiecewiseLinear
-    data_file = 'massflow_SHRT45.csv'
+    data_file = 'massflow_SHRT17.csv'
     format = "columns"
-    scale_factor = '${fparse mass_flux_in / 2.427}'
+    scale_factor = '${fparse mass_flux_in / 2.45}'
   []
 
   [time_step_limiting]
@@ -220,7 +220,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [Controls]
   [mass_flux_ctrl]
     type = RealFunctionControl
-    parameter = 'AuxKernels/mdot_in_bc/mass_flux'
+    parameter = 'Postprocessors/mass_flux_PP/value'
     function = 'mass_flux_in'
     execute_on = 'initial timestep_begin'
   []
@@ -240,7 +240,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = 0.0
+    mass_flux = mass_flux_PP
     execute_on = 'timestep_begin'
   []
   [populate_power_history]
@@ -283,7 +283,19 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     variable = q_prime
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
+
+  [mass_flux_PP]
+    type = ConstantPostprocessor
+    value = ${mass_flux_in}
+  []
+
+  [mass_flow_PP]
+    type = ParsedPostprocessor
+    expression = '${Total_Surface_Area} * mass_flux_PP'
+    pp_names = 'mass_flux_PP'
+  []
 []
+
 
 [Executioner]
   type = Transient
@@ -295,7 +307,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     dt = 0.1
     iteration_window = 5
     optimal_iterations = 6
-    growth_factor = 1.2
+    growth_factor = 1.1
     cutback_factor = 0.8
     timestep_limiting_function = 'time_step_limiting'
   []
@@ -308,7 +320,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [MultiApps]
   [viz]
     type = TransientMultiApp
-    input_files = '3d_SC_tr.i'
+    input_files = '3d_SCM_TR.i'
     execute_on = 'INITIAL TIMESTEP_END'
     catch_up = true
   []
