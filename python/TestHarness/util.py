@@ -530,6 +530,20 @@ def checkLibtorchVersion(checks, test):
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
+# Break down mfem version logic in a new define
+def checkMfemVersion(checks, test):
+    version_string = ' '.join(test['mfem_version'])
+
+    # If any version of mfem works, return true immediately
+    if 'ALL' in set(test['mfem_version']):
+        return (True, version_string)
+
+    # mfem not installed or version could not be detected
+    if checks['mfem_version'] == None:
+       return (False, version_string)
+
+    return (checkVersion(checks, version_string, 'mfem_version'), version_string)
+
 def getCapabilities(exe):
     """
     Get capabilities JSON and compare it to the required capabilities
