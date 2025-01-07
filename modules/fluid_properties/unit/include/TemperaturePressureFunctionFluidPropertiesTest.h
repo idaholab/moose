@@ -63,13 +63,14 @@ protected:
 
     InputParameters uo_params2 =
         _factory.getValidParams("TemperaturePressureFunctionFluidProperties");
-    // Set the three functions and the specific isobaric heat capacity
+    // Set the three functions and the specific heat capacity
     uo_params2.set<FunctionName>("k") = "k_function";
     uo_params2.set<FunctionName>("rho") = "rho_function";
     uo_params2.set<FunctionName>("mu") = "mu_function";
     uo_params2.set<FunctionName>("cp") = "cp_function";
     uo_params2.set<Real>("T_initial_guess") = 250;
     uo_params2.set<Real>("p_initial_guess") = 1e7;
+    uo_params2.set<unsigned int>("n_integration_intervals") = 2000;
 
     _fe_problem->addUserObject("TemperaturePressureFunctionFluidProperties", "fp_cp", uo_params2);
     _fp_cp = &_fe_problem->getUserObject<TemperaturePressureFunctionFluidProperties>("fp_cp");

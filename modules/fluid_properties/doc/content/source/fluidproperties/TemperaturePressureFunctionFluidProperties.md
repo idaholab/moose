@@ -9,12 +9,14 @@ functions. The following relations hold true:
 \begin{aligned}
   x = T \\
   y = P \\
-  \rho = \rho^{user}(time=0, (x=T, y=P, z=0)) \\
-  \mu = \mu^{user}(time=0, (x=T, y=P, z=0)) \\
-  k = k^{user}(time=0, (x=T, y=P, z=0)) \\
+  \rho = \rho^{user}(t=0, (x=T, y=P, z=0)) \\
+  \mu = \mu^{user}(t=0, (x=T, y=P, z=0)) \\
+  k = k^{user}(t=0, (x=T, y=P, z=0)) \\
 \end{aligned}
 \end{equation}
 
+Both the time (`t`) and Z-axis dimension are not used here. A fluid property made to depend on time will
+not be properly updated by this `FluidProperties` object.
 There are two options for specific heat. Either the user sets a constant specific isochoric heat capacity
 
 \begin{equation}
@@ -30,12 +32,12 @@ Or, the user uses a function of temperature and pressure (same arguments as for 
 \begin{aligned}
   x = T \\
   y = P \\
-  cp = cp^{user}(time=0, (x=T, y=P, z=0))
+  cp = cp^{user}(t=0, (x=T, y=P, z=0))
   cv = cp - \dfrac{\alpha ^ 2 T}{\rho \beta_T}
 \end{aligned}
 \end{equation}
 
-with $T$ the temperature, $P$ the pressure, $\rho$ the density, $\mu$ the dynamic viscosity, $k$ the thermal conductivity, $c_v$ the specific isochoric heat capacity, $e$ the specific energy, $\alpha$ the coefficient of thermal expansion, $\beta_T$ the isothermal
+with $T$ the temperature, $P$ the pressure, $\rho$ the density, $\mu$ the dynamic viscosity, $k$ the thermal conductivity, $c_v$ the specific isochoric heat capacity, $e$ the specific internal energy, $T_{ref}$ a reference temperature at which the specific internal energy is equal to a reference energy $e_{ref}$, $\alpha$ the coefficient of thermal expansion, $\beta_T$ the isothermal
 compressibility, and the $user$ exponent indicating a user-passed parameter.
 
 The derivatives of the fluid properties are obtained using the `Function`(s) gradient components
@@ -51,8 +53,9 @@ partial. Notable missing implementations are routines for entropy, the speed of 
 conversions between specific enthalpy and specific energy.
 
 !alert note
-When using a function for the isobaric specific heat capacity, Simpson's rule is used to compute
-the specific energy from the isochoric specific heat capacity. This limits the accuracy of the calculation.
+When using a function for the isobaric specific heat capacity, a numerical integration is performed to compute
+$e(p,T)$ as $e_{ref} + \int_{T_{ref}}^T c_v(p,T) dT$. Note that this neglects the $dV$ term. This is exact
+for incompressible fluids and ideal gases.
 
 ## Example Input File Syntax
 
