@@ -9,7 +9,7 @@
 
 #include "MooseError.h"
 #include "SolutionScalarAux.h"
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 
 registerMooseObject("MooseApp", SolutionScalarAux);
 
@@ -35,7 +35,7 @@ SolutionScalarAux::validParams()
 
 SolutionScalarAux::SolutionScalarAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _solution_object(getUserObject<SolutionUserObject>("solution")),
+    _solution_object(getUserObject<SolutionUserObjectBase>("solution")),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {

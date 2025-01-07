@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-class SolutionUserObject;
+class SolutionUserObjectBase;
 
 /** Function for reading a solution from file
  * Creates a function that extracts values from a solution read from a file,
@@ -55,7 +55,7 @@ public:
 
 protected:
   /// Pointer to SolutionUserObject containing the solution of interest
-  const SolutionUserObject * _solution_object_ptr;
+  const SolutionUserObjectBase * _solution_object_ptr;
 
   /// The local SolutionUserObject index for the variable extracted from the file
   unsigned int _solution_object_var_index;

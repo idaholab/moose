@@ -9,19 +9,22 @@
 
 #pragma once
 
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 
-class AdjointSolutionUserObject : public SolutionUserObject
+class AdjointSolutionUserObject : public SolutionUserObjectBase
 {
 public:
   static InputParameters validParams();
 
   AdjointSolutionUserObject(const InputParameters & parameters);
 
+  virtual Real solutionSampleTime() override;
+
   /**
    * Skipping parent class initialSetup since it will be called in timestepSetup
    */
   virtual void initialSetup() override {}
+
   /**
    * This will read a the files again if they have been re-written from optimization iteration
    */
@@ -30,8 +33,7 @@ public:
 protected:
   /// Mapping between adjoint simulation time and adjoint simulation time
   const Real & _reverse_time_end;
+
   /// The system time of the last instance the file was loaded
   std::time_t _file_mod_time;
-  /// The forward simulation time for last instance the solution was updated
-  Real _actual_interpolation_time;
 };
