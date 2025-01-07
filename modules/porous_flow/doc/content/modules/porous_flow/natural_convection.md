@@ -2,7 +2,7 @@
 
 ## Problem statement
 
-This example is based on the Elder problem [!cite](Elder1967TransientCI), see [!citet](Oldenburg1995OnTD). The natural convection of water in a 2D porous tank heated on one part of the bottom is modelled. The schematic is demonstrated in [schematicFig]. The experiment details are elaborated in the referred paper so will not be shown here to avoid repetition. The governing equations and associated `Kernels` that describe this problem are provided in detail [here](governing_equations.md).
+This example is based on the Elder problem [!cite](Elder1967TransientCI), see [!citet](Oldenburg1995OnTD). The natural convection of water in a 2D porous tank heated on one part of the bottom is modelled. The schematic is demonstrated in [schematicFig]. The experiment details are elaborated in the referred paper so will not be shown here to avoid repetition. The governing equations and associated `Kernels` that describe this problem are provided in detail [here](porous_flow/governing_equations.md).
 
 
 !table id=datatable caption=Parameters of the problem [!citep](Oldenburg1995OnTD).

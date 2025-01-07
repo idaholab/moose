@@ -21,7 +21,7 @@ This BC is fully upwinded, so can be used in conjunction with the [PorousFlowAdv
 
 ### Fluid flow
 
-To allow a fluid species, $\kappa$, to flow freely out of the model, the [governing equations](governing_equations.md) imply that
+To allow a fluid species, $\kappa$, to flow freely out of the model, the [governing equations](porous_flow/governing_equations.md) imply that
 \begin{equation}
 \mathbf{F} = \sum_{\beta}\chi_{\beta}^{\kappa}\mathbf{F}_{\beta}^{\mathrm{advective}} + \mathbf{F}^{\kappa}_{\mathrm{diffusion+dispersion}} \ ,
 \end{equation}
@@ -40,7 +40,7 @@ Input-file syntax for this type of boundary condition requires specifying:
 
 ### Heat flow
 
-To allow heat energy to flow freely out of the model, the [governing equations](governing_equations.md) imply that
+To allow heat energy to flow freely out of the model, the [governing equations](porous_flow/governing_equations.md) imply that
 \begin{equation}
 \mathbf{F} = -\lambda \nabla T + \sum_{\beta}h_{\beta}\mathbf{F}_{\beta} = -\lambda \nabla T - \sum_{\beta}h_{\beta}\rho_{\beta}\frac{k\,k_{\mathrm{r,}\beta}}{\mu_{\beta}}(\nabla
 P_{\beta} - \rho_{\beta} \mathbf{g}) \ .
