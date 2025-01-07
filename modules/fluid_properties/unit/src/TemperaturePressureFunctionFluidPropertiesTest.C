@@ -107,16 +107,16 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_constant_cv)
 TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
 {
   const Real tol = REL_TOL_CONSISTENCY;
-  // Simpson integration only does 1e-5
-  const Real simpson_tol = 2e5 * tol;
-  // any property post using Simpson to compute 'e'
-  const Real large_tol = 100 * tol;
+  // properties computed using numerical integral evaluation
+  const Real large_tol = 1e-8;
+  // properties using both numerical integration and Newton's method
+  const Real newton_tol = 1e-4;
 
   {
     Real p = 8.56E7;
     Real T = 200.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 9220000.4605;
+    Real e = 9220000.46051058359;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -134,19 +134,17 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     ABS_TEST(_fp_cp->k_from_p_T(p, T), thermal_cond, tol);
     ABS_TEST(_fp_cp->rho_from_p_T(p, T), density, tol);
     ABS_TEST(_fp_cp->v_from_p_T(p, T), 1 / density, tol);
-    ABS_TEST(_fp_cp->e_from_p_T(p, T), e, simpson_tol);
-    ABS_TEST(_fp_cp->e_from_p_rho(p, 1. / v), e, simpson_tol);
+    ABS_TEST(_fp_cp->e_from_p_T(p, T), e, tol);
+    ABS_TEST(_fp_cp->e_from_p_rho(p, 1. / v), e, 10 * large_tol);
     ABS_TEST(_fp_cp->mu_from_p_T(p, T), visc, tol);
-    ABS_TEST(_fp_cp->h_from_p_T(p, T), h, simpson_tol);
+    ABS_TEST(_fp_cp->h_from_p_T(p, T), h, tol);
     ABS_TEST(_fp_cp->cp_from_v_e(v, e), cp, large_tol);
     ABS_TEST(_fp_cp->cv_from_v_e(v, e), cv, large_tol);
     ABS_TEST(_fp_cp->k_from_v_e(v, e), thermal_cond, large_tol);
     ABS_TEST(_fp_cp->T_from_v_e(v, e), T, large_tol);
     ABS_TEST(_fp_cp->T_from_p_h(p, _fp_cp->h_from_p_T(p, T)), T, large_tol);
     ABS_TEST(_fp_cp->T_from_p_rho(p, 1. / v), T, large_tol);
-    ABS_TEST(_fp_cp->p_from_v_e(v, e),
-             p,
-             1.5 * simpson_tol); // uses a Newton solve for variable set inversion
+    ABS_TEST(_fp_cp->p_from_v_e(v, e), p, newton_tol);
     ABS_TEST(_fp_cp->mu_from_v_e(v, e), visc, large_tol);
   }
 
@@ -154,7 +152,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 1.06841E8;
     Real T = 300.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 17061150.67487172;
+    Real e = 17061150.6748719364;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -172,19 +170,17 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     ABS_TEST(_fp_cp->k_from_p_T(p, T), thermal_cond, tol);
     ABS_TEST(_fp_cp->rho_from_p_T(p, T), density, tol);
     ABS_TEST(_fp_cp->v_from_p_T(p, T), 1 / density, tol);
-    ABS_TEST(_fp_cp->e_from_p_T(p, T), e, simpson_tol);
-    ABS_TEST(_fp_cp->e_from_p_rho(p, 1. / v), e, simpson_tol);
+    ABS_TEST(_fp_cp->e_from_p_T(p, T), e, tol);
+    ABS_TEST(_fp_cp->e_from_p_rho(p, 1. / v), e, tol);
     ABS_TEST(_fp_cp->mu_from_p_T(p, T), visc, tol);
-    ABS_TEST(_fp_cp->h_from_p_T(p, T), h, simpson_tol);
+    ABS_TEST(_fp_cp->h_from_p_T(p, T), h, tol);
     ABS_TEST(_fp_cp->cp_from_v_e(v, e), cp, 1.5 * large_tol);
     ABS_TEST(_fp_cp->cv_from_v_e(v, e), cv, 1.5 * large_tol);
     ABS_TEST(_fp_cp->k_from_v_e(v, e), thermal_cond, large_tol);
     ABS_TEST(_fp_cp->T_from_v_e(v, e), T, 1.5 * large_tol);
     ABS_TEST(_fp_cp->T_from_p_h(p, _fp_cp->h_from_p_T(p, T)), T, large_tol);
     ABS_TEST(_fp_cp->T_from_p_rho(p, 1. / v), T, large_tol);
-    ABS_TEST(_fp_cp->p_from_v_e(v, e),
-             p,
-             10 * simpson_tol); // uses a Newton solve for variable set inversion
+    ABS_TEST(_fp_cp->p_from_v_e(v, e), p, newton_tol);
     ABS_TEST(_fp_cp->mu_from_v_e(v, e), visc, large_tol);
   }
 }
@@ -217,8 +213,8 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->cp_from_v_e, v, e, large_tol); // uses finite differencing
   DERIV_TEST(_fp->cv_from_v_e, v, e, tol);
 
-  e = 80150;
-  v = 2.16216E-4;
+  e = 80150.045818949831;
+  v = 0.00021621621621621621;
 
   AD_DERIV_TEST(_fp_cp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp_cp->rho_from_p_T, p, T, tol);
@@ -249,8 +245,8 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->cp_from_v_e, v, e, 2 * large_tol); // uses finite differencing
   DERIV_TEST(_fp->cv_from_v_e, v, e, tol);
 
-  e = 5.37415e+06;
-  v = 5.59441e-05;
+  e = 5374151.1232993276;
+  v = 5.5944055944055945e-05;
 
   AD_DERIV_TEST(_fp_cp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp_cp->rho_from_p_T, p, T, tol);

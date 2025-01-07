@@ -27,8 +27,12 @@ TemperaturePressureFunctionFluidProperties::validParams()
       "cp", "Isobaric specific heat function of temperature and pressure [J/(kg-K)]");
   params.addRangeCheckedParam<Real>(
       "cv", 0, "cv >= 0", "Constant isochoric specific heat [J/(kg-K)]");
-  params.addParam<Real>("e_ref", 0, "Specific energy at the reference temperature");
-  params.addParam<Real>("T_ref", 0, "Reference temperature for the specific energy");
+  params.addParam<Real>("e_ref", 0, "Specific internal energy at the reference temperature");
+  params.addParam<Real>("T_ref", 0, "Reference temperature for the specific internal energy");
+  params.addParam<unsigned int>(
+      "n_integration_intervals",
+      10,
+      "Number of intervals for integrating cv(T) to compute e(T) from e(T_ref)");
 
   params.addClassDescription(
       "Single-phase fluid properties that allows to provide thermal "
@@ -43,10 +47,11 @@ TemperaturePressureFunctionFluidProperties::TemperaturePressureFunctionFluidProp
     _cv(getParam<Real>("cv")),
     _cv_is_constant(_cv != 0),
     _e_ref(getParam<Real>("e_ref")),
-    _T_ref(getParam<Real>("T_ref"))
+    _T_ref(getParam<Real>("T_ref")),
+    _n_integration(getParam<unsigned int>("n_integration_intervals"))
 {
   if (isParamValid("cp") && _cv_is_constant)
-    paramError("cp", "Can only set a function for cp if a constant is not specified for cv.");
+    paramError("cp", "The parameter 'cp' may only be specified if 'cv' is unspecified or is zero.");
 }
 
 void
@@ -350,7 +355,7 @@ TemperaturePressureFunctionFluidProperties::h_from_p_T(
   Real rho, drho_dp, drho_dT;
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   h = e + pressure / rho;
-  dh_dp = de_dp + 1 / rho - pressure / rho / rho * drho_dp;
+  dh_dp = de_dp + 1. / rho - pressure / rho / rho * drho_dp;
   dh_dT = de_dT - pressure * drho_dT / rho / rho;
 }
 
@@ -361,12 +366,14 @@ TemperaturePressureFunctionFluidProperties::e_from_p_T(Real pressure, Real tempe
     return _e_ref + _cv * (temperature - _T_ref);
   else
   {
-    // Use Simpson's 3/8 rule to integrate cv
-    Real h = (temperature - _T_ref) / 3;
-    Real integral =
-        3. / 8. * h *
-        (cv_from_p_T(pressure, _T_ref) + 3 * cv_from_p_T(pressure, _T_ref + h) +
-         3 * cv_from_p_T(pressure, _T_ref + 2 * h) + cv_from_p_T(pressure, temperature));
+    const Real h = (temperature - _T_ref) / _n_integration;
+    Real integral = 0;
+    // Centered step integration is second-order
+    for (const auto i : make_range(_n_integration))
+      integral += cv_from_p_T(pressure, _T_ref + (i + 0.5) * h);
+    integral *= h;
+    // we are still missing the dV or dP term to go from V/P_ref (e_ref = e(T_ref, V/P_ref))
+    // to current V. The dT term is the largest one though
     return _e_ref + integral;
   }
 }
@@ -384,20 +391,9 @@ TemperaturePressureFunctionFluidProperties::e_from_p_T(
   else
   {
     e = e_from_p_T(pressure, temperature);
-    // Use Simpson's 3/8 rule to integrate cv then take the derivative
-    Real h = (temperature - _T_ref) / 3;
-    Real cv0, dcv_dp0, dcv_dT0;
-    cv_from_p_T(pressure, _T_ref, cv0, dcv_dp0, dcv_dT0);
-    Real cv1, dcv_dp1, dcv_dT1;
-    cv_from_p_T(pressure, _T_ref + h, cv1, dcv_dp1, dcv_dT1);
-    Real cv2, dcv_dp2, dcv_dT2;
-    cv_from_p_T(pressure, _T_ref + 2 * h, cv2, dcv_dp2, dcv_dT2);
-    Real cv3, dcv_dp3, dcv_dT3;
-    cv_from_p_T(pressure, temperature, cv3, dcv_dp3, dcv_dT3);
-    de_dp = 3. / 8 * h * (dcv_dp0 + 3 * dcv_dp1 + 3 * dcv_dp2 + dcv_dp3);
-    // Consistency with how the energy is computed is more important here
-    de_dT =
-        1. / 8. * (cv0 + 3 * cv1 + 3 * cv2 + cv3) + 3. / 8 * h * (dcv_dT1 + 2 * dcv_dT2 + dcv_dT3);
+    Real ep = e_from_p_T(pressure * (1 + 1e-8), temperature);
+    de_dp = (ep - e) / (pressure * 1e-8);
+    de_dT = cv_from_p_T(pressure, temperature);
   }
 }
 
@@ -421,7 +417,7 @@ TemperaturePressureFunctionFluidProperties::beta_from_p_T(Real pressure, Real te
 {
   Real rho, drho_dp, drho_dT;
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  return -drho_dp / rho;
+  return -drho_dT / rho;
 }
 
 Real
@@ -431,8 +427,10 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(Real p, Real T) const
   {
     Real rho, drho_dp, drho_dT;
     rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-    Real alpha = -1. / rho * drho_dT;
-    return _cv + MathUtils::pow(alpha, 2) * T / rho / beta_from_p_T(p, T);
+    // Wikipedia notation for thermal expansion / compressibility coefficients
+    Real alpha = -drho_dT / rho;
+    Real beta = -drho_dp / rho;
+    return _cv + MathUtils::pow(alpha, 2) * T / rho / beta;
   }
   else
   {
@@ -474,9 +472,10 @@ TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real pressure, Real temp
   {
     Real rho, drho_dp, drho_dT;
     rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-    Real alpha = -1. / rho * drho_dT;
-    return cp_from_p_T(pressure, temperature) -
-           MathUtils::pow(alpha, 2) * temperature / rho / beta_from_p_T(pressure, temperature);
+    // Wikipedia notation for thermal expansion / compressibility coefficients
+    Real alpha = -drho_dT / rho;
+    Real beta = -drho_dp / rho;
+    return cp_from_p_T(pressure, temperature) - MathUtils::pow(alpha, 2) * temperature / rho / beta;
   }
 }
 
