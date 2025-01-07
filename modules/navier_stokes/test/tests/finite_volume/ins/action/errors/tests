@@ -64,29 +64,22 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy inlet types does not match the number of inlet boundaries.'
-    cli_args = "Modules/NavierStokesFV/energy_inlet_types=''"
-    expect_err = "(Size \(0\) is not the same as the number of inlet boundaries in "
-                 "'inlet_boundaries' \(size 1\)|Energy inlet types \(size 0\) should be the same "
-                 "size as inlet_boundaries \(size 1\))"
+    cli_args = "Modules/NavierStokesFV/energy_inlet_types='fixed-temperature fixed-temperature' Modules/NavierStokesFV/energy_inlet_functors='2 2'"
+    expect_err = "Energy inlet types \(size 2\) should be the same size as inlet_boundaries \(size 1\)"
   []
   [passive-scalar-inlet-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_types=''"
-    expect_err = "(Size \(0\) is not the same as the number of inlet boundaries times number of "
-                 "transported scalars in 'inlet_boundaries' \(size 1\)|Vector of vector parameter "
-                 "'passive_scalar_inlet_functors' \(total size 1\) is not the same size as "
-                 "vector-enumeration parameter 'passive_scalar_inlet_types' \(size 0\))"
+    expect_err = "Parameter 'passive_scalar_names' \(size 1\) and 'passive_scalar_inlet_types' \(size 0\) must be the same size if set"
   []
   [passive-scalar-inlet-function-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet function blocks does not match the number of scalar variables.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_functors=''"
-    expect_err = "(Size \(0\) is not the same as the number of names in 'passive_scalar_names' "
-                 "\(size 1\)|Parameter 'passive_scalar_names' \(size 1\) and "
-                 "'passive_scalar_inlet_functors' \(size 0\) must be the same size if set.)"
+    expect_err = "The number of scalar inlet functors \(2\) for scalars of index \(0\) is not equal to the number of inlet boundaries \(1\)"
   []
   [passive-scalar-multiple-inlet-function-error]
     type = 'RunException'
@@ -102,10 +95,8 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall types does not match the number of wall boundaries.'
-    cli_args = "Modules/NavierStokesFV/energy_wall_types=''"
-    expect_err = "(Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' "
-                 "\(size 2\)|Energy wall types \(size 0\) should be the same size as wall_boundaries "
-                 "\(size 2\))"
+    cli_args = "Modules/NavierStokesFV/energy_wall_types='heatflux' Modules/NavierStokesFV/energy_wall_functors='1'"
+    expect_err = "Energy wall types \(size 1\) should be the same size as wall_boundaries \(size 2\)"
   []
   [energy-wall-function-action-error]
     type = 'RunException'

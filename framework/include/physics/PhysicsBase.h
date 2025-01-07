@@ -22,7 +22,8 @@
 #define registerPhysicsBaseTasks(app_name, derived_name)                                           \
   registerMooseAction(app_name, derived_name, "init_physics");                                     \
   registerMooseAction(app_name, derived_name, "copy_vars_physics");                                \
-  registerMooseAction(app_name, derived_name, "check_integrity_early_physics")
+  registerMooseAction(app_name, derived_name, "check_integrity_early_physics");                    \
+  registerMooseAction(app_name, derived_name, "check_integrity")
 
 /**
  * Base class to help creating an entire physics
@@ -50,11 +51,23 @@ public:
 
   // Block restriction //
   /**
+   * @brief Checks if the Physics' block restriction includes these blocks
+   * @param blocks list of blocks to check
+   */
+  bool hasBlocks(const std::vector<SubdomainName> & blocks);
+
+  /**
    * @brief Add new blocks to the Physics
    * @param blocks list of blocks to add to the physics
    */
   void addBlocks(const std::vector<SubdomainName> & blocks);
   void addBlocksById(const std::vector<SubdomainID> & block_ids);
+
+  /**
+   * Remove blocks from the Physics' block restriction
+   * @param blocks list of blocks to remove
+   */
+  void removeBlocks(const std::vector<SubdomainName> & blocks);
 
   /// Return the blocks this physics is defined on
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
@@ -81,6 +94,8 @@ public:
   template <typename T>
   const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
 
+  /// Manually set the dimension of the Physics
+  void setDimension(unsigned int dim) { _dim = dim; }
   /// Return the maximum dimension of the blocks the Physics is active on
   unsigned int dimension() const;
 
@@ -119,6 +134,9 @@ protected:
     mooseAssert(_problem, "Requesting the problem too early");
     return *_problem;
   }
+
+  /// Additional initialization work that should happen very early, as soon as the problem is created
+  virtual void initializePhysicsAdditional() {}
 
   /// Tell the app if we want to use Exodus restart
   void prepareCopyVariablesFromMesh() const;
@@ -191,10 +209,10 @@ private:
 
   /// Process some parameters that require the problem to be created. Executed on init_physics
   void initializePhysics();
-  /// Additional initialization work that should happen very early, as soon as the problem is created
-  virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
+  /// Additional checks performed once ----
+  virtual void checkIntegrity() const;
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type

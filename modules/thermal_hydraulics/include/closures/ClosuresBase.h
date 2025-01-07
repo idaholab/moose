@@ -15,6 +15,7 @@
 
 class FlowChannelBase;
 class HeatTransferBase;
+class ScalarTransferBase;
 class THMProblem;
 class Factory;
 
@@ -28,6 +29,8 @@ class Factory;
 class ClosuresBase : public MooseObject, public LoggingInterface, public NamingInterface
 {
 public:
+  static InputParameters validParams();
+
   ClosuresBase(const InputParameters & params);
 
   /**
@@ -47,6 +50,17 @@ public:
                                  const FlowChannelBase & flow_channel) const = 0;
 
   /**
+   * Checks for errors associated with a scalar transfer component
+   *
+   * @param[in] scalar_transfer  Scalar transfer component
+   * @param[in] flow_channel     Flow channel component
+   */
+  virtual void checkScalarTransfer(const ScalarTransferBase & /*scalar_transfer*/,
+                                   const FlowChannelBase & /*flow_channel*/) const
+  {
+  }
+
+  /**
    * Adds MOOSE objects associated with a flow channel component
    *
    * @param[in] flow_channel   Flow channel component
@@ -61,6 +75,22 @@ public:
    */
   virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
                                            const FlowChannelBase & flow_channel) = 0;
+
+  /**
+   * Adds MOOSE objects associated with a scalar transfer component
+   *
+   * @param[in] scalar_transfer  Scalar transfer component
+   * @param[in] flow_channel     Flow channel component
+   */
+  virtual void addMooseObjectsScalarTransfer(const ScalarTransferBase & /*scalar_transfer*/,
+                                             const FlowChannelBase & /*flow_channel*/)
+  {
+  }
+
+  /// Return whether this closure is set to create regular materials
+  bool createsRegularMaterials() const { return _add_regular_materials; }
+  /// Return whether this closure is set to create functors materials
+  bool createsFunctorMaterials() const { return _add_functor_materials; }
 
 protected:
   /**
@@ -100,6 +130,8 @@ protected:
   /// Factory associated with the MooseApp
   Factory & _factory;
 
-public:
-  static InputParameters validParams();
+  /// Whether to add regular materials for every material used in the closure
+  bool _add_regular_materials;
+  /// Whether to add functor materials for every material used in the closure
+  bool _add_functor_materials;
 };

@@ -1,0 +1,197 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "PhysicsBase.h"
+#include "InputParameters.h"
+#include "NamingInterface.h"
+#include "THMEnums.h"
+#include "libmesh/fe_type.h"
+
+class THMProblem;
+class Factory;
+class ThermalHydraulicsApp;
+class FluidProperties;
+class FlowChannelBase;
+
+#define registerTHMFlowModelPhysicsBaseTasks(app_name, derived_name)                               \
+  registerPhysicsBaseTasks(app_name, derived_name);                                                \
+  registerMooseAction(app_name, derived_name, "THMPhysics:add_ic");                                \
+  registerMooseAction(app_name, derived_name, "add_variable");                                     \
+  registerMooseAction(app_name, derived_name, "add_material")
+
+/**
+ * Provides functions to setup the flow model.  Should be used by components that has flow in them
+ */
+class ThermalHydraulicsFlowPhysics : public virtual PhysicsBase, public NamingInterface
+{
+public:
+  ThermalHydraulicsFlowPhysics(const InputParameters & params);
+
+  static InputParameters validParams();
+
+  /// Add a flow channel
+  void addFlowChannel(const FlowChannelBase * c_ptr);
+
+  // TODO: add here and implement all types needed
+  // Note that we could adopt a more general approach with SpecifiedFlux/SpecifiedValues options
+  // but then we would need to keep track of boundary conditions on a variable basis as well
+  // (for example MdotTemperature: mdot=flux, temperature=value)
+  enum InletTypeEnum
+  {
+    MdotTemperature,
+    VelocityTemperature,
+    StagnationPressureTemperature,
+    GeneralBoundary
+  };
+
+  /**
+   * Add an inlet boundary
+   * @param boundary_component the name of the flow boundary component
+   * @param inlet_type the type of inlet
+   */
+  void setInlet(const std::string & boundary_component, const InletTypeEnum & inlet_type);
+
+  // TODO: add here and implement all types needed
+  enum OutletTypeEnum
+  {
+    FixedPressure,
+    FreeBoundary,
+    SolidWall
+  };
+
+  /**
+   * Add an outlet boundary
+   * @param boundary_component the name of the flow boundary component
+   * @param outlet_type the type of outlet
+   */
+  void setOutlet(const std::string & boundary_component, const OutletTypeEnum & outlet_type);
+
+  enum JunctionTypeEnum
+  {
+    OneToOne,
+    Volume,
+    Pump,
+    ParallelChannels
+  };
+
+  /**
+   * Add a junction
+   * @param boundary_component the name of the flow junction component
+   * @param junction_type the type of junction
+   */
+  void setJunction(const std::string & junction_component, const JunctionTypeEnum & junction_type);
+
+  enum HeatFluxWallEnum
+  {
+    FixedWallTemperature,
+    FixedHeatFlux
+  };
+
+  /**
+   * Add a heat transfer term
+   * @param heat_transfer_component the name of the heat transfer component
+   * @param heat_flux_type how the heat flux is imposed
+   * @param functor_name functor describing the heat flux
+   */
+  virtual void addWallHeatFlux(const std::string & /*heat_transfer_component*/,
+                               const HeatFluxWallEnum & /*heat_flux_type*/){};
+
+  enum ScalarFluxWallEnum
+  {
+    FixedScalarValue,
+    FixedScalarFlux
+  };
+
+  /**
+   * Add a scalar flux term
+   * @param scalar_transfer_component the name of the scalar transfer component
+   * @param scalar_flux_type how the scalar flux is imposed
+   */
+  virtual void addWallScalarFlux(const std::string & /*heat_transfer_component*/,
+                                 const ScalarFluxWallEnum & /*scalar_flux_type*/){};
+
+protected:
+  virtual void initializePhysicsAdditional() override;
+
+  /// Get the name of a function for a given parameter of the FlowModelPhysics
+  const FunctionName & getVariableFn(const FunctionName & fn_param_name);
+
+  /**
+   * Adds variables common to any flow model physics (A, P_hf, ...)
+   * Note: we could move these to flow components since they pertain to the geometry
+   */
+  virtual void addCommonVariables();
+
+  /**
+   * Adds initial conditions common to any flow model physics
+   */
+  virtual void addCommonInitialConditions();
+
+  /**
+   * Adds common materials useful for any flow model physics
+   */
+  virtual void addCommonMaterials();
+
+  /// The THM problem
+  THMProblem * _sim;
+
+  /// All the flow channel components that this Physics is defined on
+  std::vector<const FlowChannelBase *> _flow_channels;
+
+  /// The name of the flow components
+  std::vector<std::string> _component_names;
+  /// The name of the inlet components
+  std::vector<std::string> _inlet_components;
+  /// The types of the inlets
+  std::vector<InletTypeEnum> _inlet_types;
+  /// The name of the outlet components
+  std::vector<std::string> _outlet_components;
+  /// The types of the outlets
+  std::vector<OutletTypeEnum> _outlet_types;
+  /// The name of the junction components
+  std::vector<std::string> _junction_components;
+  /// The types of the junctions
+  std::vector<JunctionTypeEnum> _junction_types;
+  /// The types of the heat transfer components
+  std::map<std::string, HeatFluxWallEnum> _heat_transfer_types;
+  /// The types of the scalar transfer components
+  std::map<std::string, ScalarFluxWallEnum> _scalar_transfer_types;
+
+  /// Gravitational acceleration vector
+  RealVectorValue _gravity_vector;
+  /// Gravitational acceleration magnitude
+  Real _gravity_magnitude;
+
+  /// The type of FE used for flow
+  FEType _fe_type;
+  /// Lump the mass matrix
+  bool _lump_mass_matrix;
+
+  // Names of variables for which derivative material properties need to be created
+  std::vector<VariableName> _derivative_vars;
+
+private:
+  /// Create the objects for the inlet boundary conditions
+  virtual void addInletBoundaries() = 0;
+  /// Create the objects for the outlet boundary conditions
+  virtual void addOutletBoundaries() = 0;
+
+public:
+  static const std::string AREA;
+  static const std::string AREA_LINEAR;
+  static const std::string HEAT_FLUX_WALL;
+  static const std::string HEAT_FLUX_PERIMETER;
+  static const std::string NUSSELT_NUMBER;
+  static const std::string SURFACE_TENSION;
+  static const std::string TEMPERATURE_WALL;
+  static const std::string UNITY;
+  static const std::string DIRECTION;
+};

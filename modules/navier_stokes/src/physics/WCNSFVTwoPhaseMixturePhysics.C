@@ -112,7 +112,8 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.suppressParameter<std::vector<MooseFunctorName>>("passive_scalar_source");
   params.suppressParameter<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source");
-  params.suppressParameter<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff");
+  params.suppressParameter<std::vector<std::vector<MooseFunctorName>>>(
+      "passive_scalar_coupled_source_coeff");
 
   // Boundary conditions
   params.renameParam("passive_scalar_inlet_types",
@@ -162,7 +163,8 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
 }
 
 WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters & parameters)
-  : WCNSFVScalarTransportPhysics(parameters),
+  : PhysicsBase(parameters),
+    WCNSFVScalarTransportPhysics(parameters),
     _add_phase_equation(_has_scalar_equation),
     _phase_1_fraction_name(getParam<MooseFunctorName>("phase_1_fraction_name")),
     _phase_2_fraction_name(_passive_scalar_names[0]),

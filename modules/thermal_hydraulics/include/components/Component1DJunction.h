@@ -19,15 +19,18 @@ class Component1DJunction : public Component1DConnection
 public:
   Component1DJunction(const InputParameters & params);
 
+  /// Get the processor ids owning the connected flow channels
+  const std::vector<processor_id_type> & getProcIds() const { return _proc_ids; }
+  /// Gets the processor IDs of the connected 1D components
+  const std::vector<processor_id_type> & getConnectedProcessorIDs() const { return _proc_ids; }
+
 protected:
   virtual void setupMesh() override;
   virtual void initSecondary() override;
   virtual void check() const override;
 
   /// Gets the element IDs of the connected 1D components
-  const std::vector<dof_id_type> & getConnectedElementIDs() { return _connected_elems; }
-  /// Gets the processor IDs of the connected 1D components
-  const std::vector<processor_id_type> & getConnectedProcessorIDs() { return _proc_ids; }
+  const std::vector<dof_id_type> & getConnectedElementIDs() const { return _connected_elems; }
 
   // TODO: make _connected_elems and _proc_ids private (after applications
   // switch to using the getter methods)

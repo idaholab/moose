@@ -64,6 +64,10 @@ registerActions(Syntax & syntax)
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
   registerMooseObjectTask("THM:add_closures", Closures, false);
 
+  // New tasks required to get correct Physics setup order
+  registerTask("THMPhysics:add_ic", false);
+  registerTask("THMPhysics:change_1D_mesh_info", false);
+
   try
   {
     syntax.addDependency("THM:output_vector_velocity", "setup_mesh");
@@ -108,6 +112,10 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:init_simulation", "THM:add_relationship_managers");
     syntax.addDependency("THM:output_vector_velocity", "THM:add_relationship_managers");
     syntax.addDependency("THM:add_variables", "THM:integrity_check");
+    syntax.addDependency("THM:add_variables", "THMPhysics:add_ic");
+    // Variable must exist for real when creating BCs
+    syntax.addDependency("add_bc", "THM:add_variables");
+    syntax.addDependency("THMPhysics:change_1D_mesh_info", "init_problem");
   }
   catch (CyclicDependencyException<std::string> & e)
   {

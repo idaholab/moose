@@ -17,16 +17,17 @@
 class HeatTransferFromHeatFlux1Phase : public HeatTransfer1PhaseBase
 {
 public:
+  static InputParameters validParams();
+
   HeatTransferFromHeatFlux1Phase(const InputParameters & parameters);
 
   virtual void addMooseObjects() override;
 
   virtual bool isTemperatureType() const override;
 
+  const MooseFunctorName getWallHeatFluxFunctorName() const override;
+
 protected:
   /// wall heat flux function name
   const FunctionName _q_wall_fn_name;
-
-public:
-  static InputParameters validParams();
 };

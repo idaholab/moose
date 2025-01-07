@@ -1,0 +1,19 @@
+[Tests]
+    issues = ''
+    design = 'ThermalHydraulicsFlowPhysics.md'
+    [closure_material_type]
+        requirement = 'The system shall throw an error if any closure used in a component leveraging physics does not create the appropriate class of materials'
+        [vace]
+            type = RunException
+            input = 'vace_single_channel.i'
+            cli_args = 'Closures/simple_closures/add_regular_materials=false'
+            expect_err = 'Should add regular materials for this closure to work with Physics'
+        []
+        [wcnsfv]
+            type = RunException
+            input = 'wcnsfv_single_channel.i'
+            cli_args = 'Closures/simple_closures/add_functor_materials=false'
+            expect_err = 'Should add functor materials for this closure to work with Physics'
+        []
+    []
+[]

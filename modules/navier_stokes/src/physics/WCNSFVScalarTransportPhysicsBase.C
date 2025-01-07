@@ -33,7 +33,8 @@ WCNSFVScalarTransportPhysicsBase::validParams()
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_inlet_function",
       std::vector<std::vector<MooseFunctorName>>(),
-      "Functors for inlet boundaries in the passive scalar equations.");
+      "Functors for inlet boundaries in the passive scalar equations. "
+      "Major (outer) ordering by equation, inner indexing by inlet boundary.");
 
   // New functor boundary conditions
   params.deprecateParam(
@@ -71,14 +72,11 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
                                                              : !usingNavierStokesFVSyntax()),
-    _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
-    _passive_scalar_inlet_functors(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors")),
     _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_sources(
         getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
-    _passive_scalar_sources_coef(
-        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff"))
+    _passive_scalar_coupled_sources_coefs(
+        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source_coeff"))
 {
   if (_has_scalar_equation)
     for (const auto & scalar_name : _passive_scalar_names)
@@ -101,17 +99,70 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
       "passive_scalar_names", "initial_scalar_variables", true);
   checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
       "passive_scalar_names", "passive_scalar_inlet_functors", true);
-  if (_passive_scalar_inlet_functors.size())
-    checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
-        "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, MooseEnum>(
+      "passive_scalar_names", "passive_scalar_inlet_types", true);
 
-  if (_passive_scalar_sources_coef.size())
-    checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
-                                                            "passive_scalar_coupled_source_coeff");
+  if (_passive_scalar_coupled_sources_coefs.size())
+    checkTwoDVectorParamsSameLength<MooseFunctorName, MooseFunctorName>(
+        "passive_scalar_coupled_source", "passive_scalar_coupled_source_coeff");
 
+  if (!_flow_equations_physics)
+    mooseError("Flow physics should be set");
   if (_porous_medium_treatment)
     _flow_equations_physics->paramError("porous_medium_treatment",
                                         "Porous media scalar advection is currently unimplemented");
+
+  // Create maps for boundary-restricted parameters
+  _passive_scalar_inlet_types.resize(_passive_scalar_names.size());
+  _passive_scalar_inlet_functors.resize(_passive_scalar_names.size());
+  const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
+  // Re-organize data from (inlet, scalar) indexing to (scalar, inlet) indexing
+  if (isParamSetByUser("passive_scalar_inlet_types"))
+  {
+    const auto & all_inlet_types = getParam<std::vector<MooseEnum>>("passive_scalar_inlet_types");
+    const auto num_scalars = _passive_scalar_names.size();
+    const auto num_inlets = inlet_boundaries.size();
+    if (num_scalars * num_inlets != all_inlet_types.size())
+      paramError("passive_scalar_inlet_types",
+                 "The number of scalar inlet types (" + std::to_string(all_inlet_types.size()) +
+                     ") is not equal to the number of inlet boundaries (" +
+                     std::to_string(num_inlets) + ") times the number of passive scalars (" +
+                     std::to_string(num_scalars) + ")");
+
+    for (const auto scalar_i : index_range(_passive_scalar_names))
+    {
+      auto inlet_types = std::vector<MooseEnum>();
+      for (const auto i : index_range(inlet_boundaries))
+        inlet_types.push_back(all_inlet_types[i * num_scalars + scalar_i]);
+      _passive_scalar_inlet_types[scalar_i] =
+          Moose::createMapFromVectors<BoundaryName, MooseEnum>(inlet_boundaries, inlet_types);
+      if (isParamSetByUser("passive_scalar_inlet_functors"))
+      {
+        const auto & all_inlet_functors =
+            getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors");
+
+        if (num_scalars != all_inlet_functors.size())
+          paramError("passive_scalar_inlet_functors",
+                     "The number of vectors of scalar inlet functors (" +
+                         std::to_string(all_inlet_functors.size()) +
+                         ") is not equal to the number of scalars being advected (" +
+                         std::to_string(num_scalars) + ")");
+        if (num_inlets != all_inlet_functors[scalar_i].size())
+          paramError("passive_scalar_inlet_functors",
+                     "The number of scalar inlet functors (" +
+                         std::to_string(all_inlet_functors[scalar_i].size()) +
+                         ") for scalars of index (" + std::to_string(scalar_i) +
+                         ") is not equal to the number of inlet boundaries (" +
+                         std::to_string(num_inlets) + ")");
+        auto inlet_functors = std::vector<MooseFunctorName>();
+        for (const auto i : index_range(inlet_boundaries))
+          inlet_functors.push_back(all_inlet_functors[scalar_i][i]);
+        _passive_scalar_inlet_functors[scalar_i] =
+            Moose::createMapFromVectors<BoundaryName, MooseFunctorName>(inlet_boundaries,
+                                                                        inlet_functors);
+      }
+    }
+  }
 }
 
 void

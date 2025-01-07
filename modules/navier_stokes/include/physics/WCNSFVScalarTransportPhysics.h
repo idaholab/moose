@@ -28,9 +28,19 @@ public:
 
   WCNSFVScalarTransportPhysics(const InputParameters & parameters);
 
-private:
+  void addInletBoundary(const BoundaryName & boundary,
+                        const MooseEnum & inlet_type,
+                        const MooseFunctorName & inlet_functor,
+                        const unsigned int scalar_index);
+
+  void addExternalScalarSources(std::vector<SubdomainName> blocks,
+                                std::vector<MooseFunctorName> scalar_sources,
+                                std::vector<MooseFunctorName> scalar_sources_coefs);
+
+protected:
   virtual void addSolverVariables() override;
 
+private:
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport
    * equation

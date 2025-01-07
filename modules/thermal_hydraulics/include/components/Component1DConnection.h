@@ -87,6 +87,20 @@ public:
    */
   const std::vector<BoundaryName> & getBoundaryNames() const;
 
+  /**
+   * Gets the boundary normals for this component
+   *
+   * @return boundary normal for this component
+   */
+  const std::vector<Real> & getBoundaryNormals() const;
+
+  /**
+   * Gets the directions for each connected component
+   *
+   * @return directions for each connected component
+   */
+  const std::vector<RealVectorValue> & getConnectedComponentDirections() const;
+
 protected:
   virtual void setupMesh() override;
   virtual void init() override;

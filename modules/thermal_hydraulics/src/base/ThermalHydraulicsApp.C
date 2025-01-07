@@ -45,6 +45,7 @@ FlowModelID FM_INVALID = registerFlowModelID();
 FlowModelID FM_SINGLE_PHASE = registerFlowModelID();
 FlowModelID FM_TWO_PHASE = registerFlowModelID();
 FlowModelID FM_TWO_PHASE_NCG = registerFlowModelID();
+FlowModelID FM_PHYSICS_BASED = registerFlowModelID();
 
 } // namespace THM
 
@@ -104,6 +105,8 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
   registerClosuresOption("none", "Closures1PhaseNone", THM::FM_SINGLE_PHASE);
+  registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_PHYSICS_BASED);
+  registerClosuresOption("none", "Closures1PhaseNone", THM::FM_PHYSICS_BASED);
 
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
@@ -121,6 +124,15 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Simulation::setComponentVariableOrder("rhovV", 5);
   Simulation::setComponentVariableOrder("rhowV", 6);
   Simulation::setComponentVariableOrder("rhoEV", 7);
+
+  // Physics
+  auto & syntax = s;
+  registerSyntax("THMVACESinglePhaseFlowPhysics", "Physics/ThermalHydraulics/CompressibleEuler/*");
+  registerSyntax("THMWCNSFVFlowPhysics", "Physics/ThermalHydraulics/WeaklyCompressibleFlow/*");
+  registerSyntax("THMWCNSFVFluidHeatTransferPhysics",
+                 "Physics/ThermalHydraulics/WeaklyCompressibleFluidHeatTransfer/*");
+  registerSyntax("THMWCNSFVScalarTransportPhysics",
+                 "Physics/ThermalHydraulics/WeaklyCompressibleScalarTransport/*");
 }
 
 const std::string &

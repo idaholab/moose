@@ -861,6 +861,9 @@ public:
    */
   void clearAllDofIndices();
 
+  /// Whether a variable is from the auxiliary system or not
+  bool isAuxiliaryVariable(const std::string & name) const;
+
   /**
    * @tparam T The type that the functor will return when evaluated, e.g. \p
                ADReal or \p Real
@@ -1149,7 +1152,7 @@ private:
   std::vector<std::map<std::string, std::unique_ptr<Moose::FunctorAbstract>>> _pbblf_functors;
 
   /// Lists all functors in the problem
-  void showFunctors() const;
+  void showFunctors(bool show_actual_only = false) const;
 
   /// Lists all functors and all the objects that requested them
   void showFunctorRequestors() const;

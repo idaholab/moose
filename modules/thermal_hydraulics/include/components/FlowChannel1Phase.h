@@ -28,7 +28,17 @@ public:
   /**
    * Gets 1-phase wall heat transfer coefficient names for connected heat transfers
    */
-  std::vector<MaterialPropertyName> getWallHTCNames1Phase() const { return _Hw_1phase_names; }
+  const std::vector<MaterialPropertyName> & getWallHTCNames1Phase() const
+  {
+    return _Hw_1phase_names;
+  }
+
+  /// Get the wall heat transfer coefficient
+  virtual const std::vector<MaterialPropertyName> &
+  getWallHeatTransferCoefficientNames() const override
+  {
+    return getWallHTCNames1Phase();
+  }
 
   virtual const THM::FlowModelID & getFlowModelID() const override { return THM::FM_SINGLE_PHASE; }
 

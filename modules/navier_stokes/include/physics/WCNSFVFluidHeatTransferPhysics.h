@@ -16,8 +16,8 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation
  */
-class WCNSFVFluidHeatTransferPhysics final : public NavierStokesPhysicsBase,
-                                             public WCNSFVCoupledAdvectionPhysicsHelper
+class WCNSFVFluidHeatTransferPhysics : public NavierStokesPhysicsBase,
+                                       public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
@@ -50,14 +50,26 @@ public:
   bool hasEnergyEquation() const { return _has_energy_equation; }
 
 protected:
-private:
-  void actOnAdditionalTasks() override;
   void addSolverVariables() override;
+  void addInletBoundary(const BoundaryName & boundary_name,
+                        const MooseEnum & inlet_type,
+                        const MooseFunctorName & inlet_functor);
+  void addWallBoundary(const BoundaryName & boundary_name,
+                       const MooseEnum & wall_type,
+                       const MooseFunctorName & wall_functor);
+  void addExternalHeatSource(const SubdomainName & subdomain,
+                             const MooseFunctorName & source,
+                             const MooseFunctorName & coef);
+  void addAmbientHeatSource(const std::vector<SubdomainName> & subdomains,
+                            const MooseFunctorName & alpha,
+                            const MooseFunctorName & temperature);
   void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;
   void addMaterials() override;
 
+private:
+  void actOnAdditionalTasks() override;
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
   /**
@@ -99,12 +111,17 @@ private:
   /// Name of the solid domain temperature for each block-group
   std::vector<MooseFunctorName> _ambient_temperature;
 
+  /// Functors describing the external heat sources
+  std::map<SubdomainName, MooseFunctorName> _external_heat_sources_functors;
+  /// Coefficients multiplying the external heat sources
+  std::map<SubdomainName, MooseFunctorName> _external_heat_sources_coefs;
+
   /// Energy inlet boundary types
-  MultiMooseEnum _energy_inlet_types;
+  std::map<BoundaryName, MooseEnum> _energy_inlet_types;
   /// Functors describing the inlet boundary values. See energy_inlet_types for what the functors actually represent
-  std::vector<MooseFunctorName> _energy_inlet_functors;
+  std::map<BoundaryName, MooseFunctorName> _energy_inlet_functors;
   /// Energy wall boundary types
-  MultiMooseEnum _energy_wall_types;
+  std::map<BoundaryName, MooseEnum> _energy_wall_types;
   /// Functors describing the wall boundary values. See energy_wall_types for what the functors actually represent
-  std::vector<MooseFunctorName> _energy_wall_functors;
+  std::map<BoundaryName, MooseFunctorName> _energy_wall_functors;
 };

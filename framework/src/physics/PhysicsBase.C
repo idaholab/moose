@@ -71,6 +71,7 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
   addRequiredPhysicsTask("init_physics");
   addRequiredPhysicsTask("copy_vars_physics");
   addRequiredPhysicsTask("check_integrity_early_physics");
+  addRequiredPhysicsTask("check_integrity");
 }
 
 void
@@ -147,6 +148,8 @@ PhysicsBase::act()
     addExecutors();
   else if (_current_task == "check_integrity_early_physics")
     checkIntegrityEarly();
+  else if (_current_task == "check_integrity")
+    checkIntegrity();
 
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
@@ -190,6 +193,15 @@ PhysicsBase::dimension() const
   return _dim;
 }
 
+bool
+PhysicsBase::hasBlocks(const std::vector<SubdomainName> & blocks)
+{
+  for (const auto & block : blocks)
+    if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+      return false;
+  return true;
+}
+
 void
 PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
 {
@@ -207,6 +219,16 @@ PhysicsBase::addBlocksById(const std::vector<SubdomainID> & block_ids)
   {
     for (const auto bid : block_ids)
       _blocks.push_back(_mesh->getSubdomainName(bid));
+  }
+}
+
+void
+PhysicsBase::removeBlocks(const std::vector<SubdomainName> & blocks)
+{
+  if (blocks.size())
+  {
+    for (const auto & block : blocks)
+      _blocks.erase(std::remove(_blocks.begin(), _blocks.end(), block), _blocks.end());
     _dim = _mesh->getBlocksMaxDimension(_blocks);
   }
 }
@@ -291,7 +313,11 @@ PhysicsBase::checkIntegrityEarly() const
                "single system name for all variables. Current you have '" +
                    std::to_string(_system_names.size()) + "' systems specified for '" +
                    std::to_string(_solver_var_names.size()) + "' solver variables.");
+}
 
+void
+PhysicsBase::checkIntegrity() const
+{
   // Check that each variable is present in the expected system
   unsigned int var_i = 0;
   for (const auto & var_name : _solver_var_names)

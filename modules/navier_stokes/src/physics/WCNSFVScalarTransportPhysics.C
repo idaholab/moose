@@ -11,6 +11,7 @@
 #include "WCNSFVFlowPhysicsBase.h"
 #include "NSFVBase.h"
 #include "NS.h"
+#include "MapConversionUtils.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
@@ -27,7 +28,7 @@ WCNSFVScalarTransportPhysics::validParams()
 }
 
 WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters & parameters)
-  : WCNSFVScalarTransportPhysicsBase(parameters)
+  : PhysicsBase(parameters), WCNSFVScalarTransportPhysicsBase(parameters)
 {
 }
 
@@ -128,6 +129,29 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
 
+  // Check the size of the scalar sources inputs
+  for (const auto scalar_i : index_range(_passive_scalar_names))
+  {
+    if (_passive_scalar_coupled_sources_blocks.size())
+      if (_passive_scalar_coupled_sources_blocks.size() !=
+          _passive_scalar_coupled_sources[scalar_i].size())
+        paramError("passive_scalar_coupled_source",
+                   "Number of coupled sources (" +
+                       std::to_string(_passive_scalar_coupled_sources[scalar_i].size()) +
+                       ") does not match the number of groups of blocks "
+                       "specified for the coupled sources (" +
+                       std::to_string(_passive_scalar_coupled_sources_blocks.size()) + ")");
+    if (_passive_scalar_coupled_sources_coefs.size())
+      if (_passive_scalar_coupled_sources_coefs[scalar_i].size() !=
+          _passive_scalar_coupled_sources[scalar_i].size())
+        paramError("passive_scalar_coupled_source_coeff",
+                   "Number of coupled sources (" +
+                       std::to_string(_passive_scalar_coupled_sources[scalar_i].size()) +
+                       ") does not match the number of coupled sources coefficients (" +
+                       std::to_string(_passive_scalar_coupled_sources_coefs[scalar_i].size()) +
+                       ")");
+  }
+
   for (const auto scalar_i : index_range(_passive_scalar_names))
   {
     params.set<NonlinearVariableName>("variable") = _passive_scalar_names[scalar_i];
@@ -144,8 +168,12 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
       for (const auto i : index_range(_passive_scalar_coupled_sources[scalar_i]))
       {
         params.set<MooseFunctorName>("v") = _passive_scalar_coupled_sources[scalar_i][i];
-        if (_passive_scalar_sources_coef.size())
-          params.set<Real>("coef") = _passive_scalar_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_coefs.size())
+          params.set<MooseFunctorName>("functor_coef") =
+              _passive_scalar_coupled_sources_coefs[scalar_i][i];
+        if (_passive_scalar_coupled_sources_blocks.size())
+          params.set<std::vector<SubdomainName>>("block") =
+              _passive_scalar_coupled_sources_blocks[i];
 
         getProblem().addFVKernel(kernel_type,
                                  prefix() + "ins_" + _passive_scalar_names[scalar_i] +
@@ -189,22 +217,20 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
                      std::to_string(_passive_scalar_inlet_functors[name_i].size()) + ")");
 
     unsigned int flux_bc_counter = 0;
-    unsigned int num_inlets = inlet_boundaries.size();
-    for (unsigned int bc_ind = 0; bc_ind < num_inlets; ++bc_ind)
+    for (const auto & boundary : inlet_boundaries)
     {
-      if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
+      const auto & boundary_type = libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary);
+      if (boundary_type == "fixed-value")
       {
         const std::string bc_type = "FVFunctionDirichletBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-        params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
+        params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][boundary];
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary};
 
-        getProblem().addFVBC(
-            bc_type, _passive_scalar_names[name_i] + "_" + inlet_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _passive_scalar_names[name_i] + "_" + boundary, params);
       }
-      else if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass" ||
-               _passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-velocity")
+      else if (boundary_type == "flux-mass" || boundary_type == "flux-velocity")
       {
         const auto flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
         const auto flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
@@ -215,33 +241,57 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
         params.set<MooseFunctorName>("passive_scalar") = _passive_scalar_names[name_i];
         if (flux_inlet_directions.size())
           params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
-        if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass")
+        if (boundary_type == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
-          params.set<PostprocessorName>("area_pp") = "area_pp_" + inlet_boundaries[bc_ind];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + boundary;
         }
         else
           params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
 
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<PostprocessorName>("scalar_value_pp") =
-            _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
+            _passive_scalar_inlet_functors[name_i][boundary];
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary};
 
+        params.set<unsigned int>("dimension") = dimension();
         params.set<MooseFunctorName>(NS::velocity_x) = _velocity_names[0];
         if (dimension() > 1)
           params.set<MooseFunctorName>(NS::velocity_y) = _velocity_names[1];
         if (dimension() > 2)
           params.set<MooseFunctorName>(NS::velocity_z) = _velocity_names[2];
 
-        getProblem().addFVBC(bc_type,
-                             prefix() + _passive_scalar_names[name_i] + "_" +
-                                 inlet_boundaries[bc_ind],
-                             params);
+        getProblem().addFVBC(
+            bc_type, prefix() + _passive_scalar_names[name_i] + "_" + boundary, params);
         flux_bc_counter += 1;
       }
     }
   }
+}
+
+void
+WCNSFVScalarTransportPhysics::addInletBoundary(const BoundaryName & boundary,
+                                               const MooseEnum & inlet_type,
+                                               const MooseFunctorName & inlet_functor,
+                                               const unsigned int scalar_index)
+{
+  _passive_scalar_inlet_types[scalar_index].insert(std::make_pair(boundary, inlet_type));
+  if (inlet_type == "fixed-value" || inlet_type == "flux-mass" || inlet_type == "flux-velocity")
+    _passive_scalar_inlet_functors[scalar_index][boundary] = inlet_functor;
+  else
+    mooseError("Unsupported inlet type on boundary " + boundary +
+               (inlet_functor.empty() ? "" : ("\nInlet functor: " + inlet_functor)));
+}
+
+void
+WCNSFVScalarTransportPhysics::addExternalScalarSources(
+    std::vector<SubdomainName> blocks,
+    std::vector<MooseFunctorName> scalar_sources,
+    std::vector<MooseFunctorName> scalar_sources_coefs)
+{
+  _passive_scalar_coupled_sources_blocks.push_back(blocks);
+  _passive_scalar_coupled_sources.push_back(scalar_sources);
+  _passive_scalar_coupled_sources_coefs.push_back(scalar_sources_coefs);
 }
 
 void

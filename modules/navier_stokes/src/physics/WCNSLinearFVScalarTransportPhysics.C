@@ -29,7 +29,7 @@ WCNSLinearFVScalarTransportPhysics::validParams()
 
 WCNSLinearFVScalarTransportPhysics::WCNSLinearFVScalarTransportPhysics(
     const InputParameters & parameters)
-  : WCNSFVScalarTransportPhysicsBase(parameters)
+  : PhysicsBase(parameters), WCNSFVScalarTransportPhysicsBase(parameters)
 {
 }
 
@@ -136,8 +136,14 @@ WCNSLinearFVScalarTransportPhysics::addScalarSourceKernels()
       {
         params.set<MooseFunctorName>("source_density") =
             _passive_scalar_coupled_sources[scalar_i][i];
-        if (_passive_scalar_sources_coef.size())
-          params.set<Real>("scaling_factor") = _passive_scalar_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_coefs.size())
+        {
+          if (MooseUtils::isFloat(_passive_scalar_coupled_sources_coefs[scalar_i][i].c_str()))
+            params.set<Real>("scaling_factor") =
+                std::atof(_passive_scalar_coupled_sources_coefs[scalar_i][i].c_str());
+          else
+            paramError("", "Non constant coefficients are not current supported");
+        }
 
         getProblem().addLinearFVKernel(kernel_type,
                                        prefix() + "ins_" + _passive_scalar_names[scalar_i] +
@@ -180,22 +186,23 @@ WCNSLinearFVScalarTransportPhysics::addScalarInletBC()
                      "' does not match the number of inlet boundaries (" +
                      std::to_string(_passive_scalar_inlet_functors[name_i].size()) + ")");
 
-    unsigned int num_inlets = inlet_boundaries.size();
-    for (unsigned int bc_ind = 0; bc_ind < num_inlets; ++bc_ind)
+    for (const auto & boundary_name : inlet_boundaries)
     {
-      if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
+      const auto & boundary_type =
+          libmesh_map_find(_passive_scalar_inlet_types[name_i], boundary_name);
+      if (boundary_type == "fixed-value")
       {
         const std::string bc_type = "LinearFVAdvectionDiffusionFunctorDirichletBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<LinearVariableName>("variable") = _passive_scalar_names[name_i];
-        params.set<MooseFunctorName>("functor") = _passive_scalar_inlet_functors[name_i][bc_ind];
-        params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
+        params.set<MooseFunctorName>("functor") =
+            libmesh_map_find(_passive_scalar_inlet_functors[name_i], boundary_name);
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
 
         getProblem().addLinearFVBC(
-            bc_type, _passive_scalar_names[name_i] + "_" + inlet_boundaries[bc_ind], params);
+            bc_type, _passive_scalar_names[name_i] + "_" + boundary_name, params);
       }
-      else if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass" ||
-               _passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-velocity")
+      else if (boundary_type == "flux-mass" || boundary_type == "flux-velocity")
       {
         mooseError("Flux boundary conditions not supported at this time using the linear finite "
                    "volume discretization");

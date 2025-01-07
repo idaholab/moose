@@ -162,14 +162,12 @@ FlowChannelBase::init()
 
   _flow_model = buildFlowModel();
   if (_flow_model)
-  {
     _flow_model->init();
 
-    if (getTHMProblem().hasClosures(_closures_name))
-      _closures = getTHMProblem().getClosures(_closures_name);
-    else
-      _closures = buildClosures();
-  }
+  if (getTHMProblem().hasClosures(_closures_name))
+    _closures = getTHMProblem().getClosures(_closures_name);
+  else
+    _closures = buildClosures();
 }
 
 std::shared_ptr<ClosuresBase>
@@ -230,7 +228,8 @@ FlowChannelBase::addVariables()
   // generated in initSecondary() of heat transfer components
   getHeatTransferVariableNames();
 
-  _flow_model->addVariables();
+  if (_flow_model)
+    _flow_model->addVariables();
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1 && !_app.isRestarting())
@@ -243,7 +242,8 @@ FlowChannelBase::addVariables()
     getTHMProblem().addSimInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
   }
 
-  _flow_model->addInitialConditions();
+  if (_flow_model)
+    _flow_model->addInitialConditions();
 }
 
 void
@@ -280,6 +280,7 @@ FlowChannelBase::addCommonObjects()
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<std::vector<VariableName>>("v") = {FlowModel::AREA_LINEAR};
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
+      params.set<bool>("warn_projection_loss") = false;
       const std::string aux_kernel_name = genName(name(), "area_aux");
       getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
@@ -333,7 +334,8 @@ FlowChannelBase::addMooseObjects()
     }
   }
 
-  _flow_model->addMooseObjects();
+  if (_flow_model)
+    _flow_model->addMooseObjects();
   _closures->addMooseObjectsFlowChannel(*this);
 }
 
@@ -342,6 +344,12 @@ FlowChannelBase::addHeatTransferName(const std::string & name) const
 {
   _heat_transfer_names.push_back(name);
   _n_heat_transfer_connections++;
+}
+
+void
+FlowChannelBase::addScalarTransferName(const std::string & name) const
+{
+  _scalar_transfer_names.push_back(name);
 }
 
 void
@@ -384,6 +392,33 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
     else
       mooseError(
           "Heat transfer component '", ht_name, "' was not added to flow channel '", name(), "'");
+  }
+  // else, don't add a suffix; there is no need
+  else
+    return "";
+}
+
+std::string
+FlowChannelBase::getScalarTransferNamesSuffix(const std::string & st_name) const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  // if there is more than one connected scalar transfer component, then number them
+  if (_scalar_transfer_names.size() > 1)
+  {
+    // determine index of scalar transfer name based on when it was added
+    auto it = std::find(_scalar_transfer_names.begin(), _scalar_transfer_names.end(), st_name);
+    if (it != _scalar_transfer_names.end())
+    {
+      const unsigned int index = std::distance(_scalar_transfer_names.begin(), it);
+
+      std::string suffix = ":" + _scalar_transfer_names[index];
+
+      return suffix;
+    }
+    else
+      mooseError(
+          "Scalar transfer component '", st_name, "' was not added to flow channel '", name(), "'");
   }
   // else, don't add a suffix; there is no need
   else

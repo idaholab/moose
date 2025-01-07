@@ -19,18 +19,24 @@ FVCoupledForce::validParams()
   params.addClassDescription("Implements a source term proportional to the value of a coupled "
                              "variable.");
   params.addRequiredParam<MooseFunctorName>("v", "The coupled functor which provides the force");
-  params.addParam<Real>("coef", 1.0, "Coefficent multiplier for the coupled force term.");
+  params.addParam<Real>("coef", 1.0, "Coefficient multiplier for the coupled force term.");
+  params.addParam<MooseFunctorName>(
+      "functor_coef", 1.0, "Additional coefficient multiplier for the coupled force term.");
 
   return params;
 }
 
 FVCoupledForce::FVCoupledForce(const InputParameters & parameters)
-  : FVElementalKernel(parameters), _v(getFunctor<ADReal>("v")), _coef(getParam<Real>("coef"))
+  : FVElementalKernel(parameters),
+    _v(getFunctor<ADReal>("v")),
+    _coef(getParam<Real>("coef")),
+    _functor_coef(getFunctor<ADReal>("functor_coef"))
 {
 }
 
 ADReal
 FVCoupledForce::computeQpResidual()
 {
-  return -_coef * _v(makeElemArg(_current_elem), determineState());
+  const auto & elem_arg = makeElemArg(_current_elem);
+  return -_coef * _v(elem_arg, determineState()) * _functor_coef(elem_arg, determineState());
 }

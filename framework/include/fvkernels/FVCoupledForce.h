@@ -29,4 +29,6 @@ protected:
   const Moose::Functor<ADReal> & _v;
   /// An optional coefficient multiplying the coupled force
   const Real _coef;
+  /// An optional functor coefficient multiplying the coupled force
+  const Moose::Functor<ADReal> & _functor_coef;
 };

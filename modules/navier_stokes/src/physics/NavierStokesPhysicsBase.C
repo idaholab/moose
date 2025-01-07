@@ -44,7 +44,7 @@ NavierStokesPhysicsBase::getAdditionalRMParams() const
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers = std::max(necessary_layers, getNumberAlgebraicGhostingLayersNeeded());
 
-  // Just an object that has a ghost_layers parameter
+  // Just an object that adds an algebraic ghosting relationship manager
   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.template set<unsigned short>("ghost_layers") = necessary_layers;

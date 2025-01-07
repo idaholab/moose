@@ -1,0 +1,171 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "THMProblem.h"
+#include "Component.h"
+#include "FlowChannelBase.h"
+#include "ConstantFunction.h"
+#include "ThermalHydraulicsFlowPhysics.h"
+
+InputParameters
+ThermalHydraulicsFlowPhysics::validParams()
+{
+  InputParameters params = PhysicsBase::validParams();
+  return params;
+}
+
+const std::string ThermalHydraulicsFlowPhysics::AREA = "A";
+const std::string ThermalHydraulicsFlowPhysics::AREA_LINEAR = "A_linear";
+const std::string ThermalHydraulicsFlowPhysics::HEAT_FLUX_WALL = "q_wall";
+const std::string ThermalHydraulicsFlowPhysics::HEAT_FLUX_PERIMETER = "P_hf";
+const std::string ThermalHydraulicsFlowPhysics::NUSSELT_NUMBER = "Nu";
+const std::string ThermalHydraulicsFlowPhysics::TEMPERATURE_WALL = "T_wall";
+const std::string ThermalHydraulicsFlowPhysics::UNITY = "unity";
+const std::string ThermalHydraulicsFlowPhysics::DIRECTION = "direction";
+
+ThermalHydraulicsFlowPhysics::ThermalHydraulicsFlowPhysics(const InputParameters & params)
+  : PhysicsBase(params), _component_names({})
+{
+  // A derived physics must act on those tasks
+  addRequiredPhysicsTask("THMPhysics:add_ic");
+  addRequiredPhysicsTask("add_variable");
+  addRequiredPhysicsTask("add_material");
+}
+
+void
+ThermalHydraulicsFlowPhysics::initializePhysicsAdditional()
+{
+  // Retrieve the problem
+  _sim = dynamic_cast<THMProblem *>(&getProblem());
+  _fe_type = _sim->getFlowFEType();
+
+  if (_flow_channels.empty())
+    mooseError("The Physics should be added from at least one flow channel");
+  _lump_mass_matrix = _flow_channels[0]->getParam<bool>("lump_mass_matrix");
+  _gravity_vector = _flow_channels[0]->getParam<RealVectorValue>("gravity_vector");
+  _gravity_magnitude = _gravity_vector.norm();
+}
+
+const FunctionName &
+ThermalHydraulicsFlowPhysics::getVariableFn(const FunctionName & fn_param_name)
+{
+  // TODO request index
+  const FunctionName & fn_name = _flow_channels[0]->getParam<FunctionName>(fn_param_name);
+  const Function & fn = _sim->getFunction(fn_name);
+
+  if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
+    _flow_channels[0]->connectObject(fn.parameters(), fn_name, fn_param_name, "value");
+
+  return fn_name;
+}
+
+void
+ThermalHydraulicsFlowPhysics::addCommonVariables()
+{
+  for (const auto i : index_range(_flow_channels))
+  {
+    const auto flow_channel = _flow_channels[i];
+    const std::vector<SubdomainName> & subdomains = flow_channel->getSubdomainNames();
+
+    _sim->addSimVariable(false, AREA, _fe_type, subdomains);
+    _sim->addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
+    _sim->addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
+  }
+}
+
+void
+ThermalHydraulicsFlowPhysics::addCommonInitialConditions()
+{
+  for (const auto i : index_range(_flow_channels))
+  {
+    const auto flow_channel = _flow_channels[i];
+    const auto & comp_name = flow_channel->name();
+    if (flow_channel->isParamValid("A") && !_app.isRestarting())
+    {
+      const std::vector<SubdomainName> & block = flow_channel->getSubdomainNames();
+      const FunctionName & area_function = flow_channel->getAreaFunctionName();
+
+      if (!_sim->hasFunction(area_function))
+      {
+        const Function & fn = _sim->getFunction(area_function);
+        _sim->addConstantIC(AREA, fn.value(0, Point()), block);
+        _sim->addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
+
+        flow_channel->makeFunctionControllableIfConstant(area_function, "Area", "value");
+      }
+      else
+      {
+        _sim->addFunctionIC(AREA_LINEAR, area_function, block);
+
+        {
+          const std::string class_name = "FunctionNodalAverageIC";
+          InputParameters params = getFactory().getValidParams(class_name);
+          params.set<VariableName>("variable") = AREA;
+          params.set<std::vector<SubdomainName>>("block") = block;
+          params.set<FunctionName>("function") = area_function;
+          _sim->addSimInitialCondition(class_name, genName(comp_name, AREA, "ic"), params);
+        }
+      }
+    }
+  }
+}
+
+void
+ThermalHydraulicsFlowPhysics::addCommonMaterials()
+{
+  for (const auto i : index_range(_flow_channels))
+  {
+    const auto flow_channel = _flow_channels[i];
+    const auto & comp_name = flow_channel->name();
+    // add material property equal to one, useful for dummy multiplier values
+    {
+      const std::string class_name = "ConstantMaterial";
+      InputParameters params = getFactory().getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = flow_channel->getSubdomainNames();
+      params.set<std::string>("property_name") = ThermalHydraulicsFlowPhysics::UNITY;
+      params.set<Real>("value") = 1.0;
+      params.set<std::vector<VariableName>>("derivative_vars") = _derivative_vars;
+      _sim->addMaterial(
+          class_name, genName(comp_name, ThermalHydraulicsFlowPhysics::UNITY), params);
+    }
+  }
+}
+
+void
+ThermalHydraulicsFlowPhysics::addFlowChannel(const FlowChannelBase * c_ptr)
+{
+  _flow_channels.push_back(c_ptr);
+  _component_names.push_back(c_ptr->name());
+  addBlocks(c_ptr->getSubdomainNames());
+  setDimension(1);
+}
+
+void
+ThermalHydraulicsFlowPhysics::setInlet(const std::string & boundary_component,
+                                       const InletTypeEnum & inlet_type)
+{
+  _inlet_components.push_back(boundary_component);
+  _inlet_types.push_back(inlet_type);
+}
+
+void
+ThermalHydraulicsFlowPhysics::setOutlet(const std::string & boundary_component,
+                                        const OutletTypeEnum & outlet_type)
+{
+  _outlet_components.push_back(boundary_component);
+  _outlet_types.push_back(outlet_type);
+}
+
+void
+ThermalHydraulicsFlowPhysics::setJunction(const std::string & boundary_component,
+                                          const JunctionTypeEnum & junction_type)
+{
+  _junction_components.push_back(boundary_component);
+  _junction_types.push_back(junction_type);
+}

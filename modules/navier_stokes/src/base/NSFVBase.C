@@ -135,12 +135,12 @@ InputParameters
 NSFVBase::commonMomentumBoundaryTypesParams()
 {
   InputParameters params = emptyInputParameters();
-  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass fixed-pressure");
+  MultiMooseEnum mom_inlet_types(getValidMomentumInletTypes());
   params.addParam<MultiMooseEnum>("momentum_inlet_types",
                                   mom_inlet_types,
                                   "Types of inlet boundaries for the momentum equation.");
 
-  MultiMooseEnum mom_outlet_types("fixed-pressure zero-gradient fixed-pressure-zero-gradient");
+  MultiMooseEnum mom_outlet_types(getValidMomentumOutletTypes());
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
                                   "Types of outlet boundaries for the momentum equation");
@@ -202,7 +202,7 @@ NSFVBase::commonFluidEnergyEquationParams()
 
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
-  MultiMooseEnum en_inlet_types("fixed-temperature flux-mass flux-velocity heatflux");
+  MultiMooseEnum en_inlet_types(getValidEnergyInletTypes());
   params.addParam<MultiMooseEnum>("energy_inlet_types",
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
@@ -212,7 +212,7 @@ NSFVBase::commonFluidEnergyEquationParams()
       std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction");
+  MultiMooseEnum en_wall_types(getValidEnergyWallTypes());
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
@@ -259,40 +259,39 @@ NSFVBase::commonScalarFieldAdvectionParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<NonlinearVariableName>>(
-      "passive_scalar_names",
-      std::vector<NonlinearVariableName>(),
-      "Vector containing the names of the advected scalar variables.");
+      "passive_scalar_names", {}, "Vector containing the names of the advected scalar variables.");
 
   params.addParam<std::vector<FunctionName>>("initial_scalar_variables",
                                              "Initial values of the passive scalar variables.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_diffusivity",
-      std::vector<MooseFunctorName>(),
+      {},
       "Functor names for the diffusivities used for the passive scalar fields.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_source",
-      std::vector<MooseFunctorName>(),
+      {},
       "Functor names for the sources used for the passive scalar fields.");
 
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source",
-      std::vector<std::vector<MooseFunctorName>>(),
+      {},
       "Coupled variable names for the sources used for the passive scalar fields. If multiple "
       "sources for each equation are specified, major (outer) ordering by equation.");
 
-  params.addParam<std::vector<std::vector<Real>>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source_coeff",
-      std::vector<std::vector<Real>>(),
+      {},
       "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
       " sources for each equation are specified, major (outer) ordering by equation.");
 
-  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity");
-  params.addParam<MultiMooseEnum>(
+  MooseEnum scalar_inlet_types(NSFVBase::getValidScalarInletTypes());
+  params.addParam<std::vector<MooseEnum>>(
       "passive_scalar_inlet_types",
-      ps_inlet_types,
-      "Types for the inlet boundaries for the passive scalar equation.");
+      {scalar_inlet_types},
+      "Types for the inlet boundaries for the passive scalar equation. Indexing by inlet boundary, "
+      "the type is shared for all equations.");
 
   params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
                               "passive_scalar_source passive_scalar_coupled_source "
