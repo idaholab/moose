@@ -14,7 +14,7 @@ declareCoefficient(PropertyMap<T, Tpw> & map,
                    const std::string & name,
                    const std::vector<std::string> & blocks,
                    std::shared_ptr<T> coef,
-                   const ObjectManager<T> & /*manager*/)
+                   const ObjectManager<T> & libmesh_dbg_var(manager))
 {
   mooseAssert(std::find(manager.cbegin(), manager.cend(), coef) != manager.cend(),
               "Coefficient object was not created by the appropriate coefficient manager.");
