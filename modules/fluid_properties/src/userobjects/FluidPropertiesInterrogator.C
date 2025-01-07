@@ -53,6 +53,7 @@ FluidPropertiesInterrogator::FluidPropertiesInterrogator(const InputParameters &
     _has_vapor_mixture(dynamic_cast<const VaporMixtureFluidProperties * const>(_fp)),
     _has_2phase(_fp_2phase),
     _has_2phase_ncg(_fp_2phase_ncg),
+    _has_2phase_ncg_partial_pressure(_fp_2phase_ncg_partial_pressure),
     _fp_liquid(_has_2phase
                    ? &getUserObjectByName<SinglePhaseFluidProperties>(_fp_2phase->getLiquidName())
                    : nullptr),
@@ -387,7 +388,9 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
 
   // determine how state is specified
   std::vector<std::vector<std::string>> parameter_sets = {
-      {"p", "T", "x_ncg"}, {"rho", "e", "x_ncg"}, {"rho", "rhou", "rhoE", "x_ncg"}, {"p", "T"}};
+      {"p", "T", "x_ncg"}, {"rho", "e", "x_ncg"}, {"rho", "rhou", "rhoE", "x_ncg"}};
+  if (_has_2phase_ncg_partial_pressure)
+    parameter_sets.push_back({"p", "T"});
   auto specified = getSpecifiedSetMap(parameter_sets, "vapor mixture", throw_error_if_no_match);
 
   // compute/determine rho, e, p, T, vel
@@ -420,7 +423,7 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
 
     specified_a_set = true;
   }
-  else if (_fp_2phase_ncg_partial_pressure && specified["p,T"])
+  else if (_has_2phase_ncg_partial_pressure && specified["p,T"])
   {
     p = getParam<Real>("p");
     T = getParam<Real>("T");
@@ -474,6 +477,22 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
     params.set<Real>("cp") = cp;
     params.set<Real>("cv") = cv;
     params.set<Real>("k") = k;
+
+    const auto x_ncg = params.get<std::vector<Real>>("x_ncg");
+    for (unsigned int i = 0; i < x_ncg.size(); i++)
+      outputProperty("Mass fraction " + std::to_string(i), x_ncg[i], "-");
+    outputProperty("Pressure", params.get<Real>("p"), "Pa");
+    outputProperty("Temperature", params.get<Real>("T"), "K");
+    outputProperty("Density", params.get<Real>("rho"), "kg/m^3");
+    outputProperty("Specific volume", params.get<Real>("v"), "m^3/kg");
+    outputProperty("Specific internal energy", params.get<Real>("e"), "J/kg");
+    outputProperty("Specific enthalpy", params.get<Real>("h"), "J/kg");
+    _console << std::endl;
+    outputProperty("Sound speed", params.get<Real>("c"), "m/s");
+    outputProperty("Dynamic viscosity", params.get<Real>("mu"), "Pa-s");
+    outputProperty("Specific heat at constant pressure", params.get<Real>("cp"), "J/(kg-K)");
+    outputProperty("Specific heat at constant volume", params.get<Real>("cv"), "J/(kg-K)");
+    outputProperty("Thermal conductivity", params.get<Real>("k"), "W/(m-K)");
 
     if (isParamValid("vel") || specified["rho,rhou,rhoE,x_ncg"])
     {
