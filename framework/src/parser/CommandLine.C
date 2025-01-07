@@ -211,7 +211,9 @@ CommandLine::initSubAppCommandLine(const std::string & multiapp_name,
     subapp_args.push_back(MooseUtils::removeExtraWhitespace(arg));
 
   // Pull out all of the arguments that are relevant to this multiapp from the parent
-  for (auto & entry : as_range(std::next(getEntries().begin()), getEntries().end()))
+  // Note that the 0th argument of the main app, i.e., the name used to invoke the program,
+  // is neither a global entry nor a subapp entry and, as such, won't be passed on
+  for (auto & entry : as_range(getEntries().begin(), getEntries().end()))
     if (entry.global || (entry.subapp_name && (*entry.subapp_name == multiapp_name ||
                                                *entry.subapp_name == subapp_name)))
     {

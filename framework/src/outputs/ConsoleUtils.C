@@ -57,7 +57,9 @@ outputFrameworkInformation(const MooseApp & app)
   oss << "\n";
 
   const auto & cl = std::as_const(*app.commandLine());
-  const auto cl_range = as_range(std::next(cl.getEntries().begin()), cl.getEntries().end());
+  // We skip the 0th argument of the main app, i.e., the name used to invoke the program
+  const auto cl_range =
+      as_range(std::next(cl.getEntries().begin(), app.multiAppLevel() == 0), cl.getEntries().end());
 
   std::stringstream args_oss;
   for (const auto & entry : cl_range)
