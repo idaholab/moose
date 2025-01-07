@@ -39,7 +39,7 @@ class PetscOptions
 {
 public:
   PetscOptions()
-    : flags("", "", true), ignored_options("", "", true), user_set_options("", "", true)
+    : flags("", "", true), dont_add_these_options("", "", true), user_set_options("", "", true)
   {
   }
 
@@ -50,7 +50,7 @@ public:
   MultiMooseEnum flags;
 
   /// Flags to explicitly not set, even if they are specified in flags
-  MultiMooseEnum ignored_options;
+  MultiMooseEnum dont_add_these_options;
 
   /// Options that are set by the user at the input level
   MultiMooseEnum user_set_options;
@@ -197,13 +197,13 @@ void setSinglePetscOption(const std::string & name,
                           FEProblemBase * const problem = nullptr);
 
 /**
-Same as setSinglePetscOption, but does not set the option if it belongs to the given list of
-ignored options.
+Same as setSinglePetscOption, but does not set the option if it doesn't make sense for the current
+simulation type.
 */
-void setSinglePetscOptionIfNotIgnored(const MultiMooseEnum & ignored_options,
-                                      const std::string & name,
-                                      const std::string & value = "",
-                                      FEProblemBase * const problem = nullptr);
+void setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_options,
+                                       const std::string & name,
+                                       const std::string & value = "",
+                                       FEProblemBase * const problem = nullptr);
 
 void addPetscOptionsFromCommandline();
 
@@ -247,12 +247,12 @@ void disableLinearConvergedReason(FEProblemBase & fe_problem);
 /**
  * disable common ksp flags
  */
-void ignoreCommonKSPOptions(FEProblemBase & fe_problem);
+void dontSetCommonKSPOptions(FEProblemBase & fe_problem);
 
 /**
  * disable common snes flags
  */
-void ignoreCommonSNESOptions(FEProblemBase & fe_problem);
+void dontSetCommonSNESOptions(FEProblemBase & fe_problem);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

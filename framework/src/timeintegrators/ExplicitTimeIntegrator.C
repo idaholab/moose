@@ -54,8 +54,8 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     _ones = addVector("ones", false, PARALLEL);
 
-  // ignore all common SNES-related petsc options to prevent unused option warnings
-  Moose::PetscSupport::ignoreCommonSNESOptions(_fe_problem);
+  // don't set any of the common SNES-related petsc options to prevent unused option warnings
+  Moose::PetscSupport::dontSetCommonSNESOptions(_fe_problem);
 }
 
 void

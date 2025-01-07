@@ -141,33 +141,33 @@ stringify(const MffdType & t)
 }
 
 void
-setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & ignored_options)
+setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont_add_these_options)
 {
   // set PETSc options implied by a solve type
   switch (solver_params._type)
   {
     case Moose::ST_PJFNK:
-      setSinglePetscOptionIfNotIgnored(ignored_options, "-snes_mf_operator");
-      setSinglePetscOptionIfNotIgnored(
-          ignored_options, "-mat_mffd_type", stringify(solver_params._mffd_type));
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_mf_operator");
+      setSinglePetscOptionIfAppropriate(
+          dont_add_these_options, "-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_JFNK:
-      setSinglePetscOptionIfNotIgnored(ignored_options, "-snes_mf");
-      setSinglePetscOptionIfNotIgnored(
-          ignored_options, "-mat_mffd_type", stringify(solver_params._mffd_type));
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_mf");
+      setSinglePetscOptionIfAppropriate(
+          dont_add_these_options, "-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_NEWTON:
       break;
 
     case Moose::ST_FD:
-      setSinglePetscOptionIfNotIgnored(ignored_options, "-snes_fd");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_fd");
       break;
 
     case Moose::ST_LINEAR:
-      setSinglePetscOptionIfNotIgnored(ignored_options, "-snes_type", "ksponly");
-      setSinglePetscOptionIfNotIgnored(ignored_options, "-snes_monitor_cancel");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_type", "ksponly");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_monitor_cancel");
       break;
   }
 
@@ -176,7 +176,8 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & igno
     ls_type = Moose::LS_BASIC;
 
   if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
-    setSinglePetscOptionIfNotIgnored(ignored_options, "-snes_linesearch_type", stringify(ls_type));
+    setSinglePetscOptionIfAppropriate(
+        dont_add_these_options, "-snes_linesearch_type", stringify(ls_type));
 }
 
 void
@@ -245,18 +246,20 @@ petscSetOptions(const PetscOptions & po,
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsClear(LIBMESH_PETSC_NULLPTR));
 #endif
 
-  setSolverOptions(solver_params, po.ignored_options);
+  setSolverOptions(solver_params, po.dont_add_these_options);
 
   // Add any additional options specified in the input file
   for (const auto & flag : po.flags)
     // Need to use name method here to pass a str instead of an EnumItem because
     // we don't care if the id attributes match
-    if (!po.ignored_options.contains(flag.name()) || po.user_set_options.contains(flag.name()))
+    if (!po.dont_add_these_options.contains(flag.name()) ||
+        po.user_set_options.contains(flag.name()))
       setSinglePetscOption(flag.rawName().c_str());
 
   // Add option pairs
   for (auto & option : po.pairs)
-    if (!po.ignored_options.contains(option.first) || po.user_set_options.contains(option.first))
+    if (!po.dont_add_these_options.contains(option.first) ||
+        po.user_set_options.contains(option.first))
       setSinglePetscOption(option.first, option.second, problem);
 
   addPetscOptionsFromCommandline();
@@ -979,12 +982,12 @@ setSinglePetscOption(const std::string & name,
 }
 
 void
-setSinglePetscOptionIfNotIgnored(const MultiMooseEnum & ignored_options,
-                                 const std::string & name,
-                                 const std::string & value /*=""*/,
-                                 FEProblemBase * const problem /*=nullptr*/)
+setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_options,
+                                  const std::string & name,
+                                  const std::string & value /*=""*/,
+                                  FEProblemBase * const problem /*=nullptr*/)
 {
-  if (!ignored_options.contains(name))
+  if (!dont_add_these_options.contains(name))
     setSinglePetscOption(name, value, problem);
 }
 
@@ -1077,27 +1080,27 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
 }
 
 void
-ignoreCommonKSPOptions(FEProblemBase & fe_problem)
+dontSetCommonKSPOptions(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
   for (const auto & flag : getCommonKSPFlags().getNames())
-    if (!petsc_options.ignored_options.contains(flag))
-      petsc_options.ignored_options.setAdditionalValue(flag);
+    if (!petsc_options.dont_add_these_options.contains(flag))
+      petsc_options.dont_add_these_options.setAdditionalValue(flag);
   for (const auto & key : getCommonKSPKeys().getNames())
-    if (!petsc_options.ignored_options.contains(key))
-      petsc_options.ignored_options.setAdditionalValue(key);
+    if (!petsc_options.dont_add_these_options.contains(key))
+      petsc_options.dont_add_these_options.setAdditionalValue(key);
 }
 
 void
-ignoreCommonSNESOptions(FEProblemBase & fe_problem)
+dontSetCommonSNESOptions(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
   for (const auto & flag : getCommonSNESFlags().getNames())
-    if (!petsc_options.ignored_options.contains(flag))
-      petsc_options.ignored_options.setAdditionalValue(flag);
+    if (!petsc_options.dont_add_these_options.contains(flag))
+      petsc_options.dont_add_these_options.setAdditionalValue(flag);
   for (const auto & key : getCommonSNESKeys().getNames())
-    if (!petsc_options.ignored_options.contains(key))
-      petsc_options.ignored_options.setAdditionalValue(key);
+    if (!petsc_options.dont_add_these_options.contains(key))
+      petsc_options.dont_add_these_options.setAdditionalValue(key);
 }
 
 } // Namespace PetscSupport
