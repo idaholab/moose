@@ -13,7 +13,6 @@ package:
 source:
   - path: ../../framework/contrib/wasp
   - path: ../../scripts/configure_wasp.sh
-  - path: ../pyhit
   - path: ../../python/moosetree
     folder: pyhit/moosetree
   - path: ../../python/mooseutils/message.py
