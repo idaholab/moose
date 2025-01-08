@@ -137,7 +137,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _control_names(getParam<std::vector<ReporterName>>("control")),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability")),
     _reward_name(getParam<ReporterName>("reward")),
-    _reward_value_pointer(&getReporterValueByName<std::vector<Real>>(_reward_name)),
+    _reward_value_pointer(&getReporterValueByName<std::vector<std::vector<Real>>>(_reward_name)),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
     _num_inputs(_input_timesteps * _response_names.size()),
     _num_outputs(_control_names.size()),
@@ -242,13 +242,13 @@ void
 LibtorchDRLControlTrainer::execute()
 {
   // Extract data from the reporters
-  getInputDataFromReporter(_input_data, _response_value_pointers, _input_timesteps);
-  getOutputDataFromReporter(_output_data, _control_value_pointers);
-  getOutputDataFromReporter(_log_probability_data, _log_probability_value_pointers);
+  getResponseDataFromReporter(_input_data, _response_value_pointers, _input_timesteps);
+  getSignalDataFromReporter(_output_data, _control_value_pointers);
+  getSignalDataFromReporter(_log_probability_data, _log_probability_value_pointers);
   getRewardDataFromReporter(_reward_data, _reward_value_pointer);
 
   // Calculate return from the reward (discounting the reward)
-  computeRewardToGo();
+  computeRewardToGo(_return_data, _reward_value_pointer);
 
   _update_counter--;
 
@@ -285,27 +285,38 @@ LibtorchDRLControlTrainer::computeAverageEpisodeReward()
 }
 
 void
-LibtorchDRLControlTrainer::computeRewardToGo()
+LibtorchDRLControlTrainer::computeRewardToGo(std::vector<Real> & data,
+                                             const std::vector<std::vector<Real>> * const reporter_link)
 {
   // Get reward data from one simulation
   std::vector<Real> reward_data_per_sim;
   std::vector<Real> return_data_per_sim;
-  getRewardDataFromReporter(reward_data_per_sim, _reward_value_pointer);
+  getRewardDataFromReporter(reward_data_per_sim, reporter_link);
 
   // Discount the reward to get the return value, we need this to be able to anticipate
-  // rewards based on the current behavior.
-  Real discounted_reward(0.0);
-  for (int i = reward_data_per_sim.size() - 1; i >= 0; --i)
+  // rewards based on the current behavior. We go backwards in samples and backwards in
+  // accumulation.
+  unsigned int reward_i = reward_data_per_sim.size();
+  for (unsigned int sample_i = reporter_link->size() - 1; sample_i >= 0; --sample_i)
   {
-    discounted_reward = reward_data_per_sim[i] + discounted_reward * _decay_factor;
+    Real discounted_reward(0.0);
+    const auto history_size = (*reporter_link)[sample_i].size() - _shift_outputs;
 
-    // We are inserting to the front of the vector and push the rest back, this will
-    // ensure that the first element of the vector is the discounter reward for the whole transient
-    return_data_per_sim.insert(return_data_per_sim.begin(), discounted_reward);
+    for (int i = 0; i < history_size; ++i)
+    {
+      discounted_reward = reward_data_per_sim[reward_i - 1 - i] + discounted_reward * _decay_factor;
+
+      // We are inserting to the front of the vector and push the rest back, this will
+      // ensure that the first element of the vector is the discounter reward for the whole transient
+      return_data_per_sim.insert(return_data_per_sim.begin(), discounted_reward);
+    }
+
+    // Update the global index
+    reward_i -= history_size;
   }
 
   // Save and accumulate the return values
-  _return_data.insert(_return_data.end(), return_data_per_sim.begin(), return_data_per_sim.end());
+  data.insert(_return_data.end(), return_data_per_sim.begin(), return_data_per_sim.end());
 }
 
 void
@@ -423,66 +434,80 @@ LibtorchDRLControlTrainer::resetData()
 }
 
 void
-LibtorchDRLControlTrainer::getInputDataFromReporter(
+LibtorchDRLControlTrainer::getResponseDataFromReporter(
     std::vector<std::vector<Real>> & data,
-    const std::vector<const std::vector<Real> *> & reporter_links,
+    const std::vector<const std::vector<std::vector<Real>> *> & reporter_links,
     const unsigned int num_timesteps)
 {
+  // We have multiple reporters, each has a time series for each sample
   for (const auto & rep_i : index_range(reporter_links))
   {
-    std::vector<Real> reporter_data = *reporter_links[rep_i];
+    // Fetch the vector of time series for a given reporter
+    const std::vector<std::vector<Real>> & reporter_data = *reporter_links[rep_i];
 
-    // We shift and scale the inputs to get better training efficiency
-    std::transform(
-        reporter_data.begin(),
-        reporter_data.end(),
-        reporter_data.begin(),
-        [this, &rep_i](Real value) -> Real
-        { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
-
-    // Fill the corresponding containers
+    // We might consider using older time steps too which requires adding new
+    // rows and populating them with staggered data
     for (const auto & start_step : make_range(num_timesteps))
     {
       unsigned int row = reporter_links.size() * start_step + rep_i;
-      for (unsigned int fill_i = 1; fill_i < num_timesteps - start_step; ++fill_i)
-        data[row].push_back(reporter_data[0]);
 
-      data[row].insert(data[row].end(),
-                       reporter_data.begin(),
-                       reporter_data.begin() + start_step + reporter_data.size() -
+      // Made it to the inner loop which is just the different samples
+      for (const auto sample_i : index_range(reporter_data))
+      {
+        for (unsigned int fill_i = 1; fill_i < num_timesteps - start_step; ++fill_i)
+          data[row].push_back(reporter_data[sample_i][0]);
+
+        data[row].insert(data[row].end(),
+                         reporter_data[sample_i].begin(),
+                         reporter_data[sample_i].begin() + start_step + reporter_data[sample_i].size() -
                            (num_timesteps - 1) - _shift_outputs);
+      }
+    }
+
+    // We shift and scale the inputs to get better training efficiency
+    for (const auto & start_step : make_range(num_timesteps))
+    {
+      unsigned int row = reporter_links.size() * start_step + rep_i;
+      std::transform(
+          data[row].begin(),
+          data[row].end(),
+          data[row].begin(),
+          [this, &rep_i](Real value) -> Real
+          { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
     }
   }
 }
 
 void
-LibtorchDRLControlTrainer::getOutputDataFromReporter(
+LibtorchDRLControlTrainer::getSignalDataFromReporter(
     std::vector<std::vector<Real>> & data,
-    const std::vector<const std::vector<Real> *> & reporter_links)
+    const std::vector<const std::vector<std::vector<Real>> *> & reporter_links)
 {
   for (const auto & rep_i : index_range(reporter_links))
-    // Fill the corresponding containers
-    data[rep_i].insert(data[rep_i].end(),
-                       reporter_links[rep_i]->begin() + _shift_outputs,
-                       reporter_links[rep_i]->end());
+    for (const auto sample_i : index_range(*reporter_links[rep_i]))
+      // Fill the corresponding containers
+      data[rep_i].insert(data[rep_i].end(),
+                        (*reporter_links[rep_i])[sample_i].begin() + _shift_outputs,
+                        (*reporter_links[rep_i])[sample_i].end());
 }
 
 void
 LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
-                                                     const std::vector<Real> * const reporter_link)
+                                                     const std::vector<std::vector<Real>> * const reporter_link)
 {
   // Fill the corresponding container
-  data.insert(data.end(), reporter_link->begin() + _shift_outputs, reporter_link->end());
+  for (const auto sample_i : index_range(*reporter_link))
+    data.insert(data.end(), (*reporter_link)[sample_i].begin() + _shift_outputs, (*reporter_link)[sample_i].end());
 }
 
 void
 LibtorchDRLControlTrainer::getReporterPointers(
     const std::vector<ReporterName> & reporter_names,
-    std::vector<const std::vector<Real> *> & pointer_storage)
+    std::vector<const std::vector<std::vector<Real>> *> & pointer_storage)
 {
   pointer_storage.clear();
   for (const auto & name : reporter_names)
-    pointer_storage.push_back(&getReporterValueByName<std::vector<Real>>(name));
+    pointer_storage.push_back(&getReporterValueByName<std::vector<std::vector<Real>>>(name));
 }
 
 #endif

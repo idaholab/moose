@@ -31,5 +31,6 @@ FunctionDirichletBC::FunctionDirichletBC(const InputParameters & parameters)
 Real
 FunctionDirichletBC::computeQpValue()
 {
+  std::cout << "Environment temperature: " << _t << " " << _func.value(_t, *_current_node) << std::endl;
   return _func.value(_t, *_current_node);
 }
