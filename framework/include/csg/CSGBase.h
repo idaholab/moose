@@ -53,6 +53,24 @@ public:
     return _surface_list.addPlaneFromCoefficients(name, a, b, c, d);
   }
 
+  std::shared_ptr<CSGSurface>
+  createSphereAtOrigin(const std::string name, const Real r)
+  {
+    return _surface_list.addSphere(name, 0.0, 0.0, 0.0, r);
+  }
+
+  std::shared_ptr<CSGSurface>
+  createSphereAtPoint(const std::string name, const Point center, const Real r)
+  {
+    return _surface_list.addSphere(name, center(0), center(1), center(2), r);
+  }
+
+    std::shared_ptr<CSGSurface>
+  createSphereAtCoordinates(const std::string name, const Real x, const Real y, const Real z, const Real r)
+  {
+    return _surface_list.addSphere(name, x, y, z, r);
+  }
+
   const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
   {
     return _surface_list.getAllSurfaces();

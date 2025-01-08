@@ -56,4 +56,17 @@ CSGSurfaceList::addPlaneFromCoefficients(const std::string name,
   _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, a, b, c, d)));
   return _surfaces[name];
 }
+
+std::shared_ptr<CSGSurface>
+CSGSurfaceList::addSphere(const std::string name,
+                          const Real x,
+                          const Real y,
+                          const Real z,
+                          const Real r)
+{
+  checkSurfaceName(name);
+  _surfaces.insert(std::make_pair(name, std::make_shared<CSGSphere>(name, x, y, z, r)));
+  return _surfaces[name];
+}
+
 } // namespace CSG
