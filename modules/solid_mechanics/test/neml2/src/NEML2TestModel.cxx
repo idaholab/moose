@@ -22,9 +22,6 @@ NEML2TestModel::expected_options()
   options.set<VariableName>("B") = VariableName("forces", "B");
   options.set<VariableName>("sum") = VariableName("state", "internal", "sum");
   options.set<VariableName>("product") = VariableName("state", "internal", "product");
-  // Use AD
-  options.set<bool>("_use_AD_first_derivative") = true;
-  options.set<bool>("_use_AD_second_derivative") = true;
   return options;
 }
 
@@ -37,6 +34,16 @@ NEML2TestModel::NEML2TestModel(const OptionSet & options)
     _sum(declare_output_variable<Scalar>("sum")),
     _product(declare_output_variable<Scalar>("product"))
 {
+}
+
+void
+NEML2TestModel::request_AD()
+{
+  std::vector<const VariableBase *> inputs = {&_input_a, &_input_b};
+
+  // First derivatives
+  _sum.request_AD(inputs);
+  _product.request_AD(inputs);
 }
 
 void

@@ -13,12 +13,6 @@
 #include "GeneralUserObject.h"
 #include "NEML2BatchIndexGenerator.h"
 
-#ifdef NEML2_ENABLED
-#include "neml2/tensors/LabeledVector.h"
-#include "neml2/tensors/LabeledMatrix.h"
-#include "neml2/models/Model.h"
-#endif
-
 class MOOSEToNEML2;
 
 /**
@@ -51,15 +45,15 @@ public:
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
   /// Get a reference(!) to the requested output view
-  const neml2::Tensor & getOutputView(const neml2::VariableName & output_name) const;
+  const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
 
   /// Get a reference(!) to the requested output derivative view
-  const neml2::Tensor & getOutputDerivativeView(const neml2::VariableName & output_name,
-                                                const neml2::VariableName & input_name) const;
+  const neml2::Tensor & getOutputDerivative(const neml2::VariableName & output_name,
+                                            const neml2::VariableName & input_name) const;
 
   /// Get a reference(!) to the requested output parameter derivative view
-  const neml2::Tensor & getOutputParameterDerivativeView(const neml2::VariableName & output_name,
-                                                         const std::string & parameter_name) const;
+  const neml2::Tensor & getOutputParameterDerivative(const neml2::VariableName & output_name,
+                                                     const std::string & parameter_name) const;
 
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
@@ -92,14 +86,17 @@ protected:
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
 
-  /// The input vector of the material model
-  const neml2::LabeledVector & _in;
+  /// The model parameters to update (gathered from MOOSE)
+  std::map<std::string, neml2::Tensor> _model_params;
 
-  /// The output vector of the material model
-  const neml2::LabeledVector & _out;
+  /// The input variables of the material model
+  neml2::ValueMap _in;
 
-  /// The derivative of the output vector w.r.t. the input vector
-  const neml2::LabeledMatrix & _dout_din;
+  /// The output variables of the material model
+  neml2::ValueMap _out;
+
+  /// The derivative of the output variables w.r.t. the input variables
+  neml2::DerivMap _dout_din;
 
   // set of variables to skip
   std::set<neml2::VariableName> _skip_vars;
@@ -114,14 +111,13 @@ protected:
   std::vector<const MOOSEToNEML2 *> _gatherers;
 
   /// set of output variables that were retrieved (by other objects)
-  mutable std::map<neml2::VariableName, neml2::Tensor> _retrieved_outputs;
+  mutable neml2::ValueMap _retrieved_outputs;
 
   /// set of derivatives that were retrieved (by other objects)
-  mutable std::map<std::pair<neml2::VariableName, neml2::VariableName>, neml2::Tensor>
-      _retrieved_derivatives;
+  mutable neml2::DerivMap _retrieved_derivatives;
 
   /// set of parameter derivatives that were retrieved (by other objects)
-  mutable std::map<std::pair<neml2::VariableName, std::string>, neml2::Tensor>
+  mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
       _retrieved_parameter_derivatives;
 #endif
 };

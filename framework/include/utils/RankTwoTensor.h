@@ -497,7 +497,7 @@ public:
    * //       7 4 1 ]
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  RankTwoTensorTempl<T> & operator=(const RankTwoTensorTempl<T> & a);
+  RankTwoTensorTempl<T> & operator=(const RankTwoTensorTempl<T> & a) = default;
 
   /**
    * @brief Assignment operator (from a ColumnMajorMatrixTempl<T>)

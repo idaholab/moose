@@ -21,6 +21,8 @@ public:
 
   NEML2TestModel(const OptionSet & options);
 
+  void request_AD() override;
+
 protected:
   // input variables
   const Variable<Scalar> & _input_a;

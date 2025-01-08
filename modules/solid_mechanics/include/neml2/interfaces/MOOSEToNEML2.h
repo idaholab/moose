@@ -13,7 +13,6 @@
 #include "InputParameters.h"
 
 #ifdef NEML2_ENABLED
-#include "neml2/tensors/LabeledVector.h"
 #include "neml2/models/Model.h"
 #endif
 
@@ -70,7 +69,7 @@ public:
   virtual neml2::Tensor gatheredData() const = 0;
 
   /// Insert the gathered data into the NEML2 material model
-  void insertInto(neml2::Model &) const;
+  void insertInto(neml2::ValueMap &, std::map<std::string, neml2::Tensor> &) const;
 
 protected:
   /// Whether we should insert into NEML2 input variable or NEML2 model parameter

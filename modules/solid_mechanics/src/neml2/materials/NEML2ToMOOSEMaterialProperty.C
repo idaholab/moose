@@ -16,7 +16,9 @@
 RegisterNEML2ToMOOSEMaterialProperty(Real);
 RegisterNEML2ToMOOSEMaterialProperty(SymmetricRankTwoTensor);
 RegisterNEML2ToMOOSEMaterialProperty(SymmetricRankFourTensor);
-RegisterNEML2ToMOOSEMaterialProperty(StdVector);
+RegisterNEML2ToMOOSEMaterialProperty(RealVectorValue);
+RegisterNEML2ToMOOSEMaterialProperty(RankTwoTensor);
+RegisterNEML2ToMOOSEMaterialProperty(RankFourTensor);
 
 template <typename T>
 InputParameters
@@ -65,19 +67,17 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
     _prop0(isParamValid("moose_material_property_init")
                ? &getMaterialProperty<T>("moose_material_property_init")
                : nullptr),
-    _output_view(
+    _value(
         !isParamValid("neml2_input_derivative")
             ? (!isParamValid("neml2_parameter_derivative")
-                   ? _execute_neml2_model.getOutputView(neml2::utils::parse<neml2::VariableName>(
-                         getParam<std::string>("from_neml2")))
-                   : _execute_neml2_model.getOutputParameterDerivativeView(
-                         neml2::utils::parse<neml2::VariableName>(
-                             getParam<std::string>("from_neml2")),
+                   ? _execute_neml2_model.getOutput(
+                         NEML2Utils::parseVariableName(getParam<std::string>("from_neml2")))
+                   : _execute_neml2_model.getOutputParameterDerivative(
+                         NEML2Utils::parseVariableName(getParam<std::string>("from_neml2")),
                          getParam<std::string>("neml2_parameter_derivative")))
-            : _execute_neml2_model.getOutputDerivativeView(
-                  neml2::utils::parse<neml2::VariableName>(getParam<std::string>("from_neml2")),
-                  neml2::utils::parse<neml2::VariableName>(
-                      getParam<std::string>("neml2_input_derivative"))))
+            : _execute_neml2_model.getOutputDerivative(
+                  NEML2Utils::parseVariableName(getParam<std::string>("from_neml2")),
+                  NEML2Utils::parseVariableName(getParam<std::string>("neml2_input_derivative"))))
 #endif
 {
   NEML2Utils::assertNEML2Enabled();
@@ -86,24 +86,23 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
 #ifdef NEML2_ENABLED
 template <typename T>
 void
-NEML2ToMOOSEMaterialProperty<T>::initQpStatefulProperties()
-{
-  if (_prop0)
-    _prop[_qp] = (*_prop0)[_qp];
-}
-
-template <typename T>
-void
 NEML2ToMOOSEMaterialProperty<T>::computeProperties()
 {
+  // See issue #28971: Using _prop0 to set initial condition for this possibly stateful property may
+  // not work. As a workaround, we set the initial condition here when _t_step == 0.
+  if (_t_step == 0 && _prop0)
+  {
+    _prop.set() = _prop0->get();
+    return;
+  }
+
   if (!_execute_neml2_model.outputReady())
     return;
 
   // look up start index for current element
   const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
-
-  for (std::size_t qp = 0; qp < _qrule->n_points(); qp++)
-    _prop[qp] = NEML2Utils::toMOOSE<T>(_output_view.batch_index({neml2::Size(i + qp)}));
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(i + _qp)}), _prop[_qp]);
 }
 #endif
 
@@ -112,4 +111,6 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
 InstantiateNEML2ToMOOSEMaterialProperty(Real);
 InstantiateNEML2ToMOOSEMaterialProperty(SymmetricRankTwoTensor);
 InstantiateNEML2ToMOOSEMaterialProperty(SymmetricRankFourTensor);
-InstantiateNEML2ToMOOSEMaterialProperty(std::vector<Real>);
+InstantiateNEML2ToMOOSEMaterialProperty(RealVectorValue);
+InstantiateNEML2ToMOOSEMaterialProperty(RankTwoTensor);
+InstantiateNEML2ToMOOSEMaterialProperty(RankFourTensor);

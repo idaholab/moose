@@ -50,7 +50,7 @@ template <unsigned int state>
 neml2::Tensor
 MOOSEPostprocessorToNEML2Templ<state>::gatheredData() const
 {
-  return NEML2Utils::toNEML2<Real>(_moose_pp);
+  return neml2::Scalar::full(_moose_pp);
 }
 #endif
 
