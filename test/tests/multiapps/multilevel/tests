@@ -28,6 +28,13 @@
 
       detail = "where the sub-application controls the time step for the parent application,"
     []
+    [header_check]
+      type = 'RunApp'
+      input = 'dt_from_parent_parent.i'
+      prereq = group/dt_from_parent
+      expect_out = 'MOOSE Test App\n\nsub0: MOOSE Test App\nsub0: \nsub0_sub0: MOOSE Test App'
+      detail = "and append the subapp number to the header"
+    []
   []
 
   [console_to_file]
@@ -37,12 +44,5 @@
     prereq = 'group/time_dt_from_parent'
 
     requirement = "The system shall support writing screen output from multi-level sub-applications to a file."
-  []
-
-  [header_check]
-    type = 'RunApp'
-    input = 'dt_from_parent_parent.i'
-    prereq = group/dt_from_parent
-    expect_out = 'MOOSE Test App\n\nsub0: MOOSE Test App\nsub0: \nsub0_sub0: MOOSE Test App'
   []
 []
