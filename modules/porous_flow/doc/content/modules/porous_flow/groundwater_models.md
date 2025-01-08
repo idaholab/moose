@@ -166,7 +166,7 @@ These equations are sometimes used to model unsaturated flow (as in unconfined a
 
 ### Presentation 1
 
-Groundwater flow is often modelled by the [equation](governing_equations.md)
+Groundwater flow is often modelled by the [equation](porous_flow/governing_equations.md)
 \begin{equation}
 \label{eqn.full.sat}
 \frac{\partial}{\partial t}(\phi \rho) = \sum_{i=1}^{3} \sum_{j=1}^{3}\nabla_{i} \left[\rho \frac{k_{ij}}{\mu} \left(\nabla_{j} P - \rho g_{j}\right) \right]\ .

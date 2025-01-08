@@ -6,7 +6,7 @@ gravity and without sources is just Darcy's equation
 \frac{\partial}{\partial t}\phi\rho = \nabla_{i}\left(\frac{\rho
   \kappa_{ij}}{\mu} \nabla_{j}P \right) \ ,
 \end{equation}
-with notation described in [the governing equations](governing_equations.md).  Using $\rho \propto
+with notation described in [the governing equations](porous_flow/governing_equations.md).  Using $\rho \propto
 \exp(P/K)$, where $K$ is the fluid bulk modulus, Darcy's equation
 becomes
 \begin{equation}

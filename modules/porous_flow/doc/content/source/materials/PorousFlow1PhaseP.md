@@ -2,7 +2,7 @@
 
 !syntax description /Materials/PorousFlow1PhaseP
 
-Given the porepressure, this Material computes the saturation for 1-phase fluid simulations.  See [capillary pressure](capillary_pressure.md) for further details.
+Given the porepressure, this Material computes the saturation for 1-phase fluid simulations.  See [capillary pressure](porous_flow/capillary_pressure.md) for further details.
 
 !syntax parameters /Materials/PorousFlow1PhaseP
 

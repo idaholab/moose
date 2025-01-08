@@ -60,7 +60,7 @@ Then, we need to declare what type of unknown we are solving. This can be done i
 
 ### Kernel declaration
 
-This section describes the physics we need to solve. To do so, some kernels are declared. In MOOSE, the required kernels depend on the terms in the governing equations. For this problem, six kernels were declared. To have a better understanding, users are recommended to visit [this page](governing_equations.md). The code block is shown below with the first three kernels associated with equation 1  and the remain associated with equation 2.
+This section describes the physics we need to solve. To do so, some kernels are declared. In MOOSE, the required kernels depend on the terms in the governing equations. For this problem, six kernels were declared. To have a better understanding, users are recommended to visit [this page](porous_flow/governing_equations.md). The code block is shown below with the first three kernels associated with equation 1  and the remain associated with equation 2.
 
 !listing modules/porous_flow/examples/solute_tracer_transport/solute_tracer_transport.i start=[Kernels] end=[FluidProperties]
 

@@ -61,7 +61,7 @@ The `Action` does *not* add Kernels to model the following effects
 
 ## Heat equation
 
-The [heat equation](governing_equations.md) is associated with the temperature variable, and is only included if the `coupling_type` includes "Thermo".
+The [heat equation](porous_flow/governing_equations.md) is associated with the temperature variable, and is only included if the `coupling_type` includes "Thermo".
 \begin{equation}
 \label{eq:heat_cons}
 0 = \frac{\partial}{\partial t}\left( (1 - \phi)\rho_{R}C_{R}T + \phi\rho\mathcal{E} \right) + \left( (1 - \phi)\rho_{R}C_{R}T + \phi\rho\mathcal{E} \right)\nabla\cdot{\mathbf
@@ -83,7 +83,7 @@ To represent the term $\nabla_{i}\left(h\rho \frac{k_{ij}}{\mu} (\nabla_{j}P - \
 
 ## Solid-mechanics equations
 
-The [static conservation of momentum equation](governing_equations.md) is associated with the displacement variables, and is only included if the `coupling_type` includes "Mechanical":
+The [static conservation of momentum equation](porous_flow/governing_equations.md) is associated with the displacement variables, and is only included if the `coupling_type` includes "Mechanical":
 \begin{equation}
 \label{eq:cons_mom}
 0 = \nabla_{i}\sigma_{ij}^{\mathrm{eff}} - \alpha_{B}\nabla_{j} P - \rho_{\mathrm{undrained}} g_{j} \ .
