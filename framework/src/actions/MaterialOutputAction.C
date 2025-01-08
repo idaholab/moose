@@ -21,6 +21,7 @@
 #include "MooseEnum.h"
 #include "MooseVariableConstMonomial.h"
 #include "FunctorMaterial.h"
+#include "CommonOutputAction.h"
 
 #include "libmesh/utility.h"
 
