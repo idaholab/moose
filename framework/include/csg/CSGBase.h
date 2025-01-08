@@ -10,10 +10,11 @@
 #pragma once
 
 #include "CSGSurfaceList.h"
+#include "CSGPlane.h"
+#include "CSGSphere.h"
 #include "CSGUniverse.h"
 #include "CSGMaterialCell.h"
 #include "CSGVoidCell.h"
-#include "CSGPlane.h"
 #include "CSGIntersection.h"
 #include "CSGHalfspace.h"
 
