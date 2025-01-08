@@ -478,22 +478,6 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
     params.set<Real>("cv") = cv;
     params.set<Real>("k") = k;
 
-    const auto x_ncg = params.get<std::vector<Real>>("x_ncg");
-    for (unsigned int i = 0; i < x_ncg.size(); i++)
-      outputProperty("Mass fraction " + std::to_string(i), x_ncg[i], "-");
-    outputProperty("Pressure", params.get<Real>("p"), "Pa");
-    outputProperty("Temperature", params.get<Real>("T"), "K");
-    outputProperty("Density", params.get<Real>("rho"), "kg/m^3");
-    outputProperty("Specific volume", params.get<Real>("v"), "m^3/kg");
-    outputProperty("Specific internal energy", params.get<Real>("e"), "J/kg");
-    outputProperty("Specific enthalpy", params.get<Real>("h"), "J/kg");
-    _console << std::endl;
-    outputProperty("Sound speed", params.get<Real>("c"), "m/s");
-    outputProperty("Dynamic viscosity", params.get<Real>("mu"), "Pa-s");
-    outputProperty("Specific heat at constant pressure", params.get<Real>("cp"), "J/(kg-K)");
-    outputProperty("Specific heat at constant volume", params.get<Real>("cv"), "J/(kg-K)");
-    outputProperty("Thermal conductivity", params.get<Real>("k"), "W/(m-K)");
-
     if (isParamValid("vel") || specified["rho,rhou,rhoE,x_ncg"])
     {
       const Real h = e + p / rho;
