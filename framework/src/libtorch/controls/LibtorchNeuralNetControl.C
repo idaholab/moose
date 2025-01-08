@@ -175,8 +175,11 @@ LibtorchNeuralNetControl::execute()
 
     // We add the curent solution to the old solutions and move everything in there one step
     // backward
-    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-    _old_responses[0] = _current_response;
+    if (_old_responses.size())
+    {
+      std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
+      _old_responses[0] = _current_response;
+    }
   }
 }
 

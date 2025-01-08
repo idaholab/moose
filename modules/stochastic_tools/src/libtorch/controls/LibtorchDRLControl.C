@@ -91,8 +91,12 @@ LibtorchDRLControl::execute()
                                                  log_probability.data_ptr<Real>() +
                                                      log_probability.size(1)};
 
+    std::cout << "Setting control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
+    std::cout << "Setting log probability to: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
+
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
+
       // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
                                        _current_control_signals[control_i] *
@@ -101,8 +105,11 @@ LibtorchDRLControl::execute()
 
     // We add the curent solution to the old solutions and move everything in there one step
     // backward
-    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-    _old_responses[0] = _current_response;
+    if (_old_responses.size())
+    {
+      std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
+      _old_responses[0] = _current_response;
+    }
   }
 }
 
