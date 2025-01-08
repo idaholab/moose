@@ -65,8 +65,8 @@ public:
     return _surface_list.addSphere(name, center(0), center(1), center(2), r);
   }
 
-    std::shared_ptr<CSGSurface>
-  createSphereAtCoordinates(const std::string name, const Real x, const Real y, const Real z, const Real r)
+  std::shared_ptr<CSGSurface>
+  createSphereAtXYZ(const std::string name, const Real x, const Real y, const Real z, const Real r)
   {
     return _surface_list.addSphere(name, x, y, z, r);
   }
