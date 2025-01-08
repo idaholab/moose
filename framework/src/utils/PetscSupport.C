@@ -467,12 +467,30 @@ petscSetDefaults(FEProblemBase & problem)
 }
 
 void
-storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
+processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
   setSolveTypeFromParams(fe_problem, params);
   setLineSearchFromParams(fe_problem, params);
   setMFFDTypeFromParams(fe_problem, params);
-  storePetscOptionsFromParams(fe_problem, params);
+}
+
+void
+storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  processSingletonMooseWrappedOptions(fe_problem, params);
+
+  // The parameters contained in the Action
+  const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
+  const auto & petsc_pair_options =
+      params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
+
+  auto & po = fe_problem.getPetscOptions();
+
+  // First process the single petsc options/flags
+  addPetscFlagsToPetscOptions(petsc_options, po);
+
+  // Then process the option-value pairs
+  addPetscPairsToPetscOptions(petsc_pair_options, fe_problem.mesh().dimension(), po);
 }
 
 void
@@ -526,23 +544,6 @@ setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params
     MooseEnum mffd_type = params.get<MooseEnum>("mffd_type");
     fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
-}
-
-void
-storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParameters & params)
-{
-  // The parameters contained in the Action
-  const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
-  const auto & petsc_pair_options =
-      params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
-
-  auto & po = fe_problem.getPetscOptions();
-
-  // First process the single petsc options/flags
-  addPetscFlagsToPetscOptions(petsc_options, po);
-
-  // Then process the option-value pairs
-  addPetscPairsToPetscOptions(petsc_pair_options, fe_problem.mesh().dimension(), po);
 }
 
 void

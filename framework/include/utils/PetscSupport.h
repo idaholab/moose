@@ -107,6 +107,12 @@ void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = fal
 PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void * void_ptr);
 
 /**
+ * Process some MOOSE-wrapped PETSc options.
+ */
+void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
+                                         const InputParameters & params);
+
+/**
  * Stores the PETSc options supplied from the InputParameters with MOOSE
  */
 void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
