@@ -26,7 +26,10 @@ public:
   {
     invalid,
     plane,
-    sphere
+    sphere,
+    xcylinder,
+    ycylinder,
+    zcylinder
   };
 
   /// An enum for boundary type of surface
