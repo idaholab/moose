@@ -14,14 +14,19 @@ namespace CSG
 
 CSGSurfaceList::CSGSurfaceList() {}
 
+void CSGSurfaceList::checkSurfaceName(const std::string name)
+{
+  if (_surfaces.find(name) != _surfaces.end())
+    mooseError("Surface with name " + name + " already exists in geoemetry.");
+}
+
 std::shared_ptr<CSGSurface>
 CSGSurfaceList::addPlaneFromPoints(const std::string name,
                                    const Point p1,
                                    const Point p2,
                                    const Point p3)
 {
-  if (_surfaces.find(name) != _surfaces.end())
-    mooseError("Surface with name " + name + " already exists in geoemetry");
+  checkSurfaceName(name);
   _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, p1, p2, p3)));
   return _surfaces[name];
 }
@@ -33,8 +38,7 @@ CSGSurfaceList::addPlaneFromCoefficients(const std::string name,
                                          const Real c,
                                          const Real d)
 {
-  if (_surfaces.find(name) != _surfaces.end())
-    mooseError("Surface with name " + name + " already exists in geoemetry");
+  checkSurfaceName(name);
   _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, a, b, c, d)));
   return _surfaces[name];
 }
