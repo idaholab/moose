@@ -25,18 +25,19 @@ R_i(u_h) = (\psi_i, \rho c_p\frac{\partial u_h}{\partial t}) \quad \forall \psi_
 where $u_h$ is the approximate solution and $\psi_i$ is a finite element test function.
 
 The density and specific heat are specified with material properties,
-and the `density_name` and `specific_heat` parameters are used to define the material property
+and the [!param](Kernels/HeatConductionTimeDerivative/density_name) and
+[!param](Kernels/HeatConductionTimeDerivative/specific_heat) parameters are used to define the material property
 name providing those properties.
 The Jacobian will account for partial derivatives of $\rho$ and $C_p$
-with respect to the unknown variable if the `density_name_dT` and `specific_heat_dT` property
+with respect to the unknown variable if the [!param](Kernels/HeatConductionTimeDerivative/density_name_dT) and [!param](Kernels/HeatConductionTimeDerivative/specific_heat_dT) property
 names are also provided.
 
 See also [/HeatCapacityConductionTimeDerivative.md] and [/SpecificHeatConductionTimeDerivative.md].
 
 ## Example Input File Syntax
 
-The case below instead demonstrates the use of `HeatConductionTimeDerivative` where the
-density and specific heat are defined by a [HeatConductionMaterial](/HeatConductionMaterial.md) (for specific heat) and a [ParsedMaterial](ParsedMaterial.md) for density and its temperature derivative.
+The case below demonstrates the use of `HeatConductionTimeDerivative` where the
+density and specific heat are defined by a [HeatConductionMaterial](/HeatConductionMaterial.md) (for specific heat) and a [ParsedMaterial](ParsedMaterial.md) for density.
 
 !listing modules/heat_transfer/test/tests/transient_heat/transient_heat_derivatives.i
   start=Kernels

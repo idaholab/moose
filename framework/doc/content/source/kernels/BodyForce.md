@@ -27,11 +27,10 @@ it is assumed that $f$ +is not+ a function of the unknown $u$.
 The force is constructed through a user supplied constant $c$,
 [function](/Functions/index.md) value evaluated at the current time and
 quadrature point $f$, and/or [postprocessor](/Postprocessors/index.md)
-value $p$. The constant $c$, supplied through the parameter `value`, may also be
+value $p$. The constant $c$ may also be
 controlled over the course of a transient simulation with a
-[`Controls`](/Controls/index.md) block.  $c$, $f$, $p$ are supplied
-through the input parameters `value`, `function`, and `postprocessor`
-respectively. Not supplying $c$, $f$, or $p$ through its corresponding
+[Controls](/Controls/index.md) block.
+Not supplying $c$, $f$, or $p$ through its corresponding
 parameter is equivalent to setting its value to unity.
 
 ## Example Input File Syntax

@@ -2,8 +2,7 @@
 
 ## Description
 
-`HeatConduction` implements the diffusion kernel in the thermal energy conservation equation, with a material property for the
-diffusion coefficient. The strong form is
+`HeatConduction` implements the diffusion kernel in the thermal energy conservation equation, with a material property for the diffusion coefficient. The strong form is
 
 \begin{equation}
 \underbrace{-\nabla\cdot(k\nabla T)}_{\textrm{HeatConduction}} + \text{other kernels} = 0 \in \Omega
@@ -20,11 +19,12 @@ R_i(u_h)=(\nabla\psi_i, k\nabla u_h)\quad\forall \psi_i,
 where $u_h$ is the approximate solution and $\psi_i$ is a finite element test function.
 
 The diffusion coefficient is specified with a material property; the
-`diffusion_coefficient` parameter is used to define the material property name
-which contains the diffusion coefficient (which defaults to `thermal_conductivity`).
+[!param](Kernels/HeatConduction/diffusion_coefficient)
+parameter is used to define the material property name
+which contains the diffusion coefficient.
 The Jacobian will account for partial derivatives of the diffusion coefficient
-with respect to the unknown variable if the `diffusion_coefficient_dT` property
-name is provided. These particular names are the defaults because they
+with respect to the unknown variable if the [!param](Kernels/HeatConduction/diffusion_coefficient_dT) property
+name is provided. These particular defaults for these parameters
 are the names used by [HeatConductionMaterial](HeatConductionMaterial.md),
 though you can also define these materials using other [Material](Materials/index.md) objects.
 
