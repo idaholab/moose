@@ -58,6 +58,11 @@ public:
     return _surface_list.getAllSurfaces();
   }
 
+  const std::shared_ptr<CSGSurface> & getSurfaceByName(const std::string name)
+  {
+    return _surface_list.getSurface(name);
+  }
+
   std::shared_ptr<CSGUniverse> createRootUniverse(const std::string name);
 
   std::shared_ptr<CSGUniverse> getRootUniverse();
