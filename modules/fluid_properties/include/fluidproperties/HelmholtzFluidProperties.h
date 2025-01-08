@@ -55,6 +55,8 @@ public:
   virtual Real h_from_p_T(Real pressure, Real temperature) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+
   /**
    * Pressure as a function of density and temperature
    *

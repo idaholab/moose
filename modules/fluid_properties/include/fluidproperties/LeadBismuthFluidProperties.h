@@ -108,6 +108,6 @@ public:
 
 private:
   /// Melting temperature of 2LiF-BeF2
-  const Real _T_mo;
+  static constexpr Real _T_mo = 398.;
 };
 #pragma GCC diagnostic pop

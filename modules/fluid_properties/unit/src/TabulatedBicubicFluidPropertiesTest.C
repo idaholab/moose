@@ -213,6 +213,19 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     REL_TEST(T, Ts, 0.001);
   }
 
+  // check computation of fluids props from p, h
+  {
+    Real T = 450;
+    Real p = 1.5e6;
+    Real h = _tab_ve_from_pT->h_from_p_T(p, T);
+    Real Ts = _tab_ve_from_pT->T_from_p_h(p, h);
+    REL_TEST(T, Ts, 1e-4);
+
+    // to keep coverage on the default definition in SinglePhaseFP
+    Ts = dynamic_cast<const SinglePhaseFluidProperties *>(_tab_ve_from_pT)->T_from_p_h(p, h);
+    REL_TEST(T, Ts, 1e-4);
+  }
+
   // are the two version of functions equivalent
   {
     Real e = _tab_ve_from_pT->e_from_p_T(p, T);
@@ -373,6 +386,30 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
 
   // cannot test AD c_from_v_e because co2 props do not
   // implement enough
+
+  // AD T_from_p_h
+  {
+    Real h = _tab_ve_from_pT->h_from_p_T(p, T);
+    DNDerivativeType dpdx;
+    DNDerivativeType dhdx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dpdx, 0, 1);
+    Moose::derivInsert(dpdx, 1, 0);
+    Moose::derivInsert(dhdx, 0, 0);
+    Moose::derivInsert(dhdx, 1, 1);
+
+    ADReal p_ad(p, dpdx);
+    ADReal h_ad(h, dhdx);
+    ADReal T_ad = _tab_ve_from_pT->T_from_p_h(p_ad, h_ad);
+
+    Real TT_1 = _tab_ve_from_pT->T_from_p_h(p * (1 + pert), h);
+    Real TT_2 = _tab_ve_from_pT->T_from_p_h(p, h * (1 + pert));
+    Real dT_dp = (TT_1 - T) / p / pert;
+    Real dT_dh = (TT_2 - T) / h / pert;
+    REL_TEST(T_ad.derivatives()[0], dT_dp, 0.0001);
+    REL_TEST(T_ad.derivatives()[1], dT_dh, 0.0001);
+  }
 }
 
 // Test tabulated fluid properties read from file including comments

@@ -47,6 +47,7 @@ public:
   propfuncWithDefinitionOverride(s, p, T);
   propfuncWithDefinitionOverride(T, v, e);
   propfuncWithDefinitionOverride(p, v, e);
+  propfuncWithDefinitionOverride(T, p, h);
   virtual Real e_from_T_v(Real T, Real v) const override;
   virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
   virtual Real p_from_T_v(Real T, Real v) const override;
@@ -172,6 +173,23 @@ StiffenedGasFluidProperties::T_from_v_e_template(
   T = T_from_v_e_template(v, e);
   dT_dv = -_p_inf / _cv;
   dT_de = 1.0 / _cv;
+}
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::T_from_p_h_template(const CppType & /*p*/, const CppType & h) const
+{
+  return (1.0 / _cv) * (h - _q) / _gamma;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::T_from_p_h_template(
+    const CppType & p, const CppType & h, CppType & T, CppType & dT_dp, CppType & dT_dh) const
+{
+  T = T_from_p_h_template(p, h);
+  dT_dp = 0;
+  dT_dh = 1.0 / _cv / _gamma;
 }
 
 template <typename CppType>
