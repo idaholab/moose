@@ -33,19 +33,16 @@ public:
   std::shared_ptr<CSGSurface>
   addPlaneFromPoints(const std::string name, const Point p1, const Point p2, const Point p3);
 
-  const std::map<unsigned int, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
+  std::shared_ptr<CSGSurface>
+  addPlaneFromCoefficients(const std::string name, const Real a, const Real b, const Real c, const Real d);
+
+  const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
   {
     return _surfaces;
   }
 
 protected:
-  /// Mapping of surface ids to pointers of stored surface objects
-  std::map<unsigned int, std::shared_ptr<CSGSurface>> _surfaces;
-
-  /// Next available surface id
-  unsigned int _next_surface_id;
-
-  /// Mapping of surface name to surface id
-  std::map<std::string, unsigned int> _surface_name_id_mapping;
+  /// Mapping of surface names to pointers of stored surface objects
+  std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;
 };
 } // namespace CSG
