@@ -15,6 +15,7 @@
 #include "NonlinearSystem.h"
 #include "NodalBCBase.h"
 
+#include "libmesh/fuzzy_equals.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
 #include "petscmat.h"
@@ -52,6 +53,14 @@ AdjointSolve::AdjointSolve(Executioner & ex)
     paramError("forward_system", "Forward system does not appear to be a 'NonlinearSystem'.");
   if (!dynamic_cast<NonlinearSystem *>(&_nl_adjoint))
     paramError("adjoint_system", "Adjoint system does not appear to be a 'NonlinearSystem'.");
+  // Adjoint system should never perform its own automatic scaling. Scaling factors from the forward
+  // system are applied.
+  _nl_adjoint.automaticScaling(false);
+
+  // We need to force the forward system to have a scaling vector. This is
+  // in case a user provides scaling for an individual variables but doesn't have any
+  // AD objects.
+  _nl_forward.addScalingVector();
 }
 
 bool
@@ -95,6 +104,10 @@ AdjointSolve::solve()
 
   // Solve the adjoint system
   solver.adjoint_solve(matrix, solution, rhs, tol, maxits);
+
+  // For scaling of the forward problem we need to apply correction factor
+  solution *= _nl_forward.getVector("scaling_factors");
+
   _nl_adjoint.update();
   if (solver.get_converged_reason() < 0)
   {
@@ -118,9 +131,6 @@ AdjointSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
                                     const NumericVector<Number> & /*solution*/,
                                     NumericVector<Number> & rhs)
 {
-  if (_nl_adjoint.hasVector("scaling_factors"))
-    mooseWarning("Scaling factors are given to adjoint variables by the user. It is not necessary "
-                 "to scale a adjoint system therefore the scaling factors will not be used.");
 
   _problem.computeJacobian(*_nl_forward.currentSolution(), matrix, _forward_sys_num);
 
@@ -174,6 +184,20 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
 void
 AdjointSolve::checkIntegrity()
 {
+  const auto adj_vars = _nl_adjoint.getVariables(0);
+  for (const auto & adj_var : adj_vars)
+    // If the user supplies any scaling factors for individual variables the
+    // adjoint system won't be consistent.
+    if (!absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
+      mooseError(
+          "User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled "
+          "automatically by the forward system.");
+
+  // This is to prevent automatic scaling of the adjoint system. Scaling is
+  // taken from the forward system
+  if (_nl_adjoint.hasVector("scaling_factors"))
+    _nl_adjoint.removeVector("scaling_factors");
+
   // Main thing is that the number of dofs in each system is the same
   if (_nl_forward.system().n_dofs() != _nl_adjoint.system().n_dofs())
     mooseError(
