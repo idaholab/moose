@@ -14,7 +14,7 @@ where $\rho$ is density, $C_p$ is the volumetric isobaric specific heat, and $T$
 temperature.
 
 !alert note
-This strong form does *not* assume that $\rho$ or $C_p$ are constant. Eq. \eqref{eq:hctd} is the rigorously-derived form which can be used for $\rho$ and $C_p$ which are not constant.
+This strong form does *not* assume that $\rho$ or $C_p$ are constant. Eq. [eq:hctd] is the rigorously-derived form which can be used for $\rho$ and $C_p$ which are not constant.
 
 The corresponding weak form using inner-product notation is
 

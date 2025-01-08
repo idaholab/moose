@@ -12,7 +12,7 @@ The `ConvectiveHeatFluxBC` boundary condition imposes a heat flux equal to
 
 where $\vec{q}\cdot\hat{n}$ is the heat flux normal to the boundary, $h$ is
 the convective heat transfer coefficient, and $T_\infty$ is the far-field temperature.
-Both $h$ and $T_{inf}$ are taken as material properties.
+Both $h$ and $T_\infty$ are taken as material properties.
 See [CoupledConvectiveHeatFluxBC](CoupledConvectiveHeatFluxBC.md) for a similar boundary condition coupled to variables.
 
 ## Example Input File Syntax

@@ -11,8 +11,8 @@ $\Omega$ as
 \begin{equation}
 \underbrace{-f}_{\textrm{BodyForce}} + \text{other kernels} = 0 \in \Omega
 \end{equation}
-where $f$ is the source term (negative if a sink) and the second term on the
-left hand side represents the strong forms of other kernels which may be present in the equation. The `BodyForce`
+where $f$ is the source term (negative if a sink) and "other kernels"
+represent the strong forms of other terms present in the equation. The `BodyForce`
 weak form, in inner-product notation, is defined as
 
 \begin{equation}
