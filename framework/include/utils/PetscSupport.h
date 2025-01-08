@@ -49,7 +49,7 @@ public:
   /// Single value PETSc options (flags)
   MultiMooseEnum flags;
 
-  /// Flags to explicitly not set, even if they are specified in flags
+  /// Flags to explicitly not set, even if they are specified programmatically
   MultiMooseEnum dont_add_these_options;
 
   /// Options that are set by the user at the input level
@@ -114,7 +114,7 @@ void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & param
 /**
  * Sets the FE problem's solve type from the input params.
  */
-void setSolveTypeFromParams(SolveType & fe_problem_solve_type, const InputParameters & params);
+void setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
  * Sets the FE problem's line search from the input params.
@@ -122,16 +122,14 @@ void setSolveTypeFromParams(SolveType & fe_problem_solve_type, const InputParame
 void setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
- *  Sets the FE problem's MFFD type from the input params.
+ *  Sets the FE problem's matrix-free finite difference type from the input params.
  */
-void setMFFDTypeFromParams(MffdType & fe_problem_mffd_type, const InputParameters & params);
+void setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
  * Stores the Petsc flags and pair options fron the input params in the given PetscOptions object.
  */
-void storePetscOptionsFromParams(PetscOptions & po,
-                                 const unsigned int mesh_dimension,
-                                 const InputParameters & params);
+void storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
  * Populate flags in a given PetscOptions object using a vector of input arguments
@@ -197,9 +195,9 @@ void setSinglePetscOption(const std::string & name,
                           FEProblemBase * const problem = nullptr);
 
 /**
-Same as setSinglePetscOption, but does not set the option if it doesn't make sense for the current
-simulation type.
-*/
+ * Same as setSinglePetscOption, but does not set the option if it doesn't make sense for the
+ * current simulation type.
+ */
 void setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_options,
                                        const std::string & name,
                                        const std::string & value = "",
@@ -230,29 +228,34 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
                           const char * coloring_algorithm);
 
 /**
- * disable a particular petsc flag
+ * Function to ensure that particular petsc option is not added to the PetscOptions
+ * storage object to be later set unless explicitly specified in input or on the command line.
  */
-void disablePetscFlag(const std::string & flag, PetscOptions & petsc_options);
+void dontAddPetscFlag(const std::string & flag, PetscOptions & petsc_options);
 
 /**
- * disable printing of the nonlinear convergence reason
+ * Function to ensure that -snes_converged_reason is not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
  */
-void disableNonlinearConvergedReason(FEProblemBase & fe_problem);
+void dontAddNonlinearConvergedReason(FEProblemBase & fe_problem);
 
 /**
- * disable printing of the linear convergence reason
+ * Function to ensure that -ksp_converged_reason is not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
  */
-void disableLinearConvergedReason(FEProblemBase & fe_problem);
+void dontAddLinearConvergedReason(FEProblemBase & fe_problem);
 
 /**
- * disable common ksp flags
+ * Function to ensure that common KSP options are not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
  */
-void dontSetCommonKSPOptions(FEProblemBase & fe_problem);
+void dontAddCommonKSPOptions(FEProblemBase & fe_problem);
 
 /**
- * disable common snes flags
+ * Function to ensure that common SNES options are not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
  */
-void dontSetCommonSNESOptions(FEProblemBase & fe_problem);
+void dontAddCommonSNESOptions(FEProblemBase & fe_problem);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

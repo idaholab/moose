@@ -55,7 +55,7 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
     _ones = addVector("ones", false, PARALLEL);
 
   // don't set any of the common SNES-related petsc options to prevent unused option warnings
-  Moose::PetscSupport::dontSetCommonSNESOptions(_fe_problem);
+  Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
 }
 
 void

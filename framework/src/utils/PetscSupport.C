@@ -469,21 +469,21 @@ petscSetDefaults(FEProblemBase & problem)
 void
 storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
-  setSolveTypeFromParams(fe_problem.solverParams()._type, params);
+  setSolveTypeFromParams(fe_problem, params);
   setLineSearchFromParams(fe_problem, params);
-  setMFFDTypeFromParams(fe_problem.solverParams()._mffd_type, params);
-  storePetscOptionsFromParams(fe_problem.getPetscOptions(), fe_problem.mesh().dimension(), params);
+  setMFFDTypeFromParams(fe_problem, params);
+  storePetscOptionsFromParams(fe_problem, params);
 }
 
 void
-setSolveTypeFromParams(SolveType & fe_problem_solve_type, const InputParameters & params)
+setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type") && !params.isParamValid("_use_eigen_value"))
   {
     // Extract the solve type
     const std::string & solve_type = params.get<MooseEnum>("solve_type");
-    fe_problem_solve_type = Moose::stringToEnum<Moose::SolveType>(solve_type);
+    fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
 }
 
@@ -519,30 +519,30 @@ setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & para
 }
 
 void
-setMFFDTypeFromParams(MffdType & fe_problem_mffd_type, const InputParameters & params)
+setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
 {
   if (params.isParamValid("mffd_type"))
   {
     MooseEnum mffd_type = params.get<MooseEnum>("mffd_type");
-    fe_problem_mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
+    fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
 }
 
 void
-storePetscOptionsFromParams(PetscOptions & po,
-                            const unsigned int mesh_dimension,
-                            const InputParameters & params)
+storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // The parameters contained in the Action
   const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
   const auto & petsc_pair_options =
       params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
 
+  auto & po = fe_problem.getPetscOptions();
+
   // First process the single petsc options/flags
   addPetscFlagsToPetscOptions(petsc_options, po);
 
   // Then process the option-value pairs
-  addPetscPairsToPetscOptions(petsc_pair_options, mesh_dimension, po);
+  addPetscPairsToPetscOptions(petsc_pair_options, fe_problem.mesh().dimension(), po);
 }
 
 void
@@ -1057,42 +1057,36 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 }
 
 void
-disablePetscFlag(const std::string & flag, PetscOptions & petsc_options)
+dontAddPetscFlag(const std::string & flag, PetscOptions & petsc_options)
 {
-  petsc_options.flags.eraseSetValue(flag);
-
-  auto & pairs = petsc_options.pairs;
-  auto it = MooseUtils::findPair(pairs, flag, MooseUtils::Any);
-  if (it != pairs.end())
-    pairs.erase(it);
+  if (!petsc_options.dont_add_these_options.contains(flag))
+    petsc_options.dont_add_these_options.setAdditionalValue(flag);
 }
 
 void
-disableNonlinearConvergedReason(FEProblemBase & fe_problem)
+dontAddNonlinearConvergedReason(FEProblemBase & fe_problem)
 {
-  disablePetscFlag("-snes_converged_reason", fe_problem.getPetscOptions());
+  dontAddPetscFlag("-snes_converged_reason", fe_problem.getPetscOptions());
 }
 
 void
-disableLinearConvergedReason(FEProblemBase & fe_problem)
+dontAddLinearConvergedReason(FEProblemBase & fe_problem)
 {
-  disablePetscFlag("-ksp_converged_reason", fe_problem.getPetscOptions());
+  dontAddPetscFlag("-ksp_converged_reason", fe_problem.getPetscOptions());
 }
 
 void
-dontSetCommonKSPOptions(FEProblemBase & fe_problem)
+dontAddCommonKSPOptions(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
   for (const auto & flag : getCommonKSPFlags().getNames())
-    if (!petsc_options.dont_add_these_options.contains(flag))
-      petsc_options.dont_add_these_options.setAdditionalValue(flag);
+    dontAddPetscFlag(flag, petsc_options);
   for (const auto & key : getCommonKSPKeys().getNames())
-    if (!petsc_options.dont_add_these_options.contains(key))
-      petsc_options.dont_add_these_options.setAdditionalValue(key);
+    dontAddPetscFlag(key, petsc_options);
 }
 
 void
-dontSetCommonSNESOptions(FEProblemBase & fe_problem)
+dontAddCommonSNESOptions(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
   for (const auto & flag : getCommonSNESFlags().getNames())

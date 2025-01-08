@@ -293,11 +293,11 @@ CommonOutputAction::act()
 
     if (!getParam<bool>("console") || (isParamValid("print_nonlinear_converged_reason") &&
                                        !getParam<bool>("print_nonlinear_converged_reason")))
-      Moose::PetscSupport::disableNonlinearConvergedReason(*_problem);
+      Moose::PetscSupport::dontAddNonlinearConvergedReason(*_problem);
 
     if (!getParam<bool>("console") || (isParamValid("print_linear_converged_reason") &&
                                        !getParam<bool>("print_linear_converged_reason")))
-      Moose::PetscSupport::disableLinearConvergedReason(*_problem);
+      Moose::PetscSupport::dontAddLinearConvergedReason(*_problem);
   }
   else
     mooseError("unrecognized task ", _current_task, " in CommonOutputAction.");
