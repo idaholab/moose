@@ -141,6 +141,12 @@ MooseTestApp::registerApps()
   registerApp(MooseTestApp);
 }
 
+std::string
+MooseTestApp::header() const
+{
+  return std::string("MOOSE Test App\n");
+}
+
 extern "C" void
 MooseTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
