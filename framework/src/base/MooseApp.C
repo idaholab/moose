@@ -730,13 +730,7 @@ MooseApp::setupOptions()
   TIME_SECTION("setupOptions", 5, "Setting Up Options");
 
   // Print the header, this is as early as possible
-  auto hdr = header();
-  if (hdr.length() != 0)
-  {
-    if (multiAppLevel() > 0)
-      MooseUtils::indentMessage(_name, hdr);
-    Moose::out << hdr << std::endl;
-  }
+  _console << header() << std::endl;
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);
