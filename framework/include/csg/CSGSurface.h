@@ -25,7 +25,8 @@ public:
   enum class SurfaceType
   {
     invalid,
-    plane
+    plane,
+    sphere
   };
 
   /// An enum for boundary type of surface
