@@ -44,5 +44,9 @@ public:
 protected:
   /// Mapping of surface names to pointers of stored surface objects
   std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;
+
+  /// Checks the validity of the surface name
+  void checkSurfaceName(const std::string name);
+
 };
 } // namespace CSG
