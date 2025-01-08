@@ -381,7 +381,7 @@ MFEMProblem::getScalarFunctionCoefficient(const std::string & name)
   {
     return this->_scalar_functions.at(name);
   }
-  catch (std::out_of_range)
+  catch (const std::out_of_range &)
   {
     mooseError("No scalar function with name '" + name + "'.");
   }
@@ -394,7 +394,7 @@ MFEMProblem::getVectorFunctionCoefficient(const std::string & name)
   {
     return this->_vector_functions.at(name);
   }
-  catch (std::out_of_range)
+  catch (const std::out_of_range &)
   {
     mooseError("No vector function with name '" + name + "'.");
   }
