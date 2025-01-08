@@ -83,5 +83,8 @@ FunctionValuePostprocessor::getValue() const
       p(j) = *_point[j];
   if (_time_pp)
     return _scale_factor * _function.value(*_time_pp, p);
+
+  std::cout << name() << " " << _t << " " << _scale_factor * _function.value(_t, p) << std::endl;
+
   return _scale_factor * _function.value(_t, p);
 }
