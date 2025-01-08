@@ -155,7 +155,7 @@ There is an all-encompasing `$CUSTOM_PROMPT` variable that allows you to pass yo
 [my-container][12:17:43]>
 ```
 
-<!-- NOTE to editor: sub children elements require less top positioning (-7 vs -15) -->
+!! NOTE to editor: sub children elements require less top positioning (-7 vs -15)
 
 !style! style=position:relative;top:-7px;left:5px;font-style:italic;font-size:small;
 (it is not possible to replicate color codes here in documentation, but they are being honored)
