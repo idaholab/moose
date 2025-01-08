@@ -1,6 +1,6 @@
 # Table Extension
 
-The table extension provides a means for defining table using traditional markdown syntax, as
+The table extension provides a means for defining tables using traditional markdown syntax, as
 shown in [example-basic]. It also adds the ability to create numbered and captioned tables
 as in [example-caption].
 

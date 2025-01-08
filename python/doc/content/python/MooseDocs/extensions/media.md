@@ -4,7 +4,6 @@ The media extension provides the `!media` markdown command for adding images and
 throughout MooseDocs content, the `!media` command can optionally create a numbered
 [extensions/floats.md] by specifying the "id" setting. A caption may be include by using the
 "caption" setting.
-
 The configuration options for the media extension are listed in [config-media-ext].
 
 !devel settings id=config-media-ext
@@ -14,9 +13,9 @@ The configuration options for the media extension are listed in [config-media-ex
 
 ## Images
 
-The media extension supports including the standard html image extensions: png, gif, jpg, jpeg,
-and svg. Images are added using the !media command followed by the filename, as shown in
-[example-media]. [image-settings] includes the list of available settings for media command for
+The media extension supports including the standard HTML image extensions: png, gif, jpg, jpeg,
+and svg. Images are added using the `!media` command followed by the filename, as shown in
+[example-media]. [image-settings] includes the list of available settings for the media command for
 images.
 
 !alert note
