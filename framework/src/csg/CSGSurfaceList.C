@@ -20,6 +20,20 @@ void CSGSurfaceList::checkSurfaceName(const std::string name)
     mooseError("Surface with name " + name + " already exists in geoemetry.");
 }
 
+const std::shared_ptr<CSGSurface> &
+CSGSurfaceList::getSurface(const std::string name)
+{
+  auto surf = _surfaces.find(name);
+  if (surf == _surfaces.end())
+  {
+    mooseError("No surface by name " + name + " exists in the geometry.");
+  }
+  else
+  {
+    return surf->second;
+  }
+}
+
 std::shared_ptr<CSGSurface>
 CSGSurfaceList::addPlaneFromPoints(const std::string name,
                                    const Point p1,

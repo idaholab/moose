@@ -41,6 +41,8 @@ public:
     return _surfaces;
   }
 
+  const std::shared_ptr<CSGSurface> & getSurface(const std::string name);
+
 protected:
   /// Mapping of surface names to pointers of stored surface objects
   std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;
