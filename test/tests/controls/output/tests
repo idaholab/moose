@@ -12,7 +12,7 @@
     input = controllable.i
     cli_args = "Debug/show_controllable=true Outputs/active=''"
     expect_out = "Active Objects:"
-    requirement = "The system shall include a means to output information regarding the controlled parameters, accessible through the Debug syntax."
+    requirement = "The system shall include a means to output information regarding the controlled parameters, accessible through dedicated debugging syntax."
   [../]
   [./clear]
     type = RunApp
