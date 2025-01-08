@@ -10,8 +10,8 @@ air_effective_k = 0.5 # W/(m K)
     xmax = 7.0
     ymin = 0.0
     ymax = 5.0
-    nx = 35
-    ny = 25
+    nx = 10
+    ny = 10
   []
 []
 
@@ -97,7 +97,7 @@ air_effective_k = 0.5 # W/(m K)
     type = FunctionValuePostprocessor
     function = reward_function
     execute_on = 'INITIAL TIMESTEP_END'
-    indirect_dependencies = 'center_temp_tend env_temp'
+    indirect_dependencies = 'center_temp_tend'
   []
   [top_flux]
     type = LibtorchControlValuePostprocessor
@@ -112,7 +112,7 @@ air_effective_k = 0.5 # W/(m K)
 [Reporters]
   [T_reporter]
     type = AccumulateReporter
-    reporters = 'center_temp_tend/value env_temp/value reward/value top_flux/value log_prob_top_flux/value'
+    reporters = 'center_temp_tend/value reward/value top_flux/value log_prob_top_flux/value'
   []
 []
 
@@ -121,14 +121,14 @@ air_effective_k = 0.5 # W/(m K)
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/top_flux/value"
-    responses = 'center_temp_tend env_temp'
+    responses = 'center_temp_tend'
 
     # keep consistent with LibtorchDRLControlTrainer
-    input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '290 290'
+    input_timesteps = 1
+    response_scaling_factors = '0.03'
+    response_shift_factors = '290'
     action_standard_deviations = '0.02'
-    action_scaling_factors = 200
+    action_scaling_factors = 20
 
     execute_on = 'TIMESTEP_BEGIN'
   []
@@ -140,14 +140,14 @@ air_effective_k = 0.5 # W/(m K)
     activation_function = 'relu'
 
     parameters = "BCs/top_flux/value"
-    responses = 'center_temp_tend env_temp'
+    responses = 'center_temp_tend'
 
     # keep consistent with LibtorchDRLControlTrainer
-    input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '290 290'
-    action_standard_deviations = '0.02'
-    action_scaling_factors = 200
+    input_timesteps = 1
+    response_scaling_factors = '0.03'
+    response_shift_factors = '290'
+    action_standard_deviations = '0.01'
+    action_scaling_factors = 20
 
     execute_on = 'TIMESTEP_BEGIN'
   []
@@ -165,13 +165,13 @@ air_effective_k = 0.5 # W/(m K)
 
   start_time = 0.0
   end_time = 86400
-  dt = 900.0
+  dt = ${fparse 86400/4}
 []
 
 [Outputs]
-  console = false
+  # console = false
   [c]
-    type = CSV
+    type = JSON
     execute_on = FINAL
   []
 []
