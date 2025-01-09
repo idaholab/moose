@@ -9,21 +9,23 @@
 
 #pragma once
 
-#include "GeometryBase.h"
+#include "MoveNodesToGeometryModifierBase.h"
 
 /**
  * Snaps the selected nodes to the surface of a sphere (or circular disk in 2D)
  */
-class GeometrySphere : public GeometryBase
+class MoveNodesToSphere : public MoveNodesToGeometryModifierBase
 {
 public:
   static InputParameters validParams();
 
-  GeometrySphere(const InputParameters & parameters);
+  MoveNodesToSphere(const InputParameters & parameters);
 
 protected:
-  virtual void snapNode(Node & node);
+  virtual void snapNode(Node & node) override;
 
+  /// Center of the sphere
   const Point _center;
+  /// Radius of the sphere
   const Real _radius;
 };

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GeometryBase.h"
+#include "MoveNodesToGeometryModifierBase.h"
 #include "MooseMesh.h"
 #include "libmesh/mesh_base.h"
 
 InputParameters
-GeometryBase::validParams()
+MoveNodesToGeometryModifierBase::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
@@ -21,10 +21,14 @@ GeometryBase::validParams()
       "boundary", {}, "List of boundaries whose nodes are snapped to a given geometry");
   params.addParam<std::vector<SubdomainName>>(
       "block", {}, "List of blocks whose nodes are snapped to a given geometry");
+
+  // By default don't execute
+  params.set<ExecFlagEnum>("execute_on") = "NONE";
+
   return params;
 }
 
-GeometryBase::GeometryBase(const InputParameters & parameters)
+MoveNodesToGeometryModifierBase::MoveNodesToGeometryModifierBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _boundary_ids(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("boundary"))),
@@ -33,22 +37,29 @@ GeometryBase::GeometryBase(const InputParameters & parameters)
 }
 
 void
-GeometryBase::initialize()
+MoveNodesToGeometryModifierBase::initialize()
 {
 }
 
 void
-GeometryBase::execute()
+MoveNodesToGeometryModifierBase::execute()
+{
+  snapNodes();
+}
+
+void
+MoveNodesToGeometryModifierBase::finalize()
 {
 }
 
 void
-GeometryBase::finalize()
+MoveNodesToGeometryModifierBase::meshChanged()
 {
+  snapNodes();
 }
 
 void
-GeometryBase::meshChanged()
+MoveNodesToGeometryModifierBase::snapNodes()
 {
   auto & mesh = _mesh.getMesh();
 
