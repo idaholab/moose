@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMTransient.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
 

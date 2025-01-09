@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMVectorFunctionDirichletBCBase.h"
+#include "MFEMProblem.h"
 
 InputParameters
 MFEMVectorFunctionDirichletBCBase::validParams()
