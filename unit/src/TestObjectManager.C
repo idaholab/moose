@@ -6,7 +6,9 @@
 #include "gtest/gtest.h"
 #include "ObjectManager.h"
 
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 class CheckObjectManager : public testing::Test
 {
@@ -38,7 +40,6 @@ TEST_F(CheckObjectManager, Iter)
 
 TEST_F(CheckObjectManager, IterMutable)
 {
-  int i = -1;
   for (auto & coef : manager)
   {
     EXPECT_EQ(coef.use_count(), 2);
@@ -79,7 +80,6 @@ TEST_F(CheckObjectManager, ReverseIter)
 
 TEST_F(CheckObjectManager, ReverseIterMutable)
 {
-  int i = -1;
   for (auto it = manager.rbegin(); it != manager.rend(); ++it)
   {
     EXPECT_EQ(it->use_count(), 2);

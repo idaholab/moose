@@ -207,8 +207,7 @@ TEST_F(MFEMSolverTest, MFEMHypreADS)
   fespace_params.set<MooseEnum>("fec_type") = "RT";
 
   // Construct fespace
-  MFEMFESpace & fespace =
-      addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HDivFESpace", fespace_params);
+  addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HDivFESpace", fespace_params);
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreADS");
@@ -234,8 +233,7 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
   fespace_params.set<MooseEnum>("fec_type") = "ND";
 
   // Construct fespace
-  MFEMFESpace & fespace =
-      addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HCurlFESpace", fespace_params);
+  addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HCurlFESpace", fespace_params);
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreAMS");
