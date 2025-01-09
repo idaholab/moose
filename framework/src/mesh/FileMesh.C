@@ -68,7 +68,7 @@ FileMesh::buildMesh()
 {
   TIME_SECTION("buildMesh", 2, "Reading Mesh");
 
-  // This dimension should get overriden if the mesh reader can determine the dimension
+  // This dimension should get overridden if the mesh reader can determine the dimension
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 
   if (_is_nemesis)
