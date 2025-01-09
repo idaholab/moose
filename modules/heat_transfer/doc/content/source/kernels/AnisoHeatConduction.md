@@ -19,7 +19,7 @@ R_i(u_h)=(\nabla\psi_i, \mathbf{k}\nabla u_h)\quad\forall \psi_i,
 
 where $u_h$ is the approximate solution and $\psi_i$ is a finite element test function.
 
-The thermal conductivity is specified with a material property, [!param](Kernels/AnisoHeatConduction/thermal_conductivity).
+The thermal conductivity is specified with a material property, [!param](/Kernels/AnisoHeatConduction/thermal_conductivity).
 
 ## Example Input File Syntax
 

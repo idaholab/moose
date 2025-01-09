@@ -19,11 +19,11 @@ R_i(u_h)=(\nabla\psi_i, k\nabla u_h)\quad\forall \psi_i,
 where $u_h$ is the approximate solution and $\psi_i$ is a finite element test function.
 
 The diffusion coefficient is specified with a material property; the
-[!param](Kernels/HeatConduction/diffusion_coefficient)
+[!param](/Kernels/HeatConduction/diffusion_coefficient)
 parameter is used to define the material property name
 which contains the diffusion coefficient.
 The Jacobian will account for partial derivatives of the diffusion coefficient
-with respect to the unknown variable if the [!param](Kernels/HeatConduction/diffusion_coefficient_dT) property
+with respect to the unknown variable if the [!param](/Kernels/HeatConduction/diffusion_coefficient_dT) property
 name is provided. These particular defaults for these parameters
 are the names used by [HeatConductionMaterial](HeatConductionMaterial.md),
 though you can also define these materials using other [Material](Materials/index.md) objects.
