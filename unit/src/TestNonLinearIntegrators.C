@@ -1,7 +1,9 @@
 #ifdef MFEM_ENABLED
 
 #include "gtest/gtest.h"
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 class VectorPowerLawNLFIntegrator : public mfem::NonlinearFormIntegrator
 {
@@ -178,7 +180,6 @@ TEST(CheckData, NonlinearIntegratorTest)
   auto pmesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mesh);
 
   mesh.EnsureNodes();
-  int dim = mesh.Dimension();
 
   auto fec_nd = std::make_unique<mfem::ND_FECollection>(1, pmesh->Dimension());
   auto fec_rt = std::make_unique<mfem::RT_FECollection>(1, pmesh->Dimension());
