@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMVectorFEWeakDivergenceKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorFEWeakDivergenceKernel);
 

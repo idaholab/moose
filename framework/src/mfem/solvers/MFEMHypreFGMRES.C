@@ -1,6 +1,5 @@
 #ifdef MFEM_ENABLED
 
-#pragma once
 #include "MFEMHypreFGMRES.h"
 #include "MFEMProblem.h"
 

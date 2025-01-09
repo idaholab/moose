@@ -1,6 +1,5 @@
 #ifdef MFEM_ENABLED
 
-#pragma once
 #include "MFEMCGSolver.h"
 #include "MFEMProblem.h"
 

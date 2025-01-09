@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMLinearElasticityKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMLinearElasticityKernel);
 

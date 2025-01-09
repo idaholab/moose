@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMVectorBoundaryIntegratedBC.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorBoundaryIntegratedBC);
 
