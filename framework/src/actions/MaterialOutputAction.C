@@ -31,6 +31,8 @@ InputParameters
 MaterialOutputAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Outputs material properties to various Outputs objects, based on the "
+                             "parameters set in each Material");
   /// A flag to tell this action whether or not to print the unsupported properties
   /// Note: A derived class can set this to false, override materialOutput and output
   ///       a particular property that is not supported by this class.
