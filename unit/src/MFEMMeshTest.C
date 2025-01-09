@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "gtest/gtest.h"
 #include "MFEMMesh.h"
 #include "MooseMain.h"
@@ -146,3 +148,5 @@ TEST_F(MFEMMeshTest, Refinement)
   // Test MFEMMesh can be cloned
   ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
 }
+
+#endif

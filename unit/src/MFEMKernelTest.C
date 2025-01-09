@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMObjectUnitTest.h"
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMDiffusionKernel.h"
@@ -234,3 +236,5 @@ TEST_F(MFEMKernelTest, MFEMVectorFEWeakDivergenceKernel)
   ASSERT_NE(integrator, nullptr);
   delete integrator;
 }
+
+#endif

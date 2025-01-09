@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "gtest/gtest.h"
@@ -101,3 +103,5 @@ MFEMObjectUnitTest::addObject(const std::string & type,
   mooseAssert(objects.size() == 1, "Doesn't work with threading");
   return *objects[0];
 }
+
+#endif

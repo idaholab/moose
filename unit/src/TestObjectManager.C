@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include <algorithm>
 #include <memory>
 
@@ -101,3 +103,5 @@ TEST_F(CheckObjectManager, ConstReverseIter)
   EXPECT_EQ(c2->constant, -2);
   EXPECT_EQ(c3->constant, -1);
 }
+
+#endif

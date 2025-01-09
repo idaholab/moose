@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include <algorithm>
 
 #include "gtest/gtest.h"
@@ -986,3 +988,5 @@ TEST_F(CheckPropertyManager, CheckRepeatedNames)
                    "a", manager.global, mfem::DenseMatrix({{2., 1.}, {0., 1.}})),
                MooseException);
 }
+
+#endif
