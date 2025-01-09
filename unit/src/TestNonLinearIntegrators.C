@@ -142,8 +142,10 @@ public:
     _x0 = x0_;
   };
 
-  //* residual = (ρ(∇×H), ∇×v) + (μdH/dt, v) + (dBᵉ/dt, v) - <(ρ∇×H)×n, v>  = 0
+  // clang-format off
+  //* residual = (\rho(\nabla\times H), \nabla\times v) + (\mu dH/dt, v) + (dB^e/dt, v) - <(\rho\nabla\times H)\times n, v>  = 0
   /// Compute y = H(x0 + dt* dx/dt) + M dx/dt
+  // clang-format on
   void Mult(const mfem::Vector & dx_dt, mfem::Vector & residual) const override
   {
     add(*_x0, _dt, dx_dt, _x1);
@@ -183,8 +185,10 @@ TEST(CheckData, NonlinearIntegratorTest)
   mfem::ConstantCoefficient coeff(1.0);
   mfem::ConstantCoefficient mu(1.0);
 
+  // clang-format off
   //* in weak form
-  //* (ρ∇×H, ∇×v) + (μdH/dt, v) + (dBᵉ/dt, v) - <(ρ∇×H)×n, v>  = 0
+  //* (\rho\nabla\times H, \nanbla\times v) + (\mu dH/dt, v) + (dB^e/dt, v) - <(\rho\nabla\times H)\times n, v>  = 0
+  // clang-format on
   mfem::ParNonlinearForm nlf_test(&h_curl_fe_space);
   mfem::ParBilinearForm blf_test(&h_curl_fe_space);
   mfem::ParBilinearForm lf_test(&h_curl_fe_space);
