@@ -14,7 +14,7 @@
 class MFEMSolverTest : public MFEMObjectUnitTest
 {
 public:
-  MFEMSolverTest() : MFEMObjectUnitTest("PlatypusApp") {}
+  MFEMSolverTest() : MFEMObjectUnitTest("MooseUnitApp") {}
 
   static double uexact(const mfem::Vector & x)
   {
