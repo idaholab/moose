@@ -1,7 +1,5 @@
 # GradField
 
-!syntax description /Kernels/GradField
-
 ## Overview
 
 !style halign=left
