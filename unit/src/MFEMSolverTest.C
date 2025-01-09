@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMObjectUnitTest.h"
 #include "MFEMHypreGMRES.h"
 #include "MFEMHypreFGMRES.h"
@@ -263,3 +265,5 @@ TEST_F(MFEMSolverTest, MFEMSuperLU)
   ASSERT_NE(solver_downcast.get(), nullptr);
   testDiffusionSolve(*solver_downcast.get(), 1e-12);
 }
+
+#endif

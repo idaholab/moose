@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "gtest/gtest.h"
 #include "mfem.hpp"
 
@@ -245,3 +247,5 @@ TEST(CheckData, NonlinearIntegratorTest)
   std::cout << "Finished on rank:" << my_rank << std::endl;
   gf.Distribute(gf_tdofs);
 }
+
+#endif

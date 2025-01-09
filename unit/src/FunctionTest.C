@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMObjectUnitTest.h"
 
 class FunctionTest : public MFEMObjectUnitTest
@@ -114,3 +116,5 @@ TEST_F(FunctionTest, AddUnknownFunction)
   EXPECT_THROW(_mfem_problem->getScalarFunctionCoefficient("coef3"), std::runtime_error);
   EXPECT_THROW(_mfem_problem->getVectorFunctionCoefficient("coef3"), std::runtime_error);
 }
+
+#endif

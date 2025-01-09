@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include <algorithm>
 
 #include "gtest/gtest.h"
@@ -263,3 +265,5 @@ TEST_F(CheckPropertyMap, DifferentMatSize)
                                            {"3"}),
                MooseException);
 }
+
+#endif

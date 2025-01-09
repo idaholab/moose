@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMObjectUnitTest.h"
 #include "MFEMGenericConstantMaterial.h"
 #include "MFEMGenericConstantVectorMaterial.h"
@@ -454,3 +456,5 @@ TEST_F(MFEMFunctionVectorMaterialTest, MFEMGenericFunctionVectorMaterial_Excepti
       _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material1", coef_params),
       std::runtime_error);
 }
+
+#endif

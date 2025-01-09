@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
@@ -179,3 +181,5 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionBoundaryIntegratedBC)
   ASSERT_EQ(blf_integrator, nullptr);
   delete blf_integrator;
 }
+
+#endif
