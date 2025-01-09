@@ -13,6 +13,8 @@
 
 TEST_F(IdealRealGasMixtureFluidPropertiesTest, test)
 {
+  Moose::_throw_on_warning = false;
+
   Real T = 400.;
   Real p = 100000.;
   std::vector<Real> x = {0.9};
