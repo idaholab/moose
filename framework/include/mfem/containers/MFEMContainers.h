@@ -180,7 +180,7 @@ private:
   MapType _field_map{};
 };
 
-static std::string
+inline std::string
 GetTimeDerivativeName(std::string name)
 {
   return std::string("d") + name + std::string("_dt");

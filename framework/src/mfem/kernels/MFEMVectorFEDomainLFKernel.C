@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMVectorFEDomainLFKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorFEDomainLFKernel);
 

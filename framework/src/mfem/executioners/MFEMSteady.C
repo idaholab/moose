@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMSteady.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 

@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMMixedVectorGradientKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMMixedVectorGradientKernel);
 

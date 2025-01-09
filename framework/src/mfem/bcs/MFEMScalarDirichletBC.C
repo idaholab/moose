@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMScalarDirichletBC.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMScalarDirichletBC);
 
