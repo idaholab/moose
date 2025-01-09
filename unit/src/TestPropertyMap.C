@@ -5,7 +5,9 @@
 #include "gtest/gtest.h"
 #include "property_map.h"
 
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 class CheckPropertyMap : public testing::Test
 {
