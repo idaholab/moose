@@ -4,6 +4,7 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
+#include "Moose.h"
 
 class VectorPowerLawNLFIntegrator : public mfem::NonlinearFormIntegrator
 {
@@ -240,12 +241,12 @@ TEST(CheckData, NonlinearIntegratorTest)
 
   int my_rank;
   MPI_Comm_rank(h_curl_fe_space.GetComm(), &my_rank);
-  std::cout << "Starting on rank:" << my_rank << std::endl;
+  Moose::out << "Starting on rank:" << my_rank << std::endl;
 
   // nlf_test.Mult(lf_tdofs, gf_tdofs);
   newton_solver.Mult(lf_tdofs, gf_tdofs);
   MFEM_VERIFY(newton_solver.GetConverged(), "Newton Solver did not converge.");
-  std::cout << "Finished on rank:" << my_rank << std::endl;
+  Moose::out << "Finished on rank:" << my_rank << std::endl;
   gf.Distribute(gf_tdofs);
 }
 
