@@ -45,17 +45,18 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _rho(nullptr),
     _pressure_drop_sidesets(getParam<std::vector<std::string>>("pressure_drop_sidesets")),
     _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
+    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs(_pressure_drop_sidesets)),
+    _theBoundaries(this->_mesh.getBoundaryIDs()),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
-    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs(_pressure_drop_sidesets));
 {
   if (_allow_two_term_expansion_on_bernoulli_faces &&
       _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
     paramError(
         "allow_two_term_expansion_on_bernoulli_faces",
         "Skewness correction with two term extrapolation on Bernoulli faces is not supported!");
-size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
-size_t num_pressure_drop_form_factors = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
+  size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
+  size_t num_pressure_drop_form_factors = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
 
   if (num_pressure_drop_form_factors != num_pressure_drop_sidesets)
     paramError(
@@ -174,14 +175,17 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   ADReal factor_upwind = 0.0;
 // Iterate through sidesets to see if they are boundary faces or not
 //How do I access the variable I defined above titled num_pressure_drop_sidesets?
-size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
+  size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
+  size_t numBoundaries = sizeof(_theBoundaries) / sizeof(_theBoundaries[0]);
 
-for(size_t i =0; i < num_pressure_drop_sidesets, i++; ){
-  if (std::find(std::begin(fi.boundaryIDs), std::end(fi.boundaryIDs), _pressure_drop_sidesets[i]);)
-  {
-    factor_downwind += _pressure_drop_form_factors[i];
+  for(size_t i =0; i < num_pressure_drop_sidesets, i++; ){
+    for(size_t j=0; j < numBoundaries, j++;){
+    if (_pressure_drop_sideset_ids[i] == _theBoundaries[j])
+    {
+      factor_downwind += _pressure_drop_form_factors[i];
+    }
+    }
   }
-}
 
   const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
