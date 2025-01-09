@@ -459,6 +459,7 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
 
     const Real v = 1.0 / rho;
     const Real h = e + p / rho;
+    const Real s = _fp_vapor_mixture->s_from_p_T(p, T, x_ncg);
     const Real c = _fp_vapor_mixture->c_from_p_T(p, T, x_ncg);
     const Real mu = _fp_vapor_mixture->mu_from_p_T(p, T, x_ncg);
     const Real cp = _fp_vapor_mixture->cp_from_p_T(p, T, x_ncg);
@@ -472,6 +473,7 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
     params.set<Real>("e") = e;
     params.set<Real>("v") = v;
     params.set<Real>("h") = h;
+    params.set<Real>("s") = s;
     params.set<Real>("c") = c;
     params.set<Real>("mu") = mu;
     params.set<Real>("cp") = cp;
@@ -537,7 +539,7 @@ void
 FluidPropertiesInterrogator::buildJSONVaporMixture(nlohmann::json & json,
                                                    const InputParameters & params)
 {
-  for (auto p : {"p", "T", "rho", "e", "v", "h", "c", "mu", "cp", "cv", "k"})
+  for (auto p : {"p", "T", "rho", "e", "v", "h", "s", "c", "mu", "cp", "cv", "k"})
     if (params.have_parameter<Real>(p))
       json["static"][p] = params.get<Real>(p);
 
@@ -764,6 +766,7 @@ FluidPropertiesInterrogator::outputVaporMixtureStaticProperties(const InputParam
   outputProperty("Specific volume", params.get<Real>("v"), "m^3/kg");
   outputProperty("Specific internal energy", params.get<Real>("e"), "J/kg");
   outputProperty("Specific enthalpy", params.get<Real>("h"), "J/kg");
+  outputProperty("Specific entropy", params.get<Real>("s"), "J/kg");
   _console << std::endl;
   outputProperty("Sound speed", params.get<Real>("c"), "m/s");
   outputProperty("Dynamic viscosity", params.get<Real>("mu"), "Pa-s");

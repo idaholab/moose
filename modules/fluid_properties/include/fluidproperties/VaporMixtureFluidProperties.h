@@ -116,6 +116,7 @@ public:
   propfunc(c, v, e)
   propfunc(rho, p, T)
   propfunc(e, p, T)
+  propfunc(s, p, T)
   propfunc(c, p, T)
   propfunc(cp, p, T)
   propfunc(cv, p, T)
