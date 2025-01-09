@@ -1,6 +1,8 @@
 #ifdef MFEM_ENABLED
 
+#include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mfem-common.hpp"
+#include "libmesh/restore_warnings.h"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarDirichletBC.h"
 #include "MFEMScalarFunctionDirichletBC.h"
@@ -53,7 +55,7 @@ public:
     _vector_hdiv_gridfunc.ProjectCoefficient(_vector_zero);
   }
 
-  void check_boundary(int bound,
+  void check_boundary(int /*bound*/,
                       mfem::FiniteElementSpace & fespace,
                       std::function<double(mfem::ElementTransformation *,
                                            const mfem::IntegrationPoint &)> error_func,
