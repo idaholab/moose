@@ -156,10 +156,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     curl -L https://github.com/pytorch/pytorch/pull/99468.patch > 99468.patch
     git apply 99468.patch
 
-   export CFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict -Wno-error=nonnull"
-   export CXXFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict -Wno-error=nonnull"
+   export CFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
+   export CXXFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
    export CMAKE_PREFIX_PATH="${CONDA_PREFIX:-'$(dirname $(which conda))/../'}:${CMAKE_PREFIX_PATH}"
-   python setup.py develop
+   MAX_JOBS=${MOOSE_JOBS} python setup.py install
+
+#    cd test
+#    python run_test.py
 
 #    # Install libtorch from a precompiled package
 #    ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest=${LIBTORCH_DEST} --libtorch-distribution=${LIBTORCH_DISTRIBUTION} --cleanup
