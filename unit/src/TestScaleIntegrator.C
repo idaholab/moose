@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "gtest/gtest.h"
 #include "mfem.hpp"
 #include "ScaleIntegrator.h"
@@ -126,3 +128,5 @@ TEST(CheckData, ScaleIntegratorTestPartial)
   diag1 -= diag2;
   EXPECT_NEAR(diag1.Normlinf(), 0, 1e-12);
 }
+
+#endif
