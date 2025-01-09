@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarDirichletBC.h"
@@ -378,3 +380,5 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
       },
       1e-8);
 }
+
+#endif
