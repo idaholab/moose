@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMMassKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMMassKernel);
 

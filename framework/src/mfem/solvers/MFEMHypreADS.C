@@ -1,6 +1,5 @@
 #ifdef MFEM_ENABLED
 
-#pragma once
 #include "MFEMHypreADS.h"
 
 registerMooseObject("MooseApp", MFEMHypreADS);

@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMVectorNormalIntegratedBC.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorNormalIntegratedBC);
 
