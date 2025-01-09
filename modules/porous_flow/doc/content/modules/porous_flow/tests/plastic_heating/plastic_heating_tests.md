@@ -1,6 +1,6 @@
 # Heat energy produced by plastic deformation
 
-In [PorousFlow](governing_equations.md), it is assumed that plastic deformation causes a heat energy-density rate
+In [PorousFlow](porous_flow/governing_equations.md), it is assumed that plastic deformation causes a heat energy-density rate
 (J.m$^{-3}$.s$^{-1}$) of
 \begin{equation}
 c (1-\phi) \sigma_{ij}\epsilon^{\mathrm{plastic}}_{ij} \ ,
@@ -9,7 +9,7 @@ where $c$ is a coefficient (s$^{-1}$), $\phi$ is the porosity,
 $\sigma$ is the stress, and $\epsilon^{\mathrm{plastic}}$ is the
 plastic strain.  This is implemented in the [PorousFlowPlasticHeatEnergy Kernel](PorousFlowPlasticHeatEnergy.md)
 
-In the set of simple tests described below, the porous skeleton contains no fluid, and no heat flow is considered, so the heat energy 
+In the set of simple tests described below, the porous skeleton contains no fluid, and no heat flow is considered, so the heat energy
 released simply heats up the porous skeleton:
 \begin{equation}
 \frac{\partial}{\partial t} (1 - \phi)c_{R}\rho_{R} T = c (1-\phi)

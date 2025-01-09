@@ -15,14 +15,13 @@ InputParameters
 LeadBismuthFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addParam<Real>("T_mo", 398, "Melting Point (K)");
   params.addClassDescription("Fluid properties for Lead Bismuth eutectic 2LiF-BeF2");
 
   return params;
 }
 
 LeadBismuthFluidProperties::LeadBismuthFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters), _T_mo(getParam<Real>("T_mo"))
+  : SinglePhaseFluidProperties(parameters)
 {
 }
 
@@ -329,21 +328,99 @@ LeadBismuthFluidProperties::T_from_p_rho(
 }
 
 Real
-LeadBismuthFluidProperties::T_from_p_h(Real p, Real h) const
+LeadBismuthFluidProperties::T_from_p_h(Real /*p*/, Real h) const
 {
-  auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
-               .first;
-  // check for nans
-  if (std::isnan(T))
-    mooseError("Conversion from pressure (p = ",
-               p,
-               ") and enthalpy (h = ",
-               h,
-               ") to temperature failed to converge.");
-  return T;
+  // Obtained from sympy solving h(T) with T as a symbol
+  return -2279.2270619664 *
+             std::sqrt(
+                 -5.00288972505329e-15 * (283680000.0 * h - 112351848202732.0) /
+                     std::pow(
+                         5.58786624617756e-6 * h +
+                             MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                             std::sqrt(0.755198459604694 *
+                                           MathUtils::pow(2.52492508612867e-6 * h - 1.0, 3) +
+                                       MathUtils::pow(
+                                           -5.58786624617756e-6 * h -
+                                               MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                               0.0867667825136797,
+                                           2)) -
+                             0.0867667825136797,
+                         1. / 3.) +
+                 0.617230605772255 *
+                     std::pow(
+                         5.58786624617756e-6 * h +
+                             MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                             std::sqrt(0.755198459604694 *
+                                           MathUtils::pow(2.52492508612867e-6 * h - 1.0, 3) +
+                                       MathUtils::pow(
+                                           -5.58786624617756e-6 * h -
+                                               MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                               0.0867667825136797,
+                                           2)) -
+                             0.0867667825136797,
+                         1. / 3.) -
+                 1.0) +
+         3223.31382276067 *
+             std::sqrt(
+                 5.27858159332216e-12 * (129917883803.256 - 480000.0 * h) /
+                     std::sqrt(
+                         -5.00288972505329e-15 * (283680000.0 * h - 112351848202732.0) /
+                             std::pow(
+                                 5.58786624617756e-6 * h +
+                                     MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                     std::sqrt(
+                                         0.755198459604694 *
+                                             MathUtils::pow(2.52492508612867e-6 * h - 1.0, 3) +
+                                         MathUtils::pow(
+                                             -5.58786624617756e-6 * h -
+                                                 MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                                 0.0867667825136797,
+                                             2)) -
+                                     0.0867667825136797,
+                                 1. / 3.) +
+                         0.617230605772255 *
+                             std::pow(
+                                 5.58786624617756e-6 * h +
+                                     MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                     std::sqrt(
+                                         0.755198459604694 *
+                                             MathUtils::pow(2.52492508612867e-6 * h - 1.0, 3) +
+                                         MathUtils::pow(
+                                             -5.58786624617756e-6 * h -
+                                                 MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                                 0.0867667825136797,
+                                             2)) -
+                                     0.0867667825136797,
+                                 1. / 3.) -
+                         1.0) +
+                 2.50144486252665e-15 * (283680000.0 * h - 112351848202732.0) /
+                     std::pow(
+                         5.58786624617756e-6 * h +
+                             MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                             std::sqrt(0.755198459604694 *
+                                           MathUtils::pow(2.52492508612867e-6 * h - 1.0, 3) +
+                                       MathUtils::pow(
+                                           -5.58786624617756e-6 * h -
+                                               MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                               0.0867667825136797,
+                                           2)) -
+                             0.0867667825136797,
+                         1. / 3.) -
+                 0.308615302886127 *
+                     std::pow(
+                         5.58786624617756e-6 * h +
+                             MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                             std::sqrt(0.755198459604694 *
+                                           MathUtils::pow(2.52492508612867e-6 * h - 1.0, 3) +
+                                       MathUtils::pow(
+                                           -5.58786624617756e-6 * h -
+                                               MathUtils::pow(1.0 - 3.69464146080841e-6 * h, 2) +
+                                               0.0867667825136797,
+                                           2)) -
+                             0.0867667825136797,
+                         1. / 3.) -
+                 1.0) +
+         1182.0;
 }
 
 void

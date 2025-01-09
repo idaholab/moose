@@ -7,6 +7,13 @@
     expect_out = "Controls:.*Active Controls:.*Active Controls:"
     requirement = "The Control system shall include a means to output information regarding the controlled parameters."
   [../]
+  [debug_syntax]
+    type = RunApp
+    input = controllable.i
+    cli_args = "Debug/show_controllable=true Outputs/active=''"
+    expect_out = "Active Objects:"
+    requirement = "The system shall include a means to output information regarding the controlled parameters, accessible through dedicated debugging syntax."
+  [../]
   [./clear]
     type = RunApp
     input = controllable_clear.i
@@ -21,7 +28,6 @@
     expect_out = "Controls:.*Active Controls:"
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
     requirement = "The system shall include a command line flag for displaying controllable parameter information."
-
   [../]
   [./active]
     type = RunApp

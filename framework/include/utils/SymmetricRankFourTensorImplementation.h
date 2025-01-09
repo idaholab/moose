@@ -161,14 +161,6 @@ SymmetricRankFourTensorTempl<T>::rotate(const TypeTensor<T> & R)
 
 template <typename T>
 SymmetricRankFourTensorTempl<T> &
-SymmetricRankFourTensorTempl<T>::operator=(const SymmetricRankFourTensorTempl<T> & a)
-{
-  std::copy(a._vals.begin(), a._vals.end(), _vals.begin());
-  return *this;
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T> &
 SymmetricRankFourTensorTempl<T>::operator*=(const T & a)
 {
   for (const auto i : make_range(N2))

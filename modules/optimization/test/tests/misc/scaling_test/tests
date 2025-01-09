@@ -1,10 +1,35 @@
 [Tests]
-  issues = '#25646'
+  issues = '#25646 #29570'
   design = 'SteadyAndAdjoint.md'
-  [scaling_factor_for_adjoint_variables]
-    type = 'RunException'
-    input = scaling_test.i
-    expect_err = 'Scaling factors are given to adjoint variables by the user. It is not necessary to scale a adjoint system therefore the scaling factors will not be used.'
-    requirement = "The system shall throw out a warning when scalings are assigned to adjoint variable to remind users that no scaling will be performed for adjoint system."
+  [optimization_scaling]
+    requirement = "The system shall be able to scale forward and adjoint systems consistently by"
+    [manual_scaling]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+      recover = false
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = "by manually providing scaling factors for the forward problem variables,"
+    []
+    [automatic_scaling]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+      recover = false
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      cli_args = "MultiApps/forward/cli_args='Executioner/automatic_scaling=true'"
+      detail = "or by using the automatic scaling option."
+    []
+  []
+  [optimization_scaling_errors]
+    requirement = "The system shall throw out an error when "
+    [scaling_factor_for_adjoint_variables]
+      type = 'RunException'
+      input = main.i
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      cli_args = "MultiApps/forward/cli_args='Variables/T_real_adj/scaling=5'"
+      expect_err = 'User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled automatically by the forward system.'
+      detail = "scalings are manually assigned to adjoint variables to remind users that no scaling will be performed for adjoint system."
+    []
   []
 []

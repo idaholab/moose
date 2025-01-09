@@ -91,7 +91,7 @@ where the polyline coordinates and weighting are defined in the following [Const
 
 !listing modules/porous_flow/test/tests/dirackernels/pls02reporter.i block=Reporters
 
-Reporter input provides an easy way to control polyline sink point locations from a [Sampler](Samplers/index.md) multi-app.  
+Reporter input provides an easy way to control polyline sink point locations from a [Sampler](Samplers/index.md) multi-app.
 It is an error to supply both plaint text file and reporter input for the point data.
 
 Rather than manually specifying each point via the separate points file or reporter, the second input format allows the
@@ -378,7 +378,7 @@ Each of these record the total fluid flux (kg) injected by or produced by the bo
 
 ### Reproducing the steady-state 2D analytical solution
 
-The PorousFlow fluid equation (see [governing equations](governing_equations.md)) for a fully-saturated medium with $\rho \propto
+The PorousFlow fluid equation (see [governing equations](porous_flow/governing_equations.md)) for a fully-saturated medium with $\rho \propto
 \exp(P/B)$ and large constant bulk modulus $B$ becomes Darcy's equation
 \begin{equation}
 \frac{\partial}{\partial t}\rho =  \nabla_{i}\alpha_{ij}\nabla_{j}\rho

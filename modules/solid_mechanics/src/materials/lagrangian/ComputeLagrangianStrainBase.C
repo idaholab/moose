@@ -51,6 +51,8 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _spatial_velocity_increment(
+        declareProperty<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
     _vorticity_increment(declareProperty<RankTwoTensor>(_base_name + "vorticity_increment")),
     _F_ust(declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _F_avg(declareProperty<RankTwoTensor>(_base_name + "average_deformation_gradient")),
@@ -147,6 +149,9 @@ ComputeLagrangianStrainBase<G>::computeQpIncrementalStrains(const RankTwoTensor 
 
   // Increment the mechanical strain
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+
+  // Yes, this does make sense to do it here
+  _spatial_velocity_increment[_qp] = _vorticity_increment[_qp] + _strain_increment[_qp];
 
   // Faked rotation increment for ComputeStressBase materials
   _rotation_increment[_qp] = RankTwoTensor::Identity();

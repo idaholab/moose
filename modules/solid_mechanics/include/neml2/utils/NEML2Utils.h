@@ -11,8 +11,9 @@
 
 #ifdef NEML2_ENABLED
 
-#include "neml2/models/Model.h"
 #include "neml2/misc/parser_utils.h"
+#include "neml2/tensors/tensors.h"
+#include "neml2/models/LabeledAxisAccessor.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
@@ -27,14 +28,6 @@ class MooseObject;
 class Action;
 class SubProblem;
 
-#ifdef NEML2_ENABLED
-namespace neml2
-{
-/// Pretty print the summary of a NEML2 model
-std::ostream & operator<<(std::ostream &, const Model &);
-}
-#endif
-
 namespace NEML2Utils
 {
 
@@ -45,76 +38,105 @@ void assertVariable(const neml2::VariableName &);
 /// Assert that the NEML2 variable name sits on either the old_forces or the old_state subaxis
 void assertOldVariable(const neml2::VariableName &);
 
-/// Convert a MOOSE data structure to its NEML2 counterpart
+/// Parse a raw string into NEML2 variable name
+neml2::VariableName parseVariableName(const std::string &);
+
 template <typename T>
-neml2::Tensor toNEML2(const T &);
+struct Layout
+{
+};
+template <>
+struct Layout<Real>
+{
+  static constexpr std::array<neml2::Size, 0> shape{};
+  static constexpr std::array<neml2::Size, 1> strides{1};
+};
+template <>
+struct Layout<RealVectorValue>
+{
+  static constexpr std::array<neml2::Size, 1> shape{3};
+  static constexpr std::array<neml2::Size, 2> strides{3, 1};
+};
+template <>
+struct Layout<RankTwoTensor>
+{
+  static constexpr std::array<neml2::Size, 2> shape{3, 3};
+  static constexpr std::array<neml2::Size, 3> strides{9, 3, 1};
+};
+template <>
+struct Layout<SymmetricRankTwoTensor>
+{
+  static constexpr std::array<neml2::Size, 1> shape{6};
+  static constexpr std::array<neml2::Size, 2> strides{6, 1};
+};
+template <>
+struct Layout<RankFourTensor>
+{
+  static constexpr std::array<neml2::Size, 4> shape{3, 3, 3, 3};
+  static constexpr std::array<neml2::Size, 5> strides{81, 27, 9, 3, 1};
+};
+template <>
+struct Layout<SymmetricRankFourTensor>
+{
+  static constexpr std::array<neml2::Size, 2> shape{6, 6};
+  static constexpr std::array<neml2::Size, 3> strides{36, 6, 1};
+};
 
 /**
- * Convert a wrapped (batched) MOOSE data structure to its NEML2 counterpart
- * The wrapper should implement size()
+ * @brief Map from std::vector<T> to neml2::Tensor without copying the data
+ *
+ * This method is used in gatherers which gather data from MOOSE as input variables to the NEML2
+ * material model. So in theory, we only need to provide Layout specializations for MOOSE types that
+ * can potentially be used as NEML2 input variables.
+ *
+ * For this method to work, the underlying data in \p data must be reinterpretable as Real
+ * (torch::kFloat64). The data class T must also be aligned and follow the striding implied by
+ * Layout<T>::shape. The data class T must also have no padding or overhead.
  */
 template <typename T>
-neml2::Tensor toNEML2Batched(const T & data);
-
-// @{ Template specializations
-template <>
-neml2::Tensor toNEML2(const Real & v);
-template <>
-neml2::Tensor toNEML2(const RankTwoTensor & r2t);
-template <>
-neml2::Tensor toNEML2(const std::vector<Real> & v);
-// @}
+neml2::Tensor
+fromBlob(const std::vector<T> & data)
+{
+  // The const_cast is fine because torch works with non-const ptr so that it can optionally handle
+  // deallocation. But we are not going to let torch do that.
+  const auto torch_tensor =
+      torch::from_blob(const_cast<T *>(data.data()),
+                       neml2::utils::add_shapes(data.size(), Layout<T>::shape),
+                       torch::TensorOptions().dtype(torch::kFloat64));
+  return neml2::Tensor(torch_tensor, 1);
+}
 
 /**
- * Decompose a `std::vector<std::tuple<Args...>>` into a `std::tuple<std::vector<Args>...>`
- * The original data structure (the batched tuple) is what BatchMaterial gathered for us, but it
- * allows for inhomogeneous batches, i.e., the batch data structure could change from batch to
- * batch. The batched tuple is efficient in terms of data gathering, but it is disadvantageous when
- * we want to convert and set all batches at once. This method essentially "homogenizes" the batched
- * tuple to a tuple of batched data structures.
+ * @brief Directly copy a contiguous chunk of memory of a torch::Tensor to a MOOSE data of type T
+ *
+ * This assumes the torch::Tensor and T have the same layout, for example both row-major
+ * with T = RankTwoTensor. If the layouts are different, we may need to reshape/reorder/transpose
+ * the torch::Tensor before copying.
+ *
+ * For this method to work,
+ * 1. the address of \p dest must align with the first element of the data,
+ * 2. the number of elements in \p dest must match the number of elements in \p src,
+ * 3. the \p src tensor must be of type torch::kFloat64, and
+ * 4. data in \p dest must be reinterpretable as Real.
  */
-template <typename... Args>
-std::tuple<std::vector<Args>...>
-homogenizeBatchedTuple(const std::vector<std::tuple<Args...>> & from);
-
-template <size_t I = 0, typename... Args>
-void homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
-                                 std::tuple<std::vector<Args>...> & to);
-
-/// Convert a NEML2 data structure to its MOOSE counterpart
 template <typename T>
-T toMOOSE(const neml2::Tensor &);
-
-// @{ Template specializations
-template <>
-Real toMOOSE(const neml2::Tensor & t);
-template <>
-SymmetricRankTwoTensor toMOOSE(const neml2::Tensor & t);
-template <>
-std::vector<Real> toMOOSE(const neml2::Tensor & t);
-template <>
-SymmetricRankFourTensor toMOOSE(const neml2::Tensor & t);
-// @}
-
-/**
- * Convert a MOOSE data structure to its NEML2 counterpart and copy the values into a NEML2
- * LabeledVector
- */
-template <size_t I = 0, typename T, typename... Ts>
-void set(neml2::LabeledVector & v,
-         const std::vector<neml2::VariableName> & indices,
-         const T * t0,
-         const Ts *... t);
-
-/**
- * Convert a wrapped (batched) MOOSE data structure to its NEML2 counterpart and copy the values
- * into a NEML2 LabeledVector
- */
-template <size_t I = 0, typename T, typename... Ts>
-void setBatched(neml2::LabeledVector & v,
-                const std::vector<neml2::VariableName> & indices,
-                const T * t0,
-                const Ts *... t);
+void
+copyTensorToMOOSEData(const torch::Tensor & src, T & dest)
+{
+  if (src.dtype() != torch::kFloat64)
+    mooseError(
+        "Cannot copy torch::Tensor with dtype ", src.dtype(), " into ", demangle(typeid(T).name()));
+  if (src.numel() != Layout<T>::strides[0])
+    mooseError("Cannot copy torch::Tensor with shape ",
+               src.sizes(),
+               " into ",
+               demangle(typeid(T).name()),
+               " with different number of elements.");
+  auto dest_tensor = torch::from_blob(reinterpret_cast<Real *>(&dest),
+                                      Layout<T>::shape,
+                                      torch::TensorOptions().dtype(torch::kFloat64));
+  dest_tensor.copy_(src.reshape(Layout<T>::shape));
+}
 
 static std::string NEML2_help_message = R""""(
 ==============================================================================
@@ -129,78 +151,6 @@ To debug NEML2 related issues:
    https://github.com/applied-material-modeling/neml2/issues
 ==============================================================================
 )"""";
-
-////////////////////////////////////////////////////////////////////////////////
-// Implementations
-////////////////////////////////////////////////////////////////////////////////
-template <typename T>
-neml2::Tensor
-toNEML2Batched(const T & data)
-{
-  std::vector<torch::Tensor> res(data.size());
-  for (const auto i : index_range(data))
-    res[i] = toNEML2<typename T::value_type>(data[i]);
-  return neml2::Tensor(torch::stack(res, 0), 1);
-}
-
-template <typename... Args>
-std::tuple<std::vector<Args>...>
-homogenizeBatchedTuple(const std::vector<std::tuple<Args...>> & from)
-{
-  std::tuple<std::vector<Args>...> to;
-  homogenizeBatchedTupleInner(from, to);
-  return to;
-}
-
-template <size_t I, typename... Args>
-void
-homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
-                            std::tuple<std::vector<Args>...> & to)
-{
-  typedef typename std::tuple_element<I, std::tuple<Args...>>::type Arg;
-  std::vector<Arg> toi;
-  std::transform(from.cbegin(),
-                 from.cend(),
-                 std::back_inserter(toi),
-                 [](const auto & b) { return std::get<I>(b); });
-  std::get<I>(to) = toi;
-
-  // recursively act on the rest of the args
-  if constexpr ((I + 1) < sizeof...(Args))
-    homogenizeBatchedTupleInner<I + 1>(from, to);
-}
-
-template <size_t I, typename T, typename... Ts>
-void
-set(neml2::LabeledVector & v,
-    const std::vector<neml2::VariableName> & indices,
-    const T * t0,
-    const Ts *... t)
-{
-  if (t0)
-    v.base_index_put_(indices[I], toNEML2(*t0));
-
-  // Recursively act on the rest of the data
-  // The compiler should be able to easily deduce the rest of the template parameters...
-  if constexpr (sizeof...(Ts) > 0)
-    set<I + 1>(v, indices, t...);
-}
-
-template <size_t I, typename T, typename... Ts>
-void
-setBatched(neml2::LabeledVector & v,
-           const std::vector<neml2::VariableName> & indices,
-           const T * t0,
-           const Ts *... t)
-{
-  if (t0)
-    v.base_index_put_(indices[I], toNEML2Batched(*t0));
-
-  // recursively act on the rest of the data
-  // The compiler should be able to easily deduce the rest of the template parameters...
-  if constexpr (sizeof...(Ts) > 0)
-    setBatched<I + 1>(v, indices, t...);
-}
 
 #endif // NEML2_ENABLED
 

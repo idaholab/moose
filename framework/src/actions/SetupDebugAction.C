@@ -41,6 +41,9 @@ SetupDebugAction::validParams()
       "show_material_props",
       false,
       "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
+  params.addParam<bool>("show_controllable",
+                        false,
+                        "Print out the controllable parameters from all input parameters");
   params.addParam<bool>("show_mesh_meta_data", false, "Print out the available mesh meta data");
   params.addParam<bool>(
       "show_reporters", false, "Print out information about the declared and requested Reporters");
@@ -165,5 +168,13 @@ SetupDebugAction::act()
     auto params = _factory.getValidParams(type);
     params.set<MultiMooseEnum>("scope") = block_restriction_scope;
     _problem->addOutput(type, "_moose_block_restriction_debug_output", params);
+  }
+
+  // Controllable output
+  if (getParam<bool>("show_controllable"))
+  {
+    const std::string type = "ControlOutput";
+    auto params = _factory.getValidParams(type);
+    _problem->addOutput(type, "_moose_controllable_debug_output", params);
   }
 }

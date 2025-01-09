@@ -36,7 +36,7 @@ MOOSEToNEML2::setMode(MOOSEToNEML2::Mode m) const
   _mode = m;
 
   if (_mode == Mode::VARIABLE || _mode == Mode::OLD_VARIABLE)
-    _neml2_variable = neml2::utils::parse<neml2::VariableName>(_raw_name);
+    _neml2_variable = NEML2Utils::parseVariableName(_raw_name);
   else if (_mode == Mode::PARAMETER)
     _neml2_parameter = _raw_name;
   else
@@ -70,12 +70,13 @@ MOOSEToNEML2::NEML2ParameterName() const
 }
 
 void
-MOOSEToNEML2::insertInto(neml2::Model & model) const
+MOOSEToNEML2::insertInto(neml2::ValueMap & input,
+                         std::map<std::string, neml2::Tensor> & params) const
 {
   if (_mode == Mode::VARIABLE || _mode == Mode::OLD_VARIABLE)
-    model.input_storage().base_index_put_(_neml2_variable, gatheredData());
+    input[_neml2_variable] = gatheredData();
   else if (_mode == Mode::PARAMETER)
-    model.set_parameter(_neml2_parameter, gatheredData());
+    params[_neml2_parameter] = gatheredData();
   else
     mooseError("Encountered invalid Mode in MOOSEToNEML2::insertInto");
 }

@@ -210,6 +210,13 @@ TEST_F(CO2FluidPropertiesTest, propertiesSW)
   REL_TEST(_fp->cp_from_p_T(p, T), 1.1624e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 0.85516e3, tol);
   REL_TEST(_fp->c_from_p_T(p, T), 337.45, tol);
+
+  // Verify properties from p, h
+  {
+    Real h1 = _fp->h_from_p_T(p, T);
+    Real T1 = _fp->T_from_p_h(p, h1);
+    REL_TEST(T1, T, REL_TOL_CONSISTENCY);
+  }
 }
 
 /**

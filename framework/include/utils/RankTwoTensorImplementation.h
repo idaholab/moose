@@ -371,14 +371,6 @@ RankTwoTensorTempl<T>::transpose() const
 
 template <typename T>
 RankTwoTensorTempl<T> &
-RankTwoTensorTempl<T>::operator=(const RankTwoTensorTempl<T> & a)
-{
-  libMesh::TensorValue<T>::operator=(a);
-  return *this;
-}
-
-template <typename T>
-RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator+=(const RankTwoTensorTempl<T> & a)
 {
   libMesh::TensorValue<T>::operator+=(a);

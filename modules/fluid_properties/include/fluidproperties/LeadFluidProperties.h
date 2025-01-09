@@ -111,6 +111,6 @@ public:
 
 private:
   /// Melting temperature of Lead
-  const Real _T_mo;
+  static constexpr Real _T_mo = 600.6;
 };
 #pragma GCC diagnostic pop

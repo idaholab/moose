@@ -15,6 +15,8 @@
 
 #include "Action.h"
 
+class NEML2ActionCommon;
+
 /**
  * Action to set up NEML2 objects.
  */
@@ -28,6 +30,8 @@ public:
   virtual void act() override;
 
 protected:
+  const NEML2ActionCommon & getCommonAction() const;
+
 #ifdef NEML2_ENABLED
 
   enum class MOOSEIOType
@@ -130,6 +134,37 @@ protected:
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
 
+  /// Material property initial conditions
+  std::map<MaterialPropertyName, MaterialPropertyName> _initialize_output_values;
+
   /// Material property additional outputs
   std::map<MaterialPropertyName, std::vector<OutputName>> _export_output_targets;
+
+private:
+#ifdef NEML2_ENABLED
+  /// Get parameter lists for mapping between MOOSE and NEML2 quantities
+  template <typename EnumType, typename T1, typename T2>
+  std::tuple<std::vector<EnumType>, std::vector<T1>, std::vector<T2>>
+  getInputParameterMapping(const std::string & moose_type_opt,
+                           const std::string & moose_name_opt,
+                           const std::string & neml2_name_opt) const
+  {
+    const auto moose_types = getParam<MultiMooseEnum>(moose_type_opt).getSetValueIDs<EnumType>();
+    const auto moose_names = getParam<std::vector<T1>>(moose_name_opt);
+    const auto neml2_names = getParam<std::vector<T2>>(neml2_name_opt);
+
+    if (moose_types.size() != moose_names.size())
+      paramError(moose_name_opt, moose_name_opt, " must have the same length as ", moose_type_opt);
+    if (moose_names.size() != neml2_names.size())
+      paramError(moose_name_opt, moose_name_opt, " must have the same length as ", neml2_name_opt);
+
+    return {moose_types, moose_names, neml2_names};
+  }
+
+  /// Print a summary of the NEML2 model
+  void printSummary(const neml2::Model &) const;
+#endif
+
+  /// Get the maximum length of all MOOSE names (for printing purposes)
+  std::size_t getLongestMOOSEName() const;
 };

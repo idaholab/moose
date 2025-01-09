@@ -69,6 +69,16 @@
     issues = '#27493'
     collections = 'SYSTEM'
     requirement = 'The system shall be capable of modularly interfacing with the NEML2 library to perform constitutive update '
+    [crystal_plasticity]
+      detail = 'in a crystal plasticity problem.'
+      type = Exodiff
+      input = 'crystal_plasticity.i'
+      exodiff = 'crystal_plasticity.e'
+      required_submodule = 'contrib/neml2'
+      libtorch = true
+      recover = false
+      valgrind = heavy
+    []
     [elasticity]
       detail = 'to solve an elasticity problem;'
       type = Exodiff

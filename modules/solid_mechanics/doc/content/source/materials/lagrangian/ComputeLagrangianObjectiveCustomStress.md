@@ -1,23 +1,9 @@
 # ComputeLagrangianObjectiveCustomSymmetricStress
 
-!alert construction title=Undocumented Class
-The ComputeLagrangianObjectiveCustomSymmetricStress has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+Objectively integrated constitutive model with a user-defined small stress and small stress Jacobian, useful for coupling with 3rd party libraries which define custom stress-strain relations.
 
 !syntax description /Materials/ComputeLagrangianObjectiveCustomSymmetricStress
-
-## Overview
-
-!! Replace these lines with information regarding the ComputeLagrangianObjectiveCustomSymmetricStress object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ComputeLagrangianObjectiveCustomSymmetricStress object.
 
 !syntax parameters /Materials/ComputeLagrangianObjectiveCustomSymmetricStress
 
 !syntax inputs /Materials/ComputeLagrangianObjectiveCustomSymmetricStress
-
-!syntax children /Materials/ComputeLagrangianObjectiveCustomSymmetricStress

@@ -480,7 +480,9 @@ TEST(CommandLineTest, initSubAppCommandLine)
   const auto test = [](const std::vector<std::string> & args,
                        const std::string & multiapp_name,
                        const std::string & subapp_name,
-                       const std::vector<std::string> & expected_args)
+                       const std::string & subsubapp_name,
+                       const std::vector<std::string> & expected_args,
+                       const std::vector<std::string> & subexpected_args)
   {
     InputParameters params = emptyInputParameters();
     params.addCommandLineParam<bool>("global", "--global", "Doc1");
@@ -498,6 +500,13 @@ TEST(CommandLineTest, initSubAppCommandLine)
     const auto subapp_cl =
         cl.initSubAppCommandLine(multiapp_name, subapp_name, std::vector<std::string>());
     ASSERT_EQ(expected_args, subapp_cl->getArguments());
+
+    subapp_cl->parse();
+    subapp_cl->populateCommandLineParams(params);
+
+    const auto subsubapp_cl =
+        subapp_cl->initSubAppCommandLine(multiapp_name, subsubapp_name, std::vector<std::string>());
+    ASSERT_EQ(subexpected_args, subsubapp_cl->getArguments());
   };
 
   test({"--global",
@@ -511,8 +520,10 @@ TEST(CommandLineTest, initSubAppCommandLine)
         "sub1:Kernels/active=foo"},
        "sub",
        "sub0",
-       {"--global", "some/value=123", "App/foo=bar", ":Foo/bar=baz", "subsub0:val=5"});
-  test({"--unused", "--another_global"}, "sub", "sub1", {});
+       "subsub0",
+       {"--global", "some/value=123", "App/foo=bar", ":Foo/bar=baz", "subsub0:val=5"},
+       {"--global", ":Foo/bar=baz", "val=5"});
+  test({"--unused", "--another_global"}, "sub", "sub1", "subsub1", {}, {});
 }
 
 TEST(CommandLineTest, requiredParameter)

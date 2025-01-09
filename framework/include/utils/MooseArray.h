@@ -173,10 +173,13 @@ public:
    */
   std::vector<T> stdVector() const;
 
+  ///@{
   /**
    * Reference to first element of array
    */
   const T * data() const { return _data; }
+  T * data() { return _data; }
+  ///@}
 
 private:
   /// Smart pointer storage

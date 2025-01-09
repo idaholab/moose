@@ -13,7 +13,6 @@
     model = 'model'
     verbose = true
     device = 'cpu'
-    enable_AD = true
 
     moose_input_types = 'VARIABLE MATERIAL'
     moose_inputs = '     a        b'
