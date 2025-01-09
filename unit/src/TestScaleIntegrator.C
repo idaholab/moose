@@ -1,7 +1,9 @@
 #ifdef MFEM_ENABLED
 
 #include "gtest/gtest.h"
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 #include "ScaleIntegrator.h"
 
 TEST(CheckData, ScaleIntegratorTestLegacy)
@@ -91,8 +93,6 @@ TEST(CheckData, ScaleIntegratorTestPartial)
 
   platypus::ScaleIntegrator integ_scale(new mfem::MassIntegrator, 2);
 
-  const mfem::FiniteElement & el = *fes.GetFE(0);
-  mfem::ElementTransformation & T = *mesh.GetElementTransformation(0);
   mfem::DenseMatrix m1, m2;
 
   // Partial Assembly
