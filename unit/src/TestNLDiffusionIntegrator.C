@@ -6,29 +6,19 @@ using namespace mfem;
 double f(double u) { return u; }
 double df(double u) { return 1.0; }
 
-// Define a coefficient that, given a grid function u, returns f(u)
-class NonlinearCoefficient : public Coefficient
+// Define a coefficient that, given a grid function u, function func, returns func(u)
+class NonlinearGridFunctionCoefficient : public Coefficient
 {
    GridFunction &gf;
+   std::function<double(double)> func;
 public:
-   NonlinearCoefficient(GridFunction &gf_) : gf(gf_) { }
+   NonlinearGridFunctionCoefficient(GridFunction &gf_, std::function<double(double)> func_) : gf(gf_), func(func_) { }
    double Eval(ElementTransformation &T, const IntegrationPoint &ip)
    {
-      return f(gf.GetValue(T, ip));
+      return func(gf.GetValue(T, ip));
    }
 };
 
-// Define a coefficient that, given a grid function u, returns df(u)
-class NonlinearDerivativeCoefficient : public Coefficient
-{
-   GridFunction &gf;
-public:
-   NonlinearDerivativeCoefficient(GridFunction &gf_) : gf(gf_) { }
-   double Eval(ElementTransformation &T, const IntegrationPoint &ip)
-   {
-      return df(gf.GetValue(T, ip));
-   }
-};
 
 // Define a nonlinear integrator that computes (f(u), v) and its linearized
 // operator, (u df(u), v).
@@ -51,7 +41,7 @@ public:
    {
       fes.GetElementDofs(Tr.ElementNo, dofs);
       gf.SetSubVector(dofs, elfun);
-      NonlinearCoefficient coeff(gf);
+      NonlinearGridFunctionCoefficient coeff(gf, f);
       DomainLFIntegrator integ(coeff);
       integ.AssembleRHSElementVect(el, Tr, elvect);
    }
@@ -62,7 +52,7 @@ public:
    {
       fes.GetElementDofs(Tr.ElementNo, dofs);
       gf.SetSubVector(dofs, elfun);
-      NonlinearDerivativeCoefficient coeff(gf);
+      NonlinearGridFunctionCoefficient coeff(gf, df);
       MassIntegrator integ(coeff);
       integ.AssembleElementMatrix(el, Tr, elmat);
    }
