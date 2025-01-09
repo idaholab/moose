@@ -129,7 +129,7 @@
     cli_args = Outputs/print_automatic_aux_variable_creation=false
     allow_warnings = true
     absent_out = "The following total 145 aux variables:"
-    requirement = "The system shall not show the field variable names for outputting material data added by materials."
+    requirement = "The system shall be able to not show the field variable names for outputting material data added by materials."
     prereq = show_added_aux_vars
   []
 []

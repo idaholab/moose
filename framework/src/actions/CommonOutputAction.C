@@ -111,11 +111,6 @@ CommonOutputAction::validParams()
       "A list of the variables and postprocessors that should be output to the Exodus file "
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
-  params.addParam<bool>("print_automatic_aux_variable_creation",
-                        true,
-                        "Flag to print list of aux variables created for automatic output by "
-                        "MaterialOutputAction.");
-
   // Add the 'execute_on' input parameter
   ExecFlagEnum exec_enum = Output::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};

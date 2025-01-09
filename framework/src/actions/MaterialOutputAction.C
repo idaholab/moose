@@ -21,7 +21,6 @@
 #include "MooseEnum.h"
 #include "MooseVariableConstMonomial.h"
 #include "FunctorMaterial.h"
-#include "CommonOutputAction.h"
 
 #include "libmesh/utility.h"
 
@@ -36,6 +35,10 @@ MaterialOutputAction::validParams()
   /// Note: A derived class can set this to false, override materialOutput and output
   ///       a particular property that is not supported by this class.
   params.addPrivateParam("print_unsupported_prop_names", true);
+  params.addParam<bool>("print_automatic_aux_variable_creation",
+                        true,
+                        "Flag to print list of aux variables created for automatic output by "
+                        "MaterialOutputAction.");
   return params;
 }
 
@@ -191,13 +194,7 @@ MaterialOutputAction::act()
       _problem->addAuxVariable("MooseVariableConstMonomial", var_name, params);
     }
 
-    bool print_aux_creation = true;
-    const auto common_actions = _app.actionWarehouse().getActions<CommonOutputAction>();
-    mooseAssert(common_actions.size() <= 1, "Should not be more than one CommonOutputAction");
-    const Action * common = common_actions.empty() ? nullptr : *common_actions.begin();
-    if (common && !common->getParam<bool>("print_automatic_aux_variable_creation"))
-      print_aux_creation = false;
-    if (material_names.size() > 0 && print_aux_creation)
+    if (material_names.size() > 0 && getParam<bool>("print_automatic_aux_variable_creation"))
       _console << COLOR_CYAN << "The following total " << material_names.size()
                << " aux variables:" << oss.str() << "\nare added for automatic output by " << type()
                << "." << COLOR_DEFAULT << std::endl;
