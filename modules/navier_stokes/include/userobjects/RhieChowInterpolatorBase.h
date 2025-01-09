@@ -9,13 +9,10 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "RhieChowFaceFluxProvider.h"
 #include "TaggingInterface.h"
-#include "BlockRestrictable.h"
-#include "FaceArgInterface.h"
 #include "INSFVPressureVariable.h"
 #include "ADReal.h"
-#include "MooseTypes.h"
 #include "ADFunctorInterface.h"
 #include "INSFVPressureVariable.h"
 #include "libmesh/vector_value.h"
@@ -31,11 +28,9 @@ class Elem;
 class MeshBase;
 }
 
-class RhieChowInterpolatorBase : public GeneralUserObject,
+class RhieChowInterpolatorBase : public RhieChowFaceFluxProvider,
                                  public TaggingInterface,
-                                 public BlockRestrictable,
-                                 public ADFunctorInterface,
-                                 public FaceArgInterface
+                                 public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -65,6 +60,12 @@ public:
                                           const THREAD_ID tid,
                                           bool subtract_mesh_velocity) const = 0;
 
+  virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
+                                     const FaceInfo & fi,
+                                     const Moose::StateArg & time,
+                                     const THREAD_ID tid,
+                                     bool subtract_mesh_velocity) const override;
+
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
 
@@ -83,8 +84,6 @@ public:
 
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   virtual bool segregated() const = 0;
-
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /**
