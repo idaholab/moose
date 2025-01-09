@@ -108,13 +108,10 @@ TEST_F(FunctionTest, AddUnknownFunction)
   InputParameters func_params3 = _factory.getValidParams("LinearCombinationFunction");
   func_params3.set<std::vector<FunctionName>>("functions") = {"coef1", "coef2"};
   func_params3.set<std::vector<double>>("w") = {1., 2.};
-  _mfem_problem->addFunction("LinearCombinationFunction", "coef3", func_params3);
+  EXPECT_THROW(_mfem_problem->addFunction("LinearCombinationFunction", "coef3", func_params3),
+               std::runtime_error);
   _mfem_problem->getFunction("coef1").initialSetup();
   _mfem_problem->getFunction("coef2").initialSetup();
-  _mfem_problem->getFunction("coef3").initialSetup();
-
-  EXPECT_THROW(_mfem_problem->getScalarFunctionCoefficient("coef3"), std::runtime_error);
-  EXPECT_THROW(_mfem_problem->getVectorFunctionCoefficient("coef3"), std::runtime_error);
 }
 
 #endif
