@@ -11,7 +11,7 @@ class MFEMMaterialTest : public MFEMObjectUnitTest
 public:
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point1, point2;
-  MFEMMaterialTest() : MFEMObjectUnitTest("PlatypusApp")
+  MFEMMaterialTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
     point1.Init(3);
     point1.Set3(0., 0., 0.);

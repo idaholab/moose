@@ -15,7 +15,7 @@
 class MFEMKernelTest : public MFEMObjectUnitTest
 {
 public:
-  MFEMKernelTest() : MFEMObjectUnitTest("PlatypusApp") {}
+  MFEMKernelTest() : MFEMObjectUnitTest("MooseUnitApp") {}
 };
 
 /**

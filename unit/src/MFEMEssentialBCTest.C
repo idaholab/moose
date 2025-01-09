@@ -26,7 +26,7 @@ public:
   mfem::VectorConstantCoefficient _vector_zero;
 
   MFEMEssentialBCTest()
-    : MFEMObjectUnitTest("PlatypusApp"),
+    : MFEMObjectUnitTest("MooseUnitApp"),
       _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3),
       _vector_h1_fes(
           _mfem_mesh_ptr->getMFEMParMeshPtr().get(), 1, 3, mfem::BasisType::GaussLobatto, 3),
