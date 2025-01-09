@@ -142,6 +142,22 @@
   []
 []
 
+[AuxVariables]
+  [penetration]
+  []
+[]
+
+[AuxKernels]
+  [penetration]
+    type = PenetrationAux
+    variable = penetration
+    boundary = ball_back
+    paired_boundary = base_front
+    quantity = distance
+  []
+[]
+
+
 [Kernels]
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
