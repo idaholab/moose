@@ -11,7 +11,7 @@
 class MFEMIntegratedBCTest : public MFEMObjectUnitTest
 {
 public:
-  MFEMIntegratedBCTest() : MFEMObjectUnitTest("PlatypusApp") {}
+  MFEMIntegratedBCTest() : MFEMObjectUnitTest("MooseUnitApp") {}
 };
 
 /**

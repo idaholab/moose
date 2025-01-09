@@ -7,7 +7,7 @@ class FunctionTest : public MFEMObjectUnitTest
 public:
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point;
-  FunctionTest() : MFEMObjectUnitTest("PlatypusApp")
+  FunctionTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
     point.Init(3);
     point.Set3(0., 0., 0.);
