@@ -1306,13 +1306,13 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
   _has_dof_values = true;
 
   auto & u = _vector_tag_u[_solution_tag];
-  for (unsigned int qp = 0; qp < u.size(); qp++)
-  {
-    u[qp] = (*_phi)[0][qp] * dof_values[0];
-
-    for (unsigned int i = 1; i < dof_values.size(); i++)
+  const auto nqps = u.size();
+  const auto ndofs = dof_values.size();
+  for (unsigned int qp = 0; qp < nqps; qp++)
+    u[qp] *= 0.;
+  for (unsigned int qp = 0; qp < nqps; qp++)
+    for (unsigned int i = 0; i < ndofs; i++)
       u[qp] += (*_phi)[i][qp] * dof_values[i];
-  }
 }
 
 template <typename OutputType>
@@ -1326,12 +1326,13 @@ MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & valu
   _has_dof_values = true;
 
   auto & u = _vector_tag_u[_solution_tag];
-  for (unsigned int qp = 0; qp < u.size(); qp++)
-  {
-    u[qp] = (*_phi)[0][qp] * dof_values[0];
-    for (unsigned int i = 1; i < dof_values.size(); i++)
+  const auto nqps = u.size();
+  const auto ndofs = dof_values.size();
+  for (unsigned int qp = 0; qp < nqps; qp++)
+    u[qp] *= 0.;
+  for (unsigned int qp = 0; qp < nqps; qp++)
+    for (unsigned int i = 0; i < ndofs; i++)
       u[qp] += (*_phi)[i][qp] * dof_values[i];
-  }
 }
 
 template <typename OutputType>
@@ -1669,10 +1670,11 @@ MooseVariableData<RealEigenVector>::computeIncrementAtNode(
   else
   {
     unsigned int n = 0;
+    const auto n_dof_indices = _dof_indices.size();
     for (unsigned int j = 0; j < _count; j++)
     {
       _increment[0](j) = increment_vec(_dof_indices[0] + n);
-      n += _dof_indices.size();
+      n += n_dof_indices;
     }
   }
 }
