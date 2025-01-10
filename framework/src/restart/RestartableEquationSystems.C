@@ -236,12 +236,20 @@ RestartableEquationSystems::load(std::istream & stream)
     std::vector<dof_id_type> from_ordered_objects_ids;
     dataLoad(stream, from_ordered_objects_ids, nullptr);
     if (_loaded_ordered_objects.size() != from_ordered_objects_ids.size())
-      mooseError("RestartableEquationSystems::load(): Previously stored elements/nodes do not "
-                 "match the current element/nodes");
+      mooseError("RestartableEquationSystems::load(): Number of previously stored elements/nodes (",
+                 _loaded_ordered_objects.size(),
+                 ") does not "
+                 "match the current number of elements/nodes (",
+                 from_ordered_objects_ids.size(),
+                 ")");
     for (const auto i : index_range(_loaded_ordered_objects))
       if (_loaded_ordered_objects[i]->id() != from_ordered_objects_ids[i])
-        mooseError("RestartableEquationSystems::load(): Previously stored elements/nodes do not "
-                   "match the current element/nodes");
+        mooseError("RestartableEquationSystems::load(): Id of previously stored element/node (",
+                   _loaded_ordered_objects[i]->id(),
+                   ") does not "
+                   "match the current element/node id (",
+                   from_ordered_objects_ids[i],
+                   ")");
   }
 
   _loaded_stream_data_begin = static_cast<std::size_t>(stream.tellg());
