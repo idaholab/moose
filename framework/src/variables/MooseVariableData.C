@@ -428,240 +428,221 @@ MooseVariableData<OutputType>::computeValues()
   unsigned int nqp = _current_qrule->n_points();
   auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
-  for (auto tag : _required_vector_tags)
-  {
-    if (_need_vector_tag_u[tag])
-      _vector_tag_u[tag].resize(nqp);
-    if (_need_vector_tag_grad[tag])
-      _vector_tag_grad[tag].resize(nqp);
-  }
-
-  for (auto tag : active_coupleable_matrix_tags)
-    if (_need_matrix_tag_u[tag])
-      _matrix_tag_u[tag].resize(nqp);
-
-  if (_need_second)
-    _second_u.resize(nqp);
-
-  if (_need_curl)
-    _curl_u.resize(nqp);
-
-  if (_need_div)
-    _div_u.resize(nqp);
-
-  if (_need_second_previous_nl)
-    _second_u_previous_nl.resize(nqp);
-
-  if (is_transient)
-  {
-    if (_need_u_dot)
-      _u_dot.resize(nqp);
-
-    if (_need_u_dotdot)
-      _u_dotdot.resize(nqp);
-
-    if (_need_u_dot_old)
-      _u_dot_old.resize(nqp);
-
-    if (_need_u_dotdot_old)
-      _u_dotdot_old.resize(nqp);
-
-    if (_need_du_dot_du)
-      _du_dot_du.resize(nqp);
-
-    if (_need_du_dotdot_du)
-      _du_dotdot_du.resize(nqp);
-
-    if (_need_grad_dot)
-      _grad_u_dot.resize(nqp);
-
-    if (_need_grad_dotdot)
-      _grad_u_dotdot.resize(nqp);
-
-    if (_need_second_old)
-      _second_u_old.resize(nqp);
-
-    if (_need_curl_old)
-      _curl_u_old.resize(nqp);
-
-    if (_need_div_old)
-      _div_u_old.resize(nqp);
-
-    if (_need_second_older)
-      _second_u_older.resize(nqp);
-  }
-
-  for (unsigned int i = 0; i < nqp; ++i)
-  {
-    for (auto tag : _required_vector_tags)
-    {
-      if (_need_vector_tag_u[tag])
-        _vector_tag_u[tag][i] = 0;
-      if (_need_vector_tag_grad[tag])
-        _vector_tag_grad[tag][i] = 0;
-    }
-
-    for (auto tag : active_coupleable_matrix_tags)
-      if (_need_matrix_tag_u[tag])
-        _matrix_tag_u[tag][i] = 0;
-
-    if (_need_second)
-      _second_u[i] = 0;
-
-    if (_need_curl)
-      _curl_u[i] = 0;
-
-    if (_need_div)
-      _div_u[i] = 0;
-
-    if (_need_second_previous_nl)
-      _second_u_previous_nl[i] = 0;
-
-    if (is_transient)
-    {
-      if (_need_u_dot)
-        _u_dot[i] = 0;
-
-      if (_need_u_dotdot)
-        _u_dotdot[i] = 0;
-
-      if (_need_u_dot_old)
-        _u_dot_old[i] = 0;
-
-      if (_need_u_dotdot_old)
-        _u_dotdot_old[i] = 0;
-
-      if (_need_du_dot_du)
-        _du_dot_du[i] = 0;
-
-      if (_need_du_dotdot_du)
-        _du_dotdot_du[i] = 0;
-
-      if (_need_grad_dot)
-        _grad_u_dot[i] = 0;
-
-      if (_need_grad_dotdot)
-        _grad_u_dotdot[i] = 0;
-
-      if (_need_second_old)
-        _second_u_old[i] = 0;
-
-      if (_need_second_older)
-        _second_u_older[i] = 0;
-
-      if (_need_curl_old)
-        _curl_u_old[i] = 0;
-
-      if (_need_div_old)
-        _div_u_old[i] = 0;
-    }
-  }
-
   bool second_required =
       _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
   bool curl_required = _need_curl || _need_curl_old;
   bool div_required = _need_div || _need_div_old;
 
-  for (unsigned int i = 0; i < num_dofs; i++)
+  if (second_required)
+    mooseAssert(_current_second_phi,
+                "We're requiring a second calculation but have not set a second shape function!");
+  if (curl_required)
+    mooseAssert(_current_curl_phi,
+                "We're requiring a curl calculation but have not set a curl shape function!");
+  if (div_required)
+    mooseAssert(_current_div_phi,
+                "We're requiring a divergence calculation but have not set a div shape function!");
+
+  // Curl
+  if (_need_curl)
   {
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    _curl_u.resize(nqp);
+    for (unsigned int i = 0; i < nqp; ++i)
+      _curl_u[i] = 0;
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _curl_u[qp] += (*_current_curl_phi)[i][qp] * _vector_tags_dof_u[_solution_tag][i];
+  }
+  if (_need_curl_old)
+  {
+    _curl_u_old.resize(nqp);
+    for (unsigned int i = 0; i < nqp; ++i)
+      _curl_u_old[i] = 0;
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _curl_u_old[qp] += (*_current_curl_phi)[i][qp] * _vector_tags_dof_u[_old_solution_tag][i];
+  }
+
+  // Div
+  if (_need_div)
+  {
+    _div_u.resize(nqp);
+    for (unsigned int i = 0; i < nqp; ++i)
+      _div_u[i] = 0;
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _div_u[qp] += (*_current_div_phi)[i][qp] * _vector_tags_dof_u[_solution_tag][i];
+  }
+  if (is_transient && _need_div_old)
+  {
+    _div_u_old.resize(nqp);
+    for (unsigned int i = 0; i < nqp; ++i)
+      _div_u_old[i] = 0;
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _div_u_old[qp] += (*_current_div_phi)[i][qp] * _vector_tags_dof_u[_old_solution_tag][i];
+  }
+
+  // Second
+  if (_need_second)
+  {
+    _second_u.resize(nqp);
+    for (unsigned int i = 0; i < nqp; ++i)
+      _second_u[i] = 0;
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _second_u[qp].add_scaled((*_current_second_phi)[i][qp],
+                                 _vector_tags_dof_u[_solution_tag][i]);
+  }
+  if (_need_second_previous_nl)
+  {
+    _second_u_previous_nl.resize(nqp);
+    for (unsigned int i = 0; i < nqp; ++i)
+      _second_u_previous_nl[i] = 0;
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _second_u_previous_nl[qp].add_scaled((*_current_second_phi)[i][qp],
+                                             _vector_tags_dof_u[_previous_nl_solution_tag][i]);
+  }
+  if (is_transient)
+  {
+    if (_need_second_old)
     {
-      const OutputType phi_local = (*_current_phi)[i][qp];
-      const typename OutputTools<OutputType>::OutputGradient dphi_qp = (*_current_grad_phi)[i][qp];
+      _second_u_old.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _second_u_old[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _second_u_old[qp].add_scaled((*_current_second_phi)[i][qp],
+                                       _vector_tags_dof_u[_old_solution_tag][i]);
+    }
 
-      if (is_transient)
-      {
-        if (_need_u_dot)
-          _u_dot[qp] += phi_local * _dof_values_dot[i];
+    if (_need_second_older)
+    {
+      _second_u_older.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _second_u_older[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _second_u_older[qp].add_scaled((*_current_second_phi)[i][qp],
+                                         _vector_tags_dof_u[_older_solution_tag][i]);
+    }
+  }
 
-        if (_need_u_dotdot)
-          _u_dotdot[qp] += phi_local * _dof_values_dotdot[i];
+  for (auto tag : _required_vector_tags)
+  {
+    if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+    {
+      _vector_tag_u[tag].resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _vector_tag_u[tag][i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _vector_tag_u[tag][qp] += (*_current_phi)[i][qp] * _vector_tags_dof_u[tag][i];
+    }
+    if (_need_vector_tag_grad[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+    {
+      _vector_tag_grad[tag].resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _vector_tag_grad[tag][i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _vector_tag_grad[tag][qp].add_scaled((*_current_grad_phi)[i][qp],
+                                               _vector_tags_dof_u[tag][i]);
+    }
+  }
 
-        if (_need_u_dot_old)
-          _u_dot_old[qp] += phi_local * _dof_values_dot_old[i];
+  for (auto tag : active_coupleable_matrix_tags)
+    if (_need_matrix_tag_u[tag])
+    {
+      _matrix_tag_u[tag].resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _matrix_tag_u[tag][i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _matrix_tag_u[tag][qp] += (*_current_phi)[i][qp] * _matrix_tags_dof_u[tag][i];
+    }
 
-        if (_need_u_dotdot_old)
-          _u_dotdot_old[qp] += phi_local * _dof_values_dotdot_old[i];
+  if (is_transient)
+  {
+    if (_need_u_dot)
+    {
+      _u_dot.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _u_dot[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _u_dot[qp] += (*_current_phi)[i][qp] * _dof_values_dot[i];
+    }
 
-        if (_need_grad_dot)
-          _grad_u_dot[qp].add_scaled(dphi_qp, _dof_values_dot[i]);
+    if (_need_u_dotdot)
+    {
+      _u_dotdot.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _u_dotdot[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _u_dotdot[qp] += (*_current_phi)[i][qp] * _dof_values_dotdot[i];
+    }
 
-        if (_need_grad_dotdot)
-          _grad_u_dotdot[qp].add_scaled(dphi_qp, _dof_values_dotdot[i]);
+    if (_need_u_dot_old)
+    {
+      _u_dot_old.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _u_dot_old[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _u_dot_old[qp] += (*_current_phi)[i][qp] * _dof_values_dot_old[i];
+    }
 
-        if (_need_du_dot_du)
+    if (_need_u_dotdot_old)
+    {
+      _u_dotdot_old.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _u_dotdot_old[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _u_dotdot_old[qp] += (*_current_phi)[i][qp] * _dof_values_dotdot_old[i];
+    }
+
+    if (_need_du_dot_du)
+    {
+      _du_dot_du.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _du_dot_du[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
           _du_dot_du[qp] = _dof_du_dot_du[i];
+    }
 
-        if (_need_du_dotdot_du)
+    if (_need_du_dotdot_du)
+    {
+      _du_dotdot_du.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _du_dotdot_du[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
           _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
-      }
+    }
 
-      if (second_required)
-      {
-        mooseAssert(
-            _current_second_phi,
-            "We're requiring a second calculation but have not set a second shape function!");
-        const typename OutputTools<OutputType>::OutputSecond d2phi_local =
-            (*_current_second_phi)[i][qp];
+    if (_need_grad_dot)
+    {
+      _grad_u_dot.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _grad_u_dot[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _grad_u_dot[qp].add_scaled((*_current_grad_phi)[i][qp], _dof_values_dot[i]);
+    }
 
-        if (_need_second)
-          _second_u[qp].add_scaled(d2phi_local, _vector_tags_dof_u[_solution_tag][i]);
-
-        if (_need_second_previous_nl)
-          _second_u_previous_nl[qp].add_scaled(d2phi_local,
-                                               _vector_tags_dof_u[_previous_nl_solution_tag][i]);
-
-        if (is_transient)
-        {
-          if (_need_second_old)
-            _second_u_old[qp].add_scaled(d2phi_local, _vector_tags_dof_u[_old_solution_tag][i]);
-
-          if (_need_second_older)
-            _second_u_older[qp].add_scaled(d2phi_local, _vector_tags_dof_u[_older_solution_tag][i]);
-        }
-      }
-
-      if (curl_required)
-      {
-        mooseAssert(_current_curl_phi,
-                    "We're requiring a curl calculation but have not set a curl shape function!");
-        const OutputType curl_phi_local = (*_current_curl_phi)[i][qp];
-
-        if (_need_curl)
-          _curl_u[qp] += curl_phi_local * _vector_tags_dof_u[_solution_tag][i];
-
-        if (is_transient && _need_curl_old)
-          _curl_u_old[qp] += curl_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
-      }
-
-      if (div_required)
-      {
-        mooseAssert(
-            _current_div_phi,
-            "We're requiring a divergence calculation but have not set a div shape function!");
-        const OutputShapeDivergence div_phi_local = (*_current_div_phi)[i][qp];
-
-        if (_need_div)
-          _div_u[qp] += div_phi_local * _vector_tags_dof_u[_solution_tag][i];
-
-        if (is_transient && _need_div_old)
-          _div_u_old[qp] += div_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
-      }
-
-      for (auto tag : _required_vector_tags)
-      {
-        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
-        {
-          if (_need_vector_tag_u[tag])
-            _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
-          if (_need_vector_tag_grad[tag])
-            _vector_tag_grad[tag][qp].add_scaled(dphi_qp, _vector_tags_dof_u[tag][i]);
-        }
-      }
-
-      for (auto tag : active_coupleable_matrix_tags)
-        if (_need_matrix_tag_u[tag])
-          _matrix_tag_u[tag][qp] += phi_local * _matrix_tags_dof_u[tag][i];
+    if (_need_grad_dotdot)
+    {
+      _grad_u_dotdot.resize(nqp);
+      for (unsigned int i = 0; i < nqp; ++i)
+        _grad_u_dotdot[i] = 0;
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _grad_u_dotdot[qp].add_scaled((*_current_grad_phi)[i][qp], _dof_values_dotdot[i]);
     }
   }
 
