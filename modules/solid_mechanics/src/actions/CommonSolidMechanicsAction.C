@@ -42,16 +42,15 @@ CommonSolidMechanicsAction::act()
   // Add disp-variables
   if (_current_task == "add_variable")
   {
-
-    // helper variables to collect what the user wants
-    bool do_add_variables = isParamSetByUser("add_variables") && getParam<bool>("add_variables");
+    // We set these variables first with the "common" (not nested) level parameters
+    bool do_add_variables = getParam<bool>("add_variables");
     auto displacement_variables = getParam<std::vector<VariableName>>("displacements");
     bool add_variables_block_restricted = true;
     std::set<SubdomainName> add_variables_blocks;
-    bool scaling_set = isParamSetByUser("scaling");
+    bool scaling_set = isParamValid("scaling");
     Real scaling_value = (scaling_set) ? getParam<Real>("scaling") : 1.0;
 
-    // check all sub-actions
+    // Check all nested sub-actions and update the variables keeping track of each selection
     for (const auto & action : actions)
     {
       if (action->getParam<bool>("add_variables"))
@@ -69,16 +68,18 @@ CommonSolidMechanicsAction::act()
         }
 
         // with block-restriction?
-        if (add_variables_block_restricted && action->isParamSetByUser("block"))
+        if (add_variables_block_restricted && action->isParamValid("block") &&
+            action->getParam<std::vector<SubdomainName>>("block").size())
         {
           auto action_blocks = action->getParam<std::vector<SubdomainName>>("block");
+          mooseAssert(action_blocks.size(), "Block restriction must not be empty");
           add_variables_blocks.insert(action_blocks.cbegin(), action_blocks.cend());
         }
         else
           add_variables_block_restricted = false;
 
         // scaling?
-        if (action->getParam<bool>("add_variables") && action->isParamSetByUser("scaling"))
+        if (action->getParam<bool>("add_variables") && action->isParamValid("scaling"))
         {
           const auto scaling = action->getParam<Real>("scaling");
 
@@ -96,7 +97,6 @@ CommonSolidMechanicsAction::act()
     // add the disp-variables, if desired
     if (do_add_variables)
     {
-
       auto params = _factory.getValidParams("MooseVariable");
       // determine necessary order
       const bool second = _problem->mesh().hasSecondOrderElements();
@@ -108,7 +108,7 @@ CommonSolidMechanicsAction::act()
         std::vector<SubdomainName> blks(add_variables_blocks.begin(), add_variables_blocks.end());
         params.set<std::vector<SubdomainName>>("block") = blks;
       }
-      if (scaling_set)
+      if (scaling_set && scaling_value != 1)
         params.set<std::vector<Real>>("scaling") = {scaling_value};
 
       // Loop through the displacement variables
@@ -119,11 +119,10 @@ CommonSolidMechanicsAction::act()
         paramError("displacements",
                    "The number of displacement variables differs from the number of dimensions of "
                    "the mesh.");
+
       for (const auto & disp : displacement_variables)
-      {
         // Create displacement variables
         _problem->addVariable("MooseVariable", disp, params);
-      }
     }
   }
 }
