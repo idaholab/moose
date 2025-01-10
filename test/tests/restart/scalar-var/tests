@@ -16,5 +16,11 @@
       exodiff = part2_out.e
       detail = 'run restart input'
     []
+    [part3]
+      prereq = 'restarting/part1'
+      type = 'RunException'
+      input = part3.i
+      expect_err = 'Two initial conditions have been provided for the variable v. One from the user and one from the restart input file.'
+    []
   []
 []
