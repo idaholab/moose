@@ -56,6 +56,7 @@ AddVariableAction::validParams()
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Specifies a constant initial condition for this variable");
+  params.addParam<std::string>("initial_from_file_var", "Initial from file");
   return params;
 }
 
@@ -131,6 +132,12 @@ AddVariableAction::init()
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`scaling` parameter set, and they are different values. I don't know how you "
                "achieved this, but you need to rectify it.");
+
+  if (_pars.isParamSetByUser("initial_condition") &&
+      _pars.isParamSetByUser("initial_from_file_var"))
+    mooseError("Two initial conditions have been provided for the variable ",
+               name(),
+               ". One from the user and one from the restart input file.");
 
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
