@@ -12,7 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class SolutionUserObject;
+class SolutionUserObjectBase;
 
 /**
  * Compute the value of a variable or the gradient at a specified location.
@@ -52,5 +52,5 @@ protected:
   unsigned int _gradient_component;
 
   /// Pointer to SolutionUserObject containing the solution of interest
-  const SolutionUserObject * _solution_object_ptr;
+  const SolutionUserObjectBase * _solution_object_ptr;
 };

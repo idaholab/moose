@@ -31,7 +31,7 @@ ParsedPostprocessor::validParams()
       {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addParam<bool>(
-      "use_t", false, "Make time (t) variables available in the function expression.");
+      "use_t", false, "Make time (t) variable available in the function expression.");
 
   params.addClassDescription("Computes a parsed expression with post-processors");
   return params;

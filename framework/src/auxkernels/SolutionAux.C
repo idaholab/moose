@@ -9,7 +9,7 @@
 
 #include "MooseError.h"
 #include "SolutionAux.h"
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 
 registerMooseObject("MooseApp", SolutionAux);
 
@@ -39,7 +39,7 @@ SolutionAux::validParams()
 
 SolutionAux::SolutionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _solution_object(getUserObject<SolutionUserObject>("solution")),
+    _solution_object(getUserObject<SolutionUserObjectBase>("solution")),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))

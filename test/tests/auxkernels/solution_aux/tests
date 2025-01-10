@@ -110,6 +110,15 @@
                   "temporal interpolation."
   []
 
+  [exodus_time_transformation]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_interp.i'
+    exodiff = 'solution_aux_exodus_interp_out2.e'
+    cli_args = 'UserObjects/soln/time_transformation=t/2 Outputs/file_base=solution_aux_exodus_interp_out2'
+    requirement = "The SolutionAux object shall be capable of setting an auxiliary variable with "
+                  "temporal interpolation and a time transformation function."
+  []
+
   [exodus_interp_restart]
     requirement = "The system shall be capable of initializing an auxiliary variable from an "
                   "existing solution that"

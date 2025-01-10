@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolutionIC.h"
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
 
@@ -31,7 +31,7 @@ SolutionIC::validParams()
 
 SolutionIC::SolutionIC(const InputParameters & parameters)
   : InitialCondition(parameters),
-    _solution_object(getUserObject<SolutionUserObject>("solution_uo")),
+    _solution_object(getUserObject<SolutionUserObjectBase>("solution_uo")),
     _solution_object_var_name(getParam<VariableName>("from_variable"))
 {
 }
