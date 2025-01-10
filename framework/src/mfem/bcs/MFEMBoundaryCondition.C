@@ -38,15 +38,30 @@ MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
     _bdr_attributes(_boundary_names.size())
 {
-  for (unsigned int i = 0; i < _boundary_names.size(); ++i)
-  {
-    _bdr_attributes[i] = std::stoi(_boundary_names[i]);
-  }
   mfem::ParMesh & mesh(*getMFEMProblem()
                             .getProblemData()
                             .gridfunctions.GetRef(_test_var_name)
                             .ParFESpace()
                             ->GetParMesh());
+
+  for (const auto i : index_range(_boundary_names))
+  {
+    const auto & boundary_name = _boundary_names[i];
+    try
+    {
+      // Is this a boundary ID
+      _bdr_attributes[i] = std::stoi(boundary_name);
+    }
+    catch (...)
+    {
+      // It was not
+      auto & bnd_ids = mesh.bdr_attribute_sets.GetAttributeSet(boundary_name);
+      if (bnd_ids.Size() != 1)
+        this->mooseError(
+            "There should be a 1-to-1 correspondence between boundary name and boundary ID");
+      _bdr_attributes[i] = bnd_ids[0];
+    }
+  }
   mfem::common::AttrToMarker(mesh.bdr_attributes.Max(), _bdr_attributes, _bdr_markers);
 }
 
