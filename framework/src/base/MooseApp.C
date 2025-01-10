@@ -248,6 +248,10 @@ MooseApp::validParams()
   params.setGlobalCommandLineParam("recover");
 
   params.addCommandLineParam<bool>(
+      "suppress_header", "--suppress-header", false, "Flag to print the App header");
+  params.setGlobalCommandLineParam("suppress_header");
+
+  params.addCommandLineParam<bool>(
       "test_checkpoint_half_transient",
       "--test-checkpoint-half-transient",
       "Run half of a transient with checkpoints enabled; used by the TestHarness");
@@ -730,13 +734,8 @@ MooseApp::setupOptions()
   TIME_SECTION("setupOptions", 5, "Setting Up Options");
 
   // Print the header, this is as early as possible
-  auto hdr = header();
-  if (hdr.length() != 0)
-  {
-    if (multiAppLevel() > 0)
-      MooseUtils::indentMessage(_name, hdr);
-    Moose::out << hdr << std::endl;
-  }
+  if (header().length() && !getParam<bool>("suppress_header"))
+    _console << header() << std::endl;
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);

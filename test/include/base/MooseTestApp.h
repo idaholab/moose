@@ -25,4 +25,6 @@ public:
 
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerApps();
+
+  virtual std::string header() const override;
 };
