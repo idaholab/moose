@@ -111,7 +111,30 @@
     type = 'Exodiff'
     input = pinched_cylinder_symm_unstructured.i
     exodiff = 'pinched_cylinder_symm_unstructured_out.e'
-
     requirement = "Shell elements should have compatible stresses even for unstructured meshes."
+  []
+  [pinched_cylinder_symm_local_stress]
+    type = 'Exodiff'
+    input = pinched_cylinder_symm_local_stress.i
+    exodiff = 'pinched_cylinder_symm_local_stress_out.e'
+    requirement = "Shell elements should have compatible local coordinates."
+  []
+  [plate_concentrated_loads]
+    type = 'Exodiff'
+    input = plate_concentrated_loads.i
+    exodiff = 'plate_concentrated_loads_out.e'
+    requirement = "Local force and bending moments should be calculated correctly on the shell element"
+  []
+  [inclined_straintest_local_stress]
+    type = 'Exodiff'
+    input = inclined_straintest_local_stress.i
+    exodiff = 'inclined_straintest_local_stress_out.e'
+    requirement = "Local stresses are calculated correctly on the shell element"
+  []
+  [plate_cantilever]
+    type = 'Exodiff'
+    input = plate_cantilever.i
+    exodiff = 'plate_cantilever_out.e'
+    requirement = "Local stress and bending moment are calculated correctly on the shell element"
   []
 []

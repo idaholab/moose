@@ -32,7 +32,7 @@
 # y = -0.57735 * (t/2) is 10 Pa at any location along the length of the beam.
 
 [Mesh]
-  [./gen]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 1
@@ -42,112 +42,112 @@
     ymin = 0.0
     ymax = 10.0
   []
-  [./rotate]
+  [rotate]
     type = TransformGenerator
     input = gen
     transform = ROTATE
     vector_value = '0 90 0'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./rot_x]
+  []
+  [rot_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./rot_y]
+  []
+  [rot_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     variable = stress_zz
     rank_two_tensor = global_stress_t_points_0
     index_i = 2
     index_j = 2
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     variable = stress_yz
     rank_two_tensor = global_stress_t_points_0
     index_i = 1
     index_j = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./fixr1]
+  []
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./fixr2]
+  []
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./fixx1]
+  []
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 'bottom'
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = ConstantRate
     variable = disp_y
     boundary = 'top'
     rate = 0.5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -163,117 +163,117 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 0
     variable = disp_x
     through_thickness_order = SECOND
-  [../]
-  [./solid_disp_y]
+  []
+  [solid_disp_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 1
     variable = disp_y
     through_thickness_order = SECOND
-  [../]
-  [./solid_disp_z]
+  []
+  [solid_disp_z]
     type = ADStressDivergenceShell
     block = '0'
     component = 2
     variable = disp_z
     through_thickness_order = SECOND
-  [../]
-  [./solid_rot_x]
+  []
+  [solid_rot_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 3
     variable = rot_x
     through_thickness_order = SECOND
-  [../]
-  [./solid_rot_y]
+  []
+  [solid_rot_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 4
     variable = rot_y
     through_thickness_order = SECOND
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ADComputeIsotropicElasticityTensorShell
     youngs_modulus = 2100000
     poissons_ratio = 0.0
     block = 0
     through_thickness_order = SECOND
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ADComputeIncrementalShellStrain
     block = '0'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
     thickness = 0.1
     through_thickness_order = SECOND
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeShellStress
     block = 0
     through_thickness_order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_z_tip]
+  [disp_z_tip]
     type = PointValue
     point = '1.0 0.0 10.0'
     variable = disp_y
-  [../]
-  [./rot_y_tip]
+  []
+  [rot_y_tip]
     type = PointValue
-    point = '0.0 0.0 10.0'
-    variable = rot_y
-  [../]
-  [./stress_zz_el_0]
+    point = '1.0 0.0 10.0'
+    variable = rot_x
+  []
+  [stress_zz_el_0]
     type = ElementalVariableValue
     elementid = 0
     variable = stress_zz
-  [../]
-  [./stress_zz_el_1]
+  []
+  [stress_zz_el_1]
     type = ElementalVariableValue
     elementid = 1
     variable = stress_zz
-  [../]
-  [./stress_zz_el_2]
+  []
+  [stress_zz_el_2]
     type = ElementalVariableValue
     elementid = 2
     variable = stress_zz
-  [../]
-  [./stress_zz_el_3]
+  []
+  [stress_zz_el_3]
     type = ElementalVariableValue
     elementid = 3
     variable = stress_zz
-  [../]
-  [./stress_yz_el_0]
+  []
+  [stress_yz_el_0]
     type = ElementalVariableValue
     elementid = 0
     variable = stress_yz
-  [../]
-  [./stress_yz_el_1]
+  []
+  [stress_yz_el_1]
     type = ElementalVariableValue
     elementid = 1
     variable = stress_yz
-  [../]
-  [./stress_yz_el_2]
+  []
+  [stress_yz_el_2]
     type = ElementalVariableValue
     elementid = 2
     variable = stress_yz
-  [../]
-  [./stress_yz_el_3]
+  []
+  [stress_yz_el_3]
     type = ElementalVariableValue
     elementid = 3
     variable = stress_yz
-  [../]
+  []
 []
 
 [Outputs]

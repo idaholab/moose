@@ -27,7 +27,6 @@
 #     40 x 40          |          0.99           |         -
 #     80 x 80          |          1.01           |         -
 
-
 [Mesh]
   [mesh]
     type = FileMeshGenerator
@@ -84,13 +83,13 @@
   [simply_support_rot_x]
     type = DirichletBC
     variable = rot_x
-    boundary = 'AD BC'
+    boundary = 'AB'
     value = 0.0
   []
   [simply_support_rot_y]
     type = DirichletBC
     variable = rot_y
-    boundary = 'AB'
+    boundary = 'AD BC'
     value = 0.0
   []
 []

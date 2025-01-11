@@ -111,19 +111,19 @@
   [simply_support_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 'CD AB'
+    boundary = 'AB'
     value = 0.0
   []
   [simply_support_rot_x]
     type = DirichletBC
     variable = rot_x
-    boundary = 'CD BC'
+    boundary = 'AD BC'
     value = 0.0
   []
   [simply_support_rot_y]
     type = DirichletBC
     variable = rot_y
-    boundary = 'CD AD'
+    boundary = 'AB'
     value = 0.0
   []
 []
@@ -211,6 +211,7 @@
     rotations = 'rot_x rot_y'
     thickness = 0.01
     through_thickness_order = SECOND
+    reference_first_local_direction = '0 0 1'
   []
   [stress]
     type = ADComputeShellStress

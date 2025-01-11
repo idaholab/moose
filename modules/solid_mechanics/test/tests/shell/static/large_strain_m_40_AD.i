@@ -14,8 +14,8 @@
 # For PL^2/EI = 3, disp_z at tip = 0.6L = 24 m & disp_y at tip = 0.76*L-L = -9.6 m
 
 # The FEM solution at tip of cantilever is:
-# disp_z = 24.85069 m; relative error = 3.54 %
-# disp_y = -9.125937 m; relative error = 5.19 %
+# disp_z = 25.2 m; relative error = 5 %
+# disp_y = -9.42 m; relative error = 1.87 %
 
 [Mesh]
   type = GeneratedMesh
@@ -29,84 +29,84 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./rot_x]
+  []
+  [rot_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./rot_y]
+  []
+  [rot_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
-  [./fixy1]
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
-  [./fixr1]
+  []
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = bottom
     value = 0.0
-  [../]
-  [./fixr2]
+  []
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./fixx1]
+  []
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = UserForcingFunctionNodalKernel
     variable = disp_z
     boundary = top
     function = force_y
-  [../]
+  []
 []
 
 [Functions]
-  [./force_y]
+  [force_y]
     type = PiecewiseLinear
     x = '0.0 1.0 3.0'
     y = '0.0 1.0 1.0'
     scale_factor = 0.140625
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -126,82 +126,82 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 0
     variable = disp_x
     through_thickness_order = SECOND
     large_strain = true
-  [../]
-  [./solid_disp_y]
+  []
+  [solid_disp_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 1
     variable = disp_y
     through_thickness_order = SECOND
     large_strain = true
-  [../]
-  [./solid_disp_z]
+  []
+  [solid_disp_z]
     type = ADStressDivergenceShell
     block = '0'
     component = 2
     variable = disp_z
     through_thickness_order = SECOND
     large_strain = true
-  [../]
-  [./solid_rot_x]
+  []
+  [solid_rot_x]
     type = ADStressDivergenceShell
     block = '0'
     component = 3
     variable = rot_x
     through_thickness_order = SECOND
     large_strain = true
-  [../]
-  [./solid_rot_y]
+  []
+  [solid_rot_y]
     type = ADStressDivergenceShell
     block = '0'
     component = 4
     variable = rot_y
     through_thickness_order = SECOND
     large_strain = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ADComputeIsotropicElasticityTensorShell
     youngs_modulus = 1800
     poissons_ratio = 0.0
     block = 0
     through_thickness_order = SECOND
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ADComputeFiniteShellStrain
     block = '0'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
     thickness = 1.0
     through_thickness_order = SECOND
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeShellStress
     block = 0
     through_thickness_order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_z2]
+  [disp_z2]
     type = PointValue
     point = '1.0 40.0 0.0'
     variable = disp_z
-  [../]
-  [./disp_y2]
+  []
+  [disp_y2]
     type = PointValue
     point = '1.0 40.0 0.0'
     variable = disp_y
-  [../]
+  []
 []
 
 [Outputs]
