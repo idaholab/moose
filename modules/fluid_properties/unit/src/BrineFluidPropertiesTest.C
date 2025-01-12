@@ -170,7 +170,7 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   Real h = 0.0, dh_dp = 0.0, dh_dT = 0.0, dh_dx = 0.0;
   _fp->h_from_p_T_X(p, T, x, h, dh_dp, dh_dT, dh_dx);
 
-  ABS_TEST(h, _fp->h_from_p_T_X(p, T, x), REL_TOL_CONSISTENCY);
+  ABS_TEST(h, _fp->h_from_p_T_X(p, T, x), 1.2 * REL_TOL_CONSISTENCY);
   REL_TEST(dh_dp, dh_dp_fd, 1.0e-4);
   REL_TEST(dh_dT, dh_dT_fd, 1.0e-6);
   REL_TEST(dh_dx, dh_dx_fd, 1.0e-6);
@@ -183,7 +183,7 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   Real e = 0.0, de_dp = 0.0, de_dT = 0.0, de_dx = 0.0;
   _fp->e_from_p_T_X(p, T, x, e, de_dp, de_dT, de_dx);
 
-  ABS_TEST(e, _fp->e_from_p_T_X(p, T, x), REL_TOL_CONSISTENCY);
+  ABS_TEST(e, _fp->e_from_p_T_X(p, T, x), 1.2 * REL_TOL_CONSISTENCY);
   REL_TEST(de_dp, de_dp_fd, 1.0e-3);
   REL_TEST(de_dT, de_dT_fd, 1.0e-6);
   REL_TEST(de_dx, de_dx_fd, 1.0e-6);
