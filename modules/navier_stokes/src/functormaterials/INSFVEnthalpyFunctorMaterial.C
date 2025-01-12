@@ -35,7 +35,7 @@ INSFVEnthalpyFunctorMaterial::validParams()
       NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
 
   // To handle non constant cp
-  params.addParam<bool>("assume_constant_cp", true, "Whether to assume cp is constant");
+  params.addParam<bool>("assumed_constant_cp", true, "Whether to assume cp is constant");
   params.addParam<UserObjectName>(
       NS::fluid, "Fluid properties, to be used when cp is not constant to compute enthalpy");
   params.addParam<MooseFunctorName>(
@@ -50,7 +50,7 @@ INSFVEnthalpyFunctorMaterial::validParams()
 
 INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _assume_constant_cp(getParam<bool>("assume_constant_cp")),
+    _assumed_constant_cp(getParam<bool>("assumed_constant_cp")),
     _fp(isParamValid(NS::fluid)
             ? &UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)
             : nullptr),
@@ -63,15 +63,15 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
            : nullptr)
 {
   // We have to use a warning because fp is often in the global parameters
-  if (_assume_constant_cp && _fp)
+  if (_assumed_constant_cp && _fp)
     paramWarning(
         "fp", "No need to specify fluid properties if assuming the specific enthalpy is constant");
-  if (!_assume_constant_cp && ((!_fp || !_pressure) && !_h))
+  if (!_assumed_constant_cp && ((!_fp || !_pressure) && !_h))
     paramError("fp",
                "Must specify both fluid properties and pressure or an enthalpy functor if not "
                "assuming the specific enthalpy is constant");
 
-  if (_assume_constant_cp)
+  if (_assumed_constant_cp)
   {
     const auto & rho_h =
         addFunctorProperty<ADReal>(NS::enthalpy_density,

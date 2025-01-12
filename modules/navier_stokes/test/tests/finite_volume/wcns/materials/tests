@@ -16,7 +16,7 @@
   [transient_using_h]
     type = 'Exodiff'
     input = 2d-transient.i
-    cli_args = 'FunctorMaterials/ins_fv/assume_constant_cp=false FunctorMaterials/ins_fv/fp=fp FunctorMaterials/ins_fv/pressure=pressure'
+    cli_args = 'FunctorMaterials/ins_fv/assumed_constant_cp=false FunctorMaterials/ins_fv/fp=fp FunctorMaterials/ins_fv/pressure=pressure'
     exodiff = 2d-transient_out.e
     method = "!dbg"
     requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation'
@@ -52,7 +52,7 @@
     custom_cmp = 'dynamic_pressure.cmp'
     prereq = 'neglect_drho_dt_derivatives'
   []
-  [enthalpy_computation]
+  [enthalpy_computation_constant_cp]
     type = 'CSVDiff'
     input = enthalpy_computation.i
     csvdiff = enthalpy_computation_out.csv
@@ -66,7 +66,7 @@
     cli_args = "Outputs/file_base=enthalpy_computation_non_constant_cp_out
                 FunctorMaterials/compute_cp/fp=fp
                 FunctorMaterials/compute_cp/pressure=pressure
-                FunctorMaterials/compute_cp/assume_constant_cp=false"
+                FunctorMaterials/compute_cp/assumed_constant_cp=false"
     requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat.'
     recover = false
   []
@@ -97,7 +97,7 @@
     [missing_fp]
       type = RunException
       input = '2d-transient.i'
-      cli_args = "FunctorMaterials/ins_fv/assume_constant_cp=false"
+      cli_args = "FunctorMaterials/ins_fv/assumed_constant_cp=false"
       expect_err = "Must specify both fluid properties and pressure or an enthalpy functor "
       detail = "not enough parameters are specified when defining the enthalpy functor."
     []

@@ -175,7 +175,7 @@ advected_interp_method = 'upwind'
     rho = 'rho'
     cp = 'cp'
 
-    assume_constant_cp = false
+    assumed_constant_cp = false
     h_in = 'h'
     # fp = 'fp'
     # pressure = 'pressure'

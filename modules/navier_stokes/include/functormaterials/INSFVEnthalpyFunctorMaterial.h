@@ -26,7 +26,7 @@ public:
 
 protected:
   /// whether we can use a constant cp as a shortcut to compute enthalpy
-  bool _assume_constant_cp;
+  bool _assumed_constant_cp;
 
   /// A fluid properties user object to compute enthalpy
   const SinglePhaseFluidProperties * _fp;

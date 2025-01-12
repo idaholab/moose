@@ -135,8 +135,9 @@ advected_interp_method = 'upwind'
     rho = 'rho'
     cp = 'cp'
 
-    assume_constant_cp = false
+    assumed_constant_cp = false
     h_in = 'h'
+    # Alternative to providing 'h': set the fluid property and the pressure parameter
     # fp = 'fp'
     # pressure = 'pressure'
   []
@@ -215,14 +216,14 @@ advected_interp_method = 'upwind'
     variable = T
     boundary = 'right'
   []
-  [T_analytical]
+  [T_analytical_outlet]
     type = Receiver
     default = ${fparse (-A_cp+sqrt(A_cp^2-2*B_cp*(-q_source/rho/bulk_u*L-A_cp*T_in-B_cp/2*T_in*T_in)))/B_cp}
   []
   [error_T]
     type = ParsedPostprocessor
-    expression = 'T_out - T_analytical'
-    pp_names = 'T_out T_analytical'
+    expression = 'T_out - T_analytical_outlet'
+    pp_names = 'T_out T_analytical_outlet'
   []
 []
 

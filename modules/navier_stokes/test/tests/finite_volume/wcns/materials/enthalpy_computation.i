@@ -35,7 +35,7 @@
 
 [FluidProperties]
   [fp]
-    type = Water97FluidProperties
+    type = LeadBismuthFluidProperties
   []
 []
 
@@ -62,7 +62,18 @@
   []
 []
 
+T_mo = 398
+
 [Postprocessors]
+  [min_T]
+    type = ElementExtremeFunctorValue
+    value_type = 'min'
+    functor = 'T_fluid'
+  []
+  [max_T]
+    type = ElementExtremeFunctorValue
+    functor = 'T_fluid'
+  []
   [min_h]
     type = ElementExtremeFunctorValue
     value_type = 'min'
@@ -83,6 +94,22 @@
     value_type = 'max'
     functor = 'rho_h'
   []
+  [expected_min_h]
+    type = ParsedPostprocessor
+    expression = '164.8 * (min_T - T_mo) - 1.97e-2 * (min_T * min_T - T_mo * T_mo) +
+         (1.25e-5 / 3) * (min_T * min_T * min_T - T_mo * T_mo * T_mo) + 4.56e+5 * (1. / min_T - 1. / T_mo)'
+    pp_names = 'min_T'
+    constant_names = 'T_mo'
+    constant_expressions = '${T_mo}'
+  []
+  [expected_max_h]
+    type = ParsedPostprocessor
+    expression = '164.8 * (max_T - T_mo) - 1.97e-2 * (max_T * max_T - T_mo * T_mo) +
+         (1.25e-5 / 3) * (max_T * max_T * max_T - T_mo * T_mo * T_mo) + 4.56e+5 * (1. / max_T - 1. / T_mo)'
+    pp_names = 'max_T'
+    constant_names = 'T_mo'
+    constant_expressions = '${T_mo}'
+  []
 []
 
 
@@ -94,6 +121,7 @@
 
 [Outputs]
   csv = true
+  hide = 'min_T max_T'
 []
 
 [Problem]
