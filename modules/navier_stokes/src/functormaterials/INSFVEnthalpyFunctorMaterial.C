@@ -94,31 +94,23 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
   }
   else if (_h)
   {
-    const auto & rho_h = addFunctorProperty<ADReal>(NS::enthalpy_density,
-                                                    [this](const auto & r, const auto & t)
-                                                    { return _rho(r, t) * (*_h)(r, t); });
+    addFunctorProperty<ADReal>(NS::enthalpy_density,
+                               [this](const auto & r, const auto & t)
+                               { return _rho(r, t) * (*_h)(r, t); });
 
     addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
                                [this](const auto & r, const auto & t) { return _h->dot(r, t); });
-
-    addFunctorProperty<ADReal>(
-        "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
-
-    addFunctorProperty<ADReal>(
-        "cp_temp", [this](const auto & r, const auto & t) -> ADReal { return (*_h)(r, t); });
   }
   else
   {
-    const auto & rho_h = addFunctorProperty<ADReal>(
+    addFunctorProperty<ADReal>(
         NS::enthalpy_density,
         [this](const auto & r, const auto & t)
         { return _rho(r, t) * _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t)); });
 
-    const auto & h =
-        addFunctorProperty<ADReal>(NS::specific_enthalpy,
-                                   [this](const auto & r, const auto & t) {
-                                     return _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t));
-                                   });
+    addFunctorProperty<ADReal>(NS::specific_enthalpy,
+                               [this](const auto & r, const auto & t)
+                               { return _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t)); });
 
     addFunctorProperty<ADReal>(
         NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
@@ -128,11 +120,5 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
           _fp->h_from_p_T((*_pressure)(r, t).value(), _temperature(r, t).value(), h, dh_dp, dh_dT);
           return dh_dT * _temperature.dot(r, t) + dh_dp * _pressure->dot(r, t);
         });
-
-    addFunctorProperty<ADReal>(
-        "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
-
-    addFunctorProperty<ADReal>("cp_temp",
-                               [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
   }
 }
