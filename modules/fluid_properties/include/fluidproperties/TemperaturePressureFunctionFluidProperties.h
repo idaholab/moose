@@ -348,6 +348,17 @@ protected:
   /// function defining dynamic viscosity as a function of temperature and pressure
   const Function * _mu_function;
 
+  /// function defining specific heat as a function of temperature and pressure
+  const Function * _cp_function;
+
   /// constant isochoric specific heat
-  const Real & _cv;
+  const Real _cv;
+  /// whether a constant isochoric specific heat is used
+  const bool _cv_is_constant;
+  /// Reference specific energy
+  const Real _e_ref;
+  /// Reference temperature for the reference specific energy
+  const Real _T_ref;
+  /// Number of steps to take when integrating the specific heat to compute the specific energy
+  const unsigned int _n_integration_dT;
 };
