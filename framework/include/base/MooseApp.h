@@ -1132,9 +1132,6 @@ protected:
    */
   void errorCheck();
 
-  /// The name of this object
-  const std::string _name;
-
   /// Parameters of this object
   InputParameters _pars;
 
