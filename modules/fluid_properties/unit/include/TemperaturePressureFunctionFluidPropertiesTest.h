@@ -70,7 +70,7 @@ protected:
     uo_params2.set<FunctionName>("cp") = "cp_function";
     uo_params2.set<Real>("T_initial_guess") = 250;
     uo_params2.set<Real>("p_initial_guess") = 1e7;
-    uo_params2.set<unsigned int>("n_integration_intervals") = 2000;
+    uo_params2.set<unsigned int>("dT_integration_intervals") = 2000;
 
     _fe_problem->addUserObject("TemperaturePressureFunctionFluidProperties", "fp_cp", uo_params2);
     _fp_cp = &_fe_problem->getUserObject<TemperaturePressureFunctionFluidProperties>("fp_cp");
