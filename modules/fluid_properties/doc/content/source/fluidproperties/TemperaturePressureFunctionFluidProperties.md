@@ -9,9 +9,9 @@ functions. The following relations hold true:
 \begin{aligned}
   x = T \\
   y = P \\
-  \rho = \rho^{user}(t=0, (x=T, y=P, z=0)) \\
-  \mu = \mu^{user}(t=0, (x=T, y=P, z=0)) \\
-  k = k^{user}(t=0, (x=T, y=P, z=0)) \\
+  \rho = \rho^{u}(t=0, (x=T, y=P, z=0)) \\
+  \mu = \mu^{u}(t=0, (x=T, y=P, z=0)) \\
+  k = k^{u}(t=0, (x=T, y=P, z=0)) \\
 \end{aligned}
 \end{equation}
 
@@ -21,7 +21,7 @@ There are two options for specific heat. Either the user sets a constant specifi
 
 \begin{equation}
 \begin{aligned}
-  c_v = c_v^{user} \\
+  c_v = c_v^{u} \\
   e = e_{ref} + c_v * (T - T_{ref})
 \end{aligned}
 \end{equation}
@@ -32,13 +32,13 @@ Or, the user uses a function of temperature and pressure (same arguments as for 
 \begin{aligned}
   x = T \\
   y = P \\
-  cp = cp^{user}(t=0, (x=T, y=P, z=0))
-  cv = cp - \dfrac{\alpha ^ 2 T}{\rho \beta_T}
+  cp = cp^{u}(t=0, (x=T, y=P, z=0))
+  cv = cp - \dfrac{\alpha^2 T}{\rho \beta_T}
 \end{aligned}
 \end{equation}
 
 with $T$ the temperature, $P$ the pressure, $\rho$ the density, $\mu$ the dynamic viscosity, $k$ the thermal conductivity, $c_v$ the specific isochoric heat capacity, $e$ the specific internal energy, $T_{ref}$ a reference temperature at which the specific internal energy is equal to a reference energy $e_{ref}$, $\alpha$ the coefficient of thermal expansion, $\beta_T$ the isothermal
-compressibility, and the $user$ exponent indicating a user-passed parameter.
+compressibility, and the $^u$ exponent indicating a user-passed parameter.
 
 The derivatives of the fluid properties are obtained using the `Function`(s) gradient components
 and the appropriate derivative chaining for derived properties.
