@@ -111,6 +111,11 @@ TabulatedFluidProperties::validParams()
       false,
       "Option to use a base-10 logarithmically-spaced grid for specific internal energy instead "
       "of a linearly-spaced grid.");
+  params.addParam<bool>(
+      "use_log_grid_h",
+      false,
+      "Option to use a base-10 logarithmically-spaced grid for specific enthalpy instead "
+      "of a linearly-spaced grid.");
 
   // Out of bounds behavior
   params.addDeprecatedParam<bool>(
@@ -120,7 +125,7 @@ TabulatedFluidProperties::validParams()
       "This parameter has been replaced by the 'out_of_bounds_behavior' parameter which offers "
       "more flexibility. The option to error is called 'throw' in that parameter.");
   // NOTE: this enum must remain the same as OOBBehavior in the header
-  MooseEnum OOBBehavior("ignore throw declare_invalid set_to_closest_bound", "throw");
+  MooseEnum OOBBehavior("ignore throw declare_invalid warn_invalid set_to_closest_bound", "throw");
   params.addParam<MooseEnum>("out_of_bounds_behavior",
                              OOBBehavior,
                              "Property evaluation behavior when evaluated outside the "
@@ -132,14 +137,17 @@ TabulatedFluidProperties::validParams()
   params.addParam<bool>(
       "allow_fp_and_tabulation", false, "Whether to allow the two sources of data concurrently");
 
-  params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
+  params.addParamNamesToGroup("fluid_property_file fluid_property_ve_file "
+                              "fluid_property_output_file fluid_property_ve_output_file",
+                              "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
                               "Variable set conversion");
   params.addParamNamesToGroup("temperature_min temperature_max pressure_min pressure_max e_min "
                               "e_max v_min v_max error_on_out_of_bounds out_of_bounds_behavior",
                               "Tabulation and interpolation bounds");
-  params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v",
-                              "Tabulation and interpolation discretization");
+  params.addParamNamesToGroup(
+      "num_T num_p num_v num_e use_log_grid_v use_log_grid_e use_log_grid_h",
+      "Tabulation and interpolation discretization");
 
   return params;
 }
@@ -200,6 +208,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_e(getParam<unsigned int>("num_e")),
     _log_space_v(getParam<bool>("use_log_grid_v")),
     _log_space_e(getParam<bool>("use_log_grid_e")),
+    _log_space_h(getParam<bool>("use_log_grid_h")),
     _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
@@ -231,7 +240,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
   }
   else if (isParamValid("v_min") || isParamValid("v_max"))
     paramError("v_min",
-               "Either both or none of the min and max values of the specific internal energy "
+               "Either both or none of the min and max values of the specific volume "
                "should be specified");
   else
     _v_bounds_specified = false;
@@ -279,8 +288,12 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
         "from the bounds of the input tabulation.");
   if (!_fp && !_file_name_ve_in.empty() && (isParamSetByUser("num_e") || isParamSetByUser("num_v")))
     mooseWarning("User-specified grid sizes in specific volume and internal energy are ignored "
-                 "when reading a 'fluid_property_ve_file'. The tabulation bounds are selected "
-                 "from the bounds of the input tabulation.");
+                 "when reading a 'fluid_property_ve_file'. The tabulation widths are read "
+                 "from the input tabulation.");
+  if (!_file_name_ve_in.empty() && (_log_space_v || _log_space_e))
+    mooseWarning(
+        "User specfied logarithmic grids in specific volume and energy are ignored when reading a "
+        "'fluid_properties_ve_file'. The tabulation grid is read from the input tabulation");
 }
 
 void
@@ -545,8 +558,13 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
   { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, rho, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                             rho,
+                                             _T_initial_guess,
+                                             _tolerance,
+                                             lambda,
+                                             name() + "::T_from_p_rho",
+                                             _max_newton_its)
                .first;
   // check for nans
   if (std::isnan(T))
@@ -573,8 +591,13 @@ TabulatedFluidProperties::T_from_p_s(Real pressure, Real s) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_s, Real & ds_dp, Real & ds_dT)
   { s_from_p_T(p, current_T, new_s, ds_dp, ds_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, s, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_s")
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                             s,
+                                             _T_initial_guess,
+                                             _tolerance,
+                                             lambda,
+                                             name() + "::T_from_p_s",
+                                             _max_newton_its)
                .first;
   // check for nans
   if (std::isnan(T))
@@ -875,7 +898,8 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
                                                /*e initial guess*/ h - _p_initial_guess * v,
                                                _tolerance,
                                                lambda,
-                                               name() + "::e_from_v_h")
+                                               name() + "::e_from_v_h",
+                                               _max_newton_its)
                  .first;
     return e;
   }
@@ -911,7 +935,8 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
                                           /*e initial guess*/ h - _p_initial_guess * v,
                                           _tolerance,
                                           lambda,
-                                          name() + "::e_from_v_h");
+                                          name() + "::e_from_v_h",
+                                          _max_newton_its);
     e = e_data.first;
     // Finite difference approximation
     const auto e2 = e_from_v_h(v * (1 + TOLERANCE), h);
@@ -1773,6 +1798,8 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
       pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Pressure out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Pressure out of bounds");
     }
   }
 
@@ -1789,6 +1816,8 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
       temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Temperature out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Temperature out of bounds");
     }
   }
 }
@@ -1810,6 +1839,8 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
       e = std::max(_e_min, std::min(e, _e_max));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Specific internal energy out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Specific internal energy out of bounds");
     }
   }
 
@@ -1824,6 +1855,8 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
       v = std::max(T(_v_min), std::min(v, T(_v_max)));
       if (_OOBBehavior == DeclareInvalid)
         flagInvalidSolution("Specific volume out of bounds");
+      else if (_OOBBehavior == WarnInvalid)
+        flagSolutionWarning("Specific volume out of bounds");
     }
   }
 }
@@ -1989,10 +2022,6 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
       paramError("construct_pT_from_ve",
                  "Reading a (v,e) tabulation and generating (p,T) to (v,e) interpolation tables is "
                  "not supported at this time.");
-    if (_construct_pT_from_vh)
-      paramError("construct_pT_from_vh",
-                 "Reading a (v,e) tabulation and generating (p,T) to (v,h) interpolation tables is "
-                 "not supported at this time.");
 
     // Make sure we use the tabulation bounds
     _e_bounds_specified = true;
@@ -2139,9 +2168,9 @@ TabulatedFluidProperties::computePropertyIndicesInInterpolationVectors()
 }
 
 void
-TabulatedFluidProperties::createVEGridVectors()
+TabulatedFluidProperties::createVGridVector()
 {
-  mooseAssert(_file_name_ve_in.empty(), "We should be reading the (v, e) grid from file");
+  mooseAssert(_file_name_ve_in.empty(), "We should be reading the specific volume grid from file");
   if (!_v_bounds_specified)
   {
     if (_fp)
@@ -2164,6 +2193,8 @@ TabulatedFluidProperties::createVEGridVectors()
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
+    // Prevent changing the bounds of the grid
+    _v_bounds_specified = true;
   }
 
   // Create v grid for interpolation
@@ -2183,7 +2214,12 @@ TabulatedFluidProperties::createVEGridVectors()
     for (unsigned int j = 0; j < _num_v; ++j)
       _specific_volume[j] = _v_min + j * dv;
   }
+}
 
+void
+TabulatedFluidProperties::createVEGridVectors()
+{
+  createVGridVector();
   if (!_e_bounds_specified)
   {
     if (_fp)
@@ -2226,6 +2262,60 @@ TabulatedFluidProperties::createVEGridVectors()
     Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
     for (const auto j : make_range(_num_e))
       _internal_energy[j] = _e_min + j * de;
+  }
+}
+
+void
+TabulatedFluidProperties::createVHGridVectors()
+{
+  if (_file_name_ve_in.empty())
+    createVGridVector();
+  if (_fp)
+  {
+    // extreme values of enthalpy for the grid bounds
+    Real h1 = h_from_p_T(_pressure_min, _temperature_min);
+    Real h2 = h_from_p_T(_pressure_max, _temperature_min);
+    Real h3 = h_from_p_T(_pressure_min, _temperature_max);
+    Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+    _h_min = std::min({h1, h2, h3, h4});
+    _h_max = std::max({h1, h2, h3, h4});
+  }
+  // if csv exists, get max and min values from csv file
+  else if (_properties.size())
+  {
+    _h_max = *max_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+    _h_min = *min_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+  }
+  else if (_properties_ve.size())
+  {
+    _h_max = *max_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+    _h_min = *min_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+  }
+  else
+    mooseError("Need a source to compute the enthalpy grid bounds: either a FP object, or a (p,T) "
+               "tabulation file or a (v,e) tabulation file");
+
+  // Create h grid for interpolation
+  // enthalpy & internal energy use same # grid points
+  _enthalpy.resize(_num_e);
+  if (_log_space_h)
+  {
+    // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
+    // the power of 10
+    if (_h_min < 0)
+      mooseError("Logarithmic grid in specific energy can only be used with a positive enthalpy. "
+                 "Current minimum: " +
+                 std::to_string(_h_min));
+    Real dh = (std::log10(_h_max) - std::log10(_h_min)) / ((Real)_num_e - 1);
+    Real log_h_min = std::log10(_h_min);
+    for (const auto j : make_range(_num_e))
+      _enthalpy[j] = std::pow(10, log_h_min + j * dh);
+  }
+  else
+  {
+    Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
+    for (const auto j : make_range(_num_e))
+      _enthalpy[j] = _h_min + j * dh;
   }
 }
 

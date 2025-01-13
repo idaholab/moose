@@ -69,8 +69,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
   bool conversion_succeeded = true;
   unsigned int fail_counter_ve = 0;
   unsigned int fail_counter_vh = 0;
-  // Create interpolations of (p,T) from (v,e) and (v,h)
-  if (_construct_pT_from_ve || _construct_pT_from_vh)
+  // Create interpolations of (p,T) from (v,e)
+  if (_construct_pT_from_ve)
   {
     // Grids in specific volume and internal energy can be either linear or logarithmic
     // NOTE: this could have been called already when generating tabulated data
@@ -159,31 +159,12 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         std::make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
   }
 
+  // Create interpolations of (p,T) from (v,h)
   if (_construct_pT_from_vh)
   {
-    if (_fp)
-    {
-      // extreme values of enthalpy for the grid bounds
-      Real h1 = h_from_p_T(_pressure_min, _temperature_min);
-      Real h2 = h_from_p_T(_pressure_max, _temperature_min);
-      Real h3 = h_from_p_T(_pressure_min, _temperature_max);
-      Real h4 = h_from_p_T(_pressure_max, _temperature_max);
-      _h_min = std::min({h1, h2, h3, h4});
-      _h_max = std::max({h1, h2, h3, h4});
-    }
-    // if csv exists, get max and min values from csv file
-    else
-    {
-      _h_max = *max_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
-      _h_min = *min_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
-    }
-    Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
-
-    // Create h grid for interpolation
-    // enthalpy & internal energy use same # grid points
-    _enthalpy.resize(_num_e);
-    for (unsigned int j = 0; j < _num_e; ++j)
-      _enthalpy[j] = _h_min + j * dh;
+    // Grids in specific volume and enthalpy can be either linear or logarithmic
+    // NOTE: the specific volume grid could have been created when generating tabulated data
+    createVHGridVectors();
 
     // initialize vectors for interpolation
     std::vector<std::vector<Real>> p_from_v_h(_num_v);

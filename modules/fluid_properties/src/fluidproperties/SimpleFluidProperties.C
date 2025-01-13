@@ -67,7 +67,8 @@ SimpleFluidProperties::molarMass() const
   return _molar_mass;
 }
 
-Real SimpleFluidProperties::beta_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+SimpleFluidProperties::beta_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_expansion;
 }
@@ -81,7 +82,8 @@ SimpleFluidProperties::beta_from_p_T(
   dbeta_dT = 0.0;
 }
 
-Real SimpleFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+SimpleFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _cp;
 }
@@ -95,7 +97,11 @@ SimpleFluidProperties::cp_from_p_T(
   dcp_dT = 0.0;
 }
 
-Real SimpleFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
+Real
+SimpleFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _cp;
+}
 
 void
 SimpleFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
@@ -105,7 +111,8 @@ SimpleFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Rea
   dcp_de = 0.0;
 }
 
-Real SimpleFluidProperties::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+SimpleFluidProperties::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _cv;
 }
@@ -119,7 +126,11 @@ SimpleFluidProperties::cv_from_p_T(
   dcv_dT = 0.0;
 }
 
-Real SimpleFluidProperties::cv_from_v_e(Real /*v*/, Real /*e*/) const { return _cv; }
+Real
+SimpleFluidProperties::cv_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _cv;
+}
 
 void
 SimpleFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
@@ -171,7 +182,8 @@ SimpleFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real &
   dc_de = 0.0;
 }
 
-Real SimpleFluidProperties::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+SimpleFluidProperties::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
@@ -185,7 +197,8 @@ SimpleFluidProperties::k_from_p_T(
   dk_dT = 0;
 }
 
-Real SimpleFluidProperties::k_from_v_e(Real /*v*/, Real /*e*/) const
+Real
+SimpleFluidProperties::k_from_v_e(Real /*v*/, Real /*e*/) const
 {
   return _thermal_conductivity;
 }
@@ -199,7 +212,8 @@ SimpleFluidProperties::k_from_v_e(
   dk_de = 0;
 }
 
-Real SimpleFluidProperties::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+SimpleFluidProperties::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
 }
@@ -213,12 +227,17 @@ SimpleFluidProperties::s_from_p_T(
   ds_dT = 0;
 }
 
-Real SimpleFluidProperties::s_from_h_p(Real /*enthalpy*/, Real /*pressure*/) const
+Real
+SimpleFluidProperties::s_from_h_p(Real /*enthalpy*/, Real /*pressure*/) const
 {
   return _specific_entropy;
 }
 
-Real SimpleFluidProperties::s_from_v_e(Real /*v*/, Real /*e*/) const { return _specific_entropy; }
+Real
+SimpleFluidProperties::s_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _specific_entropy;
+}
 
 void
 SimpleFluidProperties::s_from_v_e(
@@ -326,7 +345,7 @@ SimpleFluidProperties::T_from_p_h(Real p, Real h) const
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(p, current_T, new_rho, dh_dp, dh_dT); };
   return FluidPropertiesUtils::NewtonSolve(
-             p, h, T_initial, _tolerance, lambda, name() + "::T_from_p_h")
+             p, h, T_initial, _tolerance, lambda, name() + "::T_from_p_h", _max_newton_its)
       .first;
 }
 
@@ -429,7 +448,8 @@ SimpleFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real &
   de_dh = de_dp * dp_dh + de_dT * dT_dh;
 }
 
-Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _viscosity;
 }
@@ -443,7 +463,11 @@ SimpleFluidProperties::mu_from_p_T(
   dmu_dT = 0.0;
 }
 
-Real SimpleFluidProperties::mu_from_v_e(Real /*v*/, Real /*e*/) const { return _viscosity; }
+Real
+SimpleFluidProperties::mu_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _viscosity;
+}
 
 void
 SimpleFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const

@@ -64,7 +64,7 @@ TemperaturePressureFunctionFluidProperties::T_from_p_h(Real p, Real h) const
   auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
   Real T = FluidPropertiesUtils::NewtonSolve(
-               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h", _max_newton_its)
                .first;
   // check for nans
   if (std::isnan(T))
@@ -115,7 +115,8 @@ TemperaturePressureFunctionFluidProperties::cp_from_v_e(
   dcp_de = (cp_pert - cp) / eps / e;
 }
 
-Real TemperaturePressureFunctionFluidProperties::cv_from_v_e(Real /* v */, Real /* e */) const
+Real
+TemperaturePressureFunctionFluidProperties::cv_from_v_e(Real /* v */, Real /* e */) const
 {
   return _cv;
 }
@@ -304,8 +305,9 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(
   dcp_dT = pressure * d2v_dT2;
 }
 
-Real TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real /* pressure */,
-                                                             Real /* temperature */) const
+Real
+TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real /* pressure */,
+                                                        Real /* temperature */) const
 {
   return _cv;
 }
