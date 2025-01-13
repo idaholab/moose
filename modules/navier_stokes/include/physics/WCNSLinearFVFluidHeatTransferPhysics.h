@@ -13,14 +13,15 @@
 #include "NS.h"
 
 /**
- * Creates all the objects needed to solve the Navier Stokes energy equation
+ * Creates all the objects needed to solve the Navier Stokes energy equation using a linear finite
+ * volume discretization
  */
-class WCNSFVFluidHeatTransferPhysics final : public WCNSFVFluidHeatTransferPhysicsBase
+class WCNSLinearFVFluidHeatTransferPhysics final : public WCNSFVFluidHeatTransferPhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters);
+  WCNSLinearFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
 protected:
 private:
@@ -42,5 +43,5 @@ private:
   /// These are used for weakly-compressible simulations as well.
   void addINSEnergyInletBC() override;
   void addINSEnergyWallBC() override;
-  void addINSEnergyOutletBC() override {}
+  void addINSEnergyOutletBC() override;
 };

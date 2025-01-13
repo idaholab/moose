@@ -261,9 +261,9 @@ WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
       if (gravity_vector(d) != 0)
       {
         params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
-        params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+        params.set<LinearVariableName>("variable") = _velocity_names[d];
 
-        getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+        getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
       }
   }
 }
@@ -370,6 +370,7 @@ WCNSLinearFVFlowPhysics::addINSOutletBC()
       const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
+      params.set<bool>("use_two_term_expansion") = getParam<bool>("momentum_two_term_bc_expansion");
 
       for (const auto d : make_range(dimension()))
       {

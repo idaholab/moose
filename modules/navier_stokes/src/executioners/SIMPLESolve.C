@@ -18,6 +18,54 @@ InputParameters
 SIMPLESolve::validParams()
 {
   InputParameters params = SIMPLESolveBase::validParams();
+
+  /*
+   * Parameters to control the solution of each scalar advection system
+   */
+  params.addParam<std::vector<Real>>("active_scalar_equation_relaxation",
+                                     std::vector<Real>(),
+                                     "The relaxation which should be used for the active scalar "
+                                     "equations. (=1 for no relaxation, "
+                                     "diagonal dominance will still be enforced)");
+
+  params.addParam<MultiMooseEnum>("active_scalar_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the active scalar equation(s)");
+  params.addParam<MultiMooseEnum>(
+      "active_scalar_petsc_options_iname",
+      Moose::PetscSupport::getCommonPetscKeys(),
+      "Names of PETSc name/value pairs for the active scalar equation(s)");
+  params.addParam<std::vector<std::string>>(
+      "active_scalar_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "active scalar equation(s)");
+  params.addParam<std::vector<Real>>(
+      "active_scalar_absolute_tolerance",
+      std::vector<Real>(),
+      "The absolute tolerance(s) on the normalized residual(s) of the active scalar equation(s).");
+  params.addRangeCheckedParam<Real>("active_scalar_l_tol",
+                                    1e-5,
+                                    "0.0<=active_scalar_l_tol & active_scalar_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the active scalar equation(s).");
+  params.addRangeCheckedParam<Real>("active_scalar_l_abs_tol",
+                                    1e-10,
+                                    "0.0<active_scalar_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the active scalar equation(s).");
+  params.addParam<unsigned int>(
+      "active_scalar_l_max_its",
+      10000,
+      "The maximum allowed iterations in the linear solver of the turbulence equation.");
+
+  params.addParamNamesToGroup(
+      "active_scalar_systems active_scalar_equation_relaxation active_scalar_petsc_options "
+      "active_scalar_petsc_options_iname "
+      "active_scalar_petsc_options_value active_scalar_petsc_options_value "
+      "active_scalar_absolute_tolerance "
+      "active_scalar_l_tol active_scalar_l_abs_tol active_scalar_l_max_its",
+      "Active Scalars Equations");
+
   return params;
 }
 
@@ -28,7 +76,14 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
-    _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr)
+    _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr),
+    _active_scalar_system_names(getParam<std::vector<SolverSystemName>>("active_scalar_systems")),
+    _has_active_scalar_systems(!_active_scalar_system_names.empty()),
+    _active_scalar_equation_relaxation(
+        getParam<std::vector<Real>>("active_scalar_equation_relaxation")),
+    _active_scalar_l_abs_tol(getParam<Real>("active_scalar_l_abs_tol")),
+    _active_scalar_absolute_tolerance(
+        getParam<std::vector<Real>>("active_scalar_absolute_tolerance"))
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -44,6 +99,15 @@ SIMPLESolve::SIMPLESolve(Executioner & ex)
           _problem.linearSysNum(_passive_scalar_system_names[system_i]));
       _passive_scalar_systems.push_back(
           &_problem.getLinearSystem(_passive_scalar_system_numbers[system_i]));
+    }
+  // and for the active scalar equations
+  if (_has_active_scalar_systems)
+    for (auto system_i : index_range(_active_scalar_system_names))
+    {
+      _active_scalar_system_numbers.push_back(
+          _problem.linearSysNum(_active_scalar_system_names[system_i]));
+      _active_scalar_systems.push_back(
+          &_problem.getLinearSystem(_active_scalar_system_numbers[system_i]));
     }
 }
 
@@ -271,6 +335,10 @@ SIMPLESolve::solveAdvectedSystem(const unsigned int system_num,
 bool
 SIMPLESolve::solve()
 {
+  // Do not solve if problem is set not to
+  if (!_problem.shouldSolve())
+    return true;
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;
@@ -280,12 +348,16 @@ SIMPLESolve::solve()
   unsigned int iteration_counter = 0;
 
   // Assign residuals to general residual vector
-  const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system;
+  const unsigned int no_systems =
+      _momentum_systems.size() + 1 + _has_energy_system + _active_scalar_absolute_tolerance.size();
   std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
   std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
   if (_has_energy_system)
     ns_abs_tols.push_back(_energy_absolute_tolerance);
+  if (_has_active_scalar_systems)
+    for (const auto scalar_tol : _active_scalar_absolute_tolerance)
+      ns_abs_tols.push_back(scalar_tol);
 
   bool converged = false;
   // Loop until converged or hit the maximum allowed iteration number
@@ -352,6 +424,22 @@ SIMPLESolve::solve()
                                                                        _energy_linear_control,
                                                                        _energy_l_abs_tol);
     }
+
+    // If we have active scalar equations, solve them here in case they depend on temperature
+    if (_has_active_scalar_systems && converged)
+    {
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
+      for (const auto i : index_range(_active_scalar_system_names))
+        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i] =
+            solveAdvectedSystem(_active_scalar_system_numbers[i],
+                                *_active_scalar_systems[i],
+                                _active_scalar_equation_relaxation[i],
+                                _active_scalar_linear_control,
+                                _active_scalar_l_abs_tol);
+    }
+
     _problem.execute(EXEC_NONLINEAR);
 
     // Printing residuals
@@ -372,6 +460,15 @@ SIMPLESolve::solve()
       _console << " Energy equation: " << COLOR_GREEN
                << ns_residuals[momentum_residual.size() + 1].second << COLOR_DEFAULT
                << " Linear its: " << ns_residuals[momentum_residual.size() + 1].first << std::endl;
+
+    if (_has_active_scalar_systems)
+      _console << " Active scalar equations:\n";
+    for (const auto i : index_range(_active_scalar_system_names))
+      _console << COLOR_GREEN << "    " << _active_scalar_system_names[i] << ": "
+               << ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i].second
+               << COLOR_DEFAULT << " Linear its: "
+               << ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i].first
+               << std::endl;
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }

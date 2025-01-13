@@ -8,8 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DumpObjectsProblem.h"
+#include "DumpObjectsAction.h"
 #include "DumpObjectsNonlinearSystem.h"
+#include "DumpObjectsLinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "InputParameters.h"
 #include <sstream>
 
 #include "libmesh/string_to_enum.h"
@@ -32,17 +35,40 @@ DumpObjectsProblem::validParams()
       true,
       "Whether to include all parameters that have been specified by a user in the dump, even if "
       "they match the default value of the parameter in the Factory");
+
+  // Change the default because any complex solve or executioners needs the problem to perform its
+  // setup duties (all the calls in initialSetup()) which are skipped by the DumpObjectsProblem
+  params.addParam<bool>(
+      "solve",
+      false,
+      "Whether to attempt to solve the Problem. This will only cause additional outputs of the "
+      "objects and their parameters. This is unlikely to succeed with more complex executioners.");
   return params;
 }
 
 DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   : FEProblemBase(parameters),
-    _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0")),
     _include_all_user_specified_params(getParam<bool>("include_all_user_specified_params"))
 {
-  _nl[0] = _nl_sys;
-  _solver_systems[0] = std::dynamic_pointer_cast<SolverSystem>(_nl[0]);
+  // Make dummy systems based on parameters passed
+  _solver_systems.resize(0);
+  for (const auto i : index_range(_nl_sys_names))
+  {
+    const auto & sys_name = _nl_sys_names[i];
+    const auto & new_sys = std::make_shared<DumpObjectsNonlinearSystem>(*this, sys_name);
+    _solver_systems.push_back(new_sys);
+    _nl[i] = new_sys;
+  }
+  for (const auto i : index_range(_linear_sys_names))
+  {
+    const auto & sys_name = _linear_sys_names[i];
+    const auto & new_sys = std::make_shared<DumpObjectsLinearSystem>(*this, sys_name);
+    _solver_systems.push_back(new_sys);
+    _linear_systems[i] = new_sys;
+  }
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
+
+  // Create a dummy assembly for the systems at hand
   newAssemblyArray(_solver_systems);
 
   // Create extra vectors and matrices if any
@@ -50,6 +76,15 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
 
   // Create extra solution vectors if any
   createTagSolutions();
+
+  // Add an action to call printObjects at the end of the action/tasks phase
+  // NOTE: We previously relied on problem.solve() but some executioners (SIMPLE in NavierStokes) do
+  // not support this
+  auto action_params = _app.getActionFactory().getValidParams("DumpObjectsAction");
+  action_params.applyParameters(parameters);
+  auto dump_objects_action =
+      _app.getActionFactory().create("DumpObjectsAction", "dump_objects", action_params);
+  _app.actionWarehouse().addActionBlock(dump_objects_action);
 }
 
 std::string
@@ -144,7 +179,7 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 }
 
 void
-DumpObjectsProblem::solve(unsigned int)
+DumpObjectsProblem::printObjects()
 {
   const auto path = getParam<std::string>("dump_path");
   if (path != "all")
