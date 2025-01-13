@@ -70,7 +70,7 @@ protected:
 
   std::vector<int> _pressure_drop_sideset_ids;
 
-  std::vector<int> _theBoundaries;
+  const std::set<BoundaryID> _theBoundaries;
 
 private:
   /// Switch to enable the two-term extrapolation on porosity jump faces.
