@@ -2829,22 +2829,6 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 }
 
 void
-FEProblemBase::addHDGKernel(const std::string & kernel_name,
-                            const std::string & name,
-                            InputParameters & parameters)
-{
-  parallel_object_only();
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (!isSolverSystemNonlinear(nl_sys_num))
-    mooseError("You are trying to add a HDGKernel to a linear variable/system, which is not "
-               "supported at the moment!");
-  setResidualObjectParamsAndLog(
-      kernel_name, name, parameters, nl_sys_num, "HDGKernel", _reinit_displaced_elem);
-
-  _nl[nl_sys_num]->addHDGKernel(kernel_name, name, parameters);
-}
-
-void
 FEProblemBase::addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters)
@@ -2930,22 +2914,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   setResidualObjectParamsAndLog(
       bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
   _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
-}
-
-void
-FEProblemBase::addHDGIntegratedBC(const std::string & bc_name,
-                                  const std::string & name,
-                                  InputParameters & parameters)
-{
-  parallel_object_only();
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (!isSolverSystemNonlinear(nl_sys_num))
-    mooseError("You are trying to add a HDGIntegratedBC to a linear variable/system, which is not "
-               "supported at the moment!");
-  setResidualObjectParamsAndLog(
-      bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
-
-  _nl[nl_sys_num]->addHDGIntegratedBC(bc_name, name, parameters);
 }
 
 void
