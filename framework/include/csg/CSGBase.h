@@ -71,6 +71,60 @@ public:
     return _surface_list.addSphere(name, x, y, z, r);
   }
 
+  std::shared_ptr<CSGSurface>
+  createXCylinderAtOrigin(const std::string name, const Real r)
+  {
+    return _surface_list.addCylinder(name, 0.0, 0.0, r, "x");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createXCylinderAtPoint(const std::string name, const Point center, const Real r)
+  {
+    return _surface_list.addCylinder(name, center(1), center(2), r, "x");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createXCylinderAtYZ(const std::string name, const Real y, const Real z,  const Real r)
+  {
+    return _surface_list.addCylinder(name, y, z, r, "x");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createYCylinderAtOrigin(const std::string name, const Real r)
+  {
+    return _surface_list.addCylinder(name, 0.0, 0.0, r, "y");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createYCylinderAtPoint(const std::string name, const Point center, const Real r)
+  {
+    return _surface_list.addCylinder(name, center(0), center(2), r, "y");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createYCylinderAtXZ(const std::string name, const Real x, const Real z, const Real r)
+  {
+    return _surface_list.addCylinder(name, x, z, r, "y");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createZCylinderAtOrigin(const std::string name, const Real r)
+  {
+    return _surface_list.addCylinder(name, 0.0, 0.0, r, "z");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createZCylinderAtPoint(const std::string name, const Point center, const Real r)
+  {
+    return _surface_list.addCylinder(name, center(0), center(1), r, "z");
+  }
+
+  std::shared_ptr<CSGSurface>
+  createZCylinderAtXY(const std::string name, const Real x, const Real y, const Real r)
+  {
+    return _surface_list.addCylinder(name, x, y, r, "z");
+  }
+
   const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
   {
     return _surface_list.getAllSurfaces();

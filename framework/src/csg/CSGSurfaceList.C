@@ -69,4 +69,33 @@ CSGSurfaceList::addSphere(const std::string name,
   return _surfaces[name];
 }
 
+std::shared_ptr<CSGSurface>
+CSGSurfaceList::addCylinder(const std::string name,
+                            const Real x0,
+                            const Real x1,
+                            const Real r,
+                            const std::string axis)
+{
+  checkSurfaceName(name);
+  std::shared_ptr<CSGSurface> surf;
+  if (axis == "x" || axis == "X")
+  {
+    surf = std::make_shared<CSGXCylinder>(name, x0, x1, r);
+  }
+  else if (axis == "y" || axis == "Y")
+  {
+    surf = std::make_shared<CSGYCylinder>(name, x0, x1, r);
+  }
+  else if (axis == "z" || axis == "Z")
+  {
+    surf = std::make_shared<CSGZCylinder>(name, x0, x1, r);
+  }
+  else
+  {
+    mooseError("Axis " + axis + " not recognized for CSG cylinder. Options are x, y, z.");
+  }
+  _surfaces.insert(std::make_pair(name, surf));
+  return _surfaces[name];
+}
+
 } // namespace CSG
