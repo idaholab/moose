@@ -7,7 +7,7 @@
 ## Example Input File Syntax
 
 The case demonstrates the use of `ADHeatConduction` where the
-diffusion coefficient (thermal conductivity) is defined by an [ADGenericConstantMaterial](ADGenericConstantMaterial.md).
+diffusion coefficient (thermal conductivity) is defined by an [ADGenericConstantMaterial](GenericConstantMaterial.md).
 
 !listing modules/heat_transfer/test/tests/radiative_bcs/ad_radiative_bc_cyl.i
   start=Kernels
