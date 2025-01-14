@@ -112,7 +112,7 @@ LibtorchDRLControlTrainer::validParams()
       "read_from_file", false, "Switch to read the neural network parameters from a file.");
   params.addParam<bool>(
       "shift_outputs",
-      true,
+      false,
       "If we would like to shift the outputs the realign the input-output pairs.");
   params.addParam<bool>(
       "standardize_advantage",
@@ -297,14 +297,15 @@ LibtorchDRLControlTrainer::computeRewardToGo(std::vector<Real> & data,
   // rewards based on the current behavior. We go backwards in samples and backwards in
   // accumulation.
   unsigned int reward_i = reward_data_per_sim.size();
-  for (unsigned int sample_i = reporter_link->size() - 1; sample_i >= 0; --sample_i)
+  for (const auto sample_i : index_range(*reporter_link))
   {
+    const auto backward_sample_i = reporter_link->size() - sample_i - 1;
     Real discounted_reward(0.0);
-    const auto history_size = (*reporter_link)[sample_i].size() - _shift_outputs;
+    const auto history_size = (*reporter_link)[backward_sample_i].size() - _shift_outputs;
 
-    for (int i = 0; i < history_size; ++i)
-    {
-      discounted_reward = reward_data_per_sim[reward_i - 1 - i] + discounted_reward * _decay_factor;
+    for (const auto i : make_range(history_size))
+  {
+      discounted_reward = reward_data_per_sim[reward_i - i - 1] + discounted_reward * _decay_factor;
 
       // We are inserting to the front of the vector and push the rest back, this will
       // ensure that the first element of the vector is the discounter reward for the whole transient
@@ -312,7 +313,7 @@ LibtorchDRLControlTrainer::computeRewardToGo(std::vector<Real> & data,
     }
 
     // Update the global index
-    reward_i -= history_size;
+    reward_i -= (history_size + _shift_outputs);
   }
 
   // Save and accumulate the return values
