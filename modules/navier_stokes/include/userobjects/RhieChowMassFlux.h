@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
-#include "BlockRestrictable.h"
-#include "FaceArgInterface.h"
+#include "RhieChowFaceFluxProvider.h"
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
@@ -35,10 +33,7 @@ class MeshBase;
  * User object responsible for determining the face fluxes using the Rhie-Chow interpolation in a
  * segregated solver that uses the linear FV formulation.
  */
-class RhieChowMassFlux : public GeneralUserObject,
-                         public BlockRestrictable,
-                         public NonADFunctorInterface,
-                         public FaceArgInterface
+class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -46,8 +41,15 @@ public:
 
   /// Get the face velocity times density (used in advection terms)
   Real getMassFlux(const FaceInfo & fi) const;
+
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+
+  virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
+                                     const FaceInfo & fi,
+                                     const Moose::StateArg & time,
+                                     const THREAD_ID tid,
+                                     bool subtract_mesh_velocity) const override;
 
   /// Initialize the container for face velocities
   void initFaceMassFlux();
@@ -80,8 +82,6 @@ public:
    * pressure equation plus Rhie-Chow interpolation.
    */
   void computeHbyA(bool verbose);
-
-  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   void setupCellVolumes();

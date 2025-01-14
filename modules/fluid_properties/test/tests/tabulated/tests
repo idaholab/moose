@@ -132,6 +132,22 @@
       expect_err = 'Temperature initial guess for \(p,T\), \(v,e\) conversions 100000 is outside the range of tabulated temperature'
       detail = 'if the user-specified temperature initial guess for variable set inversions is out of bounds'
     []
+    [missing_energy_bound]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = "FluidProperties/tabulated/fluid_property_file='fluid_properties.csv'
+                  FluidProperties/tabulated/e_min=100"
+      expect_err = 'Either both or none of the min and max values of the specific internal energy should be specified'
+      detail = 'if the user only specified one bound for a range of specific internal energy,'
+    []
+    [missing_specific_volume_bound]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = "FluidProperties/tabulated/v_min=1e3
+                  FluidProperties/tabulated/fluid_property_file='fluid_properties.csv'"
+      expect_err = 'Either both or none of the min and max values of the specific volume should be specified'
+      detail = 'if the user only specified one bound for a range of specific volume.'
+    []
   []
   # Note that these could be unit tests
   [out_of_bounds]
@@ -170,6 +186,26 @@
       expect_err = 'Temperature out of bounds'
       detail = 'declare the solution invalid if the desired temperature for a fluid property evaluation is outside the user-specified bounds, when prescribed to do so in such conditions'
     []
+    [warn_pressure_out_of_bounds]
+      type = RunApp
+      input = 'tabulated.i'
+      cli_args = "AuxVariables/pressure/initial_condition=1e4 "
+                 "FluidProperties/tabulated/out_of_bounds_behavior=warn_invalid "
+                 "Problem/solve=true Kernels/diff/type=MatDiffusion "
+                 "Kernels/diff/diffusivity=viscosity"
+      expect_out = 'Pressure out of bounds'
+      detail = 'count the number of occurrences if the desired pressure for a fluid property evaluation is outside the user-specified bounds, when prescribed to do so in such conditions,'
+    []
+    [warn_temperature_out_of_bounds]
+      type = RunApp
+      input = 'tabulated.i'
+      cli_args = "AuxVariables/temperature/initial_condition=250 "
+                 "FluidProperties/tabulated/out_of_bounds_behavior=warn_invalid "
+                 "Problem/solve=true Kernels/diff/type=MatDiffusion "
+                 "Kernels/diff/diffusivity=viscosity"
+      expect_out = 'Temperature out of bounds'
+      detail = 'count the number of occurrences if the desired temperature for a fluid property evaluation is outside the user-specified bounds, when prescribed to do so in such conditions,'
+    []
     [ignore_pressure_out_of_bounds]
       type = RunApp
       input = 'tabulated.i'
@@ -181,6 +217,36 @@
       input = 'tabulated.i'
       cli_args = 'AuxVariables/temperature/initial_condition=250 FluidProperties/tabulated/out_of_bounds_behavior=ignore'
       detail = 'ignore if the desired temperature for a fluid property evaluation is outside the user-specified bounds, when prescribed to ignore in such conditions'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall return a warning if'
+    [num_grids_ve]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = "FluidProperties/tabulated/fluid_property_ve_file='gold/fluid_properties_out_ve.csv'
+                  FluidProperties/tabulated/num_v=200"
+      expect_err = 'User-specified grid sizes in specific volume and internal energy are ignored'
+      allow_warnings = false
+      detail = 'the user specifies a grid size when reading the interpolation grid from file,'
+    []
+    [min_max_ve]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = "FluidProperties/tabulated/fluid_property_ve_file='gold/fluid_properties_out_ve.csv'
+                  FluidProperties/tabulated/v_min=20 FluidProperties/tabulated/v_max=20"
+      expect_err = 'User-specified bounds in specific volume and internal energy are ignored'
+      allow_warnings = false
+      detail = 'the user specifies a grid extent when reading the interpolation grid from file,'
+    []
+    [log_ve]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = "FluidProperties/tabulated/fluid_property_ve_file='gold/fluid_properties_out_ve.csv'
+                  FluidProperties/tabulated/use_log_grid_v=true"
+      expect_err = 'User specfied logarithmic grids in specific volume and energy are ignored'
+      allow_warnings = false
+      detail = 'the user specifies that the grid is logarithmic when reading the interpolation grid from file.'
     []
   []
 []

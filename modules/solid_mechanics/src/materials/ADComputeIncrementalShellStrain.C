@@ -41,6 +41,10 @@ ADComputeIncrementalShellStrain::validParams()
                                        "Quadrature order in out of plane direction");
   params.addParam<bool>(
       "large_strain", false, "Set to true to turn on finite strain calculations.");
+  params.addParam<RealVectorValue>("reference_first_local_direction",
+                                   RealVectorValue(1, 0, 0),
+                                   "Vector that is projected onto an element to define the "
+                                   "direction for the first local coordinate direction e1.");
   return params;
 }
 
@@ -77,13 +81,17 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     _ge_old(),
     _J_map(),
     _J_map_old(),
+    _local_transformation_matrix(),
+    _local_transformation_matrix_old(),
     _covariant_transformation_matrix(),
     _covariant_transformation_matrix_old(),
     _contravariant_transformation_matrix(),
     _contravariant_transformation_matrix_old(),
     _total_global_strain(),
     _sol(_nonlinear_sys.currentSolution()),
-    _sol_old(_nonlinear_sys.solutionOld())
+    _sol_old(_nonlinear_sys.solutionOld()),
+    _ref_first_local_dir(getParam<RealVectorValue>("reference_first_local_direction"))
+
 {
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != 3 || _nrot != 2)
@@ -94,6 +102,11 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   if (_mesh.hasSecondOrderElements())
     mooseError(
         "ADComputeIncrementalShellStrain: Shell element is implemented only for linear elements.");
+
+  // Checking if the size of the first local vector is within an acceptable range
+  if (MooseUtils::absoluteFuzzyEqual(_ref_first_local_dir.norm(), 0.0, 1e-3))
+    mooseError(
+        "The norm of the defined first local axis is less than the acceptable telerance (1e-3)");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -126,6 +139,8 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   _dxyz_dxi_old.resize(_t_points.size());
   _dxyz_deta_old.resize(_t_points.size());
   _dxyz_dzeta_old.resize(_t_points.size());
+  _local_transformation_matrix.resize(_t_points.size());
+  _local_transformation_matrix_old.resize(_t_points.size());
   _covariant_transformation_matrix.resize(_t_points.size());
   _covariant_transformation_matrix_old.resize(_t_points.size());
   _contravariant_transformation_matrix.resize(_t_points.size());
@@ -159,6 +174,10 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     _dxyz_dzeta_old[i] =
         &getMaterialPropertyOldByName<RealVectorValue>("dxyz_dzeta_t_points_" + std::to_string(i));
     // Create rotation matrix and total strain global for output purposes only
+    _local_transformation_matrix[i] =
+        &declareProperty<RankTwoTensor>("local_transformation_t_points_" + std::to_string(i));
+    _local_transformation_matrix_old[i] = &getMaterialPropertyOldByName<RankTwoTensor>(
+        "local_transformation_t_points_" + std::to_string(i));
     _covariant_transformation_matrix[i] =
         &declareProperty<RankTwoTensor>("covariant_transformation_t_points_" + std::to_string(i));
     _covariant_transformation_matrix_old[i] = &getMaterialPropertyOldByName<RankTwoTensor>(
@@ -174,6 +193,9 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   // used later for computing local coordinate system
   _x2(1) = 1;
   _x3(2) = 1;
+  _e1(0) = 1;
+  _e2(1) = 1;
+  _e3(2) = 1;
 }
 
 void
@@ -188,6 +210,7 @@ ADComputeIncrementalShellStrain::initQpStatefulProperties()
   if (_qrule->get_points().size() != 4)
     mooseError("ADComputeIncrementalShellStrain: Shell element needs to have exactly four "
                "quadrature points.");
+
   computeGMatrix();
   computeBMatrix();
 }
@@ -221,6 +244,7 @@ ADComputeIncrementalShellStrain::computeProperties()
       (*_dxyz_deta[j])[i] = (*_dxyz_deta_old[j])[i];
       (*_dxyz_dzeta[j])[i] = (*_dxyz_dzeta_old[j])[i];
       (*_B[j])[i] = (*_B_old[j])[i];
+      (*_local_transformation_matrix[j])[i] = (*_local_transformation_matrix_old[j])[i];
       (*_covariant_transformation_matrix[j])[i] = (*_covariant_transformation_matrix_old[j])[i];
       (*_contravariant_transformation_matrix[j])[i] =
           (*_contravariant_transformation_matrix_old[j])[i];
@@ -280,7 +304,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
   _dphideta_map = fe->get_fe_map().get_dphideta_map();
   _phi_map = fe->get_fe_map().get_phi_map();
 
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < _nodes.size(); ++i)
     _nodes[i] = _current_elem->node_ptr(i);
 
   ADRealVectorValue x = (*_nodes[1] - *_nodes[0]);
@@ -295,6 +319,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
   ADDenseMatrix b(5, 20);
   ADRealVectorValue c;
   RankTwoTensor d;
+  RealVectorValue f;
   for (unsigned int t = 0; t < _t_points.size(); ++t)
   {
     (*_strain_increment[t])[_qp] = a;
@@ -305,6 +330,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
     (*_dxyz_dxi[t])[_qp] = c;
     (*_dxyz_deta[t])[_qp] = c;
     (*_dxyz_dzeta[t])[_qp] = c;
+    (*_local_transformation_matrix[t])[_qp] = d;
     (*_covariant_transformation_matrix[t])[_qp] = d;
     (*_contravariant_transformation_matrix[t])[_qp] = d;
   }
@@ -388,12 +414,17 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       // _transformation_matrix is an AD property, but we're not setting the derivatives!
       (*_transformation_matrix)[i] = J;
 
-      // calculate ge
-      ADRealVectorValue e3 = (*_dxyz_dzeta[j])[i] / (*_dxyz_dzeta[j])[i].norm();
-      ADRealVectorValue e1 = (*_dxyz_deta[j])[i].cross(e3);
-      e1 /= e1.norm();
-      ADRealVectorValue e2 = e3.cross(e1);
-      e2 /= e2.norm();
+      // compute element's local coordinate
+      computeLocalCoordinates();
+
+      // calculate the local transformation matrix to be used to map the global stresses to the
+      // local element coordinate
+      const auto local_rotation_mat = ADRankTwoTensor::initializeFromRows(_e1, _e2, _e3);
+
+      for (const auto ii : make_range(Moose::dim))
+        for (const auto jj : make_range(Moose::dim))
+          (*_local_transformation_matrix[j])[i](ii, jj) =
+              MetaPhysicL::raw_value(local_rotation_mat(ii, jj));
 
       // Calculate the contravariant base vectors g^0, g^1, g^2
       // The base vectors for the strain tensor in the convected coordinate
@@ -410,17 +441,49 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       //  the strain tensor (with g_1, g2_, g_3 base vectors) to
       //  the stress tensor (with base vectors e1, e2, e3)
 
-      (*_ge[j])[i](0, 0) = gi0 * e1;
-      (*_ge[j])[i](0, 1) = gi0 * e2;
-      (*_ge[j])[i](0, 2) = gi0 * e3;
-      (*_ge[j])[i](1, 0) = gi1 * e1;
-      (*_ge[j])[i](1, 1) = gi1 * e2;
-      (*_ge[j])[i](1, 2) = gi1 * e3;
-      (*_ge[j])[i](2, 0) = gi2 * e1;
-      (*_ge[j])[i](2, 1) = gi2 * e2;
-      (*_ge[j])[i](2, 2) = gi2 * e3;
+      (*_ge[j])[i](0, 0) = gi0 * _e1;
+      (*_ge[j])[i](0, 1) = gi0 * _e2;
+      (*_ge[j])[i](0, 2) = gi0 * _e3;
+      (*_ge[j])[i](1, 0) = gi1 * _e1;
+      (*_ge[j])[i](1, 1) = gi1 * _e2;
+      (*_ge[j])[i](1, 2) = gi1 * _e3;
+      (*_ge[j])[i](2, 0) = gi2 * _e1;
+      (*_ge[j])[i](2, 1) = gi2 * _e2;
+      (*_ge[j])[i](2, 2) = gi2 * _e3;
     }
   }
+}
+
+void
+ADComputeIncrementalShellStrain::computeLocalCoordinates()
+{
+  // default option for the first local vector:the global X-axis is projected on the shell plane
+  // alternatively the reference first local vector provided by the user can be used to define the
+  // 1st local axis
+
+  // All nodes in an element have the same normal vector. Therefore, here, we use only the normal
+  // vecor of the first node as "the element's normal vector"
+  _e3 = _node_normal[0];
+
+  _e1 = _ref_first_local_dir;
+
+  _e1 /= _e1.norm();
+
+  // The reference first local axis and the normal are considered parallel if the angle between them
+  // is less than 0.05 degrees
+  if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
+  {
+    mooseError("The reference first local axis must not be perpendicular to any of the shell "
+               "elements ");
+  }
+
+  // we project the reference first local vector on the shell element and calculate the in-plane e1
+  // and e2 vectors
+  _e2 = _e3.cross(_e1);
+  _e2 /= _e2.norm();
+
+  _e1 = _e2.cross(_e3);
+  _e1 /= _e1.norm();
 }
 
 void
@@ -434,17 +497,11 @@ void
 ADComputeIncrementalShellStrain::computeBMatrix()
 {
   // compute nodal local axis
+  computeLocalCoordinates();
   for (unsigned int k = 0; k < _nodes.size(); ++k)
   {
-    _v1[k] = _x2.cross(_node_normal[k]);
-
-    // If x2 is parallel to node normal, set V1 to x3
-    if (MooseUtils::absoluteFuzzyEqual(_v1[k].norm(), 0.0, 1e-6))
-      _v1[k] = _x3;
-
-    _v1[k] /= _v1[k].norm();
-
-    _v2[k] = _node_normal[k].cross(_v1[k]);
+    _v1[k] = _e1;
+    _v2[k] = _e2;
   }
 
   // compute B matrix rows correspond to [ux1, ux2, ux3, ux4, uy1, uy2, uy3, uy4, uz1, uz2, uz3,

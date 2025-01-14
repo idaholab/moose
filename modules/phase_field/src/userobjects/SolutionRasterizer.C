@@ -10,6 +10,8 @@
 #include "SolutionRasterizer.h"
 
 #include <fstream>
+#include "libmesh/mesh_function.h"
+#include "libmesh/exodusII_io.h"
 
 registerMooseObject("PhaseFieldApp", SolutionRasterizer);
 

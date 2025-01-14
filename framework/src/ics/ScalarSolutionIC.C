@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ScalarSolutionIC.h"
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 #include "MooseMesh.h"
 
 registerMooseObject("MooseApp", ScalarSolutionIC);
@@ -34,7 +34,7 @@ ScalarSolutionIC::validParams()
 
 ScalarSolutionIC::ScalarSolutionIC(const InputParameters & parameters)
   : ScalarInitialCondition(parameters),
-    _solution_object(getUserObject<SolutionUserObject>("solution_uo")),
+    _solution_object(getUserObject<SolutionUserObjectBase>("solution_uo")),
     _solution_object_var_name(getParam<VariableName>("from_variable"))
 {
 }

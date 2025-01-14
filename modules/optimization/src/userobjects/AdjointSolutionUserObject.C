@@ -9,6 +9,9 @@
 
 #include "AdjointSolutionUserObject.h"
 
+#include "libmesh/mesh_function.h"
+#include "libmesh/exodusII_io.h"
+
 #include <sys/stat.h>
 
 registerMooseObject("OptimizationApp", AdjointSolutionUserObject);
@@ -16,7 +19,7 @@ registerMooseObject("OptimizationApp", AdjointSolutionUserObject);
 InputParameters
 AdjointSolutionUserObject::validParams()
 {
-  InputParameters params = SolutionUserObject::validParams();
+  InputParameters params = SolutionUserObjectBase::validParams();
   params.addClassDescription(
       "Reads a variable from a mesh in one simulation to another specifically for loading forward "
       "solution in adjoint simulation during inverse optimization.");
@@ -34,15 +37,20 @@ AdjointSolutionUserObject::validParams()
 }
 
 AdjointSolutionUserObject::AdjointSolutionUserObject(const InputParameters & parameters)
-  : SolutionUserObject(parameters),
+  : SolutionUserObjectBase(parameters),
     _reverse_time_end(getParam<Real>("reverse_time_end")),
-    _file_mod_time(std::numeric_limits<std::time_t>::min()),
-    _actual_interpolation_time(0.0)
+    _file_mod_time(std::numeric_limits<std::time_t>::min())
 {
   if (!MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true))
     paramError("mesh",
                "Performing transient adjoint simulation currently only works if the forward "
                "solution is written and read from exodus format.");
+}
+
+Real
+AdjointSolutionUserObject::solutionSampleTime()
+{
+  return _reverse_time_end - _t + _dt;
 }
 
 void
@@ -63,24 +71,11 @@ AdjointSolutionUserObject::timestepSetup()
     _es2.reset();
 
     // Read the exodus file
-    SolutionUserObject::initialSetup();
+    SolutionUserObjectBase::initialSetup();
 
     // Make sure to communicate what solution was actually loaded
-    _actual_interpolation_time = 0.0;
     _interpolation_time = -_dt;
   }
 
-  // Update time interpolation for ExodusII solution
-  const Real actual_time = _reverse_time_end - _t + _dt;
-  if (_actual_interpolation_time != actual_time)
-  {
-    // This will make sure the solutions are updated for the current forward time
-    _interpolation_time = _actual_interpolation_time;
-    // Update based on the forward simulation time
-    updateExodusTimeInterpolation(actual_time);
-    // This avoids errors in public functions when the time is given as the adjoint simulation time
-    _interpolation_time = _t;
-    // Ensures we only update the solution when necessary
-    _actual_interpolation_time = actual_time;
-  }
+  SolutionUserObjectBase::timestepSetup();
 }
