@@ -29,7 +29,7 @@
 {%- set GPERF_DIR = '/opt/gperftools' -%}
 {#- The installation location for pprof                                                       -#}
 {%- set PPROF_DIR = '/opt/pprof' -%}
-{#- We need this here because more than one block will use it
+{#- We need this here because more than one block will use it                                 -#}
 {%- set MOOSE_PYTHON_VERSION = '3.11' -%}
 
 {#- The script used to install wasp                                                           -#}
