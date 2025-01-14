@@ -1,11 +1,10 @@
 # THM file based on https://mooseframework.inl.gov/modules/thermal_hydraulics/tutorials/single_phase_flow/step05.html
-# Used to couple THM with SC
-# This is a simple open loop with fixed massflow at the inlet and pressure at the outlet.
+# Used to loosely couple THM with SCM
+# This is a simple closed loop with a pump providing pressure head, core, pressurizer and HX.
 # THM sends massflux and temperature at the inlet of the core, and pressure at the outlet of the core
 # to subchannel. Subchannel returns total pressure drop of the assembly and total power to THM and THM calculates an
 # average friction factor for the core region.
 T_in = 583.0 # K
-m_dot_in = 1 # kg/s
 press = 2e5 # Pa
 SC_core = 0.0004980799633447909 #m2
 
@@ -108,19 +107,6 @@ m_dot_sec_in = 1. # kg/s
 []
 
 [Components]
-  [inlet]
-    type = InletMassFlowRateTemperature1Phase
-    input = 'bottom_2:in'
-    m_dot = ${m_dot_in}
-    T = ${T_in}
-  []
-
-  [outlet]
-    type = Outlet1Phase
-    input = 'bottom_1:out'
-    p = ${press}
-  []
-
   [up_pipe_1]
     type = FlowChannel1Phase
     position = '0 0 -0.5'
@@ -186,7 +172,6 @@ m_dot_sec_in = 1. # kg/s
     A = ${A_pipe}
     D_h = ${pipe_dia}
   []
-
   [top_pipe_2]
     type = FlowChannel1Phase
     position = '0.5 0 1.5'
@@ -201,7 +186,24 @@ m_dot_sec_in = 1. # kg/s
     type = VolumeJunction1Phase
     position = '0.5 0 1.5'
     volume = 1e-5
-    connections = 'top_pipe_1:out top_pipe_2:in'
+    connections = 'top_pipe_1:out top_pipe_2:in press_pipe:in'
+  []
+
+  [press_pipe]
+    type = FlowChannel1Phase
+    position = '0.5 0 1.5'
+    orientation = '0 1 0'
+    length = 0.2
+    n_elems = 5
+    A = ${A_pipe}
+    D_h = ${pipe_dia}
+  []
+
+  [pressurizer]
+    type = InletStagnationPressureTemperature1Phase
+    p0 = ${press}
+    T0 = 580
+    input = press_pipe:out
   []
 
   [jct5]
@@ -309,6 +311,15 @@ m_dot_sec_in = 1. # kg/s
     n_elems = 5
     A = ${A_pipe}
     D_h = ${pipe_dia}
+  []
+
+  [pump]
+    type = Pump1Phase
+    position = '0.5 0 -0.5'
+    connections = 'bottom_1:out bottom_2:in'
+    volume = 1e-4
+    A_ref = ${A_pipe}
+    head = 3.56
   []
 
   [bottom_2]
@@ -483,10 +494,10 @@ m_dot_sec_in = 1. # kg/s
 
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 0.01
+    dt = 2
   []
-  # dtmax = 5
-  end_time = 5000
+  dtmax = 50
+  end_time = 3000
 
   line_search = basic
   solve_type = NEWTON
@@ -494,9 +505,15 @@ m_dot_sec_in = 1. # kg/s
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-7
   nl_max_its = 25
+
+  fixed_point_min_its = 1
+  fixed_point_max_its = 5
+  accept_on_max_fixed_point_iteration = true
+  auto_advance = true
+  relaxation_factor = 0.5
 []
 
 [Outputs]
@@ -515,6 +532,7 @@ m_dot_sec_in = 1. # kg/s
 ################################################################################
 
 [MultiApps]
+  # active = ''
   [subchannel]
     type = FullSolveMultiApp
     input_files = 'subchannel.i'
@@ -527,6 +545,7 @@ m_dot_sec_in = 1. # kg/s
 []
 
 [Transfers]
+  # active = ''
   [pressure_drop_transfer] # Get pressure drop to THM from subchannel
     type = MultiAppPostprocessorTransfer
     from_multi_app = subchannel

@@ -39,8 +39,7 @@ Several problems that are ideal for thermal-hydraulic subchannel analysis have b
 ## `MOOSE` style=clear:both
 
 !style halign=left
-SCM is a [MOOSE] thermal hydraulic subchannel analysis module. It leverages the [PETSc](https://petsc.org/release/) library capabilities to solve the subchannel equations using an Newton non-linear solver. It permits seamless coupling with other [MOOSE] applications/modules like [BISON](https://mooseframework.inl.gov/bison/)/[heat-conduction](https://mooseframework.inl.gov/modules/heat_conduction/index.html). This affords the solution of coupled physics problems of varying size and dimensionality. These can be solved using computer hardware appropriate for the model size, ranging from
-laptops and workstations to large high performance computers.
+SCM is a [MOOSE] thermal hydraulic subchannel analysis module. It leverages the [PETSc](https://petsc.org/release/) library capabilities to solve the subchannel equations using an Newton non-linear solver. It permits seamless coupling with other [MOOSE] applications/modules like [BISON](https://mooseframework.inl.gov/bison/)/[heat-transfer](https://mooseframework.inl.gov/modules/heat_transfer/). This affords the solution of coupled physics problems of varying size and dimensionality. These can be solved using computer hardware appropriate for the model size, ranging from laptops and workstations to large high performance computers.
 
 !media large_media/framework/inl_blue.png style=float:right;width:30%;margin-left:30px;
 

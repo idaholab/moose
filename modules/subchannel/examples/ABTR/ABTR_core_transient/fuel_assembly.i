@@ -296,7 +296,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     type = TransientMultiApp
     input_files = 'pin.i' # seperate file for multiapps due to radial power profile
     execute_on = 'timestep_end'
-    positions_file = "rod_positions.i"
+    positions_file = "rod_positions.txt"
     bounding_box_padding = '0 0 0.01'
     output_in_position = true
   []

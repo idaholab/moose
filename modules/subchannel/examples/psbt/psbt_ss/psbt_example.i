@@ -1,9 +1,9 @@
-# This is an input file based on M. Avramova et. all 2012,
+# M. Avramova et. all 2012,
 # OECD/NRC Benchmark Based on NUPEC PWR
 # Sub-channel and Bundle Tests (PSBT). Volume III: Departure from Nucleate Boiling
 T_in = 502.35
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = '${fparse 1e+6 * 16.95 / 3600.}'
+mass_flux_in = ${fparse 1e+6 * 16.95 / 3600.}
 P_out = 14.72e6 # Pa
 [QuadSubChannelMesh]
   [sub_channel]
@@ -50,9 +50,6 @@ P_out = 14.72e6 # Pa
     block = sub_channel
   []
   [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
     block = fuel_pins
   []
   [rho]
