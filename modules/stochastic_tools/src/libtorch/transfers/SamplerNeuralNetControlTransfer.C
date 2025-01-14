@@ -45,6 +45,16 @@ SamplerNeuralNetControlTransfer::SamplerNeuralNetControlTransfer(
 }
 
 void
+SamplerNeuralNetControlTransfer::initialSetup()
+{
+  const auto multi_app = getToMultiApp();
+  const dof_id_type n = multi_app->numGlobalApps();
+  for (MooseIndex(n) i = 0; i < n; i++)
+    if (multi_app->hasLocalApp(i))
+      torch::manual_seed(i);
+}
+
+void
 SamplerNeuralNetControlTransfer::execute()
 {
   for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
