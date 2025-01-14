@@ -128,7 +128,7 @@ Navier Stokes\\
 Peridynamics\\
 Phase Field\\
 Porous Flow\\
-Tensor (solid) Mechanics\\
+Solid (solid) Mechanics\\
 Thermal Hydraulics\\
 !col-end!
 
