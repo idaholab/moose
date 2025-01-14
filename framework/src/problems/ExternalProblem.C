@@ -58,6 +58,11 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
 }
 
 void
+ExternalProblem::initializeVariables()
+{
+}
+
+void
 ExternalProblem::solve(const unsigned int)
 {
   TIME_SECTION("solve", 1, "Solving", false)
