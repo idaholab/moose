@@ -13,6 +13,7 @@
     type = SamplerFullSolveMultiApp
     sampler = dummy
     input_files = 'libtorch_drl_control_sub.i'
+    mode = batch-reset
   []
 []
 
