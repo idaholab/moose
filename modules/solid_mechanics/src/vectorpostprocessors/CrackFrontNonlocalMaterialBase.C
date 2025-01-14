@@ -18,7 +18,7 @@ CrackFrontNonlocalMaterialBase::validParams()
                                           "The CrackFrontDefinition user object name");
   params.addRequiredParam<Real>("box_length", "Distance in front of crack front.");
   params.addRequiredParam<Real>("box_height", "Distance normal to front of crack front.");
-  params.addParam<Real>("box_width", "Distance tangent to front of crack front.");
+  params.addParam<Real>("box_width", 1.0, "Distance tangent to front of crack front.");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
@@ -34,7 +34,7 @@ CrackFrontNonlocalMaterialBase::CrackFrontNonlocalMaterialBase(const InputParame
   : ElementVectorPostprocessor(parameters),
     _property_name(property_name),
     _box_length(getParam<Real>("box_length")),
-    _box_width(isParamValid("box_width") ? getParam<Real>("box_width") : 1),
+    _box_width(getParam<Real>("box_width")),
     _box_height(getParam<Real>("box_height")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _x(declareVector("x")),
@@ -77,7 +77,7 @@ void
 CrackFrontNonlocalMaterialBase::execute()
 {
   // icfp crack front point index
-  for (const auto icfp: index_range(_avg_crack_tip_scalar))
+  for (const auto icfp : index_range(_avg_crack_tip_scalar))
   {
     Point crack_front_normal = _crack_front_definition->getCrackFrontNormal(icfp);
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
@@ -98,8 +98,7 @@ CrackFrontNonlocalMaterialBase::finalize()
 {
   gatherSum(_avg_crack_tip_scalar);
   gatherSum(_volume);
-
-  for (std::size_t icfp = 0; icfp < _avg_crack_tip_scalar.size(); ++icfp)
+  for (const auto icfp : index_range(_avg_crack_tip_scalar))
   {
     if (_volume[icfp] != 0)
       _avg_crack_tip_scalar[icfp] = _avg_crack_tip_scalar[icfp] / _volume[icfp];
@@ -118,8 +117,7 @@ void
 CrackFrontNonlocalMaterialBase::threadJoin(const UserObject & y)
 {
   const auto & uo = static_cast<const CrackFrontNonlocalMaterialBase &>(y);
-
-  for (auto i = beginIndex(_avg_crack_tip_scalar); i < _avg_crack_tip_scalar.size(); ++i)
+  for (const auto i : index_range(_avg_crack_tip_scalar))
   {
     _volume[i] += uo._volume[i];
     _avg_crack_tip_scalar[i] += uo._avg_crack_tip_scalar[i];
