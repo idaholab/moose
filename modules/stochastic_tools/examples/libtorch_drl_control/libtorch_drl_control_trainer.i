@@ -18,10 +18,11 @@
 
 [Transfers]
   [nn_transfer]
-    type = LibtorchNeuralNetControlTransfer
+    type = SamplerNeuralNetControlTransfer
     to_multi_app = runner
     trainer_name = nn_trainer
     control_name = src_control
+    sampler = dummy
   []
   [r_transfer]
     type = SamplerReporterTransfer
