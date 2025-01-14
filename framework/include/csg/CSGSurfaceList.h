@@ -39,6 +39,9 @@ public:
   std::shared_ptr<CSGSurface>
   addSphere(const std::string name, const Real x, const Real y, const Real z, const Real r);
 
+  std::shared_ptr<CSGSurface>
+  addCylinder(const std::string name, const Real x0, const Real x1, const Real r, const std::string axis);
+
   const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
   {
     return _surfaces;

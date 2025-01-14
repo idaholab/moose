@@ -21,12 +21,12 @@ CSGXCylinder::CSGXCylinder(const std::string name, const Real r)
 }
 
 CSGXCylinder::CSGXCylinder(const std::string name, const Real y0, const Real z0, const Real r)
-  : CSGSurface(name, SurfaceType::sphere), _y0(y0), _z0(z0), _r(r)
+  : CSGSurface(name, SurfaceType::xcylinder), _y0(y0), _z0(z0), _r(r)
 {
 }
 
 CSGXCylinder::CSGXCylinder(const std::string name, const Point center, const Real r)
-  : CSGSurface(name, SurfaceType::sphere), _y0(center(1)), _z0(center(2)), _r(r)
+  : CSGSurface(name, SurfaceType::xcylinder), _y0(center(1)), _z0(center(2)), _r(r)
 {
 }
 
