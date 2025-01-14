@@ -20,7 +20,7 @@
       prereq = 'restarting/part1'
       type = 'RunException'
       input = part3.i
-      expect_err = 'Two initial conditions have been provided for the variable v. One from the user and one from the restart input file.'
+      expect_err = 'Two initial conditions have been provided for the variable v using the \'initial_condition\' and \'initial_from_file_var\' parameters. Please remove one of them.'
     []
   []
 []
