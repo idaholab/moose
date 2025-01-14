@@ -263,8 +263,15 @@ LibtorchDRLControlTrainer::execute()
     convertDataToTensor(_output_data, _output_tensor);
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
 
+    std::cout << "Input tensor" << std::endl << _input_tensor << std::endl;
+    std::cout << "Signal tensor" << std::endl << _output_tensor << std::endl;
+    std::cout << "Logprob tensor" << std::endl << _log_probability_tensor << std::endl;
+    std::cout << "reward" << std::endl << Moose::stringify(_reward_data) << std::endl;
+
     // Discard (detach) the gradient info for return data
     LibtorchUtils::vectorToTensor<Real>(_return_data, _return_tensor, true);
+
+    std::cout << "Return tensor" << std::endl << _return_tensor << std::endl;
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
