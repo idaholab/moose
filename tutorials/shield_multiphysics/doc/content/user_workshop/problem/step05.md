@@ -1,8 +1,10 @@
 # Step 5: Auxiliary Variables id=step05
 
+!!end-intro
+
 !---
 
-Fluid temperature
+## Example use: creating a constant field
 
 We are not solving for the temperature in the water yet. To represent it as a variable that is
 not in the nonlinear system, we use an auxiliary variable.
@@ -11,14 +13,14 @@ not in the nonlinear system, we use an auxiliary variable.
 
 !---
 
+## Example use: postprocessing
+
 Heat flux
 
 The heat flux can be computed using Fourier's law:
 
 !equation
 q = - k \nabla T
-
-!!end-intro
 
 !---
 

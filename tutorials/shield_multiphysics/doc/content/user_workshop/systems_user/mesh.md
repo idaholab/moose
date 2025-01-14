@@ -70,19 +70,19 @@ The sides are named in a logical way and are numbered:
 
 ## Mini-meshing hands-on
 
-Let's mesh the "flow over circle" geometry, used for computational fluid dynamics
+Let's mesh the "flow over circle" geometry, used for a computational fluid dynamics benchmark
 
-!media flow-over-circle.png
+!media media/flow-over-circle.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-The two inputs are "combined" on the command line with `executable-opt -i header.i mesh.i`
+Two inputs are combined on the command line with `exec-opt -i header.i mesh.i`
 
 !style! fontsize=50%
 
-!listing modules/navier_stokes/examples/flow-over-circle/header.i
+!listing modules/navier_stokes/examples/flow-over-circle/header.i end=Material max-height=250px
 
-!listing modules/navier_stokes/examples/flow-over-circle/mesh.i start=[Mesh] end=middle_top_sideset
+!listing modules/navier_stokes/examples/flow-over-circle/mesh.i start=[Mesh] end=middle_top_sideset max-height=250px
 
 !style-end!
 

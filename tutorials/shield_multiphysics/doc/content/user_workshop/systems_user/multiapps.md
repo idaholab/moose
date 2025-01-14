@@ -17,6 +17,8 @@ The MultiApp system creates simulations of loosely (or tightly) coupled systems 
 
 ## Coupling terminology
 
+!style! fontsize=90%
+
 !row!
 !col! width=39%
 - Loosely-Coupled
@@ -37,11 +39,15 @@ The MultiApp system creates simulations of loosely (or tightly) coupled systems 
 
 !col! width=20%
 
-Example scheme (implicit-explicit)
+Example numerical scheme
 
 !equation
 \text{solve }M(u_n, v_n) u_{n+1/2} = 0\\
 \text{then }N(u_{n+1/2}, v_n) v_{n+1} = 0\\
+
+[space](https://www.google.com style=color:white)
+
+[space](https://www.google.com style=color:white)
 
 !equation
 \text{solve }M(u_{n,i}, v_{n,i}) u_{n,i+1} = 0\\
@@ -49,8 +55,12 @@ Example scheme (implicit-explicit)
 \text{then }M(u_{n,i+1}, v_{n,i+1}) u_{n,i+2} = 0\\
 \text{etc }
 
+[space](https://www.google.com style=color:white)
+
+[space](https://www.google.com style=color:white)
+
 !equation
-\text{solve }\begin{bmatrix}M(u_n, v_n) \\ N(u_n, v_n)\end{bmatrix} \begin{bmatrix}u_n v_n\end{bmatrix} = \begin{bmatrix}0 0\end{bmatrix} \\
+\text{solve }\begin{bmatrix}M(u_n, v_n) N(u_n, v_n)\end{bmatrix} \begin{bmatrix}u_n \\ v_n\end{bmatrix} = \begin{bmatrix}0 \\ 0\end{bmatrix} \\
 
 !col-end!
 
@@ -59,6 +69,8 @@ Example scheme (implicit-explicit)
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
+
+!style-end!
 
 !---
 
