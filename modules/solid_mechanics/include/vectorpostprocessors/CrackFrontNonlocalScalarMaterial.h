@@ -23,7 +23,7 @@ public:
   CrackFrontNonlocalScalarMaterial(const InputParameters & parameters);
 
 protected:
-  /// The scalar material property
+  /// Property that is averaged over the crack front points
   const MaterialProperty<Real> & _scalar;
 
   Real getQPCrackFrontScalar(const unsigned int qp,

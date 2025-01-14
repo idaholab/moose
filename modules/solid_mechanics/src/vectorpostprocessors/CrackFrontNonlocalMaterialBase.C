@@ -77,7 +77,7 @@ void
 CrackFrontNonlocalMaterialBase::execute()
 {
   // icfp crack front point index
-  for (std::size_t icfp = 0; icfp < _avg_crack_tip_scalar.size(); icfp++)
+  for (const auto icfp: index_range(_avg_crack_tip_scalar))
   {
     Point crack_front_normal = _crack_front_definition->getCrackFrontNormal(icfp);
     for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
@@ -140,14 +140,11 @@ CrackFrontNonlocalMaterialBase::BoxWeightingFunction(std::size_t crack_front_poi
   RealVectorValue crack_node_to_current_node_rot =
       _crack_front_definition->rotateToCrackFrontCoords(crack_node_to_current_node,
                                                         crack_front_point_index);
-  Real q = 0.0;
   if ((crack_node_to_current_node_rot(0) > 0) &&
       (crack_node_to_current_node_rot(0) <= _box_length) &&
       (std::abs(crack_node_to_current_node_rot(1)) <= _box_height / 2) &&
       (std::abs(crack_node_to_current_node_rot(2)) <= _box_width / 2))
-  {
-    q = 1.0;
-  }
+    return 1.0;
 
-  return q;
+  return 0.0;
 }

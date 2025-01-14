@@ -16,7 +16,6 @@
  * Computes the average stress magnitude in the direction normal to the crack front at points
  * provided by the crack_front_definition vectorpostprocessor.
  */
-
 class CrackFrontNonlocalStress : public CrackFrontNonlocalMaterialBase
 {
 public:

@@ -13,11 +13,11 @@
 
 // Forward Declarations
 class CrackFrontDefinition;
+
 /**
  * Computes the average material property in regions near points provided by the
  * crack_front_definition vectorpostprocessor.
  */
-
 class CrackFrontNonlocalMaterialBase : public ElementVectorPostprocessor
 {
 public:
