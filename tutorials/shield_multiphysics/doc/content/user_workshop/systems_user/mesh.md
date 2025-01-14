@@ -54,7 +54,11 @@ MOOSE supports reading and writing a large number of formats and could be extend
 
 Built-in mesh generation is implemented for lines, rectangles,  rectangular prisms or [extruded reactor geometries](modules/reactor/index.md).
 
+!style! fontsize=50%
+
 !listing initial_adaptivity_test.i block=Mesh
+
+!style-end!
 
 The sides are named in a logical way and are numbered:
 
@@ -62,22 +66,25 @@ The sides are named in a logical way and are numbered:
 - 2D: bottom = 0, right = 1, top = 2, left = 3
 - 3D: back = 0, bottom = 1, right = 2, top = 3, left = 4, front = 5
 
-The capability is very convenient for parametric mesh optimization!
+!---
+
+## Mini-meshing hands-on
+
+Let's mesh the "flow over circle" geometry, used for computational fluid dynamics
+
+!media flow-over-circle.png
 
 !---
 
-## Named Entity Support
+The two inputs are "combined" on the command line with `executable-opt -i header.i mesh.i`
 
-Human-readable names can be assigned to blocks, sidesets, and nodesets that can be used throughout
-an input file.
+!style! fontsize=50%
 
-A parameter that requires an ID will accept either numbers or "names".
+!listing modules/navier_stokes/examples/flow-over-circle/header.i
 
-Names can be assigned to IDs for existing meshes to ease input file maintenance.
+!listing modules/navier_stokes/examples/flow-over-circle/mesh.i start=[Mesh] end=middle_top_sideset
 
-!---
-
-!listing name_on_the_fly.i block=Mesh BCs Materials
+!style-end!
 
 !---
 
@@ -106,19 +113,3 @@ If the mesh is too large to read in on a single processor, it can be split prior
 1. Copy the mesh to a large memory machine
 1. Use the `--split-mesh` option to split the mesh into $n$ pieces
 1. Run the executable with `--use-split`
-
-!---
-
-## Displaced Mesh
-
-Calculations can take place in either the initial mesh configuration or, when requested, the
-"displaced" configuration.
-
-To enable displacements, provide a vector of displacement variable names for each spatial dimension
-in the Mesh block.
-
-!listing dg_displacement.i block=Mesh
-
-Objects can enforce the use of the displaced mesh within the validParams function.
-
-!listing PenetrationAux.C line=use_displaced_mesh
