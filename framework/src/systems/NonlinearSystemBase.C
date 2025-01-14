@@ -721,7 +721,7 @@ NonlinearSystemBase::getSplit(const std::string & name)
 bool
 NonlinearSystemBase::shouldEvaluatePreSMOResidual() const
 {
-  if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
+  if (_fe_problem.solverParams(number())._type == Moose::ST_LINEAR)
     return false;
 
   // The legacy behavior (#10464) _always_ performs the pre-SMO residual evaluation

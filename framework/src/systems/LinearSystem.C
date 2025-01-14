@@ -300,3 +300,9 @@ LinearSystem::stopSolve(const ExecFlagType & /*exec_flag*/,
   closeTaggedVectors(vector_tags_to_close);
   _linear_implicit_system.matrix->close();
 }
+
+void
+LinearSystem::compute(ExecFlagType)
+{
+  // Linear systems have their own time derivative computation machinery
+}
