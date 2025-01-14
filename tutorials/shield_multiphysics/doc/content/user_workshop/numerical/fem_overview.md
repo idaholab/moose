@@ -5,7 +5,7 @@
 ## Polynomial Fitting
 
 To introduce the concept of FEM, consider a polynomial fitting exercise. When fitting a polynomial
-there is a known set of points as well as a set of coefficients that are unkown for a function
+there is a known set of points as well as a set of coefficients that are unknown for a function
 that has the form:
 
 !equation
@@ -19,7 +19,7 @@ More generally,
 !equation
 f(x) = \sum_{i=0}^d c_i x^i,
 
-where the $c_i$ are coefficients to be determined. $f(x)$ is unique and interpolary if $d+1$ is the
+where the $c_i$ are coefficients to be determined. $f(x)$ is unique and interpolated if $d+1$ is the
 same as the number of points needed to fit. This defines a linear system that must be solved to
 find the coefficients.
 
@@ -237,7 +237,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 ## Corresponding MOOSE input file blocks
 
-!style! fontsize=140%
+!style! fontsize=120%
 
 !equation
 \underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
@@ -247,7 +247,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !style-end!
 
-!style! fontsize=60%
+!style! fontsize=40%
 
 !row!
 !col! width=15%
