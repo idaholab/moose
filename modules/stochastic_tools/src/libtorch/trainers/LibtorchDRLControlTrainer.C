@@ -112,7 +112,7 @@ LibtorchDRLControlTrainer::validParams()
       "read_from_file", false, "Switch to read the neural network parameters from a file.");
   params.addParam<bool>(
       "shift_outputs",
-      false,
+      true,
       "If we would like to shift the outputs the realign the input-output pairs.");
   params.addParam<bool>(
       "standardize_advantage",
@@ -258,25 +258,27 @@ LibtorchDRLControlTrainer::execute()
     // We compute the average reward first
     computeAverageEpisodeReward();
 
+    normalizeResponseData(_input_data, _response_value_pointers.size(), _input_timesteps);
+
     // Transform input/output/return data to torch::Tensor
     convertDataToTensor(_input_data, _input_tensor);
     convertDataToTensor(_output_data, _output_tensor);
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
 
-    std::cout << "Input tensor" << std::endl << _input_tensor << std::endl;
-    std::cout << "Signal tensor" << std::endl << _output_tensor << std::endl;
-    std::cout << "Logprob tensor" << std::endl << _log_probability_tensor << std::endl;
-    std::cout << "reward" << std::endl << Moose::stringify(_reward_data) << std::endl;
+    // std::cout << "Input tensor" << std::endl << _input_tensor << std::endl;
+    // std::cout << "Signal tensor" << std::endl << _output_tensor << std::endl;
+    // std::cout << "Logprob tensor" << std::endl << _log_probability_tensor << std::endl;
+    // std::cout << "reward" << std::endl << Moose::stringify(_reward_data) << std::endl;
 
     // Discard (detach) the gradient info for return data
     LibtorchUtils::vectorToTensor<Real>(_return_data, _return_tensor, true);
 
-    std::cout << "Return tensor" << std::endl << _return_tensor << std::endl;
+    // std::cout << "Return tensor" << std::endl << _return_tensor << std::endl;
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
 
-    // We clean the training data after contoller update and reset the counter
+    // We clean the training data after controller update and reset the counter
     resetData();
   }
 }
@@ -320,7 +322,7 @@ LibtorchDRLControlTrainer::computeRewardToGo(std::vector<Real> & data,
     }
 
     // Update the global index
-    reward_i -= (history_size + _shift_outputs);
+    reward_i -= history_size;
   }
 
   // Save and accumulate the return values
@@ -453,6 +455,8 @@ LibtorchDRLControlTrainer::getResponseDataFromReporter(
     // Fetch the vector of time series for a given reporter
     const std::vector<std::vector<Real>> & reporter_data = *reporter_links[rep_i];
 
+    // std::cout << "Adding response: " << Moose::stringify(reporter_data) << std::endl;
+
     // We might consider using older time steps too which requires adding new
     // rows and populating them with staggered data
     for (const auto & start_step : make_range(num_timesteps))
@@ -471,11 +475,19 @@ LibtorchDRLControlTrainer::getResponseDataFromReporter(
                            (num_timesteps - 1) - _shift_outputs);
       }
     }
+  }
+}
 
+void LibtorchDRLControlTrainer::normalizeResponseData(std::vector<std::vector<Real>> & data, const unsigned int num_reporters, const unsigned int num_timesteps)
+{
+  // std::cout << " Normalizing " << Moose::stringify(data) << std::endl;
+  // We have multiple reporters, each has a time series for each sample
+  for (const auto & rep_i : make_range(num_reporters))
+  {
     // We shift and scale the inputs to get better training efficiency
     for (const auto & start_step : make_range(num_timesteps))
     {
-      unsigned int row = reporter_links.size() * start_step + rep_i;
+      unsigned int row = num_reporters * start_step + rep_i;
       std::transform(
           data[row].begin(),
           data[row].end(),

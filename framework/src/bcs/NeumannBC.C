@@ -38,7 +38,6 @@ template <bool is_ad>
 GenericReal<is_ad>
 NeumannBCTempl<is_ad>::computeQpResidual()
 {
-  std::cout << "The control value that I see: " << _value << std::endl;
   return -_test[_i][_qp] * _value;
 }
 

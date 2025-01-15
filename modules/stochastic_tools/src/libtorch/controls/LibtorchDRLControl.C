@@ -91,8 +91,8 @@ LibtorchDRLControl::execute()
                                                  log_probability.data_ptr<Real>() +
                                                      log_probability.size(1)};
 
-    std::cout << "Setting control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
-    std::cout << "Setting log probability to: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
+    // std::cout << "Setting control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
+    // std::cout << "Setting log probability to: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
 
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
