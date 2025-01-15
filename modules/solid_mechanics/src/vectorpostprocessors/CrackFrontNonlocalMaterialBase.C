@@ -16,8 +16,10 @@ CrackFrontNonlocalMaterialBase::validParams()
   InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
-  params.addRequiredParam<Real>("box_length", "Distance in front of crack front.");
-  params.addRequiredParam<Real>("box_height", "Distance normal to front of crack front.");
+  params.addRequiredParam<Real>(
+      "box_length", "Dimension of property-averaging box in direction of crack extension.");
+  params.addRequiredParam<Real>(
+      "box_height", "Dimension of property-averaging box in direction normal to crack.");
   params.addParam<Real>("box_width", 1.0, "Distance tangent to front of crack front.");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
@@ -53,8 +55,6 @@ CrackFrontNonlocalMaterialBase::CrackFrontNonlocalMaterialBase(const InputParame
 void
 CrackFrontNonlocalMaterialBase::initialSetup()
 {
-  // gather coupled user objects late to ensure they are constructed. Do not add them as
-  // dependencies (that's already done in the constructor).
   const auto uo_name = getParam<UserObjectName>("crack_front_definition");
   _crack_front_definition =
       &(getUserObjectByName<CrackFrontDefinition>(uo_name, /*is_dependency = */ false));

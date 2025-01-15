@@ -105,8 +105,8 @@ MeshCut2DFractureUserObject::initialize()
 void
 MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
 {
-  // k_vpp's & stress_vpp are empty (but not a nullptr) on the very first time step because this UO
-  // is called before the InteractionIntegral or crackFrontStress vpp
+  // The k*_vpp & stress_vpp are empty (but not a nullptr) on the very first time step because this
+  // UO is called before the InteractionIntegral or crackFrontStress vpp
   if ((!_ki_vpp || _ki_vpp->size() == 0) && (!_stress_vpp || _stress_vpp->size() == 0))
     return;
 
