@@ -10,7 +10,11 @@ Action recognize syntax such as `[Kernels]` or `[Outputs]` and perform actions b
 
 !---
 
+<<<<<<< HEAD
 ## Tasks
+=======
+## Syntax and Tasks
+>>>>>>> a95471b138 (Add intermediary steps back to the simulations)
 
 The MOOSE action system operates on tasks, each task is connected to one or many actions.
 
@@ -31,5 +35,3 @@ An action designed to build an entire equation. Solid mechanics, computational f
 are all implemented as Physics.
 
 !listing problems/step10.i block=Physics
-
-!---
