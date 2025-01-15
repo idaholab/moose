@@ -112,7 +112,7 @@ within the solution domain.
 ## [#step10]
 
 Thermal expansion of the concrete can be added to the coupled set of equations
-using the "tensor mechanics" module, without adding additional code.
+using the "solid mechanics" module, without adding additional code.
 
 !---
 

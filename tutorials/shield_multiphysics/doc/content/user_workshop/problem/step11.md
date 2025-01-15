@@ -4,12 +4,12 @@
 
 We want to study the effects of the local environment on sensors placed anywhere in the shield.
 
-!media images/shield_sensor_spread.png
+!media media/shield_sensor_spread.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !!end-intro
 
-!----
+!---
 
 ## Step 11: Lower-scale Input File
 

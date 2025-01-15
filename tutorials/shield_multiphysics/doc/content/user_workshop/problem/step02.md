@@ -2,17 +2,17 @@
 
 !---
 
-## Kernel Object
+## Implementing equations in MOOSE
 
-To implement the Heat Conduction equation, a `Kernel` object is needed to add the conductivity coefficient
-to the diffusion equation.
+To implement the Heat Conduction equation, we will use a `Kernel`  object to compute the
+residual and the Jacobian of the diffusion term:
 
 !equation
 -\nabla \cdot k \nabla T = 0,
 
-where $k$ is the thermal diffusivity.
+where  $k$  is the thermal diffusivity.
 
-A `Kernel` is C++ class, which inherits from `MooseObject` that is used by MOOSE for coding
+A `Kernel`  is C++ class, which inherits from `MooseObject` that is used by MOOSE for coding
 volume integrals of a [!ac](PDE).
 
 !!end-intro
