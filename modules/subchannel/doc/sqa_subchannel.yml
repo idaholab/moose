@@ -4,5 +4,10 @@ specs:
     - tests
 dependencies:
     - framework
+    - fluid_properties
+    - heat_transfer
+    - navier_stokes
+    - ray_tracing
+    - reactor
 repo: moose
 reports: !include ${MOOSE_DIR}/modules/subchannel/doc/sqa_reports.yml
