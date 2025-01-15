@@ -212,6 +212,10 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
+!include user_workshop/infrastructure/mms.md
+
+!---
+
 !include user_workshop/problem/step10.md end=end-intro
 
 !---
@@ -262,9 +266,6 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !include user_workshop/problem/step12.md start=end-intro
 
-!---
-
-!include user_workshop/infrastructure/mms.md
 
 !---
 
