@@ -325,7 +325,7 @@ public:
    * @return The IDs corresponding to the material properties that
    * MUST be reinited before evaluating this object
    */
-  const std::unordered_set<unsigned int> & getMatPropDependencies() const
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const
   {
     return _material_property_dependencies;
   }
