@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "DiffusionHDGAssemblyHelper.h"
 #include "DiffusionHDGDirichletBC.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
@@ -21,28 +22,24 @@ DiffusionHDGDirichletBC::validParams()
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
                              "hybridized discretization of a diffusion equation");
   params.addParam<MooseFunctorName>("functor", 0, "The Dirichlet value for the diffusing specie");
-  params += DiffusionHDGKernel::diffusionParams();
+  params += DiffusionHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   return params;
 }
 
 DiffusionHDGDirichletBC::DiffusionHDGDirichletBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    NonADFunctorInterface(this),
-    constructDiffusion(),
+    DiffusionHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _dirichlet_val(getFunctor<Real>("functor")),
     _my_side(libMesh::invalid_uint)
 {
-  addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_var));
-  addMooseVariableDependency(&const_cast<MooseVariableFE<RealVectorValue> &>(_grad_u_var));
-  addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_face_var));
 }
 
 void
 DiffusionHDGDirichletBC::initialSetup()
 {
   // This check must occur after FEProblemBase::init()
-  DiffusionHDGKernel::checkCoupling(_fe_problem, _sys.number(), *this);
+  checkCoupling();
 }
 
 void
@@ -70,7 +67,7 @@ DiffusionHDGDirichletBC::computeResidual()
                           _scalar_re);
 
   // Set the LMs on these Dirichlet boundary faces to 0
-  createIdentityResidual(_lm_phi_face, _lm_u_sol, _lm_re);
+  createIdentityResidual(_JxW, *_qrule, _lm_phi_face, _lm_u_sol, _lm_re);
 
   addResiduals(_assembly, _vector_re, _qu_dof_indices, _grad_u_var.scalingFactor());
   addResiduals(_assembly, _scalar_re, _u_dof_indices, _u_var.scalingFactor());
@@ -85,7 +82,7 @@ DiffusionHDGDirichletBC::computeJacobian()
   _lm_lm_jac.resize(_lm_u_dof_indices.size(), _lm_u_dof_indices.size());
 
   scalarDirichletJacobian(_JxW, *_qrule, _normals, _scalar_vector_jac, _scalar_scalar_jac);
-  createIdentityJacobian(_lm_phi_face, _lm_lm_jac);
+  createIdentityJacobian(_JxW, *_qrule, _lm_phi_face, _lm_lm_jac);
 
   addJacobian(
       _assembly, _scalar_vector_jac, _u_dof_indices, _qu_dof_indices, _u_var.scalingFactor());
@@ -93,83 +90,6 @@ DiffusionHDGDirichletBC::computeJacobian()
       _assembly, _scalar_scalar_jac, _u_dof_indices, _u_dof_indices, _u_var.scalingFactor());
   addJacobian(
       _assembly, _lm_lm_jac, _lm_u_dof_indices, _lm_u_dof_indices, _u_face_var.scalingFactor());
-}
-
-void
-DiffusionHDGDirichletBC::vectorDirichletResidual(const Moose::Functor<Real> & dirichlet_value,
-                                                 const MooseArray<Real> & JxW_face,
-                                                 const QBase & qrule_face,
-                                                 const MooseArray<Point> & normals,
-                                                 const Elem * const current_elem,
-                                                 const unsigned int current_side,
-                                                 const MooseArray<Point> & q_point_face,
-                                                 DenseVector<Number> & vector_re)
-{
-  for (const auto qp : make_range(qrule_face.n_points()))
-  {
-    const auto scalar_value = dirichlet_value(
-        Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
-        determineState());
-
-    // External boundary -> Dirichlet faces -> Vector equation RHS
-    for (const auto i : index_range(_qu_dof_indices))
-      vector_re(i) -= JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * scalar_value;
-  }
-}
-
-void
-DiffusionHDGDirichletBC::scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
-                                                 const MooseArray<Number> & scalar_sol,
-                                                 const Moose::Functor<Real> & dirichlet_value,
-                                                 const MooseArray<Real> & JxW_face,
-                                                 const QBase & qrule_face,
-                                                 const MooseArray<Point> & normals,
-                                                 const Elem * const current_elem,
-                                                 const unsigned int current_side,
-                                                 const MooseArray<Point> & q_point_face,
-                                                 DenseVector<Number> & scalar_re)
-{
-  for (const auto qp : make_range(qrule_face.n_points()))
-  {
-    const auto scalar_value = dirichlet_value(
-        Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
-        determineState());
-
-    for (const auto i : index_range(_u_dof_indices))
-    {
-      // vector
-      scalar_re(i) -=
-          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
-
-      // scalar from stabilization term
-      scalar_re(i) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] * normals[qp] *
-                      normals[qp];
-
-      // dirichlet lm from stabilization term
-      scalar_re(i) -=
-          JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_value * normals[qp] * normals[qp];
-    }
-  }
-}
-
-void
-DiffusionHDGDirichletBC::scalarDirichletJacobian(const MooseArray<Real> & JxW_face,
-                                                 const QBase & qrule_face,
-                                                 const MooseArray<Point> & normals,
-                                                 DenseMatrix<Number> & scalar_vector_jac,
-                                                 DenseMatrix<Number> & scalar_scalar_jac)
-{
-  for (const auto i : index_range(_u_dof_indices))
-    for (const auto qp : make_range(qrule_face.n_points()))
-    {
-      for (const auto j : index_range(_qu_dof_indices))
-        scalar_vector_jac(i, j) -= JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] *
-                                   (_vector_phi_face[j][qp] * normals[qp]);
-
-      for (const auto j : index_range(_u_dof_indices))
-        scalar_scalar_jac(i, j) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau *
-                                   _scalar_phi_face[j][qp] * normals[qp] * normals[qp];
-    }
 }
 
 void
@@ -188,24 +108,4 @@ DiffusionHDGDirichletBC::computeOffDiagJacobian(const unsigned int)
     _my_elem = _current_elem;
     _my_side = _current_side;
   }
-}
-
-inline void
-DiffusionHDGDirichletBC::createIdentityResidual(const MooseArray<std::vector<Real>> & phi,
-                                                const MooseArray<Number> & sol,
-                                                DenseVector<Number> & re)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : index_range(phi))
-      re(i) -= _JxW[qp] * phi[i][qp] * sol[qp];
-}
-
-inline void
-DiffusionHDGDirichletBC::createIdentityJacobian(const MooseArray<std::vector<Real>> & phi,
-                                                DenseMatrix<Number> & ke)
-{
-  for (const auto qp : make_range(_qrule->n_points()))
-    for (const auto i : index_range(phi))
-      for (const auto j : index_range(phi))
-        ke(i, j) -= _JxW[qp] * phi[i][qp] * phi[j][qp];
 }

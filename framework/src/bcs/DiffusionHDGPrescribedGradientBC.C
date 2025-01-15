@@ -7,11 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "DiffusionHDGAssemblyHelper.h"
 #include "DiffusionHDGPrescribedGradientBC.h"
-#include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
-#include "Function.h"
-#include "DiffusionHDGKernel.h"
 
 registerMooseObject("MooseApp", DiffusionHDGPrescribedGradientBC);
 
@@ -19,7 +16,7 @@ InputParameters
 DiffusionHDGPrescribedGradientBC::validParams()
 {
   auto params = IntegratedBC::validParams();
-  params += DiffusionHDGKernel::diffusionParams();
+  params += DiffusionHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   params.addClassDescription("Implements a flux boundary condition for use with a hybridized "
                              "discretization of the diffusion equation");
@@ -31,20 +28,16 @@ DiffusionHDGPrescribedGradientBC::validParams()
 DiffusionHDGPrescribedGradientBC::DiffusionHDGPrescribedGradientBC(
     const InputParameters & parameters)
   : IntegratedBC(parameters),
-    NonADFunctorInterface(this),
-    constructDiffusion(),
+    DiffusionHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _normal_gradient(getFunctor<Real>("normal_gradient")),
     _my_side(libMesh::invalid_uint)
 {
-  addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_var));
-  addMooseVariableDependency(&const_cast<MooseVariableFE<RealVectorValue> &>(_grad_u_var));
-  addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_face_var));
 }
 
 void
 DiffusionHDGPrescribedGradientBC::initialSetup()
 {
-  DiffusionHDGKernel::checkCoupling(_fe_problem, _sys.number(), *this);
+  checkCoupling();
 }
 
 void
@@ -58,20 +51,9 @@ DiffusionHDGPrescribedGradientBC::computeResidual()
   // elliptic problems" by Cockburn
 
   // qu, u, lm_u
-  DiffusionHDGKernel::vectorFaceResidual(
-      _lm_u_sol, _JxW, *_qrule, _normals, _vector_phi_face, _vector_re);
-  DiffusionHDGKernel::scalarFaceResidual(_qu_sol,
-                                         _u_sol,
-                                         _lm_u_sol,
-                                         _JxW,
-                                         *_qrule,
-                                         _normals,
-                                         _scalar_phi_face,
-                                         _diff,
-                                         _tau,
-                                         _scalar_re);
-  DiffusionHDGKernel::lmFaceResidual(
-      _qu_sol, _u_sol, _lm_u_sol, _JxW, *_qrule, _normals, _lm_phi_face, _diff, _tau, _lm_re);
+  vectorFaceResidual(_lm_u_sol, _JxW, *_qrule, _normals, _vector_re);
+  scalarFaceResidual(_qu_sol, _u_sol, _lm_u_sol, _JxW, *_qrule, _normals, _scalar_re);
+  lmFaceResidual(_qu_sol, _u_sol, _lm_u_sol, _JxW, *_qrule, _normals, _lm_re);
 
   for (const auto qp : make_range(_qrule->n_points()))
     for (const auto i : index_range(_lm_re))
@@ -100,30 +82,10 @@ DiffusionHDGPrescribedGradientBC::computeJacobian()
   _lm_vector_jac.resize(_lm_u_dof_indices.size(), _qu_dof_indices.size());
 
   // qu, u, lm_u
-  DiffusionHDGKernel::vectorFaceJacobian(
-      _JxW, *_qrule, _normals, _vector_phi_face, _lm_phi_face, _vector_lm_jac);
-  DiffusionHDGKernel::scalarFaceJacobian(_JxW,
-                                         *_qrule,
-                                         _normals,
-                                         _scalar_phi_face,
-                                         _vector_phi_face,
-                                         _lm_phi_face,
-                                         _diff,
-                                         _tau,
-                                         _scalar_vector_jac,
-                                         _scalar_scalar_jac,
-                                         _scalar_lm_jac);
-  DiffusionHDGKernel::lmFaceJacobian(_JxW,
-                                     *_qrule,
-                                     _normals,
-                                     _lm_phi_face,
-                                     _vector_phi_face,
-                                     _scalar_phi_face,
-                                     _diff,
-                                     _tau,
-                                     _lm_vector_jac,
-                                     _lm_scalar_jac,
-                                     _lm_lm_jac);
+  vectorFaceJacobian(_JxW, *_qrule, _normals, _vector_lm_jac);
+  scalarFaceJacobian(
+      _JxW, *_qrule, _normals, _scalar_vector_jac, _scalar_scalar_jac, _scalar_lm_jac);
+  lmFaceJacobian(_JxW, *_qrule, _normals, _lm_vector_jac, _lm_scalar_jac, _lm_lm_jac);
 
   addJacobian(
       _assembly, _vector_vector_jac, _qu_dof_indices, _qu_dof_indices, _grad_u_var.scalingFactor());

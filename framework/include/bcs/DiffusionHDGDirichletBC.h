@@ -10,15 +10,12 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "DiffusionHDGKernel.h"
-#include "NonADFunctorInterface.h"
-
-#include <vector>
+#include "DiffusionHDGAssemblyHelper.h"
 
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
-class DiffusionHDGDirichletBC : public IntegratedBC, public NonADFunctorInterface
+class DiffusionHDGDirichletBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -32,60 +29,7 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  /**
-   * Weakly imposes a Dirichlet condition for the scalar field in the vector (gradient) equation
-   */
-  void vectorDirichletResidual(const Moose::Functor<Real> & dirichlet_value,
-                               const MooseArray<Real> & JxW_face,
-                               const QBase & qrule_face,
-                               const MooseArray<Point> & normals,
-                               const Elem * const current_elem,
-                               const unsigned int current_side,
-                               const MooseArray<Point> & q_point_face,
-                               DenseVector<Number> & vector_re);
-
-  /**
-   * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
-   */
-  void scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
-                               const MooseArray<Number> & scalar_sol,
-                               const Moose::Functor<Real> & dirichlet_value,
-                               const MooseArray<Real> & JxW_face,
-                               const QBase & qrule_face,
-                               const MooseArray<Point> & normals,
-                               const Elem * const current_elem,
-                               const unsigned int current_side,
-                               const MooseArray<Point> & q_point_face,
-                               DenseVector<Number> & scalar_re);
-
-  /**
-   * Computes the Jacobian for a Dirichlet condition for the scalar field in the scalar field
-   * equation
-   */
-  void scalarDirichletJacobian(const MooseArray<Real> & JxW_face,
-                               const QBase & qrule_face,
-                               const MooseArray<Point> & normals,
-                               DenseMatrix<Number> & scalar_vector_jac,
-                               DenseMatrix<Number> & scalar_scalar_jac);
-
-  /**
-   * Creates residuals corresponding to the weak form (v, \hat{u}), or stated simply this routine
-   * can be used to drive Lagrange multiplier values on the boundary to zero. This should be used on
-   * boundaries where there are Dirichlet conditions for the primal variables such that there is no
-   * need for the Lagrange multiplier variables
-   */
-  void createIdentityResidual(const MooseArray<std::vector<Real>> & phi,
-                              const MooseArray<Number> & sol,
-                              DenseVector<Number> & re);
-
-  /**
-   * As above, but for the Jacobians
-   */
-  void createIdentityJacobian(const MooseArray<std::vector<Real>> & phi, DenseMatrix<Number> & ke);
-
   virtual Real computeQpResidual() override { mooseError("this will never be called"); }
-
-  declareDiffusionMembers;
 
 private:
   /// Functor computing the Dirichlet boundary value

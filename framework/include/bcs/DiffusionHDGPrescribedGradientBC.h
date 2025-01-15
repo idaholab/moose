@@ -10,14 +10,13 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "DiffusionHDGKernel.h"
-#include "NonADFunctorInterface.h"
+#include "DiffusionHDGAssemblyHelper.h"
 
 /**
  * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
  * the diffusion equation
  */
-class DiffusionHDGPrescribedGradientBC : public IntegratedBC, public NonADFunctorInterface
+class DiffusionHDGPrescribedGradientBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -31,8 +30,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  declareDiffusionMembers;
-
   virtual Real computeQpResidual() override { mooseError("this will never be called"); }
 
   /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
