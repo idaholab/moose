@@ -34,7 +34,7 @@ NAVIER_STOKES             := yes
 POROUS_FLOW               := no
 RICHARDS                  := no
 # tensor_mechanics is required by Steps 9-10.
-TENSOR_MECHANICS          := yes
+SOLID_MECHANICS           := yes
 XFEM                      := no
 # misc is required by step 2
 MISC                      := yes
