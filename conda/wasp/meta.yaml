@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.12.23" %}
+{% set version = "2025.01.07" %}
 
 package:
   name: moose-wasp
@@ -13,7 +13,6 @@ package:
 source:
   - path: ../../framework/contrib/wasp
   - path: ../../scripts/configure_wasp.sh
-  - path: ../pyhit
   - path: ../../python/moosetree
     folder: pyhit/moosetree
   - path: ../../python/mooseutils/message.py
