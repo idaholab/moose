@@ -51,6 +51,7 @@ public:
   virtual void post() override;
   bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const override;
 
+protected:
   /**
    * Reinitialize variables and materials on a face
    * @param fe_problem The finite element problem to call reinit methods on
@@ -66,7 +67,6 @@ public:
                    BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
                    const Elem * lower_d_elem = nullptr);
 
-protected:
   ///@{
   /// Base class version just calls compute on each object for the element
   virtual void computeOnElement();
