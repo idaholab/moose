@@ -118,6 +118,6 @@ HeatConductionPhysicsBase::addPreconditioning()
         std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_type"), "hypre");
     const auto option_pair2 =
         std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_hypre_type"), "boomeramg");
-    processPetscPairs({option_pair1, option_pair2}, _problem->mesh().dimension(), po);
+    addPetscPairsToPetscOptions({option_pair1, option_pair2}, _problem->mesh().dimension(), po);
   }
 }

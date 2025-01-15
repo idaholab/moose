@@ -364,3 +364,10 @@ MultiMooseEnum::operator+=(const std::initializer_list<std::string> & names)
   mooseDeprecated("MultiMooseEnum::operator+= is deprecated, use MultiMooseEnum::addValidName");
   return MooseEnumBase::operator+=(names);
 }
+
+void
+MultiMooseEnum::addValidName(const MultiMooseEnum & names)
+{
+  for (const auto & item : names._items)
+    addEnumerationItem(MooseEnumItem(item.name(), getNextValidID()));
+}

@@ -291,8 +291,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
   const auto & momentum_petsc_pair_options = getParam<MooseEnumItem, std::string>(
       "momentum_petsc_options_iname", "momentum_petsc_options_value");
-  Moose::PetscSupport::processPetscFlags(momentum_petsc_options, _momentum_petsc_options);
-  Moose::PetscSupport::processPetscPairs(
+  Moose::PetscSupport::addPetscFlagsToPetscOptions(momentum_petsc_options, _momentum_petsc_options);
+  Moose::PetscSupport::addPetscPairsToPetscOptions(
       momentum_petsc_pair_options, _problem.mesh().dimension(), _momentum_petsc_options);
 
   _momentum_linear_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
@@ -303,8 +303,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
   const auto & pressure_petsc_options = getParam<MultiMooseEnum>("pressure_petsc_options");
   const auto & pressure_petsc_pair_options = getParam<MooseEnumItem, std::string>(
       "pressure_petsc_options_iname", "pressure_petsc_options_value");
-  Moose::PetscSupport::processPetscFlags(pressure_petsc_options, _pressure_petsc_options);
-  Moose::PetscSupport::processPetscPairs(
+  Moose::PetscSupport::addPetscFlagsToPetscOptions(pressure_petsc_options, _pressure_petsc_options);
+  Moose::PetscSupport::addPetscPairsToPetscOptions(
       pressure_petsc_pair_options, _problem.mesh().dimension(), _pressure_petsc_options);
 
   _pressure_linear_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
@@ -317,8 +317,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     const auto & energy_petsc_options = getParam<MultiMooseEnum>("energy_petsc_options");
     const auto & energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
         "energy_petsc_options_iname", "energy_petsc_options_value");
-    Moose::PetscSupport::processPetscFlags(energy_petsc_options, _energy_petsc_options);
-    Moose::PetscSupport::processPetscPairs(
+    Moose::PetscSupport::addPetscFlagsToPetscOptions(energy_petsc_options, _energy_petsc_options);
+    Moose::PetscSupport::addPetscPairsToPetscOptions(
         energy_petsc_pair_options, _problem.mesh().dimension(), _energy_petsc_options);
 
     _energy_linear_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
@@ -356,11 +356,11 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
         getParam<MultiMooseEnum>("passive_scalar_petsc_options");
     const auto & passive_scalar_petsc_pair_options = getParam<MooseEnumItem, std::string>(
         "passive_scalar_petsc_options_iname", "passive_scalar_petsc_options_value");
-    Moose::PetscSupport::processPetscFlags(passive_scalar_petsc_options,
-                                           _passive_scalar_petsc_options);
-    Moose::PetscSupport::processPetscPairs(passive_scalar_petsc_pair_options,
-                                           _problem.mesh().dimension(),
-                                           _passive_scalar_petsc_options);
+    Moose::PetscSupport::addPetscFlagsToPetscOptions(passive_scalar_petsc_options,
+                                                     _passive_scalar_petsc_options);
+    Moose::PetscSupport::addPetscPairsToPetscOptions(passive_scalar_petsc_pair_options,
+                                                     _problem.mesh().dimension(),
+                                                     _passive_scalar_petsc_options);
 
     _passive_scalar_linear_control.real_valued_data["rel_tol"] =
         getParam<Real>("passive_scalar_l_tol");
