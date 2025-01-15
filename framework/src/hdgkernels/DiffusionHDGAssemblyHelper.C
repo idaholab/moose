@@ -29,7 +29,7 @@ DiffusionHDGAssemblyHelper::validParams()
       "grad_u", "The gradient of the _diffusing specie concentration");
   params.addRequiredParam<NonlinearVariableName>(
       "face_u", "The concentration of the _diffusing specie on faces");
-  params.addRequiredParam<MaterialPropertyName>("diffusivity", "The _diffusivity");
+  params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
   params.addParam<Real>("tau",
                         1,
                         "The stabilization coefficient required for discontinuous Galerkin "

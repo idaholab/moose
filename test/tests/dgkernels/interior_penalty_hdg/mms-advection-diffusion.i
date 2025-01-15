@@ -1,6 +1,14 @@
 diff=2
 a=2
 
+[GlobalParams]
+  variable = u
+  face_variable = side_u
+  diffusivity = ${diff}
+  alpha = 6
+  velocity = vel
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -21,16 +29,6 @@ a=2
 []
 
 [Kernels]
-  [diff]
-    type = MatDiffusion
-    variable = u
-    diffusivity = ${diff}
-  []
-  [adv]
-    type = ADConservativeAdvection
-    variable = u
-    velocity = vel
-  []
   [ffn]
     type = BodyForce
     variable = u
@@ -38,55 +36,24 @@ a=2
   []
 []
 
-[DGKernels]
-  [dg_interior_diff]
-    type = ADHDGDiffusion
-    variable = u
-    side_variable = side_u
-    alpha = 6
-    diff = ${diff}
+[HDGKernels]
+  [diff]
+    type = DiffusionIPHDGKernel
   []
-  [dg_side_diff]
-    type = ADHDGDiffusionSide
-    variable = side_u
-    interior_variable = u
-    alpha = 6
-    diff = ${diff}
-  []
-  [dg_interior_adv]
-    type = ADHDGAdvection
-    variable = u
-    side_variable = side_u
-    velocity = vel
-  []
-  [dg_side_adv]
-    type = ADHDGAdvectionSide
-    variable = side_u
-    interior_variable = u
-    velocity = vel
+  [adv]
+    type = AdvectionIPHDGKernel
   []
 []
 
 [BCs]
   [dirichlet_diff]
-    type = HDGDiffusionBC
-    variable = u
-    exact_soln = exact
-    boundary = 'left right top bottom'
-    alpha = 6
-    diff = ${diff}
-  []
-  [dg_interior_adv]
-    type = ADHDGAdvectionDirichletBC
-    variable = u
-    exact_soln = exact
-    velocity = vel
+    type = DiffusionIPHDGDirichletBC
+    functor = exact
     boundary = 'left right top bottom'
   []
-  [dirichlet_side]
-    type = ADHDGSideDirichletBC
-    variable = side_u
-    exact_soln = exact
+  [dirichlet_adv]
+    type = AdvectionIPHDGDirichletBC
+    functor = exact
     boundary = 'left right top bottom'
   []
 []

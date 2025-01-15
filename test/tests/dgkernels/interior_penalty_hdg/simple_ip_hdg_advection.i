@@ -1,3 +1,9 @@
+[GlobalParams]
+  variable = u
+  face_variable = side_u
+  velocity = vel
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -15,42 +21,21 @@
   []
 []
 
-[Kernels]
+[HDGKernels]
   [adv]
-    type = ADConservativeAdvection
-    variable = u
-    velocity = vel
-  []
-[]
-
-[DGKernels]
-  [dg_interior_adv]
-    type = ADHDGAdvection
-    variable = u
-    side_variable = side_u
-    velocity = vel
-  []
-  [dg_side_adv]
-    type = ADHDGAdvectionSide
-    variable = side_u
-    interior_variable = u
-    velocity = vel
+    type = AdvectionIPHDGKernel
   []
 []
 
 [BCs]
-  [dg_interior_adv]
-    type = ADHDGAdvectionDirichletBC
-    variable = u
-    exact_soln = 1
-    velocity = vel
-    boundary = 'left right'
+  [inflow]
+    type = AdvectionIPHDGDirichletBC
+    functor = 1
+    boundary = 'left'
   []
-  [dirichlet_side]
-    type = ADHDGSideDirichletBC
-    variable = side_u
-    exact_soln = 1
-    boundary = 'left right'
+  [outflow]
+    type = AdvectionIPHDGOutflowBC
+    boundary = 'right'
   []
 []
 
@@ -65,8 +50,8 @@
 [Executioner]
   type = Steady
   nl_rel_tol = 1e-10
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
   solve_type = NEWTON
 []
 
@@ -74,8 +59,16 @@
   [symmetric]
     type = IsMatrixSymmetric
   []
+  [avg_u]
+    type = ElementAverageValue
+    variable = u
+  []
+  [avg_side_u]
+    type = ElementAverageValue
+    variable = side_u
+  []
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

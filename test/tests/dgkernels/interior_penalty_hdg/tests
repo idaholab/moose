@@ -70,8 +70,8 @@
   []
   [simple_advection]
     requirement = 'The system shall be able to solve a one dimensional advection problem using a hybridizable interior penalty (no gradient variable) discontinuous Galerkin discretization.'
-    type = Exodiff
+    type = CSVDiff
     input = simple_ip_hdg_advection.i
-    exodiff = simple_ip_hdg_advection_out.e
+    csvdiff = simple_ip_hdg_advection_out.csv
   []
 []
