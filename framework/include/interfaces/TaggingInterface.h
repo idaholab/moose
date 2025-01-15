@@ -30,6 +30,13 @@ class Assembly;
 template <typename T>
 InputParameters validParams();
 
+struct ADResidualsPacket
+{
+  const DenseVector<ADReal> & residuals;
+  const std::vector<dof_id_type> & dof_indices;
+  const Real scaling_factor;
+};
+
 class TaggingInterface
 {
 public:
@@ -255,6 +262,22 @@ protected:
                    const Residuals & residuals,
                    const Indices & dof_indices,
                    Real scaling_factor);
+
+  /**
+   * Add the provided incoming residuals corresponding to the provided dof indices
+   */
+  void addResiduals(Assembly & assembly, const ADResidualsPacket & packet);
+
+  /**
+   * Add the provided incoming residuals and derivatives for the Jacobian, corresponding to the
+   * provided dof indices
+   */
+  void addResidualsAndJacobian(Assembly & assembly, const ADResidualsPacket & packet);
+
+  /**
+   * Add the provided residual derivatives into the Jacobian for the provided dof indices
+   */
+  void addJacobian(Assembly & assembly, const ADResidualsPacket & packet);
 
   /**
    * Add the provided incoming residuals corresponding to the provided dof indices. This API should
@@ -557,4 +580,22 @@ TaggingInterface::setResidual(SystemBase & sys, const SetResidualFunctor set_res
   for (const auto tag_id : _vector_tags)
     if (sys.hasVector(tag_id))
       set_residual_functor(sys.getVector(tag_id));
+}
+
+inline void
+TaggingInterface::addResiduals(Assembly & assembly, const ADResidualsPacket & packet)
+{
+  addResiduals(assembly, packet.residuals, packet.dof_indices, packet.scaling_factor);
+}
+
+inline void
+TaggingInterface::addResidualsAndJacobian(Assembly & assembly, const ADResidualsPacket & packet)
+{
+  addResidualsAndJacobian(assembly, packet.residuals, packet.dof_indices, packet.scaling_factor);
+}
+
+inline void
+TaggingInterface::addJacobian(Assembly & assembly, const ADResidualsPacket & packet)
+{
+  addJacobian(assembly, packet.residuals, packet.dof_indices, packet.scaling_factor);
 }
