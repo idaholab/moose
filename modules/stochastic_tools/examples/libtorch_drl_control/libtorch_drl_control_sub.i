@@ -127,7 +127,7 @@ air_effective_k = 0.5 # W/(m K)
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '0.02'
+    action_standard_deviations = '5e-5'
     action_scaling_factors = 20
 
     execute_on = 'TIMESTEP_BEGIN'
@@ -146,7 +146,7 @@ air_effective_k = 0.5 # W/(m K)
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '0.01'
+    action_standard_deviations = '5e-5'
     action_scaling_factors = 20
 
     execute_on = 'TIMESTEP_BEGIN'
@@ -165,11 +165,11 @@ air_effective_k = 0.5 # W/(m K)
 
   start_time = 0.0
   end_time = 86400
-  dt = ${fparse 86400/4}
+  dt = ${fparse 86400/40}
 []
 
 [Outputs]
-  # console = false
+  console = false
   [c]
     type = JSON
     execute_on = FINAL
