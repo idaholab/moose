@@ -8,11 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ShieldMultiPhysicsApp.h"
-
-// Moose Includes
-#include "MooseInit.h"
-#include "MooseApp.h"
-#include "AppFactory.h"
+#include "MooseMain.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("ShieldMultiPhysics");
@@ -21,17 +17,5 @@ PerfLog Moose::perf_log("ShieldMultiPhysics");
 int
 main(int argc, char * argv[])
 {
-  // Initialize MPI, solvers and MOOSE
-  MooseInit init(argc, argv);
-
-  // Register this application's MooseApp and any it depends on
-  ShieldMultiPhysicsApp::registerApps();
-
-  // The unique_ptr will automatically free memory allocated by the AppFactory.
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("ShieldMultiPhysicsApp", argc, argv);
-
-  // Execute the application
-  app->run();
-
-  return 0;
+  return Moose::main<ShieldMultiPhysicsApp>(argc, argv);
 }
