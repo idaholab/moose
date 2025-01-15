@@ -29,6 +29,7 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
+  const auto current_ic_state = _fe_problem.getCurrentICState();
 
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
   printGeneralExecutionInformation();
@@ -65,7 +66,8 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
       if (warehouse.hasActiveBlockObjects(id, _tid))
         for (auto ic : warehouse.getActiveBlockObjects(id, _tid))
         {
-          if ((id != elem->subdomain_id()) && !ic->variable().isNodal())
+          if ((id != elem->subdomain_id() && !ic->variable().isNodal()) ||
+              ic->getState() != current_ic_state)
             continue;
           order.push_back(&(ic->variable()));
           groups[&(ic->variable())].push_back(ic);
