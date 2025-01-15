@@ -257,6 +257,7 @@ Extensions:
             scalar_transport: !include modules/scalar_transport/doc/sqa_scalar_transport.yml
             solid_properties: !include modules/solid_properties/doc/sqa_solid_properties.yml
             stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml
+            subchannel: !include modules/subchannel/doc/sqa_subchannel.yml
             solid_mechanics: !include modules/solid_mechanics/doc/sqa_solid_mechanics.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
