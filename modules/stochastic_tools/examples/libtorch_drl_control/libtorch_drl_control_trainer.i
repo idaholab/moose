@@ -4,7 +4,7 @@
 [Samplers]
   [dummy]
     type = CartesianProduct
-    linear_space_items = '0 0.01 2'
+    linear_space_items = '0 0.01 5'
   []
 []
 
@@ -13,7 +13,7 @@
     type = SamplerFullSolveMultiApp
     sampler = dummy
     input_files = 'libtorch_drl_control_sub.i'
-    mode = batch-reset
+    # mode = batch-reset
   []
 []
 
@@ -43,22 +43,22 @@
     reward = 'storage/r_transfer:T_reporter:reward:value'
 
     num_epochs = 400
-    update_frequency = 1
-    decay_factor = 0.8
+    update_frequency = 10
+    decay_factor = 0.9
 
     loss_print_frequency = 40
 
     critic_learning_rate = 0.0005
-    num_critic_neurons_per_layer = '32 16'
+    num_critic_neurons_per_layer = '64 32'
 
     control_learning_rate = 0.0005
-    num_control_neurons_per_layer = '16 6'
+    num_control_neurons_per_layer = '32 16'
 
     # keep consistent with LibtorchNeuralNetControl
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '0.01'
+    action_standard_deviations = '5e-5'
 
     standardize_advantage = true
 
@@ -71,20 +71,21 @@
     type = StochasticReporter
     parallel_type = ROOT
   []
-  # [reward]
-  #   type = DRLRewardReporter
-  #   drl_trainer_name = nn_trainer
-  # []
+  [reward]
+    type = DRLRewardReporter
+    drl_trainer_name = nn_trainer
+  []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 1
+  num_steps = 4000
 []
 
 [Outputs]
   file_base = output/train_out
-  json = true
+  # json = true
+  csv = true
   time_step_interval = 1
   execute_on = TIMESTEP_END
 []

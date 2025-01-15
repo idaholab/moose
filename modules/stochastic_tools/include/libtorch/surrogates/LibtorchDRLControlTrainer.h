@@ -222,6 +222,8 @@ private:
   void getSignalDataFromReporter(std::vector<std::vector<Real>> & data,
                                  const std::vector<const std::vector<std::vector<Real>> *> & reporter_links);
 
+  void normalizeResponseData(std::vector<std::vector<Real>> & data, const unsigned int num_reporters, const unsigned int num_timesteps);
+
   /**
    * Extract the reward values from the postprocessors of the controlled system
    * This assumes that they are stored in an AccumulateReporter.
