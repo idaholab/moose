@@ -45,9 +45,9 @@ Example numerical scheme
 \text{solve }M(u_n, v_n) u_{n+1/2} = 0\\
 \text{then }N(u_{n+1/2}, v_n) v_{n+1} = 0\\
 
-[space](https://www.google.com style=color:white)
+[-](https://www.google.com style=color:white)
 
-[space](https://www.google.com style=color:white)
+[-](https://www.google.com style=color:white)
 
 !equation
 \text{solve }M(u_{n,i}, v_{n,i}) u_{n,i+1} = 0\\
@@ -55,9 +55,9 @@ Example numerical scheme
 \text{then }M(u_{n,i+1}, v_{n,i+1}) u_{n,i+2} = 0\\
 \text{etc }
 
-[space](https://www.google.com style=color:white)
+[-](https://www.google.com style=color:white)
 
-[space](https://www.google.com style=color:white)
+[-](https://www.google.com style=color:white)
 
 !equation
 \text{solve }\begin{bmatrix}M(u_n, v_n) N(u_n, v_n)\end{bmatrix} \begin{bmatrix}u_n \\ v_n\end{bmatrix} = \begin{bmatrix}0 \\ 0\end{bmatrix} \\

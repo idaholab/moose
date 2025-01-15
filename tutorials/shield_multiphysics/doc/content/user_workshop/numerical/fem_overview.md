@@ -167,6 +167,23 @@ and the shape functions.
 
 !---
 
+## Looking back
+
+Polynomial fitting:
+
+- Form equations that the coefficients of a polynomial function must satisfy to fit
+- Solve the linear system
+- Reconstruct the fit by evaluating the polynomial defined by its coefficients
+
+Finite Element method:
+
+- Form equations on each element to minimize the residual of an equation
+- Solve the linear system
+- Reconstruct the function
+- Re-evaluate the equation and iterate (for nonlinear equations)
+
+!---
+
 ## Integration by Parts and Divergence Theorem
 
 Suppose $\varphi$ is a scalar function, $\vec{v}$ is a vector function, and both are continuously

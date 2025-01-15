@@ -56,3 +56,96 @@ params.addParam<FunctionName>("power_history", "t+100*sin(y)", "The power histor
 
 A `ParsedFunction` or `ConstantFunction` object is automatically constructed based on the default
 value if a function name is not supplied in the input file.
+
+!---
+
+## Using a Function in our model
+
+Let's vary the water temperature in time
+
+!style! fontsize=50%
+
+```cpp
+
+  [water_convection]
+    type = ADConvectiveHeatFluxBC
+    variable = T
+    boundary = 'water_boundary_inwards'
+    T_infinity = 300.0
+    heat_transfer_coefficient = 30
+  []
+```
+
+!style-end!
+
+The same  `BC`  object can accept a function parameter:
+
+!style! fontsize=50%
+
+```cpp
+
+  [water_convection]
+    type = ADConvectiveHeatFluxBC
+    variable = T
+    boundary = 'water_boundary_inwards'
+    T_infinity_functor = water_T_ramp
+    heat_transfer_coefficient = 30
+  []
+
+[Functions]
+  [water_T_ramp]
+    type = PiecewiseLinear
+    x = '0 10 100'
+    y = '300 290 290'
+  []
+[]
+```
+
+!style-end!
+
+!---
+
+
+Let's vary the power input in space
+
+!style! fontsize=50%
+
+```cpp
+
+  [from_reactor]
+    type = NeumannBC
+    variable = T
+    boundary = inner_cavity
+    # 100 kW reactor, 108 m2 cavity area
+    value = '${fparse 1e5 / 108}'
+  []
+```
+
+!style-end!
+
+This time we have to select a different object:
+
+!style! fontsize=50%
+
+```cpp
+
+  [from_reactor]
+    type = FunctionNeumannBC
+    variable = T
+    boundary = inner_cavity
+    # 100 kW reactor, 108 m2 cavity area
+    function = 'heat_flux'
+  []
+
+[Functions]
+  [heat_flux]
+    type = ParsedFunction
+    # apply heat flux only above z=1m
+    expression = 'if(z > 1, 1e5 / 108, 0)'
+  []
+[]
+```
+
+!style-end!
+
+!---

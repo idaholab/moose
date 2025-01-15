@@ -48,6 +48,10 @@
 
 !---
 
+!include user_workshop/problem/step02.md end=end-intro
+
+!---
+
 !include user_workshop/cpp/01_basics.md
 
 !---
@@ -56,19 +60,7 @@
 
 !---
 
-!include user_workshop/cpp/03_types.md
-
-!---
-
 !include user_workshop/cpp/04_classes.md
-
-!---
-
-!include user_workshop/cpp/standards.md
-
-!---
-
-!include user_workshop/problem/step02.md end=end-intro
 
 !---
 
@@ -190,6 +182,18 @@
 
 !---
 
+# More C++
+
+!---
+
+!include user_workshop/cpp/03_types.md
+
+!---
+
+!include user_workshop/cpp/standards.md
+
+!---
+
 !include user_workshop/problem/step08.md end=end-intro
 
 !---
@@ -229,6 +233,10 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 ## (continued)
 
 !include user_workshop/problem/step09.md start=end-intro
+
+!---
+
+!include user_workshop/infrastructure/mms.md
 
 !---
 
@@ -282,9 +290,6 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !include user_workshop/problem/step12.md start=end-intro
 
-!---
-
-!include user_workshop/infrastructure/mms.md
 
 !---
 
