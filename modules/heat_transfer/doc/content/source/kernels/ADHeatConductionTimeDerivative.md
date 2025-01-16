@@ -7,7 +7,7 @@
 ## Example Input File Syntax
 
 The case demonstrates the use of `ADHeatConductionTimeDerivative` where the
-properties are defined by an [ADGenericConstantMaterial](ADGenericConstantMaterial.md)
+properties are defined by an [ADGenericConstantMaterial](GenericConstantMaterial.md)
 
 !listing modules/heat_transfer/test/tests/verify_against_analytical/ad_1D_transient.i
   start=Kernels
