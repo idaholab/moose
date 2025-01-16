@@ -23,7 +23,8 @@ BernoulliPressureVariable::validParams()
   params.addParam<MooseFunctorName>("w", 0, "The z-component of velocity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
-  params.addParam<std::vector<std::string>>("pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
+  // params.addParam<std::vector<std::string>>("pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
+  params.addParam<std::vector<BoundaryName>>("pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
   params.addParam<std::vector<Real>>("pressure_drop_form_factors", {}, "User-suppled form loss coefficients to be applied over the sidesets listed above");
   params.addParam<bool>(
       "allow_two_term_expansion_on_bernoulli_faces",
@@ -43,9 +44,9 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _w(nullptr),
     _eps(nullptr),
     _rho(nullptr),
-    _pressure_drop_sidesets(getParam<std::vector<std::string>>("pressure_drop_sidesets")),
-    _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
+    _pressure_drop_sidesets(getParam<std::vector<BoundaryName>>("pressure_drop_sidesets")),
     _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs(_pressure_drop_sidesets)),
+    _pressure_drop_form_factors(getParam<std::vector<Real>>(pressure_drop_form_factors)),
     _theBoundaries(this->_mesh.getBoundaryIDs()),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
@@ -175,13 +176,18 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   ADReal factor_upwind = 0.0;
 // Iterate through sidesets to see if they are boundary faces or not
 //How do I access the variable I defined above titled num_pressure_drop_sidesets?
-  size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
-  size_t numBoundaries = sizeof(_theBoundaries) / sizeof(_theBoundaries[0]);
-
-  for(size_t i =0; i < num_pressure_drop_sidesets, i++; ){
-    for(size_t j=0; j < numBoundaries, j++;){
-    if (_pressure_drop_sideset_ids[i] == _theBoundaries[j])
-    {
+  int num_pressure_drop_sidesets = _pressure_drop_sideset_ids.size();
+  int num_boundaries = _theBoundaries.size() ;
+ 
+  for(int i =0; i < num_pressure_drop_sidesets, i++; ){
+    int isItBoundary = 0;
+    for(int j=0; j < num_boundaries, j++;){;
+        if (_pressure_drop_sideset_ids[i] == _theBoundaries[j])
+    {     isItBoundary = 1;
+    }
+    }
+    if (!isItBoundary )
+    {   
       factor_downwind += _pressure_drop_form_factors[i];
     }
     }
@@ -204,4 +210,4 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
                                    : (*this)(makeElemArg(fi.elemPtr()), time);
 
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
-}
+
