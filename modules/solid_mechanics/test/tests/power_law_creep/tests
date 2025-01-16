@@ -127,4 +127,77 @@
       detail = 'calculate a perfect Jacobian with the small strain formulation'
     []
   []
+  [composite_power_law_creep]
+    type = 'CSVDiff'
+    input = 'composite_power_law_creep.i'
+    csvdiff = 'composite_power_law_creep_tests_soln_0011.csv'
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    requirement = "The system shall provide a phase-dependent power law creep that computes the strain with different material properties."
+    issues = '#28368'
+  []
+  [composite_power_law_creep_single_material]
+    type = 'CSVDiff'
+    input = 'composite_power_law_creep_single_material.i'
+    csvdiff = 'composite_power_law_creep_single_material_tests_soln_0011.csv'
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    requirement = "The system shall provide a phase-dependent power law creep that gives the same output as power_law_creep.i if given the same materials to all the phases."
+    issues = '#28368'
+  []
+  [composite_power_law_creep_small_strain]
+    type = 'CSVDiff'
+    input = 'composite_power_law_creep_small_strain.i'
+    csvdiff = 'composite_power_law_creep_small_strain_tests_soln_0011.csv'
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    requirement = "The system shall provide a phase-dependent power law creep that works with small strain."
+    issues = '#28368'
+  []
+  [composite_power_law_creep_plasticity]
+    type = 'CSVDiff'
+    input = 'composite_power_law_creep_plasticity.i'
+    csvdiff = 'composite_power_law_creep_plasticity_tests_soln_0011.csv'
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    requirement = "The system shall provide a phase-dependent power law creep that works with plasticity."
+    issues = '#28368'
+  []
+  [composite_power_law_creep_onePhaseMulti]
+    type = 'CSVDiff'
+    input = 'composite_power_law_creep_onePhaseMulti.i'
+    csvdiff = 'composite_power_law_creep_onePhaseMulti_tests_soln_0011.csv'
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    requirement = "The system shall provide a phase-dependent power law creep that works for when one phase has multiple plasticity rule, and another phase does not have plasticity"
+    issues = '#28368'
+  []
+  [except_composite_power_law_activation_energy]
+    type = 'RunException'
+    input = 'composite_power_law_creep.i'
+    cli_args = "Materials/power_law_creep/activation_energy='3.0e5  3.5e5  4.5e5'"
+    prereq = composite_power_law_creep
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    expect_err = 'activation energy must be equal to the number of swithing functions'
+    requirement = "The system shall produce an error"
+                  " if the input activation energies are not the same length as the switching functions provided."
+    issues = '#28368'
+  []
+  [except_composite_power_law_coefficient]
+    type = 'RunException'
+    input = 'composite_power_law_creep.i'
+    cli_args = "Materials/power_law_creep/coefficient='1.0e-15 2.0e-18 1.0e-18'"
+    prereq = except_composite_power_law_activation_energy
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    expect_err = 'number of Dorn constant must be equal to the number of switching functions'
+    requirement = "The system shall produce an error"
+                  " if the input coefficients are not the same length as the switching functions provided."
+    issues = '#28368'
+  []
+  [except_composite_power_law_n_exponent]
+    type = 'RunException'
+    input = 'composite_power_law_creep.i'
+    cli_args = "Materials/power_law_creep/n_exponent='4 5 6'"
+    prereq = except_composite_power_law_coefficient
+    design = 'CompositePowerLawCreepStressUpdate.md'
+    expect_err = 'n exponent must be equal to the number of switching functions'
+    requirement = "The system shall produce an error"
+                  " if the input n exponents are not the same length as the switching functions provided."
+    issues = '#28368'
+  []
 []
