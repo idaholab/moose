@@ -209,11 +209,13 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     format = "columns"
     scale_factor = '${fparse mass_flux_in / 2.427}'
   []
-
-  [time_step_limiting]
+  [dts]
     type = PiecewiseLinear
-    xy_data = '0.1 0.1
-               10.0 10.0'
+    xy_data = '0.0 0.1
+               5.0 2.0
+               100 2.0
+               110 20.0
+               900 20.0'
   []
 []
 
@@ -299,16 +301,13 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [Executioner]
   type = Transient
 
-  start_time = -1.0
+  start_time = -1
   end_time = 900.0
   [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.1
-    iteration_window = 5
-    optimal_iterations = 6
-    growth_factor = 1.1
-    cutback_factor = 0.8
-    timestep_limiting_function = 'time_step_limiting'
+    type = FunctionDT
+    function = dts
+    min_dt = 0.1
+    growth_factor = 2.0
   []
   dtmax = 20
 []
