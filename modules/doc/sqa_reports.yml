@@ -36,6 +36,10 @@ Applications:
         app_types:
             - ElectromagneticsApp
         content_directory: modules/electromagnetics/doc/content
+        remove:
+            - framework/doc/remove.yml
+        unregister:
+            - framework/doc/unregister.yml
 
     external_petsc_solver:
         exe_directory: modules/combined
