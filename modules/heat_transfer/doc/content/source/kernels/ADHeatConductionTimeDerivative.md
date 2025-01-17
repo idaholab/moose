@@ -2,22 +2,17 @@
 
 ## Description
 
-The `ADHeatConductionTimeDerivative` kernel implements a time derivative for the domain $\Omega$ given by
+`ADHeatConductionTimeDerivative` is the implementation of [HeatConductionTimeDerivative](/HeatConductionTimeDerivative.md) within the framework of [!ac](AD). Please see the [HeatConductionTimeDerivative](/HeatConductionTimeDerivative.md) documentation for more information.
 
-\begin{equation}
-\underbrace{\rho c_p \frac{\partial u}{\partial t}}_{\textrm{ADHeatConductionTimeDerivative}} +
-\sum_{i=1}^n \beta_i = 0 \in \Omega.
-\end{equation}
-where $\rho$ is the material density, $c_p$ is the specific heat, and the second term on the left hand side corresponds to the strong forms of
-other kernels. The corresponding `ADHeatConductionTimeDerivative` weak form using inner-product notation is
+## Example Input File Syntax
 
-\begin{equation}
-R_i(u_h) = (\psi_i, \rho c_p\frac{\partial u_h}{\partial t}) \quad \forall \psi_i,
-\end{equation}
-where $u_h$ is the approximate solution and $\psi_i$ is a finite element test function.
+The case demonstrates the use of `ADHeatConductionTimeDerivative` where the
+properties are defined by an [ADGenericConstantMaterial](GenericConstantMaterial.md)
 
-The Jacobian is given by automatic differentiation, and should be perfect as long as $c_p$ and $\rho$
-are provided using `ADMaterial` derived objects.
+!listing modules/heat_transfer/test/tests/verify_against_analytical/ad_1D_transient.i
+  start=Kernels
+  end=Materials
+  remove=BCs
 
 !syntax parameters /Kernels/ADHeatConductionTimeDerivative
 

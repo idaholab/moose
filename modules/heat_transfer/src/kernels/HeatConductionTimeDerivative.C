@@ -15,16 +15,17 @@ InputParameters
 HeatConductionTimeDerivative::validParams()
 {
   InputParameters params = TimeDerivative::validParams();
-  params.addClassDescription(
-      "Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of "
-      "the heat equation for quasi-constant specific heat $c_p$ and the density $\\rho$.");
+  params.addClassDescription("Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of "
+                             "the thermal energy conservation equation.");
 
   // Density may be changing with deformation, so we must integrate
   // over current volume by setting the use_displaced_mesh flag.
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addParam<MaterialPropertyName>(
-      "specific_heat", "specific_heat", "Name of the specific heat material property");
+      "specific_heat",
+      "specific_heat",
+      "Name of the volumetric isobaric specific heat material property");
   params.addParam<MaterialPropertyName>(
       "specific_heat_dT",
       "Name of the material property for the derivative of the specific heat with respect "
