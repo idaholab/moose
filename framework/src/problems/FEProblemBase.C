@@ -7427,6 +7427,9 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
     _functions.jacobianSetup(tid);
   }
 
+  _current_linear_sys->compute(EXEC_NONLINEAR);
+
+ /*
   try
   {
     computeSystems(EXEC_NONLINEAR);
@@ -7443,6 +7446,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
     // other errors or unhandled exceptions being thrown.
     return;
   }
+  */
 
   computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
   executeControls(EXEC_NONLINEAR);
