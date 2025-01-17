@@ -28,6 +28,7 @@ public:
 protected:
   SubChannelMesh & _mesh;
   const Real & _height;
+  /// pin index
   const int & _i_pin;
   Real _value;
 };

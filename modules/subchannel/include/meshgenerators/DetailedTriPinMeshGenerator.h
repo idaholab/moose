@@ -12,7 +12,7 @@
 #include "DetailedPinMeshGeneratorBase.h"
 
 /**
- * Mesh generator for fuel pins in a quadrilateral lattice
+ * Mesh generator for fuel pins in a triangualar lattice
  */
 class DetailedTriPinMeshGenerator : public DetailedPinMeshGeneratorBase
 {
@@ -24,7 +24,7 @@ public:
 protected:
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;
-  /// Number if rings in the fuel assembly
+  /// Number of rings in the fuel assembly
   const unsigned int & _n_rings;
 
 public:

@@ -12,6 +12,9 @@
 #include "SubChannelMesh.h"
 #include "SubChannelEnums.h"
 
+/**
+ * Creates the mesh of subchannels in a quadrilateral lattice.
+ */
 class QuadSubChannelMesh : public SubChannelMesh
 {
 public:

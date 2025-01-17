@@ -2,7 +2,6 @@
   [check_syntax]
     type = 'RunApp'
     input = 'two_channel.i'
-    check_input = true
     max_parallel = 1
   []
 []

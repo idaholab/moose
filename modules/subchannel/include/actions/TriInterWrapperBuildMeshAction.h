@@ -12,7 +12,7 @@
 #include "Action.h"
 
 /**
- * Action for building empty mesh object for quadrilateral geometry that is filled by mesh
+ * Action for building empty mesh object for triangular lattice geometry that is filled by mesh
  * generators
  */
 class TriInterWrapperBuildMeshAction : public Action

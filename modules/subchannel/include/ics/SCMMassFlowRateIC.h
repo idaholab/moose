@@ -12,7 +12,7 @@
 #include "InitialCondition.h"
 
 /**
- * Computes mass float rate from specified mass flux and cross-sectional area
+ * Computes mass flow rate from specified mass flux and cross-sectional area
  */
 class SCMMassFlowRateIC : public InitialCondition
 {

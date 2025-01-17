@@ -24,8 +24,11 @@ public:
 
 protected:
   QuadSubChannelMesh & _mesh;
+  /// matrix that holds the value of the variable the user wants to print
   Eigen::MatrixXd _exit_value;
+  /// The name of the variable
   const VariableName & _variable;
+  /// The axial location where the variable is
   const Real & _height;
 
 public:

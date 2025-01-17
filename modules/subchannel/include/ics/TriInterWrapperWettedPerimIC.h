@@ -12,7 +12,7 @@
 #include "TriInterWrapperBaseIC.h"
 
 /**
- * Sets the wetted perimeter of the quadrilater inter-wrapper flow channel
+ * Sets the wetted perimeter of the triangular inter-wrapper flow channel
  */
 class TriInterWrapperWettedPerimIC : public TriInterWrapperBaseIC
 {

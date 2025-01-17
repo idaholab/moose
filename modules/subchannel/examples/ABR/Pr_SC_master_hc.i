@@ -1,4 +1,4 @@
-# This Pronghorn model drives a multiapp setup where wrappers (solid heat conduction)
+# This heat conduction model drives a multiapp setup where wrappers (solid heat conduction)
 # and interwrapper flow (fluid) and interwall flow (fluid) and main porous flow are solved in this input.
 
 # Units are SI

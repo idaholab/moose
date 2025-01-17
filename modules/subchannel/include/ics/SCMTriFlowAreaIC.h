@@ -23,8 +23,6 @@ class SCMTriFlowAreaIC : public TriSubChannelBaseIC
 public:
   SCMTriFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
-
-public:
   static InputParameters validParams();
 
 protected:

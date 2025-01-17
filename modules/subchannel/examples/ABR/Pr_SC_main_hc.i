@@ -1,4 +1,4 @@
-# This Pronghorn model drives a multiapp setup where wrappers (solid heat conduction)
+# This heat conduction model drives a multiapp setup where wrappers (solid heat conduction)
 # and interwrapper flow (fluid) and interwall flow (fluid) and main porous flow are solved in this input.
 # Units are SI
 # physics parameters
@@ -107,7 +107,7 @@ inter_wrapper_blocks = 'inter_wrapper'
 
 [BCs]
   [T_wrapper_inside_wall]
-    type = MatchedValueBC
+    type = FunctorDirichletBC
     variable = T_wrapper
     boundary = 'wall_in_00 wall_in_01 wall_in_02 wall_in_03
                wall_in_04 wall_in_05 wall_in_06'

@@ -29,7 +29,7 @@ protected:
   /// Temperature
   const VariableValue & _T;
   /// Pressure
-  const Real & _P;
+  const Real _P;
   /// Fluid properties
   const SinglePhaseFluidProperties & _fp;
 };

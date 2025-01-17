@@ -27,6 +27,9 @@ public:
    */
   virtual const std::vector<Real> & getZGrid() const { return _z_grid; }
 
+  /**
+   * Get axial index of point
+   */
   virtual unsigned int getZIndex(const Point & point) const;
 
   /**
@@ -65,7 +68,7 @@ public:
   virtual bool pinMeshExist() const = 0;
 
   /**
-   * Return if Pin Mesh exists or not
+   * Return if duct Mesh exists or not
    */
   virtual bool ductMeshExist() const = 0;
 
@@ -173,9 +176,9 @@ protected:
   std::vector<std::vector<Real>> _k_grid;
   /// Lateral form loss coefficient
   Real _kij;
-  /// Distance between the neighbor fuel rods, pitch
+  /// Distance between neighboring assemblies
   Real _assembly_pitch;
-  /// fuel rod diameter
+  /// Size of assembly sides
   Real _assembly_side_x;
   Real _assembly_side_y;
   /// number of axial cells
@@ -185,7 +188,7 @@ public:
   static InputParameters validParams();
 
   /**
-   * Generate the spacing in z-direction using heated and unteaded lengths
+   * Generate the spacing in z-direction using heated and unheaded lengths
    */
   static void generateZGrid(Real unheated_length_entry,
                             Real heated_length,
