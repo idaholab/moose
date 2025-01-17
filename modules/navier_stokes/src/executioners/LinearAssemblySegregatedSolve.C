@@ -447,7 +447,7 @@ LinearAssemblySegregatedSolve::solve()
   // Assign residuals to general residual vector
   const unsigned int no_systems =
       _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
-  const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system;
+  unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system;
 
   // Adding the turbulence system to the numbering
   if (_has_turbulence_systems)
@@ -527,14 +527,14 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
-        ns_residuals[momentum_residual.size() + _has_energy_system + i] = 
+        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i] = 
                                                      solveAdvectedSystem(_turbulence_system_numbers[i],
                                                                          *_turbulence_systems[i],
                                                                          _turbulence_equation_relaxation[i],
                                                                          _turbulence_linear_control,
                                                                          _turbulence_l_abs_tol);
     }
-    
+
     _problem.execute(EXEC_NONLINEAR);
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
