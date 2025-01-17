@@ -156,6 +156,12 @@ INSFVTKEDSourceSink::computeQpResidual()
       else
         destruction += std::pow(_C_mu, 0.75) * std::pow(TKE_old, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+
+      // _console << "position: " << _current_elem->vertex_average() << std::endl;
+      // _console << "y_plus: " << y_plus << std::endl;
+      // _console << "TKE_old: " << TKE_old.value() << std::endl;
+      // _console << "distance_vec[i]: " << distance_vec[i] << std::endl;
+      // _console << "destruction: " << destruction.value() << std::endl;
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;
