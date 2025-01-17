@@ -80,7 +80,7 @@ version_check() {
       loc_2=$1
       ;;
     *)
-      echo "'version_check' function does only supports '-g' and '-l' for comparison!"
+      echo "'version_check' function does only support '-g' and '-l' for comparison!"
       exit 0
       ;;
   esac
