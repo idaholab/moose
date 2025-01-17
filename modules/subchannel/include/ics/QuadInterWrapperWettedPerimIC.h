@@ -18,7 +18,5 @@ class QuadInterWrapperWettedPerimIC : public QuadInterWrapperBaseIC
 public:
   QuadInterWrapperWettedPerimIC(const InputParameters & params);
   Real value(const Point & p) override;
-
-public:
   static InputParameters validParams();
 };

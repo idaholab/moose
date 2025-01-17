@@ -340,7 +340,7 @@ ifeq ($(SUBCHANNEL),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/subchannel
   APPLICATION_NAME   := subchannel
   DEPEND_MODULES     := fluid_properties heat_transfer reactor
-  SUFFIX             := st
+  SUFFIX             := sc
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

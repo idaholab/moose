@@ -24,9 +24,13 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  /// The total power of the assembly
   Real _power;
+  /// The number of lines associated with the radial power profile .txt file
   unsigned int _numberoflines;
+  /// The name of the radial power profile file
   std::string _filename;
+  /// matrix that holds the values of the relative pin power
   Eigen::MatrixXd _power_dis;
   const Function & _axial_heat_rate;
   /// Average linear heat rate over the inter wrapper assembly [W/m]

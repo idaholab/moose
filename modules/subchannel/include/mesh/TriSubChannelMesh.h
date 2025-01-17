@@ -32,6 +32,9 @@ public:
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual bool ductMeshExist() const override { return _duct_mesh_exist; }
 
+  /**
+   * Return the the gap thickness between the duct and peripheral fuel rods
+   */
   virtual const Real & getDuctToRodGap() const { return _duct_to_pin_gap; }
 
   /**

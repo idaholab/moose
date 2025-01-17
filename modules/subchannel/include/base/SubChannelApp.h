@@ -11,6 +11,9 @@
 
 #include "MooseApp.h"
 
+/**
+ * Base class of SubChannelApp.
+ */
 class SubChannelApp : public MooseApp
 {
 public:

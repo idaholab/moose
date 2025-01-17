@@ -1,9 +1,9 @@
 # PBSodiumFluidProperties
 
-!syntax description /Modules/FluidProperties/PBSodiumFluidProperties
+!syntax description /FluidProperties/PBSodiumFluidProperties
 
-!syntax parameters /Modules/FluidProperties/PBSodiumFluidProperties
+!syntax parameters /FluidProperties/PBSodiumFluidProperties
 
-!syntax inputs /Modules/FluidProperties/PBSodiumFluidProperties
+!syntax inputs /FluidProperties/PBSodiumFluidProperties
 
-!syntax children /Modules/FluidProperties/PBSodiumFluidProperties
+!syntax children /FluidProperties/PBSodiumFluidProperties

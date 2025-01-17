@@ -12,7 +12,7 @@
 #include "DiffusionFluxAux.h"
 
 /**
- * Computes linear heat rate
+ * Computes linear heat rate to/from the hexagonal duct's inner surface to subchannels.
  */
 class SCMTriDuctQPrimeAux : public DiffusionFluxAux
 {

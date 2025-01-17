@@ -1,11 +1,10 @@
-
 # Enthalpy mixing model Verification
 
 ## Test Description
 
 &nbsp;
 
-This verification problem is the same used in [!cite](CTF-Verification). This case presents a problem where the effects of turbulent mixing are clearly discernible and quantifible. Turbulence causes both momentum and enthalpy mixing through the terms:
+This verification problem is the same used in [!cite](CTF-Verification). This case presents a problem where the effects of turbulent mixing are clearly discernible and quantifiable. Turbulence causes both momentum and enthalpy mixing through the terms:
 
 \begin{equation}
 Drag_{ij} = -C_{T}\sum_{j} w'_{ij}\Delta U_{ij }

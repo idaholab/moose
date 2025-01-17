@@ -1,4 +1,4 @@
-# Based on M. Fontana, et All, this arbitary subassembly is used for THM-SC coupling
+# Based on M. Fontana, et al. this arbitrary subassembly is used for THM-SC coupling
 T_in = 583.0 #K
 flow_area = 0.0004980799633447909 #m2
 mass_flux_in = '${fparse 1.0/flow_area}'

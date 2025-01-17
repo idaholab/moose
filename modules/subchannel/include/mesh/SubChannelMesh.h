@@ -27,6 +27,9 @@ public:
    */
   virtual const std::vector<Real> & getZGrid() const { return _z_grid; }
 
+  /**
+   * Get axial index of point
+   */
   virtual unsigned int getZIndex(const Point & point) const;
 
   /**
