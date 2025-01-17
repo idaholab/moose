@@ -191,6 +191,12 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
       else
         destruction += std::pow(_C_mu, 0.75) * std::pow(TKE, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+
+      // _console << "position: " << _current_elem_info->elem()->vertex_average() << std::endl;
+      // _console << "y_plus: " << y_plus << std::endl;
+      // _console << "TKE: " << TKE << std::endl;
+      // _console << "distance_vec[i]: " << distance_vec[i] << std::endl;
+      // _console << "destruction: " << destruction << std::endl;
     }
 
     // Assign the computed value of TKED for element near the wall
