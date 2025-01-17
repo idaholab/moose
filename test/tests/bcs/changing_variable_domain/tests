@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#29360'
+  design = 'syntax/MeshModifiers/index.md'
+  [integrated_bc_no_longer_near_domain]
+    type = Exodiff
+    input = 'var_block_id.i'
+    exodiff = 'var_block_id_out.e-s002'
+    requirement = 'The system shall be able to define integrated boundary conditions and skip their execution when the variable no longer touches the boundary.'
+  []
+[]
