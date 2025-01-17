@@ -27,3 +27,4 @@ Contributing
 ============
 
 For information on how to contribute code changes to MOOSE please [see this article](https://mooseframework.org/framework/contributing.html).
+
