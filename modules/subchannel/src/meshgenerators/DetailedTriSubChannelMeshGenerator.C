@@ -540,9 +540,9 @@ DetailedTriSubChannelMeshGenerator::generate()
         Point p0{loc_position[0], loc_position[1], 0};
 
         // Determine orientation of current subchannel
-        auto subchannel_rods = getSubChannelRods(i);
+        auto subchannel_pins = getSubChannelPins(i);
         Point subchannel_side =
-            getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
+            getPinPosition(subchannel_pins[0]) + getPinPosition(subchannel_pins[1]);
         Point base_center_orientation = {0, -1};
 
         // Get rotation angle for current subchannel
@@ -555,7 +555,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           theta = 2.0 * libMesh::pi - theta;
 
         //        Real distance_side = subchannel_side.norm();
-        //        Real distance_top = getRodPosition(subchannel_rods[2]).norm();
+        //        Real distance_top = getPinPosition(subchannel_pins[2]).norm();
         //        if (distance_top > distance_side)
         //                  theta += libMesh::pi * 0.0;
 
@@ -568,7 +568,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (z == 0)
           {
             _console << "Subchannel Position: " << p0 << std::endl;
-            auto rods = getSubChannelRods(i);
+            auto rods = getSubChannelPins(i);
             for (auto r : rods)
               _console << r << " ";
             _console << std::endl;
@@ -602,9 +602,9 @@ DetailedTriSubChannelMeshGenerator::generate()
         Point p0{loc_position[0], loc_position[1], 0};
 
         // Determine orientation of current subchannel
-        auto subchannel_rods = getSubChannelRods(i);
+        auto subchannel_pins = getSubChannelPins(i);
         Point subchannel_side =
-            getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
+            getPinPosition(subchannel_pins[0]) + getPinPosition(subchannel_pins[1]);
         Point base_center_orientation = {0, 1};
 
         // Get rotation angle for current subchannel
@@ -622,7 +622,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (z == 0)
           {
             _console << "Subchannel Position: " << p0 << std::endl;
-            auto rods = getSubChannelRods(i);
+            auto rods = getSubChannelPins(i);
             for (auto r : rods)
               _console << r << " ";
             _console << std::endl;
@@ -656,8 +656,8 @@ DetailedTriSubChannelMeshGenerator::generate()
         Point p0{loc_position[0], loc_position[1], 0};
 
         // Determine orientation of current subchannel
-        auto subchannel_rods = getSubChannelRods(i);
-        Point subchannel_side = getRodPosition(subchannel_rods[0]);
+        auto subchannel_pins = getSubChannelPins(i);
+        Point subchannel_side = getPinPosition(subchannel_pins[0]);
         Point base_center_orientation = {1, 1};
 
         // Get rotation angle for current subchannel
@@ -675,7 +675,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (z == 0)
           {
             _console << "Subchannel Position: " << p0 << std::endl;
-            auto rods = getSubChannelRods(i);
+            auto rods = getSubChannelPins(i);
             for (auto r : rods)
               _console << r << " ";
             _console << std::endl;

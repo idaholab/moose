@@ -12,6 +12,9 @@
 #include "InterWrapperMesh.h"
 #include "SubChannelEnums.h"
 
+/**
+ * Creates the mesh of an inter-wrapper around square assemblies
+ */
 class QuadInterWrapperMesh : public InterWrapperMesh
 {
 public:

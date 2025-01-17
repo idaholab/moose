@@ -22,12 +22,16 @@ public:
   virtual std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// returns the type of the subchannel given the index
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
   Point rotatePoint(Point b, Real theta);
   Point translatePoint(Point b, Point translation_vector);
-  Point getRodPosition(unsigned int i) { return _pin_position[i]; }
+  /// returns the position of pin given pin index
+  Point getPinPosition(unsigned int i) { return _pin_position[i]; }
+  /// returns the position of subchannel given pin index
   std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }
-  std::vector<unsigned int> getSubChannelRods(unsigned int i) { return _chan_to_pin_map[i]; }
+  /// returns the index of neighboring pins given subchannel index
+  std::vector<unsigned int> getSubChannelPins(unsigned int i) { return _chan_to_pin_map[i]; }
 
   /// unheated length of the fuel rod at the entry of the assembly
   Real _unheated_length_entry;

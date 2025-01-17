@@ -12,14 +12,12 @@
 #include "QuadSubChannelBaseIC.h"
 
 /**
- * Sets the wetted perimeter of the quadrilater subchannel
+ * Sets the wetted perimeter of the quadrilateral subchannel
  */
 class SCMQuadWettedPerimIC : public QuadSubChannelBaseIC
 {
 public:
   SCMQuadWettedPerimIC(const InputParameters & params);
   Real value(const Point & p) override;
-
-public:
   static InputParameters validParams();
 };

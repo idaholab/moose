@@ -1,5 +1,4 @@
-
-# EBR-II, SHRT-17 Validation
+# EBR-II, SHRT-17/45R Validation
 
 ## Test Description
 

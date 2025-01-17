@@ -112,7 +112,7 @@ Auxiliary kernels are used to apply the boundary conditions on pressure, tempera
 ### Executioner
 
 The executioner can be *Steady* or *Transient*.
-The tolerances are not really used in the SCM problem.
+The tolerances are not used in the SCM problem.
 
 !listing /examples/Toshiba_37_pin/toshiba_37_pin.i block=Executioner language=cpp
 
@@ -158,5 +158,4 @@ We have selected SUBAC for the code-to-code comparison since it is to our knowle
 
 As observed in [plots], for the high mass flow rate case, the present model predicts results closer to the experimental results than SUBAC. This is expected, since the turbulent cross-flow calibration should still improve the prediction for the present case.
 However, when comparing the results predicted for the medium- and low-flow-rate cases in Figures 3b and 3c, respectively, we observe that our models over-predict the temperature distributions when compared to SUBAC.
-Further analysis determined that the more peaked distribution of temperatures predicted by PrSub towards the center of the assembly may be
-produced by an over-prediction of the mixing rates, which yields larger than expected flows in the outer channels.
+Further analysis determined that the more peaked distribution of temperatures predicted by SCM towards the center of the assembly may be produced by an over-prediction of the mixing rates, which yields larger than expected flows in the outer channels.

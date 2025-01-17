@@ -12,8 +12,6 @@
 #include "TriSubChannelBaseIC.h"
 #include "SubChannelMesh.h"
 
-class TriSubChannelMesh;
-
 /**
  * This class calculates the displacement of the duct for the areva FCTF facility
  * https://www.osti.gov/servlets/purl/1346027/
