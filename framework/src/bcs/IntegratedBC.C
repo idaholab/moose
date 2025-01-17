@@ -22,6 +22,14 @@ InputParameters
 IntegratedBC::validParams()
 {
   InputParameters params = IntegratedBCBase::validParams();
+  params.addParam<bool>(
+      "skip_execution_outside_variable_domain",
+      false,
+      "Whether to skip execution of this boundary condition when the variable it "
+      "applies to is not defined on the boundary. This can facilitate setups with "
+      "moving variable domains and fixed boundaries. Note that the FEProblem boundary-restricted "
+      "integrity checks will also need to be turned off if using this option");
+  params.addParamNamesToGroup("skip_execution_outside_variable_domain", "Advanced");
   return params;
 }
 
@@ -39,7 +47,9 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld())
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    _skip_execution_outside_variable_domain(
+        getParam<bool>("skip_execution_outside_variable_domain"))
 {
   addMooseVariableDependency(mooseVariable());
 
@@ -85,6 +95,16 @@ IntegratedBC::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
+  if (_local_re.empty())
+  {
+    if (!_skip_execution_outside_variable_domain)
+      paramError("skip_execution_outside_variable_domain",
+                 "This boundary condition is being executed outside the domain of definition of "
+                 "its variable");
+    else
+      return;
+  }
+
   precalculateResidual();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -108,6 +128,16 @@ void
 IntegratedBC::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
+
+  if (_local_ke.get_values().empty())
+  {
+    if (!_skip_execution_outside_variable_domain)
+      paramError("skip_execution_outside_variable_domain",
+                 "This boundary condition is being executed outside the domain of definition of "
+                 "its variable");
+    else
+      return;
+  }
 
   precalculateJacobian();
 

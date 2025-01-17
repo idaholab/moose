@@ -104,4 +104,7 @@ protected:
   const VariableValue & _u;
   /// the gradient of the unknown variable this BC is acting on
   const VariableGradient & _grad_u;
+
+  /// Whether to allow skipping the execution of the boundary condition outside of its domain of definition
+  const bool _skip_execution_outside_variable_domain;
 };
