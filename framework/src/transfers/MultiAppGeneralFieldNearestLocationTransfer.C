@@ -290,7 +290,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           // When querying values at a target point, the KDTree associated to the closest
           // position to the target point is queried
           // We do not need to check the positions when using nearest app as we will assume
-          // (somewhat incorrectly) that all the points in each subapp are closest to that subapp
+          // (somewhat incorrectly) that all the points in each subapp are closer to that subapp
           // than to any other
           if (!_use_nearest_app && _nearest_positions_obj &&
               !closestToPosition(i_pos, transformed_node))
@@ -346,7 +346,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
               (*_from_transforms[getGlobalSourceAppIndex(i_from)])(vertex_average);
 
           // We do not need to check the positions when using nearest app as we will assume
-          // (somewhat incorrectly) that all the points in each subapp are closest to that subapp
+          // (somewhat incorrectly) that all the points in each subapp are closer to that subapp
           if (!_use_nearest_app && _nearest_positions_obj &&
               !closestToPosition(i_pos, transformed_vertex_average))
             continue;
