@@ -29,9 +29,9 @@ ElementMaterialSampler::validParams()
   params.addClassDescription("Records all Real-valued material properties of a material object, "
                              "or Real-valued material properties of the supplied property names "
                              "on quadrature points on elements at the indicated execution points.");
-  params.addParam<MaterialName>("material",
-                                        "Material for which all properties will be recorded.");
-  params.addParam<std::vector<MaterialPropertyName>>("property", "Material property names that will be recorded.");
+  params.addParam<MaterialName>("material", "Material for which all properties will be recorded.");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "property", "Material property names that will be recorded.");
   params.addParam<std::vector<dof_id_type>>(
       "elem_ids",
       "Subset of element IDs to print data for. If omitted, all elements will be printed.");
@@ -70,7 +70,7 @@ ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameter
       mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
 
     // Get property names from the Material
-    auto & props = mat.getSuppliedItems();  // returns std::set
+    auto & props = mat.getSuppliedItems(); // returns std::set
     prop_names = std::vector<MaterialName>(props.begin(), props.end());
 
     // Check requested materials are available
@@ -92,8 +92,9 @@ ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameter
           mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
       }
     }
-
-  } else {
+  }
+  else
+  {
 
     // Properties supplied by user
     auto & props = getParam<std::vector<MaterialPropertyName>>("property");
