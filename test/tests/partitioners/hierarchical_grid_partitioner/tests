@@ -1,14 +1,118 @@
 [Tests]
-  [./test]
+  design = 'HierarchicalGridPartitioner.md'
+  [test]
     type = 'Exodiff'
     input = 'hierarchical_grid_partitioner.i'
     exodiff = 'hierarchical_grid_partitioner_out.e'
 
     requirement = "The system shall have the ability to do hierarchical partitioning based on a regular grid."
-    design = 'HierarchicalGridPartitioner.md'
     issues = '#12531'
 
     min_parallel = 16
     max_parallel = 16
-  [../]
+  []
+  [automatic_procs_grid]
+    type = 'Exodiff'
+    input = 'hierarchical_grid_partitioner.i'
+    exodiff = 'hierarchical_grid_partitioner_out.e'
+    cli_args = 'Mesh/Partitioner/processors_grid_computation=automatic Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/number_procs_per_node=4'
+
+    requirement = "The system shall have the ability to do hierarchical partitioning based on a regular grid with an automatic selection of the within-node processor grid."
+    issues = '#12531'
+
+    min_parallel = 16
+    max_parallel = 16
+  []
+  [automatic_nodes_grid]
+    type = 'Exodiff'
+    input = 'hierarchical_grid_partitioner.i'
+    exodiff = 'hierarchical_grid_partitioner_out.e'
+    cli_args = 'Mesh/Partitioner/nodes_grid_computation=automatic Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/number_procs_per_node=4'
+
+    requirement = "The system shall have the ability to do hierarchical partitioning based on a regular grid with an automatic selection of the node-based grid."
+    issues = '#12531'
+
+    min_parallel = 16
+    max_parallel = 16
+  []
+
+  [exceptions]
+    requirement = 'The system shall throw an error if'
+    issues = '#12531 #28787'
+    [missing_nx_procs]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner_errors.i'
+      expect_err = 'Required for manual processors grid specification'
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/nodes_grid_computation=automatic'
+      detail = 'the number of processors in the X-direction for a 1D manual grid mesh partition is missing,'
+      min_parallel = 2
+    []
+    [missing_ny_procs]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner_errors.i'
+      expect_err = 'ny_procs: Required for 2D meshes'
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/nodes_grid_computation=automatic Mesh/Partitioner/nx_procs=2'
+      detail = 'the number of processors in the Y-direction for a 2D manual grid mesh partition is missing,'
+      min_parallel = 2
+    []
+    [missing_nz_procs]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner_errors.i'
+      expect_err = 'Required for 3D meshes'
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/nodes_grid_computation=automatic Mesh/dim=3 Mesh/nz=1 Mesh/Partitioner/nx_procs=2 Mesh/Partitioner/ny_procs=2'
+      detail = 'the number of processors in the Z-direction for a 3D manual grid mesh partition is missing,'
+      min_parallel = 2
+    []
+    [missing_nx_nodes]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner_errors.i'
+      expect_err = 'Required for manual nodes grid specification'
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/processors_grid_computation=automatic'
+      detail = 'the number of nodes in the X-direction for a 1D manual grid mesh partition is missing,'
+      min_parallel = 2
+    []
+    [missing_ny_nodes]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner_errors.i'
+      expect_err = 'ny_nodes: Required for 2D meshes'
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/processors_grid_computation=automatic Mesh/Partitioner/nx_nodes=2'
+      detail = 'the number of nodes in the Y-direction for a 2D manual grid mesh partition is missing,'
+      min_parallel = 2
+    []
+    [missing_nz_nodes]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner_errors.i'
+      expect_err = 'Required for 3D meshes'
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/processors_grid_computation=automatic Mesh/dim=3 Mesh/Partitioner/nx_nodes=2 Mesh/Partitioner/ny_nodes=2'
+      detail = 'the number of nodes in the Z-direction for a 3D manual grid mesh partition is missing,'
+      min_parallel = 2
+    []
+    [wrong_manual_procs_partitioning]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner.i'
+      expect_err = 'Computed number of processors per node \(4\) does not match'
+      detail = 'the number of partitions for a manual hierarchical grid partitioning does not match the number of processes,'
+      cli_args = 'Mesh/Partitioner/number_procs_per_node=8'
+      min_parallel = 8
+      max_parallel = 8
+    []
+    [wrong_manual_nodes_partitioning]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner.i'
+      expect_err = 'Computed number of nodes \(20\) does not match'
+      detail = 'the number of partitions for a manual hierarchical grid node partitioning does not match the number of nodes,'
+      cli_args = 'Mesh/Partitioner/number_nodes=8 Mesh/Partitioner/nx_nodes=10'
+      min_parallel = 8
+      max_parallel = 8
+    []
+    [wrong_numbers]
+      type = 'RunException'
+      input = 'hierarchical_grid_partitioner.i'
+      expect_err = "Partitioning creates 16 partitions, which does not add up to the total number of processors: 8"
+      cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/number_procs_per_node=4 Mesh/Partitioner/processors_grid_computation=automatic Mesh/Partitioner/nodes_grid_computation=automatic Mesh/Partitioner/nx=12'
+      min_parallel = 8
+      max_parallel = 8
+      detail = 'the user specified partitioning parameters for more partitions than there are processes.'
+    []
+  []
 []

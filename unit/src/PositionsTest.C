@@ -69,7 +69,6 @@ TEST_F(PositionsTest, getters)
 {
   InputParameters params = _factory.getValidParams("InputPositions");
   params.set<std::vector<Point>>("positions") = {Point(1, 0, 0), Point(0, 0, 1)};
-  params.set<bool>("auto_sort") = true;
   auto & positions = addObject<Positions>("InputPositions", "test", params);
 
   // Test getters

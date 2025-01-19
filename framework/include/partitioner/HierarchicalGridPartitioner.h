@@ -33,12 +33,19 @@ public:
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
+  /// Mesh to partition
   MooseMesh & _mesh;
 
-  const unsigned int _nx_nodes;
-  const unsigned int _ny_nodes;
-  const unsigned int _nz_nodes;
-  const unsigned int _nx_procs;
-  const unsigned int _ny_procs;
-  const unsigned int _nz_procs;
+  /// Number of nodes in the X direction
+  unsigned int _nx_nodes;
+  /// Number of nodes in the Y direction
+  unsigned int _ny_nodes;
+  /// Number of nodes in the Z direction
+  unsigned int _nz_nodes;
+  /// Number of processors on each node in the X direction
+  unsigned int _nx_procs;
+  /// Number of processors on each node in the Y direction
+  unsigned int _ny_procs;
+  /// Number of processors on each node in the Z direction
+  unsigned int _nz_procs;
 };

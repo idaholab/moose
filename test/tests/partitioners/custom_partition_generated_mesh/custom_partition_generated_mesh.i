@@ -16,6 +16,8 @@
     nx = 1
     ny = 1
     nz = 4
+    # So we can use the same partitioner for the 2D and 3D mesh
+    grid_computation = automatic
   []
 []
 

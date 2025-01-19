@@ -27,19 +27,43 @@ HierarchicalGridPartitioner::validParams()
 {
   auto params = MoosePartitioner::validParams();
 
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "nx_nodes", "nx_nodes > 0", "Number of compute nodes in the X direction");
-  params.addRangeCheckedParam<unsigned int>(
-      "ny_nodes", 0, "ny_nodes >= 0", "Number of compute nodes in the Y direction");
-  params.addRangeCheckedParam<unsigned int>(
-      "nz_nodes", 0, "nz_nodes >= 0", "Number of compute nodes in the Z direction");
+  // Options for automatic grid computations
+  MooseEnum method("manual automatic", "manual");
+  params.addParam<MooseEnum>(
+      "nodes_grid_computation",
+      method,
+      "Whether to determine the compute node grid manually (using nx_nodes, ny_nodes and nz_nodes) "
+      "or automatically. When using the automatic mode, the user can impose a certain value for "
+      "nx, ny or nz, and the automatic factorization will adjust the number of processors in the "
+      "other directions.");
+  params.addParam<unsigned int>(
+      "number_nodes", "Number of nodes. Used for determining the node grid automatically");
+  params.addParam<MooseEnum>(
+      "processors_grid_computation",
+      method,
+      "Whether to determine the processors grid on each node manually (using nx_procs, ny_procs "
+      "and nz_procs) or automatically. When using the automatic mode, the user can impose a "
+      "certain value for nx, ny or nz, and the automatic factorization will adjust the number of "
+      "processors in the other directions.");
+  params.addParam<unsigned int>("number_procs_per_node",
+                                "Number of processors per node. Used for determining the processor "
+                                "grid on each node automatically");
 
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "nx_procs", "nx_procs > 0", "Number of processors in the X direction within each node");
+  // Node grid
   params.addRangeCheckedParam<unsigned int>(
-      "ny_procs", 0, "ny_procs >= 0", "Number of processors in the Y direction within each node");
+      "nx_nodes", "nx_nodes >= 1", "Number of compute nodes in the X direction");
   params.addRangeCheckedParam<unsigned int>(
-      "nz_procs", 0, "nz_procs >= 0", "Number of processors in the Z direction within each node");
+      "ny_nodes", "ny_nodes >= 1", "Number of compute nodes in the Y direction");
+  params.addRangeCheckedParam<unsigned int>(
+      "nz_nodes", "nz_nodes >= 1", "Number of compute nodes in the Z direction");
+
+  // Processor grid on each node
+  params.addRangeCheckedParam<unsigned int>(
+      "nx_procs", "nx_procs >= 1", "Number of processors in the X direction within each node");
+  params.addRangeCheckedParam<unsigned int>(
+      "ny_procs", "ny_procs >= 1", "Number of processors in the Y direction within each node");
+  params.addRangeCheckedParam<unsigned int>(
+      "nz_procs", "nz_procs >= 1", "Number of processors in the Z direction within each node");
 
   params.addClassDescription("Partitions a mesh into sub-partitions for each computational node"
                              " then into partitions within that node.  All partitions are made"
@@ -49,14 +73,7 @@ HierarchicalGridPartitioner::validParams()
 }
 
 HierarchicalGridPartitioner::HierarchicalGridPartitioner(const InputParameters & params)
-  : MoosePartitioner(params),
-    _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
-    _nx_nodes(getParam<unsigned int>("nx_nodes")),
-    _ny_nodes(getParam<unsigned int>("ny_nodes")),
-    _nz_nodes(getParam<unsigned int>("nz_nodes")),
-    _nx_procs(getParam<unsigned int>("nx_procs")),
-    _ny_procs(getParam<unsigned int>("ny_procs")),
-    _nz_procs(getParam<unsigned int>("nz_procs"))
+  : MoosePartitioner(params), _mesh(*getCheckedPointerParam<MooseMesh *>("mesh"))
 {
 }
 
@@ -72,36 +89,87 @@ void
 HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 {
   const auto dim = mesh.spatial_dimension();
-  if (_ny_procs == 0 && dim > 1)
-    paramError("ny_procs", "Required for ", dim, "D meshes");
-  if (_ny_nodes == 0 && dim > 1)
-    paramError("ny_nodes", "Required for ", dim, "D meshes");
-  if (_nz_procs == 0 && dim == 3)
-    paramError("nz_procs", "Required for 3D meshes");
-  if (_nz_nodes == 0 && dim == 3)
-    paramError("nz_nodes", "Required for 3D meshes");
 
+  // Process user parameters
+  _nx_nodes = isParamValid("nx_nodes") ? getParam<unsigned int>("nx_nodes") : 0;
+  _ny_nodes = isParamValid("ny_nodes") ? getParam<unsigned int>("ny_nodes") : 0;
+  _nz_nodes = isParamValid("nz_nodes") ? getParam<unsigned int>("nz_nodes") : 0;
+  _nx_procs = isParamValid("nx_procs") ? getParam<unsigned int>("nx_procs") : 0;
+  _ny_procs = isParamValid("ny_procs") ? getParam<unsigned int>("ny_procs") : 0;
+  _nz_procs = isParamValid("nz_procs") ? getParam<unsigned int>("nz_procs") : 0;
+
+  if (getParam<MooseEnum>("nodes_grid_computation") == "manual")
+  {
+    if (_nx_nodes == 0)
+      paramError("nx_nodes", "Required for manual nodes grid specification");
+    if (_ny_nodes == 0 && dim > 1)
+      paramError("ny_nodes", "Required for ", dim, "D meshes");
+    if (_nz_nodes == 0 && dim == 3)
+      paramError("nz_nodes", "Required for 3D meshes");
+  }
+  else
+  {
+    if (!isParamValid("number_nodes"))
+      paramError("number_nodes", "Required for automatic nodes grid computation");
+    // 0 means no restriction on which number to choose
+    int dims[] = {int(_nx_nodes), int(_ny_nodes), int(_nz_nodes)};
+    // This will error if the factorization is not possible
+    MPI_Dims_create(getParam<unsigned int>("number_nodes"), dim, dims);
+
+    _nx_nodes = dims[0];
+    _ny_nodes = (dim >= 2) ? dims[1] : 0;
+    _nz_nodes = (dim == 3) ? dims[2] : 0;
+  }
+
+  if (getParam<MooseEnum>("processors_grid_computation") == "manual")
+  {
+    if (_nx_procs == 0)
+      paramError("nx_procs", "Required for manual processors grid specification");
+    if (_ny_procs == 0 && dim > 1)
+      paramError("ny_procs", "Required for ", dim, "D meshes");
+    if (_nz_procs == 0 && dim == 3)
+      paramError("nz_procs", "Required for 3D meshes");
+  }
+  else
+  {
+    if (!isParamValid("number_procs_per_node"))
+      paramError("number_procs_per_node", "Required for automatic processors grid computation");
+    // 0 means no restriction on which number to choose
+    int dims[] = {int(_nx_procs), int(_ny_procs), int(_nz_procs)};
+    // This will error if the factorization is not possible
+    MPI_Dims_create(getParam<unsigned int>("number_procs_per_node"), dim, dims);
+
+    _nx_procs = dims[0];
+    _ny_procs = (dim >= 2) ? dims[1] : 0;
+    _nz_procs = (dim == 3) ? dims[2] : 0;
+  }
+
+  // Sanity checks on both grids
   auto total_nodes = _nx_nodes;
-
   if (mesh.spatial_dimension() >= 2)
     total_nodes *= _ny_nodes;
-
   if (mesh.spatial_dimension() == 3)
     total_nodes *= _nz_nodes;
+  if (isParamValid("number_nodes") && total_nodes != getParam<unsigned int>("number_nodes"))
+    paramError("number_nodes",
+               "Computed number of nodes (" + std::to_string(total_nodes) + ") does not match");
 
   auto procs_per_node = _nx_procs;
-
   if (mesh.spatial_dimension() >= 2)
     procs_per_node *= _ny_procs;
-
   if (mesh.spatial_dimension() == 3)
     procs_per_node *= _nz_procs;
+  if (isParamValid("number_procs_per_node") &&
+      procs_per_node != getParam<unsigned int>("number_procs_per_node"))
+    paramError("number_procs_per_node",
+               "Computed number of processors per node (" + std::to_string(procs_per_node) +
+                   ") does not match");
 
   if (procs_per_node * total_nodes != mesh.n_partitions())
-    mooseError("Partitioning in ",
-               name(),
-               " doesn't add up to the total number of processors: ",
-               procs_per_node * total_nodes);
+    mooseError("Partitioning creates ",
+               procs_per_node * total_nodes,
+               " partitions, which does not add up to the total number of processors: ",
+               mesh.n_partitions());
 
   // Figure out the physical bounds of the given mesh
   auto nodes_bounding_box = MeshTools::create_bounding_box(mesh);

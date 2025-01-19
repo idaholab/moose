@@ -22,14 +22,23 @@ registerMooseObject("MooseApp", GridPartitioner);
 InputParameters
 GridPartitioner::validParams()
 {
-  // These two are in this order because they are from different systems
-  // so you have to apply _this_ system's second to override the base
   InputParameters params = MoosePartitioner::validParams();
 
+  MooseEnum method("manual automatic", "manual");
+  params.addParam<MooseEnum>(
+      "grid_computation",
+      method,
+      "Whether to determine the grid manually (using nx, ny and nz) or automatically. When using "
+      "the automatic mode, the user can impose a certain value for nx, ny or nz, and the automatic "
+      "factorization will adjust the number of processors in the other directions.");
+
   // Users specify how many processors they need along each direction
-  params.addParam<unsigned int>("nx", 1, "Number of processors in the X direction");
-  params.addParam<unsigned int>("ny", 1, "Number of processors in the Y direction");
-  params.addParam<unsigned int>("nz", 1, "Number of processors in the Z direction");
+  params.addParam<unsigned int>(
+      "nx", "Number of processors in the X direction. Defaults to 1 in manual mode");
+  params.addParam<unsigned int>(
+      "ny", "Number of processors in the Y direction. Defaults to 1 in manual mode");
+  params.addParam<unsigned int>(
+      "nz", "Number of processors in the Z direction. Defaults to 1 in manual mode");
 
   params.addClassDescription("Create a uniform grid that overlays the mesh to be partitioned.  "
                              "Assign all elements within each cell of the grid to the same "
@@ -66,22 +75,65 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   const auto & max = bounding_box.max();
 
   auto dim = mesh.mesh_dimension();
-  //  Need to make sure the number of cells in the grid matches the number of procs to partition for
-  nx = getParam<unsigned int>("nx");
 
+  // Gather user parameters
+  nx = isParamValid("nx") ? getParam<unsigned int>("nx") : nx;
   if (dim >= 2)
-    ny = getParam<unsigned int>("ny");
-
+    ny = isParamValid("ny") ? getParam<unsigned int>("ny") : ny;
   if (dim == 3)
-    nz = getParam<unsigned int>("nz");
+    nz = isParamValid("nz") ? getParam<unsigned int>("nz") : nz;
 
-  // We should compute a balanced factorization so
-  // that we can assign proper processors to each direction.
-  // I just want to make grid partitioner smarter.
-  if ((nx * ny * nz) != mesh.n_partitions())
+  // simple info message unused parameters as this can be normal: we could be partitioning
+  // a 2D mesh before extruding it to 3D. The nz parameter is needed for the 3D mesh
+  if (dim < 2 && isParamValid("ny") && getParam<unsigned int>("ny") > 1)
+    paramInfo("ny", "Parameter ignored as mesh is currently of dimension less than 2.");
+  if (dim < 3 && isParamValid("nz") && getParam<unsigned int>("nz") > 1)
+    paramInfo("nz", "Parameter ignored as mesh is currently of dimension less than 3.");
+
+  // User parameters, which should match the number of partitions needed
+  if (getParam<MooseEnum>("grid_computation") == "manual")
   {
-    // Anybody knows we are living in a 3D space.
-    int dims[] = {0, 0, 0};
+    //  Need to make sure the number of grid cells matches the number of procs to partition for
+    if ((nx * ny * nz) != mesh.n_partitions())
+      mooseError("Number of grid cells (" + std::to_string(nx * ny * nz) +
+                 ") does not match the number of MPI processes (" +
+                 std::to_string(mesh.n_partitions()) + ")");
+  }
+
+  else if (getParam<MooseEnum>("grid_computation") == "automatic")
+  {
+    // remove over-constraint and tell user
+    if (nx * ny * nz > mesh.n_partitions())
+    {
+      nx = 0;
+      ny = 0;
+      nz = 0;
+      paramWarning("grid_computation",
+                   "User specified (nx,ny,nz) grid exceeded number of partitions, these parameters "
+                   "will be ignored.");
+    }
+    // 0 means no restriction on which number to choose
+    int dims[] = {isParamValid("nx") ? int(nx) : 0,
+                  isParamValid("ny") ? int(ny) : 0,
+                  isParamValid("nz") ? int(nz) : 0};
+
+    if ((dims[0] > 0 && dim == 1 && dims[0] != int(mesh.n_partitions())) ||
+        (dims[0] > 0 && dims[1] > 0 && dim == 2 && dims[0] * dims[1] != int(mesh.n_partitions())) ||
+        (dims[0] > 0 && dims[1] > 0 && dims[2] > 0 && dim == 3 &&
+         dims[0] * dims[1] * dims[2] != int(mesh.n_partitions())))
+    {
+      dims[0] = 0;
+      dims[1] = 0;
+      dims[2] = 0;
+      paramWarning("grid_computation",
+                   "User specified grid for the current dimension of the mesh (" +
+                       std::to_string(dim) + ") does not fit the number of partitions (" +
+                       std::to_string(mesh.n_partitions()) +
+                       ") and constrain the grid partitioner in every direction, these parameters "
+                       "will be ignored.");
+    }
+
+    // This will error if the factorization is not possible
     MPI_Dims_create(mesh.n_partitions(), dim, dims);
 
     nx = dims[0];
@@ -147,9 +199,9 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
     if (dim == 3)
       k = (coordz - min(2)) / hz;
 
-    mooseAssert(i < nx, "Index caculation is wrong along x direction");
-    mooseAssert(j < ny, "Index caculation is wrong along y direction");
-    mooseAssert(k < nz, "Index caculation is wrong along z direction");
+    mooseAssert(i < nx, "Index calculation is wrong along x direction");
+    mooseAssert(j < ny || ny == 0, "Index calculation is wrong along y direction");
+    mooseAssert(k < nz || nz == 0, "Index calculation is wrong along z direction");
     // Assign processor ID to current element
     elem_ptr->processor_id() = k * nx * ny + j * nx + i;
   }
