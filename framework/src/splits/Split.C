@@ -27,11 +27,11 @@ Split::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "blocks", {}, "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
   params.addParam<std::vector<BoundaryName>>(
-      "sides", {}, "Sidesets Split operates on (omitting this implies \"no sidesets\"");
+      "sides", {}, "Sidesets Split operates on (omitting this implies \"all sidesets\")");
   params.addParam<std::vector<BoundaryName>>(
       "unsides",
       {},
-      "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
+      "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\")");
   params.addParam<std::vector<std::string>>(
       "splitting", {}, "The names of the splits (subsystems) in the decomposition of this split");
   params.addParam<std::vector<BoundaryName>>(
@@ -40,6 +40,8 @@ Split::validParams()
   params.addParam<std::vector<NonlinearVariableName>>(
       "unside_by_var_var_name",
       "A map from boundary name to unside by variable, e.g. only unside for a given variable.");
+  params.addParamNamesToGroup("sides unsides unside_by_var_boundary_name unside_by_var_var_name",
+                              "Sideset restriction");
 
   MooseEnum SplittingTypeEnum("additive multiplicative symmetric_multiplicative schur", "additive");
   params.addParam<MooseEnum>("splitting_type", SplittingTypeEnum, "Split decomposition type");

@@ -1,4 +1,4 @@
-# Navier Stokes Linear Scalar Transport / WCNSLinearFVScalarTransportPhysics
+# Navier Stokes Scalar Transport Segregated / WCNSLinearFVScalarTransportPhysics
 
 !syntax description /Physics/NavierStokes/ScalarTransportSegregated/WCNSLinearFVScalarTransportPhysics
 
