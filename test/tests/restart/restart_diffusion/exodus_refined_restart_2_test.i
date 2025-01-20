@@ -6,28 +6,39 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
     initial_from_file_var = u
     initial_from_file_timestep = 2
   [../]
+  [v]
+    order = FIRST
+    family = LAGRANGE
+  []
 []
 
 [Kernels]
-  active = 'bodyforce ie'
-
-  [./bodyforce]
+  [./bodyforce_u]
     type = BodyForce
     variable = u
     value = 10.0
   [../]
 
-  [./ie]
+  [./ie_u]
     type = TimeDerivative
     variable = u
+  [../]
+
+  [./bodyforce_v]
+    type = BodyForce
+    variable = v
+    value = 10.0
+  [../]
+
+  [./ie_v]
+    type = TimeDerivative
+    variable = v
   [../]
 []
 
@@ -45,6 +56,20 @@
     type = DirichletBC
     variable = u
     boundary = 1
+    value = 1
+  [../]
+
+  [./top]
+    type = DirichletBC
+    variable = v
+    boundary = 0
+    value = 0
+  [../]
+
+  [./bottom]
+    type = DirichletBC
+    variable = v
+    boundary = 2
     value = 1
   [../]
 []
