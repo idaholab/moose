@@ -19,7 +19,7 @@ Fixed temperatures at the boundary conditions are simple but not realistic. We w
 First, the sidesets must be added / present in the mesh.
 We modified the meshing script to generate sidesets for our boundary conditions
 
-!listing step03_boundary_conditions/inputs/mesh.i
+!listing step03_boundary_conditions/mesh.i
 
 !---
 
@@ -33,14 +33,14 @@ Fixed heat flux
 Fixed heat flux
 
 
-!listing step03_boundary_conditions/inputs/step3.i block=BCs/from_reactor
+!listing step03_boundary_conditions/step3.i block=BCs/from_reactor
 
 !---
 
 Natural convection with air
 
 
-!listing step03_boundary_conditions/inputs/step3.i block=BCs/air_convection
+!listing step03_boundary_conditions/step3.i block=BCs/air_convection
 
 !---
 
@@ -49,13 +49,13 @@ Convective boundary conditions
 We use the same boundary condition as for with for now. When we introduce a separate variable for the
 water temperature, we will revisit this.
 
-!listing step03_boundary_conditions/inputs/step3.i block=BCs/water_convection
+!listing step03_boundary_conditions/step3.i block=BCs/water_convection
 
 !---
 
 ## Step 3: Input File
 
-!listing step03_boundary_conditions/inputs/step3.i
+!listing step03_boundary_conditions/step3.i
 
 !---
 

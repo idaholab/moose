@@ -25,7 +25,7 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 
 ## Step 10: Input File
 
-!listing step10_mechanics/inputs/step10.i
+!listing step10_mechanics/step10.i
 
 !---
 

@@ -32,7 +32,7 @@ Add custom syntax to build objects that are common to all conjugate heat transfe
 
 ## Step 12: Input File
 
-!listing step12_action/inputs/step12.i
+!listing step12_action/step12.i
 
 !---
 

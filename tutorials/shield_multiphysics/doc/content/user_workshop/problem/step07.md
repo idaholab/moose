@@ -31,7 +31,7 @@ where $\vec{u}$ is the fluid velocity, $\mu$ is fluid viscosity, $p$ is the pres
 We start simple by creating decoupled simulations.
 The variables for the fluid solve are created but kept as auxiliary variables.
 
-!listing step07_conjugate_heat_transfer/inputs/step7a_concrete_decoupled.i
+!listing step07_conjugate_heat_transfer/step7a_concrete_decoupled.i
 
 !---
 
@@ -49,7 +49,7 @@ F_{buoyancy} = \alpha (T_w - T_{ref})
 The `ConjugateHeatTransfer` object will only accept nonlinear variables for both
 the solid and fluid temperature, so we create simpler boundary conditions for now.
 
-!listing step07_conjugate_heat_transfer/inputs/step7b_water_decoupled.i
+!listing step07_conjugate_heat_transfer/step7b_water_decoupled.i
 
 !---
 
@@ -127,7 +127,7 @@ cd inputs
 While we can run these 3D cases unconverged on a laptop, it is also clear the turn around
 on finding issues is too long. We switch to 2D:
 
-!listing step07_conjugate_heat_transfer/inputs/step7c_2dcoupled.i
+!listing step07_conjugate_heat_transfer/step7c_2dcoupled.i
 
 !---
 
@@ -154,7 +154,7 @@ moose-opt -i step7c_2dcoupled.i
 
 Once we have found all the issues with the uncoupled simulations and the 2D coupled simulation, we can now run the 3D coupled simulation:
 
-!listing step07_conjugate_heat_transfer/inputs/step7d_coupled.i
+!listing step07_conjugate_heat_transfer/step7d_coupled.i
 
 !---
 

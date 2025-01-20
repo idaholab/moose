@@ -13,7 +13,7 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 
 ## Step 9: Input File
 
-!listing step09_postprocessing/inputs/step9.i
+!listing step09_postprocessing/step9.i
 
 !---
 

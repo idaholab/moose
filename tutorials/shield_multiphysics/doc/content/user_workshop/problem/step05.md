@@ -9,7 +9,7 @@
 We are not solving for the temperature in the water yet. To represent it as a variable that is
 not in the nonlinear system, we use an auxiliary variable.
 
-!listing step05_auxiliary_variables/inputs/step5.i block=AuxVariables
+!listing step05_auxiliary_variables/step5.i block=AuxVariables
 
 !---
 
@@ -55,7 +55,7 @@ occurs in the element interiors.
 
 ## Step 5: Input File
 
-!listing step05_auxiliary_variables/inputs/step5.i
+!listing step05_auxiliary_variables/step5.i
 
 !---
 
