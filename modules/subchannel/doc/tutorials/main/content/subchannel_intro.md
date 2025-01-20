@@ -7,7 +7,7 @@
 !row!
 !col! width=50%
 
-!media figures/CFD.jpg
+!media subchannel/tutorial/CFD.jpg
 
 !col-end!
 
@@ -21,7 +21,7 @@
 !row!
 !col! width=50%
 
-!media figures/CTF.jpg
+!media subchannel/tutorial/CTF.jpg
 
 !col-end!
 
@@ -56,7 +56,7 @@
 
 !col! width=50%
 
-!media figures/shapes.png
+!media subchannel/tutorial/shapes.png
 
 !col-end!
 
@@ -65,7 +65,7 @@
 !row!
 !col! width=50%
 
-!media figures/scales.png
+!media subchannel/tutorial/scales.png
 
 !col-end!
 
@@ -102,7 +102,7 @@
 
 !col! width=40%
 
-!media figures/ControlVolume1.png
+!media subchannel/tutorial/ControlVolume1.png
 
 !col-end!
 
@@ -126,13 +126,13 @@
 
 !col! width=50%
 
-!media figures/ControlVolume2.png
+!media subchannel/tutorial/ControlVolume2.png
 
 !col-end!
 
 !row-end!
 
-!media figures/Vij.png
+!media subchannel/tutorial/Vij.png
     style=width:25%;margin-bottom:2%;margin:auto;
 
 !---
@@ -251,7 +251,7 @@ w'_{ij} = \beta S_{ij} \bar{G}, ~\frac{dw'_{ij}}{dz} = \frac{w'_{ij}}{\Delta Z}=
 !row!
 !col! width=50%
 
-!media figures/stencil2.png
+!media subchannel/tutorial/stencil2.png
     style=width:100%;
 
 !col-end!

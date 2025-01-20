@@ -17,7 +17,7 @@ h'_{ij} = \sum_{j} w'_{ij}\Delta h_{ij}
 
 Because the model for turbulent mixing is gradient-driven based in $\Delta h, \Delta U$, in order to observe the effects of turbulence, it is necessary to make a gradient in either energy or momentum. It is easier to focus on the energy equation and deactivate the density calculation. The problem geometry consists of two identical channels connected by a gap and is seen in [enthalpy].
 
-!media figures/enthalpy.png
+!media subchannel/v&v/enthalpy.png
     style=width:30%;margin-bottom:2%;margin:auto;
     id=enthalpy
     caption=Enthalpy mixing model verification problem geometry
@@ -36,7 +36,7 @@ h_2 = \frac{(h_{1,in} + h_{2,in})}{2} + \frac{1}{2}(h_{2,in} - h_{1,in})\exp(-\f
 
 The analytical solution is compared with the code results in [enthalpy-ver]. The code results are in good agreement with the analytical solution.
 
-!media figures/enthalpy-ver.png
+!media subchannel/v&v/enthalpy-ver.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=enthalpy-ver
     caption=Enthalpy distribution in the axial direction
