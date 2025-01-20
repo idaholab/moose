@@ -50,10 +50,11 @@ class SQARequirementReport(SQAReport):
                 raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
 
         # Build Requirement objects and remove directory based dict
-        req_dict = get_requirements_from_tests(directories, specs.split(), self.include_non_testable)
         requirements = []
-        for values in req_dict.values():
-            requirements += values
+        for s in specs:
+            req_dict = get_requirements_from_tests(directories, s.split(), self.include_non_testable)
+            for values in req_dict.values():
+                requirements += values
 
         # Populate the lists of tests for SQARequirementDiffReport
         self.test_names = set()

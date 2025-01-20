@@ -189,6 +189,22 @@ Requirements:
         include_non_testable: true
 ```
 
+Multiple test specifications files can be added (such as when `tests` and `assessments` are used as
+filenames for organization) by setting the `specs:` parameter:
+
+```
+Requirements:
+    blackbear:
+        directories:
+            - test/tests
+        specs:
+            - tests
+            - assessments
+        log_testable: WARNING
+        show_warning: false
+        include_non_testable: true
+```
+
 !---
 
 ### SQA Reports: Running
