@@ -26,7 +26,7 @@ syntax.
 
 MOOSE uses the "hierarchical input text" (hit) format.
 
-!listing step01_diffusion/inputs/step1.i block=Kernels
+!listing step01_diffusion/step1.i block=Kernels
 
 !---
 
@@ -43,13 +43,13 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 
 ## Step 1: Input file to build the geometry
 
-!listing step01_diffusion/inputs/mesh.i
+!listing step01_diffusion/mesh.i
 
 !---
 
 ## Step 1: Input file to run the diffusion simulation
 
-!listing step01_diffusion/inputs/step1.i
+!listing step01_diffusion/step1.i
 
 !---
 

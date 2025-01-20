@@ -61,7 +61,7 @@ We modify it to to consume the newly created material properties.
 
 ## Step 4: Input File
 
-!listing step04_heat_conduction/inputs/step4.i
+!listing step04_heat_conduction/step4.i
 
 !---
 
