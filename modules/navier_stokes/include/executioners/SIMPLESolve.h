@@ -10,7 +10,7 @@
 #pragma once
 
 // Moose includes
-#include "PIMPLESolve.h"
+#include "LinearAssemblySegregatedSolve.h"
 
 /**
  * Implementation of Semi-Implicit Method for Pressure-Linked Equations (SIMPLE)
@@ -18,7 +18,7 @@
  * the PIMPLE algorithm: (i) no PISO iterations are allowed, (ii) no time
  * kernels are allowed.
  */
-class SIMPLESolve : public PIMPLESolve
+class SIMPLESolve : public LinearAssemblySegregatedSolve
 {
 public:
   SIMPLESolve(Executioner & ex);
