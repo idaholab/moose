@@ -25,7 +25,7 @@ NumFailedTimeSteps::NumFailedTimeSteps(const InputParameters & parameters)
 {
   if (_subproblem.isTransient())
   {
-    _timestepper = dynamic_cast<Transient *>(_app.getExecutioner())->getTimeStepper();
+    _timestepper = dynamic_cast<TransientBase *>(_app.getExecutioner())->getTimeStepper();
     if (!_timestepper)
       mooseError("No user-specified time stepper in Executioner block");
   }

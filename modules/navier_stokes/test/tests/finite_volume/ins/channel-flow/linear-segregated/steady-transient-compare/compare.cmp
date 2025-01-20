@@ -1,0 +1,3 @@
+TIME STEPS relative 1.0 floor 0.0
+
+ELEMENT VARIABLES relative 5e-5 floor 1e-6

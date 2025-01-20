@@ -19,7 +19,7 @@ class EigenProblem;
 class SubProblem;
 class SystemBase;
 class AuxiliarySystem;
-class Transient;
+class TransientBase;
 
 InputParameters
 MooseObject::validParams()
@@ -39,7 +39,7 @@ MooseObject::validParams()
   params.addPrivateParam<SubProblem *>("_subproblem", nullptr);
   params.addPrivateParam<SystemBase *>("_sys", nullptr);
   params.addPrivateParam<SystemBase *>("_nl_sys", nullptr);
-  params.addPrivateParam<Transient *>("_executioner", nullptr);
+  params.addPrivateParam<TransientBase *>("_executioner", nullptr);
   params.addPrivateParam<THREAD_ID>("_tid");
   params.addPrivateParam<bool>("_residual_object", false);
   return params;

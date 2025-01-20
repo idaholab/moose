@@ -59,9 +59,9 @@ ComposeTimeStepperAction::act()
       if (isParamValid(param_name_value.first))
         new_params.applyParameter(_pars, param_name_value.first);
 
-    Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+    TransientBase * transient = dynamic_cast<TransientBase *>(_app.getExecutioner());
     mooseAssert(transient, "The transient executioner does not exist");
-    new_params.set<Transient *>("_executioner") = transient;
+    new_params.set<TransientBase *>("_executioner") = transient;
 
     _problem->addObject<TimeStepper>(
         final_timestepper, final_timestepper, new_params, /* threaded = */ false);

@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "NS.h"
 #include "VectorCompositeFunctor.h"
+#include "PIMPLE.h"
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
@@ -65,7 +66,9 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _vel(_dim, nullptr),
     _HbyA_flux(_moose_mesh, blockIDs(), "HbyA_flux"),
     _Ainv(_moose_mesh, blockIDs(), "Ainv"),
-    _face_mass_flux(_moose_mesh, blockIDs(), "face_values"),
+    _face_mass_flux(
+        declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
+            "face_flux", _moose_mesh, blockIDs(), "face_values")),
     _rho(getFunctor<Real>(NS::density))
 {
   if (!_p)
@@ -90,7 +93,8 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
   }
 
-  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()))
+  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()) &&
+      !dynamic_cast<PIMPLE *>(getMooseApp().getExecutioner()))
     mooseError(this->name(),
                " should only be used with a linear segregated thermal-hydraulics solver!");
 }
@@ -456,7 +460,7 @@ RhieChowMassFlux::populateCouplingFunctors(
 }
 
 void
-RhieChowMassFlux::computeHbyA(bool verbose)
+RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 {
   if (verbose)
   {
@@ -467,7 +471,7 @@ RhieChowMassFlux::computeHbyA(bool verbose)
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
 
-  auto & pressure_gradient = _pressure_system->gradientContainer();
+  auto & pressure_gradient = selectPressureGradient(with_updated_pressure);
 
   _HbyA_raw.clear();
   _Ainv_raw.clear();
@@ -489,22 +493,11 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       mmat->print();
     }
 
+    // First, we extract the diagonal and we will hold on to it for a little while
     _Ainv_raw.push_back(current_local_solution.zero_clone());
     NumericVector<Number> & Ainv = *(_Ainv_raw.back());
 
     mmat->get_diagonal(Ainv);
-
-    auto working_vector = momentum_system->current_local_solution->zero_clone();
-    PetscVector<Number> * working_vector_petsc =
-        dynamic_cast<PetscVector<Number> *>(working_vector.get());
-    mooseAssert(working_vector_petsc,
-                "The vectors used in the RhieChowMassFlux objects need to be convertable "
-                "to PetscVectors!");
-
-    *working_vector_petsc = 1.0;
-
-    // We create element-wise 1/A-s based on the the diagonal of the momentum matrix
-    Ainv.pointwise_divide(*working_vector_petsc, Ainv);
 
     if (verbose)
     {
@@ -512,23 +505,41 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       solution.print();
     }
 
+    // Time to create H(u) = M_{offdiag} * u - b_{nonpressure}
     _HbyA_raw.push_back(current_local_solution.zero_clone());
     NumericVector<Number> & HbyA = *(_HbyA_raw.back());
-    HbyA = 0;
 
-    // We start creating H/A by adding the momentum right hand side contributions
-    HbyA.add(-1.0, rhs);
+    // We start with the matrix product part, we will do
+    // M*u - A*u for 2 reasons:
+    // 1, We assume A*u petsc operation is faster than setting the matrix diagonal to 0
+    // 2, In PISO loops we need to reuse the matrix so we can't just set the diagonals to 0
 
-    *working_vector_petsc = *pressure_gradient[system_i];
-    working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
+    // We create a working vector to ease some of the operations, we initialize its values
+    // with the current solution values to have something for the A*u term
+    auto working_vector = momentum_system->current_local_solution->zero_clone();
+    PetscVector<Number> * working_vector_petsc =
+        dynamic_cast<PetscVector<Number> *>(working_vector.get());
+    mooseAssert(working_vector_petsc,
+                "The vectors used in the RhieChowMassFlux objects need to be convertable "
+                "to PetscVectors!");
 
-    // We correct the right hand side to exclude the pressure contribution
+    mmat->vector_mult(HbyA, solution);
+    working_vector_petsc->pointwise_mult(Ainv, solution);
     HbyA.add(-1.0, *working_vector_petsc);
 
-    // Now we set the diagonal of our system matrix to 0 so we can create H*u
-    // TODO: Add a function for this in libmesh
-    *working_vector_petsc = 0.0;
-    LibmeshPetscCall(MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES));
+    if (verbose)
+    {
+      _console << " H(u)" << std::endl;
+      HbyA.print();
+    }
+
+    // We continue by adding the momentum right hand side contributions
+    HbyA.add(-1.0, rhs);
+
+    // Unfortunately, the pressure forces are included in the momentum RHS
+    // so we have to correct them back
+    working_vector_petsc->pointwise_mult(*pressure_gradient[system_i], *_cell_volumes);
+    HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
     {
@@ -536,31 +547,13 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       rhs.print();
       _console << "pressure RHS" << std::endl;
       pressure_gradient[system_i]->print();
-    }
-
-    if (verbose)
-    {
-      _console << "H RHS" << std::endl;
-      HbyA.print();
-    }
-
-    // Create H(u)
-    mmat->vector_mult(*working_vector_petsc, solution);
-
-    if (verbose)
-    {
-      _console << " H(u)" << std::endl;
-      working_vector_petsc->print();
-    }
-
-    // Create H(u) - RHS
-    HbyA.add(*working_vector_petsc);
-
-    if (verbose)
-    {
       _console << " H(u)-rhs-relaxation_source" << std::endl;
       HbyA.print();
     }
+
+    // It is time to create element-wise 1/A-s based on the the diagonal of the momentum matrix
+    *working_vector_petsc = 1.0;
+    Ainv.pointwise_divide(*working_vector_petsc, Ainv);
 
     // Create 1/A*(H(u)-RHS)
     HbyA.pointwise_mult(HbyA, Ainv);
@@ -570,10 +563,11 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       _console << " (H(u)-rhs)/A" << std::endl;
       HbyA.print();
     }
+
     Ainv.pointwise_mult(Ainv, *_cell_volumes);
   }
 
-  // We fill the 1/A functor
+  // We fill the 1/A and H/A functors
   populateCouplingFunctors(_HbyA_raw, _Ainv_raw);
 
   if (verbose)
@@ -582,4 +576,17 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     _console << "DONE Computing HbyA " << std::endl;
     _console << "************************************" << std::endl;
   }
+}
+
+std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
+{
+  if (updated_pressure)
+  {
+    _grad_p_current.clear();
+    for (const auto & component : _pressure_system->gradientContainer())
+      _grad_p_current.push_back(component->clone());
+  }
+
+  return _grad_p_current;
 }

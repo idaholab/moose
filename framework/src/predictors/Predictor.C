@@ -59,7 +59,7 @@ Predictor::Predictor(const InputParameters & parameters)
     _skip_times(getParam<std::vector<Real>>("skip_times")),
     _skip_times_old(getParam<std::vector<Real>>("skip_times_old")),
     _skip_after_failed_timetep(getParam<bool>("skip_after_failed_timestep")),
-    _timestep_tolerance(dynamic_cast<Transient *>(_app.getExecutioner())->timestepTol())
+    _timestep_tolerance(dynamic_cast<TransientBase *>(_app.getExecutioner())->timestepTol())
 {
   if (_scale < 0.0 || _scale > 1.0)
     mooseError("Input value for scale = ", _scale, " is outside of permissible range (0 to 1)");
