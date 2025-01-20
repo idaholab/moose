@@ -4,23 +4,23 @@
 !datetime today format=%B %Y
 
 !style halign=center
-[www.mooseframework.org](index.md exact=True)
+[www.mooseframework.org](user_workshop/index.md exact=True)
 
 !---
 
-!include user_workshop/intro/inl_background.md
+!include workshop/intro/inl_background.md
 
 !---
 
-!include user_workshop/intro/moose_introduction.md
+!include workshop/intro/moose_introduction.md
 
 !---
 
-!include user_workshop/intro/moose_multiphysics.md
+!include workshop/intro/moose_multiphysics.md
 
 !---
 
-!include user_workshop/intro/getting_started.md
+!include workshop/intro/getting_started.md
 
 !---
 
@@ -36,15 +36,15 @@
 
 !---
 
-!include user_workshop/numerical/fem_overview.md
+!include workshop/numerical/fem_overview.md
 
 !---
 
-!include user_workshop/numerical/fem_shape.md
+!include workshop/numerical/fem_shape.md
 
 !---
 
-!include user_workshop/numerical/fem_solve.md
+!include workshop/numerical/fem_solve.md
 
 !---
 
@@ -52,15 +52,15 @@
 
 !---
 
-!include user_workshop/systems/mooseobject.md
+!include user_workshop/systems_user/mooseobject.md
 
 !---
 
-!include user_workshop/systems/inputparameters.md
+!include user_workshop/systems_user/inputparameters.md
 
 !---
 
-!include user_workshop/systems/kernels.md
+!include user_workshop/systems_user/kernels.md
 
 !---
 
@@ -72,11 +72,11 @@
 
 !---
 
-!include user_workshop/systems/mesh.md
+!include user_workshop/systems_user/mesh.md
 
 !---
 
-!include user_workshop/systems/outputs.md
+!include user_workshop/systems_user/outputs.md
 
 !---
 
@@ -84,7 +84,7 @@
 
 !---
 
-!include user_workshop/systems/boundaryconditions.md
+!include user_workshop/systems_user/boundaryconditions.md
 
 !---
 
@@ -100,11 +100,11 @@
 
 !---
 
-!include user_workshop/systems/materials.md
+!include user_workshop/systems_user/materials.md
 
 !---
 
-!include user_workshop/systems/functions.md
+!include user_workshop/systems_user/functions.md
 
 !---
 
@@ -116,7 +116,7 @@
 
 !---
 
-!include user_workshop/infrastructure/testing.md
+!include workshop/infrastructure/testing.md
 
 !---
 
@@ -124,7 +124,7 @@
 
 !---
 
-!include user_workshop/systems/auxkernels.md
+!include user_workshop/systems_user/auxkernels.md
 
 !---
 
@@ -140,15 +140,15 @@
 
 !---
 
-!include user_workshop/systems/executioners.md
+!include user_workshop/systems_user/executioners.md
 
 !---
 
-!include user_workshop/systems/timeintegrators.md
+!include user_workshop/systems_user/timeintegrators.md
 
 !---
 
-!include user_workshop/systems/timesteppers.md
+!include user_workshop/systems_user/timesteppers.md
 
 !---
 
@@ -174,7 +174,7 @@
 
 !---
 
-!include user_workshop/systems/adaptivity.md end=end-intro
+!include user_workshop/systems_user/adaptivity.md end=end-intro
 
 !---
 
@@ -192,15 +192,15 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/systems/userobjects.md
+!include user_workshop/systems_user/userobjects.md
 
 !---
 
-!include user_workshop/systems/postprocessors.md
+!include user_workshop/systems_user/postprocessors.md
 
 !---
 
-!include user_workshop/systems/vectorpostprocessors.md
+!include user_workshop/systems_user/vectorpostprocessors.md
 
 !---
 
@@ -212,7 +212,7 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/infrastructure/mms.md
+!include workshop/infrastructure/mms.md
 
 !---
 
@@ -220,7 +220,7 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/modules/modules.md
+!include workshop/modules/modules.md
 
 !---
 
@@ -236,11 +236,11 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/systems/multiapps.md
+!include user_workshop/systems_user/multiapps.md
 
 !---
 
-!include user_workshop/systems/transfers.md
+!include user_workshop/systems_user/transfers.md
 
 !---
 
@@ -256,7 +256,7 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/systems/actions.md
+!include user_workshop/systems_user/actions.md
 
 !---
 
@@ -269,19 +269,19 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/infrastructure/debugging.md
+!include workshop/infrastructure/debugging.md
 
 !---
 
-!include user_workshop/infrastructure/restart.md
+!include workshop/infrastructure/restart.md
 
 !---
 
-!include user_workshop/systems/index.md
+!include user_workshop/systems_user/index.md
 
 !---
 
-!include user_workshop/numerical/fvm_overview.md
+!include workshop/numerical/fvm_overview.md
 
 !---
 

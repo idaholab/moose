@@ -28,19 +28,19 @@ only an update to the input file is required to run the transient case.
 
 We introduce a ramp up of the heat flux
 
-!listing step06_transient_heat_conduction/inputs/step6_transient.i block=BCs
+!listing step06_transient_heat_conduction/step6_transient.i block=BCs
 
 !---
 
 We introduce a multiplier on the specific heat to speed up the transient
 
-!listing step06_transient_heat_conduction/inputs/step6_transient.i block=Materials
+!listing step06_transient_heat_conduction/step6_transient.i block=Materials
 
 !---
 
 Time stepping parameters are passed to the Executioner block
 
-!listing step06_transient_heat_conduction/inputs/step6_transient.i block=Executioner
+!listing step06_transient_heat_conduction/step6_transient.i block=Executioner
 
 !---
 
