@@ -31,7 +31,7 @@ setInterpolationMethods(const MooseObject & obj,
   else if (velocity_interp_method_in == "rc")
     velocity_interp_method = InterpMethod::RhieChow;
   else
-    obj.mooseError("Unrecognized interpolation type ",
+    obj.mooseError("Unrecognized velocity interpolation type ",
                    static_cast<std::string>(velocity_interp_method_in));
 
   return need_more_ghosting;

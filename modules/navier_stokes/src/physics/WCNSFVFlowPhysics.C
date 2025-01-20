@@ -64,6 +64,10 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<bool>(NSFVBase::validParams(),
                              "pressure_allow_expansion_on_bernoulli_faces");
   params.transferParam<bool>(NSFVBase::validParams(), "momentum_two_term_bc_expansion");
+  params.addParam<bool>(
+      "use_norm_for_momentum_limiter",
+      false,
+      "Whether to use the norm of the momentum to compute the limited interpolation coefficients.");
 
   // Nonlinear solver parameters
   params.transferParam<Real>(NSFVBase::validParams(), "mass_scaling");
