@@ -1,5 +1,5 @@
 Content:
-    workshop:
+    user_workshop:
         root_dir: !include tutorials/shield_multiphysics/doc/config.yml Content user_workshop root_dir
         content:
             - user_workshop/**
