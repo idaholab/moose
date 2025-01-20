@@ -1,9 +1,22 @@
 [Tests]
   issues = '#16809'
   design = 'navier_stokes/wcnsfv.md'
-  [transient]
+  [transient_constant_cp_approx]
     type = 'Exodiff'
     input = 2d-transient.i
+    exodiff = 2d-transient_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation, while approximating enthalpy as the product of specific heat and temperature'
+    rel_err = 7e-5
+    # The non-linear tolerance is actually fairly tight, but the variable values
+    # are small at the no-slip boundary conditions, and this leads to absolute diffs of around 1e-15,
+    # triggering the default relative tolerance error criterion
+    valgrind = HEAVY
+  []
+  [transient_using_h]
+    type = 'Exodiff'
+    input = 2d-transient.i
+    cli_args = 'FunctorMaterials/ins_fv/assumed_constant_cp=false FunctorMaterials/ins_fv/fp=fp FunctorMaterials/ins_fv/pressure=pressure'
     exodiff = 2d-transient_out.e
     method = "!dbg"
     requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation'
@@ -39,6 +52,38 @@
     custom_cmp = 'dynamic_pressure.cmp'
     prereq = 'neglect_drho_dt_derivatives'
   []
+  [enthalpy_computation_constant_cp]
+    type = 'CSVDiff'
+    input = enthalpy_computation.i
+    csvdiff = enthalpy_computation_out.csv
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy assuming a constant specific heat.'
+    recover = false
+  []
+  [enthalpy_computation_cp_variable]
+    type = 'CSVDiff'
+    input = enthalpy_computation.i
+    csvdiff = enthalpy_computation_non_constant_cp_out.csv
+    cli_args = "Outputs/file_base=enthalpy_computation_non_constant_cp_out
+                FunctorMaterials/compute_cp/fp=fp
+                FunctorMaterials/compute_cp/pressure=pressure
+                FunctorMaterials/compute_cp/assumed_constant_cp=false"
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat.'
+    recover = false
+  []
+  [verification_nonconstant_cp_1d_analytical]
+    type = 'CSVDiff'
+    input = 1d_test_cpT.i
+    csvdiff = 1d_test_cpT_out.csv
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat, and show near perfect energy conservation in a 1D case with a volumetric source.'
+    recover = false
+  []
+  [verification_nonconstant_cp_2d_balance]
+    type = 'CSVDiff'
+    input = 2d-steady-wall-balance.i
+    csvdiff = 2d-steady-wall-balance_out.csv
+    requirement = 'The system shall be able to compute the specific enthalpy and the enthalpy with a non constant specific heat, and show near perfect energy conservation in a 2D case with wall heating.'
+    recover = false
+  []
 
   [exceptions]
     requirement = "The system shall throw an error if"
@@ -48,6 +93,13 @@
       cli_args = "FunctorMaterials/fluid_props_to_mat_props/reference_pressure=1e5"
       expect_err = "'reference_pressure_point' and 'reference_pressure' should not be set unless solving for the dynamic pressure"
       detail = "the reference pressure is set when not solving for the dynamic pressure"
+    []
+    [missing_fp]
+      type = RunException
+      input = '2d-transient.i'
+      cli_args = "FunctorMaterials/ins_fv/assumed_constant_cp=false"
+      expect_err = "Must specify both fluid properties and pressure or an enthalpy functor "
+      detail = "not enough parameters are specified when defining the enthalpy functor."
     []
   []
 []

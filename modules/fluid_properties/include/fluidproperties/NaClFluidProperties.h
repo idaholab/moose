@@ -69,7 +69,8 @@ public:
 
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 
-  using SinglePhaseFluidProperties::cp_from_p_T;
+  virtual void cp_from_p_T(
+      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 

@@ -10,5 +10,7 @@
     design = 'FunctorErgunDragCoefficients.md'
     valgrind = 'none'
     method = '!dbg'
+    # GlobalParams is setting fp to an object not using it at the time
+    allow_warnings = true
   []
 []

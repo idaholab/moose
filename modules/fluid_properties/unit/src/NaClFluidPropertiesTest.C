@@ -104,6 +104,7 @@ TEST_F(NaClFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cp_from_p_T, p, T, tol)
 }
 
 /**
