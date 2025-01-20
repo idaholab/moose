@@ -72,7 +72,7 @@ The sides are named in a logical way and are numbered:
 
 Let's mesh the "flow over circle" geometry, used for a computational fluid dynamics benchmark
 
-!media media/flow-over-circle.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
+!media flow-over-circle.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 

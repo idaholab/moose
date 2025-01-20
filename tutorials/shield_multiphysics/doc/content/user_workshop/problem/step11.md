@@ -4,7 +4,7 @@
 
 We want to study the effects of the local environment on sensors placed anywhere in the shield.
 
-!media media/shield_sensor_spread.png
+!media shield_sensor_spread.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !!end-intro
@@ -13,7 +13,7 @@ We want to study the effects of the local environment on sensors placed anywhere
 
 ## Step 11: Lower-scale Input File
 
-!listing step11_multiapps/inputs/step11_local.i
+!listing step11_multiapps/step11_local.i
 
 !---
 
@@ -36,7 +36,7 @@ cd inputs
 We distribute these simulations using a `MultiApp`.
 The positions of each child app are specified using a `Positions` object.
 
-!listing step11_multiapps/inputs/step11_global.i
+!listing step11_multiapps/step11_global.i
 
 !---
 
