@@ -1,6 +1,13 @@
 diff=2
 a=2
 
+[GlobalParams]
+  u = u
+  face_u = side_u
+  diffusivity = ${diff}
+  alpha = 6
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

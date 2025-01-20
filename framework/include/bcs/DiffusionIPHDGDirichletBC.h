@@ -9,38 +9,21 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+#include "IPHDGDirichletBC.h"
 #include "DiffusionIPHDGAssemblyHelper.h"
 
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
-class DiffusionIPHDGDirichletBC : public IntegratedBC, public DiffusionIPHDGAssemblyHelper
+class DiffusionIPHDGDirichletBC : public IPHDGDirichletBC
 {
 public:
   static InputParameters validParams();
-
   DiffusionIPHDGDirichletBC(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
-  virtual void computeResidualAndJacobian() override;
-
-  virtual void jacobianSetup() override;
-
 protected:
-  /**
-   * compute the AD residuals
-   */
-  void compute();
+  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
 
-  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
-
-private:
-  /// Functor computing the Dirichlet boundary value
-  const Moose::Functor<Real> & _dirichlet_val;
-
-  /// A cache variable to prevent multiple computations of Jacobians
-  unsigned int _my_side;
+  /// The assembly helper providing the required IP-HDG method implementations
+  std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;
 };

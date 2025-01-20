@@ -25,9 +25,7 @@ using namespace libMesh;
 InputParameters
 DiffusionIPHDGAssemblyHelper::validParams()
 {
-  auto params = emptyInputParameters();
-  params.addRequiredParam<NonlinearVariableName>(
-      "face_u", "The concentration of the _diffusing specie on faces");
+  auto params = IPHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
   params.addParam<Real>("alpha",
                         1,
@@ -44,158 +42,110 @@ DiffusionIPHDGAssemblyHelper::DiffusionIPHDGAssemblyHelper(
     SystemBase & sys,
     const Assembly & assembly,
     const THREAD_ID tid)
-  : ADFunctorInterface(moose_obj),
-    _u_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("u"))),
-    _u_face_var(
-        sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("face_u"))),
-    _u_dof_indices(_u_var.dofIndices()),
-    _lm_u_dof_indices(_u_face_var.dofIndices()),
-    _u_sol(_u_var.adSln()),
-    _grad_u_sol(_u_var.adGradSln()),
-    _lm_u_sol(_u_face_var.adSln()),
-    _scalar_phi(_u_var.phi()),
-    _grad_scalar_phi(_u_var.gradPhi()),
-    _scalar_phi_face(_u_var.phiFace()),
-    _grad_scalar_phi_face(_u_var.gradPhiFace()),
-    _lm_phi_face(_u_face_var.phiFace()),
+  : IPHDGAssemblyHelper(moose_obj, mvdi, sys, assembly, tid),
     _diff(mpi->getMaterialProperty<Real>("diffusivity")),
     _ti(*ti),
-    _alpha(moose_obj->getParam<Real>("alpha")),
-    _elem_volume(assembly.elemVolume()),
-    _side_area(assembly.sideElemVolume()),
-    _my_elem(nullptr)
+    _alpha(moose_obj->getParam<Real>("alpha"))
 {
-  mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_var));
-  mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_face_var));
 }
 
 void
-DiffusionIPHDGAssemblyHelper::scalarVolume(const MooseArray<ADRealVectorValue> & grad_scalar_sol,
-                                           const Moose::Functor<Real> & source,
-                                           const MooseArray<Real> & JxW,
-                                           const QBase & qrule,
-                                           const Elem * const current_elem,
-                                           const MooseArray<Point> & q_point,
-                                           DenseVector<ADReal> & scalar_re)
+DiffusionIPHDGAssemblyHelper::scalarVolume()
 {
-  for (const auto qp : make_range(qrule.n_points()))
-  {
-    // Evaluate source
-    const auto f =
-        source(Moose::ElemQpArg{current_elem, qp, &qrule, q_point[qp]}, _ti.determineState());
-
-    for (const auto i : index_range(scalar_re))
-    {
-      scalar_re(i) += JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * grad_scalar_sol[qp]);
-
-      // Scalar equation RHS
-      scalar_re(i) -= JxW[qp] * _scalar_phi[i][qp] * f;
-    }
-  }
+  for (const auto qp : make_range(_ip_qrule->n_points()))
+    for (const auto i : index_range(_scalar_re))
+      _scalar_re(i) += _ip_JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * _grad_u_sol[qp]);
 }
 
 void
-DiffusionIPHDGAssemblyHelper::scalarFace(const MooseArray<ADRealVectorValue> & grad_scalar_sol,
-                                         const MooseArray<ADReal> & scalar_sol,
-                                         const MooseArray<ADReal> & lm_sol,
-                                         const MooseArray<Real> & JxW_face,
-                                         const QBase & qrule_face,
-                                         const MooseArray<Point> & normals,
-                                         DenseVector<ADReal> & scalar_re)
+DiffusionIPHDGAssemblyHelper::scalarFace()
 {
   const auto h_elem = _elem_volume / _side_area;
 
-  for (const auto i : index_range(scalar_re))
-    for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto i : index_range(_scalar_re))
+    for (const auto qp : make_range(_ip_qrule_face->n_points()))
     {
-      scalar_re(i) -=
-          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (grad_scalar_sol[qp] * normals[qp]);
-      scalar_re(i) -=
-          _alpha / h_elem * _diff[qp] * (lm_sol[qp] - scalar_sol[qp]) * _scalar_phi_face[i][qp];
-      scalar_re(i) +=
-          (lm_sol[qp] - scalar_sol[qp]) * _diff[qp] * _grad_scalar_phi_face[i][qp] * normals[qp];
+      _scalar_re(i) -= _ip_JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] *
+                       (_grad_u_sol[qp] * _ip_normals[qp]);
+      _scalar_re(i) -=
+          _alpha / h_elem * _diff[qp] * (_lm_u_sol[qp] - _u_sol[qp]) * _scalar_phi_face[i][qp];
+      _scalar_re(i) +=
+          (_lm_u_sol[qp] - _u_sol[qp]) * _diff[qp] * _grad_scalar_phi_face[i][qp] * _ip_normals[qp];
     }
 }
 
 void
-DiffusionIPHDGAssemblyHelper::lmFace(const MooseArray<ADRealVectorValue> & grad_scalar_sol,
-                                     const MooseArray<ADReal> & scalar_sol,
-                                     const MooseArray<ADReal> & lm_sol,
-                                     const MooseArray<Real> & JxW_face,
-                                     const QBase & qrule_face,
-                                     const MooseArray<Point> & normals,
-                                     DenseVector<ADReal> & lm_re)
+DiffusionIPHDGAssemblyHelper::lmFace()
 {
   const auto h_elem = _elem_volume / _side_area;
 
-  for (const auto i : index_range(lm_re))
-    for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto i : index_range(_lm_re))
+    for (const auto qp : make_range(_ip_qrule_face->n_points()))
     {
-      lm_re(i) +=
-          JxW_face[qp] * _diff[qp] * grad_scalar_sol[qp] * normals[qp] * _lm_phi_face[i][qp];
-      lm_re(i) += JxW_face[qp] * _alpha / h_elem * _diff[qp] * (lm_sol[qp] - scalar_sol[qp]) *
-                  _lm_phi_face[i][qp];
+      _lm_re(i) +=
+          _ip_JxW_face[qp] * _diff[qp] * _grad_u_sol[qp] * _ip_normals[qp] * _lm_phi_face[i][qp];
+      _lm_re(i) += _ip_JxW_face[qp] * _alpha / h_elem * _diff[qp] * (_lm_u_sol[qp] - _u_sol[qp]) *
+                   _lm_phi_face[i][qp];
     }
 }
 
 void
-DiffusionIPHDGAssemblyHelper::scalarDirichlet(const MooseArray<ADRealVectorValue> & grad_scalar_sol,
-                                              const MooseArray<ADReal> & lm_sol,
-                                              const Moose::Functor<Real> & dirichlet_value,
-                                              const MooseArray<Real> & JxW_face,
-                                              const QBase & qrule_face,
-                                              const MooseArray<Point> & normals,
-                                              const Elem * const current_elem,
-                                              const unsigned int current_side,
-                                              const MooseArray<Point> & q_point_face,
-                                              DenseVector<ADReal> & scalar_re)
+DiffusionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
   const auto h_elem = _elem_volume / _side_area;
 
-  for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
     const auto scalar_value = dirichlet_value(
-        Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
+        Moose::ElemSideQpArg{
+            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
         _ti.determineState());
 
     for (const auto i : index_range(_u_dof_indices))
     {
-      scalar_re(i) -=
-          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (grad_scalar_sol[qp] * normals[qp]);
-      scalar_re(i) -=
-          _alpha / h_elem * _diff[qp] * (lm_sol[qp] - scalar_value) * _scalar_phi_face[i][qp];
-      scalar_re(i) +=
-          (lm_sol[qp] - scalar_value) * _diff[qp] * _grad_scalar_phi_face[i][qp] * normals[qp];
+      _scalar_re(i) -= _ip_JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] *
+                       (_grad_u_sol[qp] * _ip_normals[qp]);
+      _scalar_re(i) -=
+          _alpha / h_elem * _diff[qp] * (scalar_value - _u_sol[qp]) * _scalar_phi_face[i][qp];
+      _scalar_re(i) +=
+          (scalar_value - _u_sol[qp]) * _diff[qp] * _grad_scalar_phi_face[i][qp] * _ip_normals[qp];
     }
   }
 }
 
 void
-DiffusionIPHDGAssemblyHelper::lmDirichlet(const MooseArray<ADRealVectorValue> & grad_scalar_sol,
-                                          const MooseArray<ADReal> & lm_sol,
-                                          const Moose::Functor<Real> & dirichlet_value,
-                                          const MooseArray<Real> & JxW_face,
-                                          const QBase & qrule_face,
-                                          const MooseArray<Point> & normals,
-                                          const Elem * const current_elem,
-                                          const unsigned int current_side,
-                                          const MooseArray<Point> & q_point_face,
-                                          DenseVector<ADReal> & lm_re)
+DiffusionIPHDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
   const auto h_elem = _elem_volume / _side_area;
 
-  for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
     const auto scalar_value = dirichlet_value(
-        Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
+        Moose::ElemSideQpArg{
+            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
         _ti.determineState());
 
-    for (const auto i : index_range(lm_re))
+    for (const auto i : index_range(_lm_re))
     {
-      lm_re(i) +=
-          JxW_face[qp] * _diff[qp] * grad_scalar_sol[qp] * normals[qp] * _lm_phi_face[i][qp];
-      lm_re(i) += JxW_face[qp] * _alpha / h_elem * _diff[qp] * (lm_sol[qp] - scalar_value) *
-                  _lm_phi_face[i][qp];
+      _lm_re(i) +=
+          _ip_JxW_face[qp] * _diff[qp] * _grad_u_sol[qp] * _ip_normals[qp] * _lm_phi_face[i][qp];
+      _lm_re(i) += _ip_JxW_face[qp] * _alpha / h_elem * _diff[qp] * (_lm_u_sol[qp] - scalar_value) *
+                   _lm_phi_face[i][qp];
     }
+  }
+}
+
+void
+DiffusionIPHDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
+{
+  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  {
+    const auto flux = flux_value(
+        Moose::ElemSideQpArg{
+            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+        _ti.determineState());
+
+    for (const auto i : index_range(_lm_re))
+      _lm_re(i) += _ip_JxW_face[qp] * flux * _lm_phi_face[i][qp];
   }
 }

@@ -9,38 +9,21 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
-#include "DiffusionIPHDGAssemblyHelper.h"
+#include "IPHDGPrescribedFluxBC.h"
 
 /**
  * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
  * the diffusion equation
  */
-class DiffusionIPHDGPrescribedGradientBC : public IntegratedBC, public DiffusionIPHDGAssemblyHelper
+class DiffusionIPHDGPrescribedGradientBC : public IPHDGPrescribedFluxBC
 {
 public:
   static InputParameters validParams();
-
   DiffusionIPHDGPrescribedGradientBC(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
-  virtual void computeResidualAndJacobian() override;
-  virtual void jacobianSetup() override;
-
 protected:
-  /**
-   * compute the AD residuals
-   */
-  void compute();
+  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
 
-  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
-
-  /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
-  /// condition
-  const Moose::Functor<Real> & _normal_gradient;
-
-  /// A cache variable to prevent multiple computations of Jacobians
-  unsigned int _my_side;
+  /// The assembly helper providing the required IP-HDG method implementations
+  std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;
 };
