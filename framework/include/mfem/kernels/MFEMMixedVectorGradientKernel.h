@@ -1,0 +1,26 @@
+#ifdef MFEM_ENABLED
+
+#pragma once
+#include "MFEMKernel.h"
+
+/*
+ * \f[
+ * (\sigma \nabla V, u')
+ * \f]
+ */
+class MFEMMixedVectorGradientKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+{
+public:
+  static InputParameters validParams();
+
+  MFEMMixedVectorGradientKernel(const InputParameters & parameters);
+  ~MFEMMixedVectorGradientKernel() override = default;
+
+  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
+
+protected:
+  const platypus::MFEMScalarCoefficientName & _coef_name;
+  mfem::Coefficient & _coef;
+};
+
+#endif
