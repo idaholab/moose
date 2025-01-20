@@ -15,6 +15,7 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/mesh_tools.h"
+#include "algorithm"
 
 #include "CrackFrontDefinition.h"
 
@@ -38,15 +39,25 @@ MeshCut2DFractureUserObject::validParams()
   params.addParam<VectorPostprocessorName>(
       "stress_vectorpostprocessor",
       "The name of the vectorpostprocessor that contains crack front stress");
+  params.addParam<std::string>("stress_vector_name",
+                               "crack_tip_stress",
+                               "The name of the stress vector in the stress_vectorpostprocessor");
+  params.addParam<VectorPostprocessorName>(
+      "k_critical_vectorpostprocessor",
+      "The name of the vectorpostprocessor that contains critical fracture toughness at crack tip");
+  params.addParam<std::string>(
+      "k_critical_vector_name",
+      "The name of the k_critical vector in the k_critical_vectorpostprocessor");
   return params;
 }
 
 MeshCut2DFractureUserObject::MeshCut2DFractureUserObject(const InputParameters & parameters)
   : MeshCut2DUserObjectBase(parameters),
     _growth_increment(getParam<Real>("growth_increment")),
-    _use_k(isParamValid("k_critical")),
+    _use_k(isParamValid("k_critical") || isParamValid("k_critical_vectorpostprocessor")),
     _use_stress(isParamValid("stress_threshold")),
-    _k_critical(_use_k ? getParam<Real>("k_critical") : std::numeric_limits<Real>::max()),
+    _k_critical(isParamValid("k_critical") ? getParam<Real>("k_critical")
+                                           : std::numeric_limits<Real>::max()),
     _stress_threshold(_use_stress ? getParam<Real>("stress_threshold")
                                   : std::numeric_limits<Real>::max()),
     _ki_vpp(_use_k ? &getVectorPostprocessorValue(
@@ -58,12 +69,24 @@ MeshCut2DFractureUserObject::MeshCut2DFractureUserObject(const InputParameters &
                           getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))
                     : nullptr),
     _stress_vpp(_use_stress
-                    ? &getVectorPostprocessorValue("stress_vectorpostprocessor", "crack_tip_stress")
-                    : nullptr)
+                    ? &getVectorPostprocessorValue("stress_vectorpostprocessor",
+                                                   getParam<std::string>("stress_vector_name"))
+                    : nullptr),
+    _k_critical_vpp(
+        isParamValid("k_critical_vectorpostprocessor")
+            ? &getVectorPostprocessorValue("k_critical_vectorpostprocessor",
+                                           getParam<std::string>("k_critical_vector_name"))
+            : nullptr)
 {
   if (!_use_k && !_use_stress)
     paramError("k_critical",
-               "Must set crack extension criterion with k_critical or stress_threshold.");
+               "Must set crack extension criterion with k_critical, k_critical_vectorpostprocessor "
+               "or stress_threshold.");
+
+  if (isParamValid("k_critical") && isParamValid("k_critical_vectorpostprocessor"))
+    paramError("k_critical",
+               "Fracture toughness cannot be specified by both k_critical and "
+               "k_critical_vectorpostprocessor.");
 }
 
 void
@@ -82,8 +105,8 @@ MeshCut2DFractureUserObject::initialize()
 void
 MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
 {
-  // k1 is empty (but not a nullptr) on the very first time step because this UO is called before
-  // the InteractionIntegral or crackFrontStress vpp
+  // The k*_vpp & stress_vpp are empty (but not a nullptr) on the very first time step because this
+  // UO is called before the InteractionIntegral or crackFrontStress vpp
   if ((!_ki_vpp || _ki_vpp->size() == 0) && (!_stress_vpp || _stress_vpp->size() == 0))
     return;
 
@@ -107,30 +130,44 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
                "\n  cracktips in MeshCut2DFractureUserObject = ",
                _original_and_current_front_node_ids.size());
 
-  std::vector<Real> k_squared = getKSquared(*_ki_vpp, *_kii_vpp);
+  if (_k_critical_vpp && ((_k_critical_vpp->size() != _original_and_current_front_node_ids.size())))
+    mooseError("k_critical_vectorpostprocessor must have the same number of crack front points as "
+               "CrackFrontDefinition.",
+               "\n  k_critical_vectorpostprocessor size = ",
+               _k_critical_vpp->size(),
+               "\n  cracktips in MeshCut2DFractureUserObject = ",
+               _original_and_current_front_node_ids.size());
+
   _active_front_node_growth_vectors.clear();
   for (unsigned int i = 0; i < _original_and_current_front_node_ids.size(); ++i)
   {
-    if (_use_k && k_squared[i] > (_k_critical * _k_critical) && _ki_vpp->at(i) > 0)
+    if (_use_k)
     {
-      // growth direction in crack front coord (cfc) system based on the  max hoop stress
-      // criterion
-      Real ki = _ki_vpp->at(i);
-      Real kii = _kii_vpp->at(i);
-      Real sqrt_k = std::sqrt(ki * ki + kii * kii);
-      Real theta = 2 * std::atan((ki - sqrt_k) / (4 * kii));
-      RealVectorValue dir_cfc;
-      dir_cfc(0) = std::cos(theta);
-      dir_cfc(1) = std::sin(theta);
-      dir_cfc(2) = 0;
+      Real k_crit = _k_critical;
+      if (_k_critical_vpp)
+        k_crit = std::min(_k_critical_vpp->at(i), _k_critical);
+      Real k_squared = _ki_vpp->at(i) * _ki_vpp->at(i) + _kii_vpp->at(i) * _kii_vpp->at(i);
+      if (k_squared > (k_crit * k_crit) && _ki_vpp->at(i) > 0)
+      {
+        // growth direction in crack front coord (cfc) system based on the  max hoop stress
+        // criterion
+        Real ki = _ki_vpp->at(i);
+        Real kii = _kii_vpp->at(i);
+        Real sqrt_k = std::sqrt(ki * ki + kii * kii);
+        Real theta = 2 * std::atan((ki - sqrt_k) / (4 * kii));
+        RealVectorValue dir_cfc;
+        dir_cfc(0) = std::cos(theta);
+        dir_cfc(1) = std::sin(theta);
+        dir_cfc(2) = 0;
 
-      // growth direction in global coord system based on the max hoop stress criterion
-      RealVectorValue dir_global =
-          _crack_front_definition->rotateFromCrackFrontCoordsToGlobal(dir_cfc, i);
-      Point dir_global_pt(dir_global(0), dir_global(1), dir_global(2));
-      Point nodal_offset = dir_global_pt * _growth_increment;
-      _active_front_node_growth_vectors.push_back(
-          std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
+        // growth direction in global coord system based on the max hoop stress criterion
+        RealVectorValue dir_global =
+            _crack_front_definition->rotateFromCrackFrontCoordsToGlobal(dir_cfc, i);
+        Point dir_global_pt(dir_global(0), dir_global(1), dir_global(2));
+        Point nodal_offset = dir_global_pt * _growth_increment;
+        _active_front_node_growth_vectors.push_back(
+            std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
+      }
     }
     else if (_use_stress && _stress_vpp->at(i) > _stress_threshold)
     {
@@ -144,15 +181,4 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
           std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
     }
   }
-}
-
-std::vector<Real>
-MeshCut2DFractureUserObject::getKSquared(const std::vector<Real> & k1,
-                                         const std::vector<Real> & k2) const
-{
-  std::vector<Real> k_squared(k1.size());
-  for (unsigned int i = 0; i < k_squared.size(); ++i)
-    k_squared[i] = k1[i] * k1[i] + k2[i] * k2[i];
-
-  return k_squared;
 }

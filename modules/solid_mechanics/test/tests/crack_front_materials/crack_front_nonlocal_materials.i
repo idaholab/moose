@@ -27,6 +27,11 @@
     tensor_functions = 'fcn_00 fcn fcn  fcn fcn fcn  fcn fcn fcn'
     outputs = all
   []
+  [scalar]
+    type = GenericFunctionMaterial
+    prop_names = scalar_kcrit
+    prop_values = fcn_00
+  []
 []
 
 [UserObjects]
@@ -40,7 +45,17 @@
 [VectorPostprocessors]
   [CrackFrontNonlocalStress]
     type = CrackFrontNonlocalStress
+    stress_name = stress
     base_name = generic
+    crack_front_definition = crack
+    box_length = 0.1
+    box_width = 0.1
+    box_height = 0.05
+  []
+  [CrackFrontNonlocalKcrit]
+    type = CrackFrontNonlocalScalarMaterial
+    property_name = kcrit
+    base_name = scalar
     crack_front_definition = crack
     box_length = 0.1
     box_width = 0.1

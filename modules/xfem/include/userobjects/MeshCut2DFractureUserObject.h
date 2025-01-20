@@ -31,15 +31,6 @@ protected:
   virtual void findActiveBoundaryGrowth() override;
 
 private:
-  /**
-   * Compute all of the maximum hoop stress fracture integrals for all crack trips from the fracture
-   * integral vector post processors
-   * @param k1 fracture integrals from KI vector postprocessors
-   * @param k2 fracture integrals from KII vector postprocessors
-   * @return computed fracture integral squared
-   */
-  std::vector<Real> getKSquared(const std::vector<Real> & k1, const std::vector<Real> & k2) const;
-
   /// amount to grow crack by for each xfem update step
   const Real & _growth_increment;
 
@@ -59,4 +50,6 @@ private:
   const std::vector<Real> * const _kii_vpp;
   /// Pointer to crack front stress if available
   const std::vector<Real> * const _stress_vpp;
+  /// Pointer to crack front critical k if available
+  const std::vector<Real> * const _k_critical_vpp;
 };

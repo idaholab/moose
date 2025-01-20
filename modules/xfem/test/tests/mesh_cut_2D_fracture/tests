@@ -6,26 +6,50 @@
     'where the crack is defined using a topologically defined surface cutting mesh by MeshCut2DFunctionUserObject'
     [k_growth]
       type = Exodiff
-      input = edge_crack_2d_propagation.i
-      exodiff = 'edge_crack_2d_propagation_xfemcutter_XFEMCutMeshOutput.e-s0004 edge_crack_2d_propagation_out.e-s002'
+      input = 'edge_crack_2d_propagation.i kcrit_based_meshCut_uo.i'
+      exodiff = 'kcrit_based_meshCut_uo_xfemcutter_XFEMCutMeshOutput.e-s0004'
       abs_zero = 1e-8
       map = false
       # XFEM requires --enable-unique-ids in libmesh
       unique_id = true
-      detail = ' and crack growth and direction is computed by a fracture integral.'
+      detail = ' and crack growth and direction is computed by a fracture integral with constant fracture toughness.'
+    []
+    [kvpp_growth]
+      type = Exodiff
+      input = 'edge_crack_2d_propagation.i kvpp_based_meshCut_uo.i'
+      exodiff = 'kvpp_based_meshCut_uo_xfemcutter_XFEMCutMeshOutput.e-s0004'
+      abs_zero = 1e-8
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      detail = ' and crack growth and direction is computed by a fracture integral with fracture toughness sampled from a material at the crack tip.'
+    []
+    [stress_growth]
+      type = Exodiff
+      input = 'edge_crack_2d_propagation.i stress_based_meshCut_uo.i'
+      exodiff = 'stress_based_meshCut_uo_xfemcutter_XFEMCutMeshOutput.e-s0004'
+      abs_zero = 1e-8
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      unique_id = true
+      detail = ' and crack growth is a maximum stress criterion and the growth direction is in the original crack direction.'
     []
     [k_stress_growth]
       type = Exodiff
-      input = edge_crack_2d_propagation.i
-      cli_args = 'Outputs/file_base=k_stress_growth '
-                 'UserObjects/cut_mesh2/stress_vectorpostprocessor=CrackFrontNonlocalStressVpp '
-                 'UserObjects/cut_mesh2/stress_threshold=120'
-      exodiff = 'k_stress_growth.e-s003 k_stress_growth_XFEMCutMeshOutput.e-s0004'
+      input = 'edge_crack_2d_propagation.i kcrit_stress_based_meshCut_uo.i'
+      exodiff = 'kcrit_stress_based_meshCut_uo_xfemcutter_XFEMCutMeshOutput.e-s0004'
       abs_zero = 1e-8
       map = false
       # XFEM requires --enable-unique-ids in libmesh
       unique_id = true
-      detail = ' and crack growth and direction is computed by a fracture integral or maximum stress criterion.'
+      detail = ' and crack growth and direction is computed by a fracture integral with constant fracture toughness or maximum stress criterion.'
+    []
+    [k_error]
+      type = 'RunException'
+      input = 'edge_crack_2d_propagation.i kvpp_based_meshCut_uo.i'
+      cli_args = "UserObjects/cut_mesh2/k_critical=100"
+      expect_err = 'Fracture toughness cannot be specified by both k_critical and k_critical_vectorpostprocessor.'
+      detail = ' and produce an error when fracture toughness is specified by more than one input source.'
     []
     [stress_check]
       type = CSVDiff
