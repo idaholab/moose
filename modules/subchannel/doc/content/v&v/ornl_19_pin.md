@@ -15,7 +15,7 @@ Therefore, this data was deemed of secondary importance for validating the SCM.
 In contrast, the distribution of temperatures at the exit of the fuel assembly is indicative of the heating of the coolant and flow mixing in the fuel bundle, which is expected to be representative of the one in an actual SFR.
 Therefore, we have focused our validation work in predicting the distribution of temperatures at the exit of the fuel assembly.
 
-!media figures/ORNL_19_configuration.png
+!media subchannel/v&v/ORNL_19_configuration.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=configuration
        caption=Left: heating rod positions for the experiment. Right: subchannel positions in the experiement.
@@ -152,7 +152,7 @@ There is a small competing effect due to the viscosity in the center of the chan
 However, as mass flow decreases, heat conduction in the sodium coolant starts dominating over heat convection and, hence, the temperature profiles become flatter at the exit.
 In summary, the temperature distribution measured at the outlet of the assembly can be regulated by the balance between convection and conduction, which is experimentally regulated by changing the axial mass flux and the power at the rod bundles.
 
-!media figures/ORNL_19_results_3D.png
+!media subchannel/v&v/ORNL_19_results_3D.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=3dres
        caption=Example of simulation results for the high-flow test case in the ORNL-19 benchmark. (a) Distribution of axial mass flow. (b) Distribution of lateral mass flow. (c) Distribution of temperature. (d) Distribution of dynamic viscosity due to heating.
@@ -160,7 +160,7 @@ In summary, the temperature distribution measured at the outlet of the assembly 
 The results obtained are compared against the experimental values and the SUBAC and MATRA-LMR codes in [plots].
 It is observed, that for every single case our code predicts temperature distribution values that matches more closely the experimental results.
 
-!media figures/ORNL_19_results_plots.png
+!media subchannel/v&v/ORNL_19_results_plots.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=plots
        caption=Comparison of results obtained for ORNL-19 pin case between experimental measurements, the SUBAC code, the MATRA-LMR code, and the current code. (a) High mass flow case. (b) Medium mass flow case. (c) Low mass flow case

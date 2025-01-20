@@ -26,12 +26,12 @@ Sleeve blockages (three inches in length) were positioned on the center nine rod
 
 The 70% and 90% blockage was chosen to validate SCM performance. SCM models the blockage by decreasing the surface area of the affected subchannels accordingly. Since the subchannel formulation is based on the concept of the hydraulic diameter, reducing the surface area affects the system of equations in multiple ways. Most significantly through the $Re$ number and the friction model, pressure drop calculation. Restricting the flow area increases the pressure drop and causes flow to diverge to the adjacent subchannels. Furthermore, the user has the option to apply a concentrated form loss coefficient on the affected subchannels at the corresponding axial cell. This will have an  effect similar to the area reduction. SCM was run with 28 axial cells for the 70% blockage case and 84 axial cells for the 90% blockage case. A user-set local form loss coefficient at the blockage, $K_{bl} = 0.3$ and $K_{bl} = 0.9$, was also applied for the two cases, respectively, which was axially distributed among the blocked cells. These values were fitted to produce the best agreement. The default modeling parameters $C_T=2.6, \beta = 0.006$ were also used. In addition to SCM, a CFD simulation (Star-CCM+) of the experiment was made with 10.5 million cells, for the 70% blockage case. The results presented in [fig:70blockage] and [fig:90blockage] showcase the relative velocity of a center subchannel across the length of the assembly.
 
-!media figures/70BlockageDefault.png
+!media subchannel/v&v/70BlockageDefault.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:70blockage
     caption= The 70% sleeve blockage.
 
-!media figures/90BlockageDefault.png
+!media subchannel/v&v/90BlockageDefault.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:90blockage
     caption= The 90% sleeve blockage.
@@ -42,7 +42,7 @@ For this reason, the SCM imulation was run again, this time with a larger turbul
 
 At the exit region of the blockage, the experimental velocity profile obtained with the 70% blockage exhibits a jetting characteristic that was not measured in the 90% blockage case. According to the authors of the experimental analysis [!cite](creer1976effects), jetting may not have been detected with the 90% blockage because the measuring volume could not be positioned as close to the blockage axial center line as was possible with the 70% blockage. Though it is also probable that no jetting was present due to flow choking. SCM overestimates the jetting effect in both cases.
 
-!media figures/70blockage.png
+!media subchannel/v&v/70blockage.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:70blockage2
     caption= The 70% sleeve blockage with $\beta = 0.06$.
