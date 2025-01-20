@@ -590,12 +590,3 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 
   return _grad_p_current;
 }
-
-bool
-RhieChowMassFlux::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  if (fi_elem_side)
-    return hasBlocks(fi.elem().subdomain_id());
-  else
-    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
-}

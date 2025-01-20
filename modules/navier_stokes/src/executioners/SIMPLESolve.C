@@ -17,15 +17,11 @@ using namespace libMesh;
 InputParameters
 SIMPLESolve::validParams()
 {
-  InputParameters params = PIMPLESolve::validParams();
-
-  // We supress this considering SIMPLE should not have an internal iteration loop
-  params.suppressParameter<unsigned int>("num_piso_iterations");
-
+  InputParameters params = LinearAssemblySegregatedSolve::validParams();
   return params;
 }
 
-SIMPLESolve::SIMPLESolve(Executioner & ex) : PIMPLESolve(ex) {}
+SIMPLESolve::SIMPLESolve(Executioner & ex) : LinearAssemblySegregatedSolve(ex) {}
 
 void
 SIMPLESolve::checkTimeKernels(LinearSystem & system)
