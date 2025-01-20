@@ -73,8 +73,10 @@ public:
 
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
 
-  virtual void overwriteBoundaryVariables(NumericVector<Number> & soln,
-                                          const Node & secondary_node) const override;
+  virtual void overwriteBoundaryVariables(NumericVector<Number> &, const Node &) const override
+  {
+    return;
+  };
 
 protected:
   /**
@@ -136,9 +138,6 @@ protected:
   const VariableValue & _neighbor_vel_y;
   /// Z component of velocity at the closest point
   const VariableValue & _neighbor_vel_z;
-
-  /// Whether to overwrite contact boundary nodal solution
-  const bool _overwrite_current_solution;
 
 private:
   std::unordered_map<dof_id_type, Real> _dof_to_position;
