@@ -12,7 +12,7 @@ Subchannel codes are thermal-hydraulic codes that offer an efficient compromise 
 
 The subchannel thermal-hydraulic analysis is based on the conservation equations of mass, linear momentum and energy on the specified control volumes. The control volumes are connected in both axial and radial directions to get the three dimensional effect of the reactor core. The subchannel control volumes are shown in [ControlVolume] from [!cite](Todreas).
 
-!media figures/ControlVolume.png
+!media subchannel/getting_started/ControlVolume.png
     style=width:90%;margin-bottom:2%;margin:auto;
     id=ControlVolume
     caption=Square Lattice subchannel control volume
@@ -112,7 +112,7 @@ where $\beta$ is the turbulent mixing parameter or thermal diffusion coefficient
 
 The collocated discretization of the variables is presented in [fig:dis] . $i,j$ are the subchannel indexes. $ij$ is the name of the gap between subchannels $i,j$. $k$ is the index in the axial direction.
 
-!media figures/dis.png
+!media subchannel/getting_started/dis.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:dis
     caption=Subchannel collocated discretization.
@@ -223,7 +223,7 @@ f(w_{ij}) = \frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij} }{\Delta z} \Delta (w_{ij} 
 
 The main unknown variable in this non linear residual is the crossflow $w_{ij}$. The combined residual function calculates the non linear residual $f(w_{ij})$ after it updates the other main flow variables, such as mass flow $\dot{m}_i$,  turbulent crossflow $w'_{ij}$, pressure drop  $\Delta P_i$ and pressure $P_i$, using the current $w_{ij}$ as needed. So every time this function is called by the Newton solver the flow variables get updated. This affords the solution of all flow variables at the same time. $P_i$ is the local pressure minus the exit pressure, $P_i (z) - P_{exit}$, so at the exit $P_{i}$ is zero. The hybrid algorithm is presented in [stencil].
 
-!media figures/stencil.png
+!media subchannel/getting_started/stencil.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=stencil
     caption=SCM hybrid numerical scheme
