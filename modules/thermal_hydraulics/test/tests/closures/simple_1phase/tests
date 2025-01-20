@@ -7,12 +7,4 @@
     expect_err = "pipe: When using simple closures, the parameter 'f' must be provided."
     requirement = 'The system shall report an error if the friction parameter is missing in the simple closures object.'
   []
-  [enumeration_option]
-    type = RunException
-    input = 'err.missing_f_1phase.i'
-    cli_args = "GlobalParams/closures=simple Components/pipe/f=0"
-    allow_deprecated = False
-    expect_err = 'The closures system now uses objects created in the input file'
-    requirement = 'The system shall report an error if the user attempts passing closure parameters directly to components.'
-  []
 []

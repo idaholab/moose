@@ -51,26 +51,6 @@ public:
   ThermalHydraulicsApp(InputParameters parameters);
   virtual ~ThermalHydraulicsApp();
 
-  /**
-   * Registers a closures option
-   *
-   * @param[in] closures_option   Closures option string to register
-   * @param[in] closures_name     Closures class name
-   * @param[in] flow_model_id     Flow model ID
-   */
-  static void registerClosuresOption(const std::string & closures_option,
-                                     const std::string & class_name,
-                                     const THM::FlowModelID & flow_model_id);
-
-  /**
-   * Gets the class name of the closures corresponding to the flow model and user option
-   *
-   * @param[in] closures_option   Closures option
-   * @param[in] flow_model_id     Flow model ID
-   */
-  static const std::string & getClosuresClassName(const std::string & closures_option,
-                                                  const THM::FlowModelID & flow_model_id);
-
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
@@ -94,8 +74,4 @@ public:
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
 
   static InputParameters validParams();
-
-protected:
-  /// Map from flow model ID to map of closures option to its class
-  static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
 };

@@ -27,9 +27,6 @@
 
 std::map<THM::FlowModelID, std::string> ThermalHydraulicsApp::_flow_model_map;
 
-std::map<THM::FlowModelID, std::map<std::string, std::string>>
-    ThermalHydraulicsApp::_closures_class_names_map;
-
 namespace THM
 {
 
@@ -102,9 +99,6 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
-  registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
-  registerClosuresOption("none", "Closures1PhaseNone", THM::FM_SINGLE_PHASE);
-
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
 
@@ -146,45 +140,6 @@ ThermalHydraulicsApp::registerApps()
   RdgApp::registerApps();
   SolidPropertiesApp::registerApps();
   MiscApp::registerApps();
-}
-
-const std::string &
-ThermalHydraulicsApp::getClosuresClassName(const std::string & closures_option,
-                                           const THM::FlowModelID & flow_model_id)
-{
-  const std::string closures_option_lc = MooseUtils::toLower(closures_option);
-
-  if (_closures_class_names_map.find(flow_model_id) != _closures_class_names_map.end())
-  {
-    const auto & map_for_flow_model = _closures_class_names_map.at(flow_model_id);
-    if (map_for_flow_model.find(closures_option_lc) != map_for_flow_model.end())
-    {
-      const std::string & closures_class = map_for_flow_model.at(closures_option_lc);
-      mooseDeprecated("The closures system now uses objects created in the input file instead of "
-                      "enumerated options.\n",
-                      "To remove this warning, add the following block to your input file "
-                      "(replacing 'my_closures' as you choose):\n",
-                      "  [Closures]\n    [my_closures]\n      type = ",
-                      closures_class,
-                      "\n    []\n  []\n",
-                      "Then, set the 'closures' parameter in your flow channel to this name:\n",
-                      "  closures = my_closures");
-      return closures_class;
-    }
-    else
-      mooseError("The closures option '" + closures_option_lc + "' is not registered.");
-  }
-  else
-    mooseError("The closures option '" + closures_option_lc + "' is not registered.");
-}
-
-void
-ThermalHydraulicsApp::registerClosuresOption(const std::string & closures_option,
-                                             const std::string & class_name,
-                                             const THM::FlowModelID & flow_model_id)
-{
-  const std::string closures_option_lc = MooseUtils::toLower(closures_option);
-  _closures_class_names_map[flow_model_id][closures_option_lc] = class_name;
 }
 
 //

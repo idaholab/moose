@@ -167,21 +167,7 @@ FlowChannelBase::init()
 
     if (getTHMProblem().hasClosures(_closures_name))
       _closures = getTHMProblem().getClosures(_closures_name);
-    else
-      _closures = buildClosures();
   }
-}
-
-std::shared_ptr<ClosuresBase>
-FlowChannelBase::buildClosures()
-{
-  const std::string class_name =
-      ThermalHydraulicsApp::getClosuresClassName(_closures_name, getFlowModelID());
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<THMProblem *>("_thm_problem") = &getTHMProblem();
-  params.set<Logger *>("_logger") = &getTHMProblem().log();
-  return _factory.create<ClosuresBase>(
-      class_name, genName(name(), "closure", _closures_name), params);
 }
 
 void
