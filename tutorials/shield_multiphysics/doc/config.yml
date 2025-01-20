@@ -1,11 +1,18 @@
 Content:
     user_workshop:
         root_dir: ${MOOSE_DIR}/tutorials/shield_multiphysics/doc/content
+        content:
+            - user_workshop/**
+    regular_workshop:
+        root_dir: ${MOOSE_DIR}/tutorials/darcy_thermo_mech/doc/content
+        content:
+            - workshop/**
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - ../../../tutorials/tutorial02_multiapps/doc/content/getting_started/examples_and_tutorials/tutorial02_multiapps/images/coupling.png
             - large_media/tutorials/darcy_thermo_mech/*
+            - large_media/tutorials/shield_multiphysics/**
             - large_media/testing/*
             - large_media/tutorials/INL_Hex_Light_Presentation_Background_Thin.png
             - large_media/contact/ironing_gallery.mp4
