@@ -17,15 +17,17 @@
 []
 
 [Kernels]
-  # [time_derivative]
-  #   type = CoefTimeDerivative
-  #   variable = T
-  #   coef = '${fparse 2400 * 1170}'
-  # []
   [diffusion_concrete]
     type = CoefDiffusion
     variable = T
     coef = 2.25
+  []
+
+  [gravity]
+    type = Gravity
+    variable = 'disp_z'
+    value = '-9.81'
+    block = 'concrete'
   []
 []
 
@@ -47,7 +49,7 @@
     type = NeumannBC
     variable = T
     boundary = inner_cavity
-    # 5 MW reactor, 50kW from radiation, 108 m2 cavity area
+    # 5 MW reactor, 50kW removed by radiation, 108 m2 cavity area
     value = '${fparse 5e4 / 108}'
   []
   [air_convection]
@@ -109,9 +111,14 @@
     eigenstrain_name = eigenstrain
     temperature = T
     # inflated to get visible displacement
-    # dont overdo it: 500K * alpha should be in the per-cent, max
+    # don't overdo it: 500K * alpha should be in the per-cent, max
     thermal_expansion_coeff = 2e-4 # arbitrary value
     block = 'concrete'
+  []
+  [density]
+    type = GenericConstantMaterial
+    prop_names = 'density'
+    prop_values = '2400' # kg/m3
   []
 []
 

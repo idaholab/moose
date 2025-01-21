@@ -20,7 +20,7 @@
       type = ValueThresholdMarker
       coarsen = 0.3
       variable = temperature_jump
-      refine = 4
+      refine = 3
       block = 'concrete'
     []
   []
