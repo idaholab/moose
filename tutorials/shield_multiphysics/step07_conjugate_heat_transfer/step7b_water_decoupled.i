@@ -7,7 +7,7 @@ mu_multiplier = 1e3
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../step03_boundary_conditions/inputs/mesh_in.e'
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
 
   [pin_node]
@@ -20,7 +20,7 @@ mu_multiplier = 1e3
   [add_inner_water]
     type = SideSetsFromBoundingBoxGenerator
     input = pin_node
-    boundaries_old = 'water_boundary'
+    included_boundaries = 'water_boundary'
     boundary_new = water_boundary_inner
     bottom_left = '2.5 2.5 1'
     top_right = '6.6 10.5 5'
@@ -29,7 +29,7 @@ mu_multiplier = 1e3
   [add_outer_water]
     type = SideSetsFromBoundingBoxGenerator
     input = add_inner_water
-    boundaries_old = 'water_boundary'
+    included_boundaries = 'water_boundary'
     boundary_new = water_boundary_outer
     bottom_left = '2.5 2.5 1'
     top_right = '6.6 10.5 5'
@@ -42,7 +42,6 @@ mu_multiplier = 1e3
     refinement = '1'
     block = 'water'
   []
-  # second_order = true
 []
 
 [AuxVariables]

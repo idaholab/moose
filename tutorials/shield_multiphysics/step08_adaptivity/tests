@@ -3,22 +3,22 @@
   design = 'examples_and_tutorials/index.md'
   [step_a]
     type = RunApp
-    input = 'step8a_coarse.i'
-    cli_args = Executioner/num_steps=1
+    input = '../step03_boundary_conditions/mesh.i step8a_coarse.i'
+    cli_args = "Executioner/num_steps=1 Mesh/inactive='fmg'"
     requirement = "The shield multiphysics tutorial shall include a demonstration of problem on a "
                   "coarse mesh."
   []
   [step_b]
     type = RunApp
-    input = 'step8b_fine.i'
-    cli_args = Executioner/num_steps=1
+    input = '../step03_boundary_conditions/mesh.i step8b_fine.i'
+    cli_args = "Executioner/num_steps=1 Mesh/inactive='fmg'"
     requirement = "The shield multiphysics tutorial shall include a demonstration of problem on a "
                   "fine mesh."
   []
   [step_c]
     type = RunApp
-    input = 'step8c_adapt.i'
-    cli_args = Executioner/num_steps=1
+    input = '../step03_boundary_conditions/mesh.i step8c_adapt.i'
+    cli_args = "Executioner/num_steps=1 Mesh/inactive='fmg'"
     requirement = "The shield multiphysics tutorial shall include a demonstration of problem using "
                   "an adaptive mesh."
   []

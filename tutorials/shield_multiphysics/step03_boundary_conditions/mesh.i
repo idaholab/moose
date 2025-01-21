@@ -77,21 +77,3 @@
   #   examine_sidesets_orientation = WARNING
   # []
 []
-
-# To avoid erroring if the user forgets --mesh-only
-[Problem]
-  solve = false
-[]
-[AuxVariables]
-  [placeholder]
-  []
-[]
-[Executioner]
-  type = Steady
-[]
-[Outputs]
-  [exodus]
-    type = Exodus
-    file_base = 'mesh_in'
-  []
-[]

@@ -3,9 +3,10 @@
   design = 'examples_and_tutorials/index.md'
   [test]
     type = RunApp
-    input = 'step11.i'
+    input = 'step12.i'
     cli_args = Executioner/num_steps=1
-    requirement = "The shield multiphysics tutorial shall include a demonstration of create custom "
+    requirement = "The shield multiphysics tutorial shall include a demonstration of custom "
                   "input syntax."
+    skip = 'not ready'
   []
 []

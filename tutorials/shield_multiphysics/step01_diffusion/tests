@@ -1,6 +1,12 @@
 [Tests]
   issues = '#4522'
   design = 'examples_and_tutorials/index.md'
+  [generate_mesh]
+    type = RunApp
+    input = 'mesh.i'
+    cli_args = '--mesh-only'
+    requirement = "The shield multiphysics tutorial shall include a step that creates a mesh."
+  []
   [step]
     type = RunApp
     input = 'step1.i'

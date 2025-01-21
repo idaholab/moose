@@ -1,7 +1,7 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../step03_boundary_conditions/inputs/mesh_in.e'
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
 []
 
@@ -32,7 +32,7 @@
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     # This block adds all of the proper Kernels, strain calculators, and Variables
-    # for TensorMechanics in the correct coordinate system (autodetected)
+    # for Solid Mechanics equations in the correct coordinate system (autodetected)
     add_variables = true
     strain = FINITE
     eigenstrain_names = eigenstrain
@@ -47,8 +47,8 @@
     type = NeumannBC
     variable = T
     boundary = inner_cavity
-    # 100 kW reactor, 108 m2 cavity area
-    value = '${fparse 1e5 / 108}'
+    # 5 MW reactor, 50kW from radiation, 108 m2 cavity area
+    value = '${fparse 5e4 / 108}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -122,33 +122,22 @@
 []
 
 [Executioner]
-  # type = Transient
   type = Steady
-
-  # start_time = -1
-  # end_time = 200
-  # steady_state_tolerance = 1e-7
-  # steady_state_detection = true
-  # dt = 0.25
 
   solve_type = PJFNK
   automatic_scaling = true
-  # compute_scaling_once = false
 
   # petsc_options_iname = '-pc_type -pc_factor_shift_type'
   # petsc_options_value = 'lu NONZERO'
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 500'
   line_search = none
-  # [TimeStepper]
-  #   type = FunctionDT
-  #   function = 'if(t<0,0.1,0.25)'
-  # []
 []
 
 [Outputs]
   exodus = true # Output Exodus format
 
+  # Outputs the displaced mesh
   [displaced]
     type = Exodus
     use_displaced = true

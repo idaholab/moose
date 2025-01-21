@@ -1,21 +1,13 @@
 cp_multiplier = 1e-6
-cp_water_multiplier = 1e-6
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../step03_boundary_conditions/inputs/mesh_in.e'
-  []
-
-  [pin_node]
-    type = ExtraNodesetGenerator
-    new_boundary = 'pinned_node'
-    nodes = '2000'
-    input = fmg
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
 []
 
-[AuxVariables]
+[Variables]
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete'
@@ -74,30 +66,6 @@ cp_water_multiplier = 1e-6
     prop_names = 'density'
     prop_values = '2400' # kg / m3
   []
-
-  [water]
-    type = ADGenericConstantMaterial
-    block = 'water'
-    prop_names = 'rho    k     cp      mu alpha_wall'
-    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} 7.98e-4 30'
-  []
-  [boussinesq_params]
-    type = ADGenericConstantMaterial
-    prop_names = 'alpha '
-    prop_values = '2.9e-3'
-  []
-  [boussinesq_params_ad]
-    type = GenericConstantMaterial
-    prop_names = 'temp_ref'
-    prop_values = ' 300'
-  []
-  [ins_mat]
-    type = INSADStabilized3Eqn
-    block = 'water'
-    velocity = velocity
-    pressure = p
-    temperature = T_water
-  []
 []
 
 [BCs]
@@ -129,7 +97,7 @@ cp_water_multiplier = 1e-6
   [water_convection]
     type = ADConvectiveHeatFluxBC
     variable = T
-    boundary = 'water_boundary'
+    boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
     heat_transfer_coefficient = 30
@@ -137,7 +105,10 @@ cp_water_multiplier = 1e-6
 []
 
 [Problem]
+  # No kernel defined in water yet
   kernel_coverage_check = false
+  # No material defined in water yet
+  material_coverage_check = false
 []
 
 [Executioner]
