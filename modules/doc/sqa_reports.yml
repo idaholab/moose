@@ -251,7 +251,7 @@ Applications:
             - framework/doc/remove.yml
             - modules/subchannel/doc/remove.yml
         unregister:
-            - framework/doc/unregister.ymlx
+            - framework/doc/unregister.yml
 
     THM:
         exe_directory: modules/combined
