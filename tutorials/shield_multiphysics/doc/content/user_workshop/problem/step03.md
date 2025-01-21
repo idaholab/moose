@@ -26,13 +26,6 @@ We modified the meshing script to generate sidesets for our boundary conditions
 Fixed heat flux
 
 
-!listing framework/src/bcs/NeumannBC.C
-
-!---
-
-Fixed heat flux
-
-
 !listing step03_boundary_conditions/step3.i block=BCs/from_reactor
 
 !---

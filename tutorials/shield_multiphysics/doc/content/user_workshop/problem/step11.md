@@ -31,6 +31,10 @@ cd inputs
 
 !---
 
+!media results/step11_local.png caption="Sensor temperature field with dummy fixed boundary conditions"
+
+!---
+
 ## Step 11: Multi-scale Input File
 
 We distribute these simulations using a `MultiApp`.
@@ -48,3 +52,11 @@ make -j 12 # use number of processors for your system
 cd inputs
 ../moose-opt -i step11_global.i
 ```
+
+!---
+
+!media results/step11_global_distrib.png caption="The individual sensor results can be plotted 'in-position' in the global geometry"
+
+!---
+
+!media results/step11_global.png caption="Postprocessed quantities can be transferred from the local child app meshes to the global mesh"

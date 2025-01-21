@@ -28,21 +28,14 @@ diffusivity.
 
 !---
 
-## CoefDiffusion.h
-
-!listing step02_coef_diffusion/include/kernels/CoefDiffusion.h
-
-!---
-
-## CoefDiffusion.C
-
-!listing step02_coef_diffusion/src/kernels/CoefDiffusion.C
-
-!---
-
 ## Step 2: Input File
 
 We introduce block restriction to differentiate between water and concrete.
+Block restriction is a common feature of MOOSE objects, introduced by setting
+
+```text
+block = 'concrete'
+```
 
 !listing step02_coef_diffusion/step2.i
 

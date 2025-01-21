@@ -12,24 +12,6 @@ Add custom syntax to build objects that are common to all conjugate heat transfe
 
 !---
 
-## Navier Stokes action header
-
-!listing modules/navier_stokes/include/actions/INSAction.h
-
-!---
-
-## Navier Stokes action source
-
-!listing modules/navier_stokes/src/actions/INSAction.C
-
-!---
-
-## Actions with new syntax need to be registered within the application
-
-!listing modules/navier_stokes/src/base/NavierStokesApp.C
-
-!---
-
 ## Step 12: Input File
 
 !listing step12_action/step12.i

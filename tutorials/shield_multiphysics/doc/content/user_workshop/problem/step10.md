@@ -37,3 +37,10 @@ make -j 12 # use number of processors for your system
 cd inputs
 ../moose-opt -i step10.i
 ```
+
+!---
+
+The thermal expansion coefficient is exaggerated here to create larger, more
+visible, displacements.
+
+!media results/step10.png caption="Displaced mesh in thermal expansion simulation"

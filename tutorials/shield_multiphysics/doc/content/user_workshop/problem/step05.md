@@ -41,18 +41,6 @@ occurs in the element interiors.
 
 !---
 
-## DiffusionFluxAux.h
-
-!listing step05_auxiliary_variables/include/auxkernels/DiffusionFluxAux.h
-
-!---
-
-## DiffusionFluxAux.C
-
-!listing step05_auxiliary_variables/src/auxkernels/DiffusionFluxAux.C
-
-!---
-
 ## Step 5: Input File
 
 !listing step05_auxiliary_variables/step5.i

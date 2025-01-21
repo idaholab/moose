@@ -12,19 +12,13 @@ only an update to the input file is required to run the transient case.
 
 !---
 
-## ADHeatConductionTimeDerivative.h
-
-!listing heat_transfer/include/kernels/ADHeatConductionTimeDerivative.h
-
-!---
-
-## ADHeatConductionTimeDerivative.C
-
-!listing heat_transfer/src/kernels/ADHeatConductionTimeDerivative.C
-
-!---
-
 ## Step 6: Time-dependent Input File
+
+We introduce a time derivative kernel to model the contribution to the residual/Jacobian (and various time integration vectors) of the time derivative.
+
+!listing step06_transient_heat_conduction/step6_transient.i block=Kernels
+
+!---
 
 We introduce a ramp up of the heat flux
 
