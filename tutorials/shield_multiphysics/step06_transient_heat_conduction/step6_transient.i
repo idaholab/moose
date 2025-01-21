@@ -3,7 +3,7 @@ cp_multiplier = 1e-6
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../step03_boundary_conditions/inputs/mesh_in.e'
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
 []
 
@@ -111,12 +111,13 @@ cp_multiplier = 1e-6
     type = DirichletBC
     variable = T
     value = 300
-    boundary = 'back'
+    boundary = 'ground'
   []
   [water_convection]
     type = ADConvectiveHeatFluxBC
     variable = T
-    boundary = 'water_boundary'
+    # the sideset needs to point from concrete to water
+    boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
     heat_transfer_coefficient = 30

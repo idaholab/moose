@@ -3,7 +3,8 @@
   design = 'examples_and_tutorials/index.md'
   [step]
     type = RunApp
-    input = 'step6_transient.i'
+    input = '../step03_boundary_conditions/mesh.i step6_transient.i'
+    cli_args = "Mesh/inactive='fmg' Executioner/num_steps=2"
     requirement = "The shield multiphysics tutorial shall include a demonstration of solving the "
                   "transient heat equation."
   []
