@@ -1,6 +1,6 @@
 Content:
-    tutorial:
-        root_dir: modules/subchannel/doc/tutorials
+    tutorial_slides:
+        root_dir: modules/subchannel/doc/tutorial
 
 Executioner:
     type: MooseDocs.base.Serial
@@ -12,7 +12,7 @@ Renderer:
 Extensions:
     disable_defaults: True
     MooseDocs.extensions.reveal:
-        translate: main/index.md
+        translate: subchannel_tutorial/index.md
     MooseDocs.extensions.comment: default
     MooseDocs.extensions.command: default
     MooseDocs.extensions.core: default

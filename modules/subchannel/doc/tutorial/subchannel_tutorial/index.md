@@ -30,12 +30,12 @@
 
 !---
 
-!include moose_intro.md
+!include subchannel_tutorial/moose_intro.md
 
 !---
 
-!include subchannel_intro.md
+!include subchannel_tutorial/subchannel_intro.md
 
 !---
 
-!include modules/subchannel/tutorial/subchannel_examples.md
+!include subchannel_tutorial/subchannel_examples.md
