@@ -28,15 +28,9 @@ Both shall be computed with a single `Material` object: `HeatConductionMaterial`
 
 !---
 
-## HeatConductionMaterial.h
+## HeatConductionMaterial
 
-!listing step04_heat_conduction/include/materials/HeatConductionMaterial.h
-
-!---
-
-## HeatConductionMaterial.C
-
-!listing step04_heat_conduction/src/materials/HeatConductionMaterial.C
+!listing step04_heat_conduction/step4.i block=Materials
 
 !---
 
@@ -47,15 +41,9 @@ We modify it to to consume the newly created material properties.
 
 !---
 
-## ADHeatConduction.h
+## ADHeatConduction
 
-!listing step04_heat_conduction/include/kernels/ADHeatConduction.h
-
-!---
-
-## ADHeatConduction.C
-
-!listing step04_heat_conduction/src/kernels/ADHeatConduction.C
+!listing step04_heat_conduction/step4.i block=Kernels
 
 !---
 
