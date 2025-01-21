@@ -86,6 +86,15 @@ template <bool is_ad>
 GenericReal<is_ad>
 FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser, const std::string & name)
 {
+  return evaluate(parser, _func_params, name);
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser,
+                                     const std::vector<GenericReal<is_ad>> & func_params,
+                                     const std::string & name)
+{
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
   if (parser == NULL)
     return 0.0;
@@ -95,7 +104,7 @@ FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser, const std::string 
   parser->setEpsilon(_epsilon);
 
   // evaluate expression
-  auto result = parser->Eval(_func_params.data());
+  auto result = parser->Eval(func_params.data());
 
   // restore epsilon
   parser->setEpsilon(tmp_eps);
