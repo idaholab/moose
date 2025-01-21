@@ -27,13 +27,12 @@ MFEMGenericFunctionVectorMaterial::MFEMGenericFunctionVectorMaterial(
   unsigned int num_values = _prop_values.size();
 
   if (num_names != num_values)
-    mooseError(
-        "Number of prop_names must match the number of prop_values for a GenericConstantMaterial!");
+    mooseError("Number of prop_names must match the number of prop_values for a "
+               "GenericFunctionVectorMaterial!");
 
   _num_props = num_names;
   for (unsigned int i = 0; i < _num_props; i++)
   {
-    // FIXME: Ideally this would support arbitrary dimensions
     _properties.declareVector(_prop_names[i],
                               subdomainsToStrings(_block_ids),
                               getMFEMProblem().getVectorFunctionCoefficient(_prop_values[i]));
