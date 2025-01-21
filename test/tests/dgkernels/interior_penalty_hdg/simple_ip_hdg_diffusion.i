@@ -1,0 +1,70 @@
+[GlobalParams]
+  variable = u
+  face_variable = side_u
+  diffusivity = 1
+  alpha = 6
+[]
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+  elem_type = QUAD9
+[]
+
+[Variables]
+  [u]
+    order = FIRST
+    family = MONOMIAL
+  []
+  [side_u]
+    order = FIRST
+    family = SIDE_HIERARCHIC
+  []
+[]
+
+[Kernels]
+  [diff]
+    type = DiffusionIPHDGKernel
+  []
+[]
+
+# [BCs]
+#   [left]
+#     type = DiffusionIPHDGDirichletBC
+#     functor = 0
+#     boundary = 'left'
+#   []
+#   [right]
+#     type = DiffusionIPHDGDirichletBC
+#     functor = 1
+#     boundary = 'right'
+#   []
+#   [zero_flux]
+#     type = DiffusionIPHDGPrescribedGradientBC
+#     boundary = 'top bottom'
+#   []
+# []
+
+[Postprocessors]
+  [symmetric]
+    type = IsMatrixSymmetric
+  []
+[]
+
+[Executioner]
+  type = Steady
+  nl_rel_tol = 1e-10
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
+  solve_type = NEWTON
+[]
+
+[Outputs]
+  exodus = true
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
+  []
+[]

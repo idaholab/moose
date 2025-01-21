@@ -120,26 +120,6 @@ public:
                          InputParameters & parameters);
 
   /**
-   * Adds a hybridized discontinuous Galerkin (HDG) kernel
-   * @param kernel_name The type of the hybridized kernel
-   * @param name The name of the hybridized kernel
-   * @param parameters HDG kernel parameters
-   */
-  virtual void addHDGKernel(const std::string & kernel_name,
-                            const std::string & name,
-                            InputParameters & parameters);
-
-  /**
-   * Adds a hybridized discontinuous Galerkin (HDG) bc
-   * @param bc_name The type of the hybridized bc
-   * @param name The name of the hybridized bc
-   * @param parameters HDG bc parameters
-   */
-  virtual void addHDGIntegratedBC(const std::string & bc_name,
-                                  const std::string & name,
-                                  InputParameters & parameters);
-
-  /**
    * Adds a NodalKernel
    * @param kernel_name The type of the nodal kernel
    * @param name The name of the kernel
@@ -840,7 +820,6 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectWarehouse<HDGKernel> _hybridized_kernels;
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
@@ -853,7 +832,6 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
-  MooseObjectWarehouse<HDGIntegratedBC> _hybridized_ibcs;
   ///@}
 
   /// Dirac Kernel storage for each thread

@@ -24,8 +24,7 @@
  *
  * It is a part of FEProblemBase ;-)
  */
-class NonlinearSystem : public NonlinearSystemBase,
-                        public libMesh::NonlinearImplicitSystem::ComputePreCheck
+class NonlinearSystem : public NonlinearSystemBase
 {
 public:
   NonlinearSystem(FEProblemBase & problem, const std::string & name);
@@ -72,11 +71,6 @@ public:
   virtual void attachPreconditioner(libMesh::Preconditioner<Number> * preconditioner) override;
 
   virtual void residualAndJacobianTogether() override;
-
-  virtual void precheck(const NumericVector<Number> & precheck_soln,
-                        NumericVector<Number> & search_direction,
-                        bool & changed,
-                        libMesh::NonlinearImplicitSystem & S) override;
 
   virtual void potentiallySetupFiniteDifferencing() override;
 

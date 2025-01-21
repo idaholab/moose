@@ -71,7 +71,7 @@ MooseVecView(NumericVector<Number> & vector)
 void
 MooseMatView(SparseMatrix<Number> & mat)
 {
-  PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  PetscMatrixBase<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -86,7 +86,7 @@ MooseVecView(const NumericVector<Number> & vector)
 void
 MooseMatView(const SparseMatrix<Number> & mat)
 {
-  PetscMatrix<Number> & petsc_mat =
+  PetscMatrixBase<Number> & petsc_mat =
       static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
@@ -417,7 +417,7 @@ petscSetDefaults(FEProblemBase & problem)
     // Prefix the name of the system matrix with the name of the system
     if (sys_matrix && problem.solverParams()._type != Moose::ST_JFNK)
     {
-      auto * const petsc_sys_matrix = cast_ptr<PetscMatrix<Number> *>(sys_matrix);
+      auto * const petsc_sys_matrix = cast_ptr<PetscMatrixBase<Number> *>(sys_matrix);
       LibmeshPetscCall2(
           nl.comm(),
           MatSetOptionsPrefix(petsc_sys_matrix->mat(),
@@ -893,7 +893,7 @@ setSinglePetscOption(const std::string & name,
       for (auto & [mat_name, mat] : as_range(lm_sys.matrices_begin(), lm_sys.matrices_end()))
       {
         libmesh_ignore(mat_name);
-        auto * const petsc_mat = cast_ptr<PetscMatrix<Number> *>(mat.get());
+        auto * const petsc_mat = cast_ptr<PetscMatrixBase<Number> *>(mat.get());
         LibmeshPetscCall2(comm, MatSetFromOptions(petsc_mat->mat()));
       }
       found_matching_prefix = true;
