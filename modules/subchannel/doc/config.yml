@@ -3,7 +3,6 @@ Content:
     - modules/subchannel/doc/content
     - modules/fluid_properties/doc/content
     - modules/heat_transfer/doc/content
-    - modules/navier_stokes/doc/content
     - modules/ray_tracing/doc/content
     - modules/reactor/doc/content
 
@@ -46,6 +45,5 @@ Extensions:
                 subchannel: !include modules/subchannel/doc/sqa_subchannel.yml
                 fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
                 heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
-                navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
                 ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
                 reactor: !include modules/reactor/doc/sqa_reactor.yml
