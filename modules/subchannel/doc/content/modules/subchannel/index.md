@@ -57,4 +57,4 @@ throughout the world.
 
 ## Tutorial style=clear:both
 
-Tutorial can be found [here](modules/subchannel/tutorial/index.md)
+Tutorial can be found [here](subchannel_tutorial/index.md optional=True)
