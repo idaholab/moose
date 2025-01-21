@@ -9,6 +9,7 @@
 
 #include "QuadInterWrapperWettedPerimIC.h"
 #include "QuadInterWrapperMesh.h"
+#include "QuadSubChannelBaseIC.h"
 
 registerMooseObject("SubChannelApp", QuadInterWrapperWettedPerimIC);
 
