@@ -50,6 +50,9 @@ Positions::Positions(const InputParameters & parameters)
     _need_sort(getParam<bool>("auto_sort")),
     _initialized(false)
 {
+
+  if (_initial_positions)
+    _initial_positions_kd_tree = std::make_unique<KDTree>(*_initial_positions, 1);
 }
 
 const Point &
@@ -93,37 +96,20 @@ unsigned int
 Positions::getNearestPositionIndex(const Point & target, const bool initial) const
 {
   mooseAssert(initialized(initial), "Positions vector has not been initialized.");
-  const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
-  // To keep track of indetermination due to equidistant positions
-  std::pair<int, int> conflict_index(-1, -1);
+  std::vector<std::size_t> return_index(1);
 
-  // TODO Use faster & fancier machinery such as a KNN-partition
-  std::size_t nearest_index = 0;
-  auto nearest_distance_sq = std::numeric_limits<Real>::max();
-  for (const auto i : index_range(positions))
+  if (initial && _initial_positions)
   {
-    const auto & pt = positions[i];
-    if (MooseUtils::absoluteFuzzyLessThan((pt - target).norm_sq(), nearest_distance_sq))
-    {
-      nearest_index = i;
-      nearest_distance_sq = (pt - target).norm_sq();
-    }
-    // Check that no two positions are equidistant to the target
-    else if (MooseUtils::absoluteFuzzyEqual((positions[i] - target).norm_sq(), nearest_distance_sq))
-      conflict_index = std::make_pair(cast_int<int>(i), cast_int<int>(nearest_index));
+    mooseAssert(_initial_positions_kd_tree, "Should have an initial positions KDTree");
+    _initial_positions_kd_tree->neighborSearch(target, 1, return_index);
+  }
+  else
+  {
+    mooseAssert(_positions_kd_tree, "Should have a positions KDTree");
+    _positions_kd_tree->neighborSearch(target, 1, return_index);
   }
 
-  // If there were multiple "closest" positions, report a warning
-  if (cast_int<int>(nearest_index) == conflict_index.second)
-  {
-    mooseWarning("Search for nearest position found at least two matches: " +
-                     Moose::stringify(positions[conflict_index.first]) + " and " +
-                     Moose::stringify(positions[nearest_index]),
-                 " for point " + Moose::stringify(target) + " at a distance of " +
-                     std::to_string(std::sqrt(nearest_distance_sq)));
-  }
-
-  return nearest_index;
+  return return_index[0];
 }
 
 const std::vector<Point> &
@@ -244,6 +230,9 @@ Positions::finalize()
   // Sort positions by X then Y then Z
   if (_need_sort)
     std::sort(_positions.begin(), _positions.end());
+
+  // Make a KDTree with the positions
+  _positions_kd_tree = std::make_unique<KDTree>(_positions, 1);
 }
 
 Real

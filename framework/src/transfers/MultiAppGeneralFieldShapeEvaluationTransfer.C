@@ -143,7 +143,13 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but for shape evaluation we really do expect only one value to even be valid
         if (detectConflict(val, outgoing_vals[i_pt].first, distance, outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, local_pt, distance, true);
+        {
+          // In the nearest-position/app mode, we save conflicts in the reference frame
+          if (_nearest_positions_obj)
+            registerConflict(i_from, 0, pt, distance, true);
+          else
+            registerConflict(i_from, 0, local_pt, distance, true);
+        }
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

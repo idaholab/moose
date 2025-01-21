@@ -11,6 +11,7 @@
 
 // Moose includes
 #include "GeneralReporter.h"
+#include "KDTree.h"
 
 /**
  * Positions objects are under the hood Reporters.
@@ -98,6 +99,10 @@ protected:
 
   /// 4D storage for all the positions : space & time
   std::vector<std::vector<std::vector<std::vector<Point>>>> _positions_4d;
+
+  /// KDTree to be able to find the nearest position to a point in a fast and scalable manner
+  std::unique_ptr<KDTree> _initial_positions_kd_tree;
+  std::unique_ptr<KDTree> _positions_kd_tree;
 
   /// Whether generation of positions is distributed or not (and therefore needs a broadcast)
   bool _need_broadcast;

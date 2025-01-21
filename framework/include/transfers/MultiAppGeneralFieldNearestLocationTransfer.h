@@ -60,17 +60,21 @@ private:
       const std::vector<std::pair<Point, unsigned int>> & incoming_points,
       std::vector<std::pair<Real, Real>> & outgoing_vals);
 
+  /// Pre-compute the number of sources
   /// Number of KDTrees used to hold the locations and variable value data
-  unsigned int getNumSources() const;
+  void computeNumSources();
 
-  /// Transform a point towards the local frame
-  Point getPointInLocalSourceFrame(unsigned int i_from, const Point & pt) const;
+  /// Get the index of the app in the loop over the trees and the apps contributing data to each tree
+  unsigned int getAppIndex(unsigned int kdtree_index, unsigned int app_index) const;
 
   /// Number of applications which contributed nearest-locations to each KD-tree
   unsigned int getNumAppsPerTree() const;
 
   /// Number of divisions (nearest-positions or source mesh divisions) used when building KD-Trees
   unsigned int getNumDivisions() const;
+
+  /// Transform a point towards the local frame
+  Point getPointInLocalSourceFrame(unsigned int i_from, const Point & pt) const;
 
   /**
    * @brief Examine all spatial restrictions that could preclude this source from being
@@ -107,4 +111,7 @@ private:
 
   /// Whether we can just use the local zero-indexed dof to get the value from the solution
   std::vector<bool> _use_zero_dof_for_value;
+
+  /// Number of KD-Trees to create
+  unsigned int _num_sources;
 };

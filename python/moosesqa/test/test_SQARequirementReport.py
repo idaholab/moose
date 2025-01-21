@@ -28,7 +28,8 @@ class TestSQARequirementReport(unittest.TestCase):
     @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: '{}:{}'.format(c,t))
     def testOptions(self, *args):
 
-        reporter = SQARequirementReport(title='testing', specs='spec_missing_req',
+        # test single spec
+        reporter = SQARequirementReport(title='testing', specs=['spec_missing_req'],
                                         directories=['python/moosesqa/test/specs'])
         r = reporter.getReport()
         self.assertEqual(reporter.status, SQAReport.Status.ERROR)
@@ -38,6 +39,20 @@ class TestSQARequirementReport(unittest.TestCase):
         self.assertIn('log_empty_requirement: 1', r)
         self.assertIn('log_empty_design: 1', r)
         self.assertIn('log_empty_issues: 1',r )
+        self.assertIn('log_duplicate_requirement: 1', r)
+
+        # test multiple specs
+        reporter = SQARequirementReport(title='testing', specs=['spec_missing_req','spec_multiple'],
+                                        directories=['python/moosesqa/test/specs'])
+        r = reporter.getReport()
+        self.assertEqual(reporter.status, SQAReport.Status.ERROR)
+        self.assertIn('log_missing_requirement: 1', r)
+        self.assertIn('log_missing_design: 1', r)
+        self.assertIn('log_missing_issues: 2', r)
+        self.assertIn('log_empty_requirement: 1', r)
+        self.assertIn('log_empty_design: 1', r)
+        self.assertIn('log_empty_issues: 1',r )
+        self.assertIn('log_duplicate_requirement: 2', r)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
