@@ -1,7 +1,7 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../step03_boundary_conditions/inputs/mesh_in.e'
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
 []
 
@@ -76,7 +76,7 @@
 
 [Postprocessors]
   [num_elements]
-    type = NumElems
+    type = NumElements
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

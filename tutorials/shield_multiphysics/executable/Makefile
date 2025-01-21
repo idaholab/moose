@@ -28,7 +28,8 @@ CONTACT                   := no
 FLUID_PROPERTIES          := no
 # heat_conduction is required by Steps 5+
 HEAT_TRANSFER             := yes
-MISC                      := no
+# Coef diffusion is used in step 3 and 8
+MISC                      := yes
 # Navier Stokes is required by Step 7
 NAVIER_STOKES             := yes
 POROUS_FLOW               := no

@@ -8,7 +8,7 @@ mu_multiplier = 1e3
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../step03_boundary_conditions/inputs/mesh_in.e'
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
   [add_inner_water]
     type = SideSetsFromBoundingBoxGenerator
