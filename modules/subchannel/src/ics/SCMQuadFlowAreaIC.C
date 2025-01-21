@@ -9,6 +9,9 @@
 
 #include "SCMQuadFlowAreaIC.h"
 
+#include "SubChannelMesh.h"
+#include "QuadSubChannelMesh.h"
+
 registerMooseObject("SubChannelApp", SCMQuadFlowAreaIC);
 
 InputParameters
