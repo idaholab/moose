@@ -1,9 +1,5 @@
-[Mesh]
-  [fmg]
-    type = FileMeshGenerator
-    file = '../../step01_diffusion/inputs/mesh_in.e'
-  []
-[]
+# Start by running meshing script
+!include ../step01_diffusion/mesh.i
 
 [Variables]
   [T]
