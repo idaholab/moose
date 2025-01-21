@@ -16,6 +16,7 @@
   [diffusion_concrete]
     type = ADHeatConduction
     variable = T
+    block = 'concrete'
   []
 []
 
@@ -36,8 +37,8 @@
     type = NeumannBC
     variable = T
     boundary = inner_cavity
-    # 100 kW reactor, 108 m2 cavity area
-    value = '${fparse 1e5 / 108}'
+    # 5 MW reactor, only 50 kW removed from radiation, 108 m2 cavity area
+    value = '${fparse 5e4 / 108}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
