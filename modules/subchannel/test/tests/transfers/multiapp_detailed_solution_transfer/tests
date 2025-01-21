@@ -1,0 +1,9 @@
+[Tests]
+  [quad]
+    type = Exodiff
+    input = 'quad.i'
+    exodiff = 'quad_out.e quad_out_viz0.e'
+    recover = false
+    max_parallel = 1
+  []
+[]

@@ -1,0 +1,74 @@
+[Tests]
+  [psbt_explicit]
+    type = Exodiff
+    input = psbt_explicit.i
+    exodiff = psbt_explicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+  [psbt_explicit_staggered]
+    type = Exodiff
+    input = psbt_explicit_staggered.i
+    exodiff = psbt_explicit_staggered_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+  [psbt_implicit]
+    type = Exodiff
+    input = psbt_implicit.i
+    exodiff = psbt_implicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+  [psbt_monolithic]
+    type = Exodiff
+    input = psbt_monolithic.i
+    exodiff = psbt_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+  [psbt_full_monolithic]
+    type = Exodiff
+    input = psbt_full_monolithic.i
+    exodiff = psbt_full_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+  [psbt_full_monolithic_staggered]
+    type = Exodiff
+    input = psbt_full_monolithic_staggered.i
+    exodiff = psbt_full_monolithic_staggered_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+[]

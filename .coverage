@@ -89,6 +89,9 @@ require_total = 88
 [solid_mechanics]
 require_total = 84
 
+[subchannel]
+require_total = 87
+
 [thermal_hydraulics]
 require_total = 88
 

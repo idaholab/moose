@@ -1,0 +1,20 @@
+[Tests]
+  [main]
+    type = Exodiff
+    input = main.i
+    exodiff = main_out.e
+    recover = false
+    mesh_mode = 'replicated'
+    allow_warnings = true
+    max_parallel = 1
+  []
+  [sub]
+    type = Exodiff
+    input = main.i
+    exodiff = main_out_sub0.e
+    recover = false
+    mesh_mode = 'replicated'
+    allow_warnings = true
+    max_parallel = 1
+  []
+[]

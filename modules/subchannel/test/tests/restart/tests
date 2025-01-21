@@ -1,0 +1,20 @@
+[Tests]
+  [steady]
+    type = Exodiff
+    input = steady.i
+    exodiff = steady_out.e
+    recover = false
+    abs_zero = 1e-7
+    max_threads = 1
+    max_parallel = 1
+  []
+  [transient]
+    type = Exodiff
+    input = transient.i
+    exodiff = transient_out.e
+    prereq = 'steady'
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+  []
+[]
