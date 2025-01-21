@@ -47,9 +47,9 @@ ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameter
     _z_coords(declareVector("z"))
 {
   // Check either "material" or "property" was set but not both
-  if (parameters.isParamSetByUser("material") && parameters.isParamSetByUser("property"))
+  if (parameters.isParamValid("material") && parameters.isParamValid("property"))
     mooseError("Setting both 'material' and 'property' is not allowed. Use one or the other.");
-  if (!parameters.isParamSetByUser("material") && !parameters.isParamSetByUser("property"))
+  if (!parameters.isParamValid("material") && !parameters.isParamValid("property"))
     mooseError("Either 'material' and 'property' needs to be set.");
 
   // List of property names to collect
@@ -63,7 +63,7 @@ ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameter
   }
 
   // If Material is used, get all properties.
-  if (parameters.isParamSetByUser("material"))
+  if (parameters.isParamValid("material"))
   {
     auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
     if (mat.isBoundaryMaterial())

@@ -32,7 +32,7 @@
     csvdiff = 'property_sampler_out_props_0001.csv property_sampler_out_props_0002.csv'
 
     requirement = 'The system shall be able to output material properties calculated at quadrature '
-                  'points on all active elements when supplied with the property names.'
+                  'points, on all active elements, when supplied with the property names.'
   []
   [material_properties_multiple_blocks]
     type = 'CSVDiff'
@@ -40,7 +40,7 @@
     csvdiff = 'property_sampler_multiple_blocks_out_props_0001.csv property_sampler_multiple_blocks_out_props_0002.csv'
 
     requirement = 'The system shall be able to output material properties calculated at quadrature '
-                  'points on all active elements when supplied with the property names defined on different blocks.'
+                  'points, on all active elements, when supplied with the property names defined on different blocks.'
   []
   [material_properties_multiple_blocks_elem_ids]
     type = 'CSVDiff'
@@ -48,7 +48,7 @@
     csvdiff = 'property_sampler_multiple_blocks_elem_ids_out_props_0001.csv property_sampler_multiple_blocks_elem_ids_out_props_0002.csv'
 
     requirement = 'The system shall be able to output material properties calculated at quadrature '
-                  'points on the given elements when supplied with the property names defined on different blocks.'
+                  'points, on the given elements, when supplied with the property names defined on different blocks.'
   []
   [errors]
     requirement = 'The system shall issue an error if material output samples are attempted for '
