@@ -76,7 +76,16 @@
       cli_args = 'VectorPostprocessors/vpp/material=foo'
       expect_err = 'Unable to locate active object: foo'
 
-      detail = 'the material does not exist on the mesh.'
+      detail = 'the material does not exist on the mesh, or'
+    []
+
+    [block_restrict_property_sample]
+      type = 'RunException'
+      input = 'property_sampler_multiple_blocks.i'
+      cli_args = ' Materials/mat1/prop_names=prop1 Materials/mat1/prop_values=1 Materials/mat2/prop_names=prop2 Materials/mat2/prop_values=2 VectorPostprocessors/props/property=prop1'
+      expect_err = "Material property 'prop1', requested by 'props' is not defined on block RIGHT_SIDE"
+
+      detail = 'the property does not exist on the block.'
     []
   []
 []
