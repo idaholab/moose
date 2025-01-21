@@ -26,8 +26,12 @@ With a conda MOOSE executable:
 ```bash
 conda activate moose
 cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity/inputs
-moose-opt -i step8a_fine.i
+moose-opt -i step8a_coarse.i
 ```
+
+!---
+
+!media results/step8_coarse.png caption="Coarse mesh"
 
 !---
 
@@ -58,6 +62,10 @@ moose-opt -i step8b_fine.i
 
 !---
 
+!media results/step8_fine.png caption="2x uniform refinement"
+
+!---
+
 ## Step 8c: Adaptive Mesh Solution
 
 !listing step8c_adapt.i
@@ -82,3 +90,9 @@ conda activate moose
 cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity/inputs
 moose-opt -i step8c_adapt.i
 ```
+
+!---
+
+!media results/step8_adapt.png caption="Using adaptivity"
+
+!---
