@@ -1,5 +1,9 @@
-cp_water_multiplier = 1e3
-mu_multiplier = 1e5
+# Speeds up the transient if < 1
+cp_water_multiplier = 1e-5
+# Makes the problem more diffusive if > 1
+mu_multiplier = 1e0
+
+h_water = 30
 
 [GlobalParams]
   # This parameter is used in numerous objects. It is often
@@ -31,6 +35,7 @@ mu_multiplier = 1e5
     top_right = '6.6 10.5 5'
     location = OUTSIDE
   []
+  # careful, this is not enough refinement for a converged result
   [refine_water]
     type = RefineBlockGenerator
     input = add_outer_water
@@ -54,6 +59,7 @@ mu_multiplier = 1e5
 
         # Solve for steady state
         # It takes a while to heat up concrete
+        initial_temperature = 300
         transient = false
 
         # Heat conduction boundary conditions can be defined
@@ -68,7 +74,7 @@ mu_multiplier = 1e5
         # TODO: enable using a field instead of postprocessor
         fixed_convection_T_fluid = "T_fluid_average 300"
         # Note: should come from a correlation
-        fixed_convection_htc = "30 10"
+        fixed_convection_htc = "${h_water} 10"
       []
     []
   []
@@ -104,13 +110,11 @@ mu_multiplier = 1e5
         pinned_pressure_value = '1e5'
 
         gravity = '0 0 -9.81'
-        # boussinesq_approximation = true
-        # ref_temperature = 300
+        boussinesq_approximation = true
+        ref_temperature = 300
 
-      # wall_boundaries = 'water_boundary_inner water_boundary_outer'
-      # momentum_wall_types = 'noslip noslip'
         wall_boundaries = 'water_boundary'
-        momentum_wall_types = 'slip'
+        momentum_wall_types = 'noslip'
       []
     []
     [FluidHeatTransfer]
@@ -121,8 +125,8 @@ mu_multiplier = 1e5
         initial_temperature = 300
 
         # This is a rough coupling to heat conduction
-        energy_wall_types = 'fixed-temperature'
-        energy_wall_functors = 'T'
+        energy_wall_types = 'heatflux'
+        energy_wall_functors = 'h_dT'
 
         energy_scaling = 1e-5
       []
@@ -139,6 +143,7 @@ mu_multiplier = 1e5
     block = 'concrete'
   []
 []
+# TODO: add volumetric heat deposition, either in the Kernels or Physics blocks
 
 # The solid mechanics boundary conditions are defined outside the physics
 [BCs]
@@ -169,6 +174,14 @@ mu_multiplier = 1e5
     block = 'water'
     prop_names = 'rho    k     cp      mu alpha_wall alpha'
     prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse 7.98e-4 * mu_multiplier} 30 2e-4'
+  []
+
+  # Boundary condition functor computing the heat flux with a set heat transfer coefficient
+  [heat-flux]
+    type = ADParsedFunctorMaterial
+    expression = '${h_water} * (T - T_fluid)'
+    functor_names = 'T T_fluid'
+    property_name = 'h_dT'
   []
 []
 
@@ -222,6 +235,8 @@ mu_multiplier = 1e5
     function = 'if(t<0,0.1,0.25)'
   []
 
+  # Let it develop
+  steady_state_start_time = 5
   steady_state_tolerance = 1e-7
   steady_state_detection = true
 
@@ -237,33 +252,65 @@ mu_multiplier = 1e5
 
   # Tolerances
   # Navier Stokes natural circulation will only converge so far
-  nl_abs_tol = 5e-7
+  nl_abs_tol = 6e-7
 []
+
+[Preconditioning]
+  [thermomecha]
+    type = SMP
+    nl_sys = 'nl0'
+    petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+    petsc_options_value = 'hypre boomeramg 500'
+  []
+  [flow]
+    type = SMP
+    nl_sys = 'flow'
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu NONZERO'
+  []
+[]
+
+[Outputs]
+  csv = true
+  [out]
+    type = Exodus
+    use_displaced = true
+  []
+[]
+
 
 [Postprocessors]
   [T_fluid_average]
     type = ElementAverageValue
     variable = 'T_fluid'
     block = 'water'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-[]
-
-# [Preconditioning]
-#   [thermomecha]
-#     nl_sys = 'nl0'
-#     petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-#     petsc_options_value = 'hypre boomeramg 500'
-#   []
-#   [flow]
-#     nl_sys = 'flow'
-#     petsc_options_iname = '-pc_type -pc_factor_shift_type'
-#     petsc_options_value = 'lu NONZERO'
-#   []
-# []
-
-[Outputs]
-  [out]
-    type = Exodus
-    use_displaced = true
+  [T_solid_average]
+    type = ElementAverageValue
+    variable = 'T'
+    block = 'concrete'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_dispx]
+    type = ElementExtremeValue
+    variable = 'disp_x'
+    value_type = 'max_abs'
+    block = 'concrete'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_dispy]
+    type = ElementExtremeValue
+    variable = 'disp_y'
+    value_type = 'max_abs'
+    block = 'concrete'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_dispz]
+    type = ElementExtremeValue
+    variable = 'disp_z'
+    value_type = 'max_abs'
+    block = 'concrete'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
