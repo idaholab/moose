@@ -8,7 +8,7 @@
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 
@@ -16,7 +16,6 @@
   [diffusion_concrete]
     type = ADHeatConduction
     variable = T
-    block = 'concrete'
   []
 []
 
@@ -28,6 +27,14 @@
     # we specify a function of time, temperature is passed as the time argument
     # in the material
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
+    specific_heat = '1170'
+  []
+  [concrete_and_Al]
+    type = ADHeatConductionMaterial
+    block = 'concrete_and_Al'
+    temp = 'T'
+    # Al: 175 W/m/K, concrete: 2.5 W/m/K
+    thermal_conductivity_temperature_function = '45'
     specific_heat = '1170'
   []
 []
