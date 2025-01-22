@@ -31,11 +31,19 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 
 ## Step 10: Run
 
+With the tutorial executable:
+
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step10_mechanics
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step10.i
+../executable/shield_multiphysics-opt -i step10.i
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step10_mechanics
+moose-opt -i step10.i
 ```
 
 !---
