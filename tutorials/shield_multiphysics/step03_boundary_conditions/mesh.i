@@ -65,9 +65,18 @@
     new_boundary = 'air_boundary air_boundary air_boundary air_boundary air_boundary ground'
   []
 
+  [concrete_and_Al]
+    type = ParsedSubdomainMeshGenerator
+    input = add_concrete_outer_boundary
+    block_id = 3
+    block_name = 'concrete_and_Al'
+    combinatorial_geometry = 'x > -1e6'
+    included_boundaries = 'inner_cavity'
+  []
+
   [remove_cavity]
     type = BlockDeletionGenerator
-    input = 'add_concrete_outer_boundary'
+    input = 'concrete_and_Al'
     block = cavity
   []
 
