@@ -22,11 +22,19 @@ We want to study the effects of the local environment on sensors placed anywhere
 Before setting up the multiapp and the transfers, we must make sure
 each input file runs well separately.
 
+With the tutorial executable:
+
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt  -i step11_micro.i
+../executable/shield_multiphysics-opt -i step11_local.i
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
+moose-opt -i step11_local.i
 ```
 
 !---
@@ -46,11 +54,19 @@ The positions of each child app are specified using a `Positions` object.
 
 ## Step 11: Run Multi-scale
 
+With the tutorial executable:
+
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step11_global.i
+../executable/shield_multiphysics-opt -i step11_global.i
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
+moose-opt -i step11_global.i
 ```
 
 !---

@@ -40,19 +40,17 @@ Time stepping parameters are passed to the Executioner block
 
 ## Step 6: Running Input File
 
-Using the step 6 executable:
+Using the tutorial executable:
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step6_transient_heat_conduction
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step6_transient.i
+cd ~/projects/moose/tutorials/shield_multiphysics/step06_transient_heat_conduction
+../executable/shield_multiphysics-opt -i step6_transient.i
 ```
 
 Using the conda MOOSE executable:
 
-```
+```bash
 conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step6_transient_heat_conduction/inputs
+cd ~/projects/moose/tutorials/shield_multiphysics/step06_transient_heat_conduction
 moose-opt -i step6_transient.i
 ```

@@ -73,8 +73,7 @@ Using the step 7 executable:
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-make -j 12
-../moose-opt -i step7b_water_decoupled.i Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor
+../executable/shield_multiphysics_opt -i step7b_water_decoupled.i Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor
 ```
 
 ```bash
@@ -94,8 +93,7 @@ Time Step 1, time = 0.1, dt = 0.1
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-make -j 12
-../moose-opt -i step7b_water_decoupled.i Executioner/num_steps=1 Executioner/automatic_scaling=true -pc_type svd -pc_svd_monitor -ksp_view_pmat
+../executable/shield_multiphysics_opt -i step7b_water_decoupled.i Executioner/num_steps=1 Executioner/automatic_scaling=true -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
 ```bash
@@ -113,11 +111,19 @@ Time Step 1, time = 0.1, dt = 0.1
 
 ## Step 7b: Run decoupled
 
+Using the tutorial executable:
+
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step7b_water_decoupled.i
+../executable/shield_multiphysics-opt -i step7b_water_decoupled.i
+```
+
+Using the conda MOOSE executable
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
+moose-opt -i step7b_water_decoupled.i
 ```
 
 !---
@@ -131,20 +137,18 @@ on finding issues is too long. We switch to 2D:
 
 !---
 
-Using the step 7 executable:
+Using the tutorial executable:
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step7c_2dcoupled.i
+../executable/shield_multiphysics-opt -i step7c_2dcoupled.i
 ```
 
 Using the conda MOOSE executable
 
 ```bash
 conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer/inputs
+cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
 moose-opt -i step7c_2dcoupled.i
 ```
 
@@ -158,19 +162,17 @@ Once we have found all the issues with the uncoupled simulations and the 2D coup
 
 !---
 
-Using the step 7 executable:
+Using the tutorial executable:
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-make -j 12 # use number of processors for your system
-cd inputs
-mpirun -n 8 ../moose-opt -i step7d_coupled.i
+mpirun -n 8 ../executable/shield_multiphysics-opt -i step7d_coupled.i
 ```
 
 Using the conda MOOSE executable
 
 ```bash
 conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer/inputs
-moose-opt -i step7d_coupled.i
+cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
+mpirun -n 8 moose-opt -i step7d_coupled.i
 ```

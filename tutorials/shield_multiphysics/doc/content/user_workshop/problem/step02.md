@@ -43,19 +43,17 @@ block = 'concrete'
 
 ## Step 2: Run
 
-Using the step 2 executable:
+Using the tutorial executable:
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step02_coef_diffusion
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step2.i
+../executable/shield_multiphysics-opt -i step2.i
 ```
 
 Using a MOOSE executable from conda:
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step02_coef_diffusion/inputs
+cd ~/projects/moose/tutorials/shield_multiphysics/step02_coef_diffusion
 moose-opt -i step2.i
 ```
 
