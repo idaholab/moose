@@ -1,0 +1,10 @@
+[Tests]
+  design = 'CrackFrontNonlocalStress.md CrackFrontNonlocalScalarMaterial.md'
+  issues = '#27659 #29575'
+  [crack_front_materials]
+    type = 'CSVDiff'
+    input = 'crack_front_nonlocal_materials.i'
+    csvdiff = 'crack_front_nonlocal_materials_out_CrackFrontNonlocalStress_0001.csv crack_front_nonlocal_materials_out_CrackFrontNonlocalKcrit_0001.csv'
+    requirement = 'The system shall compute the average stress and scalar material property at each crack point in a 3D domain.'
+  []
+[]

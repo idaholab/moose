@@ -119,6 +119,7 @@
   [CrackFrontNonlocalStress]
     type = CrackFrontNonlocalStress
     base_name = generic
+    stress_name = stress
     crack_front_definition = crack_tip
     box_length = 0.1
     box_height = 0.05

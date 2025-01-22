@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYZDelaunayGenerator.md'
-  issues = '#28297'
+  issues = '#28297 #29718'
   [xyzdelaunay]
     requirement = "The system shall have the capability of tetrahedralizing a triangulated boundary"
     [basic]
@@ -31,6 +31,8 @@
       csvdiff = 'xyzdelaunay_nested_out.csv'
       recover = false
       detail = "allowing deep nesting of tetrahedralizations within tetrahedralizations"
+      # see 29718
+      valgrind = none
     []
     [smoothed]
       type = 'CSVDiff'
@@ -38,6 +40,8 @@
       csvdiff = 'xyzdelaunay_smoothed_out.csv'
       recover = false
       detail = "with optional Laplacian mesh smoothing."
+      # see 29718
+      valgrind = none
     []
   []
   [errors]
@@ -50,6 +54,8 @@
                   Mesh/triang/holes="hole_1_name hole_2_name_2"'
       expect_err = "The hole meshes contain subdomain name maps with conflicts."
       detail = "if the input hole meshes contain subdomain name maps with conflicts"
+      # see 29718
+      valgrind = none
     []
   []
 []
