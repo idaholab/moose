@@ -12,16 +12,56 @@ Add custom syntax to build objects that are common to all conjugate heat transfe
 
 !---
 
-## Step 12: Input File
+## Step 12: Heat Conduction Physics
 
-!listing step12_action/step12.i
+Defines the kernels, the boundary conditions of selected supported types,
+and some numerical parameters
+
+!listing step12_physics/step12.i block=Physics/HeatConduction
+
+!---
+
+## Step 12: Solid Mechanics Physics
+
+Defines the kernels and some helper materials for computing strain.
+
+!listing step12_physics/step12.i block=Physics/SolidMechanics
+
+!---
+
+## Step 12: Fluid Flow Physics
+
+The flow equations are separated from the conservation of energy in the fluid
+for readability purposes.
+
+Defines both the kernels and the boundary conditions.
+
+!listing step12_physics/step12.i block=Physics/NavierStokes/Flow
+
+!---
+
+## Step 12: Fluid Energy conservation Physics
+
+!listing step12_physics/step12.i block=Physics/NavierStokes/FluidHeatTransfer
+
+!---
+
+## Step 12: Setting up a multi-system simulation
+
+First declare the names of the systems to use in the [Problem](syntax/Problem/index.md)
+
+!listing step12_physics/step12.i block=Problem
+
+then specify those systems in each `Physics`
+
+!listing step12_physics/step12.i start=system_names
 
 !---
 
 ## Step 12: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step12_action
+cd ~/projects/moose/tutorials/shield_multiphysics/step12_physics
 make -j 12 # use number of processors for your system
 cd inputs
 ../moose-opt -i step12.i
