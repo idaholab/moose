@@ -19,11 +19,19 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 
 ## Step 9: Run
 
+With the tutorial executable:
+
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step09_postprocessing
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step9.i
+../executable/shield_multiphysics-opt -i step9.i
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step09_postprocessing
+moose-opt -i step9.i
 ```
 
 Then plot from the `CSV` file in python, excel, paraview etc
