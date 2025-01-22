@@ -77,12 +77,12 @@ Expert input from E. Feldman [DASSH](https://github.com/dassh-dev/examples/tree/
 
 For SHRT-17, in the constant pin power case, both SCM and DASSH exhibit similar behavior. Since DASSH does not resolve the crossflows (contrary to SCM), similar results indicate that crossflows might not be instrumental in determining the temperature profile for this case. Additionally, DASSH predicts a slightly less skewed distribution than SCM, which is closer to the experimental results. This means that the crossflows may be underestimated by the lateral momentum balance equation solved by SCM, or that the thimble model incorporated in DASSH is more accurate than the simplified, mass-flow adaptation applied to SCM. Nonetheless, both the SCM and DASSH calculations, are close enough to suggest that those differences in modeling approach, do not produce large discrepancies in the results.
 
-!media subchannel/v&v/res_17_TTC.png
+!media subchannel/v&v/XX09_TTC.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:TTC17
     caption=Test SHRT-17
 
-!media subchannel/v&v/res_45_TTC.png
+!media subchannel/v&v/XX09_TTC45.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:TTC45
     caption=Test SHRT-45R
@@ -97,12 +97,12 @@ Then for both tests, the flow rate gradually decreases due to the pump trip and 
 
 For SHRT-17 and SHRT-45R, the stand-alone SCM transient, underestimates the measured result of the peak temperature. For the SHRT-17 and SHRT-45R transient, the uniform power model under-predicts the peak temperature by approximately $5\mathrm{K}$. In general, subchannel temperatures are expected to be lower than the measurements since SCM calculates surface averaged temperatures and the experiment took point-wise measurements on thermocouples attached to the heated pins.
 
-!media subchannel/v&v/res_17_transient.png
+!media subchannel/v&v/Transient_Temperature.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:transient1
     caption=Test SHRT-17
 
-!media subchannel/v&v/res_45_transient.png
+!media subchannel/v&v/Transient_Temperature45.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:transient2
     caption=Test SHRT-45R
