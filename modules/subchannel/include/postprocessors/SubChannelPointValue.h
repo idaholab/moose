@@ -13,7 +13,7 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates a user selected variable at a user selected point in the assembly
+ * Calculates the value of a user selected variable at a user selected point in the assembly
  */
 class SubChannelPointValue : public GeneralPostprocessor
 {

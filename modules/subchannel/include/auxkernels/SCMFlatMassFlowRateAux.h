@@ -28,5 +28,5 @@ protected:
   /// Specified mass flow
   const Real & _mass_flow;
   /// Geometry information
-  SubChannelMesh & _subchannel_mesh;
+  const SubChannelMesh & _subchannel_mesh;
 };

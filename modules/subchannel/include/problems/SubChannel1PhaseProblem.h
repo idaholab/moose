@@ -21,8 +21,6 @@
 #include <petscvec.h>
 #include <petscsnes.h>
 
-class SubChannel1PhaseProblem;
-
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
  */
@@ -239,77 +237,77 @@ protected:
   //// Matrices and vectors to be used in implicit assembly
 
   /// Mass conservation
-  // Mass conservation - sum of cross fluxes
+  /// Mass conservation - sum of cross fluxes
   Mat _mc_sumWij_mat;
   Vec _Wij_vec;
   Vec _prod;
   Vec _prodp;
-  // Mass conservation - axial convection
+  /// Mass conservation - axial convection
   Mat _mc_axial_convection_mat;
   Vec _mc_axial_convection_rhs;
-  // Mass conservation - density time derivative
-  // No implicit matrix
+  /// Mass conservation - density time derivative
+  /// No implicit matrix
 
   /// Axial momentum
-  // Axial momentum conservation - compute turbulent cross fluxes
+  /// Axial momentum conservation - compute turbulent cross fluxes
   Mat _amc_turbulent_cross_flows_mat;
   Vec _amc_turbulent_cross_flows_rhs;
-  // Axial momentum conservation - time derivative
+  /// Axial momentum conservation - time derivative
   Mat _amc_time_derivative_mat;
   Vec _amc_time_derivative_rhs;
-  // Axial momentum conservation - advective (Eulerian) derivative
+  /// Axial momentum conservation - advective (Eulerian) derivative
   Mat _amc_advective_derivative_mat;
   Vec _amc_advective_derivative_rhs;
-  // Axial momentum conservation - cross flux derivative
+  /// Axial momentum conservation - cross flux derivative
   Mat _amc_cross_derivative_mat;
   Vec _amc_cross_derivative_rhs;
-  // Axial momentum conservation - friction force
+  /// Axial momentum conservation - friction force
   Mat _amc_friction_force_mat;
   Vec _amc_friction_force_rhs;
-  // Axial momentum conservation - buoyancy force
-  // No implicit matrix
+  /// Axial momentum conservation - buoyancy force
+  /// No implicit matrix
   Vec _amc_gravity_rhs;
-  // Axial momentum conservation - pressure force
+  /// Axial momentum conservation - pressure force
   Mat _amc_pressure_force_mat;
   Vec _amc_pressure_force_rhs;
-  // Axial momentum system matrix
+  /// Axial momentum system matrix
   Mat _amc_sys_mdot_mat;
   Vec _amc_sys_mdot_rhs;
 
   /// Cross momentum
-  // Cross momentum conservation - time derivative
+  /// Cross momentum conservation - time derivative
   Mat _cmc_time_derivative_mat;
   Vec _cmc_time_derivative_rhs;
-  // Cross momentum conservation - advective (Eulerian) derivative
+  /// Cross momentum conservation - advective (Eulerian) derivative
   Mat _cmc_advective_derivative_mat;
   Vec _cmc_advective_derivative_rhs;
-  // Cross momentum conservation - friction force
+  /// Cross momentum conservation - friction force
   Mat _cmc_friction_force_mat;
   Vec _cmc_friction_force_rhs;
-  // Cross momentum conservation - pressure force
+  /// Cross momentum conservation - pressure force
   Mat _cmc_pressure_force_mat;
   Vec _cmc_pressure_force_rhs;
-  // Lateral momentum system matrix
+  /// Lateral momentum system matrix
   Mat _cmc_sys_Wij_mat;
   Vec _cmc_sys_Wij_rhs;
   Vec _cmc_Wij_channel_dummy;
 
   /// Enthalpy
-  // Enthalpy conservation - time derivative
+  /// Enthalpy conservation - time derivative
   Mat _hc_time_derivative_mat;
   Vec _hc_time_derivative_rhs;
-  // Enthalpy conservation - advective (Eulerian) derivative;
+  /// Enthalpy conservation - advective (Eulerian) derivative;
   Mat _hc_advective_derivative_mat;
   Vec _hc_advective_derivative_rhs;
-  // Enthalpy conservation - cross flux derivative
+  /// Enthalpy conservation - cross flux derivative
   Mat _hc_cross_derivative_mat;
   Vec _hc_cross_derivative_rhs;
-  // Enthalpy conservation - source and sink
+  /// Enthalpy conservation - source and sink
   Vec _hc_added_heat_rhs;
-  // System matrices
+  /// System matrices
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
-  // No implicit matrix
+  /// No implicit matrix
   PetscInt _global_counter = 0;
 
   /// Added resistances for monolithic convergence
@@ -331,12 +329,10 @@ SubChannel1PhaseProblem::populateDenseFromVector(const Vec & x,
                                                  const unsigned int last_axial_level,
                                                  const unsigned int cross_dimension)
 {
-  PetscErrorCode ierr;
   PetscScalar * xx;
 
   PetscFunctionBegin;
-  ierr = VecGetArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
   {
     unsigned int iz_ind = iz - first_axial_level;
@@ -345,8 +341,8 @@ SubChannel1PhaseProblem::populateDenseFromVector(const Vec & x,
       loc_solution(i_l, iz) = xx[iz_ind * cross_dimension + i_l];
     }
   }
-  ierr = VecRestoreArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(VecRestoreArray(x, &xx));
+
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
@@ -358,12 +354,10 @@ SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
                                                   const unsigned int last_axial_level,
                                                   const unsigned int cross_dimension)
 {
-  PetscErrorCode ierr;
   PetscScalar * xx;
 
   PetscFunctionBegin;
-  ierr = VecGetArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
   {
     unsigned int iz_ind = iz - first_axial_level;
@@ -373,7 +367,7 @@ SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
       xx[iz_ind * cross_dimension + i_l] = loc_solution(loc_node);
     }
   }
-  ierr = VecRestoreArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(VecRestoreArray(x, &xx));
+
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }

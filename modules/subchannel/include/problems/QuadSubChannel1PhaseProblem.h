@@ -12,7 +12,6 @@
 #include "SubChannel1PhaseProblem.h"
 #include "QuadSubChannelMesh.h"
 
-class QuadSubChannel1PhaseProblem;
 /**
  * Quadrilateral subchannel solver
  */

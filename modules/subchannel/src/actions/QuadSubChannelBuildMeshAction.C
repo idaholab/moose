@@ -9,7 +9,6 @@
 
 #include "QuadSubChannelBuildMeshAction.h"
 #include "SubChannelMesh.h"
-#include "AddMeshGeneratorAction.h"
 
 registerMooseAction("SubChannelApp", QuadSubChannelBuildMeshAction, "setup_mesh");
 registerMooseAction("SubChannelApp", QuadSubChannelBuildMeshAction, "set_mesh_base");
@@ -18,7 +17,7 @@ InputParameters
 QuadSubChannelBuildMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Creates the infastructure necessary to buidl the subchannel mesh in "
+  params.addClassDescription("Creates the infrastructure necessary to build the subchannel mesh in "
                              "the square lattice arrangement");
   return params;
 }

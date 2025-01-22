@@ -62,7 +62,9 @@ public:
     return _sign_id_crossflow_map[i_chan][i_local];
   }
 
+  /// number of inter-wrapper channels in the -x direction
   virtual const unsigned int & getNx() const { return _nx; }
+  /// number of inter-wrapper channels in the -y direction
   virtual const unsigned int & getNy() const { return _ny; }
   const Real & getGap() const { return _side_bypass_length; }
 

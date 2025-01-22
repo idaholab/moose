@@ -26,7 +26,7 @@ public:
 
 protected:
   /// FE family of the aux variables added by this action
-  MooseEnum _fe_family;
+  const MooseEnum _fe_family;
   /// FE order of the aux variables added by this action
-  MooseEnum _fe_order;
+  const MooseEnum _fe_order;
 };

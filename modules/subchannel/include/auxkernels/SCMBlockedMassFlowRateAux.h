@@ -26,7 +26,7 @@ public:
   virtual Real computeValue() override;
 
 protected:
-  SubChannelMesh & _subchannel_mesh;
+  const SubChannelMesh & _subchannel_mesh;
   /// Specified mass flux
   const Real & _unblocked_mass_flux;
   /// Specified mass flow rate
@@ -34,5 +34,5 @@ protected:
   /// Cross-sectional area
   const VariableValue & _area;
   /// index of subchannels affected by blockage
-  std::vector<unsigned int> _index_blockage;
+  const std::vector<unsigned int> _index_blockage;
 };
