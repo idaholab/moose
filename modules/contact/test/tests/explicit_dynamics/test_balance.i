@@ -4,6 +4,10 @@
   volumetric_locking_correction = true
 []
 
+[Problem]
+  extra_tag_matrices = 'mass'
+[]
+
 [Mesh]
   [block_one]
     type = GeneratedMeshGenerator
@@ -157,7 +161,6 @@
   []
 []
 
-
 [Kernels]
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
@@ -169,19 +172,19 @@
     type = MassMatrix
     variable = disp_x
     density = density
-    matrix_tags = 'system'
+    matrix_tags = 'mass'
   []
   [Mass_y]
     type = MassMatrix
     variable = disp_y
     density = density
-    matrix_tags = 'system'
+    matrix_tags = 'mass'
   []
   [Mass_z]
     type = MassMatrix
     variable = disp_z
     density = density
-    matrix_tags = 'system'
+    matrix_tags = 'mass'
   []
 []
 
@@ -300,7 +303,7 @@
 
   [TimeIntegrator]
     type = DirectCentralDifference
-    mass_matrix_tag = 'system'
+    mass_matrix_tag = 'mass'
   []
 []
 
