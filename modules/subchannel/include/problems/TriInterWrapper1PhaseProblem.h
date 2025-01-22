@@ -11,7 +11,6 @@
 
 #include "InterWrapper1PhaseProblem.h"
 
-class TriInterWrapper1PhaseProblem;
 class TriInterWrapperMesh;
 /**
  * Triangular interwrapper solver
@@ -32,9 +31,15 @@ protected:
   virtual void computeDP(int iblock) override;
   /// computeMassFlowForDPDZ() and enforceUniformDPDZAtInlet()
   /// are overriden to define the sodium friction factor
+ /**
+ * Computes mass flow for a given pressure gradient
+ */
   virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
+ /**
+ * Enforce uniform pressure gradient at the inlet
+ */
   virtual void enforceUniformDPDZAtInlet();
-  ///
+
   virtual void computeh(int iblock) override;
   /**
    * computeInletMassFlowDist corrects the inlet mass flow rate distribution

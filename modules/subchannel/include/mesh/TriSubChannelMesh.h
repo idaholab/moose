@@ -233,7 +233,7 @@ public:
   static InputParameters validParams();
 
   /**
-   * Calculates and stores the rod positions/centers for a hexagonal assembly
+   * Calculates and stores the pin positions/centers for a hexagonal assembly
    * containing the given number of rings in a triangular/alternating row grid
    * spaced 'pitch' apart.  The points are generated such that the duct is
    * centered at the given center point.

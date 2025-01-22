@@ -11,29 +11,29 @@
 
 #include "SinglePhaseFluidProperties.h"
 
+/**
+ * Class that contains the equations of state for single-phase liquid sodium.
+ */
 class PBSodiumFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   PBSodiumFluidProperties(const InputParameters & parameters);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+  virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
+  virtual void rho_from_p_T(
+      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual Real h_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual Real rho_from_p_T(Real pressure, Real temperature) const;
-  virtual void
-  rho_from_p_T(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
-  virtual Real h_from_p_T(Real pressure, Real temperature) const;
+  virtual Real beta_from_p_T(Real pressure, Real temperature) const override;
+  virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
+  virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
+  virtual void cp_from_p_T(
+      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
+  virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
+  virtual Real mu_from_rho_T(Real rho, Real temprature) const override;
+  virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual Real beta_from_p_T(Real pressure, Real temperature) const;
-  virtual Real cv_from_p_T(Real pressure, Real temperature) const;
-  virtual Real cp_from_p_T(Real pressure, Real temperature) const;
-  virtual void
-  cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const;
-  virtual Real mu_from_p_T(Real pressure, Real temperature) const;
-  virtual Real mu_from_rho_T(Real rho, Real temprature) const;
-  virtual Real k_from_p_T(Real pressure, Real temperature) const;
-
-  virtual Real T_from_p_h(Real temperature, Real enthalpy) const;
+  virtual Real T_from_p_h(Real temperature, Real enthalpy) const override;
 
 #pragma GCC diagnostic pop
 
