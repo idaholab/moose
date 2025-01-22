@@ -62,8 +62,13 @@ then specify those systems in each `Physics`
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step12_physics
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step12.i
+../executable/shield_multiphysics-opt -i step12.i
 ```
 
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step11_physics
+moose-opt -i step12.i
+```

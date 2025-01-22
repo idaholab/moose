@@ -15,12 +15,21 @@ Notes:
 
 Hands-on:
 
-```
-cd step13_restart
+```bash
+cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
 # Generate the initialization file
 ../executable/shield_multiphysics-opt -i base_calc.i
 # Use the exodus file to initialize some variables
 ../executable/shield_multiphysics-opt -i initialization_from_exodus.i
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
+moose-opt -i base_calc.i
+moose-opt -i initialization_from_exodus.i
 ```
 
 !---
@@ -38,12 +47,21 @@ Notes:
 
 Hands-on:
 
-```
-cd step13_restart
+```bash
+cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
 # Generate the initialization file
 ../executable/shield_multiphysics-opt -i base_calc.i
 # Use the checkpoint file to restart the simulation from where it finished
 ../executable/shield_multiphysics-opt -i restart_from_checkpoint.i
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
+moose-opt -i base_calc.i
+moose-opt -i restart_from_checkpoint.i
 ```
 
 !---
@@ -53,9 +71,21 @@ cd step13_restart
 Recover lets us start from the last checkpoint before the simulation
 stopped.
 
-```
+```bash
+cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
 ../executable/shield_multiphysics-opt -i base_calc.i
 # Use Ctrl+C / Cmd+C to cancel the calculation
 # Recover from the last valid checkpoint
 ../executable/shield_multiphysics-opt -i base_calc.i --recover
+```
+
+With a conda MOOSE executable:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
+moose-opt -i base_calc.i
+# Use Ctrl+C / Cmd+C to cancel the calculation
+# Recover from the last valid checkpoint
+moose-opt -i base_calc.i --recover
 ```

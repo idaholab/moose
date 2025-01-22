@@ -54,20 +54,18 @@ water temperature, we will revisit this.
 
 ## Step 3: Run
 
-Using the step 3 executable:
+Using the tutorial executable:
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step03_boundary_conditions
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step3.i
+../executable/shield_multiphysics-opt -i step3.i
 ```
 
 Using a prebuilt MOOSE from conda:
 
-```
+```bash
 conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step03_boundary_conditions/inputs
+cd ~/projects/moose/tutorials/shield_multiphysics/step03_boundary_conditions
 moose-opt -i mesh.i --mesh-only
 moose-opt -i step3.i
 ```

@@ -57,9 +57,15 @@ We modify it to to consume the newly created material properties.
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step04_heat_conduction
-make -j 12 # use number of processors for your system
-cd inputs
-../moose-opt -i step4.i
+../executable/shield_multiphysics-opt -i step4.i
+```
+
+Using a prebuilt MOOSE from conda:
+
+```bash
+conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step04_heat_conduction
+moose-opt -i step2.i
 ```
 
 !---
