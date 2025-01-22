@@ -67,6 +67,6 @@ to consolidating fluid dynamics modeling, SAM capabilities are being migrated
 upstream as appropriate into the common module layer. In the not-too-distant
 future these kernel sets will be consolidated into a single set.
 
-For an introductory slideshow on the use of the Navier Stokes Finite Volume solvers in MOOSE, we refer the visitor to the [Navier Stokes Workshop Slides](slides/index.md optional=True).
+For an introductory slideshow on the use of the Navier Stokes Finite Volume solvers in MOOSE, we refer the visitor to the [Navier Stokes Workshop Slides](modules/navier_stokes/intro/index.md optional=True).
 
 !syntax complete groups=NavierStokesApp
