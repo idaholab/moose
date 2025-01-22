@@ -12,7 +12,7 @@ Renderer:
 Extensions:
     disable_defaults: True
     MooseDocs.extensions.reveal:
-        translate: subchannel_tutorial/index.md
+        translate: modules/subchannel/tutorial/index.md
     MooseDocs.extensions.comment: default
     MooseDocs.extensions.command: default
     MooseDocs.extensions.core: default
