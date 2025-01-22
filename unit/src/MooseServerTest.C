@@ -14,6 +14,7 @@
 #include "Moose.h"
 #include "MooseMain.h"
 #include "AppFactory.h"
+#include "MooseUtils.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
 #include "wasplsp/LSP.h"
@@ -122,24 +123,6 @@ protected:
   void format_completions(const wasp::DataArray & completions_array,
                           std::ostringstream & completions_stream) const
   {
-    struct CompletionInfo
-    {
-      std::string label;
-      std::string new_text;
-      std::string documentation;
-      int start_line;
-      int start_character;
-      int end_line;
-      int end_character;
-      int kind;
-      std::string text_format;
-    };
-
-    std::vector<CompletionInfo> completions;
-    std::size_t max_label = 0;
-    std::size_t max_new_text = 0;
-    std::size_t max_doc = 0;
-
     std::size_t completions_size = completions_array.size();
 
     for (std::size_t i = 0; i < completions_size; i++)
@@ -183,13 +166,6 @@ protected:
 
       MooseUtils::escape(completion_new_text);
 
-      if (completion_label.size() > max_label)
-        max_label = completion_label.size();
-      if (completion_new_text.size() > max_new_text)
-        max_new_text = completion_new_text.size();
-      if (completion_documentation.size() > max_doc)
-        max_doc = completion_documentation.size();
-
       // transform completion text format to string representation for test
       std::string text_format_string = "invalid";
       if (completion_text_format == wasp::lsp::m_text_format_plaintext)
@@ -197,26 +173,13 @@ protected:
       else if (completion_text_format == wasp::lsp::m_text_format_snippet)
         text_format_string = "snippet";
 
-      completions.push_back({completion_label,
-                             completion_new_text,
-                             completion_documentation,
-                             completion_start_line,
-                             completion_start_character,
-                             completion_end_line,
-                             completion_end_character,
-                             completion_kind,
-                             text_format_string});
-    }
-
-    for (const auto & completion : completions)
-    {
-      completions_stream << "label: " << std::setw(max_label) << std::left << completion.label
-                         << " text: " << std::setw(max_new_text) << std::left << completion.new_text
-                         << " desc: " << std::setw(max_doc) << std::left << completion.documentation
-                         << " pos: [" << completion.start_line << "." << completion.start_character
-                         << "]-[" << completion.end_line << "." << completion.end_character << "]"
-                         << " kind: " << std::setw(2) << std::right << completion.kind
-                         << " format: " << completion.text_format << "\n";
+      std::ostringstream completion_object;
+      completion_object << "label: " << completion_label << " text: " << completion_new_text
+                        << " desc: " << completion_documentation << " pos: ["
+                        << completion_start_line << "." << completion_start_character << "]-["
+                        << completion_end_line << "." << completion_end_character
+                        << "] kind: " << completion_kind << " format: " << text_format_string;
+      completions_stream << MooseUtils::removeExtraWhitespace(completion_object.str()) << "\n";
     }
   }
 
@@ -329,9 +292,13 @@ protected:
     std::ostringstream actual_items;
     format_completions(completions_array, actual_items);
 
+    // collapse repeated spaces to remove column format from expected items
+    auto expect_collapsed = MooseUtils::removeExtraWhitespace(expect_items);
+
     // check that each line exists to allow syntax be added without failing
-    for (const auto & line : MooseUtils::split(expect_items, "label:"))
-      EXPECT_NE(actual_items.str().find(line), std::string::npos);
+    for (const auto & line : MooseUtils::split(expect_collapsed, "label:"))
+      EXPECT_NE(actual_items.str().find(line), std::string::npos)
+          << "did not find: \"" << line << "\"";
   }
 
   // build hover request, handle request with moose_server, check response
