@@ -34,7 +34,8 @@ protected:
   enum class ExtremeType
   {
     MAX,
-    MIN
+    MIN,
+    MAX_ABS
   } _type;
 
   /// Extreme value and proxy value at the same point
