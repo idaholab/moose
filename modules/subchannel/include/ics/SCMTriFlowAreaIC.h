@@ -26,5 +26,5 @@ public:
   static InputParameters validParams();
 
 protected:
-  SubChannelMesh & _subchannel_mesh;
+  const SubChannelMesh & _subchannel_mesh;
 };

@@ -11,7 +11,9 @@
 
 #include "ExternalProblem.h"
 
-class NoSolveProblem;
+/**
+ * A Problem that does not solve, for visualization purposes
+ */
 
 class NoSolveProblem : public ExternalProblem
 {
@@ -20,7 +22,5 @@ public:
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction direction) override;
   virtual bool solverSystemConverged(const unsigned int) override;
-
-public:
   static InputParameters validParams();
 };

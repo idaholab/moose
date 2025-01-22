@@ -9,7 +9,6 @@
 
 #include "TriSubChannelBuildMeshAction.h"
 #include "SubChannelMesh.h"
-#include "AddMeshGeneratorAction.h"
 
 registerMooseAction("SubChannelApp", TriSubChannelBuildMeshAction, "setup_mesh");
 registerMooseAction("SubChannelApp", TriSubChannelBuildMeshAction, "set_mesh_base");

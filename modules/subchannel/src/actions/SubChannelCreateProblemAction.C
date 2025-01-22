@@ -8,9 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubChannelCreateProblemAction.h"
-#include "ActionWarehouse.h"
 #include "ActionFactory.h"
-#include "AddVariableAction.h"
 #include "SubChannelApp.h"
 #include "FEProblemBase.h"
 

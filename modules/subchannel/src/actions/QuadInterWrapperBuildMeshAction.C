@@ -9,7 +9,6 @@
 
 #include "QuadInterWrapperBuildMeshAction.h"
 #include "InterWrapperMesh.h"
-#include "AddMeshGeneratorAction.h"
 
 registerMooseAction("SubChannelApp", QuadInterWrapperBuildMeshAction, "setup_mesh");
 registerMooseAction("SubChannelApp", QuadInterWrapperBuildMeshAction, "set_mesh_base");
@@ -18,7 +17,7 @@ InputParameters
 QuadInterWrapperBuildMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Creates the infastructure necessary to build the inter-wrapper mesh "
+  params.addClassDescription("Creates the infrastructure necessary to build the inter-wrapper mesh "
                              "in the square lattice arrangement");
   return params;
 }

@@ -13,7 +13,7 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates an overall Delta of a chosen variable for the subchannel assembly
+ * Calculates a mass flow averaged mean of a subchannel variable on a plane
  */
 class SCMPlanarMean : public GeneralPostprocessor
 {

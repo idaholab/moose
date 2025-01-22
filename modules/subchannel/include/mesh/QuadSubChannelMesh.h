@@ -33,12 +33,17 @@ public:
     return _pin_nodes[i_pin][iz];
   }
 
-  // Duct functions not applicable to quad channel
-  // Over-writing to avoid abstract template definition in this class
+  /**
+   * Duct functions not applicable to quad channel
+   *
+   * Over-writing to avoid abstract template definition in this class
+   */
+  ///@{
   virtual Node * getChanNodeFromDuct(Node *) override { return nullptr; }
   virtual Node * getDuctNodeFromChannel(Node *) override { return nullptr; }
   virtual Node * getChannelNodeFromDuct(Node *) override { return nullptr; }
   virtual const std::vector<Node *> getDuctNodes() const override { return std::vector<Node *>(); }
+  ///@}
 
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
@@ -72,9 +77,14 @@ public:
   {
     return _sign_id_crossflow_map[i_chan][i_local];
   }
-
+  /// Number of subchannels in the -x direction
   virtual const unsigned int & getNx() const { return _nx; }
+  /// Number of subchannels in the -y direction
   virtual const unsigned int & getNy() const { return _ny; }
+  /**
+   * Returns the gap, not to be confused with the gap between pins, this refers to the gap
+   * next to the duct. Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
+   */
   const Real & getGap() const { return _gap; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;

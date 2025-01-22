@@ -9,7 +9,6 @@
 
 #include "TriInterWrapperBuildMeshAction.h"
 #include "InterWrapperMesh.h"
-#include "AddMeshGeneratorAction.h"
 
 registerMooseAction("SubChannelApp", TriInterWrapperBuildMeshAction, "setup_mesh");
 registerMooseAction("SubChannelApp", TriInterWrapperBuildMeshAction, "set_mesh_base");

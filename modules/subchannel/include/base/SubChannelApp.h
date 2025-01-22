@@ -12,7 +12,7 @@
 #include "MooseApp.h"
 
 /**
- * Base class of SubChannelApp.
+ * Application used when running the subchannel module directly
  */
 class SubChannelApp : public MooseApp
 {

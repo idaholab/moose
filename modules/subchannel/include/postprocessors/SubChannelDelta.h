@@ -13,7 +13,8 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates an overall Delta of a chosen variable for the subchannel assembly
+ * Calculates the overall change of a chosen variable
+ * between inlet and outlet of the subchannel assembly
  */
 class SubChannelDelta : public GeneralPostprocessor
 {

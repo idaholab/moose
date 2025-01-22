@@ -144,12 +144,12 @@ public:
   virtual const Real & getPitch() const { return _pitch; }
 
   /**
-   * Return rod diameter
+   * Return Pin diameter
    */
   virtual const Real & getPinDiameter() const { return _pin_diameter; }
 
   /**
-   * Return a signs for the cross flow given a subchannel index and local neighbor index
+   * Return a sign for the crossflow given a subchannel index and local neighbor index
    */
   virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const = 0;
 
