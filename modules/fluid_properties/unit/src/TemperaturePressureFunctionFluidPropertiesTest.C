@@ -116,7 +116,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 8.56E7;
     Real T = 200.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 9220000.46051058359;
+    Real e = 9220000.46051060781;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -152,7 +152,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 1.06841E8;
     Real T = 300.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 17061150.6748719364;
+    Real e = 17061150.6748718396;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -213,7 +213,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->cp_from_v_e, v, e, large_tol); // uses finite differencing
   DERIV_TEST(_fp->cv_from_v_e, v, e, tol);
 
-  e = 80150.045818949831;
+  e = 80150.0458189499477;
   v = 0.00021621621621621621;
 
   AD_DERIV_TEST(_fp_cp->rho_from_p_T, p, T, tol);
@@ -245,7 +245,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->cp_from_v_e, v, e, 2 * large_tol); // uses finite differencing
   DERIV_TEST(_fp->cv_from_v_e, v, e, tol);
 
-  e = 5374151.1232993276;
+  e = 5374151.12329934724;
   v = 5.5944055944055945e-05;
 
   AD_DERIV_TEST(_fp_cp->rho_from_p_T, p, T, tol);

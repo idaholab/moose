@@ -29,10 +29,9 @@ TemperaturePressureFunctionFluidProperties::validParams()
       "cv", 0, "cv >= 0", "Constant isochoric specific heat [J/(kg-K)]");
   params.addParam<Real>("e_ref", 0, "Specific internal energy at the reference temperature");
   params.addParam<Real>("T_ref", 0, "Reference temperature for the specific internal energy");
-  params.addParam<unsigned int>(
-      "dT_integration_intervals",
-      10,
-      "Number of intervals for integrating cv(T) to compute e(T) from e(T_ref)");
+  params.addParam<Real>("dT_integration_intervals",
+                        10,
+                        "Size of intervals for integrating cv(T) to compute e(T) from e(T_ref)");
 
   params.addClassDescription(
       "Single-phase fluid properties that allows to provide thermal "
@@ -48,7 +47,7 @@ TemperaturePressureFunctionFluidProperties::TemperaturePressureFunctionFluidProp
     _cv_is_constant(_cv != 0),
     _e_ref(getParam<Real>("e_ref")),
     _T_ref(getParam<Real>("T_ref")),
-    _n_integration_dT(getParam<unsigned int>("dT_integration_intervals"))
+    _integration_dT(getParam<Real>("dT_integration_intervals"))
 {
   if (isParamValid("cp") && _cv_is_constant)
     paramError("cp", "The parameter 'cp' may only be specified if 'cv' is unspecified or is zero.");
@@ -366,10 +365,11 @@ TemperaturePressureFunctionFluidProperties::e_from_p_T(Real pressure, Real tempe
     return _e_ref + _cv * (temperature - _T_ref);
   else
   {
-    const Real h = (temperature - _T_ref) / _n_integration_dT;
+    const int n_intervals = std::ceil(std::abs(temperature - _T_ref) / _integration_dT);
+    const auto h = (temperature - _T_ref) / n_intervals;
     Real integral = 0;
     // Centered step integration is second-order
-    for (const auto i : make_range(_n_integration_dT))
+    for (const auto i : make_range(n_intervals))
       integral += cv_from_p_T(pressure, _T_ref + (i + 0.5) * h);
     integral *= h;
     // we are still missing the dV or dP term to go from V/P_ref (e_ref = e(T_ref, V/P_ref))

@@ -359,6 +359,6 @@ protected:
   const Real _e_ref;
   /// Reference temperature for the reference specific energy
   const Real _T_ref;
-  /// Number of steps to take when integrating the specific heat to compute the specific energy
-  const unsigned int _n_integration_dT;
+  /// Size of temperature intervals when integrating the specific heat to compute the specific energy
+  const Real _integration_dT;
 };
