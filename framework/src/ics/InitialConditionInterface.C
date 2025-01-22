@@ -38,8 +38,8 @@ InitialConditionInterface::InitialConditionInterface(const InputParameters & par
 
 InitialConditionInterface::~InitialConditionInterface() {}
 
-unsigned short &
-InitialConditionInterface::getState()
+unsigned short
+InitialConditionInterface::getState() const
 {
   return _my_state;
 }

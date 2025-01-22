@@ -884,6 +884,10 @@ public:
 
   void projectSolution();
 
+  /**
+   *  Retrieves the current initial condition state.
+   * @return  current initial condition state
+   */
   unsigned short getCurrentICState();
 
   /**

@@ -1111,11 +1111,8 @@ FEProblemBase::initialSetup()
 
       // save state 0
       for (const auto i : index_range(_solver_systems))
-      {
-        _solver_systems[i]->system().update(); // not sure if this update is needed
         state0_sys_buffers[i] = _solver_systems[i]->solutionState(0).clone();
-      }
-      _aux->system().update(); // not sure if this update is needed
+
       state0_aux_buffer = _aux->solutionState(0).clone();
 
       // compute old state ICs
@@ -1124,11 +1121,8 @@ FEProblemBase::initialSetup()
         projectSolution();
 
         for (auto & sys : _solver_systems)
-        {
-          sys->system().update(); // not sure if this update is needed
           sys->solutionState(_current_ic_state) = sys->solutionState(0);
-        }
-        _aux->system().update(); // not sure if this update is needed
+
         _aux->solutionState(_current_ic_state) = _aux->solutionState(0);
       }
       _current_ic_state = 0;

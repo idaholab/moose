@@ -64,7 +64,7 @@ variable defined.
 
 ## Old and Older ICs
 
-The ICs system supports the ability to set ICs on old and older states. This can be useful for setting initial velocity or acceleration conditions. It can be set with the [!param](/ICs/ConstantIC/state) parameter and specifying `OLD` or `OLDER`.
+The ICs system supports the ability to set ICs on old and older states. This can be useful for initializing old and older states of variables needed for various time integration schemes. It can be set with the [!param](/ICs/ConstantIC/state) parameter and specifying `OLD` or `OLDER`.
 
 
 

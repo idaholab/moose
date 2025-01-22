@@ -29,7 +29,11 @@ public:
 
   static InputParameters validParams();
 
-  unsigned short & getState();
+  /**
+   * Retrieves the state of this initial condition.
+   * @return The state of this initial condition.
+   */
+  unsigned short getState() const;
 
 protected:
   // variable used when applying initial conditions to previous states
