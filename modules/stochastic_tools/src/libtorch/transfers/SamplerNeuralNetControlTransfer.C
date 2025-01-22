@@ -24,8 +24,6 @@ SamplerNeuralNetControlTransfer::validParams()
                              "LibtorchNeuralNetControl object on the subapp.");
 
   params.suppressParameter<MultiAppName>("from_multi_app");
-  // params.suppressParameter<MultiAppName>("multi_app");
-  // params.suppressParameter<MultiMooseEnum>("direction");
 
   params.addRequiredParam<UserObjectName>("trainer_name",
                                           "Trainer object that contains the neural networks."
@@ -57,7 +55,10 @@ SamplerNeuralNetControlTransfer::initialSetup()
 void
 SamplerNeuralNetControlTransfer::execute()
 {
-  for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
+  const auto n = getToMultiApp()->numGlobalApps();
+  for (MooseIndex(n) i = 0; i < n; i++)
+  {
+    // std::cout << "Do I have this app? " << i << " " << getToMultiApp()->hasLocalApp(i) << std::endl;
     if (getToMultiApp()->hasLocalApp(i))
     {
       // Get the control neural net from the trainer
@@ -76,7 +77,17 @@ SamplerNeuralNetControlTransfer::execute()
       // Copy and the neural net and execute it to get the initial values
       control_object->loadControlNeuralNet(trainer_nn);
       control_object->execute();
+
+      // const auto & named_params = trainer_nn.named_parameters();
+      // for (const auto & param_i : make_range(named_params.size()))
+      // {
+      //   // We cast the parameters into a 1D vector
+      //   std::cout << "Transferring " << Moose::stringify(std::vector<Real>(
+      //       named_params[param_i].value().data_ptr<Real>(),
+      //       named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel())) << std::endl;
+      // }
     }
+  }
 }
 
 void
