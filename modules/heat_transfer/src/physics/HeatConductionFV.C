@@ -68,6 +68,7 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("coeff") =
         getParam<MooseFunctorName>("thermal_conductivity_functor");
@@ -88,6 +89,7 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVBodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
     if (MooseUtils::parsesToReal(functor_name))
@@ -108,6 +110,7 @@ HeatConductionFV::addFVKernels()
     const std::string kernel_type =
         use_functors ? "FVFunctorHeatConductionTimeDerivative" : "FVHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     if (use_functors)
     {
