@@ -318,7 +318,7 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
   {
     if (_energy_wall_types[bc_ind] == "fixed-temperature")
     {
-      const std::string bc_type = "FVFunctorDirichletBC";
+      const std::string bc_type = "FVADFunctorDirichletBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
       params.set<MooseFunctorName>("functor") = _energy_wall_functors[bc_ind];
