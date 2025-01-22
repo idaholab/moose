@@ -4,7 +4,7 @@
 [Samplers]
   [dummy]
     type = CartesianProduct
-    linear_space_items = '0 0.01 5'
+    linear_space_items = '0 0.01 1'
   []
 []
 
@@ -42,23 +42,23 @@
     log_probability = 'storage/r_transfer:T_reporter:log_prob_top_flux:value'
     reward = 'storage/r_transfer:T_reporter:reward:value'
 
-    num_epochs = 400
-    update_frequency = 10
-    decay_factor = 0.9
+    num_epochs = 120
+    update_frequency = 2
+    decay_factor = 0.8
 
-    loss_print_frequency = 40
+    loss_print_frequency = 10
 
-    critic_learning_rate = 0.0005
-    num_critic_neurons_per_layer = '64 32'
+    critic_learning_rate = 0.005
+    num_critic_neurons_per_layer = '32 16'
 
-    control_learning_rate = 0.0005
+    control_learning_rate = 0.005
     num_control_neurons_per_layer = '32 16'
 
     # keep consistent with LibtorchNeuralNetControl
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '5e-5'
+    action_standard_deviations = '3e-2'
 
     standardize_advantage = true
 
@@ -79,7 +79,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 4000
+  num_steps = 4
 []
 
 [Outputs]
