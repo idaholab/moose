@@ -1,5 +1,5 @@
 cp_water_multiplier = 1e3
-mu_multiplier = 1e2
+mu_multiplier = 1e5
 
 [GlobalParams]
   # This parameter is used in numerous objects. It is often
@@ -31,10 +31,16 @@ mu_multiplier = 1e2
     top_right = '6.6 10.5 5'
     location = OUTSIDE
   []
+  [refine_water]
+    type = RefineBlockGenerator
+    input = add_outer_water
+    refinement = '1'
+    block = 'water'
+  []
 []
 
 [Problem]
-  nl_sys_names = 'nl0'
+  nl_sys_names = 'nl0 flow'
 []
 
 [Physics]
@@ -44,6 +50,7 @@ mu_multiplier = 1e2
         block = 'concrete'
         temperature_name = "T"
         system_names = 'nl0'
+        preconditioning = 'none'
 
         # Solve for steady state
         # It takes a while to heat up concrete
@@ -58,7 +65,8 @@ mu_multiplier = 1e2
         boundary_heat_fluxes = '${fparse 5e4 / 108}'
 
         fixed_convection_boundaries = "water_boundary_inwards air_boundary"
-        fixed_convection_T_fluid = "T_fluid 300"
+        # TODO: enable using a field instead of postprocessor
+        fixed_convection_T_fluid = "T_fluid_average 300"
         # Note: should come from a correlation
         fixed_convection_htc = "30 10"
       []
@@ -82,34 +90,41 @@ mu_multiplier = 1e2
     [Flow]
       [water]
         block = 'water'
-        # system_names = 'flow'
+        system_names = 'flow'
+        compressibility = 'incompressible'
 
-        initial_velocity = '1e-15 1e-15 1e-15'
+        initial_velocity = '1e-5 1e-5 1e-5'
+        initial_pressure = '1e5'
 
         # p only appears in a gradient term, and thus could be offset by any constant
         # We pin the pressure to avoid having this nullspace
         pin_pressure = true
-        pinned_pressure_type = 'average'
+        pinned_pressure_type = 'point-value'
+        pinned_pressure_point = '2 2 2'
+        pinned_pressure_value = '1e5'
 
         gravity = '0 0 -9.81'
-        boussinesq_approximation = true
-        # material property for reference temperature does not need to be AD material property
-        ref_temperature = 300
+        # boussinesq_approximation = true
+        # ref_temperature = 300
 
+      # wall_boundaries = 'water_boundary_inner water_boundary_outer'
+      # momentum_wall_types = 'noslip noslip'
         wall_boundaries = 'water_boundary'
-        momentum_wall_types = 'noslip'
+        momentum_wall_types = 'slip'
       []
     []
     [FluidHeatTransfer]
       [water]
         block = 'water'
-        # system_names = 'flow'
+        system_names = 'flow'
 
-        initial_temperature = 310
+        initial_temperature = 300
 
         # This is a rough coupling to heat conduction
         energy_wall_types = 'fixed-temperature'
         energy_wall_functors = 'T'
+
+        energy_scaling = 1e-5
       []
     []
   []
@@ -191,7 +206,7 @@ mu_multiplier = 1e2
     eigenstrain_name = eigenstrain
     temperature = "T"
     # Increased to have a more dramatic expansion
-    thermal_expansion_coeff = 1e-4
+    thermal_expansion_coeff = 1e-5
     block = 'concrete'
   []
 []
@@ -211,7 +226,7 @@ mu_multiplier = 1e2
   steady_state_detection = true
 
   # Solver parameters
-  solve_type = PJFNK
+  solve_type = NEWTON
   automatic_scaling = true
   # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   # petsc_options_value = 'hypre boomeramg 500'
@@ -221,8 +236,30 @@ mu_multiplier = 1e2
   line_search = none
 
   # Tolerances
-  nl_abs_tol = 1e-11
+  # Navier Stokes natural circulation will only converge so far
+  nl_abs_tol = 5e-7
 []
+
+[Postprocessors]
+  [T_fluid_average]
+    type = ElementAverageValue
+    variable = 'T_fluid'
+    block = 'water'
+  []
+[]
+
+# [Preconditioning]
+#   [thermomecha]
+#     nl_sys = 'nl0'
+#     petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+#     petsc_options_value = 'hypre boomeramg 500'
+#   []
+#   [flow]
+#     nl_sys = 'flow'
+#     petsc_options_iname = '-pc_type -pc_factor_shift_type'
+#     petsc_options_value = 'lu NONZERO'
+#   []
+# []
 
 [Outputs]
   [out]
