@@ -47,6 +47,7 @@ HeatConductionCG::addFEKernels()
   {
     const std::string kernel_type = "ADHeatConduction";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(parameters(), "thermal_conductivity");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_conduction", params);
@@ -66,6 +67,7 @@ HeatConductionCG::addFEKernels()
   {
     const std::string kernel_type = "BodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
     if (MooseUtils::parsesToReal(functor_name))
@@ -82,6 +84,7 @@ HeatConductionCG::addFEKernels()
   {
     const std::string kernel_type = "ADHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(parameters(), "density_name");
     params.applyParameter(parameters(), "specific_heat");
