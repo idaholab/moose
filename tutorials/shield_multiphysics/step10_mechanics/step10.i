@@ -12,7 +12,7 @@
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 
@@ -27,7 +27,7 @@
     type = Gravity
     variable = 'disp_z'
     value = '-9.81'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 
@@ -40,7 +40,7 @@
     eigenstrain_names = eigenstrain
     use_automatic_differentiation = true
     generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 
@@ -100,10 +100,11 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) arbitrary value
     poissons_ratio = .3 # arbitrary value
+    block = 'concrete concrete_and_Al'
   []
   [elastic_stress]
     type = ADComputeFiniteStrainElasticStress
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
   [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
@@ -113,12 +114,13 @@
     # inflated to get visible displacement
     # don't overdo it: 500K * alpha should be in the per-cent, max
     thermal_expansion_coeff = 2e-4 # arbitrary value
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
-  [density]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    prop_values = '2400' # kg/m3
+  # NOTE: This handles thermal expansion by coupling to the displacements
+  [concrete_density]
+    type = Density
+    density = '2400'
+    block = 'concrete concrete_and_Al'
   []
 []
 
@@ -126,6 +128,8 @@
   type = FEProblem
   # No kernels on the water domain
   kernel_coverage_check = false
+  # No materials defined on the water domain
+  material_coverage_check = false
 []
 
 [Executioner]

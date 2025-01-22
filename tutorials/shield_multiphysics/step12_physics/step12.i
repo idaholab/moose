@@ -52,7 +52,7 @@ h_water = 30
   [HeatConduction]
     [FiniteElement]
       [concrete]
-        block = 'concrete'
+        block = 'concrete concrete_and_Al'
         temperature_name = "T"
         system_names = 'nl0'
         preconditioning = 'none'
@@ -68,7 +68,8 @@ h_water = 30
         boundary_temperatures = '300'
 
         heat_flux_boundaries = 'inner_cavity'
-        boundary_heat_fluxes = '${fparse 5e4 / 108}'
+        # 50 kW from radiation, using real surface
+        boundary_heat_fluxes = '${fparse 5e4 / 136}'
 
         fixed_convection_boundaries = "water_boundary_inwards air_boundary"
         # TODO: enable using a field instead of postprocessor
@@ -88,7 +89,7 @@ h_water = 30
         eigenstrain_names = eigenstrain
         use_automatic_differentiation = true
         generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
-        block = 'concrete'
+        block = 'concrete concrete_and_Al'
       []
     []
   []
@@ -140,7 +141,7 @@ h_water = 30
     type = ADGravity
     variable = 'disp_z'
     value = '-9.81'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 # TODO: add volumetric heat deposition, either in the Kernels or Physics blocks
@@ -196,10 +197,19 @@ h_water = 30
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
     specific_heat = '1170'
   []
+  [concrete_and_Al]
+    type = ADHeatConductionMaterial
+    block = 'concrete_and_Al'
+    temp = 'T'
+    # Al: 175 W/m/K, concrete: 2.5 W/m/K
+    thermal_conductivity_temperature_function = '45'
+    specific_heat = '1170'
+  []
   # NOTE: This handles thermal expansion by coupling to the displacements
   [concrete_density]
     type = ADDensity
     density = '2400'
+    block = 'concrete concrete_and_Al'
   []
 
   # Materials for solid mechanics
@@ -207,11 +217,11 @@ h_water = 30
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
   [elastic_stress]
     type = ADComputeFiniteStrainElasticStress
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
   [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
@@ -220,7 +230,7 @@ h_water = 30
     temperature = "T"
     # Increased to have a more dramatic expansion
     thermal_expansion_coeff = 1e-5
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 
@@ -243,11 +253,6 @@ h_water = 30
   # Solver parameters
   solve_type = NEWTON
   automatic_scaling = true
-  # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  # petsc_options_value = 'hypre boomeramg 500'
-  # Direct solve is useful for debugging convergence issues
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
   line_search = none
 
   # Tolerances
@@ -289,28 +294,34 @@ h_water = 30
   [T_solid_average]
     type = ElementAverageValue
     variable = 'T'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [max_dispx]
     type = ElementExtremeValue
     variable = 'disp_x'
     value_type = 'max_abs'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [max_dispy]
     type = ElementExtremeValue
     variable = 'disp_y'
     value_type = 'max_abs'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [max_dispz]
     type = ElementExtremeValue
     variable = 'disp_z'
     value_type = 'max_abs'
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_Tsolid]
+    type = ElementExtremeValue
+    variable = 'T'
+    block = 'concrete concrete_and_Al'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

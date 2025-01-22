@@ -8,7 +8,7 @@
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete'
+    block = 'concrete concrete_and_Al'
   []
 []
 
