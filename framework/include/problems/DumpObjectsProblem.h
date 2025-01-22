@@ -49,7 +49,7 @@ public:
   // output data (we expect to call this from the DumpObjectsAction)
   void printObjects();
 
-  virtual void initialSetup() override {}
+  virtual void initialSetup() override;
   virtual void advanceState() override {}
   virtual void timestepSetup() override {}
   virtual void execute(const ExecFlagType & /*exec_type*/) override {}
