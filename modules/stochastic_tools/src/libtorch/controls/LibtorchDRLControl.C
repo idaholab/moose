@@ -78,8 +78,13 @@ LibtorchDRLControl::execute()
     // Evaluate the neural network to get the expected control value
     torch::Tensor output_tensor = _nn->forward(input_tensor);
 
+    // std::cout << "Input " << input_tensor << std::endl;
+    // std::cout << "Output " << output_tensor << std::endl;
+
     // Sample control value (action) from Gaussian distribution
     torch::Tensor action = at::normal(output_tensor, _std);
+
+    // std::cout << "Action " << action << std::endl;
 
     // Compute log probability
     torch::Tensor log_probability = computeLogProbability(action, output_tensor);

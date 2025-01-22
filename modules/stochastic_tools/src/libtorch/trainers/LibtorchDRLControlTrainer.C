@@ -158,6 +158,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _filename_base(isParamValid("filename_base") ? getParam<std::string>("filename_base") : ""),
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
+    _average_episode_reward(0.0),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
     _update_counter(_update_frequency)
@@ -265,15 +266,8 @@ LibtorchDRLControlTrainer::execute()
     convertDataToTensor(_output_data, _output_tensor);
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
 
-    // std::cout << "Input tensor" << std::endl << _input_tensor << std::endl;
-    // std::cout << "Signal tensor" << std::endl << _output_tensor << std::endl;
-    // std::cout << "Logprob tensor" << std::endl << _log_probability_tensor << std::endl;
-    // std::cout << "reward" << std::endl << Moose::stringify(_reward_data) << std::endl;
-
     // Discard (detach) the gradient info for return data
     LibtorchUtils::vectorToTensor<Real>(_return_data, _return_tensor, true);
-
-    // std::cout << "Return tensor" << std::endl << _return_tensor << std::endl;
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
@@ -332,56 +326,100 @@ LibtorchDRLControlTrainer::computeRewardToGo(std::vector<Real> & data,
 void
 LibtorchDRLControlTrainer::trainController()
 {
-  // Define the optimizers for the training
-  torch::optim::Adam actor_optimizer(_control_nn->parameters(),
-                                     torch::optim::AdamOptions(_control_learning_rate));
-
-  torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
-                                      torch::optim::AdamOptions(_critic_learning_rate));
-
-  // Compute the approximate value (return) from the critic neural net and use it to compute an
-  // advantage
-  auto value = evaluateValue(_input_tensor).detach();
-  auto advantage = _return_tensor - value;
-
-  // If requested, standardize the advantage
-  if (_standardize_advantage)
-    advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
-
-  for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
+  // We only train on the rank 0 partition. Libtorch should still be able to
+  // fetch the local threads which are available.
+  if (processor_id() == 0)
   {
-    // Get the approximate return from the neural net again (this one does have an associated
-    // gradient)
-    value = evaluateValue(_input_tensor);
-    // Get the approximate logarithmic action probability using the control neural net
-    auto curr_log_probability = evaluateAction(_input_tensor, _output_tensor);
+    // std::cout << "Training" << std::endl;
+    // std::cout << "Input tensor" << std::endl << _input_tensor << std::endl;
+    // std::cout << "Signal tensor" << std::endl << _output_tensor << std::endl;
+    // std::cout << "Logprob tensor" << std::endl << _log_probability_tensor << std::endl;
+    // std::cout << "reward" << std::endl << Moose::stringify(_reward_data) << std::endl;
+    // std::cout << "Return tensor" << std::endl << _return_tensor << std::endl;
 
-    // Prepare the ratio by using the e^(logx-logy)=x/y expression
-    auto ratio = (curr_log_probability - _log_probability_tensor).exp();
+    // Define the optimizers for the training
+    torch::optim::Adam actor_optimizer(_control_nn->parameters(),
+                                      torch::optim::AdamOptions(_control_learning_rate));
 
-    // Use clamping for limiting
-    auto surr1 = ratio * advantage;
-    auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage;
+    torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
+                                        torch::optim::AdamOptions(_critic_learning_rate));
 
-    // Compute loss values for the critic and the control neural net
-    auto actor_loss = -torch::min(surr1, surr2).mean();
-    auto critic_loss = torch::mse_loss(value, _return_tensor);
+    // Compute the approximate value (return) from the critic neural net and use it to compute an
+    // advantage
+    auto value = evaluateValue(_input_tensor).detach();
+    auto advantage = _return_tensor - value;
 
-    // Update the weights in the neural nets
-    actor_optimizer.zero_grad();
-    actor_loss.backward();
-    actor_optimizer.step();
+    // If requested, standardize the advantage
+    if (_standardize_advantage)
+      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
 
-    critic_optimizer.zero_grad();
-    critic_loss.backward();
-    critic_optimizer.step();
+    for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
+    {
+      // Get the approximate return from the neural net again (this one does have an associated
+      // gradient)
+      value = evaluateValue(_input_tensor);
+      // Get the approximate logarithmic action probability using the control neural net
+      auto curr_log_probability = evaluateAction(_input_tensor, _output_tensor);
 
-    // print loss per epoch
-    if (_loss_print_frequency)
-      if (epoch % _loss_print_frequency == 0)
-        _console << "Epoch: " << epoch << " | Actor Loss: " << COLOR_GREEN
-                 << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: " << COLOR_GREEN
-                 << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
+      // Prepare the ratio by using the e^(logx-logy)=x/y expression
+      auto ratio = (curr_log_probability - _log_probability_tensor).exp();
+
+      // Use clamping for limiting
+      auto surr1 = ratio * advantage;
+      auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage;
+
+      // Compute loss values for the critic and the control neural net
+      auto actor_loss = -torch::min(surr1, surr2).mean();
+      auto critic_loss = torch::mse_loss(value, _return_tensor);
+
+      // Update the weights in the neural nets
+      actor_optimizer.zero_grad();
+      actor_loss.backward();
+      actor_optimizer.step();
+
+      critic_optimizer.zero_grad();
+      critic_loss.backward();
+      critic_optimizer.step();
+
+      //           const auto & named_params = _control_nn->named_parameters();
+      // for (const auto & param_i : make_range(named_params.size()))
+      // {
+      //   // We cast the parameters into a 1D vector
+      //   std::cout << Moose::stringify(std::vector<Real>(
+      //       named_params[param_i].value().data_ptr<Real>(),
+      //       named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel())) << std::endl;
+      // }
+
+      // print loss per epoch
+      if (_loss_print_frequency)
+        if (epoch % _loss_print_frequency == 0)
+        {
+
+          _console << "Epoch: " << epoch << " | Actor Loss: " << COLOR_GREEN
+                  << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: " << COLOR_GREEN
+                  << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
+        }
+    }
+  }
+
+  // It is time to send the trained data to every other processor so that the neural networks
+  // are the same on all ranks. TODO: Make sure this can be done on a GPU as well.
+  for (auto & param : _control_nn->named_parameters())
+  {
+    MPI_Bcast(param.value().data_ptr(),
+    param.value().numel(),
+    MPI_DOUBLE,
+    0,
+    _communicator.get());
+  }
+
+  for (auto & param : _critic_nn->named_parameters())
+  {
+    MPI_Bcast(param.value().data_ptr(),
+    param.value().numel(),
+    MPI_DOUBLE,
+    0,
+    _communicator.get());
   }
 
   // Save the controller neural net so our controller can read it, we also save the critic if we

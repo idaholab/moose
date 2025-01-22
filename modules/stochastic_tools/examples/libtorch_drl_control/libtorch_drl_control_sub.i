@@ -117,7 +117,7 @@ air_effective_k = 0.5 # W/(m K)
 []
 
 [Controls]
-  inactive = 'src_control_final'
+  # inactive = 'src_control_final'
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/top_flux/value"
@@ -127,41 +127,41 @@ air_effective_k = 0.5 # W/(m K)
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '5e-5'
+    action_standard_deviations = '3e-2'
     action_scaling_factors = 20
 
     execute_on = 'TIMESTEP_BEGIN'
   []
-  [src_control_final]
-    type = LibtorchNeuralNetControl
+  # [src_control_final]
+  #   type = LibtorchNeuralNetControl
 
-    filename = 'mynet_control.net'
-    num_neurons_per_layer = '16 6'
-    activation_function = 'relu'
+  #   filename = 'mynet_control.net'
+  #   num_neurons_per_layer = '16 6'
+  #   activation_function = 'relu'
 
-    parameters = "BCs/top_flux/value"
-    responses = 'center_temp_tend'
+  #   parameters = "BCs/top_flux/value"
+  #   responses = 'center_temp_tend'
 
-    # keep consistent with LibtorchDRLControlTrainer
-    input_timesteps = 1
-    response_scaling_factors = '0.03'
-    response_shift_factors = '290'
-    action_standard_deviations = '5e-5'
-    action_scaling_factors = 20
+  #   # keep consistent with LibtorchDRLControlTrainer
+  #   input_timesteps = 1
+  #   response_scaling_factors = '0.03'
+  #   response_shift_factors = '290'
+  #   action_standard_deviations = '5e-5'
+  #   action_scaling_factors = 20
 
-    execute_on = 'TIMESTEP_BEGIN'
-  []
+  #   execute_on = 'TIMESTEP_BEGIN'
+  # []
 []
 
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
   line_search = 'none'
 
-  nl_rel_tol = 1e-7
+  nl_rel_tol = 1e-6
 
   start_time = 0.0
   end_time = 86400
