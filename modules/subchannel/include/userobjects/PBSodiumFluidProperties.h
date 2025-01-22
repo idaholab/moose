@@ -35,8 +35,6 @@ public:
 
   virtual Real T_from_p_h(Real temperature, Real enthalpy) const override;
 
-#pragma GCC diagnostic pop
-
 protected:
   static const std::vector<Real> _temperature_vec;
   static const std::vector<Real> _e_vec;
