@@ -83,9 +83,8 @@ public:
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {
-    unsigned int counts = 0;
-    unsigned int timestep_counts = 0;
-    unsigned int total_counts = 0;
+    unsigned int counts;
+    unsigned int total_counts;
   };
 
   /// Access the private solution invalidity counts
