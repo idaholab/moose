@@ -1,8 +1,9 @@
-cp_multiplier = 1e-6
-cp_water_multiplier = 1e-1
+cp_water_multiplier = 1e-4
+mu_multiplier = 1
 
-# this is in lieu of a turbulence model for simplicity
-mu_multiplier = 1e3
+# Notes:
+# While it solves, it's clearly not refined enough to show the true behavior
+# See step 7c
 
 [Mesh]
   [fmg]
@@ -10,16 +11,9 @@ mu_multiplier = 1e3
     file = '../step03_boundary_conditions/mesh_in.e'
   []
 
-  [pin_node]
-    type = ExtraNodesetGenerator
-    new_boundary = 'pinned_node'
-    nodes = '2000'
-    input = fmg
-  []
-
   [add_inner_water]
     type = SideSetsFromBoundingBoxGenerator
-    input = pin_node
+    input = 'fmg'
     included_boundaries = 'water_boundary'
     boundary_new = water_boundary_inner
     bottom_left = '2.5 2.5 1'
@@ -56,30 +50,41 @@ mu_multiplier = 1e3
 []
 
 [Variables]
-  [velocity]
-    family = LAGRANGE_VEC
+  [vel_x]
+    type = INSFVVelocityVariable
     block = 'water'
+    initial_condition = 1e-4
   []
-  [p]
+  [vel_y]
+    type = INSFVVelocityVariable
     block = 'water'
+    initial_condition = 1e-4
   []
-  [T_water]
+  [vel_z]
+    type = INSFVVelocityVariable
+    block = 'water'
+    initial_condition = 1e-4
+  []
+  [pressure]
+    type = INSFVPressureVariable
+    block = 'water'
+    initial_condition = 1e5
+  []
+  [T_fluid]
+    type = INSFVEnergyVariable
     initial_condition = 300
     block = 'water'
+    scaling = 1e-05
   []
-[]
-
-[ICs]
-  [velocity]
-    type = VectorConstantIC
-    x_value = 1e-15
-    y_value = 1e-15
-    z_value = 1e-15
-    variable = velocity
+  [lambda]
+    type = MooseVariableScalar
+    family = SCALAR
+    order = FIRST
   []
 []
 
 [Kernels]
+  # We don't need those kernels to run the water-only problem
   # Solid heat conduction
   # [diffusion_concrete]
   #   type = ADHeatConduction
@@ -89,128 +94,201 @@ mu_multiplier = 1e3
   #   type = ADHeatConductionTimeDerivative
   #   variable = T
   # []
+[]
 
-  # Fluid flow equations: mass
-  [mass]
-    type = INSADMass
-    variable = p
-    block = 'water'
-  []
-  [mass_pspg]
-    type = INSADMassPSPG
-    variable = p
-  []
+[GlobalParams]
+  velocity_interp_method = rc
+  rhie_chow_user_object = ins_rhie_chow_interpolator
+  rho = rho
+[]
 
-  # # Fluid flow: momentum
-  [momentum_time]
-    type = INSADMomentumTimeDerivative
-    variable = velocity
+[FVKernels]
+  [water_ins_mass_advection]
+    type = INSFVMassAdvection
+    advected_interp_method = upwind
+    block = water
+    variable = pressure
   []
-  [momentum_convection]
-    type = INSADMomentumAdvection
-    variable = velocity
+  [water_ins_mass_pressure_pin]
+    type = FVPointValueConstraint
+    lambda = lambda
+    phi0 = 1e5
+    point = '2 2 2'
+    variable = pressure
   []
-  [momentum_viscous]
-    type = INSADMomentumViscous
-    variable = velocity
+  [water_ins_momentum_time_vel_x]
+    type = INSFVMomentumTimeDerivative
+    block = water
+    momentum_component = x
+    variable = vel_x
   []
-  [momentum_pressure]
-    type = INSADMomentumPressure
-    variable = velocity
-    pressure = p
-    integrate_p_by_parts = true
+  [water_ins_momentum_time_vel_y]
+    type = INSFVMomentumTimeDerivative
+    block = water
+    momentum_component = y
+    variable = vel_y
   []
-  [buoyancy]
-    type = INSADBoussinesqBodyForce
-    variable = velocity
-    temperature = T_water
-    gravity = '0 0 -9.81 '
-    ref_temp = 'temp_ref'
+  [water_ins_momentum_time_vel_z]
+    type = INSFVMomentumTimeDerivative
+    block = water
+    momentum_component = z
+    variable = vel_z
   []
-  [gravity]
-    type = INSADGravityForce
-    variable = velocity
+  [water_ins_momentum_advection_x]
+    type = INSFVMomentumAdvection
+    advected_interp_method = upwind
+    block = water
+    momentum_component = x
+    variable = vel_x
+  []
+  [water_ins_momentum_advection_y]
+    type = INSFVMomentumAdvection
+    advected_interp_method = upwind
+    block = water
+    momentum_component = y
+    variable = vel_y
+  []
+  [water_ins_momentum_advection_z]
+    type = INSFVMomentumAdvection
+    advected_interp_method = upwind
+    block = water
+    momentum_component = z
+    variable = vel_z
+  []
+  [water_ins_momentum_diffusion_x]
+    type = INSFVMomentumDiffusion
+    block = water
+    momentum_component = x
+    mu = mu
+    variable = vel_x
+  []
+  [water_ins_momentum_diffusion_y]
+    type = INSFVMomentumDiffusion
+    block = water
+    momentum_component = y
+    mu = mu
+    variable = vel_y
+  []
+  [water_ins_momentum_diffusion_z]
+    type = INSFVMomentumDiffusion
+    block = water
+    momentum_component = z
+    mu = mu
+    variable = vel_z
+  []
+  [water_ins_momentum_pressure_x]
+    type = INSFVMomentumPressure
+    block = water
+    momentum_component = x
+    pressure = pressure
+    variable = vel_x
+  []
+  [water_ins_momentum_pressure_y]
+    type = INSFVMomentumPressure
+    block = water
+    momentum_component = y
+    pressure = pressure
+    variable = vel_y
+  []
+  [water_ins_momentum_pressure_z]
+    type = INSFVMomentumPressure
+    block = water
+    momentum_component = z
+    pressure = pressure
+    variable = vel_z
+  []
+  [water_ins_momentum_gravity_z]
+    type = INSFVMomentumGravity
+    block = water
     gravity = '0 0 -9.81'
+    momentum_component = z
+    variable = vel_z
   []
-  [momentum_supg]
-    type = INSADMomentumSUPG
-    variable = velocity
-    velocity = velocity
+  [water_ins_momentum_boussinesq_z]
+    type = INSFVMomentumBoussinesq
+    T_fluid = T_fluid
+    alpha_name = alpha
+    block = water
+    gravity = '0 0 -9.81'
+    momentum_component = z
+    ref_temperature = 300
+    rho = 955.7
+    variable = vel_z
   []
 
-  # # Fluid flow: energy
-  [temperature_time]
-    type = INSADHeatConductionTimeDerivative
-    variable = T_water
+  # Energy conservation equation
+  [water_ins_energy_time]
+    type = INSFVEnergyTimeDerivative
+    block = water
+    dh_dt = dh_dt
+    rho = rho
+    variable = T_fluid
   []
-  [temperature_advection]
-    type = INSADEnergyAdvection
-    variable = T_water
+  [water_ins_energy_advection]
+    type = INSFVEnergyAdvection
+    advected_interp_method = upwind
+    block = water
+    variable = T_fluid
   []
-  [temperature_conduction]
-    type = ADHeatConduction
-    variable = T_water
-    thermal_conductivity = 'k'
-  []
-  [temperature_supg]
-    type = INSADEnergySUPG
-    variable = T_water
-    velocity = velocity
+  [water_ins_energy_diffusion_all]
+    type = FVDiffusion
+    block = water
+    coeff = k
+    variable = T_fluid
   []
 []
 
 [Materials]
-  [concrete]
-    type = ADHeatConductionMaterial
-    block = 'concrete'
-    temp = 'T'
-    # we specify a function of time, temperature is passed as the time argument
-    # in the material
-    thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-    specific_heat = '${fparse cp_multiplier * 1170}'
-  []
-  [density]
-    type = ADGenericConstantMaterial
-    block = 'concrete'
-    prop_names = 'density'
-    prop_values = '2400' # kg / m3
-  []
+  # We don't need the solid materials to run the water-only problem
+  # [concrete]
+  #   type = ADHeatConductionMaterial
+  #   block = 'concrete'
+  #   temp = 'T'
+  #   # we specify a function of time, temperature is passed as the time argument
+  #   # in the material
+  #   thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
+  #   specific_heat = '${fparse cp_multiplier * 1170}'
+  # []
+  # [density]
+  #   type = ADGenericConstantMaterial
+  #   block = 'concrete'
+  #   prop_names = 'density'
+  #   prop_values = '2400' # kg / m3
+  # []
+[]
 
+[FunctorMaterials]
   [water]
-    type = ADGenericConstantMaterial
+    type = ADGenericFunctorMaterial
     block = 'water'
     prop_names = 'rho    k     cp      mu alpha_wall'
     prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse 7.98e-4 * mu_multiplier} 30'
   []
   [boussinesq_params]
-    type = ADGenericConstantMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'alpha '
     prop_values = '2.9e-3'
   []
-  [boussinesq_params_ad]
-    type = GenericConstantMaterial
-    prop_names = 'temp_ref'
-    prop_values = ' 300'
-  []
-  [ins_mat]
-    type = INSADStabilized3Eqn
-    block = 'water'
-    velocity = velocity
-    pressure = p
-    temperature = T_water
-    # has_boussinesq = true
+  [water_ins_enthalpy_material]
+    type = INSFVEnthalpyFunctorMaterial
+    block = water
+    cp = cp
+    execute_on = ALWAYS
+    outputs = none
+    temperature = T_fluid
   []
 []
 
 [BCs]
+  # We don't need the solid BCs to run the water-only problem
   # Solid
   # [from_reactor]
   #   type = FunctionNeumannBC
   #   variable = T
   #   boundary = inner_cavity
-  #   # 100 kW reactor, 108 m2 cavity area
+  #   # 5MW reactor, 50kW dissipated by radiation, 136 m2 cavity area
   #   # ramp up over 10s
-  #   function = '1e5 / 108 * min(t / 10, 1)'
+  #   function = '5e4 / 136 * min(t / 10, 1)'
   # []
   # [air_convection]
   #   type = ADConvectiveHeatFluxBC
@@ -236,30 +314,44 @@ mu_multiplier = 1e3
   #   # The heat transfer coefficient should be obtained from a correlation
   #   heat_transfer_coefficient = 30
   # []
-  [heat_from_reactor]
-    type = NeumannBC
-    variable = 'T_water'
-    value = '1e3'
-    boundary = 'water_boundary_inner'
+[]
+
+[FVBCs]
+  [vel_x_water_boundary]
+    type = INSFVNoSlipWallBC
+    boundary = water_boundary
+    function = 0
+    variable = vel_x
   []
-  [concrete_water_outer_fixed]
-    type = DirichletBC
-    variable = T_water
-    value = 300
-    boundary = 'water_boundary_outer'
+  [vel_y_water_boundary]
+    type = INSFVNoSlipWallBC
+    boundary = water_boundary
+    function = 0
+    variable = vel_y
+  []
+  [vel_z_water_boundary]
+    type = INSFVNoSlipWallBC
+    boundary = water_boundary
+    function = 0
+    variable = vel_z
   []
 
-  # Water
-  [no_slip]
-    type = VectorFunctionDirichletBC
-    variable = velocity
-    boundary = 'water_boundary'
+  [T_fluid_water_boundary]
+    type = FVFunctorNeumannBC
+    boundary = water_boundary
+    functor = ${fparse 5e4 / 136}
+    variable = T_fluid
   []
-  [pressure_pin]
-    type = DirichletBC
-    variable = p
-    boundary = 'pinned_node'
-    value = 0
+[]
+
+[UserObjects]
+  [ins_rhie_chow_interpolator]
+    type = INSFVRhieChowInterpolator
+    pressure = 'pressure'
+    u = 'vel_x'
+    v = 'vel_y'
+    w = 'vel_z'
+    block = 'water'
   []
 []
 
@@ -273,11 +365,13 @@ mu_multiplier = 1e3
   automatic_scaling = true
   off_diagonals_in_auto_scaling = true
 
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
   line_search = none
-  # petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  # petsc_options_value = 'lu NONZERO'
+  # Direct solve works for everything small enough
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
+  # These worked well for diffusive problems, not so much for advection
+  # petsc_options_iname = '-pc_type -pc_hypre_type'
+  # petsc_options_value = 'hypre boomeramg'
 
   nl_abs_tol = 1e-8
 

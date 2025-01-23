@@ -162,6 +162,10 @@
 
 !---
 
+!include workshop/numerical/fvm_overview.md
+
+!---
+
 !include user_workshop/problem/step07.md
 
 !---
@@ -282,10 +286,6 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 !---
 
 !include user_workshop/systems_user/index.md
-
-!---
-
-!include workshop/numerical/fvm_overview.md
 
 !---
 
