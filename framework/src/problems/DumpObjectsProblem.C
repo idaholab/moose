@@ -13,6 +13,10 @@
 #include "DumpObjectsLinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "InputParameters.h"
+#include "NonlinearSystem.h"
+#include "LinearSystem.h"
+#include "SolverSystem.h"
+#include "Function.h"
 #include <sstream>
 
 #include "libmesh/string_to_enum.h"
