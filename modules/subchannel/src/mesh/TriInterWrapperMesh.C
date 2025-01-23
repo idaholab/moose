@@ -98,14 +98,14 @@ TriInterWrapperMesh::buildMesh()
 unsigned int
 TriInterWrapperMesh::getPinIndexFromPoint(const Point & /*p*/) const
 {
-  // TODO: implement routine that returns rod index given a point in 3D space
+  // TODO: implement routine that returns Pin index given a point in 3D space
   return 0;
 }
 
 unsigned int
 TriInterWrapperMesh::pinIndex(const Point & /*p*/) const
 {
-  // TODO: implement routine that returns rod index given a point in 3D space
+  // TODO: implement routine that returns Pin index given a point in 3D space
   return 0;
 }
 
@@ -116,7 +116,7 @@ TriInterWrapperMesh::rodPositions(std::vector<Point> & positions,
                                   Point center)
 {
   /// Defining parameters
-  // distance: it is the distance to the next rod
+  // distance: it is the distance to the next Pin
   //
   Real theta = 0.0;
   Real dtheta = 0.0;

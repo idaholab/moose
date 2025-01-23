@@ -48,9 +48,9 @@ public:
   virtual const unsigned int & getNumOfRings() const { return _n_rings; }
 
   /**
-   * Return rod index given subchannel index and local neighbor index
+   * Return Pin index given subchannel index and local neighbor index
    */
-  virtual const unsigned int & getRodIndex(const unsigned int channel_idx,
+  virtual const unsigned int & getPinIndex(const unsigned int channel_idx,
                                            const unsigned int neighbor_idx)
   {
     return _chan_to_pin_map[channel_idx][neighbor_idx];

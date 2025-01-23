@@ -249,7 +249,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
     auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
     const Real lambda = 7.0;
 
-    // Find the coefficients of bare rod bundle friction factor
+    // Find the coefficients of bare Pin bundle friction factor
     // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume
     // 1
     if (subch_type == EChannelType::CENTER)
@@ -272,9 +272,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
         b1T = 0.09059;
         b2T = -0.09926;
       }
-      // laminar flow friction factor for bare rod bundle - Center subchannel
+      // laminar flow friction factor for bare Pin bundle - Center subchannel
       cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2);
-      // turbulent flow friction factor for bare rod bundle - Center subchannel
+      // turbulent flow friction factor for bare Pin bundle - Center subchannel
       cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2);
     }
     else if (subch_type == EChannelType::EDGE)
@@ -297,9 +297,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
         b1T = 0.04199;
         b2T = -0.04428;
       }
-      // laminar flow friction factor for bare rod bundle - Edge subchannel
+      // laminar flow friction factor for bare Pin bundle - Edge subchannel
       cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
-      // turbulent flow friction factor for bare rod bundle - Edge subchannel
+      // turbulent flow friction factor for bare Pin bundle - Edge subchannel
       cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
     }
     else
@@ -322,9 +322,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
         b1T = 0.02681;
         b2T = -0.03411;
       }
-      // laminar flow friction factor for bare rod bundle - Corner subchannel
+      // laminar flow friction factor for bare Pin bundle - Corner subchannel
       cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
-      // turbulent flow friction factor for bare rod bundle - Corner subchannel
+      // turbulent flow friction factor for bare Pin bundle - Corner subchannel
       cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
     }
 

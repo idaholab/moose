@@ -25,11 +25,11 @@ public:
 protected:
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;
-  /// unheated length of the fuel rod at the entry of the assembly
+  /// unheated length of the fuel Pin at the entry of the assembly
   Real _unheated_length_entry;
-  /// heated length of the fuel rod
+  /// heated length of the fuel Pin
   Real _heated_length;
-  /// unheated length of the fuel rod at the exit of the assembly
+  /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;

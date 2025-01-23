@@ -119,7 +119,7 @@ SCMQuadPowerIC::initialSetup()
     }
   }
 
-  // if a rod has zero power (_ref_qprime(j, i) = 0) then I need to avoid dividing by zero. I
+  // if a Pin has zero power (_ref_qprime(j, i) = 0) then I need to avoid dividing by zero. I
   // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
   // _ref_qprime(j, i) = 0.0
   for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
@@ -154,7 +154,7 @@ SCMQuadPowerIC::value(const Point & p)
   {
     // project axial heat rate on subchannels
     auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
-    // if we are adjacent to the heated part of the fuel rod
+    // if we are adjacent to the heated part of the fuel Pin
     if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
     {
       auto heat_rate = 0.0;

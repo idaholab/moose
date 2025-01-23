@@ -14,12 +14,12 @@
 /**
  * Constant auxiliary value
  */
-class PostprocessorConstantAux : public AuxKernel
+class PostprocessorAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  PostprocessorConstantAux(const InputParameters & parameters);
+  PostprocessorAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
