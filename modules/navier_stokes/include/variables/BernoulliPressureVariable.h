@@ -64,9 +64,11 @@ protected:
   /// The density
   const Moose::Functor<ADReal> * _rho;
 
-  std::vector<BoundaryID> _pressure_drop_sidesets;
+  std::vector<BoundaryName> _pressure_drop_sidesets;
 
-  const std::set<BoundaryID> _pressure_drop_sideset_ids;
+  std::vector<Real> pressure_drop_form_factors;
+
+  const std::vector<BoundaryID> _pressure_drop_sideset_ids;
 
   std::vector<Real> _pressure_drop_form_factors;
 

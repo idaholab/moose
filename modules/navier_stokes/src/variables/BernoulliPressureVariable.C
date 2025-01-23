@@ -45,8 +45,8 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _eps(nullptr),
     _rho(nullptr),
     _pressure_drop_sidesets(getParam<std::vector<BoundaryName>>("pressure_drop_sidesets")),
-    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs(_pressure_drop_sidesets)),
-    _pressure_drop_form_factors(getParam<std::vector<Real>>(pressure_drop_form_factors)),
+    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs( _pressure_drop_sidesets)),
+    _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
     _theBoundaries(this->_mesh.getBoundaryIDs()),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
@@ -181,8 +181,8 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
  
   for(int i =0; i < num_pressure_drop_sidesets, i++; ){
     int isItBoundary = 0;
-    for(int j=0; j < num_boundaries, j++;){;
-        if (_pressure_drop_sideset_ids[i] == _theBoundaries[j])
+    for(const auto & bd_id : _theBoundaries){
+        if (_pressure_drop_sideset_ids[i] == bd_id)
     {     isItBoundary = 1;
     }
     }
@@ -191,7 +191,7 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
       factor_downwind += _pressure_drop_form_factors[i];
     }
     }
-  }
+  
 
   const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
@@ -210,4 +210,5 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
                                    : (*this)(makeElemArg(fi.elemPtr()), time);
 
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
+}
 
