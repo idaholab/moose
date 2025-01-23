@@ -37,7 +37,7 @@ SCMTriWettedPerimIC::value(const Point & p)
   auto wire_lead_length = _mesh.getWireLeadLength();
   auto rod_circumference = libMesh::pi * pin_diameter;
   auto wire_circumference = libMesh::pi * wire_diameter;
-  auto gap = _mesh.getDuctToRodGap();
+  auto gap = _mesh.getDuctToPinGap();
   auto theta = std::acos(wire_lead_length /
                          std::sqrt(std::pow(wire_lead_length, 2) +
                                    std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));

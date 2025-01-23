@@ -31,7 +31,7 @@ TriInterWrapperFlowAreaIC::value(const Point & p)
 {
   auto pitch = _mesh.getPitch();
   auto flat_to_flat = _mesh.getSideX();
-  auto gap = _mesh.getDuctToRodGap();
+  auto gap = _mesh.getDuctToPinGap();
   auto element_side = flat_to_flat * std::tan(libMesh::pi / 6.0);
   auto tight_side_bypass = _mesh.getIsTightSide();
   auto i = _mesh.getSubchannelIndexFromPoint(p);
