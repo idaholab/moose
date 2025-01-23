@@ -29,7 +29,7 @@ public:
   virtual bool pinMeshExist() const override { return false; }
   virtual bool ductMeshExist() const override { return false; }
 
-  virtual const Real & getDuctToRodGap() const { return _duct_to_pin_gap; }
+  virtual const Real & getDuctToPinGap() const { return _duct_to_pin_gap; }
 
   /**
    * Return Pin index given inter_wrapper index and local neighbor index
