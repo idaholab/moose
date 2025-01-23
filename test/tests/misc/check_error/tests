@@ -1186,5 +1186,7 @@
 
     requirement = 'The system shall report a helpful error when the dump parameter does not match any valid parameters'
     issues = '#26714'
+    # See #29735
+    valgrind = none
   []
 []
