@@ -265,6 +265,19 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
     _fp_secondary[i] = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_secondary_names[i]);
 }
 
+const SinglePhaseFluidProperties &
+IdealRealGasMixtureFluidProperties::getPrimaryFluidProperties() const
+{
+  return *_fp_primary;
+}
+
+const SinglePhaseFluidProperties &
+IdealRealGasMixtureFluidProperties::getSecondaryFluidProperties(unsigned int i) const
+{
+  mooseAssert(i < getNumberOfSecondaryVapors(), "Requested secondary index too high.");
+  return *_fp_secondary[i];
+}
+
 Real
 IdealRealGasMixtureFluidProperties::T_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
