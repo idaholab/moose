@@ -78,9 +78,9 @@ public:
   virtual const unsigned int & getNumOfGapsPerLayer() const = 0;
 
   /**
-   * Return the number of pins
+   * Return the number of assemblies
    */
-  virtual const unsigned int & getNumOfPins() const = 0;
+  virtual const unsigned int & getNumOfAssemblies() const = 0;
 
   /**
    * Return a pair of inter-wrapper indices for a given gap index

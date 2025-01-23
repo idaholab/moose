@@ -7,7 +7,7 @@ T_in = 297.039 # K
   [bisonMesh]
     type = GeneratedMeshGenerator
     dim = 2
-    xmax = 0.0060325 # rod diameter / 2.0
+    xmax = 0.0060325 # pin diameter / 2.0
     bias_x = 1.0
     nx = 20
     ymax = 1.0 # heated length

@@ -1,6 +1,6 @@
 # Following Benchmark Specifications and Data Requirements for the AREVA heated-bundle test in its Fuel Cooling Test Facility (FCTF)
 # as part of a U.S. DOE funded project: Towards a Longer-Life Core. In partnership with TerraPower, TAMU and ANL,
-# AREVA NP tested a wire-wrapped rod bundle. The bundle consists of electrically heated pins and non-heated pins.
+# AREVA NP tested a wire-wrapped pin bundle. The bundle consists of electrically heated pins and non-heated pins.
 # This test collected measurements to evaluate thermal hydraulic performance of a wire wrapped bundle, useful for CFD and other software validation.
 # Available at: https://www.osti.gov/servlets/purl/1346027/
 ###################################################
@@ -14,7 +14,7 @@ T_in = 305.68 #Kelvin (32.53 C)
 Total_Surface_Area_SC = 0.00285294 #m2
 Total_Surface_Area_EXP = 0.002808 #m2
 P_out = 829370.355 # Pa (120.29 psia)
-Power = 90640 # Watt Each heater rod had a max power of 30kW
+Power = 90640 # Watt Each heater pin had a max power of 30kW
 # Heater 17 (18) not working.
 # test:19 power = 22613 22610 22754 22663 [W], Total Power = 90640 [W], mdot_average = 9.576 [kg/s], Re = 20300
 # Index of heated pins per silicon controled rectifiers (Areva notation):1 3 6 7 || 4 5 11 15 ||2 9 19 40 60 || 13 44 48 52 56 (from bottom to top)

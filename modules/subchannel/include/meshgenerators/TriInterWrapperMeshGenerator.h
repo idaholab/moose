@@ -35,19 +35,19 @@ protected:
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
   std::vector<std::vector<Real>> _k_grid;
-  /// Distance between the neighbor fuel rods, assembly_pitch
+  /// Distance between the neighbor fuel pins, assembly_pitch
   Real _assembly_pitch;
   /// assembly diameter
   Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;
-  /// number of rings of fuel rods
+  /// number of rings of fuel pins
   unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;
   /// the distance between flat surfaces of the duct facing each other
   Real _flat_to_flat;
-  /// the gap thickness between the duct and peripheral fuel rods
+  /// the gap thickness between the duct and peripheral fuel pins
   Real _duct_to_pin_gap;
   /// whether the side bypass shape follows the hexagonal shape of the assemblies
   /// TODO: add a picture in the documentation of both tight and non-tight layouts
@@ -70,13 +70,13 @@ protected:
   std::vector<Real> _gij_map;
   /// x,y coordinates of the interstices
   std::vector<std::vector<Real>> _subchannel_position;
-  /// x,y coordinates of the fuel rods
+  /// x,y coordinates of the fuel pins
   std::vector<Point> _pin_position;
-  /// fuel rods that are belonging to each ring
+  /// fuel pins that are belonging to each ring
   std::vector<std::vector<Real>> _pins_in_rings;
-  /// stores the fuel rods belonging to each interstice
+  /// stores the fuel pins belonging to each interstice
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
-  /// number of fuel rods
+  /// number of fuel pins
   unsigned int _n_assemblies;
   /// number of gaps
   unsigned int _n_gaps;

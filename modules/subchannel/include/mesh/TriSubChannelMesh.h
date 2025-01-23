@@ -22,7 +22,7 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
 
-  virtual const unsigned int & getNumOfPins() const override { return _nrods; }
+  virtual const unsigned int & getNumOfPins() const override { return _npins; }
 
   virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const override
   {
@@ -33,14 +33,9 @@ public:
   virtual bool ductMeshExist() const override { return _duct_mesh_exist; }
 
   /**
-   * Return the the gap thickness between the duct and peripheral fuel rods
+   * Return the the gap thickness between the duct and peripheral fuel pins
    */
   virtual const Real & getDuctToRodGap() const { return _duct_to_pin_gap; }
-
-  /**
-   * Return the number of rods
-   */
-  virtual const unsigned int & getNumOfRods() const { return _nrods; }
 
   /**
    * Return the number of rings
@@ -164,7 +159,7 @@ public:
   virtual const std::vector<Node *> getDuctNodes() const override { return _duct_nodes; }
 
 protected:
-  /// number of rings of fuel rods
+  /// number of rings of fuel pins
   unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;
@@ -174,7 +169,7 @@ protected:
   Real _dwire;
   /// wire lead length
   Real _hwire;
-  /// the gap thickness between the duct and peripheral fuel rods
+  /// the gap thickness between the duct and peripheral fuel pins
   Real _duct_to_pin_gap;
   /// nodes
   std::vector<std::vector<Node *>> _nodes;
@@ -182,7 +177,7 @@ protected:
   std::vector<std::vector<Node *>> _pin_nodes;
 
   /// A list of all mesh nodes that form the (elements of) the hexagonal duct
-  /// mesh that surrounds the rods/subchannels.
+  /// mesh that surrounds the pins/subchannels.
   std::vector<Node *> _duct_nodes;
   /// A map for providing the closest/corresponding duct node associated
   /// with each subchannel node. i.e. a map of subchannel mesh nodes to duct mesh nodes.
@@ -204,14 +199,14 @@ protected:
   std::vector<std::vector<Real>> _sign_id_crossflow_map;
   /// gap size
   std::vector<std::vector<Real>> _gij_map;
-  /// x,y coordinates of the fuel rods
+  /// x,y coordinates of the fuel pins
   std::vector<Point> _pin_position;
-  /// fuel rods that are belonging to each ring
+  /// fuel pins that are belonging to each ring
   std::vector<std::vector<Real>> _pins_in_rings;
-  /// stores the fuel rods belonging to each subchannel
+  /// stores the fuel pins belonging to each subchannel
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
-  /// number of fuel rods
-  unsigned int _nrods;
+  /// number of fuel pins
+  unsigned int _npins;
   /// number of gaps
   unsigned int _n_gaps;
   /// subchannel type

@@ -33,7 +33,7 @@ protected:
   Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
-  /// Distance between the neighbor fuel rods, pitch
+  /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
   /// number of subchannels in the x direction
   unsigned int _nx;

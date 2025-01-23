@@ -149,22 +149,22 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   // the indicator used while setting _gap_to_chan_map array
   std::vector<std::pair<unsigned int, unsigned int>> gap_fill;
   TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
-  _nrods = _pin_position.size();
-  // assign the rods to the corresponding rings
+  _npins = _pin_position.size();
+  // assign the pins to the corresponding rings
   unsigned int k = 0; // initialize the fuel Pin counter index
   _pins_in_rings.resize(_n_rings);
   _pins_in_rings[0].push_back(k++);
   for (unsigned int i = 1; i < _n_rings; i++)
     for (unsigned int j = 0; j < i * 6; j++)
       _pins_in_rings[i].push_back(k++);
-  //  Given the number of rods and number of fuel Pin rings, the number of subchannels can be
+  //  Given the number of pins and number of fuel Pin rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
   // Summing internal channels
   for (unsigned int j = 0; j < _n_rings - 1; j++)
     chancount += j * 6;
   // Adding external channels to the total count
-  _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
+  _n_channels = chancount + _npins - 1 + (_n_rings - 1) * 6 + 6;
 
   if (*max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
     mooseError(name(),
@@ -198,9 +198,9 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   }
 
   _chan_to_pin_map.resize(_n_channels);
-  _pin_to_chan_map.resize(_nrods);
+  _pin_to_chan_map.resize(_npins);
   _subch_type.resize(_n_channels);
-  _n_gaps = _n_channels + _nrods - 1; /// initial assignment
+  _n_gaps = _n_channels + _npins - 1; /// initial assignment
   _gap_to_chan_map.resize(_n_gaps);
   _gap_to_pin_map.resize(_n_gaps);
   gap_fill.resize(_n_gaps);
@@ -230,13 +230,13 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     _gij_map[iz].reserve(_n_gaps);
   }
 
-  for (unsigned int i = 0; i < _nrods; i++)
+  for (unsigned int i = 0; i < _npins; i++)
     _pin_to_chan_map[i].reserve(6);
 
   // create the subchannels
   k = 0; // initialize the subchannel counter index
   kgap = 0;
-  // for each ring we trace the subchannels by pairing up to neighbor rods and looking for the third
+  // for each ring we trace the subchannels by pairing up to neighbor pins and looking for the third
   // Pin at inner or outer ring compared to the current ring.
   for (unsigned int i = 1; i < _n_rings; i++)
   {
@@ -378,7 +378,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   }     // for i
 
   // Constructing pins to channels mao
-  for (unsigned int loc_rod = 0; loc_rod < _nrods; loc_rod++)
+  for (unsigned int loc_rod = 0; loc_rod < _npins; loc_rod++)
   {
     for (unsigned int i = 0; i < _n_channels; i++)
     {
@@ -836,7 +836,7 @@ TriSubChannelMeshGenerator::generate()
   sch_mesh._pin_position = _pin_position;
   sch_mesh._pins_in_rings = _pins_in_rings;
   sch_mesh._chan_to_pin_map = _chan_to_pin_map;
-  sch_mesh._nrods = _nrods;
+  sch_mesh._npins = _npins;
   sch_mesh._n_gaps = _n_gaps;
   sch_mesh._subch_type = _subch_type;
   sch_mesh._gap_type = _gap_type;

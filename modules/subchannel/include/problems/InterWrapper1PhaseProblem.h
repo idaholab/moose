@@ -104,7 +104,7 @@ protected:
   const Real & _kij;
   unsigned int _n_cells;
   unsigned int _n_gaps;
-  unsigned int _n_pins;
+  unsigned int _n_assemblies;
   unsigned int _n_channels;
   unsigned int _block_size;
   /// axial location of nodes

@@ -79,14 +79,14 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   std::vector<std::pair<unsigned int, unsigned int>> gap_fill;
   TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
   _nrods = _pin_position.size();
-  // assign the rods to the corresponding rings
+  // assign the pins to the corresponding rings
   unsigned int k = 0; // initialize the fuel Pin counter index
   _pins_in_rings.resize(_n_rings);
   _pins_in_rings[0].push_back(k++);
   for (unsigned int i = 1; i < _n_rings; i++)
     for (unsigned int j = 0; j < i * 6; j++)
       _pins_in_rings[i].push_back(k++);
-  //  Given the number of rods and number of fuel Pin rings, the number of subchannels can be
+  //  Given the number of pins and number of fuel Pin rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
   // Summing internal channels
@@ -404,7 +404,7 @@ DetailedTriSubChannelMeshGenerator::generate()
     }
   }
   // Define "quadrant center" reference points.  These will be the centers of
-  // the 3 circles that represent the fuel rods.  These centers are
+  // the 3 circles that represent the fuel pins.  These centers are
   // offset a little bit so that in the final mesh, there is a tiny gap between
   // neighboring subchannel cells.  That allows us to easily map a solution to
   // this detailed mesh with a nearest-neighbor search.
@@ -568,8 +568,8 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (z == 0)
           {
             _console << "Subchannel Position: " << p0 << std::endl;
-            auto rods = getSubChannelPins(i);
-            for (auto r : rods)
+            auto pins = getSubChannelPins(i);
+            for (auto r : pins)
               _console << r << " ";
             _console << std::endl;
             _console << "Theta: " << theta / libMesh::pi * 180. << std::endl;
@@ -622,8 +622,8 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (z == 0)
           {
             _console << "Subchannel Position: " << p0 << std::endl;
-            auto rods = getSubChannelPins(i);
-            for (auto r : rods)
+            auto pins = getSubChannelPins(i);
+            for (auto r : pins)
               _console << r << " ";
             _console << std::endl;
             _console << "Theta: " << theta * 180 / libMesh::pi << std::endl;
@@ -675,8 +675,8 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (z == 0)
           {
             _console << "Subchannel Position: " << p0 << std::endl;
-            auto rods = getSubChannelPins(i);
-            for (auto r : rods)
+            auto pins = getSubChannelPins(i);
+            for (auto r : pins)
               _console << r << " ";
             _console << std::endl;
             _console << "Theta: " << theta * 180 / libMesh::pi << std::endl;

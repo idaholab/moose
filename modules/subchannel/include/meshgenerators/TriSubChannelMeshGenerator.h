@@ -47,7 +47,7 @@ protected:
   std::vector<Real> _reduction_blockage;
   /// form loss coefficient of subchannels affected by blockage
   std::vector<Real> _k_blockage;
-  /// Distance between the neighbor fuel rods, pitch
+  /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
   /// Lateral form loss coefficient
   const Real & _kij;
@@ -55,7 +55,7 @@ protected:
   Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;
-  /// number of rings of fuel rods
+  /// number of rings of fuel pins
   unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;
@@ -65,7 +65,7 @@ protected:
   Real _dwire;
   /// wire lead length
   Real _hwire;
-  /// the gap thickness between the duct and peripheral fuel rods
+  /// the gap thickness between the duct and peripheral fuel pins
   Real _duct_to_pin_gap;
 
   /// nodes
@@ -85,16 +85,16 @@ protected:
   std::vector<std::vector<Real>> _gij_map;
   /// x,y coordinates of the subchannel centroids
   std::vector<std::vector<Real>> _subchannel_position;
-  /// x,y coordinates of the fuel rods
+  /// x,y coordinates of the fuel pins
   std::vector<Point> _pin_position;
-  /// fuel rods that are belonging to each ring
+  /// fuel pins that are belonging to each ring
   std::vector<std::vector<Real>> _pins_in_rings;
-  /// stores the fuel rods belonging to each subchannel
+  /// stores the fuel pins belonging to each subchannel
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// stores the map from pins to channels
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
-  /// number of fuel rods
-  unsigned int _nrods;
+  /// number of fuel pins
+  unsigned int _npins;
   /// number of gaps
   unsigned int _n_gaps;
   /// subchannel type

@@ -1,15 +1,15 @@
 # Steady-state mixing model Validation
 
-The PSBT 5x5 benchmark is an international benchmark developed by the Organisation for Economic Co-operation and Development (OECD), the Nuclear Regulatory Commission (NRC), and the Nuclear Power Engineering Center(NUPEC) [!cite](PSBT1). In this work we utilize the steady-state mixing test, detailed in volume III of the PSBT benchmark [!cite](PSBT3). The purpose of this test is to validate the mixing models of the participating codes. The participating codes predict the fluid temperature distribution at the exit of the heated section of a rod bundle assembly and compare it with the experimental values provided by the benchmark. Here we will present as an example case 01-5237, as well as the average error for all the cases run [!cite](kyriakopoulos2022development). The rod bundle geometry description is presented in Table below.
+The PSBT 5x5 benchmark is an international benchmark developed by the Organisation for Economic Co-operation and Development (OECD), the Nuclear Regulatory Commission (NRC), and the Nuclear Power Engineering Center(NUPEC) [!cite](PSBT1). In this work we utilize the steady-state mixing test, detailed in volume III of the PSBT benchmark [!cite](PSBT3). The purpose of this test is to validate the mixing models of the participating codes. The participating codes predict the fluid temperature distribution at the exit of the heated section of a pin bundle assembly and compare it with the experimental values provided by the benchmark. Here we will present as an example case 01-5237, as well as the average error for all the cases run [!cite](kyriakopoulos2022development). The pin bundle geometry description is presented in Table below.
 
-| PSBT rod bundle specifications |
+| PSBT pin bundle specifications |
 | |
 
 | Item | Value |
 | - | - |
 | Rods array | $5\times5$ |
-| Number of heated rods | $25$ |
-| Heated rod outer diameter (mm) | $9.50$ |
+| Number of heated pins | $25$ |
+| Heated pin outer diameter (mm) | $9.50$ |
 | Pitch (mm) | $12.60$ |
 | Axial heated length (mm) | $3658$ |
 | Flow channel inner width (mm) | $64.9$  |
@@ -21,7 +21,7 @@ The PSBT 5x5 benchmark is an international benchmark developed by the Organisati
 | NMV spacer location (mm) | $0,3658$  |
 | Simple spacer location (mm) | $229,686,1143,1600,2057,2515,2972,3429$ |
 
-The rod bundle has a radial power profile in which the right side of the assembly is under-heated. The radial power profile is shown in [fig:Power]. The rods on the left side transfer 100% of available rod power to the fluid, while the rods on the right transfer 25%. This causes an uneven temperature distribution at the exit of the assembly.
+The pin bundle has a radial power profile in which the right side of the assembly is under-heated. The radial power profile is shown in [fig:Power]. The pins on the left side transfer 100% of available pin power to the fluid, while the pins on the right transfer 25%. This causes an uneven temperature distribution at the exit of the assembly.
 
 !media subchannel/v&v/Radial_Power.png
     style=width:60%;margin-bottom:2%;margin:auto;
