@@ -88,5 +88,3 @@ moose-opt -i step8c_adapt.i
 !---
 
 !media results/step8_adapt.png caption="Using adaptivity"
-
-!---
