@@ -70,7 +70,7 @@ public:
   void updatePatch(std::vector<dof_id_type> & secondary_nodes);
 
   /**
-   * Updates the ghosted elements at the start of the time step for iterion
+   * Updates the ghosted elements at the start of the time step for iteration
    * patch update strategy.
    */
   void updateGhostedElems();
