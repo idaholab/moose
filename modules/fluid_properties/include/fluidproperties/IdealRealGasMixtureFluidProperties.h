@@ -58,6 +58,18 @@ public:
   IdealRealGasMixtureFluidProperties(const InputParameters & parameters);
 
   /**
+   * Gets the primary component single-phase fluid properties
+   */
+  const SinglePhaseFluidProperties & getPrimaryFluidProperties() const;
+
+  /**
+   * Gets a secondary component single-phase fluid properties
+   *
+   * @param[in] i  Index of the secondary fluid properties (0 is first secondary)
+   */
+  const SinglePhaseFluidProperties & getSecondaryFluidProperties(unsigned int i = 0) const;
+
+  /**
    * Number of secondary vapors (non-condensable components)
    *
    * @return number of secondary vapors
