@@ -30,7 +30,7 @@ Real
 TriInterWrapperWettedPerimIC::value(const Point & p)
 {
   auto flat_to_flat = _mesh.getSideX();
-  auto gap = _mesh.getDuctToRodGap();
+  auto gap = _mesh.getDuctToPinGap();
   auto element_side = flat_to_flat * std::tan(libMesh::pi / 6.0);
   bool tight_side_bypass = _mesh.getIsTightSide();
   auto element_side_ext = (flat_to_flat + 2. * gap) * std::tan(libMesh::pi / 6.0);

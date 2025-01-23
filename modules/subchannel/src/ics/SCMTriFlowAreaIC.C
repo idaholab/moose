@@ -34,7 +34,7 @@ SCMTriFlowAreaIC::value(const Point & p)
   auto pin_diameter = _mesh.getPinDiameter();
   auto wire_diameter = _mesh.getWireDiameter();
   auto wire_lead_length = _mesh.getWireLeadLength();
-  auto gap = _mesh.getDuctToRodGap();
+  auto gap = _mesh.getDuctToPinGap();
   auto z_blockage = _mesh.getZBlockage();
   auto index_blockage = _mesh.getIndexBlockage();
   auto reduction_blockage = _mesh.getReductionBlockage();

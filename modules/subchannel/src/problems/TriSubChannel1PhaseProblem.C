@@ -72,7 +72,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
     auto pin_diameter = _subchannel_mesh.getPinDiameter();
     auto wire_diameter = _tri_sch_mesh.getWireDiameter();
     auto wire_lead_length = _tri_sch_mesh.getWireLeadLength();
-    auto gap = _tri_sch_mesh.getDuctToRodGap();
+    auto gap = _tri_sch_mesh.getDuctToPinGap();
     auto z_blockage = _subchannel_mesh.getZBlockage();
     auto index_blockage = _subchannel_mesh.getIndexBlockage();
     auto reduction_blockage = _subchannel_mesh.getReductionBlockage();
@@ -264,7 +264,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   auto p_over_d = pitch / pin_diameter;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-  auto gap = _tri_sch_mesh.getDuctToRodGap();
+  auto gap = _tri_sch_mesh.getDuctToPinGap();
   auto w_over_d = (pin_diameter + gap) / pin_diameter;
   auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
@@ -677,7 +677,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
           const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
           const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-          auto gap = _tri_sch_mesh.getDuctToRodGap();
+          auto gap = _tri_sch_mesh.getDuctToPinGap();
           auto w = pin_diameter + gap;
           auto theta =
               std::acos(wire_lead_length /
@@ -1292,7 +1292,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
           const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
           const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-          auto gap = _tri_sch_mesh.getDuctToRodGap();
+          auto gap = _tri_sch_mesh.getDuctToPinGap();
           auto w = pin_diameter + gap;
           auto theta =
               std::acos(wire_lead_length /

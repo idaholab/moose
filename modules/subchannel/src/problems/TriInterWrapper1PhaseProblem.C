@@ -361,7 +361,7 @@ TriInterWrapper1PhaseProblem::computeh(int iblock)
         const Real & assembly_diameter = _subchannel_mesh.getSideX();
         const Real & wire_lead_length = 0.0;
         const Real & wire_diameter = 0.0;
-        auto gap = _tri_sch_mesh.getDuctToRodGap();
+        auto gap = _tri_sch_mesh.getDuctToPinGap();
         auto w = assembly_diameter + gap;
         auto theta =
             std::acos(wire_lead_length /

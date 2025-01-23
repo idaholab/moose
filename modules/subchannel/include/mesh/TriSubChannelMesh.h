@@ -35,7 +35,7 @@ public:
   /**
    * Return the the gap thickness between the duct and peripheral fuel pins
    */
-  virtual const Real & getDuctToRodGap() const { return _duct_to_pin_gap; }
+  virtual const Real & getDuctToPinGap() const { return _duct_to_pin_gap; }
 
   /**
    * Return the number of rings
