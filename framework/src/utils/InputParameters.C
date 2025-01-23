@@ -16,7 +16,6 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "MooseObject.h"
-#include "FEProblem.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/simple_range.h"
