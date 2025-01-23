@@ -37,12 +37,12 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
-  auto n_rods = _mesh.getNumOfRods();
+  auto n_pins = _mesh.getNumOfPins();
   auto heated_length = _mesh.getHeatedLength();
 
-  _power_dis.resize(n_rods, 1);
+  _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
-  _pin_power_correction.resize(n_rods, 1);
+  _pin_power_correction.resize(n_pins, 1);
   _pin_power_correction.setOnes();
 
   Real vin;
@@ -58,8 +58,8 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
   if (inFile.fail() && !inFile.eof())
     mooseError(name(), ": Non numerical input at line: ", _numberoflines);
 
-  if (_numberoflines != n_rods)
-    mooseError(name(), ": Radial profile file doesn't have correct size: ", n_rods);
+  if (_numberoflines != n_pins)
+    mooseError(name(), ": Radial profile file doesn't have correct size: ", n_pins);
   inFile.close();
 
   inFile.open(_filename);
@@ -84,13 +84,13 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
 void
 SCMTriPowerIC::initialSetup()
 {
-  auto n_rods = _mesh.getNumOfRods();
+  auto n_pins = _mesh.getNumOfPins();
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
-  _estimate_power.resize(n_rods, 1);
+  _estimate_power.resize(n_pins, 1);
   _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
@@ -105,7 +105,7 @@ SCMTriPowerIC::initialSetup()
 
     if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
     {
-      for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
+      for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
         // use of trapezoidal rule  to calculate local power
         _estimate_power(i_pin) +=
@@ -117,7 +117,7 @@ SCMTriPowerIC::initialSetup()
   // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
   // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
   // _ref_qprime(j, i) = 0.0
-  for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
+  for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
   {
     if (_estimate_power(i_pin) == 0.0)
       _estimate_power(i_pin) = 1.0;

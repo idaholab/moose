@@ -41,7 +41,7 @@ protected:
   Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
-  /// Distance between the neighbor fuel rods, pitch
+  /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;
@@ -51,7 +51,7 @@ protected:
   Real _flat_to_flat;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
-  /// x,y coordinates of the fuel rods
+  /// x,y coordinates of the fuel pins
   std::vector<Point> _pin_position;
   /// x,y coordinates of the subchannels
   std::vector<std::vector<Real>> _subchannel_position;
@@ -59,15 +59,15 @@ protected:
   const unsigned int & _block_id;
   /// Number of cells in the axial direction
   unsigned int _n_cells;
-  /// Number of rods
+  /// Number of pins
   unsigned int _nrods;
-  /// fuel rods that are belonging to each ring
+  /// fuel pins that are belonging to each ring
   std::vector<std::vector<unsigned int>> _pins_in_rings;
   /// map inner and outer rings
   std::map<unsigned int, Real> _orientation_map;
   /// number of subchannels
   unsigned int _n_channels;
-  /// stores the fuel rods belonging to each subchannel
+  /// stores the fuel pins belonging to each subchannel
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// Flag to print out the detailed mesh assembly and coordinates
   bool _verbose;

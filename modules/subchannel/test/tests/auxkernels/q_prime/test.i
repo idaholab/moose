@@ -6,7 +6,7 @@ heated_length = 1.0
   [bisonMesh]
     type = GeneratedMeshGenerator
     dim = 2
-    xmax = 0.2 # rod diameter / 2.0
+    xmax = 0.2 # pin diameter / 2.0
     bias_x = 1.0
     nx = 5
     ymax = 1.0 # heated length

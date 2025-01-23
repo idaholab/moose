@@ -28,7 +28,7 @@ k_wrapper = 40
 cp_wrapper = 300
 rho_wrapper = 2000
 
-# fuel rod properties
+# fuel pin properties
 k_fuel = 10
 cp_fuel = 300
 rho_fuel = 15000
@@ -45,7 +45,7 @@ pool_flow_blocks = 'cold_pool1 cold_pool2 hot_pool1 hot_pool2 inlet_duct'
 flow_blocks = 'fuel coupled_fuel control free_duct cold_pool1 cold_pool2 hot_pool1 hot_pool2
                cr_tip fuel_orifice control_orifice inlet_duct'
 
-# Blocks where we have either fuel or control rods
+# Blocks where we have either fuel or control pins
 # on these blocks we define T_solid & have conjugate heat transfer with the fluid
 #                    and use Rehme drag coefficients
 rodded_flow_blocks = 'fuel coupled_fuel control'
@@ -571,7 +571,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     block = ${rodded_flow_blocks}
   []
 
-  # describe the drag coefficient in regions that have rods in them
+  # describe the drag coefficient in regions that have pins in them
   [drag_fuel]
     type = FunctorRehmeDragCoefficients
     multipliers = '100 100 1'

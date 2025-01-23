@@ -88,9 +88,9 @@ protected:
   Real _unheated_length_exit;
   /// block index
   unsigned int _block_id;
-  /// Distance between the neighbor fuel rods, pitch
+  /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
-  /// number of rings of fuel rods
+  /// number of rings of fuel pins
   unsigned int _n_rings;
   /// the distance between flat surfaces of the duct facing each other
   Real _flat_to_flat;

@@ -122,7 +122,7 @@ InterWrapper1PhaseProblem::InterWrapper1PhaseProblem(const InputParameters & par
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
-  _n_pins = _subchannel_mesh.getNumOfPins();
+  _n_assemblies = _subchannel_mesh.getNumOfAssemblies();
   _n_channels = _subchannel_mesh.getNumOfChannels();
   _z_grid = _subchannel_mesh.getZGrid();
   _block_size = _n_cells / _n_blocks;
@@ -3032,7 +3032,7 @@ InterWrapper1PhaseProblem::externalSolve()
   if (_pin_mesh_exist)
   {
     _console << "Commencing calculation of Pin surface temperature \n";
-    for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
+    for (unsigned int i_pin = 0; i_pin < _n_assemblies; i_pin++)
     {
       for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
       {

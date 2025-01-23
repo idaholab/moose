@@ -47,7 +47,7 @@ protected:
   std::vector<Real> _k_blockage;
   /// Lateral form loss coefficient
   const Real & _kij;
-  /// Distance between the neighbor fuel rods, pitch
+  /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;

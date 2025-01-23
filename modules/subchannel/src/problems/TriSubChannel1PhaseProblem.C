@@ -18,7 +18,7 @@ TriSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
   params.addClassDescription("Solver class for subchannels in a triangular lattice assembly and "
-                             "bare/wire-wrapped fuel rods");
+                             "bare/wire-wrapped fuel pins");
   return params;
 }
 

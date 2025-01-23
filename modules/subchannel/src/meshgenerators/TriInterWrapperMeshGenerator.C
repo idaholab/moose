@@ -99,7 +99,7 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
   for (unsigned int i = 1; i < _n_rings; i++)
     for (unsigned int j = 0; j < i * 6; j++)
       _pins_in_rings[i].push_back(k++);
-  //  Given the number of rods and number of fuel Pin rings, the number of subchannels can be
+  //  Given the number of pins and number of fuel Pin rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
   for (unsigned int j = 0; j < _n_rings - 1; j++)
@@ -140,7 +140,7 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
   // create the subchannels
   k = 0; // initialize the subchannel counter index
   kgap = 0;
-  // for each ring we trace the subchannels by pairing up to neighbor rods and looking for the third
+  // for each ring we trace the subchannels by pairing up to neighbor pins and looking for the third
   // Pin at inner or outer ring compared to the current ring.
   for (unsigned int i = 1; i < _n_rings; i++)
   {

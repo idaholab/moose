@@ -75,7 +75,7 @@ TriPinMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
   if (!mesh_base)
     mesh_base = buildMeshBaseObject();
-  /// Boundary info is added only if specific Pin conditions are defined for the rods
+  /// Boundary info is added only if specific Pin conditions are defined for the pins
   // BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
   mesh_base->set_mesh_dimension(3);
 
@@ -128,7 +128,7 @@ TriPinMeshGenerator::generate()
       elem->set_node(0) = mesh_base->node_ptr(indx1);
       elem->set_node(1) = mesh_base->node_ptr(indx2);
 
-      /// Boundary info is added only if specific Pin conditions are defined for the rods
+      /// Boundary info is added only if specific Pin conditions are defined for the pins
       //      if (iz == 0)
       //        boundary_info.add_side(elem, 0, 0);
       //      if (iz == _n_cells - 1)
@@ -136,7 +136,7 @@ TriPinMeshGenerator::generate()
     }
   }
 
-  /// Boundary info is added only if specific Pin conditions are defined for the rods
+  /// Boundary info is added only if specific Pin conditions are defined for the pins
   //  boundary_info.sideset_name(0) = "inlet";
   //  boundary_info.sideset_name(1) = "outlet";
   //  boundary_info.nodeset_name(0) = "inlet";

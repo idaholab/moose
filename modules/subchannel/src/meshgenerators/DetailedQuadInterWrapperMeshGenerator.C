@@ -161,7 +161,7 @@ DetailedQuadInterWrapperMeshGenerator::generate()
     }
   }
   // Define "quadrant center" reference points.  These will be the centers of
-  // the 4 circles that represent the fuel rods.  These centers are
+  // the 4 circles that represent the fuel pins.  These centers are
   // offset a little bit so that in the final mesh, there is a tiny assembly_pitch between
   // neighboring subchannel cells.  That allows us to easily map a solution to
   // this detailed mesh with a nearest-neighbor search.

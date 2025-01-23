@@ -47,7 +47,7 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _pin_position(other_mesh._pin_position),
     _pins_in_rings(other_mesh._pins_in_rings),
     _chan_to_pin_map(other_mesh._chan_to_pin_map),
-    _nrods(other_mesh._nrods),
+    _npins(other_mesh._npins),
     _n_gaps(other_mesh._n_gaps),
     _subch_type(other_mesh._subch_type),
     _gap_type(other_mesh._gap_type),
@@ -183,7 +183,7 @@ TriSubChannelMesh::pinIndex(const Point & p) const
   std::vector<Point> positions;
   Point center(0, 0);
   this->rodPositions(positions, _n_rings, _pitch, center);
-  for (unsigned int i = 0; i < _nrods; i++)
+  for (unsigned int i = 0; i < _npins; i++)
   {
     Real x_dist = positions[i](0) - p(0);
     Real y_dist = positions[i](1) - p(1);
