@@ -198,11 +198,11 @@ public:
   virtual const std::vector<Node *> getDuctNodes() const = 0;
 
 protected:
-  /// unheated length of the fuel rod at the entry of the assembly
+  /// unheated length of the fuel Pin at the entry of the assembly
   Real _unheated_length_entry;
-  /// heated length of the fuel rod
+  /// heated length of the fuel Pin
   Real _heated_length;
-  /// unheated length of the fuel rod at the exit of the assembly
+  /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
@@ -222,7 +222,7 @@ protected:
   Real _kij;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
-  /// fuel rod diameter
+  /// fuel Pin diameter
   Real _pin_diameter;
   /// number of axial cells
   unsigned int _n_cells;

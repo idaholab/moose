@@ -27,7 +27,7 @@ DetailedTriSubChannelMeshGenerator::validParams()
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
-  params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
+  params.addRequiredParam<unsigned int>("nrings", "Number of fuel Pin rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addParam<unsigned int>("block_id", 0, "Block ID used for the mesh subdomain.");
@@ -80,13 +80,13 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
   _nrods = _pin_position.size();
   // assign the rods to the corresponding rings
-  unsigned int k = 0; // initialize the fuel rod counter index
+  unsigned int k = 0; // initialize the fuel Pin counter index
   _pins_in_rings.resize(_n_rings);
   _pins_in_rings[0].push_back(k++);
   for (unsigned int i = 1; i < _n_rings; i++)
     for (unsigned int j = 0; j < i * 6; j++)
       _pins_in_rings[i].push_back(k++);
-  //  Given the number of rods and number of fuel rod rings, the number of subchannels can be
+  //  Given the number of rods and number of fuel Pin rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
   // Summing internal channels
@@ -113,7 +113,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   k = 0; // initialize the subchannel counter index
   for (unsigned int i = 1; i < _n_rings; i++)
   {
-    // find the closest rod at back ring
+    // find the closest Pin at back ring
     for (unsigned int j = 0; j < _pins_in_rings[i].size(); j++)
     {
       if (j == _pins_in_rings[i].size() - 1)
@@ -152,7 +152,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
       k = k + 1;
     }
 
-    // find the closest rod at front ring
+    // find the closest Pin at front ring
     for (unsigned int j = 0; j < _pins_in_rings[i].size(); j++)
     {
       if (j == _pins_in_rings[i].size() - 1)

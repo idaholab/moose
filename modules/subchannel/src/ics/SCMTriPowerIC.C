@@ -114,7 +114,7 @@ SCMTriPowerIC::initialSetup()
       }
     }
   }
-  // if a rod has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
+  // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
   // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
   // _ref_qprime(j, i) = 0.0
   for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)

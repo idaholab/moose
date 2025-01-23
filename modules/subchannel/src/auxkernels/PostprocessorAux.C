@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PostprocessorConstantAux.h"
-registerMooseObject("SubChannelApp", PostprocessorConstantAux);
+#include "PostprocessorAux.h"
+registerMooseObject("SubChannelApp", PostprocessorAux);
 
 InputParameters
-PostprocessorConstantAux::validParams()
+PostprocessorAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -21,13 +21,13 @@ PostprocessorConstantAux::validParams()
   return params;
 }
 
-PostprocessorConstantAux::PostprocessorConstantAux(const InputParameters & parameters)
+PostprocessorAux::PostprocessorAux(const InputParameters & parameters)
   : AuxKernel(parameters), _pvalue(getPostprocessorValue("postprocessor"))
 {
 }
 
 Real
-PostprocessorConstantAux::computeValue()
+PostprocessorAux::computeValue()
 {
   return _pvalue;
 }

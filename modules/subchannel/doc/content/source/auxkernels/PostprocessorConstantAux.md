@@ -1,15 +1,15 @@
-# PostprocessorConstantAux
+# PostprocessorAux
 
-!syntax description /AuxKernels/PostprocessorConstantAux
+!syntax description /AuxKernels/PostprocessorAux
 
 ## Overview
 
 <!-- -->
 
-The `PostprocessorConstantAux` AuxKernel creates a constant field over the domain. It can read a value from a [Postprocessor](/Postprocessors/index.md).
+The `PostprocessorAux` AuxKernel creates a constant field over the domain. It can read a value from a [Postprocessor](/Postprocessors/index.md).
 
-!syntax parameters /AuxKernels/PostprocessorConstantAux
+!syntax parameters /AuxKernels/PostprocessorAux
 
-!syntax inputs /AuxKernels/PostprocessorConstantAux
+!syntax inputs /AuxKernels/PostprocessorAux
 
-!syntax children /AuxKernels/PostprocessorConstantAux
+!syntax children /AuxKernels/PostprocessorAux
