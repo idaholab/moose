@@ -22,7 +22,7 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
 
-  virtual const unsigned int & getNumOfPins() const override { return _n_assemblies; }
+  virtual const unsigned int & getNumOfAssemblies() const override { return _n_assemblies; }
 
   virtual Node * getPinNode(unsigned int, unsigned) const override { return nullptr; }
 
@@ -30,11 +30,6 @@ public:
   virtual bool ductMeshExist() const override { return false; }
 
   virtual const Real & getDuctToRodGap() const { return _duct_to_pin_gap; }
-
-  /**
-   * Return the number of rods
-   */
-  virtual const unsigned int & getNumOfRods() const { return _n_assemblies; }
 
   /**
    * Return Pin index given inter_wrapper index and local neighbor index
@@ -107,19 +102,19 @@ public:
   void setChannelToDuctMaps(const std::vector<Node *> & duct_nodes);
 
 protected:
-  /// number of rings of fuel rods
+  /// number of rings of fuel pins
   unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;
   /// the distance between flat surfaces of the duct facing each other
   Real _flat_to_flat;
-  /// the gap thickness between the duct and peripheral fuel rods
+  /// the gap thickness between the duct and peripheral fuel pins
   Real _duct_to_pin_gap;
   /// nodes
   std::vector<std::vector<Node *>> _nodes;
 
   /// A list of all mesh nodes that form the (elements of) the hexagonal duct
-  /// mesh that surrounds the rods/intertices.
+  /// mesh that surrounds the pins/intertices.
   std::vector<Node *> _duct_nodes;
   /// A map for providing the closest/corresponding duct node associated
   /// with each interstice node. i.e. a map of interstice mesh nodes to duct mesh nodes.
@@ -143,11 +138,11 @@ protected:
   std::vector<Real> _gij_map;
   /// x,y coordinates of the interstice
   std::vector<std::vector<Real>> _subchannel_position;
-  /// x,y coordinates of the fuel rods
+  /// x,y coordinates of the fuel pins
   std::vector<Point> _pin_position;
-  /// fuel rods that are belonging to each ring
+  /// fuel pins that are belonging to each ring
   std::vector<std::vector<Real>> _pins_in_rings;
-  /// stores the fuel rods belonging to each interstice
+  /// stores the fuel pins belonging to each interstice
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// number of assemblies
   unsigned int _n_assemblies;

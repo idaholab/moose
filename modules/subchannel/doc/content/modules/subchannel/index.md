@@ -2,7 +2,7 @@
 
 !style halign=center
 SCM is a Subchannel Module for performing reactor core, single-phase thermal-hydraulic
-subchannel simulations, for bare rod, square lattice bundles or wire-wrapped/bare rod, triangular lattice bundles. It can model water cooled or metal cooled (lead, sodium, LBE) bundles. It is based on the [MOOSE framework](https://mooseframework.inl.gov), and builds on the framework and modules for many of its capabilities.
+subchannel simulations, for bare pin, square lattice bundles or wire-wrapped/bare pin, triangular lattice bundles. It can model water cooled or metal cooled (lead, sodium, LBE) bundles. It is based on the [MOOSE framework](https://mooseframework.inl.gov), and builds on the framework and modules for many of its capabilities.
 
 !row!
 

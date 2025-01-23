@@ -38,14 +38,14 @@ TriInterWrapperPowerIC::TriInterWrapperPowerIC(const InputParameters & params)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
-  auto n_rods = _mesh.getNumOfRods();
+  auto n_assemblies = _mesh.getNumOfAssemblies();
 
-  _power_dis.resize(n_rods);
-  _pin_power_correction.resize(n_rods);
-  _ref_power.resize(n_rods);
-  _ref_qprime.resize(n_rods);
-  _estimate_power.resize(n_rods);
-  for (unsigned int i = 0; i < n_rods; i++)
+  _power_dis.resize(n_assemblies);
+  _pin_power_correction.resize(n_assemblies);
+  _ref_power.resize(n_assemblies);
+  _ref_qprime.resize(n_assemblies);
+  _estimate_power.resize(n_assemblies);
+  for (unsigned int i = 0; i < n_assemblies; i++)
   {
     _power_dis[i] = 0.0;
     _pin_power_correction[i] = 1.0;
@@ -67,8 +67,8 @@ TriInterWrapperPowerIC::TriInterWrapperPowerIC(const InputParameters & params)
     if (inFile.fail() && !inFile.eof())
       mooseError(name(), ": Non numerical input at line: ", _numberoflines);
 
-    if (_numberoflines != n_rods)
-      mooseError(name(), ": Radial profile file doesn't have correct size: ", n_rods);
+    if (_numberoflines != n_assemblies)
+      mooseError(name(), ": Radial profile file doesn't have correct size: ", n_assemblies);
     inFile.close();
 
     inFile.open(_filename);
@@ -82,14 +82,14 @@ TriInterWrapperPowerIC::TriInterWrapperPowerIC(const InputParameters & params)
   }
   Real sum = 0.0;
 
-  for (unsigned int i = 0; i < n_rods; i++)
+  for (unsigned int i = 0; i < n_assemblies; i++)
   {
     sum = sum + _power_dis[i];
   }
   // full pin (100%) power of one pin [W]
   auto fpin_power = _power / sum;
   // actual pin power [W]
-  for (unsigned int i = 0; i < n_rods; i++)
+  for (unsigned int i = 0; i < n_assemblies; i++)
   {
     _ref_power[i] = _power_dis[i] * fpin_power;
   }
@@ -97,7 +97,7 @@ TriInterWrapperPowerIC::TriInterWrapperPowerIC(const InputParameters & params)
   // Convert the actual pin power to a linear heat rate [W/m]
   auto heated_length = _mesh.getHeatedLength();
 
-  for (unsigned int i = 0; i < n_rods; i++)
+  for (unsigned int i = 0; i < n_assemblies; i++)
   {
     _ref_qprime[i] = _ref_power[i] / heated_length;
   }
@@ -106,13 +106,13 @@ TriInterWrapperPowerIC::TriInterWrapperPowerIC(const InputParameters & params)
 void
 TriInterWrapperPowerIC::initialSetup()
 {
-  auto n_rods = _mesh.getNumOfRods();
+  auto n_assemblies = _mesh.getNumOfAssemblies();
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
-  _estimate_power.resize(n_rods);
+  _estimate_power.resize(n_assemblies);
 
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
@@ -127,7 +127,7 @@ TriInterWrapperPowerIC::initialSetup()
 
     if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
     {
-      for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
+      for (unsigned int i_pin = 0; i_pin < n_assemblies; i_pin++)
       {
         // use of trapezoidal rule  to calculate local power
         _estimate_power[i_pin] +=
@@ -136,7 +136,7 @@ TriInterWrapperPowerIC::initialSetup()
       }
     }
   }
-  for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
+  for (unsigned int i_pin = 0; i_pin < n_assemblies; i_pin++)
   {
     _pin_power_correction[i_pin] = _ref_power[i_pin] / _estimate_power[i_pin];
   }

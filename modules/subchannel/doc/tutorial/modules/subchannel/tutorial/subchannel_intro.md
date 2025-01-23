@@ -86,11 +86,11 @@
 
 - Subchannel discretization principle:
 
-  - The rod bundle cross section is divided into flow subchannels.
+  - The pin bundle cross section is divided into flow subchannels.
 
   - The length of the bundle is divided into finite intervals.
 
-  - The result is a set of control volumes that represent the flow region of the rod bundle.
+  - The result is a set of control volumes that represent the flow region of the pin bundle.
 
 - Limitations:
 

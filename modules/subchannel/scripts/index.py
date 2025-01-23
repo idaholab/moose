@@ -37,7 +37,7 @@ _flat_to_flat = 4.64*scale_factor + 0.005
 _duct_to_rod_gap = ((_flat_to_flat /f  - (_n_rings - 1) * 2 * pitch) / 2.0)/4
 
 #################################
-# Defining rod positions
+# Defining pin positions
 #################################
 
 theta = 0.0;
@@ -77,7 +77,7 @@ for i in range(1,_n_rings):
 
 
 #################################
-# Defining rod positions in rings
+# Defining pin positions in rings
 #################################
 _nrods = len(_rod_position)
 _rods_in_rings = {}; k=0
@@ -119,7 +119,7 @@ k = 0;
 kgap = 0;
 
 for i in range(1, _n_rings):
-    # Find closest rod at back ring
+    # Find closest pin at back ring
     for j in range(len(_rods_in_rings[i])):
         if j == len(_rods_in_rings[i]) - 1:
             _subchannel_to_rod_map[k] = []
@@ -164,7 +164,7 @@ for i in range(1, _n_rings):
         _subch_type[k] = 'center';
         k = k + 1;
 
-    # Find the closest rod at front ring
+    # Find the closest pin at front ring
     for j in range(len(_rods_in_rings[i])):
         if j == len(_rods_in_rings[i]) - 1:
             _subchannel_to_rod_map[k] = []
