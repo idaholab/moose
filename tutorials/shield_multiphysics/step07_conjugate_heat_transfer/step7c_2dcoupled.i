@@ -23,6 +23,9 @@ mu = ${fparse 7.98e-4 * mu_multiplier}
 mult = 1
 nx = '${fparse 40 * mult}'
 ny = '${fparse 32 * mult}'
+# See step 8 for mesh refinement
+global_refinement = 1
+water_additional_refinement = 0
 
 [Mesh]
   [bulk]
@@ -68,17 +71,17 @@ ny = '${fparse 32 * mult}'
     paired_block = concrete
     new_boundary = 'water_boundary'
   []
-  [add_inactive_water_concrete_interface]
+  [add_concrete_water_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = add_water_concrete_interface
-    paired_block = water_inactive
-    primary_block = concrete
-    new_boundary = 'inactive_water_boundary'
+    paired_block = concrete
+    primary_block = water
+    new_boundary = 'water_boundary_inwards'
   []
 
   [add_inner_cavity]
     type = SideSetsBetweenSubdomainsGenerator
-    input = add_inactive_water_concrete_interface
+    input = add_concrete_water_interface
     primary_block = concrete
     paired_block = cavity
     new_boundary = 'inner_cavity'
@@ -100,11 +103,10 @@ ny = '${fparse 32 * mult}'
   [refine_water]
     type = RefineBlockGenerator
     input = remove_cavity
-    refinement = '2'
+    refinement = '${water_additional_refinement}'
     block = 'water'
   []
-  uniform_refine = 1
-  # second_order = true
+  uniform_refine = ${global_refinement}
 []
 
 [Variables]
@@ -217,6 +219,36 @@ ny = '${fparse 32 * mult}'
   []
 []
 
+# Project FE T onto a FV field
+# This trick will not be necessary with additional developments
+# Stay tuned.
+[AuxVariables]
+  [T_solid_FV]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 'concrete water'
+  []
+[]
+
+[AuxKernels]
+  [concrete]
+    type = ProjectionAux
+    variable = 'T_solid_FV'
+    v = 'T'
+    # Note that this limits the coupling frequency
+    execute_on = 'INITIAL TIMESTEP_END'
+    block = 'concrete'
+  []
+  [water]
+    type = NearestNodeValueAux
+    variable = T_solid_FV
+    paired_variable = 'T'
+    paired_boundary = 'water_boundary'
+    boundary = 'water_boundary_inwards'
+    check_boundary_restricted=false
+    block = 'water'
+  []
+[]
 
 [GlobalParams]
   # Common numerical parameters in INSFV
@@ -338,8 +370,8 @@ ny = '${fparse 32 * mult}'
   # Boundary condition functor computing the heat flux with a set heat transfer coefficient
   [heat-flux]
     type = ADParsedFunctorMaterial
-    expression = '-${h_water} * (T - T_fluid)'
-    functor_names = 'T T_fluid'
+    expression = '${h_water} * (T_solid_FV - T_fluid)'
+    functor_names = 'T_solid_FV T_fluid'
     property_name = 'h_dT'
   []
 []
