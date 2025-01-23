@@ -82,9 +82,9 @@ cp_multiplier = 1e-6
     type = FunctionNeumannBC
     variable = T
     boundary = inner_cavity
-    # 100 kW reactor, 108 m2 cavity area
+    # 5MW reactor, 50kW dissipated by radiation, 136 m2 cavity area
     # ramp up over 10s
-    function = '1e5 / 108 * min(t / 10, 1)'
+    function = '5e4 / 136 * min(t / 10, 1)'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC

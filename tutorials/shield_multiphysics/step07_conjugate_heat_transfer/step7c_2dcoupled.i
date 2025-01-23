@@ -1,18 +1,26 @@
 # Things we learn from experimenting in 2D
 # - mesh refinement needed in the fluid
-# - time step size can be ~6s
-# - very high Ra number. Realistic system would be easier,
-#   but to get a solution now we need to up the viscosity
-# - solver parameters: scaling notably, preconditioner
+# - time step size can be ~0.25s (can we improve?)
+# - cp multiplier to get to a steady state faster
+# - solve heat conduction for steady state directly
+# - solver parameters: scaling notably, preconditioner, multi-system!
 
-cp_multiplier = 1e-6
-cp_water_multiplier = 1e-1
-step_multiplier = 25
+# Transient parameters
+dt_step_multiplier = 2
+step_growth_start = 10
+cp_multiplier = 1e0
+cp_water_multiplier = 1e-3
 
-# this is in lieu of a turbulence model for simplicity
-mu_multiplier = 1e3
+# Use a correlation for the heat transfer coefficient
+h_water = 30
 
-mult = 2
+# Fluid properties
+mu_multiplier = 1
+cp = ${fparse 4181 * cp_water_multiplier}
+mu = ${fparse 7.98e-4 * mu_multiplier}
+
+# Mesh discretization
+mult = 1
 nx = '${fparse 40 * mult}'
 ny = '${fparse 32 * mult}'
 
@@ -79,7 +87,7 @@ ny = '${fparse 32 * mult}'
   [add_concrete_outer_boundary]
     type = RenameBoundaryGenerator
     input = add_inner_cavity
-    old_boundary = 'left right bottom top'
+    old_boundary = 'left right top bottom'
     new_boundary = 'air_boundary air_boundary air_boundary ground'
   []
 
@@ -89,24 +97,11 @@ ny = '${fparse 32 * mult}'
     block = cavity
   []
 
-  [pin_node]
-    type = BoundingBoxNodeSetGenerator
+  [refine_water]
+    type = RefineBlockGenerator
     input = remove_cavity
-    new_boundary = 'pinned_node'
-    bottom_left = '1.999 4.999 0'
-    top_right = '2.0001 5.0001 0'
-  []
-  # [refine_water]
-  #   type = RefineBlockGenerator
-  #   input = pin_node
-  #   refinement = '3'
-  #   block = 'water'
-  # []
-  [refine_water_side]
-    type = RefineSidesetGenerator
-    input = pin_node
     refinement = '2'
-    boundaries = 'water_boundary'
+    block = 'water'
   []
   uniform_refine = 1
   # second_order = true
@@ -117,155 +112,73 @@ ny = '${fparse 32 * mult}'
     # Adds a Linear Lagrange variable by default
     block = 'concrete'
     initial_condition = 300
-    # [InitialCondition]
-    #   type = FunctionIC
-    #   function = '300 + 400*16 - 200*(x-4)^2*(y-6.5)^2*(z-3)^2'
-    # []
+    solver_sys = 'heat'
   []
 
-  [velocity]
-    family = LAGRANGE_VEC
+  # Fluid flow variables
+  [vel_x]
+    type = INSFVVelocityVariable
     block = 'water'
-    # order = SECOND
+    initial_condition = 1e-4
+    solver_sys = 'flow'
   []
-  [p]
+  [vel_y]
+    type = INSFVVelocityVariable
     block = 'water'
+    initial_condition = 1e-4
+    solver_sys = 'flow'
   []
-  [T_water]
+  [pressure]
+    type = INSFVPressureVariable
+    block = 'water'
+    initial_condition = 1e5
+    solver_sys = 'flow'
+  []
+  [T_fluid]
+    type = INSFVEnergyVariable
     initial_condition = 300
     block = 'water'
-    # order = SECOND
+    scaling = 1e-3
+    solver_sys = 'flow'
   []
-[]
-
-[ICs]
-  [velocity]
-    type = VectorConstantIC
-    x_value = 1e-15
-    y_value = 1e-15
-    variable = velocity
+  [lambda]
+    type = MooseVariableScalar
+    family = SCALAR
+    order = FIRST
+    solver_sys = 'flow'
   []
 []
 
 [Kernels]
+  # We don't need those kernels to run the water-only problem
   # Solid heat conduction
   [diffusion_concrete]
     type = ADHeatConduction
     variable = T
   []
-  [time_derivative]
-    type = ADHeatConductionTimeDerivative
-    variable = T
-  []
-
-  # Fluid flow equations: mass
-  [mass]
-    type = INSADMass
-    variable = p
-    block = 'water'
-  []
-  [mass_pspg]
-    type = INSADMassPSPG
-    variable = p
-  []
-
-  # # Fluid flow: momentum
-  [momentum_time]
-    type = INSADMomentumTimeDerivative
-    variable = velocity
-  []
-  [momentum_convection]
-    type = INSADMomentumAdvection
-    variable = velocity
-  []
-  [momentum_viscous]
-    type = INSADMomentumViscous
-    variable = velocity
-  []
-  [momentum_pressure]
-    type = INSADMomentumPressure
-    variable = velocity
-    pressure = p
-    integrate_p_by_parts = true
-  []
-  [buoyancy]
-    type = INSADBoussinesqBodyForce
-    variable = velocity
-    temperature = T_water
-    gravity = '0 -9.81 0'
-    ref_temp = 'temp_ref'
-  []
-  [gravity]
-    type = INSADGravityForce
-    variable = velocity
-    gravity = '0 -9.81 0'
-  []
-  [momentum_supg]
-    type = INSADMomentumSUPG
-    variable = velocity
-    velocity = velocity
-  []
-
-  # # Fluid flow: energy
-  [temperature_time]
-    type = INSADHeatConductionTimeDerivative
-    variable = T_water
-  []
-  [temperature_advection]
-    type = INSADEnergyAdvection
-    variable = T_water
-  []
-  [temperature_conduction]
-    type = ADHeatConduction
-    variable = T_water
-    thermal_conductivity = 'k'
-  []
-  [temperature_supg]
-    type = INSADEnergySUPG
-    variable = T_water
-    velocity = velocity
-  []
+  # [time_derivative]
+  #   type = ADHeatConductionTimeDerivative
+  #   variable = T
+  # []
 []
 
 [Materials]
+  # Materials for the heat conduction equation
   [concrete]
     type = ADHeatConductionMaterial
     block = 'concrete'
     temp = 'T'
-    # we specify a function of time, temperature is passed as the time argument
-    # in the material
-    thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
+    # we keep the high thermal conductivity from the Aluminum
+    # in this simplified case to avoid having to mesh an additional layer
+    thermal_conductivity_temperature_function = '45'
     specific_heat = '${fparse cp_multiplier * 1170}'
   []
+  # This constant is fine as long as there are no mechanical deformations
   [density]
     type = ADGenericConstantMaterial
     block = 'concrete'
     prop_names = 'density'
     prop_values = '2400' # kg / m3
-  []
-
-  [water]
-    type = ADGenericConstantMaterial
-    block = 'water'
-    prop_names = 'rho    k     cp      mu alpha_wall'
-    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse mu_multiplier * 7.98e-4} 30'
-  []
-  [boussinesq_params]
-    type = ADGenericConstantMaterial
-    prop_names = 'alpha '
-    prop_values = '2.9e-3'
-  []
-  [boussinesq_params_ad]
-    type = GenericConstantMaterial
-    prop_names = 'temp_ref'
-    prop_values = ' 300'
-  []
-  [ins_mat]
-    type = INSADStabilized3Eqn
-    block = 'water'
-    velocity = velocity
-    pressure = p
-    temperature = T_water
   []
 []
 
@@ -275,9 +188,9 @@ ny = '${fparse 32 * mult}'
     type = FunctionNeumannBC
     variable = T
     boundary = inner_cavity
-    # 100 kW reactor, 108 m2 cavity area
+    # 5MW reactor, 50kW dissipated by radiation, 136 m2 cavity area (in real system)
     # ramp up over 10s
-    function = '1e5 / 108 * min(t / 10, 1)'
+    function = '5e4 / 136'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -294,55 +207,187 @@ ny = '${fparse 32 * mult}'
     boundary = 'ground'
   []
 
-  [inactive_water_convection]
-    type = ADConvectiveHeatFluxBC
+  # Heat fluxes between water and concrete
+  [solid_to_fluid]
+    type = FunctorNeumannBC
     variable = T
-    boundary = 'inactive_water_boundary'
-    T_infinity = 300.0
-    # The heat transfer coefficient should be obtained from a correlation
-    heat_transfer_coefficient = 30
-  []
-
-  # Water
-  [no_slip]
-    type = VectorFunctionDirichletBC
-    variable = velocity
-    boundary = 'water_boundary'
-  []
-  [pressure_pin]
-    type = DirichletBC
-    variable = p
-    boundary = 'pinned_node'
-    value = 0
+    boundary = water_boundary
+    functor = 'h_dT'
+    coefficient = -1
   []
 []
 
-[InterfaceKernels]
-  [water_concrete_interface]
-    type = ConjugateHeatTransfer
-    variable = T_water
-    T_fluid = T_water
-    neighbor_var = 'T'
-    boundary = 'water_boundary'
-    htc = 'alpha_wall'
+
+[GlobalParams]
+  # Common numerical parameters in INSFV
+  velocity_interp_method = rc
+  advected_interp_method = upwind
+  rhie_chow_user_object = ins_rhie_chow_interpolator
+  rho = rho
+[]
+
+[FVKernels]
+  # Mass conservation equation
+  [water_ins_mass_advection]
+    type = INSFVMassAdvection
+    variable = pressure
+  []
+
+  # Pressure constraint
+  [water_ins_mass_pressure_pin]
+    type = FVIntegralValueConstraint
+    lambda = lambda
+    phi0 = 1e5
+    variable = pressure
+  []
+
+  # Momentum conservation equations
+  [water_ins_momentum_time_vel_x]
+    type = INSFVMomentumTimeDerivative
+    momentum_component = x
+    variable = vel_x
+  []
+  [water_ins_momentum_time_vel_y]
+    type = INSFVMomentumTimeDerivative
+    momentum_component = y
+    variable = vel_y
+  []
+  [water_ins_momentum_advection_x]
+    type = INSFVMomentumAdvection
+    momentum_component = x
+    variable = vel_x
+  []
+  [water_ins_momentum_advection_y]
+    type = INSFVMomentumAdvection
+    momentum_component = y
+    variable = vel_y
+  []
+  [water_ins_momentum_diffusion_x]
+    type = INSFVMomentumDiffusion
+    momentum_component = x
+    mu = mu
+    variable = vel_x
+  []
+  [water_ins_momentum_diffusion_y]
+    type = INSFVMomentumDiffusion
+    momentum_component = y
+    mu = mu
+    variable = vel_y
+  []
+  [water_ins_momentum_pressure_x]
+    type = INSFVMomentumPressure
+    momentum_component = x
+    pressure = pressure
+    variable = vel_x
+  []
+  [water_ins_momentum_pressure_y]
+    type = INSFVMomentumPressure
+    momentum_component = y
+    pressure = pressure
+    variable = vel_y
+  []
+  [water_ins_momentum_gravity_z]
+    type = INSFVMomentumGravity
+    gravity = '0 -9.81 0'
+    momentum_component = y
+    variable = vel_y
+  []
+  [water_ins_momentum_boussinesq_z]
+    type = INSFVMomentumBoussinesq
+    T_fluid = T_fluid
+    alpha_name = alpha
+    gravity = '0 -9.81 0'
+    momentum_component = y
+    ref_temperature = 300
+    rho = 955.7
+    variable = vel_y
+  []
+
+  # Energy conservation equation
+  [water_ins_energy_time]
+    type = INSFVEnergyTimeDerivative
+    dh_dt = dh_dt
+    rho = rho
+    variable = T_fluid
+  []
+  [water_ins_energy_advection]
+    type = INSFVEnergyAdvection
+    variable = T_fluid
+  []
+  [water_ins_energy_diffusion_all]
+    type = FVDiffusion
+    coeff = k
+    variable = T_fluid
+  []
+[]
+
+[FunctorMaterials]
+  [water]
+    type = ADGenericFunctorMaterial
+    block = 'water'
+    prop_names = 'rho    k     cp  mu    alpha_wall alpha'
+    prop_values = '955.7 0.6 ${cp} ${mu} 30         2.9e-3'
+  []
+  [water_ins_enthalpy_material]
+    type = INSFVEnthalpyFunctorMaterial
+    block = water
+    cp = cp
+    temperature = T_fluid
+  []
+
+  # Boundary condition functor computing the heat flux with a set heat transfer coefficient
+  [heat-flux]
+    type = ADParsedFunctorMaterial
+    expression = '-${h_water} * (T - T_fluid)'
+    functor_names = 'T T_fluid'
+    property_name = 'h_dT'
+  []
+[]
+
+[FVBCs]
+  [vel_x_water_boundary]
+    type = INSFVNoSlipWallBC
+    boundary = water_boundary
+    function = 0
+    variable = vel_x
+  []
+  [vel_y_water_boundary]
+    type = INSFVNoSlipWallBC
+    boundary = water_boundary
+    function = 0
+    variable = vel_y
+  []
+
+  [T_fluid_water_boundary]
+    type = FVFunctorNeumannBC
+    boundary = water_boundary
+    functor = 'h_dT'
+    variable = T_fluid
+  []
+[]
+
+[UserObjects]
+  [ins_rhie_chow_interpolator]
+    type = INSFVRhieChowInterpolator
+    pressure = 'pressure'
+    u = 'vel_x'
+    v = 'vel_y'
+    block = 'water'
   []
 []
 
 [Problem]
+  nl_sys_names = 'heat flow'
+  # Nothing defined on water_inactive subdomain
   kernel_coverage_check = false
+  material_coverage_check = false
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  automatic_scaling = true
-  off_diagonals_in_auto_scaling = true
 
-  # petsc_options_iname = '-pc_type -pc_hypre_type'
-  # petsc_options_value = 'hypre boomeramg'
   line_search = none
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
 
   nl_abs_tol = 1e-8
 
@@ -354,7 +399,24 @@ ny = '${fparse 32 * mult}'
 
   [TimeStepper]
     type = FunctionDT
-    function = 'if(t<0, 0.1,${fparse 0.25 * step_multiplier})'
+    function = "if(t<0, 0.1,
+                        if(t<${step_growth_start}, 0.25,
+                                                   ${fparse 0.25*dt_step_multiplier}))"
+  []
+[]
+
+[Preconditioning]
+  [thermomecha]
+    type = SMP
+    nl_sys = 'heat'
+    petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+    petsc_options_value = 'hypre boomeramg 500'
+  []
+  [flow]
+    type = SMP
+    nl_sys = 'flow'
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu NONZERO'
   []
 []
 
@@ -362,20 +424,33 @@ ny = '${fparse 32 * mult}'
   exodus = true
 []
 
-# [Debug]
-#   show_var_residual_norms = true
-# []
+[Debug]
+  show_var_residual_norms = true
+[]
 
 [Postprocessors]
+  # we will see postprocessors in step 9
   [T_max]
     type = ElementExtremeValue
-    variable = T_water
+    variable = T
     value_type = 'max'
-    block = 'water'
+    block = 'concrete'
   []
   [T_min]
     type = ElementExtremeValue
-    variable = T_water
+    variable = T
+    value_type = 'min'
+    block = 'concrete'
+  []
+  [T_water_max]
+    type = ElementExtremeValue
+    variable = T_fluid
+    value_type = 'max'
+    block = 'water'
+  []
+  [T_water_min]
+    type = ElementExtremeValue
+    variable = T_fluid
     value_type = 'min'
     block = 'water'
   []
@@ -390,10 +465,5 @@ ny = '${fparse 32 * mult}'
     k_ave = 0.6
     gravity_magnitude = 9.81
     rho_ave = 955.7
-  []
-[]
-
-[AuxVariables]
-  [velocity_z]
   []
 []

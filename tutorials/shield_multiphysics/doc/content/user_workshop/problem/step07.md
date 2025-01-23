@@ -26,7 +26,7 @@ where $\vec{u}$ is the fluid velocity, $\mu$ is fluid viscosity, $p$ is the pres
 
 !---
 
-## Step 7a: Solve heat equation only
+## Step 7a: Solve the solid heat equation only
 
 We start simple by creating decoupled simulations.
 The variables for the fluid solve are created but kept as auxiliary variables.
@@ -46,8 +46,7 @@ F_{buoyancy} = \alpha (T_w - T_{ref})
 
 ## Step 7b: Solve natural convection only
 
-The `ConjugateHeatTransfer` object will only accept nonlinear variables for both
-the solid and fluid temperature, so we create simpler boundary conditions for now.
+We set up the flow equations:
 
 !listing step07_conjugate_heat_transfer/step7b_water_decoupled.i
 
@@ -156,23 +155,4 @@ moose-opt -i step7c_2dcoupled.i
 
 ## Step 7d: Run the 3D coupled simulation
 
-Once we have found all the issues with the uncoupled simulations and the 2D coupled simulation, we can now run the 3D coupled simulation:
-
-!listing step07_conjugate_heat_transfer/step7d_coupled.i
-
-!---
-
-Using the tutorial executable:
-
-```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-mpirun -n 8 ../executable/shield_multiphysics-opt -i step7d_coupled.i
-```
-
-Using the conda MOOSE executable
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step07_conjugate_heat_transfer
-mpirun -n 8 moose-opt -i step7d_coupled.i
-```
+Once we have found all the issues with the uncoupled simulations and the 2D coupled simulation, we can now run the 3D coupled simulation. We will do this in [step 12](user_workshop/problem/step12.md) using [Physics](syntax/Physics/index.md)!
