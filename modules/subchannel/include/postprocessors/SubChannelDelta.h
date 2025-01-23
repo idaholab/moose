@@ -14,7 +14,7 @@
 
 /**
  * Calculates the overall change of a chosen variable
- * between inlet and outlet of the subchannel assembly
+ * between the inlet and outlet of the subchannel assembly
  */
 class SubChannelDelta : public GeneralPostprocessor
 {

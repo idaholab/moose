@@ -14,7 +14,7 @@
 #include <Eigen/Dense>
 
 /**
- * Prints out a user selected value in matrix format to be used for post-processing
+ * Prints out a user selected variable value in matrix format at a specific plane
  */
 class QuadSubChannelNormalSliceValues : public FileOutput
 {
@@ -28,7 +28,7 @@ protected:
   Eigen::MatrixXd _exit_value;
   /// The name of the variable
   const VariableName & _variable;
-  /// The axial location where the variable is
+  /// The axial location where the plane is
   const Real & _height;
 
 public:
