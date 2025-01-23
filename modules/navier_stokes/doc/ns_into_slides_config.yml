@@ -1,6 +1,6 @@
 Content:
     intro_slides:
-        root_dir: modules/navier_stokes/doc/intro_slides
+        root_dir: modules/navier_stokes/doc/content/intro_slides
 
 Executioner:
     type: MooseDocs.base.Serial
