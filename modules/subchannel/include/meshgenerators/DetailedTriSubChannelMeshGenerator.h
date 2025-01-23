@@ -33,17 +33,17 @@ protected:
   /// returns the index of neighboring pins given subchannel index
   std::vector<unsigned int> getSubChannelPins(unsigned int i) { return _chan_to_pin_map[i]; }
 
-  /// unheated length of the fuel rod at the entry of the assembly
+  /// unheated length of the fuel Pin at the entry of the assembly
   Real _unheated_length_entry;
-  /// heated length of the fuel rod
+  /// heated length of the fuel Pin
   Real _heated_length;
-  /// unheated length of the fuel rod at the exit of the assembly
+  /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
-  /// fuel rod diameter
+  /// fuel Pin diameter
   Real _pin_diameter;
   /// Number of rings in the geometry
   unsigned int _n_rings;

@@ -23,11 +23,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// unheated length of the fuel rod at the entry of the assembly
+  /// unheated length of the fuel Pin at the entry of the assembly
   Real _unheated_length_entry;
-  /// heated length of the fuel rod
+  /// heated length of the fuel Pin
   Real _heated_length;
-  /// unheated length of the fuel rod at the exit of the assembly
+  /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
   /// Lateral form loss coefficient
   const Real & _kij;

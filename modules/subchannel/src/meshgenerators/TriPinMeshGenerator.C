@@ -45,7 +45,7 @@ TriPinMeshGenerator::validParams()
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
+  params.addRequiredParam<unsigned int>("nrings", "Number of fuel Pin rings per assembly [-]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addParam<unsigned int>("block_id", 1, "Domain Index");
   return params;
@@ -75,11 +75,11 @@ TriPinMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
   if (!mesh_base)
     mesh_base = buildMeshBaseObject();
-  /// Boundary info is added only if specific rod conditions are defined for the rods
+  /// Boundary info is added only if specific Pin conditions are defined for the rods
   // BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
   mesh_base->set_mesh_dimension(3);
 
-  // Defining the rod positions
+  // Defining the Pin positions
   TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
   auto _nrods = _pin_position.size();
 
@@ -128,7 +128,7 @@ TriPinMeshGenerator::generate()
       elem->set_node(0) = mesh_base->node_ptr(indx1);
       elem->set_node(1) = mesh_base->node_ptr(indx2);
 
-      /// Boundary info is added only if specific rod conditions are defined for the rods
+      /// Boundary info is added only if specific Pin conditions are defined for the rods
       //      if (iz == 0)
       //        boundary_info.add_side(elem, 0, 0);
       //      if (iz == _n_cells - 1)
@@ -136,7 +136,7 @@ TriPinMeshGenerator::generate()
     }
   }
 
-  /// Boundary info is added only if specific rod conditions are defined for the rods
+  /// Boundary info is added only if specific Pin conditions are defined for the rods
   //  boundary_info.sideset_name(0) = "inlet";
   //  boundary_info.sideset_name(1) = "outlet";
   //  boundary_info.nodeset_name(0) = "inlet";

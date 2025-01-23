@@ -28,7 +28,7 @@ TriDuctMeshGenerator::validParams()
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
+  params.addRequiredParam<unsigned int>("nrings", "Number of fuel Pin rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
   return params;

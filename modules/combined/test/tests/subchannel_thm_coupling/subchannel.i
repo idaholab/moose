@@ -186,7 +186,7 @@ heated_length = 1.0
 
 [AuxKernels]
   [T_in_bc]
-    type = PostprocessorConstantAux
+    type = PostprocessorAux
     variable = T
     boundary = inlet
     postprocessor = report_temperature_inlet

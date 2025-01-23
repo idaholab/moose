@@ -205,7 +205,7 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
                                 Point center)
 {
   /// Defining parameters
-  // distance: it is the distance to the next rod
+  // distance: it is the distance to the next Pin
   //
   Real theta = 0.0;
   Real dtheta = 0.0;

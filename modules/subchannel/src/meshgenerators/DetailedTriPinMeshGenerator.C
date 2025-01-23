@@ -20,7 +20,7 @@ DetailedTriPinMeshGenerator::validParams()
   params.addClassDescription(
       "Creates a detailed mesh of fuel pins in a triangular lattice arrangement");
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
-  params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
+  params.addRequiredParam<unsigned int>("nrings", "Number of fuel Pin rings per assembly [-]");
   return params;
 }
 

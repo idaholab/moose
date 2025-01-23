@@ -283,7 +283,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   Real ar = 0.0;
   Real a_p = 0.0;
 
-  // Find the coefficients of bare rod bundle friction factor
+  // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
   // Volume 1
   if (subch_type == EChannelType::CENTER)
@@ -306,9 +306,9 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
       b1T = 0.03632;
       b2T = -0.03333;
     }
-    // laminar flow friction factor for bare rod bundle - Center subchannel
+    // laminar flow friction factor for bare Pin bundle - Center subchannel
     cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2.0);
-    // turbulent flow friction factor for bare rod bundle - Center subchannel
+    // turbulent flow friction factor for bare Pin bundle - Center subchannel
     cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2.0);
   }
   else if (subch_type == EChannelType::EDGE)
@@ -331,9 +331,9 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
       b1T = 0.04199;
       b2T = -0.04428;
     }
-    // laminar flow friction factor for bare rod bundle - Edge subchannel
+    // laminar flow friction factor for bare Pin bundle - Edge subchannel
     cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2.0);
-    // turbulent flow friction factor for bare rod bundle - Edge subchannel
+    // turbulent flow friction factor for bare Pin bundle - Edge subchannel
     cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2.0);
   }
   else
@@ -356,24 +356,24 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
       b1T = 0.006706;
       b2T = -0.009567;
     }
-    // laminar flow friction factor for bare rod bundle - Corner subchannel
+    // laminar flow friction factor for bare Pin bundle - Corner subchannel
     cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2.0);
-    // turbulent flow friction factor for bare rod bundle - Corner subchannel
+    // turbulent flow friction factor for bare Pin bundle - Corner subchannel
     cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2.0);
   }
 
-  // Find the coefficients of wire-wrapped rod bundle friction factor
+  // Find the coefficients of wire-wrapped Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
   // Volume 1 also Chen and Todreas (2018).
   if ((wire_diameter != 0.0) && (wire_lead_length != 0.0))
   {
     if (subch_type == EChannelType::CENTER)
     {
-      // wetted perimeter for center subchannel and bare rod bundle
+      // wetted perimeter for center subchannel and bare Pin bundle
       pw_p = libMesh::pi * pin_diameter / 2.0;
       // wire projected area - center subchannel wire-wrapped bundle
       ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
-      // bare rod bundle center subchannel flow area (normal area + wire area)
+      // bare Pin bundle center subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Center subchannel
       cT *= (pw_p / w_perim);
@@ -387,7 +387,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
     {
       // wire projected area - edge subchannel wire-wrapped bundle
       ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
-      // bare rod bundle edge subchannel flow area (normal area + wire area)
+      // bare Pin bundle edge subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
       // turbulent friction factor equation constant - Edge subchannel
       cT *= std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
@@ -398,7 +398,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
     {
       // wire projected area - corner subchannel wire-wrapped bundle
       ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
-      // bare rod bundle corner subchannel flow area (normal area + wire area)
+      // bare Pin bundle corner subchannel flow area (normal area + wire area)
       a_p = S + libMesh::pi * std::pow(wire_diameter, 2.0) / 24.0 / std::cos(theta);
       // turbulent friction factor equation constant - Corner subchannel
       cT *= std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);

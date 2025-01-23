@@ -25,17 +25,17 @@ protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
   std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }
 
-  /// unheated length of the fuel rod at the entry of the assembly
+  /// unheated length of the fuel Pin at the entry of the assembly
   Real _unheated_length_entry;
-  /// heated length of the fuel rod
+  /// heated length of the fuel Pin
   Real _heated_length;
-  /// unheated length of the fuel rod at the exit of the assembly
+  /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
-  /// fuel rod diameter
+  /// fuel Pin diameter
   Real _pin_diameter;
   /// Number of cells in the axial direction
   unsigned int _n_cells;

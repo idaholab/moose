@@ -270,7 +270,7 @@ QuadInterWrapperMeshGenerator::generate()
   _nodes.resize(_nx * _ny);
   // Add the points in the shape of a rectilinear grid.  The grid is regular
   // on the xy-plane with a spacing of `pitch` between points.  The grid along
-  // z is irregular to account for rod spacers.  Store pointers in the _nodes
+  // z is irregular to account for Pin spacers.  Store pointers in the _nodes
   // array so we can keep track of which points are in which channels.
   Real offset_x = (_nx - 1) * _assembly_pitch / 2.0;
   Real offset_y = (_ny - 1) * _assembly_pitch / 2.0;

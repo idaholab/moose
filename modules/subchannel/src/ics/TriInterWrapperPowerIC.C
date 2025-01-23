@@ -154,14 +154,14 @@ TriInterWrapperPowerIC::value(const Point & p)
   Point p1(0, 0, unheated_length_entry);
   // Point P = p - p1;
 
-  // if we are adjacent to the heated part of the fuel rod
+  // if we are adjacent to the heated part of the fuel Pin
   if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
   {
     if (subch_type == EChannelType::CENTER)
     {
       for (unsigned int j = 0; j < 3; j++)
       {
-        auto rod_idx = _mesh.getRodIndex(i, j);
+        auto rod_idx = _mesh.getPinIndex(i, j);
         sum = sum + 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
                         _axial_heat_rate.value(_t, p);
       }
@@ -171,7 +171,7 @@ TriInterWrapperPowerIC::value(const Point & p)
     {
       for (unsigned int j = 0; j < 2; j++)
       {
-        auto rod_idx = _mesh.getRodIndex(i, j);
+        auto rod_idx = _mesh.getPinIndex(i, j);
         sum = sum + 1.0 / 4.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
                         _axial_heat_rate.value(_t, p);
       }
@@ -179,7 +179,7 @@ TriInterWrapperPowerIC::value(const Point & p)
     }
     else if (subch_type == EChannelType::CORNER)
     {
-      auto rod_idx = _mesh.getRodIndex(i, 0);
+      auto rod_idx = _mesh.getPinIndex(i, 0);
       sum = 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
             _axial_heat_rate.value(_t, p);
       return sum;

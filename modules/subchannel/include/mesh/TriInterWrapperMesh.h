@@ -37,9 +37,9 @@ public:
   virtual const unsigned int & getNumOfRods() const { return _n_assemblies; }
 
   /**
-   * Return rod index given inter_wrapper index and local neighbor index
+   * Return Pin index given inter_wrapper index and local neighbor index
    */
-  virtual const unsigned int & getRodIndex(const unsigned int channel_idx,
+  virtual const unsigned int & getPinIndex(const unsigned int channel_idx,
                                            const unsigned int neighbor_idx)
   {
     return _chan_to_pin_map[channel_idx][neighbor_idx];
@@ -170,7 +170,7 @@ public:
   static InputParameters validParams();
 
   /**
-   * Calculates and stores the rod positions/centers for a hexagonal assembly
+   * Calculates and stores the Pin positions/centers for a hexagonal assembly
    * containing the given number of rings in a triangular/alternating row grid
    * spaced 'assembly_pitch' apart.  The points are generated such that the duct is
    * centered at the given center point.
