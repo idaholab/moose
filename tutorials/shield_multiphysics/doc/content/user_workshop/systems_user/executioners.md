@@ -53,26 +53,3 @@ solver. Here are a few common options:
 | `nl_rel_tol` | Nonlinear Relative Tolerance (default: 1e-8) |
 | `nl_abs_tol` | Nonlinear Absolute Tolerance (default: 1e-50) |
 | `nl_max_its` | Max Nonlinear Iterations (default: 50) |
-
-
-!---
-
-## TimeKernel Object
-
-The TimeKernel object adds two member variables to a Kernel object:
-
-`_u_dot`\\
-Time derivative of the associated nonlinear variable
-
-`_du_dot_du`\\
-The derivative of _u_dot with respect to _u
-
-!---
-
-## TimeKernel Base Classes
-
-| Base | Override | Use |
-| :- | :- | :- |
-| TimeKernel\\ +ADTimeKernel+ | computeQpResidual | Use when the time term in the [!ac](PDE) is multiplied by both the test function and the gradient of the test function (`_test` and `_grad_test` must be applied) |
-| TimeKernelValue\\ +ADTimeKernelValue+ | precomputeQpResidual | Use when the time term computed in the [!ac](PDE) is only multiplied by the test function (do not use `_test` in the override, it is applied automatically) |
-| TimeKernelGrad\\ +ADTimeKernelGrad+ | precomputeQpResidual | Use when the time term computed in the [!ac](PDE) is only multiplied by the gradient of the test function (do not use `_grad_test` in the override, it is applied automatically) |
