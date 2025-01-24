@@ -26,10 +26,12 @@ InputParameters
 ElementMaterialSampler::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
-  params.addClassDescription("Records all Real-valued material properties of a material object on "
-                             "quadrature points on elements at the indicated execution points.");
-  params.addRequiredParam<MaterialName>("material",
-                                        "Material for which all properties will be recorded.");
+  params.addClassDescription("Records all Real-valued material properties of a material object, "
+                             "or Real-valued material properties of the supplied property names "
+                             "on quadrature points on elements at the indicated execution points.");
+  params.addParam<MaterialName>("material", "Material for which all properties will be recorded.");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "property", "Material property names that will be recorded.");
   params.addParam<std::vector<dof_id_type>>(
       "elem_ids",
       "Subset of element IDs to print data for. If omitted, all elements will be printed.");
@@ -44,35 +46,62 @@ ElementMaterialSampler::ElementMaterialSampler(const InputParameters & parameter
     _y_coords(declareVector("y")),
     _z_coords(declareVector("z"))
 {
-  auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
-  auto & prop_names = mat.getSuppliedItems();
-  if (mat.isBoundaryMaterial())
-    mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
+  // Check either "material" or "property" was set but not both
+  if (parameters.isParamValid("material") && parameters.isParamValid("property"))
+    mooseError("Setting both 'material' and 'property' is not allowed. Use one or the other.");
+  if (!parameters.isParamValid("material") && !parameters.isParamValid("property"))
+    mooseError("Either 'material' and 'property' needs to be set.");
+
+  // List of property names to collect
+  std::vector<MaterialName> prop_names;
 
   // Get list of elements from user
   if (parameters.isParamValid("elem_ids"))
   {
     const auto & ids = getParam<std::vector<dof_id_type>>("elem_ids");
     _elem_filter = std::set<dof_id_type>(ids.begin(), ids.end());
-
-    // check requested materials are available
-    for (const auto & id : ids)
-    {
-      auto el = _mesh.getMesh().query_elem_ptr(id);
-
-      // We'd better have found the requested element on *some*
-      // processor.
-      bool found_elem = (el != nullptr);
-      this->comm().max(found_elem);
-
-      // We might not have el on this processor in a distributed mesh,
-      // but it should be somewhere and it ought to have a material
-      // defined for its subdomain
-      if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
-        mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
-    }
   }
 
+  // If Material is used, get all properties.
+  if (parameters.isParamValid("material"))
+  {
+    auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
+    if (mat.isBoundaryMaterial())
+      mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
+
+    // Get property names from the Material
+    auto & props = mat.getSuppliedItems(); // returns std::set
+    prop_names = std::vector<MaterialName>(props.begin(), props.end());
+
+    // Check requested materials are available
+    if (_elem_filter)
+    {
+      for (const auto & id : *_elem_filter)
+      {
+        auto el = _mesh.getMesh().query_elem_ptr(id);
+
+        // We'd better have found the requested element on *some*
+        // processor.
+        bool found_elem = (el != nullptr);
+        this->comm().max(found_elem);
+
+        // We might not have el on this processor in a distributed mesh,
+        // but it should be somewhere and it ought to have a material
+        // defined for its subdomain
+        if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
+          mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
+      }
+    }
+  }
+  else
+  {
+
+    // Properties supplied by user
+    auto & props = getParam<std::vector<MaterialPropertyName>>("property");
+    prop_names = std::vector<MaterialName>(props.begin(), props.end());
+  }
+
+  // Check properties are valid and store references
   for (auto & prop : prop_names)
   {
     if (hasMaterialProperty<Real>(prop))
