@@ -1,103 +1,55 @@
 # [Input Parameters](source/utils/InputParameters.md)
 
-Every `MooseObject` includes a set of custom parameters within the `InputParameters` object that
+Every object in MOOSE includes a set of custom parameters within an `InputParameters` object that
 is used to construct the object.
 
-The `InputParameters` object for each object is created using the static `validParams` method,
-which every class contains.
-
 !---
 
-## `validParams` Declaration
+### Required parameters
 
-In the class declaration,
-```cpp
-public:
-...
-static InputParameters Convection::validParams();
-```
+Some object parameters are required. MOOSE will error if they are not provided in the input file.
 
-!---
-
-## `validParams` Definition
-
-```cpp
-InputParameters
-Convection::validParams()
-{
-  InputParameters params = Kernel::validParams();  // Start with parent
-  params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
-  params.addParam<Real>("coefficient", "Diffusion coefficient");
-  return params;
-}
-```
-
-!---
-
-## `InputParameters` Object
-
-!---
-
-### Class Description
-
-Class level documentation may be included within the source code using the `addClassDescription`
-method.
-
-```C++
-params.addClassDescription("Use this method to provide a summary of the class being created...");
-```
-
-!---
-
-### Optional Parameter(s)
-
-Adds an input file parameter, of type `int`, that includes a default value of 1980.
-
-```cpp
-params.addParam<int>("year", 1980, "Provide the year you were born.");
-```
-
-Here the default is overriden by a user-provided value
-
-```text
-[UserObjects]
-  [date_object]
-    type = Date
-    year = 1990
+```bash
+[Kernels]
+  [diff]
+    type = Diffusion
   []
 []
 ```
 
+The example above will error because the `variable` parameter is missing.
+
+!alert note
+The `MOOSE VSCode plugin` will automatically create a `<required_parameter> =` line for each required
+parameter when using the syntax auto-complete.
+
 !---
 
-### Required Parameter(s)
+### Optional Parameter(s) have a default
 
-Adds an input file parameter, of type `int`, must be supplied in the input file.
-
-```cpp
-params.addRequiredParam<int>("month", "Provide the month you were born.");
-```
+If the value of a parameter is standard, it does not need to be always included in the input file,
+unless the user wants to change its value!
+In the example below, the `block` parameter is not specified, which means the default (empty)
+is applied.
 
 ```text
-[UserObjects]
-  [date_object]
-    type = Date
-    month = 6
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable = u
   []
 []
 ```
+
+!alert note
+The `MOOSE VSCode plugin` will automatically create a `<optional_parameter> = <default_value>` line for an optional parameter when using the auto-complete feature and selecting said parameter.
 
 !---
 
 ### Coupled Variable
 
-Various types of objects in MOOSE support variable coupling, this is done using the
-`addCoupledVar` method.
-
-```cpp
-params.addRequiredCoupledVar("temperature", "The temperature (C) of interest.");
-params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atmosphere.");
-```
+Various types of objects in MOOSE can be coupled to variables. MOOSE will then automatically
+compute the local variable values when executing the object.
 
 ```text
 [Variables]
@@ -128,13 +80,9 @@ pressure = 42
 
 ### Range Checked Parameters
 
-Input constant values may be restricted to a range of values directly in the `validParams` function.
-This can also be used for vectors of constants parameters!
-
-!listing timesteppers/ConstantDT.C start=params.addRangeCheckedParam end=params.addClassDescription
-
-Syntax: [warp.povusers.org/FunctionParser/fparser.html](http://warp.povusers.org/FunctionParser/fparser.html)
-
+Input constant values may be restricted to a range of values.
+This is enforced programmatically, and MOOSE will error if the user passes a value
+out of the specified bounds.
 
 !---
 
@@ -155,14 +103,11 @@ Each application is capable of generating documentation from the `validParams` f
 
 !---
 
-## C++ Types
+## Supported types
 
-Built-in types and std::vector are supported via template methods:
-
-- `addParam<Real>("year", 1980, "The year you were born.");`
-- `addParam<int>("count", 1, "doc");`
-- `addParam<unsigned int>("another_num", "doc");`
-- `addParam<std::vector<int> >("vec", "doc");`
+MOOSE can support integer, float, vector, string, ... parameters.
+However this is specified in each object, and types cannot be changed in the
+input file.
 
 Other supported parameter types include:
 
@@ -181,6 +126,7 @@ functions.
 - SubdomainName
 - BoundaryName
 - FileName
+- DataFileName
 - VariableName
 - FunctionName
 - UserObjectName
@@ -190,70 +136,14 @@ functions.
 - NonlinearVariableName
 - AuxVariableName
 
-For a complete list, see the instantiations at the bottom of framework/include/utils/MooseTypes.h.
-
 !---
 
-## MooseEnum
+### Enumerations
 
-MOOSE includes a "smart" enum utility to overcome many of the deficiencies in the standard C++ enum
-type. It works in both integer and string contexts and is self-checked for consistency.
+MOOSE supports enumerations as parameters. An enumeration is a fixed list of options,
+that the user may then select from. Defaults are supported for these enumerations.
 
-```cpp
-#include "MooseEnum.h"
+In the example below, the `value_type` parameters can take `max` or `min` values, with a default
+of `max`. If you specify `abc` to `value_type`, it will error.
 
-// The valid options are specified in a space separated list.
-// You can optionally supply the default value as a second argument.
-// MooseEnums are case preserving but case-insensitive.
-MooseEnum option_enum("first=1 second fourth=4", "second");
-
-// Use in a string context
-if (option_enum == "first")
-  doSomething();
-
-// Use in an integer context
-switch (option_enum)
-{
-  case 1: ... break;
-  case 2: ... break;
-  case 4: ... break;
-  default: ... ;
-}
-```
-
-!---
-
-## MooseEnum with InputParameters
-
-Objects that have a specific set of named options should use a `MooseEnum` so that parsing and error
-checking code can be omitted.
-
-```cpp
-InputParameters MyObject::validParams()
-{
-  InputParameters params = ParentObject::validParams();
-  MooseEnum component("X Y Z");  // No default supplied
-  params.addRequiredParam<MooseEnum>("component", component,
-                                     "The X, Y, or Z component");
-  return params;
-}
-```
-
-If an invalid value is supplied, an error message is provided.
-
-!---
-
-## Multiple Value MooseEnums (MultiMooseEnum)
-
-Operates the same way as `MooseEnum` but supports multiple ordered options.
-
-```cpp
-InputParameters MyObject::validParams()
-{
-  InputParameters params = ParentObject::validParams();
-  MultiMooseEnum transforms("scale rotate translate");
-  params.addRequiredParam<MultiMooseEnum>("transforms", transforms,
-                                          "The transforms to perform");
-  return params;
-}
-```
+!listing test/tests/postprocessors/element_extreme_value/element_extreme_value.i block=Postprocessors

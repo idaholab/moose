@@ -69,41 +69,9 @@ other nodal auxiliary variables
 
 !---
 
-## AuxKernel Objects
-
-Directly compute AuxVariable values by overriding `computeValue()` and they can operate on
-both elemental and nodal auxiliary variable.
-
-When operating on a nodal variable `computeValue()` operates on each node; when operating
-on a elemental variable it operates on each element.
-
-!---
-
-## AuxKernel Object Members
-
-`_u`, `_grad_u`\\
-Value and gradient of variable this AuxKernel is operating on
-
-`_q_point`\\
-Coordinates of the current q-point that is only valid for elemental AuxKernels, `_current_node`
-should be used for nodal variables
-
-`_qp`\\
-Current quadrature point, this indexing is used for both nodal (`_qp=0` at the node) and elemental variables for consistency
-
-`_current_elem`\\
-Pointer to the current element that is being operated on (elemental only)
-
-`_current_node`\\
-Pointer to the current node that is being operated on (nodal only)
-
-!---
-
 ## VectorAuxKernel Objects
 
-Directly compute a vector AuxVariable values by:
-- inheriting from the `VectorAuxKernel` class
-- overriding `computeValue()`, with the difference being the return value of a `RealVectorValue` instead of Real.
+`VectorAuxKernels` can compute vector auxiliary variables.
 
 The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MONOMIAL_VEC or NEDELEC_VEC).
 

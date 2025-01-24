@@ -1,6 +1,1 @@
-# [Nodal Kernel System](syntax/NodalKernels/index.md)
-
-A system for computing a residual contribution of a [!ac](PDE) at nodes within the finite element
-mesh.
-
-!---
+../../../../../darcy_thermo_mech/doc/content/workshop/systems/nodalkernels.md

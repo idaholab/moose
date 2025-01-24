@@ -12,60 +12,17 @@ There are two flavors of BC objects: Nodal and Integrated.
 
 ## Integrated BC
 
-Integrated BCs are integrated over a boundary or internal side and should inherit
-from `ADIntegratedBC`.
+Integrated BCs are integrated over a boundary or internal side. They are meant to add a
+surface integral term, coming from example from the application of the divergence theorem.
 
-The structure is very similar to Kernels: objects must override `computeQpResidual`
-
-!---
-
-## ADIntegratedBC Object Members
-
-`_u`, `_grad_u`\\
-Value and gradient of the variable this Kernel is operating on
-
-`_test`, `_grad_test`\\
-Value ($\psi$) and gradient ($\nabla \psi$) of the test functions at the quadrature points
-
-`_phi`, `_grad_phi`\\
-Value ($\phi$) and gradient ($\nabla \phi$) of the trial functions at the quadrature points
-
-`_i`, `_j`, `_qp`\\
-Current index for test function, trial functions, and quadrature point, respectively
-
-`_normals`:\\
-Outward normal vector for boundary element
-
-`_boundary_id`\\
-The boundary ID
-
-`_current_elem`, `_current_side`\\
-A pointer to the element and index to the current boundary side
+This integral is computed using a surface quadrature.
 
 !---
 
 ## Non-Integrated BC
 
-Non-integrated BCs set values of the residual directly on a boundary or internal side and
-should inherit from `ADNodalBC`.
-
-The structure is very similar to Kernels: objects must override `computeQpResidual`.
-
-!---
-
-## NodalBC Object Members
-
-`_u`\\
-Value of the variable this Kernel is operating on
-
-`_qp`\\
-Current index, used for interface consistency
-
-`_boundary_id`\\
-The boundary ID
-
-`_current_node`\\
-A pointer to the current node that is being operated on.
+Non-integrated BCs set values of the residual directly on a boundary or internal side.
+They do not rely a quadrature-point based integration.
 
 !---
 
@@ -80,18 +37,6 @@ becomes
 
 !equation
 u - g_1 = 0 \quad \text{on} \quad \partial\Omega_1
-
-!---
-
-## DirichletBC.h
-
-!listing framework/include/bcs/DirichletBC.h
-
-!---
-
-## DirichletBC.C
-
-!listing framework/src/bcs/DirichletBC.C
 
 !---
 
@@ -115,19 +60,6 @@ becomes:
 
 If $\nabla u \cdot \hat{\boldsymbol n} = 0$, then the boundary integral is zero
 ("natural boundary condition").
-
-
-!---
-
-## NeumannBC.h
-
-!listing framework/include/bcs/NeumannBC.h
-
-!---
-
-## NeumannBC.C
-
-!listing framework/src/bcs/NeumannBC.C
 
 !---
 

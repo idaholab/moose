@@ -1,6 +1,1 @@
-# [Initial Condition System](syntax/ICs/index.md)
-
-A system for initializing field variables (non-linear and auxiliary) prior to execution of a
-simulation.
-
-!---
+../../../../../darcy_thermo_mech/doc/content/workshop/systems/initialconditions.md
