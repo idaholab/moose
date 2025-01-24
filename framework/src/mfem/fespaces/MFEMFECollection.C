@@ -22,12 +22,14 @@ MFEMFECollection::validParams()
   params.addParam<MooseEnum>("fec_order", fec_order, "Order of the FE shape function to use.");
   MooseEnum fec_types("H1 ND RT L2", "H1", true);
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
+  params.addParam<int>("dim", 3, "The spatial dimension of the basis the FE shape functions.");
   return params;
 }
 
 MFEMFECollection::MFEMFECollection(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _fec_order(parameters.get<MooseEnum>("fec_order")),
+    _fec_dim(parameters.get<int>("dim"),
     _fec_type(parameters.get<MooseEnum>("fec_type")),
     _fec_name(buildFECName()),
     _fec(buildFEC())
@@ -37,7 +39,7 @@ MFEMFECollection::MFEMFECollection(const InputParameters & parameters)
 const std::string
 MFEMFECollection::buildFECName()
 {
-  return _fec_type + "_3D_P" + std::to_string(_fec_order);
+  return _fec_type + "_" + std::to_string(_fec_dim) + "D_P" + std::to_string(_fec_order);
 }
 
 const std::shared_ptr<mfem::FiniteElementCollection>

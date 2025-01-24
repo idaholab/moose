@@ -21,6 +21,7 @@ public:
 
 protected:
   const int _fec_order;
+  const int _fec_dim;
   const std::string _fec_type;
   const std::string _fec_name;
 
