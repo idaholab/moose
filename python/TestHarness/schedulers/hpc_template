@@ -109,7 +109,6 @@ if ((return_code > 128)); then
 fi
 # If we're using --sharens, make sure the instance is dead
 if [ "$APPTAINER_SHARENS" == "1" ] && [ -n "$APPTAINER_CONFIGDIR" ]; then
-    apptainer instance list
     set +e
     instance_list=$(apptainer instance list | tail -n +2)
     if [ -n "$instance_list" ]; then
