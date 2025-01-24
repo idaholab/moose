@@ -52,10 +52,6 @@
 
 !---
 
-!include user_workshop/systems_user/mooseobject.md
-
-!---
-
 !include user_workshop/systems_user/inputparameters.md
 
 !---

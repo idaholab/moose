@@ -4,12 +4,6 @@ A system for suggesting time steps for transient executioners.
 
 !---
 
-!listing adapt_tstep_grow_dtfunc.i block=Executioner
-
-Custom objects are created by inheriting from `TimeStepper` overriding `computeDT()`.
-
-!---
-
 ## Built-in TimeSteppers
 
 MOOSE includes many built-in TimeStepper objects:
