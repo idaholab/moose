@@ -54,7 +54,7 @@ centre_y = 0.5
 
 [BCs]
   [tangential_velocity_boundary]
-    type = MFEMVectorFunctorTangentialDirichletBC
+    type = MFEMVectorFunctionTangentialDirichletBC
     variable = velocity
     boundary = 'bounds'
     vector_coefficient = exact_velocity

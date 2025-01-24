@@ -29,7 +29,7 @@ MFEMFECollection::validParams()
 MFEMFECollection::MFEMFECollection(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _fec_order(parameters.get<MooseEnum>("fec_order")),
-    _fec_dim(parameters.get<int>("dim"),
+    _fec_dim(parameters.get<int>("dim")),
     _fec_type(parameters.get<MooseEnum>("fec_type")),
     _fec_name(buildFECName()),
     _fec(buildFEC())

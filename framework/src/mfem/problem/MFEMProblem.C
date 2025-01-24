@@ -204,7 +204,8 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 libMesh::Point
 pointFromMFEMVector(const mfem::Vector & vec)
 {
-  return libMesh::Point(vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2)) : 0.;
+  return libMesh::Point(
+      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
 }
 
 int
