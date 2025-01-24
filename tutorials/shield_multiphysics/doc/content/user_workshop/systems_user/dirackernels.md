@@ -1,5 +1,1 @@
-# [DiracKernel System](syntax/DiracKernels/index.md)
-
-A system for computing residual calculations from point sources.
-
-!---
+../../../../../darcy_thermo_mech/doc/content/workshop/systems/dirackernels.md

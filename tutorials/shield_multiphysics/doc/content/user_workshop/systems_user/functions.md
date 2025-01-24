@@ -3,14 +3,6 @@
 A system for defining analytic expressions based on the spatial location ($x$, $y$, $z$) and
 time, $t$.
 
-!---
-
-A `Function` object is created by inheriting from `Function` and overriding the virtual `value()`
-(and optionally other methods as well) functions.
-
-Functions can be accessed in most MOOSE objects by calling `getFunction("name")`,
-where "name" matches a name from the input file.
-
 A `Function` can depend an other functions, but not on material properties or variables.
 
 !---
@@ -42,17 +34,9 @@ postprocessor values with the function definition.
 
 ## Default Functions
 
-Whenever a `Function` object is added via `addParam()`, a default can be provided.
-
-Both constant values and parsed function strings can be used as the default.
-
-```cpp
-// Adding a Function with a default constant
-params.addParam<FunctionName>("pressure_grad", "0.5", "The gradient of ...");
-
-// Adding a Function with a default parsed function
-params.addParam<FunctionName>("power_history", "t+100*sin(y)", "The power history of ...");
-```
+Whenever an object uses a `Function`-name parameter, the user may elect to instead write
+the expression of a x,y,z,t function directly in that parameter. A `ParsedFunction` will automatically
+be created for this function.
 
 A `ParsedFunction` or `ConstantFunction` object is automatically constructed based on the default
 value if a function name is not supplied in the input file.
