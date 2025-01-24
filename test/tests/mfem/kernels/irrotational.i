@@ -26,6 +26,7 @@ centre_y = 0.5
   [velocity]
     type = MFEMVariable
     fespace = HCurlFESpace
+    vdim = 2
   []
 []
 
@@ -94,10 +95,22 @@ centre_y = 0.5
   device = cpu
 []
 
+[Postprocessors]
+  [l2_error]
+    type = MFEMVectorL2Error
+    variable = velocity
+    function = exact_velocity
+  []
+[]
+
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/irrotational
+    file_base = OutputData/Irrotational
     vtk_format = ASCII
+  []
+  [L2CSV]
+    type = CSV
+    file_base = OutputData/Irrotational
   []
 []
