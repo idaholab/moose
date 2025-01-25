@@ -123,4 +123,13 @@
     requirement = "The system shall show the field variable names for outputting material data added by materials."
     prereq = warn_unsupported_types
   []
+  [dont_show_added_aux_vars]
+    type = RunApp
+    input = output_warning.i
+    cli_args = Outputs/print_automatic_aux_variable_creation=false
+    allow_warnings = true
+    absent_out = "The following total 145 aux variables:"
+    requirement = "The system shall be able to not show the field variable names for outputting material data added by materials."
+    prereq = show_added_aux_vars
+  []
 []
