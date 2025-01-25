@@ -18,7 +18,8 @@ do
   fi
 
   if [ "$i" == "--skip-submodule-update" ]; then
-    skip_sub_update=1;
+    skip_mfem_update=1
+    skip_conduit_update=1
   else # Remove everything else before passing to cmake
     set -- "$@" "$i"
   fi
@@ -44,7 +45,7 @@ fi
 set -e
 
 if [ -n "$MFEM_SRC_DIR" ]; then
-  skip_sub_update=1
+  skip_mfem_update=1
 else
   MFEM_SRC_DIR="$(realpath -m "${SCRIPT_DIR}"/../framework/contrib/mfem)"
 fi
@@ -57,16 +58,25 @@ else
   rm -rf "$MFEM_DIR"
 fi
 
+if [ -n "$CONDUIT_SRC_DIR" ]; then
+  skip_conduit_update=1
+else
+  CONDUIT_SRC_DIR="$(realpath -m "${SCRIPT_DIR}"/../framework/contrib/conduit)"
+fi
 CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
+
 LIBMESH_DIR=${LIBMESH_DIR:-$(realpath -m "${SCRIPT_DIR}/../libmesh/installed")}
 if [ -z "$PETSC_DIR" ]; then
   PETSC_DIR=$(realpath -m "${SCRIPT_DIR}/../petsc/arch-moose")
 fi
 
-if [ -z "$skip_sub_update" ]; then
+if [ -z "$skip_mfem_update" ]; then
+  cd "${SCRIPT_DIR}/.."
+  git submodule update --init --checkout framework/contrib/mfem
+fi
+if [ -z "$skip_conduit_update" ]; then
   cd "${SCRIPT_DIR}/.."
   git submodule update --init --checkout framework/contrib/conduit
-  git submodule update --init --checkout framework/contrib/mfem
   cd framework/contrib/conduit
   git submodule update --init
 fi
@@ -89,7 +99,6 @@ cmake .. \
     -DMFEM_USE_OPENMP=NO \
     -DMFEM_THREAD_SAFE=NO \
     -DHYPRE_DIR="$PETSC_DIR" \
-    -DPETSC_DIR="$PETSC_DIR" \
     -DMFEM_USE_MPI=YES \
     -DMFEM_USE_METIS=YES \
     -DMFEM_USE_METIS_5=YES \
