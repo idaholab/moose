@@ -9,6 +9,7 @@
     input = 'pss.i'
     jsondiff = 'pss_out.json'
     valgrind = none
+    heavy = true
   []
   [pss_errors]
     requirement = 'The system shall throw an error when '
