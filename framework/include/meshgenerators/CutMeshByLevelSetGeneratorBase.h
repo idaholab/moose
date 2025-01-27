@@ -54,11 +54,11 @@ protected:
   PointLevelSetRelationIndex pointLevelSetRelation(const Point & point);
 
   /**
-   * Calculate the intersection point of a plane and a line segment defined by two points separated
-   * by the plane.
+   * Calculate the intersection point of a level set and a line segment defined by two
+   * points separated by the level set.
    * @param point1 The first point of the line segment
    * @param point2 The second point of the line segment
-   * @return the intersection point of the plane and the line segment
+   * @return the intersection point of the level set and the line segment
    */
   Point pointPairLevelSetInterception(const Point & point1, const Point & point2);
 
@@ -89,7 +89,7 @@ protected:
    */
   const Node * nonDuplicateNodeCreator(ReplicatedMesh & mesh,
                                        std::vector<const Node *> & new_on_plane_nodes,
-                                       const Point & new_point);
+                                       const Point & new_point) const;
 
   /**
    * Evaluate the level set function at a given point.
