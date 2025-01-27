@@ -47,7 +47,7 @@ protected:
   SymFunctionPtr _func_level_set;
 
   /**
-   * Evaluate the whether a point is on the level set, inside or outside the level set.
+   * Evaluate whether a point is on the level set, inside or outside the level set.
    * @param point The point at which the level set function is to be evaluated
    * @return the relation of the point to the level set
    */
@@ -63,8 +63,8 @@ protected:
   Point pointPairLevelSetInterception(const Point & point1, const Point & point2);
 
   /**
-   * For a TET4 elements crossed by the cutting plane, keep the part of the element on the retaining
-   * side of the plane using a number of TET4 elements.
+   * For a TET4 elements crossed by the level set, keep the part of the element on the retaining
+   * side of the level set using a number of TET4 elements.
    * @param mesh The mesh to be modified
    * @param bdry_side_list A list that contains the boundary information of the original mesh
    * @param elem_id The id of the element to be cut

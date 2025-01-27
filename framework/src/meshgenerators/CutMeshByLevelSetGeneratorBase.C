@@ -37,7 +37,7 @@ CutMeshByLevelSetGeneratorBase::validParams()
 
   params.addClassDescription(
       "This CutMeshByLevelSetGeneratorBase object is designed to be the base class of mesh "
-      "generator that cuts a 3D mesh based on a analytic level set function. The level set "
+      "generator that cuts a 3D mesh based on an analytic level set function. The level set "
       "function could be provided explicitly or indirectly.");
 
   return params;
@@ -189,6 +189,7 @@ CutMeshByLevelSetGeneratorBase::pointPairLevelSetInterception(const Point & poin
   Real dist = abs(dist1) + abs(dist2);
   Point mid_point;
 
+  // Bisection method to find midpoint
   while (MooseUtils::absoluteFuzzyGreaterThan(dist, 0.0))
   {
     mid_point = 0.5 * (p1 + p2);

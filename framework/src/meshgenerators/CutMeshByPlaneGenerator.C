@@ -40,7 +40,7 @@ CutMeshByPlaneGenerator::CutMeshByPlaneGenerator(const InputParameters & paramet
   _func_level_set = std::make_shared<SymFunction>();
   // set FParser internal feature flags
   setParserFeatureFlags(_func_level_set);
-  // The plance is (x - x0) * n_x + (y - y0) * n_y + (z - z0) * n_z = 0
+  // The plane is (x - x0) * n_x + (y - y0) * n_y + (z - z0) * n_z = 0
   std::stringstream level_set_ss;
   // Let's be conservative about precision here
   level_set_ss << std::fixed << std::setprecision(15) << _plane_normal(0) << "*(x-"
