@@ -26,4 +26,11 @@
     expect_err = "it must only evaluate to either 0 or 1"
     requirement = "ParsedConvergence objects shall report an error if the parsed expression to determine convergence does not evaluate to 0 (false) or 1 (true)."
   []
+  [error_symbols_length_mismatch]
+    type = RunException
+    input = 'test_converge.i'
+    cli_args = "Convergence/parsed_conv/symbol_values='1 2'"
+    expect_err = "The parameters 'symbol_names' and 'symbol_values' must have the same size"
+    requirement = "ParsedConvergence objects shall report an error if the user supplies an inconsistent number of symbol names and values."
+  []
 []

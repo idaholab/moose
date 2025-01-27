@@ -67,7 +67,9 @@ protected:
 
   FEProblemBase & _fe_problem;
 
+  /// User-defined symbols to use in parsed expression
   std::vector<std::string> _symbol_names;
+  /// Corresponding symbol values (Convergence, Function, Postprocessor, or constant)
   std::vector<std::string> _symbol_values;
 
   /// Expression to parse for convergence
