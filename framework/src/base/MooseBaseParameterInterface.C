@@ -46,9 +46,11 @@ MooseBaseParameterInterface::connectControllableParams(const std::string & param
   {
     if (!tag.empty())
     {
+      // Only adds the parameter with the different control tags if the derived class
+      // properly registers the parameter to its own syntax
       MooseObjectParameterName tagged_name(tag, _moose_base.name(), parameter);
       _moose_base.getMooseApp().getInputParameterWarehouse().addControllableParameterConnection(
-          tagged_name, secondary_name);
+          tagged_name, secondary_name, /*error_on_empty=*/false);
     }
   }
 }

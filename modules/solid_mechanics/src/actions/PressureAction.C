@@ -86,7 +86,7 @@ PressureAction::act()
   if (_use_ad)
     ad_prepend = "AD";
 
-  std::string kernel_name = ad_prepend + "Pressure";
+  std::string bc_type = ad_prepend + "Pressure";
 
   std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
 
@@ -94,9 +94,9 @@ PressureAction::act()
   for (unsigned int i = 0; i < displacements.size(); ++i)
   {
     // Create unique kernel name for each of the components
-    std::string unique_kernel_name = kernel_name + "_" + _name + "_" + Moose::stringify(i);
+    std::string bc_name = bc_type + "_" + _name + "_" + Moose::stringify(i);
 
-    InputParameters params = _factory.getValidParams(kernel_name);
+    InputParameters params = _factory.getValidParams(bc_type);
     params.applyParameters(parameters(), {"factor"});
     params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
     params.set<Real>("alpha") =
@@ -106,9 +106,8 @@ PressureAction::act()
     if (isParamValid("control_tags"))
       params.set<std::vector<std::string>>("control_tags") =
           getParam<std::vector<std::string>>("control_tags");
-    // Setting a reference like this in three BCs is dangerous (the three BCs can no longer
-    // be controlled independently). So we only do this if "enable" is set explicitly
-    params.set<bool>("enable") = getParam<bool>("enable");
+    if (isParamValid("enable"))
+      params.set<bool>("enable") = getParam<bool>("enable");
 
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
@@ -116,6 +115,10 @@ PressureAction::act()
       params.set<std::vector<AuxVariableName>>("save_in") = _save_in_vars[i];
 
     params.set<Real>("factor") = getParam<Real>("factor");
-    _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
+    _problem->addBoundaryCondition(bc_type, bc_name, params);
+    // The three BCs can no longer be controlled independently. We agreed on PR#29603 that this
+    // was not a problem
+    if (isParamValid("enable"))
+      connectControllableParams("enable", bc_type, bc_name, "enable");
   }
 }
