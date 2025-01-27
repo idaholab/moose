@@ -1074,5 +1074,21 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
     pairs.erase(it);
 }
 
+std::unique_ptr<PetscMatrix<Number>>
+createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
+                     Mat & mat,
+                     const std::string & binary_mat_file)
+{
+  LibmeshPetscCallA(comm.get(), MatCreate(comm.get(), &mat));
+  PetscViewer matviewer;
+  LibmeshPetscCallA(
+      comm.get(),
+      PetscViewerBinaryOpen(comm.get(), binary_mat_file.c_str(), FILE_MODE_READ, &matviewer));
+  LibmeshPetscCallA(comm.get(), MatLoad(mat, matviewer));
+  LibmeshPetscCallA(comm.get(), PetscViewerDestroy(&matviewer));
+
+  return std::make_unique<PetscMatrix<Number>>(mat, comm);
+}
+
 } // Namespace PetscSupport
 } // Namespace MOOSE

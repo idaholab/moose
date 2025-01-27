@@ -342,3 +342,6 @@ share/
 *.hpc_out.txt
 *.hpc_result
 *.hpc_submit
+
+# PETSc binary output
+binaryoutput

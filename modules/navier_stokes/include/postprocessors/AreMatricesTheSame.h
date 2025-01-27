@@ -35,7 +35,5 @@ protected:
   const std::string & _mat2_name;
   Mat _petsc_mat1 = nullptr;
   Mat _petsc_mat2 = nullptr;
-  std::unique_ptr<SparseMatrix<Number>> _mat1;
-  std::unique_ptr<SparseMatrix<Number>> _mat2;
   bool _equiv = true;
 };
