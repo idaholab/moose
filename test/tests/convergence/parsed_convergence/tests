@@ -24,6 +24,6 @@
     type = RunException
     input = 'error_invalid_value.i'
     expect_err = "it must only evaluate to either 0 or 1"
-    requirement = "ParsedConvergence objects shall report an error if the parsed expression."
+    requirement = "ParsedConvergence objects shall report an error if the parsed expression to determine convergence does not evaluate to 0 (false) or 1 (true)."
   []
 []
