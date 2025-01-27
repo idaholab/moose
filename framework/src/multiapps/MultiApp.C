@@ -226,6 +226,11 @@ MultiApp::validParams()
       "True to turn off restore for this multiapp. This is useful when doing steady-state "
       "Picard iterations where we want to use the solution of previous Picard iteration as the "
       "initial guess of the current Picard iteration.");
+  params.addParam<unsigned int>(
+      "max_multiapp_level",
+      10,
+      "Integer set by user that will stop the simulation if the multiapp level "
+      "exceeds it. Usefull for preventing infinite loops with multiapp simulations");
   params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
 
   params.addDeprecatedParam<bool>("clone_master_mesh",
@@ -1189,6 +1194,10 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (app->getOutputFileBase().empty())
     setAppOutputFileBase(i);
   preRunInputFile();
+  if (_app.multiAppLevel() > getParam<unsigned int>("max_multiapp_level"))
+    mooseError("Maximum multiapp level has been reached. This is likely caused by an infinite loop "
+               "in your multiapp system. If additional multiapp levels are needed, "
+               "max_multiapp_level can be specified in the MuliApps block.");
 
   // Transfer coupling relaxation information to the subapps
   _apps[i]->fixedPointConfig().sub_relaxation_factor = getParam<Real>("relaxation_factor");
