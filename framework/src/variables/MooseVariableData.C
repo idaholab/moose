@@ -81,6 +81,12 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
 
   _time_integrator = _sys.queryTimeIntegrator(_var_num);
 
+  // Initialize AD zero with zero derivatives
+  const auto old_do = ADReal::do_derivatives;
+  ADReal::do_derivatives = true;
+  _ad_zero = 0.;
+  ADReal::do_derivatives = old_do;
+
   switch (_element_type)
   {
     case Moose::ElementType::Element:
@@ -1134,134 +1140,134 @@ template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
 {
-  // Have to do this because upon construction this won't initialize any of the derivatives
-  // (because DualNumber::do_derivatives is false at that time).
-  _ad_zero = 0.;
-
-  _ad_dof_values.resize(num_dofs);
-  if (_need_ad_u)
-    _ad_u.resize(nqp);
-
-  if (_need_ad_grad_u)
-    _ad_grad_u.resize(nqp);
-
-  if (_need_ad_second_u)
-    _ad_second_u.resize(nqp);
-
-  if (_need_ad_u_dot)
-  {
-    _ad_dofs_dot.resize(num_dofs);
-    _ad_u_dot.resize(nqp);
-  }
-  if (_need_ad_grad_u_dot)
-    _ad_grad_u_dot.resize(nqp);
-
-  if (_need_ad_u_dotdot)
-  {
-    _ad_dofs_dotdot.resize(num_dofs);
-    _ad_u_dotdot.resize(nqp);
-  }
-
   const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
-  for (unsigned int qp = 0; qp < nqp; qp++)
-  {
-    if (_need_ad_u)
-      _ad_u[qp] = _ad_zero;
-
-    if (_need_ad_grad_u)
-      _ad_grad_u[qp] = _ad_zero;
-
-    if (_need_ad_second_u)
-      _ad_second_u[qp] = _ad_zero;
-
-    if (_need_ad_u_dot)
-      _ad_u_dot[qp] = _ad_zero;
-
-    if (_need_ad_u_dotdot)
-      _ad_u_dotdot[qp] = _ad_zero;
-
-    if (_need_ad_grad_u_dot)
-      _ad_grad_u_dot[qp] = _ad_zero;
-  }
-
+  _ad_dof_values.resize(num_dofs);
   for (unsigned int i = 0; i < num_dofs; i++)
-  {
     _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
-
-    // NOTE!  You have to do this AFTER setting the value!
-    if (do_derivatives)
+  // NOTE!  You have to do this AFTER setting the value!
+  if (do_derivatives)
+    for (unsigned int i = 0; i < num_dofs; i++)
       Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
 
-    if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
-    {
-      _ad_dofs_dot[i] = _ad_dof_values[i];
-      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
-                                                 _dof_indices[i],
-                                                 _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
-                                                                   : _ad_real_dummy);
-    }
+  if (_need_ad_u)
+  {
+    _ad_u.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_u[qp] = _ad_zero;
+
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_u[qp] += _ad_dof_values[i] * (*_current_phi)[i][qp];
   }
 
-  // Now build up the solution at each quadrature point:
-  for (unsigned int i = 0; i < num_dofs; i++)
+  if (_need_ad_grad_u)
   {
+    _ad_grad_u.resize(nqp);
     for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      if (_need_ad_u)
-        _ad_u[qp] += _ad_dof_values[i] * (*_current_phi)[i][qp];
+      _ad_grad_u[qp] = _ad_zero;
 
-      if (_need_ad_grad_u)
-      {
-        // The latter check here is for handling the fact that we have not yet implemented
-        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
-        // situation we need to default to using the non-ad grad_phi
-        if (_displaced && _current_ad_grad_phi)
+    // The latter check here is for handling the fact that we have not yet implemented
+    // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
+    // situation we need to default to using the non-ad grad_phi
+    if (_displaced && _current_ad_grad_phi)
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_ad_grad_phi)[i][qp];
-        else
+    else
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int qp = 0; qp < nqp; qp++)
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_grad_phi)[i][qp];
-      }
+  }
 
-      if (_need_ad_second_u)
+  if (_need_ad_second_u)
+  {
+    _ad_second_u.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_second_u[qp] = _ad_zero;
+
+    for (unsigned int i = 0; i < num_dofs; i++)
+      for (unsigned int qp = 0; qp < nqp; qp++)
         // Note that this will not carry any derivatives with respect to displacements because
         // those calculations have not yet been implemented in Assembly
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
+  }
 
-      if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
+  bool is_transient = _subproblem.isTransient();
+  if (is_transient)
+  {
+    if (_need_ad_u_dot)
+    {
+      _ad_dofs_dot.resize(num_dofs);
+      if (_need_ad_u_dotdot)
+        _ad_dofs_dotdot.resize(num_dofs);
+      _ad_u_dot.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_u_dot[qp] = _ad_zero;
+
+      if (_time_integrator && _time_integrator->dt())
       {
-        _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
-        if (_need_ad_u_dotdot)
-          _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
-      }
+        for (unsigned int i = 0; i < num_dofs; i++)
+          _ad_dofs_dot[i] = _ad_dof_values[i];
+        for (unsigned int i = 0; i < num_dofs; i++)
+          _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
+                                                     _dof_indices[i],
+                                                     _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
+                                                                       : _ad_real_dummy);
 
-      if (_need_ad_grad_u_dot && _time_integrator && _time_integrator->dt())
+        for (unsigned int i = 0; i < num_dofs; i++)
+          for (unsigned int qp = 0; qp < nqp; qp++)
+            _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
+      }
+      else if (!_time_integrator)
+      {
+        for (unsigned int i = 0; i < num_dofs; i++)
+          _ad_dofs_dot[i] = _dof_values_dot[i];
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _ad_u_dot[qp] = _u_dot[qp];
+      }
+    }
+
+    if (_need_ad_u_dotdot)
+    {
+      _ad_u_dotdot.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_u_dotdot[qp] = _ad_zero;
+
+      if (_time_integrator && _time_integrator->dt())
+        for (unsigned int i = 0; i < num_dofs; i++)
+          for (unsigned int qp = 0; qp < nqp; qp++)
+            _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
+      else if (!_time_integrator)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _ad_u_dotdot[qp] = _u_dotdot[qp];
+    }
+
+    if (_need_ad_grad_u_dot)
+    {
+      _ad_grad_u_dot.resize(nqp);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_grad_u_dot[qp] = _ad_zero;
+
+      if (_time_integrator && _time_integrator->dt())
       {
         // The latter check here is for handling the fact that we have not yet implemented
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
         // situation we need to default to using the non-ad grad_phi
         if (_displaced && _current_ad_grad_phi)
-          _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
+          for (unsigned int i = 0; i < num_dofs; i++)
+            for (unsigned int qp = 0; qp < nqp; qp++)
+              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
         else
-          _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
+          for (unsigned int i = 0; i < num_dofs; i++)
+            for (unsigned int qp = 0; qp < nqp; qp++)
+              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
       }
+      else if (!_time_integrator)
+        for (unsigned int qp = 0; qp < nqp; qp++)
+          _ad_grad_u_dot[qp] = _grad_u_dot[qp];
     }
   }
-
-  if (_need_ad_u_dot && !_time_integrator)
-  {
-    for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
-    {
-      _ad_u_dot[qp] = _u_dot[qp];
-      if (_need_ad_u_dotdot)
-        _ad_u_dotdot[qp] = _u_dotdot[qp];
-    }
-    for (unsigned int i = 0; i < num_dofs; i++)
-      _ad_dofs_dot[i] = _dof_values_dot[i];
-  }
-
-  if (_need_ad_grad_u_dot && !_time_integrator)
-    for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
-      _ad_grad_u_dot[qp] = _grad_u_dot[qp];
 }
 
 template <>
