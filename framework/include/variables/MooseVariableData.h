@@ -554,19 +554,19 @@ private:
   FieldVariableValue _u_dot;
 
   /// u_dotdot (second time derivative)
-  FieldVariableValue _u_dotdot, _u_dotdot_bak;
+  FieldVariableValue _u_dotdot;
 
   /// u_dot_old (time derivative)
-  FieldVariableValue _u_dot_old, _u_dot_old_bak;
+  FieldVariableValue _u_dot_old;
 
   /// u_dotdot_old (second time derivative)
-  FieldVariableValue _u_dotdot_old, _u_dotdot_old_bak;
+  FieldVariableValue _u_dotdot_old;
 
   /// derivative of u_dot wrt u
   VariableValue _du_dot_du;
 
   /// derivative of u_dotdot wrt u
-  VariableValue _du_dotdot_du, _du_dotdot_du_bak;
+  VariableValue _du_dotdot_du;
 
   /// The current qrule. This has to be a reference because the current qrule will be constantly
   /// changing. If we initialized this to point to one qrule, then in the next calculation we would
