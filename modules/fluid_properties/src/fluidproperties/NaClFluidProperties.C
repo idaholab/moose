@@ -79,7 +79,7 @@ NaClFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
-  // Correlation requires temperature in Celcius
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
 
   // Halite density at 0 Pa
@@ -99,7 +99,7 @@ NaClFluidProperties::rho_from_p_T(
 
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
-  // Correlation requires temperature in Celcius
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
 
   // Halite density at 0 Pa
@@ -136,8 +136,8 @@ Real
 NaClFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
-  Real pbar = pressure * 10.0e-5;
-  // Correlation requires temperature in Celcius
+  Real pbar = pressure * 1.0e-5;
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
   // Triple point temperature of NaCl (in C)
   Real Tt = _T_triple - _T_c2k;
@@ -145,9 +145,32 @@ NaClFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
   Real r3 = -1.7099e-3 - 3.82734e-6 * Tc - 8.65455e-9 * Tc * Tc;
   Real r4 = 5.29063e-8 - 9.63084e-11 * Tc + 6.50745e-13 * Tc * Tc;
 
-  // Halite isobaric heat capapcity
+  // Halite isobaric heat capacity
   return 1148.81 + 0.551548 * (Tc - Tt) + 2.64309e-4 * (Tc - Tt) * (Tc - Tt) + r3 * pbar +
          r4 * pbar * pbar;
+}
+
+void
+NaClFluidProperties::cp_from_p_T(
+    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+{
+  // Correlation needs pressure in bar
+  Real pbar = pressure * 1.0e-5;
+  // Correlation requires temperature in Celsius
+  Real Tc = temperature - _T_c2k;
+  // Triple point temperature of NaCl (in C)
+  Real Tt = _T_triple - _T_c2k;
+  // Coefficients used in the correlation
+  Real r3 = -1.7099e-3 - 3.82734e-6 * Tc - 8.65455e-9 * Tc * Tc;
+  Real r4 = 5.29063e-8 - 9.63084e-11 * Tc + 6.50745e-13 * Tc * Tc;
+  Real dr3_dT = -3.82734e-6 - 2 * 8.65455e-9 * Tc;
+  Real dr4_dT = -9.63084e-11 + 2 * 6.50745e-13 * Tc;
+
+  // Halite isobaric heat capacity
+  cp = 1148.81 + 0.551548 * (Tc - Tt) + 2.64309e-4 * (Tc - Tt) * (Tc - Tt) + r3 * pbar +
+       r4 * pbar * pbar;
+  dcp_dp = r3 * 1.e-5 + 2 * r4 * pbar * 1.e-5;
+  dcp_dT = 0.551548 + 2 * 2.64309e-4 * (Tc - Tt) + dr3_dT * pbar + dr4_dT * pbar * pbar;
 }
 
 Real
@@ -159,7 +182,7 @@ NaClFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 Real
 NaClFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  // Correlation requires temperature in Celcius
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
 
   return 6.82793 - 3.16584e-2 * Tc + 1.03451e-4 * Tc * Tc - 1.48207e-7 * Tc * Tc * Tc;
@@ -169,7 +192,7 @@ void
 NaClFluidProperties::k_from_p_T(
     Real /*pressure*/, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  // Correlation requires temperature in Celcius
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
 
   k = 6.82793 - 3.16584e-2 * Tc + 1.03451e-4 * Tc * Tc - 1.48207e-7 * Tc * Tc * Tc;
@@ -182,7 +205,7 @@ NaClFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
-  // Correlation requires temperature in Celcius
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
   // Triple point temperature of water (in C)
   Real Tt = 273.16 - _T_c2k;
@@ -200,7 +223,7 @@ NaClFluidProperties::h_from_p_T(
 {
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
-  // Correlation requires temperature in Celcius
+  // Correlation requires temperature in Celsius
   Real Tc = temperature - _T_c2k;
   // Triple point temperature of water (in C)
   Real Tt = 273.16 - _T_c2k;
