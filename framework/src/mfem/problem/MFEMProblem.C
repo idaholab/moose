@@ -186,18 +186,45 @@ MFEMProblem::addKernel(const std::string & kernel_name,
     auto object_ptr = getUserObject<MFEMKernel<mfem::LinearFormIntegrator>>(name).getSharedPtr();
     auto lf_kernel = std::dynamic_pointer_cast<MFEMKernel<mfem::LinearFormIntegrator>>(object_ptr);
 
-    addKernel(parameters.get<std::string>("variable"), lf_kernel);
+    addKernel(lf_kernel->getTrialVariableName(), lf_kernel);
+  }
+  else if (dynamic_cast<const MFEMMixedBilinearFormKernel *>(kernel) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMMixedBilinearFormKernel>(name).getSharedPtr();
+    auto mblf_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(object_ptr);
+    addKernel(mblf_kernel->getTrialVariableName(), mblf_kernel->getTestVariableName(), mblf_kernel);
   }
   else if (dynamic_cast<const MFEMKernel<mfem::BilinearFormIntegrator> *>(kernel) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMKernel<mfem::BilinearFormIntegrator>>(name).getSharedPtr();
     auto blf_kernel =
         std::dynamic_pointer_cast<MFEMKernel<mfem::BilinearFormIntegrator>>(object_ptr);
-    addKernel(parameters.get<std::string>("variable"), blf_kernel);
+    addKernel(blf_kernel->getTrialVariableName(), blf_kernel);
   }
   else
   {
     mooseError("Unsupported kernel of type '", kernel_name, "' and name '", name, "' detected.");
+  }
+}
+
+/**
+ * Method for adding mixed bilinear kernels. We can only add kernels using equation system problem
+ * builders.
+ */
+void
+MFEMProblem::addKernel(std::string trial_var_name,
+                       std::string test_var_name,
+                       std::shared_ptr<MFEMMixedBilinearFormKernel> kernel)
+{
+  using namespace platypus;
+  if (getProblemData()._eqn_system)
+  {
+    getProblemData()._eqn_system->AddKernel(trial_var_name, test_var_name, std::move(kernel));
+  }
+  else
+  {
+    mooseError("Cannot add kernel with name '" + test_var_name +
+               "' because there is no equation system.");
   }
 }
 

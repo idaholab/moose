@@ -3,6 +3,7 @@
 #include "boundary_conditions.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
+#include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 
 namespace platypus
@@ -18,7 +19,6 @@ public:
   using MFEMBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
   using MFEMLinearFormKernel = MFEMKernel<mfem::LinearFormIntegrator>;
   using MFEMNonlinearFormKernel = MFEMKernel<mfem::NonlinearFormIntegrator>;
-  using MFEMMixedBilinearFormKernel = MFEMKernel<mfem::BilinearFormIntegrator>;
 
   EquationSystem() = default;
   ~EquationSystem() override;

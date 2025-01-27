@@ -5,7 +5,7 @@ registerMooseObject("PlatypusApp", MFEMMixedVectorGradientKernel);
 InputParameters
 MFEMMixedVectorGradientKernel::validParams()
 {
-  InputParameters params = MFEMKernel::validParams();
+  InputParameters params = MFEMMixedBilinearFormKernel::validParams();
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
       "$(k\\vec\\nabla u, \\vec v)_\\Omega$ "
@@ -16,7 +16,7 @@ MFEMMixedVectorGradientKernel::validParams()
 }
 
 MFEMMixedVectorGradientKernel::MFEMMixedVectorGradientKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
+  : MFEMMixedBilinearFormKernel(parameters),
     _coef_name(getParam<std::string>("coefficient")),
     // FIXME: The MFEM bilinear form can also handle vector and matrix
     // coefficients, so ideally we'd handle all three too.

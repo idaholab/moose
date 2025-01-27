@@ -8,6 +8,7 @@
 #include "MFEMVariable.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
+#include "MFEMMixedBilinearFormKernel.h"
 #include "MFEMExecutioner.h"
 #include "MFEMDataCollection.h"
 #include "MFEMFESpace.h"
@@ -224,6 +225,10 @@ protected:
                  "' because there is no equation system.");
     }
   }
+
+  void addKernel(std::string trial_var_name,
+                 std::string test_var_name,
+                 std::shared_ptr<MFEMMixedBilinearFormKernel> kernel);
 
   MFEMProblemData _problem_data;
   std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;

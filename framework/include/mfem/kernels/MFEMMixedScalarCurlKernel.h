@@ -1,10 +1,10 @@
 #pragma once
-#include "MFEMKernel.h"
+#include "MFEMMixedBilinearFormKernel.h"
 
 /*
 (λ∇×u, v)
 */
-class MFEMMixedScalarCurlKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMMixedScalarCurlKernel : public MFEMMixedBilinearFormKernel
 {
 public:
   static InputParameters validParams();
