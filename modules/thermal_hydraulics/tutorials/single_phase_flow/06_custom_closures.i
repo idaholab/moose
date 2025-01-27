@@ -79,9 +79,6 @@ m_dot_sec_in = 1. # kg/s
   [thm_closures]
     type = Closures1PhaseTHM
   []
-  [none_closures]
-    type = Closures1PhaseNone
-  []
 []
 
 [Materials]
@@ -299,7 +296,7 @@ m_dot_sec_in = 1. # kg/s
       roughness = 1e-5
       A = '${fparse pi * hx_dia_inner * hx_dia_inner / 4.}'
       D_h = ${hx_dia_inner}
-      closures = none_closures
+      closures = ''
     []
 
     [ht_pri]
