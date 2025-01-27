@@ -67,7 +67,7 @@
   type = Steady
   solve_type = NEWTON
   # the backtracking line search requires an explicit matrix
-  line_search = 'cp' 
+  line_search = 'cp'
 []
 
 [Postprocessors]
