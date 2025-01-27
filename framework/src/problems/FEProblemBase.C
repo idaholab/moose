@@ -6858,7 +6858,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         {
           auto & matrix = _current_nl_sys->getMatrix(tag);
           matrix.zero();
-          if (haveADObjects())
+          if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
             // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
             // diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7243,7 +7243,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
             matrix.zero();
-            if (haveADObjects())
+            if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.

@@ -1,9 +1,21 @@
 [Tests]
   [simple_diffusion]
-    requirement = 'The system shall be able to solve a two dimensional diffusion problem using a hybridizable interior penalty discontinuous Galerkin discretization.'
-    type = Exodiff
-    input = simple_ip_hdg_diffusion.i
-    exodiff = simple_ip_hdg_diffusion_out.e
+    requirement = 'The system shall be able to solve a two dimensional diffusion problem using a hybridizable interior penalty discontinuous Galerkin discretization'
+    [noncondensed]
+      type = Exodiff
+      input = simple_ip_hdg_diffusion.i
+      exodiff = simple_ip_hdg_diffusion_out.e
+      detail = 'in which the matrix is uncondensed, and'
+      cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+    []
+    [condensed]
+      type = Exodiff
+      input = simple_ip_hdg_diffusion.i
+      exodiff = simple_ip_hdg_diffusion_out.e
+      prereq = 'simple_diffusion/noncondensed'
+      detail = 'in which the matrix is statically condensed.'
+      cli_args = '--nl0-static-condensation -nl0_condensed_pc_type hypre -ksp_type preonly -nl0_condensed_ksp_view_pmat binary Outputs/print_linear_residuals=false Postprocessors/symmetric/mat=binaryoutput'
+    []
   []
   [mms]
     requirement = 'The system shall show at least second order convergence in the L2 norm for advection-diffusion with a first order basis using a hybridizable interior penalty discontinuous Galerkin discretization on'
