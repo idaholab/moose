@@ -56,9 +56,9 @@
 [Executioner]
   type = Steady
   nl_rel_tol = 1e-10
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
   solve_type = NEWTON
+  # the backtracking line search requires an explicit matrix
+  line_search = 'cp'
 []
 
 [Outputs]
