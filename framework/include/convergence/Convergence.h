@@ -13,6 +13,7 @@
 #include "SetupInterface.h"
 #include "PostprocessorInterface.h"
 #include "PerfGraphInterface.h"
+#include "TransientInterface.h"
 
 /**
  * Base class for convergence criteria.
@@ -20,7 +21,8 @@
 class Convergence : public MooseObject,
                     public SetupInterface,
                     public PostprocessorInterface,
-                    public PerfGraphInterface
+                    public PerfGraphInterface,
+                    public TransientInterface
 {
 public:
   static InputParameters validParams();
@@ -57,6 +59,9 @@ protected:
 
   /// Performance ID for \c checkConvergence
   PerfID _perfid_check_convergence;
+
+  /// Thread ID
+  THREAD_ID _tid;
 
 private:
   /// Verbose mode enabled

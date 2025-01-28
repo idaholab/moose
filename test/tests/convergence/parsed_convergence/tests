@@ -1,0 +1,36 @@
+[Tests]
+  design = 'ParsedConvergence.md'
+  issues = '#28844'
+
+  [test_converge]
+    type = CSVDiff
+    input = 'test_converge.i'
+    csvdiff = 'test_converge_out.csv'
+    requirement = 'The system shall be allow arbitrary convergence criteria based on Convergence objects, functions, post-processors, and constants.'
+  []
+  [test_diverge_default]
+    type = RunApp
+    input = 'test_diverge_default.i'
+    expect_out = "did not converge"
+    requirement = 'ParsedConvergence objects shall have a default divergence criteria based on the provided Convergence objects.'
+  []
+  [test_diverge_custom]
+    type = RunApp
+    input = 'test_diverge_custom.i'
+    expect_out = "did not converge"
+    requirement = "ParsedConvergence objects shall allow custom divergence criteria to be specified."
+  []
+  [error_invalid_value]
+    type = RunException
+    input = 'error_invalid_value.i'
+    expect_err = "it must only evaluate to either 0 or 1"
+    requirement = "ParsedConvergence objects shall report an error if the parsed expression to determine convergence does not evaluate to 0 (false) or 1 (true)."
+  []
+  [error_symbols_length_mismatch]
+    type = RunException
+    input = 'test_converge.i'
+    cli_args = "Convergence/parsed_conv/symbol_values='1 2'"
+    expect_err = "The parameters 'symbol_names' and 'symbol_values' must have the same size"
+    requirement = "ParsedConvergence objects shall report an error if the user supplies an inconsistent number of symbol names and values."
+  []
+[]
