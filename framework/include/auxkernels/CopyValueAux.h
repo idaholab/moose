@@ -24,6 +24,9 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  // variable used to specify state being copied
+  unsigned short _state;
+
   /// The variable to project from
   const VariableValue & _v;
 

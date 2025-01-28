@@ -470,6 +470,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _is_petsc_options_inserted(false),
     _line_search(nullptr),
     _using_ad_mat_props(false),
+    _current_ic_state(0),
     _error_on_jacobian_nonzero_reallocation(
         isParamValid("error_on_jacobian_nonzero_reallocation")
             ? getParam<bool>("error_on_jacobian_nonzero_reallocation")
@@ -1133,6 +1134,59 @@ FEProblemBase::initialSetup()
   {
     // During initial setup the solution is copied to the older solution states (old, older, etc)
     copySolutionsBackwards();
+
+    // Check if there are old state initial conditions
+    auto ics = _ics.getActiveObjects();
+    auto fv_ics = _fv_ics.getActiveObjects();
+    auto scalar_ics = _scalar_ics.getActiveObjects();
+    unsigned short ic_state_max = 0;
+
+    auto findMax = [&ic_state_max](const auto & obj_list)
+    {
+      for (auto ic : obj_list.getActiveObjects())
+        ic_state_max = std::max(ic_state_max, ic->getState());
+    };
+    findMax(_ics);
+    findMax(_fv_ics);
+    findMax(_scalar_ics);
+
+    // if there are old state ICs, compute them and write to old states accordingly
+    if (ic_state_max > 0)
+    {
+      // state 0 copy (we'll overwrite current state when evaluating ICs and need to restore it once
+      // we're done with the old/older state ICs)
+      std::vector<std::unique_ptr<NumericVector<Real>>> state0_sys_buffers(_solver_systems.size());
+      std::unique_ptr<NumericVector<Real>> state0_aux_buffer;
+
+      // save state 0
+      for (const auto i : index_range(_solver_systems))
+        state0_sys_buffers[i] = _solver_systems[i]->solutionState(0).clone();
+
+      state0_aux_buffer = _aux->solutionState(0).clone();
+
+      // compute old state ICs
+      for (_current_ic_state = 1; _current_ic_state <= ic_state_max; _current_ic_state++)
+      {
+        projectSolution();
+
+        for (auto & sys : _solver_systems)
+          sys->solutionState(_current_ic_state) = sys->solutionState(0);
+
+        _aux->solutionState(_current_ic_state) = _aux->solutionState(0);
+      }
+      _current_ic_state = 0;
+
+      // recover state 0
+      for (const auto i : index_range(_solver_systems))
+      {
+        _solver_systems[i]->solutionState(0) = *state0_sys_buffers[i];
+        _solver_systems[i]->solutionState(0).close();
+        _solver_systems[i]->update();
+      }
+      _aux->solutionState(0) = *state0_aux_buffer;
+      _aux->solutionState(0).close();
+      _aux->update();
+    }
   }
 
   if (!_app.isRecovering())
@@ -9067,4 +9121,10 @@ FEProblemBase::setCurrentAlgebraicBndNodeRange(ConstBndNodeRange * range)
   }
 
   _current_algebraic_bnd_node_range = std::make_unique<ConstBndNodeRange>(*range);
+}
+
+unsigned short
+FEProblemBase::getCurrentICState()
+{
+  return _current_ic_state;
 }

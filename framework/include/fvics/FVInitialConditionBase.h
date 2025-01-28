@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "InitialConditionInterface.h"
 #include "MooseObject.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
@@ -30,6 +31,7 @@ class Point;
  * description
  */
 class FVInitialConditionBase : public MooseObject,
+                               public InitialConditionInterface,
                                public BlockRestrictable,
                                public FunctionInterface,
                                public Restartable,
