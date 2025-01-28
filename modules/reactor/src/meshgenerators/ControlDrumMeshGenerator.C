@@ -10,6 +10,7 @@
 #include "ControlDrumMeshGenerator.h"
 
 #include "ReactorGeometryMeshBuilderBase.h"
+#include "PolygonalMeshGenerationUtils.h"
 #include "MooseApp.h"
 #include "Factory.h"
 #include "libmesh/elem.h"
@@ -256,9 +257,10 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
     paramError("drum_outer_radius", "Drum outer radius must be larger than the inner radius");
   // Check if volume preserved radius of outer radius exceeds assembly halfpitch. In data driven
   // mode, radius is assumed not to need volume preservation
-  auto radius_corrfac = getReactorParam<bool>(RGMB::bypass_meshgen)
-                            ? 1.0
-                            : PolygonMeshGeneratorBase::radiusCorrectionFactor(azimuthal_angles);
+  auto radius_corrfac =
+      getReactorParam<bool>(RGMB::bypass_meshgen)
+          ? 1.0
+          : PolygonalMeshGenerationUtils::radiusCorrectionFactor(azimuthal_angles);
   if (_drum_outer_radius * radius_corrfac >= assembly_pitch / 2.)
     paramError("drum_outer_radius",
                "Volume-corrected outer radius of drum region must be smaller than half the "

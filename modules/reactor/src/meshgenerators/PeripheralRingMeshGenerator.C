@@ -13,6 +13,7 @@
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
 #include "FillBetweenPointVectorsTools.h"
+#include "PolygonalMeshGenerationUtils.h"
 #include "libmesh/int_range.h"
 
 // C++ includes
@@ -357,9 +358,10 @@ PeripheralRingMeshGenerator::generate()
                                azi_array,
                                origin_pt,
                                points_array);
-  const Real correction_factor =
-      _preserve_volumes ? radiusCorrectionFactor(azi_array, true, order, is_first_node_vertex)
-                        : 1.0;
+  const Real correction_factor = _preserve_volumes
+                                     ? PolygonalMeshGenerationUtils::radiusCorrectionFactor(
+                                           azi_array, true, order, is_first_node_vertex)
+                                     : 1.0;
   // Loop to handle outer boundary layer and main region
   for (const auto i : make_range(input_ext_node_num))
   {

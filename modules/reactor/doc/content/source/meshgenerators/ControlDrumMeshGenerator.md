@@ -64,7 +64,7 @@ For applications where an output mesh does not need to be created and meshing ro
 
 !listing modules/reactor/test/tests/meshgenerators/control_drum_mesh_generator/drum_pad.i block=Mesh
 
-If [!param](/Mesh/ControlDrumMeshGenerator/pad_start_angle) and [!param](/Mesh/ControlDrumMeshGenerator/pad_end_angle) are not provided, the drum region is discretized with the same region ID applied to all azimuthal drum elements. In this case, only 3 values per axial level should be provided in [!param](/Mesh/ControlDrumMeshGenerator/region_ids) (drum inner, drum, background).
+If [!param](/Mesh/ControlDrumMeshGenerator/pad_start_angle) and [!param](/Mesh/ControlDrumMeshGenerator/pad_end_angle) are not provided, the drum region is discretized with the same region ID applied to all azimuthal drum elements. In this case, only 3 values per axial level should be provided in [!param](/Mesh/ControlDrumMeshGenerator/region_ids) (drum inner, drum, background). In order to calculate the volume fraction of the pad region, [`MultiControlDrumFunction`](/MultiControlDrumFunction.md) can be used.
 
 !syntax parameters /Mesh/ControlDrumMeshGenerator
 
