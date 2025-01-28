@@ -197,9 +197,9 @@ The best approach for this situation is to use [PatternedHexPeripheralModifier.m
 
 ## Oversized Pin
 
-Some assemblies contain an oversized pin which intrudes on neighboring unit pin cells. Here, we describe one possible approach to mesh this situation.
+Some assemblies contain one or multiple oversized pins which intrude on neighboring unit pin cells. Meshing of such oversized pins has become straightforward with [FlexiblePatternGenerator.md]
 
-First, define the regular small fuel pins and place them into the assembly as a full lattice. Separately, the oversized pin should be defined as its own object, remembering to remove the background region which is created by default in [PolygonConcentricCircleMeshGenerator.md]. Finally, [XYDelaunayGenerator.md] is used to mesh the regions between the assembly (with deleted dummies) and the oversized pin.
+As long as pins are not overlapped, [FlexiblePatternGenerator.md] can handle any oversized pin scenarios.
 
 !row!
 !col small=12 medium=6 large=8
