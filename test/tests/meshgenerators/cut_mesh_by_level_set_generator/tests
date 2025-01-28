@@ -1,0 +1,25 @@
+[Tests]
+    design = 'meshgenerators/CutMeshByLevelSetGenerator.md'
+    issues = '#29703'
+    [test]
+      requirement = "The system shall be able to "
+      [simple_hex_cut]
+        type = 'Exodiff'
+        input = 'simple_cut.i'
+        exodiff = 'simple_hex_cut_in.e'
+        cli_args = '--mesh-only simple_hex_cut_in.e'
+        mesh_mode = 'REPLICATED'
+        recover = false
+        detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned.'
+      []
+      [with_xyzd]
+        type = 'CSVDiff'
+        input = 'cut_xyzd.i'
+        csvdiff = 'cut_xyzd_out.csv'
+        mesh_mode = 'REPLICATED'
+        recover = false
+        detail ='cut a 3D mesh to generate a raw level set mesh that can be used for 3D Delaunay mesh generation.'
+      []
+    []
+  # Does not need error tests as they have been covered by CutMeshByPlaneGenerator
+[]
