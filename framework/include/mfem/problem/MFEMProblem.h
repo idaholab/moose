@@ -182,6 +182,9 @@ public:
     return this->_problem_data._matrix_manager.make<T>(args...);
   }
 
+  bool hasScalarFunctionCoefficient(const std::string & name);
+  bool hasVectorFunctionCoefficient(const std::string & name);
+
   /**
    * Method to get the MFEM scalar coefficient object corresponding to the named function.
    */
