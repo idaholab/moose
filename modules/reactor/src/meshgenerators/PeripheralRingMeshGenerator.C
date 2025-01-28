@@ -87,8 +87,8 @@ PeripheralRingMeshGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
-  params.addParam<BoundaryName>("external_boundary_name",
-                                "Optional customized external boundary name.");
+  params.addParam<BoundaryName>(
+      "external_boundary_name", "", "Optional customized external boundary name.");
   params.addParamNamesToGroup(
       "peripheral_radial_bias peripheral_inner_boundary_layer_width "
       "peripheral_inner_boundary_layer_intervals peripheral_inner_boundary_layer_bias "
@@ -131,9 +131,7 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<BoundaryName>("external_boundary_name")
-                                : BoundaryName()),
+    _external_boundary_name(getParam<BoundaryName>("external_boundary_name")),
     _input(getMeshByName(_input_name))
 {
   declareMeshProperty<bool>("hexagon_peripheral_trimmability", false);

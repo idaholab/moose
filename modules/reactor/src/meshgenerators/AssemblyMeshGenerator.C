@@ -122,8 +122,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
-               "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
-               "inputs\n");
+               "In order to extrude this mesh, ReactorMeshParams/dim needs to be set to 3\n");
   if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
                    !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
@@ -624,7 +623,7 @@ AssemblyMeshGenerator::generate()
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Assembly, _extrude);
   }
 
-  // Mark mesh as not prepared, as block ID's were re-assigned in this method
+  // Mark mesh as not prepared, as block IDs were re-assigned in this method
   (*_build_mesh)->set_isnt_prepared();
 
   return std::move(*_build_mesh);

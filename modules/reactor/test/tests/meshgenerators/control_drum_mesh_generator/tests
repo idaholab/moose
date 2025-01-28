@@ -53,7 +53,7 @@
       mesh_mode = REPLICATED
     []
     [pad_azimuthal_sector_shift]
-      detail = 'shift azimuthal nodes for a control drum assembly mesh to match the drum pad locations when the azimuthal angles line up to within tolerance'
+      detail = 'a control drum assembly mesh with shifted azimuthal nodes to match the drum pad locations when the azimuthal angles line up to within tolerance'
       type = 'CSVDiff'
       input = 'drum_pad.i'
       csvdiff = 'drum_hex_pad_shift_nodes_out.csv'
@@ -149,7 +149,7 @@
       detail = 'if region IDs are not provided for the control drum mesh'
       type = 'RunException'
       input = 'drum_nopad_err.i'
-      expect_err = "Region IDs must be assigned"
+      expect_err = "missing required parameter 'Mesh/drum/region_ids'"
     []
     [region_id_axial_mismatch]
       detail = 'if the number of region IDs provided per radial level does not match the number of axial levels for a control drum mesh'
@@ -166,7 +166,7 @@
       expect_err = "3 radial IDs need to be provided per axial zone"
     []
     [region_id_radial_mismatch_pad]
-      detail = 'if the number of radial region IDs provided per axial level does not equal 4 for a control drum mesh with ax explicit pad region'
+      detail = 'if the number of radial region IDs provided per axial level does not equal 4 for a control drum mesh with an explicit pad region'
       type = 'RunException'
       input = 'drum_nopad_err.i'
       cli_args = 'Mesh/drum/region_ids="1 2 3"
@@ -205,7 +205,7 @@
       input = 'drum_nopad_err.i'
       cli_args = 'Mesh/drum/region_ids="1 2 3"
                   Mesh/drum/extrude=true'
-      expect_err = "This is a 2 dimensional mesh, you cannot extrude it."
+      expect_err = "ReactorMeshParams/dim needs to be set to 3."
     []
     [extrude_no_axial_boundary_ids]
       detail = 'if a 3-D mesh is extruded but is missing top and bottom boundary id data'

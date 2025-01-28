@@ -237,8 +237,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   _mesh_dimensions = getReactorParam<unsigned int>(RGMB::mesh_dimensions);
 
   if (_extrude && _mesh_dimensions != 3)
-    mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
-               "inputs\n");
+    paramError("extrude",
+               "In order to extrude this mesh, ReactorMeshParams/dim needs to be set to 3\n");
   if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
                    !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
@@ -422,16 +422,15 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         {
           // For assembly structures, store region ID and block names of assembly regions and
           // constituent pins
-          std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>
-              pin_region_id_map = getMeshProperty<
-                  std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
-                  RGMB::pin_region_id_map, assembly);
+          const auto & pin_region_id_map = getMeshProperty<
+              std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
+              RGMB::pin_region_id_map, assembly);
           for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
             _pin_region_id_map.insert(
                 std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
                     pin->first, pin->second));
 
-          std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
+          const auto & pin_block_name_map =
               getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
                   RGMB::pin_block_name_map, assembly);
           for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
@@ -474,7 +473,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         else
         {
           // For control drum structures, store region ID and block name information of drum regions
-          std::vector<std::vector<subdomain_id_type>> drum_region_ids =
+          const auto & drum_region_ids =
               getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::drum_region_ids,
                                                                            assembly);
           _drum_region_id_map.insert(

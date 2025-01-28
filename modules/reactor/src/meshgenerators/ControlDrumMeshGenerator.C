@@ -56,7 +56,7 @@ ControlDrumMeshGenerator::validParams()
       "num_azimuthal_sectors",
       "num_azimuthal_sectors>2",
       "Number of azimuthal sectors to sub-divide the drum region into");
-  params.addParam<std::vector<std::vector<subdomain_id_type>>>(
+  params.addRequiredParam<std::vector<std::vector<subdomain_id_type>>>(
       "region_ids",
       "IDs for each radial and axial zone for assignment of region_id extra element "
       "id. "
@@ -94,9 +94,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
     _drum_inner_radius(getParam<Real>("drum_inner_radius")),
     _drum_outer_radius(getParam<Real>("drum_outer_radius")),
     _extrude(getParam<bool>("extrude")),
-    _region_ids(isParamValid("region_ids")
-                    ? getParam<std::vector<std::vector<subdomain_id_type>>>("region_ids")
-                    : std::vector<std::vector<subdomain_id_type>>())
+    _region_ids(getParam<std::vector<std::vector<subdomain_id_type>>>("region_ids"))
 {
   // Initialize ReactorMeshParams object
   initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
@@ -140,8 +138,8 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   // Error checking for azimuthal node tolerance
   const auto azimuthal_node_tolerance = getParam<Real>("azimuthal_node_tolerance");
   if (!_has_pad_region && isParamSetByUser("azimuthal_node_tolerance"))
-    paramWarning("azimuthal_node_tolerance",
-                 "This parameter is relevant only when pad start and end angles are defined");
+    paramError("azimuthal_node_tolerance",
+               "This parameter is relevant only when pad start and end angles are defined");
   if (_has_pad_region && MooseUtils::absoluteFuzzyGreaterEqual(2. * azimuthal_node_tolerance,
                                                                360. / (Real)num_sectors))
     paramError("azimuthal_node_tolerance",
@@ -155,30 +153,24 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
 
   // Check region IDs have correct size
   const unsigned int n_radial_regions = _has_pad_region ? 4 : 3;
-  if (isParamValid("region_ids"))
+  unsigned int n_axial_levels =
+      (_mesh_dimensions == 3)
+          ? getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals).size()
+          : 1;
+  if (_region_ids.size() != n_axial_levels)
+    mooseError("The size of region IDs must be equal to the number of axial levels as defined in "
+               "the ReactorMeshParams object");
+  if (_region_ids[0].size() != n_radial_regions)
   {
-    unsigned int n_axial_levels =
-        (_mesh_dimensions == 3)
-            ? getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals).size()
-            : 1;
-    if (_region_ids.size() != n_axial_levels)
-      mooseError("The size of region IDs must be equal to the number of axial levels as defined in "
-                 "the ReactorMeshParams object");
-    if (_region_ids[0].size() != n_radial_regions)
-    {
-      std::string err_msg =
-          "'region_ids' parameter does not have the correct number of elements per axial zone. ";
-      err_msg += _has_pad_region
-                     ? "For control drums with a pad region, 4 radial IDs need to be provided per "
-                       "axial zone (drum inner, drum pad, drum ex-pad, and drum outer)"
-                     : "For control drums with no pad region, 3 radial IDs need to be provided per "
-                       "axial zone (drum inner, drum, and drum outer)";
-      paramError("region_ids", err_msg);
-    }
+    std::string err_msg =
+        "'region_ids' parameter does not have the correct number of elements per axial zone. ";
+    err_msg += _has_pad_region
+                   ? "For control drums with a pad region, 4 radial IDs need to be provided per "
+                     "axial zone (drum inner, drum pad, drum ex-pad, and drum outer)"
+                   : "For control drums with no pad region, 3 radial IDs need to be provided per "
+                     "axial zone (drum inner, drum, and drum outer)";
+    paramError("region_ids", err_msg);
   }
-  else
-    mooseError(
-        "Region IDs must be assigned for ControlDrumMeshGenerator using parameter 'region_ids'");
 
   // Check block names have the correct size
   if (isParamValid("block_names"))
@@ -201,8 +193,7 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   // Check extrusion parameters
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
-               "This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
-               "inputs\n");
+               "In order to extrude this mesh, ReactorMeshParams/dim needs to be set to 3\n");
   if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
                    !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
@@ -492,7 +483,7 @@ ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx,
 
       // If _pad_end_angle does not exceed 360 degrees, check if drum angle lies within
       // _pad_start_angle and _pad_end_angle. Drum index needs to be incremented if element in
-      // ex-core region
+      // ex-pad region
       if (_pad_end_angle <= 360)
       {
         if ((drum_angle < _pad_start_angle) || (drum_angle > _pad_end_angle))
@@ -501,7 +492,7 @@ ControlDrumMeshGenerator::getDrumIdxFromRadialIdx(const unsigned int radial_idx,
       else
       {
         // If _pad_end_angle exceeds 360 degrees, check two intervals - _pad_start_angle to 360, and
-        // 0 to _pad_end_angle - 360 Drum index needs to be incremented if element in ex-core region
+        // 0 to _pad_end_angle - 360 Drum index needs to be incremented if element in ex-pad region
         if ((drum_angle < _pad_start_angle) && (drum_angle > _pad_end_angle - 360.))
           ++drum_idx;
       }

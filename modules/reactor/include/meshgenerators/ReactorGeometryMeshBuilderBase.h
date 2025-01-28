@@ -92,8 +92,8 @@ const SubdomainName TRI_BLOCK_NAME_SUFFIX = "_TRI";
 const SubdomainName PERIPHERAL_RING_BLOCK_NAME = "PERIPHERY_GENERATED";
 
 // Default values for setting boundary ids of RGMB regions
-const boundary_id_type PIN_BOUNDARY_ID_START = 20000;
-const boundary_id_type ASSEMBLY_BOUNDARY_ID_START = 2000;
+static constexpr boundary_id_type PIN_BOUNDARY_ID_START = 20000;
+static constexpr boundary_id_type ASSEMBLY_BOUNDARY_ID_START = 2000;
 
 // Default values for setting boundary names of RGMB regions
 const BoundaryName PIN_BOUNDARY_NAME_PREFIX = "outer_pin_";
