@@ -42,18 +42,18 @@ AreMatricesTheSame::execute()
   auto mat1 = Moose::PetscSupport::createMatrixFromFile(_communicator, _petsc_mat1, _mat1_name);
   auto mat2 = Moose::PetscSupport::createMatrixFromFile(_communicator, _petsc_mat2, _mat2_name);
 
-  if ((mat1.row_start() != mat2.row_start()) || (mat1.row_stop() != mat2.row_stop()) ||
-      (mat1.col_start() != mat2.col_start()) || (mat1.col_stop() != mat2.col_stop()))
+  if ((mat1->row_start() != mat2->row_start()) || (mat1->row_stop() != mat2->row_stop()) ||
+      (mat1->col_start() != mat2->col_start()) || (mat1->col_stop() != mat2->col_stop()))
   {
     _equiv = false;
     return;
   }
 
-  for (const auto i : make_range(mat1.row_start(), mat1.row_stop()))
-    for (const auto j : make_range(mat1.col_start(), mat1.col_stop()))
+  for (const auto i : make_range(mat1->row_start(), mat1->row_stop()))
+    for (const auto j : make_range(mat1->col_start(), mat1->col_stop()))
     {
-      const auto val1 = mat1(i, j);
-      const auto val2 = mat2(i, j);
+      const auto val1 = (*mat1)(i, j);
+      const auto val2 = (*mat2)(i, j);
       if (!MooseUtils::relativeFuzzyEqual(val1, val2, _equiv_tol) &&
           !MooseUtils::absoluteFuzzyEqual(val1, val2, _equiv_tol))
       {

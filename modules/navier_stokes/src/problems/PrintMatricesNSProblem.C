@@ -101,13 +101,11 @@ PrintMatricesNSProblem::onTimestepEnd()
   auto write_matrix = [this](Mat write_mat, const std::string & mat_name)
   {
     PetscViewer matviewer;
-    auto ierr =
-        PetscViewerBinaryOpen(_communicator.get(), mat_name.c_str(), FILE_MODE_WRITE, &matviewer);
-    LIBMESH_CHKERR(ierr);
-    MatView(write_mat, matviewer);
-    LIBMESH_CHKERR(ierr);
-    ierr = PetscViewerDestroy(&matviewer);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(
+        _communicator.get(),
+        PetscViewerBinaryOpen(_communicator.get(), mat_name.c_str(), FILE_MODE_WRITE, &matviewer));
+    LibmeshPetscCallA(_communicator.get(), MatView(write_mat, matviewer));
+    LibmeshPetscCallA(_communicator.get(), PetscViewerDestroy(&matviewer));
   };
 
   auto do_vel_p =
