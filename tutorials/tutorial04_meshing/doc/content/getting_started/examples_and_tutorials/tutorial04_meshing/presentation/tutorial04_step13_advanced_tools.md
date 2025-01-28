@@ -2,6 +2,19 @@
 
 !---
 
+## Quadratic Element Capabilities
+
+ Quadratic elements meshing is available for all MOOSE Reactor Module meshing tools commonly used for reactor meshing.
+ 
+ The quadratic element options can be selected by setting `tri_element_type` as TRI6 or TRI7, and `quad_element_type` as QUAD8 or QUAD9 in the 2D mesh generators.
+ 
+ The 2D-to-3D mesh generators such as [AdvancedExtruderGenerator.md] detects 2D quadratic elements and create 3D quadratic elements accordingly.
+
+!media reactor/meshgenerators/pccmg_quad.png
+       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+
+!---
+
 ## ParsedCurveGenerator
 
 The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2 elements which connect the series of points given by $x(t)$, $y(t)$, $z(t)$. This is useful when the user wants to construct a non-standard boundary and mesh inside of it.
@@ -16,7 +29,7 @@ The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2
 !col small=12 medium=6 large=4
 
 !media reactor/meshgenerators/xyz_curve.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:85%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
@@ -74,6 +87,44 @@ This [FillBetweenPointVectorsGenerator.md] object generates a transition layer b
 !col small=12 medium=6 large=4
 
 !media framework/meshgenerators/poly2tri_with_holes.png
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
+
+!---
+
+## FlexiblePatternGenerator
+
+[FlexiblePatternGenerator.md] is designed to generate a mesh with a background region containing dispersed unit meshes that are distributed based on a series of flexible patterns. It enhances the capabilities provided in [PatternedHexMeshGenerator.md]/[PatternedCartesianMeshGenerator.md]. It can be used for irregular background shapes and/or patterning.
+
+!row!
+!col small=12 medium=6 large=8
+
+!listing modules/reactor/test/tests/meshgenerators/flexible_pattern_generator/mixed_pattern.i
+         block=Mesh/fpg
+         link=False
+
+!col small=12 medium=6 large=4
+
+!media reactor/meshgenerators/mixed_pattern.png
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
+
+!---
+
+## RevolveGenerator
+
+!row!
+!col small=12 medium=6 large=8
+
+!listing adv_examples/mesh_revolve.i
+         block=Mesh
+         link=False
+
+!col small=12 medium=6 large=4
+
+!media tutorial04_meshing/revolve_multillayer.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
