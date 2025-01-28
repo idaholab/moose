@@ -230,7 +230,7 @@ MultiApp::validParams()
       "max_multiapp_level",
       10,
       "Integer set by user that will stop the simulation if the multiapp level "
-      "exceeds it. Usefull for preventing infinite loops with multiapp simulations");
+      "exceeds it. Useful for preventing infinite loops with multiapp simulations");
   params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
 
   params.addDeprecatedParam<bool>("clone_master_mesh",
@@ -246,7 +246,8 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
-  params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init max_multiapp_level",
+                              "Advanced");
   params.addParamNamesToGroup("positions positions_file positions_objects run_in_position "
                               "output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
