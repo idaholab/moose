@@ -110,6 +110,7 @@
                   "enforcement using the contact action and use the hypre algebraic multigrid "
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
                   "approach allows for maintaining reasonable system condition numbers."
+    heavy = true
   []
   [cylinder_friction_penalty_frictional_al_action_amg_tight]
     type = 'CSVDiff'

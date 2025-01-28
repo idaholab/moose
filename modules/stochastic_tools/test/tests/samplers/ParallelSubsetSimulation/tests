@@ -2,6 +2,14 @@
   issues = '#19398'
   design = 'ParallelSubsetSimulation.md'
 
+  [pss_reduced]
+    requirement = 'The system shall include a Parallel Subset Simulation method for sampling distribution data.'
+    type = 'JSONDiff'
+    skip_keys = 'number_of_parts part'
+    input = 'pss.i'
+    cli_args = 'Samplers/sample/num_samplessub=4 Samplers/sample/num_subsets=3 Samplers/sample/subset_probability=0.5 Outputs/file_base=pss_reduced'
+    jsondiff = 'pss_reduced.json'
+  []
   [pss1]
     requirement = 'The system shall include an Parallel Subset Simulation method for sampling distribution data.'
     type = 'JSONDiff'
@@ -9,6 +17,7 @@
     input = 'pss.i'
     jsondiff = 'pss_out.json'
     valgrind = none
+    heavy = true
   []
   [pss_errors]
     requirement = 'The system shall throw an error when '

@@ -59,7 +59,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         dynamic_viscosity = ${mu}
 
         initial_pressure = 0.2
-        initial_velocity = '0 0 0'
+        initial_velocity = '1e-10 1e-10 0'
 
         wall_boundaries = 'top left right bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
@@ -135,10 +135,11 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_type'
   petsc_options_value = 'lu        NONZERO              vinewtonrsls '
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-7
   nl_rel_tol = 1e-8
   nl_max_its = 100
   line_search = none
+  automatic_scaling = true
 []
 
 [Outputs]
