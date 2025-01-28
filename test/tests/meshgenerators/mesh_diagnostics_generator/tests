@@ -13,6 +13,14 @@
       expect_out = 'Number of non-conformal nodes: 3'
       detail = 'element overlapping,'
     []
+    [intersecting_edges]
+      type = RunApp
+      input = 'intersecting_edge_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of intersecting element edges: 4'
+      detail = 'edges intersecting'
+    []
     [inconsistent_sidesets]
       type = RunApp
       input = 'consistent_domains.i'
@@ -269,7 +277,8 @@
                   Mesh/diag/examine_nonplanar_sides=NO_CHECK
                   Mesh/diag/examine_sidesets_orientation=NO_CHECK
                   Mesh/diag/check_for_watertight_sidesets=NO_CHECK
-                  Mesh/diag/check_for_watertight_nodesets=NO_CHECK
+                  Mesh/diag/check_for_watertight_nodesets=NO_CHECK   
+                  Mesh/diag/examine_non_matching_edges=NO_CHECK
                   Mesh/diag/search_for_adaptivity_nonconformality=NO_CHECK
                   Mesh/diag/check_local_jacobian=NO_CHECK --mesh-only"
       detail = 'a diagnostics object is created but no diagnostics are requested.'
