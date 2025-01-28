@@ -69,19 +69,19 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 }
 
 bool
-checkFirstOrderEdgeOverlap(const std::unique_ptr<const Elem> & edge1,
-                           const std::unique_ptr<const Elem> & edge2,
+checkFirstOrderEdgeOverlap(const Elem & edge1,
+                           const Elem & edge2,
                            Point & intersection_point,
                            const Real intersection_tol)
 {
   // check that the two elements are of type EDGE2
-  mooseAssert(edge1->type() == EDGE2, "Elements must be of type EDGE2");
-  mooseAssert(edge2->type() == EDGE2, "Elements must be of type EDGE2");
+  mooseAssert(edge1.type() == EDGE2, "Elements must be of type EDGE2");
+  mooseAssert(edge2.type() == EDGE2, "Elements must be of type EDGE2");
   // Get nodes from the two edges
-  const Point & p1 = edge1->point(0);
-  const Point & p2 = edge1->point(1);
-  const Point & p3 = edge2->point(0);
-  const Point & p4 = edge2->point(1);
+  const Point & p1 = edge1.point(0);
+  const Point & p2 = edge1.point(1);
+  const Point & p3 = edge2.point(0);
+  const Point & p4 = edge2.point(1);
 
   // Check that the two edges are not sharing a node
   if (p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4)
