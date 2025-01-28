@@ -7,12 +7,4 @@
     exodiff = 'phy.test_out.e'
     requirement = 'The system shall be able to define a closure object that does not define closures, so they can be defined directly in the input file.'
   []
-  [enumeration_option]
-    type = RunException
-    input = 'phy.test.i'
-    cli_args = "GlobalParams/closures=none"
-    allow_deprecated = False
-    expect_err = 'The closures system now uses objects created in the input file'
-    requirement = 'The system shall report an error with a useful message if the user attempts the former way of not specifying closures.'
-  []
 []

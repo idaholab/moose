@@ -565,6 +565,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddOutputAction", "Outputs/*");
   registerSyntax("CommonOutputAction", "Outputs");
+  registerSyntax("MaterialOutputAction", "Outputs");
   registerSyntax("AutoCheckpointAction", "Outputs");
   syntax.registerSyntaxType("Outputs/*", "OutputName");
 

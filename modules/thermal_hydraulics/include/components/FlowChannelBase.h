@@ -190,8 +190,6 @@ protected:
   virtual void initSecondary() override;
   virtual void check() const override;
 
-  virtual std::shared_ptr<ClosuresBase> buildClosures();
-
   /**
    * Adds objects which are common for single- and two-phase flow
    */

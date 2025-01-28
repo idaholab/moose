@@ -11,6 +11,8 @@
 
 #include "FunctorMaterial.h"
 
+class SinglePhaseFluidProperties;
+
 /**
  * This is the material class used to compute enthalpy for the incompressible/weakly-compressible
  * finite-volume implementation of the Navier-Stokes equations
@@ -23,12 +25,24 @@ public:
   INSFVEnthalpyFunctorMaterial(const InputParameters & parameters);
 
 protected:
+  /// whether we can use a constant cp as a shortcut to compute enthalpy
+  bool _assumed_constant_cp;
+
+  /// A fluid properties user object to compute enthalpy
+  const SinglePhaseFluidProperties * _fp;
+
   /// density
   const Moose::Functor<ADReal> & _rho;
 
   /// the temperature
   const Moose::Functor<ADReal> & _temperature;
 
+  /// the pressure
+  const Moose::Functor<ADReal> * _pressure;
+
   /// the specific heat capacity
   const Moose::Functor<ADReal> & _cp;
+
+  /// the specific enthalpy
+  const Moose::Functor<ADReal> * _h;
 };
