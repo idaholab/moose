@@ -56,8 +56,9 @@ HeatTransfer1PhaseBase::check() const
 {
   HeatTransferBase::check();
 
-  if (_closures != nullptr && hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
-    _closures->checkHeatTransfer(*this, getComponentByName<FlowChannel1Phase>(_flow_channel_name));
+  for (const auto & closures : _closures_objects)
+    if (closures && hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
+      closures->checkHeatTransfer(*this, getComponentByName<FlowChannel1Phase>(_flow_channel_name));
 }
 
 void
@@ -65,8 +66,9 @@ HeatTransfer1PhaseBase::addMooseObjects()
 {
   HeatTransferBase::addMooseObjects();
 
-  _closures->addMooseObjectsHeatTransfer(*this,
-                                         getComponentByName<FlowChannel1Phase>(_flow_channel_name));
+  for (const auto & closures : _closures_objects)
+    closures->addMooseObjectsHeatTransfer(
+        *this, getComponentByName<FlowChannel1Phase>(_flow_channel_name));
 }
 
 const MaterialPropertyName &

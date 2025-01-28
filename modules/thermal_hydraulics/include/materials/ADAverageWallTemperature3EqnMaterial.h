@@ -35,8 +35,6 @@ protected:
   std::vector<const ADMaterialProperty<Real> *> _Hw_sources;
   /// Heated perimeter values from the individual sources to average
   std::vector<const ADVariableValue *> _P_hf_sources;
-  /// Average wall heat transfer coefficient
-  const ADMaterialProperty<Real> & _Hw_average;
   /// Fluid temperature
   const ADVariableValue & _T_fluid;
   /// Total heated perimeter

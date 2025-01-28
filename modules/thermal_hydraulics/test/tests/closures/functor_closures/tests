@@ -1,0 +1,11 @@
+[Tests]
+  design = 'FunctorClosures.md'
+  issues = '#29594'
+  [test]
+    type = CSVDiff
+    input = 'functor_closures.i'
+    csvdiff = 'functor_closures_out.csv'
+    required_submodule = '../fluid_properties/contrib/air'
+    requirement = 'The system shall be able to supply closures for a flow channel using functors.'
+  []
+[]
