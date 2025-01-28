@@ -14,6 +14,7 @@
 #include "MooseObjectAction.h"
 #include "QuasiStaticSolidMechanicsPhysics.h"
 #include "Material.h"
+#include "CommonSolidMechanicsAction.h"
 
 #include "BlockRestrictable.h"
 
@@ -55,8 +56,8 @@ QuasiStaticSolidMechanicsPhysics::validParams()
   InputParameters params = QuasiStaticSolidMechanicsPhysicsBase::validParams();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
 
-  // parameters specified here only appear in the input file sub-blocks of the
-  // Master action, not in the common parameters area
+  // parameters specified here only appear in the input file sub-blocks of the solid mechanics
+  // action, not in the common parameters area
   params.addParam<std::vector<SubdomainName>>("block",
                                               {},
                                               "The list of ids of the blocks (subdomain) "
@@ -382,7 +383,10 @@ QuasiStaticSolidMechanicsPhysics::act()
   // Add variables
   else if (_current_task == "add_variable")
   {
-    if (getParam<bool>("add_variables"))
+    // Add variables here only if the CommonSolidMechanicsAction does not exist.
+    // This happens notably if the QuasiStaticSolidMechanics was created by a meta_action
+    const auto common_actions = _awh.getActions<CommonSolidMechanicsAction>();
+    if (common_actions.empty() && getParam<bool>("add_variables"))
     {
       auto params = _factory.getValidParams("MooseVariable");
       // determine necessary order
@@ -392,6 +396,9 @@ QuasiStaticSolidMechanicsPhysics::act()
       params.set<MooseEnum>("family") = "LAGRANGE";
       if (isParamValid("scaling"))
         params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
+      // Note how we do not add the block restriction because BISON's meta-actions
+      // currently rely on them not being added.
 
       // Loop through the displacement variables
       for (const auto & disp : _displacements)
