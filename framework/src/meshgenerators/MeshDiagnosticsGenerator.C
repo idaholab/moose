@@ -1431,7 +1431,8 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
     bounding_box_map.insert({elem, boundingBox});
   }
 
-  std::unique_ptr<PointLocatorBase> point_locator = PointLocatorBase::build(TREE_ELEMENTS, *mesh);
+  std::unique_ptr<PointLocatorBase> point_locator =
+      mesh->sub_point_locator(); // PointLocatorBase::build(TREE_ELEMENTS, *mesh);
   std::set<std::array<dof_id_type, 4>> overlapping_edges_nodes;
   for (const auto elem : mesh->active_element_ptr_range())
   {
@@ -1443,7 +1444,7 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
       (*point_locator)(elem->point(i), candidate_elems);
       nearby_elems.insert(candidate_elems.begin(), candidate_elems.end());
     }
-    std::vector<std::unique_ptr<Elem>> elem_edges(elem->n_edges());
+    std::vector<std::unique_ptr<const Elem>> elem_edges(elem->n_edges());
     for (auto i : elem->edge_index_range())
       elem_edges[i] = elem->build_edge_ptr(i);
     for (const auto other_elem : nearby_elems)

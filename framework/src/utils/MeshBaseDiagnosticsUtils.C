@@ -69,7 +69,7 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
 }
 
 bool
-checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
+checkFirstOrderEdgeOverlap(const std::unique_ptr<const Elem> & edge1,
                            const std::unique_ptr<const Elem> & edge2,
                            Point & intersection_point,
                            const Real intersection_tol)

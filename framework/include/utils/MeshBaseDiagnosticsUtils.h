@@ -25,7 +25,7 @@ void checkNonConformalMesh(const std::unique_ptr<libMesh::MeshBase> & mesh,
                            const Real conformality_tol,
                            unsigned int & num_nonconformal_nodes);
 
-bool checkFirstOrderEdgeOverlap(const std::unique_ptr<Elem> & edge1,
+bool checkFirstOrderEdgeOverlap(const std::unique_ptr<const Elem> & edge1,
                                 const std::unique_ptr<const Elem> & edge2,
                                 Point & intersection_point,
                                 const Real intersection_tol);
