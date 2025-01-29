@@ -1,0 +1,229 @@
+[Tests]
+  design = 'meshgenerators/ControlDrumMeshGenerator.md'
+  issues = '#28457'
+  [regression_tests]
+    requirement = 'The system shall generate '
+    [hex_with_pad]
+      detail = 'a 2D hexagonal control drum assembly mesh with an explicit drum pad region'
+      type = 'CSVDiff'
+      input = 'drum_pad.i'
+      cli_args = 'Outputs/file_base=drum_hex_pad_out'
+      csvdiff = 'drum_hex_pad_out.csv'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [hex_no_pad]
+      detail = 'a 2D hexagonal control drum assembly mesh without an explicit drum pad region'
+      type = 'CSVDiff'
+      input = 'drum_nopad.i'
+      cli_args = 'Outputs/file_base=drum_hex_nopad_out'
+      csvdiff = 'drum_hex_nopad_out.csv'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [cart_with_pad]
+      detail = 'a 2D Cartesian control drum assembly mesh with an explicit drum pad region'
+      type = 'CSVDiff'
+      input = 'drum_pad.i'
+      cli_args = 'Mesh/rmp/geom=Square
+                  Outputs/file_base=drum_cart_pad_out'
+      csvdiff = 'drum_cart_pad_out.csv'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [cart_no_pad]
+      detail = 'a 2D Cartesian control drum assembly mesh without an explicit drum pad region'
+      type = 'CSVDiff'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/rmp/geom=Square
+                  Outputs/file_base=drum_cart_nopad_out'
+      csvdiff = 'drum_cart_nopad_out.csv'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [pad_azimuthal_sector_mismatch]
+      detail = 'additional azimuthal nodes for a control drum assembly mesh when the azimuthal discretization does not line up with the pad start and end angles'
+      type = 'CSVDiff'
+      input = 'drum_pad.i'
+      csvdiff = 'drum_hex_pad_out.csv'
+      cli_args = 'Mesh/drum/num_azimuthal_sectors=102
+                  Outputs/file_base=drum_hex_pad_out'
+      allow_warnings = true
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [pad_azimuthal_sector_shift]
+      detail = 'a control drum assembly mesh with shifted azimuthal nodes to match the drum pad locations when the azimuthal angles line up to within tolerance'
+      type = 'CSVDiff'
+      input = 'drum_pad.i'
+      csvdiff = 'drum_hex_pad_shift_nodes_out.csv'
+      cli_args = 'Mesh/drum/pad_start_angle=90.1
+                  Mesh/drum/pad_end_angle=179.9
+                  Mesh/drum/azimuthal_node_tolerance=0.2
+                  Outputs/file_base=drum_hex_pad_shift_nodes_out'
+      allow_warnings = true
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [drum_depletion_id]
+      detail = 'depletion IDs for each region in a 2D control drum mesh'
+      type = 'CSVDiff'
+      input = 'drum_depletion_id.i'
+      csvdiff = 'drum_depletion_id_out_region_volumes_0002.csv'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+  []
+  [error_tests]
+    requirement = 'The system shall throw an error '
+    [no_flexible_stitching]
+      detail = 'if flexible assembly stitching is not used when generating a control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/rmp/flexible_assembly_stitching=false'
+      expect_err = "'flexible_assembly_stitching' needs to be set to true"
+    []
+    [large_inner_radius]
+      detail = 'if the inner radius of the control drum exceeds the outer radius'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/drum/drum_inner_radius=9.2'
+      expect_err = "Drum outer radius must be larger than the inner radius"
+    []
+    [large_outer_radius]
+      detail = 'if the outer radius of the control drum exceeds the radius of the inscribed circle of the assembly boundary'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/drum/drum_outer_radius=9.9
+                  Mesh/drum/num_azimuthal_sectors=6'
+      expect_err = "Volume-corrected outer radius of drum region must be smaller"
+    []
+    [missing_pad_end_angle]
+      detail = 'if the user sets the start angle of the drum pad but not the end angle'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/drum/pad_start_angle=50'
+      expect_err = "If 'pad_start_angle' is set, 'pad_end_angle' needs to also be set"
+    []
+    [missing_pad_start_angle]
+      detail = 'if the user sets the end angle of the drum pad but not the start angle'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/drum/pad_end_angle=50'
+      expect_err = "If 'pad_end_angle' is set, 'pad_start_angle' needs to also be set"
+    []
+    [small_pad_angle_diff]
+      detail = 'if the difference between the end and start angle of the pad region is less than 0'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/drum/pad_start_angle=60
+                  Mesh/drum/pad_end_angle=50'
+      expect_err = "The difference between 'pad_end_angle' and 'pad_start_angle' must be between"
+    []
+    [large_pad_angle_diff]
+      detail = 'if the difference between the end and start angle of the pad region exceeeds 360 inclusive'
+      type = 'RunException'
+      input = 'drum_nopad.i'
+      cli_args = 'Mesh/drum/pad_start_angle=0
+                  Mesh/drum/pad_end_angle=360'
+      expect_err = "The difference between 'pad_end_angle' and 'pad_start_angle' must be between"
+    []
+    [node_tolerance_interval_size]
+      detail = 'if the azimuthal node tolerance is larger than half the azimuthal interval size'
+      type = 'RunException'
+      input = 'drum_pad.i'
+      cli_args = 'Mesh/drum/azimuthal_node_tolerance=1'
+      expect_err = "Azimuthal node tolerance should be smaller than half the azimuthal interval size"
+    []
+    [node_tolerance_pad_angle_range]
+      detail = 'if the azimuthal node tolerance is larger than half the difference of the pad angle range'
+      type = 'RunException'
+      input = 'drum_pad.i'
+      cli_args = 'Mesh/drum/azimuthal_node_tolerance=1
+                  Mesh/drum/num_azimuthal_sectors=36
+                  Mesh/drum/pad_start_angle=90
+                  Mesh/drum/pad_end_angle=92'
+      expect_err = "Azimuthal node tolerance should be smaller than half the difference of the pad angle range"
+    []
+    [no_region_ids]
+      detail = 'if region IDs are not provided for the control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      expect_err = "missing required parameter 'Mesh/drum/region_ids'"
+    []
+    [region_id_axial_mismatch]
+      detail = 'if the number of region IDs provided per radial level does not match the number of axial levels for a control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/drum/region_ids="1 2 3; 4 5 6"'
+      expect_err = "The size of region IDs must be equal to the number of axial levels"
+    []
+    [region_id_radial_mismatch_nopad]
+      detail = 'if the number of radial region IDs provided per axial level does not equal 3 for a control drum mesh with no explicit pad region'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/drum/region_ids="1 2 3 4"'
+      expect_err = "3 radial IDs need to be provided per axial zone"
+    []
+    [region_id_radial_mismatch_pad]
+      detail = 'if the number of radial region IDs provided per axial level does not equal 4 for a control drum mesh with an explicit pad region'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/drum/region_ids="1 2 3"
+                  Mesh/drum/pad_start_angle=0
+                  Mesh/drum/pad_end_angle=90'
+      expect_err = "4 radial IDs need to be provided per axial zone"
+    []
+    [block_names_conflict]
+      detail = 'if block names are defined explicitly while also using auto-assigned block names for a control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/rmp/region_id_as_block_name=true
+                  Mesh/drum/region_ids="1 2 3"
+                  Mesh/drum/block_names="block1 block2 block3"'
+      expect_err = "block_names should not be specified in ControlDrumMeshGenerator"
+    []
+    [block_names_size_mismatch_axial]
+      detail = 'if the size of block_names does not match the size of region_ids in the axial dimension for a control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/drum/region_ids="1 2 3"
+                  Mesh/drum/block_names="block1 block2 block3; block4 block5 block6"'
+      expect_err = "The size of block_names must match the size of region_ids"
+    []
+    [block_names_size_mismatch_radial]
+      detail = 'if the size of block_names does not match the size of region_ids in the radial dimension for a control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/drum/region_ids="1 2 3"
+                  Mesh/drum/block_names="block1 block2 block3 block4"'
+      expect_err = "The size of block_names must match the size of region_ids"
+    []
+    [extrude_2d]
+      detail = 'if a 2-D mesh with no axial information is extruded into 3-D for a control drum mesh'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/drum/region_ids="1 2 3"
+                  Mesh/drum/extrude=true'
+      expect_err = "ReactorMeshParams/dim needs to be set to 3."
+    []
+    [extrude_no_axial_boundary_ids]
+      detail = 'if a 3-D mesh is extruded but is missing top and bottom boundary id data'
+      type = 'RunException'
+      input = 'drum_nopad_err.i'
+      cli_args = 'Mesh/rmp/dim=3
+                  Mesh/rmp/axial_mesh_intervals=1
+                  Mesh/rmp/axial_regions=1.0
+                  Mesh/drum/region_ids="1 2 3"
+                  Mesh/drum/extrude=true'
+      expect_err = "Both top_boundary_id and bottom_boundary_id must be provided"
+    []
+    [depletion_id_incorrect_level]
+      detail = 'if a depletion id type other than pin type is used for a control drum mesh'
+      type = 'RunException'
+      input = 'drum_depletion_id.i'
+      cli_args = 'Mesh/drum/depletion_id_type=assembly_type'
+      expect_err = "Only 'pin_type' is allowed in depletion ID generation at drum level"
+    []
+  []
+[]

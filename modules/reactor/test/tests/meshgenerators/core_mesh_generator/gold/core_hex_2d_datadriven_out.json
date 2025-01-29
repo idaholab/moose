@@ -49,6 +49,10 @@
                         "type": "bool",
                         "value": false
                     },
+                    "MeshMetaData/amg1/is_control_drum": {
+                        "type": "bool",
+                        "value": false
+                    },
                     "MeshMetaData/amg1/is_homogenized": {
                         "type": "bool",
                         "value": false
@@ -216,7 +220,7 @@
                         "value": false
                     },
                     "MeshMetaData/rmp/mesh_dimensions": {
-                        "type": "int",
+                        "type": "unsigned int",
                         "value": 2
                     },
                     "MeshMetaData/rmp/mesh_geometry": {

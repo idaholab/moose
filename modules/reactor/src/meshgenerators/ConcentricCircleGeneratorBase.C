@@ -68,8 +68,8 @@ ConcentricCircleGeneratorBase::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<BoundaryName>(
+      "external_boundary_name", "", "Optional customized external boundary name.");
 
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7", "TRI3");
   params.addParam<MooseEnum>(
@@ -150,9 +150,7 @@ ConcentricCircleGeneratorBase::ConcentricCircleGeneratorBase(const InputParamete
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string()),
+    _external_boundary_name(getParam<BoundaryName>("external_boundary_name")),
     _inward_interface_boundary_names(
         isParamValid("inward_interface_boundary_names")
             ? getParam<std::vector<std::string>>("inward_interface_boundary_names")

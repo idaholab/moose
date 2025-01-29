@@ -68,7 +68,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     _geom(getParam<MooseEnum>("geom")),
     _assembly_pitch(getParam<Real>("assembly_pitch"))
 {
-  if (int(_dim) == 2)
+  if ((unsigned int)(_dim) == 2)
   {
     std::vector<std::string> invalid_params = {
         "axial_regions", "axial_mesh_intervals", "top_boundary_id", "bottom_boundary_id"};
@@ -88,7 +88,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     this->declareMeshProperty(RGMB::axial_mesh_intervals, _axial_mesh_intervals);
   }
 
-  this->declareMeshProperty(RGMB::mesh_dimensions, int(_dim));
+  this->declareMeshProperty(RGMB::mesh_dimensions, (unsigned int)std::stoul(_dim));
   this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty(RGMB::region_id_as_block_name,
@@ -113,10 +113,6 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
       moose_mesh->parameters().get<std::string>("data_driven_generator");
   bool bypass_meshgen = (data_driven_generator != "") && isDataOnly();
   this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);
-
-  // Declare name id map only if RGMB is outputting a mesh
-  if (!bypass_meshgen)
-    this->declareMeshProperty("name_id_map", _name_id_map);
 
   if (isParamValid("top_boundary_id"))
   {

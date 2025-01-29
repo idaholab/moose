@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TriPinHexAssemblyGenerator.h"
+#include "PolygonalMeshGenerationUtils.h"
 #include "libmesh/mesh_smoother_laplace.h"
 
 #include <cmath>
@@ -403,7 +404,7 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
   {
     if (preserve_volumes)
     {
-      const Real corr_factor = radiusCorrectionFactor(azimuthal_list);
+      const Real corr_factor = PolygonalMeshGenerationUtils::radiusCorrectionFactor(azimuthal_list);
       for (unsigned int i = 0; i < ring_radii.size(); i++)
         ring_radii_corr.push_back(ring_radii[i] * corr_factor);
     }
