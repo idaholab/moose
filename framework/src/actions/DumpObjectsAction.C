@@ -24,8 +24,7 @@ DumpObjectsAction::DumpObjectsAction(const InputParameters & params) : Action(pa
 void
 DumpObjectsAction::act()
 {
-  mooseAssert(dynamic_cast<DumpObjectsProblem *>(_problem.get()),
-              "Problem should be DumpObjectProblem");
-  if (auto * const dop = dynamic_cast<DumpObjectsProblem *>(_problem.get()); dop)
-    dop->printObjects();
+  auto * const dop = dynamic_cast<DumpObjectsProblem *>(_problem.get());
+  mooseAssert(dop, "Problem should be DumpObjectProblem");
+  dop->printObjects();
 }

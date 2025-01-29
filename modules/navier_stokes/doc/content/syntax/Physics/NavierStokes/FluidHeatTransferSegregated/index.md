@@ -1,4 +1,4 @@
-# Navier Stokes Linear finite volume Fluid Heat Transfer Physics
+# Navier Stokes Linear Finite Volume Fluid Heat Transfer Physics
 
 This syntax was created for the [WCNSLinearFVFluidHeatTransferPhysics.md] `Physics`.
 The additional nesting is intended to allow the definition of multiple instances of this `Physics`,

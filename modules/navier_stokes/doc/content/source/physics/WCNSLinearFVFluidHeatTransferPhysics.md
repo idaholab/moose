@@ -12,16 +12,14 @@ For free flow in a non-porous media:
 \dfrac{\partial \rho h}{\partial t} + \nabla \cdot (\rho h \mathbf{v}) - \nabla \cdot (k_f \nabla T_f) - Q + \alpha (T_f - T_{ambient}) = 0
 
 !alert note
-Porous medium treatment is not implemented for the linear finite volume discretization.
+Porous medium treatment is not implemented for the linear finite volume discretization yet.
 
 where:
 
-- $h$ is the fluid enthalpy, computed from the specific heat $c_p$
+- $h$ is the fluid specific enthalpy
 - $\rho$ is the fluid density
-- $\epsilon$ is the porosity
 - $T_f$ is the fluid temperature
 - \mathbf{v} is the advecting velocity (clean flow)
-- \mathbf{v}_D is the advecting superficial velocity (porous media flow)
 - $kappa_f$ the fluid effective thermal conductivity
 - $Q$ is the source term, corresponding to energy deposited directly in the fluid
 - $\alpha$ is the ambient convection volumetric heat transfer coefficient
@@ -46,10 +44,16 @@ necessary for solving the energy transport equation:
 
 For the default names of other variables used in this action, visit [this site](include/base/NS.h).
 
+## Automatically defined functors / materials
+
+The following functor materials are defined:
+
+- [INSFVEnthalpyFunctorMaterial.md] to define functors to compute the specific enthalpy and its time derivative
+
 
 ## Coupling with other Physics
 
-The heat advection equation can be solved concurrently with the flow equations by combining both the `WCNSLinearFVFluidHeatTransferPhysics`
+The enthalpy advection equation can be solved concurrently with the flow equations by combining both the `WCNSLinearFVFluidHeatTransferPhysics`
 and the [WCNSLinearFVFlowPhysics.md] using the [!param](/Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics/coupled_flow_physics) parameter.
 
 !syntax parameters /Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics

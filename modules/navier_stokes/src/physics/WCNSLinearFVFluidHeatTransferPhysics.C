@@ -23,8 +23,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   params.addParam<bool>(
       "use_nonorthogonal_correction",
       true,
-      "Whether to use a non-orthogonal correction. This will add off-diagonal terms potentially "
-      "slowing down convergence, but reducing numerical dispersion on non-orthogonal meshes. Can "
+      "Whether to use a non-orthogonal correction. This can potentially slow down convergence "
+      ", but reduces numerical dispersion on non-orthogonal meshes. Can "
       "be safely turned off on orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
 
@@ -210,9 +210,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyInletBC()
           bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
     }
     else if (_energy_inlet_types[bc_ind] == "heatflux")
-    {
       paramError("energy_inlet_types", "Heat flux inlet boundary conditions not yet supported");
-    }
     else if (_energy_inlet_types[bc_ind] == "flux-mass" ||
              _energy_inlet_types[bc_ind] == "flux-velocity")
       paramError("energy_inlet_types", "Flux inlet boundary conditions not yet supported");
@@ -248,9 +246,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyWallBC()
           bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
     }
     else if (_energy_wall_types[bc_ind] == "heatflux")
-    {
       paramError("energy_inlet_types", "Heat flux wall boundary conditions not yet supported");
-    }
     // We add this boundary condition here to facilitate the input of wall boundaries / functors for
     // energy. If there are too many turbulence options and this gets out of hand we will have to
     // move this to the turbulence Physics
