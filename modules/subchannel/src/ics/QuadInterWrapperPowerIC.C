@@ -22,7 +22,8 @@ QuadInterWrapperPowerIC::validParams()
   InputParameters params = QuadInterWrapperBaseIC::validParams();
   params.addClassDescription("Computes axial power rate, W/m that goes into the inter-wrapper "
                              "cells in a square lattice subchannel arrangement");
-  params.addParam<Real>("power", 0.0, "[W]");
+  params.addParam<Real>(
+      "power", 0.0, "The power of all the sub-assemblies that the inter-wrapper wraps around[W]");
   params.addParam<std::string>("filename",
                                "file_was_not_found",
                                "name of power profile .txt file (should be a single column). It's "
@@ -31,7 +32,8 @@ QuadInterWrapperPowerIC::validParams()
       "axial_heat_rate",
       "1.0",
       "user provided normalized function of axial heat rate [Unitless]. "
-      "The integral over pin heated length should equal the heated length");
+      "The integral over pin heated length should equal the heated length."
+      "Zero is considered the inlet of the heated length.");
   return params;
 }
 

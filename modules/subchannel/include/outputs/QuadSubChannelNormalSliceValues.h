@@ -23,7 +23,7 @@ public:
   virtual void output() override;
 
 protected:
-  QuadSubChannelMesh & _mesh;
+  const QuadSubChannelMesh & _mesh;
   /// matrix that holds the value of the variable the user wants to print
   Eigen::MatrixXd _exit_value;
   /// The name of the variable

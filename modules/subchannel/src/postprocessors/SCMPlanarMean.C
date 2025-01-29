@@ -22,8 +22,8 @@ InputParameters
 SCMPlanarMean::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription("Calculates an overall mass-flow-rate averaged mean of the chosen "
-                             "variable on a z-plane at a user defined height");
+  params.addClassDescription("Calculates an mass-flow-rate averaged mean of the chosen "
+                             "variable on a z-plane at a user defined height over all subchannels");
   params.addRequiredParam<AuxVariableName>("variable", "Variable you want the mean of");
   params.addRequiredParam<Real>("height", "Axial location of plane [m]");
   return params;
@@ -52,6 +52,7 @@ SCMPlanarMean::execute()
   auto mass_flow = 0.0;
   auto sum_sol_mass_flow = 0.0;
 
+  // Use outlet mass flow rate for weighting. Print value at the exit of the assembly.
   if (_height >= total_length)
   {
     for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
@@ -64,6 +65,7 @@ SCMPlanarMean::execute()
   }
   else
   {
+    // Locally average over each axial location in each channel
     for (unsigned int iz = 0; iz < nz; iz++)
     {
       if (_height >= z_grid[iz] && _height < z_grid[iz + 1])

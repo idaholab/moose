@@ -19,9 +19,6 @@ class PBSodiumFluidProperties : public SinglePhaseFluidProperties
 public:
   PBSodiumFluidProperties(const InputParameters & parameters);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-
   virtual Real rho_from_p_T(Real pressure, Real temperature) const;
   virtual void
   rho_from_p_T(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
@@ -38,8 +35,6 @@ public:
 
   virtual Real T_from_p_h(Real temperature, Real enthalpy) const;
 
-#pragma GCC diagnostic pop
-
 protected:
   static const std::vector<Real> _temperature_vec;
   static const std::vector<Real> _e_vec;
@@ -48,9 +43,9 @@ protected:
   Real F_enthalpy(Real temperature) const;
 
   const Real & _p_0;
-  Real _T0;
-  Real _Tmax;
-  Real _Tmin;
+  static constexpr Real _T0 = 628.15;
+  static constexpr Real _Tmax = 1154.55;
+  static constexpr Real _Tmin = 373.15;
   Real _H0;
   Real _H_Tmax;
   Real _H_Tmin;

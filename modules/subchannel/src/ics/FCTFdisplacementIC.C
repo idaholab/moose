@@ -9,6 +9,7 @@
 
 #include "FCTFdisplacementIC.h"
 #include "TriSubChannelMesh.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", FCTFdisplacementIC);
 
@@ -22,7 +23,7 @@ FCTFdisplacementIC::validParams()
 }
 
 FCTFdisplacementIC::FCTFdisplacementIC(const InputParameters & params)
-  : TriSubChannelBaseIC(params), _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
+  : TriSubChannelBaseIC(params), _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh))
 {
 }
 

@@ -188,7 +188,7 @@ public:
   static InputParameters validParams();
 
   /**
-   * Generate the spacing in z-direction using heated and unheaded lengths
+   * Generate the spacing in z-direction using heated and unheated lengths
    */
   static void generateZGrid(Real unheated_length_entry,
                             Real heated_length,

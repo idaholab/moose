@@ -81,7 +81,9 @@ TriDuctMeshGenerator::generate()
 }
 
 void
-TriDuctMeshGenerator::ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center)
+TriDuctMeshGenerator::ductCorners(std::vector<Point> & corners,
+                                  Real flat_to_flat,
+                                  const Point & center) const
 {
   corners.resize(TriSubChannelMesh::N_CORNERS);
   Real r_corner = flat_to_flat / 2. / std::cos(libMesh::pi / 6.);
@@ -98,7 +100,7 @@ TriDuctMeshGenerator::ductXsec(std::vector<Point> & xsec,
                                const std::vector<Point> & corners,
                                unsigned int nrings,
                                Real pitch,
-                               Real flat_to_flat)
+                               Real flat_to_flat) const
 {
   xsec.clear();
 
@@ -121,7 +123,7 @@ TriDuctMeshGenerator::ductXsec(std::vector<Point> & xsec,
 size_t
 TriDuctMeshGenerator::ductPointIndex(unsigned int points_per_layer,
                                      unsigned int layer,
-                                     unsigned int point)
+                                     unsigned int point) const
 {
   return layer * points_per_layer + point;
 }
@@ -129,7 +131,7 @@ TriDuctMeshGenerator::ductPointIndex(unsigned int points_per_layer,
 void
 TriDuctMeshGenerator::ductPoints(std::vector<Point> & points,
                                  const std::vector<Point> & xsec,
-                                 const std::vector<Real> & z_layers)
+                                 const std::vector<Real> & z_layers) const
 {
   points.resize(xsec.size() * z_layers.size());
   for (size_t i = 0; i < z_layers.size(); i++)
@@ -140,7 +142,7 @@ TriDuctMeshGenerator::ductPoints(std::vector<Point> & points,
 void
 TriDuctMeshGenerator::ductElems(std::vector<std::vector<size_t>> & elem_point_indices,
                                 unsigned int n_layers,
-                                unsigned int points_per_layer)
+                                unsigned int points_per_layer) const
 {
   elem_point_indices.clear();
   for (unsigned int i = 0; i < n_layers - 1; i++)
@@ -164,7 +166,7 @@ TriDuctMeshGenerator::buildDuct(std::unique_ptr<MeshBase> & mesh,
                                 std::vector<Node *> & duct_nodes,
                                 const std::vector<Point> & points,
                                 const std::vector<std::vector<size_t>> & elem_point_indices,
-                                SubdomainID block)
+                                SubdomainID block) const
 {
   for (size_t i = 0; i < points.size(); i++)
     duct_nodes.push_back(mesh->add_point(points[i]));

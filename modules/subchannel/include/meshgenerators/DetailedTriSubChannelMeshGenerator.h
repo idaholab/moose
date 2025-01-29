@@ -25,7 +25,7 @@ protected:
   /// returns the type of the subchannel given the index
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
   Point rotatePoint(Point b, Real theta);
-  Point translatePoint(Point b, Point translation_vector);
+  Point translatePoint(Point & b, Point & translation_vector);
   /// returns the position of pin given pin index
   Point getPinPosition(unsigned int i) { return _pin_position[i]; }
   /// returns the position of subchannel given pin index

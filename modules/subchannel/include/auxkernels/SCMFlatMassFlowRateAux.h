@@ -13,7 +13,7 @@
 #include "SubChannelMesh.h"
 
 /**
- * Computes mass float rate from total mass flow at the inlet
+ * Computes a uniform mass flow rate at the inlet provided a total mass flow rate
  */
 class SCMFlatMassFlowRateAux : public AuxKernel
 {

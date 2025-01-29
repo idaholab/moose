@@ -86,7 +86,7 @@ TriInterWrapperMesh::getSubchannelIndexFromPoint(const Point & p) const
 unsigned int
 TriInterWrapperMesh::channelIndex(const Point & /*point*/) const
 {
-  // FIXME:
+  mooseAssert(false, "This is not implemented");
   return 0;
 }
 
@@ -98,14 +98,14 @@ TriInterWrapperMesh::buildMesh()
 unsigned int
 TriInterWrapperMesh::getPinIndexFromPoint(const Point & /*p*/) const
 {
-  // TODO: implement routine that returns Pin index given a point in 3D space
+  mooseAssert(false, "This is not implemented");
   return 0;
 }
 
 unsigned int
 TriInterWrapperMesh::pinIndex(const Point & /*p*/) const
 {
-  // TODO: implement routine that returns Pin index given a point in 3D space
+  mooseAssert(false, "This is not implemented");
   return 0;
 }
 

@@ -22,6 +22,7 @@ public:
   InterWrapperSolutionTransferBase(const InputParameters & parameters);
 
   virtual void execute() override;
+  void initialSetup() override;
 
 protected:
   /**

@@ -26,7 +26,34 @@ SCMSolutionTransferBase::SCMSolutionTransferBase(const InputParameters & paramet
   : MultiAppTransfer(parameters), _var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
   if (_directions.contains(Transfer::FROM_MULTIAPP))
-    mooseError("This transfer works only into multi-app. Correct the 'direction' parameter.");
+    paramError("from_multiapp", "This transfer works only into multi-app.");
+}
+
+void
+SCMSolutionTransferBase::initialSetup()
+{
+  MultiAppTransfer::initialSetup();
+  for (std::size_t var_index = 0; var_index < _var_names.size(); ++var_index)
+  {
+    // Check source variable on regular subchannel problem
+    MooseVariableFieldBase & from_var = _subproblem.getVariable(
+        0, _var_names[var_index], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+    System & from_sys = from_var.sys().system();
+    const auto & fe_type = from_sys.variable_type(from_var.number());
+
+    if (fe_type.family != LAGRANGE || fe_type.order != FIRST)
+      mooseError("This transfer requires same type of variables between meshes (source)");
+
+    // Check target variable in visualization mesh
+    MooseVariableFieldBase & to_var = _to_problems[0]->getVariable(
+        0, _var_names[var_index], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+
+    System & to_sys = to_var.sys().system();
+    const auto & fe_type_target = to_sys.variable_type(to_var.number());
+
+    if (fe_type_target.family != LAGRANGE || fe_type_target.order != FIRST)
+      mooseError("This transfer requires same type of variables between meshes (target)");
+  }
 }
 
 void
@@ -34,7 +61,6 @@ SCMSolutionTransferBase::execute()
 {
   TIME_SECTION(
       "MultiAppDetailedSolutionBaseTransfer::execute()", 5, "Transferring subchannel solutions");
-  _console << "********** Executing **********" << std::endl;
   getAppInfo();
 
   switch (_current_direction)
@@ -51,8 +77,7 @@ SCMSolutionTransferBase::execute()
 void
 SCMSolutionTransferBase::transferToMultiApps()
 {
-  _console << "********** Transfer to MultiApps a **********" << std::endl;
-  mooseAssert(_from_meshes.size() == 1, "Only one master mesh can be active in this transfer.");
+  mooseAssert(_from_meshes.size() == 1, "Only one source mesh can be active in this transfer.");
   if (dynamic_cast<SubChannelMesh *>(_from_meshes[0]) == nullptr)
     mooseError("This transfer works only with SubChannelMesh classes.");
 

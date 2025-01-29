@@ -104,13 +104,20 @@ public:
   }
 
 protected:
+  /// number of subchannels in the x direction
   unsigned int _nx;
+  /// number of subchannels in the y direction
   unsigned int _ny;
+  /// number of subchannels in total
   unsigned int _n_channels;
   /// Number of gaps per layer
   unsigned int _n_gaps;
   /// Number of pins
   unsigned int _n_pins;
+  /**
+   * The gap, not to be confused with the gap between pins, this refers to the gap
+   * next to the duct. Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
+   */
   Real _gap;
   std::vector<std::vector<Node *>> _nodes;
   std::vector<std::vector<Node *>> _pin_nodes;
