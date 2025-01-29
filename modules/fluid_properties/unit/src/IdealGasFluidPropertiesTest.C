@@ -18,89 +18,108 @@ TEST_F(IdealGasFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "id
 TEST_F(IdealGasFluidPropertiesTest, testAll)
 {
   // Test when R and gamma are provided
-  Real T = 120. + 273.15; // K
-  Real p = 101325;        // Pa
+  const Real T = 120. + 273.15; // K
+  const Real p = 101325;        // Pa
 
-  const Real rho = _fp->rho_from_p_T(p, T);
-  const Real v = 1.0 / rho;
-  const Real e = _fp->e_from_p_rho(p, rho);
-  const Real s = _fp->s_from_v_e(v, e);
-  const Real h = _fp->h_from_p_T(p, T);
+  // saved values
+  const Real rho = 0.897875065343506;
+  const Real v = 1.1137406957809;
+  const Real e = 2.762433560975611e+05;
+  const Real h = 3.890931320975610e+05;
+  const Real s = 2588.90011905277;
+  const Real c = 398.896207251962;
+  const Real cp = 987.13756097561;
+  const Real cv = 700.09756097561;
+  const Real mu = 1.823000000000000e-05;
+  const Real k = 0.02568;
+  const Real beta = 0.00254355843825512;
 
-  Real e_inv = _fp->e_from_T_v(T, v);
-  REL_TEST(e_inv, e, 10.0 * REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->e_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
-  Real p_inv = _fp->p_from_T_v(T, v);
-  REL_TEST(p_inv, p, 10.0 * REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->p_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
-  REL_TEST(_fp->h_from_T_v(T, v), h, REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->h_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
-  REL_TEST(_fp->s_from_T_v(T, v), s, REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->s_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
-  REL_TEST(_fp->cv_from_T_v(T, v), _fp->cv_from_v_e(v, e), REL_TOL_CONSISTENCY);
+  // const Real rho = 0.897875065343506;
+  // const Real v = 1.1137406957809;
+  // const Real e = 2.752433560975611e+05;
+  // const Real h = 3.880931320975610e+05;
+  // const Real s = 2588.90011905277;
+  // const Real c = 398.896207251962;
+  // const Real cp = 987.13756097561;
+  // const Real cv = 700.09756097561;
+  // const Real mu = 1.823000000000000e-05;
+  // const Real k = 0.02568;
+  // const Real beta = 0.00254355843825512;
 
-  REL_TEST(_fp->p_from_h_s(h, s), p, REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->p_from_h_s, h, s, REL_TOL_DERIVATIVE);
+  // Because the ideal gas equation of state is exact, we expect consistency
+  // to roundoff error:
+  const Real rel_tol_consistency = REL_TOL_SAVED_VALUE;
 
-  REL_TEST(_fp->rho_from_p_s(p, s), rho, REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->rho_from_p_s, p, s, REL_TOL_DERIVATIVE);
-
-  REL_TEST(_fp->p_from_v_e(v, e), p, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->p_from_v_e, v, e, REL_TOL_DERIVATIVE);
-
-  REL_TEST(_fp->T_from_v_e(v, e), T, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->T_from_v_e(v, e), T, rel_tol_consistency);
+  REL_TEST(_fp->T_from_p_h(p, h), T, rel_tol_consistency);
   DERIV_TEST(_fp->T_from_v_e, v, e, REL_TOL_DERIVATIVE);
-
-  REL_TEST(_fp->c_from_v_e(v, e), 398.896207251962, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->cp_from_v_e(v, e), 987.13756097561, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
-  REL_TEST(_fp->cv_from_v_e(v, e), 700.09756097561, REL_TOL_SAVED_VALUE);
-
-  REL_TEST(_fp->mu_from_v_e(v, e), 18.23e-6, 1e-15);
-  DERIV_TEST(_fp->mu_from_v_e, p, T, REL_TOL_DERIVATIVE);
-
-  REL_TEST(_fp->k_from_v_e(v, e), 25.68e-3, 1e-15);
-
-  REL_TEST(_fp->beta_from_p_T(p, T), 2.54355843825512e-3, REL_TOL_SAVED_VALUE);
-
-  REL_TEST(_fp->s_from_v_e(v, e), 2.58890011905277e3, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);
-
-  ABS_TEST(_fp->rho_from_p_T(p, T), 0.897875065343506, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->rho_from_p_T, p, T, REL_TOL_DERIVATIVE);
-
-  ABS_TEST(_fp->v_from_p_T(p, T), 1.0 / 0.897875065343506, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->v_from_p_T, p, T, REL_TOL_DERIVATIVE);
-
-  REL_TEST(_fp->e_from_p_rho(p, rho), 2.75243356098e5, REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->e_from_p_rho, p, rho, REL_TOL_DERIVATIVE);
-
-  ABS_TEST(_fp->h_from_p_T(p, T), 3.88093132097561e5, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
-
-  ABS_TEST(_fp->s_from_p_T(p, T), 2.588900119052767e3, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->s_from_p_T, p, T, REL_TOL_DERIVATIVE);
-  ABS_TEST(_fp->s_from_h_p(h, p), 2.588900119052767e3, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->s_from_h_p, h, p, REL_TOL_DERIVATIVE);
-
-  ABS_TEST(_fp->e_from_p_T(p, T), 2.75243356097561e5, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
-
-  REL_TEST(_fp->e_from_v_h(v, h), e, REL_TOL_CONSISTENCY);
-  DERIV_TEST(_fp->e_from_v_h, v, h, REL_TOL_DERIVATIVE);
-
-  ABS_TEST(_fp->molarMass(), 0.0289662061037, REL_TOL_SAVED_VALUE);
-
-  ABS_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_CONSISTENCY);
   DERIV_TEST(_fp->T_from_p_h, p, h, REL_TOL_DERIVATIVE);
 
-  REL_TEST(_fp->mu_from_p_T(p, T), 18.23e-6, REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->p_from_v_e(v, e), p, rel_tol_consistency);
+  REL_TEST(_fp->p_from_T_v(T, v), p, rel_tol_consistency);
+  REL_TEST(_fp->p_from_h_s(h, s), p, rel_tol_consistency);
+  DERIV_TEST(_fp->p_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->p_from_T_v, T, v, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->p_from_h_s, h, s, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->rho_from_p_T(p, T), rho, rel_tol_consistency);
+  REL_TEST(_fp->rho_from_p_s(p, s), rho, rel_tol_consistency);
+  DERIV_TEST(_fp->rho_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->rho_from_p_s, p, s, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->v_from_p_T(p, T), v, rel_tol_consistency);
+  DERIV_TEST(_fp->v_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->e_from_p_rho(p, rho), e, rel_tol_consistency);
+  REL_TEST(_fp->e_from_p_T(p, T), e, rel_tol_consistency);
+  REL_TEST(_fp->e_from_T_v(T, v), e, rel_tol_consistency);
+  REL_TEST(_fp->e_from_v_h(v, h), e, rel_tol_consistency);
+  DERIV_TEST(_fp->e_from_p_rho, p, rho, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->e_from_T_v, T, v, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->e_from_v_h, v, h, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->h_from_p_T(p, T), h, rel_tol_consistency);
+  REL_TEST(_fp->h_from_T_v(T, v), h, rel_tol_consistency);
+  DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->h_from_T_v, T, v, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->s_from_v_e(v, e), s, rel_tol_consistency);
+  REL_TEST(_fp->s_from_p_T(p, T), s, rel_tol_consistency);
+  REL_TEST(_fp->s_from_T_v(T, v), s, rel_tol_consistency);
+  REL_TEST(_fp->s_from_h_p(h, p), s, rel_tol_consistency);
+  DERIV_TEST(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->s_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->s_from_T_v, T, v, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->s_from_h_p, h, p, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->c_from_v_e(v, e), c, rel_tol_consistency);
+  REL_TEST(_fp->c_from_p_T(p, T), c, rel_tol_consistency);
+  DERIV_TEST(_fp->c_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->c_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->cp_from_v_e(v, e), cp, rel_tol_consistency);
+  REL_TEST(_fp->cp_from_p_T(p, T), cp, rel_tol_consistency);
+  DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->cv_from_v_e(v, e), cv, rel_tol_consistency);
+  REL_TEST(_fp->cv_from_p_T(p, T), cv, rel_tol_consistency);
+  REL_TEST(_fp->cv_from_T_v(T, v), cv, rel_tol_consistency);
+  DERIV_TEST(_fp->cv_from_v_e, v, e, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->cv_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->mu_from_v_e(v, e), mu, rel_tol_consistency);
+  REL_TEST(_fp->mu_from_p_T(p, T), mu, rel_tol_consistency);
+  DERIV_TEST(_fp->mu_from_v_e, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
-  REL_TEST(_fp->k_from_p_T(p, T), 25.68e-3, REL_TOL_CONSISTENCY);
+  REL_TEST(_fp->k_from_v_e(v, e), k, rel_tol_consistency);
+  REL_TEST(_fp->k_from_p_T(p, T), k, rel_tol_consistency);
+  DERIV_TEST(_fp->k_from_v_e, v, e, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
-  REL_TEST(_fp->cv_from_p_T(p, T), 700.09756097561, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->cp_from_p_T(p, T), 987.13756097561, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  REL_TEST(_fp->beta_from_p_T(p, T), beta, rel_tol_consistency);
+
+  REL_TEST(_fp->molarMass(), _molar_mass, rel_tol_consistency);
 }
