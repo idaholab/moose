@@ -560,7 +560,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
       mooseAssert(num_dofs == 1, "Should have only one dof");
       set_zero(0);
       accumulate(0, 0);
-      for (unsigned int qp = 0; qp < nqp; ++qp)
+      for (unsigned int qp = 1; qp < nqp; ++qp)
         dest[qp] = dest[0];
     }
     // Non monomial case
