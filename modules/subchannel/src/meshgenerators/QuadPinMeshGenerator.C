@@ -9,29 +9,7 @@
 
 #include "QuadPinMeshGenerator.h"
 #include "QuadSubChannelMesh.h"
-#include "libmesh/boundary_info.h"
-#include "libmesh/function_base.h"
-#include "libmesh/cell_prism6.h"
-#include "libmesh/cell_prism18.h"
-#include "libmesh/cell_hex8.h"
-#include "libmesh/cell_hex27.h"
-#include "libmesh/cell_tet4.h"
-#include "libmesh/cell_tet10.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/face_tri6.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/face_quad9.h"
-#include "libmesh/libmesh_logging.h"
-#include "libmesh/mesh_communication.h"
-#include "libmesh/mesh_modification.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/parallel.h"
-#include "libmesh/remote_elem.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/unstructured_mesh.h"
-#include "libmesh/point.h"
 #include "libmesh/edge_edge2.h"
-#include <numeric>
 
 registerMooseObject("SubChannelApp", QuadPinMeshGenerator);
 
@@ -75,7 +53,6 @@ QuadPinMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
   if (!mesh_base)
     mesh_base = buildMeshBaseObject();
-  // BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
   mesh_base->set_mesh_dimension(3);
   mesh_base->reserve_elem(_n_cells * (_ny - 1) * (_nx - 1));
   mesh_base->reserve_nodes((_n_cells + 1) * (_ny - 1) * (_nx - 1));
@@ -84,6 +61,7 @@ QuadPinMeshGenerator::generate()
   unsigned int node_sub = (_n_cells + 1) * _ny * _nx;
   // number of elements in subchannel mesh
   unsigned int elem_sub = _n_cells * _ny * _nx;
+
   // Add the points in the shape of a rectilinear grid.  The grid is regular
   // on the xy-plane with a spacing of `pitch` between points.  The grid along
   // z is also regular.  Store pointers in the _nodes

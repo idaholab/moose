@@ -9,27 +9,6 @@
 
 #include "TriPinMeshGenerator.h"
 #include "TriSubChannelMesh.h"
-#include "libmesh/boundary_info.h"
-#include "libmesh/function_base.h"
-#include "libmesh/cell_prism6.h"
-#include "libmesh/cell_prism18.h"
-#include "libmesh/cell_hex8.h"
-#include "libmesh/cell_hex27.h"
-#include "libmesh/cell_tet4.h"
-#include "libmesh/cell_tet10.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/face_tri6.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/face_quad9.h"
-#include "libmesh/libmesh_logging.h"
-#include "libmesh/mesh_communication.h"
-#include "libmesh/mesh_modification.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/parallel.h"
-#include "libmesh/remote_elem.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/unstructured_mesh.h"
-#include "libmesh/point.h"
 #include "libmesh/edge_edge2.h"
 #include <numeric>
 
@@ -75,8 +54,7 @@ TriPinMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
   if (!mesh_base)
     mesh_base = buildMeshBaseObject();
-  /// Boundary info is added only if specific Pin conditions are defined for the pins
-  // BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
+
   mesh_base->set_mesh_dimension(3);
 
   // Defining the Pin positions
@@ -127,20 +105,8 @@ TriPinMeshGenerator::generate()
       const int indx2 = (_n_cells + 1) * i + (iz + 1) + node_sub;
       elem->set_node(0) = mesh_base->node_ptr(indx1);
       elem->set_node(1) = mesh_base->node_ptr(indx2);
-
-      /// Boundary info is added only if specific Pin conditions are defined for the pins
-      //      if (iz == 0)
-      //        boundary_info.add_side(elem, 0, 0);
-      //      if (iz == _n_cells - 1)
-      //        boundary_info.add_side(elem, 1, 1);
     }
   }
-
-  /// Boundary info is added only if specific Pin conditions are defined for the pins
-  //  boundary_info.sideset_name(0) = "inlet";
-  //  boundary_info.sideset_name(1) = "outlet";
-  //  boundary_info.nodeset_name(0) = "inlet";
-  //  boundary_info.nodeset_name(1) = "outlet";
   mesh_base->subdomain_name(_block_id) = name();
   mesh_base->prepare_for_use();
 

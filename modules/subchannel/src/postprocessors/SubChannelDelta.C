@@ -23,7 +23,7 @@ SubChannelDelta::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription(
-      "Calculates an absolute overall mass-flow-rate averaged difference, of a chosen "
+      "Calculates an absolute overall inlet-mass-flow-rate weighted difference, of a chosen "
       "variable, for the whole subchannel assembly, from inlet to outlet");
   params.addRequiredParam<AuxVariableName>("variable", "Variable you want the delta of");
   return params;

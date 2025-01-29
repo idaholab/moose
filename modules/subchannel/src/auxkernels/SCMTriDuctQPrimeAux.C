@@ -16,7 +16,8 @@ SCMTriDuctQPrimeAux::validParams()
 {
   InputParameters params = DiffusionFluxAux::validParams();
   params.addClassDescription("Axial heat rate on duct surface");
-  params.addRequiredParam<Real>("flat_to_flat", "[m]");
+  params.addRequiredParam<Real>(
+      "flat_to_flat", "distance from one flat side of the duct to the opposite flat side [m]");
   return params;
 }
 

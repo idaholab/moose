@@ -11,7 +11,6 @@
 
 #include "MeshGenerator.h"
 #include "libmesh/point.h"
-#include "QuadSubChannelMeshGenerator.h"
 
 /**
  * Class to create Pin mesh in the square lattice geometry

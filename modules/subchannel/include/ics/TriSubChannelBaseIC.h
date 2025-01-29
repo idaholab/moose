@@ -25,9 +25,9 @@ protected:
   /**
    * Check that `mesh` is TriSubChannelMesh and if not, report an error.
    */
-  TriSubChannelMesh & getMesh(MooseMesh & mesh);
+  const TriSubChannelMesh & getMesh(const MooseMesh & mesh) const;
 
-  TriSubChannelMesh & _mesh;
+  const TriSubChannelMesh & _mesh;
 
 public:
   static InputParameters validParams();

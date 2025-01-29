@@ -10,21 +10,12 @@
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 305.68 #Kelvin (32.53 C)
-# mu = 0.0007646 #Pas
-# Re = 20500
-# Dh = 0.004535
 Total_Surface_Area_SC = 0.00285294 #m2
 Total_Surface_Area_EXP = 0.002808 #m2
 P_out = 829370.355 # Pa (120.29 psia)
 Power = 90640 # Watt Each heater pin had a max power of 30kW
-# Heater 17 (18) not working.
-# test:19 power = 22613 22610 22754 22663 [W], Total Power = 90640 [W], mdot_average = 9.576 [kg/s], Re = 20300
-# Index of heated pins per silicon controled rectifiers (Areva notation):1 3 6 7 || 4 5 11 15 ||2 9 19 40 60 || 13 44 48 52 56 (from bottom to top)
-# Index of heated pins per silicon controled rectifiers (SC notation):0 3 6 1 || 4 5 12 16 || 2 10 8 43 39 || 14 47 51 55 59 (from top to bottom) 38 areva->41 SC
-# Relative power of pin per rectifier: 1.12266659312 || 1.12251765225 || 0.90373345101 || 0.90011915269
 mdot_average = '${fparse 9.58 * Total_Surface_Area_SC / Total_Surface_Area_EXP}'
 mass_flux_in = '${fparse mdot_average / Total_Surface_Area_SC / 1.5}' #kg/m2
-# mass_flux_in = 3456.29
 ###################################################
 # Geometric parameters (non-deformed heated bundle)
 ###################################################
@@ -43,7 +34,7 @@ unheated_length_exit = 0.855 #m
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = ${n_rings}
-    n_cells = 100
+    n_cells = 10
     flat_to_flat = ${inner_duct_in}
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
@@ -60,7 +51,7 @@ unheated_length_exit = 0.855 #m
     type = TriPinMeshGenerator
     input = subchannel
     nrings = ${n_rings}
-    n_cells = 100
+    n_cells = 10
     unheated_length_entry = ${unheated_length_entry}
     heated_length = ${heated_length}
     unheated_length_exit = ${unheated_length_exit}

@@ -26,7 +26,7 @@ public:
   virtual Real getValue() const override;
 
 protected:
-  SubChannelMesh & _mesh;
+  const SubChannelMesh & _mesh;
   const Real & _height;
   /// pin index
   const int & _i_pin;

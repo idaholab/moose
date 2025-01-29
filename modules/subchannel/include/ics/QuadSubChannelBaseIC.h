@@ -25,9 +25,9 @@ protected:
   /**
    * Check that `mesh` is QuadSubChannelMesh and if not, report an error.
    */
-  QuadSubChannelMesh & getMesh(MooseMesh & mesh);
+  const QuadSubChannelMesh & getMesh(const MooseMesh & mesh) const;
 
-  QuadSubChannelMesh & _mesh;
+  const QuadSubChannelMesh & _mesh;
 
 public:
   static InputParameters validParams();

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SCMFlatMassFlowRateAux.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMFlatMassFlowRateAux);
 
@@ -23,7 +24,7 @@ SCMFlatMassFlowRateAux::validParams()
 SCMFlatMassFlowRateAux::SCMFlatMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _mass_flow(getParam<Real>("mass_flow")),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
+    _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh))
 {
 }
 

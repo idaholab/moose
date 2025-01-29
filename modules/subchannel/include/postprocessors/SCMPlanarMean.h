@@ -26,7 +26,7 @@ public:
   virtual Real getValue() const override;
 
 protected:
-  SubChannelMesh & _mesh;
+  const SubChannelMesh & _mesh;
   AuxVariableName const & _variable;
   const Real & _height;
   Real _mean_value;

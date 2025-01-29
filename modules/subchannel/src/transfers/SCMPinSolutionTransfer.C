@@ -17,7 +17,7 @@ SCMPinSolutionTransfer::validParams()
 {
   InputParameters params = SCMSolutionTransferBase::validParams();
   params.addClassDescription(
-      "Transfers subchannel solution from computational mesh onto visualization mesh");
+      "Transfers pin solution from computational mesh onto visualization mesh");
   return params;
 }
 

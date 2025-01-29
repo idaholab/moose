@@ -47,16 +47,12 @@ DetailedQuadInterWrapperMeshGenerator::DetailedQuadInterWrapperMeshGenerator(
     _assembly_side_x(getParam<Real>("assembly_side_x")),
     _assembly_side_y(getParam<Real>("assembly_side_y")),
     _n_cells(getParam<unsigned int>("n_cells")),
-    _nx(getParam<unsigned int>("nx")),
-    _ny(getParam<unsigned int>("ny")),
+    _nx(getParam<unsigned int>("nx") + 1),
+    _ny(getParam<unsigned int>("ny") + 1),
     _n_channels((_nx + 1) * (_ny + 1)),
     _side_bypass_length(getParam<Real>("side_bypass")),
     _block_id(getParam<unsigned int>("block_id"))
 {
-  _console << "Side bypass length: " << _side_bypass_length << std::endl;
-  // Changing nx and ny from assemblies to channel numbering
-  _nx += 1;
-  _ny += 1;
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)

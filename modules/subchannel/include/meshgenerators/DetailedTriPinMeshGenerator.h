@@ -12,7 +12,7 @@
 #include "DetailedPinMeshGeneratorBase.h"
 
 /**
- * Mesh generator for fuel pins in a triangualar lattice
+ * Mesh generator for fuel pins in a triangular lattice
  */
 class DetailedTriPinMeshGenerator : public DetailedPinMeshGeneratorBase
 {

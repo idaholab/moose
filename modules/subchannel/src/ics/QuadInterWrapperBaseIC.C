@@ -21,12 +21,12 @@ QuadInterWrapperBaseIC::QuadInterWrapperBaseIC(const InputParameters & params)
 {
 }
 
-QuadInterWrapperMesh &
-QuadInterWrapperBaseIC::getMesh(MooseMesh & mesh)
+const QuadInterWrapperMesh &
+QuadInterWrapperBaseIC::getMesh(const MooseMesh & mesh)
 {
-  QuadInterWrapperMesh * m = dynamic_cast<QuadInterWrapperMesh *>(&mesh);
+  const QuadInterWrapperMesh * m = dynamic_cast<const QuadInterWrapperMesh *>(&mesh);
   if (m)
-    return dynamic_cast<QuadInterWrapperMesh &>(mesh);
+    return static_cast<const QuadInterWrapperMesh &>(mesh);
   else
     mooseError(name(),
                ": This initial condition works only with quadrilateral mesh. Update your input "

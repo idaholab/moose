@@ -13,7 +13,7 @@
 #include "SubChannelMesh.h"
 
 /**
- * Computes mass float rate from specified uniform mass flux and cross-sectional area and applies
+ * Computes mass flow rate from specified uniform mass flux and cross-sectional area and applies
  * inlet blockage conditions
  */
 class SCMBlockedMassFlowRateAux : public AuxKernel
@@ -27,9 +27,9 @@ public:
 
 protected:
   const SubChannelMesh & _subchannel_mesh;
-  /// Specified mass flux
+  /// Specified mass flux of unblocked channels
   const Real & _unblocked_mass_flux;
-  /// Specified mass flow rate
+  /// Specified mass flux of blocked channels
   const Real & _blocked_mass_flux;
   /// Cross-sectional area
   const VariableValue & _area;

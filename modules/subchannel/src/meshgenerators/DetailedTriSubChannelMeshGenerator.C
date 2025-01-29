@@ -821,7 +821,7 @@ DetailedTriSubChannelMeshGenerator::rotatePoint(Point b, Real theta)
 }
 
 Point
-DetailedTriSubChannelMeshGenerator::translatePoint(Point b, Point translation_vector)
+DetailedTriSubChannelMeshGenerator::translatePoint(Point & b, Point & translation_vector)
 {
   // Translating point
   Point translated_vector = Point(0.0, 0.0, 0.0);
