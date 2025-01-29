@@ -58,6 +58,8 @@ MFEMTransient::step(double dt, int it) const
   // Sync Host/Device
   _problem_data._f.HostRead();
 
+  // Execute user objects at timestep end
+  _mfem_problem.execute(EXEC_TIMESTEP_END);
   // Perform the output of the current time step
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
 }

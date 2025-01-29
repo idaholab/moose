@@ -59,6 +59,8 @@ MFEMSteady::execute()
 
   _time_step = 0;
   _time = _time_step;
+  // Execute user objects at timestep end
+  _mfem_problem.execute(EXEC_TIMESTEP_END);
   _mfem_problem.outputStep(EXEC_INITIAL);
   _time = _system_time;
 
