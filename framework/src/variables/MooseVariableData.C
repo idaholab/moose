@@ -472,23 +472,27 @@ MooseVariableData<OutputType>::computeValues()
   mooseAssert(!(_need_div || _need_div_old) || _current_div_phi,
               "We're requiring a divergence calculation but have not set a div shape function!");
 
+  // Helper for filling values
   const auto fill = [this, &nqp, &num_dofs](auto & dest, const auto & phi, const auto & vector)
   {
+    // Deduce OutputType
     constexpr bool is_real = std::is_same_v<OutputType, Real>;
     constexpr bool is_real_vector = std::is_same_v<OutputType, RealVectorValue>;
     constexpr bool is_eigen = std::is_same_v<OutputType, RealEigenVector>;
-    mooseAssert(is_real || is_real_vector || is_eigen, "Unsupported type");
+    static_assert(is_real || is_real_vector || is_eigen, "Unsupported type");
 
+    // this is only used in the RealEigenVector case to get this->_count
     if constexpr (!is_eigen)
       (void)this;
 
-    // Output type
-    using T = typename std::remove_reference_t<decltype(dest)>::value_type;
-    constexpr bool is_output = std::is_same_v<T, OutputType>;
-    constexpr bool is_gradient = std::is_same_v<T, OutputGradient>;
-    constexpr bool is_second = std::is_same_v<T, OutputSecond>;
-    constexpr bool is_divergence = std::is_same_v<T, OutputDivergence>;
+    // Deduce type of value within dest MooseArray
+    using dest_array_type = typename std::remove_reference_t<decltype(dest)>::value_type;
+    constexpr bool is_output = std::is_same_v<dest_array_type, OutputType>;
+    constexpr bool is_gradient = std::is_same_v<dest_array_type, OutputGradient>;
+    constexpr bool is_second = std::is_same_v<dest_array_type, OutputSecond>;
+    constexpr bool is_divergence = std::is_same_v<dest_array_type, OutputDivergence>;
 
+    // Resize and zero
     dest.resize(nqp);
     for (unsigned int qp = 0; qp < nqp; ++qp)
     {
@@ -503,12 +507,13 @@ MooseVariableData<OutputType>::computeValues()
         else if constexpr (is_second)
           dest[qp].setZero(this->_count, LIBMESH_DIM * LIBMESH_DIM);
         else
-          mooseAssert(false, "Unsupported type");
+          static_assert(Moose::always_false<T>, "Unsupported type");
       }
       else
-        mooseAssert(false, "Unsupported type");
+        static_assert(Moose::always_false<OutputType>, "Unsupported type");
     }
 
+    // Fill
     for (unsigned int i = 0; i < num_dofs; i++)
       for (unsigned int qp = 0; qp < nqp; qp++)
       {
@@ -519,7 +524,7 @@ MooseVariableData<OutputType>::computeValues()
           else if constexpr (is_gradient || is_second)
             dest[qp].add_scaled(phi[i][qp], vector[i]);
           else
-            mooseAssert(false, "Unsupported type");
+            static_assert(Moose::always_false<T>, "Unsupported type");
         }
         else if constexpr (is_eigen)
         {
@@ -535,7 +540,7 @@ MooseVariableData<OutputType>::computeValues()
                 dest[qp].col(d++) += phi[i][qp](d1, d2) * vector[i];
           }
           else
-            mooseAssert(false, "Unsupported type");
+            static_assert(Moose::always_false<T>, "Unsupported type");
         }
       }
   };
