@@ -45,9 +45,9 @@ to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_inval
       nlohmann::json entry;
       entry["object_type"] = solution_registry.item(id).object_type;
       entry["message"] = solution_registry.item(id).message;
-      entry["converged_counts"] = counts[id].counts;
-      entry["timestep_counts"] = counts[id].timestep_counts;
-      entry["total_counts"] = counts[id].total_counts;
+      entry["converged_counts"] = counts[id].counts.back();
+      entry["timestep_counts"] = counts[id].timestep_counts.back();
+      entry["total_counts"] = counts[id].total_counts.back();
       json.push_back(entry);
     }
 }
