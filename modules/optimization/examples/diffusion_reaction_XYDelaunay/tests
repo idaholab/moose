@@ -23,6 +23,7 @@
         recover = false
         detail = 'using TAO to perform optimization.'
         valgrind = HEAVY
+        heavy = true
       []
     []
   []
