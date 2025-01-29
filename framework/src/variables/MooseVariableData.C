@@ -475,6 +475,9 @@ MooseVariableData<OutputType>::computeValuesInternal()
   // Helper for filling values
   const auto fill = [this, &nqp, &num_dofs](auto & dest, const auto & phi, const auto & vector)
   {
+    if constexpr (monomial)
+      libmesh_ignore(num_dofs);
+
     // Deduce OutputType
     constexpr bool is_real = std::is_same_v<OutputType, Real>;
     constexpr bool is_real_vector = std::is_same_v<OutputType, RealVectorValue>;
@@ -483,7 +486,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
 
     // this is only used in the RealEigenVector case to get this->_count
     if constexpr (!is_eigen)
-      (void)this;
+      libmesh_ignore(this);
 
     // Deduce type of value within dest MooseArray
     using dest_array_type = typename std::remove_reference_t<decltype(dest)>::value_type;
@@ -496,7 +499,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
     const auto set_zero = [this, &dest](const auto qp)
     {
       if constexpr (!is_eigen)
-        (void)this;
+        libmesh_ignore(this);
 
       if constexpr (is_real || is_real_vector)
         dest[qp] = 0;
@@ -516,7 +519,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
     };
 
     // Accumulates a value
-    const auto accumulate = [this, &dest, &phi, &vector](const auto i, const auto qp)
+    const auto accumulate = [&dest, &phi, &vector](const auto i, const auto qp)
     {
       if constexpr (is_real || is_real_vector || (is_eigen && is_output))
       {
