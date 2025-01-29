@@ -78,13 +78,22 @@ public:
   void solutionInvalidAccumulation();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
-  void solutionInvalidAccumulationTimeStep();
+  void solutionInvalidAccumulationTimeStep(const unsigned int timestep_index);
+
+  /// Struct used in InvalidCounts for storing the time history of invalid occurrences
+  struct TimestepCounts
+  {
+    TimestepCounts(const unsigned int timestep_index) : timestep_index(timestep_index) {}
+    unsigned int timestep_index;
+    unsigned int counts = 0;
+  };
 
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {
-    unsigned int counts;
-    unsigned int total_counts;
+    unsigned int current_counts = 0;
+    unsigned int current_timestep_counts = 0;
+    std::vector<TimestepCounts> timestep_counts;
   };
 
   /// Access the private solution invalidity counts
@@ -101,7 +110,10 @@ public:
    */
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
-  void sync();
+  /**
+   * Sync iteration counts to master processor
+   */
+  void syncIteration();
 
   friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
   friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
@@ -136,5 +148,11 @@ private:
 };
 
 // datastore and dataload for recover
+void dataStore(std::ostream & stream,
+               SolutionInvalidity::TimestepCounts & timestep_counts,
+               void * context);
+void dataLoad(std::istream & stream,
+              SolutionInvalidity::TimestepCounts & timestep_counts,
+              void * context);
 void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context);
 void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context);

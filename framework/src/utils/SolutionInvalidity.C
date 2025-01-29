@@ -40,7 +40,7 @@ SolutionInvalidity::flagInvalidSolutionInternal(const InvalidSolutionID _invalid
   if (_counts.size() <= _invalid_solution_id)
     _counts.resize(_invalid_solution_id + 1);
 
-  ++_counts[_invalid_solution_id].counts;
+  ++_counts[_invalid_solution_id].current_counts;
 }
 
 bool
@@ -68,7 +68,7 @@ SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 {
   // Zero current counts
   for (auto & entry : _counts)
-    entry.counts = 0;
+    entry.current_counts = 0;
 }
 
 void
@@ -76,22 +76,29 @@ SolutionInvalidity::resetSolutionInvalidTimeStep()
 {
   // Reset that we have synced because we're on a new iteration
   _has_synced = false;
+  resetSolutionInvalidCurrentIteration();
   for (auto & entry : _counts)
-    entry.timestep_counts.emplace_back(0);
+    entry.current_timestep_counts = 0;
 }
 
 void
 SolutionInvalidity::solutionInvalidAccumulation()
 {
   for (auto & entry : _counts)
-    entry.timestep_counts.back() += entry.counts;
+    entry.current_timestep_counts += entry.current_counts;
 }
 
 void
-SolutionInvalidity::solutionInvalidAccumulationTimeStep()
+SolutionInvalidity::solutionInvalidAccumulationTimeStep(const unsigned int timestep_index)
 {
   for (auto & entry : _counts)
-    entry.total_counts += entry.timestep_counts.back();
+    if (entry.current_timestep_counts)
+    {
+      if (entry.timestep_counts.empty() ||
+          entry.timestep_counts.back().timestep_index != timestep_index)
+        entry.timestep_counts.emplace_back(timestep_index);
+      entry.timestep_counts.back().counts = entry.current_timestep_counts;
+    }
 }
 
 void
@@ -102,7 +109,7 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 }
 
 void
-SolutionInvalidity::sync()
+SolutionInvalidity::syncIteration()
 {
   std::map<processor_id_type, std::vector<std::tuple<std::string, std::string, int, unsigned int>>>
       data_to_send;
@@ -206,13 +213,13 @@ SolutionInvalidity::summaryTable() const
     for (const auto id : index_range(_counts))
     {
       const auto & entry = _counts[id];
-      if (entry.counts > 0)
+      if (!entry.counts.empty())
       {
         const auto & info = _solution_invalidity_registry.item(id);
         vtable.addRow(info.object_type,             // Object Type
-                      entry.counts,                 // Converged Iteration Warnings
+                      entry.counts.back(),          // Converged Iteration Warnings
                       entry.timestep_counts.back(), // Latest Time Step Warnings
-                      entry.total_counts,           // Total Iteration Warnings
+                      entry.total_counts.back(),    // Total Iteration Warnings
                       info.message                  // Message
         );
       }
@@ -220,6 +227,26 @@ SolutionInvalidity::summaryTable() const
   }
 
   return vtable;
+}
+
+// Define data store structure for TimestepCounts
+void
+dataStore(std::ostream & stream,
+          SolutionInvalidity::TimestepCounts & timestep_counts,
+          void * context)
+{
+  dataStore(stream, timestep_counts.timestep_index, context);
+  dataStore(stream, timestep_counts.current_timestep_counts, context);
+}
+
+// Define data load structure for TimestepCounts
+void
+dataLoad(std::istream & stream,
+         SolutionInvalidity::TimestepCounts & timestep_counts,
+         void * context)
+{
+  dataLoad(stream, timestep_counts.timestep_index, context);
+  dataLoad(stream, timestep_counts.current_timestep_counts, context);
 }
 
 void
@@ -236,7 +263,7 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
 
   for (const auto id : index_range(solution_invalidity._counts))
   {
-    const auto & entry = solution_invalidity._counts[id];
+    auto & entry = solution_invalidity._counts[id];
     const auto & info = solution_invalidity._solution_invalidity_registry.item(id);
     std::string type = info.object_type;
     std::string message = info.message;
@@ -244,10 +271,7 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
     dataStore(stream, type, context);
     dataStore(stream, message, context);
     dataStore(stream, warning, context);
-    dataStore(stream, entry.counts, context);
-    for (const auto i : index_range(entry.timestep_counts))
-      dataStore(stream, entry.timestep_counts[i], context);
-    dataStore(stream, entry.total_counts, context);
+    dataStore(stream, entry.timestep_counts, context);
   }
 }
 
@@ -283,9 +307,6 @@ dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void *
       solution_invalidity._counts.resize(id + 1);
 
     const auto & entry = solution_invalidity._counts[id];
-    dataLoad(stream, entry.counts, context);
-    or (const auto i
-        : index_range(entry.timestep_counts)) dataLoad(stream, entry.timestep_counts[i], context);
-    dataLoad(stream, entry.total_counts, context);
+    dataLoad(stream, entry.timestep_counts, context);
   }
 }
