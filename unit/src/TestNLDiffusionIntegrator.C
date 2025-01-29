@@ -1,8 +1,6 @@
 #include "gtest/gtest.h"
 #include "mfem.hpp"
 
-using namespace mfem;
-
 double
 f(double u)
 {
@@ -15,17 +13,17 @@ df(double u)
 }
 
 // Define a coefficient that, given a grid function u, function func, returns func(u)
-class NonlinearGridFunctionCoefficient : public Coefficient
+class NonlinearGridFunctionCoefficient : public mfem::Coefficient
 {
-  GridFunction & gf;
+  mfem::GridFunction & gf;
   std::function<double(double)> func;
 
 public:
-  NonlinearGridFunctionCoefficient(GridFunction & gf_, std::function<double(double)> func_)
+  NonlinearGridFunctionCoefficient(mfem::GridFunction & gf_, std::function<double(double)> func_)
     : gf(gf_), func(func_)
   {
   }
-  double Eval(ElementTransformation & T, const IntegrationPoint & ip)
+  double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
   {
     return func(gf.GetValue(T, ip));
   }
@@ -37,36 +35,36 @@ public:
 // Note that the action (f(u), v) can be computed using DomainLFIntegrator
 // and the Jacobian matrix linearized operator can be computed using
 // MassIntegrator with the appropriate coefficients.
-class NonlinearMassIntegrator : public NonlinearFormIntegrator
+class NonlinearMassIntegrator : public mfem::NonlinearFormIntegrator
 {
-  FiniteElementSpace & fes;
-  GridFunction gf;
-  Array<int> dofs;
+  mfem::FiniteElementSpace & fes;
+  mfem::GridFunction gf;
+  mfem::Array<int> dofs;
 
 public:
-  NonlinearMassIntegrator(FiniteElementSpace & fes_) : fes(fes_), gf(&fes) {}
+  NonlinearMassIntegrator(mfem::FiniteElementSpace & fes_) : fes(fes_), gf(&fes) {}
 
-  virtual void AssembleElementVector(const FiniteElement & el,
-                                     ElementTransformation & Tr,
-                                     const Vector & elfun,
-                                     Vector & elvect)
+  virtual void AssembleElementVector(const mfem::FiniteElement & el,
+                                     mfem::ElementTransformation & Tr,
+                                     const mfem::Vector & elfun,
+                                     mfem::Vector & elvect)
   {
     fes.GetElementDofs(Tr.ElementNo, dofs);
     gf.SetSubVector(dofs, elfun);
     NonlinearGridFunctionCoefficient coeff(gf, f);
-    DomainLFIntegrator integ(coeff);
+    mfem::DomainLFIntegrator integ(coeff);
     integ.AssembleRHSElementVect(el, Tr, elvect);
   }
 
-  virtual void AssembleElementGrad(const FiniteElement & el,
-                                   ElementTransformation & Tr,
-                                   const Vector & elfun,
-                                   DenseMatrix & elmat)
+  virtual void AssembleElementGrad(const mfem::FiniteElement & el,
+                                   mfem::ElementTransformation & Tr,
+                                   const mfem::Vector & elfun,
+                                   mfem::DenseMatrix & elmat)
   {
     fes.GetElementDofs(Tr.ElementNo, dofs);
     gf.SetSubVector(dofs, elfun);
     NonlinearGridFunctionCoefficient coeff(gf, df);
-    MassIntegrator integ(coeff);
+    mfem::MassIntegrator integ(coeff);
     integ.AssembleElementMatrix(el, Tr, elmat);
   }
 };
@@ -81,57 +79,57 @@ TEST(CheckData, NLDiffusionTest)
   bool nonzero_rhs = true;
 
   // 2. Read the mesh from the given mesh file, and refine once uniformly.
-  Mesh mesh(mesh_file);
+  mfem::Mesh mesh(mesh_file);
   mesh.UniformRefinement();
-  ParMesh pmesh(MPI_COMM_WORLD, mesh);
+  mfem::ParMesh pmesh(MPI_COMM_WORLD, mesh);
 
   // 3. Define a finite element space on the mesh. Here we use H1 continuous
   //    high-order Lagrange finite elements of the given order.
-  H1_FECollection fec(order, mesh.Dimension());
-  ParFiniteElementSpace fespace(&pmesh, &fec);
+  mfem::H1_FECollection fec(order, mesh.Dimension());
+  mfem::ParFiniteElementSpace fespace(&pmesh, &fec);
 
   // 4. Extract the list of all the boundaries. These will be marked as
   //    Dirichlet in order to enforce zero boundary conditions.
-  Array<int> ess_bdr(pmesh.bdr_attributes.Max());
+  mfem::Array<int> ess_bdr(pmesh.bdr_attributes.Max());
   ess_bdr = 1;
-  Array<int> ess_tdof_list;
+  mfem::Array<int> ess_tdof_list;
   fespace.GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
 
   // 5. Define the solution x as a finite element grid function in fespace. Set
   //    the initial guess to zero, which also sets the boundary conditions.
-  ParGridFunction u1(&fespace), u2(&fespace);
+  mfem::ParGridFunction u1(&fespace), u2(&fespace);
   u1 = 0.0;
   u2 = 0.0;
 
   // Solve as a non-linear problem.
 
   // 6. Set up the nonlinear form n(u,v) = (grad u, grad v) + (f(u), v)
-  ParNonlinearForm n(&fespace);
+  mfem::ParNonlinearForm n(&fespace);
   n.AddDomainIntegrator(new NonlinearMassIntegrator(fespace));
-  n.AddDomainIntegrator(new DiffusionIntegrator);
+  n.AddDomainIntegrator(new mfem::DiffusionIntegrator);
 
   // 7. Set up the the right-hand side. For simplicitly, we just use a zero
   //    vector. Because of the form of the nonlinear function f, it is still
   //    nontrivial to solve n(u,v) = 0.
-  ParLinearForm b(&fespace);
+  mfem::ParLinearForm b(&fespace);
   b = 0.0;
   if (nonzero_rhs)
   {
-    ConstantCoefficient five(5.0);
-    b.AddDomainIntegrator(new DomainLFIntegrator(five));
+    mfem::ConstantCoefficient five(5.0);
+    b.AddDomainIntegrator(new mfem::DomainLFIntegrator(five));
     b.Assemble();
   }
 
   // 8. Get true dof vectors and set essential BCs on rhs.
-  Vector X(fespace.GetTrueVSize()), B(fespace.GetTrueVSize());
+  mfem::Vector X(fespace.GetTrueVSize()), B(fespace.GetTrueVSize());
   u1.GetTrueDofs(X);
   b.ParallelAssemble(B);
   n.SetEssentialBC(ess_bdr, &B);
 
   // 9. Set up the Newton solver. Each Newton iteration requires a linear
   //    solve. Here we use UMFPack as a direct solver for these systems.
-  CGSolver solver(MPI_COMM_WORLD);
-  NewtonSolver newton(MPI_COMM_WORLD);
+  mfem::CGSolver solver(MPI_COMM_WORLD);
+  mfem::NewtonSolver newton(MPI_COMM_WORLD);
   newton.SetOperator(n);
   newton.SetSolver(solver);
   newton.SetPrintLevel(1);
@@ -144,16 +142,16 @@ TEST(CheckData, NLDiffusionTest)
 
   // Solve as a linear problem.
   {
-    BilinearForm a(&fespace);
-    a.AddDomainIntegrator(new DiffusionIntegrator);
-    a.AddDomainIntegrator(new MassIntegrator);
+    mfem::BilinearForm a(&fespace);
+    a.AddDomainIntegrator(new mfem::DiffusionIntegrator);
+    a.AddDomainIntegrator(new mfem::MassIntegrator);
     a.Assemble();
 
-    OperatorPtr A;
-    Vector C, Y;
+    mfem::OperatorPtr A;
+    mfem::Vector C, Y;
     a.FormLinearSystem(ess_tdof_list, u2, b, A, Y, C);
-    GSSmoother M((SparseMatrix &)(*A));
-    PCG(*A, M, C, Y, 1, 500, 1e-12, 0.0);
+    mfem::GSSmoother M((mfem::SparseMatrix &)(*A));
+    mfem::PCG(*A, M, C, Y, 1, 500, 1e-12, 0.0);
     a.RecoverFEMSolution(Y, b, u2);
   }
 
