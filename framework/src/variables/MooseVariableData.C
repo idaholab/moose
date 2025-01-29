@@ -473,7 +473,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
               "We're requiring a divergence calculation but have not set a div shape function!");
 
   // Helper for filling values
-  const auto fill = [this, &nqp, &num_dofs](auto & dest, const auto & phi, const auto & vector)
+  const auto fill = [this, &nqp, &num_dofs](auto & dest, const auto & phi, const auto & dof_values)
   {
     if constexpr (monomial)
       libmesh_ignore(num_dofs);
@@ -519,14 +519,14 @@ MooseVariableData<OutputType>::computeValuesInternal()
     };
 
     // Accumulates a value
-    const auto accumulate = [&dest, &phi, &vector](const auto i, const auto qp)
+    const auto accumulate = [&dest, &phi, &dof_values](const auto i, const auto qp)
     {
       if constexpr (is_real || is_real_vector || (is_eigen && is_output))
       {
         if constexpr (is_output || is_divergence)
-          dest[qp] += phi[i][qp] * vector[i];
+          dest[qp] += phi[i][qp] * dof_values[i];
         else if constexpr (is_gradient || is_second)
-          dest[qp].add_scaled(phi[i][qp], vector[i]);
+          dest[qp].add_scaled(phi[i][qp], dof_values[i]);
         else
           static_assert(Moose::always_false<dest_array_type>, "Unsupported type");
       }
@@ -535,13 +535,13 @@ MooseVariableData<OutputType>::computeValuesInternal()
         if constexpr (is_gradient)
         {
           for (const auto d : make_range(Moose::dim))
-            dest[qp].col(d) += phi[i][qp](d) * vector[i];
+            dest[qp].col(d) += phi[i][qp](d) * dof_values[i];
         }
         else if constexpr (is_second)
         {
           for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
             for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
-              dest[qp].col(d++) += phi[i][qp](d1, d2) * vector[i];
+              dest[qp].col(d++) += phi[i][qp](d1, d2) * dof_values[i];
         }
         else
           static_assert(Moose::always_false<dest_array_type>, "Unsupported type");
