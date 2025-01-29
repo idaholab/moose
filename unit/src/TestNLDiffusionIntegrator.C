@@ -40,9 +40,16 @@ class NonlinearMassIntegrator : public mfem::NonlinearFormIntegrator
   mfem::FiniteElementSpace & fes;
   mfem::GridFunction gf;
   mfem::Array<int> dofs;
+  std::function<double(double)> func;
+  std::function<double(double)> dfunc;
 
 public:
-  NonlinearMassIntegrator(mfem::FiniteElementSpace & fes_) : fes(fes_), gf(&fes) {}
+  NonlinearMassIntegrator(mfem::FiniteElementSpace & fes_,
+                          std::function<double(double)> func_,
+                          std::function<double(double)> dfunc_)
+    : fes(fes_), gf(&fes), func(func_), dfunc(dfunc_)
+  {
+  }
 
   virtual void AssembleElementVector(const mfem::FiniteElement & el,
                                      mfem::ElementTransformation & Tr,
@@ -51,7 +58,7 @@ public:
   {
     fes.GetElementDofs(Tr.ElementNo, dofs);
     gf.SetSubVector(dofs, elfun);
-    NonlinearGridFunctionCoefficient coeff(gf, f);
+    NonlinearGridFunctionCoefficient coeff(gf, func);
     mfem::DomainLFIntegrator integ(coeff);
     integ.AssembleRHSElementVect(el, Tr, elvect);
   }
@@ -63,7 +70,7 @@ public:
   {
     fes.GetElementDofs(Tr.ElementNo, dofs);
     gf.SetSubVector(dofs, elfun);
-    NonlinearGridFunctionCoefficient coeff(gf, df);
+    NonlinearGridFunctionCoefficient coeff(gf, dfunc);
     mfem::MassIntegrator integ(coeff);
     integ.AssembleElementMatrix(el, Tr, elmat);
   }
@@ -105,7 +112,7 @@ TEST(CheckData, NLDiffusionTest)
 
   // 6. Set up the nonlinear form n(u,v) = (grad u, grad v) + (f(u), v)
   mfem::ParNonlinearForm n(&fespace);
-  n.AddDomainIntegrator(new NonlinearMassIntegrator(fespace));
+  n.AddDomainIntegrator(new NonlinearMassIntegrator(fespace, f, df));
   n.AddDomainIntegrator(new mfem::DiffusionIntegrator);
 
   // 7. Set up the the right-hand side. For simplicitly, we just use a zero
