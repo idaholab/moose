@@ -11,6 +11,7 @@
 
 #include "SubChannelMesh.h"
 #include "QuadSubChannelMesh.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMQuadFlowAreaIC);
 
@@ -24,7 +25,7 @@ SCMQuadFlowAreaIC::validParams()
 }
 
 SCMQuadFlowAreaIC::SCMQuadFlowAreaIC(const InputParameters & params)
-  : QuadSubChannelBaseIC(params), _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
+  : QuadSubChannelBaseIC(params), _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh))
 {
 }
 

@@ -55,12 +55,7 @@ PBSodiumFluidProperties::validParams()
 PBSodiumFluidProperties::PBSodiumFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters), _p_0(getParam<Real>("p_0"))
 {
-  _T0 = 628.15;
-  // sodium boiling temprature
-  _Tmax = 1154.55;
-  _Tmin = 373.15;
   _H0 = cp_from_p_T(_p_0, _T0) * _T0;
-
   _Cp_Tmax = cp_from_p_T(_p_0, _Tmax);
   _Cp_Tmin = cp_from_p_T(_p_0, _Tmin);
   _H_Tmax = h_from_p_T(_p_0, _Tmax);

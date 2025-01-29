@@ -96,7 +96,6 @@ SCMQuadPowerIC::initialSetup()
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
   _estimate_power.resize((ny - 1) * (nx - 1), 1);
-  _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
     // Compute the height of this element.
@@ -121,12 +120,15 @@ SCMQuadPowerIC::initialSetup()
 
   // if a Pin has zero power (_ref_qprime(j, i) = 0) then I need to avoid dividing by zero. I
   // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
-  // _ref_qprime(j, i) = 0.0
+  // _ref_qprime(i_pin) = 0.0
   for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
   {
     if (_estimate_power(i_pin) == 0.0)
       _estimate_power(i_pin) = 1.0;
   }
+  // We need to correct the linear power assigned to the nodes of each pin
+  // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
+  // the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
 }
 

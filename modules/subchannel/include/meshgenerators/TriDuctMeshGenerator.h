@@ -27,12 +27,13 @@ protected:
    * ductPoints.  This is used for mapping a xsec point index and a z-axis layer
    * index to its corresponding point vector index.
    */
-  size_t ductPointIndex(unsigned int points_per_layer, unsigned int layer, unsigned int point);
+  size_t
+  ductPointIndex(unsigned int points_per_layer, unsigned int layer, unsigned int point) const;
 
   /**
    * calculate the x-y coordinates of the corner points for the duct cross section.
    */
-  void ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center);
+  void ductCorners(std::vector<Point> & corners, Real flat_to_flat, const Point & center) const;
 
   /**
    * calcultes the points around the duct cross section boundary (perpendicular to z axis) using
@@ -42,7 +43,7 @@ protected:
                 const std::vector<Point> & corners,
                 unsigned int nrings,
                 Real pitch,
-                Real flat_to_flat);
+                Real flat_to_flat) const;
 
   /**
    * Calculates all the point/node positions that will be used to form elements
@@ -50,7 +51,7 @@ protected:
    */
   void ductPoints(std::vector<Point> & points,
                   const std::vector<Point> & xsec,
-                  const std::vector<Real> & z_layers);
+                  const std::vector<Real> & z_layers) const;
 
   /**
    * Calculates the groups of points/nodes that comprise each element in the
@@ -61,7 +62,7 @@ protected:
    */
   void ductElems(std::vector<std::vector<size_t>> & elem_point_indices,
                  unsigned int n_layers,
-                 unsigned int points_per_layer);
+                 unsigned int points_per_layer) const;
 
   /**
    * buildDuct generates and adds mesh node and element objects to the given
@@ -72,7 +73,7 @@ protected:
                  std::vector<Node *> & duct_nodes,
                  const std::vector<Point> & points,
                  const std::vector<std::vector<size_t>> & elem_point_indices,
-                 SubdomainID block);
+                 SubdomainID block) const;
 
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;

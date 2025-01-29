@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SCMBlockedMassFlowRateAux.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMBlockedMassFlowRateAux);
 
@@ -31,7 +32,7 @@ SCMBlockedMassFlowRateAux::validParams()
 
 SCMBlockedMassFlowRateAux::SCMBlockedMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
+    _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _unblocked_mass_flux(getParam<Real>("unblocked_mass_flux")),
     _blocked_mass_flux(getParam<Real>("blocked_mass_flux")),
     _area(coupledValue("area")),

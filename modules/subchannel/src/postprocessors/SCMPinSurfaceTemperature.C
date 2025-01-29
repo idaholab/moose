@@ -23,7 +23,8 @@ SCMPinSurfaceTemperature::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription(
-      "Returns the surface temperature of a specific fuel pin at a user defined height");
+      "Returns the surface temperature of a specific fuel pin at a user defined height. Applies a "
+      "linear reconstruction for the temperature.");
   params.addRequiredParam<Real>("height", "Axial location on fuel pin [m]");
   params.addRequiredParam<int>("index", "Index of fuel pin");
   return params;

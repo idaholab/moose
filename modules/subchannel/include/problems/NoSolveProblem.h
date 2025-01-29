@@ -14,7 +14,6 @@
 /**
  * A Problem that does not solve, for visualization purposes
  */
-
 class NoSolveProblem : public ExternalProblem
 {
 public:

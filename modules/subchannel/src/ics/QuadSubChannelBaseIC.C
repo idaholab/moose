@@ -21,12 +21,12 @@ QuadSubChannelBaseIC::QuadSubChannelBaseIC(const InputParameters & params)
 {
 }
 
-QuadSubChannelMesh &
-QuadSubChannelBaseIC::getMesh(MooseMesh & mesh)
+const QuadSubChannelMesh &
+QuadSubChannelBaseIC::getMesh(const MooseMesh & mesh) const
 {
-  QuadSubChannelMesh * m = dynamic_cast<QuadSubChannelMesh *>(&mesh);
+  const auto m = dynamic_cast<const QuadSubChannelMesh *>(&mesh);
   if (m)
-    return dynamic_cast<QuadSubChannelMesh &>(mesh);
+    return dynamic_cast<const QuadSubChannelMesh &>(mesh);
   else
     mooseError(name(),
                ": This initial condition works only with quadrilateral mesh. Update your input "

@@ -21,12 +21,12 @@ TriSubChannelBaseIC::TriSubChannelBaseIC(const InputParameters & params)
 {
 }
 
-TriSubChannelMesh &
-TriSubChannelBaseIC::getMesh(MooseMesh & mesh)
+const TriSubChannelMesh &
+TriSubChannelBaseIC::getMesh(const MooseMesh & mesh) const
 {
-  TriSubChannelMesh * m = dynamic_cast<TriSubChannelMesh *>(&mesh);
+  const auto m = dynamic_cast<const TriSubChannelMesh *>(&mesh);
   if (m)
-    return dynamic_cast<TriSubChannelMesh &>(mesh);
+    return dynamic_cast<const TriSubChannelMesh &>(mesh);
   else
     mooseError(name(),
                ": This initial condition works only with triangular subchannel geometry. Update "

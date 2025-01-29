@@ -24,9 +24,9 @@ protected:
   /**
    * Check that `mesh` is QuadSubChannelMesh and if not, report an error.
    */
-  QuadInterWrapperMesh & getMesh(MooseMesh & mesh);
+  const QuadInterWrapperMesh & getMesh(const MooseMesh & mesh);
 
-  QuadInterWrapperMesh & _mesh;
+  const QuadInterWrapperMesh & _mesh;
 
 public:
   static InputParameters validParams();

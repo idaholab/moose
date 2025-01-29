@@ -83,7 +83,7 @@ DetailedQuadSubChannelMeshGenerator::DetailedQuadSubChannelMeshGenerator(
       else
         _subch_type[i_ch] = EChannelType::CENTER;
 
-      // set the subchannel positions
+      // set the subchannel positions so that the center of the assembly is the zero point
       Real offset_x = (_nx - 1) * _pitch / 2.0;
       Real offset_y = (_ny - 1) * _pitch / 2.0;
       _subchannel_position[i_ch][0] = _pitch * ix - offset_x;
