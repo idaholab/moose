@@ -17,6 +17,14 @@
     design = 'syntax/BCs/Pressure/index.md'
     requirement = 'The Pressure boundary condition action shall create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure using the volumetric locking correction b-bar formulation.'
   []
+  [controls]
+    type = Exodiff
+    input = 'pressure_control_test.i'
+    exodiff = 'pressure_control_test_out.e'
+    issues = '#29602'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The system shall be able to forward control parameters from the Pressure action to the pressure boundary conditions.'
+  []
   [jacobian_3D_hex8]
     type = 'PetscJacobianTester'
     input = 'cantilever.i'
