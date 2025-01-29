@@ -141,6 +141,8 @@ protected:
   const Real & _gamma;
   /// molar mass
   const Real & _molar_mass;
+  /// Reference specific internal energy
+  const Real & _e_ref;
 
   /// Specific gas constant (R / molar mass)
   const Real _R_specific;
