@@ -392,8 +392,8 @@ public:
    * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
    * @param po The petsc options for the solve, if not supplied, the defaults are used
    */
-  void solveLinearSystem(const unsigned int linear_sys_num,
-                         const Moose::PetscSupport::PetscOptions * po = nullptr);
+  virtual void solveLinearSystem(const unsigned int linear_sys_num,
+                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
 
   ///@{
   /**
@@ -891,9 +891,9 @@ public:
   virtual void addInterfaceMaterial(const std::string & material_name,
                                     const std::string & name,
                                     InputParameters & parameters);
-  void addFunctorMaterial(const std::string & functor_material_name,
-                          const std::string & name,
-                          InputParameters & parameters);
+  virtual void addFunctorMaterial(const std::string & functor_material_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
 
   /**
    * Add the MooseVariables and the material properties that the current materials depend on to the

@@ -44,6 +44,7 @@ advected_interp_method = 'average'
       pressure_functors = '1.4'
 
       orthogonality_correction = false
+      momentum_two_term_bc_expansion = false
       pressure_two_term_bc_expansion = false
       momentum_advection_interpolation = ${advected_interp_method}
     []
