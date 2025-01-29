@@ -563,13 +563,6 @@ MooseVariableData<OutputType>::computeValues()
   if (_need_second_previous_nl)
     fill(
         _second_u_previous_nl, *_current_second_phi, _vector_tags_dof_u[_previous_nl_solution_tag]);
-  if (is_transient)
-  {
-    if (_need_second_old)
-      fill(_second_u_old, *_current_second_phi, _vector_tags_dof_u[_old_solution_tag]);
-    if (_need_second_older)
-      fill(_second_u_older, *_current_second_phi, _vector_tags_dof_u[_older_solution_tag]);
-  }
 
   // Vector tags
   for (auto tag : _required_vector_tags)
@@ -585,18 +578,19 @@ MooseVariableData<OutputType>::computeValues()
     if (_need_matrix_tag_u[tag])
       fill(_matrix_tag_u[tag], *_current_phi, _matrix_tags_dof_u[tag]);
 
-  // Derivatives
+  // Derivatives and old values
   if (is_transient)
   {
+    if (_need_second_old)
+      fill(_second_u_old, *_current_second_phi, _vector_tags_dof_u[_old_solution_tag]);
+    if (_need_second_older)
+      fill(_second_u_older, *_current_second_phi, _vector_tags_dof_u[_older_solution_tag]);
     if (_need_u_dot)
       fill(_u_dot, *_current_phi, _dof_values_dot);
-
     if (_need_u_dotdot)
       fill(_u_dotdot, *_current_phi, _dof_values_dotdot);
-
     if (_need_u_dot_old)
       fill(_u_dot_old, *_current_phi, _dof_values_dot_old);
-
     if (_need_u_dotdot_old)
       fill(_u_dotdot_old, *_current_phi, _dof_values_dotdot_old);
 
@@ -609,7 +603,6 @@ MooseVariableData<OutputType>::computeValues()
         for (unsigned int qp = 0; qp < nqp; qp++)
           _du_dot_du[qp] = _dof_du_dot_du[i];
     }
-
     if (_need_du_dotdot_du)
     {
       _du_dotdot_du.resize(nqp);
@@ -620,7 +613,6 @@ MooseVariableData<OutputType>::computeValues()
           _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
     }
 
-    // Derivative gradients
     if (_need_grad_dot)
       fill(_grad_u_dot, *_current_grad_phi, _dof_values_dot);
     if (_need_grad_dotdot)
