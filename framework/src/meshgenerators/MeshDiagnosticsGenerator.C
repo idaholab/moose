@@ -338,40 +338,24 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
         // get intersection of boundary_ids and _watertight_boundaries
         std::vector<boundary_id_type> intersections =
             findBoundaryOverlap(_watertight_boundaries, boundary_ids);
-        if (boundary_ids.empty())
+
+        bool no_specified_ids = boundary_ids.empty();
+        bool specified_ids = !_watertight_boundaries.empty() && intersections.empty();
+        std::string message;
+        if (mesh->mesh_dimension() == 3)
+          message = "Element " + std::to_string(elem->id()) +
+                    " contains an external face which has not been assigned to "; // a sideset";
+        else
+          message = "Element " + std::to_string(elem->id()) +
+                    " contains an external edge which has not been assigned to "; // a sideset";
+        if (no_specified_ids)
+          message = message + "a sideset";
+        else if (specified_ids)
+          message = message + "one of the specifiec sidesets";
+        if ((no_specified_ids || specified_ids) && num_faces_without_sideset < _num_outputs)
         {
-          // This side does not have a sideset!!!
-          std::string message;
-          if (num_faces_without_sideset < _num_outputs)
-          {
-            if (mesh->mesh_dimension() == 3)
-              message = "Element " + std::to_string(elem->id()) +
-                        " contains an external face which has not been assigned to a sideset";
-            else
-              message = "Element " + std::to_string(elem->id()) +
-                        " contains an external edge which has not been assigned to a sideset";
-            _console << message << std::endl;
-            num_faces_without_sideset++;
-          }
-        }
-        else if (!_watertight_boundaries.empty() && intersections.empty())
-        {
-          // This means that at least 1 boundary was specified, and that this side was not assigned
-          // to it
-          std::string message;
-          if (num_faces_without_sideset < _num_outputs)
-          {
-            if (mesh->mesh_dimension() == 3)
-              message = "Element " + std::to_string(elem->id()) +
-                        " contains an external face which has not been assigned to one of the "
-                        "specified sidesets";
-            else
-              message = "Element " + std::to_string(elem->id()) +
-                        " contains an external edge which has not been assigned to one of the "
-                        "specified sidesets";
-            _console << message << std::endl;
-            num_faces_without_sideset++;
-          }
+          _console << message << std::endl;
+          num_faces_without_sideset++;
         }
       }
     }
@@ -428,35 +412,21 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
           boundary_info.boundary_ids(node, boundary_ids);
           std::vector<boundary_id_type> intersection =
               findBoundaryOverlap(boundary_copy, boundary_ids);
-          // if node has no nodeset, add it to list of bad nodes
-          if (boundary_info.n_boundary_ids(node) == 0)
+
+          bool no_specified_ids = boundary_info.n_boundary_ids(node) == 0;
+          bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();
+          std::string message =
+              "Node " + std::to_string(node->id()) +
+              " is on an external boundary of the mesh, but has not been assigned to ";
+          if (no_specified_ids)
+            message = message + "a nodeset";
+          else if (specified_ids)
+            message = message + "one of the specifiec nodesets";
+          if ((no_specified_ids || specified_ids) && num_nodes_without_nodeset < _num_outputs)
           {
-            // This node does not have a nodeset!!!
-            num_nodes_without_nodeset++;
             checked_nodes_id.insert(node->id());
-            std::string message;
-            if (num_nodes_without_nodeset < _num_outputs)
-            {
-              message =
-                  "Node " + std::to_string(node->id()) +
-                  " is on an external boundary of the mesh, but has not been assigned to a nodeset";
-              _console << message << std::endl;
-            }
-          }
-          else if (!_watertight_boundaries.empty() && intersection.empty())
-          {
-            // This indicates that at least one boundary was specified, and it does not match with
-            // any
             num_nodes_without_nodeset++;
-            checked_nodes_id.insert(node->id());
-            std::string message;
-            if (num_nodes_without_nodeset < _num_outputs)
-            {
-              message = "Node " + std::to_string(node->id()) +
-                        " is on an external boundary of the mesh, but has not been assigned to one "
-                        "of the specified nodesets";
-              _console << message << std::endl;
-            }
+            _console << message << std::endl;
           }
         }
       }
