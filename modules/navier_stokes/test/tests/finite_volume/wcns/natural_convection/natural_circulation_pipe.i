@@ -131,6 +131,7 @@ gamma = 1.4
     T_fluid = T_fluid
     speed = speed
     force_define_density = true
+    neglect_derivatives_of_density_time_derivative = false
     mu_rampdown = 'mu_rampdown_fn'
     characteristic_length = 1
     porosity = porosity
