@@ -542,6 +542,8 @@ MooseVariableData<OutputType>::computeValues()
           else
             static_assert(Moose::always_false<T>, "Unsupported type");
         }
+        else
+          static_assert(Moose::always_false<OutputType>, "Unsupported type");
       }
   };
 
