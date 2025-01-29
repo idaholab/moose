@@ -494,6 +494,8 @@ MooseVariableData<OutputType>::computeValuesInternal()
     constexpr bool is_gradient = std::is_same_v<dest_array_type, OutputGradient>;
     constexpr bool is_second = std::is_same_v<dest_array_type, OutputSecond>;
     constexpr bool is_divergence = std::is_same_v<dest_array_type, OutputDivergence>;
+    static_assert(is_output || is_gradient || is_second || is_divergence,
+                  "Unsupported destination array type");
 
     // Sets a value to zero at a quadrature point
     const auto set_zero = [this, &dest](const auto qp)
