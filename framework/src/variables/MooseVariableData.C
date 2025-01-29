@@ -487,6 +487,7 @@ MooseVariableData<OutputType>::computeValues()
     constexpr bool is_output = std::is_same_v<T, OutputType>;
     constexpr bool is_gradient = std::is_same_v<T, OutputGradient>;
     constexpr bool is_second = std::is_same_v<T, OutputSecond>;
+    constexpr bool is_divergence = std::is_same_v<T, OutputDivergence>;
 
     dest.resize(nqp);
     for (unsigned int qp = 0; qp < nqp; ++qp)
@@ -513,7 +514,7 @@ MooseVariableData<OutputType>::computeValues()
       {
         if constexpr (is_real || is_real_vector || (is_eigen && is_output))
         {
-          if constexpr (is_output)
+          if constexpr (is_output || is_divergence)
             dest[qp] += phi[i][qp] * vector[i];
           else if constexpr (is_gradient || is_second)
             dest[qp].add_scaled(phi[i][qp], vector[i]);
