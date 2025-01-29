@@ -479,6 +479,9 @@ MooseVariableData<OutputType>::computeValues()
     constexpr bool is_eigen = std::is_same_v<OutputType, RealEigenVector>;
     mooseAssert(is_real || is_real_vector || is_eigen, "Unsupported type");
 
+    if constexpr (!is_eigen)
+      (void)this;
+
     // Output type
     using T = typename std::remove_reference_t<decltype(dest)>::value_type;
     constexpr bool is_output = std::is_same_v<T, OutputType>;
