@@ -20,8 +20,8 @@ MFEML2Error::MFEML2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     _var_name(getParam<VariableName>("variable")),
     _coeff_name(getParam<FunctionName>("function")),
-    _coeff(getMFEMProblem().getProperties().getScalarProperty(_coeff_name)),
-    _var(getUserObject<MFEMVariable>(_var_name).getGridFunction())
+    _coeff(getMFEMProblem().getScalarFunctionCoefficient(_coeff_name)),
+    _var(getMFEMProblem().getProblemData()._gridfunctions.GetRef(_var_name))
 {
 }
 
@@ -38,5 +38,5 @@ MFEML2Error::execute()
 PostprocessorValue
 MFEML2Error::getValue() const
 {
-  return _var->ComputeL2Error(_coeff);
+  return _var.ComputeL2Error(*_coeff);
 }

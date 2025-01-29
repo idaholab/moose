@@ -23,6 +23,6 @@ public:
 private:
   VariableName _var_name;
   FunctionName _coeff_name;
-  mfem::Coefficient & _coeff;
-  std::shared_ptr<mfem::GridFunction> _var;
+  std::shared_ptr<mfem::Coefficient> _coeff;
+  mfem::GridFunction & _var;
 };

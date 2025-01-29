@@ -55,6 +55,44 @@ TEST_F(FunctionTest, GetVectorFunctionCoefficient)
 }
 
 /**
+ * Test MFEMProblem::getVectorFunctionCoefficient works as it should with 2D vector functions.
+ */
+TEST_F(FunctionTest, GetVectorFunctionCoefficient2D)
+{
+  // Build required kernel inputs
+  InputParameters func_params1 = _factory.getValidParams("ParsedVectorFunction");
+  func_params1.set<std::string>("expression_x") = "1.";
+  func_params1.set<std::string>("expression_y") = "2.";
+  _mfem_problem->addFunction("ParsedVectorFunction", "vec_coef1", func_params1);
+  _mfem_problem->getFunction("vec_coef1").initialSetup();
+  std::shared_ptr<mfem::VectorCoefficient> coef =
+      _mfem_problem->getVectorFunctionCoefficient("vec_coef1");
+  mfem::Vector vec;
+  coef->Eval(vec, fe_transform, point);
+  EXPECT_EQ(vec.Size(), 2);
+  EXPECT_EQ(vec[0], 1.);
+  EXPECT_EQ(vec[1], 2.);
+}
+
+/**
+ * Test MFEMProblem::getVectorFunctionCoefficient works as it should with 1D vector functions.
+ */
+TEST_F(FunctionTest, GetVectorFunctionCoefficient1D)
+{
+  // Build required kernel inputs
+  InputParameters func_params1 = _factory.getValidParams("ParsedVectorFunction");
+  func_params1.set<std::string>("expression_x") = "1.";
+  _mfem_problem->addFunction("ParsedVectorFunction", "vec_coef1", func_params1);
+  _mfem_problem->getFunction("vec_coef1").initialSetup();
+  std::shared_ptr<mfem::VectorCoefficient> coef =
+      _mfem_problem->getVectorFunctionCoefficient("vec_coef1");
+  mfem::Vector vec;
+  coef->Eval(vec, fe_transform, point);
+  EXPECT_EQ(vec.Size(), 1);
+  EXPECT_EQ(vec[0], 1.);
+}
+
+/**
  * Test MFEMProblem::addFunction when unkown function type is used.
  */
 TEST_F(FunctionTest, AddUnknownFunction)
