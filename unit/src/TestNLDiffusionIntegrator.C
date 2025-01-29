@@ -35,6 +35,7 @@ public:
 // Note that the action (f(u), v) can be computed using DomainLFIntegrator
 // and the Jacobian matrix linearized operator can be computed using
 // MassIntegrator with the appropriate coefficients.
+// This integrator is supported for H1 and L2 fespaces
 class NonlinearMassIntegrator : public mfem::NonlinearFormIntegrator
 {
   mfem::FiniteElementSpace & fes;
