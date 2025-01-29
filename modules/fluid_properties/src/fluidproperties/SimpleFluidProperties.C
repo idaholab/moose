@@ -163,20 +163,15 @@ SimpleFluidProperties::c_from_p_T(
 }
 
 Real
-SimpleFluidProperties::c_from_v_e(Real v, Real e) const
+SimpleFluidProperties::c_from_v_e(Real v, Real /*e*/) const
 {
-  Real T = T_from_v_e(v, e);
-  Real p = p_from_v_e(v, e);
-  return std::sqrt(_bulk_modulus / rho_from_p_T(p, T));
+  return std::sqrt(_bulk_modulus * v);
 }
 
 void
-SimpleFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
+SimpleFluidProperties::c_from_v_e(Real v, Real /*e*/, Real & c, Real & dc_dv, Real & dc_de) const
 {
-  Real T = T_from_v_e(v, e);
-  Real p = p_from_v_e(v, e);
-
-  c = std::sqrt(_bulk_modulus / rho_from_p_T(p, T));
+  c = std::sqrt(_bulk_modulus * v);
 
   dc_dv = 0.5 * std::sqrt(_bulk_modulus / v);
   dc_de = 0.0;

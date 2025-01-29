@@ -35,9 +35,14 @@ public:
     params.set<std::string>("_object_name") = "mu_function";
     _fe_problem->addFunction("ParsedFunction", "mu_function", params);
 
+    params.set<std::string>("expression") = "3000. + 3*x + 5e-4*y";
+    params.set<std::string>("_object_name") = "cp_function";
+    _fe_problem->addFunction("ParsedFunction", "cp_function", params);
+
     _fe_problem->getFunction("k_function").initialSetup();
     _fe_problem->getFunction("rho_function").initialSetup();
     _fe_problem->getFunction("mu_function").initialSetup();
+    _fe_problem->getFunction("cp_function").initialSetup();
 
     buildObjects();
   }
@@ -55,7 +60,22 @@ protected:
 
     _fe_problem->addUserObject("TemperaturePressureFunctionFluidProperties", "fp", uo_params);
     _fp = &_fe_problem->getUserObject<TemperaturePressureFunctionFluidProperties>("fp");
+
+    InputParameters uo_params2 =
+        _factory.getValidParams("TemperaturePressureFunctionFluidProperties");
+    // Set the three functions and the specific heat capacity
+    uo_params2.set<FunctionName>("k") = "k_function";
+    uo_params2.set<FunctionName>("rho") = "rho_function";
+    uo_params2.set<FunctionName>("mu") = "mu_function";
+    uo_params2.set<FunctionName>("cp") = "cp_function";
+    uo_params2.set<Real>("T_initial_guess") = 250;
+    uo_params2.set<Real>("p_initial_guess") = 1e7;
+    uo_params2.set<Real>("dT_integration_intervals") = 0.01;
+
+    _fe_problem->addUserObject("TemperaturePressureFunctionFluidProperties", "fp_cp", uo_params2);
+    _fp_cp = &_fe_problem->getUserObject<TemperaturePressureFunctionFluidProperties>("fp_cp");
   }
 
   TemperaturePressureFunctionFluidProperties * _fp;
+  TemperaturePressureFunctionFluidProperties * _fp_cp;
 };
