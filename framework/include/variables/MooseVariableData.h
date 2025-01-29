@@ -461,6 +461,15 @@ private:
   void assignADNodalValue(const ADReal & value, const unsigned int & component);
   void fetchADNodalValues();
 
+  /**
+   * Internal method for computeValues() and computeMonomialValues()
+   *
+   * Monomial is a template parameter so that we get compile time optimization
+   * for monomial vs non-monomial
+   */
+  template <bool monomial>
+  void computeValuesInternal();
+
   const libMesh::FEType & _fe_type;
 
   const unsigned int _var_num;
