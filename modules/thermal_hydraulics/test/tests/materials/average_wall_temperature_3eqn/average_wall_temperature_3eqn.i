@@ -130,20 +130,12 @@
     prop_values = '10 6'
   []
 
-  [Hw_avg_material]
-    type = WeightedAverageMaterial
-    prop_name = Hw_avg
-    values = 'Hw1 Hw2'
-    weights = 'P_hf1 P_hf2'
-  []
-
   [T_wall_avg_material]
     type = AverageWallTemperature3EqnMaterial
     T_wall_sources = 'T_wall1 T_wall2'
     Hw_sources = 'Hw1 Hw2'
     P_hf_sources = 'P_hf1 P_hf2'
     T_fluid = T_fluid
-    Hw_average = Hw_avg
     P_hf_total = P_hf_total
   []
 []

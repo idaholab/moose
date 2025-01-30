@@ -70,6 +70,16 @@ public:
 protected:
   /// Evaluate FParser object and check EvalError
   GenericReal<is_ad> evaluate(SymFunctionPtr &, const std::string & object_name = "");
+  /**
+   * Evaluate FParser object and check EvalError
+   *
+   * This version uses a supplied vector of function parameters, which is useful
+   * if an object uses more than one parsed function, which may have different
+   * function parameter values.
+   */
+  GenericReal<is_ad> evaluate(SymFunctionPtr &,
+                              const std::vector<GenericReal<is_ad>> &,
+                              const std::string & object_name = "");
 
   /// add constants (which can be complex expressions) to the parser object
   void addFParserConstants(SymFunctionPtr & parser,

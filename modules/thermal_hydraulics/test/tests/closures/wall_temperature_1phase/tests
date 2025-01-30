@@ -1,0 +1,19 @@
+[Tests]
+  design = 'WallTemperature1PhaseClosures.md'
+  issues = '#29594'
+  [test]
+    requirement = 'The system shall provide closures to compute a wall temperature for single phase flow'
+    [single]
+      type = CSVDiff
+      input = 'single.i'
+      csvdiff = 'single_out.csv'
+      detail = 'when there is a single heat transfer.'
+    []
+    [multiple]
+      type = CSVDiff
+      input = 'multiple.i'
+      csvdiff = 'multiple_out.csv'
+      detail = 'when there are multiple heat transfers.'
+    []
+  []
+[]

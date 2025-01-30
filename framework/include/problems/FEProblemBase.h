@@ -867,6 +867,12 @@ public:
   void projectSolution();
 
   /**
+   *  Retrieves the current initial condition state.
+   * @return  current initial condition state
+   */
+  unsigned short getCurrentICState();
+
+  /**
    * Project initial conditions for custom \p elem_range and \p bnd_node_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
    * at an intermediate step
@@ -2789,6 +2795,9 @@ protected:
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property
   bool _using_ad_mat_props;
+
+  // loop state during projection of initial conditions
+  unsigned short _current_ic_state;
 
 private:
   /**

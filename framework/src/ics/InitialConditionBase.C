@@ -16,6 +16,7 @@ InputParameters
 InitialConditionBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += InitialConditionInterface::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
   params += MaterialPropertyInterface::validParams();
@@ -38,6 +39,7 @@ InitialConditionBase::validParams()
 
 InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
   : MooseObject(parameters),
+    InitialConditionInterface(parameters),
     BlockRestrictable(this),
     Coupleable(this,
                getParam<SystemBase *>("_sys")

@@ -25,8 +25,6 @@ AverageWallTemperature3EqnMaterial::validParams()
       "Hw_sources", "Vector of wall heat transfer coefficients from individual sources");
   params.addRequiredCoupledVar("P_hf_sources",
                                "Vector of heated perimeters from individual sources");
-  params.addRequiredParam<MaterialPropertyName>(
-      "Hw_average", "Weighted average of wall heat transfer coefficients");
   params.addRequiredCoupledVar("T_fluid", "Fluid temperature");
   params.addRequiredCoupledVar("P_hf_total", "Total heat flux perimeter from all sources");
 
@@ -38,7 +36,6 @@ AverageWallTemperature3EqnMaterial::AverageWallTemperature3EqnMaterial(
   : Material(parameters),
     _T_wall(declareProperty<Real>("T_wall")),
     _n_values(coupledComponents("T_wall_sources")),
-    _Hw_average(getMaterialProperty<Real>("Hw_average")),
     _T_fluid(coupledValue("T_fluid")),
     _P_hf_total(coupledValue("P_hf_total"))
 {
@@ -66,7 +63,9 @@ AverageWallTemperature3EqnMaterial::AverageWallTemperature3EqnMaterial(
 void
 AverageWallTemperature3EqnMaterial::computeQpProperties()
 {
-  const Real denominator = _Hw_average[_qp] * _P_hf_total[_qp];
+  Real denominator = 0;
+  for (unsigned int i = 0; i < _n_values; i++)
+    denominator += (*(_Hw_sources[i]))[_qp] * (*(_P_hf_sources[i]))[_qp];
 
   if (std::abs(denominator) < 1e-15)
   {

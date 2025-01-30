@@ -79,5 +79,13 @@
 
       detail = "continue run."
     []
+    [infinite_recursion]
+      type = RunException
+      input = recursive_parent.i
+      expect_err = "Maximum multiapp level has been reached. This is likely caused by an infinite loop "
+               "in your multiapp system. If additional multiapp levels are needed, "
+               "max_multiapp_level can be specified in the MuliApps block."
+      detail = "throw an error if the user-selected maximum level of nesting of applications is reached"
+    []
   []
 []

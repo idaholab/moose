@@ -21,7 +21,7 @@ class Factory;
 /**
  * Base class for closures implementations
  *
- * The responsibilities of the closures objects depends on the flow model that
+ * The responsibilities of the closures objects depend on the flow model that
  * uses them. Examples of responsibilities will be to provide material properties
  * for friction factors and heat transfer coefficients.
  */
@@ -35,7 +35,7 @@ public:
    *
    * @param[in] flow_channel   Flow channel component
    */
-  virtual void checkFlowChannel(const FlowChannelBase & flow_channel) const = 0;
+  virtual void checkFlowChannel(const FlowChannelBase & /*flow_channel*/) const {}
 
   /**
    * Checks for errors associated with a heat transfer component
@@ -43,8 +43,10 @@ public:
    * @param[in] heat_transfer   Heat transfer component
    * @param[in] flow_channel   Flow channel component
    */
-  virtual void checkHeatTransfer(const HeatTransferBase & heat_transfer,
-                                 const FlowChannelBase & flow_channel) const = 0;
+  virtual void checkHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
+                                 const FlowChannelBase & /*flow_channel*/) const
+  {
+  }
 
   /**
    * Adds MOOSE objects associated with a flow channel component

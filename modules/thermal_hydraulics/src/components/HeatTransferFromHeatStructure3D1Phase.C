@@ -138,7 +138,9 @@ HeatTransferFromHeatStructure3D1Phase::init()
       const auto subdomain_names = flow_channel.getSubdomainNames();
       _flow_channel_subdomains.insert(
           _flow_channel_subdomains.end(), subdomain_names.begin(), subdomain_names.end());
-      _flow_channel_closures.push_back(flow_channel.getClosures());
+
+      const auto & closures = flow_channel.getClosuresObjects();
+      _flow_channel_closures.insert(_flow_channel_closures.end(), closures.begin(), closures.end());
 
       fch_num_elems.push_back(flow_channel.getNumElems());
 

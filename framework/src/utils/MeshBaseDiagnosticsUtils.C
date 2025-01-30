@@ -67,4 +67,66 @@ checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh,
   }
   pl->unset_close_to_point_tol();
 }
+
+bool
+checkFirstOrderEdgeOverlap(const Elem & edge1,
+                           const Elem & edge2,
+                           Point & intersection_point,
+                           const Real intersection_tol)
+{
+  // check that the two elements are of type EDGE2
+  mooseAssert(edge1.type() == EDGE2, "Elements must be of type EDGE2");
+  mooseAssert(edge2.type() == EDGE2, "Elements must be of type EDGE2");
+  // Get nodes from the two edges
+  const Point & p1 = edge1.point(0);
+  const Point & p2 = edge1.point(1);
+  const Point & p3 = edge2.point(0);
+  const Point & p4 = edge2.point(1);
+
+  // Check that the two edges are not sharing a node
+  if (p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4)
+    return false;
+
+  /*
+    There's a chance that they overlap. Find shortest line that connects two edges and if its length
+    is close enough to 0 return true The shortest line between the two edges will be perpendicular
+    to both.
+  */
+  const auto d1343 = (p1 - p3) * (p4 - p3);
+  const auto d4321 = (p4 - p3) * (p2 - p1);
+  const auto d1321 = (p1 - p3) * (p2 - p1);
+  const auto d4343 = (p4 - p3) * (p4 - p3);
+  const auto d2121 = (p2 - p1) * (p2 - p1);
+
+  const auto denominator = d2121 * d4343 - d4321 * d4321;
+  const auto numerator = d1343 * d4321 - d1321 * d4343;
+
+  if (std::fabs(denominator) < intersection_tol)
+    // This indicates that the two lines are parallel so they don't intersect
+    return false;
+
+  const auto mua = numerator / denominator;
+  const auto mub = (d1343 + (mua * d4321)) / d4343;
+
+  // Use these values to solve for the two points that define the shortest line segment
+  const auto pa = p1 + mua * (p2 - p1);
+  const auto pb = p3 + mub * (p4 - p3);
+
+  // This method assume the two lines are infinite. This check to make sure na and nb are part of
+  // their respective line segments
+  if (mua < 0 || mua > 1)
+    return false;
+  if (mub < 0 || mub > 1)
+    return false;
+
+  // Calculate distance between these two nodes
+  const auto distance = (pa - pb).norm();
+  if (distance < intersection_tol)
+  {
+    intersection_point = pa;
+    return true;
+  }
+  else
+    return false;
+}
 }
