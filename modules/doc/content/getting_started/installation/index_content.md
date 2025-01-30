@@ -9,7 +9,7 @@ choice:
 - [Conda Pre-Built MOOSE](installation/moose_conda_binary.md) (Excellent for Training)
 - INL's HPC Cluster (access restrictions)
 
-  - [Developerment](installation/inl_hpc_install_moose.md)
+  - [Development](installation/inl_hpc_install_moose.md)
   - [Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md) (Excellent for Training)
 
 - Optional packages:
