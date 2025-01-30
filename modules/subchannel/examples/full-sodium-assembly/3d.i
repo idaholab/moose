@@ -1,6 +1,6 @@
 [Mesh]
   [subchannel]
-    type = DetailedTriSubChannelMeshGenerator
+    type = SCMDetailedTriSubChannelMeshGenerator
     nrings = 4
     n_cells = 100
     flat_to_flat = 0.085
@@ -12,7 +12,7 @@
   []
 
   [fuel_pins]
-    type = DetailedTriPinMeshGenerator
+    type = SCMDetailedTriPinMeshGenerator
     input = subchannel
     nrings = 4
     n_cells = 100

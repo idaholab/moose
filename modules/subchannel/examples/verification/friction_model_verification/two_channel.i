@@ -4,7 +4,7 @@ P_out = 155e+5 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     nx = 1
     ny = 2
     n_cells = 100

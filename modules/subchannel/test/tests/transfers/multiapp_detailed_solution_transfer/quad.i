@@ -8,7 +8,7 @@
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     pin_diameter = 0.5
     gap = 0.1
     spacer_z = '0'
@@ -16,7 +16,7 @@
   []
 
   [fuel_pins]
-    type = QuadPinMeshGenerator
+    type = SCMQuadPinMeshGenerator
     input = sub_channel
   []
 []

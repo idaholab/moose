@@ -22,7 +22,7 @@ n_rings = 9
 
 [Mesh]
   [subchannel]
-    type = DetailedTriSubChannelMeshGenerator
+    type = SCMDetailedTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = 26
     flat_to_flat = '${fparse duct_inside}'
@@ -34,7 +34,7 @@ n_rings = 9
   []
 
   [fuel_pins]
-    type = DetailedTriPinMeshGenerator
+    type = SCMDetailedTriPinMeshGenerator
     input = subchannel
     nrings = '${fparse n_rings}'
     n_cells = 26

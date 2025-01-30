@@ -10,7 +10,7 @@
 
   [Mesh]
     [subchannel]
-      type = DetailedQuadSubChannelMeshGenerator
+      type = SCMDetailedQuadSubChannelMeshGenerator
     []
   []
 

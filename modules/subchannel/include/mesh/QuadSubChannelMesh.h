@@ -150,7 +150,7 @@ public:
   static void generatePinCenters(
       unsigned int nx, unsigned int ny, Real pitch, Real elev, std::vector<Point> & pin_centers);
 
-  friend class QuadSubChannelMeshGenerator;
-  friend class QuadPinMeshGenerator;
+  friend class SCMQuadSubChannelMeshGenerator;
+  friend class SCMQuadPinMeshGenerator;
   friend class QuadSubChannel1PhaseProblem;
 };

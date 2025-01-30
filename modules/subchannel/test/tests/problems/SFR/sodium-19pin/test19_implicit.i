@@ -12,7 +12,7 @@ P_out = 2.0e5 # Pa
 
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     pin_diameter = 0.01
     dwire = 0.002
     hwire = 0.0833
@@ -20,7 +20,7 @@ P_out = 2.0e5 # Pa
     spacer_k = '5.0'
   []
   [duct]
-    type = TriDuctMeshGenerator
+    type = SCMTriDuctMeshGenerator
     input = subchannel
   []
 []

@@ -9,7 +9,7 @@ heated_length = 1.0
 pitch = 7.26e-3
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = 2
     n_cells = 40
     flat_to_flat = 2.1e-2 # 3.41e-2
@@ -23,7 +23,7 @@ pitch = 7.26e-3
   []
 
   [fuel_pins]
-    type = TriPinMeshGenerator
+    type = SCMTriPinMeshGenerator
     input = subchannel
     nrings = 2
     n_cells = 40

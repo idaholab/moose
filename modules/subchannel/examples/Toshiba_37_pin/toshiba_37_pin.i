@@ -4,7 +4,7 @@ mass_flux_in = '${fparse 1e+6 * 37.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = 4
     n_cells = 100
     flat_to_flat = 0.085
