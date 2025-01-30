@@ -22,7 +22,7 @@ ExtremeValueBase<T>::validParams()
 {
   InputParameters params = T::validParams();
   params.addParam<MooseEnum>("value_type",
-                             MooseEnum("max=0 min=1", "max"),
+                             MooseEnum("max=0 min=1 max_abs=2", "max"),
                              "Type of extreme value to return. 'max' "
                              "returns the maximum value. 'min' returns "
                              "the minimum value.");
@@ -41,7 +41,7 @@ template <class T>
 void
 ExtremeValueBase<T>::initialize()
 {
-  if (_type == ExtremeType::MAX)
+  if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
     _proxy_value =
         std::make_pair(-std::numeric_limits<Real>::max(), -std::numeric_limits<Real>::max());
   else if (_type == ExtremeType::MIN)
@@ -58,6 +58,8 @@ ExtremeValueBase<T>::computeExtremeValue()
   if ((_type == ExtremeType::MAX && pv > _proxy_value) ||
       (_type == ExtremeType::MIN && pv < _proxy_value))
     _proxy_value = pv;
+  else if (_type == ExtremeType::MAX_ABS && std::abs(pv.first) > _proxy_value.first)
+    _proxy_value = std::make_pair(std::abs(pv.first), pv.second);
 }
 
 template <class T>
@@ -71,7 +73,7 @@ template <class T>
 void
 ExtremeValueBase<T>::finalize()
 {
-  if (_type == ExtremeType::MAX)
+  if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
   {
     if (_use_proxy)
       this->gatherProxyValueMax(_proxy_value.first, _proxy_value.second);
@@ -93,7 +95,8 @@ ExtremeValueBase<T>::threadJoin(const UserObject & y)
 {
   const auto & pps = static_cast<const ExtremeValueBase<T> &>(y);
 
-  if ((_type == ExtremeType::MAX && pps._proxy_value > _proxy_value) ||
+  if (((_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS) &&
+       pps._proxy_value > _proxy_value) ||
       (_type == ExtremeType::MIN && pps._proxy_value < _proxy_value))
     _proxy_value = pps._proxy_value;
 }

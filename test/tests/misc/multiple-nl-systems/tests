@@ -2,12 +2,13 @@
   design = 'Problem/index.md'
   [coupled_system]
     requirement = 'The software shall be able to solve a system of equations in which one variable depends on another by'
-    issues = '#8780'
+    issues = '#8780 #24690 #29063'
     [segregated]
       type = Exodiff
       input = test.i
       exodiff = test_out.e
       detail = 'segregating the solves; first the independent variable is solved for, and second the dependent variable is solved for using the solution of the first'
+      absent_out = 'unused database options'
     []
     [segregated-fv]
       type = Exodiff
@@ -36,6 +37,7 @@
       run_sim = True
       input = ad-test.i
       detail = 'show a perfect Jacobian for both solves'
+      cli_args = '-u_snes_test_jacobian -v_snes_test_jacobian'
     []
   []
   [hand-jac]
@@ -44,6 +46,7 @@
     run_sim = True
     input = test.i
     requirement = 'The system shall be able to perform a segregated solve using objects with hand-coded Jacobians and show perfect Jacobians for those objects.'
+    cli_args = '-u_snes_test_jacobian -v_snes_test_jacobian'
   []
   [different_num_vars_per_system]
     requirement = 'The software shall allow having a different number of variables in nonlinear systems within the same problem when the action of the Jacobian is provided by'
@@ -77,7 +80,7 @@
       type = Exodiff
       input = restart_problem.i
       exodiff = restart_problem_out.e
-      detail = 'using problem_out.e as a starting point, slightly modify the BCs and rerun' 
+      detail = 'using problem_out.e as a starting point, slightly modify the BCs and rerun'
     []
   []
 []

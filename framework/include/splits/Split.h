@@ -63,7 +63,4 @@ protected:
   MooseEnum _schur_type;
   MooseEnum _schur_pre;
   ///@}
-
-  /// Additional PETSc options
-  Moose::PetscSupport::PetscOptions _petsc_options;
 };

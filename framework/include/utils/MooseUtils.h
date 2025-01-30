@@ -1093,7 +1093,7 @@ wildcardEqual(AnyType, const T &)
  * Find a specific pair in a container matching on first, second or both pair components
  */
 template <typename C, typename M1, typename M2>
-typename C::iterator
+auto
 findPair(C & container, const M1 & first, const M2 & second)
 {
   return std::find_if(container.begin(),

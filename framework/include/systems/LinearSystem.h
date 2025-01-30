@@ -128,6 +128,8 @@ public:
     return _new_gradient;
   }
 
+  virtual void compute(ExecFlagType type) override;
+
 protected:
   /**
    * Compute the right hand side and system matrix for given tags

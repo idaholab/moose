@@ -386,7 +386,16 @@ NonlinearSystem::getSNES()
       dynamic_cast<PetscNonlinearSolver<Number> *>(nonlinearSolver());
 
   if (petsc_solver)
-    return petsc_solver->snes();
+  {
+    const char * snes_prefix = nullptr;
+    std::string snes_prefix_str;
+    if (feProblem().numSolverSystems() > 1)
+    {
+      snes_prefix_str = name() + "_";
+      snes_prefix = snes_prefix_str.c_str();
+    }
+    return petsc_solver->snes(snes_prefix);
+  }
   else
     mooseError("It is not a petsc nonlinear solver");
 }
@@ -394,7 +403,7 @@ NonlinearSystem::getSNES()
 void
 NonlinearSystem::residualAndJacobianTogether()
 {
-  if (_fe_problem.solverParams()._type == Moose::ST_JFNK)
+  if (_fe_problem.solverParams(number())._type == Moose::ST_JFNK)
     mooseError(
         "Evaluting the residual and Jacobian together does not make sense for a JFNK solve type in "
         "which only function evaluations are required, e.g. there is no need to form a matrix");

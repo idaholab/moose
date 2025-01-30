@@ -228,10 +228,12 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
           getParam<MultiMooseEnum>("solid_energy_petsc_options");
       const auto & solid_energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
           "solid_energy_petsc_options_iname", "solid_energy_petsc_options_value");
-      Moose::PetscSupport::processPetscFlags(solid_energy_petsc_options,
-                                             _solid_energy_petsc_options);
+      Moose::PetscSupport::processPetscFlags(
+          solid_energy_petsc_options, "-", *this, _solid_energy_petsc_options);
       Moose::PetscSupport::processPetscPairs(solid_energy_petsc_pair_options,
                                              _problem.mesh().dimension(),
+                                             "-",
+                                             *this,
                                              _solid_energy_petsc_options);
 
       _solid_energy_linear_control.real_valued_data["rel_tol"] =
@@ -258,9 +260,13 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     const auto & turbulence_petsc_options = getParam<MultiMooseEnum>("turbulence_petsc_options");
     const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(
         "turbulence_petsc_options_iname", "turbulence_petsc_options_value");
-    Moose::PetscSupport::processPetscFlags(turbulence_petsc_options, _turbulence_petsc_options);
-    Moose::PetscSupport::processPetscPairs(
-        turbulence_petsc_pair_options, _problem.mesh().dimension(), _turbulence_petsc_options);
+    Moose::PetscSupport::processPetscFlags(
+        turbulence_petsc_options, "-", *this, _turbulence_petsc_options);
+    Moose::PetscSupport::processPetscPairs(turbulence_petsc_pair_options,
+                                           _problem.mesh().dimension(),
+                                           "-",
+                                           *this,
+                                           _turbulence_petsc_options);
 
     _turbulence_linear_control.real_valued_data["rel_tol"] = getParam<Real>("turbulence_l_tol");
     _turbulence_linear_control.real_valued_data["abs_tol"] = getParam<Real>("turbulence_l_abs_tol");

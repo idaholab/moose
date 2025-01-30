@@ -144,7 +144,7 @@ SolverSystem::compute(const ExecFlagType type)
   }
   else if ((type == EXEC_TIMESTEP_END) || (type == EXEC_FINAL))
   {
-    if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
+    if (_fe_problem.solverParams(number())._type == Moose::ST_LINEAR)
       // We likely don't have a final residual evaluation upon which we compute the time derivatives
       // so we need to do so now
       compute_tds = true;

@@ -60,8 +60,9 @@ Split::validParams()
   params.addParam<MultiMooseEnum>("petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "PETSc flags for the FieldSplit solver");
-  params.addParam<std::vector<std::string>>("petsc_options_iname",
-                                            "PETSc option names for the FieldSplit solver");
+  params.addParam<MultiMooseEnum>("petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string>>("petsc_options_value",
                                             "PETSc option values for the FieldSplit solver");
 
@@ -82,9 +83,6 @@ Split::Split(const InputParameters & parameters)
     _schur_type(getParam<MooseEnum>("schur_type")),
     _schur_pre(getParam<MooseEnum>("schur_pre"))
 {
-  _petsc_options.flags = getParam<MultiMooseEnum>("petsc_options");
-  _petsc_options.pairs =
-      getParam<std::string, std::string>("petsc_options_iname", "petsc_options_value");
 }
 
 void
@@ -175,24 +173,5 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
 
   // Now we set the user-specified petsc options for this split, possibly overriding the above
   // settings.
-  for (const auto & item : _petsc_options.flags)
-  {
-    // Need to prepend the prefix and strip off the leading '-' on the option name.
-    std::string op(item);
-    if (op[0] != '-')
-      mooseError("Invalid PETSc option name ", op, " for Split ", _name);
-
-    // push back PETSc options
-    po.flags.setAdditionalValue(prefix + op.substr(1));
-  }
-
-  for (auto & option : _petsc_options.pairs)
-  {
-    // Need to prepend the prefix and strip off the leading '-' on the option name.
-    const std::string & op = option.first;
-    if (op[0] != '-')
-      mooseError("Invalid PETSc option name ", op, " for Split ", _name);
-
-    po.pairs.emplace_back(prefix + op.substr(1), option.second);
-  }
+  Moose::PetscSupport::storePetscOptions(_fe_problem, prefix, *this);
 }
