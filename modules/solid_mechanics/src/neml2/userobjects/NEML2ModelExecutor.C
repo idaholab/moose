@@ -269,6 +269,8 @@ NEML2ModelExecutor::applyPredictor()
 {
   if (!model().input_axis().has_state())
     return;
+  if (!model().input_axis().has_old_state())
+    return;
 
   // Set trial state variables (i.e., initial guesses).
   // Right now we hard-code to use the old state as the trial state.
