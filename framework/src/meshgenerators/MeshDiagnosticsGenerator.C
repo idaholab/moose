@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshDiagnosticsGenerator.h"
+#include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 #include "MeshCoarseningUtils.h"
 #include "MeshBaseDiagnosticsUtils.h"
@@ -51,7 +52,7 @@ MeshDiagnosticsGenerator::validParams()
       "check_for_watertight_nodesets",
       chk_option,
       "whether to check for external nodes that are not assigned to any nodeset");
-  params.addParam<std::vector<BoundaryID>>(
+  params.addParam<std::vector<BoundaryName>>(
       "boundaries_to_check",
       {},
       "Names boundaries that should form a watertight envelope around the mesh. Defaults to all "
@@ -96,7 +97,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_sidesets_orientation(getParam<MooseEnum>("examine_sidesets_orientation")),
     _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
     _check_watertight_nodesets(getParam<MooseEnum>("check_for_watertight_nodesets")),
-    _watertight_boundaries(getParam<std::vector<BoundaryID>>("boundaries_to_check")),
+    _watertight_boundary_names(getParam<std::vector<BoundaryName>>("boundaries_to_check")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -112,9 +113,6 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
     _num_outputs(getParam<unsigned int>("log_length_limit"))
 {
-  // Sort boundary vector if not empty
-  if (!_watertight_boundaries.empty())
-    std::sort(_watertight_boundaries.begin(), _watertight_boundaries.end());
   // Check that no secondary parameters have been passed with the main check disabled
   if ((isParamSetByUser("minimum_element_volumes") ||
        isParamSetByUser("maximum_element_volumes")) &&
@@ -145,6 +143,10 @@ MeshDiagnosticsGenerator::generate()
   // We prepare for use at the beginning to facilitate diagnosis
   // This deliberately does not trust the mesh to know whether it's already prepared or not
   mesh->prepare_for_use();
+
+  // convert BoundaryNames to IDs and sort
+  _watertight_boundaries = prepareBoundaries(mesh);
+  //_watertight_boundaries = mesh->getBoundaryIDs(_watertight_boundary_names);
 
   if (_check_sidesets_orientation != "NO_CHECK")
     checkSidesetsOrientation(mesh);
@@ -180,6 +182,22 @@ MeshDiagnosticsGenerator::generate()
     checkNonMatchingEdges(mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+std::vector<BoundaryID>
+MeshDiagnosticsGenerator::prepareBoundaries(const std::unique_ptr<MeshBase> & mesh) const
+{
+  std::vector<BoundaryID> boundary_ids;
+  if (!_watertight_boundary_names.empty())
+  {
+    for (const auto & name : _watertight_boundary_names)
+    {
+      BoundaryID id = MooseMeshUtils::getBoundaryID(name, *mesh);
+      boundary_ids.push_back(id);
+    }
+    std::sort(boundary_ids.begin(), boundary_ids.end());
+  }
+  return boundary_ids;
 }
 
 void
@@ -321,6 +339,7 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
   boundary_info.build_side_list();
   const auto sideset_map = boundary_info.get_sideset_map();
   unsigned int num_faces_without_sideset = 0;
+  //
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
@@ -344,14 +363,14 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
         std::string message;
         if (mesh->mesh_dimension() == 3)
           message = "Element " + std::to_string(elem->id()) +
-                    " contains an external face which has not been assigned to "; // a sideset";
+                    " contains an external face which has not been assigned to ";
         else
           message = "Element " + std::to_string(elem->id()) +
-                    " contains an external edge which has not been assigned to "; // a sideset";
+                    " contains an external edge which has not been assigned to ";
         if (no_specified_ids)
           message = message + "a sideset";
         else if (specified_ids)
-          message = message + "one of the specifiec sidesets";
+          message = message + "one of the specified sidesets";
         if ((no_specified_ids || specified_ids) && num_faces_without_sideset < _num_outputs)
         {
           _console << message << std::endl;
@@ -421,7 +440,7 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
           if (no_specified_ids)
             message = message + "a nodeset";
           else if (specified_ids)
-            message = message + "one of the specifiec nodesets";
+            message = message + "one of the specified nodesets";
           if ((no_specified_ids || specified_ids) && num_nodes_without_nodeset < _num_outputs)
           {
             checked_nodes_id.insert(node->id());

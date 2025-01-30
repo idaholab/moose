@@ -66,13 +66,18 @@ private:
    */
   void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool problem_detected) const;
 
+  /// Convert bounday names to IDs and sort
+  std::vector<BoundaryID> prepareBoundaries(const std::unique_ptr<MeshBase> & mesh) const;
+
   /// whether to check that sidesets are consistently oriented using neighbor subdomains
   const MooseEnum _check_sidesets_orientation;
   /// whether to check that each external side is assigned to a sideset
   const MooseEnum _check_watertight_sidesets;
   /// whether to check that each external node is assigned to a nodeset
   const MooseEnum _check_watertight_nodesets;
-  /// boundaries to be checked in watertight checks
+  /// Names of boundaries to be checked in watertight checks
+  std::vector<BoundaryName> _watertight_boundary_names;
+  /// IDs of boundaries to be checked in watertight checks
   std::vector<BoundaryID> _watertight_boundaries;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
