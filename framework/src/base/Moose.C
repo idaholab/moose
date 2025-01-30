@@ -449,7 +449,8 @@ registerActions(Syntax & syntax,
 {
   Registry::registerActionsTo(action_factory, obj_labels);
 
-  // TODO: Why is this here?
+  // Add these actions here so they are always executed last, without setting any dependency
+  registerTask("dump_objects", false);
   registerTask("finish_input_file_output", false);
 }
 
