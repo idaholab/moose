@@ -1,6 +1,6 @@
 [Mesh]
   [subchannel]
-    type = DetailedQuadSubChannelMeshGenerator
+    type = SCMDetailedQuadSubChannelMeshGenerator
     nx = 7
     ny = 3
     n_cells = 48

@@ -1,6 +1,6 @@
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     nx = 3
     ny = 3
     n_cells = 10
@@ -13,7 +13,7 @@
   []
 
   [fuel_pins]
-    type = QuadPinMeshGenerator
+    type = SCMQuadPinMeshGenerator
     input = sub_channel
     nx = 3
     ny = 3

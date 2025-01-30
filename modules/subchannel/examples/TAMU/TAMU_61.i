@@ -8,7 +8,7 @@ mass_flux_in = '${fparse 23.86/flow_area}' # [kg/sm2]
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = 5
     n_cells = 40
     flat_to_flat = 0.154

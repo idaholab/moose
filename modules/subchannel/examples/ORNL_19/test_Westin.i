@@ -5,7 +5,7 @@ P_out = 2.0e5 # Pa
 
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = 9
     n_cells = 200
     flat_to_flat = 0.185

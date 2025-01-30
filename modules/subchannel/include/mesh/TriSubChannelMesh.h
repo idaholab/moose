@@ -236,10 +236,10 @@ public:
   static void
   rodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center);
 
-  friend class TriSubChannelMeshGenerator;
-  friend class TriDuctMeshGenerator;
-  friend class TriPinMeshGenerator;
-  friend class DetailedTriPinMeshGenerator;
+  friend class SCMTriSubChannelMeshGenerator;
+  friend class SCMTriDuctMeshGenerator;
+  friend class SCMTriPinMeshGenerator;
+  friend class SCMDetailedTriPinMeshGenerator;
   friend class TriSubChannel1PhaseProblem;
 
   /// number of corners in the duct x-sec

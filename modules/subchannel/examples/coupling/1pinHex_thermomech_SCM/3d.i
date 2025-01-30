@@ -2,7 +2,7 @@ pin_diameter = 5.84e-3
 heated_length = 1.0
 [Mesh]
   [subchannel]
-    type = DetailedTriSubChannelMeshGenerator
+    type = SCMDetailedTriSubChannelMeshGenerator
     nrings = 2
     n_cells = 40
     flat_to_flat = 2.1e-2 # 3.41e-2
@@ -12,7 +12,7 @@ heated_length = 1.0
   []
 
   [fuel_pins]
-    type = DetailedTriPinMeshGenerator
+    type = SCMDetailedTriPinMeshGenerator
     input = subchannel
     nrings = 2
     n_cells = 40

@@ -19,7 +19,7 @@ n_rings = 10
 
 [Mesh]
   [subchannel]
-    type = DetailedTriSubChannelMeshGenerator
+    type = SCMDetailedTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = 100
     flat_to_flat = '${fparse duct_inside}'

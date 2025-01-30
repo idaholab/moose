@@ -36,7 +36,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = 100
     flat_to_flat = '${fparse duct_inside}'
@@ -52,7 +52,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 
   [fuel_pins]
-    type = TriPinMeshGenerator
+    type = SCMTriPinMeshGenerator
     input = subchannel
     nrings = '${fparse n_rings}'
     n_cells = 100
@@ -63,7 +63,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 
   [duct]
-    type = TriDuctMeshGenerator
+    type = SCMTriDuctMeshGenerator
     input = fuel_pins
     nrings = '${fparse n_rings}'
     n_cells = 100

@@ -1,6 +1,6 @@
 [QuadInterWrapperMesh]
     [sub_channel]
-      type = DetailedQuadInterWrapperMeshGenerator
+      type = SCMDetailedQuadInterWrapperMeshGenerator
       nx = 3
       ny = 3
       n_cells = 10

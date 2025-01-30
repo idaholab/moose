@@ -1,6 +1,6 @@
 [Mesh]
   [subchannel]
-  type = DetailedTriSubChannelMeshGenerator
+  type = SCMDetailedTriSubChannelMeshGenerator
   nrings = 9
   n_cells = 200
   flat_to_flat = 0.185

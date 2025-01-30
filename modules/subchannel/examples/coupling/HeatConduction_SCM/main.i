@@ -4,7 +4,7 @@ heated_length = 1.0 # m
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     nx = 2
     ny = 2
     n_cells = 10
@@ -17,7 +17,7 @@ heated_length = 1.0 # m
   []
 
   [fuel_pins]
-    type = QuadPinMeshGenerator
+    type = SCMQuadPinMeshGenerator
     input = sub_channel
     nx = 2
     ny = 2
