@@ -203,8 +203,9 @@ ControlDrumMeshGenerator::ControlDrumMeshGenerator(const InputParameters & param
   // Define azimuthal angles explicitly based on num_azimuthal_sectors and manually add pad start
   // angle and end angle if they are not contained within these angle intervals
   std::vector<Real> azimuthal_angles;
-  const auto custom_start_angle = _pad_start_angle;
-  const auto custom_end_angle = (_pad_end_angle > 360) ? _pad_end_angle - 360. : _pad_end_angle;
+  const auto custom_start_angle = _has_pad_region ? _pad_start_angle : 0.;
+  const auto custom_end_angle =
+      _has_pad_region ? ((_pad_end_angle > 360) ? _pad_end_angle - 360. : _pad_end_angle) : 0.;
   for (unsigned int i = 0; i < num_sectors; ++i)
   {
     Real current_azim_angle = (Real)i * 360. / (Real)num_sectors;
