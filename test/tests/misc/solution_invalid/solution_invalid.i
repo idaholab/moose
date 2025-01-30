@@ -57,9 +57,12 @@
   petsc_options_value = 'lu superlu_dist'
 []
 
-[Reporters/solution_invalidity]
-  type = SolutionInvalidityReporter
-  execute_on = FINAL
+[Reporters]
+
+  [solution_invalidity]
+    type = SolutionInvalidityReporter
+    execute_on = FINAL
+  []
 []
 
 [Outputs]
@@ -68,5 +71,8 @@
     type = JSON
     execute_on = 'FINAL'
     execute_system_information_on = none
+  []
+  [solution_invalid]
+    type = solution_invalidity_history
   []
 []

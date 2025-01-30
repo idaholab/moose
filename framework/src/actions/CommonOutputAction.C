@@ -149,6 +149,14 @@ CommonOutputAction::validParams()
                         "screen. This parameter only affects the output of the third-party solver "
                         "(e.g. PETSc), not MOOSE itself.");
 
+  params.addParam<bool>("solution_invalidity_history",
+                        false,
+                        "Enable printing of the time history of the solution invalidity occurances "
+                        "to the screen(Console)");
+  params.addParam<unsigned int>("solution_invalidity_time_interval",
+                                1,
+                                "The time interval to report the solution invalidity occurances.");
+
   // Return object
   return params;
 }
@@ -285,6 +293,18 @@ CommonOutputAction::act()
 
     if (!getParam<bool>("color"))
       Moose::setColorConsole(false);
+
+    if (getParam<bool>("solution_invalidity_history"))
+    {
+      std::optional<std::string> from_param_name;
+      const InputParameters * from_params = nullptr;
+
+      from_param_name = "solution_invalidity_history";
+      from_params = &parameters();
+
+      if (from_param_name)
+        create("SolutionInvalidityOutput", *from_param_name, from_params);
+    }
   }
   else if (_current_task == "add_output")
   {
