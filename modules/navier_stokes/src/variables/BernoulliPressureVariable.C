@@ -176,6 +176,8 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   ADReal factor_upwind = 0.0;
 // Iterate through sidesets to see if they are boundary faces or not
 //How do I access the variable I defined above titled num_pressure_drop_sidesets?
+
+if (isParamSetByUser("pressure_drop_sidesets")){
   int num_pressure_drop_sidesets = _pressure_drop_sideset_ids.size();
   int num_boundaries = _theBoundaries.size() ;
  
@@ -191,7 +193,7 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
       factor_downwind += _pressure_drop_form_factors[i];
     }
     }
-  
+}
 
   const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
