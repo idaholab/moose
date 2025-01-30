@@ -1,0 +1,17 @@
+[Tests]
+  design = '?'
+  issues = '#29774'
+  requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 "
+  [interpolate]
+    type = 'CSVDiff'
+    input = 'laromance_interpolate.i'
+    csvdiff = 'laromance_interpolate_out.csv'
+    detail = "to sample cell and wall dislocation density rate and inelastic strain rate from the the 6D input grid."
+  []
+  [radialReturn]
+    type = 'CSVDiff'
+    input = 'laromance_return_mapping.i'
+    csvdiff = 'laromance_return_mapping_out.csv'
+    detail = "to solve for the nonlinear material response in NEML2 using the radial return mapping."
+  []
+[]
