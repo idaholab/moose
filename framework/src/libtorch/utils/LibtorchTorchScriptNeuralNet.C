@@ -16,10 +16,13 @@
 namespace Moose
 {
 
-LibtorchTorchScriptNeuralNet::LibtorchTorchScriptNeuralNet(const std::string & filename)
-  : _filename(filename)
+LibtorchTorchScriptNeuralNet::LibtorchTorchScriptNeuralNet()
 {
-  loadNeuralNetwork(_filename);
+}
+
+LibtorchTorchScriptNeuralNet::LibtorchTorchScriptNeuralNet(const std::string & filename)
+{
+  loadNeuralNetwork(filename);
 }
 
 void

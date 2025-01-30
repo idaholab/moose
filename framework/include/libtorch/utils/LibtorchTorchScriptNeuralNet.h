@@ -24,14 +24,20 @@ namespace Moose
 class LibtorchTorchScriptNeuralNet : public torch::jit::script::Module, public LibtorchNeuralNetBase
 {
 public:
+
   /**
    * Construct using a filename which contains the source code in torchscript format
-   * @param filename The number of output neurons
+   */
+  LibtorchTorchScriptNeuralNet();
+
+  /**
+   * Construct using a filename which contains the source code in torchscript format
+   * @param filename The name of the file that contains the neural net
    */
   LibtorchTorchScriptNeuralNet(const std::string & filename);
 
-  /// Return the name of the neural network
-  const std::string & filename() const { return _filename; }
+  /// Construct the neural network
+  void loadNeuralNetwork(const std::string & filename);
 
   /**
    * Overriding the forward substitution function for the neural network, unfortunately
@@ -39,14 +45,6 @@ public:
    * @param x Input tensor for the evaluation
    */
   virtual torch::Tensor forward(torch::Tensor & x) override;
-
-protected:
-  /// Name of the torchscript containing the neural network
-  const std::string _filename;
-
-private:
-  /// Construct the neural network
-  void loadNeuralNetwork(const std::string & filename);
 };
 
 }
