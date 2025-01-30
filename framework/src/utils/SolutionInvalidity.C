@@ -18,6 +18,7 @@
 #include <chrono>
 #include <memory>
 #include <timpi/parallel_sync.h>
+#include <numeric>
 
 // libMesh Includes
 #include "libmesh/parallel_algebra.h"
@@ -76,7 +77,7 @@ SolutionInvalidity::resetSolutionInvalidTimeStep()
 {
   // Reset that we have synced because we're on a new iteration
   _has_synced = false;
-  resetSolutionInvalidCurrentIteration();
+
   for (auto & entry : _counts)
     entry.current_timestep_counts = 0;
 }
@@ -98,7 +99,21 @@ SolutionInvalidity::solutionInvalidAccumulationTimeStep(const unsigned int times
           entry.timestep_counts.back().timestep_index != timestep_index)
         entry.timestep_counts.emplace_back(timestep_index);
       entry.timestep_counts.back().counts = entry.current_timestep_counts;
+      entry.total_counts += entry.current_timestep_counts;
     }
+}
+
+void
+SolutionInvalidity::computeTotalCounts()
+{
+  mooseAssert(_has_synced, "Has not synced");
+
+  for (auto & entry : _counts)
+  {
+    entry.total_counts = 0;
+    for (auto & time_counts : entry.timestep_counts)
+      entry.total_counts += time_counts.counts;
+  }
 }
 
 void
@@ -106,6 +121,13 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 {
   console << "\nSolution Invalid Warnings:\n";
   summaryTable().print(console);
+}
+
+void
+SolutionInvalidity::printHistory(const ConsoleStream & console) const
+{
+  console << "\nSolution Invalid Warnings:\n";
+  transientTable().print(console);
 }
 
 void
@@ -121,11 +143,12 @@ SolutionInvalidity::syncIteration()
   for (const auto id : index_range(_counts))
   {
     auto & entry = _counts[id];
-    if (entry.counts)
+    if (entry.current_counts)
     {
       const auto & info = _solution_invalidity_registry.item(id);
-      data_to_send[0].emplace_back(info.object_type, info.message, info.warning, entry.counts);
-      entry.counts = 0;
+      data_to_send[0].emplace_back(
+          info.object_type, info.message, info.warning, entry.current_counts);
+      entry.current_counts = 0;
     }
   }
 
@@ -158,7 +181,7 @@ SolutionInvalidity::syncIteration()
       if (_counts.size() <= main_id)
         _counts.resize(main_id + 1);
 
-      _counts[main_id].counts += counts;
+      _counts[main_id].current_counts += counts;
 
       if (warning)
         _has_solution_warning = true;
@@ -213,14 +236,56 @@ SolutionInvalidity::summaryTable() const
     for (const auto id : index_range(_counts))
     {
       const auto & entry = _counts[id];
-      if (!entry.counts.empty())
+      if (entry.current_counts)
       {
         const auto & info = _solution_invalidity_registry.item(id);
-        vtable.addRow(info.object_type,             // Object Type
-                      entry.counts.back(),          // Converged Iteration Warnings
-                      entry.timestep_counts.back(), // Latest Time Step Warnings
-                      entry.total_counts.back(),    // Total Iteration Warnings
-                      info.message                  // Message
+        vtable.addRow(info.object_type,              // Object Type
+                      entry.current_counts,          // Converged Iteration Warnings
+                      entry.current_timestep_counts, // Latest Time Step Warnings
+                      entry.total_counts,            // Total Iteration Warnings
+                      info.message                   // Message
+        );
+      }
+    }
+  }
+
+  return vtable;
+}
+
+SolutionInvalidity::TimeTable
+SolutionInvalidity::transientTable() const
+{
+  mooseAssert(_has_synced, "Has not synced");
+
+  TimeTable vtable({"Object", "Time", "Timestep Count", "Total Count"}, 4);
+
+  vtable.setColumnFormat({
+      VariadicTableColumnFormat::AUTO, // Object information
+      VariadicTableColumnFormat::AUTO, // Simulation Time Step
+      VariadicTableColumnFormat::AUTO, // Latest Time Step Warnings
+      VariadicTableColumnFormat::AUTO, // Total Iteration Warnings
+  });
+
+  vtable.setColumnPrecision({
+      1, // Object information
+      0, // Simulation Time Step
+      0, // Latest Time Step Warnings
+      0, // Total Iteration Warnings
+  });
+
+  if (processor_id() == 0)
+  {
+
+    for (const auto id : index_range(_counts))
+    {
+      const auto & entry = _counts[id];
+      for (const auto time_step : index_range(entry.timestep_counts))
+      {
+        const auto & info = _solution_invalidity_registry.item(id);
+        vtable.addRow(info.object_type + " : " + info.message,         // Object information
+                      entry.timestep_counts[time_step].timestep_index, // Simulation Time Step
+                      entry.timestep_counts[time_step].counts,         // Latest Time Step Warnings
+                      entry.total_counts                               // Total Iteration Warnings
         );
       }
     }
@@ -236,7 +301,7 @@ dataStore(std::ostream & stream,
           void * context)
 {
   dataStore(stream, timestep_counts.timestep_index, context);
-  dataStore(stream, timestep_counts.current_timestep_counts, context);
+  dataStore(stream, timestep_counts.counts, context);
 }
 
 // Define data load structure for TimestepCounts
@@ -246,13 +311,13 @@ dataLoad(std::istream & stream,
          void * context)
 {
   dataLoad(stream, timestep_counts.timestep_index, context);
-  dataLoad(stream, timestep_counts.current_timestep_counts, context);
+  dataLoad(stream, timestep_counts.counts, context);
 }
 
 void
 dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context)
 {
-  solution_invalidity.sync();
+  solution_invalidity.syncIteration();
 
   if (solution_invalidity.processor_id() != 0)
     return;
@@ -271,7 +336,10 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
     dataStore(stream, type, context);
     dataStore(stream, message, context);
     dataStore(stream, warning, context);
-    dataStore(stream, entry.timestep_counts, context);
+    dataStore(stream, entry.current_counts, context);
+    dataStore(stream, entry.current_timestep_counts, context);
+    // dataStore(stream, entry.timestep_counts, context);
+    dataStore(stream, entry.total_counts, context);
   }
 }
 
@@ -307,6 +375,9 @@ dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void *
       solution_invalidity._counts.resize(id + 1);
 
     const auto & entry = solution_invalidity._counts[id];
-    dataLoad(stream, entry.timestep_counts, context);
+    dataLoad(stream, entry.current_counts, context);
+    dataLoad(stream, entry.current_timestep_counts, context);
+    // dataLoad(stream, entry.timestep_counts, context);
+    dataLoad(stream, entry.total_counts, context);
   }
 }

@@ -80,6 +80,9 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
   void solutionInvalidAccumulationTimeStep(const unsigned int timestep_index);
 
+  /// Compute the total number of solution invalid occurrences
+  void computeTotalCounts();
+
   /// Struct used in InvalidCounts for storing the time history of invalid occurrences
   struct TimestepCounts
   {
@@ -93,6 +96,7 @@ public:
   {
     unsigned int current_counts = 0;
     unsigned int current_timestep_counts = 0;
+    unsigned int total_counts = 0;
     std::vector<TimestepCounts> timestep_counts;
   };
 
@@ -104,6 +108,12 @@ public:
    * @param console The output stream to output to
    */
   void print(const ConsoleStream & console) const;
+
+  /**
+   * Print the time history table of Solution Invalid warnings
+   * @param console The output stream to output to
+   */
+  void printHistory(const ConsoleStream & console) const;
 
   /**
    * Immediately print the section and message for debug purpose
@@ -132,6 +142,11 @@ private:
 
   /// Build a VariadicTable for solution invalidity
   FullTable summaryTable() const;
+
+  typedef VariadicTable<std::string, unsigned long int, unsigned long int, unsigned long int>
+      TimeTable;
+
+  TimeTable transientTable() const;
 
   /// Create a registry to keep track of the names and occurrences of the solution invalidity
   SolutionInvalidityRegistry & _solution_invalidity_registry;
