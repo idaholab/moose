@@ -9,12 +9,12 @@
 
 [Mesh]
   [sub_channel]
-    type = DetailedQuadSubChannelMeshGenerator
+    type = SCMDetailedQuadSubChannelMeshGenerator
     gap = 0.1
   []
 
   [fuel_pins]
-    type = DetailedQuadPinMeshGenerator
+    type = SCMDetailedQuadPinMeshGenerator
     input = sub_channel
   []
 []

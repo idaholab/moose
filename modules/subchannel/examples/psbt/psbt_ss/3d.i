@@ -1,6 +1,6 @@
 [Mesh]
   [subchannel]
-    type = DetailedQuadSubChannelMeshGenerator
+    type = SCMDetailedQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
     n_cells = 20
@@ -11,7 +11,7 @@
   []
 
   [fuel_pins]
-    type = DetailedQuadPinMeshGenerator
+    type = SCMDetailedQuadPinMeshGenerator
     input = subchannel
     nx = 6
     ny = 6

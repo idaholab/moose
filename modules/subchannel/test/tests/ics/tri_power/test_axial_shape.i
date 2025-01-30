@@ -3,7 +3,7 @@ length = 1.0
 
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 10
     flat_to_flat = 0.60

@@ -25,7 +25,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 50
     flat_to_flat = ${inner_duct_in}
@@ -40,7 +40,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 
   [fuel_pins]
-    type = TriPinMeshGenerator
+    type = SCMTriPinMeshGenerator
     input = subchannel
     nrings = ${n_rings}
     n_cells = 50

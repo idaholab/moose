@@ -11,10 +11,10 @@
 
 [Mesh]
   [subchannel]
-    type = DetailedQuadSubChannelMeshGenerator
+    type = SCMDetailedQuadSubChannelMeshGenerator
   []
   [pins]
-    type = DetailedQuadPinMeshGenerator
+    type = SCMDetailedQuadPinMeshGenerator
     input = subchannel
   []
 []

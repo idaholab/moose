@@ -3,7 +3,7 @@ P_out = 101325 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     nx = 2
     ny = 2
     n_cells = 10
@@ -16,7 +16,7 @@ P_out = 101325 # Pa
   []
 
   [fuel_pins]
-    type = QuadPinMeshGenerator
+    type = SCMQuadPinMeshGenerator
     input = sub_channel
     nx = 2
     ny = 2

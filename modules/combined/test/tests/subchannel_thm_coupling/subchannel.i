@@ -17,7 +17,7 @@ heated_length = 1.0
 ###################################################
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = ${n_cells}
     flat_to_flat = ${inner_duct_in}
@@ -31,7 +31,7 @@ heated_length = 1.0
   []
 
   [fuel_pins]
-    type = TriPinMeshGenerator
+    type = SCMTriPinMeshGenerator
     input = subchannel
     nrings = ${n_rings}
     n_cells = ${n_cells}

@@ -7,7 +7,7 @@ mass_flux_in = ${fparse 1e+6 * 16.95 / 3600.}
 P_out = 14.72e6 # Pa
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
     n_cells = 50
@@ -20,7 +20,7 @@ P_out = 14.72e6 # Pa
   []
 
   [fuel_pins]
-    type = QuadPinMeshGenerator
+    type = SCMQuadPinMeshGenerator
     input = sub_channel
     nx = 6
     ny = 6

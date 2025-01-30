@@ -175,7 +175,7 @@ public:
                            Real assembly_pitch,
                            Point center);
 
-  friend class TriInterWrapperMeshGenerator;
+  friend class SCMTriInterWrapperMeshGenerator;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;

@@ -5,7 +5,7 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 50
     flat_to_flat = 3.41e-2
@@ -21,7 +21,7 @@ P_out = 2.0e5 # Pa
   []
 
   [fuel_pins]
-    type = TriPinMeshGenerator
+    type = SCMTriPinMeshGenerator
     input = subchannel
     nrings = 3
     n_cells = 50

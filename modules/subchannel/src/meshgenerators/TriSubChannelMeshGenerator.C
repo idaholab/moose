@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TriSubChannelMeshGenerator.h"
+#include "SCMTriSubChannelMeshGenerator.h"
 #include "TriSubChannelMesh.h"
 #include <cmath>
 #include "libmesh/edge_edge2.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("SubChannelApp", TriSubChannelMeshGenerator);
+registerMooseObject("SubChannelApp", SCMTriSubChannelMeshGenerator);
 
 InputParameters
-TriSubChannelMeshGenerator::validParams()
+SCMTriSubChannelMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
@@ -54,7 +54,7 @@ TriSubChannelMeshGenerator::validParams()
   return params;
 }
 
-TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & params)
+SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
     _heated_length(getParam<Real>("heated_length")),
@@ -749,7 +749,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
 }
 
 std::unique_ptr<MeshBase>
-TriSubChannelMeshGenerator::generate()
+SCMTriSubChannelMeshGenerator::generate()
 {
   auto mesh_base = buildMeshBaseObject();
 

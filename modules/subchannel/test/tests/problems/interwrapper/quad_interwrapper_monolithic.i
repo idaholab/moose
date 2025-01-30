@@ -4,7 +4,7 @@ P_out = 4.923e6 # Pa
 
 [QuadInterWrapperMesh]
   [sub_channel]
-    type = QuadInterWrapperMeshGenerator
+    type = SCMQuadInterWrapperMeshGenerator
     nx = 5
     ny = 5
     n_cells = 10

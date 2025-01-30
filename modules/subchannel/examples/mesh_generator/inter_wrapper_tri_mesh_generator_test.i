@@ -4,7 +4,7 @@ P_out = 4.923e6 # Pa
 
 [TriInterWrapperMesh]
   [sub_channel]
-    type = TriInterWrapperMeshGenerator
+    type = SCMTriInterWrapperMeshGenerator
     nrings = 4
     n_cells = 50
     flat_to_flat = 0.16

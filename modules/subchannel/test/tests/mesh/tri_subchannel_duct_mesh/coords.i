@@ -8,7 +8,7 @@
 
 [TriSubChannelMesh]
   [sub_channel]
-    type = TriSubChannelMeshGenerator
+    type = SCMTriSubChannelMeshGenerator
     pin_diameter = 0.1
     dwire = 0.03
     hwire = 0.3
@@ -17,7 +17,7 @@
   []
 
   [duct]
-    type = TriDuctMeshGenerator
+    type = SCMTriDuctMeshGenerator
     input = sub_channel
   []
 []

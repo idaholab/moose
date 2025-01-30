@@ -6,7 +6,7 @@ pin_diameter = 0.00950
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = QuadSubChannelMeshGenerator
+    type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
     n_cells = 3
@@ -19,7 +19,7 @@ pin_diameter = 0.00950
   []
 
   [fuel_pins]
-    type = QuadPinMeshGenerator
+    type = SCMQuadPinMeshGenerator
     input = sub_channel
     nx = 6
     ny = 6
