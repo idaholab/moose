@@ -343,18 +343,13 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
-  [2ph_ncg_p_T_sat]
+  [2ph_ncg_partial_pressure_p_T]
     type = RunApp
-    input = '2ph_ncg_p_T.i'
-    cli_args = "
-      FluidPropertiesInterrogator/fp=fp_2phase_ncg_partial_pressure
-      FluidPropertiesInterrogator/p=40e3
-      FluidPropertiesInterrogator/T=300"
+    input = '2ph_ncg_partial_pressure_p_T.i'
     allow_test_objects = true
-    allow_warnings = true
     method = 'OPT'
     threading = '!pthreads'
-    expect_out = 'Mass fraction 0:\s+0.8463343673'
+    expect_out = 'Mass fraction 0:\s+0.9930237384'
     requirement = "The fluid properties interrogator shall output two-phase and static-state, "
       "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object when the NCG mass fraction is not provided."
     issues = '#28335'

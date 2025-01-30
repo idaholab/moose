@@ -14,13 +14,4 @@
     type = TestTwoPhaseNCGFluidProperties
     fp_ncgs = 'fp_nitrogen'
   []
-
-  [fp_2phase]
-    type = StiffenedGasTwoPhaseFluidProperties
-  []
-  [fp_2phase_ncg_partial_pressure]
-    type = TwoPhaseNCGPartialPressureFluidProperties
-    fp_2phase = fp_2phase
-    fp_ncg = fp_nitrogen
-  []
 []

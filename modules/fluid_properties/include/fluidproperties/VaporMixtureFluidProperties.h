@@ -89,6 +89,8 @@
                                                                                                    \
   propfuncAD(want, prop1, prop2)
 
+class SinglePhaseFluidProperties;
+
 /**
  * Base class for fluid properties of vapor mixtures
  *
@@ -105,6 +107,19 @@ public:
   VaporMixtureFluidProperties(const InputParameters & parameters);
   virtual ~VaporMixtureFluidProperties();
 
+  /**
+   * Gets the primary component single-phase fluid properties
+   */
+  virtual const SinglePhaseFluidProperties & getPrimaryFluidProperties() const = 0;
+
+  /**
+   * Gets a secondary component single-phase fluid properties
+   *
+   * @param[in] i  Index of the secondary fluid properties (0 is first secondary)
+   */
+  virtual const SinglePhaseFluidProperties &
+  getSecondaryFluidProperties(unsigned int i = 0) const = 0;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
   // clang-format off
@@ -113,7 +128,8 @@ public:
   propfunc(p, v, e)
   propfunc(T, v, e)
   propfunc(c, v, e)
-  propfunc(rho, p, T)
+  propfunc(v, p, T)
+  propfunc(rho, p, T) // TODO: deprecate this one in favor of v(p,T)
   propfunc(e, p, T)
   propfunc(s, p, T)
   propfunc(c, p, T)
@@ -132,7 +148,15 @@ public:
       /**
        * Returns the number of secondary vapors
        */
-      virtual unsigned int getNumberOfSecondaryVapors() const = 0;
+      virtual unsigned int getNumberOfSecondaryVapors() const
+  {
+    return numberOfComponents() - 1;
+  }
+
+  /**
+   * Returns the number of components in the mixture
+   */
+  virtual unsigned int numberOfComponents() const = 0;
 
   /**
    * Computes the mass fraction of the primary vapor given mass fractions of the
@@ -177,3 +201,17 @@ protected:
 };
 
 #pragma GCC diagnostic pop
+
+// Macro to avoid compilation issues associated with overloading virtual methods
+#define usingVaporMixtureFluidPropertiesMembers                                                    \
+  using VaporMixtureFluidProperties::p_from_v_e;                                                   \
+  using VaporMixtureFluidProperties::T_from_v_e;                                                   \
+  using VaporMixtureFluidProperties::c_from_v_e;                                                   \
+  using VaporMixtureFluidProperties::rho_from_p_T;                                                 \
+  using VaporMixtureFluidProperties::e_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::c_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::cp_from_p_T;                                                  \
+  using VaporMixtureFluidProperties::cv_from_p_T;                                                  \
+  using VaporMixtureFluidProperties::mu_from_p_T;                                                  \
+  using VaporMixtureFluidProperties::k_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::e_from_p_rho
