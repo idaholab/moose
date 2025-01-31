@@ -19,6 +19,7 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, intTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, stringTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, versionTest);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, multipleTest);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, parseFail);
 #endif
 
 namespace Moose
@@ -74,6 +75,7 @@ private:
   FRIEND_TEST(::CapabilitiesTest, stringTest);
   FRIEND_TEST(::CapabilitiesTest, versionTest);
   FRIEND_TEST(::CapabilitiesTest, multipleTest);
+  FRIEND_TEST(::CapabilitiesTest, parseFail);
 #endif
 };
 

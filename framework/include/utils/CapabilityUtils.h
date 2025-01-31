@@ -35,7 +35,8 @@ enum CheckState
   POSSIBLE_FAIL = 1,
   UNKNOWN = 2,
   POSSIBLE_PASS = 3,
-  CERTAIN_PASS = 4
+  CERTAIN_PASS = 4,
+  PARSE_FAIL = 5
 };
 
 /// A capability can have a bool, int, or string value
