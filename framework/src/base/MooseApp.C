@@ -3356,8 +3356,8 @@ MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 #endif
 
 void
-MooseApp::outputMachineReadableData(const std::string & param const,
-                                    std::string & start_marker,
+MooseApp::outputMachineReadableData(const std::string & param,
+                                    const std::string & start_marker,
                                     const std::string & end_marker,
                                     const std::string & data) const
 {
