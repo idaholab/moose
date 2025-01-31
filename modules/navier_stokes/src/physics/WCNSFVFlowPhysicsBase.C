@@ -245,9 +245,9 @@ WCNSFVFlowPhysicsBase::actOnAdditionalTasks()
 void
 WCNSFVFlowPhysicsBase::addFVBCs()
 {
-  addINSInletBC();
-  addINSOutletBC();
-  addINSWallsBC();
+  addInletBC();
+  addOutletBC();
+  addWallsBC();
 }
 
 void

@@ -71,18 +71,17 @@ protected:
    * If the material properties are not constant, some of these can be used for
    * weakly-compressible simulations as well.
    */
-  virtual void addINSEnergyTimeKernels() = 0;
-  virtual void addWCNSEnergyTimeKernels() = 0;
-  virtual void addINSEnergyHeatConductionKernels() = 0;
-  virtual void addINSEnergyAdvectionKernels() = 0;
-  virtual void addINSEnergyAmbientConvection() = 0;
-  virtual void addINSEnergyExternalHeatSource() = 0;
+  virtual void addEnergyTimeKernels() = 0;
+  virtual void addEnergyHeatConductionKernels() = 0;
+  virtual void addEnergyAdvectionKernels() = 0;
+  virtual void addEnergyAmbientConvection() = 0;
+  virtual void addEnergyExternalHeatSource() = 0;
 
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
-  virtual void addINSEnergyInletBC() = 0;
-  virtual void addINSEnergyWallBC() = 0;
-  virtual void addINSEnergyOutletBC() = 0;
+  virtual void addEnergyInletBC() = 0;
+  virtual void addEnergyWallBC() = 0;
+  virtual void addEnergyOutletBC() = 0;
 
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar

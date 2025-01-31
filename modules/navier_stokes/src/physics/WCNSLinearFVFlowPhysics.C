@@ -151,28 +151,28 @@ WCNSLinearFVFlowPhysics::addFVKernels()
     return;
 
   // Pressure correction equation: divergence of momentum
-  addINSPressureCorrectionKernels();
+  addPressureCorrectionKernels();
 
   // Momentum equation: time derivative
   if (isTransient())
     mooseError("Transient terms not implemented");
 
   // Momentum equation: flux terms
-  addINSMomentumFluxKernels();
+  addMomentumFluxKernels();
 
   // Momentum equation: pressure term
-  addINSMomentumPressureKernels();
+  addMomentumPressureKernels();
 
   // Momentum equation: gravity source term
-  addINSMomentumGravityKernels();
+  addMomentumGravityKernels();
 
   // Momentum equation: boussinesq approximation
   if (getParam<bool>("boussinesq_approximation"))
-    addINSMomentumBoussinesqKernels();
+    addMomentumBoussinesqKernels();
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSPressureCorrectionKernels()
+WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
 {
   {
     std::string kernel_type = "LinearFVAnisotropicDiffusion";
@@ -201,7 +201,7 @@ WCNSLinearFVFlowPhysics::addINSPressureCorrectionKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumFluxKernels()
+WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";
@@ -228,7 +228,7 @@ WCNSLinearFVFlowPhysics::addINSMomentumFluxKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumPressureKernels()
+WCNSLinearFVFlowPhysics::addMomentumPressureKernels()
 {
   std::string kernel_type = "LinearFVMomentumPressure";
   std::string kernel_name = prefix() + "ins_momentum_pressure_";
@@ -246,7 +246,7 @@ WCNSLinearFVFlowPhysics::addINSMomentumPressureKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
+WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
 {
   if (parameters().isParamValid("gravity") && !_solve_for_dynamic_pressure)
   {
@@ -269,13 +269,13 @@ WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumBoussinesqKernels()
+WCNSLinearFVFlowPhysics::addMomentumBoussinesqKernels()
 {
   paramError("boussinesq_approximation", "Currently not implemented.");
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSInletBC()
+WCNSLinearFVFlowPhysics::addInletBC()
 {
   // Check the size of the BC parameters
   unsigned int num_velocity_functor_inlets = 0;
@@ -344,7 +344,7 @@ WCNSLinearFVFlowPhysics::addINSInletBC()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSOutletBC()
+WCNSLinearFVFlowPhysics::addOutletBC()
 {
   // Check the BCs size
   unsigned int num_pressure_outlets = 0;
@@ -395,7 +395,7 @@ WCNSLinearFVFlowPhysics::addINSOutletBC()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSWallsBC()
+WCNSLinearFVFlowPhysics::addWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
 
