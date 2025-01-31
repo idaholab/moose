@@ -91,6 +91,7 @@ SCMTriPowerIC::initialSetup()
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
   _estimate_power.resize(n_pins, 1);
+  _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
     // Compute the height of this element.
