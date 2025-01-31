@@ -1382,18 +1382,12 @@ MooseApp::setupOptions()
         return;
       }
       if (status == CapabilityUtils::UNKNOWN)
-      {
         mooseError("Required capabilities '",
                    required_capabilities,
                    "' are not specific enough. A comparison test is performed on an undefined "
                    "capability. Disambiguate this requirement by adding an existence/non-existence "
                    "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
                    "or '!unknown | unknown<1.2.3'");
-        _ready_to_exit = true;
-        // we use code 77 as "skip" in the Testharness
-        _exit_code = 77;
-        return;
-      }
     }
 
     if (isParamSetByUser("mesh_only"))
