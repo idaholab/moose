@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TorchScriptUserObject.h"
-#include "LibtorchUtils.h"
 
 InputParameters
 TorchScriptUserObject::validParams()
@@ -30,16 +29,10 @@ void TorchScriptUserObject::execute()
   _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(_filename);
 }
 
-void TorchScriptUserObject::evaluate(const std::vector<Real> & input, std::vector<Real> & output)
+torch::Tensor TorchScriptUserObject::evaluate(torch::Tensor & input) const
 {
   mooseAssert(_nn, "We need a neural network to evalute!");
-
-  torch::Tensor converted_input;
-  // This is sad, but the converter function needs this nonconst in libtorch
-  std::vector<Real> & nonconst_input = const_cast<std::vector<Real> &>(input);
-  LibtorchUtils::vectorToTensor<Real>(nonconst_input, converted_input, /*detach*/true);
-  torch::Tensor result = _nn->forward(converted_input);
-  LibtorchUtils::tensorToVector<Real>(result, output);
+  return _nn->forward(input);
 }
 
 
