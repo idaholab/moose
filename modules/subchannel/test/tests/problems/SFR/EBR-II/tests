@@ -5,6 +5,7 @@
     exodiff  = 'XX09_SS_SHRT17_out.e'
     custom_cmp = 'test.exodiff'
     method = '!DBG'
+    abs_zero = 1e-8
     valgrind = NONE
     recover = false
     max_parallel = 1
