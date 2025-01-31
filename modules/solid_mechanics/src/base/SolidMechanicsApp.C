@@ -200,6 +200,13 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 SolidMechanicsApp::registerApps()
 {
+  const std::string doc = "New Engineering Material model Library, version 2 ";
+#ifdef NEML2_ENABLED
+  addCapability("neml2", true, doc + "is available.");
+#else
+  addCapability("neml2", false, doc + "is not available.");
+#endif
+
   registerApp(SolidMechanicsApp);
 }
 
