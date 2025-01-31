@@ -27,12 +27,14 @@ public:
   virtual void execute() override;
   virtual void finalize() override {};
 
+  const std::shared_ptr<Moose::LibtorchTorchScriptNeuralNet> & network() {return _nn;}
+
   /**
    * Function to evaluate the neural network at certain input
-   * @param input The input vector
+   * @param input The input vector (why not const, because torch needs nonconst sadly)
    * @param output Storage for the outputs
    */
-  void evaluate(const std::vector<Real> & input, std::vector<Real> & output);
+  torch::Tensor evaluate(torch::Tensor & input) const;
 
 protected:
 
