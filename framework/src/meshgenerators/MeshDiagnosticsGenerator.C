@@ -144,9 +144,14 @@ MeshDiagnosticsGenerator::generate()
   // This deliberately does not trust the mesh to know whether it's already prepared or not
   mesh->prepare_for_use();
 
-  // convert BoundaryNames to IDs and sort
-  _watertight_boundaries = prepareBoundaries(mesh);
-  //_watertight_boundaries = mesh->getBoundaryIDs(_watertight_boundary_names);
+  // check that specified boundary is valid, convert BoundaryNames to BoundaryIDs, and sort
+  for (const auto & boundary_name : _watertight_boundary_names)
+  {
+    if (!MooseMeshUtils::hasBoundaryName(*mesh, boundary_name))
+      mooseError("User specified boundary_to_check \'", boundary_name, "\' does not exist");
+  }
+  _watertight_boundaries = MooseMeshUtils::getBoundaryIDs(*mesh, _watertight_boundary_names, false);
+  std::sort(_watertight_boundaries.begin(), _watertight_boundaries.end());
 
   if (_check_sidesets_orientation != "NO_CHECK")
     checkSidesetsOrientation(mesh);
@@ -182,22 +187,6 @@ MeshDiagnosticsGenerator::generate()
     checkNonMatchingEdges(mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
-}
-
-std::vector<BoundaryID>
-MeshDiagnosticsGenerator::prepareBoundaries(const std::unique_ptr<MeshBase> & mesh) const
-{
-  std::vector<BoundaryID> boundary_ids;
-  if (!_watertight_boundary_names.empty())
-  {
-    for (const auto & name : _watertight_boundary_names)
-    {
-      BoundaryID id = MooseMeshUtils::getBoundaryID(name, *mesh);
-      boundary_ids.push_back(id);
-    }
-    std::sort(boundary_ids.begin(), boundary_ids.end());
-  }
-  return boundary_ids;
 }
 
 void
@@ -339,7 +328,6 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
   boundary_info.build_side_list();
   const auto sideset_map = boundary_info.get_sideset_map();
   unsigned int num_faces_without_sideset = 0;
-  //
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
@@ -407,10 +395,6 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   unsigned int num_nodes_without_nodeset = 0;
   std::set<dof_id_type> checked_nodes_id;
 
-  // Make copy of _watertight_boundaries and sort it for later use
-  std::vector<BoundaryID> boundary_copy = _watertight_boundaries;
-  std::sort(boundary_copy.begin(), boundary_copy.end());
-
   for (const auto elem : mesh->active_element_ptr_range())
   {
     for (const auto i : elem->side_index_range())
@@ -430,7 +414,7 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
           std::vector<boundary_id_type> boundary_ids;
           boundary_info.boundary_ids(node, boundary_ids);
           std::vector<boundary_id_type> intersection =
-              findBoundaryOverlap(boundary_copy, boundary_ids);
+              findBoundaryOverlap(_watertight_boundaries, boundary_ids);
 
           bool no_specified_ids = boundary_info.n_boundary_ids(node) == 0;
           bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();

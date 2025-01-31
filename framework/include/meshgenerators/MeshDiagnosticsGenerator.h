@@ -66,9 +66,6 @@ private:
    */
   void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool problem_detected) const;
 
-  /// Convert bounday names to IDs and sort
-  std::vector<BoundaryID> prepareBoundaries(const std::unique_ptr<MeshBase> & mesh) const;
-
   /// whether to check that sidesets are consistently oriented using neighbor subdomains
   const MooseEnum _check_sidesets_orientation;
   /// whether to check that each external side is assigned to a sideset
