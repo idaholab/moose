@@ -371,7 +371,7 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     NonlinearImplicitSystem & momentum_system =
         libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copySolutionsBackwards();
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
 
   return its_normalized_residuals;

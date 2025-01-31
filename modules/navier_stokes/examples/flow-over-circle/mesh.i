@@ -214,4 +214,9 @@
     normal = '1 0 0'
     new_sideset_name = 'right_boundary'
   []
+  [sideset_removal]
+    input = create_fused_right_sideset
+    type = BoundaryDeletionGenerator
+    boundary_names = 'bottom top left right middle_bottom middle_top bottom_top top_bottom'
+  []
 []

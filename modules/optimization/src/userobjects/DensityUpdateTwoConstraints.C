@@ -100,7 +100,7 @@ DensityUpdateTwoConstraints::DensityUpdateTwoConstraints(const InputParameters &
                  "This parameter needs to be provided when including thermal sensitivity.");
   }
 
-  auto transient = dynamic_cast<Transient *>(_app.getExecutioner());
+  auto transient = dynamic_cast<TransientBase *>(_app.getExecutioner());
 
   if (!transient && _adaptive_move)
     paramError("adaptive_move", "Cannot find a transient executioner for adaptive bisection move.");

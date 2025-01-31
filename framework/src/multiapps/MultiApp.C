@@ -652,9 +652,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
   // Get a transient executioner to get a user-set tolerance
   Real timestep_tol = 1e-13;
-  if (dynamic_cast<Transient *>(_fe_problem.getMooseApp().getExecutioner()))
+  if (dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner()))
     timestep_tol =
-        dynamic_cast<Transient *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
+        dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
 
   // First, see if any Apps need to be reset
   for (unsigned int i = 0; i < _reset_times.size(); i++)

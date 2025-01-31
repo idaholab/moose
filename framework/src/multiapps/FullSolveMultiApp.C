@@ -10,7 +10,7 @@
 #include "FullSolveMultiApp.h"
 #include "LayeredSideDiffusiveFluxAverage.h"
 #include "Executioner.h"
-#include "Transient.h"
+#include "TransientBase.h"
 #include "Console.h"
 
 // libMesh
@@ -72,7 +72,7 @@ FullSolveMultiApp::initialSetup()
 
       if (_ignore_diverge)
       {
-        Transient * tex = dynamic_cast<Transient *>(ex);
+        TransientBase * tex = dynamic_cast<TransientBase *>(ex);
         if (tex && tex->parameters().get<bool>("error_on_dtmin"))
           mooseError("Requesting to ignore failed solutions, but 'Executioner/error_on_dtmin' is "
                      "true in sub-application. Set this parameter to false in sub-application to "

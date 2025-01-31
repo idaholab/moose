@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ProgressOutput.h"
-#include "Transient.h"
+#include "TransientBase.h"
 
 registerMooseObjectAliased("MooseApp", ProgressOutput, "Progress");
 
@@ -29,7 +29,7 @@ ProgressOutput::validParams()
 
 ProgressOutput::ProgressOutput(const InputParameters & parameters)
   : Output(parameters),
-    _transient_executioner(dynamic_cast<Transient *>(_app.getExecutioner())),
+    _transient_executioner(dynamic_cast<TransientBase *>(_app.getExecutioner())),
     _use_filename(getParam<bool>("use_filename")),
     _length(isParamValid("progress_bar_width") ? getParam<unsigned int>("progress_bar_width")
                                                : MooseUtils::getTermWidth(true) - 2)

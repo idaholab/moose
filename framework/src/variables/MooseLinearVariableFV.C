@@ -173,9 +173,14 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   }
   // If no boundary condition is defined but we are evaluating on a boundary, just return the
   // element value
-  else if (face.face_side)
+  else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
   {
-    const auto & elem_info = this->_mesh.elemInfo(face.face_side->id());
+    const auto & elem_info = this->_mesh.elemInfo(fi->elemPtr()->id());
+    return getElemValue(elem_info, state);
+  }
+  else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+  {
+    const auto & elem_info = this->_mesh.elemInfo(fi->neighborPtr()->id());
     return getElemValue(elem_info, state);
   }
   else
