@@ -8,7 +8,7 @@
     input = 'error.i'
     expect_err = 'To debug NEML2 related issues'
     collections = 'SYSTEM'
-    required_submodule = 'contrib/neml2'
+    capabilities = 'neml2'
     libtorch = true
     valgrind = none
   []
@@ -25,7 +25,7 @@
     type = Exodiff
     input = 'parameter.i'
     exodiff = 'parameter_out.e'
-    required_submodule = 'contrib/neml2'
+    capabilities = 'neml2'
     libtorch = true
     recover = false
     valgrind = heavy
@@ -35,7 +35,7 @@
     type = Exodiff
     input = 'custom_model.i'
     exodiff = 'custom_model_out.e'
-    required_submodule = 'contrib/neml2'
+    capabilities = 'neml2'
     libtorch = true
     recover = false
     valgrind = heavy
@@ -49,7 +49,7 @@
       type = Exodiff
       input = 'blocks_same_model.i'
       exodiff = 'blocks_same_model_out.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -59,7 +59,7 @@
       type = Exodiff
       input = 'blocks_different_model.i'
       exodiff = 'blocks_different_model_out.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -74,7 +74,7 @@
       type = Exodiff
       input = 'crystal_plasticity.i'
       exodiff = 'crystal_plasticity.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -84,7 +84,7 @@
       type = Exodiff
       input = 'elasticity.i'
       exodiff = 'elasticity.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -94,7 +94,7 @@
       type = Exodiff
       input = 'viscoplasticity_perfect.i'
       exodiff = 'viscoplasticity_perfect.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -104,7 +104,7 @@
       type = Exodiff
       input = 'viscoplasticity_isoharden.i'
       exodiff = 'viscoplasticity_isoharden.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -114,7 +114,7 @@
       type = Exodiff
       input = 'viscoplasticity_kinharden.i'
       exodiff = 'viscoplasticity_kinharden.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -124,7 +124,7 @@
       type = Exodiff
       input = 'viscoplasticity_isokinharden.i'
       exodiff = 'viscoplasticity_isokinharden.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -134,7 +134,7 @@
       type = Exodiff
       input = 'viscoplasticity_chaboche.i'
       exodiff = 'viscoplasticity_chaboche.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -144,7 +144,7 @@
       type = Exodiff
       input = 'viscoplasticity_radial_return.i'
       exodiff = 'viscoplasticity_radial_return.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -154,7 +154,7 @@
       type = Exodiff
       input = 'rate_independent_plasticity_perfect.i'
       exodiff = 'rate_independent_plasticity_perfect.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -164,7 +164,7 @@
       type = Exodiff
       input = 'rate_independent_plasticity_isoharden.i'
       exodiff = 'rate_independent_plasticity_isoharden.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -174,7 +174,7 @@
       type = Exodiff
       input = 'rate_independent_plasticity_kinharden.i'
       exodiff = 'rate_independent_plasticity_kinharden.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
@@ -184,7 +184,7 @@
       type = Exodiff
       input = 'rate_independent_plasticity_isokinharden.i'
       exodiff = 'rate_independent_plasticity_isokinharden.e'
-      required_submodule = 'contrib/neml2'
+      capabilities = 'neml2'
       libtorch = true
       recover = false
       valgrind = heavy
