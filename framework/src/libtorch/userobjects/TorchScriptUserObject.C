@@ -9,6 +9,8 @@
 
 #include "TorchScriptUserObject.h"
 
+registerMooseObject("MooseApp", TorchScriptUserObject);
+
 InputParameters
 TorchScriptUserObject::validParams()
 {
