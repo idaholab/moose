@@ -11,7 +11,7 @@
     max_threads = 1
     # steady solve
     recover = false
-    capabilities = 'neml2 & libtorch'
+    capabilities = 'neml2'
     issues = '#26920'
   []
 []
