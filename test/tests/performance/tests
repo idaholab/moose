@@ -45,14 +45,14 @@
     [macOS]
        type = RunApp
        input = input.i
-       platform = DARWIN
+       capabilities = 'platform=darwin'
 
        detail = "macOS and"
     []
     [linux]
        type = RunApp
        input = input.i
-       platform = DARWIN
+       capabilities = 'platform=darwin'
 
        detail = "Linux operating systems."
     []

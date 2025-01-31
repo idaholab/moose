@@ -21,7 +21,7 @@
     type = 'Exodiff'
     input = 'fromrestrictedsub_parent.i'
     exodiff = 'fromrestrictedsub_parent_out.e'
-    platform = darwin # Object is sensitive and needs to be evaluated #12800
+    capabilities = 'platform=darwin' # Object is sensitive and needs to be evaluated #12800
 
     design = 'transfers/MultiAppGeometricInterpolationTransfer.md'
     issues = '#1879 #12618'
