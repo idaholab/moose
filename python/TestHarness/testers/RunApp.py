@@ -52,7 +52,6 @@ class RunApp(Tester):
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
         params.addParam('libtorch_devices', ['CPU'], "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS'); default ('CPU')")
-
         return params
 
     def __init__(self, name, params):
@@ -345,34 +344,36 @@ class RunApp(Tester):
 
         return errors
 
-    def testExitCodes(self, moose_dir, options, exit_code, runner_output):
+    def testExitCodes(self, options, exit_code, runner_output):
+        specs = self.specs
+
+        # If we had capability requirements and get an exit 77, it means that the
+        # capability doesn't exist in the binary
+        if specs['capabilities'] and exit_code == 77:
+            self.setStatus(self.skip, "CAPABILITIES")
+            self.addCaveats(specs['capabilities'])
+            return ''
+
         # Don't do anything if we already have a status set
         reason = ''
-        if self.isNoStatus():
-            specs = self.specs
-            # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
-            # since a message to standard error might actually be a real error.  This case should be handled
-            # in the derived class.
-            if exit_code == 77:
-                self.setStatus(self.skip, "CAPABILITIES")
-                self.addCaveats(specs['capabilities'])
-                return ''
-            elif options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
-                reason = 'ERRMSG'
-            elif exit_code == 0 and specs['should_crash'] == True:
-                reason = 'NO CRASH'
-            elif exit_code != 0 and specs['should_crash'] == False and self.shouldExecute():
-                # Let's look at the error code to see if we can perhaps further split this out later with a post exam
-                reason = 'CRASH'
-            # Valgrind runs
-            elif exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in runner_output:
-                reason = 'MEMORY ERROR'
 
-            if reason != '':
-                self.setStatus(self.fail, str(reason))
-                return "\n\nExit Code: " + str(exit_code)
+        # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
+        # since a message to standard error might actually be a real error.  This case should be handled
+        # in the derived class.
+        if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
+            reason = 'ERRMSG'
+        elif exit_code == 0 and specs['should_crash'] == True:
+            reason = 'NO CRASH'
+        elif exit_code != 0 and specs['should_crash'] == False and self.shouldExecute():
+            # Let's look at the error code to see if we can perhaps further split this out later with a post exam
+            reason = 'CRASH'
+        # Valgrind runs
+        elif exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in runner_output:
+            reason = 'MEMORY ERROR'
 
-        # Return anything extra here that we want to tack onto the Output for when it gets printed later
+        if reason:
+            self.setStatus(self.fail, str(reason))
+            return "\n\nExit Code: " + str(exit_code)
         return ''
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
@@ -391,7 +392,8 @@ class RunApp(Tester):
         """
         output = ''
         output += self.testFileOutput(moose_dir, options, runner_output)
-        output += self.testExitCodes(moose_dir, options, exit_code, runner_output)
+        if self.isNoStatus():
+            output += self.testExitCodes(options, exit_code, runner_output)
 
         return output
 
