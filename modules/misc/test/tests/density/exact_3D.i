@@ -1,6 +1,6 @@
 [Mesh]
   [mesh]
-    type = PatchMeshGenerator
+    type = ExamplePatchMeshGenerator
     dim = 3
   []
 []
