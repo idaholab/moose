@@ -523,6 +523,51 @@ processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParam
   setMFFDTypeFromParams(fe_problem, params);
 }
 
+#define checkPrefix(prefix)                                                                        \
+  mooseAssert(prefix[0] == '-',                                                                    \
+              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
+  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
+              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
+  mooseAssert(MooseUtils::isAllLowercase(prefix),                                                  \
+              "PETSc prefixes should be all lower-case. What are you, a crazy person?")
+
+void
+changePetscOptionsPrefix(FEProblemBase & fe_problem,
+                         const std::string & old_prefix,
+                         const std::string & new_prefix)
+{
+  checkPrefix(old_prefix);
+  checkPrefix(new_prefix);
+
+  // Note that we insanely convert petsc options to upper case through MultiMooseEnum
+
+  auto & po = fe_problem.getPetscOptions();
+  std::vector<std::string> new_flags;
+  new_flags.reserve(po.flags.size());
+  for (const auto & possibly_upper_case_flag : po.flags)
+  {
+    auto flag = MooseUtils::toLower(possibly_upper_case_flag);
+    if (!MooseUtils::startsWith(flag, old_prefix))
+      new_flags.push_back(std::move(flag));
+    else
+    {
+      std::string new_flag = flag;
+      MooseUtils::replaceStart(new_flag, old_prefix, new_prefix);
+      new_flags.push_back(std::move(new_flag));
+    }
+  }
+  po.flags = new_flags;
+
+  for (auto & [possibly_upper_case_petsc_option, petsc_option_value] : po.pairs)
+  {
+    auto petsc_option = MooseUtils::toLower(possibly_upper_case_petsc_option);
+    libmesh_ignore(petsc_option_value);
+    if (MooseUtils::startsWith(petsc_option, old_prefix))
+      MooseUtils::replaceStart(petsc_option, old_prefix, new_prefix);
+    possibly_upper_case_petsc_option = std::move(petsc_option);
+  }
+}
+
 void
 storePetscOptions(FEProblemBase & fe_problem,
                   const std::string & prefix,
@@ -603,12 +648,6 @@ setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params
       fe_problem.solverParams(i)._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
 }
-
-#define checkPrefix(prefix)                                                                        \
-  mooseAssert(prefix[0] == '-',                                                                    \
-              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
-  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
-              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'")
 
 template <typename T>
 void
