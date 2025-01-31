@@ -148,3 +148,23 @@ TEST(CapabilitiesTest, multipleTest)
                std::runtime_error);
   EXPECT_THROW(capabilities.check("(unittest2_bool"), std::runtime_error);
 }
+
+TEST(CapabilitiesTest, parseFail)
+{
+  Moose::Capabilities capabilities;
+  const std::string bad_capabilities = "foo bar";
+
+  const auto result = CapabilityUtils::check(bad_capabilities, capabilities._capability_registry);
+  EXPECT_EQ(std::get<0>(result), CapabilityUtils::PARSE_FAIL);
+
+  try
+  {
+    capabilities.check(bad_capabilities);
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    ASSERT_EQ(std::string(err.what()),
+              "Unable to parse requested capabilities '" + bad_capabilities + "'.");
+  }
+}
