@@ -28,11 +28,10 @@
     expect_out = 'Solve Converged'
     recover = false
     # See #24187
-    capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0'
+    capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0 & vtk'
     # Set to >=9.0 once #21449 is resolved
     # VTK diffs via XMLDiff are really fragile
     max_parallel = 1
-    vtk = true
     xmldiff = '2d_diffusion_iga_out_002.pvtu 2d_diffusion_iga_out_002_0.vtu'
 
     requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases and output spline results in VTK format.'
@@ -58,13 +57,11 @@
     input = '2d_diffusion_iga_nosplines.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
     # See #24187
-    capabilities = 'petsc>=3.12.0 & vtk>=9.1'
+    capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0 & vtk'
     # Set to >=9.0 once #21449 is resolved
     # VTK diffs via XMLDiff are really fragile
     max_parallel = 1
-    vtk = true
     xmldiff = '2d_diffusion_iga_nosplines_out_002.pvtu 2d_diffusion_iga_nosplines_out_002_0.vtu'
 
     requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes and output Bernstein-Bezier results in VTK format.'
@@ -91,7 +88,6 @@
     input = '3d_steady_diffusion_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
     # See #24187
     capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0'
     # VTK diffs via XMLDiff are really fragile ... and we can't add an
@@ -139,7 +135,7 @@
     input = '1d_discontinuous_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = '1d_discontinuous_iga_out.e'
 
     requirement = 'The system shall have the ability to find continuous PDE solutions on discontinuous Bezier-Bernstein edges from IsoGeometric Analysis meshes.'
@@ -152,7 +148,7 @@
     input = 'iga_constraint_matrix.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = 'iga_constraint_matrix_out.e'
 
     # Penalty method boundary conditions
@@ -185,7 +181,7 @@
     input = 'iga_constraint_matrix_1d.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = 'iga_constraint_matrix_1d_out.e'
 
     # Penalty method boundary conditions
@@ -223,7 +219,7 @@
     input = '2d_discontinuous_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = '2d_discontinuous_iga_out.e'
 
     requirement = 'The system shall have the ability to find continuous PDE solutions on discontinuous Bezier-Bernstein quads from IsoGeometric Analysis meshes.'
