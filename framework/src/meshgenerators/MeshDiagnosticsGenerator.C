@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshDiagnosticsGenerator.h"
+#include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 #include "MeshCoarseningUtils.h"
 #include "MeshBaseDiagnosticsUtils.h"
@@ -51,6 +52,11 @@ MeshDiagnosticsGenerator::validParams()
       "check_for_watertight_nodesets",
       chk_option,
       "whether to check for external nodes that are not assigned to any nodeset");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundaries_to_check",
+      {},
+      "Names boundaries that should form a watertight envelope around the mesh. Defaults to all "
+      "the boundaries combined.");
   params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
@@ -91,6 +97,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_sidesets_orientation(getParam<MooseEnum>("examine_sidesets_orientation")),
     _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
     _check_watertight_nodesets(getParam<MooseEnum>("check_for_watertight_nodesets")),
+    _watertight_boundary_names(getParam<std::vector<BoundaryName>>("boundaries_to_check")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -137,11 +144,20 @@ MeshDiagnosticsGenerator::generate()
   // This deliberately does not trust the mesh to know whether it's already prepared or not
   mesh->prepare_for_use();
 
+  // check that specified boundary is valid, convert BoundaryNames to BoundaryIDs, and sort
+  for (const auto & boundary_name : _watertight_boundary_names)
+  {
+    if (!MooseMeshUtils::hasBoundaryName(*mesh, boundary_name))
+      mooseError("User specified boundary_to_check \'", boundary_name, "\' does not exist");
+  }
+  _watertight_boundaries = MooseMeshUtils::getBoundaryIDs(*mesh, _watertight_boundary_names, false);
+  std::sort(_watertight_boundaries.begin(), _watertight_boundaries.end());
+
   if (_check_sidesets_orientation != "NO_CHECK")
     checkSidesetsOrientation(mesh);
 
   if (_check_watertight_sidesets != "NO_CHECK")
-    checkWaterTightSidesets(mesh);
+    checkWatertightSidesets(mesh);
 
   if (_check_watertight_nodesets != "NO_CHECK")
     checkWatertightNodesets(mesh);
@@ -297,7 +313,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 }
 
 void
-MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase> & mesh) const
+MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase> & mesh) const
 {
   /*
   Algorithm Overview:
@@ -315,33 +331,38 @@ MeshDiagnosticsGenerator::checkWaterTightSidesets(const std::unique_ptr<MeshBase
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
-    std::vector<std::unique_ptr<Elem>> elem_sides(elem->n_sides());
     for (auto i : elem->side_index_range())
     {
       // Check if side is external
       if (elem->neighbor_ptr(i) == nullptr)
       {
-        // If external check if that side had a sideset
+        // If external get the boundary ids associated with this side
+        std::vector<boundary_id_type> boundary_ids;
         auto side_range = sideset_map.equal_range(elem);
-        bool has_boundary = false;
         for (const auto & itr : as_range(side_range))
           if (itr.second.first == i)
-            has_boundary = true;
-        if (!has_boundary)
+            boundary_ids.push_back(i);
+        // get intersection of boundary_ids and _watertight_boundaries
+        std::vector<boundary_id_type> intersections =
+            findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+
+        bool no_specified_ids = boundary_ids.empty();
+        bool specified_ids = !_watertight_boundaries.empty() && intersections.empty();
+        std::string message;
+        if (mesh->mesh_dimension() == 3)
+          message = "Element " + std::to_string(elem->id()) +
+                    " contains an external face which has not been assigned to ";
+        else
+          message = "Element " + std::to_string(elem->id()) +
+                    " contains an external edge which has not been assigned to ";
+        if (no_specified_ids)
+          message = message + "a sideset";
+        else if (specified_ids)
+          message = message + "one of the specified sidesets";
+        if ((no_specified_ids || specified_ids) && num_faces_without_sideset < _num_outputs)
         {
-          // This side does not have a sideset!!!
-          std::string message;
-          if (num_faces_without_sideset < _num_outputs)
-          {
-            if (mesh->mesh_dimension() == 3)
-              message = "Element " + std::to_string(elem->id()) +
-                        " contains an external face which has not been assigned to a sideset";
-            else
-              message = "Element " + std::to_string(elem->id()) +
-                        " contains an external edge which has not been assigned to a sideset";
-            _console << message << std::endl;
-            num_faces_without_sideset++;
-          }
+          _console << message << std::endl;
+          num_faces_without_sideset++;
         }
       }
     }
@@ -389,20 +410,26 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
           const auto node = node_list[j];
           if (checked_nodes_id.count(node->id()))
             continue;
-          // if node has no nodeset, add it to list of bad nodes
-          if (boundary_info.n_boundary_ids(node) == 0)
+          // get vector of node's boundaries (in most cases it will only have one)
+          std::vector<boundary_id_type> boundary_ids;
+          boundary_info.boundary_ids(node, boundary_ids);
+          std::vector<boundary_id_type> intersection =
+              findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+
+          bool no_specified_ids = boundary_info.n_boundary_ids(node) == 0;
+          bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();
+          std::string message =
+              "Node " + std::to_string(node->id()) +
+              " is on an external boundary of the mesh, but has not been assigned to ";
+          if (no_specified_ids)
+            message = message + "a nodeset";
+          else if (specified_ids)
+            message = message + "one of the specified nodesets";
+          if ((no_specified_ids || specified_ids) && num_nodes_without_nodeset < _num_outputs)
           {
-            // This node does not have a nodeset!!!
-            num_nodes_without_nodeset++;
             checked_nodes_id.insert(node->id());
-            std::string message;
-            if (num_nodes_without_nodeset < _num_outputs)
-            {
-              message =
-                  "Node " + std::to_string(node->id()) +
-                  " is on an external boundary of the mesh, but has not been assigned to a nodeset";
-              _console << message << std::endl;
-            }
+            num_nodes_without_nodeset++;
+            _console << message << std::endl;
           }
         }
       }
@@ -412,6 +439,23 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   message = "Number of external nodes that have not been assigned to a nodeset: " +
             std::to_string(num_nodes_without_nodeset);
   diagnosticsLog(message, _check_watertight_nodesets, num_nodes_without_nodeset);
+}
+
+std::vector<boundary_id_type>
+MeshDiagnosticsGenerator::findBoundaryOverlap(
+    const std::vector<boundary_id_type> & watertight_boundaries,
+    std::vector<boundary_id_type> & boundary_ids) const
+{
+  // Only the boundary_ids vector is sorted here. watertight_boundaries has to be sorted beforehand
+  // Returns their intersection (elements that they share)
+  std::sort(boundary_ids.begin(), boundary_ids.end());
+  std::vector<boundary_id_type> boundary_intersection;
+  std::set_intersection(watertight_boundaries.begin(),
+                        watertight_boundaries.end(),
+                        boundary_ids.begin(),
+                        boundary_ids.end(),
+                        std::back_inserter(boundary_intersection));
+  return boundary_intersection;
 }
 
 void
