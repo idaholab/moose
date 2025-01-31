@@ -40,7 +40,7 @@ FsiTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
 void
 FsiTestApp::registerApps()
 {
-  registerApp(FsiApp);
+  FsiApp::registerApps();
   registerApp(FsiTestApp);
 }
 
