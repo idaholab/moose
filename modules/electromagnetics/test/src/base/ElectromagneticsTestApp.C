@@ -47,7 +47,7 @@ ElectromagneticsTestApp::registerAll(Factory & f,
 void
 ElectromagneticsTestApp::registerApps()
 {
-  registerApp(ElectromagneticsApp);
+  ElectromagneticsApp::registerApps();
   registerApp(ElectromagneticsTestApp);
 }
 

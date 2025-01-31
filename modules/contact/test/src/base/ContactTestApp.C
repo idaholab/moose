@@ -44,7 +44,7 @@ ContactTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool us
 void
 ContactTestApp::registerApps()
 {
-  registerApp(ContactApp);
+  ContactApp::registerApps();
   registerApp(ContactTestApp);
 }
 

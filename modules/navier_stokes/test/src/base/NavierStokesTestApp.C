@@ -44,7 +44,7 @@ NavierStokesTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 NavierStokesTestApp::registerApps()
 {
-  registerApp(NavierStokesApp);
+  NavierStokesApp::registerApps();
   registerApp(NavierStokesTestApp);
 }
 

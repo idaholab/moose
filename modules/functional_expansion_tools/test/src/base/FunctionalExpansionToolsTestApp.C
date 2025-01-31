@@ -49,7 +49,7 @@ FunctionalExpansionToolsTestApp::~FunctionalExpansionToolsTestApp() {}
 void
 FunctionalExpansionToolsTestApp::registerApps()
 {
-  registerApp(FunctionalExpansionToolsApp);
+  FunctionalExpansionToolsApp::registerApps();
   registerApp(FunctionalExpansionToolsTestApp);
 }
 
