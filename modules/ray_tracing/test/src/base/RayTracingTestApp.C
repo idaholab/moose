@@ -44,7 +44,7 @@ RayTracingTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool
 void
 RayTracingTestApp::registerApps()
 {
-  registerApp(RayTracingApp);
+  RayTracingApp::registerApps();
   registerApp(RayTracingTestApp);
 }
 
