@@ -10,9 +10,6 @@
     # of iterations.  And then the number of residuals is reduced by 1,
     # and this causes CSV diff.
     petsc_version_release = true
-    # This test requires a different number of residual evaluations in older PETScs
-    # due to the changes in 3061bbd5d.
-    petsc_version = '>=3.8.3'
     # Difficult to have consistent solve behavior when running across nodes
     hpc = false
 
