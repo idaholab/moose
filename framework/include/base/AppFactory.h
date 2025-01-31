@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "MooseApp.h"
+#include "Capabilities.h"
 
 // Forward declarations
 class InputParameters;
@@ -154,4 +155,6 @@ AppFactory::reg(const std::string & name)
     return;
 
   _name_to_build_info[name] = std::make_unique<AppFactoryBuildInfo<T>>();
+  Moose::Capabilities::getCapabilityRegistry().add(
+      name, true, "MOOSE application " + name + " is available.");
 }
