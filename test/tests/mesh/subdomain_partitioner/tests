@@ -6,10 +6,9 @@
     type = 'Exodiff'
     input = 'subdomain_partitioner.i'
     exodiff = 'subdomain_partitioner_out.e'
-    dof_id_bytes = 8
     min_parallel = 4
     max_parallel = 4
-    capabilities = 'petsc>=3.8.0'
+    capabilities = 'petsc>=3.8.0 & dof_id_bytes=8'
 
     requirement = 'The system shall provide a parallel partition based on mesh subdomains'
   []

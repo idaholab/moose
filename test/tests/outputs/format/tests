@@ -64,7 +64,7 @@
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.plt'
-    tecplot = true
+    capabilities = 'tecplot'
     issues = '#3403'
     design = 'Tecplot.md'
     requirement = 'The system shall support Tecplot output given in Tecplot binary format if the Tecplot API is available.'
@@ -74,7 +74,7 @@
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.dat'
-    tecplot = false
+    capabilities = '!tecplot'
     allow_warnings = true
     design = 'Tecplot.md'
     issues = '#3403'

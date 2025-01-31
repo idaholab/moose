@@ -20,7 +20,7 @@
     input = test_GoldDiffPlugin.py
     separate = True
     display_required = true
-    platform = LINUX
+    capabilities = 'platform=linux'
     requirement = "The system shall include a graphical interface with a widget for comparing ('diff'ing) solution files."
   []
   [ColorbarPlugin]

@@ -7,7 +7,7 @@
     absent_out = "Option left.*value.*hypre"
     requirement = "The system shall use the default PETSc option database in the parent app to handle system-level PETSc parameters"
     issues = '#15129'
-    petsc_version = '>=3.19.2'
+    capabilities = 'petsc>=3.19.2'
   []
 
   [test_missing_time_kernels]
@@ -27,7 +27,7 @@
     absent_out = "Option left:\s+name:--show_input"
     requirement = "The system shall warn the user of unused options if and only if they are not valid moose options."
     issues = '#25577'
-    petsc_version = '>=3.19.2'
+    capabilities = 'petsc>=3.19.2'
   []
 
   [test_user_set_petsc_options_left]

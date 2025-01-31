@@ -61,7 +61,7 @@
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
     max_threads = 1
-    vtk = true
+    capabilities = 'vtk'
     mesh_mode = REPLICATED
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the VTK format."
@@ -77,7 +77,6 @@
     # no. of iterations is not recoverable
     recover = false
     petsc_version_release = true
-    compiler = '!INTEL'
     # MPI dependent
     hpc = false
 

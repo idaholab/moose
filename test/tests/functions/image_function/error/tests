@@ -12,7 +12,7 @@
       input = check_error.i
       cli_args = Functions/tif/file_suffix=bmp
       expect_err = "No image file\(s\) located"
-      vtk = true
+      capabilities = 'vtk'
 
       detail = "an unsupported file type is provided;"
     []
@@ -22,7 +22,7 @@
       input = check_error.i
       cli_args = "Functions/tif/component=5"
       expect_err = "'component' parameter must be empty or have a value of 0 to 2"
-      vtk = true
+      capabilities = 'vtk'
 
       detail = "if an invalid component value is supplied;"
     []
@@ -32,7 +32,7 @@
       input = check_error.i
       cli_args = "Functions/tif/file_base=not_a_real_file"
       expect_err = "No image file\(s\) located"
-      vtk = true
+      capabilities = 'vtk'
 
       detail = "if an invalid filename is provided; and"
     []
@@ -41,7 +41,7 @@
       type = RunException
       input = check_error.i
       expect_err = "libMesh must be configured with VTK enabled to utilize ImageSampler"
-      vtk = false
+      capabilities = '!vtk'
 
       detail = "the system is not configured with the correct dependencies."
     []

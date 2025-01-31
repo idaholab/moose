@@ -16,8 +16,7 @@
     input = 'ne_fail.i'
     design = 'Problem/index.md'
     issues = '#27084'
-    slepc = true
-    slepc_version = '>=3.13.0'
+    capabilities = 'slepc>=3.13.0'
   []
   [eigen_problem_skip_solve]
     type = 'RunApp'
@@ -31,7 +30,6 @@
     cli_args = Problem/solve=false
     design = 'Problem/index.md'
     issues = '#27084'
-    slepc = true
-    slepc_version = '>=3.13.0'
+    capabilities = 'slepc>=3.13.0'
   []
 []
