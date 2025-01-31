@@ -12,6 +12,13 @@
     match_literal = true
   [../]
 
+  [no_expect_exit_code]
+    type = RunException
+    input = bad_kernel.i
+    expect_err = 'not a registered object'
+    expect_exit_code = 2
+  []
+
   [./no_expect_out_pattern]
     type = RunApp
     input = good.i
