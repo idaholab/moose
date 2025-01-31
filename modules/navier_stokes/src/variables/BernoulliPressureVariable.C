@@ -177,28 +177,34 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
 // Iterate through sidesets to see if they are boundary faces or not
 //How do I access the variable I defined above titled num_pressure_drop_sidesets?
 
-if (isParamSetByUser("pressure_drop_sidesets")){
+if (isParamSetByUser("pressure_drop_sidesets"))
+{
   int num_pressure_drop_sidesets = _pressure_drop_sideset_ids.size();
   int num_boundaries = _theBoundaries.size() ;
  
-  for(int i =0; i < num_pressure_drop_sidesets, i++; ){
+  for(int i =0; i < num_pressure_drop_sidesets; i++)
+  {
     int isItBoundary = 0;
-    for(const auto & bd_id : _theBoundaries){
-        if (_pressure_drop_sideset_ids[i] == bd_id)
-    {     isItBoundary = 1;
+    for(const auto & bd_id : _theBoundaries)
+    {
+      if (_pressure_drop_sideset_ids[i] == bd_id)
+      {     
+        isItBoundary = 1;
+      }
     }
-    }
-    if (!isItBoundary )
-    {   
+    if (isItBoundary )
+    { 
       factor_downwind += _pressure_drop_form_factors[i];
       factor_upwind += _pressure_drop_form_factors[i];
     }
-    }
+  }
 }
-
-  const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
+  const auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
+  // const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
        0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor + 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+      //  0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor ;
+      //  0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor + 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
 
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;

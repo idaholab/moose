@@ -18,7 +18,20 @@
 
 [Debug]
     show_material_props = true
+[]
+  [Variables]
+    [pressVar]
+      type = BernoulliPressureVariable
+      pressure_drop_sidesets = 'area_change'
+      pressure_drop_form_factors = '0.40296'
+      porosity = porosity
+      u = u
+      rho = 988.0
+      # pressure = pressure
+      initial_condition = 1.01e3
+      block = '1 2'
   []
+[]
   
 #   [Problem]
 #     solve = false
@@ -31,16 +44,16 @@
       initial_condition = 1
     []
 
-    [pressVar]
-      type = BernoulliPressureVariable
-      pressure_drop_sideSets = 'area_change'
-      pressure_drop_form_loss_coefficients = '0.40296'
-      porosity = porosity
-      u = u
-      rho = 988.0
-      # pressure = pressure
-      initial_condition = 1.01e3
-  []
+  #   [pressVar]
+  #     type = BernoulliPressureVariable
+  #     pressure_drop_sidesets = 'area_change'
+  #     pressure_drop_form_factors = '0.40296'
+  #     porosity = porosity
+  #     u = u
+  #     rho = 988.0
+  #     # pressure = pressure
+  #     initial_condition = 1.01e3
+  # []
   
     [forchheimer]
       family = MONOMIAL
@@ -55,12 +68,12 @@
       variable = 'porosity_var'
       execute_on = 'initial'
     []
-    [pressure_var_aux]
-      type = FunctorMaterialRealAux
-      functor = 'pressure'
-      variable = 'pressVar'
-      execute_on = 'initial timestep_end'
-    []
+    # [pressure_var_aux]
+    #   type = FunctorMaterialRealAux
+    #   functor = 'pressure'
+    #   variable = 'pressVar'
+    #   execute_on = 'initial timestep_end'
+    # []
   []
   
   [Materials]
@@ -86,12 +99,14 @@
       # Dh_channel = ${fparse sqrt(4*1/pi)}
       # porosity = porosity_var
       block = 1
+      multipliers = '0 0 0'
     []
     [churchill2]
         type = FunctorChurchillDragCoefficients
         # Dh_channel = ${fparse sqrt(4*0.25/pi)}
         # porosity = porosity_var
         block = 2
+        multipliers = '1e-6 1e-6 1e-6'
     []
   []
 [Modules]
@@ -104,6 +119,7 @@
      # Material property parameters
      density = rho
      dynamic_viscosity = mu
+     pressure_variable = pressVar
  
      # Porous medium parameters
      porosity = porosity
@@ -140,17 +156,15 @@
       variable = forchheimer
     []
     [inlet_pressure]
-        type = SideAverageValue
-        variable = pressure
-        boundary = left
-        outputs = none
+      type = ElementAverageValue
+      variable = pressVar
+      block = 1
       []
-      [outlet_pressure]
-        type = SideAverageValue
-        variable = pressure
-        boundary = right
-        outputs = none
-      []
+    [outlet_pressure]
+      type = ElementAverageValue
+      variable = pressVar
+      block = 2  
+    []
       [pressure_drop]
         type = ParsedPostprocessor
         pp_names = 'inlet_pressure outlet_pressure'
