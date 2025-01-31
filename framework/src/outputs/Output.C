@@ -307,8 +307,11 @@ Output::onInterval()
   }
 
   // If sync times are not skipped, return true if the current time is a sync_time
-  if (_sync_times.find(_time) != _sync_times.end())
-    output = true;
+  for (const auto _sync_time : _sync_times)
+  {
+    if (std::abs(_sync_time - _time) < _t_tol)
+      output = true;
+  }
 
   // check if enough simulation time has passed between outputs
   if (_time > _last_output_simulation_time &&
