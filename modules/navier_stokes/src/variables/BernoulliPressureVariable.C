@@ -191,14 +191,14 @@ if (isParamSetByUser("pressure_drop_sidesets")){
     if (!isItBoundary )
     {   
       factor_downwind += _pressure_drop_form_factors[i];
+      factor_upwind += _pressure_drop_form_factors[i];
     }
     }
 }
 
   const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
   const auto bernoulli_vel_chunk_neighbor =
-      factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
-
+       0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor + 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
 
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
