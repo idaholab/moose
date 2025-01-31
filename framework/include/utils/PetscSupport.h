@@ -137,6 +137,13 @@ void storePetscOptions(FEProblemBase & fe_problem,
                        const std::string & prefix,
                        const ParallelParamObject & param_object);
 
+/*
+ * Change any prefix in the problem's \p PetscOptions that matches \p old_prefix to \p new_prefix
+ */
+void changePetscOptionsPrefix(FEProblemBase & fe_problem,
+                              const std::string & old_prefix,
+                              const std::string & new_prefix);
+
 /**
  * Set flags that will instruct the user on the reason their simulation diverged from PETSc's
  * perspective
