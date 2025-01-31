@@ -27,4 +27,11 @@
     installation_type = in_tree
     valgrind = 'none'
   []
+  [dont_condense]
+    requirement = 'The system shall be able to not condense user-specified variables when peforming static condensation.'
+    input = dont-condense-test.i
+    exodiff = 'dont-condense-test_out.e'
+    type = Exodiff
+    absent_out = 'Option left'
+  []
 []
