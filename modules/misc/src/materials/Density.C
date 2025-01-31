@@ -26,7 +26,11 @@ DensityTempl<is_ad>::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple material systems on the same block, "
                                "e.g. for multiple phases");
-  params.addRequiredParam<Real>("density", "Density");
+  params.addParam<Real>("density", "Density");
+  params.deprecateParam("density", "strain_free_density", "02/01/2026");
+  params.addParam<MaterialPropertyName>("strain_free_density",
+                                        "Material property for the strain free density.");
+
   params.addClassDescription("Creates density material property");
 
   return params;
@@ -40,7 +44,11 @@ DensityTempl<is_ad>::DensityTempl(const InputParameters & parameters)
     _disp_r(_is_coupled ? this->template coupledGenericValue<is_ad>("displacements", 0)
                         : genericZeroValue<is_ad>()),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _initial_density(getParam<Real>("density")),
+    _initial_density(isParamValid("density") ? &getParam<Real>("density") : nullptr),
+    _strain_free_density(
+        isParamValid("strain_free_density")
+            ? &this->template getGenericMaterialProperty<Real, is_ad>("strain_free_density")
+            : nullptr),
     _grad_disp(_is_coupled ? this->template coupledGenericGradients<is_ad>("displacements")
                            : std::vector<const GenericVariableGradient<is_ad> *>()),
     _density(declareGenericProperty<Real, is_ad>(_base_name + "density"))
@@ -60,20 +68,26 @@ DensityTempl<is_ad>::DensityTempl(const InputParameters & parameters)
 
   // fill remaining components with zero
   _grad_disp.resize(3, &genericZeroGradient<is_ad>());
+
+  if ((isParamValid("density") && isParamValid("strain_free_density")) ||
+      (!isParamValid("density") && !isParamValid("strain_free_density")))
+    paramError("strain_free_density",
+               "Either density or strain_free_density must be supplied. Since density is "
+               "deprecated, please provide a strain_free_density");
 }
 
 template <bool is_ad>
 void
 DensityTempl<is_ad>::initQpStatefulProperties()
 {
-  _density[_qp] = _initial_density;
+  _density[_qp] = _initial_density ? *_initial_density : (*_strain_free_density)[_qp];
 }
 
 template <bool is_ad>
 void
 DensityTempl<is_ad>::computeQpProperties()
 {
-  GenericReal<is_ad> density = _initial_density;
+  _density[_qp] = _initial_density ? *_initial_density : (*_strain_free_density)[_qp];
 
   // TODO: We should deprecate the !_is_coupled case and have the
   // user use a GenericConstantMaterial
@@ -113,10 +127,8 @@ DensityTempl<is_ad>::computeQpProperties()
 
     const auto detF = Axx * Ayy * Azz + Axy * Ayz * Azx + Axz * Ayx * Azy - Azx * Ayy * Axz -
                       Azy * Ayz * Axx - Azz * Ayx * Axy;
-    density /= detF;
+    _density[_qp] /= detF;
   }
-
-  _density[_qp] = density;
 }
 
 template class DensityTempl<false>;

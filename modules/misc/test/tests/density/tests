@@ -1,0 +1,10 @@
+[Tests]
+  [exact_3D]
+    type = 'CSVDiff'
+    input = 'exact_3D.i'
+    csvdiff = 'exact_3D_out.csv'
+    issues = '#29556'
+    design = 'Density.md'
+    requirement = 'The system material shall calculate a density from a time dependent strain-free density and displacements in 3D.'
+  []
+[]
