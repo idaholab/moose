@@ -118,7 +118,7 @@
     requirement = 'The system shall throw an error if the temperature unit is not specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [punit_error]
     type = RunException
@@ -130,7 +130,7 @@
     requirement = 'The system shall throw an error if the pressure unit is not specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [munit_error]
     type = RunException
@@ -142,7 +142,7 @@
     requirement = 'The system shall throw an error if the mass unit is not specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [op_munit_error]
     type = RunException
@@ -154,7 +154,7 @@
     requirement = 'The system shall throw an error if the output mass unit is not specified when species amount or amount of element in phase is requested'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [separator_error1]
