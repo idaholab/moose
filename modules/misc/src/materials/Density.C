@@ -26,10 +26,9 @@ DensityTempl<is_ad>::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple material systems on the same block, "
                                "e.g. for multiple phases");
-  params.addParam<Real>("density", "Density");
-  params.deprecateParam("density", "strain_free_density", "02/01/2026");
+  params.addDeprecatedParam<Real>("density", "Density", "Use strain_free_density instead");
   params.addParam<MaterialPropertyName>("strain_free_density",
-                                        "Material property for the strain free density.");
+                                        "Name of the strain free density material property.");
 
   params.addClassDescription("Creates density material property");
 
