@@ -10,6 +10,7 @@
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
 #include "libmesh/mesh_smoother_laplace.h"
 #include "MooseUtils.h"
+#include "PolygonalMeshGenerationUtils.h"
 
 #include <cmath>
 
@@ -657,7 +658,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   {
     if (_preserve_volumes)
     {
-      Real corr_factor = radiusCorrectionFactor(azimuthal_list, true, _order);
+      Real corr_factor =
+          PolygonalMeshGenerationUtils::radiusCorrectionFactor(azimuthal_list, true, _order);
       for (unsigned int i = 0; i < _ring_radii.size(); i++)
         ring_radii_corr.push_back(_ring_radii[i] * corr_factor);
     }

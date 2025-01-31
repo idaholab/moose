@@ -9,6 +9,7 @@
 
 #include "AzimuthalBlockSplitGenerator.h"
 #include "MooseMeshUtils.h"
+#include "PolygonalMeshGenerationUtils.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -148,9 +149,9 @@ AzimuthalBlockSplitGenerator::generate()
   setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
 
   Real radiusCorrectionFactor_original =
-      _preserve_volumes
-          ? radiusCorrectionFactor(_azimuthal_angle_meta, true, order, is_first_value_vertex)
-          : 1.0;
+      _preserve_volumes ? PolygonalMeshGenerationUtils::radiusCorrectionFactor(
+                              _azimuthal_angle_meta, true, order, is_first_value_vertex)
+                        : 1.0;
 
   const Real azi_tol = 1.0E-6;
   const Real rad_tol = 1.0e-6;
@@ -371,9 +372,9 @@ AzimuthalBlockSplitGenerator::generate()
       order == 1 ? true : MooseUtils::absoluteFuzzyEqual(_azimuthal_angle_meta[0], -180.0);
 
   Real radiusCorrectionFactor_mod =
-      _preserve_volumes
-          ? radiusCorrectionFactor(_azimuthal_angle_meta, true, order, is_first_value_vertex_mod)
-          : 1.0;
+      _preserve_volumes ? PolygonalMeshGenerationUtils::radiusCorrectionFactor(
+                              _azimuthal_angle_meta, true, order, is_first_value_vertex_mod)
+                        : 1.0;
 
   // Re-correct Radii
   if (_preserve_volumes)

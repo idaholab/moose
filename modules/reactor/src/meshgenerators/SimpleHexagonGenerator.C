@@ -44,8 +44,8 @@ SimpleHexagonGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>=0",
                                                 "Optional customized external boundary id.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<BoundaryName>("external_boundary_name",
+                                "Optional customized external boundary name.");
   params.addParamNamesToGroup("block_id block_name external_boundary_id external_boundary_name",
                               "Customized Subdomain/Boundary");
   params.addClassDescription(
@@ -74,8 +74,8 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
     _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string())
+                                ? getParam<BoundaryName>("external_boundary_name")
+                                : BoundaryName())
 {
   if (_radial_intervals > 1 && _element_type != ElemType::HYBRID)
     paramError(

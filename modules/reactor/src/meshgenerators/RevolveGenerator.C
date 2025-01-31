@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RevolveGenerator.h"
+#include "PolygonalMeshGenerationUtils.h"
 
 #include "libmesh/cell_prism6.h"
 #include "libmesh/cell_prism15.h"
@@ -411,7 +412,8 @@ RevolveGenerator::generate()
   }
   if (_preserve_volumes)
   {
-    _radius_correction_factor = radiusCorrectionFactor(azi_array, _full_circle_revolving, order);
+    _radius_correction_factor = PolygonalMeshGenerationUtils::radiusCorrectionFactor(
+        azi_array, _full_circle_revolving, order);
 
     // In the meanwhile, modify the input mesh for radius correction if applicable
     for (const auto & node : input->node_ptr_range())

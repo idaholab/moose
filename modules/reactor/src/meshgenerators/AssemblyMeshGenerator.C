@@ -76,7 +76,7 @@ AssemblyMeshGenerator::validParams()
   params.addClassDescription("This AssemblyMeshGenerator object is designed to generate "
                              "assembly-like structures, with IDs, from a reactor geometry. "
                              "The assembly-like structures must consist of a full pattern of equal "
-                             "sized pins from PinMeshGenerator"
+                             "sized pins from PinMeshGenerator. "
                              "A hexagonal assembly will be placed inside of a bounding hexagon "
                              "consisting of a background region and, optionally,"
                              " duct regions.");
@@ -118,12 +118,11 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   initializeReactorMeshParams(reactor_params);
 
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
-  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  _mesh_dimensions = getReactorParam<unsigned int>(RGMB::mesh_dimensions);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
-               "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
-               "inputs\n");
+               "In order to extrude this mesh, ReactorMeshParams/dim needs to be set to 3\n");
   if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
                    !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
@@ -257,8 +256,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     // Declare dependency of inputs to sub generator calls. If mesh generation
     declareMeshesForSub("inputs");
 
-    _assembly_boundary_id = 2000 + _assembly_type;
-    _assembly_boundary_name = "outer_assembly_" + std::to_string(_assembly_type);
+    _assembly_boundary_id = RGMB::ASSEMBLY_BOUNDARY_ID_START + _assembly_type;
+    _assembly_boundary_name = RGMB::ASSEMBLY_BOUNDARY_NAME_PREFIX + std::to_string(_assembly_type);
 
     // Call PatternedHexMeshGenerator or PatternedCartesianMeshGenerator to stitch assembly
     {
@@ -295,7 +294,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         params.set<unsigned int>("background_intervals") = _background_intervals;
         // Initial block id used to define peripheral regions of assembly
 
-        const auto background_block_name = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R0";
+        const auto background_block_name =
+            RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R0";
         const auto background_block_id = RGMB::ASSEMBLY_BLOCK_ID_START;
         params.set<subdomain_id_type>("background_block_id") = background_block_id;
         params.set<SubdomainName>("background_block_name") = background_block_name;
@@ -307,8 +307,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         std::vector<SubdomainName> duct_block_names;
         for (const auto duct_it : index_range(_duct_region_ids[0]))
         {
-          const auto duct_block_name =
-              "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
+          const auto duct_block_name = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX +
+                                       std::to_string(_assembly_type) + "_R" +
+                                       std::to_string(duct_it + 1);
           const auto duct_block_id = RGMB::ASSEMBLY_BLOCK_ID_START + duct_it + 1;
           duct_block_ids.push_back(duct_block_id);
           duct_block_names.push_back(duct_block_name);
@@ -321,7 +322,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       }
 
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-      params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
+      params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
 
       addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
 
@@ -347,7 +348,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         {
           const auto pin_name = _inputs[pattern_idx];
           const auto pin_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pin_name);
-          const BoundaryName boundary_name = "outer_pin_" + std::to_string(pin_id);
+          const BoundaryName boundary_name =
+              RGMB::PIN_BOUNDARY_NAME_PREFIX + std::to_string(pin_id);
           if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
             boundaries_to_delete.push_back(boundary_name);
         }
@@ -385,55 +387,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     }
 
     if (_extrude && _mesh_dimensions == 3)
-    {
-      std::vector<Real> axial_boundaries =
-          getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
-      const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
-      const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
-      {
-        auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
-
-        params.set<MeshGeneratorName>("input") = build_mesh_name;
-        params.set<Point>("direction") = Point(0, 0, 1);
-        params.set<std::vector<unsigned int>>("num_layers") =
-            getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
-        params.set<std::vector<Real>>("heights") = axial_boundaries;
-        params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
-        params.set<boundary_id_type>("top_boundary") = top_boundary;
-
-        addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
-      }
-
-      {
-        auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
-
-        params.set<MeshGeneratorName>("input") = name() + "_extruded";
-        params.set<std::vector<BoundaryName>>("old_boundary") = {
-            std::to_string(top_boundary),
-            std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
-        params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
-
-        addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
-      }
-
-      {
-        auto params = _app.getFactory().getValidParams("PlaneIDMeshGenerator");
-
-        params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
-
-        std::vector<Real> plane_heights{0};
-        for (Real z : axial_boundaries)
-          plane_heights.push_back(z + plane_heights.back());
-
-        params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
-
-        std::string plane_id_name = "plane_id";
-        params.set<std::string>("id_name") = "plane_id";
-
-        build_mesh_name = name() + "_extrudedIDs";
-        addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
-      }
-    }
+      build_mesh_name = callExtrusionMeshSubgenerators(build_mesh_name);
 
     // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
@@ -460,6 +414,7 @@ AssemblyMeshGenerator::generateMetadata()
   declareMeshProperty(RGMB::is_homogenized, false);
   declareMeshProperty(RGMB::is_single_pin, false);
   declareMeshProperty(RGMB::extruded, _extrude && _mesh_dimensions == 3);
+  declareMeshProperty(RGMB::is_control_drum, false);
   // Following metadata is only relevant if an output mesh is generated by RGMB
   if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
@@ -489,9 +444,6 @@ AssemblyMeshGenerator::generateMetadata()
   }
   declareMeshProperty(RGMB::pin_names, input_pin_names);
   declareMeshProperty(RGMB::pin_lattice, pin_name_lattice);
-
-  if (getParam<bool>("show_rgmb_metadata"))
-    printReactorMetadata("assembly", name());
 }
 
 void
@@ -504,8 +456,8 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     mooseError("Attempting to use flexible stitching on assembly " + name() +
                " that does not have a background region. This is not yet supported.");
   const auto radial_index = _duct_region_ids.size() == 0 ? 0 : _duct_region_ids[0].size();
-  block_to_delete =
-      "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(radial_index);
+  block_to_delete = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R" +
+                    std::to_string(radial_index);
 
   {
     // Invoke BlockDeletionGenerator to delete outermost mesh interval of assembly
@@ -530,7 +482,8 @@ AssemblyMeshGenerator::generateFlexibleAssemblyBoundaries()
     params.set<Real>("boundary_size") = getReactorParam<Real>(RGMB::assembly_pitch);
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
     params.set<BoundaryName>("external_boundary_name") = _assembly_boundary_name;
-    params.set<SubdomainName>("background_subdomain_name") = block_to_delete + "_TRI";
+    params.set<SubdomainName>("background_subdomain_name") =
+        block_to_delete + RGMB::TRI_BLOCK_NAME_SUFFIX;
     params.set<bool>("verify_holes") = false;
     params.set<unsigned short>("background_subdomain_id") = RGMB::ASSEMBLY_BLOCK_ID_TRI_FLEXIBLE;
 
@@ -582,7 +535,8 @@ AssemblyMeshGenerator::generate()
   std::string pin_type_id_name = "pin_type_id";
   std::string assembly_type_id_name = "assembly_type_id";
   std::string radial_id_name = "radial_id";
-  const std::string default_block_name = "RGMB_ASSEMBLY" + std::to_string(_assembly_type);
+  const std::string default_block_name =
+      RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type);
 
   auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name, true);
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name, true);
@@ -622,20 +576,20 @@ AssemblyMeshGenerator::generate()
       else if (getReactorParam<bool>(RGMB::region_id_as_block_name))
         elem_block_name += "_REG" + std::to_string(elem_rid);
       if (elem->type() == TRI3 || elem->type() == PRISM6)
-        elem_block_name += "_TRI";
+        elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
     else
     {
       // Assembly peripheral element (background / duct), set subdomains according
-      // to user preferences and set pin type id to (UINT16_MAX/2) - 1 - peripheral index
+      // to user preferences and set pin type id to RGMB::MAX_PIN_TYPE_ID - peripheral index
       // Region id is inferred from z_id and peripheral_idx
       const auto base_block_id = elem->subdomain_id();
       const auto base_block_name = (*_build_mesh)->subdomain_name(base_block_id);
 
       // Check if block name has correct prefix
-      std::string prefix = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R";
+      std::string prefix = RGMB::ASSEMBLY_BLOCK_NAME_PREFIX + std::to_string(_assembly_type) + "_R";
       if (!(base_block_name.find(prefix, 0) == 0))
         continue;
       // Peripheral index is integer value of substring after prefix
@@ -643,7 +597,7 @@ AssemblyMeshGenerator::generate()
 
       bool is_background_region = peripheral_idx == 0;
 
-      subdomain_id_type pin_type = (UINT16_MAX / 2) - 1 - peripheral_idx;
+      subdomain_id_type pin_type = RGMB::MAX_PIN_TYPE_ID - peripheral_idx;
       elem->set_extra_integer(pin_type_id_int, pin_type);
 
       const auto elem_rid = (is_background_region ? _background_region_id[z_id]
@@ -669,7 +623,8 @@ AssemblyMeshGenerator::generate()
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Assembly, _extrude);
   }
 
-  (*_build_mesh)->find_neighbors();
+  // Mark mesh as not prepared, as block IDs were re-assigned in this method
+  (*_build_mesh)->set_isnt_prepared();
 
   return std::move(*_build_mesh);
 }

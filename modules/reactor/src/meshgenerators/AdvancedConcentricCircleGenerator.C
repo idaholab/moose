@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AdvancedConcentricCircleGenerator.h"
+#include "PolygonalMeshGenerationUtils.h"
 
 // C++ includes
 #include <cmath>
@@ -199,7 +200,9 @@ AdvancedConcentricCircleGenerator::generate()
                                    2.0);
 
   const Real corr_factor =
-      _preserve_volumes ? radiusCorrectionFactor(mod_azimuthal_angles, true, _order) : 1.0;
+      _preserve_volumes
+          ? PolygonalMeshGenerationUtils::radiusCorrectionFactor(mod_azimuthal_angles, true, _order)
+          : 1.0;
 
   for (const auto & ring_radius : _ring_radii)
     ring_radii_corr.push_back(ring_radius * corr_factor);

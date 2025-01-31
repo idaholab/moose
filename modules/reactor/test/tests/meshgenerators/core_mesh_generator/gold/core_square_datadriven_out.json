@@ -41,6 +41,10 @@
                         "type": "bool",
                         "value": false
                     },
+                    "MeshMetaData/amg1/is_control_drum": {
+                        "type": "bool",
+                        "value": false
+                    },
                     "MeshMetaData/amg1/is_homogenized": {
                         "type": "bool",
                         "value": false
@@ -101,6 +105,10 @@
                         "value": []
                     },
                     "MeshMetaData/amg2/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/is_control_drum": {
                         "type": "bool",
                         "value": false
                     },
@@ -410,7 +418,7 @@
                         "value": false
                     },
                     "MeshMetaData/rmp/mesh_dimensions": {
-                        "type": "int",
+                        "type": "unsigned int",
                         "value": 3
                     },
                     "MeshMetaData/rmp/mesh_geometry": {

@@ -13,6 +13,7 @@
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
 #include "FillBetweenPointVectorsTools.h"
+#include "PolygonalMeshGenerationUtils.h"
 #include "libmesh/int_range.h"
 
 // C++ includes
@@ -87,8 +88,8 @@ PeripheralRingMeshGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<BoundaryName>(
+      "external_boundary_name", "", "Optional customized external boundary name.");
   params.addParamNamesToGroup(
       "peripheral_radial_bias peripheral_inner_boundary_layer_width "
       "peripheral_inner_boundary_layer_intervals peripheral_inner_boundary_layer_bias "
@@ -131,9 +132,7 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string()),
+    _external_boundary_name(getParam<BoundaryName>("external_boundary_name")),
     _input(getMeshByName(_input_name))
 {
   declareMeshProperty<bool>("hexagon_peripheral_trimmability", false);
@@ -359,9 +358,10 @@ PeripheralRingMeshGenerator::generate()
                                azi_array,
                                origin_pt,
                                points_array);
-  const Real correction_factor =
-      _preserve_volumes ? radiusCorrectionFactor(azi_array, true, order, is_first_node_vertex)
-                        : 1.0;
+  const Real correction_factor = _preserve_volumes
+                                     ? PolygonalMeshGenerationUtils::radiusCorrectionFactor(
+                                           azi_array, true, order, is_first_node_vertex)
+                                     : 1.0;
   // Loop to handle outer boundary layer and main region
   for (const auto i : make_range(input_ext_node_num))
   {

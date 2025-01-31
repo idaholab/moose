@@ -1,0 +1,381 @@
+{
+    "reporters": {
+        "metadata": {
+            "type": "MeshMetaDataReporter",
+            "values": {
+                "values": {
+                    "type": "std::map<std::string, RestartableDataReporter::Value, std::less<std::string>, std::allocator<std::pair<std::stringconst, RestartableDataReporter::Value>>>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "metadata": {
+                "values": {
+                    "MeshMetaData/core/assembly_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                1,
+                                2
+                            ],
+                            [
+                                -1,
+                                0,
+                                -1
+                            ],
+                            [
+                                2,
+                                1
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/core/assembly_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "het_assembly",
+                            "hom_assembly",
+                            "drum"
+                        ]
+                    },
+                    "MeshMetaData/core/extruded": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/core/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "het_pin"
+                        ]
+                    },
+                    "MeshMetaData/core/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/drum/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 3
+                    },
+                    "MeshMetaData/drum/drum_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": []
+                    },
+                    "MeshMetaData/drum/drum_pad_angles": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            90.0,
+                            180.0
+                        ]
+                    },
+                    "MeshMetaData/drum/drum_radii": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            8.0,
+                            9.1
+                        ]
+                    },
+                    "MeshMetaData/drum/drum_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                6,
+                                7,
+                                8,
+                                9
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/drum/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/drum/is_control_drum": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/drum/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/drum/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/drum/pitch": {
+                        "type": "double",
+                        "value": 20.0
+                    },
+                    "MeshMetaData/drum/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/het_assembly/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 1
+                    },
+                    "MeshMetaData/het_assembly/background_block_name": {
+                        "type": "std::vector<std::string>",
+                        "value": []
+                    },
+                    "MeshMetaData/het_assembly/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            3
+                        ]
+                    },
+                    "MeshMetaData/het_assembly/duct_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": []
+                    },
+                    "MeshMetaData/het_assembly/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            9.0
+                        ]
+                    },
+                    "MeshMetaData/het_assembly/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                4
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/het_assembly/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/het_assembly/is_control_drum": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/het_assembly/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/het_assembly/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/het_assembly/pin_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                0
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/het_assembly/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "het_pin"
+                        ]
+                    },
+                    "MeshMetaData/het_assembly/pitch": {
+                        "type": "double",
+                        "value": 20.0
+                    },
+                    "MeshMetaData/het_assembly/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/het_pin/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            2
+                        ]
+                    },
+                    "MeshMetaData/het_pin/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/het_pin/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            []
+                        ]
+                    },
+                    "MeshMetaData/het_pin/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/het_pin/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/het_pin/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": []
+                    },
+                    "MeshMetaData/het_pin/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                1,
+                                [
+                                    [
+                                        1,
+                                        2
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/het_pin/pin_type": {
+                        "type": "unsigned short",
+                        "value": 1
+                    },
+                    "MeshMetaData/het_pin/pitch": {
+                        "type": "double",
+                        "value": 1.0
+                    },
+                    "MeshMetaData/het_pin/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/het_pin/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.4
+                        ]
+                    },
+                    "MeshMetaData/het_pin/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                1
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/hom_assembly/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 2
+                    },
+                    "MeshMetaData/hom_assembly/background_block_name": {
+                        "type": "std::vector<std::string>",
+                        "value": []
+                    },
+                    "MeshMetaData/hom_assembly/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            5
+                        ]
+                    },
+                    "MeshMetaData/hom_assembly/duct_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": []
+                    },
+                    "MeshMetaData/hom_assembly/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/hom_assembly/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            []
+                        ]
+                    },
+                    "MeshMetaData/hom_assembly/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/hom_assembly/is_control_drum": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/hom_assembly/is_homogenized": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/hom_assembly/is_single_pin": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/hom_assembly/pitch": {
+                        "type": "double",
+                        "value": 20.0
+                    },
+                    "MeshMetaData/hom_assembly/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/hom_assembly/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/hom_assembly/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            []
+                        ]
+                    },
+                    "MeshMetaData/rmp/assembly_pitch": {
+                        "type": "double",
+                        "value": 20.0
+                    },
+                    "MeshMetaData/rmp/axial_mesh_intervals": {
+                        "type": "std::vector<unsigned int>",
+                        "value": [
+                            1
+                        ]
+                    },
+                    "MeshMetaData/rmp/axial_mesh_sizes": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            1.0
+                        ]
+                    },
+                    "MeshMetaData/rmp/bottom_boundary_id": {
+                        "type": "short",
+                        "value": 202
+                    },
+                    "MeshMetaData/rmp/bypass_meshgen": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/rmp/flexible_assembly_stitching": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/rmp/mesh_dimensions": {
+                        "type": "unsigned int",
+                        "value": 3
+                    },
+                    "MeshMetaData/rmp/mesh_geometry": {
+                        "type": "std::string",
+                        "value": "Hex"
+                    },
+                    "MeshMetaData/rmp/num_sectors_flexible_stitching": {
+                        "type": "unsigned int",
+                        "value": 6
+                    },
+                    "MeshMetaData/rmp/radial_boundary_id": {
+                        "type": "short",
+                        "value": 200
+                    },
+                    "MeshMetaData/rmp/region_id_as_block_name": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/rmp/top_boundary_id": {
+                        "type": "short",
+                        "value": 201
+                    }
+                }
+            },
+            "time": 1.0,
+            "time_step": 2
+        }
+    ]
+}
