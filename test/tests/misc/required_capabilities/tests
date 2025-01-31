@@ -2,11 +2,12 @@
   issues = '#26470'
   design = Capabilities.md
   [not_supported_registered]
-    type = RunApp
+    type = RunException
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco'
-    expect_out = 'Required capabilities \'chaco\' not fulfilled\.'
+    expect_err = 'Required capabilities \'chaco\' not fulfilled\.'
+    expect_exit_code = 77
     requirement = 'The system shall not start a simulation if a requested capability is registered as false.'
   []
   [negative_not_supported_registered]
@@ -18,11 +19,12 @@
     requirement = 'The system shall start a simulation if a capability requested to not be present is registered as false.'
   []
   [false_compare_registered]
-    type = RunApp
+    type = RunException
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco>10'
-    expect_out = 'Required capabilities \'chaco>10\' not fulfilled\.'
+    expect_err = 'Required capabilities \'chaco>10\' not fulfilled\.'
+    expect_exit_code = 77
     requirement = 'The system shall not start a simulation if a requested capability is not registered.'
   []
   [negative_false_compare_registered]
@@ -34,10 +36,11 @@
     requirement = 'The system shall start a simulation if a capability in a negate comparison is not registered.'
   []
   [not_supported_not_registered]
-    type = RunApp
+    type = RunException
     input = input.i
     cli_args = '--required-capabilities doesnotexist'
-    expect_out = 'Required capabilities \'doesnotexist\' not fulfilled\.'
+    expect_err = 'Required capabilities \'doesnotexist\' not fulfilled\.'
+    expect_exit_code = 77
     requirement = 'The system shall not start a simulation if a requested capability is not supported.'
   []
   [negative_not_supported_not_registered]
@@ -48,10 +51,11 @@
     requirement = 'The system shall start a simulation if a capability requested to not be present is not registered.'
   []
   [not_absent]
-    type = RunApp
+    type = RunException
     input = input.i
     cli_args = '--required-capabilities !petsc'
-    expect_out = 'Required capabilities \'!petsc\' not fulfilled\.'
+    expect_err = 'Required capabilities \'!petsc\' not fulfilled\.'
+    expect_exit_code = 77
     requirement = 'The system shall not start a simulation if an excluded capability is supported.'
   []
   [supported]
@@ -62,10 +66,11 @@
     requirement = 'The system shall start a simulation if a requested capability is supported.'
   []
   [version_mismatch]
-    type = RunApp
+    type = RunException
     input = input.i
     cli_args = "--required-capabilities petsc<1.0.3"
-    expect_out = 'Required capabilities \'petsc<1.0.3\' not fulfilled\.'
+    expect_err = 'Required capabilities \'petsc<1.0.3\' not fulfilled\.'
+    expect_exit_code = 77
     requirement = 'The system shall not start a simulation if a requested capability has the wrong version.'
   []
   [negative_version_mismatch]
