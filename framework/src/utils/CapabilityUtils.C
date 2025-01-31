@@ -312,7 +312,7 @@ check(std::string requirements, const Registry & app_capabilities)
 
   CheckState state = CheckState::CERTAIN_FAIL;
   if (!parser.parse(requirements, state))
-    mooseError("Unable to parse requirements '", requirements, "'.");
+    state = CheckState::PARSE_FAIL;
 
   std::string reason;
   std::string doc;
