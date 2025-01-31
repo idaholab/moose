@@ -113,7 +113,7 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
       std::string variable_type = "MooseLinearVariableFVReal";
 
       auto params = getFactory().getValidParams(variable_type);
-      assignBlocks(params, _blocks); // TODO: check wrt components
+      assignBlocks(params, _blocks);
       params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
 
       getProblem().addVariable(variable_type, _velocity_names[d], params);
@@ -155,7 +155,7 @@ WCNSLinearFVFlowPhysics::addFVKernels()
 
   // Momentum equation: time derivative
   if (isTransient())
-    mooseError("Transient terms not implemented");
+    addMomentumTimeKernels();
 
   // Momentum equation: flux terms
   addMomentumFluxKernels();
@@ -197,6 +197,23 @@ WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
     params.set<bool>("force_boundary_execution") = true;
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
+  }
+}
+
+void
+WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
+{
+  std::string kernel_type = "LinearFVTimeDerivative";
+  std::string kernel_name = prefix() + "ins_momentum_time";
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>("factor") = _density_name;
+
+  for (const auto d : make_range(dimension()))
+  {
+    params.set<LinearVariableName>("variable") = _velocity_names[d];
+    getProblem().addLinearFVKernel(kernel_type, kernel_name + "_" + NS::directions[d], params);
   }
 }
 

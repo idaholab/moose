@@ -93,6 +93,7 @@ protected:
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
+  virtual void addMomentumTimeKernels() = 0;
   virtual void addMomentumPressureKernels() = 0;
   virtual void addMomentumGravityKernels() = 0;
   virtual void addMomentumBoussinesqKernels() = 0;

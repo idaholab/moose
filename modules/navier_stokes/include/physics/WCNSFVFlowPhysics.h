@@ -47,7 +47,7 @@ private:
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
-  void addMomentumTimeKernels();
+  void addMomentumTimeKernels() override;
   void addMomentumViscousDissipationKernels();
   void addMomentumMixingLengthKernels();
   void addMomentumAdvectionKernels();

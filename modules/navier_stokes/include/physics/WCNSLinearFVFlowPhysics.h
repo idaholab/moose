@@ -44,6 +44,7 @@ private:
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
+  void addMomentumTimeKernels() override;
   void addMomentumFluxKernels();
   virtual void addMomentumPressureKernels() override;
   virtual void addMomentumGravityKernels() override;

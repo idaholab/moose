@@ -24,9 +24,12 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       "use_nonorthogonal_correction",
       true,
       "Whether to use a non-orthogonal correction. This can potentially slow down convergence "
-      ", but reduces numerical dispersion on non-orthogonal meshes. Can "
-      "be safely turned off on orthogonal meshes.");
+      ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
+      "orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
+
+  // We could split between discretization and solver here.
+  params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
 
   // Not implemented
   params.suppressParameter<bool>("effective_conductivity");
@@ -71,8 +74,15 @@ WCNSLinearFVFluidHeatTransferPhysics::addSolverVariables()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addEnergyTimeKernels()
 {
-  paramError("transient",
-             "Transient simulations not supported at this time with the linear FV discretization");
+  std::string kernel_type = "LinearFVTimeDerivative";
+  std::string kernel_name = prefix() + "ins_energy_time";
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>("factor") = "rho_cp";
+
+  getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
 
 void
