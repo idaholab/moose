@@ -205,7 +205,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     auto diff_diagonal = solution.zero_clone();
 
     // We assemble the matrix and the right hand side
-    _problem.computeLinearSystemSys(momentum_system, mmat, rhs);
+    _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
 
     // Still need to relax the right hand side with the same vector
     NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
@@ -597,9 +597,6 @@ LinearAssemblySegregatedSolve::solve()
     if (_has_active_scalar_systems && simple_iteration_counter > 1)
     {
       _problem.execute(EXEC_NONLINEAR);
-      // We need velocity gradients to compute slip velocities
-      for (const auto system_i : index_range(_momentum_systems))
-        _momentum_systems[system_i]->computeGradients();
 
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
