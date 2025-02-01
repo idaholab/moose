@@ -127,8 +127,8 @@ Console::validParams()
                                      "the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear relationship execution output",
-                      "framework mesh aux nonlinear execution");
+  MultiMooseEnum info("framework mesh aux nonlinear linear relationship execution output",
+                      "framework mesh aux nonlinear linear execution");
   params.addParam<MultiMooseEnum>("system_info",
                                   info,
                                   "List of information types to display "
@@ -712,7 +712,7 @@ Console::outputSystemInformation()
   {
     for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
     {
-      std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
+      std::string output = ConsoleUtils::outputSolverSystemInformation(*_problem_ptr, i);
       if (!output.empty())
       {
         _console << "Nonlinear System";
@@ -720,6 +720,20 @@ Console::outputSystemInformation()
           _console << " [" + _problem_ptr->getNonlinearSystemNames()[i] + "]";
         _console << ":\n" << output;
       }
+    }
+  }
+
+  if (_system_info_flags.isValueSet("linear"))
+  {
+    for (const auto i : make_range(_problem_ptr->numLinearSystems()))
+    {
+      std::string output = ConsoleUtils::outputSolverSystemInformation(
+          *_problem_ptr, _problem_ptr->numNonlinearSystems() + i);
+      if (!output.empty())
+        _console << "Linear System" +
+                        (_problem_ptr->numLinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
+                        ":\n"
+                 << output;
     }
   }
 
@@ -773,7 +787,7 @@ Console::meshChanged()
     std::string output;
     for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
     {
-      output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
+      output = ConsoleUtils::outputSolverSystemInformation(*_problem_ptr, i);
       if (!output.empty())
       {
         _console << "Nonlinear System";
@@ -781,6 +795,17 @@ Console::meshChanged()
           _console << " [" + _problem_ptr->getNonlinearSystemNames()[i] + "]";
         _console << ":\n" << output;
       }
+    }
+
+    for (const auto i : make_range(_problem_ptr->numLinearSystems()))
+    {
+      output = ConsoleUtils::outputSolverSystemInformation(*_problem_ptr,
+                                                           _problem_ptr->numNonlinearSystems() + i);
+      if (!output.empty())
+        _console << "Linear System" +
+                        (_problem_ptr->numLinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
+                        ":\n"
+                 << output;
     }
 
     output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);

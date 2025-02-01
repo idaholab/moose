@@ -324,12 +324,12 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
 }
 
 std::string
-outputNonlinearSystemInformation(FEProblemBase & problem, const unsigned int nl_sys_num)
+outputSolverSystemInformation(FEProblemBase & problem, const unsigned int sys_num)
 {
   std::stringstream oss;
   oss << std::left;
 
-  return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase(nl_sys_num).system());
+  return outputSystemInformationHelper(oss, problem.getSolverSystem(sys_num).system());
 }
 
 std::string
