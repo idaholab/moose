@@ -29,6 +29,15 @@
     abs_zero = 5e-6
     rel_err = 5e-6
   []
+  [energy_boussinesq_pimple-physics]
+    type = 'Exodiff'
+    input = 2d-boussinesq-transient-physics.i
+    exodiff = 2d-boussinesq-transient-physics_out.e
+    requirement = "The system shall be able to solve the transient Navier-Stokes equations with coupled fluid energy equations in a 2D channel using the Boussinesq approximation for buoyancy with the PIMPLE algorithm using the linear finite volume system and the shorthand Physics syntax."
+    max_threads = 1 # see libmesh issue #3808
+    abs_zero = 5e-6
+    rel_err = 5e-6
+  []
   [energy_boussinesq_piso]
     type = 'Exodiff'
     input = 2d-boussinesq-transient.i
