@@ -36,6 +36,11 @@ WCNSLinearFVFlowPhysics::validParams()
   params.set<std::vector<SolverSystemName>>("system_names") = {
       "u_system", "v_system", "w_system", "pressure_system"};
 
+  // Implemented in the executioner
+  params.suppressParameter<MooseEnum>("pinned_pressure_type");
+  params.suppressParameter<Point>("pinned_pressure_point");
+  params.suppressParameter<PostprocessorName>("pinned_pressure_value");
+
   // Not supported
   params.suppressParameter<bool>("add_flow_equations");
   params.set<bool>("porous_medium_treatment") = false;
@@ -65,6 +70,10 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
   if (_hydraulic_separators.size())
     paramError("hydraulic_separator_sidesets",
                "Flow separators are not supported yet for linearFV!");
+  if (getParam<bool>("pin_pressure"))
+    paramError("pin_pressure",
+               "Pressure pinning is implemented in the executioner for the linear finite volume "
+               "segregated solves");
 }
 
 void
