@@ -11,7 +11,7 @@
 
 #include "GeneralPostprocessor.h"
 
-class Transient;
+class TransientBase;
 
 /**
  * Gets the relative solution norm from the transient executioner
@@ -43,5 +43,5 @@ public:
 
 protected:
   /// Transient executioner
-  Transient * _trex;
+  TransientBase * _trex;
 };

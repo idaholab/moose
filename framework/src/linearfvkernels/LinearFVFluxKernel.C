@@ -70,8 +70,11 @@ LinearFVFluxKernel::addMatrixContribution()
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    mooseAssert(_current_face_info->boundaryIDs().size() == 1,
-                "We should only have one boundary on every face.");
+    mooseAssert(
+        _current_face_info->boundaryIDs().size() == 1,
+        "We should only have one boundary on every face. Current face center: " +
+            Moose::stringify(_current_face_info->faceCentroid()) +
+            " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
 
     LinearFVBoundaryCondition * bc_pointer =
         _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());

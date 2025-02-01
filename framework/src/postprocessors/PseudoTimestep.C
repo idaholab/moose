@@ -11,7 +11,7 @@
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
 #include "MathUtils.h"
-#include "Transient.h"
+#include "TransientBase.h"
 #include "Restartable.h"
 #include "libmesh/enum_norm_type.h"
 
@@ -159,7 +159,7 @@ PseudoTimestep::timestepEXP() const
 void
 PseudoTimestep::execute()
 {
-  Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+  TransientBase * transient = dynamic_cast<TransientBase *>(_app.getExecutioner());
 
   Real res_norm;
   Real curr_dt;

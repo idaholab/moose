@@ -17,7 +17,7 @@
 #include "MooseMesh.h"
 #include "Output.h"
 #include "TimeStepper.h"
-#include "Transient.h"
+#include "TransientBase.h"
 #include "NonlinearSystem.h"
 
 #include "libmesh/mesh_tools.h"
@@ -210,7 +210,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
     {
       FEProblemBase & problem = appProblemBase(_first_local_app + i);
 
-      Transient * ex = _transient_executioners[i];
+      TransientBase * ex = _transient_executioners[i];
 
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
@@ -563,7 +563,7 @@ TransientMultiApp::incrementTStep(Real target_time)
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      Transient * ex = _transient_executioners[i];
+      TransientBase * ex = _transient_executioners[i];
 
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
@@ -583,7 +583,7 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      Transient * ex = _transient_executioners[i];
+      TransientBase * ex = _transient_executioners[i];
       ex->endStep();
       ex->postStep();
       if (recurse_through_multiapp_levels)
@@ -611,7 +611,7 @@ TransientMultiApp::computeDT()
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      Transient * ex = _transient_executioners[i];
+      TransientBase * ex = _transient_executioners[i];
       ex->computeDT();
       Real dt = ex->getDT();
 
@@ -659,7 +659,7 @@ void
 TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
 {
   auto & app = _apps[i];
-  Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
+  TransientBase * ex = dynamic_cast<TransientBase *>(app->getExecutioner());
   if (!ex)
     mooseError("MultiApp ", name(), " is not using a Transient Executioner!");
 

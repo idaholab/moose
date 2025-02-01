@@ -1231,8 +1231,25 @@ void
 SystemBase::copySolutionsBackwards()
 {
   system().update();
-
   copyOldSolutions();
+  copyPreviousNonlinearSolutions();
+}
+
+/**
+ * Shifts the solutions backwards in nonlinear iteration history
+ */
+void
+SystemBase::copyPreviousNonlinearSolutions()
+{
+  // 1 is for nonlinear, 0 is for time, we do this for nonlinear only here
+  const auto states = _solution_states[1].size();
+  if (states > 1)
+    for (unsigned int i = states - 1; i > 0; --i)
+      solutionState(i, Moose::SolutionIterationType::Nonlinear) =
+          solutionState(i - 1, Moose::SolutionIterationType::Nonlinear);
+
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = *currentSolution();
 }
 
 /**
@@ -1242,22 +1259,16 @@ void
 SystemBase::copyOldSolutions()
 {
   // Copying the solutions backward so the current solution will become the old, and the old will
-  // become older. The same applies to the nonlinear iterates.
-  for (const auto iteration_index : index_range(_solution_states))
-  {
-    const auto states = _solution_states[iteration_index].size();
-    if (states > 1)
-      for (unsigned int i = states - 1; i > 0; --i)
-        solutionState(i, Moose::SolutionIterationType(iteration_index)) =
-            solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
-  }
+  // become older. 0 index is for time, 1 would be nonlinear iteration.
+  const auto states = _solution_states[0].size();
+  if (states > 1)
+    for (unsigned int i = states - 1; i > 0; --i)
+      solutionState(i) = solutionState(i - 1);
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
   if (solutionUDotDotOld())
     *solutionUDotDotOld() = *solutionUDotDot();
-  if (solutionPreviousNewton())
-    *solutionPreviousNewton() = *currentSolution();
 }
 
 /**

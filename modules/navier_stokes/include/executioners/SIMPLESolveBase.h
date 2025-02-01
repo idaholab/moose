@@ -57,6 +57,9 @@ public:
   /// Setup pressure pin if there is need for one
   void setupPressurePin();
 
+  /// Check if the user defined time kernels
+  virtual void checkIntegrity() {}
+
 protected:
   void checkDependentParameterError(const std::string & main_parameter,
                                     const std::vector<std::string> & dependent_parameters,

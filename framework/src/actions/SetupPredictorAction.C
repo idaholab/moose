@@ -9,7 +9,7 @@
 
 // MOOSE includes
 #include "SetupPredictorAction.h"
-#include "Transient.h"
+#include "TransientBase.h"
 #include "Predictor.h"
 #include "Factory.h"
 #include "NonlinearSystemBase.h"
@@ -34,11 +34,11 @@ SetupPredictorAction::act()
 {
   if (_problem->isTransient())
   {
-    Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+    TransientBase * transient = dynamic_cast<TransientBase *>(_app.getExecutioner());
     if (!transient)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
-    _moose_object_pars.set<Transient *>("_executioner") = transient;
+    _moose_object_pars.set<TransientBase *>("_executioner") = transient;
     std::shared_ptr<Predictor> predictor =
         _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
     predictor->_nl.setPredictor(predictor);
