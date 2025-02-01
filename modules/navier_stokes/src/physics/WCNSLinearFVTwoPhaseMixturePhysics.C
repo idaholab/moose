@@ -241,6 +241,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   // Compute slip terms as functors, used by the drift flux kernels
   if (_use_advection_slip || _use_drift_flux || _add_phase_equation)
   {
+    mooseAssert(_flow_equations_physics, "We must have coupled to this");
     const std::vector<std::string> vel_components = {"u", "v", "w"};
     const std::vector<std::string> components = {"x", "y", "z"};
     for (const auto dim : make_range(dimension()))

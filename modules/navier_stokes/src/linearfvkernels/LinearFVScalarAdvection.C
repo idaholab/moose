@@ -104,13 +104,18 @@ LinearFVScalarAdvection::setupFaceData(const FaceInfo * face_info)
   _volumetric_face_flux = _mass_flux_provider.getVolumetricFaceFlux(*face_info);
 
   // Adjust volumetric face flux using the slip velocity
-  if (_u_slip)
+  // TODO: add boundaries
+  if (_u_slip && face_info->neighborPtr())
   {
     const auto state = determineState();
     Moose::FaceArg face_arg;
     // TODO Add boundary treatment to be able select two-term expansion if desired
-    face_arg = Moose::FaceArg{
-        face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
+    face_arg = Moose::FaceArg{face_info,
+                              Moose::FV::LimiterType::CentralDifference,
+                              true,
+                              false,
+                              face_info->neighborPtr(),
+                              nullptr};
 
     RealVectorValue velocity_slip_vel_vec;
     if (_u_slip)
