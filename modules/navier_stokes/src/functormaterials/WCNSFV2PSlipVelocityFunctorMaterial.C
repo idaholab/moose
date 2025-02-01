@@ -64,13 +64,11 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
     const InputParameters & params)
   : FunctorMaterial(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const MooseVariableField<Real> *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const MooseVariableField<Real> *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const MooseVariableField<Real> *>(getFieldVar("w", 0))
-               : nullptr),
+    _u_var(dynamic_cast<MooseVariableField<Real> *>(getFieldVar("u", 0))),
+    _v_var(params.isParamValid("v") ? dynamic_cast<MooseVariableField<Real> *>(getFieldVar("v", 0))
+                                    : nullptr),
+    _w_var(params.isParamValid("w") ? dynamic_cast<MooseVariableField<Real> *>(getFieldVar("w", 0))
+                                    : nullptr),
     _rho_mixture(getFunctor<ADReal>(NS::density)),
     _rho_d(getFunctor<ADReal>("rho_d")),
     _mu_mixture(getFunctor<ADReal>(NS::mu)),
@@ -98,6 +96,16 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
     paramError("w",
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
+
+  // Slip velocity advection term requires gradients
+  // TODO: this could be set less often, keeping it false until the two phase mixture system is
+  // solved
+  if (auto u = dynamic_cast<MooseLinearVariableFV<Real> *>(_u_var))
+    u->computeCellGradients();
+  if (auto v = dynamic_cast<MooseLinearVariableFV<Real> *>(_v_var))
+    v->computeCellGradients();
+  if (auto w = dynamic_cast<MooseLinearVariableFV<Real> *>(_w_var))
+    w->computeCellGradients();
 
   addFunctorProperty<ADReal>(
       getParam<MooseFunctorName>("slip_velocity_name"),

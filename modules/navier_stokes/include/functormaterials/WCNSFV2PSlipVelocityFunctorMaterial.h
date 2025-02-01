@@ -28,11 +28,11 @@ protected:
   const unsigned int _dim;
 
   /// x-velocity
-  const MooseVariableField<Real> * const _u_var;
+  MooseVariableField<Real> * const _u_var;
   /// y-velocity
-  const MooseVariableField<Real> * const _v_var;
+  MooseVariableField<Real> * const _v_var;
   /// z-velocity
-  const MooseVariableField<Real> * const _w_var;
+  MooseVariableField<Real> * const _w_var;
 
   /// Continuous phase density
   const Moose::Functor<ADReal> & _rho_mixture;
