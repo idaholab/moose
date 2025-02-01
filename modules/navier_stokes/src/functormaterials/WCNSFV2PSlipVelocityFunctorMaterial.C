@@ -123,11 +123,11 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
         // Adding transient term
         if (is_transient)
         {
-          term_transient(0) += _u_var->dot(r, t);
-          if (_dim > 1)
-            term_transient(1) += _v_var->dot(r, t);
-          if (_dim > 2)
-            term_transient(2) += _w_var->dot(r, t);
+          // term_transient(0) += _u_var->dot(r, t);
+          // if (_dim > 1)
+          //   term_transient(1) += _v_var->dot(r, t);
+          // if (_dim > 2)
+          //   term_transient(2) += _w_var->dot(r, t);
         }
 
         // Adding advection term
