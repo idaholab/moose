@@ -528,37 +528,34 @@ WCNSFVFlowPhysics::addMomentumBoussinesqKernels()
     paramError("boussinesq_approximation",
                "We cannot use boussinesq approximation while running in weakly-compressible mode!");
 
-  if (parameters().isParamValid("gravity"))
+  std::string kernel_type = "INSFVMomentumBoussinesq";
+  std::string kernel_name = prefix() + "ins_momentum_boussinesq_";
+
+  if (_porous_medium_treatment)
   {
-    std::string kernel_type = "INSFVMomentumBoussinesq";
-    std::string kernel_name = prefix() + "ins_momentum_boussinesq_";
+    kernel_type = "PINSFVMomentumBoussinesq";
+    kernel_name = prefix() + "pins_momentum_boussinesq_";
+  }
 
-    if (_porous_medium_treatment)
-    {
-      kernel_type = "PINSFVMomentumBoussinesq";
-      kernel_name = prefix() + "pins_momentum_boussinesq_";
-    }
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+  params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
+  params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+  params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
+  params.set<MooseFunctorName>("alpha_name") = getParam<MooseFunctorName>("thermal_expansion");
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  // User declared the flow to be incompressible, we have to trust them
+  params.set<bool>("_override_constant_check") = true;
 
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
-    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-    params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-    params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
-    params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-    params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
-    params.set<MooseFunctorName>("alpha_name") = getParam<MooseFunctorName>("thermal_expansion");
-    if (_porous_medium_treatment)
-      params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-    // User declared the flow to be incompressible, we have to trust them
-    params.set<bool>("_override_constant_check") = true;
+  for (const auto d : make_range(dimension()))
+  {
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
 
-    for (const auto d : make_range(dimension()))
-    {
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-      params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-
-      getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
-    }
+    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 

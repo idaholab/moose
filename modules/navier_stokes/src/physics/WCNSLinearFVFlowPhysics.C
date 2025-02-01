@@ -43,7 +43,6 @@ WCNSLinearFVFlowPhysics::validParams()
   params.set<MooseFunctorName>("porosity") = "1";
   params.suppressParameter<MooseFunctorName>("porosity");
   params.suppressParameter<MooseEnum>("mu_interp_method");
-  params.suppressParameter<MooseFunctorName>("thermal_expansion");
 
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
@@ -278,9 +277,9 @@ WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
       if (gravity_vector(d) != 0)
       {
         params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
-        params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+        params.set<LinearVariableName>("variable") = _velocity_names[d];
 
-        getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+        getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
       }
   }
 }
@@ -288,7 +287,28 @@ WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
 void
 WCNSLinearFVFlowPhysics::addMomentumBoussinesqKernels()
 {
-  paramError("boussinesq_approximation", "Currently not implemented.");
+  if (_compressibility == "weakly-compressible")
+    paramError("boussinesq_approximation",
+               "We cannot use boussinesq approximation while running in weakly-compressible mode!");
+
+  std::string kernel_type = "LinearFVMomentumBoussinesq";
+  std::string kernel_name = prefix() + "ins_momentum_boussinesq_";
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<VariableName>(NS::T_fluid) = _fluid_temperature_name;
+  params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
+  params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+  params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
+  params.set<MooseFunctorName>("alpha_name") = getParam<MooseFunctorName>("thermal_expansion");
+
+  for (const auto d : make_range(dimension()))
+  {
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    params.set<LinearVariableName>("variable") = _velocity_names[d];
+
+    getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+  }
 }
 
 void
