@@ -121,13 +121,14 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
             _force_function.value(_t, _current_elem->vertex_average()) * _force_direction);
 
         // Adding transient term
-        if (is_transient)
+        // TODO: add time derivative term to lienar FV variable
+        if (is_transient && !dynamic_cast<MooseLinearVariableFV<Real> *>(_u_var))
         {
-          term_transient(0) += _u_var->dot(r, t);
-          if (_dim > 1)
-            term_transient(1) += _v_var->dot(r, t);
-          if (_dim > 2)
-            term_transient(2) += _w_var->dot(r, t);
+          // term_transient(0) += _u_var->dot(r, t);
+          // if (_dim > 1)
+          //   term_transient(1) += _v_var->dot(r, t);
+          // if (_dim > 2)
+          //   term_transient(2) += _w_var->dot(r, t);
         }
 
         // Adding advection term
