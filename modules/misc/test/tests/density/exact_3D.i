@@ -89,7 +89,20 @@
   [density_exact]
     type = ParsedPostprocessor
     pp_names = 'disp_x disp_y disp_z'
-    expression = '1 / (1 + disp_x) / (1 + disp_y) / (1 + disp_z)'
+    expression = 't / (1 + disp_x) / (1 + disp_y) / (1 + disp_z)'
+    use_t = true
+    outputs = console
+  []
+  [density_diff]
+    type = ParsedPostprocessor
+    expression = '(density_exact - density) / density_exact'
+    pp_names = 'density density_exact'
+    outputs = console
+  []
+  [density_diff_max]
+    type = TimeExtremeValue
+    postprocessor = density_diff
+    value_type = ABS_MAX
   []
 []
 
