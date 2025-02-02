@@ -35,6 +35,19 @@
     issues = '#951 #14946'
     requirement = "The system shall be able to impose constant upper and lower bounds on a finite volume variable."
   []
+  [constant_bounds_displaced]
+    type = 'Exodiff'
+    prereq = 'constant_bounds'
+    input = 'constant_bounds.i'
+    cli_args = "GlobalParams/use_displaced_mesh=true GlobalParams/displacements='disp_x disp_y'
+                AuxVariables/disp_x/family=LAGRANGE AuxVariables/disp_y/family=LAGRANGE
+                Outputs/hide='disp_x disp_y'"
+    exodiff = 'constant_bounds_out.e'
+    scale_refine = 3
+    design = 'ConstantBounds.md'
+    issues = '#29792'
+    requirement = "The system shall include the ability to compute a nodal field variable with a constant upper and lower bounds, even when using a displaced mesh."
+  []
 
   [exceptions]
     requirement = "The system shall"
