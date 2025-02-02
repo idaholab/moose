@@ -58,6 +58,14 @@ protected:
 
   /// Standard deviations converted to a 2D diagonal tensor that can be used by Libtorch routines.
   torch::Tensor _std;
+
+  std::vector<Real> _previous_control_signal;
+  std::vector<Real> _current_smoothed_signal;
+
+  unsigned int _call_counter;
+  const unsigned int _num_steps_in_period;
+  const Real _smoother;
+
 };
 
 #endif

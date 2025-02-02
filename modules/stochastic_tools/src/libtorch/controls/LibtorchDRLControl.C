@@ -25,7 +25,11 @@ LibtorchDRLControl::validParams()
       "Reinforcement Learning (DRL) neural network trained using a PPO algorithm.");
   params.addRequiredParam<std::vector<Real>>(
       "action_standard_deviations", "Standard deviation value used while sampling the actions.");
+
   params.addParam<unsigned int>("seed", "Seed for the random number generator.");
+
+  params.addParam<unsigned int>("num_stems_in_period", 1, "Blabla");
+  params.addParam<Real>("smoother", 1.0, "Blabla");
 
   return params;
 }
@@ -33,7 +37,13 @@ LibtorchDRLControl::validParams()
 LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   : LibtorchNeuralNetControl(parameters),
     _current_control_signal_log_probabilities(std::vector<Real>(_control_names.size(), 0.0)),
-    _action_std(getParam<std::vector<Real>>("action_standard_deviations"))
+    _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
+    _previous_control_signal(std::vector<Real>(_control_names.size(), 0.0)),
+    _current_smoothed_signal(std::vector<Real>(_control_names.size(), 0.0)),
+    _call_counter(0),
+    _num_steps_in_period(getParam<unsigned int>("num_stems_in_period")),
+    _smoother(getParam<Real>("smoother"))
+
 {
   if (_control_names.size() != _action_std.size())
     paramError("action_standard_deviations",
@@ -72,12 +82,15 @@ LibtorchDRLControl::execute()
       _initialized = true;
     }
 
-    // Organize the old an current solution into a tensor so we can evaluate the neural net
-    torch::Tensor input_tensor = prepareInputTensor();
+    if (_call_counter % _num_steps_in_period == 0)
+    {
+      // Organize the old an current solution into a tensor so we can evaluate the neural net
+      torch::Tensor input_tensor = prepareInputTensor();
 
-    // Evaluate the neural network to get the expected control value
-    torch::Tensor output_tensor = _nn->forward(input_tensor);
+      // Evaluate the neural network to get the expected control value
+      torch::Tensor output_tensor = _nn->forward(input_tensor);
 
+<<<<<<< HEAD
     // std::cout << "Input " << input_tensor << std::endl;
     // std::cout << "Output " << output_tensor << std::endl;
 
@@ -88,23 +101,41 @@ LibtorchDRLControl::execute()
 
     // Compute log probability
     torch::Tensor log_probability = computeLogProbability(action, output_tensor);
+=======
+      // Sample control value (action) from Gaussian distribution
+      torch::Tensor action = at::normal(output_tensor, _std);
 
-    // Convert data
-    _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
+      // Compute log probability
+      torch::Tensor log_probability = computeLogProbability(action, output_tensor);
+>>>>>>> 4b5d311c80 (Add option for smoothing signal.)
 
-    _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
+      _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
+
+      _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
                                                  log_probability.data_ptr<Real>() +
                                                      log_probability.size(1)};
+    }
 
+    // Convert data
+    _previous_control_signal = _current_smoothed_signal;
+
+
+    for (const auto i : index_range(_current_smoothed_signal))
+      _current_smoothed_signal[i] = _previous_control_signal[i] + _smoother*(_current_control_signals[i] - _previous_control_signal[i]);
+
+
+<<<<<<< HEAD
     // std::cout << "Setting control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
     // std::cout << "Setting log probability to: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
+=======
+>>>>>>> 4b5d311c80 (Add option for smoothing signal.)
 
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
 
       // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
-                                       _current_control_signals[control_i] *
+                                       _current_smoothed_signal[control_i] *
                                            _action_scaling_factors[control_i]);
     }
 
@@ -115,6 +146,7 @@ LibtorchDRLControl::execute()
       std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
       _old_responses[0] = _current_response;
     }
+    _call_counter++;
   }
 }
 
