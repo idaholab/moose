@@ -52,7 +52,6 @@
   []
   [density]
     type = Density
-    strain_free_density = strain_free_density
     displacements = 'disp_x disp_y disp_z'
     outputs = all
   []
