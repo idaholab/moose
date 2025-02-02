@@ -1,10 +1,12 @@
-# [Mesh]
-#   [fmg]
-#     type = FileMeshGenerator
-#     file = flow_over_circle_linearfv_out_orig.e
-#     use_for_exodus_restart = true
-#   []
-# []
+!include header.i
+
+[Mesh]
+  [fmg]
+    type = FileMeshGenerator
+    file = flow_over_circle_linearfv_out_orig.e
+    use_for_exodus_restart = true
+  []
+[]
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -22,13 +24,13 @@
     type = ParsedFunction
     expression = 'Q*x/(x^2+y^2)*abs(cos(pi/(20/180*pi)*atan(x/y)))'
     symbol_names = 'Q'
-    symbol_values = '${Q}'
+    symbol_values = 'Q_signal'
   []
   [gap_y]
     type = ParsedFunction
     expression = 'if(y>0,Q,-Q)*y/(x^2+y^2)*abs(cos(pi/(20/180*pi)*atan(x/y)))'
     symbol_names = 'Q'
-    symbol_values = '${Q}'
+    symbol_values = 'Q_signal'
   []
 []
 
@@ -47,21 +49,21 @@
   [vel_x]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
-    # initial_from_file_var = vel_x
-    # initial_from_file_timestep = LATEST
+    initial_from_file_var = vel_x
+    initial_from_file_timestep = LATEST
   []
   [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
-    # initial_from_file_var = vel_y
-    # initial_from_file_timestep = LATEST
+    initial_from_file_var = vel_y
+    initial_from_file_timestep = LATEST
   []
   [pressure]
     type = MooseLinearVariableFVReal
-    initial_condition = 0
+    # initial_condition = 0
     solver_sys = pressure_system
-    # initial_from_file_var = pressure
-    # initial_from_file_timestep = LATEST
+    initial_from_file_var = pressure
+    initial_from_file_timestep = LATEST
   []
 []
 
@@ -243,6 +245,74 @@
     coeff_2 = 1.59
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [p1]
+    type = PointValue
+    variable = pressure
+    point = '0 0.07 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p2]
+    type = PointValue
+    variable = pressure
+    point = '0 -0.07 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p3]
+    type = PointValue
+    variable = pressure
+    point = '0.075 0.1 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p4]
+    type = PointValue
+    variable = pressure
+    point = '0.075 0.0 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p5]
+    type = PointValue
+    variable = pressure
+    point = '0.075 -0.1 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [Q_signal]
+    type = ConstantPostprocessor
+    value = 0.0
+  []
+  [Q]
+    type = LibtorchControlValuePostprocessor
+    control_name = src_control
+  []
+  [log_prob_Q]
+    type = LibtorchDRLLogProbabilityPostprocessor
+    control_name = src_control
+  []
+[]
+
+[Reporters]
+  [results]
+    type = AccumulateReporter
+    reporters = 'p1/value p2/value p3/value p4/value p5/value reward/value Q/value log_prob_Q/value'
+  []
+[]
+
+[Controls]
+  [src_control]
+    type = LibtorchDRLControl
+    parameters = "Postprocessors/Q_signal/value"
+    responses = 'p1 p2 p3 p4 p5'
+
+    # keep consistent with LibtorchDRLControlTrainer
+    input_timesteps = 1
+    response_scaling_factors = '0.4 0.4 0.4 0.4 0.4'
+    response_shift_factors = '-0.4 -0.4 -0.4 -0.4 -0.4'
+    action_standard_deviations = '0.02'
+    action_scaling_factors = 0.01
+
+    execute_on = 'TIMESTEP_BEGIN'
+    smoother = 0.1
+    num_stems_in_period = 25
+  []
 []
 
 [Executioner]
@@ -265,11 +335,16 @@
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  dt = 0.002
-  num_steps = 50
+  dt = 0.001
+  num_steps = 500
 []
 
 [Outputs]
-  exodus = true
-  csv = true
+  # exodus = true
+  [json]
+    type = JSON
+    execute_on = final
+  []
+  # console = false
+  # execute_on = FINAL
 []
