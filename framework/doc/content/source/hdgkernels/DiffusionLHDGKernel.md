@@ -1,4 +1,4 @@
-# DiffusionHDGKernel
+# DiffusionLHDGKernel
 
 This class implements the same physics as [MatDiffusion.md] (see note) but with a
 hybridized discontinuous Galerkin (HDG) discretization. For more information on
@@ -33,8 +33,8 @@ studies, or as a source term for the diffused quantity.
 !alert note
 Unlike MatDiffusion, the dependence of the diffusion coefficient on nonlinear variables is not captured in the construction of the Jacobian.
 
-!syntax parameters /HDGKernels/DiffusionHDGKernel
+!syntax parameters /HDGKernels/DiffusionLHDGKernel
 
-!syntax inputs /HDGKernels/DiffusionHDGKernel
+!syntax inputs /HDGKernels/DiffusionLHDGKernel
 
-!syntax children /HDGKernels/DiffusionHDGKernel
+!syntax children /HDGKernels/DiffusionLHDGKernel

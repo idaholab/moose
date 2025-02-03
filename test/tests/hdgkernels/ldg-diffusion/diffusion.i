@@ -29,29 +29,29 @@
 
 [HDGKernels]
   [diff]
-    type = DiffusionHDGKernel
+    type = DiffusionLHDGKernel
   []
 []
 
 [BCs]
   inactive = 'right_flux'
   [left]
-    type = DiffusionHDGDirichletBC
+    type = DiffusionLHDGDirichletBC
     boundary = 'left'
     functor = '0'
   []
   [right]
-    type = DiffusionHDGDirichletBC
+    type = DiffusionLHDGDirichletBC
     boundary = 'right'
     functor = '1'
   []
   [right_flux]
-    type = DiffusionHDGPrescribedGradientBC
+    type = DiffusionLHDGPrescribedGradientBC
     boundary = 'right'
     normal_gradient = 1
   []
   [zero_flux]
-    type = DiffusionHDGPrescribedGradientBC
+    type = DiffusionLHDGPrescribedGradientBC
     boundary = 'top bottom'
   []
 []

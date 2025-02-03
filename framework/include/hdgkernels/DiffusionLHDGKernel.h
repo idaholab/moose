@@ -10,17 +10,17 @@
 #pragma once
 
 #include "HDGKernel.h"
-#include "DiffusionHDGAssemblyHelper.h"
+#include "DiffusionLHDGAssemblyHelper.h"
 
 /**
  * Implements the diffusion equation for a hybridized discretization
  */
-class DiffusionHDGKernel : public HDGKernel, public DiffusionHDGAssemblyHelper
+class DiffusionLHDGKernel : public HDGKernel, public DiffusionLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGKernel(const InputParameters & params);
+  DiffusionLHDGKernel(const InputParameters & params);
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;

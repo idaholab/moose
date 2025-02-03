@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesHDGKernel.h"
+#include "NavierStokesLHDGKernel.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
 #include "FEProblemBase.h"
 
-registerMooseObject("NavierStokesApp", NavierStokesHDGKernel);
+registerMooseObject("NavierStokesApp", NavierStokesLHDGKernel);
 
 InputParameters
-NavierStokesHDGKernel::validParams()
+NavierStokesLHDGKernel::validParams()
 {
   auto params = HDGKernel::validParams();
-  params += NavierStokesHDGAssemblyHelper::validParams();
+  params += NavierStokesLHDGAssemblyHelper::validParams();
   params.addParam<MooseFunctorName>(
       "body_force_x", 0, "Body force for the momentum equation in the x-direction");
   params.addParam<MooseFunctorName>(
@@ -36,9 +36,9 @@ NavierStokesHDGKernel::validParams()
   return params;
 }
 
-NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
+NavierStokesLHDGKernel::NavierStokesLHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters),
-    NavierStokesHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
+    NavierStokesLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
     // body forces
     _body_force_x(getFunctor<Real>("body_force_x")),
     _body_force_y(getFunctor<Real>("body_force_y")),
@@ -56,7 +56,7 @@ NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
 }
 
 void
-NavierStokesHDGKernel::computeResidual()
+NavierStokesLHDGKernel::computeResidual()
 {
   _grad_u_vel_re.resize(_qu_dof_indices.size());
   _grad_v_vel_re.resize(_qv_dof_indices.size());
@@ -90,7 +90,7 @@ NavierStokesHDGKernel::computeResidual()
 }
 
 void
-NavierStokesHDGKernel::computeJacobian()
+NavierStokesLHDGKernel::computeJacobian()
 {
   _grad_u_grad_u_jac.resize(_qu_dof_indices.size(), _qu_dof_indices.size());
   _grad_v_grad_v_jac.resize(_qv_dof_indices.size(), _qv_dof_indices.size());
@@ -156,7 +156,7 @@ NavierStokesHDGKernel::computeJacobian()
 }
 
 void
-NavierStokesHDGKernel::computeResidualOnSide()
+NavierStokesLHDGKernel::computeResidualOnSide()
 {
   const Elem * const neigh = _current_elem->neighbor_ptr(_current_side);
 
@@ -193,7 +193,7 @@ NavierStokesHDGKernel::computeResidualOnSide()
 }
 
 void
-NavierStokesHDGKernel::computeJacobianOnSide()
+NavierStokesLHDGKernel::computeJacobianOnSide()
 {
   const Elem * const neigh = _current_elem->neighbor_ptr(_current_side);
 
@@ -314,20 +314,20 @@ NavierStokesHDGKernel::computeJacobianOnSide()
 }
 
 void
-NavierStokesHDGKernel::initialSetup()
+NavierStokesLHDGKernel::initialSetup()
 {
   // This check must occur after FEProblemBase::init()
   checkCoupling();
 }
 
 void
-NavierStokesHDGKernel::jacobianSetup()
+NavierStokesLHDGKernel::jacobianSetup()
 {
   _my_elem = nullptr;
 }
 
 void
-NavierStokesHDGKernel::computeOffDiagJacobian(const unsigned int)
+NavierStokesLHDGKernel::computeOffDiagJacobian(const unsigned int)
 {
   if (_my_elem != _current_elem)
   {
@@ -337,7 +337,7 @@ NavierStokesHDGKernel::computeOffDiagJacobian(const unsigned int)
 }
 
 std::set<std::string>
-NavierStokesHDGKernel::additionalVariablesCovered()
+NavierStokesLHDGKernel::additionalVariablesCovered()
 {
   std::set<std::string> covered_vars = {_u_var.name(),
                                         _grad_u_var.name(),

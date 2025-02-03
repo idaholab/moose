@@ -29,14 +29,14 @@
 
 [HDGKernels]
   [diff]
-    type = DiffusionHDGKernel
+    type = DiffusionLHDGKernel
     source = 'forcing'
   []
 []
 
 [BCs]
   [all]
-    type = DiffusionHDGDirichletBC
+    type = DiffusionLHDGDirichletBC
     boundary = 'left right top bottom'
     functor = 'exact'
   []

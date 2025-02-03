@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DiffusionHDGAssemblyHelper.h"
-#include "DiffusionHDGPrescribedGradientBC.h"
+#include "DiffusionLHDGAssemblyHelper.h"
+#include "DiffusionLHDGPrescribedGradientBC.h"
 
-registerMooseObject("MooseApp", DiffusionHDGPrescribedGradientBC);
+registerMooseObject("MooseApp", DiffusionLHDGPrescribedGradientBC);
 
 InputParameters
-DiffusionHDGPrescribedGradientBC::validParams()
+DiffusionLHDGPrescribedGradientBC::validParams()
 {
   auto params = IntegratedBC::validParams();
-  params += DiffusionHDGAssemblyHelper::validParams();
+  params += DiffusionLHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   params.addClassDescription("Implements a flux boundary condition for use with a hybridized "
                              "discretization of the diffusion equation");
@@ -25,23 +25,23 @@ DiffusionHDGPrescribedGradientBC::validParams()
   return params;
 }
 
-DiffusionHDGPrescribedGradientBC::DiffusionHDGPrescribedGradientBC(
+DiffusionLHDGPrescribedGradientBC::DiffusionLHDGPrescribedGradientBC(
     const InputParameters & parameters)
   : IntegratedBC(parameters),
-    DiffusionHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
+    DiffusionLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _normal_gradient(getFunctor<Real>("normal_gradient")),
     _my_side(libMesh::invalid_uint)
 {
 }
 
 void
-DiffusionHDGPrescribedGradientBC::initialSetup()
+DiffusionLHDGPrescribedGradientBC::initialSetup()
 {
   checkCoupling();
 }
 
 void
-DiffusionHDGPrescribedGradientBC::computeResidual()
+DiffusionLHDGPrescribedGradientBC::computeResidual()
 {
   _vector_re.resize(_qu_dof_indices.size());
   _scalar_re.resize(_u_dof_indices.size());
@@ -69,7 +69,7 @@ DiffusionHDGPrescribedGradientBC::computeResidual()
 }
 
 void
-DiffusionHDGPrescribedGradientBC::computeJacobian()
+DiffusionLHDGPrescribedGradientBC::computeJacobian()
 {
   _vector_vector_jac.resize(_qu_dof_indices.size(), _qu_dof_indices.size());
   _vector_scalar_jac.resize(_qu_dof_indices.size(), _u_dof_indices.size());
@@ -107,14 +107,14 @@ DiffusionHDGPrescribedGradientBC::computeJacobian()
 }
 
 void
-DiffusionHDGPrescribedGradientBC::jacobianSetup()
+DiffusionLHDGPrescribedGradientBC::jacobianSetup()
 {
   _my_elem = nullptr;
   _my_side = libMesh::invalid_uint;
 }
 
 void
-DiffusionHDGPrescribedGradientBC::computeOffDiagJacobian(const unsigned int)
+DiffusionLHDGPrescribedGradientBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_my_elem != _current_elem) || (_my_side != _current_side))
   {

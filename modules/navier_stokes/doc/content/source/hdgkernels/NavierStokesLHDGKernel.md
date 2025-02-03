@@ -1,4 +1,4 @@
-# NavierStokesHDGKernel
+# NavierStokesLHDGKernel
 
 This class implements the steady incompressible Navier-Stokes equations. These include the conservation of mass:
 
@@ -16,8 +16,8 @@ the hybridization laid out in [!citep](nguyen2011implicit). Note that, as shown
 in the reference, the pressure field is integrated by parts which has
 consequences for boundary conditions on momentum flux boundaries.
 
-!syntax parameters /HDGKernels/NavierStokesHDGKernel
+!syntax parameters /HDGKernels/NavierStokesLHDGKernel
 
-!syntax inputs /HDGKernels/NavierStokesHDGKernel
+!syntax inputs /HDGKernels/NavierStokesLHDGKernel
 
-!syntax children /HDGKernels/NavierStokesHDGKernel
+!syntax children /HDGKernels/NavierStokesLHDGKernel

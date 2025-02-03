@@ -7,47 +7,43 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesHDGOutflowBC.h"
-#include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
-#include "Function.h"
-#include "NavierStokesHDGKernel.h"
+#include "NavierStokesLHDGOutflowBC.h"
 
-registerMooseObject("NavierStokesApp", NavierStokesHDGOutflowBC);
+registerMooseObject("NavierStokesApp", NavierStokesLHDGOutflowBC);
 
 InputParameters
-NavierStokesHDGOutflowBC::validParams()
+NavierStokesLHDGOutflowBC::validParams()
 {
   auto params = IntegratedBC::validParams();
-  params += NavierStokesHDGAssemblyHelper::validParams();
+  params += NavierStokesLHDGAssemblyHelper::validParams();
   params.addClassDescription("Implements an outflow boundary condition for use with a hybridized "
                              "discretization of the incompressible Navier-Stokes equations");
   params.renameParam("variable", "u", "The x-component of velocity");
   return params;
 }
 
-NavierStokesHDGOutflowBC::NavierStokesHDGOutflowBC(const InputParameters & parameters)
+NavierStokesLHDGOutflowBC::NavierStokesLHDGOutflowBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    NavierStokesHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
+    NavierStokesLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
     _my_side(libMesh::invalid_uint)
 {
 }
 
 void
-NavierStokesHDGOutflowBC::initialSetup()
+NavierStokesLHDGOutflowBC::initialSetup()
 {
   checkCoupling();
 }
 
 void
-NavierStokesHDGOutflowBC::jacobianSetup()
+NavierStokesLHDGOutflowBC::jacobianSetup()
 {
   _my_elem = nullptr;
   _my_side = libMesh::invalid_uint;
 }
 
 void
-NavierStokesHDGOutflowBC::computeOffDiagJacobian(const unsigned int)
+NavierStokesLHDGOutflowBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_my_elem != _current_elem) || (_my_side != _current_side))
   {
@@ -58,7 +54,7 @@ NavierStokesHDGOutflowBC::computeOffDiagJacobian(const unsigned int)
 }
 
 void
-NavierStokesHDGOutflowBC::computeResidual()
+NavierStokesLHDGOutflowBC::computeResidual()
 {
   const Elem * const neigh = _current_elem->neighbor_ptr(_current_side);
 
@@ -93,7 +89,7 @@ NavierStokesHDGOutflowBC::computeResidual()
 }
 
 void
-NavierStokesHDGOutflowBC::computeJacobian()
+NavierStokesLHDGOutflowBC::computeJacobian()
 {
   const Elem * const neigh = _current_elem->neighbor_ptr(_current_side);
 

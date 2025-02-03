@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ActionWarehouse.h"
-#include "DiffusionHDGAssemblyHelper.h"
+#include "DiffusionLHDGAssemblyHelper.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
@@ -22,7 +22,7 @@
 using namespace libMesh;
 
 InputParameters
-DiffusionHDGAssemblyHelper::validParams()
+DiffusionLHDGAssemblyHelper::validParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredParam<NonlinearVariableName>(
@@ -37,7 +37,7 @@ DiffusionHDGAssemblyHelper::validParams()
   return params;
 }
 
-DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(
+DiffusionLHDGAssemblyHelper::DiffusionLHDGAssemblyHelper(
     const MooseObject * const moose_obj,
     MaterialPropertyInterface * const mpi,
     MooseVariableDependencyInterface * const mvdi,
@@ -78,7 +78,7 @@ DiffusionHDGAssemblyHelper::DiffusionHDGAssemblyHelper(
 }
 
 void
-DiffusionHDGAssemblyHelper::checkCoupling()
+DiffusionLHDGAssemblyHelper::checkCoupling()
 {
   // This check must occur after FEProblemBase::init()
   if (_dhah_fe_problem.coupling() == Moose::COUPLING_FULL)
@@ -101,7 +101,7 @@ error:
 }
 
 void
-DiffusionHDGAssemblyHelper::vectorVolumeResidual(const MooseArray<Gradient> & vector_sol,
+DiffusionLHDGAssemblyHelper::vectorVolumeResidual(const MooseArray<Gradient> & vector_sol,
                                                  const MooseArray<Number> & scalar_sol,
                                                  const MooseArray<Real> & JxW,
                                                  const QBase & qrule,
@@ -119,7 +119,7 @@ DiffusionHDGAssemblyHelper::vectorVolumeResidual(const MooseArray<Gradient> & ve
 }
 
 void
-DiffusionHDGAssemblyHelper::vectorVolumeJacobian(const MooseArray<Real> & JxW,
+DiffusionLHDGAssemblyHelper::vectorVolumeJacobian(const MooseArray<Real> & JxW,
                                                  const QBase & qrule,
                                                  DenseMatrix<Number> & vector_vector_jac,
                                                  DenseMatrix<Number> & vector_scalar_jac)
@@ -138,7 +138,7 @@ DiffusionHDGAssemblyHelper::vectorVolumeJacobian(const MooseArray<Real> & JxW,
 }
 
 void
-DiffusionHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & vector_field,
+DiffusionLHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & vector_field,
                                                  const Moose::Functor<Real> & source,
                                                  const MooseArray<Real> & JxW,
                                                  const QBase & qrule,
@@ -163,7 +163,7 @@ DiffusionHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & ve
 }
 
 void
-DiffusionHDGAssemblyHelper::scalarVolumeJacobian(const MooseArray<Real> & JxW,
+DiffusionLHDGAssemblyHelper::scalarVolumeJacobian(const MooseArray<Real> & JxW,
                                                  const QBase & qrule,
                                                  DenseMatrix<Number> & scalar_vector_jac)
 {
@@ -176,7 +176,7 @@ DiffusionHDGAssemblyHelper::scalarVolumeJacobian(const MooseArray<Real> & JxW,
 }
 
 void
-DiffusionHDGAssemblyHelper::vectorFaceResidual(const MooseArray<Number> & lm_sol,
+DiffusionLHDGAssemblyHelper::vectorFaceResidual(const MooseArray<Number> & lm_sol,
                                                const MooseArray<Real> & JxW_face,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals,
@@ -189,7 +189,7 @@ DiffusionHDGAssemblyHelper::vectorFaceResidual(const MooseArray<Number> & lm_sol
 }
 
 void
-DiffusionHDGAssemblyHelper::vectorFaceJacobian(const MooseArray<Real> & JxW_face,
+DiffusionLHDGAssemblyHelper::vectorFaceJacobian(const MooseArray<Real> & JxW_face,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals,
                                                DenseMatrix<Number> & vector_lm_jac)
@@ -203,7 +203,7 @@ DiffusionHDGAssemblyHelper::vectorFaceJacobian(const MooseArray<Real> & JxW_face
 }
 
 void
-DiffusionHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vector_sol,
+DiffusionLHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vector_sol,
                                                const MooseArray<Number> & scalar_sol,
                                                const MooseArray<Number> & lm_sol,
                                                const MooseArray<Real> & JxW_face,
@@ -229,7 +229,7 @@ DiffusionHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vect
 }
 
 void
-DiffusionHDGAssemblyHelper::scalarFaceJacobian(const MooseArray<Real> & JxW_face,
+DiffusionLHDGAssemblyHelper::scalarFaceJacobian(const MooseArray<Real> & JxW_face,
                                                const QBase & qrule_face,
                                                const MooseArray<Point> & normals,
                                                DenseMatrix<Number> & scalar_vector_jac,
@@ -255,7 +255,7 @@ DiffusionHDGAssemblyHelper::scalarFaceJacobian(const MooseArray<Real> & JxW_face
 }
 
 void
-DiffusionHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_sol,
+DiffusionLHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_sol,
                                            const MooseArray<Number> & scalar_sol,
                                            const MooseArray<Number> & lm_sol,
                                            const MooseArray<Real> & JxW_face,
@@ -280,7 +280,7 @@ DiffusionHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_s
 }
 
 void
-DiffusionHDGAssemblyHelper::lmFaceJacobian(const MooseArray<Real> & JxW_face,
+DiffusionLHDGAssemblyHelper::lmFaceJacobian(const MooseArray<Real> & JxW_face,
                                            const QBase & qrule_face,
                                            const MooseArray<Point> & normals,
                                            DenseMatrix<Number> & lm_vec_jac,
@@ -306,7 +306,7 @@ DiffusionHDGAssemblyHelper::lmFaceJacobian(const MooseArray<Real> & JxW_face,
 }
 
 void
-DiffusionHDGAssemblyHelper::vectorDirichletResidual(const Moose::Functor<Real> & dirichlet_value,
+DiffusionLHDGAssemblyHelper::vectorDirichletResidual(const Moose::Functor<Real> & dirichlet_value,
                                                     const MooseArray<Real> & JxW_face,
                                                     const QBase & qrule_face,
                                                     const MooseArray<Point> & normals,
@@ -328,7 +328,7 @@ DiffusionHDGAssemblyHelper::vectorDirichletResidual(const Moose::Functor<Real> &
 }
 
 void
-DiffusionHDGAssemblyHelper::scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
+DiffusionLHDGAssemblyHelper::scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
                                                     const MooseArray<Number> & scalar_sol,
                                                     const Moose::Functor<Real> & dirichlet_value,
                                                     const MooseArray<Real> & JxW_face,
@@ -363,7 +363,7 @@ DiffusionHDGAssemblyHelper::scalarDirichletResidual(const MooseArray<Gradient> &
 }
 
 void
-DiffusionHDGAssemblyHelper::scalarDirichletJacobian(const MooseArray<Real> & JxW_face,
+DiffusionLHDGAssemblyHelper::scalarDirichletJacobian(const MooseArray<Real> & JxW_face,
                                                     const QBase & qrule_face,
                                                     const MooseArray<Point> & normals,
                                                     DenseMatrix<Number> & scalar_vector_jac,
@@ -383,7 +383,7 @@ DiffusionHDGAssemblyHelper::scalarDirichletJacobian(const MooseArray<Real> & JxW
 }
 
 void
-DiffusionHDGAssemblyHelper::createIdentityResidual(const MooseArray<Real> & JxW,
+DiffusionLHDGAssemblyHelper::createIdentityResidual(const MooseArray<Real> & JxW,
                                                    const QBase & qrule,
                                                    const MooseArray<std::vector<Real>> & phi,
                                                    const MooseArray<Number> & sol,
@@ -395,7 +395,7 @@ DiffusionHDGAssemblyHelper::createIdentityResidual(const MooseArray<Real> & JxW,
 }
 
 void
-DiffusionHDGAssemblyHelper::createIdentityJacobian(const MooseArray<Real> & JxW,
+DiffusionLHDGAssemblyHelper::createIdentityJacobian(const MooseArray<Real> & JxW,
                                                    const QBase & qrule,
                                                    const MooseArray<std::vector<Real>> & phi,
                                                    DenseMatrix<Number> & ke)

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#26405'
-  design = 'NavierStokesHDGKernel.md'
+  design = 'NavierStokesLHDGKernel.md'
   [lid]
     type = Exodiff
     input = lid.i

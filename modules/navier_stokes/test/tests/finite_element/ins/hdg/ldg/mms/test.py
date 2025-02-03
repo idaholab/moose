@@ -4,10 +4,10 @@ from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
 def run_spatial(*args, **kwargs):
     try:
-        kwargs['executable'] = "../../../../../../"
+        kwargs['executable'] = "../../../../../../.."
         return mms.run_spatial(*args, **kwargs)
     except:
-        kwargs['executable'] = "../../../../../../../combined/"
+        kwargs['executable'] = "../../../../../../../../combined/"
         return mms.run_spatial(*args, **kwargs)
 
 class TestLidLagrange(unittest.TestCase):
