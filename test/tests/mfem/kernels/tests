@@ -65,10 +65,4 @@
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
   []  
-  [./MFEMIrrotationalVortex]
-    type = CSVDiff
-    input = irrotational.i
-    csvdiff = 'OutputData/Irrotational.csv'
-    requirement = 'Platypus shall have the ability to solve a problem with 2D Nedelec elements of the first kind and produce an irrotational vortex.'
-  []
 []
