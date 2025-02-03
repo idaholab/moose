@@ -9,21 +9,22 @@
 
 #pragma once
 
-#include "IPHDGKernel.h"
+#include "IPHDGDirichletBC.h"
+#include "NavierStokesStressIPHDGAssemblyHelper.h"
 
 /**
- * Implements the diffusion equation for a interior penalty hybridized discretization
+ * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of a Navier-Stokes
+ * equation stress term"
  */
-class DiffusionIPHDGKernel : public IPHDGKernel
+class NavierStokesStressIPHDGDirichletBC : public IPHDGDirichletBC
 {
 public:
   static InputParameters validParams();
-  DiffusionIPHDGKernel(const InputParameters & params);
+  NavierStokesStressIPHDGDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
 
-private:
   /// The assembly helper providing the required IP-HDG method implementations
-  std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;
+  std::unique_ptr<NavierStokesStressIPHDGAssemblyHelper> _iphdg_helper;
 };
