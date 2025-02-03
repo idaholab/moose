@@ -2,10 +2,17 @@
   issues = '#25824'
   design = 'syntax/FVICs/index.md'
 
-  [parsed_function]
+  [file_ic]
     type = 'Exodiff'
     input = 'file_restart.i'
     exodiff = 'file_restart_out.e'
     requirement = 'The system shall support the initialization of a finite volume variable from an exodus file.'
+  []
+  [file_ic_linearfv]
+    type = 'Exodiff'
+    input = 'file_restart_linearfv.i'
+    exodiff = 'file_restart_linearfv_out.e'
+    requirement = 'The system shall support the initialization of a finite volume variable in a linear system from an exodus file.'
+    max_threads = 1 # Linear FV doesn't support threading yet
   []
 []
