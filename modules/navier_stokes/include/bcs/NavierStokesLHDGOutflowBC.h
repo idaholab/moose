@@ -10,18 +10,27 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "DiffusionHDGAssemblyHelper.h"
+#include "NavierStokesLHDGAssemblyHelper.h"
+
+#include <vector>
+
+template <typename>
+class MooseVariableFE;
+class MooseVariableScalar;
+template <typename>
+class MooseArray;
+class Function;
 
 /**
- * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
- * the diffusion equation
+ * Implements an outflow boundary condition for use with a hybridized discretization of the
+ * incompressible Navier-Stokes equations
  */
-class DiffusionHDGPrescribedGradientBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
+class NavierStokesLHDGOutflowBC : public IntegratedBC, public NavierStokesLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGPrescribedGradientBC(const InputParameters & parameters);
+  NavierStokesLHDGOutflowBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -31,10 +40,6 @@ public:
 
 protected:
   virtual Real computeQpResidual() override { mooseError("this will never be called"); }
-
-  /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
-  /// condition
-  const Moose::Functor<Real> & _normal_gradient;
 
   /// A cache variable to prevent multiple computations of Jacobians
   unsigned int _my_side;
