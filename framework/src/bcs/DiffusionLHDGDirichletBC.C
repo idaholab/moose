@@ -7,43 +7,43 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DiffusionHDGAssemblyHelper.h"
-#include "DiffusionHDGDirichletBC.h"
+#include "DiffusionLHDGAssemblyHelper.h"
+#include "DiffusionLHDGDirichletBC.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", DiffusionHDGDirichletBC);
+registerMooseObject("MooseApp", DiffusionLHDGDirichletBC);
 
 InputParameters
-DiffusionHDGDirichletBC::validParams()
+DiffusionLHDGDirichletBC::validParams()
 {
   auto params = IntegratedBC::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
                              "hybridized discretization of a diffusion equation");
   params.addParam<MooseFunctorName>("functor", 0, "The Dirichlet value for the diffusing specie");
-  params += DiffusionHDGAssemblyHelper::validParams();
+  params += DiffusionLHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   return params;
 }
 
-DiffusionHDGDirichletBC::DiffusionHDGDirichletBC(const InputParameters & parameters)
+DiffusionLHDGDirichletBC::DiffusionLHDGDirichletBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    DiffusionHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
+    DiffusionLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _dirichlet_val(getFunctor<Real>("functor")),
     _my_side(libMesh::invalid_uint)
 {
 }
 
 void
-DiffusionHDGDirichletBC::initialSetup()
+DiffusionLHDGDirichletBC::initialSetup()
 {
   // This check must occur after FEProblemBase::init()
   checkCoupling();
 }
 
 void
-DiffusionHDGDirichletBC::computeResidual()
+DiffusionLHDGDirichletBC::computeResidual()
 {
   // For notation, please read "A superconvergent LDG-hybridizable Galerkin method for second-order
   // elliptic problems" by Cockburn
@@ -75,7 +75,7 @@ DiffusionHDGDirichletBC::computeResidual()
 }
 
 void
-DiffusionHDGDirichletBC::computeJacobian()
+DiffusionLHDGDirichletBC::computeJacobian()
 {
   _scalar_vector_jac.resize(_u_dof_indices.size(), _qu_dof_indices.size());
   _scalar_scalar_jac.resize(_u_dof_indices.size(), _u_dof_indices.size());
@@ -93,14 +93,14 @@ DiffusionHDGDirichletBC::computeJacobian()
 }
 
 void
-DiffusionHDGDirichletBC::jacobianSetup()
+DiffusionLHDGDirichletBC::jacobianSetup()
 {
   _my_elem = nullptr;
   _my_side = libMesh::invalid_uint;
 }
 
 void
-DiffusionHDGDirichletBC::computeOffDiagJacobian(const unsigned int)
+DiffusionLHDGDirichletBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_my_elem != _current_elem) || (_my_side != _current_side))
   {
