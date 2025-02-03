@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DiffusionHDGAssemblyHelper.h"
-#include "DiffusionHDGKernel.h"
+#include "DiffusionLHDGAssemblyHelper.h"
+#include "DiffusionLHDGKernel.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
@@ -20,21 +20,21 @@
 
 using namespace libMesh;
 
-registerMooseObject("MooseApp", DiffusionHDGKernel);
+registerMooseObject("MooseApp", DiffusionLHDGKernel);
 
 InputParameters
-DiffusionHDGKernel::validParams()
+DiffusionLHDGKernel::validParams()
 {
   auto params = HDGKernel::validParams();
-  params += DiffusionHDGAssemblyHelper::validParams();
+  params += DiffusionLHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   params.addParam<MooseFunctorName>("source", 0, "Source for the diffusing species");
   return params;
 }
 
-DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & params)
+DiffusionLHDGKernel::DiffusionLHDGKernel(const InputParameters & params)
   : HDGKernel(params),
-    DiffusionHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
+    DiffusionLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _source(getFunctor<Real>("source")),
     _qrule_face(_assembly.qRuleFace()),
     _q_point_face(_assembly.qPointsFace()),
@@ -44,14 +44,14 @@ DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & params)
 }
 
 void
-DiffusionHDGKernel::initialSetup()
+DiffusionLHDGKernel::initialSetup()
 {
   // This check must occur after FEProblemBase::init()
   checkCoupling();
 }
 
 void
-DiffusionHDGKernel::computeResidual()
+DiffusionLHDGKernel::computeResidual()
 {
   _vector_re.resize(_qu_dof_indices.size());
   _scalar_re.resize(_u_dof_indices.size());
@@ -65,7 +65,7 @@ DiffusionHDGKernel::computeResidual()
 }
 
 void
-DiffusionHDGKernel::computeResidualOnSide()
+DiffusionLHDGKernel::computeResidualOnSide()
 {
   _vector_re.resize(_qu_dof_indices.size());
   _scalar_re.resize(_u_dof_indices.size());
@@ -82,7 +82,7 @@ DiffusionHDGKernel::computeResidualOnSide()
 }
 
 void
-DiffusionHDGKernel::computeJacobian()
+DiffusionLHDGKernel::computeJacobian()
 {
   _vector_vector_jac.resize(_qu_dof_indices.size(), _qu_dof_indices.size());
   _vector_scalar_jac.resize(_qu_dof_indices.size(), _u_dof_indices.size());
@@ -101,7 +101,7 @@ DiffusionHDGKernel::computeJacobian()
 }
 
 void
-DiffusionHDGKernel::computeJacobianOnSide()
+DiffusionLHDGKernel::computeJacobianOnSide()
 {
   _scalar_vector_jac.resize(_u_dof_indices.size(), _qu_dof_indices.size());
   _scalar_scalar_jac.resize(_u_dof_indices.size(), _u_dof_indices.size());
@@ -133,13 +133,13 @@ DiffusionHDGKernel::computeJacobianOnSide()
 }
 
 void
-DiffusionHDGKernel::jacobianSetup()
+DiffusionLHDGKernel::jacobianSetup()
 {
   _my_elem = nullptr;
 }
 
 void
-DiffusionHDGKernel::computeOffDiagJacobian(const unsigned int)
+DiffusionLHDGKernel::computeOffDiagJacobian(const unsigned int)
 {
   if (_my_elem != _current_elem)
   {
@@ -149,7 +149,7 @@ DiffusionHDGKernel::computeOffDiagJacobian(const unsigned int)
 }
 
 std::set<std::string>
-DiffusionHDGKernel::additionalVariablesCovered()
+DiffusionLHDGKernel::additionalVariablesCovered()
 {
   return {_u_var.name(), _grad_u_var.name(), _u_face_var.name()};
 }

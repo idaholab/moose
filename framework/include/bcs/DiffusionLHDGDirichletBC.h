@@ -10,17 +10,17 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "DiffusionHDGAssemblyHelper.h"
+#include "DiffusionLHDGAssemblyHelper.h"
 
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
-class DiffusionHDGDirichletBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
+class DiffusionLHDGDirichletBC : public IntegratedBC, public DiffusionLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGDirichletBC(const InputParameters & parameters);
+  DiffusionLHDGDirichletBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
