@@ -1,5 +1,5 @@
 #pragma once
-#include "../common/pfem_extras.hpp"
+#include "mfem/miniapps/common/pfem_extras.hpp"
 #include "MFEMAuxKernel.h"
 
 /*
@@ -22,6 +22,8 @@ protected:
   VariableName _source_var_name;
   // Pointer to source gridfunction.
   mfem::ParGridFunction & _source_var;
+  // Scalar factor to multiply the result by.
+  mfem::real_t _scale_factor;
   // FESpaces
   mfem::ParFiniteElementSpace & _hcurl_fespace;
   mfem::ParFiniteElementSpace & _hdiv_fespace;

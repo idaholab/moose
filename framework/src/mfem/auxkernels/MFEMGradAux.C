@@ -12,6 +12,7 @@ MFEMGradAux::validParams()
   InputParameters params = MFEMAuxKernel::validParams();
   params.addRequiredParam<VariableName>("source",
                                         "Scalar H1 MFEMVariable to take the gradient of.");
+  params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
   return params;
 }
 
@@ -19,6 +20,7 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
+    _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _h1_fespace(*_source_var.ParFESpace()),
     _hcurl_fespace(*_result_var.ParFESpace()),
     _grad(&_h1_fespace, &_hcurl_fespace)
@@ -31,5 +33,6 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
 void
 MFEMGradAux::execute()
 {
-  _grad.Mult(_source_var, _result_var);
+  _result_var = 0.0;
+  _grad.AddMult(_source_var, _result_var, _scale_factor);
 }

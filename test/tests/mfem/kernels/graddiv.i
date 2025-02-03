@@ -20,12 +20,33 @@
     vdim = 1
     ordering = "vdim"
   []
+  [L2FESpace]
+    type = MFEMFESpace
+    fec_type = L2
+    fec_order = CONSTANT
+  []  
 []
 
 [Variables]
   [F]
     type = MFEMVariable
     fespace = HDivFESpace
+  []
+[]
+
+[AuxVariables]
+  [divF]
+    type = MFEMVariable
+    fespace = L2FESpace
+  []
+[]
+
+[AuxKernels]
+  [div]
+    type = MFEMDivAux
+    variable = divF
+    source = F
+    execute_on = TIMESTEP_END
   []
 []
 
