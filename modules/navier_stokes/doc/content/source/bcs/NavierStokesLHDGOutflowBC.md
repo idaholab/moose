@@ -1,7 +1,7 @@
-# NavierStokesHDGOutflowBC
+# NavierStokesLHDGOutflowBC
 
 This class implements an outflow boundary condition for use with the
-hybridized kernel [NavierStokesHDGKernel.md]. The condition imposed is
+hybridized kernel [NavierStokesLHDGKernel.md]. The condition imposed is
 
 \begin{equation}
 \vec{n}p -\mu\nabla\vec{u}\cdot{n} = \vec{0}
@@ -10,8 +10,8 @@ hybridized kernel [NavierStokesHDGKernel.md]. The condition imposed is
 where $\vec{n}$ is the outward-facing normal on the boundary, $p$ is the
 pressure, $\nu$ is the kinematic viscosity, and $\vec{u}$ is the velocity.
 
-!syntax parameters /HDGBCs/NavierStokesHDGOutflowBC
+!syntax parameters /HDGBCs/NavierStokesLHDGOutflowBC
 
-!syntax inputs /HDGBCs/NavierStokesHDGOutflowBC
+!syntax inputs /HDGBCs/NavierStokesLHDGOutflowBC
 
-!syntax children /HDGBCs/NavierStokesHDGOutflowBC
+!syntax children /HDGBCs/NavierStokesLHDGOutflowBC
