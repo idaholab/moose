@@ -78,4 +78,13 @@
     issues = '#23386'
     requirement = 'The system shall throw a warning if user-provided extra element id names do not exist on mesh.'
   []
+  [mesh_only_with_incompatible_parameter]
+    type = 'RunException'
+    input = 'mesh_only.i'
+    cli_args = '--check-input --mesh-only'
+    expect_err = "Cannot run --check-input with mesh_only as this will result in a segfault"
+    method = '!dbg'
+    issues = '#29788'
+    requirement = 'The system shall throw an error is the user provides a parameter that would result in a segfault when used with --mesh-only'
+  []
 []

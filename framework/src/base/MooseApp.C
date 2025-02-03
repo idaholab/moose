@@ -1003,6 +1003,12 @@ MooseApp::setupOptions()
     }
     _action_warehouse.build();
 
+    // Check that --check-input was not used with and final task as this will results in a segFault
+    if (_check_input && _action_warehouse.getFinalTask() != "")
+      mooseError("Cannot run --check-input with ",
+                 _action_warehouse.getFinalTask(),
+                 " as this will result in a segfault");
+
     // Setup the AppFileBase for use by the Outputs or other systems that need output file info
     {
       // Extract the CommonOutputAction
