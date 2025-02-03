@@ -10,18 +10,18 @@
 #pragma once
 
 #include "HDGKernel.h"
-#include "NavierStokesHDGAssemblyHelper.h"
+#include "NavierStokesLHDGAssemblyHelper.h"
 
 #include <vector>
 
 /**
  * Implements the steady incompressible Navier-Stokes equations for a hybridized discretization
  */
-class NavierStokesHDGKernel : public HDGKernel, public NavierStokesHDGAssemblyHelper
+class NavierStokesLHDGKernel : public HDGKernel, public NavierStokesLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
-  NavierStokesHDGKernel(const InputParameters & parameters);
+  NavierStokesLHDGKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

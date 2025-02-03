@@ -39,12 +39,12 @@ class MooseVariableDependencyInterface;
  * (but not exactly based) on "A superconvergent LDG-hybridizable Galerkin method for second-order
  * elliptic problems" by Cockburn
  */
-class DiffusionHDGAssemblyHelper : public NonADFunctorInterface
+class DiffusionLHDGAssemblyHelper : public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGAssemblyHelper(const MooseObject * const moose_obj,
+  DiffusionLHDGAssemblyHelper(const MooseObject * const moose_obj,
                              MaterialPropertyInterface * const mpi,
                              MooseVariableDependencyInterface * const mvdi,
                              const TransientInterface * const ti,

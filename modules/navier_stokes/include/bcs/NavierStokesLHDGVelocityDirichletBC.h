@@ -10,18 +10,20 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "DiffusionHDGAssemblyHelper.h"
+#include "NavierStokesLHDGAssemblyHelper.h"
+
+#include <array>
 
 /**
- * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
- * the diffusion equation
+ * Weakly imposes Dirichlet boundary conditions for the velocity for a hybridized discretization of
+ * the Navier-Stokes equations
  */
-class DiffusionHDGPrescribedGradientBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
+class NavierStokesLHDGVelocityDirichletBC : public IntegratedBC, public NavierStokesLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  DiffusionHDGPrescribedGradientBC(const InputParameters & parameters);
+  NavierStokesLHDGVelocityDirichletBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -32,9 +34,9 @@ public:
 protected:
   virtual Real computeQpResidual() override { mooseError("this will never be called"); }
 
-  /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
-  /// condition
-  const Moose::Functor<Real> & _normal_gradient;
+private:
+  /// Dirichlet velocity
+  std::array<const Moose::Functor<Real> *, 3> _dirichlet_vel;
 
   /// A cache variable to prevent multiple computations of Jacobians
   unsigned int _my_side;

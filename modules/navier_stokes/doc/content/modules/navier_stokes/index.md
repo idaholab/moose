@@ -15,7 +15,7 @@ please refer to the below pages:
 - [Weakly Compressible Finite Volume](wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
-- [Hybridized Discontinous Galerkin (HDG) Finite Element](NavierStokesHDGKernel.md)
+- [Hybridized Discontinous Galerkin (HDG) Finite Element](NavierStokesLHDGKernel.md)
 - [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
 - [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
 - [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
