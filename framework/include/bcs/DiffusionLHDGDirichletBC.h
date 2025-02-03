@@ -10,20 +10,17 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "NavierStokesHDGAssemblyHelper.h"
-
-#include <array>
+#include "DiffusionLHDGAssemblyHelper.h"
 
 /**
- * Weakly imposes Dirichlet boundary conditions for the velocity for a hybridized discretization of
- * the Navier-Stokes equations
+ * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
-class NavierStokesHDGVelocityDirichletBC : public IntegratedBC, public NavierStokesHDGAssemblyHelper
+class DiffusionLHDGDirichletBC : public IntegratedBC, public DiffusionLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  NavierStokesHDGVelocityDirichletBC(const InputParameters & parameters);
+  DiffusionLHDGDirichletBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -35,8 +32,8 @@ protected:
   virtual Real computeQpResidual() override { mooseError("this will never be called"); }
 
 private:
-  /// Dirichlet velocity
-  std::array<const Moose::Functor<Real> *, 3> _dirichlet_vel;
+  /// Functor computing the Dirichlet boundary value
+  const Moose::Functor<Real> & _dirichlet_val;
 
   /// A cache variable to prevent multiple computations of Jacobians
   unsigned int _my_side;
