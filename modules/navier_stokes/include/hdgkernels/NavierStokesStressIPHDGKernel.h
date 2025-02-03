@@ -11,19 +11,22 @@
 
 #include "IPHDGKernel.h"
 
+class NavierStokesStressIPHDGAssemblyHelper;
+
 /**
- * Implements the diffusion equation for a interior penalty hybridized discretization
+ * Implements the stress terms for a interior penalty hybridized discretization of the Navier-Stokes
+ * equations
  */
-class DiffusionIPHDGKernel : public IPHDGKernel
+class NavierStokesStressIPHDGKernel : public IPHDGKernel
 {
 public:
   static InputParameters validParams();
-  DiffusionIPHDGKernel(const InputParameters & params);
+  NavierStokesStressIPHDGKernel(const InputParameters & params);
 
 protected:
   virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
 
 private:
   /// The assembly helper providing the required IP-HDG method implementations
-  std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;
+  std::unique_ptr<NavierStokesStressIPHDGAssemblyHelper> _iphdg_helper;
 };

@@ -285,7 +285,7 @@ public:
    * Get the coordinate system type
    * @return A reference to the coordinate system type
    */
-  const Moose::CoordinateSystemType & coordSystem() { return _coord_type; }
+  const Moose::CoordinateSystemType & coordSystem() const { return _coord_type; }
 
   /**
    * Returns the reference to the current quadrature being used on a current face

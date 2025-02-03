@@ -122,6 +122,9 @@ protected:
   /// The element qrule
   const QBase * const & _ip_qrule;
 
+  /// The physical quadrature point locations in the element volume
+  const MooseArray<Point> & _ip_q_point;
+
   /// The face JxW
   const MooseArray<Real> & _ip_JxW_face;
 

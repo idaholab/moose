@@ -57,10 +57,10 @@ protected:
   virtual void scalarDirichlet(const Moose::Functor<Real> & dirichlet_value) override;
 
   /// The diffusivity in the element volume
-  const MaterialProperty<Real> & _diff;
+  const ADMaterialProperty<Real> & _diff;
 
   /// The diffusivity on the element faces
-  const MaterialProperty<Real> & _face_diff;
+  const ADMaterialProperty<Real> & _face_diff;
 
   /// Our stabilization coefficient
   const Real _alpha;

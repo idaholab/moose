@@ -53,52 +53,52 @@ gamma = 1e5
   []
 []
 
-[Kernels]
+[HDGKernels]
   [momentum_x_convection]
-    type = ADConservativeAdvection
+    type = AdvectionIPHDGKernel
     variable = vel_x
+    face_variable = vel_bar_x
     velocity = 'velocity'
-    advected_quantity = 'rhou'
+    coeff = ${rho}
   []
   [momentum_x_diffusion]
-    type = ADMatDiffusion
+    type = NavierStokesStressIPHDGKernel
     variable = vel_x
+    face_variable = vel_bar_x
     diffusivity = 'mu'
-  []
-  [momentum_x_pressure]
-    type = PressureGradient
-    integrate_p_by_parts = true
-    variable = vel_x
-    pressure = pressure
+    alpha = 6
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     component = 0
   []
-
   [momentum_y_convection]
-    type = ADConservativeAdvection
+    type = AdvectionIPHDGKernel
     variable = vel_y
+    face_variable = vel_bar_y
     velocity = 'velocity'
-    advected_quantity = 'rhov'
+    coeff = ${rho}
   []
   [momentum_y_diffusion]
-    type = ADMatDiffusion
+    type = NavierStokesStressIPHDGKernel
     variable = vel_y
+    face_variable = vel_bar_y
     diffusivity = 'mu'
-  []
-  [momentum_y_pressure]
-    type = PressureGradient
-    integrate_p_by_parts = true
-    variable = vel_y
-    pressure = pressure
+    alpha = 6
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     component = 1
   []
-
-  [mass]
-    type = ADConservativeAdvection
+  [pressure_convection]
+    type = AdvectionIPHDGKernel
     variable = pressure
-    velocity = velocity
-    advected_quantity = ${fparse -rho}
+    face_variable = pressure_bar
+    velocity = 'velocity'
+    coeff = ${fparse -rho}
+    self_advection = false
   []
+[]
 
+[Kernels]
   [mass_matrix_pressure]
     type = MassMatrix
     variable = pressure
@@ -124,174 +124,42 @@ gamma = 1e5
   []
 []
 
-[DGKernels]
-  [momentum_x_convection]
-    type = ADHDGAdvection
-    variable = vel_x
-    velocity = 'velocity'
-    coeff = ${rho}
-    side_variable = vel_bar_x
-  []
-  [momentum_x_convection_side]
-    type = ADHDGAdvectionSide
-    variable = vel_bar_x
-    velocity = 'velocity'
-    coeff = ${rho}
-    interior_variable = vel_x
-  []
-  [momentum_x_diffusion]
-    type = ADHDGDiffusion
-    variable = vel_x
-    alpha = 6
-    diff = 'mu'
-    side_variable = vel_bar_x
-  []
-  [momentum_x_diffusion_side]
-    type = ADHDGDiffusionSide
-    variable = vel_bar_x
-    alpha = 6
-    diff = 'mu'
-    interior_variable = vel_x
-  []
-  [momentum_x_pressure]
-    type = ADHDGPressure
-    variable = vel_x
-    pressure = pressure_bar
-    component = 0
-  []
-
-  [momentum_y_convection]
-    type = ADHDGAdvection
-    variable = vel_y
-    velocity = 'velocity'
-    coeff = ${rho}
-    side_variable = vel_bar_y
-  []
-  [momentum_y_convection_side]
-    type = ADHDGAdvectionSide
-    variable = vel_bar_y
-    velocity = 'velocity'
-    coeff = ${rho}
-    interior_variable = vel_y
-  []
-  [momentum_y_diffusion]
-    type = ADHDGDiffusion
-    variable = vel_y
-    alpha = 6
-    diff = 'mu'
-    side_variable = vel_bar_y
-  []
-  [momentum_y_diffusion_side]
-    type = ADHDGDiffusionSide
-    variable = vel_bar_y
-    alpha = 6
-    diff = 'mu'
-    interior_variable = vel_y
-  []
-  [momentum_y_pressure]
-    type = ADHDGPressure
-    variable = vel_y
-    pressure = pressure_bar
-    component = 1
-  []
-
-  [mass_convection]
-    type = ADHDGAdvection
-    variable = pressure
-    velocity = 'velocity'
-    coeff = ${fparse -rho}
-    self_advection = false
-  []
-  [mass_convection_bar]
-    type = ADHDGAdvection
-    variable = pressure_bar
-    velocity = 'velocity'
-    coeff = ${rho}
-    self_advection = false
-  []
-
-  [pb_mass]
-    type = MassMatrixDGKernel
-    variable = pressure_bar
-    matrix_tags = 'mass'
-    density = ${fparse -1/gamma}
-  []
-
-  [u_jump]
-    type = MassFluxPenalty
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    component = 0
-    gamma = ${gamma}
-  []
-  [v_jump]
-    type = MassFluxPenalty
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    component = 1
-    gamma = ${gamma}
-  []
-[]
-
 [BCs]
   [momentum_x_diffusion_walls]
-    type = HDGDiffusionBC
+    type = NavierStokesStressIPHDGDirichletBC
     boundary = 'left bottom right'
     variable = vel_x
+    face_variable = vel_bar_x
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     alpha = 6
-    exact_soln = '0'
-    diff = 'mu'
-  []
-  [momentum_x_diffusion_side_walls]
-    type = ADHDGSideDirichletBC
-    variable = vel_bar_x
-    exact_soln = 0
-    boundary = 'left bottom right'
+    functor = '0'
+    diffusivity = 'mu'
+    component = 0
   []
   [momentum_x_diffusion_top]
-    type = HDGDiffusionBC
+    type = NavierStokesStressIPHDGDirichletBC
     boundary = 'top'
     variable = vel_x
+    face_variable = vel_bar_x
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     alpha = 6
-    exact_soln = '${U}'
-    diff = 'mu'
-  []
-  [momentum_x_diffusion_side_top]
-    type = ADHDGSideDirichletBC
-    variable = vel_bar_x
-    exact_soln = ${U}
-    boundary = 'top'
-  []
-  [momentum_x_pressure_all]
-    type = ADHDGPressureBC
-    variable = vel_x
+    functor = '${U}'
+    diffusivity = 'mu'
     component = 0
-    pressure = pressure_bar
-    boundary = 'left bottom right top'
   []
-
   [momentum_y_diffusion_all]
-    type = HDGDiffusionBC
+    type = NavierStokesStressIPHDGDirichletBC
     boundary = 'left bottom right top'
     variable = vel_y
+    face_variable = vel_bar_y
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     alpha = 6
-    exact_soln = '0'
-    diff = 'mu'
-  []
-  [momentum_y_side_all]
-    type = ADHDGSideDirichletBC
-    variable = vel_bar_y
-    exact_soln = 0
-    boundary = 'left bottom right top'
-  []
-  [momentum_y_pressure_all]
-    type = ADHDGPressureBC
-    variable = vel_y
+    functor = '0'
+    diffusivity = 'mu'
     component = 1
-    pressure = pressure_bar
-    boundary = 'left bottom right top'
   []
 
   [mass_convection_all]
@@ -376,20 +244,6 @@ gamma = 1e5
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
-  []
-  [rhou]
-    type = ADParsedMaterial
-    property_name = 'rhou'
-    coupled_variables = 'vel_x'
-    material_property_names = 'rho'
-    expression = 'rho*vel_x'
-  []
-  [rhov]
-    type = ADParsedMaterial
-    property_name = 'rhov'
-    coupled_variables = 'vel_y'
-    material_property_names = 'rho'
-    expression = 'rho*vel_y'
   []
 []
 
