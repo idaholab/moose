@@ -1,5 +1,5 @@
 [Tests]
-  design = 'DiffusionHDGKernel.md DiffusionHDGDirichletBC.md DiffusionHDGPrescribedGradientBC.md'
+  design = 'DiffusionLHDGKernel.md DiffusionLHDGDirichletBC.md DiffusionLHDGPrescribedGradientBC.md'
   issues = '#26406'
   [diffusion]
     requirement = 'The system shall be to solve a simple diffusion problem using a hybridized discontinuous Galerkin discretization'

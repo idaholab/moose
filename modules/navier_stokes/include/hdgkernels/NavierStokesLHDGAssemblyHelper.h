@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "DiffusionHDGAssemblyHelper.h"
+#include "DiffusionLHDGAssemblyHelper.h"
 
 /**
  * Implements all the methods for assembling a hybridized local discontinuous Galerkin (LDG-H),
@@ -18,12 +18,12 @@
  * implementation here is based on "An implicit high-order hybridizable discontinuous Galerkin
  * method for the incompressible Navier-Stokes equations" by Nguyen and Cockburn
  */
-class NavierStokesHDGAssemblyHelper : public DiffusionHDGAssemblyHelper
+class NavierStokesLHDGAssemblyHelper : public DiffusionLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  NavierStokesHDGAssemblyHelper(const MooseObject * moose_obj,
+  NavierStokesLHDGAssemblyHelper(const MooseObject * moose_obj,
                                 MaterialPropertyInterface * mpi,
                                 MooseVariableDependencyInterface * mvdi,
                                 const TransientInterface * const ti,

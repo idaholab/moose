@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesHDGVelocityDirichletBC.h"
+#include "NavierStokesLHDGVelocityDirichletBC.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
-#include "NavierStokesHDGKernel.h"
+#include "NavierStokesLHDGKernel.h"
 
-registerMooseObject("NavierStokesApp", NavierStokesHDGVelocityDirichletBC);
+registerMooseObject("NavierStokesApp", NavierStokesLHDGVelocityDirichletBC);
 
 InputParameters
-NavierStokesHDGVelocityDirichletBC::validParams()
+NavierStokesLHDGVelocityDirichletBC::validParams()
 {
   auto params = IntegratedBC::validParams();
-  params += NavierStokesHDGAssemblyHelper::validParams();
+  params += NavierStokesLHDGAssemblyHelper::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for the velocity for a "
                              "hybridized discretization of the Navier-Stokes equations");
   params.addParam<MooseFunctorName>(
@@ -32,10 +32,10 @@ NavierStokesHDGVelocityDirichletBC::validParams()
   return params;
 }
 
-NavierStokesHDGVelocityDirichletBC::NavierStokesHDGVelocityDirichletBC(
+NavierStokesLHDGVelocityDirichletBC::NavierStokesLHDGVelocityDirichletBC(
     const InputParameters & parameters)
   : IntegratedBC(parameters),
-    NavierStokesHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
+    NavierStokesLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
     _my_side(libMesh::invalid_uint)
 {
   _dirichlet_vel[0] = &getFunctor<Real>("dirichlet_u");
@@ -44,21 +44,21 @@ NavierStokesHDGVelocityDirichletBC::NavierStokesHDGVelocityDirichletBC(
 }
 
 void
-NavierStokesHDGVelocityDirichletBC::initialSetup()
+NavierStokesLHDGVelocityDirichletBC::initialSetup()
 {
   // This check must occur after FEProblemBase::init()
   checkCoupling();
 }
 
 void
-NavierStokesHDGVelocityDirichletBC::jacobianSetup()
+NavierStokesLHDGVelocityDirichletBC::jacobianSetup()
 {
   _my_elem = nullptr;
   _my_side = libMesh::invalid_uint;
 }
 
 void
-NavierStokesHDGVelocityDirichletBC::computeOffDiagJacobian(const unsigned int)
+NavierStokesLHDGVelocityDirichletBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_my_elem != _current_elem) || (_my_side != _current_side))
   {
@@ -69,7 +69,7 @@ NavierStokesHDGVelocityDirichletBC::computeOffDiagJacobian(const unsigned int)
 }
 
 void
-NavierStokesHDGVelocityDirichletBC::computeResidual()
+NavierStokesLHDGVelocityDirichletBC::computeResidual()
 {
   _grad_u_vel_re.resize(_qu_dof_indices.size());
   _u_vel_re.resize(_u_dof_indices.size());
@@ -139,7 +139,7 @@ NavierStokesHDGVelocityDirichletBC::computeResidual()
 }
 
 void
-NavierStokesHDGVelocityDirichletBC::computeJacobian()
+NavierStokesLHDGVelocityDirichletBC::computeJacobian()
 {
   _u_grad_u_jac.resize(_u_dof_indices.size(), _qu_dof_indices.size());
   _u_u_jac.resize(_u_dof_indices.size(), _u_dof_indices.size());
