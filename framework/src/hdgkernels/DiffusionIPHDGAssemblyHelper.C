@@ -7,18 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ActionWarehouse.h"
 #include "DiffusionIPHDGAssemblyHelper.h"
 #include "MooseTypes.h"
 #include "MooseVariableDependencyInterface.h"
-#include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
-#include "Function.h"
 #include "SystemBase.h"
 #include "MooseMesh.h"
 #include "MooseObject.h"
 #include "MaterialPropertyInterface.h"
-#include "NonlinearThread.h"
 
 using namespace libMesh;
 
@@ -44,8 +40,8 @@ DiffusionIPHDGAssemblyHelper::DiffusionIPHDGAssemblyHelper(
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
   : IPHDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
-    _diff(this->getMaterialProperty<Real>("diffusivity")),
-    _face_diff(this->getFaceMaterialProperty<Real>("diffusivity")),
+    _diff(this->getADMaterialProperty<Real>("diffusivity")),
+    _face_diff(this->getFaceADMaterialProperty<Real>("diffusivity")),
     _alpha(moose_obj->getParam<Real>("alpha"))
 {
 }
