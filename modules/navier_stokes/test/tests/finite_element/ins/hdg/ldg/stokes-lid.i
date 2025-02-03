@@ -54,17 +54,17 @@
 
 [HDGKernels]
   [ns]
-    type = NavierStokesHDGKernel
+    type = NavierStokesLHDGKernel
   []
 []
 
 [BCs]
   [walls]
-    type = NavierStokesHDGVelocityDirichletBC
+    type = NavierStokesLHDGVelocityDirichletBC
     boundary = 'left right bottom'
   []
   [lid]
-    type = NavierStokesHDGVelocityDirichletBC
+    type = NavierStokesLHDGVelocityDirichletBC
     boundary = 'top'
     dirichlet_u = '1'
   []
