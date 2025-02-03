@@ -338,7 +338,6 @@ MFEMProblem::addFunction(const std::string & type,
                  type,
                  " is scalar or vector; no MFEM coefficient object created.");
   }
-  func.initialSetup();
 }
 
 InputParameters
@@ -427,18 +426,6 @@ std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {
   return systemBaseAuxiliary().getVariableNames();
-}
-
-bool
-MFEMProblem::hasScalarFunctionCoefficient(const std::string & name)
-{
-  return this->_scalar_functions.count(name) > 0;
-}
-
-bool
-MFEMProblem::hasVectorFunctionCoefficient(const std::string & name)
-{
-  return this->_vector_functions.count(name) > 0;
 }
 
 std::shared_ptr<mfem::FunctionCoefficient>
