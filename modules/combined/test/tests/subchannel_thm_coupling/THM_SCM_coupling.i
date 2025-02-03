@@ -486,7 +486,7 @@ m_dot_sec_in = 1. # kg/s
     dt = 0.01
   []
   # dtmax = 5
-  end_time = 5000
+  end_time = 5
 
   line_search = basic
   solve_type = NEWTON
@@ -500,7 +500,7 @@ m_dot_sec_in = 1. # kg/s
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 
   [console]
     type = Console
