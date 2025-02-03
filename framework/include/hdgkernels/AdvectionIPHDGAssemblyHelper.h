@@ -66,9 +66,6 @@ public:
   /// The velocity on the element faces
   const ADMaterialProperty<RealVectorValue> & _face_velocity;
 
-  /// An optional advected quantity material property (values in the volume)
-  const ADMaterialProperty<Real> * const _adv_quant;
-
-  /// An optional advected quantity material property (values on the faces)
-  const ADMaterialProperty<Real> * const _adv_quant_face;
+  const Real _coeff;
+  const bool _self_advection;
 };
