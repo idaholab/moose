@@ -24,13 +24,13 @@ public:
   static InputParameters validParams();
 
   NavierStokesLHDGAssemblyHelper(const MooseObject * moose_obj,
-                                MaterialPropertyInterface * mpi,
-                                MooseVariableDependencyInterface * mvdi,
-                                const TransientInterface * const ti,
-                                const FEProblemBase & fe_problem,
-                                SystemBase & sys,
-                                const MooseMesh & mesh,
-                                const THREAD_ID tid);
+                                 MaterialPropertyInterface * mpi,
+                                 MooseVariableDependencyInterface * mvdi,
+                                 const TransientInterface * const ti,
+                                 const FEProblemBase & fe_problem,
+                                 SystemBase & sys,
+                                 const MooseMesh & mesh,
+                                 const THREAD_ID tid);
 
 protected:
   /**
