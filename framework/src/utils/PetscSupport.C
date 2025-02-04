@@ -510,7 +510,7 @@ setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & para
 {
   if (params.isParamValid("line_search"))
   {
-    const MooseEnum line_search = params.get<MooseEnum>("line_search");
+    const auto & line_search = params.get<MooseEnum>("line_search");
     if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
     {
       Moose::LineSearchType enum_line_search =

@@ -202,7 +202,7 @@ void setSinglePetscOption(const std::string & name,
 
 /**
  * Same as setSinglePetscOption, but does not set the option if it doesn't make sense for the
- * current simulation type.
+ * current simulation type, e.g. if \p name is contained within \p dont_add_these_options
  */
 void setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_options,
                                        const std::string & name,
@@ -234,7 +234,7 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
                           const char * coloring_algorithm);
 
 /**
- * Function to ensure that particular petsc option is not added to the PetscOptions
+ * Function to ensure that a particular petsc option is not added to the PetscOptions
  * storage object to be later set unless explicitly specified in input or on the command line.
  */
 void dontAddPetscFlag(const std::string & flag, PetscOptions & petsc_options);
