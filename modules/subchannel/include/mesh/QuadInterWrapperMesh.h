@@ -66,7 +66,7 @@ public:
   virtual const unsigned int & getNx() const { return _nx; }
   /// number of inter-wrapper channels in the -y direction
   virtual const unsigned int & getNy() const { return _ny; }
-  const Real getGap() const { return _side_bypass_length; }
+  Real getGap() const { return _side_bypass_length; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
   virtual unsigned int channelIndex(const Point & point) const override;
