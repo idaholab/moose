@@ -45,12 +45,12 @@ public:
   static InputParameters validParams();
 
   DiffusionLHDGAssemblyHelper(const MooseObject * const moose_obj,
-                             MaterialPropertyInterface * const mpi,
-                             MooseVariableDependencyInterface * const mvdi,
-                             const TransientInterface * const ti,
-                             const FEProblemBase & fe_problem,
-                             SystemBase & sys,
-                             const THREAD_ID tid);
+                              MaterialPropertyInterface * const mpi,
+                              MooseVariableDependencyInterface * const mvdi,
+                              const TransientInterface * const ti,
+                              const FEProblemBase & fe_problem,
+                              SystemBase & sys,
+                              const THREAD_ID tid);
   void checkCoupling();
 
 protected:
