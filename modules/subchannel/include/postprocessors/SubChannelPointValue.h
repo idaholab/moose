@@ -26,11 +26,15 @@ public:
   virtual Real getValue() const override;
 
 protected:
+  /// geometric information
   SubChannelMesh & _mesh;
+  /// axial location [m]
   const Real & _height;
+  /// subchannel index
   const int & _i_ch;
   Point _point;
   const unsigned int _var_number;
   const System & _system;
+  /// value we want to calculate
   Real _value;
 };

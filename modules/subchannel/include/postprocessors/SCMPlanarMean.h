@@ -30,7 +30,7 @@ protected:
   const SubChannelMesh & _mesh;
   /// name of variable
   AuxVariableName const & _variable;
-  /// axial location
+  /// axial location [m]
   const Real & _height;
   /// average value we want to calculate
   Real _mean_value;
