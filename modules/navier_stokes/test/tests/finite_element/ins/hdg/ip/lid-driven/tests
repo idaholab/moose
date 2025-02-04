@@ -1,10 +1,22 @@
 [Tests]
   [lid-driven]
-    requirement = 'The system shall be able to solve a lid driven cavity using an interior penalty hybridizable discontinuous Galerkin discretization.'
-    type = Exodiff
-    input = lid-driven.i
-    exodiff = lid-driven_out.e
-    installation_type = 'in_tree' # uses JIT
+    requirement = 'The system shall be able to solve a lid driven cavity using an interior penalty hybridizable discontinuous Galerkin discretization when'
+    [uncondensed]
+      type = Exodiff
+      input = lid-driven.i
+      exodiff = lid-driven_out.e
+      installation_type = 'in_tree' # uses JIT
+      detail = 'the system is uncondensed, and when'
+    []
+    [condensed]
+      type = Exodiff
+      input = sc-lid-driven.i
+      cli_args = 'Outputs/file_base=lid-driven_out'
+      exodiff = lid-driven_out.e
+      prereq = 'lid-driven/uncondensed'
+      installation_type = 'in_tree' # uses JIT
+      detail = 'the system is condensed.'
+    []
   []
   [lid-mms]
     type = PythonUnitTest
