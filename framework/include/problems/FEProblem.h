@@ -32,6 +32,7 @@ public:
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int nl_sys_num) override;
 
   virtual void addLineSearch(const InputParameters & parameters) override;
+  virtual void init() override;
 
 protected:
   bool _use_nonlinear;

@@ -1093,7 +1093,7 @@ wildcardEqual(AnyType, const T &)
  * Find a specific pair in a container matching on first, second or both pair components
  */
 template <typename C, typename M1, typename M2>
-typename C::iterator
+auto
 findPair(C & container, const M1 & first, const M2 & second)
 {
   return std::find_if(container.begin(),
@@ -1265,6 +1265,22 @@ isFloat(const std::string & str)
  * Gets the canonical path of the given path
  */
 std::string canonicalPath(const std::string & path);
+
+/**
+ * @returns Whether the \p string1 starts with \p string2
+ */
+bool startsWith(const std::string & string1, const std::string & string2);
+
+/**
+ * Replace the starting string \p string2 of \p string1 with \p string3. A user should have checked
+ * that \p string1 \p startsWith \p string2
+ */
+void replaceStart(std::string & string1, const std::string & string2, const std::string & string3);
+
+/**
+ * @returns whether every alphabetic character in a string is lower-case
+ */
+bool isAllLowercase(const std::string & str);
 } // MooseUtils namespace
 
 namespace Moose

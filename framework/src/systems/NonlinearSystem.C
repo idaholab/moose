@@ -19,8 +19,6 @@
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 #include "SolutionInvalidity.h"
-#include "HDGPrimalSolutionUpdateThread.h"
-#include "HDGKernel.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
 
@@ -111,7 +109,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
   nonlinearSolver()->nullspace = Moose::compute_nullspace;
   nonlinearSolver()->transpose_nullspace = Moose::compute_transpose_nullspace;
   nonlinearSolver()->nearnullspace = Moose::compute_nearnullspace;
-  nonlinearSolver()->precheck_object = this;
 
   PetscNonlinearSolver<Real> * petsc_solver =
       static_cast<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
@@ -133,9 +130,6 @@ NonlinearSystem::preInit()
   if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
     // Add diagonal matrix that will be used for computing scaling factors
     _nl_implicit_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
-
-  if (_hybridized_kernels.hasObjects())
-    addVector(HDGKernel::lm_increment_vector_name, true, GHOSTED);
 }
 
 void
@@ -386,7 +380,16 @@ NonlinearSystem::getSNES()
       dynamic_cast<PetscNonlinearSolver<Number> *>(nonlinearSolver());
 
   if (petsc_solver)
-    return petsc_solver->snes();
+  {
+    const char * snes_prefix = nullptr;
+    std::string snes_prefix_str;
+    if (feProblem().numSolverSystems() > 1)
+    {
+      snes_prefix_str = name() + "_";
+      snes_prefix = snes_prefix_str.c_str();
+    }
+    return petsc_solver->snes(snes_prefix);
+  }
   else
     mooseError("It is not a petsc nonlinear solver");
 }
@@ -394,7 +397,7 @@ NonlinearSystem::getSNES()
 void
 NonlinearSystem::residualAndJacobianTogether()
 {
-  if (_fe_problem.solverParams()._type == Moose::ST_JFNK)
+  if (_fe_problem.solverParams(number())._type == Moose::ST_JFNK)
     mooseError(
         "Evaluting the residual and Jacobian together does not make sense for a JFNK solve type in "
         "which only function evaluations are required, e.g. there is no need to form a matrix");
@@ -402,34 +405,4 @@ NonlinearSystem::residualAndJacobianTogether()
   nonlinearSolver()->residual_object = nullptr;
   nonlinearSolver()->jacobian = nullptr;
   nonlinearSolver()->residual_and_jacobian_object = &_resid_and_jac_functor;
-}
-
-void
-NonlinearSystem::precheck(const NumericVector<Number> & /*precheck_soln*/,
-                          NumericVector<Number> & search_direction,
-                          bool & /*changed*/,
-                          NonlinearImplicitSystem & /*S*/)
-{
-  if (!_hybridized_kernels.hasActiveObjects())
-    return;
-
-  auto & ghosted_increment = getVector(HDGKernel::lm_increment_vector_name);
-  ghosted_increment.zero();
-  // The search direction coming from PETSc is the negative of the solution update
-  ghosted_increment -= search_direction;
-
-  PARALLEL_TRY
-  {
-    TIME_SECTION("HDG kernel primal solution update",
-                 3 /*, "Computing hybridized kernel primal solution update"*/);
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    HDGPrimalSolutionUpdateThread pre_thread(_fe_problem, _hybridized_kernels);
-    Threads::parallel_reduce(elem_range, pre_thread);
-  }
-  PARALLEL_CATCH;
-  // The primal variables live in the aux system
-  auto & aux = _fe_problem.getAuxiliarySystem();
-  aux.solution().close();
-  // scatter into ghosted current local solution
-  aux.update();
 }

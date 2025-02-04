@@ -27,7 +27,9 @@ public:
 
 protected:
   using NonlinearThread::compute;
-  void compute(ResidualObject & ro) override;
+  virtual void compute(ResidualObject & ro) override;
+  using NonlinearThread::computeOnInternalFace;
+  virtual void computeOnInternalFace() override;
 
   void accumulateNeighbor() override;
   void accumulateNeighborLower() override;

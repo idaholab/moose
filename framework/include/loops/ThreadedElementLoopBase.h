@@ -192,7 +192,6 @@ protected:
   /// Resets the set of blocks and boundaries visited
   void resetExecPrintedSets() const;
 
-private:
   /**
    * Whether to compute the internal side for the provided element-neighbor pair. Typically this
    * will return true if the element id is less than the neighbor id when the elements are equal

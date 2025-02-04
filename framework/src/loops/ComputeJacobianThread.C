@@ -20,8 +20,11 @@
 #include "FVElementalKernel.h"
 #include "MaterialBase.h"
 #include "ConsoleUtils.h"
+#include "Assembly.h"
 
 #include "libmesh/threads.h"
+
+Threads::spin_mutex ComputeJacobianThread::_add_mutex;
 
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
                                              const std::set<TagID> & tags)
@@ -105,6 +108,7 @@ ComputeJacobianThread::determineObjectWarehouses()
     _dg_warehouse = &_dg_kernels;
     _ibc_warehouse = &_integrated_bcs;
     _ik_warehouse = &_interface_kernels;
+    _hdg_warehouse = &_hdg_kernels;
   }
   // If we have one tag only,
   // We call tag based storage
@@ -114,6 +118,7 @@ ComputeJacobianThread::determineObjectWarehouses()
     _dg_warehouse = &(_dg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _hdg_warehouse = &(_hdg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive, and hopefully we do not use it so often
   else
@@ -122,6 +127,7 @@ ComputeJacobianThread::determineObjectWarehouses()
     _dg_warehouse = &(_dg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _hdg_warehouse = &(_hdg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
   }
 }
 
@@ -149,9 +155,9 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
   _fe_problem.cacheJacobian(_tid);
   _num_cached++;
 
-  if (_num_cached % 20 == 0)
+  if (_num_cached % 20 == 0 || _fe_problem.assembly(_tid, _nl.number()).hasStaticCondensation())
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_add_mutex);
     _fe_problem.addCachedJacobian(_tid);
   }
 }
@@ -159,4 +165,12 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
 void
 ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)
 {
+}
+
+void
+ComputeJacobianThread::computeOnInternalFace()
+{
+  mooseAssert(_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid),
+              "We should not be called if we have no active HDG kernels");
+  mooseAssert(false, "HDGKernels must compute the full Jacobian");
 }

@@ -89,6 +89,9 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
     paramError("off_diag_column",
                "If off-diagonal columns are specified, matching off-diagonal "
                "rows must be specified as well");
+
+  Moose::PetscSupport::storePetscOptions(
+      _fe_problem, _fe_problem.numSolverSystems() > 1 ? ("-" + _nl.name() + "_") : "-", *this);
 }
 
 void

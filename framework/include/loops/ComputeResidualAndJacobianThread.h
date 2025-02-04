@@ -43,6 +43,8 @@ protected:
   void accumulateLower() override;
   void accumulate() override;
   void determineObjectWarehouses() override;
+  using NonlinearThread::computeOnInternalFace;
+  virtual void computeOnInternalFace() override;
 
   std::string objectType() const override { return "combined Jacobian & Residual"; }
 
