@@ -34,7 +34,8 @@ MassMatrixDGKernel::MassMatrixDGKernel(const InputParameters & parameters)
     mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
 }
 
-Real MassMatrixDGKernel::computeQpResidual(Moose::DGResidualType)
+Real
+MassMatrixDGKernel::computeQpResidual(Moose::DGResidualType)
 {
   mooseError("should never be called");
 }

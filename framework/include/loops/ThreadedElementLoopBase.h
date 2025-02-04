@@ -149,7 +149,7 @@ public:
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException &) {};
+  virtual void caughtMooseException(MooseException &){};
 
   /**
    * Whether or not the loop should continue.

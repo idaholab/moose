@@ -110,13 +110,13 @@ NavierStokesLHDGAssemblyHelper::NavierStokesLHDGAssemblyHelper(
 
 void
 NavierStokesLHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & vel_gradient,
-                                                    const unsigned int vel_component,
-                                                    const Moose::Functor<Real> & body_force,
-                                                    const MooseArray<Real> & JxW,
-                                                    const QBase & qrule,
-                                                    const Elem * const current_elem,
-                                                    const MooseArray<Point> & q_point,
-                                                    DenseVector<Number> & scalar_re)
+                                                     const unsigned int vel_component,
+                                                     const Moose::Functor<Real> & body_force,
+                                                     const MooseArray<Real> & JxW,
+                                                     const QBase & qrule,
+                                                     const Elem * const current_elem,
+                                                     const MooseArray<Point> & q_point,
+                                                     DenseVector<Number> & scalar_re)
 {
   DiffusionLHDGAssemblyHelper::scalarVolumeResidual(
       vel_gradient, body_force, JxW, qrule, current_elem, q_point, scalar_re);
@@ -140,12 +140,12 @@ NavierStokesLHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> 
 
 void
 NavierStokesLHDGAssemblyHelper::scalarVolumeJacobian(const unsigned int vel_component,
-                                                    const MooseArray<Real> & JxW,
-                                                    const QBase & qrule,
-                                                    DenseMatrix<Number> & scalar_vector_jac,
-                                                    DenseMatrix<Number> & scalar_u_vel_jac,
-                                                    DenseMatrix<Number> & scalar_v_vel_jac,
-                                                    DenseMatrix<Number> & scalar_p_jac)
+                                                     const MooseArray<Real> & JxW,
+                                                     const QBase & qrule,
+                                                     DenseMatrix<Number> & scalar_vector_jac,
+                                                     DenseMatrix<Number> & scalar_u_vel_jac,
+                                                     DenseMatrix<Number> & scalar_v_vel_jac,
+                                                     DenseMatrix<Number> & scalar_p_jac)
 {
   DiffusionLHDGAssemblyHelper::scalarVolumeJacobian(JxW, qrule, scalar_vector_jac);
 
@@ -220,11 +220,11 @@ NavierStokesLHDGAssemblyHelper::pressureVolumeResidual(
 
 void
 NavierStokesLHDGAssemblyHelper::pressureVolumeJacobian(const MooseArray<Real> & JxW,
-                                                      const QBase & qrule,
-                                                      DenseMatrix<Number> & p_u_vel_jac,
-                                                      DenseMatrix<Number> & p_v_vel_jac,
-                                                      DenseMatrix<Number> & p_global_lm_jac,
-                                                      DenseMatrix<Number> & global_lm_p_jac)
+                                                       const QBase & qrule,
+                                                       DenseMatrix<Number> & p_u_vel_jac,
+                                                       DenseMatrix<Number> & p_v_vel_jac,
+                                                       DenseMatrix<Number> & p_global_lm_jac,
+                                                       DenseMatrix<Number> & global_lm_p_jac)
 {
   for (const auto qp : make_range(qrule.n_points()))
   {
@@ -255,9 +255,9 @@ NavierStokesLHDGAssemblyHelper::pressureVolumeJacobian(const MooseArray<Real> & 
 
 RealVectorValue
 NavierStokesLHDGAssemblyHelper::rhoVelCrossVelResidual(const MooseArray<Number> & u_sol,
-                                                      const MooseArray<Number> & v_sol,
-                                                      const unsigned int qp,
-                                                      const unsigned int vel_component)
+                                                       const MooseArray<Number> & v_sol,
+                                                       const unsigned int qp,
+                                                       const unsigned int vel_component)
 {
   const RealVectorValue U(u_sol[qp], v_sol[qp]);
   return _rho * U * U(vel_component);
@@ -265,12 +265,12 @@ NavierStokesLHDGAssemblyHelper::rhoVelCrossVelResidual(const MooseArray<Number> 
 
 RealVectorValue
 NavierStokesLHDGAssemblyHelper::rhoVelCrossVelJacobian(const MooseArray<Number> & u_sol,
-                                                      const MooseArray<Number> & v_sol,
-                                                      const unsigned int qp,
-                                                      const unsigned int vel_component,
-                                                      const unsigned int vel_j_component,
-                                                      const MooseArray<std::vector<Real>> & phi,
-                                                      const unsigned int j)
+                                                       const MooseArray<Number> & v_sol,
+                                                       const unsigned int qp,
+                                                       const unsigned int vel_component,
+                                                       const unsigned int vel_j_component,
+                                                       const MooseArray<std::vector<Real>> & phi,
+                                                       const unsigned int j)
 {
   const RealVectorValue U(u_sol[qp], v_sol[qp]);
   RealVectorValue vector_phi;
@@ -284,9 +284,9 @@ NavierStokesLHDGAssemblyHelper::rhoVelCrossVelJacobian(const MooseArray<Number> 
 
 void
 NavierStokesLHDGAssemblyHelper::pressureFaceResidual(const MooseArray<Real> & JxW_face,
-                                                    const QBase & qrule_face,
-                                                    const MooseArray<Point> & normals,
-                                                    DenseVector<Number> & pressure_re)
+                                                     const QBase & qrule_face,
+                                                     const MooseArray<Point> & normals,
+                                                     DenseVector<Number> & pressure_re)
 {
   for (const auto qp : make_range(qrule_face.n_points()))
   {
@@ -299,10 +299,10 @@ NavierStokesLHDGAssemblyHelper::pressureFaceResidual(const MooseArray<Real> & Jx
 
 void
 NavierStokesLHDGAssemblyHelper::pressureFaceJacobian(const MooseArray<Real> & JxW_face,
-                                                    const QBase & qrule_face,
-                                                    const MooseArray<Point> & normals,
-                                                    DenseMatrix<Number> & p_lm_u_vel_jac,
-                                                    DenseMatrix<Number> & p_lm_v_vel_jac)
+                                                     const QBase & qrule_face,
+                                                     const MooseArray<Point> & normals,
+                                                     DenseMatrix<Number> & p_lm_u_vel_jac,
+                                                     DenseMatrix<Number> & p_lm_v_vel_jac)
 {
   for (const auto i : make_range(p_lm_u_vel_jac.m()))
     for (const auto j : make_range(p_lm_u_vel_jac.n()))
@@ -321,13 +321,13 @@ NavierStokesLHDGAssemblyHelper::pressureFaceJacobian(const MooseArray<Real> & Jx
 
 void
 NavierStokesLHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vector_sol,
-                                                  const MooseArray<Number> & scalar_sol,
-                                                  const MooseArray<Number> & lm_sol,
-                                                  const unsigned int vel_component,
-                                                  const MooseArray<Real> & JxW_face,
-                                                  const QBase & qrule_face,
-                                                  const MooseArray<Point> & normals,
-                                                  DenseVector<Number> & scalar_re)
+                                                   const MooseArray<Number> & scalar_sol,
+                                                   const MooseArray<Number> & lm_sol,
+                                                   const unsigned int vel_component,
+                                                   const MooseArray<Real> & JxW_face,
+                                                   const QBase & qrule_face,
+                                                   const MooseArray<Point> & normals,
+                                                   DenseVector<Number> & scalar_re)
 {
   DiffusionLHDGAssemblyHelper::scalarFaceResidual(
       vector_sol, scalar_sol, lm_sol, JxW_face, qrule_face, normals, scalar_re);
@@ -351,15 +351,15 @@ NavierStokesLHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & 
 
 void
 NavierStokesLHDGAssemblyHelper::scalarFaceJacobian(const unsigned int vel_component,
-                                                  const MooseArray<Real> & JxW_face,
-                                                  const QBase & qrule_face,
-                                                  const MooseArray<Point> & normals,
-                                                  DenseMatrix<Number> & scalar_vector_jac,
-                                                  DenseMatrix<Number> & scalar_scalar_jac,
-                                                  DenseMatrix<Number> & scalar_lm_jac,
-                                                  DenseMatrix<Number> & scalar_p_jac,
-                                                  DenseMatrix<Number> & scalar_lm_u_vel_jac,
-                                                  DenseMatrix<Number> & scalar_lm_v_vel_jac)
+                                                   const MooseArray<Real> & JxW_face,
+                                                   const QBase & qrule_face,
+                                                   const MooseArray<Point> & normals,
+                                                   DenseMatrix<Number> & scalar_vector_jac,
+                                                   DenseMatrix<Number> & scalar_scalar_jac,
+                                                   DenseMatrix<Number> & scalar_lm_jac,
+                                                   DenseMatrix<Number> & scalar_p_jac,
+                                                   DenseMatrix<Number> & scalar_lm_u_vel_jac,
+                                                   DenseMatrix<Number> & scalar_lm_v_vel_jac)
 
 {
   DiffusionLHDGAssemblyHelper::scalarFaceJacobian(
@@ -402,14 +402,14 @@ NavierStokesLHDGAssemblyHelper::scalarFaceJacobian(const unsigned int vel_compon
 
 void
 NavierStokesLHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_sol,
-                                              const MooseArray<Number> & scalar_sol,
-                                              const MooseArray<Number> & lm_sol,
-                                              const unsigned int vel_component,
-                                              const MooseArray<Real> & JxW_face,
-                                              const QBase & qrule_face,
-                                              const MooseArray<Point> & normals,
-                                              const Elem * const neigh,
-                                              DenseVector<Number> & lm_re)
+                                               const MooseArray<Number> & scalar_sol,
+                                               const MooseArray<Number> & lm_sol,
+                                               const unsigned int vel_component,
+                                               const MooseArray<Real> & JxW_face,
+                                               const QBase & qrule_face,
+                                               const MooseArray<Point> & normals,
+                                               const Elem * const neigh,
+                                               DenseVector<Number> & lm_re)
 {
   DiffusionLHDGAssemblyHelper::lmFaceResidual(
       vector_sol, scalar_sol, lm_sol, JxW_face, qrule_face, normals, lm_re);
@@ -436,16 +436,16 @@ NavierStokesLHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vect
 
 void
 NavierStokesLHDGAssemblyHelper::lmFaceJacobian(const unsigned int vel_component,
-                                              const MooseArray<Real> & JxW_face,
-                                              const QBase & qrule_face,
-                                              const MooseArray<Point> & normals,
-                                              const Elem * const neigh,
-                                              DenseMatrix<Number> & lm_vec_jac,
-                                              DenseMatrix<Number> & lm_scalar_jac,
-                                              DenseMatrix<Number> & lm_lm_jac,
-                                              DenseMatrix<Number> & lm_p_jac,
-                                              DenseMatrix<Number> & lm_lm_u_vel_jac,
-                                              DenseMatrix<Number> & lm_lm_v_vel_jac)
+                                               const MooseArray<Real> & JxW_face,
+                                               const QBase & qrule_face,
+                                               const MooseArray<Point> & normals,
+                                               const Elem * const neigh,
+                                               DenseMatrix<Number> & lm_vec_jac,
+                                               DenseMatrix<Number> & lm_scalar_jac,
+                                               DenseMatrix<Number> & lm_lm_jac,
+                                               DenseMatrix<Number> & lm_p_jac,
+                                               DenseMatrix<Number> & lm_lm_u_vel_jac,
+                                               DenseMatrix<Number> & lm_lm_v_vel_jac)
 {
   DiffusionLHDGAssemblyHelper::lmFaceJacobian(
       JxW_face, qrule_face, normals, lm_vec_jac, lm_scalar_jac, lm_lm_jac);
@@ -521,15 +521,15 @@ NavierStokesLHDGAssemblyHelper::scalarDirichletResidual(
     DenseVector<Number> & scalar_re)
 {
   DiffusionLHDGAssemblyHelper::scalarDirichletResidual(vector_sol,
-                                                      scalar_sol,
-                                                      *dirichlet_vel[vel_component],
-                                                      JxW_face,
-                                                      qrule_face,
-                                                      normals,
-                                                      current_elem,
-                                                      current_side,
-                                                      q_point_face,
-                                                      scalar_re);
+                                                       scalar_sol,
+                                                       *dirichlet_vel[vel_component],
+                                                       JxW_face,
+                                                       qrule_face,
+                                                       normals,
+                                                       current_elem,
+                                                       current_side,
+                                                       q_point_face,
+                                                       scalar_re);
 
   for (const auto qp : make_range(qrule_face.n_points()))
   {
@@ -558,12 +558,12 @@ NavierStokesLHDGAssemblyHelper::scalarDirichletResidual(
 
 void
 NavierStokesLHDGAssemblyHelper::scalarDirichletJacobian(const unsigned int vel_component,
-                                                       const MooseArray<Real> & JxW_face,
-                                                       const QBase & qrule_face,
-                                                       const MooseArray<Point> & normals,
-                                                       DenseMatrix<Number> & scalar_vector_jac,
-                                                       DenseMatrix<Number> & scalar_scalar_jac,
-                                                       DenseMatrix<Number> & scalar_pressure_jac)
+                                                        const MooseArray<Real> & JxW_face,
+                                                        const QBase & qrule_face,
+                                                        const MooseArray<Point> & normals,
+                                                        DenseMatrix<Number> & scalar_vector_jac,
+                                                        DenseMatrix<Number> & scalar_scalar_jac,
+                                                        DenseMatrix<Number> & scalar_pressure_jac)
 {
   DiffusionLHDGAssemblyHelper::scalarDirichletJacobian(
       JxW_face, qrule_face, normals, scalar_vector_jac, scalar_scalar_jac);

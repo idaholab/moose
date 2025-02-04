@@ -102,10 +102,10 @@ error:
 
 void
 DiffusionLHDGAssemblyHelper::vectorVolumeResidual(const MooseArray<Gradient> & vector_sol,
-                                                 const MooseArray<Number> & scalar_sol,
-                                                 const MooseArray<Real> & JxW,
-                                                 const QBase & qrule,
-                                                 DenseVector<Number> & vector_re)
+                                                  const MooseArray<Number> & scalar_sol,
+                                                  const MooseArray<Real> & JxW,
+                                                  const QBase & qrule,
+                                                  DenseVector<Number> & vector_re)
 {
   for (const auto i : index_range(vector_re))
     for (const auto qp : make_range(qrule.n_points()))
@@ -120,9 +120,9 @@ DiffusionLHDGAssemblyHelper::vectorVolumeResidual(const MooseArray<Gradient> & v
 
 void
 DiffusionLHDGAssemblyHelper::vectorVolumeJacobian(const MooseArray<Real> & JxW,
-                                                 const QBase & qrule,
-                                                 DenseMatrix<Number> & vector_vector_jac,
-                                                 DenseMatrix<Number> & vector_scalar_jac)
+                                                  const QBase & qrule,
+                                                  DenseMatrix<Number> & vector_vector_jac,
+                                                  DenseMatrix<Number> & vector_scalar_jac)
 {
   for (const auto i : make_range(vector_vector_jac.m()))
     for (const auto qp : make_range(qrule.n_points()))
@@ -139,12 +139,12 @@ DiffusionLHDGAssemblyHelper::vectorVolumeJacobian(const MooseArray<Real> & JxW,
 
 void
 DiffusionLHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & vector_field,
-                                                 const Moose::Functor<Real> & source,
-                                                 const MooseArray<Real> & JxW,
-                                                 const QBase & qrule,
-                                                 const Elem * const current_elem,
-                                                 const MooseArray<Point> & q_point,
-                                                 DenseVector<Number> & scalar_re)
+                                                  const Moose::Functor<Real> & source,
+                                                  const MooseArray<Real> & JxW,
+                                                  const QBase & qrule,
+                                                  const Elem * const current_elem,
+                                                  const MooseArray<Point> & q_point,
+                                                  DenseVector<Number> & scalar_re)
 {
   for (const auto qp : make_range(qrule.n_points()))
   {
@@ -164,8 +164,8 @@ DiffusionLHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & v
 
 void
 DiffusionLHDGAssemblyHelper::scalarVolumeJacobian(const MooseArray<Real> & JxW,
-                                                 const QBase & qrule,
-                                                 DenseMatrix<Number> & scalar_vector_jac)
+                                                  const QBase & qrule,
+                                                  DenseMatrix<Number> & scalar_vector_jac)
 {
   for (const auto i : make_range(scalar_vector_jac.m()))
     // Scalar equation dependence on vector dofs
@@ -177,10 +177,10 @@ DiffusionLHDGAssemblyHelper::scalarVolumeJacobian(const MooseArray<Real> & JxW,
 
 void
 DiffusionLHDGAssemblyHelper::vectorFaceResidual(const MooseArray<Number> & lm_sol,
-                                               const MooseArray<Real> & JxW_face,
-                                               const QBase & qrule_face,
-                                               const MooseArray<Point> & normals,
-                                               DenseVector<Number> & vector_re)
+                                                const MooseArray<Real> & JxW_face,
+                                                const QBase & qrule_face,
+                                                const MooseArray<Point> & normals,
+                                                DenseVector<Number> & vector_re)
 {
   // Vector equation dependence on LM dofs
   for (const auto i : index_range(vector_re))
@@ -190,9 +190,9 @@ DiffusionLHDGAssemblyHelper::vectorFaceResidual(const MooseArray<Number> & lm_so
 
 void
 DiffusionLHDGAssemblyHelper::vectorFaceJacobian(const MooseArray<Real> & JxW_face,
-                                               const QBase & qrule_face,
-                                               const MooseArray<Point> & normals,
-                                               DenseMatrix<Number> & vector_lm_jac)
+                                                const QBase & qrule_face,
+                                                const MooseArray<Point> & normals,
+                                                DenseMatrix<Number> & vector_lm_jac)
 {
   // Vector equation dependence on LM dofs
   for (const auto i : make_range(vector_lm_jac.m()))
@@ -204,12 +204,12 @@ DiffusionLHDGAssemblyHelper::vectorFaceJacobian(const MooseArray<Real> & JxW_fac
 
 void
 DiffusionLHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vector_sol,
-                                               const MooseArray<Number> & scalar_sol,
-                                               const MooseArray<Number> & lm_sol,
-                                               const MooseArray<Real> & JxW_face,
-                                               const QBase & qrule_face,
-                                               const MooseArray<Point> & normals,
-                                               DenseVector<Number> & scalar_re)
+                                                const MooseArray<Number> & scalar_sol,
+                                                const MooseArray<Number> & lm_sol,
+                                                const MooseArray<Real> & JxW_face,
+                                                const QBase & qrule_face,
+                                                const MooseArray<Point> & normals,
+                                                DenseVector<Number> & scalar_re)
 {
   for (const auto i : index_range(scalar_re))
     for (const auto qp : make_range(qrule_face.n_points()))
@@ -230,11 +230,11 @@ DiffusionLHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vec
 
 void
 DiffusionLHDGAssemblyHelper::scalarFaceJacobian(const MooseArray<Real> & JxW_face,
-                                               const QBase & qrule_face,
-                                               const MooseArray<Point> & normals,
-                                               DenseMatrix<Number> & scalar_vector_jac,
-                                               DenseMatrix<Number> & scalar_scalar_jac,
-                                               DenseMatrix<Number> & scalar_lm_jac)
+                                                const QBase & qrule_face,
+                                                const MooseArray<Point> & normals,
+                                                DenseMatrix<Number> & scalar_vector_jac,
+                                                DenseMatrix<Number> & scalar_scalar_jac,
+                                                DenseMatrix<Number> & scalar_lm_jac)
 {
   for (const auto i : make_range(scalar_vector_jac.m()))
     for (const auto qp : make_range(qrule_face.n_points()))
@@ -256,12 +256,12 @@ DiffusionLHDGAssemblyHelper::scalarFaceJacobian(const MooseArray<Real> & JxW_fac
 
 void
 DiffusionLHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_sol,
-                                           const MooseArray<Number> & scalar_sol,
-                                           const MooseArray<Number> & lm_sol,
-                                           const MooseArray<Real> & JxW_face,
-                                           const QBase & qrule_face,
-                                           const MooseArray<Point> & normals,
-                                           DenseVector<Number> & lm_re)
+                                            const MooseArray<Number> & scalar_sol,
+                                            const MooseArray<Number> & lm_sol,
+                                            const MooseArray<Real> & JxW_face,
+                                            const QBase & qrule_face,
+                                            const MooseArray<Point> & normals,
+                                            DenseVector<Number> & lm_re)
 {
   for (const auto i : index_range(lm_re))
     for (const auto qp : make_range(qrule_face.n_points()))
@@ -281,11 +281,11 @@ DiffusionLHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_
 
 void
 DiffusionLHDGAssemblyHelper::lmFaceJacobian(const MooseArray<Real> & JxW_face,
-                                           const QBase & qrule_face,
-                                           const MooseArray<Point> & normals,
-                                           DenseMatrix<Number> & lm_vec_jac,
-                                           DenseMatrix<Number> & lm_scalar_jac,
-                                           DenseMatrix<Number> & lm_lm_jac)
+                                            const QBase & qrule_face,
+                                            const MooseArray<Point> & normals,
+                                            DenseMatrix<Number> & lm_vec_jac,
+                                            DenseMatrix<Number> & lm_scalar_jac,
+                                            DenseMatrix<Number> & lm_lm_jac)
 {
   for (const auto i : make_range(lm_vec_jac.m()))
     for (const auto qp : make_range(qrule_face.n_points()))
@@ -307,13 +307,13 @@ DiffusionLHDGAssemblyHelper::lmFaceJacobian(const MooseArray<Real> & JxW_face,
 
 void
 DiffusionLHDGAssemblyHelper::vectorDirichletResidual(const Moose::Functor<Real> & dirichlet_value,
-                                                    const MooseArray<Real> & JxW_face,
-                                                    const QBase & qrule_face,
-                                                    const MooseArray<Point> & normals,
-                                                    const Elem * const current_elem,
-                                                    const unsigned int current_side,
-                                                    const MooseArray<Point> & q_point_face,
-                                                    DenseVector<Number> & vector_re)
+                                                     const MooseArray<Real> & JxW_face,
+                                                     const QBase & qrule_face,
+                                                     const MooseArray<Point> & normals,
+                                                     const Elem * const current_elem,
+                                                     const unsigned int current_side,
+                                                     const MooseArray<Point> & q_point_face,
+                                                     DenseVector<Number> & vector_re)
 {
   for (const auto qp : make_range(qrule_face.n_points()))
   {
@@ -329,15 +329,15 @@ DiffusionLHDGAssemblyHelper::vectorDirichletResidual(const Moose::Functor<Real> 
 
 void
 DiffusionLHDGAssemblyHelper::scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
-                                                    const MooseArray<Number> & scalar_sol,
-                                                    const Moose::Functor<Real> & dirichlet_value,
-                                                    const MooseArray<Real> & JxW_face,
-                                                    const QBase & qrule_face,
-                                                    const MooseArray<Point> & normals,
-                                                    const Elem * const current_elem,
-                                                    const unsigned int current_side,
-                                                    const MooseArray<Point> & q_point_face,
-                                                    DenseVector<Number> & scalar_re)
+                                                     const MooseArray<Number> & scalar_sol,
+                                                     const Moose::Functor<Real> & dirichlet_value,
+                                                     const MooseArray<Real> & JxW_face,
+                                                     const QBase & qrule_face,
+                                                     const MooseArray<Point> & normals,
+                                                     const Elem * const current_elem,
+                                                     const unsigned int current_side,
+                                                     const MooseArray<Point> & q_point_face,
+                                                     DenseVector<Number> & scalar_re)
 {
   for (const auto qp : make_range(qrule_face.n_points()))
   {
@@ -364,10 +364,10 @@ DiffusionLHDGAssemblyHelper::scalarDirichletResidual(const MooseArray<Gradient> 
 
 void
 DiffusionLHDGAssemblyHelper::scalarDirichletJacobian(const MooseArray<Real> & JxW_face,
-                                                    const QBase & qrule_face,
-                                                    const MooseArray<Point> & normals,
-                                                    DenseMatrix<Number> & scalar_vector_jac,
-                                                    DenseMatrix<Number> & scalar_scalar_jac)
+                                                     const QBase & qrule_face,
+                                                     const MooseArray<Point> & normals,
+                                                     DenseMatrix<Number> & scalar_vector_jac,
+                                                     DenseMatrix<Number> & scalar_scalar_jac)
 {
   for (const auto i : index_range(_u_dof_indices))
     for (const auto qp : make_range(qrule_face.n_points()))
@@ -384,10 +384,10 @@ DiffusionLHDGAssemblyHelper::scalarDirichletJacobian(const MooseArray<Real> & Jx
 
 void
 DiffusionLHDGAssemblyHelper::createIdentityResidual(const MooseArray<Real> & JxW,
-                                                   const QBase & qrule,
-                                                   const MooseArray<std::vector<Real>> & phi,
-                                                   const MooseArray<Number> & sol,
-                                                   DenseVector<Number> & re)
+                                                    const QBase & qrule,
+                                                    const MooseArray<std::vector<Real>> & phi,
+                                                    const MooseArray<Number> & sol,
+                                                    DenseVector<Number> & re)
 {
   for (const auto qp : make_range(qrule.n_points()))
     for (const auto i : index_range(phi))
@@ -396,9 +396,9 @@ DiffusionLHDGAssemblyHelper::createIdentityResidual(const MooseArray<Real> & JxW
 
 void
 DiffusionLHDGAssemblyHelper::createIdentityJacobian(const MooseArray<Real> & JxW,
-                                                   const QBase & qrule,
-                                                   const MooseArray<std::vector<Real>> & phi,
-                                                   DenseMatrix<Number> & ke)
+                                                    const QBase & qrule,
+                                                    const MooseArray<std::vector<Real>> & phi,
+                                                    DenseMatrix<Number> & ke)
 {
   for (const auto qp : make_range(qrule.n_points()))
     for (const auto i : index_range(phi))
