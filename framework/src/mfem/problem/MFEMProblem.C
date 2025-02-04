@@ -186,7 +186,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
     auto object_ptr = getUserObject<MFEMKernel<mfem::LinearFormIntegrator>>(name).getSharedPtr();
     auto lf_kernel = std::dynamic_pointer_cast<MFEMKernel<mfem::LinearFormIntegrator>>(object_ptr);
 
-    addKernel(lf_kernel->getTrialVariableName(), lf_kernel);
+    addKernel(lf_kernel->getTestVariableName(), lf_kernel);
   }
   else if (dynamic_cast<const MFEMMixedBilinearFormKernel *>(kernel) != nullptr)
   {
@@ -199,7 +199,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
     auto object_ptr = getUserObject<MFEMKernel<mfem::BilinearFormIntegrator>>(name).getSharedPtr();
     auto blf_kernel =
         std::dynamic_pointer_cast<MFEMKernel<mfem::BilinearFormIntegrator>>(object_ptr);
-    addKernel(blf_kernel->getTrialVariableName(), blf_kernel);
+    addKernel(blf_kernel->getTestVariableName(), blf_kernel);
   }
   else
   {
