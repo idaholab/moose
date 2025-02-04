@@ -8,15 +8,28 @@
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete concrete_and_Al'
+    block = 'concrete concrete_hd Al'
   []
 []
 
 [Kernels]
+  [diffusion_concrete_hd]
+    type = CoefDiffusion
+    variable = T
+    coef = 5
+    block = concrete_hd
+  []
   [diffusion_concrete]
     type = CoefDiffusion
     variable = T
     coef = 2.25
+    block = concrete
+  []
+  [diffusion_Al]
+    type = CoefDiffusion
+    variable = T
+    coef = 175
+    block = Al
   []
 []
 
@@ -24,9 +37,9 @@
   [from_reactor]
     type = NeumannBC
     variable = T
-    boundary = inner_cavity
-    # 5 MW reactor, only 50kW removed through radiation, 108 m2 cavity area
-    value = '${fparse 5e4 / 108}'
+    boundary = inner_cavity_solid
+    # 5 MW reactor, only 50kW removed through radiation, 144 m2 cavity area
+    value = '${fparse 5e4 / 144}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -48,7 +61,7 @@
     boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
-    heat_transfer_coefficient = 30
+    heat_transfer_coefficient = 600
   []
 []
 

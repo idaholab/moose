@@ -10,7 +10,8 @@ cp_multiplier = 1e-6
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
+    initial_condition = 300
   []
 []
 
@@ -51,40 +52,57 @@ cp_multiplier = 1e-6
 []
 
 [Materials]
-  [concrete]
+  [concrete_hd]
     type = ADHeatConductionMaterial
-    block = 'concrete'
+    block = concrete_hd
     temp = 'T'
     # we specify a function of time, temperature is passed as the time argument
     # in the material
-    thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-    specific_heat = '${fparse cp_multiplier * 1170}'
+    thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
+    specific_heat = ${fparse cp_multiplier * 1050}
   []
-  [concrete_and_Al]
+  [concrete]
     type = ADHeatConductionMaterial
-    block = 'concrete_and_Al'
+    block = concrete
     temp = 'T'
-    # Al: 175 W/m/K, concrete: 2.5 W/m/K
-    thermal_conductivity_temperature_function = '45'
-    specific_heat = '1170'
+    thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
+    specific_heat = ${fparse cp_multiplier * 1050}
   []
-  [density]
+  [Al]
+    type = ADHeatConductionMaterial
+    block = Al
+    temp = T
+    thermal_conductivity_temperature_function = '175'
+    specific_heat = ${fparse cp_multiplier * 875}
+  []
+  [density_concrete_hd]
     type = ADGenericConstantMaterial
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd'
     prop_names = 'density'
-    prop_values = '2400' # kg / m3
+    prop_values = '3524' # kg / m3
+  []
+  [density_concrete]
+    type = ADGenericConstantMaterial
+    block = 'concrete'
+    prop_names = 'density'
+    prop_values = '2403' # kg / m3
+  []
+  [density_Al]
+    type = ADGenericConstantMaterial
+    block = 'Al'
+    prop_names = 'density'
+    prop_values = '2270' # kg / m3
   []
 []
 
 [BCs]
   # Solid
   [from_reactor]
-    type = FunctionNeumannBC
+    type = NeumannBC
     variable = T
-    boundary = inner_cavity
-    # 5MW reactor, 50kW dissipated by radiation, 136 m2 cavity area
-    # ramp up over 10s
-    function = '5e4 / 136 * min(t / 10, 1)'
+    boundary = inner_cavity_solid
+    # 5 MW reactor, only 50 kW removed from radiation, 144 m2 cavity area
+    value = '${fparse 5e4 / 144}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -108,7 +126,7 @@ cp_multiplier = 1e-6
     boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
-    heat_transfer_coefficient = 30
+    heat_transfer_coefficient = 600
   []
 []
 
@@ -121,26 +139,11 @@ cp_multiplier = 1e-6
 
 [Executioner]
   type = Transient
+  steady_state_detection = true
   solve_type = NEWTON
-  automatic_scaling = true
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-
-  l_abs_tol = 1e-9
   nl_abs_tol = 1e-8
-
-  end_time = 100
-  dt = 0.25
-  start_time = -1
-
-  # steady_state_tolerance = 1e-5
-  # steady_state_detection = true
-
-  [TimeStepper]
-    type = FunctionDT
-    function = 'if(t<0,0.1,0.25)'
-  []
 []
 
 [Outputs]
