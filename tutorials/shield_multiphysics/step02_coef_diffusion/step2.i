@@ -12,11 +12,25 @@
     type = CoefDiffusion
     variable = T
     coef = 0.6
+    block = water
+  []
+  [diffusion_concrete_hd]
+    type = CoefDiffusion
+    variable = T
+    coef = 5
+    block = concrete_hd
   []
   [diffusion_concrete]
     type = CoefDiffusion
     variable = T
     coef = 2.25
+    block = concrete
+  []
+  [diffusion_Al]
+    type = CoefDiffusion
+    variable = T
+    coef = 175
+    block = Al
   []
 []
 

@@ -10,29 +10,9 @@ mu_multiplier = 1
     type = FileMeshGenerator
     file = '../step03_boundary_conditions/mesh_in.e'
   []
-
-  [add_inner_water]
-    type = SideSetsFromBoundingBoxGenerator
-    input = 'fmg'
-    included_boundaries = 'water_boundary'
-    boundary_new = water_boundary_inner
-    bottom_left = '2.5 2.5 1'
-    top_right = '6.6 10.5 5'
-    location = INSIDE
-  []
-  [add_outer_water]
-    type = SideSetsFromBoundingBoxGenerator
-    input = add_inner_water
-    included_boundaries = 'water_boundary'
-    boundary_new = water_boundary_outer
-    bottom_left = '2.5 2.5 1'
-    top_right = '6.6 10.5 5'
-    location = OUTSIDE
-  []
-
   [refine_water]
     type = RefineBlockGenerator
-    input = add_outer_water
+    input = fmg
     refinement = '1'
     block = 'water'
   []
@@ -40,12 +20,8 @@ mu_multiplier = 1
 
 [AuxVariables]
   [T]
-    # Adds a Linear Lagrange variable by default
-    block = 'concrete'
-    [InitialCondition]
-      type = FunctionIC
-      function = '400'
-    []
+    block = 'concrete_hd concrete Al'
+    initial_condition = 370
   []
 []
 
@@ -83,19 +59,6 @@ mu_multiplier = 1
   []
 []
 
-[Kernels]
-  # We don't need those kernels to run the water-only problem
-  # Solid heat conduction
-  # [diffusion_concrete]
-  #   type = ADHeatConduction
-  #   variable = T
-  # []
-  # [time_derivative]
-  #   type = ADHeatConductionTimeDerivative
-  #   variable = T
-  # []
-[]
-
 [GlobalParams]
   velocity_interp_method = rc
   rhie_chow_user_object = ins_rhie_chow_interpolator
@@ -113,7 +76,7 @@ mu_multiplier = 1
     type = FVPointValueConstraint
     lambda = lambda
     phi0 = 1e5
-    point = '2 2 2'
+    point = '2 9 2'
     variable = pressure
   []
   [water_ins_momentum_time_vel_x]
@@ -238,25 +201,6 @@ mu_multiplier = 1
   []
 []
 
-[Materials]
-  # We don't need the solid materials to run the water-only problem
-  # [concrete]
-  #   type = ADHeatConductionMaterial
-  #   block = 'concrete'
-  #   temp = 'T'
-  #   # we specify a function of time, temperature is passed as the time argument
-  #   # in the material
-  #   thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-  #   specific_heat = '${fparse cp_multiplier * 1170}'
-  # []
-  # [density]
-  #   type = ADGenericConstantMaterial
-  #   block = 'concrete'
-  #   prop_names = 'density'
-  #   prop_values = '2400' # kg / m3
-  # []
-[]
-
 [FunctorMaterials]
   [water]
     type = ADGenericFunctorMaterial
@@ -277,43 +221,6 @@ mu_multiplier = 1
     outputs = none
     temperature = T_fluid
   []
-[]
-
-[BCs]
-  # We don't need the solid BCs to run the water-only problem
-  # Solid
-  # [from_reactor]
-  #   type = FunctionNeumannBC
-  #   variable = T
-  #   boundary = inner_cavity
-  #   # 5MW reactor, 50kW dissipated by radiation, 136 m2 cavity area
-  #   # ramp up over 10s
-  #   function = '5e4 / 136 * min(t / 10, 1)'
-  # []
-  # [air_convection]
-  #   type = ADConvectiveHeatFluxBC
-  #   variable = T
-  #   boundary = 'air_boundary'
-  #   T_infinity = 300.0
-  #   # The heat transfer coefficient should be obtained from a correlation
-  #   heat_transfer_coefficient = 10
-  # []
-  # [ground]
-  #   type = DirichletBC
-  #   variable = T
-  #   value = 300
-  #   boundary = 'ground'
-  # []
-
-  # Heat fluxes for decoupling
-  # [water_convection]
-  #   type = ADConvectiveHeatFluxBC
-  #   variable = T
-  #   boundary = 'water_boundary'
-  #   T_infinity = 300.0
-  #   # The heat transfer coefficient should be obtained from a correlation
-  #   heat_transfer_coefficient = 30
-  # []
 []
 
 [FVBCs]
@@ -369,15 +276,12 @@ mu_multiplier = 1
   # Direct solve works for everything small enough
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  # These worked well for diffusive problems, not so much for advection
-  # petsc_options_iname = '-pc_type -pc_hypre_type'
-  # petsc_options_value = 'hypre boomeramg'
 
   nl_abs_tol = 1e-8
 
   end_time = 100
   dt = 0.25
-  start_time = -1
+  start_time = -2
 
   # steady_state_tolerance = 1e-5
   # steady_state_detection = true

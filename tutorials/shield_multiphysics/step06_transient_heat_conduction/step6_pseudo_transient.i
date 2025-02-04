@@ -1,3 +1,5 @@
+cp_multiplier = 1e-6
+
 [Mesh]
   [fmg]
     type = FileMeshGenerator
@@ -9,12 +11,17 @@
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete_hd concrete Al'
+    initial_condition = 300
   []
 []
 
 [Kernels]
   [diffusion_concrete]
     type = ADHeatConduction
+    variable = T
+  []
+  [time_derivative]
+    type = ADHeatConductionTimeDerivative
     variable = T
   []
 []
@@ -27,21 +34,81 @@
     # we specify a function of time, temperature is passed as the time argument
     # in the material
     thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
-    specific_heat = '1050'
+    specific_heat = ${fparse cp_multiplier * 1050}
   []
   [concrete]
     type = ADHeatConductionMaterial
     block = concrete
     temp = 'T'
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-    specific_heat = '1050'
+    specific_heat = ${fparse cp_multiplier * 1050}
   []
   [Al]
     type = ADHeatConductionMaterial
     block = Al
     temp = T
     thermal_conductivity_temperature_function = '175'
-    specific_heat = '875'
+    specific_heat = ${fparse cp_multiplier * 875}
+  []
+  [density_concrete_hd]
+    type = ADGenericConstantMaterial
+    block = 'concrete_hd'
+    prop_names = 'density'
+    prop_values = '3524' # kg / m3
+  []
+  [density_concrete]
+    type = ADGenericConstantMaterial
+    block = 'concrete'
+    prop_names = 'density'
+    prop_values = '2403' # kg / m3
+  []
+  [density_Al]
+    type = ADGenericConstantMaterial
+    block = 'Al'
+    prop_names = 'density'
+    prop_values = '2270' # kg / m3
+  []
+[]
+
+[AuxVariables]
+  [heat_flux_x]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 'concrete_hd concrete'
+  []
+  [heat_flux_y]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 'concrete_hd concrete'
+  []
+  [heat_flux_z]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 'concrete_hd concrete'
+  []
+[]
+
+[AuxKernels]
+  [diff_flux_x]
+    type = DiffusionFluxAux
+    variable = heat_flux_x
+    diffusion_variable = T
+    diffusivity = 'thermal_conductivity'
+    component = 'x'
+  []
+  [diff_flux_y]
+    type = DiffusionFluxAux
+    variable = heat_flux_x
+    diffusion_variable = T
+    diffusivity = 'thermal_conductivity'
+    component = 'y'
+  []
+  [diff_flux_z]
+    type = DiffusionFluxAux
+    variable = heat_flux_x
+    diffusion_variable = T
+    diffusivity = 'thermal_conductivity'
+    component = 'z'
   []
 []
 
@@ -85,12 +152,14 @@
 []
 
 [Executioner]
-  type = Steady # Steady state problem
-  solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
-  petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
+  type = Transient
+  steady_state_detection = true
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  nl_abs_tol = 1e-8
 []
 
 [Outputs]
-  exodus = true # Output Exodus format
+  exodus = true
 []
