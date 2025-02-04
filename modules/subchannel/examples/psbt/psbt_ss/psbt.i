@@ -1,23 +1,72 @@
-# This is an input file based on M. Avramova et. all 2012,
+# M. Avramova et al., 2012,
 # OECD/NRC Benchmark Based on NUPEC PWR
 # Sub-channel and Bundle Tests (PSBT). Volume III: Departure from Nucleate Boiling
-T_in = 359.15
+# Case:01-5237
+T_in = 502.35
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
-P_out = 4.923e6 # Pa
-
+mass_flux_in = ${fparse 1e+6 * 16.95 / 3600.}
+P_out = 14.72e6 # Pa
 [QuadSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 30
+    n_cells = 20
     pitch = 0.0126
     pin_diameter = 0.00950
-    gap = 0.00095 # the half gap between sub-channel assemblies
-    heated_length = 3.0
-    spacer_z = '0.0'
-    spacer_k = '0.0'
+    gap = 0.00095
+    heated_length = 3.658
+    spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
+    spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
+  []
+
+  [fuel_pins]
+    type = SCMQuadPinMeshGenerator
+    input = sub_channel
+    nx = 6
+    ny = 6
+    n_cells = 20
+    pitch = 0.0126
+    heated_length = 3.658
+  []
+[]
+
+[AuxVariables]
+  [mdot]
+    block = sub_channel
+  []
+  [SumWij]
+    block = sub_channel
+  []
+  [P]
+    block = sub_channel
+  []
+  [DP]
+    block = sub_channel
+  []
+  [h]
+    block = sub_channel
+  []
+  [T]
+    block = sub_channel
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [rho]
+    block = sub_channel
+  []
+  [mu]
+    block = sub_channel
+  []
+  [S]
+    block = sub_channel
+  []
+  [w_perim]
+    block = sub_channel
+  []
+  [q_prime]
+    block = fuel_pins
   []
 []
 
@@ -41,9 +90,6 @@ P_out = 4.923e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  P_tol = 1e-04
-  T_tol = 1e-04
-  verbose_subchannel = false
 []
 
 [ICs]
@@ -60,7 +106,7 @@ P_out = 4.923e6 # Pa
   [q_prime_IC]
     type = SCMQuadPowerIC
     variable = q_prime
-    power = 100000.0 # W
+    power = 3.23e6 # W
     filename = "power_profile.txt"
   []
 
@@ -68,6 +114,12 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.00950
   []
 
   [P_ic]
@@ -120,16 +172,14 @@ P_out = 4.923e6 # Pa
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = report_mass_flux_inlet
+    mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
-    block = subchannel
   []
 []
 
@@ -140,14 +190,14 @@ P_out = 4.923e6 # Pa
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"
-    height = 3.0
+    height = 3.658
   []
   [mdot_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_Out.txt"
-    height = 3.0
+    height = 3.658
   []
   [mdot_In_MATRIX]
     type = QuadSubChannelNormalSliceValues
@@ -160,56 +210,4 @@ P_out = 4.923e6 # Pa
 
 [Executioner]
   type = Steady
-[]
-
-[Postprocessors]
-  [T]
-    type = SubChannelPointValue
-    variable = T
-    index = 5
-    execute_on = 'final timestep_end'
-    height = 3.0
-  []
-
-  [report_mass_flux_inlet]
-    type = Receiver
-    default = ${mass_flux_in}
-  []
-
-  [report_pressure_outlet]
-    type = Receiver
-    default = ${P_out}
-  []
-
-  [m_dot_in]
-    type = SideIntegralVariablePostprocessor
-    variable = mdot
-    boundary = inlet
-  []
-
-  [m_dot_out]
-    type = SideIntegralVariablePostprocessor
-    variable = mdot
-    boundary = outlet
-  []
-[]
-
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "3d.i"
-    execute_on = "timestep_end"
-  []
-[]
-
-[Transfers]
-  [xfer]
-    type = SCMSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
-  []
 []

@@ -1,11 +1,10 @@
-
 # Friction model Verification
 
 ## Test Description
 
 &nbsp;
 
-This verification problem is the same used in [!cite](CTF-Verification). This case presents a problem where the effects of friction are clearly discernible and quantifible. Momentum transfer in the single-phase case is driven by a lateral pressure gradient and turbulence. By deactivating turbulence in the test model case, momentum transfer can only be the result of lateral pressure imbalance; which for a model with no form losses (spacer grids), can only be driven by unequal frictional losses. Friction loss depends on the hydraulic diameter, so it makes sense to devise a two-channel problem, with channels that have an unequal flow area. The problem geometry is shown in [fig-friction].
+This verification problem is the same used in [!cite](CTF-Verification). This case presents a problem where the effects of friction are clearly discernible and quantifiable. Momentum transfer in the single-phase case is driven by a lateral pressure gradient and turbulence. By deactivating turbulence in the test model case, momentum transfer can only be the result of lateral pressure imbalance; which for a model with no form losses (spacer grids), can only be driven by unequal frictional losses. Friction loss depends on the hydraulic diameter, so it makes sense to devise a two-channel problem, with channels that have an unequal flow area. The problem geometry is shown in [fig-friction].
 
 !media subchannel/v&v/friction.png
     style=width:30%;margin-bottom:2%;margin:auto;

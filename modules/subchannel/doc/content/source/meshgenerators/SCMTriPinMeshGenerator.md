@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This kernel creates the mesh were the `SCM` solution variables associated with the pins live.
+This mesh generator creates the mesh were the `SCM` solution variables associated with the pins live.
 The user needs to provide the [!param](/Mesh/SCMTriPinMeshGenerator/nrings) parameter which defines the number of fuel pin rings. For triangular sub-assemblies, one nring means that there is one central pin in the (0 0 0)
 position and six neighboring ones on the the vertices of a normal hexagon. The number of cells in the -z direction is given by [!param](/Mesh/SCMTriPinMeshGenerator/n_cells). The distance of the pins from eachother is
 given by the [!param](/Mesh/SCMTriPinMeshGenerator/pitch) parameter and the total length of the pins in the -z direction is defined by the parameters:

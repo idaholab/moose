@@ -1,51 +1,49 @@
 [Mesh]
-  [subchannel]
-    type = SCMDetailedQuadSubChannelMeshGenerator
-    nx = 1
-    ny = 2
-    n_cells = 50
-    pitch = 0.0126
-    pin_diameter = 0.00950
-    gap = 0.00095
-    heated_length = 10.0
+    [subchannel]
+      type = SCMDetailedQuadSubChannelMeshGenerator
+      nx = 2
+      ny = 1
+      n_cells = 100
+      pitch = 0.0126
+      pin_diameter = 0.00950
+      gap = 0.00095
+      heated_length = 10.0
+    []
   []
-[]
 
-[AuxVariables]
-  [mdot]
+  [AuxVariables]
+    [mdot]
+    []
+    [SumWij]
+    []
+    [P]
+    []
+    [DP]
+    []
+    [h]
+    []
+    [T]
+    []
+    [rho]
+    []
+    [mu]
+    []
+    [S]
+    []
+    [w_perim]
+    []
+    [q_prime]
+    []
   []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [mu]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-[]
 
-[Problem]
-  type = NoSolveProblem
-[]
+  [Problem]
+    type = NoSolveProblem
+  []
 
-[Outputs]
-  exodus = true
-[]
+  [Outputs]
+    exodus = true
+  []
 
-[Executioner]
-  type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
-[]
+  [Executioner]
+    type = Steady
+  []

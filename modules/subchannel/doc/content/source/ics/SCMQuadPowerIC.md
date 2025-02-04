@@ -25,7 +25,7 @@ The axial heat rate at a specific height is the product of the total power of th
 
 <!-- -->
 
-If the user has created a mesh for the pins, the axial hear rate will be assigned to the nodes of the pin mesh. If the user hasn't created a pin mesh the appropiate heat rate will be assigned to
+If the user has created a mesh for the pins, the axial heat rate will be assigned to the nodes of the pin mesh. If the user hasn't created a pin mesh the appropriate heat rate will be assigned to
 the nodes of the subchannel mesh.
 
 !syntax parameters /ICs/SCMQuadPowerIC

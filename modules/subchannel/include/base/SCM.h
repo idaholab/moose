@@ -25,8 +25,6 @@ getMesh(const MooseMesh & mesh)
     mooseError("The mesh is not of type: ",
                MooseUtils::prettyCppType<T>(),
                ". You must use the relevant Subchannel mesh/mesh generator with this object.");
-
-  // Cast it to desired type
   return *T_mesh;
 }
 }
