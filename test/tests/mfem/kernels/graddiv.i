@@ -17,7 +17,6 @@
     type = MFEMFESpace
     fec_type = RT
     fec_order = CONSTANT
-    vdim = 1
     ordering = "vdim"
   []
 []

@@ -20,14 +20,14 @@ public:
   inline std::shared_ptr<mfem::FiniteElementCollection> getFEC() const { return _fec.getFEC(); }
 
 protected:
-  /// Vector dimension (number of unknowns per degree of freedom).
-  const int _vdim;
-
   /// Type of ordering of the vector dofs when _vdim > 1.
   const int _ordering;
 
   /// Constructs and stores the fec.
   const MFEMFECollection _fec;
+
+  /// Vector dimension (number of unknowns per degree of freedom).
+  const int _vdim;
 
 private:
   /// Constructs the fespace.
