@@ -43,7 +43,8 @@ InterWrapperSolutionTransferBase::initialSetup()
     const auto & fe_type = from_sys.variable_type(from_var.number());
 
     if (fe_type.family != LAGRANGE || fe_type.order != FIRST)
-      mooseError("This transfer requires same type of variables between meshes (source)");
+      paramError("variable",
+                 "This transfer requires a first order Lagrange variable for the source variable");
 
     // Check target variable in visualization mesh
     MooseVariableFieldBase & to_var = _to_problems[0]->getVariable(
@@ -53,7 +54,8 @@ InterWrapperSolutionTransferBase::initialSetup()
     const auto & fe_type_target = to_sys.variable_type(to_var.number());
 
     if (fe_type_target.family != LAGRANGE || fe_type_target.order != FIRST)
-      mooseError("This transfer requires same type of variables between meshes (target)");
+      paramError("variable",
+                 "This transfer requires a first order Lagrange variable for the source variable");
   }
 }
 

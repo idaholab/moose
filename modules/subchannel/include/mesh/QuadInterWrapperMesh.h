@@ -91,15 +91,22 @@ protected:
   unsigned int _n_channels;
   /// Number of gaps per layer
   unsigned int _n_gaps;
-  /// Number of pins
+  /// Number of assemblies
   unsigned int _n_assemblies;
   Real _side_bypass_length;
+  /// vector of subchannel nodes
   std::vector<std::vector<Node *>> _nodes;
+  /// vector of fuel assembly nodes
   std::vector<std::vector<Node *>> _pin_nodes;
+  /// vector of gap (interface between pairs of neighboring assemblies) nodes
   std::vector<std::vector<Node *>> _gapnodes;
+  /// map relating gap index to subchannel index
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
+  /// map relating subchannel index to gap index
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
+  /// map relating subchannel index to assembly index
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
+    /// map relating fuel assembly index to subchannel index
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
   /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;
