@@ -770,7 +770,7 @@ class RenderParameterToken(components.RenderComponent):
 
         doc_unit = param['doc_unit']
         # Only display a unit if specified or if the type is likely to have a unit
-        if doc_unit or "double" in cpp_type:
+        if doc_unit or "double" in cpp_type or "Variable" in cpp_type or "Postprocessor" in cpp_type or "Funct" in cpp_type or "MaterialProperty" in cpp_type:
             p = html.Tag(body, 'p', class_='moose-parameter-description-doc-unit')
             html.Tag(p, 'span', string='Unit:')
             # If a unit was specified, always display it
