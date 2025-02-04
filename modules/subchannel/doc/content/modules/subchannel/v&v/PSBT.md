@@ -1,6 +1,6 @@
 # Steady-state mixing model Validation
 
-The PSBT 5x5 benchmark is an international benchmark developed by the Organisation for Economic Co-operation and Development (OECD), the Nuclear Regulatory Commission (NRC), and the Nuclear Power Engineering Center(NUPEC) [!cite](PSBT1). In this work we utilize the steady-state mixing test, detailed in volume III of the PSBT benchmark [!cite](PSBT3). The purpose of this test is to validate the mixing models of the participating codes. The participating codes predict the fluid temperature distribution at the exit of the heated section of a pin bundle assembly and compare it with the experimental values provided by the benchmark. Here we will present as an example case 01-5237, as well as the average error for all the cases run [!cite](kyriakopoulos2022development). The pin bundle geometry description is presented in Table below.
+The PSBT 5x5 benchmark is an international benchmark developed by the Organisation for Economic Co-operation and Development (OECD), the Nuclear Regulatory Commission (NRC), and the Nuclear Power Engineering Center (NUPEC) [!cite](PSBT1). In this work we utilize the steady-state mixing test, detailed in volume III of the PSBT benchmark [!cite](PSBT3). The purpose of this test is to validate the mixing models of the participating codes. The participating codes predict the fluid temperature distribution at the exit of the heated section of a pin bundle assembly and compare it with the experimental values provided by the benchmark. Here we will present as an example case 01-5237, as well as the average error for all the cases run [!cite](kyriakopoulos2022development). The pin bundle geometry description is presented in Table below.
 
 | PSBT pin bundle specifications |
 | |
@@ -47,4 +47,4 @@ This illustrates the fact that modeling parameters like $\beta$ should ideally b
 
 ## Input file for case: 01-5237
 
-!listing /examples/psbt/psbt_ss/psbt_example.i language=cpp
+!listing /examples/psbt/psbt_ss/psbt.i language=cpp

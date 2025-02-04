@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This kernel creates the mesh were the `SCM` solution variables associated with the fuel pins live.
+This mesh generator creates the mesh were the `SCM` solution variables associated with the fuel pins live.
 The user needs to provide the number of subchannels [!param](/Mesh/SCMQuadPinMeshGenerator/nx) in the -x direction and [!param](/Mesh/SCMQuadPinMeshGenerator/ny) in the -y direction.
 The number of cells in the -z direction is given by [!param](/Mesh/SCMQuadPinMeshGenerator/n_cells). The distance of the pins from eachother is
 given by the [!param](/Mesh/SCMQuadPinMeshGenerator/pitch) parameter and the total length of the pins in the -z direction is defined by the parameters:

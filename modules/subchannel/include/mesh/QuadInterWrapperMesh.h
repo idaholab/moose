@@ -66,7 +66,7 @@ public:
   virtual const unsigned int & getNx() const { return _nx; }
   /// number of inter-wrapper channels in the -y direction
   virtual const unsigned int & getNy() const { return _ny; }
-  const Real & getGap() const { return _side_bypass_length; }
+  const Real getGap() const { return _side_bypass_length; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
   virtual unsigned int channelIndex(const Point & point) const override;
@@ -79,11 +79,15 @@ public:
     return _subch_type[index];
   }
 
+  /// returns the size of the gap in the interface of between assemblies
   virtual Real getGapWidth(unsigned int gap_index) const override { return _gij_map[gap_index]; }
 
 protected:
+  /// Number of assemblies in the -x direction
   unsigned int _nx;
+  /// Number of assemblies in the -y direction
   unsigned int _ny;
+  /// Number of subchannels
   unsigned int _n_channels;
   /// Number of gaps per layer
   unsigned int _n_gaps;

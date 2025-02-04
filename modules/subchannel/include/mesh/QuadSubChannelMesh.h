@@ -119,13 +119,21 @@ protected:
    * next to the duct. Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
    */
   Real _gap;
+  /// vector of subchannel nodes
   std::vector<std::vector<Node *>> _nodes;
+  /// vector of fuel pin nodes
   std::vector<std::vector<Node *>> _pin_nodes;
+  /// vector of gap (interface between pairs of neighboring subchannels) nodes
   std::vector<std::vector<Node *>> _gapnodes;
+  /// map relating gap index to subchannel index
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
+  /// map relating gap index to fuel pin index
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_pin_map;
+  /// map relating subchannel index to gap index
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
+  /// map relating subchannel index to fuel pin index
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
+  /// map relating fuel pin index to subchannel index
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
   /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;

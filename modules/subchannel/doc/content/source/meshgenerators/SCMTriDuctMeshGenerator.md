@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This kernel creates the mesh were the variables associated with the duct live.
+This mesh generator creates the mesh were the variables associated with the duct live.
 
 ## Example Input File Syntax
 
