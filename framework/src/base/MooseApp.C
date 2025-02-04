@@ -427,7 +427,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _enable_unused_check(ERROR_UNUSED),
     _factory(*this),
     _error_overridden(false),
-    _ready_to_exit(false),
+    _ready_to_exit(""),
     _exit_code(0),
     _initial_from_file(false),
     _distributed_mesh_on_command_line(false),
@@ -814,13 +814,13 @@ MooseApp::setupOptions()
   else if (getParam<bool>("display_version"))
   {
     Moose::out << getPrintableVersion() << std::endl;
-    _ready_to_exit = true;
+    _ready_to_exit = "display_version";
     return;
   }
   else if (getParam<bool>("help"))
   {
     _command_line->printUsage();
-    _ready_to_exit = true;
+    _ready_to_exit = "help";
   }
   else if (getParam<bool>("dump") || isParamSetByUser("dump_search"))
   {
@@ -843,7 +843,7 @@ MooseApp::setupOptions()
       JsonInputFileFormatter formatter;
       Moose::out << "\n### START DUMP DATA ###\n"
                  << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
-      _ready_to_exit = true;
+      _ready_to_exit = "dump";
     }
     else
       mooseError("Search parameter '", search, "' was not found in the registered syntax.");
@@ -867,8 +867,7 @@ MooseApp::setupOptions()
         Moose::out << entry.first << "\taction\t" << act->_name << "\t" << act->_classname << "\t"
                    << act->_file << "\n";
     }
-
-    _ready_to_exit = true;
+    _ready_to_exit = "registry";
   }
   else if (getParam<bool>("registry_hit"))
   {
@@ -913,7 +912,7 @@ MooseApp::setupOptions()
     Moose::out << root.render();
 
     Moose::out << "\n### END REGISTRY DATA ###\n";
-    _ready_to_exit = true;
+    _ready_to_exit = "registry_hit";
   }
   else if (getParam<bool>("definition"))
   {
@@ -924,7 +923,7 @@ MooseApp::setupOptions()
     SONDefinitionFormatter formatter;
     Moose::out << "%-START-SON-DEFINITION-%\n"
                << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
-    _ready_to_exit = true;
+    _ready_to_exit = "definition";
   }
   else if (getParam<bool>("yaml") || isParamSetByUser("yaml_search"))
   {
@@ -935,7 +934,7 @@ MooseApp::setupOptions()
     _builder.initSyntaxFormatter(Moose::Builder::YAML, true);
     _builder.buildFullTree(search);
 
-    _ready_to_exit = true;
+    _ready_to_exit = "yaml";
   }
   else if (getParam<bool>("json") || isParamSetByUser("json_search"))
   {
@@ -947,7 +946,7 @@ MooseApp::setupOptions()
     _builder.buildJsonSyntaxTree(tree);
 
     Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
-    _ready_to_exit = true;
+    _ready_to_exit = "json";
   }
   else if (getParam<bool>("syntax"))
   {
@@ -958,14 +957,14 @@ MooseApp::setupOptions()
     for (const auto & it : syntax)
       Moose::out << it.first << "\n";
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
-    _ready_to_exit = true;
+    _ready_to_exit = "syntax";
   }
   else if (getParam<bool>("show_type"))
   {
     _perf_graph.disableLivePrint();
 
     Moose::out << "MooseApp Type: " << type() << std::endl;
-    _ready_to_exit = true;
+    _ready_to_exit = "show_type";
   }
   else if (getInputFileNames().size())
   {
@@ -1002,12 +1001,6 @@ MooseApp::setupOptions()
       _action_warehouse.setFinalTask("split_mesh");
     }
     _action_warehouse.build();
-
-    // Check that --check-input was not used with and final task as this will results in a segFault
-    if (_check_input && _action_warehouse.getFinalTask() != "")
-      mooseError("Cannot run --check-input with ",
-                 _action_warehouse.getFinalTask(),
-                 " as this will result in a segfault");
 
     // Setup the AppFileBase for use by the Outputs or other systems that need output file info
     {
@@ -1060,13 +1053,13 @@ MooseApp::setupOptions()
 
     moose_server.run();
 
-    _ready_to_exit = true;
+    _ready_to_exit = "language_server";
   }
 
   else /* The catch-all case for bad options or missing options, etc. */
   {
     _command_line->printUsage();
-    _ready_to_exit = true;
+    _ready_to_exit = "bad or missing";
     _exit_code = 1;
   }
 
@@ -1118,17 +1111,19 @@ MooseApp::runInputFile()
   TIME_SECTION("runInputFile", 3);
 
   // If ready to exit has been set, then just return
-  if (_ready_to_exit)
+  if (!_ready_to_exit.empty())
     return;
 
   _action_warehouse.executeAllActions();
 
-  if (isParamSetByUser("mesh_only") || isParamSetByUser("split_mesh"))
-    _ready_to_exit = true;
+  if (isParamSetByUser("mesh_only"))
+    _ready_to_exit = "mesh_only";
+  else if (isParamSetByUser("split_mesh"))
+    _ready_to_exit = "split_mesh";
   else if (getParam<bool>("list_constructed_objects"))
   {
     // TODO: ask multiapps for their constructed objects
-    _ready_to_exit = true;
+    _ready_to_exit = "list_constructed_objects";
     std::vector<std::string> obj_list = _factory.getConstructedObjects();
     Moose::out << "**START OBJECT DATA**\n";
     for (const auto & name : obj_list)
@@ -1145,6 +1140,14 @@ MooseApp::errorCheck()
 
   _builder.errorCheck(*_comm, warn, err);
 
+  if (!_executor.get() && !_executioner.get() && !_ready_to_exit.empty())
+    mooseError("Incompatible command line arguments provided. --check-input cannot be called with ",
+               _ready_to_exit,
+               ".");
+  else if (!_executor.get() && !_executioner.get())
+    mooseError("The Executor is being called without being initialized. This is likely caused by "
+               "incompatible command line arguments");
+
   auto apps = feProblem().getMultiAppWarehouse().getObjects();
   for (auto app : apps)
     for (unsigned int i = 0; i < app->numLocalApps(); i++)
@@ -1157,7 +1160,7 @@ MooseApp::executeExecutioner()
   TIME_SECTION("executeExecutioner", 3);
 
   // If ready to exit has been set, then just return
-  if (_ready_to_exit)
+  if (!_ready_to_exit.empty())
     return;
 
   // run the simulation
@@ -1533,13 +1536,13 @@ MooseApp::run()
     }
 
     Moose::out << docmsg << "\n";
-    _ready_to_exit = true;
+    _ready_to_exit = "show_docs";
     return;
   }
 
   if (showInputs() || copyInputs() || runInputs())
   {
-    _ready_to_exit = true;
+    _ready_to_exit = "true";
     return;
   }
 

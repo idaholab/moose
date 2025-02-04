@@ -53,7 +53,7 @@ SolidMechanicsApp::runInputFile()
   MooseApp::runInputFile();
 
   if (getParam<bool>("parse_neml2_only"))
-    _ready_to_exit = true;
+    _ready_to_exit = "parse_neml2_only";
 }
 
 static void

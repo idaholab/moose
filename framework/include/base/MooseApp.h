@@ -1251,7 +1251,7 @@ protected:
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
-  bool _ready_to_exit;
+  std::string _ready_to_exit;
   /// The exit code
   int _exit_code;
 

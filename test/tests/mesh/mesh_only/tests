@@ -82,7 +82,7 @@
     type = 'RunException'
     input = 'mesh_only.i'
     cli_args = '--check-input --mesh-only'
-    expect_err = "Cannot run --check-input with mesh_only as this will result in a segfault"
+    expect_err = "Incompatible command line arguments provided. --check-input cannot be called with mesh_only."
     method = '!dbg'
     issues = '#29788'
     requirement = 'The system shall throw an error is the user provides a parameter that would result in a segfault when used with --mesh-only'
