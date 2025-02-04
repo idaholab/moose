@@ -247,8 +247,10 @@ MooseApp::validParams()
       "Continue the calculation. Without <file base>, the most recent recovery file will be used");
   params.setGlobalCommandLineParam("recover");
 
-  params.addCommandLineParam<bool>(
-      "suppress_header", "--suppress-header", false, "Flag to print the App header");
+  params.addCommandLineParam<bool>("suppress_header",
+                                   "--suppress-header",
+                                   false,
+                                   "Disables the output of the application header.");
   params.setGlobalCommandLineParam("suppress_header");
 
   params.addCommandLineParam<bool>(
