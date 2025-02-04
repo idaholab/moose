@@ -27,7 +27,10 @@ public:
   virtual Real getValue() const override;
 
 protected:
+  /// geometric information
   SubChannelMesh & _mesh;
+  /// variable name
   AuxVariableName const & _variable;
+  /// value we want to calculate
   Real _value;
 };

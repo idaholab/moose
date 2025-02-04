@@ -26,9 +26,12 @@ public:
   virtual Real getValue() const override;
 
 protected:
+  /// geometric information
   const SubChannelMesh & _mesh;
+  /// axial location [m]
   const Real & _height;
   /// pin index
   const int & _i_pin;
+  /// value we want to calculate
   Real _value;
 };
