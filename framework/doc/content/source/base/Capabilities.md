@@ -32,4 +32,4 @@ The logic operators +and+ `&` and +or+ `|` can be used to chain multiple checks 
 
 The test harness performs a two tiered check of the capabilities. The first tier is a static check against the capabilities exported from the base application (using `--show-capabilities`). Based on this check a decision can be made on whether to skip a test, if all capabilities that are being tested are registered by the base application. If a check is made against an unregistered capability the second tier check is invoked.
 
-In the second tier the application is executed with the `--required-capabilities` parameter. In this check an `[Application]` block in the current input could dynamically load modules or apps that register new capabilities not yet known by the base application.
+In the second tier the application is executed with the `--required-capabilities` parameter. This check is only done when `dynamic_capabilities = true` is set within the test specification (the default is false). In this check an `[Application]` block in the current input could dynamically load modules or apps that register new capabilities not yet known by the base application.

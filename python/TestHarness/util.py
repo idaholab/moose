@@ -621,14 +621,15 @@ def getCapabilities(exe):
         raise Exception(f'{exe} --show-capabilities, produced invalid JSON output') from e
     return results
 
-def checkCapabilities(supported, test):
+def checkCapabilities(supported: dict, test, certain):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
     [status, message, doc] = pycapabilities.check(test['capabilities'], supported)
     if status == pycapabilities.PARSE_FAIL:
         raise ValueError(f"Failed to parse capabilities='{test['capabilities']}'")
-    return (status == pycapabilities.CERTAIN_PASS, message)
+    success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
+    return success, message
 
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])

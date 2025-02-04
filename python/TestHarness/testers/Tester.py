@@ -87,7 +87,7 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
-
+        params.addParam('dynamic_capabilities', False, "Whether or not to do a capability check that supports dynamic application loading")
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed are set")
         params.addParam('env_vars_not_set', [], "A test that only runs if all the environment variables listed are not set")
@@ -615,7 +615,7 @@ class Tester(MooseObject, OutputInterface):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # Check for supported capabilities
-        capabilities_present = util.checkCapabilities(capabilities, self.specs)[0]
+        capabilities_present = util.checkCapabilities(capabilities, self.specs, certain=self.specs['dynamic_capabilities'])[0]
         if not capabilities_present:
             reasons['missing_capabilities'] = 'Needs: ' + self.specs['capabilities']
 
