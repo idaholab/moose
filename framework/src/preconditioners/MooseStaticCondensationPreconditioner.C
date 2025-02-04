@@ -28,6 +28,7 @@ MooseStaticCondensationPreconditioner::validParams()
   params.suppressParameter<bool>("full");
   params.addParam<std::vector<NonlinearVariableName>>(
       "dont_condense_vars",
+      {},
       "A list of variables for whom to not statically condense their degrees of freedom out of the "
       "system. By default all degrees of freedom on element interiors are condensed out.");
   return params;
