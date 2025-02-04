@@ -21,8 +21,6 @@ k \vec\nabla \times \vec u
 
 ## Example Input File Syntax
 
-!listing irrotational.i
-
 !syntax parameters /Kernels/MFEMMixedScalarCurlKernel
 
 !syntax inputs /Kernels/MFEMMixedScalarCurlKernel
