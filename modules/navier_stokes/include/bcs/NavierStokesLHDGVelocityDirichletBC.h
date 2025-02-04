@@ -18,7 +18,8 @@
  * Weakly imposes Dirichlet boundary conditions for the velocity for a hybridized discretization of
  * the Navier-Stokes equations
  */
-class NavierStokesLHDGVelocityDirichletBC : public IntegratedBC, public NavierStokesLHDGAssemblyHelper
+class NavierStokesLHDGVelocityDirichletBC : public IntegratedBC,
+                                            public NavierStokesLHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
