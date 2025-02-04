@@ -297,8 +297,6 @@ public:
    */
   bool isTaskComplete(const std::string & task) const;
 
-  std::string getFinalTask() { return _final_task; }
-
 protected:
   /**
    * This method auto-builds all Actions that needs to be built and adds them to ActionWarehouse.

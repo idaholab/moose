@@ -1251,7 +1251,8 @@ protected:
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
-  std::string _ready_to_exit;
+  /// Indicates if simulation is ready to exit, and keeps track of which param caused it to exit
+  std::string _early_exit_param;
   /// The exit code
   int _exit_code;
 
