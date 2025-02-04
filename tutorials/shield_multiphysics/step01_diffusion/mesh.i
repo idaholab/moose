@@ -1,36 +1,80 @@
 [Mesh]
   [bulk]
-    type = GeneratedMeshGenerator # Can generate simple lines, rectangles and rectangular prisms
+    type = CartesianMeshGenerator
     dim = 3
-    nx = 30
-    ny = 30
-    nz = 30
-    xmax = 10 # m
-    ymax = 13 # m
-    zmax = 8 # m
-  []
+    dx = '0.5 0.75 0.025 4.0 0.025 0.75 0.5'
+    dy = '0.5 0.3 0.025 7.6 0.025 0.75 0.5'
+    dz = '0.5 0.3 0.025 3.6 0.025 0.3 0.5'
+    ix = '2 3 1 16 1 3 2'
+    iy = '2 1 1 30 1 3 2'
+    iz = '2 1 1 14 1 1 2'
+    subdomain_id = '
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
 
-  [create_inner_water]
-    type = ParsedSubdomainMeshGenerator
-    input = bulk
-    # Create each water wall
-    combinatorial_geometry = '(x > 2 & x < 3 & y > 2 & y < 11 & z > 1 & z < 5) |
-                  (x > 6.5 & x < 7.5 & y > 2 & y < 11 & z > 1 & z < 5) |
-                  (x > 2 & x < 7.5 & y > 2 & y < 3 & z > 1 & z < 5) |
-                  (x > 2 & x < 7.5 & y > 10 & y < 11 & z > 1 & z < 5)'
-    block_id = 2
-  []
+      0 0 0 0 0 0 0
+      0 1 1 1 1 1 0
+      0 2 2 1 2 2 0
+      0 2 2 1 2 2 0
+      0 2 2 2 2 2 0
+      0 2 2 2 2 2 0
+      0 0 0 0 0 0 0
 
+      0 0 0 0 0 0 0
+      0 1 1 1 1 1 0
+      0 2 2 3 2 2 0
+      0 2 2 3 2 2 0
+      0 2 2 2 2 2 0
+      0 2 2 2 2 2 0
+      0 0 0 0 0 0 0
+
+      0 0 0 0 0 0 0
+      0 1 1 1 1 1 0
+      0 2 2 3 2 2 0
+      0 2 2 4 2 2 0
+      0 2 2 2 2 2 0
+      0 2 2 2 2 2 0
+      0 0 0 0 0 0 0
+
+      0 0 0 0 0 0 0
+      0 1 1 1 1 1 0
+      0 2 2 3 2 2 0
+      0 2 2 3 2 2 0
+      0 2 2 2 2 2 0
+      0 2 2 2 2 2 0
+      0 0 0 0 0 0 0
+
+      0 0 0 0 0 0 0
+      0 1 1 1 1 1 0
+      0 1 1 1 1 1 0
+      0 1 1 1 1 1 0
+      0 1 1 1 1 1 0
+      0 1 1 1 1 1 0
+      0 0 0 0 0 0 0
+
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      0 0 0 0 0 0 0
+      '
+  []
   [hollow_concrete]
-    type = ParsedElementDeletionGenerator
-    input = create_inner_water
-    expression = 'x > 3.5 & x < 6.5 & y > 3.5 & y < 9.5 & z > 1 & z < 5'
+    type = BlockDeletionGenerator
+    input = bulk
+    block = 4
   []
-
   [rename_blocks]
     type = RenameBlockGenerator
     input = hollow_concrete
-    old_block = '0 2'
-    new_block = 'concrete water'
+    old_block = '0 1 2 3'
+    new_block = 'concrete_hd concrete water Al'
   []
 []
