@@ -20,7 +20,7 @@ SubChannelCreateProblemAction::validParams()
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Creates the input block that encopasses all the problem parameters");
   params.addRequiredParam<std::string>("type", "Problem type");
-  params.addParam<std::string>("name", "SubChannel Problem", "The name the problem");
+  params.addParam<std::string>("name", "SubChannel Problem", "The name of the problem");
   return params;
 }
 

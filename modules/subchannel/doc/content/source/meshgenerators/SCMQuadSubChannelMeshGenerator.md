@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This kernel creates the mesh were the `SCM` solution variables associated with the subchannels live.
+This mesh generator creates the mesh were the `SCM` solution variables associated with the subchannels live.
 The user needs to provide the number of subchannels [!param](/Mesh/SCMQuadSubChannelMeshGenerator/nx) in the -x direction and [!param](/Mesh/SCMQuadSubChannelMeshGenerator/ny) in the -y direction.
 The number of cells in the -z direction is given by [!param](/Mesh/SCMQuadSubChannelMeshGenerator/n_cells). The distance of the pins from eachother is
 given by the [!param](/Mesh/SCMQuadSubChannelMeshGenerator/pitch) parameter and the total length of the sub-assembly is defined by the parameters:

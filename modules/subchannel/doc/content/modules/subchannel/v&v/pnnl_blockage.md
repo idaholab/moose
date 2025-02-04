@@ -20,7 +20,7 @@ PNL's $7 \times 7$ sleeve blockage facility was designed to investigate the turb
 | Grid spacer loss coefficient (---) | $1.14, 1.14$ |
 | Sleeve blockage location (cm) | $64.135$ (midway between the spacers) |
 
-Sleeve blockages (three inches in length) were positioned on the center nine pins of the bundle. Area reductions, of 70% and 90%, were obtained in the center four subchannels of the bundle. The 70% and 90% blockages corresponded to area reductions of 35% and 45% in the subchannels adjacent to the sides of the cluster and 17% and 22% in the subchannels next to the corners of the blockage, respectively. These area reductions were not intended to define those expected during loss-of-coolant accidents but were chosen to provide a severe test case to verify subchannel computer programs. Axial components of local mean velocity and intensity of turbulence were measured, using a one-velocity component 1aser Doppler anemometer.
+Sleeve blockages (three inches in length) were positioned on the center nine pins of the bundle. Area reductions, of 70% and 90%, were obtained in the center four subchannels of the bundle. The 70% and 90% blockages corresponded to area reductions of 35% and 45% in the subchannels adjacent to the sides of the cluster and 17% and 22% in the subchannels next to the corners of the blockage, respectively. These area reductions were not intended to define those expected during loss-of-coolant accidents but were chosen to provide a severe test case to verify subchannel computer programs. Axial components of local mean velocity and intensity of turbulence were measured, using a one-velocity component laser Doppler anemometer.
 
 ## Results
 

@@ -14,7 +14,8 @@ Local fluid velocity and temperature measurements in the mixed (combined free an
 Velocity data were recorded at selected points along the central subchannel axial centerlines (centerpoints) for the transient flow cases.  Cases 5, 9 and 13 where chosen to test the SCM code. For the transient case 5, the location of the experimental measurements is the center of subchannel 4. The nominal run conditions for these cases are shown in Table [parameters].
 
 !table id=parameters caption=Operational parameters for PNNL 2X6-pin benchmark.
-| Case number | Initial Flow $[GPM]$  | Final Flow $[GPM]$ | time $[sec]$ |Power Gradient| $Q_H [kW/pin]$| $Q_L [kW/pin]$ | Re {initial/final} |
+| Case number | Initial Flow $[GPM]$  | Final Flow $[GPM]$ | time $[sec]$ | Power Gradient
+|$Q_H [kW/pin]$ | $Q_L [kW/pin]$ | Re {initial/final} |
 | :- | :- | :- | :- | :- | :- | :- | :- | :- |
 | $5$ | $3.08$ | $1.08$ | $150$ | $0:0$ | $0.0$ | $0.0$ | $1200/420$ |
 | $9$ | $3.08$ | $3.08$ | S.S | $1:0$ | $0.91$ | $0.0$ | $1290/1290$ |
@@ -59,9 +60,9 @@ The SCM results vs the experimental measurements are shown in Figures [buoyancy9
     id=coast_down
     caption=  Linear flow coast down
 
-The code predicted average values in all three cases are lower than the measured experimental values. That's because the experimental results are point-wise instantaneous velocity measurements while the SCM results are the surface averaged velocities in each subchannel.
+The code predicted average values in all three cases are lower than the measured experimental values. That's because the experimental results are pointwise instantaneous velocity measurements while the SCM results are the surface-averaged velocities in each subchannel.
 
-The experimental maximum values measured at the subchannel centers are less than the analytically predicted value of $U_{max} = 2 \times U_{average}$ for laminar flow inside a circular pipe. Where a good prediction for $U_{average}$ would be the SCM calculation.  This happens because of turbulence (modeled in SCM with closure models) which tends to flatten the velocity profiles. In turbulent flows momentum is transferred towards the wall regions, hence the maximum velocity in a turbulent profile is less than that in the laminar case.
+The experimental maximum values measured at the subchannel centers are less than the analytically predicted value of $U_{max} = 2 \times U_{average}$ for laminar flow inside a circular pipe. Where $U_{average}$ is the surface average of the flow profile which is what SCM calculates.  This happens because of turbulence (modeled in SCM with closure models) which tends to flatten the velocity profiles. In turbulent flows momentum is transferred towards the wall regions, hence the maximum velocity in a turbulent profile is less than that in the laminar case.
 
 Furthermore, when the power ratio is reduced (case 13 vs case 9), the velocity profile gets more flat. The code prediction follows that trend. Buoyancy effects are more pronounced when there are more extreme gradients in heat rate in the radial direction.
 

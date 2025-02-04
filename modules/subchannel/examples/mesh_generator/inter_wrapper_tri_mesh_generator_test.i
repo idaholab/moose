@@ -1,5 +1,4 @@
 T_in = 360.0
-mass_flux_in = '${fparse 1e+4 * 17.0 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [TriInterWrapperMesh]
@@ -117,7 +116,6 @@ P_out = 4.923e6 # Pa
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
-  enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = false

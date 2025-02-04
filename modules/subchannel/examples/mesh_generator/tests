@@ -1,7 +1,19 @@
 [Tests]
-  [check_syntax]
+  [check_syntax_psbt]
     type = 'RunApp'
-    input = 'psbt_test_mesh_generator.i'
+    input = 'psbt_mesh_generator_test.i'
+    check_input = true
+    max_parallel = 1
+  []
+  [check_syntax_quad_interwrapper]
+    type = 'RunApp'
+    input = 'inter_wrapper_mesh_generator_test.i'
+    check_input = true
+    max_parallel = 1
+  []
+  [check_syntax_tri_interwrapper]
+    type = 'RunApp'
+    input = 'inter_wrapper_tri_mesh_generator_test.i'
     check_input = true
     max_parallel = 1
   []

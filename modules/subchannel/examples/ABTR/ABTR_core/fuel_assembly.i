@@ -1,5 +1,5 @@
 # Following Advanced Burner Test Reactor Preconceptual Design Report
-# Vailable at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.pdf
+# Available at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.pdf
 ###################################################
 # Thermal-hydraulics parameters
 ###################################################

@@ -74,7 +74,6 @@ P_out = 4.923e6 # Pa
   segregated = true
   staggered_pressure = false
   monolithic_thermal = false
-  discretization = "central_difference"
 []
 
 [ICs]
@@ -184,8 +183,7 @@ P_out = 4.923e6 # Pa
 [Transfers]
   [xfer]
     type = InterWrapperSolutionTransfer
-    multi_app = viz
-    direction = to_multiapp
+    to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []

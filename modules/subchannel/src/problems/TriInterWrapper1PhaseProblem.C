@@ -166,15 +166,12 @@ TriInterWrapper1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
 void
 TriInterWrapper1PhaseProblem::enforceUniformDPDZAtInlet()
 {
-  _console
-      << "Edit mass flow boundary condition in order to have uniform Pressure drop at the inlet\n";
   auto total_mass_flow = 0.0;
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
     total_mass_flow += (*_mdot_soln)(node_in);
   }
-  _console << "Total mass flow :" << total_mass_flow << " [kg/sec] \n";
   // Define vectors of pressure drop and massflow
   Eigen::VectorXd dPdZ_i(_subchannel_mesh.getNumOfChannels());
   Eigen::VectorXd mass_flow_i(_subchannel_mesh.getNumOfChannels());
@@ -224,7 +221,6 @@ TriInterWrapper1PhaseProblem::enforceUniformDPDZAtInlet()
     auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
     _mdot_soln->set(node, mass_flow_i(i_ch));
   }
-  _console << "Done applying mass flow boundary condition\n";
 }
 
 void
@@ -239,7 +235,7 @@ TriInterWrapper1PhaseProblem::computeInletMassFlowDist()
   Eigen::VectorXd dpz(_subchannel_mesh.getNumOfChannels());
   // inlet mass flow rate
   Eigen::VectorXd mass_flow_i(_subchannel_mesh.getNumOfChannels());
-  // inlet mass flow flux
+  // inlet mass flux
   Eigen::VectorXd mass_flux_i(_subchannel_mesh.getNumOfChannels());
   // new/corrected mass flux
   Eigen::VectorXd g_new(_subchannel_mesh.getNumOfChannels());
@@ -247,9 +243,9 @@ TriInterWrapper1PhaseProblem::computeInletMassFlowDist()
   Eigen::VectorXd Si(_subchannel_mesh.getNumOfChannels());
   // total number of subchannels
   auto tot_chan = _subchannel_mesh.getNumOfChannels();
-  // average pressure
+  // average pressure drop
   auto dpz_ave = 0.0;
-  // summmation for the pressure drop over all subchannels
+  // summation for the pressure drop over all subchannels
   auto dpzsum = 0.0;
   // new total mass flow rate - used for correction
   auto mass_flow_new_tot = 0.0;
@@ -269,7 +265,7 @@ TriInterWrapper1PhaseProblem::computeInletMassFlowDist()
     if (dpz(i_ch) <= 0.0)
     {
       mooseError(
-          name(), " Computed presurre drop at the following subchannel is less than zero. ", i_ch);
+          name(), " Computed pressure drop at the following subchannel is less than zero. ", i_ch);
     }
     dpzsum = dpzsum + dpz(i_ch);
     mass_flow = mass_flow + mass_flow_i(i_ch);
@@ -404,8 +400,6 @@ TriInterWrapper1PhaseProblem::computeh(int iblock)
         sumWijPrimeDhij += _WijPrime(i_gap, iz) * (2 * (*_h_soln)(node_in) - (*_h_soln)(node_in_j) -
                                                    (*_h_soln)(node_in_i));
         counter++;
-
-        // compute the radial heat conduction through the gaps
 
         // compute the radial heat conduction through gaps
         auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
@@ -600,6 +594,4 @@ TriInterWrapper1PhaseProblem::externalSolve()
   _console << "Mass in: " << mass_flow_in << " kg/sec" << std::endl;
   _console << "Mass out: " << mass_flow_out << " kg/sec" << std::endl;
   _console << " ======================================= " << std::endl;
-
-  _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
 }

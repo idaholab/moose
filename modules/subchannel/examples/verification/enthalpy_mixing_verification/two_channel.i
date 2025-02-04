@@ -124,26 +124,23 @@ P_out = 155e+5 # Pa
 
 [Outputs]
   exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
+  csv = true
+[]
+
+[Postprocessors]
+  [Temp_1]
+    type = SubChannelPointValue
     variable = T
-    execute_on = final
-    file_base = "Temp_Out.txt"
+    index = 0
+    execute_on = 'initial timestep_end'
     height = 10.0
   []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_Out.txt"
+  [Temp_2]
+    type = SubChannelPointValue
+    variable = T
+    index = 1
+    execute_on = 'initial timestep_end'
     height = 10.0
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_In.txt"
-    height = 0.0
   []
 []
 
