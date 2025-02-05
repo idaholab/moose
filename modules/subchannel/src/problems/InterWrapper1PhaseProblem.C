@@ -55,6 +55,7 @@ formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
 InputParameters
 InterWrapper1PhaseProblem::validParams()
 {
+  MooseEnum schemes("upwind downwind central_difference peclet", "upwind");
   InputParameters params = ExternalProblem::validParams();
   params.addClassDescription("Base class of the interwrapper solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
@@ -68,8 +69,8 @@ InterWrapper1PhaseProblem::validParams()
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
-  params.addParam<std::string>(
-      "interpolation_scheme", "central_difference", "Interpolation scheme used for the method.");
+  params.addParam<MooseEnum>(
+      "interpolation_scheme", schemes, "Interpolation scheme used for the method.");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -113,7 +114,7 @@ InterWrapper1PhaseProblem::InterWrapper1PhaseProblem(const InputParameters & par
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
-    _interpolation_scheme(getParam<std::string>("interpolation_scheme")),
+    _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
@@ -307,34 +308,38 @@ InterWrapper1PhaseProblem::solverSystemConverged(const unsigned int)
 }
 
 PetscScalar
-InterWrapper1PhaseProblem::computeInterpolationCoefficients(const std::string interp_type,
-                                                            PetscScalar Peclet)
+InterWrapper1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
 {
-  if (interp_type.compare("upwind") != 0)
+  if (_interpolation_scheme == "upwind")
   {
     return 1.0;
   }
-  else if (interp_type.compare("downwind") != 0)
+  else if (_interpolation_scheme == "downwind")
   {
     return 0.0;
   }
-  else if (interp_type.compare("central_difference") != 0)
+  else if (_interpolation_scheme == "central_difference")
   {
     return 0.5;
   }
-  else
+  else if (_interpolation_scheme == "peclet")
   {
     return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
+  }
+  else
+  {
+    // Handle unexpected interpolation types
+    mooseError(name(), "Unknown interpolation type: ");
+    return -1.0; // or some other appropriate default/error value
   }
 }
 
 PetscScalar
 InterWrapper1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
                                                     PetscScalar botValue,
-                                                    const std::string interp_type,
-                                                    PetscScalar Peclet = 0.5)
+                                                    PetscScalar Peclet)
 {
-  PetscScalar alpha = computeInterpolationCoefficients(interp_type, Peclet);
+  PetscScalar alpha = computeInterpolationCoefficients(Peclet);
   return alpha * botValue + (1.0 - alpha) * topValue;
 }
 
@@ -879,28 +884,27 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
 
         // interpolation weight coefficient
         PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("central_difference", Pe);
+        auto alpha = computeInterpolationCoefficients(Pe);
 
         // inlet, outlet, and interpolated density
         auto rho_in = (*_rho_soln)(node_in);
         auto rho_out = (*_rho_soln)(node_out);
-        auto rho_interp = computeInterpolatedValue(rho_out, rho_in, "central_difference");
+        auto rho_interp = computeInterpolatedValue(rho_out, rho_in, Pe);
 
         // inlet, outlet, and interpolated viscosity
         auto mu_in = (*_mu_soln)(node_in);
         auto mu_out = (*_mu_soln)(node_out);
-        auto mu_interp = computeInterpolatedValue(mu_out, mu_in, "central_difference");
+        auto mu_interp = computeInterpolatedValue(mu_out, mu_in, Pe);
 
         // inlet, outlet, and interpolated axial surface area
         auto S_in = (*_S_flow_soln)(node_in);
         auto S_out = (*_S_flow_soln)(node_out);
-        auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
+        auto S_interp = computeInterpolatedValue(S_out, S_in, Pe);
 
         // inlet, outlet, and interpolated wetted perimeter
         auto w_perim_in = (*_w_perim_soln)(node_in);
         auto w_perim_out = (*_w_perim_soln)(node_out);
-        auto w_perim_interp =
-            computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference");
+        auto w_perim_interp = computeInterpolatedValue(w_perim_out, w_perim_in, Pe);
 
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S_interp / w_perim_interp;
@@ -930,8 +934,8 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
             _amc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
         // Adding RHS elements
-        PetscScalar mdot_old_interp = computeInterpolatedValue(
-            _mdot_soln->old(node_out), _mdot_soln->old(node_in), "central_difference", Pe);
+        PetscScalar mdot_old_interp =
+            computeInterpolatedValue(_mdot_soln->old(node_out), _mdot_soln->old(node_in), Pe);
         PetscScalar value_vec_tt = _TR * mdot_old_interp * dz / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(
@@ -973,14 +977,14 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
           auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
           auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
           auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-          auto rho_i = computeInterpolatedValue(
-              (*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), "central_difference", Pe);
-          auto rho_j = computeInterpolatedValue(
-              (*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), "central_difference", Pe);
-          auto S_i = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), "central_difference", Pe);
-          auto S_j = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), "central_difference", Pe);
+          auto rho_i =
+              computeInterpolatedValue((*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), Pe);
+          auto rho_j =
+              computeInterpolatedValue((*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), Pe);
+          auto S_i =
+              computeInterpolatedValue((*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), Pe);
+          auto S_j =
+              computeInterpolatedValue((*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), Pe);
           auto u_star = 0.0;
           // figure out donor axial velocity
           if (_Wij(i_gap, cross_index) > 0.0)
@@ -1104,12 +1108,11 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
         }
 
         /// Friction term
-        PetscScalar mdot_interp = computeInterpolatedValue(
-            (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", Pe);
+        PetscScalar mdot_interp =
+            computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
         auto fi = computeFrictionFactor(Re);
-        auto ki = computeInterpolatedValue(
-            k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", Pe);
+        auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], Pe);
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
@@ -1211,7 +1214,7 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
+          auto S_interp = computeInterpolatedValue(S_out, S_in);
 
           // Setting solutions
           if (S_interp != 0)
@@ -1266,7 +1269,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
           // We will need to update this later if we allow non-uniform refinements in the axial
           // direction
           PetscScalar Pe = 0.5;
-          auto alpha = computeInterpolationCoefficients("central_difference", Pe);
+          auto alpha = computeInterpolationCoefficients(Pe);
           if (iz == last_node)
           {
             _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out) / 2.0);
@@ -1298,7 +1301,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
+          auto S_interp = computeInterpolatedValue(S_out, S_in);
 
           // Creating matrix of coefficients
           PetscInt row = i_ch + _n_channels * iz_ind;
@@ -1381,7 +1384,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
+          auto S_interp = computeInterpolatedValue(S_out, S_in);
 
           // Creating matrix of coefficients
           PetscInt row = i_ch + _n_channels * iz_ind;
@@ -1414,7 +1417,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
             {
               auto dp_in = (*_DP_soln)(node_in);
               auto dp_out = (*_DP_soln)(node_out);
-              auto dp_interp = computeInterpolatedValue(dp_out, dp_in, "central_difference");
+              auto dp_interp = computeInterpolatedValue(dp_out, dp_in);
               PetscScalar value_v = -1.0 * dp_interp * S_interp;
               PetscInt row_v = i_ch + _n_channels * iz_ind;
               LibmeshPetscCall(
@@ -1596,7 +1599,7 @@ InterWrapper1PhaseProblem::computeh(int iblock)
 
         // interpolation weight coefficient
         PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("central_difference", Pe);
+        auto alpha = computeInterpolationCoefficients(Pe);
 
         /// Time derivative term
         if (iz == first_node)
@@ -1624,10 +1627,10 @@ InterWrapper1PhaseProblem::computeh(int iblock)
             _hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
         // Adding RHS elements
-        PetscScalar rho_old_interp = computeInterpolatedValue(
-            _rho_soln->old(node_out), _rho_soln->old(node_in), "central_difference", Pe);
-        PetscScalar h_old_interp = computeInterpolatedValue(
-            _h_soln->old(node_out), _h_soln->old(node_in), "central_difference", Pe);
+        PetscScalar rho_old_interp =
+            computeInterpolatedValue(_rho_soln->old(node_out), _rho_soln->old(node_in), Pe);
+        PetscScalar h_old_interp =
+            computeInterpolatedValue(_h_soln->old(node_out), _h_soln->old(node_in), Pe);
 
         PetscScalar value_vec_tt = _TR * rho_old_interp * h_old_interp * volume / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
@@ -2039,10 +2042,10 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
         // inlet, outlet, and interpolated densities
         auto rho_i_in = (*_rho_soln)(node_in_i);
         auto rho_i_out = (*_rho_soln)(node_out_i);
-        auto rho_i_interp = computeInterpolatedValue(rho_i_out, rho_i_in, "central_difference");
+        auto rho_i_interp = computeInterpolatedValue(rho_i_out, rho_i_in);
         auto rho_j_in = (*_rho_soln)(node_in_j);
         auto rho_j_out = (*_rho_soln)(node_out_j);
-        auto rho_j_interp = computeInterpolatedValue(rho_j_out, rho_j_in, "central_difference");
+        auto rho_j_interp = computeInterpolatedValue(rho_j_out, rho_j_in);
 
         // inlet, outlet, and interpolated areas
         auto S_i_in = (*_S_flow_soln)(node_in_i);
@@ -2076,7 +2079,7 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
 
         // Assembling inertial term
         PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("upwind", Pe);
+        auto alpha = 0.0; // hard code downwind;
         auto mass_term_out = (*_mdot_soln)(node_out_i) / S_i_out / rho_i_out +
                              (*_mdot_soln)(node_out_j) / S_j_out / rho_j_out;
         auto mass_term_in = (*_mdot_soln)(node_in_i) / S_i_in / rho_i_in +
@@ -2143,7 +2146,7 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
             _cmc_friction_force_mat, 1, &row_ff, 1, &col_ff, &value_ff, INSERT_VALUES));
 
         // Assembling pressure force
-        alpha = computeInterpolationCoefficients("central_difference", Pe);
+        alpha = computeInterpolationCoefficients(Pe);
 
         if (!_staggered_pressure_bool)
         {
