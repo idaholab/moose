@@ -85,6 +85,6 @@
     expect_err = "Incompatible command line arguments provided. --check-input cannot be called with --mesh-only."
     method = '!dbg'
     issues = '#29788'
-    requirement = 'The system shall throw an error if the user specifies incompatible command line arguments that would cause a segfault.'
+    requirement = 'The system shall throw an error if the user specifies incompatible command line arguments that would access an uninitialized executor or executor.'
   []
 []

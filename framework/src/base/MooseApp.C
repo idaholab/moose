@@ -1110,7 +1110,7 @@ MooseApp::runInputFile()
 {
   TIME_SECTION("runInputFile", 3);
 
-  // If ready to exit has been set, then just return
+  // If early exit param has been set, then just return
   if (!_early_exit_param.empty())
     return;
 
@@ -1144,18 +1144,16 @@ MooseApp::errorCheck()
   {
     if (!_early_exit_param.empty())
     {
-      if (_check_input)
-        mooseError(
-            "Incompatible command line arguments provided. --check-input cannot be called with ",
-            _early_exit_param,
-            ".");
-      else
-        mooseError("We should never get here!");
+      mooseAssert(_check_input,
+                  "Something went wrong, we should only get here if _check_input is true.");
+      mooseError(
+          "Incompatible command line arguments provided. --check-input cannot be called with ",
+          _early_exit_param,
+          ".");
     }
-    else
-      mooseError("The Executor is being called without being initialized. This is likely "
-                 "caused by "
-                 "incompatible command line arguments");
+    mooseError("The Executor is being called without being initialized. This is likely "
+               "caused by "
+               "incompatible command line arguments");
   }
 
   auto apps = feProblem().getMultiAppWarehouse().getObjects();
@@ -1552,7 +1550,7 @@ MooseApp::run()
 
   if (showInputs() || copyInputs() || runInputs())
   {
-    _early_exit_param = "true";
+    _early_exit_param = "--show-input, --copy-inputs, or --run";
     return;
   }
 
