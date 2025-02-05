@@ -66,6 +66,9 @@ protected:
   const unsigned int _num_steps_in_period;
   const Real _smoother;
 
+  std::vector<Real> _maximum_actions;
+  std::vector<Real> _minimum_actions;
+
 };
 
 #endif
