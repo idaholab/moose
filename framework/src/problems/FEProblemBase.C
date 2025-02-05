@@ -6271,6 +6271,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   if (_displaced_problem)
     _displaced_problem->clearAllDofIndices();
 
+  // Setup the output system for printing linear/nonlinear iteration information and some solver
+  // settings, including setting matrix prefixes. This must occur before petscSetOptions
+  initPetscOutputAndSomeSolverSettings();
+
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   Moose::PetscSupport::petscSetOptions(
       _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
@@ -6292,10 +6296,6 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
   // Do not worry, DM setup is very cheap
   _current_nl_sys->setupDM();
-
-  // Setup the output system for printing linear/nonlinear iteration information and some solver
-  // settings
-  initPetscOutputAndSomeSolverSettings();
 
   possiblyRebuildGeomSearchPatches();
 
