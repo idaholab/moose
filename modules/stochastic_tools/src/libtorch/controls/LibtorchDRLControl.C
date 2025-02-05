@@ -30,6 +30,8 @@ LibtorchDRLControl::validParams()
 
   params.addParam<unsigned int>("num_stems_in_period", 1, "Blabla");
   params.addParam<Real>("smoother", 1.0, "Blabla");
+  params.addParam<std::vector<Real>>("maximum_actions", {}, "The maximum actions");
+  params.addParam<std::vector<Real>>("minimum_actions", {}, "The minimum actions");
 
   return params;
 }
@@ -42,7 +44,9 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _current_smoothed_signal(std::vector<Real>(_control_names.size(), 0.0)),
     _call_counter(0),
     _num_steps_in_period(getParam<unsigned int>("num_stems_in_period")),
-    _smoother(getParam<Real>("smoother"))
+    _smoother(getParam<Real>("smoother")),
+    _maximum_actions(isParamSetByUser("maximum_actions") ? getParam<std::vector<Real>>("maximum_actions") : std::vector<Real>(_control_names.size(), std::numeric_limits<Real>::max())),
+    _minimum_actions(isParamSetByUser("minimum_actions") ? getParam<std::vector<Real>>("minimum_actions") : std::vector<Real>(_control_names.size(), -std::numeric_limits<Real>::max()))
 
 {
   if (_control_names.size() != _action_std.size())
@@ -59,6 +63,18 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   _std = torch::eye(_control_names.size());
   for (unsigned int i = 0; i < _control_names.size(); ++i)
     _std[i][i] = _action_std[i];
+
+  if (isParamSetByUser("maximum_actions"))
+  {
+    for (const auto i : index_range(_maximum_actions))
+      _maximum_actions[i] = _maximum_actions[i]/_action_scaling_factors[i];
+  }
+
+  if (isParamSetByUser("minimum_actions"))
+  {
+    for (const auto i : index_range(_minimum_actions))
+      _minimum_actions[i] = _minimum_actions[i]/_action_scaling_factors[i];
+  }
 }
 
 void
@@ -90,26 +106,19 @@ LibtorchDRLControl::execute()
       // Evaluate the neural network to get the expected control value
       torch::Tensor output_tensor = _nn->forward(input_tensor);
 
-<<<<<<< HEAD
-    // std::cout << "Input " << input_tensor << std::endl;
-    // std::cout << "Output " << output_tensor << std::endl;
+      // std::cout << "Input " << input_tensor << std::endl;
+      // std::cout << "Output " << output_tensor << std::endl;
 
-    // Sample control value (action) from Gaussian distribution
-    torch::Tensor action = at::normal(output_tensor, _std);
-
-    // std::cout << "Action " << action << std::endl;
-
-    // Compute log probability
-    torch::Tensor log_probability = computeLogProbability(action, output_tensor);
-=======
       // Sample control value (action) from Gaussian distribution
       torch::Tensor action = at::normal(output_tensor, _std);
 
       // Compute log probability
       torch::Tensor log_probability = computeLogProbability(action, output_tensor);
->>>>>>> 4b5d311c80 (Add option for smoothing signal.)
 
       _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
+
+      for (const auto i : index_range(_current_control_signals))
+        _current_control_signals[i] = std::min(std::max(_current_control_signals[i], _minimum_actions[i]), _maximum_actions[i]);
 
       _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
                                                  log_probability.data_ptr<Real>() +
@@ -124,11 +133,8 @@ LibtorchDRLControl::execute()
       _current_smoothed_signal[i] = _previous_control_signal[i] + _smoother*(_current_control_signals[i] - _previous_control_signal[i]);
 
 
-<<<<<<< HEAD
     // std::cout << "Setting control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
     // std::cout << "Setting log probability to: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
-=======
->>>>>>> 4b5d311c80 (Add option for smoothing signal.)
 
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
