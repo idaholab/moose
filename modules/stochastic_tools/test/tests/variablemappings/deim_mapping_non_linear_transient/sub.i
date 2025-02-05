@@ -1,12 +1,12 @@
-S = 9
-D = 5
+S = 20
+D = 20
 
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 25
-    ny = 25
+    nx = 250
+    ny = 250
   []
 
 []
@@ -80,7 +80,7 @@ D = 5
   [residual_storage]
     type = ResidualContainer
     tag_name = 'total'
-    execute_on = 'TIMESTEP_BEGIN   NONLINEAR_CONVERGENCE TIMESTEP_END'
+    execute_on = 'TIMESTEP_BEGIN  NONLINEAR_CONVERGENCE TIMESTEP_END'
   []
   [jacobian_storage]
     type = JacobianContainer
@@ -88,17 +88,16 @@ D = 5
     jac_indices_reporter_name = indices
     execute_on = ' NONLINEAR_CONVERGENCE TIMESTEP_END'
     execution_order_group = 1
-    # force_postaux = true
   []
 []
 
 [Outputs]
   console = true
-  exodus = true
-  # [perf]
-  #   type = PerfGraphOutput
-  #   level = 3
-  # []
+  # exodus = true
+  [perf]
+    type = PerfGraphOutput
+    level = 3
+  []
 []
 
 [Problem]

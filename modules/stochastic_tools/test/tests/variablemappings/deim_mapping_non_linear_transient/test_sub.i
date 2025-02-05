@@ -1,12 +1,12 @@
-S = 9
-D = 5
+S = 20
+D = 20
 
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 25
-    ny = 25
+    nx = 250
+    ny = 250
   []
 
 []
@@ -82,11 +82,16 @@ D = 5
     type = InverseRB
     mapping = rb_mapping
     execute_on = 'INITIAL TIMESTEP_END'
-    relaxation_factor = 0.5
-    max_iter = 10
+    relaxation_factor = 0.25
+    max_iter = 20
   []
 []
 
 [Outputs]
-  exodus = true
+  console = true
+  # exodus = true
+  [perf]
+    type = PerfGraphOutput
+    level = 3
+  []
 []

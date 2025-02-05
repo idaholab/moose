@@ -5,12 +5,12 @@
   [S_dist]
     type = Uniform
     lower_bound = 0.1
-    upper_bound = 10
+    upper_bound = 30
   []
   [D_dist]
     type = Uniform
     lower_bound = 0.1
-    upper_bound = 10
+    upper_bound = 30
   []
 
 []
@@ -32,6 +32,7 @@
     solution_storage = parallel_storage
     variables = 'solution residual jacobian'
     num_modes_to_compute = '100 20 30'
+    energy_threshold = '0.00001 0.00001 0.00001'
     extra_slepc_options = "-svd_monitor_all"
     jac_index_name = 'jacobian_storage/indices'
   []
