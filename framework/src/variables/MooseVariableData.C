@@ -426,12 +426,12 @@ template <bool monomial>
 void
 MooseVariableData<OutputType>::computeValuesInternal()
 {
-  const unsigned int num_dofs = _dof_indices.size();
+  const auto num_dofs = _dof_indices.size();
   if (num_dofs > 0)
     fetchDoFValues();
 
   const bool is_transient = _subproblem.isTransient();
-  const unsigned int nqp = _current_qrule->n_points();
+  const auto nqp = _current_qrule->n_points();
   auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
   // Map grad_phi using Eigen so that we can perform array operations easier
@@ -440,10 +440,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_qrule == _current_qrule)
     {
       _mapped_grad_phi.resize(num_dofs);
-      for (unsigned int i = 0; i < num_dofs; i++)
+      for (const auto i : make_range(num_dofs))
       {
         _mapped_grad_phi[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
-        for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto qp : make_range(nqp))
           // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
           new (&_mapped_grad_phi[i][qp])
               Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
@@ -452,10 +452,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
     else
     {
       _mapped_grad_phi_face.resize(num_dofs);
-      for (unsigned int i = 0; i < num_dofs; i++)
+      for (const auto i : make_range(num_dofs))
       {
         _mapped_grad_phi_face[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
-        for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto qp : make_range(nqp))
           // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
           new (&_mapped_grad_phi_face[i][qp])
               Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
@@ -490,11 +490,11 @@ MooseVariableData<OutputType>::computeValuesInternal()
 
     // Deduce type of value within dest MooseArray
     using dest_array_type = typename std::remove_reference_t<decltype(dest)>::value_type;
-    constexpr bool is_output = std::is_same_v<dest_array_type, OutputType>;
+    constexpr bool is_value = std::is_same_v<dest_array_type, OutputType>;
     constexpr bool is_gradient = std::is_same_v<dest_array_type, OutputGradient>;
     constexpr bool is_second = std::is_same_v<dest_array_type, OutputSecond>;
     constexpr bool is_divergence = std::is_same_v<dest_array_type, OutputDivergence>;
-    static_assert(is_output || is_gradient || is_second || is_divergence,
+    static_assert(is_value || is_gradient || is_second || is_divergence,
                   "Unsupported destination array type");
 
     // Sets a value to zero at a quadrature point
@@ -507,7 +507,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
         dest[qp] = 0;
       else if constexpr (is_eigen)
       {
-        if constexpr (is_output)
+        if constexpr (is_value)
           dest[qp].setZero(this->_count);
         else if constexpr (is_gradient)
           dest[qp].setZero(this->_count, LIBMESH_DIM);
@@ -523,9 +523,9 @@ MooseVariableData<OutputType>::computeValuesInternal()
     // Accumulates a value
     const auto accumulate = [&dest, &phi, &dof_values](const auto i, const auto qp)
     {
-      if constexpr (is_real || is_real_vector || (is_eigen && is_output))
+      if constexpr (is_real || is_real_vector || (is_eigen && is_value))
       {
-        if constexpr (is_output || is_divergence)
+        if constexpr (is_value || is_divergence)
           dest[qp] += phi[i][qp] * dof_values[i];
         else if constexpr (is_gradient || is_second)
           dest[qp].add_scaled(phi[i][qp], dof_values[i]);
@@ -542,7 +542,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
         else if constexpr (is_second)
         {
           for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
-            for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
+            for (const auto d2 : make_range(Moose::dim))
               dest[qp].col(d++) += phi[i][qp](d1, d2) * dof_values[i];
         }
         else
@@ -682,51 +682,51 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
   _ad_dof_values.resize(num_dofs);
-  for (unsigned int i = 0; i < num_dofs; i++)
+  for (const auto i : make_range(num_dofs))
     _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
   // NOTE!  You have to do this AFTER setting the value!
   if (do_derivatives)
-    for (unsigned int i = 0; i < num_dofs; i++)
+    for (const auto i : make_range(num_dofs))
       Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
 
   if (_need_ad_u)
   {
     _ad_u.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
       _ad_u[qp] = _ad_zero;
 
-    for (unsigned int i = 0; i < num_dofs; i++)
-      for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto i : make_range(num_dofs))
+      for (const auto qp : make_range(nqp))
         _ad_u[qp] += _ad_dof_values[i] * (*_current_phi)[i][qp];
   }
 
   if (_need_ad_grad_u)
   {
     _ad_grad_u.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
       _ad_grad_u[qp] = _ad_zero;
 
     // The latter check here is for handling the fact that we have not yet implemented
     // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
     // situation we need to default to using the non-ad grad_phi
     if (_displaced && _current_ad_grad_phi)
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_ad_grad_phi)[i][qp];
     else
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_grad_phi)[i][qp];
   }
 
   if (_need_ad_second_u)
   {
     _ad_second_u.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
       _ad_second_u[qp] = _ad_zero;
 
-    for (unsigned int i = 0; i < num_dofs; i++)
-      for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto i : make_range(num_dofs))
+      for (const auto qp : make_range(nqp))
         // Note that this will not carry any derivatives with respect to displacements because
         // those calculations have not yet been implemented in Assembly
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
@@ -741,28 +741,28 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       if (_need_ad_u_dotdot)
         _ad_dofs_dotdot.resize(num_dofs);
       _ad_u_dot.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto qp : make_range(nqp))
         _ad_u_dot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
       {
-        for (unsigned int i = 0; i < num_dofs; i++)
+        for (const auto i : make_range(num_dofs))
           _ad_dofs_dot[i] = _ad_dof_values[i];
-        for (unsigned int i = 0; i < num_dofs; i++)
+        for (const auto i : make_range(num_dofs))
           _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
                                                      _dof_indices[i],
                                                      _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
                                                                        : _ad_real_dummy);
 
-        for (unsigned int i = 0; i < num_dofs; i++)
-          for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto i : make_range(num_dofs))
+          for (const auto qp : make_range(nqp))
             _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
       }
       else if (!_time_integrator)
       {
-        for (unsigned int i = 0; i < num_dofs; i++)
+        for (const auto i : make_range(num_dofs))
           _ad_dofs_dot[i] = _dof_values_dot[i];
-        for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto qp : make_range(nqp))
           _ad_u_dot[qp] = _u_dot[qp];
       }
     }
@@ -770,22 +770,22 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dotdot)
     {
       _ad_u_dotdot.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto qp : make_range(nqp))
         _ad_u_dotdot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
-        for (unsigned int i = 0; i < num_dofs; i++)
-          for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto i : make_range(num_dofs))
+          for (const auto qp : make_range(nqp))
             _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
       else if (!_time_integrator)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto qp : make_range(nqp))
           _ad_u_dotdot[qp] = _u_dotdot[qp];
     }
 
     if (_need_ad_grad_u_dot)
     {
       _ad_grad_u_dot.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto qp : make_range(nqp))
         _ad_grad_u_dot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
@@ -794,16 +794,16 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
         // situation we need to default to using the non-ad grad_phi
         if (_displaced && _current_ad_grad_phi)
-          for (unsigned int i = 0; i < num_dofs; i++)
-            for (unsigned int qp = 0; qp < nqp; qp++)
+          for (const auto i : make_range(num_dofs))
+            for (const auto qp : make_range(nqp))
               _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
         else
-          for (unsigned int i = 0; i < num_dofs; i++)
-            for (unsigned int qp = 0; qp < nqp; qp++)
+          for (const auto i : make_range(num_dofs))
+            for (const auto qp : make_range(nqp))
               _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
       }
       else if (!_time_integrator)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+        for (const auto qp : make_range(nqp))
           _ad_grad_u_dot[qp] = _grad_u_dot[qp];
     }
   }
@@ -828,10 +828,10 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
   auto & u = _vector_tag_u[_solution_tag];
   const auto nqps = u.size();
   const auto ndofs = dof_values.size();
-  for (unsigned int qp = 0; qp < nqps; qp++)
+  for (const auto qp : make_range(nqps))
     u[qp] *= 0.;
-  for (unsigned int qp = 0; qp < nqps; qp++)
-    for (unsigned int i = 0; i < ndofs; i++)
+  for (const auto qp : make_range(nqps))
+    for (const auto i : make_range(ndofs))
       u[qp] += (*_phi)[i][qp] * dof_values[i];
 }
 
@@ -848,10 +848,10 @@ MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & valu
   auto & u = _vector_tag_u[_solution_tag];
   const auto nqps = u.size();
   const auto ndofs = dof_values.size();
-  for (unsigned int qp = 0; qp < nqps; qp++)
+  for (const auto qp : make_range(nqps))
     u[qp] *= 0.;
-  for (unsigned int qp = 0; qp < nqps; qp++)
-    for (unsigned int i = 0; i < ndofs; i++)
+  for (const auto qp : make_range(nqps))
+    for (const auto i : make_range(ndofs))
       u[qp] += (*_phi)[i][qp] * dof_values[i];
 }
 
@@ -1030,7 +1030,7 @@ MooseVariableData<RealEigenVector>::addSolution(NumericVector<Number> & sol,
   {
     const auto num_dofs = _dof_indices.size();
     unsigned int inc = (isNodal() ? j : j * num_dofs);
-    for (unsigned int i = 0; i < num_dofs; ++i)
+    for (const auto i : make_range(num_dofs))
       sol.add(_dof_indices[i] + inc, v(p++));
   }
 }
@@ -1122,7 +1122,7 @@ MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number>
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
     _increment[qp] = 0.;
-    for (unsigned int i = 0; i < num_dofs; i++)
+    for (const auto i : make_range(num_dofs))
       _increment[qp] += (*_phi)[i][qp] * increment_vec(_dof_indices[i]);
   }
 }
@@ -1192,7 +1192,7 @@ MooseVariableData<RealEigenVector>::computeIncrementAtNode(
   {
     unsigned int n = 0;
     const auto n_dof_indices = _dof_indices.size();
-    for (unsigned int j = 0; j < _count; j++)
+    for (const auto j : make_range(_count))
     {
       _increment[0](j) = increment_vec(_dof_indices[0] + n);
       n += n_dof_indices;
