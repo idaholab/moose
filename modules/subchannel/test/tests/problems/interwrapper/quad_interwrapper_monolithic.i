@@ -74,7 +74,7 @@ P_out = 4.923e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  interpolation_scheme = 'central_difference'
+  interpolation_scheme = 'upwind'
 []
 
 [ICs]
