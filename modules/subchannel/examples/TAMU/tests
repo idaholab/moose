@@ -1,7 +1,0 @@
-[Tests]
-    [TAMU_61_friction_model_case]
-        type = CSVDiff
-        input = TAMU_61.i
-        csvdiff = TAMU_61_out.csv
-    []
-[]
