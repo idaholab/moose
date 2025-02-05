@@ -3,7 +3,7 @@
     type = SCMDetailedQuadSubChannelMeshGenerator
     nx = 3
     ny = 3
-    n_cells = 100
+    n_cells = 20
     pitch = 0.0126
     pin_diameter = 0.00950
     gap = 0.00095
