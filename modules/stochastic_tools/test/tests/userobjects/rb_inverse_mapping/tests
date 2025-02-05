@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#'
+  design = ''
+
+  [p]
+    type = Exodiff
+    requirement = 'The system should be able to print serialized snapshots in a distributed fashion in a json format.'
+    input = main_rb.i
+    exodiff = 'main_rb_out.e'
+    max_parallel =1
+  []
+[]
