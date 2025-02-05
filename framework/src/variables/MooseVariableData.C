@@ -473,7 +473,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
               "We're requiring a divergence calculation but have not set a div shape function!");
 
   // Helper for filling values
-  const auto fill = [this, &nqp, &num_dofs](auto & dest, const auto & phi, const auto & dof_values)
+  const auto fill = [this, nqp, num_dofs](auto & dest, const auto & phi, const auto & dof_values)
   {
     if constexpr (monomial)
       libmesh_ignore(num_dofs);
@@ -566,10 +566,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
     // Non monomial case
     else
     {
-      for (unsigned int qp = 0; qp < nqp; ++qp)
+      for (const auto qp : make_range(nqp))
         set_zero(qp);
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           accumulate(i, qp);
     }
   };
@@ -626,19 +626,19 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dot_du)
     {
       _du_dot_du.resize(nqp);
-      for (unsigned int i = 0; i < nqp; ++i)
-        _du_dot_du[i] = 0.;
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto qp : make_range(nqp))
+        _du_dot_du[qp] = 0.;
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           _du_dot_du[qp] = _dof_du_dot_du[i];
     }
     if (_need_du_dotdot_du)
     {
       _du_dotdot_du.resize(nqp);
-      for (unsigned int i = 0; i < nqp; ++i)
-        _du_dotdot_du[i] = 0.;
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int qp = 0; qp < nqp; qp++)
+      for (const auto qp : make_range(nqp))
+        _du_dotdot_du[qp] = 0.;
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
     }
 
@@ -868,7 +868,7 @@ void
 MooseVariableData<RealEigenVector>::insertNodalValue(NumericVector<Number> & residual,
                                                      const RealEigenVector & v)
 {
-  for (unsigned int j = 0; j < _count; ++j)
+  for (const auto j : make_range(_count))
     residual.set(_nodal_dof_index + j, v(j));
 }
 
@@ -1026,9 +1026,9 @@ MooseVariableData<RealEigenVector>::addSolution(NumericVector<Number> & sol,
                                                 const DenseVector<Number> & v) const
 {
   unsigned int p = 0;
-  for (unsigned int j = 0; j < _count; ++j)
+  const auto num_dofs = _dof_indices.size();
+  for (const auto j : make_range(_count))
   {
-    const auto num_dofs = _dof_indices.size();
     unsigned int inc = (isNodal() ? j : j * num_dofs);
     for (const auto i : make_range(num_dofs))
       sol.add(_dof_indices[i] + inc, v(p++));
@@ -1119,7 +1119,7 @@ MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number>
   _increment.resize(nqp);
   // Compute the increment at each quadrature point
   unsigned int num_dofs = _dof_indices.size();
-  for (unsigned int qp = 0; qp < nqp; qp++)
+  for (const auto qp : make_range(nqp))
   {
     _increment[qp] = 0.;
     for (const auto i : make_range(num_dofs))
@@ -1139,20 +1139,20 @@ MooseVariableData<RealEigenVector>::computeIncrementAtQps(
   unsigned int num_dofs = _dof_indices.size();
   if (isNodal())
   {
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
     {
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int j = 0; j < _count; j++)
+      for (const auto i : make_range(num_dofs))
+        for (const auto j : make_range(_count))
           _increment[qp](j) += (*_phi)[i][qp] * increment_vec(_dof_indices[i] + j);
     }
   }
   else
   {
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
     {
       unsigned int n = 0;
-      for (unsigned int j = 0; j < _count; j++)
-        for (unsigned int i = 0; i < num_dofs; i++)
+      for (const auto j : make_range(_count))
+        for (const auto i : make_range(num_dofs))
         {
           _increment[qp](j) += (*_phi)[i][qp] * increment_vec(_dof_indices[i] + n);
           n += num_dofs;
