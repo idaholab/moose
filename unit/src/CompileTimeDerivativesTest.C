@@ -207,13 +207,18 @@ TEST(CompileTimeDerivativesTest, variable_reference)
   const auto X = makeRef<dX>(x);
   const auto result = X * X + 100.0;
 
-  x = 5;
+  x = 5.0;
   EXPECT_EQ(result(), 125.0);
   EXPECT_EQ(result.D<dX>()(), 10.0);
 
-  x = 3;
+  x = 3.0;
   EXPECT_EQ(result(), 109.0);
+  EXPECT_EQ(eval(result), 109.0); // alternative syntax for evaluation
+
   EXPECT_EQ(result.D<dX>()(), 6.0);
+  EXPECT_EQ(eval(diff<dX>(result)), 6.0); // alternative derivative syntax
+
+  EXPECT_EQ(eval(diff<dX, dX>(result)), 2.0);
 }
 
 TEST(CompileTimeDerivativesTest, vector_reference)
@@ -322,4 +327,14 @@ TEST(CompileTimeDerivativesTest, conditional)
     else
       EXPECT_EQ(result(), 5 * vx);
   }
+}
+
+TEST(CompileTimeDerivativesTest, typeRefs)
+{
+  const RealVectorValue va(1, 2, 3), vb(4, 6, 8);
+  const auto [a, b] = makeRefs<30>(va, vb);
+
+  // matching order
+  EXPECT_EQ(&va, &a());
+  EXPECT_EQ(&vb, &b());
 }
