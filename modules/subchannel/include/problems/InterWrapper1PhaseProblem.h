@@ -86,12 +86,9 @@ protected:
   virtual void initializeSolution();
 
   /// Functions that computes the interpolation scheme given the Peclet number
-  virtual PetscScalar computeInterpolationCoefficients(const std::string interp_type,
-                                                       PetscScalar Peclet);
-  virtual PetscScalar computeInterpolatedValue(PetscScalar topValue,
-                                               PetscScalar botValue,
-                                               const std::string interp_type,
-                                               PetscScalar Peclet);
+  virtual PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
+  virtual PetscScalar
+  computeInterpolatedValue(PetscScalar topValue, PetscScalar botValue, PetscScalar Peclet = 0.0);
   PetscErrorCode cleanUp();
   const InterWrapperMesh & _subchannel_mesh;
   /// number of axial blocks
@@ -145,7 +142,7 @@ protected:
   /// The maximum number of iterations to use for the ksp linear solver
   const PetscInt & _maxit;
   /// The interpolation method used in constructing the systems
-  const std::string _interpolation_scheme;
+  const MooseEnum _interpolation_scheme;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
   /// Flag to define the usage of staggered or collocated pressure
