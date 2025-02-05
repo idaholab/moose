@@ -32,7 +32,7 @@ SCMBlockedMassFlowRateAux::validParams()
 
 SCMBlockedMassFlowRateAux::SCMBlockedMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
+    _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_mesh)),
     _unblocked_mass_flux(getParam<Real>("unblocked_mass_flux")),
     _blocked_mass_flux(getParam<Real>("blocked_mass_flux")),
     _area(coupledValue("area")),

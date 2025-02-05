@@ -25,7 +25,7 @@ SCMQuadFlowAreaIC::validParams()
 }
 
 SCMQuadFlowAreaIC::SCMQuadFlowAreaIC(const InputParameters & params)
-  : QuadSubChannelBaseIC(params), _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh))
+  : QuadSubChannelBaseIC(params), _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_mesh))
 {
 }
 

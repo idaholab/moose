@@ -23,7 +23,7 @@ SCMTriFlowAreaIC::validParams()
 }
 
 SCMTriFlowAreaIC::SCMTriFlowAreaIC(const InputParameters & params)
-  : TriSubChannelBaseIC(params), _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh))
+  : TriSubChannelBaseIC(params), _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_mesh))
 {
 }
 

@@ -15,11 +15,26 @@ class MooseMesh;
 
 namespace SCM
 {
+/// function to cast const mesh
 template <typename T>
 const T &
-getMesh(const MooseMesh & mesh)
+getConstMesh(const MooseMesh & mesh)
 {
   const auto T_mesh = dynamic_cast<const T *>(&mesh);
+  // Check that the mesh of the right type
+  if (!T_mesh)
+    mooseError("The mesh is not of type: ",
+               MooseUtils::prettyCppType<T>(),
+               ". You must use the relevant Subchannel mesh/mesh generator with this object.");
+  return *T_mesh;
+}
+
+/// function to cast mesh
+template <typename T>
+T &
+getMesh(MooseMesh & mesh)
+{
+  auto T_mesh = dynamic_cast<T *>(&mesh);
   // Check that the mesh of the right type
   if (!T_mesh)
     mooseError("The mesh is not of type: ",

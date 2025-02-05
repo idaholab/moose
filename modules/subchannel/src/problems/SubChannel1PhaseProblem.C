@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cmath>
 #include "AuxiliarySystem.h"
+#include "SCM.h"
 
 struct Ctx
 {
@@ -99,7 +100,7 @@ SubChannel1PhaseProblem::validParams()
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     PostprocessorInterface(this),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
+    _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.81),
