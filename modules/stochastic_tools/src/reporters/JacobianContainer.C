@@ -56,13 +56,8 @@ JacobianContainer::collectSnapshot()
   _sparse_ind.clear();
 
   // Obtain a reference to the Jacobian matrix from the nonlinear system
-  auto & jac = _nl_sys.getMatrix(_tag_id);
-
-  // Retrieve the dimensions of the Jacobian matrix
-  auto num_cols = jac.n();
-
-  // Close the Jacobian matrix to finalize its state for NONLINEAR systems
-  jac.close();
+  _nl_sys.closeTaggedMatrices({_tag_id});
+  const auto & jac = _nl_sys.getMatrix(_tag_id);
 
   std::vector<Real> nnz_vals;
 
@@ -76,12 +71,9 @@ JacobianContainer::collectSnapshot()
     // Extract the non-zero values and their column indices for the current row
     jac.get_row(row, cols, values);
 
-    // Adjust the column indices based on the row, for a flattened vector representation
     for (auto & col : cols)
-    {
       _sparse_ind.push_back(std::make_pair(row, col));
-      col = row * num_cols + col; // Update column index
-    }
+
     nnz_vals.insert(nnz_vals.end(), values.begin(), values.end());
   }
 

@@ -4,22 +4,26 @@
 [Distributions]
   [S_dist]
     type = Uniform
-    lower_bound = 0.1
-    upper_bound = 10
+    lower_bound = 0
+    upper_bound = 20
   []
   [D_dist]
     type = Uniform
-    lower_bound = 0.1
+    lower_bound = 0
+    upper_bound = 20
+  []
+  [L_dist]
+    type = Uniform
+    lower_bound = 1
     upper_bound = 10
   []
-
 []
 
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 250
-    distributions = 'S_dist D_dist'
+    num_rows = 100
+    distributions = 'S_dist D_dist L_dist'
     execute_on = PRE_MULTIAPP_SETUP
     # min_procs_per_row = 4
     max_procs_per_row = 1
@@ -31,7 +35,7 @@
     type = DEIMRBMapping
     solution_storage = parallel_storage
     variables = 'solution residual jacobian'
-    num_modes_to_compute = '100 20 30'
+    num_modes_to_compute = '100 10 30'
     extra_slepc_options = "-svd_monitor_all"
     jac_index_name = 'jacobian_storage/indices'
   []
@@ -78,7 +82,7 @@
     type = MultiAppSamplerControl
     multi_app = worker
     sampler = sample
-    param_names = 'S D'
+    param_names = 'S D L'
   []
 []
 
