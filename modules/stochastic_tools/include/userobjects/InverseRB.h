@@ -42,7 +42,7 @@ public:
   virtual void initialSetup() override;
 
   // only needed for ElementUserObjects and NodalUseroObjects
-  virtual void threadJoin(const UserObject & /*y*/) override{};
+  virtual void threadJoin(const UserObject & /*y*/) override {};
 
 protected:
   /// Link to the mapping object which provides the inverse mapping function
@@ -136,6 +136,12 @@ private:
   /// Vector of reduced residual nodes
   std::vector<const Node *> _red_res_node;
 
+  /// Vector of reduced residual elements
+  std::vector<const Elem *> _red_elem;
+
+  /// Vector of reduced residual nodes
+  std::vector<const Node *> _red_nodes;
+
   /// Local range of reduced Jacobian elements
   std::unique_ptr<ConstElemRange> _red_jac_elem_local_range;
 
@@ -148,6 +154,11 @@ private:
   /// Local range of reduced residual nodes
   std::unique_ptr<ConstNodeRange> _red_res_node_local_range;
 
+  /// Local range of reduced Jacobian nodes
+  std::unique_ptr<ConstNodeRange> _red_node_local_range;
+
+  /// Local range of reduced residual elements
+  std::unique_ptr<ConstElemRange> _red_elem_local_range;
   /// Nonlinear system
   NonlinearSystemBase & _nl_sys;
 
@@ -161,5 +172,5 @@ private:
   const NumericVector<Number> * _curr_sol;
 
   /// Linear solver
-  LinearSolver<Number> * _solver;
+  libMesh::LinearSolver<Number> * _solver;
 };

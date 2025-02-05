@@ -89,9 +89,9 @@ public:
    * Computes the reduced jacobian using the selection values. This function
    * assumes that the jacobian values are in the same order as the selection indicies
    * @param red_jac_values vector of the jacobian values
-   * @return RealDenseMatrix Reduced jacobian matrix
+   * @return DenseMatrix<Real> Reduced jacobian matrix
    */
-  RealDenseMatrix compute_reduced_jac(const std::vector<Real> & red_jac_values);
+  DenseMatrix<Real> compute_reduced_jac(const std::vector<Real> & red_jac_values);
 
   /**
    * Computes the reduced residual vector using the given residual values. This function

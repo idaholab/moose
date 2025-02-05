@@ -93,7 +93,7 @@ JacobianContainer::collectSnapshot()
   _communicator.sum(total_size);
 
   // Create distributed vectors for storing the non-zero values and their indices
-  DistributedVector<Real> sparse_vector(_communicator, total_size, nnz_vals.size());
+  libMesh::DistributedVector<Real> sparse_vector(_communicator, total_size, nnz_vals.size());
 
   // Vector to hold the distributed indices for the non-zero values
   std::vector<dof_id_type> dist_ind(nnz_vals.size());

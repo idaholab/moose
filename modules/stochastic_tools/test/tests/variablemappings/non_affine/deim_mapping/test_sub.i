@@ -82,8 +82,7 @@ L = 5
     type = InverseRB
     mapping = rb_mapping
     execute_on = TIMESTEP_END
-    relaxation_factor = 0.8
-    max_iter = 5
+    max_iter = 1
   []
 []
 

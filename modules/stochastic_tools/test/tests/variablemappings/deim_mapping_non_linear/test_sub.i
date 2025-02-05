@@ -3,10 +3,16 @@ D = 10
 L = 5
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 50
-  xmax = ${L}
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 500
+    ny = 100
+    xmax = ${L}
+    ymin = -1
+    ymax = 1
+  []
+
 []
 
 [Problem]
@@ -19,22 +25,32 @@ L = 5
 []
 
 [Kernels]
+  [time]
+    type = CoefReaction
+    variable = u
+  []
   [diffusion_u]
-    type = MatDiffusion
+    type = ADMatDiffusion
     variable = u
     diffusivity = D_u
   []
   [source_u]
-    type = BodyForce
+    type = ADBodyForce
     variable = u
     value = 1.0
   []
+  # [non_linear_u]
+  #   type = ExponentialReaction
+  #   variable = u
+  #   mu1 = 7
+  #   mu2 = 0.4
+  # []
 []
 
 [Functions]
   [du]
     type = ParsedFunction
-    expression = 'D * D * x + 1'
+    expression = 'D * x^2 + 1'
     symbol_names = D
     symbol_values = ${D}
   []
@@ -42,7 +58,7 @@ L = 5
 
 [Materials]
   [diffusivity_u]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = D_u
     prop_values = du
   []
@@ -52,21 +68,22 @@ L = 5
   [left_u]
     type = DirichletBC
     variable = u
-    boundary = left
+    boundary = 'left top bottom'
     value = 0
-    preset = true
   []
   [right_u]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = u
     boundary = right
-    value = ${S}
-    preset = true
+    function = '${S} * t^2 * -(y^2-1)'
+    preset = false
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  dt = 0.25
+  num_steps = 5
   solve_type = NEWTON
 []
 
@@ -81,12 +98,15 @@ L = 5
   [im]
     type = InverseRB
     mapping = rb_mapping
-    execute_on = TIMESTEP_END
-    relaxation_factor = 0.8
-    max_iter = 5
+    execute_on = 'INITIAL TIMESTEP_END'
+    max_iter = 2
   []
 []
 
 [Outputs]
   exodus = true
+  [perf]
+    type = PerfGraphOutput
+    level = 3
+  []
 []

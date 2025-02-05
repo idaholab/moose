@@ -4,8 +4,10 @@ L = 5
 
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 50
+  dim = 3
+  nx = 100
+  ny = 25
+  nz = 25
   xmax = ${L}
 []
 
@@ -48,7 +50,7 @@ L = 5
   [left_u]
     type = DirichletBC
     variable = u
-    boundary = left
+    boundary = ' front top'
     value = 0
     preset = true
   []
@@ -64,9 +66,12 @@ L = 5
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       NONZERO               strumpack'
-  nl_abs_tol = 1e-8
+  # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre    boomeramg 2000'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  l_tol = 1e-10
+  nl_abs_tol = 1e-7
   nl_rel_tol = 1e-18
 []
 
@@ -105,5 +110,11 @@ L = 5
 []
 
 [Outputs]
+  [pgraph]
+    type = PerfGraphOutput
+    execute_on = ' final' # Default is "final"
+    level = 3 # Default is 1
+
+  []
   exodus = true
 []

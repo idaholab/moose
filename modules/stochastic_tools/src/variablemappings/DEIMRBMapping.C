@@ -270,7 +270,7 @@ DEIMRBMapping::constructReducedBasis()
     RealEigenMatrix reduced_matrix = sol_basis_transpose * matrix * sol_basis;
 
     // Fill the real dense matrix with the values from the reduced matrix
-    RealDenseMatrix real_dense_mat(reduced_matrix.rows(), reduced_matrix.cols());
+    DenseMatrix<Real> real_dense_mat(reduced_matrix.rows(), reduced_matrix.cols());
     for (const auto i : make_range(reduced_matrix.rows()))
     {
       for (const auto j : make_range(reduced_matrix.cols()))
@@ -283,7 +283,7 @@ DEIMRBMapping::constructReducedBasis()
     _reduced_jacobian.push_back(real_dense_mat);
   }
 
-  RealDenseMatrix real_dense_solution_basis(sol_basis.rows(), sol_basis.cols());
+  DenseMatrix<Real> real_dense_solution_basis(sol_basis.rows(), sol_basis.cols());
   for (const auto i : make_range(sol_basis.rows()))
   {
     for (const auto j : make_range(sol_basis.cols()))
@@ -389,7 +389,7 @@ DEIMRBMapping::convertMatrixSelectionInds(dof_id_type num_dofs,
   return dof_pairs;
 }
 
-RealDenseMatrix
+DenseMatrix<Real>
 DEIMRBMapping::compute_reduced_jac(const std::vector<Real> & red_jac_values)
 {
   // We assume the reduced values come in the same order as
@@ -399,7 +399,7 @@ DEIMRBMapping::compute_reduced_jac(const std::vector<Real> & red_jac_values)
   _jacobian_selection_matrix.lu_solve(red_jac_values, jac_theta);
 
   // Now we can construct the reduced jacobian
-  RealDenseMatrix reduce_jac(_reduced_jacobian[0].m(), _reduced_jacobian[0].n());
+  DenseMatrix<Real> reduce_jac(_reduced_jacobian[0].m(), _reduced_jacobian[0].n());
 
   for (MooseIndex(jac_theta) i = 0; i < jac_theta.size(); i++)
     reduce_jac.add(jac_theta(i), _reduced_jacobian[i]);

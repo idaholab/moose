@@ -1,11 +1,13 @@
 S = 10
 D = 10
 L = 5
+P = 5
 
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 50
+  dim = 2
+  ny = 500
+  nx = 500
   xmax = ${L}
 []
 
@@ -20,21 +22,21 @@ L = 5
 
 [Kernels]
   [diffusion_u]
-    type = MatDiffusion
+    type = ADMatDiffusion
     variable = u
     diffusivity = D_u
   []
   [source_u]
-    type = BodyForce
+    type = ADBodyForce
     variable = u
-    value = 1.0
+    function = '1 + ${P} * cos(2*pi*x)^2 * cos(2*pi*y)^2'
   []
 []
 
 [Functions]
   [du]
     type = ParsedFunction
-    expression = 'D * D * x + 1'
+    expression = '1 + D * sin(2*pi*x)^2 * sin(2*pi*y)^2 + ${S}'
     symbol_names = D
     symbol_values = ${D}
   []
@@ -42,25 +44,25 @@ L = 5
 
 [Materials]
   [diffusivity_u]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = D_u
     prop_values = du
   []
 []
 
 [BCs]
-  [left_u]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-    preset = true
-  []
+  # [left_u]
+  #   type = DirichletBC
+  #   variable = u
+  #   boundary = left
+  #   value = 0
+  #   preset = true
+  # []
   [right_u]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     boundary = right
-    value = ${S}
+    value = 0
     preset = true
   []
 []
@@ -81,12 +83,23 @@ L = 5
   [im]
     type = InverseRB
     mapping = rb_mapping
-    execute_on = TIMESTEP_END
-    relaxation_factor = 0.8
-    max_iter = 5
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    force_preic = true
+    max_iter = 1
   []
 []
 
 [Outputs]
   exodus = true
 []
+[AuxVariables]
+  [on_node]
+    initial_condition = 1.0
+  []
+  [on_elem]
+    initial_condition = 1.0
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+

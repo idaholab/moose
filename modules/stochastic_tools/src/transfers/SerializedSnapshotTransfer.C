@@ -186,23 +186,22 @@ SerializedSnapshotTransfer::transferInParallel(FEProblemBase & app_problem,
                                    new_local_entries_begin,
                                    new_local_entries_end);
 
-  for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
-       ++solution_i)
+  for (const auto & snapshot : solution_container.getSnapshots())
   {
     DenseVector<Real> serialized_solution;
+
     // Create indices of that span entire vector
-    auto num_vals = solution_container.getSnapshot(solution_i)->size();
+    auto num_vals = snapshot.size();
     std::vector<dof_id_type> indices(num_vals);
     std::iota(indices.begin(), indices.end(), 0);
 
     // Localize the solution and add it to the local container on the rank
     // which is supposed to own it
-    solution_container.getSnapshot(solution_i)
-        ->localize(
-            serialized_solution.get_values(),
-            (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
-                ? indices
-                : std::vector<dof_id_type>());
+    snapshot.localize(
+        serialized_solution.get_values(),
+        (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
+            ? indices
+            : std::vector<dof_id_type>());
 
     if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
       _parallel_storage->addEntry(snapshot_type, global_i, serialized_solution);
@@ -216,13 +215,12 @@ SerializedSnapshotTransfer::transferToSubAppRoot(FEProblemBase & /*app_problem*/
                                                  const std::string snapshot_type)
 {
 
-  for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
-       ++solution_i)
+  for (const auto & snapshot : solution_container.getSnapshots())
   {
     DenseVector<Real> serialized_solution;
 
     // In this case we always serialize on the root processor of the application.
-    solution_container.getSnapshot(solution_i)->localize_to_one(serialized_solution.get_values());
+    snapshot.localize_to_one(serialized_solution.get_values());
 
     if (getFromMultiApp()->isRootProcessor())
       _parallel_storage->addEntry(snapshot_type, global_i, serialized_solution);

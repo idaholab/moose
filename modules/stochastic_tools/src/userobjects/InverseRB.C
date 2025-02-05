@@ -1,5 +1,6 @@
 #include "DEIMRBMapping.h"
 #include "InverseRB.h"
+#include "Moose.h"
 #include "NonlinearSystemBase.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/elem_range.h"
@@ -45,6 +46,15 @@ InverseRB::initialize()
 void
 InverseRB::execute()
 {
+  auto flag = _fe_problem.getCurrentExecuteOnFlag();
+  if (flag == EXEC_INITIAL)
+  {
+    // Set the local elem/node ranges
+    _fe_problem.setCurrentAlgebraicElementRange(_red_elem_local_range.get());
+    _fe_problem.setCurrentAlgebraicNodeRange(_red_node_local_range.get());
+    return;
+  }
+
   // Start with an initial guess of 0 for the reduced solution
   // This will not work for a few things.
   dof_id_type reduced_size = _mapping->getReducedSize();
@@ -53,7 +63,12 @@ InverseRB::execute()
   // Main loop (for instance, until convergence)
   bool is_converged = false;
   unsigned int iter = 0;
+
+  // Set the local elem/node ranges
+  _fe_problem.setCurrentAlgebraicElementRange(_red_elem_local_range.get());
+  _fe_problem.setCurrentAlgebraicNodeRange(_red_node_local_range.get());
   updateSolution(reduced_sol);
+
   while (!is_converged && iter < _max_iter)
   {
     // Calculate reduced Jacobian and residual
@@ -68,10 +83,10 @@ InverseRB::execute()
 
     // Update the full solution and check for convergence
     updateSolution(reduced_sol);
-    Real res = computeResidual();
 
+    // Check for convergence
+    Real res = computeReducedResidual().l2_norm();
     is_converged = res <= _tolerance;
-
     iter++;
   }
 
@@ -79,6 +94,9 @@ InverseRB::execute()
   {
     // Handle non-convergence scenario
   }
+
+  // _fe_problem.setCurrentAlgebraicElementRange(nullptr);
+  // _fe_problem.setCurrentAlgebraicNodeRange(nullptr);
 }
 
 void
@@ -110,6 +128,25 @@ InverseRB::initialSetup()
   }
 
   std::vector<dof_id_type> jacobian_vec_inds(jac_dofs_set.begin(), jac_dofs_set.end());
+
+  // Create a set to store the total indices
+  std::set<dof_id_type> total_set;
+
+  // Insert the indices from _residual_inds into the total_set
+  total_set.insert(_residual_inds.begin(), _residual_inds.end());
+
+  // Insert the indices from jacobian_vec_inds into the total_set
+  total_set.insert(jacobian_vec_inds.begin(), jacobian_vec_inds.end());
+
+  // Convert the total_set to a vector
+  std::vector<dof_id_type> total_vec(total_set.begin(), total_set.end());
+
+  _red_elem = findReducedElemRange(total_vec);
+  _red_nodes = findReducedNodeRange(total_vec);
+  _red_elem_local_range =
+      createRangeFromVector<ConstElemRange, Elem, MeshBase::const_element_iterator>(_red_elem);
+  _red_node_local_range =
+      createRangeFromVector<ConstNodeRange, Node, MeshBase::const_node_iterator>(_red_nodes);
 
   // Determine the reduced element ranges for both the Jacobian and the residual.
   // These ranges represent a subset of elements that are relevant for our calculations.

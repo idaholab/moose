@@ -1,11 +1,13 @@
 S = 10
 D = 10
 L = 5
+P = 5
 
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 50
+  dim = 2
+  ny = 500
+  nx = 500
   xmax = ${L}
 []
 
@@ -21,16 +23,16 @@ L = 5
     diffusivity = D_u
   []
   [source_u]
-    type = BodyForce
+    type = ADBodyForce
     variable = u
-    value = 1.0
+    function = '1 + ${P} * cos(2*pi*x)^2 * cos(2*pi*y)^2'
   []
 []
 
 [Functions]
   [du]
     type = ParsedFunction
-    expression = 'D * D * x + 1'
+    expression = '1 + D * sin(2*pi*x)^2 * sin(2*pi*y)^2 + ${S}'
     symbol_names = D
     symbol_values = ${D}
   []
@@ -45,27 +47,20 @@ L = 5
 []
 
 [BCs]
-  [left_u]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-    preset = true
-  []
   [right_u]
     type = DirichletBC
     variable = u
     boundary = right
-    value = ${S}
-    preset = true
+    value = 0
+    preset = false
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       NONZERO               strumpack'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre    boomeramg 2000'
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-18
 []
@@ -76,10 +71,17 @@ L = 5
   []
 []
 
+# [Dampers]
+#   [slow]
+#     type = ConstantDamper
+#     damping = 0.99
+#   []
+# []
+
 [Reporters]
   [solution_storage]
     type = SolutionContainer
-    execute_on = 'FINAL'
+    execute_on = 'TIMESTEP_END'
   []
   [residual_storage]
     type = ResidualContainer
@@ -90,7 +92,7 @@ L = 5
     type = JacobianContainer
     tag_name = total
     jac_indices_reporter_name = indices
-    execute_on = 'FINAL'
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -104,6 +106,6 @@ L = 5
   extra_vector_tags = 'total'
 []
 
-[Outputs]
-  exodus = true
-[]
+# [Outputs]
+#   exodus = true
+# []
