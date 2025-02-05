@@ -141,31 +141,33 @@ stringify(const MffdType & t)
 }
 
 void
-setSolverOptions(const SolverParams & solver_params)
+setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont_add_these_options)
 {
   // set PETSc options implied by a solve type
   switch (solver_params._type)
   {
     case Moose::ST_PJFNK:
-      setSinglePetscOption("-snes_mf_operator");
-      setSinglePetscOption("-mat_mffd_type", stringify(solver_params._mffd_type));
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_mf_operator");
+      setSinglePetscOptionIfAppropriate(
+          dont_add_these_options, "-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_JFNK:
-      setSinglePetscOption("-snes_mf");
-      setSinglePetscOption("-mat_mffd_type", stringify(solver_params._mffd_type));
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_mf");
+      setSinglePetscOptionIfAppropriate(
+          dont_add_these_options, "-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_NEWTON:
       break;
 
     case Moose::ST_FD:
-      setSinglePetscOption("-snes_fd");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_fd");
       break;
 
     case Moose::ST_LINEAR:
-      setSinglePetscOption("-snes_type", "ksponly");
-      setSinglePetscOption("-snes_monitor_cancel");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_type", "ksponly");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, "-snes_monitor_cancel");
       break;
   }
 
@@ -174,7 +176,8 @@ setSolverOptions(const SolverParams & solver_params)
     ls_type = Moose::LS_BASIC;
 
   if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
-    setSinglePetscOption("-snes_linesearch_type", stringify(ls_type));
+    setSinglePetscOptionIfAppropriate(
+        dont_add_these_options, "-snes_linesearch_type", stringify(ls_type));
 }
 
 void
@@ -243,15 +246,21 @@ petscSetOptions(const PetscOptions & po,
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsClear(LIBMESH_PETSC_NULLPTR));
 #endif
 
-  setSolverOptions(solver_params);
+  setSolverOptions(solver_params, po.dont_add_these_options);
 
   // Add any additional options specified in the input file
   for (const auto & flag : po.flags)
-    setSinglePetscOption(flag.rawName().c_str());
+    // Need to use name method here to pass a str instead of an EnumItem because
+    // we don't care if the id attributes match
+    if (!po.dont_add_these_options.contains(flag.name()) ||
+        po.user_set_options.contains(flag.name()))
+      setSinglePetscOption(flag.rawName().c_str());
 
   // Add option pairs
   for (auto & option : po.pairs)
-    setSinglePetscOption(option.first, option.second, problem);
+    if (!po.dont_add_these_options.contains(option.first) ||
+        po.user_set_options.contains(option.first))
+      setSinglePetscOption(option.first, option.second, problem);
 
   addPetscOptionsFromCommandline();
 }
@@ -458,7 +467,34 @@ petscSetDefaults(FEProblemBase & problem)
 }
 
 void
+processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  setSolveTypeFromParams(fe_problem, params);
+  setLineSearchFromParams(fe_problem, params);
+  setMFFDTypeFromParams(fe_problem, params);
+}
+
+void
 storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  processSingletonMooseWrappedOptions(fe_problem, params);
+
+  // The parameters contained in the Action
+  const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
+  const auto & petsc_pair_options =
+      params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
+
+  auto & po = fe_problem.getPetscOptions();
+
+  // First process the single petsc options/flags
+  addPetscFlagsToPetscOptions(petsc_options, po);
+
+  // Then process the option-value pairs
+  addPetscPairsToPetscOptions(petsc_pair_options, fe_problem.mesh().dimension(), po);
+}
+
+void
+setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type") && !params.isParamValid("_use_eigen_value"))
@@ -467,10 +503,14 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     const std::string & solve_type = params.get<MooseEnum>("solve_type");
     fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
+}
 
+void
+setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & params)
+{
   if (params.isParamValid("line_search"))
   {
-    MooseEnum line_search = params.get<MooseEnum>("line_search");
+    const auto & line_search = params.get<MooseEnum>("line_search");
     if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
     {
       Moose::LineSearchType enum_line_search =
@@ -494,31 +534,20 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         }
     }
   }
-
-  if (params.isParamValid("mffd_type"))
-  {
-    MooseEnum mffd_type = params.get<MooseEnum>("mffd_type");
-    fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
-  }
-
-  // The parameters contained in the Action
-  const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
-  const auto & petsc_pair_options =
-      params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
-
-  // A reference to the PetscOptions object that contains the settings that will be used in the
-  // solve
-  Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
-
-  // First process the single petsc options/flags
-  processPetscFlags(petsc_options, po);
-
-  // Then process the option-value pairs
-  processPetscPairs(petsc_pair_options, fe_problem.mesh().dimension(), po);
 }
 
 void
-processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
+setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  if (params.isParamValid("mffd_type"))
+  {
+    const auto & mffd_type = params.get<MooseEnum>("mffd_type");
+    fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
+  }
+}
+
+void
+addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & po)
 {
   // Update the PETSc single flags
   for (const auto & option : petsc_flags)
@@ -553,14 +582,18 @@ processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
 
     // Update the stored items, but do not create duplicates
     if (!po.flags.isValueSet(option))
+    {
       po.flags.setAdditionalValue(option);
+      po.user_set_options.setAdditionalValue(option);
+    }
   }
 }
 
 void
-processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
-                  const unsigned int mesh_dimension,
-                  PetscOptions & po)
+addPetscPairsToPetscOptions(
+    const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+    const unsigned int mesh_dimension,
+    PetscOptions & po)
 {
   // the boolean in these pairs denote whether the user has specified any of the reason flags in the
   // input file
@@ -660,15 +693,25 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
 #endif
 
       if (!new_options.empty())
+      {
         std::copy(new_options.begin(), new_options.end(), std::back_inserter(po.pairs));
+        for (const auto & option : new_options)
+          po.user_set_options.setAdditionalValue(option.first);
+      }
       else
+      {
         po.pairs.push_back(option);
+        po.user_set_options.setAdditionalValue(option.first);
+      }
     }
     else
     {
       for (unsigned int j = 0; j < po.pairs.size(); j++)
         if (option.first == po.pairs[j].first)
+        {
           po.pairs[j].second = option.second;
+          po.user_set_options.setAdditionalValue(option.first);
+        }
     }
   }
 
@@ -782,31 +825,63 @@ getPetscValidParams()
 }
 
 MultiMooseEnum
-getCommonPetscFlags()
+getCommonSNESFlags()
 {
   return MultiMooseEnum(
-      "-dm_moose_print_embedding -dm_view -ksp_converged_reason -ksp_gmres_modifiedgramschmidt "
-      "-ksp_monitor -ksp_monitor_snes_lg-snes_ksp_ew -ksp_snes_ew -snes_converged_reason "
-      "-snes_ksp -snes_ksp_ew -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor "
-      "-snes_test_display -snes_view",
+      "-ksp_monitor_snes_lg -snes_ksp_ew -ksp_snes_ew -snes_converged_reason "
+      "-snes_ksp -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor "
+      "-snes_test_display -snes_view -snes_monitor_cancel",
       "",
       true);
 }
 
 MultiMooseEnum
-getCommonPetscKeys()
+getCommonKSPFlags()
 {
-  return MultiMooseEnum("-ksp_atol -ksp_gmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
-                        "-ksp_type -mat_fd_coloring_err -mat_fd_type -mat_mffd_type "
-                        "-pc_asm_overlap -pc_factor_levels "
-                        "-pc_factor_mat_ordering_type -pc_hypre_boomeramg_grid_sweeps_all "
-                        "-pc_hypre_boomeramg_max_iter "
-                        "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol "
-                        "-snes_linesearch_type "
-                        "-snes_ls -snes_max_it -snes_rtol -snes_divergence_tolerance -snes_type "
-                        "-sub_ksp_type -sub_pc_type",
+  return MultiMooseEnum(
+      "-ksp_converged_reason -ksp_gmres_modifiedgramschmidt -ksp_monitor", "", true);
+}
+
+MultiMooseEnum
+getCommonPetscFlags()
+{
+  auto options = MultiMooseEnum("-dm_moose_print_embedding -dm_view", "", true);
+  options.addValidName(getCommonKSPFlags());
+  options.addValidName(getCommonSNESFlags());
+  return options;
+}
+
+MultiMooseEnum
+getCommonSNESKeys()
+{
+  return MultiMooseEnum("-snes_atol -snes_linesearch_type -snes_ls -snes_max_it -snes_rtol "
+                        "-snes_divergence_tolerance -snes_type",
                         "",
                         true);
+}
+
+MultiMooseEnum
+getCommonKSPKeys()
+{
+  return MultiMooseEnum("-ksp_atol -ksp_gmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
+                        "-ksp_type -sub_ksp_type",
+                        "",
+                        true);
+}
+MultiMooseEnum
+getCommonPetscKeys()
+{
+  auto options = MultiMooseEnum("-mat_fd_coloring_err -mat_fd_type -mat_mffd_type "
+                                "-pc_asm_overlap -pc_factor_levels "
+                                "-pc_factor_mat_ordering_type -pc_hypre_boomeramg_grid_sweeps_all "
+                                "-pc_hypre_boomeramg_max_iter "
+                                "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type "
+                                "-sub_pc_type",
+                                "",
+                                true);
+  options.addValidName(getCommonKSPKeys());
+  options.addValidName(getCommonSNESKeys());
+  return options;
 }
 
 bool
@@ -833,7 +908,7 @@ isSNESVI(FEProblemBase & fe_problem)
 
 void
 setSinglePetscOption(const std::string & name,
-                     const std::string & value,
+                     const std::string & value /*=""*/,
                      FEProblemBase * const problem /*=nullptr*/)
 {
   static const TIMPI::Communicator comm_world(PETSC_COMM_WORLD);
@@ -908,6 +983,16 @@ setSinglePetscOption(const std::string & name,
 }
 
 void
+setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_options,
+                                  const std::string & name,
+                                  const std::string & value /*=""*/,
+                                  FEProblemBase * const problem /*=nullptr*/)
+{
+  if (!dont_add_these_options.contains(name))
+    setSinglePetscOption(name, value, problem);
+}
+
+void
 colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
                      unsigned int size,
                      unsigned int colors,
@@ -973,29 +1058,44 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 }
 
 void
-disableNonlinearConvergedReason(FEProblemBase & fe_problem)
+dontAddPetscFlag(const std::string & flag, PetscOptions & petsc_options)
 {
-  auto & petsc_options = fe_problem.getPetscOptions();
-
-  petsc_options.flags.eraseSetValue("-snes_converged_reason");
-
-  auto & pairs = petsc_options.pairs;
-  auto it = MooseUtils::findPair(pairs, "-snes_converged_reason", MooseUtils::Any);
-  if (it != pairs.end())
-    pairs.erase(it);
+  if (!petsc_options.dont_add_these_options.contains(flag))
+    petsc_options.dont_add_these_options.setAdditionalValue(flag);
 }
 
 void
-disableLinearConvergedReason(FEProblemBase & fe_problem)
+dontAddNonlinearConvergedReason(FEProblemBase & fe_problem)
+{
+  dontAddPetscFlag("-snes_converged_reason", fe_problem.getPetscOptions());
+}
+
+void
+dontAddLinearConvergedReason(FEProblemBase & fe_problem)
+{
+  dontAddPetscFlag("-ksp_converged_reason", fe_problem.getPetscOptions());
+}
+
+void
+dontAddCommonKSPOptions(FEProblemBase & fe_problem)
 {
   auto & petsc_options = fe_problem.getPetscOptions();
+  for (const auto & flag : getCommonKSPFlags().getNames())
+    dontAddPetscFlag(flag, petsc_options);
+  for (const auto & key : getCommonKSPKeys().getNames())
+    dontAddPetscFlag(key, petsc_options);
+}
 
-  petsc_options.flags.eraseSetValue("-ksp_converged_reason");
-
-  auto & pairs = petsc_options.pairs;
-  auto it = MooseUtils::findPair(pairs, "-ksp_converged_reason", MooseUtils::Any);
-  if (it != pairs.end())
-    pairs.erase(it);
+void
+dontAddCommonSNESOptions(FEProblemBase & fe_problem)
+{
+  auto & petsc_options = fe_problem.getPetscOptions();
+  for (const auto & flag : getCommonSNESFlags().getNames())
+    if (!petsc_options.dont_add_these_options.contains(flag))
+      petsc_options.dont_add_these_options.setAdditionalValue(flag);
+  for (const auto & key : getCommonSNESKeys().getNames())
+    if (!petsc_options.dont_add_these_options.contains(key))
+      petsc_options.dont_add_these_options.setAdditionalValue(key);
 }
 
 } // Namespace PetscSupport
