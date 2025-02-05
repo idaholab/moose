@@ -53,7 +53,7 @@ protected:
   virtual void externalSolve() override;
   /// average relative error in pressure drop of channels
   Real _dpz_error;
-  TriInterWrapperMesh & _tri_sch_mesh;
+  const TriInterWrapperMesh & _tri_sch_mesh;
 
 public:
   static InputParameters validParams();

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cmath>
 #include "AuxiliarySystem.h"
+#include "SCM.h"
 
 struct CtxIW
 {
@@ -90,7 +91,7 @@ InterWrapper1PhaseProblem::validParams()
 
 InterWrapper1PhaseProblem::InterWrapper1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
-    _subchannel_mesh(dynamic_cast<InterWrapperMesh &>(_mesh)),
+    _subchannel_mesh(SCM::getConstMesh<InterWrapperMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.81),

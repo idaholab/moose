@@ -10,6 +10,7 @@
 #include "TriInterWrapper1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 #include "TriInterWrapperMesh.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", TriInterWrapper1PhaseProblem);
 
@@ -24,7 +25,7 @@ TriInterWrapper1PhaseProblem::validParams()
 
 TriInterWrapper1PhaseProblem::TriInterWrapper1PhaseProblem(const InputParameters & params)
   : InterWrapper1PhaseProblem(params),
-    _tri_sch_mesh(dynamic_cast<TriInterWrapperMesh &>(_subchannel_mesh))
+    _tri_sch_mesh(SCM::getConstMesh<TriInterWrapperMesh>(_subchannel_mesh))
 {
 }
 

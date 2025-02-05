@@ -24,7 +24,7 @@ TriSubChannel1PhaseProblem::validParams()
 
 TriSubChannel1PhaseProblem::TriSubChannel1PhaseProblem(const InputParameters & params)
   : SubChannel1PhaseProblem(params),
-    _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
+    _tri_sch_mesh(SCM::getMesh<TriSubChannelMesh>(_subchannel_mesh))
 {
   // Initializing heat conduction system
   LibmeshPetscCall(createPetscMatrix(

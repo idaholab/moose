@@ -9,6 +9,7 @@
 
 #include "QuadSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", QuadSubChannel1PhaseProblem);
 
@@ -35,7 +36,7 @@ QuadSubChannel1PhaseProblem::validParams()
 
 QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters & params)
   : SubChannel1PhaseProblem(params),
-    _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh)),
+    _subchannel_mesh(SCM::getMesh<QuadSubChannelMesh>(_mesh)),
     _beta(getParam<Real>("beta")),
     _default_friction_model(getParam<bool>("default_friction_model")),
     _constant_beta(getParam<bool>("constant_beta"))
