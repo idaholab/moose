@@ -120,9 +120,18 @@ OutputWarehouse::addOutput(std::shared_ptr<Output> const output)
 }
 
 bool
-OutputWarehouse::hasOutput(const std::string & name) const
+OutputWarehouse::hasOutput(const std::string & name, const bool is_exodus) const
 {
-  return _object_map.find(name) != _object_map.end();
+  const auto found_object = _object_map.find(name) != _object_map.end();
+  if (!is_exodus || !found_object)
+    return found_object;
+  else
+  {
+    // This condition is met if output object was found and is_exodus is true
+    // Check if output object can be typecast to Exodus
+    auto * exodus = dynamic_cast<Exodus *>(_object_map.at(name));
+    return (exodus != NULL);
+  }
 }
 
 const std::set<OutputName> &
@@ -314,11 +323,37 @@ OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name,
 }
 
 void
-OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
+OutputWarehouse::checkOutputs(const std::set<OutputName> & names, const bool is_exodus)
 {
+  std::string reserved_name = "";
   for (const auto & name : names)
-    if (!isReservedName(name) && !hasOutput(name))
-      mooseError("The output object '", name, "' is not a defined output object");
+  {
+    const bool is_reserved_name = isReservedName(name);
+    if (is_reserved_name)
+      reserved_name = name;
+    if (!is_reserved_name && !hasOutput(name, is_exodus))
+      mooseError("The output object '",
+                 name,
+                 "' is not a defined ",
+                 (is_exodus ? "Exodus " : ""),
+                 "output object");
+  }
+  if (!reserved_name.empty() && names.size() > 1)
+    mooseError("When setting output name to reserved name '" + reserved_name +
+               "', only one entry is allowed in outputs parameter.");
+}
+
+const std::set<OutputName>
+OutputWarehouse::getExodusOutputNames() const
+{
+  std::set<OutputName> exodus_output_names;
+  for (const auto & pair : _object_map)
+  {
+    auto * exodus = dynamic_cast<Exodus *>(pair.second);
+    if (exodus != NULL)
+      exodus_output_names.insert(pair.first);
+  }
+  return exodus_output_names;
 }
 
 const std::set<std::string> &
