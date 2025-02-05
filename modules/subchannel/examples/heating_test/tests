@@ -1,8 +1,13 @@
 [Tests]
-  [check_syntax]
-    type = 'RunApp'
-    input = '3X3_channel.i'
-    check_input = true
+  [heating_test]
+    type = Exodiff
+    input = 3X3_channel.i
+    exodiff = 3X3_channel_out_viz0.e
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
     max_parallel = 1
   []
 []
