@@ -4,7 +4,9 @@
 [Samplers]
   [dummy]
     type = CartesianProduct
-    linear_space_items = '0 0.01 1'
+    linear_space_items = '0 0.01 4'
+    min_procs_per_row = 7
+    max_procs_per_row = 7
   []
 []
 
@@ -13,17 +15,19 @@
     type = SamplerFullSolveMultiApp
     sampler = dummy
     input_files = 'flow_over_circle_linearfv.i'
-    mode= batch-reset
+    mode = batch-reset
+    min_procs_per_app = 7
+    max_procs_per_app = 7
   []
 []
 
 [Transfers]
   [nn_transfer]
-    type = LibtorchNeuralNetControlTransfer
+    type = SamplerNeuralNetControlTransfer
     to_multi_app = runner
     trainer_name = nn_trainer
     control_name = src_control
-    execute_on = TIMESTEP_BEGIN
+    sampler = dummy
   []
   [r_transfer]
     type = SamplerReporterTransfer
@@ -42,16 +46,16 @@
     log_probability = 'storage/r_transfer:results:log_prob_Q:value'
     reward = 'storage/r_transfer:results:reward:value'
 
-    num_epochs = 400
+    num_epochs = 50
     update_frequency = 1
-    decay_factor = 0.99
+    decay_factor = 0.98
 
     loss_print_frequency = 10
 
-    critic_learning_rate = 0.0005
+    critic_learning_rate = 0.001
     num_critic_neurons_per_layer = '64 32'
 
-    control_learning_rate = 0.0005
+    control_learning_rate = 0.001
     num_control_neurons_per_layer = '64 32'
 
     # keep consistent with LibtorchNeuralNetControl
@@ -59,7 +63,7 @@
 
     response_scaling_factors = '0.4 0.4 0.4 0.4 0.4'
     response_shift_factors = '-0.4 -0.4 -0.4 -0.4 -0.4'
-    action_standard_deviations = '0.02'
+    action_standard_deviations = '0.01'
 
     standardize_advantage = true
 
@@ -71,6 +75,7 @@
   [storage]
     type = StochasticReporter
     parallel_type = ROOT
+    outputs = none
   []
   [reward]
     type = DRLRewardReporter
@@ -80,12 +85,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 20
+  num_steps = 300
 []
 
 [Outputs]
   file_base = output/train_out
   json = true
-  time_step_interval = 1
   execute_on = TIMESTEP_END
 []

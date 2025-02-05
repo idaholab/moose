@@ -41,6 +41,4 @@ protected:
 
   unsigned int _replace_counter;
 
-
-
 };
