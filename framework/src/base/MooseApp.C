@@ -774,13 +774,19 @@ MooseApp::setupOptions()
   {
     // Set from command line
     auto color = getParam<MooseEnum>("color");
-    // Set from environment
-    char * c_color = std::getenv("MOOSE_COLOR");
-    if (c_color)
-      color.assign(std::string(c_color), "While assigning environment variable MOOSE_COLOR");
-    // Set from deprecated --no-color
-    if (getParam<bool>("no_color"))
-      color = "off";
+    if (!isParamSetByUser("color"))
+    {
+      // Set from deprecated --no-color
+      if (getParam<bool>("no_color"))
+        color = "off";
+      // Set from environment
+      else
+      {
+        char * c_color = std::getenv("MOOSE_COLOR");
+        if (c_color)
+          color.assign(std::string(c_color), "While assigning environment variable MOOSE_COLOR");
+      }
+    }
 
     if (color == "auto")
       Moose::setColorConsole(true);
