@@ -24,7 +24,7 @@ SCMFlatMassFlowRateAux::validParams()
 SCMFlatMassFlowRateAux::SCMFlatMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _mass_flow(getParam<Real>("mass_flow")),
-    _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh))
+    _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_mesh))
 {
 }
 
