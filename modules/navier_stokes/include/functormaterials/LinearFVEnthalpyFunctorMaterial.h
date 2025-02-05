@@ -27,9 +27,9 @@ public:
 protected:
   /// Variables, treated as functors, needs to be AD because
   /// Materials inherit from ADFunctorInterface
-  const Moose::Functor<ADReal> & _pressure;
-  const Moose::Functor<ADReal> & _T_fluid;
-  const Moose::Functor<ADReal> & _h;
+  const Moose::Functor<Real> & _pressure;
+  const Moose::Functor<Real> & _T_fluid;
+  const Moose::Functor<Real> & _h;
 
   /// The fluid properties that containt the h from Tconversion routines
   const SinglePhaseFluidProperties * _fluid;

@@ -37,9 +37,9 @@ LinearFVEnthalpyFunctorMaterial::validParams()
 
 LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputParameters & params)
   : FunctorMaterial(params),
-    _pressure(getFunctor<ADReal>(NS::pressure)),
-    _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
-    _h(getFunctor<ADReal>("h")),
+    _pressure(getFunctor<Real>(NS::pressure)),
+    _T_fluid(getFunctor<Real>(NS::T_fluid)),
+    _h(getFunctor<Real>("h")),
     _fluid(params.isParamValid(NS::fluid)
                ? &UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)
                : nullptr),
@@ -69,11 +69,11 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
     addFunctorProperty<Real>(
         "h_from_p_T",
         [this](const auto & r, const auto & t) -> Real
-        { return _fluid->h_from_p_T(raw_value(_pressure(r, t)), raw_value(_T_fluid(r, t))); });
+        { return _fluid->h_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
     addFunctorProperty<Real>(
         "T_from_p_h",
         [this](const auto & r, const auto & t) -> Real
-        { return _fluid->T_from_p_h(raw_value(_pressure(r, t)), raw_value(_h(r, t))); });
+        { return _fluid->T_from_p_h(_pressure(r, t), _h(r, t)); });
   }
   else
   {
