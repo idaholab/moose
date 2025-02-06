@@ -251,6 +251,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
 Real
 TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
+  /// The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;
   auto S = friction_args.S;
@@ -285,7 +286,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
 
   // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
-  // Volume 1
+  // second edition, Volume 1, Chapter 9.6
   if (subch_type == EChannelType::CENTER)
   {
     if (p_over_d < 1.1)
@@ -364,7 +365,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
 
   // Find the coefficients of wire-wrapped Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
-  // Volume 1 also Chen and Todreas (2018).
+  // Volume 1 Chapter 9-6 also Chen and Todreas (2018).
   if ((wire_diameter != 0.0) && (wire_lead_length != 0.0))
   {
     if (subch_type == EChannelType::CENTER)
@@ -754,8 +755,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           counter++;
 
           // compute the radial heat conduction through the gaps
-
-          // compute the radial heat conduction through gaps
           auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
           auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
           Real dist_ij = pitch;
@@ -995,7 +994,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
           auto dz_up = _z_grid[iz + 1] - _z_grid[iz];
           auto dz_down = _z_grid[iz] - _z_grid[iz - 1];
-          auto S_up = 0.5 * ((*_S_flow_soln)(node_top) + (*_S_flow_soln)(node_center)); // TODO:
+          auto S_up = 0.5 * ((*_S_flow_soln)(node_top) + (*_S_flow_soln)(node_center));
           auto S_down = 0.5 * ((*_S_flow_soln)(node_center) + (*_S_flow_soln)(node_bottom));
           auto diff_up = 0.5 * (diff_top + diff_center);
           auto diff_down = 0.5 * (diff_center + diff_bottom);
