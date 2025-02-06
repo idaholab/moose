@@ -16,7 +16,9 @@
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
  */
-class MeshGeneratorComponent : public virtual ActionComponent, public ComponentPhysicsInterface
+class MeshGeneratorComponent : public virtual ActionComponent,
+                               public ComponentPhysicsInterface,
+                               public ComponentMaterialPropertyInterface
 {
 public:
   /**

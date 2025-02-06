@@ -16,7 +16,9 @@
 /**
  * Cylinder on which one can define a Physics. The mesh is automatically created
  */
-class CylinderComponent : public virtual ActionComponent, public ComponentPhysicsInterface
+class CylinderComponent : public virtual ActionComponent,
+                          public ComponentPhysicsInterface,
+                          public ComponentMaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
