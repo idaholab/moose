@@ -17,12 +17,12 @@ centre_y = 0.1
   [H1FESpace]
     type = MFEMFESpace
     fec_type = H1
-    fec_order = SECOND
+    fec_order = SEVENTH
   []
   [HCurlFESpace]
     type = MFEMFESpace
     fec_type = ND
-    fec_order = FIRST
+    fec_order = SEVENTH
   []
 []
 
@@ -81,23 +81,32 @@ centre_y = 0.1
 
 [Kernels]
   [laplacian]
-    type = MFEMCurlCurlKernel
+    type = MFEMDiffusionKernel
     variable = velocity_potential
     coefficient = one
   []
 []
 
+[AuxKernels]
+  [grad]
+    type = MFEMGradAux
+    variable = velocity
+    source = velocity_potential
+    execute_on = TIMESTEP_END
+  []
+[]
+
 [Preconditioner]
-  [ams]
-    type = MFEMHypreAMS
-    fespace = HCurlFESpace
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
   []
 []
 
 [Solver]
   type = MFEMHypreGMRES
-  preconditioner = ams
-  l_tol = 1e-6  
+  preconditioner = boomeramg
+  l_tol = 1e-16
+  l_max_its = 1000
 []
 
 [Executioner]
@@ -110,11 +119,13 @@ centre_y = 0.1
     type = MFEML2Error
     variable = velocity_potential
     function = theta
+    execution_order_group = 1
   []
   [velocity_error]
     type = MFEMVectorL2Error
     variable = velocity
     function = exact_velocity
+    execution_order_group = 1
   []
 []
 
