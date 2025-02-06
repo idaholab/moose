@@ -24,11 +24,11 @@ public:
 
 protected:
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
@@ -38,36 +38,40 @@ protected:
   /// form loss coefficient of the spacers
   const std::vector<Real> & _spacer_k;
   /// axial location of blockage (inlet, outlet) [m]
-  std::vector<Real> _z_blockage;
+  const std::vector<Real> _z_blockage;
   /// index of subchannels affected by blockage
-  std::vector<unsigned int> _index_blockage;
+  const std::vector<unsigned int> _index_blockage;
   /// area reduction of subchannels affected by blockage
-  std::vector<Real> _reduction_blockage;
+  const std::vector<Real> _reduction_blockage;
   /// form loss coefficient of subchannels affected by blockage
-  std::vector<Real> _k_blockage;
+  const std::vector<Real> _k_blockage;
   /// Lateral form loss coefficient
   const Real & _kij;
   /// Distance between the neighbor fuel pins, pitch
-  Real _pitch;
+  const Real _pitch;
   /// fuel Pin diameter
-  Real _pin_diameter;
+  const Real _pin_diameter;
   /// number of axial cells
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// number of axial blocks
   unsigned int _n_blocks;
   /// Number of subchannels in the x direction
-  unsigned int _nx;
+  const unsigned int _nx;
   /// Number of subchannels in the y direction
-  unsigned int _ny;
+  const unsigned int _ny;
   /// Total number of subchannels
-  unsigned int _n_channels;
+  const unsigned int _n_channels;
   /// Number of gaps per layer
-  unsigned int _n_gaps;
+  const unsigned int _n_gaps;
   /// Number of pins
-  unsigned int _n_pins;
-  Real _gap;
+  const unsigned int _n_pins;
+  /**
+   * The gap, not to be confused with the gap between pins, this refers to the gap
+   * next to the duct. Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
+   */
+  const Real _gap;
   /// block index
-  unsigned int _block_id;
+  const unsigned int _block_id;
   /// Channel nodes
   std::vector<std::vector<Node *>> _nodes;
   /// gap nodes
