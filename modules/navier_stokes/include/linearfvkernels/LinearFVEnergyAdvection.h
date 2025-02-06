@@ -38,7 +38,6 @@ public:
   virtual void setupFaceData(const FaceInfo * face_info) override;
 
 protected:
-
   /// The advected quantity options
   enum class AdvectedQuantityEnum
   {

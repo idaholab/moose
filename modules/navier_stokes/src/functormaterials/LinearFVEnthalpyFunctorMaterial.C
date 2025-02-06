@@ -18,7 +18,8 @@ InputParameters
 LinearFVEnthalpyFunctorMaterial::validParams()
 {
   auto params = FunctorMaterial::validParams();
-  params.addClassDescription("Creates an enthalpy-temperature (both directions) converter functor material.");
+  params.addClassDescription(
+      "Creates an enthalpy-temperature (both directions) converter functor material.");
 
   params.addRequiredParam<MooseFunctorName>(NS::pressure, "Pressure");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
@@ -66,14 +67,12 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
 
   if (_fluid)
   {
-    addFunctorProperty<Real>(
-        "h_from_p_T",
-        [this](const auto & r, const auto & t) -> Real
-        { return _fluid->h_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
-    addFunctorProperty<Real>(
-        "T_from_p_h",
-        [this](const auto & r, const auto & t) -> Real
-        { return _fluid->T_from_p_h(_pressure(r, t), _h(r, t)); });
+    addFunctorProperty<Real>("h_from_p_T",
+                             [this](const auto & r, const auto & t) -> Real
+                             { return _fluid->h_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
+    addFunctorProperty<Real>("T_from_p_h",
+                             [this](const auto & r, const auto & t) -> Real
+                             { return _fluid->T_from_p_h(_pressure(r, t), _h(r, t)); });
   }
   else
   {

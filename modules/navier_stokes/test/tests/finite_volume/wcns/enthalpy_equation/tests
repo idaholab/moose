@@ -17,5 +17,10 @@
       detail = 'outlet temperature compared with simulation solution'
       abs_zero = 1e-4
     []
+    [2D_enthalpy_channel]
+      type = 'Exodiff'
+      input = 'enthalpy_equation.i'
+      exodiff = 'enthalpy_equation_out.e'
+    [../]
   []
 []

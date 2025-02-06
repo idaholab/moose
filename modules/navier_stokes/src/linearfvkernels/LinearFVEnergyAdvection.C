@@ -22,8 +22,7 @@ LinearFVEnergyAdvection::validParams()
                              "advection term for the energy e.g. h=int(cp dT). A user may still "
                              "override what quantity is advected, but the default is temperature.");
   MooseEnum advected_quantity("enthalpy temperature", "enthalpy");
-  params.addParam<MooseEnum>(
-      "advected_quantity", advected_quantity, "The advected quantity");
+  params.addParam<MooseEnum>("advected_quantity", advected_quantity, "The advected quantity");
   params.addParam<Real>("cp", "Constant specific heat value");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",

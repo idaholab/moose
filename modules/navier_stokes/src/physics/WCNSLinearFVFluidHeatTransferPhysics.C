@@ -27,9 +27,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
       "orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
-  params.addParam<bool>("solve_for_enthalpy",
-                        false,
-                        "Whether to use an enthalpy variable or a temperature variable");
+  params.addParam<bool>(
+      "solve_for_enthalpy", false, "Whether to use an enthalpy variable or a temperature variable");
 
   // We could split between discretization and solver here.
   params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
@@ -42,7 +41,7 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
 WCNSLinearFVFluidHeatTransferPhysics::WCNSLinearFVFluidHeatTransferPhysics(
     const InputParameters & parameters)
   : WCNSFVFluidHeatTransferPhysicsBase(parameters),
-  _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy"))
+    _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy"))
 {
   if (_porous_medium_treatment)
     paramError("porous_medium_treatment", "Porous media not supported at this time");
