@@ -78,7 +78,7 @@ protected:
   virtual PetscErrorCode petscSnesSolver(int iblock,
                                          const libMesh::DenseVector<Real> & solution,
                                          libMesh::DenseVector<Real> & root);
-  friend PetscErrorCode formFunctionIW(SNES snes, Vec x, Vec f, void * ctxIW);
+  friend PetscErrorCode formFunctionIW(SNES snes, Vec x, Vec f, void * info);
 
   /// Computes implicit solve using PetSc
   virtual PetscErrorCode implicitPetscSolve(int iblock);
@@ -99,11 +99,11 @@ protected:
   libMesh::DenseMatrix<Real> _Wij_residual_matrix;
   const Real _g_grav;
   const Real & _kij;
-  unsigned int _n_cells;
-  unsigned int _n_gaps;
-  unsigned int _n_assemblies;
-  unsigned int _n_channels;
-  unsigned int _block_size;
+  const unsigned int _n_cells;
+  const unsigned int _n_gaps;
+  const unsigned int _n_assemblies;
+  const unsigned int _n_channels;
+  const unsigned int _block_size;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
