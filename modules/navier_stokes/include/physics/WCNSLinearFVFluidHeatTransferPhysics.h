@@ -24,6 +24,8 @@ public:
   WCNSLinearFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
 protected:
+  bool _solve_for_enthalpy;
+
 private:
   virtual void addSolverVariables() override;
 

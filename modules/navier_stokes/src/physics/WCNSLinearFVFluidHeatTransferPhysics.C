@@ -27,6 +27,9 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
       "orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
+  params.addParam<bool>("solve_for_enthalpy",
+                        false,
+                        "Whether to use an enthalpy variable or a temperature variable");
 
   // We could split between discretization and solver here.
   params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
@@ -38,10 +41,13 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
 
 WCNSLinearFVFluidHeatTransferPhysics::WCNSLinearFVFluidHeatTransferPhysics(
     const InputParameters & parameters)
-  : WCNSFVFluidHeatTransferPhysicsBase(parameters)
+  : WCNSFVFluidHeatTransferPhysicsBase(parameters),
+  _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy"))
 {
   if (_porous_medium_treatment)
     paramError("porous_medium_treatment", "Porous media not supported at this time");
+  if (_solve_for_enthalpy)
+    paramError("solve_for_enthalpy", "Enthalpy solve not supported at this time with Physics");
 }
 
 void
@@ -94,9 +100,13 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<LinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
-  if (!MooseUtils::isFloat(_specific_heat_name))
-    paramError(NS::cp, "Must be a Real number. Functors not supported at this time");
-  params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
+  if (!getParam<bool>("solve_for_enthalpy"))
+  {
+    params.set<MooseEnum>("advected_quantity") = "temperature";
+    if (!MooseUtils::isFloat(_specific_heat_name))
+      paramError(NS::cp, "Must be a Real number. Functors not supported at this time");
+    params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
+  }
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");
