@@ -19,7 +19,7 @@ InputParameters
 MeshGeneratorComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
-  params += PhysicsComponentBase::validParams();
+  params += ComponentPhysicsInterface::validParams();
   params.addRequiredParam<MeshGeneratorName>("mesh_generator", "Mesh generator providing the mesh");
   MooseEnum mesh_generator_type("saved_mesh final_generator");
   params.addRequiredParam<MooseEnum>("mesh_generator_type",
@@ -34,7 +34,7 @@ MeshGeneratorComponent::validParams()
 
 MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
   : ActionComponent(params),
-    PhysicsComponentBase(params),
+    ComponentPhysicsInterface(params),
     _mesh_generator_type(getParam<MooseEnum>("mesh_generator_type"))
 {
   if (_mesh_generator_type == "saved_mesh" && !isParamValid("saved_mesh_name"))

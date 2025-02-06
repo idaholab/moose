@@ -19,7 +19,7 @@ InputParameters
 CylinderComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
-  params += PhysicsComponentBase::validParams();
+  params += ComponentPhysicsInterface::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -43,7 +43,7 @@ CylinderComponent::validParams()
 
 CylinderComponent::CylinderComponent(const InputParameters & params)
   : ActionComponent(params),
-    PhysicsComponentBase(params),
+    ComponentPhysicsInterface(params),
     _radius(getParam<Real>("radius")),
     _height(getParam<Real>("length"))
 {
