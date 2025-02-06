@@ -14,6 +14,7 @@ advected_interp_method = 'upwind'
     xmax = ${L}
     nx = ${nx}
   []
+  allow_renumbering = false
 []
 
 [GlobalParams]
@@ -253,7 +254,7 @@ advected_interp_method = 'upwind'
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.95
-  num_iterations = 400
+  num_iterations = 100
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   energy_absolute_tolerance = 1e-6

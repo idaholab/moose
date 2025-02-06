@@ -107,6 +107,7 @@ k = 1
   [h_advection]
     type = LinearFVEnergyAdvection
     variable = T_fluid
+    advected_quantity = temperature
     cp = ${cp}
     advected_interp_method = ${advected_interp_method}
     rhie_chow_user_object = 'rc'

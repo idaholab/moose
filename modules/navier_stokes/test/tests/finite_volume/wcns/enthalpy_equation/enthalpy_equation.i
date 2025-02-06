@@ -1,5 +1,5 @@
 H = 0.015 #halfwidth of the channel, 10 cm of channel height
-L = 3
+L = 1
 bulk_u = 0.01
 p_ref = 101325.0
 #inlet_temp = 860.
@@ -15,8 +15,8 @@ advected_interp_method = 'upwind'
     xmax = ${L}
     ymin = -${H}
     ymax = ${H}
-    nx = 100
-    ny = 30
+    nx = 30
+    ny = 15
   []
 []
 
@@ -305,9 +305,9 @@ advected_interp_method = 'upwind'
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.9
   num_iterations = 200
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-8
+  pressure_absolute_tolerance = 1e-6
+  momentum_absolute_tolerance = 1e-6
+  energy_absolute_tolerance = 1e-6
   print_fields = false
   momentum_l_max_its = 1000
 
