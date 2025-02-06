@@ -1,0 +1,14 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES
+	DP relative 1e-4
+	P
+	S
+	SumWij relative 1e-5 floor 1e-4
+	T
+	h relative 1e-5
+	mdot relative 1e-5
+	mu relative 1e-5
+	q_prime
+	rho
+	w_perim

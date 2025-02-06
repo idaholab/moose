@@ -34,21 +34,21 @@ protected:
   std::vector<unsigned int> getSubChannelPins(unsigned int i) { return _chan_to_pin_map[i]; }
 
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// Distance between the neighbor fuel pins, pitch
-  Real _pitch;
+  const Real _pitch;
   /// fuel Pin diameter
-  Real _pin_diameter;
+  const Real _pin_diameter;
   /// Number of rings in the geometry
-  unsigned int _n_rings;
+  const unsigned int _n_rings;
   /// Half of gap between adjacent assemblies
-  Real _flat_to_flat;
+  const Real _flat_to_flat;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// x,y coordinates of the fuel pins
@@ -58,7 +58,7 @@ protected:
   /// Subdomain ID used for the mesh block
   const unsigned int & _block_id;
   /// Number of cells in the axial direction
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// Number of pins
   unsigned int _nrods;
   /// fuel pins that are belonging to each ring
@@ -70,7 +70,7 @@ protected:
   /// stores the fuel pins belonging to each subchannel
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// Flag to print out the detailed mesh assembly and coordinates
-  bool _verbose;
+  const bool _verbose;
 
 public:
   static InputParameters validParams();

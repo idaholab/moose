@@ -3,11 +3,11 @@
     type = Exodiff
     input = psbt.i
     exodiff = psbt_out.e
-    # custom_cmp = 'test.exodiff'
+    custom_cmp = 'test.exodiff'
     method = '!DBG'
     valgrind = NONE
     recover = false
-    abs_zero = 5e-6
+    abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
   []

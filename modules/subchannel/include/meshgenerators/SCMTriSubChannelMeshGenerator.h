@@ -24,13 +24,13 @@ public:
 
 protected:
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// block index
-  unsigned int _block_id;
+  const unsigned int _block_id;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
@@ -40,33 +40,33 @@ protected:
   /// form loss coefficient of the spacers
   const std::vector<Real> & _spacer_k;
   /// axial location of blockage (inlet, outlet) [m]
-  std::vector<Real> _z_blockage;
+  const std::vector<Real> _z_blockage;
   /// index of subchannels affected by blockage
-  std::vector<unsigned int> _index_blockage;
+  const std::vector<unsigned int> _index_blockage;
   /// area reduction of subchannels affected by blockage
-  std::vector<Real> _reduction_blockage;
+  const std::vector<Real> _reduction_blockage;
   /// form loss coefficient of subchannels affected by blockage
-  std::vector<Real> _k_blockage;
+  const std::vector<Real> _k_blockage;
   /// Distance between the neighbor fuel pins, pitch
-  Real _pitch;
+  const Real _pitch;
   /// Lateral form loss coefficient
   const Real & _kij;
   /// fuel Pin diameter
-  Real _pin_diameter;
+  const Real _pin_diameter;
   /// number of axial cells
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// number of rings of fuel pins
-  unsigned int _n_rings;
+  const unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;
   /// the distance between flat surfaces of the duct facing each other
-  Real _flat_to_flat;
+  const Real _flat_to_flat;
   /// wire diameter
-  Real _dwire;
+  const Real _dwire;
   /// wire lead length
-  Real _hwire;
+  const Real _hwire;
   /// the gap thickness between the duct and peripheral fuel pins
-  Real _duct_to_pin_gap;
+  const Real _duct_to_pin_gap;
 
   /// nodes
   std::vector<std::vector<Node *>> _nodes;

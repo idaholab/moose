@@ -78,23 +78,23 @@ protected:
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;
   /// number of axial cells
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// block index
-  unsigned int _block_id;
+  const unsigned int _block_id;
   /// Distance between the neighbor fuel pins, pitch
-  Real _pitch;
+  const Real _pitch;
   /// number of rings of fuel pins
-  unsigned int _n_rings;
+  const unsigned int _n_rings;
   /// the distance between flat surfaces of the duct facing each other
-  Real _flat_to_flat;
+  const Real _flat_to_flat;
 
 public:
   static InputParameters validParams();

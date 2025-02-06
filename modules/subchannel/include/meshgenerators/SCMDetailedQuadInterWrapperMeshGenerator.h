@@ -25,28 +25,28 @@ protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
 
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// Distance between the neighbor fuel pins, pitch
-  Real _assembly_pitch;
+  const Real _assembly_pitch;
   /// Fuel assembly dimensions
-  Real _assembly_side_x;
-  Real _assembly_side_y;
+  const Real _assembly_side_x;
+  const Real _assembly_side_y;
   /// Number of cells in the axial direction
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// Number of subchannels in the x direction
-  unsigned int _nx;
+  const unsigned int _nx;
   /// Number of subchannels in the y direction
-  unsigned int _ny;
+  const unsigned int _ny;
   /// Total number of subchannels
   unsigned int _n_channels;
   /// Half of gap between adjacent assemblies
-  Real _side_bypass_length;
+  const Real _side_bypass_length;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// Subdomain ID used for the mesh block

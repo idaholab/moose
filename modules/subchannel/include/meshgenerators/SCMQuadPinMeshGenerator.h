@@ -26,25 +26,25 @@ protected:
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// Distance between the neighbor fuel pins, pitch
-  Real _pitch;
+  const Real _pitch;
   /// number of subchannels in the x direction
-  unsigned int _nx;
+  const unsigned int _nx;
   /// number of subchannels in the y direction
-  unsigned int _ny;
+  const unsigned int _ny;
   /// number of axial cells
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// Pin nodes
   std::vector<std::vector<Node *>> _pin_nodes;
   /// block index
-  unsigned int _block_id;
+  const unsigned int _block_id;
 
 public:
   static InputParameters validParams();
