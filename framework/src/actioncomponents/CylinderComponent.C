@@ -12,7 +12,10 @@
 #include "RotationMatrix.h"
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
+// CylinderComponent is an exmaple of ComponentPhysicsInterface
 registerMooseAction("MooseApp", CylinderComponent, "init_component_physics");
+// CylinderComponent is an example of ComponentMaterialPropertyInterface
+registerMooseAction("MooseApp", CylinderComponent, "add_material");
 registerActionComponent("MooseApp", CylinderComponent);
 
 InputParameters
@@ -20,6 +23,7 @@ CylinderComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
   params += ComponentPhysicsInterface::validParams();
+  params += ComponentMaterialPropertyInterface::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -44,6 +48,7 @@ CylinderComponent::validParams()
 CylinderComponent::CylinderComponent(const InputParameters & params)
   : ActionComponent(params),
     ComponentPhysicsInterface(params),
+    ComponentMaterialPropertyInterface(params),
     _radius(getParam<Real>("radius")),
     _height(getParam<Real>("length"))
 {

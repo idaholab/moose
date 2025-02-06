@@ -46,9 +46,7 @@ DiffusionFV::addFVKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    params.set<MooseFunctorName>("coeff") = isParamValid("diffusivity_functor")
-                                                ? getParam<MooseFunctorName>("diffusivity_functor")
-                                                : "1";
+    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>("diffusivity_functor");
     getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }
   // Source term

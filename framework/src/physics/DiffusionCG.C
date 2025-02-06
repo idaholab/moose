@@ -61,10 +61,14 @@ DiffusionCG::addFEKernels()
     assignBlocks(params, _blocks);
 
     // Transfer the diffusivity parameter from the Physics to the kernel
+    // From parameters
     if (isParamValid("diffusivity_matprop"))
       params.set<MaterialPropertyName>("diffusivity") =
           getParam<MaterialPropertyName>("diffusivity_matprop");
     else if (isParamValid("diffusivity_functor"))
+      params.set<FunctionName>("function") = getParam<MooseFunctorName>("diffusivity_functor");
+    else
+      // TODO: From components
       params.set<MaterialPropertyName>("diffusivity") =
           getParam<MaterialPropertyName>("diffusivity_matprop");
 

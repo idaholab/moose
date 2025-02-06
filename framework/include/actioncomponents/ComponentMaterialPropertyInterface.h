@@ -1,0 +1,39 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "ActionComponent.h"
+#include "InputParameters.h"
+#include "MooseTypes.h"
+
+/**
+ * Helper class to help Components define the material properties the Physics may need
+ * from the parameters specified by the user
+ * Note: Trying out virtual inheritance. It makes things
+ *       a little easier to define as we can use the attributes
+ *       of the underlying ActionComponent
+ */
+class ComponentMaterialPropertyInterface : public virtual ActionComponent
+{
+public:
+  static InputParameters validParams();
+
+  ComponentMaterialPropertyInterface(const InputParameters & params);
+
+protected:
+  virtual void addMaterials() override;
+
+  /// Names of the material properties
+  const std::vector<std::string> _property_names;
+  /// Functor values of the material properties
+  const std::vector<MooseFunctorName> _property_functors;
+  /// Whether to use automatic differentiation when defining properties
+  const bool _use_ad_for_props;
+};
