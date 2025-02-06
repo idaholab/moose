@@ -65,8 +65,8 @@ During the SHRT transients, the mass flow rate and power vary. The normalized po
 
 Three simulation results are presented here and compared with experimental measurements:
 
-- item Results from the [DASSH](https://github.com/dassh-dev/examples/tree/master/Example-3) [!cite](atz2021ducted), subchannel code, which is used as a reference for subchannel agreement.
-- item Results from SCM with a uniform (axially and radially) pin power profile.
+- Results from the [DASSH](https://github.com/dassh-dev/examples/tree/master/Example-3) [!cite](atz2021ducted), subchannel code, which is used as a reference for subchannel agreement.
+- Results from SCM with a uniform (axially and radially) pin power profile.
 - Results from SCM only with the corrected power profile (axially and radially) computed via the Serpent-2 model.
 
 Aditional results can be found in the relevant publication [!cite](tano2024validation)

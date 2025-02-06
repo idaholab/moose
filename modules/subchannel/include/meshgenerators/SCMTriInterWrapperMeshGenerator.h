@@ -24,11 +24,11 @@ public:
 
 protected:
   /// unheated length of the fuel Pin at the entry of the assembly
-  Real _unheated_length_entry;
+  const Real _unheated_length_entry;
   /// heated length of the fuel Pin
-  Real _heated_length;
+  const Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
-  Real _unheated_length_exit;
+  const Real _unheated_length_exit;
   /// Lateral form loss coefficient
   const Real & _kij;
   /// axial location of nodes
@@ -36,19 +36,17 @@ protected:
   /// axial form loss coefficient per computational cell
   std::vector<std::vector<Real>> _k_grid;
   /// Distance between the neighbor fuel pins, assembly_pitch
-  Real _assembly_pitch;
-  /// assembly diameter
-  Real _pin_diameter;
+  const Real _assembly_pitch;
   /// number of axial cells
-  unsigned int _n_cells;
+  const unsigned int _n_cells;
   /// number of rings of fuel pins
-  unsigned int _n_rings;
+  const unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;
   /// the distance between flat surfaces of the duct facing each other
-  Real _flat_to_flat;
+  const Real _flat_to_flat;
   /// the gap thickness between the duct and peripheral fuel pins
-  Real _duct_to_pin_gap;
+  const Real _duct_to_pin_gap;
   /// whether the side bypass shape follows the hexagonal shape of the assemblies
   /// TODO: add a picture in the documentation of both tight and non-tight layouts
   const bool _tight_side_bypass;
@@ -76,7 +74,7 @@ protected:
   std::vector<std::vector<Real>> _pins_in_rings;
   /// stores the fuel pins belonging to each interstice
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
-  /// number of fuel pins
+  /// number of assemblies
   unsigned int _n_assemblies;
   /// number of gaps
   unsigned int _n_gaps;
