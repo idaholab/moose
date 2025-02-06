@@ -17,21 +17,23 @@
 #include "AuxiliarySystem.h"
 #include "SCM.h"
 
-struct CtxIW
+/// problem information to be used in the PETSc problem
+struct problemInfo
 {
   int iblock;
   InterWrapper1PhaseProblem * schp;
 };
 
+/// creates the residual function to be used in the PETCs snes context
 PetscErrorCode
-formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
+formFunctionIW(SNES, Vec x, Vec f, void * info)
 {
   const PetscScalar * xx;
   PetscScalar * ff;
   PetscInt size;
 
   PetscFunctionBegin;
-  CtxIW * cc = static_cast<CtxIW *>(ctxIW);
+  problemInfo * cc = static_cast<problemInfo *>(info);
   LibmeshPetscCall(VecGetSize(x, &size));
 
   libMesh::DenseVector<Real> solution_seed(size, 0.0);
@@ -55,7 +57,7 @@ formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
 InputParameters
 InterWrapper1PhaseProblem::validParams()
 {
-  MooseEnum schemes("upwind downwind central_difference peclet", "upwind");
+  MooseEnum schemes("upwind downwind central_difference exponential", "upwind");
   InputParameters params = ExternalProblem::validParams();
   params.addClassDescription("Base class of the interwrapper solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
@@ -67,16 +69,19 @@ InterWrapper1PhaseProblem::validParams()
   params.addParam<int>("T_maxit", 10, "Maximum number of iterations for inner temperature loop");
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
-  params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
+  params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance for ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
   params.addParam<MooseEnum>(
       "interpolation_scheme", schemes, "Interpolation scheme used for the method.");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
+  params.addParam<bool>("staggered_pressure",
+                        false,
+                        "Boolean to define the use of the staggered pressure formulation.");
   params.addParam<bool>(
-      "staggered_pressure", false, "Boolean to define the use of explicit or implicit solution.");
-  params.addParam<bool>(
-      "segregated", true, "Boolean to define whether to use a segregated solution.");
+      "segregated",
+      true,
+      "Boolean to define whether to use a segregated solver (physics solved independently).");
   params.addParam<bool>(
       "monolithic_thermal", false, "Boolean to define whether to use thermal monolithic solve.");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
@@ -97,6 +102,12 @@ InterWrapper1PhaseProblem::InterWrapper1PhaseProblem(const InputParameters & par
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.81),
     _kij(_subchannel_mesh.getKij()),
+    _n_cells(_subchannel_mesh.getNumOfAxialCells()),
+    _n_gaps(_subchannel_mesh.getNumOfGapsPerLayer()),
+    _n_assemblies(_subchannel_mesh.getNumOfAssemblies()),
+    _n_channels(_subchannel_mesh.getNumOfChannels()),
+    _block_size(_n_cells / _n_blocks),
+    _z_grid(_subchannel_mesh.getZGrid()),
     _one(1.0),
     _TR(isTransient() ? 1. : 0.),
     _compute_density(getParam<bool>("compute_density")),
@@ -122,12 +133,6 @@ InterWrapper1PhaseProblem::InterWrapper1PhaseProblem(const InputParameters & par
     _fp(nullptr),
     _Tpin_soln(nullptr)
 {
-  _n_cells = _subchannel_mesh.getNumOfAxialCells();
-  _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
-  _n_assemblies = _subchannel_mesh.getNumOfAssemblies();
-  _n_channels = _subchannel_mesh.getNumOfChannels();
-  _z_grid = _subchannel_mesh.getZGrid();
-  _block_size = _n_cells / _n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
   if (!_app.isRestarting() && !_app.isRecovering())
   {
@@ -322,15 +327,15 @@ InterWrapper1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
   {
     return 0.5;
   }
-  else if (_interpolation_scheme == "peclet")
+  else if (_interpolation_scheme == "exponential")
   {
     return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
   }
   else
   {
-    // Handle unexpected interpolation types
-    mooseError(name(), "Unknown interpolation type: ");
-    return -1.0; // or some other appropriate default/error value
+    mooseError(name(),
+               ": Interpolation scheme should be a string: upwind, downwind, central_difference, "
+               "exponential");
   }
 }
 
@@ -382,8 +387,7 @@ InterWrapper1PhaseProblem::populateVectorFromDense(Vec & x,
     unsigned int iz_ind = iz - first_axial_level;
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
     {
-      xx[iz_ind * cross_dimension + i_l] =
-          loc_solution(i_l, iz); // loc_solution(iz_ind*cross_dimension + i_l);
+      xx[iz_ind * cross_dimension + i_l] = loc_solution(i_l, iz);
     }
   }
   LibmeshPetscCall(VecRestoreArray(x, &xx));
@@ -519,7 +523,7 @@ InterWrapper1PhaseProblem::computeSumWij(int iblock)
       }
     }
   }
-  // Add to matrix if explicit
+  // Add to matrix if implicit
   else
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -1303,7 +1307,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
           auto S_out = (*_S_flow_soln)(node_out);
           auto S_interp = computeInterpolatedValue(S_out, S_in);
 
-          // Creating matrix of coefficients
+          // Creating matrix of coefficients and RHS vector
           PetscInt row = i_ch + _n_channels * iz_ind;
           PetscInt col = i_ch + _n_channels * iz_ind;
           PetscScalar value = -1.0 * S_interp;
@@ -2349,10 +2353,10 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
 #else
   LibmeshPetscCall(SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE));
 #endif
-  CtxIW ctxIW;
-  ctxIW.iblock = iblock;
-  ctxIW.schp = this;
-  LibmeshPetscCall(SNESSetFunction(snes, r, formFunctionIW, &ctxIW));
+  problemInfo info;
+  info.iblock = iblock;
+  info.schp = this;
+  LibmeshPetscCall(SNESSetFunction(snes, r, formFunctionIW, &info));
 
   LibmeshPetscCall(SNESGetKSP(snes, &ksp));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
@@ -2520,7 +2524,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   {
     mat_array[Q * field_num + 1] = NULL;
   }
-  //  mat_array[Q*field_num+1] = NULL;
 
   LibmeshPetscCall(MatDuplicate(_cmc_sys_Wij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]));
   LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
@@ -2797,7 +2800,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   {
     LibmeshPetscCall(VecDestroy(&vec_array[i]));
   }
-  _console << "Solver elements destroyed." << std::endl;
 
   /// Recovering the solutions
   Vec sol_mdot, sol_p, sol_Wij;
@@ -2987,7 +2989,6 @@ InterWrapper1PhaseProblem::externalSolve()
           }
           else
           {
-            _console << "No llores mas aqui estoy 2." << std::endl;
             if (_compute_power)
             {
               computeh(iblock);

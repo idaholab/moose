@@ -20,8 +20,7 @@ QuadSubChannel1PhaseProblem::validParams()
   params.addClassDescription(
       "Solver class for subchannels in a square lattice assembly and bare fuel pins");
   params.addRequiredParam<Real>("beta",
-                                "Thermal diffusion coefficient used in turbulent crossflow. This "
-                                "parameter in not user defined in triangular subchannels");
+                                "Thermal diffusion coefficient used in turbulent crossflow.");
   params.addParam<bool>(
       "default_friction_model",
       true,
@@ -210,6 +209,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
 {
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;
+  /// Pang, B. et al. KIT, 2013
   if (_default_friction_model)
   {
     Real a, b;
@@ -234,6 +234,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
     }
     return a * std::pow(Re, b);
   }
+  /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
   else
   {
     Real aL, b1L, b2L, cL;
