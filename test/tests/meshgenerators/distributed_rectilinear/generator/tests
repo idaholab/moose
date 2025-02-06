@@ -42,7 +42,7 @@
     input = 'distributed_rectilinear_mesh_generator.i'
     exodiff = 'distributed_rectilinear_mesh_generator_out_3d_ptscotch.e'
     ptscotch = true
-    petsc_version = '>=3.10.0'
+    capabilities = 'petsc>=3.10.0'
     valgrind = none
     cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Mesh/gmg/part_package=ptscotch Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d_ptscotch Outputs/hide="pid npid" '
     requirement = 'The system shall be able to generate 3D HEX8 mesh in parallel using ptscotch partitioner'

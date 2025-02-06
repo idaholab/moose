@@ -5,7 +5,7 @@
     exodiff = 'edge_crack_2d_out.e'
     map = false
     unique_id = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = 'The XFEM module shall have the capability to include '
                   'near-tip enrichment functions in 2D mechanics simulations.'
     design = 'LineSegmentCutUserObject.md '
@@ -19,7 +19,7 @@
     map = false
     unique_id = true
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     max_time = 400 # Slow test
     requirement = 'The XFEM module shall have the capability to include '
                   'near-tip enrichment functions in 3D mechanics simulations.'

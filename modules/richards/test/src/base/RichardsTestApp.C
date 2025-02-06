@@ -46,7 +46,7 @@ RichardsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
 void
 RichardsTestApp::registerApps()
 {
-  registerApp(RichardsApp);
+  RichardsApp::registerApps();
   registerApp(RichardsTestApp);
 }
 

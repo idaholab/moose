@@ -53,7 +53,6 @@
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
-    petsc_version = '>=3.8.4'
     prereq = testdirichlet
     requirement = 'The system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
     issues = '#10594'

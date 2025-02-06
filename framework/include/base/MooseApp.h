@@ -37,6 +37,8 @@
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
+#include "Capabilities.h"
+
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
@@ -48,6 +50,7 @@
 #include <unordered_set>
 #include <typeindex>
 #include <filesystem>
+#include <variant>
 
 // Forward declarations
 class Executioner;
@@ -382,6 +385,13 @@ private:
   void recursivelyCreateExecutors(const std::string & current_executor_name,
                                   std::list<std::string> & possible_roots,
                                   std::list<std::string> & current_branch);
+
+  /**
+   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
+   * Apps and Modules may register additional capabilities in their registerAll
+   * function.
+   */
+  void registerCapabilities();
 
 public:
   /**
@@ -1131,6 +1141,22 @@ protected:
    * has been fully set up and initialized.
    */
   void errorCheck();
+
+  /**
+   * Outputs machine readable data (JSON, YAML, etc.) either to the screen (if no filename was
+   * provided as an argument to the parameter param) or to a file (if a filename was provided).
+   */
+  void outputMachineReadableData(const std::string & param,
+                                 const std::string & start_marker,
+                                 const std::string & end_marker,
+                                 const std::string & data) const;
+  ///@{ register a new capability
+  static void addCapability(const std::string & capability,
+                            CapabilityUtils::Type value,
+                            const std::string & doc);
+  static void
+  addCapability(const std::string & capability, const char * value, const std::string & doc);
+  //@}
 
   /// Parameters of this object
   InputParameters _pars;

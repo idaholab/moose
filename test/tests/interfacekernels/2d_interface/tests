@@ -35,7 +35,6 @@
     input = coupled_value_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
     prereq = test
     issues = "#7437"
@@ -74,7 +73,6 @@
     requirement = 'The system shall not perform memory allocation for automatic scaling when computing values.'
     issues = '#12601'
     design = 'FEProblemSolve.md'
-    petsc_version = '>=3.9.0'
     max_parallel = 4 # Can't have zero dofs on any process for MatResetPreallocation
   []
 []

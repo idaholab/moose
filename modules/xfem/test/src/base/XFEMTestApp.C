@@ -45,7 +45,7 @@ XFEMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_t
 void
 XFEMTestApp::registerApps()
 {
-  registerApp(XFEMApp);
+  XFEMApp::registerApps();
   registerApp(XFEMTestApp);
 }
 
