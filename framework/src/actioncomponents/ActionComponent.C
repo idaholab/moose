@@ -49,6 +49,10 @@ ActionComponent::act()
   // sense to include the physics than to split it off into its own block
   else if (_current_task == "add_variable")
     addSolverVariables();
+  // Useful for declaring materials on a component, which helps keep the input of local material
+  // properties on the component
+  else if (_current_task == "add_material")
+    addMaterials();
   else
     // For a new task that isn't registered to ActionComponent in the framework
     actOnAdditionalTasks();
