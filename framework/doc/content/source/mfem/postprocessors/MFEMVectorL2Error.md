@@ -2,7 +2,7 @@
 
 ## Summary
 
-!syntax description /Postrocessors/MFEMVectorL2Error
+!syntax description /Postprocessors/MFEMVectorL2Error
 
 ## Overview
 
@@ -20,8 +20,8 @@ H(\mathrm{div})$ and $\vec{u}_{ex}$ is a vector function.
 
 !listing kernels/irrotational.i
 
-!syntax parameters /Postrocessors/MFEMVectorL2Error
+!syntax parameters /Postprocessors/MFEMVectorL2Error
 
-!syntax inputs /Postrocessors/MFEMVectorL2Error
+!syntax inputs /Postprocessors/MFEMVectorL2Error
 
-!syntax children /Postrocessors/MFEMVectorL2Error
+!syntax children /Postprocessors/MFEMVectorL2Error

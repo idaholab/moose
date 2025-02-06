@@ -2,7 +2,7 @@
 
 ## Summary
 
-!syntax description /Postrocessors/MFEML2Error
+!syntax description /Postprocessors/MFEML2Error
 
 ## Overview
 
@@ -18,8 +18,8 @@ where $u_{h} \in H^1 \lor L^2$ and $u_{ex}$ is a scalar function.
 
 !listing kernels/irrotational.i
 
-!syntax parameters /Postrocessors/MFEML2Error
+!syntax parameters /Postprocessors/MFEML2Error
 
-!syntax inputs /Postrocessors/MFEML2Error
+!syntax inputs /Postprocessors/MFEML2Error
 
-!syntax children /Postrocessors/MFEML2Error
+!syntax children /Postprocessors/MFEML2Error
