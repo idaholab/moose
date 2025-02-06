@@ -81,6 +81,12 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
 
   _time_integrator = _sys.queryTimeIntegrator(_var_num);
 
+  // Initialize AD zero with zero derivatives
+  const auto old_do = ADReal::do_derivatives;
+  ADReal::do_derivatives = true;
+  _ad_zero = 0.;
+  ADReal::do_derivatives = old_do;
+
   switch (_element_type)
   {
     case Moose::ElementType::Element:
@@ -416,545 +422,243 @@ MooseVariableData<OutputType>::divPhiFace() const
 }
 
 template <typename OutputType>
+template <bool monomial>
 void
-MooseVariableData<OutputType>::computeValues()
+MooseVariableData<OutputType>::computeValuesInternal()
 {
-  unsigned int num_dofs = _dof_indices.size();
-
+  const auto num_dofs = _dof_indices.size();
   if (num_dofs > 0)
     fetchDoFValues();
 
-  bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _current_qrule->n_points();
-  auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
-
-  for (auto tag : _required_vector_tags)
-  {
-    if (_need_vector_tag_u[tag])
-      _vector_tag_u[tag].resize(nqp);
-    if (_need_vector_tag_grad[tag])
-      _vector_tag_grad[tag].resize(nqp);
-  }
-
-  for (auto tag : active_coupleable_matrix_tags)
-    if (_need_matrix_tag_u[tag])
-      _matrix_tag_u[tag].resize(nqp);
-
-  if (_need_second)
-    _second_u.resize(nqp);
-
-  if (_need_curl)
-    _curl_u.resize(nqp);
-
-  if (_need_div)
-    _div_u.resize(nqp);
-
-  if (_need_second_previous_nl)
-    _second_u_previous_nl.resize(nqp);
-
-  if (is_transient)
-  {
-    if (_need_u_dot)
-      _u_dot.resize(nqp);
-
-    if (_need_u_dotdot)
-      _u_dotdot.resize(nqp);
-
-    if (_need_u_dot_old)
-      _u_dot_old.resize(nqp);
-
-    if (_need_u_dotdot_old)
-      _u_dotdot_old.resize(nqp);
-
-    if (_need_du_dot_du)
-      _du_dot_du.resize(nqp);
-
-    if (_need_du_dotdot_du)
-      _du_dotdot_du.resize(nqp);
-
-    if (_need_grad_dot)
-      _grad_u_dot.resize(nqp);
-
-    if (_need_grad_dotdot)
-      _grad_u_dotdot.resize(nqp);
-
-    if (_need_second_old)
-      _second_u_old.resize(nqp);
-
-    if (_need_curl_old)
-      _curl_u_old.resize(nqp);
-
-    if (_need_div_old)
-      _div_u_old.resize(nqp);
-
-    if (_need_second_older)
-      _second_u_older.resize(nqp);
-  }
-
-  for (unsigned int i = 0; i < nqp; ++i)
-  {
-    for (auto tag : _required_vector_tags)
-    {
-      if (_need_vector_tag_u[tag])
-        _vector_tag_u[tag][i] = 0;
-      if (_need_vector_tag_grad[tag])
-        _vector_tag_grad[tag][i] = 0;
-    }
-
-    for (auto tag : active_coupleable_matrix_tags)
-      if (_need_matrix_tag_u[tag])
-        _matrix_tag_u[tag][i] = 0;
-
-    if (_need_second)
-      _second_u[i] = 0;
-
-    if (_need_curl)
-      _curl_u[i] = 0;
-
-    if (_need_div)
-      _div_u[i] = 0;
-
-    if (_need_second_previous_nl)
-      _second_u_previous_nl[i] = 0;
-
-    if (is_transient)
-    {
-      if (_need_u_dot)
-        _u_dot[i] = 0;
-
-      if (_need_u_dotdot)
-        _u_dotdot[i] = 0;
-
-      if (_need_u_dot_old)
-        _u_dot_old[i] = 0;
-
-      if (_need_u_dotdot_old)
-        _u_dotdot_old[i] = 0;
-
-      if (_need_du_dot_du)
-        _du_dot_du[i] = 0;
-
-      if (_need_du_dotdot_du)
-        _du_dotdot_du[i] = 0;
-
-      if (_need_grad_dot)
-        _grad_u_dot[i] = 0;
-
-      if (_need_grad_dotdot)
-        _grad_u_dotdot[i] = 0;
-
-      if (_need_second_old)
-        _second_u_old[i] = 0;
-
-      if (_need_second_older)
-        _second_u_older[i] = 0;
-
-      if (_need_curl_old)
-        _curl_u_old[i] = 0;
-
-      if (_need_div_old)
-        _div_u_old[i] = 0;
-    }
-  }
-
-  bool second_required =
-      _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
-  bool curl_required = _need_curl || _need_curl_old;
-  bool div_required = _need_div || _need_div_old;
-
-  for (unsigned int i = 0; i < num_dofs; i++)
-  {
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      const OutputType phi_local = (*_current_phi)[i][qp];
-      const typename OutputTools<OutputType>::OutputGradient dphi_qp = (*_current_grad_phi)[i][qp];
-
-      if (is_transient)
-      {
-        if (_need_u_dot)
-          _u_dot[qp] += phi_local * _dof_values_dot[i];
-
-        if (_need_u_dotdot)
-          _u_dotdot[qp] += phi_local * _dof_values_dotdot[i];
-
-        if (_need_u_dot_old)
-          _u_dot_old[qp] += phi_local * _dof_values_dot_old[i];
-
-        if (_need_u_dotdot_old)
-          _u_dotdot_old[qp] += phi_local * _dof_values_dotdot_old[i];
-
-        if (_need_grad_dot)
-          _grad_u_dot[qp].add_scaled(dphi_qp, _dof_values_dot[i]);
-
-        if (_need_grad_dotdot)
-          _grad_u_dotdot[qp].add_scaled(dphi_qp, _dof_values_dotdot[i]);
-
-        if (_need_du_dot_du)
-          _du_dot_du[qp] = _dof_du_dot_du[i];
-
-        if (_need_du_dotdot_du)
-          _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
-      }
-
-      if (second_required)
-      {
-        mooseAssert(
-            _current_second_phi,
-            "We're requiring a second calculation but have not set a second shape function!");
-        const typename OutputTools<OutputType>::OutputSecond d2phi_local =
-            (*_current_second_phi)[i][qp];
-
-        if (_need_second)
-          _second_u[qp].add_scaled(d2phi_local, _vector_tags_dof_u[_solution_tag][i]);
-
-        if (_need_second_previous_nl)
-          _second_u_previous_nl[qp].add_scaled(d2phi_local,
-                                               _vector_tags_dof_u[_previous_nl_solution_tag][i]);
-
-        if (is_transient)
-        {
-          if (_need_second_old)
-            _second_u_old[qp].add_scaled(d2phi_local, _vector_tags_dof_u[_old_solution_tag][i]);
-
-          if (_need_second_older)
-            _second_u_older[qp].add_scaled(d2phi_local, _vector_tags_dof_u[_older_solution_tag][i]);
-        }
-      }
-
-      if (curl_required)
-      {
-        mooseAssert(_current_curl_phi,
-                    "We're requiring a curl calculation but have not set a curl shape function!");
-        const OutputType curl_phi_local = (*_current_curl_phi)[i][qp];
-
-        if (_need_curl)
-          _curl_u[qp] += curl_phi_local * _vector_tags_dof_u[_solution_tag][i];
-
-        if (is_transient && _need_curl_old)
-          _curl_u_old[qp] += curl_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
-      }
-
-      if (div_required)
-      {
-        mooseAssert(
-            _current_div_phi,
-            "We're requiring a divergence calculation but have not set a div shape function!");
-        const OutputShapeDivergence div_phi_local = (*_current_div_phi)[i][qp];
-
-        if (_need_div)
-          _div_u[qp] += div_phi_local * _vector_tags_dof_u[_solution_tag][i];
-
-        if (is_transient && _need_div_old)
-          _div_u_old[qp] += div_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
-      }
-
-      for (auto tag : _required_vector_tags)
-      {
-        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
-        {
-          if (_need_vector_tag_u[tag])
-            _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
-          if (_need_vector_tag_grad[tag])
-            _vector_tag_grad[tag][qp].add_scaled(dphi_qp, _vector_tags_dof_u[tag][i]);
-        }
-      }
-
-      for (auto tag : active_coupleable_matrix_tags)
-        if (_need_matrix_tag_u[tag])
-          _matrix_tag_u[tag][qp] += phi_local * _matrix_tags_dof_u[tag][i];
-    }
-  }
-
-  // Automatic differentiation
-  if (_need_ad)
-    computeAD(num_dofs, nqp);
-}
-
-template <>
-void
-MooseVariableData<RealEigenVector>::computeValues()
-{
-  unsigned int num_dofs = _dof_indices.size();
-
-  if (num_dofs > 0)
-    fetchDoFValues();
-
-  bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _current_qrule->n_points();
+  const bool is_transient = _subproblem.isTransient();
+  const auto nqp = _current_qrule->n_points();
   auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
   // Map grad_phi using Eigen so that we can perform array operations easier
-  if (_qrule == _current_qrule)
+  if constexpr (std::is_same_v<OutputType, RealEigenVector>)
   {
-    _mapped_grad_phi.resize(num_dofs);
-    for (unsigned int i = 0; i < num_dofs; i++)
+    if (_qrule == _current_qrule)
     {
-      _mapped_grad_phi[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
-        new (&_mapped_grad_phi[i][qp])
-            Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+      _mapped_grad_phi.resize(num_dofs);
+      for (const auto i : make_range(num_dofs))
+      {
+        _mapped_grad_phi[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
+        for (const auto qp : make_range(nqp))
+          // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
+          new (&_mapped_grad_phi[i][qp])
+              Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+      }
     }
-  }
-  else
-  {
-    _mapped_grad_phi_face.resize(num_dofs);
-    for (unsigned int i = 0; i < num_dofs; i++)
+    else
     {
-      _mapped_grad_phi_face[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
-        new (&_mapped_grad_phi_face[i][qp])
-            Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+      _mapped_grad_phi_face.resize(num_dofs);
+      for (const auto i : make_range(num_dofs))
+      {
+        _mapped_grad_phi_face[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
+        for (const auto qp : make_range(nqp))
+          // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
+          new (&_mapped_grad_phi_face[i][qp])
+              Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+      }
     }
   }
 
+  mooseAssert(
+      !(_need_second || _need_second_old || _need_second_older || _need_second_previous_nl) ||
+          _current_second_phi,
+      "We're requiring a second calculation but have not set a second shape function!");
+  mooseAssert(!(_need_curl || _need_curl_old) || _current_curl_phi,
+              "We're requiring a curl calculation but have not set a curl shape function!");
+  mooseAssert(!(_need_div || _need_div_old) || _current_div_phi,
+              "We're requiring a divergence calculation but have not set a div shape function!");
+
+  // Helper for filling values
+  const auto fill = [this, nqp, num_dofs](auto & dest, const auto & phi, const auto & dof_values)
+  {
+    if constexpr (monomial)
+      libmesh_ignore(num_dofs);
+
+    // Deduce OutputType
+    constexpr bool is_real = std::is_same_v<OutputType, Real>;
+    constexpr bool is_real_vector = std::is_same_v<OutputType, RealVectorValue>;
+    constexpr bool is_eigen = std::is_same_v<OutputType, RealEigenVector>;
+    static_assert(is_real || is_real_vector || is_eigen, "Unsupported type");
+
+    // this is only used in the RealEigenVector case to get this->_count
+    if constexpr (!is_eigen)
+      libmesh_ignore(this);
+
+    // Deduce type of value within dest MooseArray
+    using dest_array_type = typename std::remove_reference_t<decltype(dest)>::value_type;
+    constexpr bool is_value = std::is_same_v<dest_array_type, OutputType>;
+    constexpr bool is_gradient = std::is_same_v<dest_array_type, OutputGradient>;
+    constexpr bool is_second = std::is_same_v<dest_array_type, OutputSecond>;
+    constexpr bool is_divergence = std::is_same_v<dest_array_type, OutputDivergence>;
+    static_assert(is_value || is_gradient || is_second || is_divergence,
+                  "Unsupported destination array type");
+
+    // Sets a value to zero at a quadrature point
+    const auto set_zero = [this, &dest](const auto qp)
+    {
+      if constexpr (!is_eigen)
+        libmesh_ignore(this);
+
+      if constexpr (is_real || is_real_vector)
+        dest[qp] = 0;
+      else if constexpr (is_eigen)
+      {
+        if constexpr (is_value)
+          dest[qp].setZero(this->_count);
+        else if constexpr (is_gradient)
+          dest[qp].setZero(this->_count, LIBMESH_DIM);
+        else if constexpr (is_second)
+          dest[qp].setZero(this->_count, LIBMESH_DIM * LIBMESH_DIM);
+        else
+          static_assert(Moose::always_false<OutputType, dest_array_type>, "Unsupported type");
+      }
+      else
+        static_assert(Moose::always_false<OutputType, dest_array_type>, "Unsupported type");
+    };
+
+    // Accumulates a value
+    const auto accumulate = [&dest, &phi, &dof_values](const auto i, const auto qp)
+    {
+      if constexpr (is_real || is_real_vector || (is_eigen && is_value))
+      {
+        if constexpr (is_value || is_divergence)
+          dest[qp] += phi[i][qp] * dof_values[i];
+        else if constexpr (is_gradient || is_second)
+          dest[qp].add_scaled(phi[i][qp], dof_values[i]);
+        else
+          static_assert(Moose::always_false<OutputType, dest_array_type>, "Unsupported type");
+      }
+      else if constexpr (is_eigen)
+      {
+        if constexpr (is_gradient)
+        {
+          for (const auto d : make_range(Moose::dim))
+            dest[qp].col(d) += phi[i][qp](d) * dof_values[i];
+        }
+        else if constexpr (is_second)
+        {
+          for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
+            for (const auto d2 : make_range(Moose::dim))
+              dest[qp].col(d++) += phi[i][qp](d1, d2) * dof_values[i];
+        }
+        else
+          static_assert(Moose::always_false<OutputType, dest_array_type>, "Unsupported type");
+      }
+      else
+        static_assert(Moose::always_false<OutputType, dest_array_type>, "Unsupported type");
+    };
+
+    dest.resize(nqp);
+
+    // Monomial case, accumulate dest[0] and set dest[>0] to dest[0]
+    if constexpr (monomial)
+    {
+      mooseAssert(num_dofs == 1, "Should have only one dof");
+      set_zero(0);
+      accumulate(0, 0);
+      for (unsigned int qp = 1; qp < nqp; ++qp)
+        dest[qp] = dest[0];
+    }
+    // Non monomial case
+    else
+    {
+      for (const auto qp : make_range(nqp))
+        set_zero(qp);
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
+          accumulate(i, qp);
+    }
+  };
+
+  // Curl
+  if (_need_curl)
+    fill(_curl_u, *_current_curl_phi, _vector_tags_dof_u[_solution_tag]);
+  if (_need_curl_old)
+    fill(_curl_u_old, *_current_curl_phi, _vector_tags_dof_u[_old_solution_tag]);
+
+  // Div
+  if (_need_div)
+    fill(_div_u, *_current_div_phi, _vector_tags_dof_u[_solution_tag]);
+  if (is_transient && _need_div_old)
+    fill(_div_u_old, *_current_div_phi, _vector_tags_dof_u[_old_solution_tag]);
+
+  // Second
+  if (_need_second)
+    fill(_second_u, *_current_second_phi, _vector_tags_dof_u[_solution_tag]);
+  if (_need_second_previous_nl)
+    fill(
+        _second_u_previous_nl, *_current_second_phi, _vector_tags_dof_u[_previous_nl_solution_tag]);
+
+  // Vector tags
   for (auto tag : _required_vector_tags)
   {
-    if (_need_vector_tag_u[tag])
-      _vector_tag_u[tag].resize(nqp);
-    if (_need_vector_tag_grad[tag])
-      _vector_tag_grad[tag].resize(nqp);
+    if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+      fill(_vector_tag_u[tag], *_current_phi, _vector_tags_dof_u[tag]);
+    if (_need_vector_tag_grad[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+      fill(_vector_tag_grad[tag], *_current_grad_phi, _vector_tags_dof_u[tag]);
   }
 
+  // Matrix tags
   for (auto tag : active_coupleable_matrix_tags)
     if (_need_matrix_tag_u[tag])
-      _matrix_tag_u[tag].resize(nqp);
+      fill(_matrix_tag_u[tag], *_current_phi, _matrix_tags_dof_u[tag]);
 
-  if (_need_second)
-    _second_u.resize(nqp);
-
-  if (_need_curl)
-    _curl_u.resize(nqp);
-
-  if (_need_div)
-    _div_u.resize(nqp);
-
-  if (_need_second_previous_nl)
-    _second_u_previous_nl.resize(nqp);
-
+  // Derivatives and old values
   if (is_transient)
   {
+    if (_need_second_old)
+      fill(_second_u_old, *_current_second_phi, _vector_tags_dof_u[_old_solution_tag]);
+    if (_need_second_older)
+      fill(_second_u_older, *_current_second_phi, _vector_tags_dof_u[_older_solution_tag]);
     if (_need_u_dot)
-      _u_dot.resize(nqp);
-
+      fill(_u_dot, *_current_phi, _dof_values_dot);
     if (_need_u_dotdot)
-      _u_dotdot.resize(nqp);
-
+      fill(_u_dotdot, *_current_phi, _dof_values_dotdot);
     if (_need_u_dot_old)
-      _u_dot_old.resize(nqp);
-
+      fill(_u_dot_old, *_current_phi, _dof_values_dot_old);
     if (_need_u_dotdot_old)
-      _u_dotdot_old.resize(nqp);
+      fill(_u_dotdot_old, *_current_phi, _dof_values_dotdot_old);
 
     if (_need_du_dot_du)
+    {
       _du_dot_du.resize(nqp);
-
+      for (const auto qp : make_range(nqp))
+        _du_dot_du[qp] = 0.;
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
+          _du_dot_du[qp] = _dof_du_dot_du[i];
+    }
     if (_need_du_dotdot_du)
+    {
       _du_dotdot_du.resize(nqp);
+      for (const auto qp : make_range(nqp))
+        _du_dotdot_du[qp] = 0.;
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
+          _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
+    }
 
     if (_need_grad_dot)
-      _grad_u_dot.resize(nqp);
-
+      fill(_grad_u_dot, *_current_grad_phi, _dof_values_dot);
     if (_need_grad_dotdot)
-      _grad_u_dotdot.resize(nqp);
-
-    if (_need_second_old)
-      _second_u_old.resize(nqp);
-
-    if (_need_curl_old)
-      _curl_u_old.resize(nqp);
-
-    if (_need_div_old)
-      _div_u_old.resize(nqp);
-
-    if (_need_second_older)
-      _second_u_older.resize(nqp);
+      fill(_grad_u_dotdot, *_current_grad_phi, _dof_values_dotdot);
   }
 
-  for (unsigned int i = 0; i < nqp; ++i)
-  {
-    for (auto tag : _required_vector_tags)
-    {
-      if (_need_vector_tag_u[tag])
-        _vector_tag_u[tag][i].setZero(_count);
-      if (_need_vector_tag_grad[tag])
-        _vector_tag_grad[tag][i].setZero(_count, LIBMESH_DIM);
-    }
+  // Automatic differentiation, not for eigen
+  if constexpr (!std::is_same_v<OutputType, RealEigenVector>)
+    if (_need_ad)
+      computeAD(num_dofs, nqp);
+}
 
-    for (auto tag : active_coupleable_matrix_tags)
-      if (_need_matrix_tag_u[tag])
-        _matrix_tag_u[tag][i].setZero(_count);
-
-    if (_need_second)
-      _second_u[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
-
-    if (_need_curl)
-      _curl_u[i].setZero(_count);
-
-    if (_need_div)
-      _div_u[i].setZero(_count);
-
-    if (_need_second_previous_nl)
-      _second_u_previous_nl[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
-
-    if (is_transient)
-    {
-      if (_need_u_dot)
-        _u_dot[i].setZero(_count);
-
-      if (_need_u_dotdot)
-        _u_dotdot[i].setZero(_count);
-
-      if (_need_u_dot_old)
-        _u_dot_old[i].setZero(_count);
-
-      if (_need_u_dotdot_old)
-        _u_dotdot_old[i].setZero(_count);
-
-      if (_need_du_dot_du)
-        _du_dot_du[i] = 0;
-
-      if (_need_du_dotdot_du)
-        _du_dotdot_du[i] = 0;
-
-      if (_need_grad_dot)
-        _grad_u_dot[i].setZero(_count, LIBMESH_DIM);
-
-      if (_need_grad_dotdot)
-        _grad_u_dotdot[i].setZero(_count, LIBMESH_DIM);
-
-      if (_need_second_old)
-        _second_u_old[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
-
-      if (_need_second_older)
-        _second_u_older[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
-
-      if (_need_curl_old)
-        _curl_u_old[i].setZero(_count);
-
-      if (_need_div_old)
-        _div_u_old[i].setZero(_count);
-    }
-  }
-
-  bool second_required =
-      _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
-  bool curl_required = _need_curl || _need_curl_old;
-  bool div_required = _need_div || _need_div_old;
-
-  for (unsigned int i = 0; i < num_dofs; i++)
-  {
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      const OutputShape phi_local = (*_current_phi)[i][qp];
-      const OutputShapeGradient dphi_qp = (*_current_grad_phi)[i][qp];
-
-      if (is_transient)
-      {
-        if (_need_u_dot)
-          _u_dot[qp] += phi_local * _dof_values_dot[i];
-
-        if (_need_u_dotdot)
-          _u_dotdot[qp] += phi_local * _dof_values_dotdot[i];
-
-        if (_need_u_dot_old)
-          _u_dot_old[qp] += phi_local * _dof_values_dot_old[i];
-
-        if (_need_u_dotdot_old)
-          _u_dotdot_old[qp] += phi_local * _dof_values_dotdot_old[i];
-
-        if (_need_grad_dot)
-          for (const auto d : make_range(Moose::dim))
-            _grad_u_dot[qp].col(d) += dphi_qp(d) * _dof_values_dot[i];
-
-        if (_need_grad_dotdot)
-          for (const auto d : make_range(Moose::dim))
-            _grad_u_dotdot[qp].col(d) += dphi_qp(d) * _dof_values_dotdot[i];
-
-        if (_need_du_dot_du)
-          _du_dot_du[qp] = _dof_du_dot_du[i];
-
-        if (_need_du_dotdot_du)
-          _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
-      }
-
-      if (second_required)
-      {
-        mooseAssert(
-            _current_second_phi,
-            "We're requiring a second calculation but have not set a second shape function!");
-        const RealTensorValue d2phi_local = (*_current_second_phi)[i][qp];
-
-        if (_need_second)
-          for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
-            for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
-              _second_u[qp].col(d++) += d2phi_local(d1, d2) * _vector_tags_dof_u[_solution_tag][i];
-
-        if (_need_second_previous_nl)
-          for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
-            for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
-              _second_u_previous_nl[qp].col(d++) +=
-                  d2phi_local(d1, d2) * _vector_tags_dof_u[_previous_nl_solution_tag][i];
-
-        if (is_transient)
-        {
-          if (_need_second_old)
-            for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
-              for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
-                _second_u_old[qp].col(d++) +=
-                    d2phi_local(d1, d2) * _vector_tags_dof_u[_old_solution_tag][i];
-
-          if (_need_second_older)
-            for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
-              for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
-                _second_u_older[qp].col(d++) +=
-                    d2phi_local(d1, d2) * _vector_tags_dof_u[_older_solution_tag][i];
-        }
-      }
-
-      if (curl_required)
-      {
-        mooseAssert(_current_curl_phi,
-                    "We're requiring a curl calculation but have not set a curl shape function!");
-        const auto curl_phi_local = (*_current_curl_phi)[i][qp];
-
-        if (_need_curl)
-          _curl_u[qp] += curl_phi_local * _vector_tags_dof_u[_solution_tag][i];
-
-        if (is_transient && _need_curl_old)
-          _curl_u_old[qp] += curl_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
-      }
-
-      if (div_required)
-      {
-        mooseAssert(_current_div_phi,
-                    "We're requiring a divergence calculation but have not set a divergence shape "
-                    "function!");
-        const auto div_phi_local = (*_current_div_phi)[i][qp];
-
-        if (_need_div)
-          _div_u[qp] += div_phi_local * _vector_tags_dof_u[_solution_tag][i];
-
-        if (is_transient && _need_div_old)
-          _div_u_old[qp] += div_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
-      }
-
-      for (auto tag : _required_vector_tags)
-      {
-        if (_need_vector_tag_u[tag])
-          _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
-        if (_need_vector_tag_grad[tag])
-          for (const auto d : make_range(Moose::dim))
-            _vector_tag_grad[tag][qp].col(d) += dphi_qp(d) * _vector_tags_dof_u[tag][i];
-      }
-
-      for (auto tag : active_coupleable_matrix_tags)
-        if (_need_matrix_tag_u[tag])
-          _matrix_tag_u[tag][qp] += phi_local * _matrix_tags_dof_u[tag][i];
-    }
-  }
-  // No AD support for array variable yet.
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeValues()
+{
+  computeValuesInternal</* monomial = */ false>();
 }
 
 template <typename OutputType>
@@ -964,329 +668,145 @@ MooseVariableData<OutputType>::computeMonomialValues()
   if (_dof_indices.size() == 0)
     return;
 
+  // Monomial optimizations are not appropriate after p-refinement
   if (_elem->p_level())
-  {
-    // The optimizations in this routine are not appropriate after p-refinement
     computeValues();
-    return;
-  }
-
-  bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _current_qrule->n_points();
-
-  if (_need_second)
-    _second_u.resize(nqp);
-
-  if (_need_second_previous_nl)
-    _second_u_previous_nl.resize(nqp);
-
-  if (is_transient)
-  {
-    if (_need_u_dot)
-      _u_dot.resize(nqp);
-
-    if (_need_u_dotdot)
-      _u_dotdot.resize(nqp);
-
-    if (_need_u_dot_old)
-      _u_dot_old.resize(nqp);
-
-    if (_need_u_dotdot_old)
-      _u_dotdot_old.resize(nqp);
-
-    if (_need_du_dot_du)
-      _du_dot_du.resize(nqp);
-
-    if (_need_du_dotdot_du)
-      _du_dotdot_du.resize(nqp);
-
-    if (_need_second_old)
-      _second_u_old.resize(nqp);
-
-    if (_need_second_older)
-      _second_u_older.resize(nqp);
-  }
-
-  if (is_transient)
-  {
-    if (_need_dof_values_dot)
-      _dof_values_dot.resize(1);
-    if (_need_dof_values_dotdot)
-      _dof_values_dotdot.resize(1);
-    if (_need_dof_values_dot_old)
-      _dof_values_dot_old.resize(1);
-    if (_need_dof_values_dotdot_old)
-      _dof_values_dotdot_old.resize(1);
-  }
-
-  const dof_id_type & idx = _dof_indices[0];
-  Real u_dot = 0;
-  Real u_dotdot = 0;
-  Real u_dot_old = 0;
-  Real u_dotdot_old = 0;
-  const Real & du_dot_du = _sys.duDotDu(_var_num);
-  const Real & du_dotdot_du = _sys.duDotDotDu();
-
-  if (is_transient)
-  {
-    if (_sys.solutionUDot())
-      u_dot = (*_sys.solutionUDot())(idx);
-    if (_sys.solutionUDotDot())
-      u_dotdot = (*_sys.solutionUDotDot())(idx);
-    if (_sys.solutionUDotOld())
-      u_dot_old = (*_sys.solutionUDotOld())(idx);
-    if (_sys.solutionUDotDotOld())
-      u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
-
-    if (_need_dof_values_dot)
-      _dof_values_dot[0] = u_dot;
-
-    if (_need_dof_values_dotdot)
-      _dof_values_dotdot[0] = u_dotdot;
-  }
-
-  auto phi = (*_current_phi)[0][0];
-
-  if (is_transient)
-  {
-    if (_need_u_dot)
-      _u_dot[0] = phi * u_dot;
-
-    if (_need_u_dotdot)
-      _u_dotdot[0] = phi * u_dotdot;
-
-    if (_need_u_dot_old)
-      _u_dot_old[0] = phi * u_dot_old;
-
-    if (_need_u_dotdot_old)
-      _u_dotdot_old[0] = phi * u_dotdot_old;
-
-    if (_need_du_dot_du)
-      _du_dot_du[0] = du_dot_du;
-
-    if (_need_du_dotdot_du)
-      _du_dotdot_du[0] = du_dotdot_du;
-  }
-
-  for (unsigned qp = 1; qp < nqp; ++qp)
-  {
-    if (is_transient)
-    {
-      if (_need_u_dot)
-        _u_dot[qp] = _u_dot[0];
-
-      if (_need_u_dotdot)
-        _u_dotdot[qp] = _u_dotdot[0];
-
-      if (_need_u_dot_old)
-        _u_dot_old[qp] = _u_dot_old[0];
-
-      if (_need_u_dotdot_old)
-        _u_dotdot_old[qp] = _u_dotdot_old[0];
-
-      if (_need_du_dot_du)
-        _du_dot_du[qp] = _du_dot_du[0];
-
-      if (_need_du_dotdot_du)
-        _du_dotdot_du[qp] = _du_dotdot_du[0];
-    }
-  }
-
-  auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
-
-  for (auto tag : _required_vector_tags)
-  {
-    if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
-      if ((_subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
-           _subproblem.safeAccessTaggedVectors()) ||
-          _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
-        // tag is defined on problem but may not be used by a system
-        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
-        {
-          auto & vec = _sys.getVector(tag);
-          _vector_tags_dof_u[tag].resize(1);
-          _vector_tags_dof_u[tag][0] = vec(_dof_indices[0]);
-        }
-
-    if (_need_vector_tag_u[tag])
-    {
-      _vector_tag_u[tag].resize(nqp);
-      auto v = phi * _vector_tags_dof_u[tag][0];
-      for (unsigned int qp = 0; qp < nqp; ++qp)
-        _vector_tag_u[tag][qp] = v;
-    }
-    if (_need_vector_tag_grad[tag])
-      _vector_tag_grad[tag].resize(nqp);
-  }
-
-  if (_subproblem.safeAccessTaggedMatrices())
-  {
-    auto & active_coupleable_matrix_tags =
-        _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
-    for (auto tag : active_coupleable_matrix_tags)
-    {
-      _matrix_tags_dof_u[tag].resize(1);
-      if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
-        {
-          auto & mat = _sys.getMatrix(tag);
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-            _matrix_tags_dof_u[tag][0] = mat(_dof_indices[0], _dof_indices[0]);
-          }
-        }
-    }
-  }
-  for (auto tag : active_coupleable_matrix_tags)
-    if (_need_matrix_tag_u[tag])
-    {
-      _matrix_tag_u[tag].resize(nqp);
-      auto v = phi * _matrix_tags_dof_u[tag][0];
-      for (unsigned int qp = 0; qp < nqp; ++qp)
-        _matrix_tag_u[tag][qp] = v;
-    }
-}
-
-template <>
-void
-MooseVariableData<RealEigenVector>::computeMonomialValues()
-{
-  // FIXME: will think of optimization later
-  computeValues();
+  else
+    computeValuesInternal</* monomial = */ true>();
 }
 
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
 {
-  // Have to do this because upon construction this won't initialize any of the derivatives
-  // (because DualNumber::do_derivatives is false at that time).
-  _ad_zero = 0;
-
-  _ad_dof_values.resize(num_dofs);
-  if (_need_ad_u)
-    _ad_u.resize(nqp);
-
-  if (_need_ad_grad_u)
-    _ad_grad_u.resize(nqp);
-
-  if (_need_ad_second_u)
-    _ad_second_u.resize(nqp);
-
-  if (_need_ad_u_dot)
-  {
-    _ad_dofs_dot.resize(num_dofs);
-    _ad_u_dot.resize(nqp);
-  }
-  if (_need_ad_grad_u_dot)
-    _ad_grad_u_dot.resize(nqp);
-
-  if (_need_ad_u_dotdot)
-  {
-    _ad_dofs_dotdot.resize(num_dofs);
-    _ad_u_dotdot.resize(nqp);
-  }
-
   const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
-  for (unsigned int qp = 0; qp < nqp; qp++)
-  {
-    if (_need_ad_u)
-      _ad_u[qp] = _ad_zero;
-
-    if (_need_ad_grad_u)
-      _ad_grad_u[qp] = _ad_zero;
-
-    if (_need_ad_second_u)
-      _ad_second_u[qp] = _ad_zero;
-
-    if (_need_ad_u_dot)
-      _ad_u_dot[qp] = _ad_zero;
-
-    if (_need_ad_u_dotdot)
-      _ad_u_dotdot[qp] = _ad_zero;
-
-    if (_need_ad_grad_u_dot)
-      _ad_grad_u_dot[qp] = _ad_zero;
-  }
-
-  for (unsigned int i = 0; i < num_dofs; i++)
-  {
+  _ad_dof_values.resize(num_dofs);
+  for (const auto i : make_range(num_dofs))
     _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
-
-    // NOTE!  You have to do this AFTER setting the value!
-    if (do_derivatives)
+  // NOTE!  You have to do this AFTER setting the value!
+  if (do_derivatives)
+    for (const auto i : make_range(num_dofs))
       Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
 
-    if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
-    {
-      _ad_dofs_dot[i] = _ad_dof_values[i];
-      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
-                                                 _dof_indices[i],
-                                                 _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
-                                                                   : _ad_real_dummy);
-    }
+  if (_need_ad_u)
+  {
+    _ad_u.resize(nqp);
+    for (const auto qp : make_range(nqp))
+      _ad_u[qp] = _ad_zero;
+
+    for (const auto i : make_range(num_dofs))
+      for (const auto qp : make_range(nqp))
+        _ad_u[qp] += _ad_dof_values[i] * (*_current_phi)[i][qp];
   }
 
-  // Now build up the solution at each quadrature point:
-  for (unsigned int i = 0; i < num_dofs; i++)
+  if (_need_ad_grad_u)
   {
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      if (_need_ad_u)
-        _ad_u[qp] += _ad_dof_values[i] * (*_current_phi)[i][qp];
+    _ad_grad_u.resize(nqp);
+    for (const auto qp : make_range(nqp))
+      _ad_grad_u[qp] = _ad_zero;
 
-      if (_need_ad_grad_u)
-      {
-        // The latter check here is for handling the fact that we have not yet implemented
-        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
-        // situation we need to default to using the non-ad grad_phi
-        if (_displaced && _current_ad_grad_phi)
+    // The latter check here is for handling the fact that we have not yet implemented
+    // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
+    // situation we need to default to using the non-ad grad_phi
+    if (_displaced && _current_ad_grad_phi)
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_ad_grad_phi)[i][qp];
-        else
+    else
+      for (const auto i : make_range(num_dofs))
+        for (const auto qp : make_range(nqp))
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_grad_phi)[i][qp];
-      }
+  }
 
-      if (_need_ad_second_u)
+  if (_need_ad_second_u)
+  {
+    _ad_second_u.resize(nqp);
+    for (const auto qp : make_range(nqp))
+      _ad_second_u[qp] = _ad_zero;
+
+    for (const auto i : make_range(num_dofs))
+      for (const auto qp : make_range(nqp))
         // Note that this will not carry any derivatives with respect to displacements because
         // those calculations have not yet been implemented in Assembly
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
+  }
 
-      if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
+  bool is_transient = _subproblem.isTransient();
+  if (is_transient)
+  {
+    if (_need_ad_u_dot)
+    {
+      _ad_dofs_dot.resize(num_dofs);
+      if (_need_ad_u_dotdot)
+        _ad_dofs_dotdot.resize(num_dofs);
+      _ad_u_dot.resize(nqp);
+      for (const auto qp : make_range(nqp))
+        _ad_u_dot[qp] = _ad_zero;
+
+      if (_time_integrator && _time_integrator->dt())
       {
-        _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
-        if (_need_ad_u_dotdot)
-          _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
-      }
+        for (const auto i : make_range(num_dofs))
+          _ad_dofs_dot[i] = _ad_dof_values[i];
+        for (const auto i : make_range(num_dofs))
+          _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
+                                                     _dof_indices[i],
+                                                     _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
+                                                                       : _ad_real_dummy);
 
-      if (_need_ad_grad_u_dot && _time_integrator && _time_integrator->dt())
+        for (const auto i : make_range(num_dofs))
+          for (const auto qp : make_range(nqp))
+            _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
+      }
+      else if (!_time_integrator)
+      {
+        for (const auto i : make_range(num_dofs))
+          _ad_dofs_dot[i] = _dof_values_dot[i];
+        for (const auto qp : make_range(nqp))
+          _ad_u_dot[qp] = _u_dot[qp];
+      }
+    }
+
+    if (_need_ad_u_dotdot)
+    {
+      _ad_u_dotdot.resize(nqp);
+      for (const auto qp : make_range(nqp))
+        _ad_u_dotdot[qp] = _ad_zero;
+
+      if (_time_integrator && _time_integrator->dt())
+        for (const auto i : make_range(num_dofs))
+          for (const auto qp : make_range(nqp))
+            _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
+      else if (!_time_integrator)
+        for (const auto qp : make_range(nqp))
+          _ad_u_dotdot[qp] = _u_dotdot[qp];
+    }
+
+    if (_need_ad_grad_u_dot)
+    {
+      _ad_grad_u_dot.resize(nqp);
+      for (const auto qp : make_range(nqp))
+        _ad_grad_u_dot[qp] = _ad_zero;
+
+      if (_time_integrator && _time_integrator->dt())
       {
         // The latter check here is for handling the fact that we have not yet implemented
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
         // situation we need to default to using the non-ad grad_phi
         if (_displaced && _current_ad_grad_phi)
-          _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
+          for (const auto i : make_range(num_dofs))
+            for (const auto qp : make_range(nqp))
+              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
         else
-          _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
+          for (const auto i : make_range(num_dofs))
+            for (const auto qp : make_range(nqp))
+              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
       }
+      else if (!_time_integrator)
+        for (const auto qp : make_range(nqp))
+          _ad_grad_u_dot[qp] = _grad_u_dot[qp];
     }
   }
-
-  if (_need_ad_u_dot && !_time_integrator)
-  {
-    for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
-    {
-      _ad_u_dot[qp] = _u_dot[qp];
-      if (_need_ad_u_dotdot)
-        _ad_u_dotdot[qp] = _u_dotdot[qp];
-    }
-    for (unsigned int i = 0; i < num_dofs; i++)
-      _ad_dofs_dot[i] = _dof_values_dot[i];
-  }
-
-  if (_need_ad_grad_u_dot && !_time_integrator)
-    for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
-      _ad_grad_u_dot[qp] = _grad_u_dot[qp];
 }
 
 template <>
@@ -1306,13 +826,13 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
   _has_dof_values = true;
 
   auto & u = _vector_tag_u[_solution_tag];
-  for (unsigned int qp = 0; qp < u.size(); qp++)
-  {
-    u[qp] = (*_phi)[0][qp] * dof_values[0];
-
-    for (unsigned int i = 1; i < dof_values.size(); i++)
+  const auto nqps = u.size();
+  const auto ndofs = dof_values.size();
+  for (const auto qp : make_range(nqps))
+    u[qp] *= 0.;
+  for (const auto qp : make_range(nqps))
+    for (const auto i : make_range(ndofs))
       u[qp] += (*_phi)[i][qp] * dof_values[i];
-  }
 }
 
 template <typename OutputType>
@@ -1326,12 +846,13 @@ MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & valu
   _has_dof_values = true;
 
   auto & u = _vector_tag_u[_solution_tag];
-  for (unsigned int qp = 0; qp < u.size(); qp++)
-  {
-    u[qp] = (*_phi)[0][qp] * dof_values[0];
-    for (unsigned int i = 1; i < dof_values.size(); i++)
+  const auto nqps = u.size();
+  const auto ndofs = dof_values.size();
+  for (const auto qp : make_range(nqps))
+    u[qp] *= 0.;
+  for (const auto qp : make_range(nqps))
+    for (const auto i : make_range(ndofs))
       u[qp] += (*_phi)[i][qp] * dof_values[i];
-  }
 }
 
 template <typename OutputType>
@@ -1347,7 +868,7 @@ void
 MooseVariableData<RealEigenVector>::insertNodalValue(NumericVector<Number> & residual,
                                                      const RealEigenVector & v)
 {
-  for (unsigned int j = 0; j < _count; ++j)
+  for (const auto j : make_range(_count))
     residual.set(_nodal_dof_index + j, v(j));
 }
 
@@ -1505,10 +1026,11 @@ MooseVariableData<RealEigenVector>::addSolution(NumericVector<Number> & sol,
                                                 const DenseVector<Number> & v) const
 {
   unsigned int p = 0;
-  for (unsigned int j = 0; j < _count; ++j)
+  const auto num_dofs = _dof_indices.size();
+  for (const auto j : make_range(_count))
   {
-    unsigned int inc = (isNodal() ? j : j * _dof_indices.size());
-    for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+    unsigned int inc = (isNodal() ? j : j * num_dofs);
+    for (const auto i : make_range(num_dofs))
       sol.add(_dof_indices[i] + inc, v(p++));
   }
 }
@@ -1597,10 +1119,10 @@ MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number>
   _increment.resize(nqp);
   // Compute the increment at each quadrature point
   unsigned int num_dofs = _dof_indices.size();
-  for (unsigned int qp = 0; qp < nqp; qp++)
+  for (const auto qp : make_range(nqp))
   {
-    _increment[qp] = 0;
-    for (unsigned int i = 0; i < num_dofs; i++)
+    _increment[qp] = 0.;
+    for (const auto i : make_range(num_dofs))
       _increment[qp] += (*_phi)[i][qp] * increment_vec(_dof_indices[i]);
   }
 }
@@ -1617,20 +1139,20 @@ MooseVariableData<RealEigenVector>::computeIncrementAtQps(
   unsigned int num_dofs = _dof_indices.size();
   if (isNodal())
   {
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
     {
-      for (unsigned int i = 0; i < num_dofs; i++)
-        for (unsigned int j = 0; j < _count; j++)
+      for (const auto i : make_range(num_dofs))
+        for (const auto j : make_range(_count))
           _increment[qp](j) += (*_phi)[i][qp] * increment_vec(_dof_indices[i] + j);
     }
   }
   else
   {
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    for (const auto qp : make_range(nqp))
     {
       unsigned int n = 0;
-      for (unsigned int j = 0; j < _count; j++)
-        for (unsigned int i = 0; i < num_dofs; i++)
+      for (const auto j : make_range(_count))
+        for (const auto i : make_range(num_dofs))
         {
           _increment[qp](j) += (*_phi)[i][qp] * increment_vec(_dof_indices[i] + n);
           n += num_dofs;
@@ -1669,10 +1191,11 @@ MooseVariableData<RealEigenVector>::computeIncrementAtNode(
   else
   {
     unsigned int n = 0;
-    for (unsigned int j = 0; j < _count; j++)
+    const auto n_dof_indices = _dof_indices.size();
+    for (const auto j : make_range(_count))
     {
       _increment[0](j) = increment_vec(_dof_indices[0] + n);
-      n += _dof_indices.size();
+      n += n_dof_indices;
     }
   }
 }
@@ -1818,7 +1341,7 @@ MooseVariableData<OutputType>::fetchADNodalValues()
       }
       // Executing something with a time derivative at initial should not put a NaN
       else if (_time_integrator && !_time_integrator->dt())
-        _ad_dofs_dot[i] = 0;
+        _ad_dofs_dot[i] = 0.;
       else
         mooseError("AD nodal time derivatives not implemented for variables without a time "
                    "integrator (auxiliary variables)");
@@ -1868,10 +1391,7 @@ MooseVariableData<OutputType>::prepare()
 
   // FIXME: remove this when the Richard's module is migrated to use the new NodalCoupleable
   // interface.
-  if (_dof_indices.size() > 0)
-    _has_dof_indices = true;
-  else
-    _has_dof_indices = false;
+  _has_dof_indices = _dof_indices.size();
 }
 
 template <typename OutputType>
@@ -1911,11 +1431,12 @@ MooseVariableData<OutputType>::reinitAux()
 
       fetchDoFValues();
 
+      const auto num_dofs = _dof_indices.size();
       for (auto & dof_u : _vector_tags_dof_u)
-        dof_u.resize(_dof_indices.size());
+        dof_u.resize(num_dofs);
 
       for (auto & dof_u : _matrix_tags_dof_u)
-        dof_u.resize(_dof_indices.size());
+        dof_u.resize(num_dofs);
 
       _has_dof_indices = true;
     }
@@ -1944,7 +1465,7 @@ MooseVariableData<OutputType>::reinitNodes(const std::vector<dof_id_type> & node
     }
   }
 
-  if (_dof_indices.size() > 0)
+  if (!_dof_indices.empty())
     _has_dof_indices = true;
   else
     _has_dof_indices = false;
