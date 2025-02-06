@@ -53,5 +53,5 @@
   [../]
 
   petsc_options_iname = "-pc_type"
-  petsc_options_value = "hypre"
+  petsc_options_value = "none"
 []
