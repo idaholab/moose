@@ -16,15 +16,16 @@
 
 /**
  * Helper class to help creating an entire physics
- * TODO: Should this be an Interface rather than a Helper?
- * Note: Trying out virtual inheritance
+ * Note: Trying out virtual inheritance. It makes things
+ *       a little easier to define as we can use the attributes
+ *       of the underlying ActionComponent
  */
-class PhysicsComponentBase : public virtual ActionComponent
+class ComponentPhysicsInterface : public virtual ActionComponent
 {
 public:
   static InputParameters validParams();
 
-  PhysicsComponentBase(const InputParameters & params);
+  ComponentPhysicsInterface(const InputParameters & params);
 
   /// Get the Physics from the Component
   std::vector<PhysicsBase *> getPhysics() const { return _physics; }
@@ -45,7 +46,7 @@ protected:
 
 template <typename T>
 bool
-PhysicsComponentBase::physicsExists(const PhysicsName & name) const
+ComponentPhysicsInterface::physicsExists(const PhysicsName & name) const
 {
   const auto physics = _awh.getPhysics<const T>();
   for (const auto phys : physics)
