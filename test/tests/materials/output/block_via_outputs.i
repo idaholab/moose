@@ -6,48 +6,48 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 10
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./block_1]
+  [block_1]
     type = OutputTestMaterial
     block = 1
     variable = u
-  [../]
-  [./block_2]
+  []
+  [block_2]
     type = OutputTestMaterial
     block = 2
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,9 +60,9 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     output_material_properties = true
     show_material_properties = real_property
-  [../]
+  []
 []
