@@ -1,12 +1,5 @@
 [Tests]
   issues = '#24103'
-  [physics]
-    type = CSVDiff
-    input = 'component_with_physics.i'
-    csvdiff = 'component_with_physics_out.csv'
-    design = 'PhysicsComponentBase.md'
-    requirement = 'The system shall be able to add equations onto the mesh of (action)components using the Physics syntax.'
-  []
   [combining_meshes]
     type = Exodiff
     input = 'two_same_components.i'

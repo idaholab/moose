@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhysicsComponentBase.h"
+#include "ComponentPhysicsInterface.h"
 
 InputParameters
-PhysicsComponentBase::validParams()
+ComponentPhysicsInterface::validParams()
 {
   auto params = ActionComponent::validParams();
   params.addParam<std::vector<PhysicsName>>(
@@ -18,10 +18,10 @@ PhysicsComponentBase::validParams()
   return params;
 }
 
-PhysicsComponentBase::PhysicsComponentBase(const InputParameters & params)
+ComponentPhysicsInterface::ComponentPhysicsInterface(const InputParameters & params)
   : ActionComponent(params), _physics_names(getParam<std::vector<PhysicsName>>("physics"))
 {
-  // Should be done later?
+  // Adding ActionComponents must be done after adding adding Physics
   for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
     _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
 
@@ -29,7 +29,7 @@ PhysicsComponentBase::PhysicsComponentBase(const InputParameters & params)
 }
 
 void
-PhysicsComponentBase::initComponentPhysics()
+ComponentPhysicsInterface::initComponentPhysics()
 {
   for (auto physics : _physics)
   {
