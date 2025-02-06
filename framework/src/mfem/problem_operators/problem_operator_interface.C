@@ -25,6 +25,7 @@ void
 ProblemOperatorInterface::Init(mfem::BlockVector & X)
 {
   X.Update(_block_true_offsets);
+  X = 0.0;
   for (size_t i = 0; i < _test_variables.size(); ++i)
   {
     _test_variables.at(i)->MakeTRef(_test_variables.at(i)->ParFESpace(), X, _block_true_offsets[i]);

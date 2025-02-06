@@ -14,12 +14,33 @@
     fec_type = H1
     fec_order = FIRST
   []
+  [HCurlFESpace]
+    type = MFEMFESpace
+    fec_type = ND
+    fec_order = FIRST
+  []  
 []
 
 [Variables]
   [diffused]
     type = MFEMVariable
     fespace = H1FESpace
+  []
+[]
+
+[AuxVariables]
+  [diffusion_gradient]
+    type = MFEMVariable
+    fespace = HCurlFESpace
+  []
+[]
+
+[AuxKernels]
+  [grad]
+    type = MFEMGradAux
+    variable = diffusion_gradient
+    source = diffused
+    execute_on = TIMESTEP_END
   []
 []
 
