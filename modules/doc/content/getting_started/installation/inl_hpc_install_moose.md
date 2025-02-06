@@ -62,6 +62,7 @@ Enter the `moose` directory where ever that may be, and run the following comman
 assumes you cloned MOOSE as directed in the previous step):
 
 ```bash
+module load use.moose versioner
 cd /scratch/<your INL HPC User ID>/projects/moose
 # or cd to your application/moose directory
 ./scripts/versioner.py moose-dev
@@ -111,7 +112,7 @@ MOOSE based work:
 
 1. figure out the version you need:
 
-  `moose/scripts/versioner.py moose-dev`
+  `module load use.moose versioner; moose/scripts/versioner.py moose-dev`
 
 
 2. load the matching module version:
