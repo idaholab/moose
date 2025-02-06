@@ -13,8 +13,8 @@
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
 #include "Assembly.h"
-#include "NonlinearSystemBase.h"
 #include "MooseVariableFE.h"
+#include "SystemBase.h"
 
 #include "libmesh/dense_vector.h"
 #include "metaphysicl/raw_type.h"
@@ -394,7 +394,7 @@ private:
   /// this data member to avoid constant dynamic heap allocations
   std::vector<Real> _absolute_residuals;
 
-  friend void NonlinearSystemBase::constraintJacobians(bool);
+  friend class NonlinearSystemBase;
 };
 
 #define usingTaggingInterfaceMembers                                                               \

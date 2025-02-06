@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WebServerControl.h"
+#include "FEProblemBase.h"
+#include "MooseApp.h"
 
 #include "minijson/minijson.h"
 

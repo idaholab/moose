@@ -60,6 +60,11 @@ public:
   MooseObjectWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
   /**
+   * const version of the above
+   */
+  const MooseObjectWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid) const;
+
+  /**
    * Retrieve a moose object warehouse in which every moose object has one of the given matrix tags.
    * If the warehouse is not constructed yet, it will be constructed here and returned. If
    * the warehouse is already cached (it was queried before), we just directly return the
@@ -179,6 +184,13 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
   }
 
   return matrix_tag_to_object_warehouse[tag_id];
+}
+
+template <typename T>
+const MooseObjectWarehouse<T> &
+MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid) const
+{
+  return const_cast<MooseObjectTagWarehouse<T> *>(this)->getMatrixTagObjectWarehouse(tag_id, tid);
 }
 
 template <typename T>

@@ -22,6 +22,11 @@ typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class Assembly;
 
+namespace libMesh
+{
+class QBase;
+}
+
 /**
  * Base class for deriving element dampers
  */

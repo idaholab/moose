@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "PetscSupport.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/periodic_boundaries.h"

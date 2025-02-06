@@ -9,6 +9,7 @@
 
 #include "SmoothMultiBoundingBoxBaseIC.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 InputParameters
 SmoothMultiBoundingBoxBaseIC::validParams()

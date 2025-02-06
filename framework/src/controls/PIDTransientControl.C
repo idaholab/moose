@@ -10,6 +10,7 @@
 #include "PIDTransientControl.h"
 #include "Function.h"
 #include "Transient.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", PIDTransientControl);
 

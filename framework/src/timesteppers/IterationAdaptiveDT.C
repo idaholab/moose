@@ -13,6 +13,7 @@
 #include "PiecewiseLinear.h"
 #include "Transient.h"
 #include "NonlinearSystem.h"
+#include "FEProblemBase.h"
 
 #include <limits>
 #include <set>

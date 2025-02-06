@@ -16,7 +16,6 @@
 #include "MathUtils.h"
 #include "MooseObjectName.h"
 #include "InputParameters.h"
-#include "SubProblem.h"
 
 #include <unordered_map>
 
@@ -27,6 +26,7 @@
 // Forward declarations
 class MooseObject;
 class FEProblemBase;
+class SubProblem;
 
 /**
  * Helper class for deferred getting of material properties after the construction

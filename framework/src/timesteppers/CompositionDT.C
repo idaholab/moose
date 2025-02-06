@@ -12,6 +12,7 @@
 #include "Transient.h"
 #include "TimeSequenceStepperBase.h"
 #include "IterationAdaptiveDT.h"
+#include "FEProblemBase.h"
 
 #include <limits>
 

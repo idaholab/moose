@@ -11,6 +11,7 @@
 #include "LinearSystem.h"
 #include "LinearFVKernel.h"
 #include "LinearFVElementalKernel.h"
+#include "FEProblemBase.h"
 
 ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
     FEProblemBase & fe_problem,

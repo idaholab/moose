@@ -30,6 +30,7 @@ namespace libMesh
 {
 template <typename T>
 class NumericVector;
+class DofMap;
 }
 
 class DisplacedProblem : public SubProblem
@@ -270,14 +271,14 @@ public:
   virtual void addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     unsigned int ivar,
                                     unsigned int jvar,
-                                    const DofMap & dof_map,
+                                    const libMesh::DofMap & dof_map,
                                     std::vector<dof_id_type> & dof_indices,
                                     const std::set<TagID> & tags,
                                     const THREAD_ID tid);
   void addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
-                                const DofMap & dof_map,
+                                const libMesh::DofMap & dof_map,
                                 const std::vector<dof_id_type> & idof_indices,
                                 const std::vector<dof_id_type> & jdof_indices,
                                 const std::set<TagID> & tags,
@@ -285,7 +286,7 @@ public:
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,
-                                   const DofMap & dof_map,
+                                   const libMesh::DofMap & dof_map,
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    const std::set<TagID> & tags,

@@ -73,7 +73,7 @@ protected:
                             const unsigned int vel_component,
                             const Moose::Functor<Real> & body_force,
                             const MooseArray<Real> & JxW,
-                            const QBase & qrule,
+                            const libMesh::QBase & qrule,
                             const Elem * const current_elem,
                             const MooseArray<Point> & q_point);
 
@@ -94,7 +94,7 @@ protected:
                             const unsigned int u_j_offset,
                             const unsigned int v_j_offset,
                             const MooseArray<Real> & JxW,
-                            const QBase & qrule);
+                            const libMesh::QBase & qrule);
 
   /**
    * Compute the volumetric contributions to the pressure residual, e.g. the conservation of mass
@@ -107,7 +107,7 @@ protected:
                               const unsigned int global_lm_i_offset,
                               const Moose::Functor<Real> & pressure_mms_forcing_function,
                               const MooseArray<Real> & JxW,
-                              const QBase & qrule,
+                              const libMesh::QBase & qrule,
                               const Elem * const current_elem,
                               const MooseArray<Point> & q_point);
 
@@ -127,7 +127,7 @@ protected:
                               const unsigned int p_j_offset,
                               const unsigned int global_lm_offset,
                               const MooseArray<Real> & JxW,
-                              const QBase & qrule);
+                              const libMesh::QBase & qrule);
 
   //
   // Methods which are leveraged both on internal sides in the kernel and by the outflow bc
@@ -135,14 +135,14 @@ protected:
 
   void pressureFaceResidual(const unsigned int i_offset,
                             const MooseArray<Real> & JxW_face,
-                            const QBase & qrule_face,
+                            const libMesh::QBase & qrule_face,
                             const MooseArray<Point> & normals);
 
   void pressureFaceJacobian(const unsigned int i_offset,
                             const unsigned int lm_u_j_offset,
                             const unsigned int lm_v_j_offset,
                             const MooseArray<Real> & JxW_face,
-                            const QBase & qrule_face,
+                            const libMesh::QBase & qrule_face,
                             const MooseArray<Point> & normals);
 
   void scalarFaceResidual(const unsigned int i_offset,
@@ -151,7 +151,7 @@ protected:
                           const MooseArray<Number> & lm_sol,
                           const unsigned int vel_component,
                           const MooseArray<Real> & JxW_face,
-                          const QBase & qrule_face,
+                          const libMesh::QBase & qrule_face,
                           const MooseArray<Point> & normals);
 
   void scalarFaceJacobian(const unsigned int i_offset,
@@ -163,7 +163,7 @@ protected:
                           const unsigned int lm_u_j_offset,
                           const unsigned int lm_v_j_offset,
                           const MooseArray<Real> & JxW_face,
-                          const QBase & qrule_face,
+                          const libMesh::QBase & qrule_face,
                           const MooseArray<Point> & normals);
 
   void lmFaceResidual(const unsigned int i_offset,
@@ -172,7 +172,7 @@ protected:
                       const MooseArray<Number> & lm_sol,
                       const unsigned int vel_component,
                       const MooseArray<Real> & JxW_face,
-                      const QBase & qrule_face,
+                      const libMesh::QBase & qrule_face,
                       const MooseArray<Point> & normals,
                       const Elem * const neigh);
 
@@ -185,14 +185,14 @@ protected:
                       const unsigned int lm_u_j_offset,
                       const unsigned int lm_v_j_offset,
                       const MooseArray<Real> & JxW_face,
-                      const QBase & qrule_face,
+                      const libMesh::QBase & qrule_face,
                       const MooseArray<Point> & normals,
                       const Elem * const neigh);
 
   void pressureDirichletResidual(const unsigned int i_offset,
                                  const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
                                  const MooseArray<Real> & JxW_face,
-                                 const QBase & qrule_face,
+                                 const libMesh::QBase & qrule_face,
                                  const MooseArray<Point> & normals,
                                  const Elem * const current_elem,
                                  const unsigned int current_side,
@@ -204,7 +204,7 @@ protected:
                                const unsigned int vel_component,
                                const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
                                const MooseArray<Real> & JxW_face,
-                               const QBase & qrule_face,
+                               const libMesh::QBase & qrule_face,
                                const MooseArray<Point> & normals,
                                const Elem * const current_elem,
                                const unsigned int current_side,
@@ -216,7 +216,7 @@ protected:
                                const unsigned int p_j_offset,
                                const unsigned int vel_component,
                                const MooseArray<Real> & JxW_face,
-                               const QBase & qrule_face,
+                               const libMesh::QBase & qrule_face,
                                const MooseArray<Point> & normals);
 
   const MooseVariableFE<Real> & _v_var;

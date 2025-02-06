@@ -136,7 +136,7 @@ protected:
   /**
    * Get the corresponding variable.
    */
-  virtual const MooseLinearVariableFV<OutputType> & var() const override { return _var; }
+  virtual const MooseLinearVariableFV<OutputType> & var() const override;
 
 private:
   void initializeSolnVars();

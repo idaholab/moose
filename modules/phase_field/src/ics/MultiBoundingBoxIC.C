@@ -9,6 +9,7 @@
 
 #include "MultiBoundingBoxIC.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("PhaseFieldApp", MultiBoundingBoxIC);
 

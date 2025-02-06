@@ -12,6 +12,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 #include "TimeIntegrator.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("SolidMechanicsApp", NodalRotationalInertia);
 

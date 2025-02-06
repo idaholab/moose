@@ -15,6 +15,10 @@
 []
 
 [Kernels]
+  [time]
+    type = TimeDerivative
+    variable = u
+  []
   [./diff]
     type = Diffusion
     variable = u

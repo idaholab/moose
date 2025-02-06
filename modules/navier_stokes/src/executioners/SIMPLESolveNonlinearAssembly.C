@@ -10,6 +10,9 @@
 #include "SIMPLESolveNonlinearAssembly.h"
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
+#include "NonlinearSystemBase.h"
+
+#include "libmesh/nonlinear_implicit_system.h"
 
 using namespace libMesh;
 

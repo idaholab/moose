@@ -12,6 +12,12 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
+#include "KernelBase.h"
+#include "DGKernelBase.h"
+#include "ScalarKernelBase.h"
+#include "FVElementalKernel.h"
+#include "FVFluxKernel.h"
+#include "NodalKernelBase.h"
 
 // libMesh includes
 #include "libmesh/enum_convergence_flags.h"
@@ -63,6 +69,76 @@ void
 ExplicitTimeIntegrator::initialSetup()
 {
   meshChanged();
+
+  if (_nl)
+  {
+    std::unordered_set<unsigned int> vars_to_check;
+    if (!_vars.empty())
+      vars_to_check = _vars;
+    else
+      for (const auto i : make_range(_nl->nVariables()))
+        vars_to_check.insert(i);
+
+    const auto mass_matrix_tag_id = massMatrixTagID();
+    std::set<TagID> matrix_tags = {mass_matrix_tag_id};
+    auto fv_object_starting_query = _fe_problem.theWarehouse()
+                                        .query()
+                                        .template condition<AttribMatrixTags>(matrix_tags)
+                                        .template condition<AttribSysNum>(_nl->number());
+
+    for (const auto var_id : vars_to_check)
+    {
+      const auto & var_name = _nl->system().variable_name(var_id);
+      const bool field_var = _nl->hasVariable(var_name);
+      if (!field_var)
+        mooseAssert(_nl->hasScalarVariable(var_name),
+                    var_name << " should be either a field or scalar variable");
+      if (field_var)
+      {
+        const auto & field_var = _nl->getVariable(/*tid=*/0, var_name);
+        if (field_var.isFV())
+        {
+          std::vector<FVElementalKernel *> fv_elemental_kernels;
+          auto var_query = fv_object_starting_query.clone().template condition<AttribVar>(var_id);
+          auto var_query_clone = var_query.clone();
+          var_query.template condition<AttribSystem>("FVElementalKernel")
+              .queryInto(fv_elemental_kernels);
+          if (fv_elemental_kernels.size())
+            continue;
+
+          std::vector<FVFluxKernel *> fv_flux_kernels;
+          var_query_clone.template condition<AttribSystem>("FVFluxKernel")
+              .queryInto(fv_flux_kernels);
+          if (fv_flux_kernels.size())
+            continue;
+        }
+        else
+        {
+          // We are a finite element variable
+          if (_nl->getKernelWarehouse()
+                  .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
+                  .hasVariableObjects(var_id))
+            continue;
+          if (_nl->getDGKernelWarehouse()
+                  .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
+                  .hasVariableObjects(var_id))
+            continue;
+          if (_nl->getNodalKernelWarehouse()
+                  .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
+                  .hasVariableObjects(var_id))
+            continue;
+        }
+      }
+      else if (_nl->getScalarKernelWarehouse()
+                   .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
+                   .hasVariableObjects(var_id))
+        continue;
+
+      mooseError("No objects contributing to the mass matrix were found for variable '",
+                 var_name,
+                 "'. Did you, e.g., forget a time derivative term?");
+    }
+  }
 }
 
 void
