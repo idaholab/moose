@@ -250,9 +250,15 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarCurlKernel");
   kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<std::string>("trial_variable") = "trial_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMMixedScalarCurlKernel & kernel =
       addObject<MFEMMixedScalarCurlKernel>("MFEMMixedScalarCurlKernel", "kernel1", kernel_params);
+
+  // Test the trial variable name is different from the test variable name
+  const std::string trial_name = kernel.getTrialVariableName();
+  EXPECT_NE(trial_name, kernel.getTestVariableName());
+  EXPECT_EQ(trial_name, "trial_variable_name");
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::MixedScalarCurlIntegrator *>(kernel.createIntegrator());
