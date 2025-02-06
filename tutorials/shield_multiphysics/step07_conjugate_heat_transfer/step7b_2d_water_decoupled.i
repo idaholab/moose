@@ -1,5 +1,5 @@
 cp_water_multiplier = 1e-4
-mu_multiplier = 1
+mu_multiplier = 1e4
 
 # Notes:
 # While it solves, it's clearly not refined enough to show the true behavior
@@ -8,29 +8,12 @@ mu_multiplier = 1
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../step03_boundary_conditions/mesh_in.e'
+    file = 'mesh2d_in.e'
   []
-  [add_water_bottom]
-    type = SideSetsBetweenSubdomainsGenerator
+  [remove_solid]
+    type = BlockDeletionGenerator
     input = fmg
-    new_boundary = water_bottom
-    primary_block = water
-    paired_block = concrete_hd
-    normal = '0 0 -1'
-    replace = true
-  []
-  [refine_water]
-    type = RefineBlockGenerator
-    input = add_water_bottom
-    refinement = '1'
-    block = 'water'
-  []
-[]
-
-[AuxVariables]
-  [T]
     block = 'concrete_hd concrete Al'
-    initial_condition = 300
   []
 []
 
@@ -45,10 +28,11 @@ mu_multiplier = 1
     block = 'water'
     initial_condition = 1e-4
   []
+  # This isn't used in simulation, but useful for visualization
   [vel_z]
     type = INSFVVelocityVariable
     block = 'water'
-    initial_condition = 1e-4
+    initial_condition = 0
   []
   [pressure]
     type = INSFVPressureVariable
@@ -85,7 +69,7 @@ mu_multiplier = 1
     type = FVPointValueConstraint
     lambda = lambda
     phi0 = 1e5
-    point = '2 9 2'
+    point = '1 3 0'
     variable = pressure
   []
   [water_ins_momentum_time_vel_x]
@@ -99,12 +83,6 @@ mu_multiplier = 1
     block = water
     momentum_component = y
     variable = vel_y
-  []
-  [water_ins_momentum_time_vel_z]
-    type = INSFVMomentumTimeDerivative
-    block = water
-    momentum_component = z
-    variable = vel_z
   []
   [water_ins_momentum_advection_x]
     type = INSFVMomentumAdvection
@@ -120,13 +98,6 @@ mu_multiplier = 1
     momentum_component = y
     variable = vel_y
   []
-  [water_ins_momentum_advection_z]
-    type = INSFVMomentumAdvection
-    advected_interp_method = upwind
-    block = water
-    momentum_component = z
-    variable = vel_z
-  []
   [water_ins_momentum_diffusion_x]
     type = INSFVMomentumDiffusion
     block = water
@@ -140,13 +111,6 @@ mu_multiplier = 1
     momentum_component = y
     mu = mu
     variable = vel_y
-  []
-  [water_ins_momentum_diffusion_z]
-    type = INSFVMomentumDiffusion
-    block = water
-    momentum_component = z
-    mu = mu
-    variable = vel_z
   []
   [water_ins_momentum_pressure_x]
     type = INSFVMomentumPressure
@@ -162,30 +126,23 @@ mu_multiplier = 1
     pressure = pressure
     variable = vel_y
   []
-  [water_ins_momentum_pressure_z]
-    type = INSFVMomentumPressure
-    block = water
-    momentum_component = z
-    pressure = pressure
-    variable = vel_z
-  []
   [water_ins_momentum_gravity_z]
     type = INSFVMomentumGravity
     block = water
-    gravity = '0 0 -9.81'
-    momentum_component = z
-    variable = vel_z
+    gravity = '0 -9.81 0'
+    momentum_component = y
+    variable = vel_y
   []
   [water_ins_momentum_boussinesq_z]
     type = INSFVMomentumBoussinesq
     T_fluid = T_fluid
     alpha_name = alpha
     block = water
-    gravity = '0 0 -9.81'
-    momentum_component = z
+    gravity = '0 -9.81 0'
+    momentum_component = y
     ref_temperature = 300
     rho = 955.7
-    variable = vel_z
+    variable = vel_y
   []
 
   # Energy conservation equation
@@ -235,27 +192,23 @@ mu_multiplier = 1
 [FVBCs]
   [vel_x_water_boundary]
     type = INSFVNoSlipWallBC
-    boundary = water_boundary
+    boundary = 'water_boundary water_bottom inner_cavity_water'
     function = 0
     variable = vel_x
   []
   [vel_y_water_boundary]
     type = INSFVNoSlipWallBC
-    boundary = water_boundary
+    boundary = 'water_boundary water_bottom inner_cavity_water'
     function = 0
     variable = vel_y
-  []
-  [vel_z_water_boundary]
-    type = INSFVNoSlipWallBC
-    boundary = water_boundary
-    function = 0
-    variable = vel_z
   []
 
   [T_fluid_inner_cavity]
     type = FVFunctorNeumannBC
     boundary = inner_cavity_water
-    functor = ${fparse 5e4 / 144}
+    # Real facility uses forced convection to cool the water tank at full power
+    # Need to lower power for natural convection so water doesn't boil.
+    functor = ${fparse 5e4 / 144 * 0.06}
     variable = T_fluid
   []
   [T_fluid_water_boundary]
@@ -267,11 +220,11 @@ mu_multiplier = 1
     heat_transfer_coefficient = 600
     is_solid = true
   []
-  [T_fluid_water_bottom]
+  [T_fluid_bottom]
     type = FVDirichletBC
     boundary = water_bottom
-    value = 300
     variable = T_fluid
+    value = 300
   []
 []
 
@@ -281,7 +234,6 @@ mu_multiplier = 1
     pressure = 'pressure'
     u = 'vel_x'
     v = 'vel_y'
-    w = 'vel_z'
     block = 'water'
   []
 []
@@ -303,17 +255,15 @@ mu_multiplier = 1
 
   nl_abs_tol = 1e-8
   nl_max_its = 10
+  l_max_its = 3
 
-  # end_time = 100
-  # dt = 0.25
-  # start_time = -1
-
-  steady_state_tolerance = 1e-5
+  steady_state_tolerance = 1e-6
   steady_state_detection = true
 
+  start_time = -1
   [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.1
+    type = FunctionDT
+    function = 'if(t<0.1, 0.1, t)'
   []
 []
 
