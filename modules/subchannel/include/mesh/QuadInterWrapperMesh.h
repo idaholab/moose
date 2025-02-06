@@ -106,7 +106,7 @@ protected:
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
   /// map relating subchannel index to assembly index
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
-    /// map relating fuel assembly index to subchannel index
+  /// map relating fuel assembly index to subchannel index
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
   /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;

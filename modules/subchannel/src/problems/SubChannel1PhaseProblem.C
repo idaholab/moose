@@ -2868,23 +2868,6 @@ SubChannel1PhaseProblem::externalSolve()
   if (_duct_mesh_exist)
   {
     _console << "Commencing calculation of duct surface temperature " << std::endl;
-    /// TODO: looping over the channels omits the corners - should check later
-    //    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    //    {
-    //      for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
-    //        {
-    //          auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    //          if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-    //          {
-    //            //auto dz = _z_grid[iz] - _z_grid[iz - 1];
-    //            auto * node_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
-    //            auto * node_duct = _subchannel_mesh.getDuctNodeFromChannel(node_chan);
-    //            auto T_chan = (*_T_soln)(node_chan);
-    //            //_console << "T_chan: " << T_chan << std::endl;
-    //            _Tduct_soln->set(node_duct, T_chan);
-    //          }
-    //        }
-    //    }
     auto duct_nodes = _subchannel_mesh.getDuctNodes();
     for (Node * dn : duct_nodes)
     {

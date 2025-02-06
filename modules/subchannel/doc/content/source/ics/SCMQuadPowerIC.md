@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This kernel assigns the axial heat rate ([!param](/ICs/SCMQuadPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a
+This IC kernel assigns the axial heat rate ([!param](/ICs/SCMQuadPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a
 square lattice arrangement. The user must provide the  total power of the subassembly [!param](/ICs/SCMQuadPowerIC/power), the axial shape of the power profile and the radial
 power distribution (power per pin). The axial power profile is given as a function over the -z direction, which integral over the length of the heated portion of the pin, is equal
 to the length of the heated portion of the pin. The radial power distribution is given as a column of numbers in a .txt file [!param](/ICs/SCMQuadPowerIC/filename) that has as many entries as the number of pins.
