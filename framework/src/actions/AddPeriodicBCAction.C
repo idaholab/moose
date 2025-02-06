@@ -87,19 +87,37 @@ AddPeriodicBCAction::setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
   else
     var_names_ptr = &var_names;
 
+  // Helper function to apply periodic BC for a given variable number
+  auto applyPeriodicBC = [&](unsigned int var_num, const std::string & var_name)
+  {
+    p.set_variable(var_num);
+    if (_mesh->isRegularOrthogonal())
+      _mesh->addPeriodicVariable(var_num, p.myboundary, p.pairedboundary);
+    else
+      mooseInfoRepeated("Periodicity information for variable '" + var_name +
+                        "' will only be stored in the system's DoF map, not on the MooseMesh");
+  };
+
+  // If is an array variable, loop over all of components
   for (const auto & var_name : *var_names_ptr)
   {
     // Exclude scalar variables for which periodic boundary conditions dont make sense
     if (!nl.hasScalarVariable(var_name))
     {
-      unsigned int var_num = nl.getVariable(0, var_name).number();
-      p.set_variable(var_num);
-      // Only try to add periodic information to meshes which currently support them
-      if (_mesh->isRegularOrthogonal())
-        _mesh->addPeriodicVariable(var_num, p.myboundary, p.pairedboundary);
+      MooseVariableFieldBase & var = nl.getVariable(0, var_name);
+      unsigned int var_num = var.number();
+
+      if (var.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
+      {
+        for (unsigned int component = 0; component < var.count(); ++component)
+        {
+          applyPeriodicBC(var_num + component, var_name + "_" + std::to_string(component));
+        }
+      }
       else
-        mooseInfoRepeated("Periodicity information for variable '" + var_name +
-                          "' will only be stored in the system's DoF map, not on the MooseMesh");
+      {
+        applyPeriodicBC(var_num, var_name);
+      }
     }
   }
 }
