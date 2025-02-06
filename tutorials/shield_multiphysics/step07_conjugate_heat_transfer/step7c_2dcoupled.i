@@ -5,106 +5,26 @@
 # - solve heat conduction for steady state directly
 # - solver parameters: scaling notably, preconditioner, multi-system!
 
-# Transient parameters
-dt_step_multiplier = 2
-step_growth_start = 10
-cp_multiplier = 1e0
-cp_water_multiplier = 1e-3
-
-# Use a correlation for the heat transfer coefficient
-h_water = 30
-
 # Fluid properties
+cp_water_multiplier = 1e-3
 mu_multiplier = 1
 cp = ${fparse 4181 * cp_water_multiplier}
 mu = ${fparse 7.98e-4 * mu_multiplier}
 
-# Mesh discretization
-mult = 1
-nx = '${fparse 40 * mult}'
-ny = '${fparse 32 * mult}'
 # See step 8 for mesh refinement
 global_refinement = 1
 water_additional_refinement = 0
 
 [Mesh]
-  [bulk]
-    type = GeneratedMeshGenerator # Can generate simple lines, rectangles and rectangular prisms
-    dim = 2
-    nx = ${nx}
-    ny = ${ny}
-    xmax = 10 # m
-    ymax = 8 # m
+  [fmg]
+    type = FileMeshGenerator
+    file = 'mesh2d_in.e'
   []
-
-  [create_inner_water]
-    type = ParsedSubdomainMeshGenerator
-    input = bulk
-    combinatorial_geometry = '(x > 2 & x < 3 & y > 1 & y < 5)'
-    block_id = 2
-  []
-  [create_right_water]
-    type = ParsedSubdomainMeshGenerator
-    input = create_inner_water
-    combinatorial_geometry = '(x > 7 & x < 8 & y > 1 & y < 5)'
-    block_id = 3
-  []
-
-  [hollow_concrete]
-    type = ParsedSubdomainMeshGenerator
-    input = create_right_water
-    block_id = 1
-    combinatorial_geometry = 'x > 3.2 & x < 6.8 & y > 1 & y < 5'
-  []
-
-  [rename_blocks]
-    type = RenameBlockGenerator
-    input = hollow_concrete
-    old_block = '0 1 2 3'
-    new_block = 'concrete cavity water water_inactive'
-  []
-
-  [add_water_concrete_interface]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = rename_blocks
-    primary_block = water
-    paired_block = concrete
-    new_boundary = 'water_boundary'
-  []
-  [add_concrete_water_interface]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = add_water_concrete_interface
-    paired_block = concrete
-    primary_block = water
-    new_boundary = 'water_boundary_inwards'
-  []
-
-  [add_inner_cavity]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = add_concrete_water_interface
-    primary_block = concrete
-    paired_block = cavity
-    new_boundary = 'inner_cavity'
-  []
-
-  [add_concrete_outer_boundary]
-    type = RenameBoundaryGenerator
-    input = add_inner_cavity
-    old_boundary = 'left right top bottom'
-    new_boundary = 'air_boundary air_boundary air_boundary ground'
-  []
-
-  [remove_cavity]
-    type = BlockDeletionGenerator
-    input = 'add_concrete_outer_boundary'
-    block = cavity
-  []
-
-  [refine_water]
+  [water_refine]
     type = RefineBlockGenerator
-    input = remove_cavity
-    refinement = '${water_additional_refinement}'
-    block = 'water'
+    input = fmg
+    block = water
+    refinement = ${water_additional_refinement}
   []
   uniform_refine = ${global_refinement}
 []
@@ -112,7 +32,7 @@ water_additional_refinement = 0
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete'
+    block = 'concrete_hd concrete Al'
     initial_condition = 300
     solver_sys = 'heat'
   []
@@ -152,47 +72,46 @@ water_additional_refinement = 0
 []
 
 [Kernels]
-  # We don't need those kernels to run the water-only problem
   # Solid heat conduction
   [diffusion_concrete]
     type = ADHeatConduction
     variable = T
   []
-  # [time_derivative]
-  #   type = ADHeatConductionTimeDerivative
-  #   variable = T
-  # []
 []
 
 [Materials]
   # Materials for the heat conduction equation
+  [concrete_hd]
+    type = ADHeatConductionMaterial
+    block = 'concrete_hd'
+    temp = 'T'
+    # we specify a function of time, temperature is passed as the time argument
+    # in the material
+    thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
+  []
   [concrete]
     type = ADHeatConductionMaterial
     block = 'concrete'
     temp = 'T'
-    # we keep the high thermal conductivity from the Aluminum
-    # in this simplified case to avoid having to mesh an additional layer
-    thermal_conductivity_temperature_function = '45'
-    specific_heat = '${fparse cp_multiplier * 1170}'
+    thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
   []
-  # This constant is fine as long as there are no mechanical deformations
-  [density]
-    type = ADGenericConstantMaterial
-    block = 'concrete'
-    prop_names = 'density'
-    prop_values = '2400' # kg / m3
+  [Al]
+    type = ADHeatConductionMaterial
+    block = 'Al'
+    temp = T
+    thermal_conductivity_temperature_function = '175'
   []
 []
 
 [BCs]
   # Solid
   [from_reactor]
-    type = FunctionNeumannBC
+    type = NeumannBC
     variable = T
-    boundary = inner_cavity
-    # 5MW reactor, 50kW dissipated by radiation, 136 m2 cavity area (in real system)
-    # ramp up over 10s
-    function = '5e4 / 136'
+    boundary = inner_cavity_solid
+    # Real facility uses forced convection to cool the water tank at full power
+    # Need to lower power for natural convection so water doesn't boil.
+    value = '${fparse 5e4 / 14 * 0.06}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -210,11 +129,11 @@ water_additional_refinement = 0
   []
 
   # Heat fluxes between water and concrete
-  [solid_to_fluid]
+  [fluid_to_solid]
     type = FunctorNeumannBC
-    variable = T
     boundary = water_boundary
-    functor = 'h_dT'
+    variable = T
+    functor = h_dT
     coefficient = -1
   []
 []
@@ -226,7 +145,6 @@ water_additional_refinement = 0
   [T_solid_FV]
     family = MONOMIAL
     order = CONSTANT
-    block = 'concrete water'
   []
 []
 
@@ -237,7 +155,7 @@ water_additional_refinement = 0
     v = 'T'
     # Note that this limits the coupling frequency
     execute_on = 'INITIAL TIMESTEP_END'
-    block = 'concrete'
+    block = 'concrete_hd concrete Al'
   []
   [water]
     type = NearestNodeValueAux
@@ -245,7 +163,7 @@ water_additional_refinement = 0
     paired_variable = 'T'
     paired_boundary = 'water_boundary'
     boundary = 'water_boundary_inwards'
-    check_boundary_restricted=false
+    check_boundary_restricted = false
     block = 'water'
   []
 []
@@ -368,9 +286,9 @@ water_additional_refinement = 0
   []
 
   # Boundary condition functor computing the heat flux with a set heat transfer coefficient
-  [heat-flux]
+  [heat_flux]
     type = ADParsedFunctorMaterial
-    expression = '${h_water} * (T_solid_FV - T_fluid)'
+    expression = '600 * (T_solid_FV - T_fluid)'
     functor_names = 'T_solid_FV T_fluid'
     property_name = 'h_dT'
   []
@@ -390,11 +308,25 @@ water_additional_refinement = 0
     variable = vel_y
   []
 
+  [T_fluid_inner_cavity]
+    type = FVFunctorNeumannBC
+    boundary = inner_cavity_water
+    # Real facility uses forced convection to cool the water tank at full power
+    # Need to lower power for natural convection so water doesn't boil.
+    functor = ${fparse 5e4 / 144 * 0.06}
+    variable = T_fluid
+  []
   [T_fluid_water_boundary]
     type = FVFunctorNeumannBC
     boundary = water_boundary
-    functor = 'h_dT'
     variable = T_fluid
+    functor = h_dT
+  []
+  [T_fluid_bottom]
+    type = FVDirichletBC
+    boundary = water_bottom
+    variable = T_fluid
+    value = 300
   []
 []
 
@@ -410,7 +342,6 @@ water_additional_refinement = 0
 
 [Problem]
   nl_sys_names = 'heat flow'
-  # Nothing defined on water_inactive subdomain
   kernel_coverage_check = false
   material_coverage_check = false
 []
@@ -422,18 +353,16 @@ water_additional_refinement = 0
   line_search = none
 
   nl_abs_tol = 1e-8
+  nl_max_its = 10
+  l_max_its = 3
 
-  end_time = 1000
+  steady_state_tolerance = 1e-6
+  steady_state_detection = true
+
   start_time = -1
-
-  # steady_state_tolerance = 1e-5
-  # steady_state_detection = true
-
   [TimeStepper]
     type = FunctionDT
-    function = "if(t<0, 0.1,
-                        if(t<${step_growth_start}, 0.25,
-                                                   ${fparse 0.25*dt_step_multiplier}))"
+    function = 'if(t<0.1, 0.1, t)'
   []
 []
 
