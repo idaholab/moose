@@ -8,7 +8,7 @@ MFEML2Error::validParams()
 {
   InputParameters params = MFEMPostprocessor::validParams();
   params.addClassDescription(
-      "Computes L2 error $\\left\\Vertu_{ex} - u_{h}\\right\\Vert_{\rm L2}$ for "
+      "Computes L2 error $\\left\\Vert u_{ex} - u_{h}\\right\\Vert_{\rm L2}$ for "
       "gridfucntions using H1 or L2 elements.");
   params.addParam<FunctionName>("function", "The analytic solution to compare against.");
   params.addParam<VariableName>("variable",

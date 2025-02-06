@@ -20,6 +20,8 @@ where $u \in H^1$, $\vec v \in H(\mathrm{curl})$ and $\lambda$ is a scalar const
 
 !listing kernels/diffusion.i
 
+!listing kernels/irrotational.i
+
 !syntax parameters /AuxKernels/MFEMGradAux
 
 !syntax inputs /AuxKernels/MFEMGradAux
