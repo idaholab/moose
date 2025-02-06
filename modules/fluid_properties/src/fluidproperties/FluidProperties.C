@@ -23,6 +23,16 @@ FluidProperties::validParams()
   params.set<std::string>("fp_type") = "unspecified-type";
   params.addParamNamesToGroup("fp_type allow_imperfect_jacobians", "Advanced");
   params.registerBase("FluidProperties");
+
+  // Suppress unused parameters
+  params.suppressParameter<bool>("use_displaced_mesh");
+  params.suppressParameter<ExecFlagEnum>("execute_on");
+  params.suppressParameter<bool>("allow_duplicate_execution_on_initial");
+  params.suppressParameter<bool>("force_preic");
+  params.suppressParameter<bool>("force_preaux");
+  params.suppressParameter<bool>("force_postaux");
+  params.suppressParameter<int>("execution_order_group");
+
   return params;
 }
 

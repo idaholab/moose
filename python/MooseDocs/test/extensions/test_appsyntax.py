@@ -76,7 +76,7 @@ class TestParameters(AppSyntaxTestCase):
     def testHTML(self):
         _, res = self.execute(self.TEXT, renderer=base.HTMLRenderer())
 
-        self.assertSize(res, 9)
+        self.assertSize(res, 11)
         self.assertHTMLTag(res(0), 'h2', id_='input-parameters', size=3)
         self.assertEqual(res(0).text(), 'Input Parameters')
 
@@ -95,11 +95,11 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), 'Optional Parameters')
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), 'ul', size=4)
+        self.assertHTMLTag(res(4), 'ul', size=2)
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
-        self.assertEqual(res(5).text(), 'Tagging Parameters')
+        self.assertEqual(res(5).text(), 'Contribution To Tagged Field Data Parameters')
 
         self.assertHTMLTag(res(6), 'ul', size=5)
 
@@ -111,7 +111,7 @@ class TestParameters(AppSyntaxTestCase):
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
-        self.assertSize(res, 9)
+        self.assertSize(res, 11)
         self.assertHTMLTag(res(0), 'h2', id_='input-parameters', size=3)
         self.assertEqual(res(0).text(), 'Input Parameters')
 
@@ -137,11 +137,11 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), 'Optional Parameters')
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), 'ul', size=4, class_='collapsible')
+        self.assertHTMLTag(res(4), 'ul', size=2, class_='collapsible')
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
-        self.assertEqual(res(5).text(), 'Tagging Parameters')
+        self.assertEqual(res(5).text(), 'Contribution To Tagged Field Data Parameters')
 
         self.assertHTMLTag(res(6), 'ul', size=5, class_='collapsible')
 
