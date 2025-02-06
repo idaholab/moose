@@ -612,6 +612,8 @@ AssemblyMeshGenerator::generate()
         elem_block_name += "_" + _background_block_name[z_id];
       else if (!is_background_region && _has_duct_block_names)
         elem_block_name += "_" + _duct_block_names[z_id][peripheral_idx - 1];
+      if (elem->type() == TRI3 || elem->type() == PRISM6)
+        elem_block_name += RGMB::TRI_BLOCK_NAME_SUFFIX;
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
