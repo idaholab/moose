@@ -6,8 +6,7 @@
 
 ## Overview
 
-AuxKernel for calculating the divegence of an $H(\mathrm{div})$ conforming source variable defined on a 3D RT
-FE space and storing it in a scalar elemental result variable defined on a $L^2$ FE space.
+AuxKernel for calculating the divegence of an $H(\mathrm{div})$ conforming source variable defined on a 3D Raviart-Thomas finite element space and storing it in a scalar elemental result variable defined on an $L^2$ FE space.
 
 The result may be scaled by an optional (global) scalar factor.
 

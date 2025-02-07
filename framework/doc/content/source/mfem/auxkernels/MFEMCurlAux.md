@@ -6,8 +6,8 @@
 
 ## Overview
 
-AuxKernel for calculating the curl of an $H(\mathrm{curl})$ conforming source variable defined on a 3D ND FE
-space and storing it in a $H(\mathrm{div})$ conforming result variable defined on a RT FE space.
+AuxKernel for calculating the curl of an $H(\mathrm{curl})$ conforming source variable defined on a 3D Nédélec finite element
+space and storing it in an $H(\mathrm{div})$ conforming result variable defined on a Raviart-Thomas finite element space.
 
 The result may be scaled by an optional (global) scalar factor.
 
