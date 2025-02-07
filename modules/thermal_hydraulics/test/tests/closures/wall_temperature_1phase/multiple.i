@@ -16,3 +16,15 @@
     T_wall = 700
   []
 []
+[Postprocessors]
+  [T_wall_1]
+    type = ADElementAverageMaterialProperty
+    mat_prop = T_wall:1
+    execute_on = 'INITIAL'
+  []
+  [T_wall_2]
+    type = ADElementAverageMaterialProperty
+    mat_prop = T_wall:2
+    execute_on = 'INITIAL'
+  []
+[]
