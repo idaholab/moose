@@ -103,6 +103,15 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
+   * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
+   * to be used in the MFEM solve.
+   */
+  void addAuxKernel(const std::string & kernel_name,
+                    const std::string & name,
+                    InputParameters & parameters) override;
+
+  /**
    * Override of ExternalProblem::addFunction. Uses ExternalProblem::addFunction to create a
    * MFEMGeneralUserObject representing the function in MOOSE, and creates a corresponding
    * MFEM Coefficient or VectorCoefficient object.

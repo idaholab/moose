@@ -14,25 +14,46 @@
     fec_type = H1
     fec_order = FIRST
   []
+  [HCurlFESpace]
+    type = MFEMFESpace
+    fec_type = ND
+    fec_order = FIRST
+  []  
 []
 
 [Variables]
-  [diffused]
+  [concentration]
     type = MFEMVariable
     fespace = H1FESpace
+  []
+[]
+
+[AuxVariables]
+  [concentration_gradient]
+    type = MFEMVariable
+    fespace = HCurlFESpace
+  []
+[]
+
+[AuxKernels]
+  [grad]
+    type = MFEMGradAux
+    variable = concentration_gradient
+    source = concentration
+    execute_on = TIMESTEP_END
   []
 []
 
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = concentration
     boundary = '1'
     value = 1.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = concentration
     boundary = '2'
     value = 0.0
   []
@@ -49,7 +70,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = diffused
+    variable = concentration
     coefficient = diffusivity
   []
 []
