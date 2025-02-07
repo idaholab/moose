@@ -45,7 +45,8 @@ FunctorAux::computeValue()
   const auto state = determineState();
   if (isNodal())
   {
-    const Moose::NodeArg node_arg = {_current_node, Moose::INVALID_BLOCK_ID};
+    const Moose::NodeArg node_arg = {
+        _current_node, blockIDs().size() == 1 ? *blockIDs().begin() : Moose::INVALID_BLOCK_ID};
     return _factor(node_arg, state) * _functor(node_arg, state);
   }
   else if (_is_standard_fe)

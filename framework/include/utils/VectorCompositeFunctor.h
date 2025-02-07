@@ -62,6 +62,7 @@ public:
 
   bool supportsFaceArg() const override;
   bool supportsElemSideQpArg() const override;
+  bool mayRequireGhosting() const override;
 
 private:
   ValueType evaluate(const ElemArg & elem_arg, const StateArg & state) const override;
@@ -166,6 +167,17 @@ VectorCompositeFunctor<T>::supportsElemSideQpArg() const
   if (_has_z && !_z_comp.supportsElemSideQpArg())
     return false;
   return true;
+}
+
+template <typename T>
+bool
+VectorCompositeFunctor<T>::mayRequireGhosting() const
+{
+  if (!_x_comp.mayRequireGhosting() && (!_has_y || !_y_comp.mayRequireGhosting()) &&
+      (!_has_z || !_z_comp.mayRequireGhosting()))
+    return false;
+  else
+    return true;
 }
 
 template <typename T>
