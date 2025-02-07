@@ -51,8 +51,13 @@ class SQARequirementReport(SQAReport):
 
         # Build Requirement objects and remove directory based dict
         requirements = []
-        for s in specs:
-            req_dict = get_requirements_from_tests(directories, s.split(), self.include_non_testable)
+        if not isinstance(specs, str):
+            for s in specs:
+                req_dict = get_requirements_from_tests(directories, s.split(), self.include_non_testable)
+                for values in req_dict.values():
+                    requirements += values
+        else:
+            req_dict = get_requirements_from_tests(directories, specs, self.include_non_testable)
             for values in req_dict.values():
                 requirements += values
 

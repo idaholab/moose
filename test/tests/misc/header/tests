@@ -1,0 +1,23 @@
+[Tests]
+  issues = '#1832'
+  design = 'syntax/MultiApps/index.md'
+
+  [g]
+    requirement = "The system shall be able to print a header for multi-level sub-applications:"
+    [header_on]
+      type = 'RunApp'
+      input = 'parent.i'
+      expect_out = 'parent\nsub0: sub\nsub0_sub0: subsub'
+      detail = "custom for each parent and sub-applications;"
+      cli_args = '--append-header=parent'
+    []
+    [header_off]
+      type = 'RunApp'
+      input = 'parent.i'
+      prereq = g/header_on
+      cli_args = '--append-header=parent --suppress-header'
+      absent_out = 'parent\nsub0: sub\nsub0_sub0: subsub'
+      detail = "and suppress the all parent and sub-applications."
+    []
+  []
+[]

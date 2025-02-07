@@ -21,6 +21,8 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel_sync.h"
 
+#include "PetscSupport.h"
+
 CommandLine::CommandLine() {}
 CommandLine::CommandLine(int argc, char * argv[]) { addArguments(argc, argv); }
 CommandLine::CommandLine(const std::vector<std::string> & args) { addArguments(args); }
@@ -416,6 +418,10 @@ CommandLine::printUsage() const
 
   Moose::out << "Solver Options:\n"
              << "  See PETSc manual for details" << std::endl;
+
+  // If we get here, we are not running a simulation and should silence petsc's unused options
+  // warning
+  Moose::PetscSupport::setSinglePetscOption("-options_left", "0");
 }
 
 std::vector<std::string>

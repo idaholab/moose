@@ -40,10 +40,18 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
 
-  solve_type = 'NEWTON'
+  solve_type = 'LINEAR'
+
+  start_time = 0.0
+  num_steps = 1
+  dt = 0.00005
+
+  [./TimeIntegrator]
+    type = ActuallyExplicitEuler
+  [../]
 
   petsc_options_iname = "-pc_type"
-  petsc_options_value = "hypre"
+  petsc_options_value = "none"
 []

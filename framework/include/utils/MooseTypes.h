@@ -581,7 +581,7 @@ struct IsADType<MetaPhysicL::DualNumber<T, Args...>>
  * error with constexpr-based if conditions. The templating delays the triggering
  * of the static assertion until the template is instantiated.
  */
-template <class T>
+template <class... Ts>
 constexpr std::false_type always_false{};
 
 } // namespace Moose

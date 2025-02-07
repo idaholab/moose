@@ -52,6 +52,9 @@ MooseTestApp::validParams()
       "--test-check-legacy-params",
       "Check for legacy parameter construction with CheckLegacyParamsAction; for testing");
 
+  params.addCommandLineParam<std::string>(
+      "append_header", "--append-header <header>", "", "String to print at top of console output");
+
   params.set<bool>("automatic_automatic_scaling") = false;
   params.set<bool>("use_legacy_material_output") = false;
   params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
@@ -139,6 +142,12 @@ void
 MooseTestApp::registerApps()
 {
   registerApp(MooseTestApp);
+}
+
+std::string
+MooseTestApp::header() const
+{
+  return getParam<std::string>("append_header");
 }
 
 extern "C" void

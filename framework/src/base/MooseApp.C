@@ -247,6 +247,12 @@ MooseApp::validParams()
       "Continue the calculation. Without <file base>, the most recent recovery file will be used");
   params.setGlobalCommandLineParam("recover");
 
+  params.addCommandLineParam<bool>("suppress_header",
+                                   "--suppress-header",
+                                   false,
+                                   "Disables the output of the application header.");
+  params.setGlobalCommandLineParam("suppress_header");
+
   params.addCommandLineParam<bool>(
       "test_checkpoint_half_transient",
       "--test-checkpoint-half-transient",
@@ -730,13 +736,8 @@ MooseApp::setupOptions()
   TIME_SECTION("setupOptions", 5, "Setting Up Options");
 
   // Print the header, this is as early as possible
-  auto hdr = header();
-  if (hdr.length() != 0)
-  {
-    if (multiAppLevel() > 0)
-      MooseUtils::indentMessage(_name, hdr);
-    Moose::out << hdr << std::endl;
-  }
+  if (header().length() && !getParam<bool>("suppress_header"))
+    _console << header() << std::endl;
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);
@@ -774,13 +775,19 @@ MooseApp::setupOptions()
   {
     // Set from command line
     auto color = getParam<MooseEnum>("color");
-    // Set from environment
-    char * c_color = std::getenv("MOOSE_COLOR");
-    if (c_color)
-      color.assign(std::string(c_color), "While assigning environment variable MOOSE_COLOR");
-    // Set from deprecated --no-color
-    if (getParam<bool>("no_color"))
-      color = "off";
+    if (!isParamSetByUser("color"))
+    {
+      // Set from deprecated --no-color
+      if (getParam<bool>("no_color"))
+        color = "off";
+      // Set from environment
+      else
+      {
+        char * c_color = std::getenv("MOOSE_COLOR");
+        if (c_color)
+          color.assign(std::string(c_color), "While assigning environment variable MOOSE_COLOR");
+      }
+    }
 
     if (color == "auto")
       Moose::setColorConsole(true);

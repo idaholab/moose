@@ -20,4 +20,14 @@
     issues = '#25577'
     petsc_version = '>=3.19.2'
   []
+
+  [test_user_set_petsc_options_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = 'Executioner/petsc_options_iname="-pc_type -snes_type" Executioner/petsc_options_value="none ksponly"'
+    expect_out = "Option left:\s+name:-SNES_TYPE\s+value:\s+ksponly"
+    requirement = "The system shall warn the user of unused petsc options that are not set programatically."
+    issues = '#28053'
+    petsc_version = '>=3.19.2'
+  []
 []

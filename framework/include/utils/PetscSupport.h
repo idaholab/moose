@@ -38,13 +38,22 @@ namespace PetscSupport
 class PetscOptions
 {
 public:
-  PetscOptions() : flags("", "", true) {}
+  PetscOptions()
+    : flags("", "", true), dont_add_these_options("", "", true), user_set_options("", "", true)
+  {
+  }
 
   /// PETSc key-value pairs
   std::vector<std::pair<std::string, std::string>> pairs;
 
   /// Single value PETSc options (flags)
   MultiMooseEnum flags;
+
+  /// Flags to explicitly not set, even if they are specified programmatically
+  MultiMooseEnum dont_add_these_options;
+
+  /// Options that are set by the user at the input level
+  MultiMooseEnum user_set_options;
 
   /// Preconditioner description
   std::string pc_description;
@@ -98,16 +107,42 @@ void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = fal
 PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void * void_ptr);
 
 /**
+ * Process some MOOSE-wrapped PETSc options.
+ */
+void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
+                                         const InputParameters & params);
+
+/**
  * Stores the PETSc options supplied from the InputParameters with MOOSE
  */
 void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
+ * Sets the FE problem's solve type from the input params.
+ */
+void setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
+ * Sets the FE problem's line search from the input params.
+ */
+void setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
+ *  Sets the FE problem's matrix-free finite difference type from the input params.
+ */
+void setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
+ * Stores the Petsc flags and pair options fron the input params in the given PetscOptions object.
+ */
+void storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
  * Populate flags in a given PetscOptions object using a vector of input arguments
  * @param petsc_flags Container holding the flags of the petsc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
+void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
 
 /**
  * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
@@ -115,10 +150,10 @@ void processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_
  * @param mesh_dimension The mesh dimension, needed for multigrid settings
  * @param petsc_options Data structure which handles petsc options within moose
  */
-void
-processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
-                  const unsigned int mesh_dimension,
-                  PetscOptions & petsc_options);
+void addPetscPairsToPetscOptions(
+    const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+    const unsigned int mesh_dimension,
+    PetscOptions & petsc_options);
 
 /**
  * Returns the valid petsc line search options as a set of strings
@@ -137,8 +172,20 @@ InputParameters getPetscValidParams();
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc single options (flags)
 MultiMooseEnum getCommonPetscFlags();
 
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc snes single options (flags)
+MultiMooseEnum getCommonSNESFlags();
+
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc ksp single options (flags)
+MultiMooseEnum getCommonKSPFlags();
+
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc iname options (keys in key-value pairs)
 MultiMooseEnum getCommonPetscKeys();
+
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc snes option names (keys)
+MultiMooseEnum getCommonSNESKeys();
+
+/// A helper function to produce a MultiMooseEnum with commonly used PETSc ksp option names (keys)
+MultiMooseEnum getCommonKSPKeys();
 
 /// check if SNES type is variational inequalities (VI) solver
 bool isSNESVI(FEProblemBase & fe_problem);
@@ -152,6 +199,15 @@ bool isSNESVI(FEProblemBase & fe_problem);
 void setSinglePetscOption(const std::string & name,
                           const std::string & value = "",
                           FEProblemBase * const problem = nullptr);
+
+/**
+ * Same as setSinglePetscOption, but does not set the option if it doesn't make sense for the
+ * current simulation type, e.g. if \p name is contained within \p dont_add_these_options
+ */
+void setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_options,
+                                       const std::string & name,
+                                       const std::string & value = "",
+                                       FEProblemBase * const problem = nullptr);
 
 void addPetscOptionsFromCommandline();
 
@@ -178,14 +234,34 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
                           const char * coloring_algorithm);
 
 /**
- * disable printing of the nonlinear convergence reason
+ * Function to ensure that a particular petsc option is not added to the PetscOptions
+ * storage object to be later set unless explicitly specified in input or on the command line.
  */
-void disableNonlinearConvergedReason(FEProblemBase & fe_problem);
+void dontAddPetscFlag(const std::string & flag, PetscOptions & petsc_options);
 
 /**
- * disable printing of the linear convergence reason
+ * Function to ensure that -snes_converged_reason is not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
  */
-void disableLinearConvergedReason(FEProblemBase & fe_problem);
+void dontAddNonlinearConvergedReason(FEProblemBase & fe_problem);
+
+/**
+ * Function to ensure that -ksp_converged_reason is not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
+ */
+void dontAddLinearConvergedReason(FEProblemBase & fe_problem);
+
+/**
+ * Function to ensure that common KSP options are not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
+ */
+void dontAddCommonKSPOptions(FEProblemBase & fe_problem);
+
+/**
+ * Function to ensure that common SNES options are not added to the PetscOptions storage
+ * object to be later set unless explicitly specified in input or on the command line.
+ */
+void dontAddCommonSNESOptions(FEProblemBase & fe_problem);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

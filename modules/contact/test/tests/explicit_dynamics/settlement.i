@@ -4,6 +4,10 @@
   volumetric_locking_correction = true
 []
 
+[Problem]
+  extra_tag_matrices = 'mass'
+[]
+
 [Mesh]
   [block_one]
     type = GeneratedMeshGenerator
@@ -203,69 +207,70 @@
 [Kernels]
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    stiffness_damping_coefficient = 1.0e-3
+    stiffness_damping_coefficient = 9.5e-4
     generate_output = 'stress_zz strain_zz'
   []
-  [inertia_x]
-    type = InertialForce
+  [Mass_x]
+    type = MassMatrix
     variable = disp_x
+    density = density
+    matrix_tags = 'mass'
   []
-  [inertia_y]
-    type = InertialForce
+  [Mass_y]
+    type = MassMatrix
     variable = disp_y
+    density = density
+    matrix_tags = 'mass'
   []
-  [inertia_z]
-    type = InertialForce
+  [Mass_z]
+    type = MassMatrix
     variable = disp_z
+    density = density
+    matrix_tags = 'mass'
   []
   [gravity]
     type = Gravity
     variable = disp_z
     value = -98.10
+    block = 1
   []
 []
 
 [BCs]
   [x_front]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_x
     boundary = 'ball_front'
-    preset = false
     value = 0.0
   []
   [y_front]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_y
     boundary = 'ball_front'
-    preset = false
     value = 0.0
   []
   [x_fixed]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_x
     boundary = 'base_back'
-    preset = false
     value = 0.0
   []
   [y_fixed]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_y
     boundary = 'base_back'
-    preset = false
     value = 0.0
   []
   [z_fixed]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_z
     boundary = 'base_back'
-    preset = false
     value = 0.0
   []
   [z_fixed_front]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_z
     boundary = 'base_front'
-    preset = false
     value = 0.0
   []
 []
@@ -331,14 +336,14 @@
 
 [Executioner]
   type = Transient
-  start_time = -0.01
-  end_time = 0.04
+  start_time = 0
+  end_time = 0.05
   dt = 1.0e-4
   timestep_tolerance = 1e-6
 
   [TimeIntegrator]
-    type = CentralDifference
-    solve_type = lumped
+    type = DirectCentralDifference
+    mass_matrix_tag = 'mass'
   []
 []
 
