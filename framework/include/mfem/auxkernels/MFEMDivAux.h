@@ -24,9 +24,6 @@ protected:
   mfem::ParGridFunction & _source_var;
   // Scalar factor to multiply the result by.
   mfem::real_t _scale_factor;
-  // FESpaces
-  mfem::ParFiniteElementSpace & _hdiv_fespace;
-  mfem::ParFiniteElementSpace & _l2_fespace;
   // Divergence operator
   mfem::common::ParDiscreteDivOperator _div;
 };

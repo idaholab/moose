@@ -24,9 +24,7 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
-    _hcurl_fespace(*_source_var.ParFESpace()),
-    _hdiv_fespace(*_result_var.ParFESpace()),
-    _curl(&_hcurl_fespace, &_hdiv_fespace)
+    _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _curl.Assemble();
   _curl.Finalize();

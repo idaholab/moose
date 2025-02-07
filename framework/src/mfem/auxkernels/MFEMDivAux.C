@@ -24,9 +24,7 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
-    _hdiv_fespace(*_source_var.ParFESpace()),
-    _l2_fespace(*_result_var.ParFESpace()),
-    _div(&_hdiv_fespace, &_l2_fespace)
+    _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _div.Assemble();
   _div.Finalize();

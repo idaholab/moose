@@ -24,9 +24,7 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
-    _h1_fespace(*_source_var.ParFESpace()),
-    _hcurl_fespace(*_result_var.ParFESpace()),
-    _grad(&_h1_fespace, &_hcurl_fespace)
+    _grad(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _grad.Assemble();
   _grad.Finalize();

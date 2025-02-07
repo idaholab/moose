@@ -24,9 +24,6 @@ protected:
   mfem::ParGridFunction & _source_var;
   // Scalar factor to multiply the result by.
   mfem::real_t _scale_factor;
-  // FESpaces
-  mfem::ParFiniteElementSpace & _h1_fespace;
-  mfem::ParFiniteElementSpace & _hcurl_fespace;
   // Grad operator
   mfem::common::ParDiscreteGradOperator _grad;
 };
