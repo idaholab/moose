@@ -29730,7 +29730,7 @@
 </DataArray>
 </CellData>
 <PointData >
-<DataArray type="Float64" Name="diffused" NumberOfComponents="1"  format="ascii" >
+<DataArray type="Float64" Name="concentration" NumberOfComponents="1"  format="ascii" >
 0.915747982
 0.915750416
 0.916863041
@@ -49540,7 +49540,7 @@
 0.999987762
 0.999973933
 </DataArray>
-<DataArray type="Float64" Name="diffusion_gradient" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
+<DataArray type="Float64" Name="concentration_gradient" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
 0.00917521141 0.000767673635 -0.23435473 
 0.00916932514 0.000767185885 -0.234391478 
 0.0091752114 0.000765622049 -0.195958204 

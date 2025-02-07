@@ -32,7 +32,7 @@
 []
 
 [AuxVariables]
-  [neg_db_dt_field]
+  [db_dt_field]
     type = MFEMVariable
     fespace = HDivFESpace
   []
@@ -41,8 +41,9 @@
 [AuxKernels]
   [curl]
     type = MFEMCurlAux
-    variable = neg_db_dt_field
+    variable = db_dt_field
     source = e_field
+    scale_factor = -1.0
     execute_on = TIMESTEP_END
   []
 []
