@@ -13,7 +13,7 @@
 
 class SinglePhaseFluidProperties;
 
-/**e
+/**
  * Converts temperature to enthalpy or enthalpy to temperature using
  * functor material properties. The derivatives are discarded, so can't
  * be used with AD.
@@ -25,13 +25,12 @@ public:
   LinearFVEnthalpyFunctorMaterial(const InputParameters & parameters);
 
 protected:
-  /// Variables, treated as functors, needs to be AD because
-  /// Materials inherit from ADFunctorInterface
+  /// Variables, treated as functors
   const Moose::Functor<Real> & _pressure;
   const Moose::Functor<Real> & _T_fluid;
   const Moose::Functor<Real> & _h;
 
-  /// The fluid properties that containt the h from Tconversion routines
+  /// The fluid properties that contain the h from T conversion routines
   const SinglePhaseFluidProperties * _fluid;
 
   /// Pointers to the the conversion functors (in case the fluid property is not provided)

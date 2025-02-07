@@ -21,6 +21,6 @@
       type = 'Exodiff'
       input = 'enthalpy_equation.i'
       exodiff = 'enthalpy_equation_out.e'
-    [../]
+    []
   []
 []

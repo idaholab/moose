@@ -23,7 +23,7 @@ LinearFVEnthalpyFunctorMaterial::validParams()
 
   params.addRequiredParam<MooseFunctorName>(NS::pressure, "Pressure");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
-  params.addRequiredParam<MooseFunctorName>("h", "Specific Enthalpy");
+  params.addRequiredParam<MooseFunctorName>(NS::specific_enthalpy, "Specific Enthalpy");
 
   // Please choose between providing a fluid properties
   params.addParam<UserObjectName>(NS::fluid, "Fluid properties functor userobject");
@@ -40,7 +40,7 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
   : FunctorMaterial(params),
     _pressure(getFunctor<Real>(NS::pressure)),
     _T_fluid(getFunctor<Real>(NS::T_fluid)),
-    _h(getFunctor<Real>("h")),
+    _h(getFunctor<Real>(NS::specific_enthalpy)),
     _fluid(params.isParamValid(NS::fluid)
                ? &UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)
                : nullptr),
@@ -62,9 +62,8 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
   }
 
   //
-  // Set material properties functors
+  // Set material property functors
   //
-
   if (_fluid)
   {
     addFunctorProperty<Real>("h_from_p_T",

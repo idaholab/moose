@@ -2,7 +2,7 @@
 
 This kernel adds the contributions of the energy advection term to the matrix and right hand side of the energy equation system for the finite volume SIMPLE segregated solver [SIMPLE.md].
 
-This kernel currently supports the advection of specific enthalpy $h$ or temperature $T$. Important consideration: Temperature advection is only supported for constant specific heat, where $h$ can be defined as $h=c_p T$. For variable $c_p$ the user should use the enthalpy formulation. The boolean paremeter 'advected_quantity' lets the user select "enthalpy" or "temperature".
+This kernel currently supports the advection of specific enthalpy $h$ or temperature $T$. Important consideration: Temperature advection is only supported for constant specific heat, where $h$ can be defined as $h=c_p T$. For variable $c_p$, the user should use the enthalpy formulation. Parameter [!param](/LinearFVKernels/LinearFVEnergyAdvection/advected_quantity) lets the user select "enthalpy" or "temperature".
 
 This term is described by $\nabla \cdot \left(\rho\vec{u} h \right)$ for enthalpy or $\nabla \cdot \left(\rho\vec{u} c_p T \right)$ for constant specific heat. This term is present in the energy equation conservation for an incompressible/weakly-compressible formulation.
 

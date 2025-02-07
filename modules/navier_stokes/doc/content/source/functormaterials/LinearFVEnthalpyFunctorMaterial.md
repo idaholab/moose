@@ -4,7 +4,7 @@ This Functor Material class is needed when the user wants to solve for the entha
 
 This material class defines the functors to convert from specific enthalpy and pressure to temperature ('T_from_p_h') and to convert from temperature and pressure to specific enthalpy ('h_from_p_T').
 
-When solving the enthalpy conservation equation and obtaining the specific enthalpy ${h} as the solution, two functors are required.
+When solving the enthalpy conservation equation and obtaining the specific enthalpy ($h$) as the solution, two functors are required.
 The 'T_from_p_h' functor computes the temperature field, which is then used to evaluate temperature-dependent thermophysical properties. The 'h_from_p_T' functor is primarily utilized for setting boundary conditions where the temperature is specified.
 
 The specific enthalpy is defined as:
@@ -20,7 +20,7 @@ where
 
 ## Example input syntax 1: Fluid Properties
 
-In this input, a `LinearFVEnthalpyFunctorMaterial` is defined to solve for a 1D heated channel using Lead fluid properties with a fixed mass flux.
+In this input, a `LinearFVEnthalpyFunctorMaterial` is defined to solve for a 1D heated channel using lead fluid properties with a fixed mass flux.
 
 The `FluidProperties` object for lead is defined in
 
