@@ -55,6 +55,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 InputParameters
 SubChannel1PhaseProblem::validParams()
 {
+  MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
@@ -67,10 +68,8 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
-  params.addParam<std::string>(
-      "interpolation_scheme",
-      "central_difference",
-      "Interpolation scheme used for the method. Only affects implicit solutions");
+  params.addParam<MooseEnum>(
+      "interpolation_scheme", schemes, "Interpolation scheme used for the method.");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -120,7 +119,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
-    _interpolation_scheme(getParam<std::string>("interpolation_scheme")),
+    _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
@@ -340,22 +339,21 @@ SubChannel1PhaseProblem::solverSystemConverged(const unsigned int)
 }
 
 PetscScalar
-SubChannel1PhaseProblem::computeInterpolationCoefficients(const std::string interp_type,
-                                                          PetscScalar Peclet)
+SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
 {
-  if (interp_type.compare("upwind") == 0)
+  if (_interpolation_scheme == "upwind")
   {
     return 1.0;
   }
-  else if (interp_type.compare("downwind") == 0)
+  else if (_interpolation_scheme == "downwind")
   {
     return 0.0;
   }
-  else if (interp_type.compare("central_difference") == 0)
+  else if (_interpolation_scheme == "central_difference")
   {
     return 0.5;
   }
-  else if (interp_type.compare("exponential") == 0)
+  else if (_interpolation_scheme == "exponential")
   {
     return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
   }
@@ -370,10 +368,9 @@ SubChannel1PhaseProblem::computeInterpolationCoefficients(const std::string inte
 PetscScalar
 SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
                                                   PetscScalar botValue,
-                                                  const std::string interp_type,
-                                                  PetscScalar Peclet = 0.5)
+                                                  PetscScalar Peclet)
 {
-  PetscScalar alpha = computeInterpolationCoefficients(interp_type, Peclet);
+  PetscScalar alpha = computeInterpolationCoefficients(Peclet);
   return alpha * botValue + (1.0 - alpha) * topValue;
 }
 
@@ -781,21 +778,20 @@ SubChannel1PhaseProblem::computeDP(int iblock)
 
         // interpolation weight coefficient
         PetscScalar Pe = 0.5;
-        if (_interpolation_scheme.compare("exponential") == 0)
+        if (_interpolation_scheme == "exponential")
         {
           // Compute the Peclet number
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+          auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
           auto w_perim_in = (*_w_perim_soln)(node_in);
           auto w_perim_out = (*_w_perim_soln)(node_out);
-          auto w_perim_interp =
-              this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
-          auto mdot_loc = this->computeInterpolatedValue(
-              (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
+          auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
+          auto mdot_loc =
+              this->computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
           auto mu_in = (*_mu_soln)(node_in);
           auto mu_out = (*_mu_soln)(node_out);
-          auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, "central_difference", 0.5);
+          auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, 0.5);
           auto Dh_i = 4.0 * S_interp / w_perim_interp;
           // Compute friction
           auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
@@ -804,32 +800,30 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
           auto fi = computeFrictionFactor(_friction_args);
-          auto ki = computeInterpolatedValue(
-              k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
+          auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], 0.5);
           Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
-        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+        auto alpha = computeInterpolationCoefficients(Pe);
 
         // inlet, outlet, and interpolated density
         auto rho_in = (*_rho_soln)(node_in);
         auto rho_out = (*_rho_soln)(node_out);
-        auto rho_interp = computeInterpolatedValue(rho_out, rho_in, _interpolation_scheme, Pe);
+        auto rho_interp = computeInterpolatedValue(rho_out, rho_in, Pe);
 
         // inlet, outlet, and interpolated viscosity
         auto mu_in = (*_mu_soln)(node_in);
         auto mu_out = (*_mu_soln)(node_out);
-        auto mu_interp = computeInterpolatedValue(mu_out, mu_in, _interpolation_scheme, Pe);
+        auto mu_interp = computeInterpolatedValue(mu_out, mu_in, Pe);
 
         // inlet, outlet, and interpolated axial surface area
         auto S_in = (*_S_flow_soln)(node_in);
         auto S_out = (*_S_flow_soln)(node_out);
-        auto S_interp = computeInterpolatedValue(S_out, S_in, _interpolation_scheme, Pe);
+        auto S_interp = computeInterpolatedValue(S_out, S_in, Pe);
 
         // inlet, outlet, and interpolated wetted perimeter
         auto w_perim_in = (*_w_perim_soln)(node_in);
         auto w_perim_out = (*_w_perim_soln)(node_out);
-        auto w_perim_interp =
-            computeInterpolatedValue(w_perim_out, w_perim_in, _interpolation_scheme, Pe);
+        auto w_perim_interp = computeInterpolatedValue(w_perim_out, w_perim_in, Pe);
 
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S_interp / w_perim_interp;
@@ -859,8 +853,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             _amc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
         // Adding RHS elements
-        PetscScalar mdot_old_interp = computeInterpolatedValue(
-            _mdot_soln->old(node_out), _mdot_soln->old(node_in), _interpolation_scheme, Pe);
+        PetscScalar mdot_old_interp =
+            computeInterpolatedValue(_mdot_soln->old(node_out), _mdot_soln->old(node_in), Pe);
         PetscScalar value_vec_tt = _TR * mdot_old_interp * dz / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(
@@ -902,14 +896,14 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
           auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
           auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-          auto rho_i = computeInterpolatedValue(
-              (*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), _interpolation_scheme, Pe);
-          auto rho_j = computeInterpolatedValue(
-              (*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), _interpolation_scheme, Pe);
-          auto S_i = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), _interpolation_scheme, Pe);
-          auto S_j = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), _interpolation_scheme, Pe);
+          auto rho_i =
+              computeInterpolatedValue((*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), Pe);
+          auto rho_j =
+              computeInterpolatedValue((*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), Pe);
+          auto S_i =
+              computeInterpolatedValue((*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), Pe);
+          auto S_j =
+              computeInterpolatedValue((*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), Pe);
           auto u_star = 0.0;
           // figure out donor axial velocity
           if (_Wij(i_gap, cross_index) > 0.0)
@@ -1031,16 +1025,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         }
 
         /// Friction term
-        PetscScalar mdot_interp = computeInterpolatedValue(
-            (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), _interpolation_scheme, Pe);
+        PetscScalar mdot_interp =
+            computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
         _friction_args.Re = Re;
         _friction_args.i_ch = i_ch;
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
         auto fi = computeFrictionFactor(_friction_args);
-        auto ki = computeInterpolatedValue(
-            k_grid[i_ch][iz], k_grid[i_ch][iz - 1], _interpolation_scheme, Pe);
+        auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], Pe);
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
@@ -1151,7 +1144,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, _interpolation_scheme);
+          auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
 
           // Setting solutions
           if (S_interp != 0)
@@ -1206,7 +1199,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           // We will need to update this later if we allow non-uniform refinements in the axial
           // direction
           PetscScalar Pe = 0.5;
-          auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+          auto alpha = computeInterpolationCoefficients(Pe);
           if (iz == last_node)
           {
             _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out) / 2.0);
@@ -1238,7 +1231,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
+          auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
 
           // Creating matrix of coefficients
           PetscInt row = i_ch + _n_channels * iz_ind;
@@ -1321,7 +1314,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
+          auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
 
           // Creating matrix of coefficients
           PetscInt row = i_ch + _n_channels * iz_ind;
@@ -1354,7 +1347,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
             {
               auto dp_in = (*_DP_soln)(node_in);
               auto dp_out = (*_DP_soln)(node_out);
-              auto dp_interp = computeInterpolatedValue(dp_out, dp_in, _interpolation_scheme);
+              auto dp_interp = computeInterpolatedValue(dp_out, dp_in, 0.5);
               PetscScalar value_v = -1.0 * dp_interp * S_interp;
               PetscInt row_v = i_ch + _n_channels * iz_ind;
               LibmeshPetscCall(
@@ -1580,10 +1573,10 @@ SubChannel1PhaseProblem::computeWij(int iblock)
         // inlet, outlet, and interpolated densities
         auto rho_i_in = (*_rho_soln)(node_in_i);
         auto rho_i_out = (*_rho_soln)(node_out_i);
-        auto rho_i_interp = computeInterpolatedValue(rho_i_out, rho_i_in, _interpolation_scheme);
+        auto rho_i_interp = computeInterpolatedValue(rho_i_out, rho_i_in, 0.5);
         auto rho_j_in = (*_rho_soln)(node_in_j);
         auto rho_j_out = (*_rho_soln)(node_out_j);
-        auto rho_j_interp = computeInterpolatedValue(rho_j_out, rho_j_in, _interpolation_scheme);
+        auto rho_j_interp = computeInterpolatedValue(rho_j_out, rho_j_in, 0.5);
 
         // inlet, outlet, and interpolated areas
         auto S_i_in = (*_S_flow_soln)(node_in_i);
@@ -1617,7 +1610,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
 
         // Assembling inertial term
         PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+        auto alpha = computeInterpolationCoefficients(Pe);
         auto mass_term_out = (*_mdot_soln)(node_out_i) / S_i_out / rho_i_out +
                              (*_mdot_soln)(node_out_j) / S_j_out / rho_j_out;
         auto mass_term_in = (*_mdot_soln)(node_in_i) / S_i_in / rho_i_in +
@@ -1684,7 +1677,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
             _cmc_friction_force_mat, 1, &row_ff, 1, &col_ff, &value_ff, INSERT_VALUES));
 
         // Assembling pressure force
-        alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+        alpha = computeInterpolationCoefficients(Pe);
 
         if (!_staggered_pressure_bool)
         {

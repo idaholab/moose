@@ -860,30 +860,29 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto S_in = (*_S_flow_soln)(node_in);
         auto S_out = (*_S_flow_soln)(node_out);
-        auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+        auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
         auto volume = dz * S_interp;
 
         PetscScalar Pe = 0.5;
-        if (_interpolation_scheme.compare("exponential") == 0)
+        if (_interpolation_scheme == "exponential")
         {
           // Compute the Peclet number
           auto w_perim_in = (*_w_perim_soln)(node_in);
           auto w_perim_out = (*_w_perim_soln)(node_out);
-          auto w_perim_interp =
-              this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
+          auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
           auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
           auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
-          auto K = this->computeInterpolatedValue(K_out, K_in, "central_difference", 0.5);
+          auto K = this->computeInterpolatedValue(K_out, K_in, 0.5);
           auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
           auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
-          auto cp = this->computeInterpolatedValue(cp_out, cp_in, "central_difference", 0.5);
-          auto mdot_loc = this->computeInterpolatedValue(
-              (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
+          auto cp = this->computeInterpolatedValue(cp_out, cp_in, 0.5);
+          auto mdot_loc =
+              this->computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
           // hydraulic diameter in the i direction
           auto Dh_i = 4.0 * S_interp / w_perim_interp;
           Pe = mdot_loc * Dh_i * cp / (K * S_interp) * (mdot_loc / std::abs(mdot_loc));
         }
-        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+        auto alpha = computeInterpolationCoefficients(Pe);
 
         /// Time derivative term
         if (iz == first_node)
@@ -911,10 +910,10 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             _hc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES));
 
         // Adding RHS elements
-        PetscScalar rho_old_interp = computeInterpolatedValue(
-            _rho_soln->old(node_out), _rho_soln->old(node_in), _interpolation_scheme, Pe);
-        PetscScalar h_old_interp = computeInterpolatedValue(
-            _h_soln->old(node_out), _h_soln->old(node_in), _interpolation_scheme, Pe);
+        PetscScalar rho_old_interp =
+            computeInterpolatedValue(_rho_soln->old(node_out), _rho_soln->old(node_in), Pe);
+        PetscScalar h_old_interp =
+            computeInterpolatedValue(_h_soln->old(node_out), _h_soln->old(node_in), Pe);
         PetscScalar value_vec_tt = _TR * rho_old_interp * h_old_interp * volume / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(
