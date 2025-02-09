@@ -250,8 +250,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
           trace_neighbor += w_grad_neighbor(2);
         }
       }
-      deviatoric_vector_elem(_index) -= 2/3 * trace_elem;
-      deviatoric_vector_neighbor(_index) -= 2/3 *trace_neighbor;
+      deviatoric_vector_elem(_index) -= 2 / 3 * trace_elem;
+      deviatoric_vector_neighbor(_index) -= 2 / 3 * trace_neighbor;
 
       _stress_rhs_contribution += _mu(face_arg, state_arg) *
                                   (interp_coeffs.first * deviatoric_vector_elem +
@@ -311,35 +311,33 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
   if (_use_deviatoric_terms)
   {
-      const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
+    const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
 
-      Real trace_elem = 0;
-      RealVectorValue frace_grad_approx;
+    Real trace_elem = 0;
+    RealVectorValue frace_grad_approx;
 
-      trace_elem += u_grad_elem(0);
-      frace_grad_approx(0) =  u_grad_elem(_index);
+    trace_elem += u_grad_elem(0);
+    frace_grad_approx(0) = u_grad_elem(_index);
 
-      const auto face_arg = makeCDFace(*_current_face_info);
-      const auto state_arg = determineState();
+    const auto face_arg = makeCDFace(*_current_face_info);
+    const auto state_arg = determineState();
 
-      if (_dim > 1)
+    if (_dim > 1)
+    {
+      const auto v_grad_elem = _v_var->gradSln(*_current_face_info->elemInfo());
+      trace_elem += v_grad_elem(1);
+      frace_grad_approx(1) = v_grad_elem(_index);
+
+      if (_dim > 2)
       {
-        const auto v_grad_elem = _v_var->gradSln(*_current_face_info->elemInfo());
-        trace_elem += v_grad_elem(1);
-        frace_grad_approx(1) =  v_grad_elem(_index);
-
-        if (_dim > 2)
-        {
-          const auto w_grad_elem = _w_var->gradSln(*_current_face_info->elemInfo());
-          trace_elem += w_grad_elem(2);
-          frace_grad_approx(2) =  w_grad_elem(_index);
-        }
+        const auto w_grad_elem = _w_var->gradSln(*_current_face_info->elemInfo());
+        trace_elem += w_grad_elem(2);
+        frace_grad_approx(2) = w_grad_elem(_index);
       }
+    }
 
-      frace_grad_approx(_index) -= 2/3 * trace_elem;
-      grad_contrib += _mu(face_arg, state_arg) *
-                      frace_grad_approx *
-                      _current_face_info->normal();
+    frace_grad_approx(_index) -= 2 / 3 * trace_elem;
+    grad_contrib += _mu(face_arg, state_arg) * frace_grad_approx * _current_face_info->normal();
   }
 
   return grad_contrib;

@@ -119,7 +119,8 @@ kEpsilonViscosityAux::computeValue()
       velocity(2) = (*_w_var)(current_argument, state);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
-    const auto parallel_speed = NS::computeSpeed<ADReal>(velocity - velocity * loc_normal * loc_normal);
+    const auto parallel_speed =
+        NS::computeSpeed<ADReal>(velocity - velocity * loc_normal * loc_normal);
 
     // Switch for determining the near wall quantities
     // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"

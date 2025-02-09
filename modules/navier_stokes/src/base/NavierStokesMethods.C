@@ -61,7 +61,8 @@ prandtlPropertyDerivative(const Real & mu,
 }
 
 template <typename T>
-T findUStar(const T & mu, const T & rho, const T & u, const Real dist)
+T
+findUStar(const T & mu, const T & rho, const T & u, const Real dist)
 {
   // usually takes about 3-4 iterations
   constexpr int MAX_ITERS{50};
@@ -77,24 +78,22 @@ T findUStar(const T & mu, const T & rho, const T & u, const Real dist)
 
   // Wall-function linearized guess
   const Real a_c = 1 / NS::von_karman_constant;
-  const T b_c =
-      1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
+  const T b_c = 1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
   const T & c_c = u;
 
   /// This is important to reduce the number of nonlinear iterations
-  T u_star =
-      std::max(1e-20, (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
+  T u_star = std::max(1e-20, (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
 
   // Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
   {
     T residual =
         u_star / NS::von_karman_constant * std::log(NS::E_turb_constant * u_star * dist / nu) - u;
-    T deriv =
-        (1.0 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
+    T deriv = (1.0 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
     T new_u_star = std::max(1e-20, u_star - residual / deriv);
 
-    Real rel_err = std::abs(MetaPhysicL::raw_value(new_u_star - u_star) / MetaPhysicL::raw_value(new_u_star));
+    Real rel_err =
+        std::abs(MetaPhysicL::raw_value(new_u_star - u_star) / MetaPhysicL::raw_value(new_u_star));
 
     u_star = new_u_star;
     if (rel_err < REL_TOLERANCE)
@@ -112,10 +111,12 @@ T findUStar(const T & mu, const T & rho, const T & u, const Real dist)
                  ")");
 }
 template Real findUStar<Real>(const Real & mu, const Real & rho, const Real & u, const Real dist);
-template ADReal findUStar<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist);
+template ADReal
+findUStar<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist);
 
 template <typename T>
-T findyPlus(const T & mu, const T & rho, const T & u, const Real dist)
+T
+findyPlus(const T & mu, const T & rho, const T & u, const Real dist)
 {
   // Fixed point iteration method to find y_plus
   // It should take 3 or 4 iterations
@@ -146,10 +147,12 @@ T findyPlus(const T & mu, const T & rho, const T & u, const Real dist)
   return std::max(NS::min_y_plus, yPlus);
 }
 template Real findyPlus<Real>(const Real & mu, const Real & rho, const Real & u, Real dist);
-template ADReal findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+template ADReal
+findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
 template <typename T>
-T computeSpeed(const libMesh::VectorValue<T> & velocity)
+T
+computeSpeed(const libMesh::VectorValue<T> & velocity)
 {
   // if the velocity is zero, then the norm function call fails because AD tries to calculate the
   // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
@@ -161,11 +164,12 @@ template Real computeSpeed<Real>(const libMesh::VectorValue<Real> & velocity);
 template ADReal computeSpeed<ADReal>(const libMesh::VectorValue<ADReal> & velocity);
 
 template <typename T>
-T computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
-                                    const Moose::Functor<T> * v,
-                                    const Moose::Functor<T> * w,
-                                    const Moose::ElemArg & elem_arg,
-                                    const Moose::StateArg & state)
+T
+computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
+                                  const Moose::Functor<T> * v,
+                                  const Moose::Functor<T> * w,
+                                  const Moose::ElemArg & elem_arg,
+                                  const Moose::StateArg & state)
 {
   const auto & grad_u = u.gradient(elem_arg, state);
   const T Sij_xx = 2.0 * grad_u(0);
