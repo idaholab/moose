@@ -20,10 +20,12 @@ InputParameters
 LinearFVTurbulentLimitedDiffusion::validParams()
 {
   InputParameters params = LinearFVDiffusion::validParams();
-  params.addClassDescription("Represents the matrix and right hand side contributions of a "
-                             "diffusion term for a turbulent variable in a partial differential equation.");
+  params.addClassDescription(
+      "Represents the matrix and right hand side contributions of a "
+      "diffusion term for a turbulent variable in a partial differential equation.");
 
-  params.addParam<MooseFunctorName>("scaling_coeff", 1.0, "The scaling coefficient for the diffusion term.");
+  params.addParam<MooseFunctorName>(
+      "scaling_coeff", 1.0, "The scaling coefficient for the diffusion term.");
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -76,7 +78,8 @@ LinearFVTurbulentLimitedDiffusion::computeNeighborRightHandSideContribution()
 }
 
 Real
-LinearFVTurbulentLimitedDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
+LinearFVTurbulentLimitedDiffusion::computeBoundaryMatrixContribution(
+    const LinearFVBoundaryCondition & bc)
 {
   const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
@@ -86,15 +89,16 @@ LinearFVTurbulentLimitedDiffusion::computeBoundaryMatrixContribution(const Linea
   // add it here.
   if (!diff_bc->includesMaterialPropertyMultiplier())
   {
-      const auto face_arg = singleSidedFaceArg(_current_face_info);
-      grad_contrib *= _diffusion_coeff(face_arg, determineState());
+    const auto face_arg = singleSidedFaceArg(_current_face_info);
+    grad_contrib *= _diffusion_coeff(face_arg, determineState());
   }
 
   return grad_contrib;
 }
 
 Real
-LinearFVTurbulentLimitedDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
+LinearFVTurbulentLimitedDiffusion::computeBoundaryRHSContribution(
+    const LinearFVBoundaryCondition & bc)
 {
   const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(diff_bc, "This should be a valid BC!");
@@ -105,19 +109,19 @@ LinearFVTurbulentLimitedDiffusion::computeBoundaryRHSContribution(const LinearFV
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
   if (!diff_bc->includesMaterialPropertyMultiplier())
-      grad_contrib *= _diffusion_coeff(face_arg, determineState());
+    grad_contrib *= _diffusion_coeff(face_arg, determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
   if (_use_nonorthogonal_correction)
   {
-      const auto correction_vector =
-          _current_face_info->normal() -
-          1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
+    const auto correction_vector =
+        _current_face_info->normal() -
+        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
 
-      grad_contrib += _diffusion_coeff(face_arg, determineState()) *
-                      _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
-                      _current_face_area;
+    grad_contrib += _diffusion_coeff(face_arg, determineState()) *
+                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
+                    _current_face_area;
   }
 
   return grad_contrib;
@@ -256,4 +260,3 @@ LinearFVTurbulentLimitedDiffusion::addRightHandSideContribution()
     }
   }
 }
-

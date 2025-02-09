@@ -106,7 +106,7 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
 
     // Compute production of TKE
     const auto symmetric_strain_tensor_sq_norm =
-              NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
+        NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
     Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // Limit TKE production (needed for flows with stagnation zones)
@@ -118,7 +118,7 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
     destruction = _C2_eps * rho * _var.getElemValue(*_current_elem_info, state) / TKE;
 
     // Assign to matrix (term gets multiplied by TKED)
-    return (destruction - production*0.0) * _current_elem_volume;
+    return (destruction - production * 0.0) * _current_elem_volume;
   }
 }
 
@@ -185,8 +185,8 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
         const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
         const Moose::FaceArg facearg = {
             fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
-        destruction += 2.0 * TKE * _mu(facearg, state) / rho /
-                       Utility::pow<2>(distance_vec[i]) / tot_weight;
+        destruction +=
+            2.0 * TKE * _mu(facearg, state) / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
         destruction += std::pow(_C_mu, 0.75) * std::pow(TKE, 1.5) /
@@ -203,8 +203,8 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     return destruction * _current_elem_volume;
   }
   else
-    // Do nothing
-    // return 0.0;
+  // Do nothing
+  // return 0.0;
   {
     // Convenient definitions
     const auto state = determineState();
@@ -217,7 +217,7 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
 
     // Compute production of TKE
     const auto symmetric_strain_tensor_sq_norm =
-              NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
+        NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
     Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // Limit TKE production (needed for flows with stagnation zones)
