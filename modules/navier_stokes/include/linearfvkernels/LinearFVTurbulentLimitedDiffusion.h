@@ -48,7 +48,7 @@ protected:
 
   /// The functor for the scaling coefficient for the diffusion term
   const Moose::Functor<Real> & _scaling_coeff;
-  
+
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
