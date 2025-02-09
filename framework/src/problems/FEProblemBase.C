@@ -4138,11 +4138,9 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto sys_num =
-      parameters.isParamValid(var_param_name) &&
-              &getSystem(parameters.varName(var_param_name, object_name))
-          ? getSystem(parameters.varName(var_param_name, object_name)).number()
-          : (unsigned int)0;
+  const auto sys_num = parameters.isParamValid(var_param_name)
+                           ? getSystem(parameters.varName(var_param_name, object_name)).number()
+                           : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
@@ -7429,24 +7427,24 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _current_linear_sys->compute(EXEC_NONLINEAR);
 
- /*
-  try
-  {
-    computeSystems(EXEC_NONLINEAR);
-  }
-  catch (MooseException & e)
-  {
-    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
-             << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
-             << std::endl;
+  /*
+   try
+   {
+     computeSystems(EXEC_NONLINEAR);
+   }
+   catch (MooseException & e)
+   {
+     _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+              << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
+              << std::endl;
 
-    // We know the next solve is going to fail, so there's no point in
-    // computing anything else after this.  Plus, using incompletely
-    // computed AuxVariables in subsequent calculations could lead to
-    // other errors or unhandled exceptions being thrown.
-    return;
-  }
-  */
+     // We know the next solve is going to fail, so there's no point in
+     // computing anything else after this.  Plus, using incompletely
+     // computed AuxVariables in subsequent calculations could lead to
+     // other errors or unhandled exceptions being thrown.
+     return;
+   }
+   */
 
   computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
   executeControls(EXEC_NONLINEAR);
