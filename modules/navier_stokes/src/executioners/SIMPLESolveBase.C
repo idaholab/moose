@@ -297,10 +297,9 @@ SIMPLESolveBase::validParams()
   params.addParam<MultiMooseEnum>("turbulence_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "Singleton PETSc options for the turbulence equation(s)");
-  params.addParam<MultiMooseEnum>(
-      "turbulence_petsc_options_iname",
-      Moose::PetscSupport::getCommonPetscKeys(),
-      "Names of PETSc name/value pairs for the turbulence equation(s)");
+  params.addParam<MultiMooseEnum>("turbulence_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the turbulence equation(s)");
   params.addParam<std::vector<std::string>>(
       "turbulence_petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
@@ -373,8 +372,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
     _turbulence_system_names(getParam<std::vector<SolverSystemName>>("turbulence_systems")),
     _has_turbulence_systems(!_turbulence_system_names.empty()),
-    _turbulence_equation_relaxation(
-        getParam<std::vector<Real>>("turbulence_equation_relaxation")),
+    _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
     _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
@@ -382,8 +380,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
     _passive_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
-    _turbulence_absolute_tolerance(
-        getParam<std::vector<Real>>("turbulence_absolute_tolerance")),
+    _turbulence_absolute_tolerance(getParam<std::vector<Real>>("turbulence_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
@@ -529,8 +526,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "passive_scalar_absolute_tolerance"},
                                  false);
 
-  // We check for input errors with regards to the surrogate turbulence equations. At the same time, we
-  // set up the corresponding system numbers
+  // We check for input errors with regards to the surrogate turbulence equations. At the same time,
+  // we set up the corresponding system numbers
   if (_has_turbulence_systems)
   {
     if (_turbulence_system_names.size() != _turbulence_equation_relaxation.size())
@@ -542,8 +539,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                  "The number of absolute tolerances does not match the number of "
                  "passive scalar equations!");
 
-    const auto & turbulence_petsc_options =
-        getParam<MultiMooseEnum>("turbulence_petsc_options");
+    const auto & turbulence_petsc_options = getParam<MultiMooseEnum>("turbulence_petsc_options");
     const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(
         "turbulence_petsc_options_iname", "turbulence_petsc_options_value");
     Moose::PetscSupport::addPetscFlagsToPetscOptions(
@@ -554,10 +550,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                                      *this,
                                                      _turbulence_petsc_options);
 
-    _turbulence_linear_control.real_valued_data["rel_tol"] =
-        getParam<Real>("turbulence_l_tol");
-    _turbulence_linear_control.real_valued_data["abs_tol"] =
-        getParam<Real>("turbulence_l_abs_tol");
+    _turbulence_linear_control.real_valued_data["rel_tol"] = getParam<Real>("turbulence_l_tol");
+    _turbulence_linear_control.real_valued_data["abs_tol"] = getParam<Real>("turbulence_l_abs_tol");
     _turbulence_linear_control.int_valued_data["max_its"] =
         getParam<unsigned int>("turbulence_l_max_its");
   }

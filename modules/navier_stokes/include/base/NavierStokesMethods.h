@@ -199,11 +199,14 @@ wallHeatTransferCoefficient(const T1 & Nu, const T2 & k, const T3 & D_h)
 }
 
 // Prevent implicit instantiation in other translation units where these classes are used
-extern template Real findUStar<Real>(const Real & mu, const Real & rho, const Real & u, const Real dist);
-extern template ADReal findUStar<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist);
+extern template Real
+findUStar<Real>(const Real & mu, const Real & rho, const Real & u, const Real dist);
+extern template ADReal
+findUStar<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist);
 
 extern template Real findyPlus<Real>(const Real & mu, const Real & rho, const Real & u, Real dist);
-extern template ADReal findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+extern template ADReal
+findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
 extern template Real computeSpeed<Real>(const libMesh::VectorValue<Real> & velocity);
 extern template ADReal computeSpeed<ADReal>(const libMesh::VectorValue<ADReal> & velocity);

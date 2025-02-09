@@ -45,7 +45,6 @@ public:
   virtual void addRightHandSideContribution() override;
 
 protected:
-
   /// The functor for the scaling coefficient for the diffusion term
   const Moose::Functor<Real> & _scaling_coeff;
 
