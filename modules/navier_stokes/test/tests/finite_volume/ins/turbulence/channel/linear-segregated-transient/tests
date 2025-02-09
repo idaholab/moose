@@ -19,7 +19,7 @@
       detail = 'and pass debugging checks.'
       abs_zero = 5e-6
       rel_err = 5e-6
-      cli_args = 'Executioner/dt=1.0 Executioner/num_steps=1 Outputs/exodus/file_base=channel_ERCOFTAC_short'
+      cli_args = 'Executioner/dt=1.0 Executioner/num_steps=1 Outputs/file_base=channel_ERCOFTAC_short'
     []
   []
 []
