@@ -31,7 +31,6 @@ LinearFVTurbulentLimitedAdvection::validParams()
 LinearFVTurbulentLimitedAdvection::LinearFVTurbulentLimitedAdvection(const InputParameters & params)
   : LinearFVScalarAdvection(params),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
-    _face_mass_flux(0.0),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
