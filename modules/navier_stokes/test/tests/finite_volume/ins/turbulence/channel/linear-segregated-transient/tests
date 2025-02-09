@@ -1,0 +1,25 @@
+[Tests]
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#9007'
+  [channel_ERCOFTAC_linear_transient]
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a backward facing step, '
+    [result]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC.i'
+      exodiff = 'channel_ERCOFTAC_out.e'
+      detail = 'and reach converged results with segregated solvers,'
+      abs_zero = 5e-6
+      rel_err = 5e-6
+      heavy = true
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'channel_ERCOFTAC.i'
+      exodiff = 'channel_ERCOFTAC_short.e'
+      detail = 'and pass debugging checks.'
+      abs_zero = 5e-6
+      rel_err = 5e-6
+      cli_args = 'Executioner/dt=1.0 Executioner/num_steps=1 Outputs/exodus/file_base=channel_ERCOFTAC_short'
+    []
+  []
+[]
