@@ -22,10 +22,9 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
 ### Modeling parameters ###
 bulk_wall_treatment = false
 walls = 'bottom wall-side top'
-wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
-  uniform_refine = 2
   [gen]
     type = CartesianMeshGenerator
     dim = 2
@@ -425,14 +424,14 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
 
   print_fields = false
   continue_on_max_its = true
-  dt = 1.0
-  num_steps = 100
+  dt = 10.0
+  num_steps = 10
+  num_piso_iterations = 2
 []
 
 [Outputs]
-  exodus = true
-  [console]
-    type = Console
-    outlier_variable_norms = false
+  [exodus]
+    type = Exodus
+    execute_on = 'final'
   []
 []
