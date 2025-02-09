@@ -528,7 +528,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "passive_scalar_equation_relaxation",
                                   "passive_scalar_absolute_tolerance"},
                                  false);
-  
+
   // We check for input errors with regards to the surrogate turbulence equations. At the same time, we
   // set up the corresponding system numbers
   if (_has_turbulence_systems)

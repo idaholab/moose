@@ -82,7 +82,7 @@ LinearFVTKESourceSink::initialSetup()
 
 Real
 LinearFVTKESourceSink::computeMatrixContribution()
-{ 
+{
   /*
   Matrix contribution:
   - Computes near-wall TKE destruction
@@ -150,7 +150,7 @@ LinearFVTKESourceSink::computeMatrixContribution()
       const Moose::FaceArg facearg = {
           fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
 
-      
+
       const Real wall_mu = _mu(facearg, state);
       const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
       const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
@@ -252,7 +252,7 @@ LinearFVTKESourceSink::computeRightHandSideContribution()
   else // Not wall bounded
   {
     // Compute TKE production
-    const auto symmetric_strain_tensor_sq_norm = 
+    const auto symmetric_strain_tensor_sq_norm =
                 NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
 
     auto production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
