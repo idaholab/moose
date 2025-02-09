@@ -34,23 +34,23 @@ formFunctionIW(SNES, Vec x, Vec f, void * info)
 
   PetscFunctionBegin;
   problemInfo * cc = static_cast<problemInfo *>(info);
-  LibmeshPetscCall(VecGetSize(x, &size));
+  LibmeshPetscCallQ(VecGetSize(x, &size));
 
   libMesh::DenseVector<Real> solution_seed(size, 0.0);
-  LibmeshPetscCall(VecGetArrayRead(x, &xx));
+  LibmeshPetscCallQ(VecGetArrayRead(x, &xx));
   for (PetscInt i = 0; i < size; i++)
     solution_seed(i) = xx[i];
 
-  LibmeshPetscCall(VecRestoreArrayRead(x, &xx));
+  LibmeshPetscCallQ(VecRestoreArrayRead(x, &xx));
 
   libMesh::DenseVector<Real> Wij_residual_vector =
       cc->schp->residualFunction(cc->iblock, solution_seed);
 
-  LibmeshPetscCall(VecGetArray(f, &ff));
+  LibmeshPetscCallQ(VecGetArray(f, &ff));
   for (int i = 0; i < size; i++)
     ff[i] = Wij_residual_vector(i);
 
-  LibmeshPetscCall(VecRestoreArray(f, &ff));
+  LibmeshPetscCallQ(VecRestoreArray(f, &ff));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
