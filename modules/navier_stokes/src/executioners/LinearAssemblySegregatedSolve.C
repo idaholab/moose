@@ -440,7 +440,7 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
-        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i] = 
+        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i] =
                                                      solveAdvectedSystem(_turbulence_system_numbers[i],
                                                                          *_turbulence_systems[i],
                                                                          _turbulence_equation_relaxation[i],

@@ -88,7 +88,7 @@ LinearFVTKEDSourceSink::initialSetup()
 
 Real
 LinearFVTKEDSourceSink::computeMatrixContribution()
-{ 
+{
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
     // TKED value for near wall element will be directly assigned for this cell
     return _current_elem_volume;
@@ -105,7 +105,7 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
     Real destruction = 0.0;
 
     // Compute production of TKE
-    const auto symmetric_strain_tensor_sq_norm = 
+    const auto symmetric_strain_tensor_sq_norm =
               NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
     Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
@@ -216,7 +216,7 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     Real production = 0.0;
 
     // Compute production of TKE
-    const auto symmetric_strain_tensor_sq_norm = 
+    const auto symmetric_strain_tensor_sq_norm =
               NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
     Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
