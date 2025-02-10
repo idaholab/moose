@@ -6,10 +6,19 @@
     type = 'RunApp'
     input = 'csg_only.i'
     cli_args = '--csg-only'
-    expect_out = 'Outputting CSGBase object at this step'
+    expect_out = 'Outputting CSGBase object for csg_inf_square'
     recover = false
     mesh_mode = REPLICATED
     requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file'
+  []
+  [csg_only_chained]
+    type = 'RunApp'
+    input = 'csg_only_chained.i'
+    cli_args = '--csg-only'
+    expect_out = 'Outputting CSGBase object for csg_cube'
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file, where one mesh generator modifies the mesh created by another mesh generator'
   []
 
   [errors]
@@ -25,7 +34,7 @@
       type = RunException
       input = 'csg_only.i'
       detail = ' used in conjunction with split mesh command line option'
-      cli_args = '--split-mesh --csg-only'
+      cli_args = '--split-mesh split_mesh --csg-only'
       expect_err = "--csg-only is not compatible with any mesh splitting options"
       mesh_mode = REPLICATED
     []

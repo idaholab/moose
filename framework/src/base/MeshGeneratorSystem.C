@@ -203,6 +203,13 @@ MeshGeneratorSystem::createAddedMeshGenerators()
     mooseWarning("--csg-only option does not currently support multi-threading");
 
   // Construct all of the mesh generators that we know exist
+  const bool csg_only = getCSGOnly();
+  if (csg_only && _data_driven_generator_name)
+    moose_mesh->paramError(data_driven_generator_param, "This parameter should not be set in conjunction with --csg-only");
+  if (libMesh::n_threads() > 1)
+    mooseWarning("--csg-only option does not currently support multi-threading");
+
+  // Construct all of the mesh generators that we know exist
   for (const auto & generator_names : ordered_generators)
     for (const auto & generator_name : generator_names)
       if (auto it = _mesh_generator_params.find(generator_name); it != _mesh_generator_params.end())
@@ -693,4 +700,22 @@ void
 MeshGeneratorSystem::setCSGOnly()
 {
   _csg_only = true;
+}
+
+void
+MeshGeneratorSystem::saveOutputCSGMesh(const MeshGeneratorName generator_name,
+                                      std::unique_ptr<CSG::CSGBase> & csg_mesh)
+{
+  mooseAssert(_csg_mesh_output.find(generator_name) == _csg_mesh_output.end(), "CSG mesh already exists");
+  _csg_mesh_output[generator_name] = std::move(csg_mesh);
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGeneratorSystem::getCSGMeshGeneratorOutput(const MeshGeneratorName & name)
+{
+  mooseAssert(_app.actionWarehouse().getCurrentTaskName() == "execute_csg_generators", "Incorrect call time");
+
+  auto it = _csg_mesh_output.find(name);
+  mooseAssert(it != _csg_mesh_output.end(), "CSG mesh not initialized");
+  return it->second;
 }

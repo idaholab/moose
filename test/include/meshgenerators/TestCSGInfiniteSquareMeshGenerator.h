@@ -11,16 +11,20 @@
 
 #include "MeshGenerator.h"
 
-class TestCSGOnlyMesh : public MeshGenerator
+class TestCSGInfiniteSquareMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestCSGOnlyMesh(const InputParameters & parameters);
+  TestCSGInfiniteSquareMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
   void generateData() override{};
 
-  void generateCSG() override;
+  std::unique_ptr<CSG::CSGBase> generateCSG() override;
+
+protected:
+  /// the side length of the infinite square
+  const Real _side_length;
 };
