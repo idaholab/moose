@@ -5394,7 +5394,7 @@
 </DataArray>
 </CellData>
 <PointData >
-<DataArray type="Float64" Name="e_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
+<DataArray type="Float64" Name="db_dt_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
 0 0 0 
 0 0 0 
 0 0 0 
@@ -8980,7 +8980,7 @@
 0 0 0 
 0 0 0 
 </DataArray>
-<DataArray type="Float64" Name="neg_db_dt_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
+<DataArray type="Float64" Name="e_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
 0 0 0 
 0 0 0 
 0 0 0 

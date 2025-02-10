@@ -7,6 +7,8 @@ MFEMAuxKernel::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("AuxKernel");
+  params.addClassDescription("Base class for MFEMGeneralUserObjects that update auxiliary "
+                             "variables outside of the main solve step.");
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");
   return params;

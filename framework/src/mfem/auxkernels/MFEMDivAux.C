@@ -11,8 +11,8 @@ MFEMDivAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Calculates the divergence of a H(div) conforming RT source variable and stores the result"
-      " on a L2 conforming result auxvariable");
+      "Calculates the divergence of an H(div) conforming RT source variable and stores the result"
+      " on an L2 conforming result auxvariable");
   params.addRequiredParam<VariableName>("source",
                                         "Vector H(div) MFEMVariable to take the divergence of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
@@ -24,9 +24,7 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
-    _hdiv_fespace(*_source_var.ParFESpace()),
-    _l2_fespace(*_result_var.ParFESpace()),
-    _div(&_hdiv_fespace, &_l2_fespace)
+    _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _div.Assemble();
   _div.Finalize();

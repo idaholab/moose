@@ -11,8 +11,8 @@ MFEMCurlAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Calculates the curl of a H(curl) conforming ND source variable and stores the result"
-      " on a H(div) conforming RT result auxvariable");
+      "Calculates the curl of an H(curl) conforming ND source variable and stores the result"
+      " on an H(div) conforming RT result auxvariable");
   params.addRequiredParam<VariableName>("source",
                                         "Vector H(curl) MFEMVariable to take the curl of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
@@ -24,9 +24,7 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
-    _hcurl_fespace(*_source_var.ParFESpace()),
-    _hdiv_fespace(*_result_var.ParFESpace()),
-    _curl(&_hcurl_fespace, &_hdiv_fespace)
+    _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _curl.Assemble();
   _curl.Finalize();

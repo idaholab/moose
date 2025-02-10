@@ -21,6 +21,6 @@ protected:
   // Name of auxvariable to store the result of the auxkernel in.
   AuxVariableName _result_var_name;
 
-  /// Pointer to result gridfunction.
+  /// Reference to result gridfunction.
   mfem::ParGridFunction & _result_var;
 };

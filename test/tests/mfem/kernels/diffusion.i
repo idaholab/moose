@@ -22,14 +22,14 @@
 []
 
 [Variables]
-  [diffused]
+  [concentration]
     type = MFEMVariable
     fespace = H1FESpace
   []
 []
 
 [AuxVariables]
-  [diffusion_gradient]
+  [concentration_gradient]
     type = MFEMVariable
     fespace = HCurlFESpace
   []
@@ -38,8 +38,8 @@
 [AuxKernels]
   [grad]
     type = MFEMGradAux
-    variable = diffusion_gradient
-    source = diffused
+    variable = concentration_gradient
+    source = concentration
     execute_on = TIMESTEP_END
   []
 []
@@ -47,13 +47,13 @@
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = concentration
     boundary = '1'
     value = 1.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = diffused
+    variable = concentration
     boundary = '2'
     value = 0.0
   []
@@ -70,7 +70,7 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = diffused
+    variable = concentration
     coefficient = diffusivity
   []
 []
