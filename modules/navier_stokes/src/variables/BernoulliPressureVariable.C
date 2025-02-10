@@ -121,7 +121,7 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
     return true;
 
   if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
-    // We choose to apply the Dirichlet condition for the upwind element
+    // We choose to apply the Dirichlet condition for the upwind 
     return std::get<0>(elemIsUpwind(*elem, fi, time));
 
   return false;
@@ -192,24 +192,35 @@ if (isParamSetByUser("pressure_drop_sidesets"))
         isItBoundary = 1;
       }
     }
-    if (isItBoundary )
+    if (isItBoundary)
     { 
       factor_downwind += _pressure_drop_form_factors[i];
       factor_upwind += _pressure_drop_form_factors[i];
     }
   }
 }
-  const auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
-  // const auto bernoulli_vel_chunk_elem = 0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
-  const auto bernoulli_vel_chunk_neighbor =
-       0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor + 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
-      //  0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor ;
-      //  0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor + 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
+auto bernoulli_vel_chunk_neighbor = 0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor ;
 
+if (eps_elem > eps_neighbor)
+{
+  //  std::cout <<  factor_downwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor << std::endl;
+  bernoulli_vel_chunk_neighbor += 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+}
+else
+{
+  // std::cout <<  0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem << std::endl;
+   bernoulli_vel_chunk_elem += -0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem  ;
+}
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
+      // if(fi_elem_is_upwind)
+      //   std::cout << elem->id() << std::endl ;
   const auto & downwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
+      // if(!fi_elem_is_upwind)
+      //   std::cout << elem->id() << std::endl;
+
   ADReal p_downwind;
   if (_allow_two_term_expansion_on_bernoulli_faces)
     p_downwind = (*this)(downwind_face, time);

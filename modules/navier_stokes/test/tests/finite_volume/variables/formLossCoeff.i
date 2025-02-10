@@ -23,12 +23,12 @@
     [pressVar]
       type = BernoulliPressureVariable
       pressure_drop_sidesets = 'area_change'
-      pressure_drop_form_factors = '0.40296'
+      pressure_drop_form_factors = '0.34087'
       porosity = porosity
       u = u
       rho = 988.0
       # pressure = pressure
-      initial_condition = 1.01e3
+      initial_condition = 1.01e5
       block = '1 2'
   []
 []
@@ -43,17 +43,6 @@
       order = CONSTANT
       initial_condition = 1
     []
-
-  #   [pressVar]
-  #     type = BernoulliPressureVariable
-  #     pressure_drop_sidesets = 'area_change'
-  #     pressure_drop_form_factors = '0.40296'
-  #     porosity = porosity
-  #     u = u
-  #     rho = 988.0
-  #     # pressure = pressure
-  #     initial_condition = 1.01e3
-  # []
   
     [forchheimer]
       family = MONOMIAL
@@ -80,19 +69,19 @@
     [all_constant_props]
       type = ADGenericConstantFunctorMaterial
       prop_names = 'u rho  mu   '
-      prop_values = '1.2  988  1e-3 '
+      prop_values = '0.30 988  1e-3 '
     []
     [porosityMat]
         type = ADPiecewiseByBlockFunctorMaterial
         prop_name = porosity
-        subdomain_to_prop_value = '1 1.00
-                                   2 0.25'
+        subdomain_to_prop_value = '1 0.25
+                                   2 0.10'
     []
     [DhMat]
       type = PiecewiseByBlockFunctorMaterial
       prop_name = characteristic_length
-      subdomain_to_prop_value = '1  1.000
-                                 2  0.500'
+      subdomain_to_prop_value = '1  0.50
+                                 2  0.32'
     []
     [churchill1]
       type = FunctorChurchillDragCoefficients
