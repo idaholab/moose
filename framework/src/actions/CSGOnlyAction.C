@@ -9,7 +9,11 @@
 
 #include "MooseApp.h"
 #include "CSGOnlyAction.h"
+<<<<<<< HEAD
 #include "CSGBase.h"
+=======
+#include "MeshGenerator.h"
+>>>>>>> 1cdf47d43b (Preliminary design of csg_only action)
 
 registerMooseAction("MooseApp", CSGOnlyAction, "csg_only");
 registerMooseAction("MooseApp", CSGOnlyAction, "setup_mesh");
@@ -34,14 +38,48 @@ CSGOnlyAction::act()
   }
   else if (_current_task == "execute_csg_generators")
   {
+<<<<<<< HEAD
+    const auto final_mg_name = _app.getMeshGeneratorSystem().getFinalMeshGeneratorName();
     const auto ordered_mg = _app.getMeshGeneratorSystem().getOrderedMeshGenerators();
+
     for (const auto & generator_set : ordered_mg)
       for (const auto & generator : generator_set)
-        _csg_mesh = generator->generateInternalCSG();
+      {
+        auto csg_mesh = generator->generateInternalCSG();
+        const auto & name = generator->name();
+        // If we are running generateCSG for final generator, store mesh for use in csg_only task
+        if (name == final_mg_name)
+        {
+          _csg_mesh = std::move(csg_mesh);
+          return;
+        }
+        else
+        {
+          // Store CSG mesh created by mesh generator for use by downstream MG's
+          _app.getMeshGeneratorSystem().saveOutputCSGMesh(name, csg_mesh);
+        }
+      }
   }
   else if (_current_task == "csg_only")
   {
-    Moose::out << "Outputting CSGBase object at this step\n";
+    const auto final_mg_name = _app.getMeshGeneratorSystem().getFinalMeshGeneratorName();
+    if (!_csg_mesh)
+      mooseError("Expecting final generator with name " + final_mg_name + " but not found in mesh generator tree");
+
+    // TODO add error checking here to check that there aren't any hanging mesh objects
+
+    Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
     _csg_mesh->generateOutput();
+=======
+    const auto ordered_mg = _app.getMeshGeneratorSystem().getOrderedMeshGenerators();
+    for (const auto & generator_set : ordered_mg)
+      for (const auto & generator : generator_set)
+        generator->generateInternalCSG();
+  }
+  else if (_current_task == "csg_only")
+  {
+    // TODO fill out this logic to output CSGBase object to file
+    Moose::out << "Outputting CSGBase object at this step\n";
+>>>>>>> 1cdf47d43b (Preliminary design of csg_only action)
   }
 }

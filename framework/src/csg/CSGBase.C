@@ -22,6 +22,14 @@ CSGBase::createRootUniverse(const std::string name)
   return _root_universe;
 }
 
+std::shared_ptr<CSGUniverse>
+CSGBase::getRootUniverse()
+{
+  if (!_root_universe)
+    mooseError("Cannot retrieve root universe before it is initialized.");
+  return _root_universe;
+}
+
 CSGBase::CSGBase() : _surface_list(CSGSurfaceList()) {}
 
 CSGBase::~CSGBase() {}

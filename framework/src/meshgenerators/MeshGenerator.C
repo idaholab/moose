@@ -160,7 +160,7 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
 {
   mooseAssert(!mesh_generator_name.empty(), "Empty name");
   const auto & mg_sys = _app.getMeshGeneratorSystem();
-  if (!_app.constructingMeshGenerators())
+  if (!hasGenerateCSG() && !_app.constructingMeshGenerators())
     mooseError("Cannot get a mesh outside of construction");
   if (!mg_sys.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
   {
@@ -217,6 +217,24 @@ MeshGenerator::getMeshesByName(const std::vector<MeshGeneratorName> & mesh_gener
   for (const auto & name : mesh_generator_names)
     meshes.push_back(&getMeshByName(name));
   return meshes;
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGenerator::getCSGMesh(const std::string & param_name)
+{
+  const MeshGeneratorName * name = getMeshGeneratorNameFromParam(param_name, false);
+  return getCSGMeshByName(*name);
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGenerator::getCSGMeshByName(const MeshGeneratorName & mesh_generator_name)
+{
+  checkGetMesh(mesh_generator_name, "");
+
+  auto & csg_mesh = _app.getMeshGeneratorSystem().getCSGMeshGeneratorOutput(mesh_generator_name);
+  if (!csg_mesh)
+    mooseError("Requested CSG mesh " + mesh_generator_name + " returned a null mesh.");
+  return csg_mesh;
 }
 
 void
@@ -349,6 +367,13 @@ MeshGenerator::generateInternalCSG()
 {
   mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
   return generateCSG();
+}
+
+void
+MeshGenerator::generateInternalCSG()
+{
+  mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
+  generateCSG();
 }
 
 void
