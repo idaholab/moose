@@ -138,32 +138,50 @@ CombinerGenerator::generate()
   // Case 1
   if (_meshes.size() != 1)
   {
+    // Sort the _meshes by the number of elements so that we start with the largest input mesh
+    // calling libMesh's copy_nodes_and_elements() in distributed mesh mode with the destination
+    // mesh with only one element and big source mesh leads to a crash
+    std::vector<std::pair<unsigned int, unsigned int>> mesh_indices;
+    for (const auto & unit_mesh_index : index_range(_meshes))
+      mesh_indices.push_back(
+          std::make_pair((*_meshes[unit_mesh_index])->n_elem(), unit_mesh_index));
+    // We only need to do sorting when the meshes have different numbers of elements
+    if ((*std::max_element(mesh_indices.begin(), mesh_indices.end())).first !=
+        (*std::min_element(mesh_indices.begin(), mesh_indices.end())).first)
+      std::sort(mesh_indices.begin(), mesh_indices.end(), std::greater<>());
+
     // merge all meshes into the first one
-    auto mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[0]);
+    auto mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[mesh_indices[0].second]);
 
     if (!mesh)
-      paramError("inputs", _input_names[0], " is not a valid unstructured mesh");
+      paramError(
+          "inputs", _input_names[mesh_indices[0].second], " is not a valid unstructured mesh");
 
     // Move the first input mesh if applicable
     if (_positions.size())
     {
-      MeshTools::Modification::translate(
-          *mesh, _positions[0](0), _positions[0](1), _positions[0](2));
+      MeshTools::Modification::translate(*mesh,
+                                         _positions[mesh_indices[0].second](0),
+                                         _positions[mesh_indices[0].second](1),
+                                         _positions[mesh_indices[0].second](2));
     }
 
     // Read in all of the other meshes
     for (MooseIndex(_meshes) i = 1; i < _meshes.size(); ++i)
     {
-      auto other_mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[i]);
+      auto other_mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[mesh_indices[i].second]);
 
       if (!other_mesh)
-        paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
+        paramError(
+            "inputs", _input_names[mesh_indices[i].second], " is not a valid unstructured mesh");
 
       // Move It
       if (_positions.size())
       {
-        MeshTools::Modification::translate(
-            *other_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
+        MeshTools::Modification::translate(*other_mesh,
+                                           _positions[mesh_indices[i].second](0),
+                                           _positions[mesh_indices[i].second](1),
+                                           _positions[mesh_indices[i].second](2));
       }
 
       copyIntoMesh(*mesh, *other_mesh);
