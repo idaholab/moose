@@ -76,7 +76,7 @@ where $K_{ij}$ is an overall loss coefficient encompassing lateral concentrated 
 
 ### Friction factor
 
-The default friction factor [!cite](KIT) is presented below.
+The default friction factor for assemblies with bare pins in a quadrilateral lattice [!cite](KIT) is presented below.
 
 \begin{equation}
 f_w \rightarrow
@@ -87,6 +87,11 @@ f_w \rightarrow
 0.184 Re^{-0.20}, &30000 \leq Re
 \end{cases}
 \end{equation}
+
+Additional friction factor models are implemented as follows:
+- Quadrilateral assembly with bare pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear).
+- Triangular assembly with bare pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear), The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles [!cite](chen2018upgraded).
+- Triangular assembly with wire-wrapped pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear), The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles [!cite](chen2018upgraded).
 
 ### Turbulent momentum diffusion
 
@@ -113,6 +118,11 @@ w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=
 \end{equation}
 
 where $\beta$ is the turbulent mixing parameter or thermal diffusion coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](TODREAS), for enthalpy and momentum respectively. The approximation that the rate of turbulent exchange for energy and momentum are equal is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M}$.
+
+ Additional turbulent mixing parameters are implemented as follows:
+ - Quadrilateral assembly with bare pins: A scale analysis of the turbulent mixing rate for various Prandtl number flow fields in rod bundles eq 25,Kim and Chung (2001) [!cite](kim2001scale), Modeling of flow blockage in a liquid metal-cooled reactor subassembly with a subchannel analysis code eq 19, Jeong et. al (2005)[!cite](jeong2005modeling)
+ - Triangular assembly with wire-wrapped pins: Hydrodynamic models and correlations for bare and wire-wrapped hexagonal rod bundles—bundle friction factors, subchannel friction factors and mixing parameters, Cheng and Todreas [!cite](cheng1986hydrodynamic)
+ - Triangular assembly with bare pins: A scale analysis of the turbulent mixing rate for various Prandtl number flow fields in rod bundles eq 25,Kim and Chung (2001) [!cite](kim2001scale)
 
 ## Discretization
 
