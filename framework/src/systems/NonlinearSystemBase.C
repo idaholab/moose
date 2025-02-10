@@ -1910,7 +1910,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
-  _app.solutionInvalidity().sync();
+  _app.solutionInvalidity().syncIteration();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -3093,7 +3093,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
-  _app.solutionInvalidity().sync();
+  _app.solutionInvalidity().syncIteration();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
