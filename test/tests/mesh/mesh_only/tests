@@ -78,4 +78,13 @@
     issues = '#23386'
     requirement = 'The system shall throw a warning if user-provided extra element id names do not exist on mesh.'
   []
+  [mesh_only_with_incompatible_parameter]
+    type = 'RunException'
+    input = 'mesh_only.i'
+    cli_args = '--check-input --mesh-only'
+    expect_err = "Incompatible command line arguments provided. --check-input cannot be called with --mesh-only."
+    method = '!dbg'
+    issues = '#29788'
+    requirement = 'The system shall throw an error if the user specifies incompatible command line arguments that would access an uninitialized executor or executor.'
+  []
 []
