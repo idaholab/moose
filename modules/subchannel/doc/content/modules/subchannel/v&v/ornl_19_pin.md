@@ -130,7 +130,7 @@ The tolerances are not really used in the SCM problem.
 
 A *MultiApp* is used for transfering the SCM solution into a detailed mesh.
 
-!listing /examples/_ORNL_19_pin_/ORNL_19.i block=MultiApps language=cpp
+!listing /examples/ORNL_19_pin_/ORNL_19.i block=MultiApps language=cpp
 
 A custom transfer, *MultiAppDetailedSolutionTransfer*, is used for this purpose.
 
