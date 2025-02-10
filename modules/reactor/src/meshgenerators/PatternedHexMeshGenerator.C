@@ -145,7 +145,6 @@ PatternedHexMeshGenerator::validParams()
 
 PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
-    _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _pattern_boundary(getParam<MooseEnum>("pattern_boundary")),
@@ -192,6 +191,8 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
   declareMeshProperty<bool>("hexagon_peripheral_trimmability", !_generate_core_metadata);
   declareMeshProperty<bool>("hexagon_center_trimmability", true);
   declareMeshProperty<bool>("peripheral_modifier_compatible", _pattern_boundary == "hexagon");
+
+  _mesh_ptrs = getMeshes("inputs");
 
   const unsigned int n_pattern_layers = _pattern.size();
   declareMeshProperty("pattern_size", n_pattern_layers);
