@@ -16,7 +16,7 @@ parameters across both `MeshGenerators`.
 
 ## Example Input File Syntax
 
-!listing /examples/psbt/psbt_ss/psbt_example.i block=QuadSubChannelMesh language=cpp
+!listing /examples/psbt/psbt_ss/psbt.i block=QuadSubChannelMesh language=cpp
 
 !syntax parameters /Mesh/SCMQuadPinMeshGenerator
 
