@@ -52,13 +52,11 @@ InverseRB::execute()
     // Set the local elem/node ranges
     _fe_problem.setCurrentAlgebraicElementRange(_red_elem_local_range.get());
     _fe_problem.setCurrentAlgebraicNodeRange(_red_node_local_range.get());
+    // Start with an initial guess of 0 for the reduced solution
+    // This will not work for a few things.
+
     return;
   }
-
-  // Start with an initial guess of 0 for the reduced solution
-  // This will not work for a few things.
-  dof_id_type reduced_size = _mapping->getReducedSize();
-  DenseVector<Real> reduced_sol(reduced_size);
 
   // Main loop (for instance, until convergence)
   bool is_converged = false;
@@ -67,8 +65,13 @@ InverseRB::execute()
   // Set the local elem/node ranges
   _fe_problem.setCurrentAlgebraicElementRange(_red_elem_local_range.get());
   _fe_problem.setCurrentAlgebraicNodeRange(_red_node_local_range.get());
-  updateSolution(reduced_sol);
 
+  dof_id_type reduced_size = _mapping->getReducedSize();
+  if (_reduced_sol.size() != reduced_size)
+  {
+    _reduced_sol.resize(reduced_size);
+    updateSolution(_reduced_sol);
+  }
   while (!is_converged && iter < _max_iter)
   {
     // Calculate reduced Jacobian and residual
@@ -79,10 +82,10 @@ InverseRB::execute()
     // Perform linear solve (without updating the reduced solution yet)
     DenseVector<Real> reduced_sol_update;
     reduced_jac.lu_solve(reduced_res, reduced_sol_update);
-    reduced_sol.add(_relax_factor, reduced_sol_update);
+    _reduced_sol.add(_relax_factor, reduced_sol_update);
 
     // Update the full solution and check for convergence
-    updateSolution(reduced_sol);
+    updateSolution(_reduced_sol);
 
     // Check for convergence
     Real res = computeReducedResidual().l2_norm();

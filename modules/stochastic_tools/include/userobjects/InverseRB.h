@@ -14,6 +14,7 @@
 #include "MappingInterface.h"
 #include "NonlinearSystemBase.h"
 #include "SystemBase.h"
+#include "libmesh/dense_vector.h"
 #include "libmesh/elem.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/id_types.h"
@@ -173,4 +174,6 @@ private:
 
   /// Linear solver
   libMesh::LinearSolver<Number> * _solver;
+
+  DenseVector<Real> _reduced_sol;
 };
