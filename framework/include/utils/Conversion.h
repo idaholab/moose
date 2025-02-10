@@ -188,6 +188,20 @@ stringify(const T<U...> & c,
   return str;
 }
 
+/// Add MooseArray stringify for debugging
+template <typename T>
+std::string
+stringify(const MooseArray<T> & c,
+          const std::string & delim = ", ",
+          const std::string & elem_encl = "",
+          bool enclose_list_in_curly_braces = false)
+{
+  std::vector<T> buf(c.size());
+  for (const auto i:index_range(c))
+    buf[i] = c[i];
+  return stringify(buf, delim, elem_encl, enclose_list_in_curly_braces);
+}
+
 /**
  * Stringify Reals with enough precision to guarantee lossless
  * Real -> string -> Real roundtrips.
