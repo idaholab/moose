@@ -22,11 +22,9 @@ public:
   HourglassCorrectionQuad4(const InputParameters & parameters);
 
   Real computeQpResidual() override;
+  Real computeQpJacobian() override;
 
 protected:
-
   const Real _penalty;
-
-  const MooseVariable::DoFValue & _ux;
-  const MooseVariable::DoFValue & _uy;
+  const MooseVariable::DoFValue & _v;
 };
