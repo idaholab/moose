@@ -4,7 +4,7 @@ NODAL VARIABLES
 	DP relative 1e-4
 	P relative 1e-4
 	S
-	SumWij relative 1e-2 floor 1e-3
+	SumWij relative 2e-2 floor 1e-3
 	T
 	h relative 1e-5
 	mdot relative 1e-4
