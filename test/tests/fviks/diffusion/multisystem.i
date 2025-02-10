@@ -94,12 +94,26 @@
   []
 []
 
+[Preconditioning]
+  [u]
+    type = SMP
+    nl_sys = u
+    petsc_options = '-snes_monitor'
+    petsc_options_iname = '-pc_type -pc_hypre_type'
+    petsc_options_value = 'hypre boomeramg'
+  []
+  [v]
+    type = SMP
+    nl_sys = v
+    petsc_options = '-snes_monitor'
+    petsc_options_iname = '-pc_type -pc_hypre_type'
+    petsc_options_value = 'hypre boomeramg'
+  []
+[]
+
 [Executioner]
   type = SteadySolve2
   solve_type = 'NEWTON'
-  petsc_options = '-snes_monitor'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
   first_nl_sys_to_solve = 'u'
   second_nl_sys_to_solve = 'v'
   number_of_iterations = 200

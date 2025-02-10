@@ -28,6 +28,7 @@
 
 class EigenProblem;
 class InputParameters;
+class SolverParams;
 
 namespace Moose
 {
@@ -60,12 +61,16 @@ void setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParame
  * Push all SLEPc/PETSc options into SLEPc/PETSc side. Options could come from commandline,
  * SolverParams, params, etc.
  */
-void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params);
+void slepcSetOptions(EigenProblem & eigen_problem,
+                     SolverParams & solver_params,
+                     const InputParameters & params);
 
 /**
  * Control eigen solver tolerances via SLEPc options
  */
-void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
+void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
+                                   const SolverParams & solver_params,
+                                   const InputParameters & params);
 
 /**
  * Set SLEPc/PETSc options to trigger free power iteration

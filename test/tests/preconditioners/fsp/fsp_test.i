@@ -115,7 +115,7 @@
       vars = 'v'
       # PETSc options for this subsolver
       petsc_options_iname = '-pc_type -ksp_type'
-      petsc_options_value = '     hypre  preonly'
+      petsc_options_value = '     lu  preonly'
     [../]
   [../]
 []

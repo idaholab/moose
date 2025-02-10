@@ -13,22 +13,29 @@
 
 #include "SlepcEigenSolverConfiguration.h"
 #include "SlepcSupport.h"
-
+#include "EigenProblem.h"
+#include "NonlinearEigenSystem.h"
+#include "libmesh/slepc_eigen_solver.h"
 #include <slepceps.h>
 
 /**
- * Constructur: get a reference to the \p SlepcEigenSolver variable to be able to manipulate it
+ * Constructor: get a reference to the \p SlepcEigenSolver variable to be able to manipulate it
  */
 SlepcEigenSolverConfiguration::SlepcEigenSolverConfiguration(
-    EigenProblem & eigen_problem, libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver)
-  : SolverConfiguration(), _eigen_problem(eigen_problem), _slepc_solver(slepc_eigen_solver)
+    EigenProblem & eigen_problem,
+    libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver,
+    const NonlinearEigenSystem & nl_eigen_sys)
+  : SolverConfiguration(),
+    _eigen_problem(eigen_problem),
+    _slepc_solver(slepc_eigen_solver),
+    _nl_eigen_sys(nl_eigen_sys)
 {
 }
 
 void
 SlepcEigenSolverConfiguration::configure_solver()
 {
-  if (_eigen_problem.isNonlinearEigenvalueSolver())
+  if (_eigen_problem.isNonlinearEigenvalueSolver(_nl_eigen_sys.number()))
   {
     // Set custom monitors for SNES and KSP
     _eigen_problem.initPetscOutputAndSomeSolverSettings();
@@ -37,10 +44,9 @@ SlepcEigenSolverConfiguration::configure_solver()
                       Moose::SlepcSupport::mooseSlepcEPSSNESSetUpOptionPrefix(_slepc_solver.eps()));
     // Let us hook up a customize PC if users ask. Users still can use PETSc options to override
     // this setting
-    if (_eigen_problem.solverParams()._customized_pc_for_eigen)
+    if (_eigen_problem.solverParams(_nl_eigen_sys.number())._customized_pc_for_eigen)
       LibmeshPetscCallA(_eigen_problem.comm().get(),
                         Moose::SlepcSupport::mooseSlepcEPSSNESSetCustomizePC(_slepc_solver.eps()));
-
     // Let set a default PC side. I would like to have the setting be consistent with
     // what we do in regular nonlinear executioner. Petsc options are able to override
     // this setting

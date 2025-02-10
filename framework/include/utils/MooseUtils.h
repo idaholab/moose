@@ -1092,11 +1092,11 @@ wildcardEqual(AnyType, const T &)
 /**
  * Find a specific pair in a container matching on first, second or both pair components
  */
-template <typename C, typename M1, typename M2>
-typename C::iterator
-findPair(C & container, const M1 & first, const M2 & second)
+template <typename C, typename It, typename M1, typename M2>
+auto
+findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(container.begin(),
+  return std::find_if(start_iterator,
                       container.end(),
                       [&](auto & item) {
                         return wildcardEqual(first, item.first) &&

@@ -49,7 +49,8 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
 
   // This effectively changes the default solve_type to LINEAR instead of PJFNK,
   // so that it is valid to not supply solve_type in the Executioner block:
-  _fe_problem.solverParams()._type = Moose::ST_LINEAR;
+  if (_nl)
+    _fe_problem.solverParams(_nl->number())._type = Moose::ST_LINEAR;
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     _ones = addVector("ones", false, PARALLEL);
@@ -67,7 +68,7 @@ ExplicitTimeIntegrator::initialSetup()
 void
 ExplicitTimeIntegrator::init()
 {
-  if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
+  if (_nl && _fe_problem.solverParams(_nl->number())._type != Moose::ST_LINEAR)
     mooseError(
         "The chosen time integrator requires 'solve_type = LINEAR' in the Executioner block.");
 }

@@ -30,4 +30,8 @@ public:
   bool _precond_matrix_free;
   unsigned int _free_power_iterations;
   unsigned int _extra_power_iterations;
+
+  // For distinguishing between multiple systems
+  std::string _prefix;
+  unsigned int _solver_sys_num;
 };
