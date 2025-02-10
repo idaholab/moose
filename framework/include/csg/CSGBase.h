@@ -45,6 +45,8 @@ public:
 
   std::shared_ptr<CSGUniverse> createRootUniverse(const std::string name);
 
+  std::shared_ptr<CSGUniverse> getRootUniverse();
+
   void generateOutput() const;
 
 private:

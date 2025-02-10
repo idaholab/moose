@@ -1,5 +1,6 @@
 [Mesh]
-  [test]
-    type = TestCSGOnlyMesh
+  [csg_inf_square]
+    type = TestCSGInfiniteSquareMeshGenerator
+    side_length = 5
   []
 []
