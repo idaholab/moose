@@ -17,6 +17,8 @@ registerMooseAction("MooseApp", MeshGeneratorComponent, "add_mesh_generator");
 registerMooseAction("MooseApp", MeshGeneratorComponent, "init_component_physics");
 // MeshGeneratorComponent is an example of ComponentMaterialPropertyInterface
 registerMooseAction("MooseApp", MeshGeneratorComponent, "add_material");
+// MeshGeneratorComponent  is an example of ComponentInitialConditionInterface
+registerMooseAction("MooseApp", MeshGeneratorComponent, "check_integrity");
 
 InputParameters
 MeshGeneratorComponent::validParams()
@@ -24,6 +26,7 @@ MeshGeneratorComponent::validParams()
   InputParameters params = ActionComponent::validParams();
   params += ComponentPhysicsInterface::validParams();
   params += ComponentMaterialPropertyInterface::validParams();
+  params += ComponentInitialConditionInterface::validParams();
   params.addRequiredParam<MeshGeneratorName>("mesh_generator", "Mesh generator providing the mesh");
   MooseEnum mesh_generator_type("saved_mesh final_generator");
   params.addRequiredParam<MooseEnum>("mesh_generator_type",
@@ -40,6 +43,7 @@ MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
   : ActionComponent(params),
     ComponentPhysicsInterface(params),
     ComponentMaterialPropertyInterface(params),
+    ComponentInitialConditionInterface(params),
     _mesh_generator_type(getParam<MooseEnum>("mesh_generator_type"))
 {
   if (_mesh_generator_type == "saved_mesh" && !isParamValid("saved_mesh_name"))
