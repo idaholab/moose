@@ -18,6 +18,7 @@ HourglassCorrectionQuad4::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Apply hourglass correction for QUAD4 elements.");
   params.addParam<Real>("penalty", 0.0, "penalty parameter");
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
