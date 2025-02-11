@@ -7,4 +7,25 @@
     issues = '#24103'
     requirement = 'The system shall be able to add equations onto the mesh of (action)components using the Physics syntax.'
   []
+  [materials]
+    type = CSVDiff
+    input = 'component_with_materials.i'
+    csvdiff = 'component_with_materials_out.csv'
+    design = 'ComponentMaterialPropertyInterface.md'
+    issues = '#29856'
+    requirement = 'The system shall be able to add generic materials on the subdomains of (action)components for a compact, local syntax.'
+  []
+
+
+  [errors]
+    issues = '#29856'
+    requirement = 'The system shall report an error'
+    [materials]
+      type = RunException
+      input = 'component_with_materials.i'
+      cli_args = "ActionComponents/cylinder_1/property_values='1 2'"
+      expect_err = 'Should be the same size as property functors'
+      detail = 'if the input of properties directly on the functor is not consistent between values and names'
+    []
+  []
 []
