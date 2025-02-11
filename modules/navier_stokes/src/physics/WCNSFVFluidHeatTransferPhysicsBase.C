@@ -115,19 +115,14 @@ WCNSFVFluidHeatTransferPhysicsBase::addFVKernels()
     return;
 
   if (isTransient())
-  {
-    if (_compressibility == "incompressible")
-      addINSEnergyTimeKernels();
-    else
-      addWCNSEnergyTimeKernels();
-  }
+    addEnergyTimeKernels();
 
-  addINSEnergyAdvectionKernels();
-  addINSEnergyHeatConductionKernels();
+  addEnergyAdvectionKernels();
+  addEnergyHeatConductionKernels();
   if (getParam<std::vector<MooseFunctorName>>("ambient_temperature").size())
-    addINSEnergyAmbientConvection();
+    addEnergyAmbientConvection();
   if (isParamValid("external_heat_source"))
-    addINSEnergyExternalHeatSource();
+    addEnergyExternalHeatSource();
 }
 
 void
@@ -137,9 +132,9 @@ WCNSFVFluidHeatTransferPhysicsBase::addFVBCs()
   if (!_has_energy_equation)
     return;
 
-  addINSEnergyInletBC();
-  addINSEnergyWallBC();
-  addINSEnergyOutletBC();
+  addEnergyInletBC();
+  addEnergyWallBC();
+  addEnergyOutletBC();
 }
 
 void

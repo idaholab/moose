@@ -79,7 +79,7 @@ void limitSolutionUpdate(NumericVector<Number> & solution,
 /**
  * Compute a normalization factor which is applied to the linear residual to determine
  * convergence. This function is based on the description provided here:
- *  // @article{greenshields2022notes,
+ * @article{greenshields2022notes,
  * title={Notes on computational fluid dynamics: General principles},
  * author={Greenshields, Christopher J and Weller, Henry G},
  * journal={(No Title)},

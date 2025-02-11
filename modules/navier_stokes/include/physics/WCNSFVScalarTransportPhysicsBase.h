@@ -67,8 +67,6 @@ private:
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport
    * equation
-   * If the material properties are not constant, some of these can be used for
-   * weakly-compressible simulations as well.
    */
   virtual void addScalarTimeKernels() = 0;
   virtual void addScalarDiffusionKernels() = 0;
@@ -76,8 +74,7 @@ private:
   /// Equivalent of NSFVAction addScalarCoupledSourceKernels
   virtual void addScalarSourceKernels() = 0;
 
-  /// Functions adding boundary conditions for the incompressible simulation.
-  /// These are used for weakly-compressible simulations as well.
+  /// Functions adding boundary conditions for the scalar conservation equations.
   virtual void addScalarInletBC() = 0;
   virtual void addScalarWallBC() = 0;
   virtual void addScalarOutletBC() = 0;
