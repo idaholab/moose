@@ -68,6 +68,9 @@ protected:
   virtual void addPhysics() {}
   /// Used to add materials or functor materials on a component
   virtual void addMaterials() {}
+  /// Used for various checks notably:
+  /// - that all ICs in a ComponentInitialConditionInterface are used
+  virtual void checkIntegrity() {}
 
   /// Use this if registering a new task to the derived ActionComponent
   virtual void actOnAdditionalTasks() {}
