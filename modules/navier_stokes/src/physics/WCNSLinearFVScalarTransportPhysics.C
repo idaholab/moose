@@ -66,7 +66,15 @@ WCNSLinearFVScalarTransportPhysics::addSolverVariables()
 void
 WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
 {
-  paramError("transient", "Transient simulations are not supported at this time");
+  std::string kernel_type = "LinearFVTimeDerivative";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+
+  for (const auto & vname : _passive_scalar_names)
+  {
+    params.set<LinearVariableName>("variable") = vname;
+    getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
+  }
 }
 
 void

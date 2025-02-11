@@ -37,21 +37,22 @@ private:
   virtual void addUserObjects() override;
 
   /// Function adding kernels for the incompressible pressure correction equation
-  void addINSPressureCorrectionKernels();
+  void addPressureCorrectionKernels();
 
   /**
    * Functions adding kernels for the incompressible momentum equation
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
-  void addINSMomentumFluxKernels();
-  virtual void addINSMomentumPressureKernels() override;
-  virtual void addINSMomentumGravityKernels() override;
-  virtual void addINSMomentumBoussinesqKernels() override;
+  void addMomentumTimeKernels() override;
+  void addMomentumFluxKernels();
+  virtual void addMomentumPressureKernels() override;
+  virtual void addMomentumGravityKernels() override;
+  virtual void addMomentumBoussinesqKernels() override;
 
-  virtual void addINSInletBC() override;
-  virtual void addINSOutletBC() override;
-  virtual void addINSWallsBC() override;
+  virtual void addInletBC() override;
+  virtual void addOutletBC() override;
+  virtual void addWallsBC() override;
 
   virtual bool hasForchheimerFriction() const override { return false; };
 

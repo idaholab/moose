@@ -59,15 +59,18 @@ WCNSFVFluidHeatTransferPhysics::addSolverVariables()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
+WCNSFVFluidHeatTransferPhysics::addEnergyTimeKernels()
 {
-  std::string kernel_type = "INSFVEnergyTimeDerivative";
-  std::string kernel_name = prefix() + "ins_energy_time";
-
+  std::string kernel_type =
+      ((_compressibility == "weakly-compressible") ? "WCNSFVEnergyTimeDerivative"
+                                                   : "INSFVEnergyTimeDerivative");
+  std::string kernel_name =
+      prefix() + ((_compressibility == "weakly-compressible") ? "wcns" : "ins") + "_energy_time";
   if (_porous_medium_treatment)
   {
     kernel_type = "PINSFVEnergyTimeDerivative";
-    kernel_name = prefix() + "pins_energy_time";
+    kernel_name = prefix() + ((_compressibility == "weakly-compressible") ? "pwcns" : "pins") +
+                  "_energy_time";
   }
 
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -76,7 +79,11 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
       NS::time_deriv(NS::specific_enthalpy);
-
+  if (_compressibility == "weakly-compressible")
+  {
+    params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+    params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
+  }
   if (_porous_medium_treatment)
   {
     params.set<MooseFunctorName>(NS::porosity) =
@@ -87,6 +94,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
       params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
     }
+
     params.set<bool>("is_solid") = false;
   }
 
@@ -94,37 +102,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addWCNSEnergyTimeKernels()
-{
-  std::string en_kernel_type = "WCNSFVEnergyTimeDerivative";
-  std::string kernel_name = prefix() + "wcns_energy_time";
-
-  if (_porous_medium_treatment)
-  {
-    en_kernel_type = "PINSFVEnergyTimeDerivative";
-    kernel_name = prefix() + "pwcns_energy_time";
-  }
-
-  InputParameters params = getFactory().getValidParams(en_kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-
-  if (_porous_medium_treatment)
-  {
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>(NS::porosity) =
-        _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/false);
-    params.set<bool>("is_solid") = false;
-  }
-
-  getProblem().addFVKernel(en_kernel_type, kernel_name, params);
-}
-
-void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
+WCNSFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
 {
   std::string kernel_type = "INSFVEnergyAdvection";
   std::string kernel_name = prefix() + "ins_energy_advection";
@@ -146,7 +124,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
+WCNSFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
 {
   const auto vector_conductivity = processThermalConductivity();
   const auto num_blocks = _thermal_conductivity_blocks.size();
@@ -195,7 +173,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
+WCNSFVFluidHeatTransferPhysics::addEnergyAmbientConvection()
 {
   unsigned int num_convection_blocks = _ambient_convection_blocks.size();
   unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
@@ -228,7 +206,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
+WCNSFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
 {
   const std::string kernel_type = "FVCoupledForce";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -241,7 +219,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyInletBC()
+WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
 {
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
   // These are parameter errors for now. If Components add boundaries to Physics, the error
@@ -319,7 +297,7 @@ WCNSFVFluidHeatTransferPhysics::addINSEnergyInletBC()
 }
 
 void
-WCNSFVFluidHeatTransferPhysics::addINSEnergyWallBC()
+WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
 {
   const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())

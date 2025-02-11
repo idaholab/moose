@@ -21,6 +21,15 @@ class DumpObjectsNonlinearSystem;
     FEProblemBase::method_name(type, name, parameters);                                            \
   }
 
+#define captureDumpUO(method_name, path)                                                           \
+  std::vector<std::shared_ptr<UserObject>> method_name(                                            \
+      const std::string & type, const std::string & name, InputParameters & parameters) override   \
+  {                                                                                                \
+    dumpObjectHelper(path, type, name, parameters);                                                \
+    FEProblemBase::method_name(type, name, parameters);                                            \
+    return std::vector<std::shared_ptr<UserObject>>();                                             \
+  }
+
 /**
  * Specialization of SubProblem for dumping generated objects as input file syntax
  */
@@ -94,6 +103,7 @@ public:
   captureDump(addAuxVariable,         "AuxVariables")
   captureDump(addBoundaryCondition,   "BCs")
   captureDump(addConstraint,          "Constraints")
+  captureDump(addConvergence,         "Convergence")
   captureDump(addDamper,              "Dampers")
   captureDump(addDGKernel,            "DGKernels")
   captureDump(addDiracKernel,         "DiracKernels")
@@ -110,10 +120,11 @@ public:
   captureDump(addInitialCondition,    "ICs")
   captureDump(addInterfaceKernel,     "InterfaceKernels")
   captureDump(addKernel,              "Kernels")
-  captureDump(addLinearFVBC,      "LinearFVBCs")
+  captureDump(addLinearFVBC,          "LinearFVBCs")
   captureDump(addLinearFVKernel,      "LinearFVKernels")
   captureDump(addMarker,              "Adaptivity/Markers")
   captureDump(addMaterial,            "Materials")
+  captureDump(addMeshDivision,        "MeshDivisions")
   captureDump(addMultiApp,            "MultiApps")
   captureDump(addNodalKernel,         "NodalKernels")
   captureDump(addPostprocessor,       "Postprocessors")
@@ -121,7 +132,8 @@ public:
   captureDump(addSampler,             "Samplers")
   captureDump(addScalarKernel,        "ScalarKernels")
   captureDump(addTransfer,            "Transfers")
-  captureDump(addTimeIntegrator,      "TimeIntegrators")
+  captureDump(addTimeIntegrator,      "Executioner/TimeIntegrators")
+  captureDumpUO(addUserObject,        "UserObjects")
   captureDump(addVariable,            "Variables")
   captureDump(addVectorPostprocessor, "VectorPostprocessors")
   // clang-format off

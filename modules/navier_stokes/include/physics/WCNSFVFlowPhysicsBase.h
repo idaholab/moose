@@ -89,19 +89,20 @@ protected:
   virtual void addPostprocessors() override;
 
   /**
-   * Functions adding kernels for the incompressible momentum equation
+   * Functions adding kernels for the flow momentum equations
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
-  virtual void addINSMomentumPressureKernels() = 0;
-  virtual void addINSMomentumGravityKernels() = 0;
-  virtual void addINSMomentumBoussinesqKernels() = 0;
+  virtual void addMomentumTimeKernels() = 0;
+  virtual void addMomentumPressureKernels() = 0;
+  virtual void addMomentumGravityKernels() = 0;
+  virtual void addMomentumBoussinesqKernels() = 0;
 
-  /// Functions adding boundary conditions for the incompressible simulation.
+  /// Functions adding boundary conditions for the flow simulation.
   /// These are used for weakly-compressible simulations as well.
-  virtual void addINSInletBC() = 0;
-  virtual void addINSOutletBC() = 0;
-  virtual void addINSWallsBC() = 0;
+  virtual void addInletBC() = 0;
+  virtual void addOutletBC() = 0;
+  virtual void addWallsBC() = 0;
 
   /// Return whether a Forchheimer friction model is in use
   virtual bool hasForchheimerFriction() const = 0;

@@ -43,7 +43,6 @@ WCNSLinearFVFlowPhysics::validParams()
   params.set<MooseFunctorName>("porosity") = "1";
   params.suppressParameter<MooseFunctorName>("porosity");
   params.suppressParameter<MooseEnum>("mu_interp_method");
-  params.suppressParameter<MooseFunctorName>("thermal_expansion");
 
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
@@ -113,7 +112,7 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
       std::string variable_type = "MooseLinearVariableFVReal";
 
       auto params = getFactory().getValidParams(variable_type);
-      assignBlocks(params, _blocks); // TODO: check wrt components
+      assignBlocks(params, _blocks);
       params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
 
       getProblem().addVariable(variable_type, _velocity_names[d], params);
@@ -151,28 +150,28 @@ WCNSLinearFVFlowPhysics::addFVKernels()
     return;
 
   // Pressure correction equation: divergence of momentum
-  addINSPressureCorrectionKernels();
+  addPressureCorrectionKernels();
 
   // Momentum equation: time derivative
   if (isTransient())
-    mooseError("Transient terms not implemented");
+    addMomentumTimeKernels();
 
   // Momentum equation: flux terms
-  addINSMomentumFluxKernels();
+  addMomentumFluxKernels();
 
   // Momentum equation: pressure term
-  addINSMomentumPressureKernels();
+  addMomentumPressureKernels();
 
   // Momentum equation: gravity source term
-  addINSMomentumGravityKernels();
+  addMomentumGravityKernels();
 
   // Momentum equation: boussinesq approximation
   if (getParam<bool>("boussinesq_approximation"))
-    addINSMomentumBoussinesqKernels();
+    addMomentumBoussinesqKernels();
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSPressureCorrectionKernels()
+WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
 {
   {
     std::string kernel_type = "LinearFVAnisotropicDiffusion";
@@ -201,7 +200,24 @@ WCNSLinearFVFlowPhysics::addINSPressureCorrectionKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumFluxKernels()
+WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
+{
+  std::string kernel_type = "LinearFVTimeDerivative";
+  std::string kernel_name = prefix() + "ins_momentum_time";
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>("factor") = _density_name;
+
+  for (const auto d : make_range(dimension()))
+  {
+    params.set<LinearVariableName>("variable") = _velocity_names[d];
+    getProblem().addLinearFVKernel(kernel_type, kernel_name + "_" + NS::directions[d], params);
+  }
+}
+
+void
+WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";
@@ -228,7 +244,7 @@ WCNSLinearFVFlowPhysics::addINSMomentumFluxKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumPressureKernels()
+WCNSLinearFVFlowPhysics::addMomentumPressureKernels()
 {
   std::string kernel_type = "LinearFVMomentumPressure";
   std::string kernel_name = prefix() + "ins_momentum_pressure_";
@@ -246,7 +262,7 @@ WCNSLinearFVFlowPhysics::addINSMomentumPressureKernels()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
+WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
 {
   if (parameters().isParamValid("gravity") && !_solve_for_dynamic_pressure)
   {
@@ -261,21 +277,42 @@ WCNSLinearFVFlowPhysics::addINSMomentumGravityKernels()
       if (gravity_vector(d) != 0)
       {
         params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
-        params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+        params.set<LinearVariableName>("variable") = _velocity_names[d];
 
-        getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+        getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
       }
   }
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSMomentumBoussinesqKernels()
+WCNSLinearFVFlowPhysics::addMomentumBoussinesqKernels()
 {
-  paramError("boussinesq_approximation", "Currently not implemented.");
+  if (_compressibility == "weakly-compressible")
+    paramError("boussinesq_approximation",
+               "We cannot use boussinesq approximation while running in weakly-compressible mode!");
+
+  std::string kernel_type = "LinearFVMomentumBoussinesq";
+  std::string kernel_name = prefix() + "ins_momentum_boussinesq_";
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<VariableName>(NS::T_fluid) = _fluid_temperature_name;
+  params.set<MooseFunctorName>(NS::density) = _density_gravity_name;
+  params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+  params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
+  params.set<MooseFunctorName>("alpha_name") = getParam<MooseFunctorName>("thermal_expansion");
+
+  for (const auto d : make_range(dimension()))
+  {
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    params.set<LinearVariableName>("variable") = _velocity_names[d];
+
+    getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+  }
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSInletBC()
+WCNSLinearFVFlowPhysics::addInletBC()
 {
   // Check the size of the BC parameters
   unsigned int num_velocity_functor_inlets = 0;
@@ -344,7 +381,7 @@ WCNSLinearFVFlowPhysics::addINSInletBC()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSOutletBC()
+WCNSLinearFVFlowPhysics::addOutletBC()
 {
   // Check the BCs size
   unsigned int num_pressure_outlets = 0;
@@ -395,7 +432,7 @@ WCNSLinearFVFlowPhysics::addINSOutletBC()
 }
 
 void
-WCNSLinearFVFlowPhysics::addINSWallsBC()
+WCNSLinearFVFlowPhysics::addWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
 

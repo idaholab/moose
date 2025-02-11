@@ -135,6 +135,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
 
   // Boussinesq parameters checks
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
+  checkSecondParamSetOnlyIfFirstOneSet("gravity", "boussinesq_approximation");
 
   // Dynamic pressure parameter checks
   if (_compressibility != "incompressible" && _solve_for_dynamic_pressure)
@@ -245,9 +246,9 @@ WCNSFVFlowPhysicsBase::actOnAdditionalTasks()
 void
 WCNSFVFlowPhysicsBase::addFVBCs()
 {
-  addINSInletBC();
-  addINSOutletBC();
-  addINSWallsBC();
+  addInletBC();
+  addOutletBC();
+  addWallsBC();
 }
 
 void

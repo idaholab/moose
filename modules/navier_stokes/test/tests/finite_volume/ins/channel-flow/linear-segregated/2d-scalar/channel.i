@@ -223,7 +223,10 @@ k2 = 0.2
   num_iterations = 200
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
-  passive_scalar_absolute_tolerance = '1e-10 1e-10'
+  # The solution being flat, the normalization factor based on fluxes goes to
+  # 0. The convergence criteria being multiplied by said factor, we won't do any
+  # better than this. For a non-flat solution, use tighter tolerances
+  passive_scalar_absolute_tolerance = '1e-2 1e-2'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'

@@ -24,9 +24,12 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       "use_nonorthogonal_correction",
       true,
       "Whether to use a non-orthogonal correction. This can potentially slow down convergence "
-      ", but reduces numerical dispersion on non-orthogonal meshes. Can "
-      "be safely turned off on orthogonal meshes.");
+      ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
+      "orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
+
+  // We could split between discretization and solver here.
+  params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
 
   // Not implemented
   params.suppressParameter<bool>("effective_conductivity");
@@ -69,21 +72,21 @@ WCNSLinearFVFluidHeatTransferPhysics::addSolverVariables()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyTimeKernels()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyTimeKernels()
 {
-  paramError("transient",
-             "Transient simulations not supported at this time with the linear FV discretization");
+  std::string kernel_type = "LinearFVTimeDerivative";
+  std::string kernel_name = prefix() + "ins_energy_time";
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>("factor") = "rho_cp";
+
+  getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addWCNSEnergyTimeKernels()
-{
-  paramError("transient",
-             "Transient simulations not supported at this time with the linear FV discretization");
-}
-
-void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
 {
   std::string kernel_type = "LinearFVEnergyAdvection";
   std::string kernel_name = prefix() + "ins_energy_advection";
@@ -102,7 +105,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAdvectionKernels()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
 {
   const auto num_blocks = _thermal_conductivity_blocks.size();
   const auto num_used_blocks = num_blocks ? num_blocks : 1;
@@ -132,7 +135,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyHeatConductionKernels()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyAmbientConvection()
 {
   unsigned int num_convection_blocks = _ambient_convection_blocks.size();
   unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
@@ -166,7 +169,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyAmbientConvection()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
 {
   const std::string kernel_type = "LinearFVSource";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -180,7 +183,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyExternalHeatSource()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyInletBC()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyInletBC()
 {
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
   // These are parameter errors for now. If Components add boundaries to Physics, the error
@@ -218,7 +221,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyInletBC()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyWallBC()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
 {
   const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())
@@ -256,7 +259,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyWallBC()
 }
 
 void
-WCNSLinearFVFluidHeatTransferPhysics::addINSEnergyOutletBC()
+WCNSLinearFVFluidHeatTransferPhysics::addEnergyOutletBC()
 {
   const auto & outlet_boundaries = _flow_equations_physics->getOutletBoundaries();
   if (outlet_boundaries.empty())
