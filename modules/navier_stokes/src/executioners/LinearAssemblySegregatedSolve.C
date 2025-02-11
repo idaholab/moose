@@ -417,7 +417,7 @@ LinearAssemblySegregatedSolve::solve()
   // If we have passive scalar equations, solve them here. We assume the material properties in the
   // Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
   // solve outside of the velocity-pressure loop
-  if (_has_passive_scalar_systems && converged)
+  if (_has_passive_scalar_systems && (converged || _continue_on_max_its))
   {
     // The reason why we need more than one iteration is due to the matrix relaxation
     // which can be used to stabilize the equations
