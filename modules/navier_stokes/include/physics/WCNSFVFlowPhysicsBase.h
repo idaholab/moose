@@ -89,7 +89,7 @@ protected:
   virtual void addPostprocessors() override;
 
   /**
-   * Functions adding kernels for the incompressible momentum equation
+   * Functions adding kernels for the flow momentum equations
    * If the material properties are not constant, these can be used for
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
@@ -98,7 +98,7 @@ protected:
   virtual void addMomentumGravityKernels() = 0;
   virtual void addMomentumBoussinesqKernels() = 0;
 
-  /// Functions adding boundary conditions for the incompressible simulation.
+  /// Functions adding boundary conditions for the flow simulation.
   /// These are used for weakly-compressible simulations as well.
   virtual void addInletBC() = 0;
   virtual void addOutletBC() = 0;

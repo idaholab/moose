@@ -68,8 +68,6 @@ protected:
 
   /**
    * Functions adding kernels for the incompressible / weakly compressible energy equation
-   * If the material properties are not constant, some of these can be used for
-   * weakly-compressible simulations as well.
    */
   virtual void addEnergyTimeKernels() = 0;
   virtual void addEnergyHeatConductionKernels() = 0;
@@ -77,8 +75,7 @@ protected:
   virtual void addEnergyAmbientConvection() = 0;
   virtual void addEnergyExternalHeatSource() = 0;
 
-  /// Functions adding boundary conditions for the incompressible simulation.
-  /// These are used for weakly-compressible simulations as well.
+  /// Functions adding boundary conditions for the fluid heat transfer equation.
   virtual void addEnergyInletBC() = 0;
   virtual void addEnergyWallBC() = 0;
   virtual void addEnergyOutletBC() = 0;
