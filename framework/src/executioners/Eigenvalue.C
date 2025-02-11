@@ -107,15 +107,19 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 {
 // Extract and store SLEPc options
 #ifdef LIBMESH_HAVE_SLEPC
+  mooseAssert(_fe_problem.numSolverSystems() == 1,
+              "The Eigenvalue executioner only currently supports a single solver system.");
+
   Moose::SlepcSupport::storeSolveType(_eigen_problem, parameters);
 
   Moose::SlepcSupport::setEigenProblemSolverParams(_eigen_problem, parameters);
-  _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
+  _eigen_problem.setEigenproblemType(
+      _eigen_problem.solverParams(/*solver_sys_num=*/0)._eigen_problem_type);
 
   // pass two control parameters to eigen problem
-  _eigen_problem.solverParams()._free_power_iterations =
+  _eigen_problem.solverParams(/*solver_sys_num=*/0)._free_power_iterations =
       getParam<unsigned int>("free_power_iterations");
-  _eigen_problem.solverParams()._extra_power_iterations =
+  _eigen_problem.solverParams(/*solver_sys_num=*/0)._extra_power_iterations =
       getParam<unsigned int>("extra_power_iterations");
 
   if (!isParamValid("normalization") && isParamValid("normal_factor"))
@@ -190,20 +194,19 @@ Eigenvalue::prepareSolverOptions()
 {
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app
-  Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+  Moose::SlepcSupport::slepcSetOptions(
+      _eigen_problem, _eigen_problem.solverParams(/*eigen_sys_num=*/0), _pars);
 #else
   // Options need to be setup once only
   if (!_eigen_problem.petscOptionsInserted())
   {
-    // Master app has the default data base
+    // Parent application has the default data base
     if (!_app.isUltimateMaster())
       LibmeshPetscCall(PetscOptionsPush(_eigen_problem.petscOptionsDatabase()));
-
-    Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
-
+    Moose::SlepcSupport::slepcSetOptions(
+        _eigen_problem, _eigen_problem.solverParams(/*eigen_sys_num=*/0), _pars);
     if (!_app.isUltimateMaster())
       LibmeshPetscCall(PetscOptionsPop());
-
     _eigen_problem.petscOptionsInserted() = true;
   }
 #endif

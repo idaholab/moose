@@ -167,6 +167,12 @@ protected:
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
 
+  /**
+   * Process the given petsc option pairs into the system solver settings
+   */
+  void addPetscPairsToPetscOptions(
+      const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options);
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 

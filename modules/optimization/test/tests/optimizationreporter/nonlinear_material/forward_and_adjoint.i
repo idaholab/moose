@@ -113,6 +113,21 @@
   []
 []
 
+[Preconditioning]
+  [nl0]
+    type = SMP
+    nl_sys = 'nl0'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
+  []
+  [adjoint]
+    type = SMP
+    nl_sys = 'adjoint'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
+  []
+[]
+
 [Executioner]
   type = SteadyAndAdjoint
   forward_system = nl0
@@ -121,8 +136,6 @@
   nl_abs_tol = 1e-12
   nl_rel_tol = 1e-12
   l_tol = 1e-12
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
 []
 
 [Outputs]
