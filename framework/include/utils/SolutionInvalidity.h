@@ -86,6 +86,7 @@ public:
   /// Struct used in InvalidCounts for storing the time history of invalid occurrences
   struct TimestepCounts
   {
+    TimestepCounts() : timestep_index(std::numeric_limits<unsigned int>::max()) {}
     TimestepCounts(const unsigned int timestep_index) : timestep_index(timestep_index) {}
     unsigned int timestep_index;
     unsigned int counts = 0;

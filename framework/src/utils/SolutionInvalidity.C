@@ -323,7 +323,7 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
     return;
 
   // Build data structure for store
-  auto size = solution_invalidity._counts.size();
+  std::size_t size = solution_invalidity._counts.size();
   dataStore(stream, size, context);
 
   for (const auto id : index_range(solution_invalidity._counts))
@@ -338,7 +338,7 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
     dataStore(stream, warning, context);
     dataStore(stream, entry.current_counts, context);
     dataStore(stream, entry.current_timestep_counts, context);
-    // dataStore(stream, entry.timestep_counts, context);
+    dataStore(stream, entry.timestep_counts, context);
     dataStore(stream, entry.total_counts, context);
   }
 }
@@ -374,10 +374,10 @@ dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void *
     if (solution_invalidity._counts.size() <= id)
       solution_invalidity._counts.resize(id + 1);
 
-    const auto & entry = solution_invalidity._counts[id];
+    auto & entry = solution_invalidity._counts[id];
     dataLoad(stream, entry.current_counts, context);
     dataLoad(stream, entry.current_timestep_counts, context);
-    // dataLoad(stream, entry.timestep_counts, context);
+    dataLoad(stream, entry.timestep_counts, context);
     dataLoad(stream, entry.total_counts, context);
   }
 }
