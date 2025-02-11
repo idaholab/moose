@@ -72,12 +72,12 @@
   [hourglass_x]
     type = HourglassCorrectionQuad4
     variable = disp_x
-    penalty = 2e-3
+    penalty = 1e-3
   []
   [hourglass_y]
     type = HourglassCorrectionQuad4
     variable = disp_y
-    penalty = 2e-3
+    penalty = 5e-2
   []
 []
 
