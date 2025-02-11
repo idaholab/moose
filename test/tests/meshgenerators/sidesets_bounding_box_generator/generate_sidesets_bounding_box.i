@@ -4,7 +4,6 @@
     dim = 2
     nx = 10
     ny = 10
-    parallel_type = replicated
   []
 
   [./createNewSidesetOne]
