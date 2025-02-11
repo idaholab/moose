@@ -38,7 +38,7 @@
     [external_only]
       type = 'Exodiff'
       input = 'external_only.i'
-      cli_args = 'Mesh/interface/external_only=true --mesh-only'
+      cli_args = '--mesh-only'
       exodiff = 'external_only_in.e'
       recover = false
 

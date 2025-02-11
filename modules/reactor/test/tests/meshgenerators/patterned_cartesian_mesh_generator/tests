@@ -75,7 +75,6 @@
                   Mesh/pattern/duct_block_ids=2000
                   Mesh/pattern/duct_block_names="duct_block"
                   Mesh/pattern/uniform_mesh_on_sides=true
-                  Mesh/pattern/create_interface_boundaries=false
                   --mesh-only "patterned_sq_no_interface.e"'
     requirement = 'The system shall stitch square meshes to form a large mesh with square boundary and without interface boundaries defined.'
     recover = false

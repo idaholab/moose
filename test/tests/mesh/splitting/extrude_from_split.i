@@ -9,8 +9,6 @@
     heights = '1 2 3'
     num_layers = '1 2 3'
     direction = '0 0 1'
-    bottom_sideset = '4'
-    top_sideset = '5'
   []
 []
 
