@@ -34,7 +34,7 @@ public:
                                                const std::string & requestor_name) const;
 
 protected:
-  virtual checkIntegrity() override { checkInitialConditionsAllRequested(); }
+  virtual void checkIntegrity() override { checkInitialConditionsAllRequested(); }
 
   /// Names of the variables to set an initial condition on
   const std::vector<VariableName> _initial_condition_variables;

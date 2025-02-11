@@ -41,11 +41,19 @@ ComponentInitialConditionInterface::ComponentInitialConditionInterface(
                "Should be the same size as 'initial_condition_values'");
 }
 
+bool
+ComponentInitialConditionInterface::hasInitialCondition(const VariableName & var_name) const
+{
+  return std::find(_initial_condition_variables.begin(),
+                   _initial_condition_variables.end(),
+                   var_name) != _initial_condition_variables.end();
+}
+
 const MooseFunctorName &
 ComponentInitialConditionInterface::getInitialCondition(const VariableName & variable,
                                                         const std::string & requestor_name) const
 {
-  // Ideally all properties defined by the user in the input will get requested
+  // Ideally all initial conditions defined by the user in the input will get requested
   _requested_ic_variables.insert(variable);
 
   // Sorted by the user in the input parameters
@@ -63,9 +71,9 @@ ComponentInitialConditionInterface::checkInitialConditionsAllRequested() const
   if (_requested_ic_variables.size() != _initial_condition_variables.size())
   {
     std::string list_missing = "";
-    for (const auto & prop_name : _initial_condition_variables)
-      if (_requested_ic_variables.count(prop_name) == 0)
-        list_missing = (list_missing == "" ? "" : ", ") + prop_name;
+    for (const auto & ic_name : _initial_condition_variables)
+      if (_requested_ic_variables.count(ic_name) == 0)
+        list_missing = (list_missing == "" ? "" : ", ") + ic_name;
 
     paramError("initial_condition_variables",
                "Initial conditions for variables '" + list_missing +

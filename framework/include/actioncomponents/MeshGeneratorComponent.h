@@ -18,7 +18,8 @@
  */
 class MeshGeneratorComponent : public virtual ActionComponent,
                                public ComponentPhysicsInterface,
-                               public ComponentMaterialPropertyInterface
+                               public ComponentMaterialPropertyInterface,
+                               public ComponentInitialConditionInterface
 {
 public:
   /**
