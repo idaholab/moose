@@ -19,7 +19,7 @@ LinearFVEnthalpyFunctorMaterial::validParams()
 {
   auto params = FunctorMaterial::validParams();
   params.addClassDescription(
-      "Creates an enthalpy-temperature (both directions) converter functor material.");
+      "Creates functors for conversions between specific enthalpy and temperature");
 
   params.addRequiredParam<MooseFunctorName>(NS::pressure, "Pressure");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
@@ -58,7 +58,7 @@ LinearFVEnthalpyFunctorMaterial::LinearFVEnthalpyFunctorMaterial(const InputPara
     mooseError("An unsupported combination of input parameters was given. Current"
                "supported combinations are either i) `fp` and neither `h_from_p_T_functor` nor "
                "`T_from_p_h_functor`, or ii) "
-               "no `fp` and `h_from_p_T_functor` and `T_from_p_h_functor`.");
+               "no `fp` and  both`h_from_p_T_functor` and `T_from_p_h_functor` are provided.");
   }
 
   //

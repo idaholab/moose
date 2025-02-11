@@ -1,6 +1,6 @@
 # LinearFVEnthalpyFunctorMaterial
 
-This Functor Material class is needed when the user wants to solve for the enthalpy conservation for the incompressible/weakly-compressible linear finite-volume implementation of the Navier-Stokes equations.
+This [FunctorMaterial](syntax/FunctorMaterials/index.md) class is needed when the user wants to solve for the enthalpy conservation for the linear finite-volume implementation of the incompressible/weakly-compressible Navier-Stokes equations.
 
 This material class defines the functors to convert from specific enthalpy and pressure to temperature ('T_from_p_h') and to convert from temperature and pressure to specific enthalpy ('h_from_p_T').
 
@@ -10,12 +10,12 @@ The 'T_from_p_h' functor computes the temperature field, which is then used to e
 The specific enthalpy is defined as:
 
 \begin{equation}
-  h(T) = \int_{T_{ref}}^{T} c_p(T)dT + h_{ref},
+  h(T) = \int_{T_{ref}}^{T} c_p(p, T')dT' + h_{ref},
 \end{equation}
 
 where
 
-- $c_p(T)$ is the temperature-dependent specific heat
+- $c_p(p, T)$ is the pressure and temperature-dependent specific heat
 - $T_{ref}$ is a reference temperature where the reference enthalpy $h_{ref}$ is defined
 
 ## Example input syntax 1: Fluid Properties
@@ -46,6 +46,8 @@ for the linear specific heat:
 
 !listing test/tests/finite_volume/wcns/enthalpy_equation/1d_test_h.i block=FunctorMaterials/cp
 
+!alert warning
+If using user-defined properties, it is the responsibility of the user to update these properties often enough. For example auxiliary variable properties would only be updated at the end of every time step by default, which would introduce a lag. 
 
 !syntax parameters /FunctorMaterials/LinearFVEnthalpyFunctorMaterial
 
