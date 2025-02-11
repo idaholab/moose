@@ -1,0 +1,20 @@
+#ifdef MFEM_ENABLED
+
+#include "MFEMSolverBase.h"
+
+InputParameters
+MFEMSolverBase::validParams()
+{
+  InputParameters params = MFEMGeneralUserObject::validParams();
+  params.addClassDescription("Base class for defining mfem::Solver derived classes for Moose.");
+  params.registerBase("MFEMSolverBase");
+
+  return params;
+}
+
+MFEMSolverBase::MFEMSolverBase(const InputParameters & parameters)
+  : MFEMGeneralUserObject(parameters)
+{
+}
+
+#endif
