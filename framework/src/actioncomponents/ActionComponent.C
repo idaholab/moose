@@ -53,6 +53,8 @@ ActionComponent::act()
   // properties on the component
   else if (_current_task == "add_material")
     addMaterials();
+  else if (_current_task == "check_integrity")
+    checkIntegrity();
   else
     // For a new task that isn't registered to ActionComponent in the framework
     actOnAdditionalTasks();
