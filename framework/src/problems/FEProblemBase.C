@@ -4144,10 +4144,17 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto sys_num = parameters.isParamValid(var_param_name) &&
-                               &getSystem(parameters.varName(var_param_name, object_name))
-                           ? getSystem(parameters.varName(var_param_name, object_name)).number()
-                           : (unsigned int)0;
+  // Due to objects like SolutionUserObject which manipulate libmesh objects
+  // and variables directly at the back end, we need a default option here
+  // which is going to be the pointer to the first solver system within this
+  // problem
+  unsigned int sys_num = 0;
+  if (parameters.isParamValid(var_param_name))
+  {
+    const auto variable_name = parameters.varName(var_param_name, object_name);
+    if (this->hasVariable(variable_name) || this->hasScalarVariable(variable_name))
+      sys_num = getSystem(parameters.varName(var_param_name, object_name)).number();
+  }
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
@@ -5690,7 +5697,7 @@ FEProblemBase::getSystem(const std::string & var_name)
   const auto [var_in_sys, sys_num] = determineSolverSystem(var_name);
   if (var_in_sys)
     return _solver_systems[sys_num]->system();
-  else if (_aux->hasVariable(var_name))
+  else if (_aux->hasVariable(var_name) || _aux->hasScalarVariable(var_name))
     return _aux->system();
   else
     mooseError("Unable to find a system containing the variable " + var_name);
