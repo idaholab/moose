@@ -35,8 +35,7 @@ protected:
   template <typename T>
   bool physicsExists(const PhysicsName & name) const;
 
-  virtual void addPhysics() override { initComponentPhysics(); }
-  virtual void initComponentPhysics();
+  virtual void addPhysics() override;
 
   /// Names of the Physics defined on the component
   std::vector<PhysicsName> _physics_names;
