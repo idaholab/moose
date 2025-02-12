@@ -743,7 +743,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       for (const auto qp : make_range(nqp))
       {
         mooseAssert(_current_curl_phi,
-          "We're requiring a curl calculation but have not set a curl shape function!");
+                    "We're requiring a curl calculation but have not set a curl shape function!");
 
         // Note that the current version of _ad_curl_u is not yet implemented for mesh displacement
         _ad_curl_u[qp] += _ad_dof_values[i] * (*_current_curl_phi)[i][qp];

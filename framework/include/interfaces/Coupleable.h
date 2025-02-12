@@ -889,7 +889,7 @@ protected:
    * @see Kernel::_curl_u
    */
   const ADVectorVariableCurl & adCoupledCurl(const std::string & var_name,
-                                               unsigned int comp = 0) const;
+                                             unsigned int comp = 0) const;
 
   /**
    * Returns divergence of a coupled variable
