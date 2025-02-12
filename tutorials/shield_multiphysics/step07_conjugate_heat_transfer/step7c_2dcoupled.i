@@ -1,32 +1,27 @@
 # Things we learn from experimenting in 2D
-# - mesh refinement needed in the fluid
-# - time step size can be ~0.25s (can we improve?)
 # - cp multiplier to get to a steady state faster
 # - solve heat conduction for steady state directly
 # - solver parameters: scaling notably, preconditioner, multi-system!
 
 # Fluid properties
-cp_water_multiplier = 1e-3
-mu_multiplier = 1
+cp_water_multiplier = 1e-4
+mu_multiplier = 1e4
 cp = ${fparse 4181 * cp_water_multiplier}
 mu = ${fparse 7.98e-4 * mu_multiplier}
 
-# See step 8 for mesh refinement
-global_refinement = 1
-water_additional_refinement = 0
+# Power
+# Real facility uses forced convection to cool the water tank at full power
+# Need to lower power for natural convection so water doesn't boil.
+power = ${fparse 5e4 / 144 * 0.5}
+
+# Coupling
+htc = 600
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
     file = 'mesh2d_in.e'
   []
-  [water_refine]
-    type = RefineBlockGenerator
-    input = fmg
-    block = water
-    refinement = ${water_additional_refinement}
-  []
-  uniform_refine = ${global_refinement}
 []
 
 [Variables]
@@ -109,9 +104,7 @@ water_additional_refinement = 0
     type = NeumannBC
     variable = T
     boundary = inner_cavity_solid
-    # Real facility uses forced convection to cool the water tank at full power
-    # Need to lower power for natural convection so water doesn't boil.
-    value = '${fparse 5e4 / 14 * 0.06}'
+    value = '${power}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -130,41 +123,11 @@ water_additional_refinement = 0
 
   # Heat fluxes between water and concrete
   [fluid_to_solid]
-    type = FunctorNeumannBC
-    boundary = water_boundary
+    type = ADConvectiveHeatFluxBC
+    boundary = water_boundary_inwards
     variable = T
-    functor = h_dT
-    coefficient = -1
-  []
-[]
-
-# Project FE T onto a FV field
-# This trick will not be necessary with additional developments
-# Stay tuned.
-[AuxVariables]
-  [T_solid_FV]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [concrete]
-    type = ProjectionAux
-    variable = 'T_solid_FV'
-    v = 'T'
-    # Note that this limits the coupling frequency
-    execute_on = 'INITIAL TIMESTEP_END'
-    block = 'concrete_hd concrete Al'
-  []
-  [water]
-    type = NearestNodeValueAux
-    variable = T_solid_FV
-    paired_variable = 'T'
-    paired_boundary = 'water_boundary'
-    boundary = 'water_boundary_inwards'
-    check_boundary_restricted = false
-    block = 'water'
+    T_infinity_functor = T_fluid_interface_avg
+    heat_transfer_coefficient_functor = ${htc}
   []
 []
 
@@ -284,14 +247,6 @@ water_additional_refinement = 0
     cp = cp
     temperature = T_fluid
   []
-
-  # Boundary condition functor computing the heat flux with a set heat transfer coefficient
-  [heat_flux]
-    type = ADParsedFunctorMaterial
-    expression = '600 * (T_solid_FV - T_fluid)'
-    functor_names = 'T_solid_FV T_fluid'
-    property_name = 'h_dT'
-  []
 []
 
 [FVBCs]
@@ -313,14 +268,17 @@ water_additional_refinement = 0
     boundary = inner_cavity_water
     # Real facility uses forced convection to cool the water tank at full power
     # Need to lower power for natural convection so water doesn't boil.
-    functor = ${fparse 5e4 / 144 * 0.06}
+    functor = ${power}
     variable = T_fluid
   []
   [T_fluid_water_boundary]
-    type = FVFunctorNeumannBC
+    type = FVFunctorConvectiveHeatFluxBC
     boundary = water_boundary
     variable = T_fluid
-    functor = h_dT
+    T_bulk = T_fluid
+    T_solid = T_solid_interface_avg
+    heat_transfer_coefficient = ${htc}
+    is_solid = true
   []
   [T_fluid_bottom]
     type = FVDirichletBC
@@ -353,8 +311,7 @@ water_additional_refinement = 0
   line_search = none
 
   nl_abs_tol = 1e-8
-  nl_max_its = 10
-  l_max_its = 3
+  nl_max_its = 15
 
   steady_state_tolerance = 1e-6
   steady_state_detection = true
@@ -385,23 +342,36 @@ water_additional_refinement = 0
   exodus = true
 []
 
-[Debug]
-  show_var_residual_norms = true
-[]
-
+# we will see postprocessors in step 9
 [Postprocessors]
-  # we will see postprocessors in step 9
+  # Postprocessors used for coupling
+  [T_solid_interface_avg]
+    type = SideAverageValue
+    boundary = water_boundary_inwards
+    variable = T
+    # Want to compute initial value and after each timestep for coupling
+    execute_on = 'initial timestep_end'
+  []
+  [T_fluid_interface_avg]
+    type = SideAverageValue
+    boundary = water_boundary
+    variable = T_fluid
+    # Want to compute initial value and after each timestep for coupling
+    execute_on = 'initial timestep_end'
+  []
+
+  # Useful information
   [T_max]
     type = ElementExtremeValue
     variable = T
     value_type = 'max'
-    block = 'concrete'
+    block = 'concrete_hd concrete'
   []
   [T_min]
     type = ElementExtremeValue
     variable = T
     value_type = 'min'
-    block = 'concrete'
+    block = 'concrete_hd concrete'
   []
   [T_water_max]
     type = ElementExtremeValue
@@ -421,8 +391,8 @@ water_additional_refinement = 0
     T_hot = T_max
     T_cold = T_min
     l = 4
-    mu_ave = '${fparse mu_multiplier * 7.98e-4}'
-    cp_ave = '${fparse cp_water_multiplier * 4181}'
+    mu_ave = '${mu}'
+    cp_ave = '${cp}'
     k_ave = 0.6
     gravity_magnitude = 9.81
     rho_ave = 955.7

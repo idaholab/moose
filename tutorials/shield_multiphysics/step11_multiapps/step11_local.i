@@ -74,8 +74,10 @@
   [source]
     type = CoupledForce
     variable = T
-    v = capture_rate
     block = 'boron_inner boron_mid'
+    v = flux
+    # 2 is our arbitrary value for the group cross section
+    coef = 2
   []
 []
 
@@ -92,21 +94,6 @@
   # Received from the main solve
   [flux]
     initial_condition = 1e5
-  []
-
-  [capture_rate]
-    block = 'boron_inner boron_mid'
-  []
-[]
-
-[AuxKernels]
-  [compute_rate]
-    type = ParsedAux
-    variable = capture_rate
-    # 2 is our arbitrary value for the group cross section
-    expression = 'flux * 2'
-    coupled_variables = 'flux'
-    execute_on = INITIAL
   []
 []
 
@@ -127,8 +114,9 @@
 
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Postprocessors]
@@ -136,6 +124,14 @@
   [T_boundary]
     type = Receiver
     default = 320
+  []
+
+  # Compute the heat transfer into the surroundings
+  [heat_flux]
+    type = SideDiffusiveFluxIntegral
+    boundary = outer
+    variable = T
+    diffusivity = thermal_conductivity
   []
 
   # Compute those then send to the main app

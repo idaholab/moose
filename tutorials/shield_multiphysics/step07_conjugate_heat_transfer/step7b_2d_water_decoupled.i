@@ -208,7 +208,7 @@ mu_multiplier = 1e4
     boundary = inner_cavity_water
     # Real facility uses forced convection to cool the water tank at full power
     # Need to lower power for natural convection so water doesn't boil.
-    functor = ${fparse 5e4 / 144 * 0.06}
+    functor = ${fparse 5e4 / 144 * 0.5}
     variable = T_fluid
   []
   [T_fluid_water_boundary]

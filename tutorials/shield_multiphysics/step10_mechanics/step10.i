@@ -12,22 +12,21 @@
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
   []
 []
 
 [Kernels]
   [diffusion_concrete]
-    type = CoefDiffusion
+    type = ADHeatConduction
     variable = T
-    coef = 2.25
   []
 
   [gravity]
     type = Gravity
     variable = 'disp_z'
     value = '-9.81'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
   []
 []
 
@@ -40,7 +39,7 @@
     eigenstrain_names = eigenstrain
     use_automatic_differentiation = true
     generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
   []
 []
 
@@ -48,9 +47,9 @@
   [from_reactor]
     type = NeumannBC
     variable = T
-    boundary = inner_cavity
-    # 5 MW reactor, 50kW removed by radiation, 108 m2 cavity area
-    value = '${fparse 5e4 / 108}'
+    boundary = inner_cavity_solid
+    # 5 MW reactor, only 50 kW removed from radiation, 144 m2 cavity area
+    value = '${fparse 5e4 / 144}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -72,7 +71,7 @@
     boundary = 'water_boundary_inwards'
     T_infinity = 300.0
     # The heat transfer coefficient should be obtained from a correlation
-    heat_transfer_coefficient = 30
+    heat_transfer_coefficient = 600
   []
 
   [hold_ground_x]
@@ -96,31 +95,91 @@
 []
 
 [Materials]
-  [elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 200e9 # (Pa) arbitrary value
-    poissons_ratio = .3 # arbitrary value
-    block = 'concrete concrete_and_Al'
+  [concrete_hd]
+    type = ADHeatConductionMaterial
+    block = concrete_hd
+    temp = 'T'
+    # we specify a function of time, temperature is passed as the time argument
+    # in the material
+    thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
   []
+  [concrete]
+    type = ADHeatConductionMaterial
+    block = concrete
+    temp = 'T'
+    thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
+  []
+  [Al]
+    type = ADHeatConductionMaterial
+    block = Al
+    temp = T
+    thermal_conductivity_temperature_function = '175'
+  []
+
+  [elasticity_tensor_concrete_hd]
+    type = ADComputeIsotropicElasticityTensor
+    youngs_modulus = 2.75e9 # (Pa)
+    poissons_ratio = 0.15
+    block = 'concrete_hd'
+  []
+  [elasticity_tensor_concrete]
+    type = ADComputeIsotropicElasticityTensor
+    youngs_modulus = 30e9 # (Pa)
+    poissons_ratio = 0.2
+    block = 'concrete'
+  []
+  [elasticity_tensor_Al]
+    type = ADComputeIsotropicElasticityTensor
+    youngs_modulus = 68e9 # (Pa)
+    poissons_ratio = 0.36
+    block = 'Al'
+  []
+
   [elastic_stress]
     type = ADComputeFiniteStrainElasticStress
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
   []
-  [thermal_strain]
+
+  [thermal_strain_concrete_hd]
+    type = ADComputeThermalExpansionEigenstrain
+    stress_free_temperature = 300
+    eigenstrain_name = eigenstrain
+    temperature = T
+    thermal_expansion_coeff = 1e-5 # 1/K
+    block = 'concrete_hd'
+  []
+  [thermal_strain_concrete]
+    type = ADComputeThermalExpansionEigenstrain
+    stress_free_temperature = 300
+    eigenstrain_name = eigenstrain
+    temperature = T
+    thermal_expansion_coeff = 1e-5 # 1/K
+    block = 'concrete'
+  []
+  [thermal_strain_Al]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 300 # arbitrary value
     eigenstrain_name = eigenstrain
     temperature = T
-    # inflated to get visible displacement
-    # don't overdo it: 500K * alpha should be in the per-cent, max
-    thermal_expansion_coeff = 2e-4 # arbitrary value
-    block = 'concrete concrete_and_Al'
+    thermal_expansion_coeff = 2.4e-5 # 1/K
+    block = 'Al'
   []
+
   # NOTE: This handles thermal expansion by coupling to the displacements
-  [concrete_density]
+  [density_concrete_hd]
     type = Density
-    density = '2400'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd'
+    density = '3524' # kg / m3
+  []
+  [density_concrete]
+    type = Density
+    block = 'concrete'
+    density = '2403' # kg / m3
+  []
+  [density_Al]
+    type = Density
+    block = 'Al'
+    density = '2270' # kg / m3
   []
 []
 
@@ -135,22 +194,14 @@
 [Executioner]
   type = Steady
 
-  solve_type = PJFNK
+  solve_type = NEWTON
   automatic_scaling = true
 
-  # petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  # petsc_options_value = 'lu NONZERO'
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 500'
   line_search = none
 []
 
 [Outputs]
-  exodus = true # Output Exodus format
-
-  # Outputs the displaced mesh
-  [displaced]
-    type = Exodus
-    use_displaced = true
-  []
+  exodus = true
 []
