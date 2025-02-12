@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMDetailedQuadInterWrapperMeshGenerator.md'
+  issues = '#29484'
+  requirement = 'The system will create a detailed mesh of the inter-wrapper for quadrilateral assemblies'
   [coords]
     type = Exodiff
     input = coords.i

@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMMassFlowRateIC.md'
+  issues = '#29513'
+  requirement = 'The system will apply initial massflow rate'
   [test]
     type = Exodiff
     input = 'test.i'

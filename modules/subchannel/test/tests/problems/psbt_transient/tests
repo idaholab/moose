@@ -1,4 +1,7 @@
 [Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29217 #29196'
+  requirement = 'The system will examine the subchannel transient solver for the psbt case'
   [psbt_transient_explicit]
     type = Exodiff
     input = psbt.i

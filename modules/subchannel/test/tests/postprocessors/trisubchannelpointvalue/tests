@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SubChannelPointValue.md'
+  issues = '#29226'
+  requirement = 'The system will print a variable on a specific subchannel and height in triangular assemblies'
   [test]
     type = CSVDiff
     input = 'test.i'

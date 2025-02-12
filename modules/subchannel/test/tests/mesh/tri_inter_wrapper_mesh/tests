@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMTriInterWrapperMeshGenerator.md'
+  issues = '#29484'
+  requirement = 'The system will create a mesh of the inter-wrapper for triangualar assemblies'
   [coords]
     type = Exodiff
     input = coords.i

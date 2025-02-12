@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMDetailedTriPinMeshGenerator.md'
+  issues = '#29484'
+  requirement = 'The system will create a detailed mesh of the fuel pins for triangular assemblies'
   [coords]
     type = Exodiff
     input = coords.i

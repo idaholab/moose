@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMTriDuctMeshGenerator.md'
+  issues = '#28497'
+  requirement = 'The system will create a hexagonal duct mesh for triangular assemblies'
   [test]
     type = Exodiff
     input = coords.i

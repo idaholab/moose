@@ -4,10 +4,16 @@
     input = 'blocked_test.i'
     exodiff = 'blocked_test_out.e'
     recover = false
+    design = 'SCMBlockedMassFlowRateAux.md'
+    issues = '#29237'
+    requirement = 'The system shall apply inlet boundary massflow conditions for a blocked/partially blocked inlet'
   []
   [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
+    design = 'SCMMassFlowRateAux.md'
+    issues = '#29511'
+    requirement = 'The system shall apply inlet boundary massflow conditions'
   []
 []

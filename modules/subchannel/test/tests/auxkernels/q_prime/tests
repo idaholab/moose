@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMRZPinQPrimeAux.md'
+  issues = '#29511'
+  requirement = 'The system shall calculate linear heat rate on fuel pin surface'
   [test]
     type = Exodiff
     input = 'test.i'

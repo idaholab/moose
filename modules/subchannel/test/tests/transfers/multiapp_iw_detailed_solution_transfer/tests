@@ -1,4 +1,7 @@
 [Tests]
+  design = 'InterWrapperSolutionTransfer.md'
+  issues = '#29258'
+  requirement = 'The system shall be able to transger the interwrapper solution onto a detailed mesh'
   [quad_iw]
     type = Exodiff
     input = quad_iw.i

@@ -1,4 +1,7 @@
 [Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#29496'
+  requirement = 'The system will examine the subchannel solver for THORS liquid sodium cooled assembly with blockage'
   # Regression check for THORS model
   [THORS_FFM-5B]
     type = Exodiff

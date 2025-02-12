@@ -1,4 +1,7 @@
 [Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29193'
+  requirement = 'The system will examine the discretizations of various algorithms'
   [psbt_explicit]
     type = Exodiff
     input = psbt_explicit.i

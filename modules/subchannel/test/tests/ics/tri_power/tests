@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMTriPowerIC.md'
+  issues = '#29194'
+  requirement = 'The system will calculate the linear heat rate on subchannels/fuel-pins in a triangular lattice'
   [test_pin_power]
     type = Exodiff
     input = 'test_pin_power.i'

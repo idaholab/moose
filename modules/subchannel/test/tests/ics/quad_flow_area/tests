@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMQuadFlowAreaIC.md'
+  issues = '#29194'
+  requirement = 'The system will calculate the subchannel flow area for quadrilateral assemblies'
   [test]
     type = Exodiff
     input = 'test.i'

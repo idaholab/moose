@@ -1,4 +1,7 @@
 [Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#29194 #29490 #29505'
+  requirement = 'The system will examine the subchannel solver for a 19pin liquid sodium cooled assembly'
   [test_explicit]
     type = Exodiff
     input = test19.i

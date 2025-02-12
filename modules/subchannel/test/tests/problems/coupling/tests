@@ -1,4 +1,7 @@
 [Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29247'
+  requirement = 'The system will examine the coupling using SCM as main app'
   [main]
     type = Exodiff
     input = main.i
