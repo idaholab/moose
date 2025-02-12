@@ -77,7 +77,7 @@
     invariant = 'state/s'
   []
   [rom_ep]
-    type = TabulatedEffectiveStrain
+    type = Multilinear6DInterpolationModel
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_ep'
     output_rate = 'state/ep_rate'
@@ -90,12 +90,6 @@
     wall_dd_density = 'old_state/wall_dd'
     temperature = 'forces/T'
     env_factor = 'forces/env_fac'
-    # log10 transform variables
-    factor = 0.0
-    lowerbound = 0.0
-    upperbound = 1.0
-    logmin = -12
-    logmax = 5
   []
   [integrate_ep]
     type = ScalarBackwardEulerTimeIntegration
@@ -115,7 +109,7 @@
   # Extra materials that evolve dislocation densities FIXME lynn I don't know how to evolve these
   #####################################################################################
   [rom_cell]
-    type = TabulatedDislocationDensity
+    type = Multilinear6DInterpolationModel
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_cell'
     output_rate = 'state/cell_rate'
@@ -126,13 +120,9 @@
     wall_dd_density = 'old_state/wall_dd'
     temperature = 'forces/T'
     env_factor = 'forces/env_fac'
-    # compress transform variables
-    factor = 1.0e-8
-    compressor = 0.3
-    original_min = -60
   []
   [rom_wall]
-    type = TabulatedDislocationDensity
+    type = Multilinear6DInterpolationModel
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_wall'
     output_rate = 'state/wall_rate'
@@ -143,10 +133,6 @@
     wall_dd_density = 'old_state/wall_dd'
     temperature = 'forces/T'
     env_factor = 'forces/env_fac'
-    # compress transform variables
-    factor = 1.0e-8
-    compressor = 0.3
-    original_min = -60
   []
   [cell_dd]
     type = ScalarForwardEulerTimeIntegration
