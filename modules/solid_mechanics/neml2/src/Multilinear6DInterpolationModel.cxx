@@ -55,7 +55,7 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
   _cell_grid = json_vector_to_torch("in_cell");
   _wall_grid = json_vector_to_torch("in_wall");
   _env_grid = json_vector_to_torch("in_env");
-  // Read in grid axes transform strings
+  // Read in grid axes transform enums
   _stress_transform_enum = get_transform_enum(json_to_string("in_stress_transform_type"));
   _temperature_transform_enum = get_transform_enum(json_to_string("in_temperature_transform_type"));
   _plastic_strain_transform_enum =
@@ -73,6 +73,7 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
 
   // Storing values for interpolation
   std::string filename_variable = options.get<std::string>("model_file_variable_name");
+  _grid_values = json_6Dvector_to_torch(filename_variable);
 
   // set up output transforms
   if (filename_variable == "out_ep")
@@ -90,8 +91,11 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
     _output_transform_enum = get_transform_enum(json_to_string("out_wall_rate_transform_type"));
     _output_transform_values = json_to_vector("out_wall_rate_transform_values");
   }
-
-  _grid_values = json_6Dvector_to_torch(filename_variable);
+  else
+  {
+    throw NEMLException("This ouput variable is not implemented, model_file_variable_name: " +
+                        std::string(filename_variable));
+  }
 }
 
 void
@@ -117,7 +121,7 @@ Multilinear6DInterpolationModel::get_transform_enum(const std::string & name) co
   else if (name == "MINMAX")
     return TransformEnum::MINMAX;
 
-  return TransformEnum::UNKNOWN;
+  throw NEMLException("Unrecognized transform: " + std::string(name));
 }
 
 std::pair<Scalar, Scalar>
@@ -134,15 +138,6 @@ Multilinear6DInterpolationModel::findLeftIndexAndFraction(const Scalar & grid,
   Scalar left_coord = grid.index({left_idx});
   Scalar right_coord = grid.index({left_idx + torch::tensor(1, default_integer_tensor_options())});
   Scalar left_fraction = (right_coord - interp_points) / (right_coord - left_coord);
-
-  // derivative (only needed for stress):
-  // Scalar left_fraction_deriv = right_coord / (right_coord - left_coord);
-  // Scalar right_fraction_deriv = -left_coord / (right_coord - left_coord);
-
-  neml_assert_dbg((!torch::all(left_fraction.gt(1)).item<bool>() &&
-                   !torch::all(left_fraction.lt(0)).item<bool>()),
-                  "Interpolated value outside interpolation grid.  This exception is only thrown "
-                  "in debug.  Running in opt will perform extrapolation.");
 
   return std::pair<Scalar, Scalar>(left_idx, torch::stack({left_fraction, 1 - left_fraction}, -1));
 }
@@ -243,13 +238,7 @@ Multilinear6DInterpolationModel::transform_data(const Scalar & data,
       Scalar transformed_result = transform_min_max(data, param);
       return transformed_result;
     }
-
-    default:
-      neml_assert_dbg("Invalid output transform.");
   }
-  // fixme lynn, I DO NOT WANT TO DO THIS becuause this is wrong.  This should be fatal error
-  // and this should have been caught way before this point
-  return data;
 }
 
 Scalar
@@ -286,7 +275,6 @@ Multilinear6DInterpolationModel::transform_log10_bounded(const Scalar & data,
   Real upperbound = param[2];
   Real logmin = param[3];
   Real logmax = param[4];
-
   Real range = upperbound - lowerbound;
   auto transformed_data =
       range * (math::log10(data + factor) - logmin) / (logmax - logmin) + lowerbound;
@@ -324,7 +312,9 @@ Multilinear6DInterpolationModel::transform_min_max(const Scalar & data,
 std::string
 Multilinear6DInterpolationModel::json_to_string(std::string key)
 {
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  if (!_json.contains(key))
+    throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
+
   std::string name = _json[key].template get<std::string>();
   return name;
 }
@@ -332,7 +322,9 @@ Multilinear6DInterpolationModel::json_to_string(std::string key)
 std::vector<Real>
 Multilinear6DInterpolationModel::json_to_vector(std::string key)
 {
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  if (!_json.contains(key))
+    throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
+
   std::vector<Real> data_vec = _json[key].template get<std::vector<Real>>();
   return data_vec;
 }
@@ -340,7 +332,9 @@ Multilinear6DInterpolationModel::json_to_vector(std::string key)
 Scalar
 Multilinear6DInterpolationModel::json_vector_to_torch(std::string key)
 {
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  if (!_json.contains(key))
+    throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
+
   std::vector<Real> in_data = _json[key].template get<std::vector<Real>>();
   const long long data_dim = in_data.size();
   return Scalar(torch::from_blob(in_data.data(), {data_dim}).clone());
@@ -349,7 +343,8 @@ Multilinear6DInterpolationModel::json_vector_to_torch(std::string key)
 Scalar
 Multilinear6DInterpolationModel::json_6Dvector_to_torch(std::string key)
 {
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  if (!_json.contains(key))
+    throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
   std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>> out_data =
       _json[key]
