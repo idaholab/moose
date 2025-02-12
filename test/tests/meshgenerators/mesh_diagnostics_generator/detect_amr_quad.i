@@ -10,12 +10,12 @@
     ymax = 1
   []
   [cut_one]
-    type = CartesianMeshGenerator
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = 1
-    dy = 1
-    ix = 2
-    iy = 2
+    xmax = 1
+    ymax = 1
+    nx = 2
+    ny = 2
   []
   [cmbn]
     type = CombinerGenerator

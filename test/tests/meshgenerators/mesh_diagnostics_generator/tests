@@ -143,7 +143,7 @@
       type = 'RunApp'
       input = 'detect_amr_quad.i'
       mesh_mode = replicated
-      cli_args = 'Mesh/cut_one/elem_type=QUAD9 --mesh-only'
+      cli_args = 'Mesh/cut_one/elem_type=QUAD9 Mesh/cut_one/subdomain_ids=2 --mesh-only'
       expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
 
       detail = 'quadrilateral elements of second order,'
@@ -152,7 +152,7 @@
       type = 'RunApp'
       input = 'detect_amr_quad.i'
       mesh_mode = replicated
-      cli_args = 'Mesh/cut_one/ix=4 Mesh/cut_one/iy=4 --mesh-only'
+      cli_args = 'Mesh/cut_one/nx=4 Mesh/cut_one/ny=4 --mesh-only'
       # Detects one too many but only reconstructing the whole unrefined mesh can eliminate the center one
       expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 3'
 
@@ -171,7 +171,7 @@
       type = 'RunApp'
       input = 'detect_amr_hex.i'
       mesh_mode = replicated
-      cli_args = 'Mesh/cut_one/elem_type=HEX20 --mesh-only'
+      cli_args = 'Mesh/cut_one/elem_type=HEX20 Mesh/cut_one/subdomain_ids=2 --mesh-only'
       expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
 
       detail = 'hexahedral elements of second order,'
@@ -180,7 +180,7 @@
       type = 'RunApp'
       input = 'detect_amr_hex.i'
       mesh_mode = replicated
-      cli_args = 'Mesh/cut_one/ix=4 Mesh/cut_one/iy=4 Mesh/cut_one/iz=4 --mesh-only'
+      cli_args = 'Mesh/cut_one/nx=4 Mesh/cut_one/ny=4 Mesh/cut_one/nz=4 --mesh-only'
       # Detects too many but only reconstructing the whole unrefined mesh can eliminate the center one
       expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 9'
 
@@ -259,7 +259,7 @@
       input = 'detect_amr_quad.i'
       mesh_mode = replicated
       expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 0'
-      cli_args = 'Mesh/cut_one/iy=1 --mesh-only'
+      cli_args = 'Mesh/cut_one/ny=1 --mesh-only'
 
       detail = 'quadrilateral elements refined in only one direction,'
     []
@@ -277,7 +277,7 @@
                   Mesh/diag/examine_nonplanar_sides=NO_CHECK
                   Mesh/diag/examine_sidesets_orientation=NO_CHECK
                   Mesh/diag/check_for_watertight_sidesets=NO_CHECK
-                  Mesh/diag/check_for_watertight_nodesets=NO_CHECK   
+                  Mesh/diag/check_for_watertight_nodesets=NO_CHECK
                   Mesh/diag/examine_non_matching_edges=NO_CHECK
                   Mesh/diag/search_for_adaptivity_nonconformality=NO_CHECK
                   Mesh/diag/check_local_jacobian=NO_CHECK --mesh-only"
