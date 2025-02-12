@@ -193,6 +193,7 @@
     primary = base_front
     secondary = ball_back
     penalty = 1.0e3
+    verbose = true
   []
 []
 
