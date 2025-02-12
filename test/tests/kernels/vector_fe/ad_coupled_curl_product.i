@@ -1,5 +1,5 @@
-# This example couples the product of the curl of a variable vector 
-# and a supplied field into a diffusion problem of a Lagrange variable 
+# This example couples the product of the curl of a variable vector
+# and a supplied field into a diffusion problem of a Lagrange variable
 # using automatic differentiation
 
 
