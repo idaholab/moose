@@ -9,6 +9,7 @@
 
 #include "QuadInterWrapperBaseIC.h"
 #include "QuadInterWrapperMesh.h"
+#include "FEProblemBase.h"
 
 InputParameters
 QuadInterWrapperBaseIC::validParams()
