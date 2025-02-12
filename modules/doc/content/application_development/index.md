@@ -10,7 +10,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Source Code](source/index.md exact=True) - MOOSE source documentation
 
-[MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html) - MOOSE Doxygen
+[MOOSE Doxygen](https://mooseframework.inl.gov/docs/doxygen/moose/classes.html) - MOOSE Doxygen
 
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html)
 

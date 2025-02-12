@@ -6,7 +6,7 @@ instructions aim at preparing your machine or environment for such development.
 
 If you encounter errors during any of these steps, you need to stop and figure out a solution before
 continuing. Please see MOOSE's
-[Troubleshooting](https://mooseframework.org/help/troubleshooting.html) guide, which also contains
+[Troubleshooting](https://mooseframework.inl.gov/help/troubleshooting.html) guide, which also contains
 information on how to reach us in the event troubleshooting fails.
 
 If you need to update {{ApplicationName}}, know that by following through the
