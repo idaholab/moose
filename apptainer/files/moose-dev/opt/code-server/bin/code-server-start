@@ -11,6 +11,7 @@
 # - CODE_SERVER_DATAROOT:        The data root to use for code server and the extensions.
 #                                If not set, the default by code-server will be used.
 # - CODE_SERVER_SKIP_EXTENSIONS: Set to anything to skip the install of extensions
+# - UNSET_APPTAINER_VARS:        Set to anything to unset APPTAINER/SINGULARITY vars
 
 set -e
 
@@ -52,6 +53,10 @@ if [ -z "$CODE_SERVER_PASSWORD" ]; then
   GREEN='\033[0;32m'
   NC='\033[0m'
   printf "${GREEN}Connect to the instance at http://localhost:${CODE_SERVER_PORT} with password ${PASSWORD}${NC}\n"
+fi
+
+if [ -n "$UNSET_APPTAINER_VARS" ]; then
+  unset "${!APPTAINER@}" "${!SINGULARITY@}"
 fi
 
 # Run the server
