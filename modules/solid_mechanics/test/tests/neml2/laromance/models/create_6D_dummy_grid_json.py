@@ -82,6 +82,13 @@ node_dict["in_env_transform_values"] = [
     1.0,
 ]
 
+node_dict["out_cell_rate_transform_type"] = "DECOMPRESS"
+node_dict["out_wall_rate_transform_type"] = "DECOMPRESS"
+node_dict["out_strain_rate_transform_type"] = "EXP10BOUNDED"
+
+node_dict["out_cell_rate_transform_values"] = [1.0e-10, 0.3, -80.0]
+node_dict["out_wall_rate_transform_values"] = [1.0e-12, 0.3, -80.0]
+node_dict["out_strain_rate_transform_values"] = [0.0, 0.0, 1.0, -12.0, 4.0]
 
 with open("random_value_6d_grid.json", "w") as fp:
     json.dump(node_dict, fp)
