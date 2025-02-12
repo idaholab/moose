@@ -1,6 +1,6 @@
 [Models]
   [rom_ep]
-    type = TabulatedEffectiveStrain
+    type = Multilinear6DInterpolationModel
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_ep'
     output_rate = 'state/ep_rate'
@@ -11,15 +11,9 @@
     cell_dd_density = 'forces/cell_dd'
     wall_dd_density = 'forces/wall_dd'
     env_factor = 'forces/env_fac'
-    # log10 transform variables
-    factor = 0.0
-    lowerbound = 0.0
-    upperbound = 1.0
-    logmin = -12
-    logmax = 4
   []
   [rom_cell]
-    type = TabulatedDislocationDensity
+    type = Multilinear6DInterpolationModel
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_cell'
     output_rate = 'state/cell_rate'
@@ -30,13 +24,9 @@
     cell_dd_density = 'forces/cell_dd'
     wall_dd_density = 'forces/wall_dd'
     env_factor = 'forces/env_fac'
-    # compress transform variables
-    factor = 1.0e-10
-    compressor = 0.3
-    original_min = -80
   []
   [rom_wall]
-    type = TabulatedDislocationDensity
+    type = Multilinear6DInterpolationModel
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_wall'
     output_rate = 'state/wall_rate'
@@ -47,10 +37,6 @@
     cell_dd_density = 'forces/cell_dd'
     wall_dd_density = 'forces/wall_dd'
     env_factor = 'forces/env_fac'
-    # compress transform variables
-    factor = 1.0e-12
-    compressor = 0.3
-    original_min = -80
   []
   [combined_model]
     type = ComposedModel
