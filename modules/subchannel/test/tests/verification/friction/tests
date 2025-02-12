@@ -1,5 +1,8 @@
 [Tests]
   [friction]
+    design = 'SubChannel1PhaseProblem.md'
+    issues = '#29219'
+    requirement = 'The system shall model the turbulent momentum diffusion'
     type = Exodiff
     input = two_channel.i
     exodiff = two_channel_out.e
@@ -9,6 +12,9 @@
     max_parallel = 1
   []
   [friction2]
+    design = 'QuadSubChannelNormalSliceValues.md'
+    issues = '#29237'
+    requirement = 'The system shall output values on a plane of a quadrilateral assembly'
     type = Exodiff
     input = two_channel2.i
     exodiff = two_channel2_out.e

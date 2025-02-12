@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMTriWettedPerimIC.md'
+  issues = '#29194'
+  requirement = 'The system will calculate the wetted perimeter of subchannels in a triangular lattice'
   [test]
     type = Exodiff
     input = 'test.i'

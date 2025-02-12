@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMTriSubChannelMeshGenerator.md'
+  issues = '#29194'
+  requirement = 'The system will create a subchannel mesh for triangular assemblies'
   [tricoords3]
     type = Exodiff
     input = tricoords3.i
