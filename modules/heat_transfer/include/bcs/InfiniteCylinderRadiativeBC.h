@@ -26,6 +26,9 @@ public:
 protected:
   virtual GenericReal<is_ad> coefficient() const override;
 
+  /// Emissivity of the boundary
+  const Real _eps_boundary;
+
   /// emissivity of the cylinder in radiative heat transfer with the boundary
   const Real _eps_cylinder;
 
