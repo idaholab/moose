@@ -47,12 +47,12 @@ node_dict["out_cell"] = out_cell_grid.tolist()
 node_dict["out_wall"] = out_wall_grid.tolist()
 node_dict["out_ep"] = out_ep_grid.tolist()
 
-node_dict["in_stress_transform_type"] = "min_max"
-node_dict["in_temperature_transform_type"] = "min_max"
-node_dict["in_plastic_strain_transform_type"] = "log10_bounded"
-node_dict["in_cell_transform_type"] = "compress"
-node_dict["in_wall_transform_type"] = "min_max"
-node_dict["in_env_transform_type"] = "min_max"
+node_dict["in_stress_transform_type"] = "MINMAX"
+node_dict["in_temperature_transform_type"] = "MINMAX"
+node_dict["in_plastic_strain_transform_type"] = "LOG10BOUNDED"
+node_dict["in_cell_transform_type"] = "COMPRESS"
+node_dict["in_wall_transform_type"] = "MINMAX"
+node_dict["in_env_transform_type"] = "MINMAX"
 
 node_dict["in_stress_transform_values"] = [
     1e-8,

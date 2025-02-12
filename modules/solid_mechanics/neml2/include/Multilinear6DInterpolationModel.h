@@ -18,12 +18,14 @@ public:
     DECOMPRESS,
     LOG10BOUNDED,
     EXP10BOUNDED,
-    MINMAX
+    MINMAX,
+    UNKNOWN
   };
 
 protected:
   void set_value(bool, bool, bool) override;
 
+private:
   /// grid for interpolation
   Scalar _stress_grid;
   Scalar _temperature_grid;
@@ -67,9 +69,10 @@ protected:
   /// compute interpolated value and transform results
   Scalar interpolate_and_transform();
 
-  /// transform output data
-  // fixme lynn get rid of
-  Scalar transform_output(const Scalar & data);
+  /// transform data
+  Scalar transform_data(const Scalar & data,
+                        const std::vector<Real> & param,
+                        TransformEnum transform_type) const;
 
   /// read in json axes transform name
   std::string json_to_string(std::string key);
@@ -80,7 +83,6 @@ protected:
   ///read 6D grid date from json and store in Torch tensor
   Scalar json_6Dvector_to_torch(std::string key);
 
-private:
   ///read 1D vector of grid points from json and store in Torch tensor
   Scalar json_vector_to_torch(std::string key);
 
@@ -88,13 +90,15 @@ private:
   Scalar compute_interpolation(const std::vector<std::pair<Scalar, Scalar>> index_and_fraction,
                                const Scalar grid_values);
 
+  TransformEnum get_transform_enum(const std::string & name) const;
+
   /// input transform strings
-  std::string _stress_transform_name;
-  std::string _temperature_transform_name;
-  std::string _plastic_strain_transform_name;
-  std::string _cell_transform_name;
-  std::string _wall_transform_name;
-  std::string _env_transform_name;
+  TransformEnum _stress_transform_enum;
+  TransformEnum _temperature_transform_enum;
+  TransformEnum _plastic_strain_transform_enum;
+  TransformEnum _cell_transform_enum;
+  TransformEnum _wall_transform_enum;
+  TransformEnum _env_transform_enum;
 
   /// input transform values
   std::vector<Real> _stress_transform_values;

@@ -56,12 +56,13 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
   _wall_grid = json_vector_to_torch("in_wall");
   _env_grid = json_vector_to_torch("in_env");
   // Read in grid axes transform strings
-  _stress_transform_name = json_to_string("in_stress_transform_type");
-  _temperature_transform_name = json_to_string("in_temperature_transform_type");
-  _plastic_strain_transform_name = json_to_string("in_plastic_strain_transform_type");
-  _cell_transform_name = json_to_string("in_cell_transform_type");
-  _wall_transform_name = json_to_string("in_wall_transform_type");
-  _env_transform_name = json_to_string("in_env_transform_type");
+  _stress_transform_enum = get_transform_enum(json_to_string("in_stress_transform_type"));
+  _temperature_transform_enum = get_transform_enum(json_to_string("in_temperature_transform_type"));
+  _plastic_strain_transform_enum =
+      get_transform_enum(json_to_string("in_plastic_strain_transform_type"));
+  _cell_transform_enum = get_transform_enum(json_to_string("in_cell_transform_type"));
+  _wall_transform_enum = get_transform_enum(json_to_string("in_wall_transform_type"));
+  _env_transform_enum = get_transform_enum(json_to_string("in_env_transform_type"));
   // Read in grid axes transform values
   _stress_transform_values = json_to_vector("in_stress_transform_values");
   _temperature_transform_values = json_to_vector("in_temperature_transform_values");
@@ -69,30 +70,26 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
   _cell_transform_values = json_to_vector("in_cell_transform_values");
   _wall_transform_values = json_to_vector("in_wall_transform_values");
   _env_transform_values = json_to_vector("in_env_transform_values");
+
   // Storing values for interpolation
   std::string filename_variable = options.get<std::string>("model_file_variable_name");
 
   // set up output transforms
-
-    if (filename_variable == "out_ep")
-    {
-      _output_transform_name = json_to_string("out_strain_rate_transform_type");
-      // fixme lynn get this from string
-      _output_transform_enum = TransformEnum::EXP10BOUNDED;
-      _output_transform_values = json_to_vector("out_strain_rate_transform_values");
-    }
-    else if (filename_variable == "out_cell")
-    {
-      _output_transform_name = json_to_string("out_cell_rate_transform_type");
-      _output_transform_enum = TransformEnum::DECOMPRESS;
-      _output_transform_values = json_to_vector("out_cell_rate_transform_values");
-    }
-    else if (filename_variable == "out_wall")
-    {
-      _output_transform_name = json_to_string("out_wall_rate_transform_type");
-      _output_transform_enum = TransformEnum::DECOMPRESS;
-      _output_transform_values = json_to_vector("out_wall_rate_transform_values");
-    }
+  if (filename_variable == "out_ep")
+  {
+    _output_transform_enum = get_transform_enum(json_to_string("out_strain_rate_transform_type"));
+    _output_transform_values = json_to_vector("out_strain_rate_transform_values");
+  }
+  else if (filename_variable == "out_cell")
+  {
+    _output_transform_enum = get_transform_enum(json_to_string("out_cell_rate_transform_type"));
+    _output_transform_values = json_to_vector("out_cell_rate_transform_values");
+  }
+  else if (filename_variable == "out_wall")
+  {
+    _output_transform_enum = get_transform_enum(json_to_string("out_wall_rate_transform_type"));
+    _output_transform_values = json_to_vector("out_wall_rate_transform_values");
+  }
 
   _grid_values = json_6Dvector_to_torch(filename_variable);
 }
@@ -103,9 +100,24 @@ Multilinear6DInterpolationModel::set_value(bool out, bool dout_din, bool d2out_d
   neml_assert_dbg(!dout_din || !d2out_din2,
                   "Only AD derivatives are currently supported for this model");
   if (out)
-  {
     _output_rate = interpolate_and_transform();
-  }
+}
+
+Multilinear6DInterpolationModel::TransformEnum
+Multilinear6DInterpolationModel::get_transform_enum(const std::string & name) const
+{
+  if (name == "COMPRESS")
+    return TransformEnum::COMPRESS;
+  else if (name == "DECOMPRESS")
+    return TransformEnum::DECOMPRESS;
+  else if (name == "LOG10BOUNDED")
+    return TransformEnum::LOG10BOUNDED;
+  else if (name == "EXP10BOUNDED")
+    return TransformEnum::EXP10BOUNDED;
+  else if (name == "MINMAX")
+    return TransformEnum::MINMAX;
+
+  return TransformEnum::UNKNOWN;
 }
 
 std::pair<Scalar, Scalar>
@@ -177,12 +189,14 @@ Scalar
 Multilinear6DInterpolationModel::interpolate_and_transform()
 {
   // These transform constants should be given in the json file.
-  auto cell_dd_transformed = transform_compress(_cell_dd, _cell_transform_values);
-  auto wall_dd_transformed = transform_min_max(_wall_dd, _wall_transform_values);
-  auto s_transformed = transform_min_max(_s, _stress_transform_values);
-  auto ep_transformed = transform_log10_bounded(_ep, _plastic_strain_transform_values);
-  auto T_transformed = transform_min_max(_T, _temperature_transform_values);
-  auto env_fac_transformed = transform_min_max(_env_fac, _env_transform_values);
+  auto cell_dd_transformed = transform_data(_cell_dd, _cell_transform_values, _cell_transform_enum);
+  auto wall_dd_transformed = transform_data(_wall_dd, _wall_transform_values, _wall_transform_enum);
+  auto s_transformed = transform_data(_s, _stress_transform_values, _stress_transform_enum);
+  auto ep_transformed =
+      transform_data(_ep, _plastic_strain_transform_values, _plastic_strain_transform_enum);
+  auto T_transformed =
+      transform_data(_T, _temperature_transform_values, _temperature_transform_enum);
+  auto env_fac_transformed = transform_data(_env_fac, _env_transform_values, _env_transform_enum);
 
   std::vector<std::pair<Scalar, Scalar>> left_index_weight;
   left_index_weight.push_back(findLeftIndexAndFraction(_stress_grid, s_transformed));
@@ -192,80 +206,44 @@ Multilinear6DInterpolationModel::interpolate_and_transform()
   left_index_weight.push_back(findLeftIndexAndFraction(_wall_grid, wall_dd_transformed));
   left_index_weight.push_back(findLeftIndexAndFraction(_env_grid, env_fac_transformed));
   Scalar interpolated_result = compute_interpolation(left_index_weight, _grid_values);
-  Scalar transformed_result = transform_output(interpolated_result);
+  Scalar transformed_result =
+      transform_data(interpolated_result, _output_transform_values, _output_transform_enum);
   return transformed_result;
 }
 
-std::string
-Multilinear6DInterpolationModel::json_to_string(std::string key)
-{
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
-  std::string name = _json[key].template get<std::string>();
-  return name;
-}
-
-std::vector<Real>
-Multilinear6DInterpolationModel::json_to_vector(std::string key)
-{
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
-  std::vector<Real> data_vec = _json[key].template get<std::vector<Real>>();
-  return data_vec;
-}
-
 Scalar
-Multilinear6DInterpolationModel::json_vector_to_torch(std::string key)
+Multilinear6DInterpolationModel::transform_data(const Scalar & data,
+                                                const std::vector<Real> & param,
+                                                TransformEnum transform_type) const
 {
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
-  std::vector<Real> in_data = _json[key].template get<std::vector<Real>>();
-  const long long data_dim = in_data.size();
-  return Scalar(torch::from_blob(in_data.data(), {data_dim}).clone());
-}
-
-Scalar
-Multilinear6DInterpolationModel::json_6Dvector_to_torch(std::string key)
-{
-  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
-
-  std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>> out_data =
-      _json[key]
-          .template get<
-              std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>>>();
-
-  std::vector<Real> linearize_values;
-  for (auto && level0 : out_data)
-    for (auto && level1 : level0)
-      for (auto && level2 : level1)
-        for (auto && level3 : level2)
-          for (auto && level4 : level3)
-            for (auto && value : level4)
-              linearize_values.push_back(value);
-
-  long long sz_l0 = out_data.size();
-  long long sz_l1 = out_data[0].size();
-  long long sz_l2 = out_data[0][0].size();
-  long long sz_l3 = out_data[0][0][0].size();
-  long long sz_l4 = out_data[0][0][0][0].size();
-  long long sz_l5 = out_data[0][0][0][0][0].size();
-  return Scalar(
-      torch::from_blob(linearize_values.data(), {sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
-          .clone());
-}
-
-Scalar
-Multilinear6DInterpolationModel::transform_output(const Scalar & data)
-{
-  switch (_output_transform_enum)
+  switch (transform_type)
   {
-    case TransformEnum::EXP10BOUNDED:
+    case TransformEnum::COMPRESS:
     {
-      Scalar transformed_result = transform_exp10_bounded(data, _output_transform_values);
+      Scalar transformed_result = transform_compress(data, param);
       return transformed_result;
     }
     case TransformEnum::DECOMPRESS:
     {
-      Scalar transformed_result = transform_decompress(data, _output_transform_values);
+      Scalar transformed_result = transform_decompress(data, param);
       return transformed_result;
     }
+    case TransformEnum::LOG10BOUNDED:
+    {
+      Scalar transformed_result = transform_log10_bounded(data, param);
+      return transformed_result;
+    }
+    case TransformEnum::EXP10BOUNDED:
+    {
+      Scalar transformed_result = transform_exp10_bounded(data, param);
+      return transformed_result;
+    }
+    case TransformEnum::MINMAX:
+    {
+      Scalar transformed_result = transform_min_max(data, param);
+      return transformed_result;
+    }
+
     default:
       neml_assert_dbg("Invalid output transform.");
   }
@@ -341,6 +319,61 @@ Multilinear6DInterpolationModel::transform_min_max(const Scalar & data,
   auto transformed_data =
       ((data - data_min) / (data_max - data_min)) * (scaled_max - scaled_min) + scaled_min;
   return transformed_data;
+}
+
+std::string
+Multilinear6DInterpolationModel::json_to_string(std::string key)
+{
+  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  std::string name = _json[key].template get<std::string>();
+  return name;
+}
+
+std::vector<Real>
+Multilinear6DInterpolationModel::json_to_vector(std::string key)
+{
+  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  std::vector<Real> data_vec = _json[key].template get<std::vector<Real>>();
+  return data_vec;
+}
+
+Scalar
+Multilinear6DInterpolationModel::json_vector_to_torch(std::string key)
+{
+  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+  std::vector<Real> in_data = _json[key].template get<std::vector<Real>>();
+  const long long data_dim = in_data.size();
+  return Scalar(torch::from_blob(in_data.data(), {data_dim}).clone());
+}
+
+Scalar
+Multilinear6DInterpolationModel::json_6Dvector_to_torch(std::string key)
+{
+  neml_assert_dbg(_json.contains(key), "The key '", key, "' is missing from the JSON data file.");
+
+  std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>> out_data =
+      _json[key]
+          .template get<
+              std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>>>();
+
+  std::vector<Real> linearize_values;
+  for (auto && level0 : out_data)
+    for (auto && level1 : level0)
+      for (auto && level2 : level1)
+        for (auto && level3 : level2)
+          for (auto && level4 : level3)
+            for (auto && value : level4)
+              linearize_values.push_back(value);
+
+  long long sz_l0 = out_data.size();
+  long long sz_l1 = out_data[0].size();
+  long long sz_l2 = out_data[0][0].size();
+  long long sz_l3 = out_data[0][0][0].size();
+  long long sz_l4 = out_data[0][0][0][0].size();
+  long long sz_l5 = out_data[0][0][0][0][0].size();
+  return Scalar(
+      torch::from_blob(linearize_values.data(), {sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
+          .clone());
 }
 
 } // namespace neml2
