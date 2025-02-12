@@ -83,19 +83,20 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
 {
   if (!dynamic_cast<const INSFVVelocityVariable *>(_u_var) &&
       !dynamic_cast<const MooseLinearVariableFV<Real> *>(_u_var))
-    paramError("u", "the u velocity must be an INSFVVelocityVariable or a .");
+    paramError("u",
+               "the u velocity must be an INSFVVelocityVariable or a MooseLinearVariableFVReal");
 
   if (_dim >= 2 && (!dynamic_cast<const INSFVVelocityVariable *>(_v_var) &&
                     !dynamic_cast<const MooseLinearVariableFV<Real> *>(_v_var)))
     paramError("v",
                "In two or more dimensions, the v velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
+               "INSFVVelocityVariable or a MooseLinearVariableFVReal.");
 
   if (_dim >= 3 && (!dynamic_cast<const INSFVVelocityVariable *>(_w_var) &&
                     !dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var)))
     paramError("w",
                "In three-dimensions, the w velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
+               "INSFVVelocityVariable or a MooseLinearVariableFVReal.");
 
   // Slip velocity advection term requires gradients
   // TODO: this could be set less often, keeping it false until the two phase mixture system is
@@ -124,11 +125,11 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
         // TODO: add time derivative term to lienar FV variable
         if (is_transient && !dynamic_cast<MooseLinearVariableFV<Real> *>(_u_var))
         {
-          // term_transient(0) += _u_var->dot(r, t);
-          // if (_dim > 1)
-          //   term_transient(1) += _v_var->dot(r, t);
-          // if (_dim > 2)
-          //   term_transient(2) += _w_var->dot(r, t);
+          term_transient(0) += _u_var->dot(r, t);
+          if (_dim > 1)
+            term_transient(1) += _v_var->dot(r, t);
+          if (_dim > 2)
+            term_transient(2) += _w_var->dot(r, t);
         }
 
         // Adding advection term
