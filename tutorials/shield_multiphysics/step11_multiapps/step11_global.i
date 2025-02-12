@@ -1,14 +1,14 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = 'mesh_coarse_in.e'
+    file = '../step03_boundary_conditions/mesh_in.e'
   []
 []
 
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
-    block = 'concrete concrete_inner'
+    block = 'concrete_hd concrete Al'
   []
 []
 
@@ -19,15 +19,36 @@
   []
 []
 
+[DiracKernels]
+  [detector_heat]
+    type = ReporterPointSource
+    variable = T
+    block = Al
+    point_name = 'detector_positions/positions_1d'
+    value_name = 'receiver/detector_heat'
+  []
+[]
+
 [Materials]
-  [concrete]
+  [concrete_hd]
     type = ADHeatConductionMaterial
-    block = 'concrete concrete_inner'
+    block = concrete_hd
     temp = 'T'
     # we specify a function of time, temperature is passed as the time argument
     # in the material
+    thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
+  []
+  [concrete]
+    type = ADHeatConductionMaterial
+    block = concrete
+    temp = 'T'
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-    specific_heat = '1170'
+  []
+  [Al]
+    type = ADHeatConductionMaterial
+    block = Al
+    temp = T
+    thermal_conductivity_temperature_function = '175'
   []
 []
 
@@ -35,10 +56,9 @@
   [from_reactor]
     type = NeumannBC
     variable = T
-    boundary = inner_cavity
-    # Power is reduced as cooling was further removed
-    # 10 kW reactor, 108 m2 cavity area
-    value = '${fparse 1e4 / 108}'
+    boundary = inner_cavity_solid
+    # 5 MW reactor, only 50 kW removed from radiation, 144 m2 cavity area
+    value = '${fparse 5e4 / 144}'
   []
   [air_convection]
     type = ADConvectiveHeatFluxBC
@@ -54,19 +74,38 @@
     value = 300
     boundary = 'ground'
   []
+  [water_convection]
+    type = ADConvectiveHeatFluxBC
+    variable = T
+    boundary = 'water_boundary_inwards'
+    T_infinity = 300.0
+    # The heat transfer coefficient should be obtained from a correlation
+    heat_transfer_coefficient = 600
+  []
+[]
+
+[Problem]
+  # No kernels on the water domain
+  kernel_coverage_check = false
+  # No materials defined on the water domain
+  material_coverage_check = false
 []
 
 [Executioner]
   type = Steady # Steady state problem
+
   solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
   petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
   petsc_options_value = 'hypre boomeramg'
+
+  # Fixed point iteration parameters
+  fixed_point_max_its = 10
 []
 
 [Positions]
-  [all_elements]
-    type = ElementCentroidPositions
-    block = concrete_inner
+  [detector_positions]
+    type = FilePositions
+    files = detector_positions.txt
   []
 []
 
@@ -75,7 +114,7 @@
     type = FullSolveMultiApp
     input_files = 'step11_local.i'
     # Create one app at each position
-    positions_objects = 'all_elements'
+    positions_objects = 'detector_positions'
 
     # displace the subapp output to their position in the parent app frame
     output_in_position = true
@@ -102,12 +141,18 @@
   []
 
   # retrieve outputs from the child apps
+  [detector_heat]
+    type = MultiAppReporterTransfer
+    from_multi_app = detectors
+    from_reporters = 'heat_flux/value'
+    to_reporters = 'receiver/detector_heat'
+    distribute_reporter_vector = true
+  []
   [hdpe_temperature]
     type = MultiAppPostprocessorInterpolationTransfer
     from_multi_app = detectors
     postprocessor = T_hdpe_inner
     variable = T_hdpe_inner
-
   []
   [boron_temperature]
     type = MultiAppPostprocessorInterpolationTransfer
@@ -117,11 +162,22 @@
   []
 []
 
+[Reporters]
+  [receiver]
+    type = ConstantReporter
+    real_vector_names = 'detector_heat'
+    real_vector_values = '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'
+  []
+[]
+
+reactor_x = 3.275
+reactor_y = 4.625
+reactor_z = 2.225
 [AuxVariables]
   [flux]
     [InitialCondition]
       type = FunctionIC
-      function = '10 * exp(-((x-5)*(x-5) + (y-7) * (y-7) + (z - 3)*(z-3)))'
+      function = '4e6 * exp(-((x-${reactor_x})^2 + (y-${reactor_y})^2 + (z-${reactor_z})^2))'
     []
   []
 
@@ -129,12 +185,12 @@
   [T_hdpe_inner]
     family = MONOMIAL
     order = CONSTANT
-    block = concrete_inner
+    block = Al
   []
   [T_boron_inner]
     family = MONOMIAL
     order = CONSTANT
-    block = concrete_inner
+    block = Al
   []
 []
 

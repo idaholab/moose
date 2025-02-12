@@ -1,58 +1,41 @@
 # Speeds up the transient if < 1
-cp_water_multiplier = 1e-5
+cp_water_multiplier = 1e-4
 # Makes the problem more diffusive if > 1
-mu_multiplier = 1e0
+mu_multiplier = 1e4
 
-h_water = 30
+# Power
+# Real facility uses forced convection to cool the water tank at full power
+# Need to lower power for natural convection so water doesn't boil.
+power = ${fparse 5e4 / 144 * 0.5}
+
+# Coupling
+h_water = 600
 
 [GlobalParams]
   # This parameter is used in numerous objects. It is often
   # best to define it here to avoid missing it in an object
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x disp_y'
 []
 
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../step03_boundary_conditions/mesh_in.e'
-  []
-  [add_inner_water]
-    type = SideSetsFromBoundingBoxGenerator
-    input = fmg
-    included_boundaries = 'water_boundary'
-    boundary_new = water_boundary_inner
-    bottom_left = '2.5 2.5 1'
-    top_right = '6.6 10.5 5'
-    location = INSIDE
-  []
-  [add_outer_water]
-    type = SideSetsFromBoundingBoxGenerator
-    input = add_inner_water
-    included_boundaries = 'water_boundary'
-    boundary_new = water_boundary_outer
-    bottom_left = '2.5 2.5 1'
-    top_right = '6.6 10.5 5'
-    location = OUTSIDE
-  []
-  # careful, this is not enough refinement for a converged result
-  [refine_water]
-    type = RefineBlockGenerator
-    input = add_outer_water
-    refinement = '1'
-    block = 'water'
+    file = '../step07_conjugate_heat_transfer/mesh2d_in.e'
   []
 []
 
 [Problem]
   nl_sys_names = 'nl0 flow'
+  kernel_coverage_check = false
+  material_coverage_check = false
 []
 
 [Physics]
   [HeatConduction]
     [FiniteElement]
       [concrete]
-        block = 'concrete concrete_and_Al'
+        block = 'concrete_hd concrete Al'
         temperature_name = "T"
         system_names = 'nl0'
         preconditioning = 'none'
@@ -67,13 +50,13 @@ h_water = 30
         fixed_temperature_boundaries = 'ground'
         boundary_temperatures = '300'
 
-        heat_flux_boundaries = 'inner_cavity'
+        heat_flux_boundaries = 'inner_cavity_solid'
         # 50 kW from radiation, using real surface
-        boundary_heat_fluxes = '${fparse 5e4 / 136}'
+        boundary_heat_fluxes = '${power}'
 
         fixed_convection_boundaries = "water_boundary_inwards air_boundary"
         # TODO: enable using a field instead of postprocessor
-        fixed_convection_T_fluid = "T_fluid_average 300"
+        fixed_convection_T_fluid = "T_fluid_interface_avg 300"
         # Note: should come from a correlation
         fixed_convection_htc = "${h_water} 10"
       []
@@ -89,7 +72,7 @@ h_water = 30
         eigenstrain_names = eigenstrain
         use_automatic_differentiation = true
         generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
-        block = 'concrete concrete_and_Al'
+        block = 'concrete_hd concrete Al'
       []
     []
   []
@@ -100,22 +83,22 @@ h_water = 30
         system_names = 'flow'
         compressibility = 'incompressible'
 
-        initial_velocity = '1e-5 1e-5 1e-5'
+        initial_velocity = '1e-5 1e-5'
         initial_pressure = '1e5'
 
         # p only appears in a gradient term, and thus could be offset by any constant
         # We pin the pressure to avoid having this nullspace
         pin_pressure = true
-        pinned_pressure_type = 'point-value'
-        pinned_pressure_point = '2 2 2'
+        pinned_pressure_type = POINT-VALUE
+        pinned_pressure_point = '1 3 0'
         pinned_pressure_value = '1e5'
 
-        gravity = '0 0 -9.81'
+        gravity = '0 -9.81 0'
         boussinesq_approximation = true
         ref_temperature = 300
 
-        wall_boundaries = 'water_boundary'
-        momentum_wall_types = 'noslip'
+        wall_boundaries = 'water_boundary inner_cavity_water'
+        momentum_wall_types = 'noslip noslip'
       []
     []
     [FluidHeatTransfer]
@@ -126,8 +109,8 @@ h_water = 30
         initial_temperature = 300
 
         # This is a rough coupling to heat conduction
-        energy_wall_types = 'heatflux'
-        energy_wall_functors = 'h_dT'
+        energy_wall_types = 'heatflux heatflux'
+        energy_wall_functors = 'h_dT ${power}'
 
         energy_scaling = 1e-5
       []
@@ -139,9 +122,9 @@ h_water = 30
 [Kernels]
   [gravity]
     type = ADGravity
-    variable = 'disp_z'
+    variable = 'disp_y'
     value = '-9.81'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
   []
 []
 # TODO: add volumetric heat deposition, either in the Kernels or Physics blocks
@@ -160,12 +143,6 @@ h_water = 30
     boundary = ground
     value = 0
   []
-  [hold_ground_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = ground
-    value = 0
-  []
 []
 
 [FunctorMaterials]
@@ -178,59 +155,100 @@ h_water = 30
   []
 
   # Boundary condition functor computing the heat flux with a set heat transfer coefficient
-  [heat-flux]
+  [heat_flux]
     type = ADParsedFunctorMaterial
-    expression = '${h_water} * (T - T_fluid)'
-    functor_names = 'T T_fluid'
+    expression = '${h_water} * (T_solid_interface_avg - T_fluid)'
+    functor_names = 'T_solid_interface_avg T_fluid'
     property_name = 'h_dT'
   []
 []
 
 [Materials]
   # Materials for heat conduction
-  [concrete_thermal]
+  [concrete_hd]
+    type = ADHeatConductionMaterial
+    block = 'concrete_hd'
+    temp = 'T'
+    # we specify a function of time, temperature is passed as the time argument
+    # in the material
+    thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
+  []
+  [concrete]
     type = ADHeatConductionMaterial
     block = 'concrete'
     temp = 'T'
-    # we specify a function of time, temperature is passed as the time argument
-    # by the material
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-    specific_heat = '1170'
   []
-  [concrete_and_Al]
+  [Al]
     type = ADHeatConductionMaterial
-    block = 'concrete_and_Al'
-    temp = 'T'
-    # Al: 175 W/m/K, concrete: 2.5 W/m/K
-    thermal_conductivity_temperature_function = '45'
-    specific_heat = '1170'
+    block = 'Al'
+    temp = T
+    thermal_conductivity_temperature_function = '175'
   []
+
   # NOTE: This handles thermal expansion by coupling to the displacements
-  [concrete_density]
+  [density_concrete_hd]
     type = ADDensity
-    density = '2400'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd'
+    density = '3524' # kg / m3
+  []
+  [density_concrete]
+    type = ADDensity
+    block = 'concrete'
+    density = '2403' # kg / m3
+  []
+  [density_Al]
+    type = ADDensity
+    block = 'Al'
+    density = '2270' # kg / m3
   []
 
   # Materials for solid mechanics
-  [elasticity_tensor]
+  [elasticity_tensor_concrete_hd]
     type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 200e9 # (Pa) from wikipedia
-    poissons_ratio = .3 # from wikipedia
-    block = 'concrete concrete_and_Al'
+    youngs_modulus = 2.75e9 # (Pa)
+    poissons_ratio = 0.15
+    block = 'concrete_hd'
+  []
+  [elasticity_tensor_concrete]
+    type = ADComputeIsotropicElasticityTensor
+    youngs_modulus = 30e9 # (Pa)
+    poissons_ratio = 0.2
+    block = 'concrete'
+  []
+  [elasticity_tensor_Al]
+    type = ADComputeIsotropicElasticityTensor
+    youngs_modulus = 68e9 # (Pa)
+    poissons_ratio = 0.36
+    block = 'Al'
   []
   [elastic_stress]
     type = ADComputeFiniteStrainElasticStress
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete Al'
   []
-  [thermal_strain]
+  [thermal_strain_concrete_hd]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain
-    temperature = "T"
-    # Increased to have a more dramatic expansion
-    thermal_expansion_coeff = 1e-5
-    block = 'concrete concrete_and_Al'
+    temperature = T
+    thermal_expansion_coeff = 1e-5 # 1/K
+    block = 'concrete_hd'
+  []
+  [thermal_strain_concrete]
+    type = ADComputeThermalExpansionEigenstrain
+    stress_free_temperature = 300
+    eigenstrain_name = eigenstrain
+    temperature = T
+    thermal_expansion_coeff = 1e-5 # 1/K
+    block = 'concrete'
+  []
+  [thermal_strain_Al]
+    type = ADComputeThermalExpansionEigenstrain
+    stress_free_temperature = 300 # arbitrary value
+    eigenstrain_name = eigenstrain
+    temperature = T
+    thermal_expansion_coeff = 2.4e-5 # 1/K
+    block = 'Al'
   []
 []
 
@@ -239,15 +257,13 @@ h_water = 30
 
   # Time stepping parameters
   start_time = -1
-  end_time = 200
   [TimeStepper]
     type = FunctionDT
-    function = 'if(t<0,0.1,0.25)'
+    function = 'if(t<0.1, 0.1, t)'
   []
 
   # Let it develop
-  steady_state_start_time = 5
-  steady_state_tolerance = 1e-7
+  steady_state_tolerance = 1e-6
   steady_state_detection = true
 
   # Solver parameters
@@ -258,6 +274,7 @@ h_water = 30
   # Tolerances
   # Navier Stokes natural circulation will only converge so far
   nl_abs_tol = 6e-7
+  nl_max_its = 15
 []
 
 [Preconditioning]
@@ -277,14 +294,27 @@ h_water = 30
 
 [Outputs]
   csv = true
-  [out]
-    type = Exodus
-    use_displaced = true
-  []
+  exodus = true
 []
 
-
 [Postprocessors]
+  # Postprocessors used for coupling
+  [T_solid_interface_avg]
+    type = SideAverageValue
+    boundary = water_boundary_inwards
+    variable = T
+    # Want to compute initial value and after each timestep for coupling
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [T_fluid_interface_avg]
+    type = SideAverageValue
+    boundary = water_boundary
+    variable = T_fluid
+    # Want to compute initial value and after each timestep for coupling
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+
+  # Useful information
   [T_fluid_average]
     type = ElementAverageValue
     variable = 'T_fluid'
@@ -294,34 +324,33 @@ h_water = 30
   [T_solid_average]
     type = ElementAverageValue
     variable = 'T'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [max_dispx]
     type = ElementExtremeValue
     variable = 'disp_x'
     value_type = 'max_abs'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [max_dispy]
     type = ElementExtremeValue
     variable = 'disp_y'
     value_type = 'max_abs'
-    block = 'concrete concrete_and_Al'
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [max_dispz]
-    type = ElementExtremeValue
-    variable = 'disp_z'
-    value_type = 'max_abs'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [max_Tsolid]
     type = ElementExtremeValue
     variable = 'T'
-    block = 'concrete concrete_and_Al'
+    block = 'concrete_hd concrete'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_Tfluid]
+    type = ElementExtremeValue
+    variable = 'T_fluid'
+    block = 'water'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
