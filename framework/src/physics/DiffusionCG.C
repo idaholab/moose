@@ -32,7 +32,10 @@ DiffusionCG::validParams()
 }
 
 DiffusionCG::DiffusionCG(const InputParameters & parameters)
-  : DiffusionPhysicsBase(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
+  : PhysicsBase(parameters),
+    PhysicsComponentInterface(parameters),
+    DiffusionPhysicsBase(parameters),
+    _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 }
 
