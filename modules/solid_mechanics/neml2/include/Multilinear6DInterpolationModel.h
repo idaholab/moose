@@ -18,8 +18,7 @@ public:
     DECOMPRESS,
     LOG10BOUNDED,
     EXP10BOUNDED,
-    MINMAX,
-    UNKNOWN
+    MINMAX
   };
 
 protected:
