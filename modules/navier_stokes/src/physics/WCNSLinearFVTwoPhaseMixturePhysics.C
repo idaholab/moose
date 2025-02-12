@@ -97,12 +97,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
                  "' should be 'cp_mixture'");
   }
   if (_flow_equations_physics)
-  {
     if (_flow_equations_physics->densityName() != "rho_mixture")
       mooseError("Density name should for Physics ,",
                  _flow_equations_physics->name(),
                  "' should be 'rho_mixture'");
-  }
 
   if (_verbose)
   {

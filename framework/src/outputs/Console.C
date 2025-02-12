@@ -724,7 +724,6 @@ Console::outputSystemInformation()
   }
 
   if (_system_info_flags.isValueSet("linear"))
-  {
     for (const auto i : make_range(_problem_ptr->numLinearSystems()))
     {
       std::string output = ConsoleUtils::outputSolverSystemInformation(
@@ -735,7 +734,6 @@ Console::outputSystemInformation()
                         ":\n"
                  << output;
     }
-  }
 
   if (_system_info_flags.isValueSet("aux"))
   {

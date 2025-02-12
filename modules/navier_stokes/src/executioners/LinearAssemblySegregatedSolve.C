@@ -477,7 +477,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   }
 
   // We compute the normalization factors based on the fluxes
-  Real norm_factor = std::max(1e-10, NS::FV::computeNormalizationFactor(solution, mmat, rhs));
+  Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
 
   // We need the non-preconditioned norm to be consistent with the norm factor
   LibmeshPetscCall(KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED));
