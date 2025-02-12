@@ -15,6 +15,7 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "MaterialPropertyStorage.h"
 
 #include "libmesh/quadrature.h"
 
@@ -88,6 +89,13 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
+
+  // Stateful properties on the boundary will try to re-init variables out of their domain
+  if (_skip_execution_outside_variable_domain &&
+      _fe_problem.getBndMaterialPropertyStorage().hasStatefulProperties())
+    paramError("skip_execution_outside_variable_domain",
+               "Stateful boundary material properties are not supported when executing boundary "
+               "conditions outside the variable domain");
 }
 
 void
