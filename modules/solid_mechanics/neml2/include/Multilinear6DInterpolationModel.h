@@ -12,6 +12,15 @@ public:
 
   static OptionSet expected_options();
 
+  enum class TransformEnum
+  {
+    COMPRESS,
+    DECOMPRESS,
+    LOG10BOUNDED,
+    EXP10BOUNDED,
+    MINMAX
+  };
+
 protected:
   void set_value(bool, bool, bool) override;
 
@@ -59,7 +68,8 @@ protected:
   Scalar interpolate_and_transform();
 
   /// transform output data
-  virtual Scalar transform(const Scalar & data) = 0;
+  // fixme lynn get rid of
+  virtual Scalar transform(const Scalar & data);
 
   /// read in json axes transform name
   std::string json_to_string(std::string key);
@@ -78,6 +88,7 @@ private:
   Scalar compute_interpolation(const std::vector<std::pair<Scalar, Scalar>> index_and_fraction,
                                const Scalar grid_values);
 
+  /// input transform strings
   std::string _stress_transform_name;
   std::string _temperature_transform_name;
   std::string _plastic_strain_transform_name;
@@ -85,6 +96,7 @@ private:
   std::string _wall_transform_name;
   std::string _env_transform_name;
 
+  /// input transform values
   std::vector<Real> _stress_transform_values;
   std::vector<Real> _temperature_transform_values;
   std::vector<Real> _plastic_strain_transform_values;
@@ -92,10 +104,19 @@ private:
   std::vector<Real> _wall_transform_values;
   std::vector<Real> _env_transform_values;
 
+  /// output transform strings
+  std::string _output_transform_name;
+  /// output transform values
+  std::vector<Real> _output_transform_values;
+  /// output transform enum
+  TransformEnum _output_transform_enum;
+
   /// LAROMANCE transforms for input axis
   // @{
   Scalar transform_compress(const Scalar & data, const std::vector<Real> & params) const;
+  Scalar transform_decompress(const Scalar & data, const std::vector<Real> & params) const;
   Scalar transform_log10_bounded(const Scalar & data, const std::vector<Real> & params) const;
+  Scalar transform_exp10_bounded(const Scalar & data, const std::vector<Real> & params) const;
   Scalar transform_min_max(const Scalar & data, const std::vector<Real> & params) const;
   // @}
 };
