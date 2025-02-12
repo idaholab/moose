@@ -8,7 +8,7 @@ This object is the same as [CurlCurlField](CurlCurlField.md) in terms of physics
 
 ## Example Input File Syntax
 
-!listing ad_vector_kernels.i block=Kernels/curl_curl
+!listing /ad_vector_kernels.i block=Kernels/curl_curl
 
 !syntax parameters /Kernels/ADCurlCurlField
 
