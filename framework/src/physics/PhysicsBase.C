@@ -78,6 +78,9 @@ PhysicsBase::act()
 {
   mooseDoOnce(checkRequiredTasks());
 
+  // Lets a derived Physics class implement additional tasks
+  actOnAdditionalTasks();
+
   if (_current_task == "init_physics")
     initializePhysics();
   else if (_current_task == "add_variable")
@@ -155,9 +158,6 @@ PhysicsBase::act()
     if (_aux_var_names.size() > 0)
       copyVariablesFromMesh(auxVariableNames(), false);
   }
-
-  // Lets a derived Physics class implement additional tasks
-  actOnAdditionalTasks();
 }
 
 void
