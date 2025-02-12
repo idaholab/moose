@@ -6449,10 +6449,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-  {
-    auto ierr = PetscOptionsPop();
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(PetscOptionsPop());
 #endif
 }
 
