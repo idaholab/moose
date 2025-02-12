@@ -9,6 +9,7 @@
 
 #include "TriSubChannelBaseIC.h"
 #include "TriSubChannelMesh.h"
+#include "FEProblemBase.h"
 
 InputParameters
 TriSubChannelBaseIC::validParams()

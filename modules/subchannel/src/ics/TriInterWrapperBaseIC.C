@@ -9,6 +9,7 @@
 
 #include "TriInterWrapperBaseIC.h"
 #include "TriInterWrapperMesh.h"
+#include "FEProblemBase.h"
 
 InputParameters
 TriInterWrapperBaseIC::validParams()

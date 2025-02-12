@@ -9,6 +9,7 @@
 
 #include "QuadSubChannelBaseIC.h"
 #include "QuadSubChannelMesh.h"
+#include "FEProblemBase.h"
 
 InputParameters
 QuadSubChannelBaseIC::validParams()
