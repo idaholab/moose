@@ -206,9 +206,6 @@ protected:
   /// Indicates whether we should continue after a remap failure (will result in non-physical results)
   const bool _tolerate_failure;
 
-  /// A reference to the nonlinear system (used for retrieving solution vectors)
-  NonlinearSystemBase & _nl;
-
   /**
    * This data structure holds the map of unique grains from the previous time step.
    * The information is updated each timestep to track grains over time.
