@@ -882,6 +882,16 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
+   * Returns curl of a coupled variable for use in Automatic Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVectorVariableCurl containing the curl of the coupled variable
+   * @see Kernel::_curl_u
+   */
+  const ADVectorVariableCurl & adCoupledCurl(const std::string & var_name,
+                                               unsigned int comp = 0) const;
+
+  /**
    * Returns divergence of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -1451,6 +1461,9 @@ protected:
   /// This will always be zero because the default values for optionally coupled variables is always constant
   mutable MooseArray<ADRealTensorValue> _ad_default_second;
 
+  /// This will always be zero because the default values for optionally coupled vector variables is always constant
+  mutable MooseArray<ADRealVectorValue> _ad_default_curl;
+
   /// Zero value of a variable
   const VariableValue & _zero;
   const VariablePhiValue & _phi_zero;
@@ -1712,6 +1725,14 @@ public:
    * @return VariableSecond * a pointer to the associated VariableSecond.
    */
   const ADVariableSecond & getADDefaultSecond() const;
+
+  /**
+   * Helper method to return (and insert if necessary) the default curl value for Automatic
+   * Differentiation for an uncoupled variable.
+   * @param var_name the name of the vector variable for which to retrieve a default value
+   * @return VectorVariableCurl * a pointer to the associated VectorVariableCurl.
+   */
+  const ADVectorVariableCurl & getADDefaultCurl() const;
 
 private:
   /**

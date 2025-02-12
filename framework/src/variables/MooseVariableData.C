@@ -57,6 +57,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _need_ad_grad_u(false),
     _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
+    _need_ad_curl_u(false),
     _has_dof_indices(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
