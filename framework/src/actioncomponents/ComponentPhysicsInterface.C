@@ -29,7 +29,7 @@ ComponentPhysicsInterface::ComponentPhysicsInterface(const InputParameters & par
 }
 
 void
-ComponentPhysicsInterface::initComponentPhysics()
+ComponentPhysicsInterface::addPhysics()
 {
   for (auto physics : _physics)
   {
