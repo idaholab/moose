@@ -31,7 +31,8 @@ protected:
   const GenericVariableValue<is_ad> & _disp_r;
 
   const std::string _base_name;
-  const Real _initial_density;
+  const Real * _initial_density;
+  const GenericMaterialProperty<Real, is_ad> * _strain_free_density;
 
 private:
   std::vector<const GenericVariableGradient<is_ad> *> _grad_disp;
