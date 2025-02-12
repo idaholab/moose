@@ -73,7 +73,7 @@
 [Functions]
   [pull_func]
     type = ParsedFunction
-    expression = 0.00025*(1+t)
+    expression = 0.000307*(1+t)
   []
 []
 
