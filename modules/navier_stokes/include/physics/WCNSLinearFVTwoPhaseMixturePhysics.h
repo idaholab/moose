@@ -55,7 +55,7 @@ private:
 
   /// Name of the density of the other phase
   const MooseFunctorName _phase_1_density;
-  /// Name of the dyanmic viscosity of the other phase
+  /// Name of the dynamic viscosity of the other phase
   const MooseFunctorName _phase_1_viscosity;
   /// Name of the specific heat of the other phase
   const MooseFunctorName _phase_1_specific_heat;
