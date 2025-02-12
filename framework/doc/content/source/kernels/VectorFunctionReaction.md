@@ -4,7 +4,7 @@
 
 ## Example Input File Syntax
 
-!listing vector_kernels.i block=Kernels/coeff
+!listing /vector_kernels.i block=Kernels/coeff
 
 !syntax parameters /Kernels/VectorFunctionReaction
 
