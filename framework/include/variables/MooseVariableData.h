@@ -350,6 +350,14 @@ public:
     return _du_dotdot_du;
   }
 
+  const ADTemplateVariableCurl<OutputType> & adCurlSln() const
+  {
+    _need_ad = _need_ad_curl_u = true;
+    curlPhi();
+    curlPhiFace();
+    return _ad_curl_u;
+  }
+
   ///////////////////////// Nodal value getters ///////////////////////////////////////////
 
   const OutputType & nodalValueDot() const;
@@ -523,6 +531,7 @@ private:
   mutable bool _need_ad_grad_u;
   mutable bool _need_ad_grad_u_dot;
   mutable bool _need_ad_second_u;
+  mutable bool _need_ad_curl_u;
 
   bool _has_dof_indices;
 
@@ -556,6 +565,7 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u_dot;
   ADTemplateVariableValue<OutputType> _ad_u_dotdot;
   ADTemplateVariableGradient<OutputType> _ad_grad_u_dot;
+  ADTemplateVariableCurl<OutputType> _ad_curl_u;
 
   // time derivatives
 
