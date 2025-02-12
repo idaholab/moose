@@ -5,6 +5,7 @@
 
 namespace neml2
 {
+register_NEML2_object(Multilinear6DInterpolationModel);
 
 OptionSet
 Multilinear6DInterpolationModel::expected_options()
@@ -26,6 +27,8 @@ Multilinear6DInterpolationModel::expected_options()
   // JSON
   options.set<std::string>("model_file_name");
   options.set<std::string>("model_file_variable_name");
+  // fixme lynn trying to debug new not working
+  options.set<bool>("use_new") = false;
 
   options.set<bool>("_use_AD_first_derivative") = true;
   options.set<bool>("_use_AD_second_derivative") = true;
@@ -70,14 +73,42 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
   _env_transform_values = json_to_vector("in_env_transform_values");
   // Storing values for interpolation
   std::string filename_variable = options.get<std::string>("model_file_variable_name");
+
+  // set up output transforms
+  if (options.get<bool>("use_new"))
+  {
+    if (filename_variable == "out_ep")
+    {
+      _output_transform_name = json_to_string("out_strain_rate_transform_type");
+      // fixme lynn get this from string
+      _output_transform_enum = TransformEnum::EXP10BOUNDED;
+      _output_transform_values = json_to_vector("out_strain_rate_transform_values");
+    }
+    else if (filename_variable == "out_cell")
+    {
+      _output_transform_name = json_to_string("out_cell_rate_transform_type");
+      _output_transform_enum = TransformEnum::DECOMPRESS;
+      _output_transform_values = json_to_vector("out_cell_rate_transform_values");
+    }
+    else if (filename_variable == "out_wall")
+    {
+      _output_transform_name = json_to_string("out_wall_rate_transform_type");
+      _output_transform_enum = TransformEnum::DECOMPRESS;
+      _output_transform_values = json_to_vector("out_wall_rate_transform_values");
+    }
+  }
   _grid_values = json_6Dvector_to_torch(filename_variable);
 }
 
 void
-Multilinear6DInterpolationModel::set_value(bool /*out*/, bool /*dout_din*/, bool /*d2out_din2*/)
+Multilinear6DInterpolationModel::set_value(bool out, bool dout_din, bool d2out_din2)
 {
-  neml_assert_dbg("Multilinear6DInterpolationModel should never be called, it is only base class "
-                  "with helper functions.");
+  neml_assert_dbg(!dout_din || !d2out_din2,
+                  "Only AD derivatives are currently supported for this model");
+  if (out)
+  {
+    _output_rate = interpolate_and_transform();
+  }
 }
 
 std::pair<Scalar, Scalar>
@@ -165,7 +196,7 @@ Multilinear6DInterpolationModel::interpolate_and_transform()
   left_index_weight.push_back(findLeftIndexAndFraction(_env_grid, env_fac_transformed));
   Scalar interpolated_result = compute_interpolation(left_index_weight, _grid_values);
   Scalar transformed_result = transform(interpolated_result);
-  return transformed_result;
+  return interpolated_result;
 }
 
 std::string
@@ -224,6 +255,29 @@ Multilinear6DInterpolationModel::json_6Dvector_to_torch(std::string key)
 }
 
 Scalar
+Multilinear6DInterpolationModel::transform(const Scalar & data)
+{
+  switch (_output_transform_enum)
+  {
+    case TransformEnum::EXP10BOUNDED:
+    {
+      Scalar transformed_result = transform_exp10_bounded(data, _output_transform_values);
+      return transformed_result;
+    }
+    case TransformEnum::DECOMPRESS:
+    {
+      Scalar transformed_result = transform_decompress(data, _output_transform_values);
+      return transformed_result;
+    }
+    default:
+      neml_assert_dbg("Invalid output transform.");
+  }
+  // fixme lynn, I DO NOT WANT TO DO THIS becuause this is wrong.  This should be fatal error
+  // and this should have been caught way before this point
+  return data;
+}
+
+Scalar
 Multilinear6DInterpolationModel::transform_compress(const Scalar & data,
                                                     const std::vector<Real> & param) const
 {
@@ -232,6 +286,18 @@ Multilinear6DInterpolationModel::transform_compress(const Scalar & data,
   Real original_min = param[2];
   auto d1 = math::sign(data) * math::pow(math::abs(data * factor), compressor);
   auto transformed_data = math::log10(1.0 + d1 - original_min);
+  return transformed_data;
+}
+
+Scalar
+Multilinear6DInterpolationModel::transform_decompress(const Scalar & data,
+                                                      const std::vector<Real> & param) const
+{
+  Real factor = param[0];
+  Real compressor = param[1];
+  Real original_min = param[2];
+  auto d1 = math::pow(10.0, data) - 1.0 + original_min;
+  auto transformed_data = math::sign(d1) * math::pow(math::abs(d1), 1.0 / compressor) / factor;
   return transformed_data;
 }
 
@@ -249,6 +315,21 @@ Multilinear6DInterpolationModel::transform_log10_bounded(const Scalar & data,
   Real range = upperbound - lowerbound;
   auto transformed_data =
       range * (math::log10(data + factor) - logmin) / (logmax - logmin) + lowerbound;
+  return transformed_data;
+}
+
+Scalar
+Multilinear6DInterpolationModel::transform_exp10_bounded(const Scalar & data,
+                                                         const std::vector<Real> & param) const
+{
+  Real factor = param[0];
+  Real lowerbound = param[1];
+  Real upperbound = param[2];
+  Real logmin = param[3];
+  Real logmax = param[4];
+  Real range = upperbound - lowerbound;
+  auto transformed_data =
+      (math::pow(10.0, ((data - lowerbound) * (logmax - logmin) / range) + logmin) - factor);
   return transformed_data;
 }
 
