@@ -69,7 +69,7 @@ protected:
 
   /// transform output data
   // fixme lynn get rid of
-  virtual Scalar transform(const Scalar & data);
+  Scalar transform_output(const Scalar & data);
 
   /// read in json axes transform name
   std::string json_to_string(std::string key);

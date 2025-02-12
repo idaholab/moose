@@ -27,8 +27,6 @@ Multilinear6DInterpolationModel::expected_options()
   // JSON
   options.set<std::string>("model_file_name");
   options.set<std::string>("model_file_variable_name");
-  // fixme lynn trying to debug new not working
-  options.set<bool>("use_new") = false;
 
   options.set<bool>("_use_AD_first_derivative") = true;
   options.set<bool>("_use_AD_second_derivative") = true;
@@ -75,8 +73,7 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
   std::string filename_variable = options.get<std::string>("model_file_variable_name");
 
   // set up output transforms
-  if (options.get<bool>("use_new"))
-  {
+
     if (filename_variable == "out_ep")
     {
       _output_transform_name = json_to_string("out_strain_rate_transform_type");
@@ -96,7 +93,7 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
       _output_transform_enum = TransformEnum::DECOMPRESS;
       _output_transform_values = json_to_vector("out_wall_rate_transform_values");
     }
-  }
+
   _grid_values = json_6Dvector_to_torch(filename_variable);
 }
 
@@ -195,8 +192,8 @@ Multilinear6DInterpolationModel::interpolate_and_transform()
   left_index_weight.push_back(findLeftIndexAndFraction(_wall_grid, wall_dd_transformed));
   left_index_weight.push_back(findLeftIndexAndFraction(_env_grid, env_fac_transformed));
   Scalar interpolated_result = compute_interpolation(left_index_weight, _grid_values);
-  Scalar transformed_result = transform(interpolated_result);
-  return interpolated_result;
+  Scalar transformed_result = transform_output(interpolated_result);
+  return transformed_result;
 }
 
 std::string
@@ -255,7 +252,7 @@ Multilinear6DInterpolationModel::json_6Dvector_to_torch(std::string key)
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform(const Scalar & data)
+Multilinear6DInterpolationModel::transform_output(const Scalar & data)
 {
   switch (_output_transform_enum)
   {

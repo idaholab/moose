@@ -101,7 +101,7 @@ sample_file = "models/sampled_combinations.csv"
   nl_abs_tol = 1e-1 # Nothing is really being solved here, so loose tolerances are okay
   dt = 1
   dtmin=1
-  end_time = 40 #242
+  end_time = 40
   timestep_tolerance = 1e-3
 []
 
