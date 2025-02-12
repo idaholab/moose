@@ -110,12 +110,12 @@ total_height = ${fparse orifice_plate_height + height + 2 * top_bottom}
     #               10
     #               5 20
     #               6'
-    num_layers = '3 2
-                 5
-                 2 5 2
-                 5
-                 2 10
-                 3'
+    num_layers = '2 1
+                 3
+                 1 2 1
+                 2
+                 1 3
+                 2'
     subdomain_swaps = '1 101 2 102 11 101; 1 101 2 102 11 101;
                        1 301 11 302 1000 2000;
                        11 402 1000 2000; 11 402 1000 2000; 11 402 1000 2000;

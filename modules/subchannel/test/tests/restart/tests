@@ -1,4 +1,7 @@
 [Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#28497'
+  requirement = 'The system shall be able to restart after from steady state or transient'
   [steady]
     type = Exodiff
     input = steady.i

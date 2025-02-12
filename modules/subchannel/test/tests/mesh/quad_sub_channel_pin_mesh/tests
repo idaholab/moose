@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMQuadPinMeshGenerator.md'
+  issues = '#29241'
+  requirement = 'The system will create a mesh of the fuel pins for quadrilateral assemblies'
   [coords]
     type = Exodiff
     input = coords.i

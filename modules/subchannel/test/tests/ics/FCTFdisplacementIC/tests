@@ -1,4 +1,7 @@
 [Tests]
+  design = 'FCTFdisplacementIC.md'
+  issues = '#29501'
+  requirement = 'The system will calculate the geometric parameters for FCTF'
   [test]
     type = Exodiff
     input = 'test.i'

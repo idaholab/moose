@@ -4,13 +4,13 @@
 # Units are SI
 
 # geometry parameters
-pin_diameter = 8e-3
-pin_pitch = 9.04e-3
-cr_pin_diameter = 1.11e-2
-cr_pin_pitch = 1.2476e-2
+# pin_diameter = 8e-3
+# pin_pitch = 9.04e-3
+# cr_pin_diameter = 1.11e-2
+# cr_pin_pitch = 1.2476e-2
 flat_to_flat = 13.598e-2
-wire_diameter = 1.03e-3
-wire_pitch = 203.2e-3
+# wire_diameter = 1.03e-3
+# wire_pitch = 203.2e-3
 
 # physics parameters
 inlet_temperature = 628.15
@@ -92,28 +92,6 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 
 [Debug]
   show_material_props = true
-[]
-
-[UserObjects]
-  [fuel_hex]
-    type = HexagonalLattice
-    flow_region_flat_to_flat = ${flat_to_flat}
-    pin_pitch = ${pin_pitch}
-    pin_diameter = ${pin_diameter}
-    wire_diameter = ${wire_diameter}
-    wire_pitch = ${wire_pitch}
-    n_rings = 9
-  []
-
-  [cr_hex]
-    type = HexagonalLattice
-    flow_region_flat_to_flat = ${flat_to_flat}
-    pin_pitch = ${cr_pin_pitch}
-    pin_diameter = ${cr_pin_diameter}
-    wire_diameter = 0
-    wire_pitch = 1
-    n_rings = 6
-  []
 []
 
 [FluidProperties]
@@ -540,7 +518,9 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 
   ## wall heat transfer coefficient uses Lyon-Martinelli
   [wall_htc]
-    type = FunctorLyonMartinelliWallHTC
+    type = ADParsedFunctorMaterial
+    expression = 100.0
+    property_name = 'wall_htc'
     block = ${flow_blocks}
   []
 
@@ -573,16 +553,16 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 
   # describe the drag coefficient in regions that have pins in them
   [drag_fuel]
-    type = FunctorRehmeDragCoefficients
-    multipliers = '100 100 1'
-    hex_lattice = fuel_hex
+    type = ADGenericVectorFunctorMaterial
+    prop_names =  'Darcy_coefficient Forchheimer_coefficient'
+    prop_values = '1 1 1             1 1 1'
     block = 'fuel coupled_fuel'
   []
 
   [drag_control]
-    type = FunctorRehmeDragCoefficients
-    multipliers = '100 100 1'
-    hex_lattice = cr_hex
+    type = ADGenericVectorFunctorMaterial
+    prop_names =  'Darcy_coefficient Forchheimer_coefficient'
+    prop_values = '1 1 1             1 1 1'
     block = 'control'
   []
 
@@ -628,28 +608,32 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   # alpha needs to be defined separately in the fuel and control
   # blocks because the geometry is different
   [alpha_fuel]
-    type = FunctorHexagonalLatticeHTC
-    hex_lattice = fuel_hex
+    type = ADParsedFunctorMaterial
+    expression = 1.0
+    property_name = 'alpha'
     block = 'fuel coupled_fuel'
   []
 
   [alpha_control]
-    type = FunctorHexagonalLatticeHTC
-    hex_lattice = cr_hex
+    type = ADParsedFunctorMaterial
+    expression = 0.2
+    property_name = 'alpha'
     block = 'control'
   []
 
   ## kappa_f is used instead of thermal conductivity k
   ## in the rodded regions it's different than k, otherwise it's k
   [kappa_f_fuel]
-    type = FunctorLinearPecletHexagonalLatticeKappaFluid
-    hex_lattice = fuel_hex
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'kappa'
+    prop_values = 'k k k'
     block = 'fuel coupled_fuel'
   []
 
   [kappa_f_control]
-    type = FunctorLinearPecletHexagonalLatticeKappaFluid
-    hex_lattice = cr_hex
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'kappa'
+    prop_values = 'k k k'
     block = 'control'
   []
 

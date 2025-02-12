@@ -1,4 +1,7 @@
 [Tests]
+  design = 'SCMSolutionTransfer.md'
+  issues = '#29251'
+  requirement = 'The system shall be able to transger the subchannel/pin solution onto a detailed mesh'
   [quad]
     type = Exodiff
     input = 'quad.i'
