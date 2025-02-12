@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SystemBase.h"
+#include "MooseVariableFieldBase.h"
 #include "libmesh/system.h"
 #include "libmesh/enum_norm_type.h"
 #include "libmesh/petsc_vector.h"
