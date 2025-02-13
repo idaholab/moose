@@ -219,6 +219,7 @@ HeatConductionCG::addSolverVariables()
   // defaults to linear lagrange FE family
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<SolverSystemName>("solver_sys") = getSolverSystem(_temperature_name);
+  assignBlocks(params, _blocks);
 
   getProblem().addVariable(variable_type, _temperature_name, params);
 }
