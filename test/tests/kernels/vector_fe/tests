@@ -44,6 +44,7 @@
     type = Exodiff
     input = 'ad_coupled_curl_product.i'
     exodiff = 'ad_coupled_curl_product_out.e'
+    custom_cmp = 'ad_coupled_curl_product.cmp'
     abs_zero = 1e-8
     issues = '#29868'
     requirement = "The system shall be able to solve a problem that supplies the product "
