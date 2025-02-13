@@ -112,6 +112,9 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
     else if (auto mvie = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
              mvie)
       _variable_objects[mvie->mooseVariableBase()->number()].addObject(object, tid, false);
+    // Some objects, such as ScalarKernels, do not inherit from the MooseVariableInterface (which is
+    // for field variables). These objects *do* inherit from ResidualObject which has this more
+    // generic variable() API
     else if (auto ro = std::dynamic_pointer_cast<ResidualObject>(object); ro)
       _variable_objects[ro->variable().number()].addObject(object, tid, false);
   }

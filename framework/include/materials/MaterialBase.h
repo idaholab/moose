@@ -382,7 +382,7 @@ private:
 
   /**
    * Adds to a map based on block ids of material properties for which a zero
-   * value can be returned. Thes properties are optional and will not trigger a
+   * value can be returned. These properties are optional and will not trigger a
    * missing material property error.
    *
    * @param block_id The block id for the MaterialProperty
@@ -392,7 +392,7 @@ private:
 
   /**
    * Adds to a map based on boundary ids of material properties for which a zero
-   * value can be returned. Thes properties are optional and will not trigger a
+   * value can be returned. These properties are optional and will not trigger a
    * missing material property error.
    *
    * @param boundary_id The block id for the MaterialProperty
