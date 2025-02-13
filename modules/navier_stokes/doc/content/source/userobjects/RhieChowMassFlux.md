@@ -22,6 +22,15 @@ Besides these capabilities, this user object is also responsible for reconstruct
 cell velocities at the end of the pressure corrector step.
 For more information on these fields and processes, we suggest visiting [SIMPLE.md].
 
+The object enables the computation of the standard (SIMPLE) or consistent (SIMPLEC)
+momentum projection matrix ($A^{-1}$) and neighbour face flux ($H(u)$) vector via
+[!param](/UserObjects/RhieChowMassFlux/pressure_projection_method).
+In general, SIMPLEC will be stable with higher relaxation factors for pressure than SIMPLE.
+This is particularly useful in problems with slow-converging pressure fields,
+such as those with high Reynolds numbers, complex geometries, viscous flows in narrow channels,
+multiphase flows, problems with rapidly varying thermophysical properties, and,
+in general, when using high-resolution grids.
+
 !syntax parameters /UserObjects/RhieChowMassFlux
 
 !syntax inputs /UserObjects/RhieChowMassFlux
