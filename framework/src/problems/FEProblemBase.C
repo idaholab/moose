@@ -4144,17 +4144,18 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto solver_sys_num =
-      parameters.isParamValid(var_param_name) &&
-              determineSolverSystem(parameters.varName(var_param_name, object_name)).first
-          ? determineSolverSystem(parameters.varName(var_param_name, object_name)).second
-          : (unsigned int)0;
+  const auto sys_num = parameters.isParamValid(var_param_name)
+                           ? getSystem(parameters.varName(var_param_name, object_name)).number()
+                           : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(solver_sys_num);
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = _aux.get();
+    else
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
   }
   else
   {
@@ -4166,7 +4167,11 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _solver_systems[solver_sys_num].get();
+
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = _aux.get();
+    else
+      parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
   }
 }
 
@@ -7424,22 +7429,26 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
     _functions.jacobianSetup(tid);
   }
 
-  try
-  {
-    computeSystems(EXEC_NONLINEAR);
-  }
-  catch (MooseException & e)
-  {
-    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
-             << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
-             << std::endl;
+  _current_linear_sys->compute(EXEC_NONLINEAR);
 
-    // We know the next solve is going to fail, so there's no point in
-    // computing anything else after this.  Plus, using incompletely
-    // computed AuxVariables in subsequent calculations could lead to
-    // other errors or unhandled exceptions being thrown.
-    return;
-  }
+  /*
+   try
+   {
+     computeSystems(EXEC_NONLINEAR);
+   }
+   catch (MooseException & e)
+   {
+     _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+              << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
+              << std::endl;
+
+     // We know the next solve is going to fail, so there's no point in
+     // computing anything else after this.  Plus, using incompletely
+     // computed AuxVariables in subsequent calculations could lead to
+     // other errors or unhandled exceptions being thrown.
+     return;
+   }
+   */
 
   computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
   executeControls(EXEC_NONLINEAR);
