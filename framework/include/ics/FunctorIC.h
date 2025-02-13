@@ -10,28 +10,19 @@
 #pragma once
 
 #include "InitialCondition.h"
+#include "NonADFunctorInterface.h"
 
 /**
- * Defines an initial condition that forces the value to be a user specified function
+ * Defines an initial condition using a functor
  */
-class FunctionIC : public InitialCondition
+class FunctorIC : public InitialCondition, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
-  FunctionIC(const InputParameters & parameters);
-
-  /**
-   * @returns The function name
-   */
-  const FunctionName functionName() const;
+  FunctorIC(const InputParameters & parameters);
 
 protected:
-  /**
-   * Evaluate the function at the current quadrature point and time step.
-   */
-  Real f();
-
   /**
    * The value of the variable at a point.
    */
@@ -43,8 +34,11 @@ protected:
   virtual RealGradient gradient(const Point & p) override;
 
   /// Function to evaluate to form the initial condition
-  const Function & _func;
+  const Moose::Functor<Real> & _functor;
 
-  /// Scaling factor, to be able to use a function with multiple ICs
+  /// Scaling factor, to be able to use a functor with multiple ICs
   const Real _scaling;
+
+  /// Point locator to get the element for a requested point
+  std::unique_ptr<libMesh::PointLocatorBase> _pl;
 };
