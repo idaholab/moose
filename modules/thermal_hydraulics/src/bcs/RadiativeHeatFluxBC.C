@@ -17,6 +17,7 @@ RadiativeHeatFluxBC::validParams()
 {
   InputParameters params = RadiativeHeatFluxBCBase::validParams();
 
+  params.addRequiredParam<Real>("boundary_emissivity", "Emissivity of the boundary.");
   params.addParam<FunctionName>("view_factor", "1", "View factor function");
   params.addParam<PostprocessorName>(
       "scale_pp", 1.0, "Post-processor by which to scale boundary condition");
@@ -29,7 +30,7 @@ RadiativeHeatFluxBC::validParams()
 
 RadiativeHeatFluxBC::RadiativeHeatFluxBC(const InputParameters & parameters)
   : RadiativeHeatFluxBCBase(parameters),
-
+    _eps_boundary(getParam<Real>("boundary_emissivity")),
     _view_factor_fn(getFunction("view_factor")),
     _scale_pp(getPostprocessorValue("scale_pp"))
 {

@@ -35,6 +35,9 @@
     boundary_radius = 1
     cylinder_radius = 12
     cylinder_emissivity = 0.4
+    # Using previous defaults
+    boundary_emissivity = 1
+    Tinfinity = 0
   []
   [top]
     type = FVInfiniteCylinderRadiativeBC
@@ -45,6 +48,9 @@
     boundary_radius = 1
     cylinder_radius = 12
     cylinder_emissivity = 0.4
+    # Using previous defaults
+    boundary_emissivity = 1
+    Tinfinity = 0
   []
   [other]
     type = FVDirichletBC

@@ -18,6 +18,7 @@ InputParameters
 InfiniteCylinderRadiativeBCTempl<is_ad>::validParams()
 {
   InputParameters params = RadiativeHeatFluxBCBaseTempl<is_ad>::validParams();
+  params.addRequiredParam<Real>("boundary_emissivity", "Emissivity of the boundary.");
   params.addParam<Real>("cylinder_emissivity",
                         1,
                         "Emissivity of the cylinder in radiative heat transfer with the boundary.");
@@ -34,6 +35,7 @@ template <bool is_ad>
 InfiniteCylinderRadiativeBCTempl<is_ad>::InfiniteCylinderRadiativeBCTempl(
     const InputParameters & parameters)
   : RadiativeHeatFluxBCBaseTempl<is_ad>(parameters),
+    _eps_boundary(this->template getParam<Real>("boundary_emissivity")),
     _eps_cylinder(this->template getParam<Real>("cylinder_emissivity")),
     _boundary_radius(this->template getParam<Real>("boundary_radius")),
     _cylinder_radius(this->template getParam<Real>("cylinder_radius"))

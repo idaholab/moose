@@ -22,6 +22,8 @@ public:
 protected:
   virtual ADReal coefficient() const override;
 
+  /// Emissivity of the boundary
+  const Real _eps_boundary;
   /// View factor function
   const Function & _view_factor_fn;
 
