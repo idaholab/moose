@@ -24,7 +24,7 @@ public:
   CrackTipEnrichmentCutOffBC(const InputParameters & parameters);
 
 protected:
-  virtual bool shouldApply() override;
+  virtual bool shouldApply() const override;
 
   const Real _cut_off_radius;
 

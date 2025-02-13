@@ -24,7 +24,7 @@ public:
   StickyBC(const InputParameters & parameters);
 
 protected:
-  virtual bool shouldApply() override;
+  virtual bool shouldApply() const override;
   virtual Real computeQpResidual() override;
 
   // old value of the variable

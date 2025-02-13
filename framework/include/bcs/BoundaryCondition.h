@@ -45,5 +45,5 @@ public:
    * this method. However, one has to index into the values manually, i.e. not using _qp.
    * @return true if the boundary condition should be applied, otherwise false
    */
-  virtual bool shouldApply() { return true; }
+  virtual bool shouldApply() const { return true; }
 };

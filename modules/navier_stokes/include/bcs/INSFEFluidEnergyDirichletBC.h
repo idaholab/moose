@@ -28,8 +28,8 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  bool shouldApply() override;
-  bool isInlet();
+  bool shouldApply() const override;
+  bool isInlet() const;
 
   RealVectorValue _out_norm;
 
