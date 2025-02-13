@@ -4161,7 +4161,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     if (sys_num == _aux->number())
-      parameters.set<SystemBase *>("_sys") = _aux.get();
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseAuxiliary();
     else
       parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
   }
