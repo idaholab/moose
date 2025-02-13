@@ -31,6 +31,15 @@ IntegratedBCBase::validParams()
 
   params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
 
+  params.addParam<bool>(
+      "skip_execution_outside_variable_domain",
+      false,
+      "Whether to skip execution of this boundary condition when the variable it "
+      "applies to is not defined on the boundary. This can facilitate setups with "
+      "moving variable domains and fixed boundaries. Note that the FEProblem boundary-restricted "
+      "integrity checks will also need to be turned off if using this option");
+  params.addParamNamesToGroup("skip_execution_outside_variable_domain", "Advanced");
+
   // Integrated BCs always rely on Boundary MaterialData
   params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
 
@@ -52,7 +61,9 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters)
     _JxW(_assembly.JxWFace()),
     _coord(_assembly.coordTransformation()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
+    _skip_execution_outside_variable_domain(
+        getParam<bool>("skip_execution_outside_variable_domain"))
 {
 }
 
@@ -60,4 +71,39 @@ void
 IntegratedBCBase::prepareShapes(const unsigned int var_num)
 {
   _subproblem.prepareFaceShapes(var_num, _tid);
+}
+
+bool
+IntegratedBCBase::shouldApply() const
+{
+  mooseAssert(_current_elem, "Should have set the current element");
+  const auto block_id = _current_elem->subdomain_id();
+
+  if (!variable().hasBlocks(block_id))
+  {
+    if (!_skip_execution_outside_variable_domain)
+      mooseError("This boundary condition is likely being executed outside the domain of "
+                 "definition of its variable. You can set 'skip_execution_outside_variable_domain' "
+                 "to true to prevent this.");
+    else
+      return false;
+  }
+
+#ifndef NDEBUG
+  // Check all coupled variables
+  // We do not do that in opt mode for potential performance reasons
+  for (const auto & var : getCoupledMooseVars())
+    if (!var->hasBlocks(block_id))
+    {
+      if (!_skip_execution_outside_variable_domain)
+        mooseError("This boundary condition is likely being executed outside the domain of "
+                   "definition of coupled variable '",
+                   var->name(),
+                   "'. You can set 'skip_execution_outside_variable_domain' "
+                   "to true to prevent this.");
+      else
+        return false;
+    }
+#endif
+  return true;
 }

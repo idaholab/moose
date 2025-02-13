@@ -12,6 +12,6 @@
     input = 'var_block_id.i'
     cli_args= 'BCs/neum/skip_execution_outside_variable_domain=false'
     requirement = 'The system shall error if an integrated boundary condition is being executed outside the domain of definition of variable, without explicitly allowing this.'
-    expect_err = 'This boundary condition is being executed outside the domain of definition of its variable'
+    expect_err = "This boundary condition is likely being executed outside the domain of definition of its variable. You can set 'skip_execution_outside_variable_domain' to true to prevent this."
   []
 []
