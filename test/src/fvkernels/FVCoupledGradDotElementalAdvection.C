@@ -16,8 +16,8 @@ FVCoupledGradDotElementalAdvection::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable.");
-  params.addClassDescription("Computes residual for the gradient of the coupled varaible time the "
-                             "gradient of the FV varaible for finite volume method.");
+  params.addClassDescription("Computes residual for the gradient of the coupled variable times the "
+                             "gradient of the FV variable for finite volume method.");
   return params;
 }
 

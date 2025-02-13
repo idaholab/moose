@@ -13,14 +13,6 @@
 
 class Function;
 
-/*
-// Forward Declarations
-class ElementCenterL2Error;
-
-template <>
-InputParameters validParams<ElementCenterL2Error>();
-*/
-
 class ElementCenterL2Error : public ElementIntegralVariablePostprocessor
 {
 public:

@@ -294,7 +294,7 @@ public:
   const libMesh::QBase * const & qRuleFace() const { return constify_ref(_current_qrule_face); }
 
   /**
-   * Returns the reference to the current FV quadrature being used on a current face
+   * Returns the reference to a pointer to the current FV quadrature being used on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
   const QBase * const & qRuleFVFace() const { return _current_FV_qrule_face; }

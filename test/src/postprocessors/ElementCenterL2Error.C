@@ -10,9 +10,8 @@
 #include "ElementCenterL2Error.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", ElementCenterL2Error);
+registerMooseObject("MooseTestApp", ElementCenterL2Error);
 
-// defineLegacyParams(ElementCenterL2Error);
 
 InputParameters
 ElementCenterL2Error::validParams()
