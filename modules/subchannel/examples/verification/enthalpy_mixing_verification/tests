@@ -1,0 +1,7 @@
+[Tests]
+  [enthalpy_mixing_verification]
+    type = CSVDiff
+    input = two_channel.i
+    csvdiff = two_channel_out.csv
+  []
+[]

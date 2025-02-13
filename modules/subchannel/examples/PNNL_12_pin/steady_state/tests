@@ -1,0 +1,8 @@
+[Tests]
+  [ss_check_syntax]
+    type = 'RunApp'
+    input = '2X6_ss.i'
+    check_input = true
+    max_parallel = 1
+  []
+[]
