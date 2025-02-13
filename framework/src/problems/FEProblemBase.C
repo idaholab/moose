@@ -8714,6 +8714,24 @@ FEProblemBase::haveADObjects(const bool have_ad_objects)
 }
 
 const SystemBase &
+FEProblemBase::getSystemBase(const unsigned int sys_num) const
+{
+  if (sys_num < _solver_systems.size())
+    return *_solver_systems[sys_num];
+
+  return *_aux;
+}
+
+SystemBase &
+FEProblemBase::getSystemBase(const unsigned int sys_num)
+{
+  if (sys_num < _solver_systems.size())
+    return *_solver_systems[sys_num];
+
+  return *_aux;
+}
+
+const SystemBase &
 FEProblemBase::systemBaseNonlinear(const unsigned int sys_num) const
 {
   mooseAssert(sys_num < _nl.size(), "System number greater than the number of nonlinear systems");

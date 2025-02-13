@@ -705,6 +705,18 @@ public:
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
   /**
+   * Get constant reference to a system in this problem
+   * @param sys_num The number of the system
+   */
+  virtual const SystemBase & getSystemBase(const unsigned int sys_num) const;
+
+  /**
+   * Get non-constant reference to a system in this problem
+   * @param sys_num The number of the system
+   */
+  virtual SystemBase & getSystemBase(const unsigned int sys_num);
+
+  /**
    * Get non-constant reference to a linear system
    * @param sys_num The number of the linear system
    */
