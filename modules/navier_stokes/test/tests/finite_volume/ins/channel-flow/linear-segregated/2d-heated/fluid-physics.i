@@ -51,6 +51,7 @@ h_cv = 100
       momentum_advection_interpolation = ${advected_interp_method}
     []
     [FluidHeatTransferSegregated/energy]
+      solve_for_enthalpy = false
       thermal_conductivity = ${k}
       specific_heat = ${cp}
 

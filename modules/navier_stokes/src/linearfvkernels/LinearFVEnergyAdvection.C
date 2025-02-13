@@ -21,7 +21,9 @@ LinearFVEnergyAdvection::validParams()
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
                              "advection term for the energy e.g. h=int(cp dT). A user may still "
                              "override what quantity is advected, but the default is temperature.");
-  params.addRequiredParam<Real>("cp", "Specific heat value");
+  MooseEnum advected_quantity("enthalpy temperature", "enthalpy");
+  params.addParam<MooseEnum>("advected_quantity", advected_quantity, "The advected quantity");
+  params.addParam<Real>("cp", "Constant specific heat value");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
@@ -31,12 +33,19 @@ LinearFVEnergyAdvection::validParams()
 
 LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    _advected_quantity(getParam<MooseEnum>("advected_quantity").getEnum<AdvectedQuantityEnum>()),
+    _cp(isParamValid("cp") ? getParam<Real>("cp") : 1.0),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
-    _cp(getParam<Real>("cp")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
     _face_mass_flux(0.0)
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+
+  if (isParamValid("cp") && _advected_quantity == AdvectedQuantityEnum::ENTHALPY)
+    paramError("cp", "cp should not be specified for enthalpy advection");
+
+  if (!isParamValid("cp") && _advected_quantity == AdvectedQuantityEnum::TEMPERATURE)
+    paramError("cp", "cp should be specified for temperature advection");
 }
 
 Real

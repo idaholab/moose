@@ -142,6 +142,7 @@ walls = 'right left top bottom'
   [heat_advection]
     type = LinearFVEnergyAdvection
     variable = T_fluid
+    advected_quantity = temperature
     cp = ${cp}
   []
   [conduction]

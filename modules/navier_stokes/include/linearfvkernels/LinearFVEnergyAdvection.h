@@ -38,11 +38,22 @@ public:
   virtual void setupFaceData(const FaceInfo * face_info) override;
 
 protected:
+  /// The advected quantity options
+  enum class AdvectedQuantityEnum
+  {
+    ENTHALPY = 0,
+    TEMPERATURE = 1
+  };
+
+  /// The advected quantity
+  AdvectedQuantityEnum _advected_quantity;
+
+  /// The constant specific heat value. Only needed for temperature advection, with
+  /// the assumption of constant cp.
+  const Real _cp;
+
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
-
-  /// The constant specific heat value
-  const Real _cp;
 
 private:
   /// Container for the current advected interpolation coefficients on the face to make sure

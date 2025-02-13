@@ -1,0 +1,34 @@
+[Tests]
+  design = 'LinearFVEnthalpyFunctorMaterial.md'
+  issues = '#29531'
+  [1d]
+    requirement = 'The system shall be able to solve a one-dimensional enthalpy conservation equation using'
+    [analytical_outlet_temperature_userdefined]
+      type = CSVDiff
+      input = 1d_test_h.i
+      csvdiff = 1d_test_h_out.csv
+      detail = 'user-defined enthalpy function;'
+      abs_zero = 1e-5
+      rel_err = 1e-5
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [analytical_outlet_temperature_fp]
+      type = CSVDiff
+      input = 1d_test_h_fp.i
+      csvdiff = 1d_test_h_fp_out.csv
+      detail = 'an enthalpy function defined in fluid properties.'
+      abs_zero = 1e-5
+      rel_err = 1e-5
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+  [2d-fp]
+    type = 'Exodiff'
+    input = 'enthalpy_equation.i'
+    exodiff = 'enthalpy_equation_out.e'
+    abs_zero = 1e-5
+    rel_err = 1e-5
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

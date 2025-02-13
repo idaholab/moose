@@ -89,9 +89,6 @@ UserObject::UserObject(const InputParameters & parameters)
                "A user object may be specified as executing before or after "
                "AuxKernels, not both.");
 
-  mooseAssert(_sys.varKind() == Moose::VAR_SOLVER,
-              "We expect the system to conceptually be nonlinear or linear.");
-
   _supplied_uo.insert(name());
 }
 
