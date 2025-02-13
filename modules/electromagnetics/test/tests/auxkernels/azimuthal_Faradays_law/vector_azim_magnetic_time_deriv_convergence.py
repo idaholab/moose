@@ -35,8 +35,8 @@ for i in range(0, runs):
 
     # Locate and modify "x_max" parameter for the mesh
     mesh = moosetree.find(root, func=lambda n: n.fullpath == '/Mesh/gmg')
-    mesh["nx"] = 10*2**i
-    mesh["ny"] = 10*2**i
+    mesh["nx"] = 5*2**i
+    mesh["ny"] = 5*2**i
 
     # Write the modified file
     pyhit.write("vector_azim_magnetic_time_deriv.i", root)
@@ -63,8 +63,8 @@ for i in range(0, runs):
     data = pandas.DataFrame(df_dict, columns=df_columns)
 
 # Reset mesh
-mesh["nx"] = 10
-mesh["ny"] = 10
+mesh["nx"] = 5
+mesh["ny"] = 5
 pyhit.write("vector_azim_magnetic_time_deriv.i", root)
 
 

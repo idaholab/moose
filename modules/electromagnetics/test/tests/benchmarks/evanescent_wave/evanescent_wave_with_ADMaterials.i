@@ -178,6 +178,7 @@
 
 [Outputs]
   exodus = true
+  file_base = 'evanescent_wave_out'
   print_linear_residuals = true
 []
 
