@@ -10,6 +10,7 @@
 #include "WCNSLinearFVTwoPhaseMixturePhysics.h"
 #include "WCNSFVTwoPhaseMixturePhysics.h"
 #include "WCNSFVFluidHeatTransferPhysics.h"
+#include "WCNSLinearFVFluidHeatTransferPhysics.h"
 #include "WCNSFVFlowPhysics.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics);
