@@ -6,6 +6,7 @@
     iy = 2
     dx = 1
     dy = 1
+    subdomain_id = 2
   []
   final_generator = 'cmg'
 []
