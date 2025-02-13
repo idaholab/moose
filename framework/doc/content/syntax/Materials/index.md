@@ -207,7 +207,14 @@ vector or tensor value.
 ## Material Property Output
 
 Output of `Material` properties is enabled by setting the "outputs" parameter. The following example
-creates two additional variables called "mat1" and "mat2" that will show up in the output file.
+creates two additional variables called "mat1" and "mat2" that will show up in the output file. In this
+example, the `exodus` name is a special keyword used to signal to MOOSE that the material properties
+should be outputted to the output object created when setting `Outputs/exodus=true`. If multiple output
+Exodus objects exist in the `[Outputs]` block, one or more names can be provided to the "outputs"
+parameter. In addition, the reserved output name `all` can be used to output the material property to
+all Exodus objects in the `[Outputs]` block, while the reserved output name `none` can be used to
+prevent the material property from being outputted to any Exodus output object. If `all` or `none`
+is specified in the outputs parameter, no other additional names should be specified.
 
 !listing output_block.i block=Materials Outputs
 
