@@ -1,2 +1,2 @@
-time,T_wall
-0,600
+time,T_wall,T_wall_1,T_wall_2
+0,600,500,700
