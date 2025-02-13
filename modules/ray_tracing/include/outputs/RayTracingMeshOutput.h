@@ -64,7 +64,7 @@ protected:
   /// The mesh that contains the segments
   std::unique_ptr<MeshBase> _segment_mesh;
   /// The EquationSystems
-  std::unique_ptr<EquationSystems> _es;
+  std::unique_ptr<libMesh::EquationSystems> _es;
   /// The system that stores the field data
   libMesh::ExplicitSystem * _sys;
 

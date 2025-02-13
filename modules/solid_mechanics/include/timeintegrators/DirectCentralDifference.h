@@ -44,6 +44,8 @@ public:
   }
 
 protected:
+  virtual TagID massMatrixTagID() const override;
+
   const bool & _constant_mass;
 
   const TagName & _mass_matrix;

@@ -11,6 +11,7 @@
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", NavierStokesHDGKernel);
 

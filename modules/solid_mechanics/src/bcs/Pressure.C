@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "Function.h"
 #include "MooseError.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("SolidMechanicsApp", Pressure);
 registerMooseObject("SolidMechanicsApp", ADPressure);

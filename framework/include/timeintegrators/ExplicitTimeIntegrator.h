@@ -62,6 +62,11 @@ protected:
    */
   bool checkLinearConvergence();
 
+  /**
+   * @returns the mass matrix tag ID
+   */
+  virtual TagID massMatrixTagID() const { return _Ke_time_tag; }
+
   /// Solve type for how mass matrix is handled
   MooseEnum _solve_type;
 

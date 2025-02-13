@@ -61,5 +61,11 @@ FVInitialConditionTempl<T>::computeElement(const ElemInfo & elem_info)
                   "Initial condition is not implemented for the used type!");
   }
 }
+template <typename T>
+MooseVariableFEBase &
+FVInitialConditionTempl<T>::variable()
+{
+  return _base_var;
+}
 
 template class FVInitialConditionTempl<Real>;

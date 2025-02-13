@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ChainControl.h"
+#include "MooseApp.h"
 
 InputParameters
 ChainControl::validParams()
@@ -31,4 +32,10 @@ std::string
 ChainControl::fullControlDataName(const std::string & data_name, bool apply_object_prefix) const
 {
   return (apply_object_prefix ? name() + ":" : "") + data_name;
+}
+
+ChainControlDataSystem &
+ChainControl::getChainControlDataSystem()
+{
+  return getMooseApp().getChainControlDataSystem();
 }

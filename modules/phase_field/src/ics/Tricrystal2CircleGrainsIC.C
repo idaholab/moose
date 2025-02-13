@@ -10,6 +10,7 @@
 #include "Tricrystal2CircleGrainsIC.h"
 #include "MooseRandom.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("PhaseFieldApp", Tricrystal2CircleGrainsIC);
 

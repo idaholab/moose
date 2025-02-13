@@ -13,6 +13,7 @@
 
 // Forward Declarations
 class TimeIntegrator;
+class AuxiliarySystem;
 
 /**
  * Calculates the inertial force and mass proportional damping for a nodal mass

@@ -14,6 +14,7 @@
 #include "SubProblem.h"
 #include "NonlinearSystemBase.h"
 #include "ADUtils.h"
+#include "FEProblemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

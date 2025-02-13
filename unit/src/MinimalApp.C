@@ -13,6 +13,7 @@
 #include "Executioner.h"
 #include "MooseMesh.h"
 #include "MooseMain.h"
+#include "FEProblemBase.h"
 
 TEST(MinimalApp, create)
 {

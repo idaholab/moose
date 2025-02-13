@@ -11,6 +11,7 @@
 #include "Function.h"
 #include "Transient.h"
 #include "MooseUtils.h"
+#include "FEProblemBase.h"
 
 InputParameters
 TimePeriodBase::validParams()

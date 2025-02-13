@@ -54,6 +54,7 @@
 #include "RestartableDataWriter.h"
 #include "StringInputStream.h"
 #include "MooseMain.h"
+#include "FEProblemBase.h"
 
 // Regular expression includes
 #include "pcrecpp.h"

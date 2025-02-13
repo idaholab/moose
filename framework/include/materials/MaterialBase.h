@@ -35,6 +35,7 @@
 #include "GeometricSearchInterface.h"
 #include "ADFunctorInterface.h"
 #include "SolutionInvalidInterface.h"
+#include "MaterialPropertyInterface.h"
 
 #define usingMaterialBaseMembers                                                                   \
   usingMooseObjectMembers;                                                                         \
@@ -53,6 +54,7 @@ class MaterialBase;
 class MooseMesh;
 class SubProblem;
 class FaceInfo;
+class FEProblemBase;
 
 /**
  * MaterialBases compute MaterialProperties.
@@ -366,7 +368,6 @@ protected:
 
   std::vector<unsigned int> _displacements;
 
-  // private:
   bool _has_stateful_property;
 
   bool _overrides_init_stateful_props = true;
@@ -374,6 +375,36 @@ protected:
   const FaceInfo * _face_info = nullptr;
 
 private:
+  /**
+   * Helper method for adding a material property name to the material property requested set
+   */
+  void markMatPropRequested(const std::string & name);
+
+  /**
+   * Adds to a map based on block ids of material properties for which a zero
+   * value can be returned. Thes properties are optional and will not trigger a
+   * missing material property error.
+   *
+   * @param block_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  void storeSubdomainZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name);
+
+  /**
+   * Adds to a map based on boundary ids of material properties for which a zero
+   * value can be returned. Thes properties are optional and will not trigger a
+   * missing material property error.
+   *
+   * @param boundary_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  void storeBoundaryZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name);
+
+  /**
+   * @return The maximum number of quadrature points in use on any element in this problem.
+   */
+  unsigned int getMaxQps() const;
+
   /// Suffix to append to the name of the material property/ies when declaring it/them
   const MaterialPropertyName _declare_suffix;
 
@@ -433,19 +464,19 @@ MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name
 
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, 0);
-  _fe_problem.markMatPropRequested(prop_name);
+  markMatPropRequested(prop_name);
 
   // Register this material on these blocks and boundaries as a zero property with relaxed
   // consistency checking
   for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-    _fe_problem.storeSubdomainZeroMatProp(*it, prop_name);
+    storeSubdomainZeroMatProp(*it, prop_name);
   for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end();
        ++it)
-    _fe_problem.storeBoundaryZeroMatProp(*it, prop_name);
+    storeBoundaryZeroMatProp(*it, prop_name);
 
   // set values for all qpoints to zero
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = _fe_problem.getMaxQps();
+  unsigned int nqp = getMaxQps();
   if (nqp > preload_with_zero.size())
     preload_with_zero.resize(nqp);
   for (unsigned int qp = 0; qp < nqp; ++qp)
@@ -463,7 +494,7 @@ MaterialBase::getGenericZeroMaterialProperty()
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = _fe_problem.getMaxQps();
+  unsigned int nqp = getMaxQps();
   if (nqp > zero.size())
     zero.resize(nqp);
 

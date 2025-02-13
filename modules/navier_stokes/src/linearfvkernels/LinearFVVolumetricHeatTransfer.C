@@ -10,6 +10,7 @@
 #include "LinearFVVolumetricHeatTransfer.h"
 #include "SubProblem.h"
 #include "NS.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", LinearFVVolumetricHeatTransfer);
 

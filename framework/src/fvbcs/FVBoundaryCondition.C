@@ -72,7 +72,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     ADFunctorInterface(this),
     _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
+    _fv_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(changeSystem(parameters, _var)),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid, _var.kind() == Moose::VAR_SOLVER ? _sys.number() : 0)),

@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "Control.h"
 #include "InputParameterWarehouse.h"
+#include "FEProblemBase.h"
 
 InputParameters
 Control::validParams()

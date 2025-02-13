@@ -11,6 +11,7 @@
 #include "MooseRandom.h"
 #include "MooseMesh.h"
 #include "MathUtils.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("PhaseFieldApp", TricrystalTripleJunctionIC);
 

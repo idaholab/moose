@@ -208,7 +208,7 @@ public:
    */
   Real unconstrainedDT() { return _unconstrained_dt; }
 
-  void parentOutputPositionChanged() override { _fe_problem.parentOutputPositionChanged(); }
+  void parentOutputPositionChanged() override;
 
   /**
    * The relative L2 norm of the difference between solution and old solution vector.

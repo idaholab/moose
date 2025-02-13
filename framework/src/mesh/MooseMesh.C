@@ -23,6 +23,7 @@
 #include "MooseVariableBase.h"
 #include "MooseMeshUtils.h"
 #include "MooseAppCoordTransform.h"
+#include "FEProblemBase.h"
 
 #include <utility>
 

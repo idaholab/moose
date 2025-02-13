@@ -15,6 +15,10 @@
 []
 
 [Kernels]
+  [time]
+    type = TimeDerivative
+    variable = u
+  []
   [./diff]
     type = Diffusion
     variable = u
@@ -53,5 +57,5 @@
   [../]
 
   petsc_options_iname = "-pc_type"
-  petsc_options_value = "none"
+  petsc_options_value = "hypre"
 []

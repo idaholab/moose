@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoundaryMarker.h"
+#include "MooseMesh.h"
 
 registerMooseObject("MooseApp", BoundaryMarker);
 

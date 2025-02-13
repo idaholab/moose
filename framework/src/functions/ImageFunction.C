@@ -9,6 +9,7 @@
 
 #include "ImageFunction.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", ImageFunction);
 

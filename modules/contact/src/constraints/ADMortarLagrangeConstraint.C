@@ -17,6 +17,8 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 #include "ADUtils.h"
+#include "FEProblemBase.h"
+#include "AutomaticMortarGeneration.h"
 
 #include <algorithm>
 #include <vector>

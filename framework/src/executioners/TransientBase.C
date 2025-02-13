@@ -759,3 +759,9 @@ TransientBase::convergedToSteadyState() const
 
   return converged;
 }
+
+void
+TransientBase::parentOutputPositionChanged()
+{
+  _fe_problem.parentOutputPositionChanged();
+}

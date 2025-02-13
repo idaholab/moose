@@ -10,6 +10,15 @@
     petsc_version = '>=3.19.2'
   []
 
+  [test_missing_time_kernels]
+    type = RunException
+    input = '2d_diffusion_petsc_option.i'
+    expect_err = 'No objects contributing to the mass matrix were found'
+    cli_args = "Kernels/inactive='time'"
+    issues = '#29834'
+    requirement = 'The system shall error if there are no objects contributing to the mass matrix for explicit solves.'
+  []
+
   [test_non_petsc_options_not_left]
     type = RunApp
     input = '2d_diffusion_petsc_option.i'
@@ -24,7 +33,7 @@
   [test_user_set_petsc_options_left]
     type = RunApp
     input = '2d_diffusion_petsc_option.i'
-    cli_args = 'Executioner/petsc_options_iname="-pc_type -snes_type" Executioner/petsc_options_value="none ksponly"'
+    cli_args = 'Executioner/petsc_options_iname="-pc_type -snes_type" Executioner/petsc_options_value="hypre ksponly"'
     expect_out = "Option left:\s+name:-SNES_TYPE\s+value:\s+ksponly"
     requirement = "The system shall warn the user of unused petsc options that are not set programatically."
     issues = '#28053'

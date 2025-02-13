@@ -18,6 +18,7 @@ class ContactLineSearchBase;
 class AugmentedLagrangianContactProblemInterface;
 enum class ContactModel;
 enum class ContactFormulation;
+class DisplacedProblem;
 
 /**
  * A MechanicalContactConstraint forces the value of a variable to be the same on both sides of an

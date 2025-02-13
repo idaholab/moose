@@ -11,6 +11,7 @@
 #include "MooseTestAppTypes.h"
 #include "MooseApp.h"
 #include "ActionWarehouse.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseTestApp", TestSteady);
 

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVInitialConditionBase.h"
+#include "MooseVariableFEBase.h"
 
 // libMesh
 #include "libmesh/point.h"
@@ -18,6 +19,8 @@
 
 // forward declarations
 class FEProblemBase;
+template <typename>
+class MooseVariableField;
 
 /**
  * This is a template class that implements the workhorse `compute` and `computeNodal` methods. The
@@ -40,7 +43,7 @@ public:
 
   static InputParameters validParams();
 
-  virtual MooseVariableFEBase & variable() override { return _base_var; }
+  virtual MooseVariableFEBase & variable() override;
 
   virtual void computeElement(const ElemInfo & elem_info) override;
 

@@ -10,6 +10,7 @@
 #include "SmoothCircleBaseIC.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/utility.h"
 

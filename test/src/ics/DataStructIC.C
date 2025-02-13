@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DataStructIC.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseTestApp", DataStructIC);
 

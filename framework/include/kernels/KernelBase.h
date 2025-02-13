@@ -14,6 +14,7 @@
 #include "MaterialPropertyInterface.h"
 #include "GeometricSearchInterface.h"
 #include "ElementIDInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 /**
  * This is the common base class for the three main

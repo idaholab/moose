@@ -11,6 +11,7 @@
 #include "LinearSystem.h"
 #include "LinearFVKernel.h"
 #include "LinearFVFluxKernel.h"
+#include "FEProblemBase.h"
 
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
                                                      const unsigned int linear_system_num,

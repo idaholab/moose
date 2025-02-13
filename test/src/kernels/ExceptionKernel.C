@@ -10,6 +10,7 @@
 #include "ExceptionKernel.h"
 #include "MooseException.h"
 #include "NonlinearSystem.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/threads.h"
 

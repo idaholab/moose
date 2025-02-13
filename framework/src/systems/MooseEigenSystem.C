@@ -12,6 +12,7 @@
 #include "MaterialData.h"
 #include "Factory.h"
 #include "EigenKernel.h"
+#include "FEProblemBase.h"
 
 MooseEigenSystem::MooseEigenSystem(FEProblemBase & fe_problem, const std::string & name)
   : NonlinearSystem(fe_problem, name),

@@ -27,6 +27,7 @@
 #include "NonADFunctorInterface.h"
 #include "FaceArgInterface.h"
 #include "MooseLinearVariableFV.h"
+#include "MooseVariableInterface.h"
 
 #include "libmesh/linear_implicit_system.h"
 
@@ -126,7 +127,7 @@ protected:
   MooseMesh & _mesh;
 
   /// Reference to the ruling finite volume problem
-  FVProblemBase & _fv_problem;
+  FEProblemBase & _fv_problem;
 
   /// Reference to the linear finite volume variable object
   MooseLinearVariableFV<Real> & _var;

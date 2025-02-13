@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "NodeElemConstraint.h"
 
+class DisplacedProblem;
+class FEProblemBase;
+
 /**
  * A EqualValueEmbeddedConstraint forces the value of a variable to be the same
  * on overlapping portion of two blocks
@@ -23,9 +26,9 @@ public:
 
   EqualValueEmbeddedConstraint(const InputParameters & parameters);
 
-  virtual void timestepSetup() override{};
-  virtual void jacobianSetup() override{};
-  virtual void residualEnd() override{};
+  virtual void timestepSetup() override {}
+  virtual void jacobianSetup() override {}
+  virtual void residualEnd() override {}
 
   virtual bool addCouplingEntriesToJacobian() override { return true; }
 

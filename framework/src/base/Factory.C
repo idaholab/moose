@@ -11,6 +11,7 @@
 #include "Registry.h"
 #include "InfixIterator.h"
 #include "InputParameterWarehouse.h"
+#include "FEProblemBase.h"
 // Just for testing...
 #include "Diffusion.h"
 

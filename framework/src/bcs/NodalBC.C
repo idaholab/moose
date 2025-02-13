@@ -13,6 +13,7 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
+#include "FEProblemBase.h"
 
 InputParameters
 NodalBC::validParams()

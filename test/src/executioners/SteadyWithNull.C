@@ -10,6 +10,7 @@
 #include "SteadyWithNull.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseTestApp", SteadyWithNull);
 

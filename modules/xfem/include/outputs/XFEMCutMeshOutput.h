@@ -38,7 +38,7 @@ private:
   const MeshCut2DUserObjectBase & _cutter_uo;
 
   /// The EquationSystems
-  std::unique_ptr<EquationSystems> _es;
+  std::unique_ptr<libMesh::EquationSystems> _es;
 
   /// Exodus for outputting points and values
   std::unique_ptr<libMesh::ExodusII_IO> _exodus_io;

@@ -22,6 +22,7 @@
 class MooseMesh;
 class SubProblem;
 class Assembly;
+class SystemBase;
 
 class Indicator : public MooseObject,
                   public BlockRestrictable,
@@ -54,7 +55,7 @@ public:
    * This will allow you to sum up error from multiple places and then do something like take the
    * square root of it in this function.
    */
-  virtual void finalize(){};
+  virtual void finalize() {}
 
   SubProblem & subProblem() { return _subproblem; }
 

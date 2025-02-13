@@ -9,6 +9,7 @@
 
 #include "BoundaryPreservedMarker.h"
 #include "MooseMeshUtils.h"
+#include "MooseMesh.h"
 
 #include "libmesh/error_vector.h"
 

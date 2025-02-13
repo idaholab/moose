@@ -11,6 +11,7 @@
 
 #include "KernelBase.h"
 #include "ADFunctorInterface.h"
+#include "MooseVariableInterface.h"
 
 // forward declarations
 template <typename>
