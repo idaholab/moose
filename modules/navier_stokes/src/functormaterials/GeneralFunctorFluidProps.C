@@ -31,7 +31,7 @@ GeneralFunctorFluidProps::validParams()
       false,
       "Whether to force the definition of a density functor from the fluid properties");
   params.addParam<bool>("neglect_derivatives_of_density_time_derivative",
-                        false,
+                        true,
                         "Whether to neglect the derivatives with regards to nonlinear variables "
                         "of the density time derivatives");
 

@@ -42,9 +42,6 @@ protected:
   /// Function describing the temperature of the body irhs
   const Function & _tinf;
 
-  /// Emissivity of the boundary
-  const Real _eps_boundary;
-
   usingGenericIntegratedBCMembers;
 };
 

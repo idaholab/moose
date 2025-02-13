@@ -17,9 +17,8 @@ RadiativeHeatFluxBCBaseTempl<is_ad>::validParams()
 {
   InputParameters params = GenericIntegratedBC<is_ad>::validParams();
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
-  params.addParam<FunctionName>(
-      "Tinfinity", "0", "Temperature of the body in radiative heat transfer.");
-  params.addParam<Real>("boundary_emissivity", 1, "Emissivity of the boundary.");
+  params.addRequiredParam<FunctionName>("Tinfinity",
+                                        "Temperature of the body in radiative heat transfer.");
   params.addClassDescription("Boundary condition for radiative heat flux where temperature and the"
                              "temperature of a body in radiative heat transfer are specified.");
   return params;
@@ -30,8 +29,7 @@ RadiativeHeatFluxBCBaseTempl<is_ad>::RadiativeHeatFluxBCBaseTempl(
     const InputParameters & parameters)
   : GenericIntegratedBC<is_ad>(parameters),
     _sigma_stefan_boltzmann(this->template getParam<Real>("stefan_boltzmann_constant")),
-    _tinf(getFunction("Tinfinity")),
-    _eps_boundary(this->template getParam<Real>("boundary_emissivity"))
+    _tinf(getFunction("Tinfinity"))
 {
 }
 
