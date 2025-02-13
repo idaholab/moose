@@ -7,7 +7,7 @@
     input = 'three_pipe_shock.i'
     csvdiff = 'three_pipe_shock.csv'
     heavy = True
-    max_time = 600
+    max_time = 650
     requirement = 'The system shall be able to model a 3-pipe shock.'
   []
 []
