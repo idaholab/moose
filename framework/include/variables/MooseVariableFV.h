@@ -303,11 +303,11 @@ public:
   virtual VectorValue<ADReal>
   adGradSln(const FaceInfo & fi, const StateArg & state, const bool correct_skewness = false) const;
 
-  // /**
-  //  * Retrieve the const adGradSln(const FaceInfo & fi) when
-  //  * non-const adGradSln(const FaceInfo & fi) is called for. This is because
-  //  * adGradSln(const FaceInfo & fi) for FE variable are non-const.
-  //  */
+   /**
+    * Retrieve the const adGradSln(const FaceInfo & fi) when
+    * non-const adGradSln(const FaceInfo & fi) is called for. This is because
+    * adGradSln(const FaceInfo & fi) for FE variable are non-const.
+    */
   VectorValue<ADReal> adGradSln(const FaceInfo & fi, const StateArg & state) override
   {
     return adGradSln(fi, state, false);
