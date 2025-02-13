@@ -74,6 +74,8 @@ MooseVariableBase::validParams()
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
+  params.transferParam<std::vector<Real>>(AddVariableAction::validParams(), "initial_condition");
+  params.transferParam<std::string>(AddVariableAction::validParams(), "initial_from_file_var");
 
   params.registerBase("MooseVariableBase");
   params.addPrivateParam<SystemBase *>("_system_base");
