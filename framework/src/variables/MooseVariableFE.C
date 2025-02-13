@@ -433,14 +433,14 @@ MooseVariableFE<OutputType>::computeFaceValues(const FaceInfo & fi)
     _element_data->computeGhostValuesFace(fi, *_neighbor_data);
   }
   else
-    mooseError("FE to FV coupling broken.");
+    mooseAssert(false, "FE to FV coupling broken.");
 }
 
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeAdGradFaceAvg(const FaceInfo & /*fi*/)
 {
-  mooseError("computeAdGradFaceAvg(const FaceInfo & fi) are only for MooseVariableFE<Real>.");
+  mooseError("computeAdGradFaceAvg(const FaceInfo & fi) are only implemented for MooseVariableFE<Real>.");
 }
 
 template <>
@@ -464,7 +464,7 @@ template <typename OutputType>
 VectorValue<ADReal>
 MooseVariableFE<OutputType>::adGradSln(const FaceInfo & /*fi*/, const Moose::StateArg & /*state*/)
 {
-  mooseError("adGradSln(const FaceInfo & fi) are only for MooseVariableFE<Real>.");
+  mooseError("adGradSln(const FaceInfo & fi) are only implemented for MooseVariableFE<Real>.");
 }
 
 template <>
