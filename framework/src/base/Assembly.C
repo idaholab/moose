@@ -1858,8 +1858,6 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
   computeCurrentElemVolume();
 }
 
-// Currently Doing: changing anything to a FV verison if an override is possible
-// during a FE reinit for FE coupling.
 void
 Assembly::reinitFVFace(const FaceInfo & fi, bool areFE)
 {
