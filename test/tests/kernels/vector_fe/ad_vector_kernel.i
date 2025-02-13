@@ -48,9 +48,9 @@
   []
   [sln]
     type = ParsedVectorFunction
-    expression_x =  cos(pi*x)*sin(pi*y)
-    expression_y = -sin(pi*x)*cos(pi*y)
-    curl_z =  -2*pi*cos(pi*x)*cos(pi*y)
+    expression_x =  'cos(pi*x)*sin(pi*y)'
+    expression_y = '-sin(pi*x)*cos(pi*y)'
+    curl_z =  '-2*pi*cos(pi*x)*cos(pi*y)'
   []
 []
 

@@ -882,7 +882,7 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
-   * Returns curl of a coupled variable for use in Automatic Differentiation
+   * Returns curl of a coupled variable for use in objects utilizing Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to an ADVectorVariableCurl containing the curl of the coupled variable
