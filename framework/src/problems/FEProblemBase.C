@@ -4144,17 +4144,26 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto solver_sys_num =
-      parameters.isParamValid(var_param_name) &&
-              determineSolverSystem(parameters.varName(var_param_name, object_name)).first
-          ? determineSolverSystem(parameters.varName(var_param_name, object_name)).second
-          : (unsigned int)0;
+  // Due to objects like SolutionUserObject which manipulate libmesh objects
+  // and variables directly at the back end, we need a default option here
+  // which is going to be the pointer to the first solver system within this
+  // problem
+  unsigned int sys_num = 0;
+  if (parameters.isParamValid(var_param_name))
+  {
+    const auto variable_name = parameters.varName(var_param_name, object_name);
+    if (this->hasVariable(variable_name) || this->hasScalarVariable(variable_name))
+      sys_num = getSystem(parameters.varName(var_param_name, object_name)).number();
+  }
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(solver_sys_num);
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseAuxiliary();
+    else
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
   }
   else
   {
@@ -4166,7 +4175,11 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _solver_systems[solver_sys_num].get();
+
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = _aux.get();
+    else
+      parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
   }
 }
 
@@ -5684,7 +5697,7 @@ FEProblemBase::getSystem(const std::string & var_name)
   const auto [var_in_sys, sys_num] = determineSolverSystem(var_name);
   if (var_in_sys)
     return _solver_systems[sys_num]->system();
-  else if (_aux->hasVariable(var_name))
+  else if (_aux->hasVariable(var_name) || _aux->hasScalarVariable(var_name))
     return _aux->system();
   else
     mooseError("Unable to find a system containing the variable " + var_name);
@@ -8695,6 +8708,24 @@ FEProblemBase::haveADObjects(const bool have_ad_objects)
   _have_ad_objects = have_ad_objects;
   if (_displaced_problem)
     _displaced_problem->SubProblem::haveADObjects(have_ad_objects);
+}
+
+const SystemBase &
+FEProblemBase::getSystemBase(const unsigned int sys_num) const
+{
+  if (sys_num < _solver_systems.size())
+    return *_solver_systems[sys_num];
+
+  return *_aux;
+}
+
+SystemBase &
+FEProblemBase::getSystemBase(const unsigned int sys_num)
+{
+  if (sys_num < _solver_systems.size())
+    return *_solver_systems[sys_num];
+
+  return *_aux;
 }
 
 const SystemBase &

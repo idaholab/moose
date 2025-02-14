@@ -98,7 +98,7 @@ RayKernelTempl<T>::computeJacobian()
 
   precalculateJacobian();
 
-  const auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
+  const auto & ce = _fe_problem.couplingEntries(_tid, _nl->number());
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);

@@ -49,7 +49,7 @@ RayTracingObject::RayTracingObject(const InputParameters & params)
     _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _study(*params.getCheckedPointerParam<RayTracingStudy *>("_ray_tracing_study")),
     _trace_ray(const_cast<const RayTracingStudy &>(_study).traceRay(_tid)),
-    _nl(_fe_problem.getNonlinearSystemBase(_study.systemNumber())),
+    _nl(getNonlinearSystem()),
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_fe_problem.mesh()),
     _current_elem(_trace_ray.currentElem()),
@@ -60,4 +60,20 @@ RayTracingObject::RayTracingObject(const InputParameters & params)
 {
   // Supplies only itself
   _supplied_names.insert(name());
+}
+
+NonlinearSystemBase *
+RayTracingObject::getNonlinearSystem()
+{
+  // If this object actually operates with a nonlinear variable that belongs to a system
+  // we use the variable's system
+  if (_study.systemNumber() < _fe_problem.numNonlinearSystems())
+    return &_fe_problem.getNonlinearSystemBase(_study.systemNumber());
+
+  // If the user operates on auxiliary variables we just use the first nonlinear
+  // system if there is any
+  if (_fe_problem.numNonlinearSystems())
+    return &_fe_problem.getNonlinearSystemBase(0);
+
+  return nullptr;
 }

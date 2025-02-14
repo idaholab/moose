@@ -127,6 +127,7 @@ alpha_b = 1e-4
   [h_advection]
     type = LinearFVEnergyAdvection
     variable = T
+    advected_quantity = temperature
     cp = ${cp}
     advected_interp_method = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
