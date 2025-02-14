@@ -37,7 +37,7 @@ test:
     - pyhit
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: 'HIT Parser'
 
