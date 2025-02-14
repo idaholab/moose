@@ -27,6 +27,7 @@ CylinderComponent::validParams()
   params += ComponentPhysicsInterface::validParams();
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
+  params += ComponentBoundaryConditionInterface::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -53,6 +54,7 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
     ComponentPhysicsInterface(params),
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
+    ComponentBoundaryConditionInterface(params),
     _radius(getParam<Real>("radius")),
     _height(getParam<Real>("length"))
 {
@@ -135,4 +137,11 @@ CylinderComponent::setupComponent()
 {
   if (_dimension == 2)
     _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
+}
+
+void
+CylinderComponent::checkIntegrity()
+{
+  ComponentInitialConditionInterface::checkIntegrity();
+  ComponentBoundaryConditionInterface::checkIntegrity();
 }

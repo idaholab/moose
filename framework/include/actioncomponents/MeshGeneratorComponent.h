@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "ActionComponent.h"
 #include "ComponentPhysicsInterface.h"
+#include "ComponentMaterialPropertyInterface.h"
+#include "ComponentInitialConditionInterface.h"
+#include "ComponentBoundaryConditionInterface.h"
 
 /**
  * Component whose mesh is generated in the [Mesh] block on which one can define a Physics.
@@ -19,7 +22,8 @@
 class MeshGeneratorComponent : public virtual ActionComponent,
                                public ComponentPhysicsInterface,
                                public ComponentMaterialPropertyInterface,
-                               public ComponentInitialConditionInterface
+                               public ComponentInitialConditionInterface,
+                               public ComponentBoundaryConditionInterface
 {
 public:
   /**
@@ -32,6 +36,7 @@ public:
 protected:
   virtual void addMeshGenerators() override;
   virtual void setupComponent() override;
+  void checkIntegrity() override;
 
 private:
   /// Whether the component uses a saved mesh or the final mesh
