@@ -57,7 +57,7 @@ w.r.t. $\eta$ (`eta`), which contain second and higher derivatives of $h$ (make
 sure to set the `derivative_order` of $h$ high enough!).
 
 The [!param](/Materials/DerivativeParsedMaterial/material_property_names) are parsed by
-the [`FunctionMaterialPropertyDescriptor` class](http://mooseframework.org/docs/doxygen/moose/classFunctionMaterialPropertyDescriptor.html),
+the [`FunctionMaterialPropertyDescriptor` class](https://mooseframework.inl.gov/docs/doxygen/moose/classFunctionMaterialPropertyDescriptor.html),
 which understands the following syntax:
 
 | Expression | Description |

@@ -40,7 +40,7 @@ test:
     - $PREFIX/bin/moose -h
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: >
    The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element,

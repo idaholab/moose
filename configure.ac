@@ -1,4 +1,4 @@
-AC_INIT([moose], [0.9.0], [https://github.com/idaholab/moose/discussions], [moose], [https://mooseframework.org])
+AC_INIT([moose], [0.9.0], [https://github.com/idaholab/moose/discussions], [moose], [https://mooseframework.inl.gov])
 AC_PREREQ([2.69])
 
 # Infer the source directory as the path to the ./configure script
