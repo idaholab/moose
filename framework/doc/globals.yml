@@ -1,6 +1,6 @@
 libMesh: http://libmesh.github.io/
 PETSc: https://www.mcs.anl.gov/petsc/
-MOOSE: http://www.mooseframework.org
+MOOSE: https://mooseframework.inl.gov
 YAML: http://yaml.org/
 python: https://www.python.org/
 AuxVariables: /AuxVariables/index.md

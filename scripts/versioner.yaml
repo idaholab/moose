@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2024.12.23
+    version: 2025.03.24
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
-  # dependers: petsc, libmesh, moose-dev, libmesh-vtk, peacock
+  # dependers: libmesh-vtk, peacock, petsc, libmesh, moose-dev
   mpi:
-    version: 2024.12.23
+    version: 2025.03.24
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -24,9 +24,30 @@ packages:
       - conda/mpi/base_build.sh
     apptainer:
   # dependers: libmesh, moose-dev
+  libmesh-vtk:
+    version: 9.3.0
+    build_number: 6
+    conda: conda/libmesh-vtk
+    templates:
+      conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
+      conda/libmesh-vtk/meta.yaml.template: conda/libmesh-vtk/meta.yaml
+    dependencies:
+      - mpi
+    influential:
+      - conda/libmesh-vtk/build.sh
+  # dependers: peacock
+  peacock:
+    version: 2025.03.24
+    conda: conda/peacock
+    templates:
+      conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml
+      conda/peacock/meta.yaml.template: conda/peacock/meta.yaml
+    dependencies:
+      - mpi
+  # dependers: libmesh, moose-dev
   petsc:
     version: 3.22.1.193.g72c1e49ee3d
-    build_number: 1
+    build_number: 2
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -45,7 +66,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2025.03.06
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -64,7 +85,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.02.25
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -81,7 +102,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.03.06
+    version: 2025.03.24
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -98,27 +119,6 @@ packages:
       - apptainer/remove_channels.def
       - apptainer/files/moose-dev
       - scripts/setup_libtorch.sh
-  # dependers: libmesh, moose-dev
-  libmesh-vtk:
-    version: 9.3.0
-    build_number: 5
-    conda: conda/libmesh-vtk
-    templates:
-      conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
-      conda/libmesh-vtk/meta.yaml.template: conda/libmesh-vtk/meta.yaml
-    dependencies:
-      - mpi
-    influential:
-      - conda/libmesh-vtk/build.sh
-  # dependers: peacock
-  peacock:
-    version: 2024.12.23
-    conda: conda/peacock
-    templates:
-      conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml
-      conda/peacock/meta.yaml.template: conda/peacock/meta.yaml
-    dependencies:
-      - mpi
   # dependers: none
   pprof:
     version: 2024.12.23

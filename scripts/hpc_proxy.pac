@@ -1,7 +1,7 @@
 // INL HPC PAC (Proxy-Auto Configuration)
 //
 // Used within the MOOSE HPC connectivity instructions
-// (mooseframework.org/help/inl/hpc_remote.html)
+// (https://mooseframework.inl.gov/help/inl/hpc_remote.html)
 // to tunnel traffic to common HPC resources
 // using a SOCKS proxy to hpclogin.inl.gov.
 // See the link for more information.

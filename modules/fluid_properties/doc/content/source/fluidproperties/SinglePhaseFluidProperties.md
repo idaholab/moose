@@ -74,7 +74,7 @@ Additionally, the following interfaces are available:
 - `molarMass()`: The fluid's molar mass (kg/mol).
 
 The full list of available methods can be found in either the source code or the
-[Modules Doxygen](http://mooseframework.org/docs/doxygen/modules/classes.html) page for each
+[Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html) page for each
 FluidProperties class.
 
 ## Default Analytical Fluid Properties Relations

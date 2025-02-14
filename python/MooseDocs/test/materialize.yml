@@ -111,7 +111,7 @@ Extensions:
     MooseDocs.extensions.common:
         active: True
         shortcuts:
-            MOOSE: https:://mooseframework.org
+            MOOSE: https:://https://mooseframework.inl.gov
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
         active: True
