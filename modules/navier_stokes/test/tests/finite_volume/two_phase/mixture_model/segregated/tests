@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#22637 #29175'
+  design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
+  [lid-driven]
+    type = CSVDiff
+    input = 'lid-driven-two-phase-physics.i'
+    csvdiff = 'lid-driven-two-phase-physics_out.csv'
+    requirement = 'The system shall be able to model a lid-driven cavity with a two phase mixture using the linear finite volume discretization.'
+  []
+  [rayleigh-bernard]
+    type = CSVDiff
+    input = 'rayleigh-bernard-two-phase-physics.i'
+    csvdiff = 'rayleigh-bernard-two-phase-physics_out.csv'
+    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Bernard convection with a two phase mixture using the linear finite volume discretization.'
+  []
+[]
