@@ -44,7 +44,6 @@ void
 FlowChannel1PhaseBase::init()
 {
   FlowChannelBase::init();
-  checkFluidProperties();
 }
 
 std::shared_ptr<FlowModel>
@@ -64,6 +63,8 @@ void
 FlowChannel1PhaseBase::check() const
 {
   FlowChannelBase::check();
+
+  checkFluidProperties();
 
   // only 1-phase flow compatible heat transfers are allowed
   for (unsigned int i = 0; i < _heat_transfer_names.size(); i++)
