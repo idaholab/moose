@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "KernelGrad.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -23,7 +23,7 @@
  *           isotropic diffusion or RealTensorValue for the general anisotropic case.
  */
 template <typename T>
-class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad>>
 {
 public:
   static InputParameters validParams();
@@ -33,10 +33,10 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual RealGradient precomputeQpResidual() override;
+  virtual RealGradient precomputeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-  virtual Real computeQpCJacobian();
+  virtual RealGradient computeQpCJacobian();
 
   /// diffusion coefficient
   const MaterialProperty<T> & _D;
@@ -61,7 +61,7 @@ template <typename T>
 InputParameters
 MatDiffusionBase<T>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = KernelGrad::validParams();
   params.addDeprecatedParam<MaterialPropertyName>(
       "D_name",
       "The name of the diffusivity",
@@ -83,7 +83,7 @@ MatDiffusionBase<T>::validParams()
 
 template <typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
+  : DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad>>(parameters),
     _D(isParamValid("D_name") ? getMaterialProperty<T>("D_name")
                               : getMaterialProperty<T>("diffusivity")),
     _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
@@ -113,17 +113,17 @@ MatDiffusionBase<T>::initialSetup()
 }
 
 template <typename T>
-Real
-MatDiffusionBase<T>::computeQpResidual()
+RealGradient
+MatDiffusionBase<T>::precomputeQpResidual()
 {
-  return _D[_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  return _D[_qp] * _grad_v[_qp];
 }
 
 template <typename T>
-Real
-MatDiffusionBase<T>::computeQpJacobian()
+RealGradient
+MatDiffusionBase<T>::precomputeQpJacobian()
 {
-  Real sum = _phi[_j][_qp] * _dDdc[_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  RealGradient sum = _phi[_j][_qp] * _dDdc[_qp] * _grad_v[_qp];
   if (!_is_coupled)
     sum += computeQpCJacobian();
 
@@ -140,14 +140,14 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
 
   if (_v_var == jvar)
-    sum += computeQpCJacobian();
+    sum += computeQpCJacobian() * _grad_test[_i][_qp];
 
   return sum;
 }
 
 template <typename T>
-Real
+RealGradient
 MatDiffusionBase<T>::computeQpCJacobian()
 {
-  return _D[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _D[_qp] * _grad_phi[_j][_qp];
 }
