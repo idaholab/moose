@@ -25,8 +25,7 @@ CurlCurlFieldTempl<is_ad>::validParams()
 
 template <bool is_ad>
 CurlCurlFieldTempl<is_ad>::CurlCurlFieldTempl(const InputParameters & parameters)
-  : GenericKernelCurl<is_ad>(parameters),
-    _coeff(this->template getParam<Real>("coeff"))
+  : GenericKernelCurl<is_ad>(parameters), _coeff(this->template getParam<Real>("coeff"))
 {
 }
 

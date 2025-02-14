@@ -15,8 +15,8 @@
  *  Weak form contribution corresponding to the curl(curl(E)) where E is the
  *  electric field vector
  */
- template <bool is_ad>
- class CurlCurlFieldTempl : public GenericKernelCurl<is_ad>
+template <bool is_ad>
+class CurlCurlFieldTempl : public GenericKernelCurl<is_ad>
 {
 public:
   static InputParameters validParams();
