@@ -26,9 +26,9 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html)
 
-[libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
+[libMesh Doxygen](https://mooseframework.inl.gov/docs/doxygen/libmesh/classes.html)
 
-[TIMPI Doxygen](https://mooseframework.org/docs/doxygen/timpi/classes.html)
+[TIMPI Doxygen](https://mooseframework.inl.gov/docs/doxygen/timpi/classes.html)
 
 [Source Code Documentation](source/index.md exact=True)
 

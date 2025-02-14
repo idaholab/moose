@@ -9,7 +9,7 @@ section for what may look familiar, and follow those instructions:
   you (Sorry!). Remove the offending channel(s):
 
   ```bash
-  conda config --remove channels https://mooseframework.org/conda/moose
+  conda config --remove channels https://mooseframework.inl.gov/conda/moose
   conda config --remove channels https://mooseframework.com/conda/moose
   conda config --remove channels https://mooseframework.inl.gov/conda/moose
   ```
