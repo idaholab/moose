@@ -28,7 +28,7 @@ protected:
   /**
    *  curl of the shape function
    *  Note: This still needs to be defined for the uses of GenericKernelCurl
-   */ 
+   */
   const VectorVariablePhiCurl & _curl_phi;
 
   /// Holds the solution curl at the current quadrature points

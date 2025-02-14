@@ -20,8 +20,8 @@ public:
   VectorFEWaveTempl(const InputParameters & parameters);
 
 protected:
-virtual GenericReal<is_ad> computeQpResidual() override;
-virtual Real computeQpJacobian() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
   /// x component forcing function
   const Function & _x_ffn;
