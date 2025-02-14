@@ -23,9 +23,18 @@
     issues = '#29856'
     requirement = 'The system shall be able to add initial conditions directly on the subdomains (action)components for a compact, local syntax.'
   []
+  [bcs]
+    type = CSVDiff
+    input = 'component_with_bcs.i'
+    csvdiff = 'component_with_bcs_out.csv'
+    design = 'ComponentBoundaryConditionInterface.md'
+    issues = '#29856'
+    requirement = 'The system shall be able to add boundary conditions directly on the subdomains (action)components for a compact, local syntax.'
+  []
 
   [errors]
     issues = '#29856'
+    design = 'ComponentPhysicsInterface.md ComponentMaterialPropertyInterface.md ComponentInitialConditionInterface.md ComponentBoundaryConditionInterface.md'
     requirement = 'The system shall report an error'
     [materials_input_size]
       type = RunException
@@ -47,6 +56,18 @@
       cli_args = "ActionComponents/cylinder_1/initial_condition_variables='w'"
       expect_err = "Initial conditions for variables \'w\' have been defined on this ActionComponent, but have not been requested by any Physics."
       detail = 'if the input of an initial condition on an (action)component is not used by any Physics to define an initial condition'
+    []
+    [bcs_unrequested]
+      type = RunException
+      input = 'component_with_bcs.i'
+      cli_args = "ActionComponents/cylinder_1/flux_bc_variables='w' "
+                 "ActionComponents/cylinder_1/flux_bc_boundaries='cylinder_1_right' "
+                 "ActionComponents/cylinder_1/flux_bc_values='4' "
+                 "ActionComponents/cylinder_1/fixed_value_bc_variables='u v w' "
+                 "ActionComponents/cylinder_1/fixed_value_bc_boundaries='cylinder_1_right; cylinder_1_right; cylinder_1_right' "
+                 "ActionComponents/cylinder_1/fixed_value_bc_values='4; 4; 2'"
+      expect_err = "have been defined on this ActionComponent, but have not been requested by any Physics."
+      detail = 'if the input of a boundary condition on an (action)component is not used by any Physics to define a boundary condition'
     []
   []
 []
