@@ -27,6 +27,8 @@ private:
   virtual void addFEKernels() override;
   virtual void addFEBCs() override;
 
+  virtual void addBoundaryConditionsFromComponents() override;
+
   /// Whether to use automatic differentiation or not
   const bool _use_ad;
 };

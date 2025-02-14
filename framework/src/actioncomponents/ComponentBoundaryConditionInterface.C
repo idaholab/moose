@@ -71,8 +71,8 @@ ComponentBoundaryConditionInterface::ComponentBoundaryConditionInterface(
       getParam<std::vector<std::vector<MooseFunctorName>>>("fixed_value_bc_values");
   checkVectorParamsSameLength<VariableName, std::vector<BoundaryName>>("fixed_value_bc_variables",
                                                                        "fixed_value_bc_boundaries");
-  checkVectorParamsSameLength<VariableName, std::vector<BoundaryName>>("fixed_value_bc_variables",
-                                                                       "fixed_value_bc_values");
+  checkVectorParamsSameLength<VariableName, std::vector<MooseFunctorName>>(
+      "fixed_value_bc_variables", "fixed_value_bc_values");
   checkTwoDVectorParamsSameLength<BoundaryName, MooseFunctorName>("fixed_value_bc_boundaries",
                                                                   "fixed_value_bc_values");
   const auto & flux_boundaries =
@@ -80,8 +80,8 @@ ComponentBoundaryConditionInterface::ComponentBoundaryConditionInterface(
   const auto & flux_values = getParam<std::vector<std::vector<MooseFunctorName>>>("flux_bc_values");
   checkVectorParamsSameLength<VariableName, std::vector<BoundaryName>>("flux_bc_variables",
                                                                        "flux_bc_boundaries");
-  checkVectorParamsSameLength<VariableName, std::vector<BoundaryName>>("flux_bc_variables",
-                                                                       "flux_bc_values");
+  checkVectorParamsSameLength<VariableName, std::vector<MooseFunctorName>>("flux_bc_variables",
+                                                                           "flux_bc_values");
   checkTwoDVectorParamsSameLength<BoundaryName, MooseFunctorName>("flux_bc_boundaries",
                                                                   "flux_bc_values");
 
@@ -94,13 +94,13 @@ ComponentBoundaryConditionInterface::ComponentBoundaryConditionInterface(
   for (const auto i : index_range(_fixed_value_bc_variables))
   {
     const auto & var_name = _fixed_value_bc_variables[i];
-    for (const auto j : index_range(fixed_value_boundaries))
+    for (const auto j : index_range(fixed_value_boundaries[i]))
       _fixed_value_bcs[var_name][fixed_value_boundaries[i][j]] = fixed_value_values[i][j];
   }
   for (const auto i : index_range(_flux_bc_variables))
   {
     const auto & var_name = _flux_bc_variables[i];
-    for (const auto j : index_range(flux_boundaries))
+    for (const auto j : index_range(flux_boundaries[i]))
       _flux_bcs[var_name][flux_boundaries[i][j]] = flux_values[i][j];
   }
 }
@@ -194,8 +194,7 @@ ComponentBoundaryConditionInterface::checkBoundaryConditionsAllRequested() const
       if (std::find(_requested_bc_variables.begin(),
                     _requested_bc_variables.end(),
                     std::make_pair(var_pair.first, bc_pair.first)) == _requested_bc_variables.end())
-        list_missing +=
-            (list_missing.empty() ? "" : "\n- ") + var_pair.first + " on " + bc_pair.first;
+        list_missing += "\n- " + var_pair.first + " on " + bc_pair.first;
 
   for (const auto & var_pair : _flux_bcs)
     for (const auto & bc_pair : var_pair.second)
@@ -205,7 +204,7 @@ ComponentBoundaryConditionInterface::checkBoundaryConditionsAllRequested() const
         list_missing += "\n- " + var_pair.first + " on " + bc_pair.first;
 
   if (!list_missing.empty())
-    mooseError("Initial conditions for variables and boundaries:\n" + list_missing +
+    mooseError("Boundary conditions for variables and boundaries:" + list_missing +
                "\n  have been defined on this ActionComponent, but have not been requested by "
                "any Physics.");
 }
