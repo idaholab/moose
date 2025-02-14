@@ -350,6 +350,7 @@ FlowModel1PhaseBase::addDensityAux()
   params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
   params.set<std::vector<VariableName>>("numerator") = {THM::RHOA};
   params.set<std::vector<VariableName>>("denominator") = {THM::AREA};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   _sim.addAuxKernel(class_name, genName(_comp_name, "rho_aux"), params);
 }
 
@@ -362,6 +363,7 @@ FlowModel1PhaseBase::addSpecificVolumeAux()
   params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
   params.set<std::vector<VariableName>>("rhoA") = {THM::RHOA};
   params.set<std::vector<VariableName>>("A") = {THM::AREA};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   _sim.addAuxKernel(class_name, genName(_comp_name, "v_aux"), params);
 }
 
@@ -375,6 +377,7 @@ FlowModel1PhaseBase::addSpecificInternalEnergyAux()
   params.set<std::vector<VariableName>>("rhoA") = {THM::RHOA};
   params.set<std::vector<VariableName>>("rhouA") = {THM::RHOUA};
   params.set<std::vector<VariableName>>("rhoEA") = {THM::RHOEA};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   _sim.addAuxKernel(class_name, genName(_comp_name, "e_aux"), params);
 }
 
@@ -389,6 +392,7 @@ FlowModel1PhaseBase::addSpecificTotalEnthalpyAux()
   params.set<std::vector<VariableName>>("rhoEA") = {THM::RHOEA};
   params.set<std::vector<VariableName>>("p") = {THM::PRESSURE};
   params.set<std::vector<VariableName>>("A") = {THM::AREA};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   _sim.addAuxKernel(class_name, genName(_comp_name, "H_auxkernel"), params);
 }
 
