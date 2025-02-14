@@ -58,8 +58,6 @@ InputParameters
 ADMatDiffusionBase<T>::validParams()
 {
   InputParameters params = ADKernelGrad::validParams();
-  params.addClassDescription("Diffusion kernel with a material property as diffusivity and "
-                             "automatic differentiation to provide perfect Jacobians");
   params.addParam<MaterialPropertyName>(
       "diffusivity", "D", "The diffusivity value or material property");
   params.addCoupledVar("v",
