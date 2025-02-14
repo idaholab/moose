@@ -14,6 +14,7 @@
 #include "Transient.h"
 #include "NonlinearSystem.h"
 #include "FEProblemBase.h"
+#include "LinearSystem.h"
 
 #include <limits>
 #include <set>
@@ -575,8 +576,18 @@ IterationAdaptiveDT::acceptStep()
     _tfunc_times.erase(_tfunc_times.begin());
   }
 
-  _nl_its = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).nNonlinearIterations();
-  _l_its = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).nLinearIterations();
+  // Reset counts
+  _nl_its = 0;
+  _l_its = 0;
+
+  // Use the total number of iterations for multi-system
+  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
+    _nl_its += _fe_problem.getNonlinearSystemBase(/*nl_sys=*/i).nNonlinearIterations();
+  // Add linear iterations for both nonlinear and linear systems for multi-system
+  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
+    _l_its += _fe_problem.getNonlinearSystemBase(/*nl_sys=*/i).nLinearIterations();
+  for (const auto i : make_range(_fe_problem.numLinearSystems()))
+    _l_its += _fe_problem.getLinearSystem(/*nl_sys=*/i).nLinearIterations();
 
   if ((_at_function_point || _executioner.atSyncPoint()) &&
       _dt + _timestep_tolerance < _executioner.unconstrainedDT())
