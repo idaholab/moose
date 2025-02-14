@@ -27,6 +27,7 @@ MeshGeneratorComponent::validParams()
   params += ComponentPhysicsInterface::validParams();
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
+  params += ComponentBoundaryConditionInterface::validParams();
   params.addRequiredParam<MeshGeneratorName>("mesh_generator", "Mesh generator providing the mesh");
   MooseEnum mesh_generator_type("saved_mesh final_generator");
   params.addRequiredParam<MooseEnum>("mesh_generator_type",
@@ -44,6 +45,7 @@ MeshGeneratorComponent::MeshGeneratorComponent(const InputParameters & params)
     ComponentPhysicsInterface(params),
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
+    ComponentBoundaryConditionInterface(params),
     _mesh_generator_type(getParam<MooseEnum>("mesh_generator_type"))
 {
   if (_mesh_generator_type == "saved_mesh" && !isParamValid("saved_mesh_name"))
@@ -76,4 +78,11 @@ MeshGeneratorComponent::setupComponent()
   component_mesh->subdomain_ids(blocks);
   for (const auto bid : blocks)
     _blocks.push_back(component_mesh->subdomain_name(bid));
+}
+
+void
+MeshGeneratorComponent::checkIntegrity()
+{
+  ComponentInitialConditionInterface::checkIntegrity();
+  ComponentBoundaryConditionInterface::checkIntegrity();
 }
