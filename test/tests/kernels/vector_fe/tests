@@ -55,8 +55,8 @@
     type = CSVDiff
     input = ad_coupled_curl_product.i
     csvdiff = ad_coupled_curl_product_out.csv
-    cli_args = 'Postprocessors/active="v_L2Error HCurlSemiError HCurlError u_L2Error" '
-               'Outputs/exodus=false Outputs/csv=true'
+    prereq = 'ad_coupled_curl_product'
+    should_execute = false
     issues = '#29868'
     requirement = 'The system shall be able to estimate the L2 and H(curl) errors for a '
                   'problem that supplies the product of the curl of a variable vector '

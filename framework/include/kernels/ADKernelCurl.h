@@ -12,25 +12,25 @@
 #include "ADVectorKernel.h"
 
 /**
- *  Weak form contribution corresponding to the curl(curl(E)) where E is the
- *  electric field vector using Automatic Differentiation for the Jacobian
+ *  A base class that defines the AD curl operators.
  */
-class ADCurlCurlField : public ADVectorKernel
+class ADKernelCurl : public ADVectorKernel
 {
 public:
   static InputParameters validParams();
 
-  ADCurlCurlField(const InputParameters & parameters);
+  ADKernelCurl(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
-
   /// curl of the test function
   const VectorVariableTestCurl & _curl_test;
 
+  /**
+   *  curl of the shape function
+   *  Note: This still needs to be defined for the uses of GenericKernelCurl
+   */ 
+  const VectorVariablePhiCurl & _curl_phi;
+
   /// Holds the solution curl at the current quadrature points
   const ADVectorVariableCurl & _curl_u;
-
-  /// Scalar coefficient
-  Real _coeff;
 };

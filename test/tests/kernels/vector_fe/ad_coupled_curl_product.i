@@ -95,7 +95,6 @@
 []
 
 [Postprocessors]
-  active = ''
   [v_L2Error]
     type = ElementVectorL2Error
     variable = v
@@ -133,4 +132,5 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []
