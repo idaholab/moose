@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Action.h"
 #include "ActionWarehouse.h"
+#include "InputParametersChecksUtils.h"
 
 class PhysicsBase;
 class FEProblemBase;
@@ -22,7 +23,7 @@ class FEProblemBase;
 /**
  * Base class for components that are defined using an action
  */
-class ActionComponent : public Action
+class ActionComponent : public Action, public InputParametersChecksUtils<ActionComponent>
 {
 public:
   static InputParameters validParams();

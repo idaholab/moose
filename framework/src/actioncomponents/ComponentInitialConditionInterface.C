@@ -36,6 +36,9 @@ ComponentInitialConditionInterface::ComponentInitialConditionInterface(
     _variable_ic_functors(getParam<std::vector<MooseFunctorName>>("initial_condition_values"))
 {
   addRequiredTask("check_integrity");
+
+  // Parameter checks
+  checkVectorParamsNoOverlap<VariableName>({"initial_condition_variables"});
   if (_initial_condition_variables.size() != _variable_ic_functors.size())
     paramError("initial_condition_variables",
                "Should be the same size as 'initial_condition_values'");
