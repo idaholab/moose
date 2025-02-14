@@ -582,7 +582,7 @@ PACKAGE_TARNAME='moose'
 PACKAGE_VERSION='0.9.0'
 PACKAGE_STRING='moose 0.9.0'
 PACKAGE_BUGREPORT='https://github.com/idaholab/moose/discussions'
-PACKAGE_URL='https://mooseframework.org'
+PACKAGE_URL='https://mooseframework.inl.gov'
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
@@ -1253,7 +1253,7 @@ Optional Packages:
                           [ARG=yes or libtorch directory]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
-moose home page: <https://mooseframework.org>.
+moose home page: <https://mooseframework.inl.gov>.
 _ACEOF
 ac_status=$?
 fi
@@ -2465,7 +2465,7 @@ Configuration commands:
 $config_commands
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
-moose home page: <https://mooseframework.org>."
+moose home page: <https://mooseframework.inl.gov>."
 
 _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
