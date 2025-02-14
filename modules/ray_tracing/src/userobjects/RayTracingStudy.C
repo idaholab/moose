@@ -261,8 +261,8 @@ RayTracingStudy::initialSetup()
                  "\nIn this case, the study must use the execute_on = PRE_KERNELS");
 
   // Build 1D quadrature rule for along a segment
-  _segment_qrule = QBase::build(
-      QGAUSS, 1, _fe_problem.getNonlinearSystemBase(_sys.number()).getMinQuadratureOrder());
+  _segment_qrule =
+      QBase::build(QGAUSS, 1, _fe_problem.getSystemBase(_sys.number()).getMinQuadratureOrder());
 }
 
 void

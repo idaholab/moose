@@ -46,10 +46,11 @@ WallTemperature1PhaseClosures::addMooseObjectsFlowChannel(const FlowChannelBase 
   const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
   if ((n_ht_connections > 0) && (flow_channel.getTemperatureMode()))
   {
+    for (unsigned int i = 0; i < n_ht_connections; i++)
+      addWallTemperatureFromAuxMaterial(flow_channel_1phase, i);
+
     if (flow_channel.getNumberOfHeatTransferConnections() > 1)
       addAverageWallTemperatureMaterial(flow_channel_1phase);
-    else
-      addWallTemperatureFromAuxMaterial(flow_channel_1phase);
   }
 }
 

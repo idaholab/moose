@@ -13,7 +13,7 @@ The Nusselt number in this correlation is:
 !equation
 Nu = 0.023 Re^{\dfrac{4}{5}} Pr^n;
 
-with $n$ = 0.4 if the fluid temperature is greater than the wall temperature and 0.3 otherwise,
+with $n$ = 0.4 if the fluid temperature is lower than the wall temperature and 0.3 otherwise,
 $Re$ the Reynolds number and $Pr$ the Prandtl number.
 
 !syntax parameters /Materials/WallHeatTransferCoefficient3EqnDittusBoelterMaterial

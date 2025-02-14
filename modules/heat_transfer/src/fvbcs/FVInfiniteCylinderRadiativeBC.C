@@ -16,6 +16,7 @@ InputParameters
 FVInfiniteCylinderRadiativeBC::validParams()
 {
   InputParameters params = FVRadiativeHeatFluxBCBase::validParams();
+  params.addRequiredParam<Real>("boundary_emissivity", "Emissivity of the boundary.");
   params.addParam<Real>("cylinder_emissivity",
                         1,
                         "Emissivity of the cylinder in radiative heat transfer with the boundary.");
@@ -30,6 +31,7 @@ FVInfiniteCylinderRadiativeBC::validParams()
 
 FVInfiniteCylinderRadiativeBC::FVInfiniteCylinderRadiativeBC(const InputParameters & parameters)
   : FVRadiativeHeatFluxBCBase(parameters),
+    _eps_boundary(getParam<Real>("boundary_emissivity")),
     _eps_cylinder(getParam<Real>("cylinder_emissivity")),
     _boundary_radius(getParam<Real>("boundary_radius")),
     _cylinder_radius(getParam<Real>("cylinder_radius"))

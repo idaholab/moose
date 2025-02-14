@@ -44,9 +44,14 @@ ADConvectiveHeatFluxBC::ADConvectiveHeatFluxBC(const InputParameters & parameter
 {
   if (_T_infinity || _htc)
   {
-    if (_T_infinity_functor || _htc_functor)
+    if (_T_infinity_functor)
       paramError("T_infinity_functor",
-                 "Either material properties or functors should be specified");
+                 "Either material properties or functors should be specified for both T_infinity "
+                 "and the heat transfer coefficient.");
+    if (_htc_functor)
+      paramError("heat_transfer_coefficient_functor",
+                 "Either material properties or functors should be specified for both T_infinity "
+                 "and the heat transfer coefficient");
     if (!_htc)
       paramError("heat_transfer_coefficient",
                  "Heat transfer coefficient material property must be specified");

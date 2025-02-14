@@ -163,6 +163,7 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   mooseAssert(fi, "The face information must be non-null");
 
   const auto face_type = fi->faceType(std::make_pair(this->_var_num, this->_sys_num));
+
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
     return Moose::FV::interpolate(*this, face, state);
   else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))

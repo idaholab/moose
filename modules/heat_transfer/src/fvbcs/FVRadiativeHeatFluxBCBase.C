@@ -16,9 +16,8 @@ FVRadiativeHeatFluxBCBase::validParams()
   InputParameters params = FVFluxBC::validParams();
   params.addCoupledVar("temperature", "temperature variable");
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
-  params.addParam<MooseFunctorName>(
-      "Tinfinity", "0", "Temperature of the body in radiative heat transfer.");
-  params.addParam<Real>("boundary_emissivity", 1, "Emissivity of the boundary.");
+  params.addRequiredParam<MooseFunctorName>("Tinfinity",
+                                            "Temperature of the body in radiative heat transfer.");
   params.addClassDescription("Boundary condition for radiative heat flux where temperature and the"
                              "temperature of a body in radiative heat transfer are specified.");
   return params;
@@ -28,8 +27,7 @@ FVRadiativeHeatFluxBCBase::FVRadiativeHeatFluxBCBase(const InputParameters & par
   : FVFluxBC(parameters),
     _T(isParamValid("temperature") ? adCoupledValue("temperature") : _u),
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
-    _tinf(getFunctor<ADReal>("Tinfinity")),
-    _eps_boundary(getParam<Real>("boundary_emissivity"))
+    _tinf(getFunctor<ADReal>("Tinfinity"))
 {
   if (!isParamValid("temperature"))
     _var.requireQpComputations();
