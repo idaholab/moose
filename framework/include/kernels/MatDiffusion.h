@@ -16,7 +16,7 @@
  * Real. All logic is implemnted in the MatDiffusionBase class
  * template.
  */
-class MatDiffusion : public MatDiffusionBase<Real>
+class MatDiffusion : public MatDiffusionBaseTempl<Real, false>
 {
 public:
   static InputParameters validParams();
