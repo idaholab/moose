@@ -32,7 +32,9 @@ class Test(unittest.TestCase):
         for hash, packages in OLD_HASHES.items():
             meta = versioner.version_meta(hash)
             for package, package_hash in packages.items():
-                self.assertEqual(str(package_hash), str(meta[package]['hash']))
+                actual_package_hash = str(meta[package]['hash'])
+                message = f'Commit {hash}, package {package}: expected = {package_hash}, actual = {actual_package_hash}'
+                self.assertEqual(str(package_hash), actual_package_hash, message)
 
     def testBadCommit(self):
         with self.assertRaises(Exception) as e:
