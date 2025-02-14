@@ -2369,7 +2369,6 @@ void
 FEProblemBase::subdomainSetup(SubdomainID subdomain, const THREAD_ID tid)
 {
   _all_materials.subdomainSetup(subdomain, tid);
-
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
     _app.getOutputWarehouse().subdomainSetup();

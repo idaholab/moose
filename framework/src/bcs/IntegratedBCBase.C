@@ -76,34 +76,23 @@ IntegratedBCBase::prepareShapes(const unsigned int var_num)
 bool
 IntegratedBCBase::shouldApply() const
 {
-  mooseAssert(_current_elem, "Should have set the current element");
-  const auto block_id = _current_elem->subdomain_id();
-
-  if (!variable().hasBlocks(block_id))
+#ifndef NDEBUG
+  const bool check_subdomain = true;
+#else
+  const bool check_subdomain = false;
+#endif
+  if (_skip_execution_outside_variable_domain || check_subdomain)
   {
-    if (!_skip_execution_outside_variable_domain)
-      mooseError("This boundary condition is likely being executed outside the domain of "
-                 "definition of its variable. You can set 'skip_execution_outside_variable_domain' "
-                 "to true to prevent this.");
-    else
+    mooseAssert(_current_elem, "Should have a current element");
+    const auto block_id = _current_elem->subdomain_id();
+#ifndef NDEBUG
+    if (!_skip_execution_outside_variable_domain && !variable().hasBlocks(block_id))
+      mooseError("This boundary condition is being executed outside the domain of "
+                 "definition of its variable, on subdomain: ",
+                 block_id);
+#endif
+    if (!variable().hasBlocks(block_id))
       return false;
   }
-
-#ifndef NDEBUG
-  // Check all coupled variables
-  // We do not do that in opt mode for potential performance reasons
-  for (const auto & var : getCoupledMooseVars())
-    if (!var->hasBlocks(block_id))
-    {
-      if (!_skip_execution_outside_variable_domain)
-        mooseError("This boundary condition is likely being executed outside the domain of "
-                   "definition of coupled variable '",
-                   var->name(),
-                   "'. You can set 'skip_execution_outside_variable_domain' "
-                   "to true to prevent this.");
-      else
-        return false;
-    }
-#endif
   return true;
 }
