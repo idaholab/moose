@@ -275,7 +275,8 @@ InputParametersChecksUtils<C>::checkTwoDVectorParamsSameLength(const std::string
             param1,
             "Vector at index " + std::to_string(index) + " of 2D vector parameter '" + param1 +
                 "' is not the same size as its counterpart from 2D vector parameter '" + param2 +
-                "'");
+                "'.\nSize first vector: " + std::to_string(value1[index].size()) +
+                "\nSize second vector: " + std::to_string(value2[index].size()));
   }
   // handle empty vector defaults
   else if (forwardIsParamValid(param1) || forwardIsParamValid(param2))

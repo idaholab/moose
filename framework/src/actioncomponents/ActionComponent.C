@@ -21,7 +21,10 @@ ActionComponent::validParams()
 }
 
 ActionComponent::ActionComponent(const InputParameters & params)
-  : Action(params), _dimension(libMesh::invalid_uint), _verbose(getParam<bool>("verbose"))
+  : Action(params),
+    InputParametersChecksUtils<ActionComponent>(this),
+    _dimension(libMesh::invalid_uint),
+    _verbose(getParam<bool>("verbose"))
 {
 }
 
