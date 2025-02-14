@@ -8,37 +8,38 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CurlCurlField.h"
-#include "Assembly.h"
 
 registerMooseObject("ElectromagneticsApp", CurlCurlField);
+registerMooseObject("ElectromagneticsApp", ADCurlCurlField);
 
+template <bool is_ad>
 InputParameters
-CurlCurlField::validParams()
+CurlCurlFieldTempl<is_ad>::validParams()
 {
-  InputParameters params = VectorKernel::validParams();
+  InputParameters params = GenericKernelCurl<is_ad>::validParams();
   params.addClassDescription("Weak form term corresponding to $\\nabla \\times (a \\nabla \\times "
                              "\\vec{E})$.");
   params.addParam<Real>("coeff", 1.0, "Weak form coefficient (default = 1.0).");
   return params;
 }
 
-CurlCurlField::CurlCurlField(const InputParameters & parameters)
-  : VectorKernel(parameters),
-    _curl_test(_var.curlPhi()),
-    _curl_phi(_assembly.curlPhi(_var)),
-    _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld()),
-    _coeff(getParam<Real>("coeff"))
+template <bool is_ad>
+CurlCurlFieldTempl<is_ad>::CurlCurlFieldTempl(const InputParameters & parameters)
+  : GenericKernelCurl<is_ad>(parameters),
+    _coeff(this->template getParam<Real>("coeff"))
 {
 }
 
-Real
-CurlCurlField::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+CurlCurlFieldTempl<is_ad>::computeQpResidual()
 {
   return _coeff * _curl_u[_qp] * _curl_test[_i][_qp];
 }
 
+template <bool is_ad>
 Real
-CurlCurlField::computeQpJacobian()
+CurlCurlFieldTempl<is_ad>::computeQpJacobian()
 {
   return _coeff * _curl_phi[_j][_qp] * _curl_test[_i][_qp];
 }

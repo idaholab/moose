@@ -9,32 +9,29 @@
 
 #pragma once
 
-#include "VectorKernel.h"
+#include "GenericKernelCurl.h"
 
 /**
  *  Weak form contribution corresponding to the curl(curl(E)) where E is the
  *  electric field vector
  */
-class CurlCurlField : public VectorKernel
+ template <bool is_ad>
+ class CurlCurlFieldTempl : public GenericKernelCurl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CurlCurlField(const InputParameters & parameters);
+  CurlCurlFieldTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-
-  /// curl of the test function
-  const VectorVariableTestCurl & _curl_test;
-
-  /// curl of the shape function
-  const VectorVariablePhiCurl & _curl_phi;
-
-  /// Holds the solution curl at the current quadrature points
-  const VectorVariableCurl & _curl_u;
 
   /// Scalar coefficient
   Real _coeff;
+
+  usingGenericKernelCurlMembers;
 };
+
+typedef CurlCurlFieldTempl<false> CurlCurlField;
+typedef CurlCurlFieldTempl<true> ADCurlCurlField;

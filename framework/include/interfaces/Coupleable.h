@@ -1706,7 +1706,7 @@ public:
    * Helper method to return (and insert if necessary) the default gradient for Automatic
    * Differentiation for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default gradient
-   * @return VariableGradient * a pointer to the associated VariableGradient.
+   * @return Reference to a ADVariableGradient containing zero entries for the default values
    */
   const ADVariableGradient & getADDefaultGradient() const;
 
@@ -1714,7 +1714,7 @@ public:
    * Helper method to return (and insert if necessary) the default gradient for Automatic
    * Differentiation for an uncoupled vector variable.
    * @param var_name the name of the vector variable for which to retrieve a default gradient
-   * @return VariableGradient * a pointer to the associated VectorVariableGradient.
+   * @return Reference to a ADVectorVariableGradient containing zero entries for the default values
    */
   const ADVectorVariableGradient & getADDefaultVectorGradient() const;
 
@@ -1722,7 +1722,7 @@ public:
    * Helper method to return (and insert if necessary) the default second derivatives for Automatic
    * Differentiation for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default second derivative
-   * @return VariableSecond * a pointer to the associated VariableSecond.
+   * @return Reference to a ADVariableSecond containing zero entries for the default values
    */
   const ADVariableSecond & getADDefaultSecond() const;
 
@@ -1730,7 +1730,7 @@ public:
    * Helper method to return (and insert if necessary) the default curl value for Automatic
    * Differentiation for an uncoupled variable.
    * @param var_name the name of the vector variable for which to retrieve a default value
-   * @return VectorVariableCurl * a pointer to the associated VectorVariableCurl.
+   * @return Reference to a ADVectorVariableCurl containing zero entries for the default values
    */
   const ADVectorVariableCurl & getADDefaultCurl() const;
 
