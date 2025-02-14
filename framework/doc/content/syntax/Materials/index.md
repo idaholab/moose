@@ -255,7 +255,7 @@ Interface materials are often used along with [InterfaceKernel](syntax/Interface
 
 A "[Discrete](http://www.dictionary.com/browse/discrete)" `Material` is an object that may be
 detached from MOOSE and computed explicitly from other objects. An object inheriting from
-[MaterialPropertyInterface](http://www.mooseframework.org/docs/doxygen/moose/classMaterialPropertyInterface.html)
+[MaterialPropertyInterface](https://mooseframework.inl.gov/docs/doxygen/moose/classMaterialPropertyInterface.html)
 may explicitly call the compute methods of a `Material` object via the `getMaterial` method.
 
 The following should be considered when computing `Material` properties explicitly.

@@ -22,7 +22,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Documentation
 
-[MOOSE Doxygen](http://www.mooseframework.org/docs/doxygen/moose/classes.html)
+[MOOSE Doxygen](https://mooseframework.inl.gov/docs/doxygen/moose/classes.html)
 
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html)
 
@@ -40,9 +40,9 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Build Status (internal)](https://moosebuild.hpc.inl.gov)
 
-[Code Coverage](http://mooseframework.org/docs/coverage/framework/)
+[Code Coverage](https://mooseframework.inl.gov/docs/coverage/framework/)
 
-[Test Timing](http://mooseframework.org/docs/timing/)
+[Test Timing](https://mooseframework.inl.gov/docs/timing/)
 
 ## Software Quality Assurance Documents
 

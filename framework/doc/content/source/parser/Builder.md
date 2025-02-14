@@ -12,7 +12,7 @@ of objects to build. MOOSE is delivered with a very low-level list of syntax whe
 each type of object is exposed directly to the input file by system type (e.g.
 Kernels, BCs, Outputs, etc). Each application that builds upon MOOSE can augment
 or replace this syntax completely. The registered list of syntax can be viewed
-on the mooseframework.org website, or can be dumped on the command-line in a number
+on the https://mooseframework.inl.gov website, or can be dumped on the command-line in a number
 of different formats. The registration itself occurs in [Moose.C](Moose.md).
 
 ## Parameter Substitution
