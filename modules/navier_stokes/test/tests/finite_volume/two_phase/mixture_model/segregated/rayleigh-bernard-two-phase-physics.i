@@ -1,11 +1,13 @@
 mu = 1.0
-rho = 1.0e3
+rho = 1e3
 mu_d = 0.3
-rho_d = 5e2
+rho_d = 1.0
 dp = 0.01
-U_lid = 0.1
+U_lid = 0.0
+g = -9.81
 advected_interp_method = 'upwind'
 
+# Currently required
 k = 1
 k_d = 1
 cp = 1
@@ -19,8 +21,8 @@ cp_d = 1
     xmax = .1
     ymin = 0
     ymax = .1
-    nx = 10
-    ny = 10
+    nx = 11
+    ny = 11
   []
 []
 
@@ -36,6 +38,7 @@ cp_d = 1
 
         density = 'rho_mixture'
         dynamic_viscosity = 'mu_mixture'
+        gravity = '0 ${g} 0'
 
         # Initial conditions
         initial_velocity = '1e-12 1e-12 0'
@@ -103,8 +106,16 @@ cp_d = 1
 [Executioner]
   type = PIMPLE
   rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-  dt = 1
-  end_time = 10
+
+  end_time = 1e8
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    optimal_iterations = 10
+    iteration_window = 2
+    growth_factor = 2
+    cutback_factor = 0.5
+    dt = 1e-3
+  []
 
   # Systems
   momentum_systems = 'u_system v_system'
@@ -136,11 +147,11 @@ cp_d = 1
 
   pin_pressure = true
   pressure_pin_value = 0.0
-  pressure_pin_point = '0.05 0.05 0.0'
+  pressure_pin_point = '0.0 0.0 0.0'
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   [out]
     type = CSV
     execute_on = 'FINAL'
@@ -148,17 +159,19 @@ cp_d = 1
 []
 
 [AuxVariables]
-  [drag_coefficient]
-    type = MooseVariableFVReal
+  [U]
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
   []
 []
 
 [AuxKernels]
-  [populate_cd]
-    type = FunctorAux
-    variable = drag_coefficient
-    functor = 'Darcy_coefficient'
-    execute_on = 'TIMESTEP_END'
+  [mag]
+    type = VectorMagnitudeAux
+    variable = U
+    x = vel_x
+    y = vel_y
   []
 []
 
@@ -197,9 +210,14 @@ cp_d = 1
     functor = 'vel_slip_y'
     value_type = max
   []
-  [max_drag_coefficient]
+  [max_drag_coefficient_x]
     type = ElementExtremeFunctorValue
-    functor = 'drag_coefficient'
+    functor = 'Darcy_coefficient_vec_out_x'
+    value_type = max
+  []
+  [max_drag_coefficient_y]
+    type = ElementExtremeFunctorValue
+    functor = 'Darcy_coefficient_vec_out_y'
     value_type = max
   []
 []
