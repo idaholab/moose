@@ -193,14 +193,16 @@ ComponentBoundaryConditionInterface::checkBoundaryConditionsAllRequested() const
     for (const auto & bc_pair : var_pair.second)
       if (std::find(_requested_bc_variables.begin(),
                     _requested_bc_variables.end(),
-                    std::make_pair(var_pair.first, bc_pair.first)) == _requested_bc_variables.end())
+                    std::make_pair(VariableName(var_pair.first), BoundaryName(bc_pair.first))) ==
+          _requested_bc_variables.end())
         list_missing += "\n- " + var_pair.first + " on " + bc_pair.first;
 
   for (const auto & var_pair : _flux_bcs)
     for (const auto & bc_pair : var_pair.second)
       if (std::find(_requested_bc_variables.begin(),
                     _requested_bc_variables.end(),
-                    std::make_pair(var_pair.first, bc_pair.first)) == _requested_bc_variables.end())
+                    std::make_pair(VariableName(var_pair.first), BoundaryName(bc_pair.first))) ==
+          _requested_bc_variables.end())
         list_missing += "\n- " + var_pair.first + " on " + bc_pair.first;
 
   if (!list_missing.empty())
