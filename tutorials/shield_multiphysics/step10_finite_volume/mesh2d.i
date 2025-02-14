@@ -36,15 +36,15 @@
   [add_water_concrete_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = add_concrete_outer_boundary
-    primary_block = 'water water'
-    paired_block = 'concrete_hd concrete'
+    primary_block = 'water water water'
+    paired_block = 'concrete_hd concrete Al'
     new_boundary = 'water_boundary'
   []
   [add_water_concrete_interface_inwards]
     type = SideSetsBetweenSubdomainsGenerator
     input = add_water_concrete_interface
-    primary_block = 'concrete_hd concrete'
-    paired_block = 'water water'
+    primary_block = 'concrete_hd concrete Al'
+    paired_block = 'water water water'
     new_boundary = 'water_boundary_inwards'
   []
   [add_water_bottom]
