@@ -21,6 +21,7 @@
     [ContinuousGalerkin]
       [diff]
         source_functor = 2
+        diffusivity_matprop = '1'
 
         # Test all the ways of setting the boundary conditions
         neumann_boundaries = 'left_to_0 right_to_0 top_to_0 bottom_to_0'
