@@ -107,7 +107,6 @@
     function = source_real
   []
 
-
   [curl_curl_imag]
     type = CurlCurlField
     variable = E_imag

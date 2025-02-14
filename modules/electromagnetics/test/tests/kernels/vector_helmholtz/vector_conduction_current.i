@@ -25,14 +25,14 @@
   #The forcing terms for the real and imag. component
   [source_real]
     type = ParsedVectorFunction
-    symbol_names =  'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
+    symbol_names = 'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
     symbol_values = 'omega   mu   epsilon   sigma   omega   mu   epsilon   sigma'
     expression_x = '-epsilon_i*mu_i*omega_i^2*y^2 - 2*epsilon_i*mu_i*omega_i*omega_r*y^2 + epsilon_i*mu_i*omega_r^2*y^2 - epsilon_i*mu_r*omega_i^2*y^2 + 2*epsilon_i*mu_r*omega_i*omega_r*y^2 + epsilon_i*mu_r*omega_r^2*y^2 - epsilon_r*mu_i*omega_i^2*y^2 + 2*epsilon_r*mu_i*omega_i*omega_r*y^2 + epsilon_r*mu_i*omega_r^2*y^2 + epsilon_r*mu_r*omega_i^2*y^2 + 2*epsilon_r*mu_r*omega_i*omega_r*y^2 - epsilon_r*mu_r*omega_r^2*y^2 + mu_i*omega_i*sigma_i*y^2 + mu_i*omega_i*sigma_r*y^2 + mu_i*omega_r*sigma_i*y^2 - mu_i*omega_r*sigma_r*y^2 + mu_r*omega_i*sigma_i*y^2 - mu_r*omega_i*sigma_r*y^2 - mu_r*omega_r*sigma_i*y^2 - mu_r*omega_r*sigma_r*y^2 - 2'
     expression_y = 'epsilon_i*mu_i*omega_i^2*x^2 + 2*epsilon_i*mu_i*omega_i*omega_r*x^2 - epsilon_i*mu_i*omega_r^2*x^2 + epsilon_i*mu_r*omega_i^2*x^2 - 2*epsilon_i*mu_r*omega_i*omega_r*x^2 - epsilon_i*mu_r*omega_r^2*x^2 + epsilon_r*mu_i*omega_i^2*x^2 - 2*epsilon_r*mu_i*omega_i*omega_r*x^2 - epsilon_r*mu_i*omega_r^2*x^2 - epsilon_r*mu_r*omega_i^2*x^2 - 2*epsilon_r*mu_r*omega_i*omega_r*x^2 + epsilon_r*mu_r*omega_r^2*x^2 - mu_i*omega_i*sigma_i*x^2 - mu_i*omega_i*sigma_r*x^2 - mu_i*omega_r*sigma_i*x^2 + mu_i*omega_r*sigma_r*x^2 - mu_r*omega_i*sigma_i*x^2 + mu_r*omega_i*sigma_r*x^2 + mu_r*omega_r*sigma_i*x^2 + mu_r*omega_r*sigma_r*x^2 + 2'
   []
   [source_imag]
     type = ParsedVectorFunction
-    symbol_names =  'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
+    symbol_names = 'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
     symbol_values = 'omega   mu   epsilon   sigma   omega   mu   epsilon   sigma'
     expression_x = '-epsilon_i*mu_i*omega_i^2*y^2 + 2*epsilon_i*mu_i*omega_i*omega_r*y^2 + epsilon_i*mu_i*omega_r^2*y^2 + epsilon_i*mu_r*omega_i^2*y^2 + 2*epsilon_i*mu_r*omega_i*omega_r*y^2 - epsilon_i*mu_r*omega_r^2*y^2 + epsilon_r*mu_i*omega_i^2*y^2 + 2*epsilon_r*mu_i*omega_i*omega_r*y^2 - epsilon_r*mu_i*omega_r^2*y^2 + epsilon_r*mu_r*omega_i^2*y^2 - 2*epsilon_r*mu_r*omega_i*omega_r*y^2 - epsilon_r*mu_r*omega_r^2*y^2 + mu_i*omega_i*sigma_i*y^2 - mu_i*omega_i*sigma_r*y^2 - mu_i*omega_r*sigma_i*y^2 - mu_i*omega_r*sigma_r*y^2 - mu_r*omega_i*sigma_i*y^2 - mu_r*omega_i*sigma_r*y^2 - mu_r*omega_r*sigma_i*y^2 + mu_r*omega_r*sigma_r*y^2 - 2'
     expression_y = 'epsilon_i*mu_i*omega_i^2*x^2 - 2*epsilon_i*mu_i*omega_i*omega_r*x^2 - epsilon_i*mu_i*omega_r^2*x^2 - epsilon_i*mu_r*omega_i^2*x^2 - 2*epsilon_i*mu_r*omega_i*omega_r*x^2 + epsilon_i*mu_r*omega_r^2*x^2 - epsilon_r*mu_i*omega_i^2*x^2 - 2*epsilon_r*mu_i*omega_i*omega_r*x^2 + epsilon_r*mu_i*omega_r^2*x^2 - epsilon_r*mu_r*omega_i^2*x^2 + 2*epsilon_r*mu_r*omega_i*omega_r*x^2 + epsilon_r*mu_r*omega_r^2*x^2 - mu_i*omega_i*sigma_i*x^2 + mu_i*omega_i*sigma_r*x^2 + mu_i*omega_r*sigma_i*x^2 + mu_i*omega_r*sigma_r*x^2 + mu_r*omega_i*sigma_i*x^2 + mu_r*omega_i*sigma_r*x^2 + mu_r*omega_r*sigma_i*x^2 - mu_r*omega_r*sigma_r*x^2 + 2'
@@ -153,7 +153,6 @@
     function = source_real
   []
 
-
   [curl_curl_imag]
     type = CurlCurlField
     variable = E_imag
@@ -185,7 +184,6 @@
     variable = E_imag
     function = source_imag
   []
-
 []
 
 [BCs]

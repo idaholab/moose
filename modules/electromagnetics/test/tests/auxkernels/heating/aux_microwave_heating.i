@@ -36,14 +36,14 @@
   #The forcing terms for the heated species and electric field real and imag. component
   [source_real]
     type = ParsedVectorFunction
-    symbol_names =  'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
+    symbol_names = 'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
     symbol_values = 'omega   mu   epsilon   sigma   omega   mu   epsilon   sigma'
     expression_x = '-epsilon_i*mu_i*omega_i^2*cos(pi*y) - 2*epsilon_i*mu_i*omega_i*omega_r*sin(pi*y) + epsilon_i*mu_i*omega_r^2*cos(pi*y) - epsilon_i*mu_r*omega_i^2*sin(pi*y) + 2*epsilon_i*mu_r*omega_i*omega_r*cos(pi*y) + epsilon_i*mu_r*omega_r^2*sin(pi*y) - epsilon_r*mu_i*omega_i^2*sin(pi*y) + 2*epsilon_r*mu_i*omega_i*omega_r*cos(pi*y) + epsilon_r*mu_i*omega_r^2*sin(pi*y) + epsilon_r*mu_r*omega_i^2*cos(pi*y) + 2*epsilon_r*mu_r*omega_i*omega_r*sin(pi*y) - epsilon_r*mu_r*omega_r^2*cos(pi*y) + mu_i*omega_i*sigma_i*cos(pi*y) + mu_i*omega_i*sigma_r*sin(pi*y) + mu_i*omega_r*sigma_i*sin(pi*y) - mu_i*omega_r*sigma_r*cos(pi*y) + mu_r*omega_i*sigma_i*sin(pi*y) - mu_r*omega_i*sigma_r*cos(pi*y) - mu_r*omega_r*sigma_i*cos(pi*y) - mu_r*omega_r*sigma_r*sin(pi*y) + pi^2*cos(pi*y)'
     expression_y = 'epsilon_i*mu_i*omega_i^2*cos(pi*x) + 2*epsilon_i*mu_i*omega_i*omega_r*sin(pi*x) - epsilon_i*mu_i*omega_r^2*cos(pi*x) + epsilon_i*mu_r*omega_i^2*sin(pi*x) - 2*epsilon_i*mu_r*omega_i*omega_r*cos(pi*x) - epsilon_i*mu_r*omega_r^2*sin(pi*x) + epsilon_r*mu_i*omega_i^2*sin(pi*x) - 2*epsilon_r*mu_i*omega_i*omega_r*cos(pi*x) - epsilon_r*mu_i*omega_r^2*sin(pi*x) - epsilon_r*mu_r*omega_i^2*cos(pi*x) - 2*epsilon_r*mu_r*omega_i*omega_r*sin(pi*x) + epsilon_r*mu_r*omega_r^2*cos(pi*x) - mu_i*omega_i*sigma_i*cos(pi*x) - mu_i*omega_i*sigma_r*sin(pi*x) - mu_i*omega_r*sigma_i*sin(pi*x) + mu_i*omega_r*sigma_r*cos(pi*x) - mu_r*omega_i*sigma_i*sin(pi*x) + mu_r*omega_i*sigma_r*cos(pi*x) + mu_r*omega_r*sigma_i*cos(pi*x) + mu_r*omega_r*sigma_r*sin(pi*x) - pi^2*cos(pi*x)'
   []
   [source_imag]
     type = ParsedVectorFunction
-    symbol_names =  'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
+    symbol_names = 'omega_r mu_r epsilon_r sigma_r omega_i mu_i epsilon_i sigma_i'
     symbol_values = 'omega   mu   epsilon   sigma   omega   mu   epsilon   sigma'
     expression_x = '-epsilon_i*mu_i*omega_i^2*sin(pi*y) + 2*epsilon_i*mu_i*omega_i*omega_r*cos(pi*y) + epsilon_i*mu_i*omega_r^2*sin(pi*y) + epsilon_i*mu_r*omega_i^2*cos(pi*y) + 2*epsilon_i*mu_r*omega_i*omega_r*sin(pi*y) - epsilon_i*mu_r*omega_r^2*cos(pi*y) + epsilon_r*mu_i*omega_i^2*cos(pi*y) + 2*epsilon_r*mu_i*omega_i*omega_r*sin(pi*y) - epsilon_r*mu_i*omega_r^2*cos(pi*y) + epsilon_r*mu_r*omega_i^2*sin(pi*y) - 2*epsilon_r*mu_r*omega_i*omega_r*cos(pi*y) - epsilon_r*mu_r*omega_r^2*sin(pi*y) + mu_i*omega_i*sigma_i*sin(pi*y) - mu_i*omega_i*sigma_r*cos(pi*y) - mu_i*omega_r*sigma_i*cos(pi*y) - mu_i*omega_r*sigma_r*sin(pi*y) - mu_r*omega_i*sigma_i*cos(pi*y) - mu_r*omega_i*sigma_r*sin(pi*y) - mu_r*omega_r*sigma_i*sin(pi*y) + mu_r*omega_r*sigma_r*cos(pi*y) + pi^2*sin(pi*y)'
     expression_y = 'epsilon_i*mu_i*omega_i^2*sin(pi*x) - 2*epsilon_i*mu_i*omega_i*omega_r*cos(pi*x) - epsilon_i*mu_i*omega_r^2*sin(pi*x) - epsilon_i*mu_r*omega_i^2*cos(pi*x) - 2*epsilon_i*mu_r*omega_i*omega_r*sin(pi*x) + epsilon_i*mu_r*omega_r^2*cos(pi*x) - epsilon_r*mu_i*omega_i^2*cos(pi*x) - 2*epsilon_r*mu_i*omega_i*omega_r*sin(pi*x) + epsilon_r*mu_i*omega_r^2*cos(pi*x) - epsilon_r*mu_r*omega_i^2*sin(pi*x) + 2*epsilon_r*mu_r*omega_i*omega_r*cos(pi*x) + epsilon_r*mu_r*omega_r^2*sin(pi*x) - mu_i*omega_i*sigma_i*sin(pi*x) + mu_i*omega_i*sigma_r*cos(pi*x) + mu_i*omega_r*sigma_i*cos(pi*x) + mu_i*omega_r*sigma_r*sin(pi*x) + mu_r*omega_i*sigma_i*cos(pi*x) + mu_r*omega_i*sigma_r*sin(pi*x) + mu_r*omega_r*sigma_i*sin(pi*x) - mu_r*omega_r*sigma_r*cos(pi*x) - pi^2*sin(pi*x)'
@@ -61,7 +61,6 @@
     symbol_values = 'sigma'
     expression = '0.5*sigma_r*(sin(x*pi)^2 + sin(y*pi)^2 + cos(x*pi)^2 + cos(y*pi)^2)'
   []
-
 
   #Material Coefficients
   [omega]
@@ -183,7 +182,6 @@
     variable = E_real
     function = source_real
   []
-
 
   [curl_curl_imag]
     type = CurlCurlField
