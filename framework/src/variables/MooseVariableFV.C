@@ -766,6 +766,9 @@ MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg &
     mooseAssert(elem, "We should have this element available");
     if (!this->hasBlocks(elem->subdomain_id()))
       continue;
+    if (node_arg.subdomain_id != Moose::INVALID_BLOCK_ID &&
+        elem->subdomain_id() != node_arg.subdomain_id)
+      continue;
     const ElemPointArg elem_point{
         elem, *node_arg.node, _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage};
     const auto weight = 1 / (*node_arg.node - elem->vertex_average()).norm();
