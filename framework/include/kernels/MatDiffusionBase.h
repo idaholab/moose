@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernelGrad.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -22,30 +22,31 @@
  * \tparam T Type of the diffusion coefficient parameter. This can be Real for
  *           isotropic diffusion or RealTensorValue for the general anisotropic case.
  */
-template <typename T>
-class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+template <typename T, bool is_ad>
+class MatDiffusionBaseTempl
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernelGrad<is_ad>>>
 {
 public:
   static InputParameters validParams();
 
-  MatDiffusionBase(const InputParameters & parameters);
+  MatDiffusionBaseTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual GenericRealGradient<is_ad> precomputeQpResidual() override;
+  virtual RealGradient precomputeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-  virtual Real computeQpCJacobian();
+  virtual RealGradient computeQpCJacobian();
 
   /// diffusion coefficient
-  const MaterialProperty<T> & _D;
+  const GenericMaterialProperty<T, is_ad> & _diffusivity;
 
   /// diffusion coefficient derivative w.r.t. the kernel variable
-  const MaterialProperty<T> & _dDdc;
+  const MaterialProperty<T> * _ddiffusivity_dc;
 
   /// diffusion coefficient derivatives w.r.t. coupled variables
-  std::vector<const MaterialProperty<T> *> _dDdarg;
+  std::vector<const MaterialProperty<T> *> _ddiffusivity_darg;
 
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
@@ -54,26 +55,24 @@ protected:
   unsigned int _v_var;
 
   /// Gradient of the concentration
-  const VariableGradient & _grad_v;
+  const GenericVariableGradient<is_ad> & _grad_v;
+
+  usingGenericKernelGradMembers;
 };
 
-template <typename T>
+template <typename T, bool is_ad>
 InputParameters
-MatDiffusionBase<T>::validParams()
+MatDiffusionBaseTempl<T, is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
-  params.addDeprecatedParam<MaterialPropertyName>(
-      "D_name",
-      "The name of the diffusivity",
-      "This parameter has been renamed to 'diffusivity', which is more mnemonic and more conducive "
-      "to passing a number literal");
+  InputParameters params = GenericKernelGrad<is_ad>::validParams();
+
   params.addParam<MaterialPropertyName>(
       "diffusivity", "D", "The diffusivity value or material property");
-  params.addCoupledVar("args",
-                       "Optional vector of arguments for the diffusivity. If provided and "
-                       "diffusivity is a derivative parsed material, Jacobian contributions from "
-                       "the diffusivity will be automatically computed");
-  params.addCoupledVar("conc", "Deprecated! Use 'v' instead");
+  params.addCoupledVar(
+      "args",
+      "Optional vector of arguments for the diffusivity when using the non-AD "
+      "version. If provided and diffusivity is a derivative parsed material, Jacobian "
+      "contributions from the diffusivity will be automatically computed");
   params.addCoupledVar("v",
                        "Coupled concentration variable for kernel to operate on; if this "
                        "is not specified, the kernel's nonlinear variable will be used as "
@@ -81,49 +80,43 @@ MatDiffusionBase<T>::validParams()
   return params;
 }
 
-template <typename T>
-MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
-  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _D(isParamValid("D_name") ? getMaterialProperty<T>("D_name")
-                              : getMaterialProperty<T>("diffusivity")),
-    _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
-                                           _var.name())),
-    _dDdarg(_coupled_moose_vars.size()),
+template <typename T, bool is_ad>
+MatDiffusionBaseTempl<T, is_ad>::MatDiffusionBaseTempl(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernelGrad<is_ad>>>(parameters),
+    _diffusivity(this->template getGenericMaterialProperty<T, is_ad>("diffusivity")),
+    _ddiffusivity_dc(
+        is_ad ? nullptr
+              : &this->template getMaterialPropertyDerivative<T>("diffusivity", _var.name())),
+    _ddiffusivity_darg(is_ad ? 0 : this->_coupled_moose_vars.size()),
     _is_coupled(isCoupled("v")),
-    _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
-    _grad_v(_is_coupled ? coupledGradient("v")
-                        : (isCoupled("conc") ? coupledGradient("conc") : _grad_u))
+    _v_var(_is_coupled ? coupled("v") : _var.number()),
+    _grad_v(_is_coupled ? this->template coupledGenericGradient<is_ad>("v") : _grad_u)
 {
-  // deprecated variable parameter conc
-  if (isCoupled("conc"))
-    mooseDeprecated("In '", name(), "' the parameter 'conc' is deprecated, please use 'v' instead");
-
   // fetch derivatives
-  for (unsigned int i = 0; i < _dDdarg.size(); ++i)
-    _dDdarg[i] = &getMaterialPropertyDerivative<T>(
-        isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
+  for (unsigned int i = 0; i < _ddiffusivity_darg.size(); ++i)
+    _ddiffusivity_darg[i] = &this->template getMaterialPropertyDerivative<T>(
+        "diffusivity", _coupled_moose_vars[i]->name());
 }
 
-template <typename T>
+template <typename T, bool is_ad>
 void
-MatDiffusionBase<T>::initialSetup()
+MatDiffusionBaseTempl<T, is_ad>::initialSetup()
 {
-  validateNonlinearCoupling<Real>(parameters().isParamSetByUser("D_name") ? "D_name"
-                                                                          : "diffusivity");
+  this->template validateNonlinearCoupling<Real>("diffusivity");
+}
+
+template <typename T, bool is_ad>
+GenericRealGradient<is_ad>
+MatDiffusionBaseTempl<T, is_ad>::precomputeQpResidual()
+{
+  return _diffusivity[_qp] * _grad_v[_qp];
 }
 
 template <typename T>
-Real
-MatDiffusionBase<T>::computeQpResidual()
+RealGradient
+MatDiffusionBaseTempl<T, false>::precomputeQpJacobian()
 {
-  return _D[_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
-}
-
-template <typename T>
-Real
-MatDiffusionBase<T>::computeQpJacobian()
-{
-  Real sum = _phi[_j][_qp] * _dDdc[_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  RealGradient sum = _phi[_j][_qp] * (*_ddiffusivity_dc)[_qp] * _grad_v[_qp];
   if (!_is_coupled)
     sum += computeQpCJacobian();
 
@@ -132,21 +125,27 @@ MatDiffusionBase<T>::computeQpJacobian()
 
 template <typename T>
 Real
-MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
+MatDiffusionBaseTempl<T, false>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  const unsigned int cvar = mapJvarToCvar(jvar);
+  const unsigned int cvar = this->mapJvarToCvar(jvar);
 
-  Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  Real sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
   if (_v_var == jvar)
-    sum += computeQpCJacobian();
+    sum += computeQpCJacobian() * _grad_test[_i][_qp];
 
   return sum;
 }
 
 template <typename T>
-Real
-MatDiffusionBase<T>::computeQpCJacobian()
+RealGradient
+MatDiffusionBaseTempl<T, false>::computeQpCJacobian()
 {
-  return _D[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _diffusivity[_qp] * _grad_phi[_j][_qp];
 }
+
+template class MatDiffusionBaseTempl<Real, false>;
+template class MatDiffusionBaseTempl<Real, true>;
+
+// typedef MatDiffusionBaseTempl<Real, false> MatDiffusionBaseTempl;
+// typedef MatDiffusionBaseTempl<Real, true> ADMatDiffusionBaseTempl;

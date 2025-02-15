@@ -640,6 +640,8 @@ using GenericType = typename std::conditional<is_ad, typename ADType<T>::type, T
 template <bool is_ad>
 using GenericReal = Moose::GenericType<Real, is_ad>;
 template <bool is_ad>
+using GenericRealGradient = Moose::GenericType<RealGradient, is_ad>;
+template <bool is_ad>
 using GenericChainedReal = Moose::GenericType<ChainedReal, is_ad>;
 template <bool is_ad>
 using GenericRealVectorValue = Moose::GenericType<RealVectorValue, is_ad>;
