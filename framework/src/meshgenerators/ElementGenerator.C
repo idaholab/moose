@@ -26,14 +26,17 @@ ElementGenerator::validParams()
 
   params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
 
+  // Element shape and location
   params.addRequiredParam<std::vector<Point>>("nodal_positions",
                                               "The x,y,z positions of the nodes");
-
   params.addRequiredParam<std::vector<dof_id_type>>("element_connectivity",
                                                     "List of nodes to use for each element");
-
-  params.addParam<MooseEnum>(
+  params.addRequiredParam<MooseEnum>(
       "elem_type", elem_types, "The type of element from libMesh to generate");
+
+  // Subdomain
+  params.addParam<SubdomainName>("subdomain_name", "Subdomain name");
+  params.addParam<SubdomainID>("subdomain_id", 0, "Subdomain id");
 
   params.addClassDescription("Generates individual elements given a list of nodal positions.");
 
@@ -66,6 +69,10 @@ ElementGenerator::generate()
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
   auto elem = getElemType(elem_type_enum);
+  elem->subdomain_id() = getParam<SubdomainID>("subdomain_id");
+  if (isParamValid("subdomain_name"))
+    mesh->subdomain_name(getParam<SubdomainID>("subdomain_id")) =
+        getParam<SubdomainName>("subdomain_name");
 
   mesh->set_mesh_dimension(std::max((unsigned int)elem->dim(), mesh->mesh_dimension()));
 
