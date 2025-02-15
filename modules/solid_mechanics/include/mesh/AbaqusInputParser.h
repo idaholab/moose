@@ -15,95 +15,71 @@
 #include <istream>
 
 #include "Conversion.h"
+#include "MooseUtils.h"
+#include "MooseError.h"
 
 namespace AbaqusInputParser
 {
+
 /**
- * Helper class to get a map of header fields
+ * Helper class to get a map of header fields from a header string
  */
 class HeaderMap
 {
 public:
-  HeaderMap(const std::string & header);
+  HeaderMap() {}
+  HeaderMap(const std::vector<std::string> fields);
+  std::string stringify(const std::string & indent = "") const;
+
   bool has(const std::string & key) const;
   template <typename T>
   T get(const std::string & key) const;
 
 private:
   std::map<std::string, std::string> _map;
-  const std::string _header;
 };
 
-class Root;
-
-/**
- * Helper class to build and parse blocks and store them as a list
- */
-template <typename T>
-class Builder
+struct Node
 {
-public:
-  Builder(const Root & root) : _root(root) {}
-  void operator()()
-  {
-    T block(_root);
-    block.parse();
-    _list.push_back(block);
-  }
+  Node(std::vector<std::string> line);
 
-private:
-  const Root & _root;
-  std::vector<T> _list;
+  std::string _type;
+  HeaderMap _header;
+};
+struct OptionNode : public Node
+{
+  OptionNode(std::vector<std::string> line) : Node(line) {}
+  std::string stringify(const std::string & indent = "") const;
+
+  std::vector<std::vector<std::string>> _data;
 };
 
-/**
- * Base class for all blocks
- */
-class Block
+struct BlockNode;
+struct BlockNode : public Node
 {
-public:
-  Block(const Root & root) : _root(root) {}
-  Block() = delete;
-  Block(const Block &) = delete;
-  Block(Block &&) = delete;
+  BlockNode() : Node({"ROOT"}) {}
+  BlockNode(std::vector<std::string> line) : Node(line) {}
+  std::string stringify(const std::string & indent = "") const;
 
-  virtual ~Block() = default;
-
-  virtual read() { add<Assembly>(); }
-
-  template <typename T>
-  void registerBlock(const std::string & name)
-  {
-    _blocks[name] = make_unique<Builder<T>>(_root);
-  }
-
-private:
-  std::map<std::string, std::unique_ptr<Block>> _blocks;
-  Root & _root;
+  std::vector<BlockNode> _children;
+  std::vector<OptionNode> _options;
 };
 
 /**
- * Toplevel class to parse Abaqus input files
+ * Build a syntax tree from an abaqus input file
  */
-class Root : public Block
+class AbaqusInputParser
 {
 public:
-  Root(std::istream file) : Block(*this), _file(file)
-  {
-    // register subblocks
-    registerBlock<Assembly>("assembly");
-    registerBlock<Step>("step");
-
-    // load and preprocess entire file
-    loadFile();
-  }
-
-  Root() = delete;
-  Root(const Root &) = delete;
-  Root(Root &&) = delete;
+  AbaqusInputParser(std::istream & file);
+  std::string stringify() const { return _root.stringify(); }
 
 private:
   void loadFile();
+
+  BlockNode parseBlock(const std::string & end = "",
+                       const std::vector<std::string> & head_line = {"ROOT"});
+  OptionNode parseOption(const std::vector<std::string> & head_line = {"ROOT"});
 
   /// input steam for the Abaqus input file
   std::istream & _file;
@@ -113,21 +89,21 @@ private:
 
   /// currently parsed line
   std::size_t _current_line;
+
+  BlockNode _root;
 };
 
-/**
- * Subblock classes
- */
-#define ABAQUS_SUBBLOCK(name)                                                                      \
-  class name : public Block                                                                        \
-  {                                                                                                \
-  public:                                                                                          \
-    name(const Root & root);                                                                       \
-  };
+template <typename T>
+T
+HeaderMap::get(const std::string & key) const
+{
+  const auto it = _map.find(MooseUtils::toLower(key));
+  if (it == _map.end())
+    mooseError("Key '", key, "' not found.");
+  return MooseUtils::convert<T>(it->second);
+}
 
-ABAQUS_SUBBLOCK(Part)
-ABAQUS_SUBBLOCK(Assembly)
-ABAQUS_SUBBLOCK(Step)
-ABAQUS_SUBBLOCK(Instance)
+template <>
+bool HeaderMap::get(const std::string & key) const;
 
 } // namespace AbaqusInputParser

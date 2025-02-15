@@ -12,7 +12,7 @@
 #include "AbaqusUELMesh.h"
 #include "MooseMain.h"
 #include "DataFileUtils.h"
-
+#include "AbaqusInputParser.h"
 namespace
 {
 
@@ -101,3 +101,12 @@ TEST(AbaqusUELTest, ParseErrors)
   exceptionTest("error_node_count.inp", "Wrong number of nodes for user element of type");
   exceptionTest("error_node_num.inp", "Invalid node number in Abaqus input.");
 }
+
+// TEST(AbaqusUELTest, parse_and_print)
+// {
+//   const std::string filename = "/home/daniel/Programs/moose-uel-energy/modules/solid_mechanics/"
+//                                "test/tests/uel_mesh/CUBE_UEL.inp";
+//   std::ifstream in(filename.c_str());
+//   AbaqusInputParser::AbaqusInputParser parser(in);
+//   std::cout << parser.stringify();
+// }
