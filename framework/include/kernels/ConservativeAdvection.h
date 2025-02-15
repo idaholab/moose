@@ -19,6 +19,7 @@ template <bool is_ad>
 class ConservativeAdvectionTempl : public GenericKernel<is_ad>
 {
 public:
+  static InputParameters generalParams();
   static InputParameters validParams();
 
   ConservativeAdvectionTempl(const InputParameters & parameters);
@@ -30,7 +31,7 @@ protected:
   virtual void computeJacobian() override;
 
   /// advection velocity
-  const GenericVectorVariableValue<is_ad> & _velocity;
+  const MooseArray<GenericRealVectorValue<is_ad>> * _velocity;
 
   /// advected quantity
   const MooseArray<GenericReal<is_ad>> & _adv_quant;
