@@ -100,7 +100,11 @@ DiffusionPhysicsBase::addPostprocessors()
        getParam<std::vector<BoundaryName>>("compute_diffusive_fluxes_on"))
   {
     // Create the boundary integration of the flux
-    const std::string pp_type = "SideDiffusiveFluxIntegral";
+    const bool use_ad = isParamValid("use_automatic_differentiation")
+                            ? getParam<bool>("use_automatic_differentiation")
+                            : false;
+    const std::string pp_type =
+        use_ad ? "ADSideDiffusiveFluxIntegral" : "SideDiffusiveFluxIntegral";
     auto params = _factory.getValidParams(pp_type);
     params.set<std::vector<VariableName>>("variable") = {_var_name};
     if (isParamValid("diffusivity_matprop"))

@@ -47,10 +47,10 @@ public:
   };
 
   /// Return the component volume
-  virtual Real volume() const { mooseError("Not implemented"); }
+  virtual Real volume() const { mooseError("Volume routine is not implemented"); }
 
   /// Return the component outer boundary area
-  virtual Real outerSurfaceArea() const { mooseError("Not implemented"); }
+  virtual Real outerSurfaceArea() const { mooseError("Outer surface area is not implemented"); }
 
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
