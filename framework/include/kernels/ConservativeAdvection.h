@@ -31,6 +31,9 @@ protected:
   /// advection velocity
   const VectorVariableValue & _velocity;
 
+  /// advected quantity
+  const MooseArray<Real> & _adv_quant;
+
   /// enum to make the code clearer
   enum class JacRes
   {
