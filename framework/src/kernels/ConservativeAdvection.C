@@ -25,17 +25,26 @@ ConservativeAdvection::validParams()
                              "Type of upwinding used.  None: Typically results in overshoots and "
                              "undershoots, but numerical diffusion is minimized.  Full: Overshoots "
                              "and undershoots are avoided, but numerical diffusion is large");
+  params.addParam<MaterialPropertyName>("advected_quantity",
+                                        "An optional material property to be advected. If not "
+                                        "supplied, then the variable will be used.");
   return params;
 }
 
 ConservativeAdvection::ConservativeAdvection(const InputParameters & parameters)
   : Kernel(parameters),
     _velocity(coupledVectorValue("velocity")),
-    _upwinding(getParam<MooseEnum>("upwinding_type").getEnum<UpwindingType>()),
+    _adv_quant(isParamValid("advected_quantity")
+                   ? getMaterialProperty<Real>("advected_quantity").get()
+                   : _u) _upwinding(getParam<MooseEnum>("upwinding_type").getEnum<UpwindingType>()),
     _u_nodal(_var.dofValues()),
     _upwind_node(0),
     _dtotal_mass_out(0)
 {
+  if (_upwinding == UpwindingType::full && isParamValid("advected_quantity"))
+    paramError(
+        "advected_quantity",
+        "Upwinding is not compatable with an advected quantity that is not the primary variable.")
 }
 
 Real
@@ -49,7 +58,7 @@ ConservativeAdvection::computeQpResidual()
 {
   // This is the no-upwinded version
   // It gets called via Kernel::computeResidual()
-  return negSpeedQp() * _u[_qp];
+  return negSpeedQp() * _adv_quant[_qp];
 }
 
 Real
