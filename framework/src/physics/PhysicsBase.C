@@ -150,6 +150,8 @@ PhysicsBase::act()
     addExecutors();
   else if (_current_task == "check_integrity_early_physics")
     checkIntegrityEarly();
+  else if (_current_task == "check_integrity")
+    checkIntegrity();
 
   // Exodus restart capabilities
   if (_current_task == "copy_vars_physics")
@@ -226,7 +228,7 @@ PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_typ
 }
 
 const ActionComponent &
-PhysicsBase::getActionComponent(const ComponentName & comp_name)
+PhysicsBase::getActionComponent(const ComponentName & comp_name) const
 {
   return _awh.getAction<ActionComponent>(comp_name);
 }
@@ -297,7 +299,8 @@ PhysicsBase::checkIntegrityEarly() const
   for (const auto & var_name : _solver_var_names)
   {
     const auto & sys_name = _system_names.size() == 1 ? _system_names[0] : _system_names[var_i++];
-    if (!_problem->getSolverSystem(_problem->solverSysNum(sys_name)).hasVariable(var_name))
+    if (!_problem->getSolverSystem(_problem->solverSysNum(sys_name)).hasVariable(var_name) &&
+        !_problem->getSolverSystem(_problem->solverSysNum(sys_name)).hasScalarVariable(var_name))
       paramError("system_names",
                  "We expected system '" + sys_name + "' to contain variable '" + var_name +
                      "' but it did not. Make sure the system names closely match the ordering of "
