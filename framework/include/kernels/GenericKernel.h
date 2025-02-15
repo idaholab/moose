@@ -41,6 +41,7 @@ public:
   using GenericKernel<is_ad>::_u;                                                                  \
   using GenericKernel<is_ad>::_phi;                                                                \
   using GenericKernel<is_ad>::_test;                                                               \
+  using GenericKernel<is_ad>::_grad_test;                                                          \
   using GenericKernel<is_ad>::_q_point;                                                            \
   using GenericKernel<is_ad>::_var;                                                                \
   using GenericKernel<is_ad>::getVar;                                                              \
