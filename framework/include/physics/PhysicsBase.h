@@ -86,7 +86,7 @@ public:
 
   // Coupling with Components //
   /// Get a component with the requested name
-  const ActionComponent & getActionComponent(const ComponentName & comp_name);
+  const ActionComponent & getActionComponent(const ComponentName & comp_name) const;
   /// Check that the component is of the desired type
   template <typename T>
   void checkComponentType(const ActionComponent & component) const;
@@ -201,6 +201,8 @@ private:
   virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
+  /// Additional checks performed near the end of the setup phase
+  virtual void checkIntegrity() const {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
