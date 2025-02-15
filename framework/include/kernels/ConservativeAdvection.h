@@ -9,30 +9,31 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
 /**
  * Advection of the variable by the velocity provided by the user.
  * Options for numerical stabilization are: none; full upwinding
  */
-class ConservativeAdvection : public Kernel
+template <bool is_ad>
+class ConservativeAdvectionTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ConservativeAdvection(const InputParameters & parameters);
+  ConservativeAdvectionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 
   /// advection velocity
-  const VectorVariableValue & _velocity;
+  const GenericVectorVariableValue<is_ad> & _velocity;
 
   /// advected quantity
-  const MooseArray<Real> & _adv_quant;
+  const MooseArray<GenericReal<is_ad>> & _adv_quant;
 
   /// enum to make the code clearer
   enum class JacRes
@@ -54,8 +55,13 @@ protected:
   std::vector<Real> _dtotal_mass_out;
 
   /// Returns - _grad_test * velocity
-  Real negSpeedQp() const;
+  GenericReal<is_ad> negSpeedQp() const;
 
   /// Calculates the fully-upwind Residual and Jacobian (depending on res_or_jac)
   void fullUpwind(JacRes res_or_jac);
+
+  usingGenericKernelMembers;
 };
+
+typedef ConservativeAdvectionTempl<false> ConservativeAdvection;
+typedef ConservativeAdvectionTempl<true> ADConservativeAdvection;
