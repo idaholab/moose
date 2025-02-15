@@ -167,7 +167,8 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & libmesh_dbg_var(m
   for (const auto block_id : block_ids)
     add_lammy(block_id);
 
-  // Handle special case of ANY_BLOCK_ID
+  // Handle special case of ANY_BLOCK_ID and empty block restriction that also cover
+  // INVALID_BLOCK_ID
   if (block_ids.count(Moose::ANY_BLOCK_ID) || block_ids.empty())
     add_lammy(Moose::INVALID_BLOCK_ID);
 }
