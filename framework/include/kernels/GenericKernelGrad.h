@@ -46,7 +46,7 @@ public:
   using GenericKernelGrad<is_ad>::_var;                                                            \
   using GenericKernelGrad<is_ad>::_coupled_moose_vars;                                             \
   using GenericKernelGrad<is_ad>::_grad_u;                                                         \
-  using GenericKernelGrad<is_ad>::_grad_phi;                                                            \
+  using GenericKernelGrad<is_ad>::_grad_phi;                                                       \
   using GenericKernelGrad<is_ad>::getVar;                                                          \
   using Coupleable::coupled;                                                                       \
   using Coupleable::isCoupled;                                                                     \

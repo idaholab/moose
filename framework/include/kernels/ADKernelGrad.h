@@ -28,6 +28,12 @@ public:
   void computeResidual() override;
   void computeResidualAndJacobian() override;
 
+  virtual RealGradient precomputeQpJacobian()
+  {
+    mooseError("Should never get here. Included for downstream inheritance conflict resolution.");
+    return RealGradient(0.0);
+  }
+
 protected:
   void computeResidualsForJacobian() override;
 

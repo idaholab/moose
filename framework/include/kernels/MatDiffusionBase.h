@@ -55,7 +55,7 @@ protected:
   unsigned int _v_var;
 
   /// Gradient of the concentration
-  const VariableGradient & _grad_v;
+  const GenericVariableGradient<is_ad> & _grad_v;
 
   usingGenericKernelGradMembers;
 };
@@ -90,7 +90,7 @@ MatDiffusionBaseTempl<T, is_ad>::MatDiffusionBaseTempl(const InputParameters & p
     _ddiffusivity_darg(is_ad ? 0 : this->_coupled_moose_vars.size()),
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : _var.number()),
-    _grad_v(_is_coupled ? this->coupledGradient("v") : _grad_u)
+    _grad_v(_is_coupled ? this->template coupledGenericGradient<is_ad>("v") : _grad_u)
 {
   // fetch derivatives
   for (unsigned int i = 0; i < _ddiffusivity_darg.size(); ++i)
@@ -112,9 +112,9 @@ MatDiffusionBaseTempl<T, is_ad>::precomputeQpResidual()
   return _diffusivity[_qp] * _grad_v[_qp];
 }
 
-template <typename T, bool is_ad>
+template <typename T>
 RealGradient
-MatDiffusionBaseTempl<T, is_ad>::precomputeQpJacobian()
+MatDiffusionBaseTempl<T, false>::precomputeQpJacobian()
 {
   RealGradient sum = _phi[_j][_qp] * (*_ddiffusivity_dc)[_qp] * _grad_v[_qp];
   if (!_is_coupled)
@@ -123,9 +123,9 @@ MatDiffusionBaseTempl<T, is_ad>::precomputeQpJacobian()
   return sum;
 }
 
-template <typename T, bool is_ad>
+template <typename T>
 Real
-MatDiffusionBaseTempl<T, is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
+MatDiffusionBaseTempl<T, false>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
   const unsigned int cvar = this->mapJvarToCvar(jvar);
@@ -137,12 +137,15 @@ MatDiffusionBaseTempl<T, is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
   return sum;
 }
 
-template <typename T, bool is_ad>
+template <typename T>
 RealGradient
-MatDiffusionBaseTempl<T, is_ad>::computeQpCJacobian()
+MatDiffusionBaseTempl<T, false>::computeQpCJacobian()
 {
   return _diffusivity[_qp] * _grad_phi[_j][_qp];
 }
 
-// template <typename T>
-// typedef MatDiffusionBaseTempl<T, false> MatDiffusionBase;
+template class MatDiffusionBaseTempl<Real, false>;
+template class MatDiffusionBaseTempl<Real, true>;
+
+// typedef MatDiffusionBaseTempl<Real, false> MatDiffusionBaseTempl;
+// typedef MatDiffusionBaseTempl<Real, true> ADMatDiffusionBaseTempl;
