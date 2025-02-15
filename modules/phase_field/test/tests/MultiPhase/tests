@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     requirement = 'The system shall provide a material to combine two free energies materials into a WBM two phase free energy'
     design = 'DerivativeTwoPhaseMaterial.md'
     issues = '#4035'
@@ -53,7 +53,7 @@
     type = 'Exodiff'
     input = 'lagrangemult.i'
     exodiff = 'lagrangemult_out.e'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     requirement = 'The system shall provide a lagrange multiplier based constraint for keeping the sum of all phase order parameters equal to one'
     design = 'SwitchingFunctionConstraintLagrange.md'
     issues = '#4545'

@@ -41,7 +41,7 @@ GeochemistryTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 GeochemistryTestApp::registerApps()
 {
-  registerApp(GeochemistryApp);
+  GeochemistryApp::registerApps();
   registerApp(GeochemistryTestApp);
 }
 

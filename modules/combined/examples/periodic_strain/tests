@@ -8,7 +8,7 @@
     # input we can run on something much smaller...
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     requirement = "This shall correctly compute the deformation behavior using
                    the globalstrain system for a multiphysics problem in 2D."
   [../]
@@ -18,7 +18,7 @@
     # Checking input on smaller mesh
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Mesh/gen/nz=2'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     requirement = "This shall correctly compute the deformation behavior using
                    the globalstrain system for a multiphysics problem in 3D."
   [../]

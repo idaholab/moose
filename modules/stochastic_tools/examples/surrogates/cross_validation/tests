@@ -6,7 +6,7 @@
     [cv_all]
       type = JSONDiff
       input = all_trainers_uniform_cv.i
-      libtorch = true
+      capabilities = 'libtorch'
       cli_args = "GlobalParams/cv_n_trials=3
                   GlobalParams/cv_splits=2
                   Samplers/cv_sampler/num_rows=10
@@ -21,7 +21,7 @@
     [cv_no_libtorch]
       type = JSONDiff
       input = all_trainers_uniform_cv.i
-      libtorch = false
+      capabilities = '!libtorch'
       cli_args = "GlobalParams/cv_n_trials=3
                   GlobalParams/cv_splits=2
                   Samplers/cv_sampler/num_rows=10

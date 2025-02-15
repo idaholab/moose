@@ -7,7 +7,7 @@
     input = boundary_intersecting_features.i
     csvdiff = boundary_intersecting_features_out_grain_volumes_0000.csv
     # This test requires VTK because it uses the ImageFunction class
-    vtk = true
+    capabilities = 'vtk'
 
     requirement = "The FeatureVolumeVectorPostprocessor shall capture volume information of individual features."
   [../]
@@ -18,7 +18,7 @@
     cli_args = 'Mesh/file=sixteenth_image001_cropped3_closing_298_flipped.png Outputs/file_base=boundary_intersecting_features_flipped'
     csvdiff = boundary_intersecting_features_flipped_grain_volumes_0000.csv
     # This test requires VTK because it uses the ImageFunction class
-    vtk = true
+    capabilities = 'vtk'
 
     requirement = "The FeatureVolumeVectorPostprocessor shall capture whether any feature intersects the boundary, "
                    " even when the non-root rank doesn't own a part of the feature that intersects the boundary."
