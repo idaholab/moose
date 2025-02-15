@@ -6,7 +6,7 @@
     type = Exodiff
     input = FFM-5B.i
     exodiff = 'FFM-5B_out.e'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     rel_err = 4e-4

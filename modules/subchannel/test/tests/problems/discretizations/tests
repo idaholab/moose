@@ -6,7 +6,7 @@
     input = psbt_explicit.i
     exodiff = psbt_explicit_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 5e-6
@@ -19,7 +19,7 @@
     input = psbt_explicit_staggered.i
     exodiff = psbt_explicit_staggered_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 5e-6
@@ -32,7 +32,7 @@
     input = psbt_implicit.i
     exodiff = psbt_implicit_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 5e-6
@@ -45,7 +45,7 @@
     input = psbt_monolithic.i
     exodiff = psbt_monolithic_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 5e-6
@@ -58,7 +58,7 @@
     input = psbt_full_monolithic.i
     exodiff = psbt_full_monolithic_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 5e-6
@@ -71,7 +71,7 @@
     input = psbt_full_monolithic_staggered.i
     exodiff = psbt_full_monolithic_staggered_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 5e-6

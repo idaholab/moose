@@ -6,7 +6,7 @@
     input = parent.i
     exodiff = parent_original.e
     cli_args = 'Executioner/num_steps=2 Outputs/file_base=parent_original'
-    method = '!dbg' # complete reinitilization solve, debug is slow and not needed
+    capabilities = 'method!=dbg' # complete reinitilization solve, debug is slow and not needed
     valgrind = HEAVY
     requirement = "The level set module shall be capable of solving the level set equation with original reinitialization."
     issues = '#14849'
@@ -17,7 +17,7 @@
     input = parent.i
     exodiff = parent_modified.e
     cli_args = 'Executioner/num_steps=2 MultiApps/reinit/input_files=reinit_modified.i Outputs/file_base=parent_modified'
-    method = '!dbg' # complete reinitilization solve, debug is slow and not needed
+    capabilities = 'method!=dbg' # complete reinitilization solve, debug is slow and not needed
     valgrind = HEAVY
     requirement = "The level set module shall be capable of solving the level set equation with modified reinitialization."
     issues = '#8465'

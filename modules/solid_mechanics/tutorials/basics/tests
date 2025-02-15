@@ -15,24 +15,24 @@
     type = 'RunApp'
     input = 'part_2.2.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
   [../]
   [./part2_3]
     type = 'RunApp'
     input = 'part_2.3.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
   [../]
   [./part2_4]
     type = 'RunApp'
     input = 'part_2.4.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
   [../]
   [./part3_1]
     type = 'RunApp'
     input = 'part_3_1.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
   [../]
 []

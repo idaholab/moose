@@ -6,7 +6,7 @@
     input = test19.i
     exodiff = test19_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     allow_warnings = true
@@ -18,7 +18,7 @@
     input = test19_implicit.i
     exodiff = test19_implicit_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     allow_warnings = true
@@ -30,7 +30,7 @@
     input = test19_monolithic.i
     exodiff = test19_monolithic_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-7
     valgrind = NONE
     recover = false

@@ -13,7 +13,7 @@
                   Outputs/file_base=vtv_out'
       allow_test_objects = true
       abs_zero = 1e-8
-      method = '!dbg'
+      capabilities = 'method!=dbg'
 
       detail = 'from boundary vertices on boundary sides in the direction of the vertices on the other side of the same boundary element, '
     []
@@ -27,7 +27,7 @@
                   Outputs/file_base=ctv_out'
       allow_test_objects = true
       abs_zero = 1e-8
-      method = '!dbg'
+      capabilities = 'method!=dbg'
 
       detail = 'from the centroids of boundary sides in the direction of all other vertices in the same boundary element, '
     []
@@ -41,7 +41,7 @@
                   Outputs/file_base=ctc_out'
       allow_test_objects = true
       abs_zero = 1e-8
-      method = '!dbg'
+      capabilities = 'method!=dbg'
 
       detail = 'from the centroids of all boundary sides to the centroids of all other boundary elements, '
     []
@@ -55,7 +55,7 @@
                   Outputs/file_base=side_aq_out'
       allow_test_objects = true
       abs_zero = 1e-8
-      method = '!dbg'
+      capabilities = 'method!=dbg'
 
       detail = 'from boundary sides centroids using an angular quadrature, '
     []
@@ -69,7 +69,7 @@
                   Outputs/file_base=centroid_aq_out'
       allow_test_objects = true
       abs_zero = 1e-8
-      method = '!dbg'
+      capabilities = 'method!=dbg'
 
       detail = 'and from boundary element centroids using an angular quadrature.'
     []

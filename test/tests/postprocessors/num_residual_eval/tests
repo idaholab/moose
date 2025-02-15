@@ -3,18 +3,18 @@
     type = 'CSVDiff'
     input = 'num_residual_eval.i'
     csvdiff = 'out.csv'
-    max_parallel=2
-    min_parallel=2
+    max_parallel = 2
+    min_parallel = 2
     # Do not test this against PETSc-parent because
     # PETSc-parent has a little better convergence in terms of the number
     # of iterations.  And then the number of residuals is reduced by 1,
     # and this causes CSV diff.
-    petsc_version_release = true
     # Difficult to have consistent solve behavior when running across nodes
     hpc = false
 
     requirement = 'The system shall be capable of outputting the number of Residual evaluations'
     issues = '#2089'
     design = 'NumResidualEvaluations.md'
+    capabilities = 'petsc_version_release'
   [../]
 []

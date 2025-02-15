@@ -9,8 +9,8 @@
       test_case = 'TestGapConductanceFirstOrder'
       detail = 'first order accuracy'
       required_python_packages = 'sympy pandas matplotlib'
-      method = '!dbg'
       installation_type = in_tree # see #26480
+      capabilities = 'method!=dbg'
     []
     [second_order]
       type = PythonUnitTest
@@ -18,8 +18,8 @@
       test_case = 'TestGapConductanceSecondOrder'
       detail = 'second order accuracy'
       required_python_packages = 'sympy pandas matplotlib'
-      method = '!dbg'
       installation_type = in_tree # see #26480
+      capabilities = 'method!=dbg'
     []
   []
 []

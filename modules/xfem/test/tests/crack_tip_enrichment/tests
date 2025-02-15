@@ -27,6 +27,6 @@
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
 
-    method = '!dbg' #Slow test
+    capabilities = 'method!=dbg' #Slow test
   [../]
 []

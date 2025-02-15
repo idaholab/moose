@@ -127,7 +127,7 @@
     input = '3d-prism.i'
     exodiff = '3d-prism_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with mixed types of interior and boundary sides.'
-    mumps = true
+    capabilities = 'mumps'
   []
   [lower_d_variable_block_restriction]
     type = 'RunException'
@@ -135,6 +135,6 @@
     cli_args = 'Variables/lambdab/block=BOUNDARY_SIDE_LOWERD_SUBDOMAIN_QUAD4'
     expect_err = 'This error is documented at github.com/idaholab/moose/issues/29151'
     requirement = 'The system shall issue an error for lower-dimensional variables undefined on all boundaries in a boundary condition with hybrid finite element method (HFEM) calculations.'
-    mumps = true
+    capabilities = 'mumps'
   []
 []

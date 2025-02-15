@@ -9,9 +9,9 @@
     issues = "#13334"
 
     valgrind = 'NONE'
-    method = '!dbg'
 
     # HPC runs could lead to a timeout
     hpc = false
+    capabilities = 'method!=dbg'
   [../]
 []

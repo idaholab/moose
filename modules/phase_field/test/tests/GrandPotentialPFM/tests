@@ -36,7 +36,7 @@
     design = '/GrandPotentialKernelAction.md'
     requirement = 'The system shall provide classes to implement a Grand Potential phase field '
                   'formulation with strict mass conservation'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [GrandPotentialInterface]
     type = 'CSVDiff'

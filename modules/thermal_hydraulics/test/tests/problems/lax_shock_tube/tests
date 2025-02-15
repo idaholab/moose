@@ -31,7 +31,7 @@
       abs_zero = 1e-8
       rel_err = 1e-5
       max_parallel = 1
-      method = opt
+      capabilities = 'method=opt'
 
       detail = 'using an implicit temporal discretization.'
     []

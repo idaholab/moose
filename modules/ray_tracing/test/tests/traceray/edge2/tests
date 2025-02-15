@@ -15,7 +15,7 @@
                 Outputs/file_base=lots_out'
     allow_test_objects = true
     abs_zero = 1e-8
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to trace rays within EDGE2 elements.'
   []
 []

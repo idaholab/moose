@@ -612,6 +612,8 @@ def getCapabilities(exe):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
+    if exe is None:
+        return {}
     output = runCommand("%s --show-capabilities" % exe)
     try:
         output = output.split('**START JSON DATA**\n')[1]

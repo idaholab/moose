@@ -17,7 +17,7 @@
     input = 'multiple_blocks.i'
     exodiff = 'multiple_blocks_out.e-s005'
     recover = false
-    method = 'opt'
+    capabilities = 'method=opt'
     # relap7 #709
     skip = '#26336'
     requirement = 'The system shall be able to use adaptive mesh refinement in a 1D single phase compressible flow simulation with multiple subdomains.'

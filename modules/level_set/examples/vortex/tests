@@ -5,21 +5,21 @@
     type = RunApp
     input = vortex.i
     cli_args = Executioner/num_steps=2
-    method = opt # Can be slow in debug and this is simply to make sure input file remains working
+    capabilities = 'method=opt' # Can be slow in debug and this is simply to make sure input file remains working
     requirement = "The level set module shall include an example solution of a rotating vortex problem."
   []
   [level_set_supg]
     type = RunApp
     input = vortex_supg.i
     cli_args = Executioner/num_steps=2
-    method = opt # Can be slow in debug and this is simply to make sure input file remains working
+    capabilities = 'method=opt' # Can be slow in debug and this is simply to make sure input file remains working
     requirement = "The level set module shall include an example solution of a rotating vortex problem with SUPG stabilization."
   []
   [level_set_reinit]
     type = RunApp
     input = vortex_reinit.i
     cli_args = Executioner/num_steps=1
-    method = opt # Can be slow in debug and this is simply to make sure input file remains working
+    capabilities = 'method=opt' # Can be slow in debug and this is simply to make sure input file remains working
     requirement = "The level set module shall include an example solution of a rotating vortex problem with reinitialization."
   []
 []

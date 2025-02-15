@@ -39,10 +39,10 @@
     input = 'unit_conversion.i'
     cli_args = 'Problem/solve=false'
 
-    method = dbg
     expect_out = 'unit_conversion\.i:27:5: Unit conversion 1 J\/mol -> 1\.0364269656262175e-05 eV\/at'
 
     issues = '#25362'
     requirement = 'The system shall report the unit conversions performed at parse time when running in debug mode.'
+    capabilities = 'method=dbg'
   []
 []

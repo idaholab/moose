@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 2d-transient.i
     exodiff = 2d-transient_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     cli_args = "AuxVariables/inactive='mixing_length'"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation.'
     abs_zero = 1e-9
@@ -16,7 +16,7 @@
     type = 'Exodiff'
     input = 2d-transient-action.i
     exodiff = 2d-transient-action_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation using the NSFV action syntax.'
     abs_zero = 1e-9
     recover = false # see #19126
@@ -26,7 +26,7 @@
     type = 'Exodiff'
     input = 2d-transient-physics.i
     exodiff = 2d-transient-physics_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation using the WCNSFV Physics syntax.'
     abs_zero = 1e-9
     recover = false # see #19126
@@ -37,7 +37,7 @@
     input = 2d-transient.i
     exodiff = 2d-turbulent.e
     cli_args = "FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model.'
     mesh_mode = REPLICATED
     abs_zero = 1e-9
@@ -65,7 +65,7 @@
                "Modules/NavierStokesFV/mixing_length_aux_execute_on='initial' "
                "Modules/NavierStokesFV/mixing_length_two_term_bc_expansion=true "
                "Outputs/file_base='2d-turbulent-action'"
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model using the NSFV action syntax.'
     mesh_mode = REPLICATED
     abs_zero = 1e-9

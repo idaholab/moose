@@ -25,7 +25,7 @@
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
     capabilities = 'mumps'
     recover = false # See https://github.com/idaholab/moose/issues/17906
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md PCNSFVMomentumFriction.md'
   []
@@ -36,7 +36,7 @@
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem using a mixed variable set with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
     capabilities = 'mumps'
     recover = false # See https://github.com/idaholab/moose/issues/17906
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousMixedVarMaterial.md PCNSFVMomentumFriction.md'
   []
