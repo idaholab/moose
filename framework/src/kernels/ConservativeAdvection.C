@@ -15,12 +15,11 @@ registerMooseObject("MooseApp", ADConservativeAdvection);
 
 template <bool is_ad>
 InputParameters
-ConservativeAdvectionTempl<is_ad>::validParams()
+ConservativeAdvectionTempl<is_ad>::generalParams()
 {
   InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                              "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
-  params.addRequiredCoupledVar("velocity", "Velocity vector");
   MooseEnum upwinding_type("none full", "none");
   params.addParam<MooseEnum>("upwinding_type",
                              upwinding_type,
@@ -30,13 +29,47 @@ ConservativeAdvectionTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("advected_quantity",
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");
+  params.addCoupledVar("velocity_variable", "Velocity vector given as a variable");
+  params.addParam<MaterialPropertyName>("velocity_material", "Velocity vector given as a material");
+  return params;
+}
+
+template <>
+InputParameters
+ConservativeAdvectionTempl<false>::validParams()
+{
+  InputParameters params = generalParams();
+  params.addCoupledVar("velocity", "Velocity vector");
+  params.renameCoupledVar("velocity",
+                          "velocity_variable",
+                          "Velocity vector given as a variable. 'velocity' is deprecated and will "
+                          "be removed on 12/31/2025. Please use velocity_variable.");
+  return params;
+}
+
+template <bool is_ad>
+InputParameters
+ConservativeAdvectionTempl<is_ad>::validParams()
+{
+  InputParameters params = generalParams();
+  params.addParam<MaterialPropertyName>("velocity", "Velocity vector");
+  params.renameParam("velocity",
+                     "velocity_material",
+                     "Velocity vector given as a material. 'velocity' is deprecated and will be "
+                     "removed on 12/31/2025. Please use velocity_material.");
   return params;
 }
 
 template <bool is_ad>
 ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _velocity(this->template coupledGenericVectorValue<is_ad>("velocity")),
+    _velocity(isParamValid("velocity_material")
+                  ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
+                             "velocity_material")
+                         .get()
+                  : (this->isParamValid("velocity_variable")
+                         ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
+                         : nullptr)),
     _adv_quant(
         isParamValid("advected_quantity")
             ? this->template getGenericMaterialProperty<Real, is_ad>("advected_quantity").get()
@@ -51,13 +84,17 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
     paramError(
         "advected_quantity",
         "Upwinding is not compatable with an advected quantity that is not the primary variable.");
+  if ((!this->isParamValid("velocity_variable") && !isParamValid("velocity_material")) ||
+      (this->isParamValid("velocity_variable") && isParamValid("velocity_material")))
+    paramError("velocity_variable",
+               "Either velocity_variable or velocity_material must be specificied, not both.");
 }
 
 template <bool is_ad>
 GenericReal<is_ad>
 ConservativeAdvectionTempl<is_ad>::negSpeedQp() const
 {
-  return -_grad_test[_i][_qp] * _velocity[_qp];
+  return -_grad_test[_i][_qp] * (*_velocity)[_qp];
 }
 
 template <bool is_ad>
