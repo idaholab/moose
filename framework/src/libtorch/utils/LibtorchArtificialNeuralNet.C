@@ -11,6 +11,7 @@
 
 #include "LibtorchArtificialNeuralNet.h"
 #include "MooseError.h"
+#include "LibtorchUtils.h"
 
 namespace Moose
 {
@@ -21,15 +22,20 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const unsigned int num_outputs,
     const std::vector<unsigned int> & num_neurons_per_layer,
     const std::vector<std::string> & activation_function,
+    const std::vector<Real> & minimum_values,
+    const std::vector<Real> & maximum_values,
     const torch::DeviceType device_type,
-    const torch::ScalarType data_type)
+    const torch::ScalarType data_type,
+    const bool build_on_construct)
   : _name(name),
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
     _num_neurons_per_layer(num_neurons_per_layer),
-    _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear", "relu")),
+    _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear tanh", "relu")),
     _device_type(device_type),
-    _data_type(data_type)
+    _data_type(data_type),
+    _minimum_values(minimum_values),
+    _maximum_values(maximum_values)
 {
   _activation_function = activation_function;
 
@@ -38,11 +44,24 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
       (_activation_function.size() != _num_neurons_per_layer.size()))
     mooseError("The number of activation functions should be either one or the same as the number "
                "of hidden layers");
-  constructNeuralNetwork();
+
+  if (_minimum_values.size())
+  {
+    auto min_value = _minimum_values;
+    LibtorchUtils::vectorToTensor(min_value, _min_tensor);
+    _min_tensor.to(_data_type).to(_device_type);
+    auto max_value = _maximum_values;
+    LibtorchUtils::vectorToTensor(max_value, _max_tensor);
+    _max_tensor.to(_data_type).to(_device_type);
+  }
+
+  if (build_on_construct)
+    constructNeuralNetwork();
 }
 
 LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
-    const Moose::LibtorchArtificialNeuralNet & nn)
+    const Moose::LibtorchArtificialNeuralNet & nn,
+    const bool build_on_construct)
   : torch::nn::Module(),
     _name(nn.name()),
     _num_inputs(nn.numInputs()),
@@ -50,16 +69,31 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_neurons_per_layer(nn.numNeuronsPerLayer()),
     _activation_function(nn.activationFunctions()),
     _device_type(nn.deviceType()),
-    _data_type(nn.dataType())
+    _data_type(nn.dataType()),
+    _minimum_values(nn.minValues()),
+    _maximum_values(nn.maxValues())
 {
 
   // We construct the NN architecture
-  constructNeuralNetwork();
-  // We fill it up with the current parameter values
-  const auto & from_params = nn.named_parameters();
-  auto to_params = this->named_parameters();
-  for (unsigned int param_i : make_range(from_params.size()))
-    to_params[param_i].value().data() = from_params[param_i].value().data().clone();
+  if (build_on_construct)
+  {
+    constructNeuralNetwork();
+    // We fill it up with the current parameter values
+    const auto & from_params = nn.named_parameters();
+    auto to_params = this->named_parameters();
+    for (unsigned int param_i : make_range(from_params.size()))
+      to_params[param_i].value().data() = from_params[param_i].value().data().clone();
+  }
+
+  if (_minimum_values.size())
+  {
+    auto min_value = _minimum_values;
+    LibtorchUtils::vectorToTensor(min_value, _min_tensor);
+    _min_tensor.to(_data_type).to(_device_type);
+    auto max_value = _maximum_values;
+    LibtorchUtils::vectorToTensor(max_value, _max_tensor);
+    _max_tensor.to(_data_type).to(_device_type);
+  }
 }
 
 void
@@ -101,6 +135,8 @@ LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
       output = torch::relu(_weights[i]->forward(output));
     else if (activation == "sigmoid")
       output = torch::sigmoid(_weights[i]->forward(output));
+    else if (activation == "tanh")
+      output = torch::tanh(_weights[i]->forward(output));
     else if (activation == "elu")
       output = torch::elu(_weights[i]->forward(output));
     else if (activation == "gelu")
@@ -109,7 +145,17 @@ LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
       output = _weights[i]->forward(output);
   }
 
-  output = _weights[_weights.size() - 1]->forward(output);
+  if (_minimum_values.size())
+  {
+    output = torch::sigmoid(_weights[_weights.size() - 1]->forward(output));
+    torch::Tensor scale = torch::sub(_max_tensor, _min_tensor).to(_data_type);
+    output = torch::mul(output, scale);
+    output = output + _min_tensor;
+  }
+  else
+  {
+    output = _weights[_weights.size() - 1]->forward(output);
+  }
 
   return output;
 }
@@ -183,6 +229,16 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
   for (unsigned int i = 0; i < afs; ++i)
     items[i] = nn->activationFunctions()[i];
 
+  // unsigned int nminv(nn->minValues().size());
+  // dataStore(stream, nminv, context);
+  std::vector<Real> minv(nn->minValues());
+  dataStore(stream, minv, context);
+
+  // unsigned int nmaxv(nn->minValues().size());
+  // dataStore(stream, nmaxv, context);
+  std::vector<Real> maxv(nn->maxValues());
+  dataStore(stream, maxv, context);
+
   dataStore(stream, items, context);
 
   auto device_type = static_cast<std::underlying_type<torch::DeviceType>::type>(nn->deviceType());
@@ -222,6 +278,14 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   activation_functions.resize(num_activation_items);
   dataLoad(stream, activation_functions, context);
 
+  std::vector<Real> min_values;
+  min_values.resize(num_outputs);
+  dataLoad(stream, min_values, context);
+
+  std::vector<Real> max_values;
+  max_values.resize(num_outputs);
+  dataLoad(stream, max_values, context);
+
   std::underlying_type<torch::DeviceType>::type device_type;
   dataLoad(stream, device_type, context);
   const torch::DeviceType divt(static_cast<torch::DeviceType>(device_type));
@@ -231,7 +295,7 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   const torch::ScalarType datt(static_cast<torch::ScalarType>(data_type));
 
   nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, divt, datt);
+      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, min_values, max_values, divt, datt);
 
   torch::load(nn, name);
 }

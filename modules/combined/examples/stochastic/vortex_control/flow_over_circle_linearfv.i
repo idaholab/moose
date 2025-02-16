@@ -240,44 +240,105 @@
     type = LiftDragRewardPostprocessor
     lift = lift_coeff
     drag = drag_coeff
-    averaging_window = 200
-    coeff_1 = 2.0
+    averaging_window = 50
+    coeff_1 = 0.0
     coeff_2 = 0.2
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
-  [p1]
+  # [p1]
+  #   type = PointValue
+  #   variable = pressure
+  #   point = '0 0.07 0.0'
+  #   execute_on = 'INITIAL TIMESTEP_END'
+  # []
+  # [p2]
+  #   type = PointValue
+  #   variable = pressure
+  #   point = '0 -0.07 0.0'
+  #   execute_on = 'INITIAL TIMESTEP_END'
+  # []
+  # [p3]
+  #   type = PointValue
+  #   variable = pressure
+  #   point = '0.075 0.1 0.0'
+  #   execute_on = 'INITIAL TIMESTEP_END'
+  # []
+  # [p4]
+  #   type = PointValue
+  #   variable = pressure
+  #   point = '0.075 0.0 0.0'
+  #   execute_on = 'INITIAL TIMESTEP_END'
+  # []
+  # [p5]
+  #   type = PointValue
+  #   variable = pressure
+  #   point = '0.075 -0.1 0.0'
+  #   execute_on = 'INITIAL TIMESTEP_END'
+  # []
+  [p1x]
     type = PointValue
-    variable = pressure
+    variable = vel_x
     point = '0 0.07 0.0'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [p2]
+  [p2x]
     type = PointValue
-    variable = pressure
+    variable = vel_x
     point = '0 -0.07 0.0'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [p3]
+  [p3x]
     type = PointValue
-    variable = pressure
+    variable = vel_x
     point = '0.075 0.1 0.0'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [p4]
+  [p4x]
     type = PointValue
-    variable = pressure
+    variable = vel_x
     point = '0.075 0.0 0.0'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [p5]
+  [p5x]
     type = PointValue
-    variable = pressure
+    variable = vel_x
+    point = '0.075 -0.1 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p1y]
+    type = PointValue
+    variable = vel_y
+    point = '0 0.07 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p2y]
+    type = PointValue
+    variable = vel_y
+    point = '0 -0.07 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p3y]
+    type = PointValue
+    variable = vel_y
+    point = '0.075 0.1 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p4y]
+    type = PointValue
+    variable = vel_y
+    point = '0.075 0.0 0.0'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [p5y]
+    type = PointValue
+    variable = vel_y
     point = '0.075 -0.1 0.0'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [Q_signal]
     type = ConstantPostprocessor
     value = 0.0
+    execute_on = TIMESTEP_BEGIN
   []
   [Q]
     type = LibtorchControlValuePostprocessor
@@ -292,7 +353,7 @@
 [Reporters]
   [results]
     type = AccumulateReporter
-    reporters = 'p1/value p2/value p3/value p4/value p5/value reward/value Q/value log_prob_Q/value'
+    reporters = 'p1x/value p2x/value p3x/value p4x/value p5x/value p1y/value p2y/value p3y/value p4y/value p5y/value reward/value Q/value log_prob_Q/value'
   []
 []
 
@@ -300,21 +361,21 @@
   [src_control]
     type = LibtorchDRLControl
     parameters = "Postprocessors/Q_signal/value"
-    responses = 'p1 p2 p3 p4 p5'
+    responses = 'p1x p2x p3x p4x p5x p1y p2y p3y p4y p5y'
 
     # keep consistent with LibtorchDRLControlTrainer
     input_timesteps = 1
-    response_scaling_factors = '0.4 0.4 0.4 0.4 0.4'
-    response_shift_factors = '-0.4 -0.4 -0.4 -0.4 -0.4'
-    action_standard_deviations = '0.01'
-    action_scaling_factors = 0.2
+    response_scaling_factors = '13.33 15.38 16.66 38.46 15.38 33.33 40 11.76 4.711 15.38'
+    response_shift_factors = '2.055 2.055 1.93 -0.171 1.945 0.449 -0.525 0.029 0.17675 1.945'
+    action_scaling_factors = 0.5
 
-    maximum_actions = 0.108
-    minimum_actions = -0.108
+    # response_scaling_factors = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0'
+    # response_shift_factors = '0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0'
+    # action_scaling_factors = 1.0
 
     execute_on = 'TIMESTEP_BEGIN'
-    smoother = 0.2
-    num_stems_in_period = 25
+    smoother = 0.1
+    num_stems_in_period = 50
   []
 []
 
@@ -328,7 +389,7 @@
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.9
-  pressure_variable_relaxation = 0.55
+  pressure_variable_relaxation = 0.6
   num_iterations = 100
   pressure_absolute_tolerance = 5e-6
   momentum_absolute_tolerance = 5e-6
@@ -338,8 +399,8 @@
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  dt = 0.001
-  num_steps = 2000
+  dt = 0.0005
+  num_steps = 800
 []
 
 [Outputs]

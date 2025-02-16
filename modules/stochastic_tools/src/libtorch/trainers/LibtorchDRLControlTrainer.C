@@ -10,7 +10,6 @@
 #ifdef LIBTORCH_ENABLED
 
 #include "LibtorchDataset.h"
-#include "LibtorchArtificialNeuralNetTrainer.h"
 #include "LibtorchUtils.h"
 #include "LibtorchDRLControlTrainer.h"
 #include "Sampler.h"
@@ -122,6 +121,9 @@ LibtorchDRLControlTrainer::validParams()
                                 0,
                                 "The frequency which is used to print the loss values. If 0, the "
                                 "loss values are not printed.");
+  params.addParam<unsigned int>("batch_size", 100, "Batch size");
+  params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
+  params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
   return params;
 }
 
@@ -161,6 +163,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _average_episode_reward(0.0),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
+    _min_values(getParam<std::vector<Real>>("min_control_value")),
+    _max_values(getParam<std::vector<Real>>("max_control_value")),
     _update_counter(_update_frequency)
 {
   if (_response_names.size() != _response_shift_factors.size())
@@ -181,20 +185,18 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
 
-  // Convert the user input standard deviations to a diagonal tensor
-  _std = torch::eye(_control_names.size());
-  for (unsigned int i = 0; i < _control_names.size(); ++i)
-    _std[i][i] = _action_std[i];
-
   bool filename_valid = isParamValid("filename_base");
 
   // Initializing the control neural net so that the control can grab it right away
-  _control_nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
+  _control_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
       filename_valid ? _filename_base + "_control.net" : "control.net",
       _num_inputs,
       _num_outputs,
       _num_control_neurons_per_layer,
-      getParam<std::vector<std::string>>("control_activation_functions"));
+      _action_std,
+      getParam<std::vector<std::string>>("control_activation_functions"),
+      _min_values,
+      _max_values);
 
   // We read parameters for the control neural net if it is requested
   if (_read_from_file)
@@ -353,52 +355,80 @@ LibtorchDRLControlTrainer::trainController()
     if (_standardize_advantage)
       advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
 
+    // auto data_set = DRLDataset({_input_tensor, _output_tensor, _log_probability_tensor, _return_tensor});
+
+    // Transform the dataset se that the loader has an easier time
+    auto input_size = _input_tensor.sizes()[0];
+    auto batch_size = getParam<unsigned int>("batch_size");
+    // auto data_loader = torch::data::make_data_loader(std::move(transformed_data_set), batch_size);
+
     for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
     {
-      // Get the approximate return from the neural net again (this one does have an associated
-      // gradient)
-      value = evaluateValue(_input_tensor);
-      // Get the approximate logarithmic action probability using the control neural net
-      auto curr_log_probability = evaluateAction(_input_tensor, _output_tensor);
+      auto permutation = torch::randperm(input_size);
+      unsigned int batch_begin = 0;
+      unsigned int batch_end = 0;
+      while (batch_end < input_size)
+      {
+        batch_end = batch_begin + batch_size > input_size ? input_size : batch_begin + batch_size;
+        unsigned int offset = batch_end - batch_begin;
+        auto batch_permutation = permutation.narrow(0, batch_begin, offset);
+        auto obs_batch = _input_tensor.index({batch_permutation});
+        auto action_batch = _output_tensor.index({batch_permutation});
+        auto log_prob_batch = _log_probability_tensor.index({batch_permutation});
+        auto return_batch = _return_tensor.index({batch_permutation});
+        auto advantage_batch = advantage.index({batch_permutation});
 
-      // Prepare the ratio by using the e^(logx-logy)=x/y expression
-      auto ratio = (curr_log_probability - _log_probability_tensor).exp();
+        // Get the approximate return from the neural net again (this one does have an associated
+        // gradient)
+        value = evaluateValue(obs_batch);
 
-      // Use clamping for limiting
-      auto surr1 = ratio * advantage;
-      auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage;
 
-      // Compute loss values for the critic and the control neural net
-      auto actor_loss = -torch::min(surr1, surr2).mean();
-      auto critic_loss = torch::mse_loss(value, _return_tensor);
+        _control_nn->forward(obs_batch);
+        // Get the approximate logarithmic action probability using the control neural net
+        auto curr_log_probability = _control_nn->logProbability(action_batch);
 
-      // Update the weights in the neural nets
-      actor_optimizer.zero_grad();
-      actor_loss.backward();
-      actor_optimizer.step();
+        // Prepare the ratio by using the e^(logx-logy)=x/y expression
+        auto ratio = (curr_log_probability - log_prob_batch).exp();
 
-      critic_optimizer.zero_grad();
-      critic_loss.backward();
-      critic_optimizer.step();
+        // Use clamping for limiting
+        auto surr1 = ratio * advantage_batch;
+        auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage_batch;
 
-      //           const auto & named_params = _control_nn->named_parameters();
-      // for (const auto & param_i : make_range(named_params.size()))
-      // {
-      //   // We cast the parameters into a 1D vector
-      //   std::cout << Moose::stringify(std::vector<Real>(
-      //       named_params[param_i].value().data_ptr<Real>(),
-      //       named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel())) << std::endl;
-      // }
+        // Compute loss values for the critic and the control neural net
+        auto actor_loss = -(torch::min(surr1, surr2) + 0.01*_control_nn->entropy()).mean();
+        auto critic_loss = torch::mse_loss(value, return_batch);
 
-      // print loss per epoch
+        // Update the weights in the neural nets
+        actor_optimizer.zero_grad();
+        actor_loss.backward();
+        actor_optimizer.step();
+
+        critic_optimizer.zero_grad();
+        critic_loss.backward();
+        critic_optimizer.step();
+
+        //           const auto & named_params = _control_nn->named_parameters();
+        // for (const auto & param_i : make_range(named_params.size()))
+        // {
+        //   // We cast the parameters into a 1D vector
+        //   std::cout << Moose::stringify(std::vector<Real>(
+        //       named_params[param_i].value().data_ptr<Real>(),
+        //       named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel())) << std::endl;
+        // }
+
+              // print loss per epoch
       if (_loss_print_frequency)
-        if (epoch % _loss_print_frequency == 0)
+        if (epoch % _loss_print_frequency == 0 && batch_begin == 0)
         {
-
           _console << "Epoch: " << epoch << " | Actor Loss: " << COLOR_GREEN
-                  << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: " << COLOR_GREEN
-                  << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
+                << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: " << COLOR_GREEN
+                << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
         }
+
+        batch_begin = batch_end;
+      }
+      std::cout << _control_nn->stdTensor() << std::endl;
+
     }
   }
 
@@ -452,17 +482,6 @@ torch::Tensor
 LibtorchDRLControlTrainer::evaluateValue(torch::Tensor & input)
 {
   return _critic_nn->forward(input);
-}
-
-torch::Tensor
-LibtorchDRLControlTrainer::evaluateAction(torch::Tensor & input, torch::Tensor & output)
-{
-  torch::Tensor var = torch::matmul(_std, _std);
-
-  // Compute an action and get it's logarithmic proability based on an assumed Gaussian distribution
-  torch::Tensor action = _control_nn->forward(input);
-  return -((action - output) * (action - output)) / (2 * var) - torch::log(_std) -
-         std::log(std::sqrt(2 * M_PI));
 }
 
 void
