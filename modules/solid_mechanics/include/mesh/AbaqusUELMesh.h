@@ -11,6 +11,7 @@
 
 #include "MooseMesh.h"
 #include "MoosePassKey.h"
+#include "AbaqusInputParser.h"
 
 #include <list>
 #include <stdexcept>
@@ -98,14 +99,7 @@ public:
   void addNodeset(BoundaryID id);
 
 protected:
-  /// read a single line from the input
-  std::string readLine();
-
-  /// read data line, including continuation lines
-  bool readDataLine(std::string & s);
-
-  bool startsWith(const std::string & s, const std::string & pattern);
-  void strip(std::string & line);
+  AbaqusInputParser::AbaqusInputParser _input;
 
   void readNodes();
   void readUserElement(const std::string & header);
@@ -117,9 +111,6 @@ protected:
 
   void setupLibmeshSubdomains();
   void setupNodeSets();
-
-  /// Stream object used to interact with the file
-  std::unique_ptr<std::istream> _in;
 
   /// Element type definitions
   std::vector<UELDefinition> _element_definition;

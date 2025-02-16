@@ -42,147 +42,45 @@ AbaqusUELMesh::safeClone() const
   return _app.getFactory().copyConstruct(*this);
 }
 
-std::string
-AbaqusUELMesh::readLine()
-{
-  std::string s;
-  while (true)
-  {
-    // read line
-    std::getline(*_in, s);
-
-    // check for error condition
-    if (*_in)
-    {
-      // skip empty line
-      if (s == "")
-        continue;
-
-      // skip comment line
-      if (s.substr(0, 2) == "**")
-        continue;
-
-      return s;
-    }
-
-    // regular end-of-file
-    if (_in->eof())
-      throw EndOfAbaqusInput();
-
-    // bad stream
-    paramError("file", "Error reading file (bad stream).");
-  }
-}
-
-bool
-AbaqusUELMesh::readDataLine(std::string & s)
-{
-  s.clear();
-
-  while (true)
-  {
-    if (_in->peek() == '*' || _in->peek() == EOF)
-    {
-      if (s.empty())
-        return false;
-      mooseError("Incomplete data line.");
-    }
-
-    // read line
-    auto l = readLine();
-    strip(l);
-    s += l;
-
-    // check if line continuation is needed
-    if (s.back() != ',')
-      return true;
-  }
-}
-
-bool
-AbaqusUELMesh::startsWith(const std::string & s, const std::string & pattern)
-{
-  const auto n = pattern.length();
-  return (s.substr(0, n) == pattern);
-}
-
-void
-AbaqusUELMesh::strip(std::string & line)
-{
-  line.erase(std::remove_if(
-                 line.begin(), line.end(), [](unsigned char const c) { return std::isspace(c); }),
-             line.end());
-}
-
 void
 AbaqusUELMesh::buildMesh()
 {
   // open Abaqus input
-  auto inf = std::make_unique<std::ifstream>();
-  inf->open(getParam<FileName>("file").c_str(), std::ios::in);
-  if (!inf->good())
+  std::ifstream in;
+  in.open(getParam<FileName>("file").c_str(), std::ios::in);
+  if (!in.good())
     paramError("file", "Error opening mesh file.");
-  _in = std::move(inf);
+  _input.parse(in);
 
-  // read file line by line
-  std::string s;
-  while (true)
-  {
-    // read line
-    try
-    {
-      s = readLine();
-    }
-    catch (EndOfAbaqusInput &)
-    {
-      break;
-    }
+  //
+  // parts
+  //
+  _input.forBlock("part",
+                  [](auto block)
+                  {
+                    std::cout << block._type << '\n';
+                    return;
+                  });
 
-    // parse the current line
-    std::string upper = MooseUtils::toUpper(s);
-    try
-    {
-      if (startsWith(upper, "*NODE"))
-      {
-        readNodes();
-        continue;
-      }
-      if (startsWith(upper, "*USER ELEMENT"))
-      {
-        readUserElement(upper);
-        continue;
-      }
-      if (startsWith(upper, "*ELEMENT"))
-      {
-        readElements(upper);
-        continue;
-      }
-      if (startsWith(upper, "*NSET"))
-      {
-        readNodeSet(upper);
-        continue;
-      }
-      if (startsWith(upper, "*ELSET"))
-      {
-        readElementSet(upper);
-        continue;
-      }
-      if (startsWith(upper, "*UEL PROPERTY"))
-      {
-        readProperties(upper);
-        continue;
-      }
-      if (startsWith(upper, "*INITIAL CONDITIONS"))
-      {
-        _abaqus_ics.push_back(readInputBlock(upper));
-        continue;
-      }
-    }
-    catch (EndOfAbaqusInput &)
-    {
-      paramError("file", "Unexpected end of file.");
-    }
-  }
+  //
+  // assembly
+  _input.forBlock("assembly",
+                  [](auto block)
+                  {
+                    block.forBlock("instance",
+                                   [](auto block)
+                                   {
+                                     std::cout << block._type << '\n';
+                                     return;
+                                   });
+
+                    block.forOption("nset",
+                                    [](auto option)
+                                    {
+                                      std::cout << option._type << '\n';
+                                      return;
+                                    });
+                  });
 
   // create blocks to restrict each variable
   setupLibmeshSubdomains();
@@ -218,15 +116,13 @@ AbaqusUELMesh::prepare(const MeshBase * mesh_to_clone)
 void
 AbaqusUELMesh::readNodes()
 {
-  // We will read nodes until the next line begins with *, since that will be the
-  // next section.
-  while (_in->peek() != '*' && _in->peek() != EOF)
+  for (const auto & col : std::vector<std::vector<std::string>>())
   {
-    // read and split line
-    std::string s = readLine();
-    strip(s);
-    std::vector<std::string> col;
-    MooseUtils::tokenize(s, col, 1, ",");
+    // // read nodes
+    // if (col == "node")
+    //   readNodes();
+    // else if (col == "nset")
+    //   readNodeSet();
 
     // node id
     int id = MooseUtils::convert<int>(col[0]) - 1;
@@ -275,7 +171,7 @@ AbaqusUELMesh::readUserElement(const std::string & header)
   std::string s;
   int line = 0;
   std::set<std::size_t> seen_node;
-  while (readDataLine(s))
+  while (false)
   {
     // split line
     std::vector<std::size_t> col;
@@ -343,7 +239,7 @@ AbaqusUELMesh::readElements(const std::string & header)
 
   // We will read nodes until the next line begins with *
   std::string s;
-  while (readDataLine(s))
+  while (false)
   {
     // split line
     std::vector<std::size_t> col;
@@ -423,7 +319,7 @@ AbaqusUELMesh::readSetHelper(std::map<std::string, std::vector<std::size_t>> & s
   std::string s;
   auto & set = set_map[name];
   std::set<std::size_t> unique_items(set.begin(), set.end());
-  while (readDataLine(s))
+  while (false)
   {
     // split line
     std::vector<std::string> col;
@@ -489,7 +385,7 @@ AbaqusUELMesh::readProperties(const std::string & header)
   auto & props = _properties.back();
 
   std::string s;
-  while (readDataLine(s))
+  while (false)
   {
     // tokenize all data as both integer and float. this should always succeed. we leter iterate
     // over elements and only then know from the uel type how many entries are float and int.
@@ -518,7 +414,7 @@ AbaqusUELMesh::readInputBlock(const std::string & header)
 {
   AbaqusInputBlock block(header);
   std::string s;
-  while (readDataLine(s))
+  while (false)
     block._data_lines.push_back(s);
   if (_debug)
     mooseInfoRepeated("Block: ", header, "\n", Moose::stringify(block._data_lines));
