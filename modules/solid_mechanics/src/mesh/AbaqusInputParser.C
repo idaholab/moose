@@ -75,37 +75,38 @@ const static std::set<std::string> abaqus_options = {
     "user element",
 };
 
-AbaqusInputParser::AbaqusInputParser(std::istream & file) : _file(file)
+void
+AbaqusInputParser::parse(std::istream & in)
 {
   // load and preprocess entire file
-  loadFile();
+  loadFile(in);
 
   // build the parse tree
-  _root = parseBlock();
+  parseBlockInternal(*this);
 }
 
 void
-AbaqusInputParser::loadFile()
+AbaqusInputParser::loadFile(std::istream & in)
 {
   _current_line = 0;
 
   std::string s, ss;
   while (true)
   {
-    if (_file.eof())
+    if (in.eof())
       break;
 
     // read line
-    std::getline(_file, s);
+    std::getline(in, s);
     ss = s;
 
     // continuation lines
     while (ss.length() > 0 && ss.back() == ',')
     {
-      std::getline(_file, s);
+      std::getline(in, s);
 
       // error, expected a continuation line but got EOF
-      if (_file.eof())
+      if (in.eof())
         mooseError("Expected a continuation line but got EOF in Abaqus input file");
 
       ss += s;
@@ -128,8 +129,14 @@ AbaqusInputParser::loadFile()
 BlockNode
 AbaqusInputParser::parseBlock(const std::string & end, const std::vector<std::string> & head_line)
 {
-  // std::cout << "*" << end << '\n';
   BlockNode node(head_line);
+  parseBlockInternal(node, end);
+  return node;
+}
+
+void
+AbaqusInputParser::parseBlockInternal(BlockNode & node, const std::string & end)
+{
   while (_current_line < _lines.size())
   {
     const auto & line = _lines[_current_line];
@@ -162,7 +169,6 @@ AbaqusInputParser::parseBlock(const std::string & end, const std::vector<std::st
                  "' in Abaqus input file. Add this to abaqus_blocks or abaqus_options in "
                  "AbaqusInputParser.C to parse it.");
   }
-  return node;
 }
 
 OptionNode
