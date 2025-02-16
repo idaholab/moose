@@ -12,7 +12,7 @@
 #pragma once
 
 #include <torch/torch.h>
-#include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchActorNeuralNet.h"
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
@@ -188,13 +188,15 @@ protected:
   /// The frequency the loss should be printed
   const unsigned int _loss_print_frequency;
 
+  /// min
+  std::vector<Real> _min_values;
+  /// max
+  std::vector<Real> _max_values;
+
   /// Pointer to the control (or actor) neural net object
-  std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _control_nn;
+  std::shared_ptr<Moose::LibtorchActorNeuralNet> _control_nn;
   /// Pointer to the critic neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _critic_nn;
-
-  /// standard deviation in a tensor format for sampling the actual control value
-  torch::Tensor _std;
 
   /// Torch::tensor version of the input and action data
   torch::Tensor _input_tensor;
@@ -203,6 +205,9 @@ protected:
   torch::Tensor _log_probability_tensor;
 
 private:
+
+  torch::Tensor gaussianEntropy(const torch::Tensor std);
+
   /**
    * Extract the response values from the postprocessors of the controlled system.
    * This assumes that they are stored in an AccumulateReporter

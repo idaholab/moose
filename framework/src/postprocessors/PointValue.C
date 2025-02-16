@@ -72,6 +72,5 @@ PointValue::execute()
 Real
 PointValue::getValue() const
 {
-  // std::cout << "Point value " << _value << std::endl;
   return _value;
 }

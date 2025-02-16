@@ -48,7 +48,7 @@ public:
    * when copying the neural network from a main app which trains it.
    * @param input_nn Reference to a neural network which will be copied into this object
    */
-  void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
+  virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
   /// Return a reference to the stored neural network
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;

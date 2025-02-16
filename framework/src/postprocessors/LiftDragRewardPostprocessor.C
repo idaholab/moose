@@ -52,7 +52,7 @@ LiftDragRewardPostprocessor::LiftDragRewardPostprocessor(const InputParameters &
 Real
 LiftDragRewardPostprocessor::getValue() const
 {
-  return _coeff_1 - _avg_drag - _coeff_2*_avg_lift;
+  return _coeff_1 - _avg_drag - _coeff_2*std::abs(_avg_lift);
 }
 
 void
@@ -61,7 +61,7 @@ LiftDragRewardPostprocessor::execute()
   auto rolling_index = _replace_counter % _averaging_window;
   auto normalization = std::min(_replace_counter + 1, _averaging_window);
 
-  _lift_history[rolling_index] = std::abs(_lift);
+  _lift_history[rolling_index] = _lift;
   _drag_history[rolling_index] = _drag;
 
   _avg_lift = std::reduce(_lift_history.begin(), _lift_history.end())/normalization;

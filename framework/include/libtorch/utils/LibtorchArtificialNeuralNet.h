@@ -38,14 +38,18 @@ public:
                               const unsigned int num_outputs,
                               const std::vector<unsigned int> & num_neurons_per_layer,
                               const std::vector<std::string> & activation_function = {"relu"},
+                              const std::vector<Real> & minimum_values = {},
+                              const std::vector<Real> & maximum_values = {},
                               const torch::DeviceType device_type = torch::kCPU,
-                              const torch::ScalarType scalar_type = torch::kDouble);
+                              const torch::ScalarType scalar_type = torch::kDouble,
+                              const bool build_on_construct = true);
 
   /**
    * Copy construct an artificial neural network
    * @param nn The neural network which needs to be copied
    */
-  LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn);
+  LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn,
+                             const bool build_on_construct = true);
 
   /**
    * Add layers to the neural network
@@ -80,7 +84,11 @@ public:
   /// Return the data type which is used by this neural network
   torch::ScalarType dataType() const { return _data_type; }
   /// Construct the neural network
-  void constructNeuralNetwork();
+  virtual void constructNeuralNetwork();
+
+  const std::vector<Real> & minValues() const {return _minimum_values;};
+
+  const std::vector<Real> & maxValues() const {return _maximum_values;};
 
   /// Store the network architecture in a json file (for debugging, visualization)
   void store(nlohmann::json & json) const;
@@ -104,6 +112,11 @@ protected:
   const torch::DeviceType _device_type;
   /// The data type used in this neural network
   const torch::ScalarType _data_type;
+  ///
+  const std::vector<Real> _minimum_values;
+  const std::vector<Real> _maximum_values;
+  torch::Tensor _min_tensor;
+  torch::Tensor _max_tensor;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
