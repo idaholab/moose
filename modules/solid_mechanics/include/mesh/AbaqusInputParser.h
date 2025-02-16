@@ -57,9 +57,23 @@ struct OptionNode : public Node
 struct BlockNode;
 struct BlockNode : public Node
 {
-  BlockNode() : Node({"ROOT"}) {}
   BlockNode(std::vector<std::string> line) : Node(line) {}
   std::string stringify(const std::string & indent = "") const;
+
+  template <typename T>
+  void forBlock(const std::string & name, T && func) const
+  {
+    for (const auto & child : _children)
+      if (child._type == name)
+        func(child);
+  }
+  template <typename T>
+  void forOption(const std::string & name, T && func) const
+  {
+    for (const auto & option : _options)
+      if (option._type == name)
+        func(option);
+  }
 
   std::vector<BlockNode> _children;
   std::vector<OptionNode> _options;
@@ -68,29 +82,26 @@ struct BlockNode : public Node
 /**
  * Build a syntax tree from an abaqus input file
  */
-class AbaqusInputParser
+class AbaqusInputParser : public BlockNode
 {
 public:
-  AbaqusInputParser(std::istream & file);
-  std::string stringify() const { return _root.stringify(); }
+  AbaqusInputParser() : BlockNode({"ROOT"}) {}
+  void parse(std::istream & in);
 
 private:
-  void loadFile();
+  void loadFile(std::istream & in);
 
-  BlockNode parseBlock(const std::string & end = "",
+  BlockNode parseBlock(const std::string & end,
                        const std::vector<std::string> & head_line = {"ROOT"});
   OptionNode parseOption(const std::vector<std::string> & head_line = {"ROOT"});
 
-  /// input steam for the Abaqus input file
-  std::istream & _file;
+  void parseBlockInternal(BlockNode & node, const std::string & end = "");
 
   /// items for each line of the file (without comments, skipping empty lines, and joining continuation lines)
   std::vector<std::vector<std::string>> _lines;
 
   /// currently parsed line
   std::size_t _current_line;
-
-  BlockNode _root;
 };
 
 template <typename T>
