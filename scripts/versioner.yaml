@@ -6,13 +6,13 @@
 packages:
   # dependencies: moose-dev
   tools:
-    version: 2024.12.23
+    version: 2025.02.17
     influential:
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
   # dependencies: petsc, libmesh, moose-dev, libmesh-vtk, peacock
   mpi:
-    version: 2024.12.23
+    version: 2025.02.17
     influential:
       - apptainer/set_prompt.bash
       - apptainer/mpi.def
@@ -24,7 +24,7 @@ packages:
   # dependencies: libmesh, moose-dev
   petsc:
     version: 3.22.1.193.g72c1e49ee3d
-    build_number: 1
+    build_number: 2
     dependencies:
       - mpi
     apptainer:
@@ -41,7 +41,7 @@ packages:
   # dependencies: moose-dev
   libmesh:
     version: 2024.12.02
-    build_number: 1
+    build_number: 2
     dependencies:
       - petsc
       - libmesh-vtk
@@ -58,7 +58,7 @@ packages:
   # dependencies: moose-dev, pyhit
   wasp:
     version: 2024.12.23
-    build_number: 0
+    build_number: 1
     influential:
       - scripts/update_and_rebuild_wasp.sh
       - framework/contrib/wasp
@@ -74,7 +74,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependencies: none
   moose-dev:
-    version: 2024.12.23
+    version: 2025.02.17
     dependencies:
       - libmesh
       - wasp
@@ -92,7 +92,7 @@ packages:
   # dependencies: libmesh, moose-dev
   libmesh-vtk:
     version: 9.3.0
-    build_number: 5
+    build_number: 6
     dependencies:
       - mpi
     influential:
@@ -101,7 +101,7 @@ packages:
       - conda/libmesh-vtk/conda_build_config.yaml
   # dependencies: moose-dev
   peacock:
-    version: 2024.12.23
+    version: 2025.02.17
     build_number: 0
     dependencies:
       - mpi
@@ -110,7 +110,7 @@ packages:
       - conda/peacock/conda_build_config.yaml
   # dependencies: none
   pprof:
-    version: 2024.12.23
+    version: 2025.02.17
     build_number: 0
     influential:
       - conda/pprof/build.sh
@@ -119,13 +119,13 @@ packages:
   # dependencies: none
   pyhit:
     version: 2024.05.08
-    build_number: 0
+    build_number: 1
     dependencies:
       - wasp
   # dependencies: none
   seacas:
     version: 2024.08.15
-    build_number: 2
+    build_number: 3
     influential:
       - conda/seacas/meta.yaml
       - conda/seacas/conda_build_config.yaml
