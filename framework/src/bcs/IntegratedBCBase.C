@@ -76,7 +76,7 @@ IntegratedBCBase::prepareShapes(const unsigned int var_num)
 bool
 IntegratedBCBase::shouldApply() const
 {
-#ifndef NDEBUG
+#ifdef DEBUG
   const bool check_subdomain = true;
 #else
   const bool check_subdomain = false;
@@ -85,7 +85,7 @@ IntegratedBCBase::shouldApply() const
   {
     mooseAssert(_current_elem, "Should have a current element");
     const auto block_id = _current_elem->subdomain_id();
-#ifndef NDEBUG
+#ifdef DEBUG
     if (!_skip_execution_outside_variable_domain && !variable().hasBlocks(block_id))
       mooseError("This boundary condition is being executed outside the domain of "
                  "definition of its variable, on subdomain: ",
