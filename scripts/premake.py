@@ -24,7 +24,7 @@ class PreMake:
             warning += f'\n\n{traceback.format_exc()}'
             self.warn(warning)
 
-        self.versioner_meta = Versioner().version_meta()
+        self.packages = Versioner().get_packages('HEAD')
 
     @staticmethod
     def printColored(msg, color, **kwargs):
@@ -214,9 +214,10 @@ class PreMake:
         if package:
             if versioner_name is None:
                 versioner_name = package_name
+            versioner_package = self.packages[versioner_name]
             package_tuple = (package['version'], package['build_number'])
-            version_tuple = (self.versioner_meta[versioner_name]['conda']['version'],
-                             self.versioner_meta[versioner_name]['conda']['build'])
+            version_tuple = (versioner_package.conda.version,
+                             versioner_package.conda.build_number)
             if package_tuple != version_tuple:
                 raise self.CondaVersionMismatch(package_name,
                                                 *package_tuple,
@@ -226,19 +227,15 @@ class PreMake:
     def _checkApptainer(self):
         library = self.apptainer_env['LIBRARY']
 
-        library_meta = self.versioner_meta.get(library)
-        if not library_meta:
+        package = self.packages.get(library)
+        if not package or not package.apptainer:
             return
 
-        apptainer_meta = library_meta.get('apptainer')
-        if not apptainer_meta:
-            return
-
-        required_version = apptainer_meta['tag']
+        required_version = package.apptainer.tag
         current_version = self.apptainer_env['VERSION']
         if required_version != current_version:
             name = self.apptainer_env['NAME']
-            name_base = apptainer_meta['name_base']
+            name_base = package.apptainer.name_base
             raise self.ApptainerVersionMismatch(name, name_base, current_version, required_version)
 
     def _check(self):

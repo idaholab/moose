@@ -1,0 +1,58 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   libmesh/*
+#
+# As well as any directions pertaining to modifying those files.
+{% set build = __VERSIONER_LIBMESH_VTK_BUILD_NUMBER__ %}
+{% set vtk_version = "__VERSIONER_LIBMESH_VTK_VERSION__" %}
+{% set vtk_friendly_version = "9.3" %}
+{% set sha256 = "fdc7b9295225b34e4fdddc49cd06e66e94260cb00efee456e0f66568c9681be9" %}
+
+package:
+  name: moose-libmesh-vtk
+  version: {{ vtk_version }}
+
+source:
+  - url: https://www.vtk.org/files/release/{{ vtk_friendly_version }}/VTK-{{ vtk_version }}.tar.gz
+  - vtk_friendly_version: {{ vtk_friendly_version }}
+  - sha256: {{ sha256 }}
+  - path: ../functions/retry_build.sh
+
+build:
+  number: {{ build }}
+  string: {{ mpi }}_{{ build }}
+  skip: true             # [win]
+  script_env:
+    - MOOSE_JOBS
+    - vtk_friendly_version={{ vtk_friendly_version }}
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+
+requirements:
+  build:
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - ninja
+  run:
+    - {{ mpi }}
+    - {{ moose_mpi }}
+
+test:
+  commands:
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.dylib   # [osx]
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.so      # [linux]
+
+about:
+  home: http://www.vtk.org/
+  license: BSD 3-Clause
+  license_file: Copyright.txt
+  summary: >
+    The Visualization Toolkit (VTK) is an open-source, freely available software
+    system for 3D computer graphics, modeling, image processing, volume
+    rendering, scientific visualization, and information visualization.
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour
