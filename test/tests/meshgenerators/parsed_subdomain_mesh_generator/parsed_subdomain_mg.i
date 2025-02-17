@@ -6,7 +6,6 @@
     ny = 10
     xmax = 1
     ymax = 1
-    uniform_refine = 2
   []
 
   [subdomains]

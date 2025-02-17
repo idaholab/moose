@@ -895,7 +895,9 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
             }
             // A node for the coarse parent will appear in only one fine neighbor (not shared)
             // and will lay on the side of the coarse neighbor
-            if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol))
+            // We only care about the coarse neighbor vertex nodes
+            if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol) &&
+                elem_1->is_vertex(elem_1->get_node_index(&coarse_node)))
               tentative_coarse_nodes[i++] = &coarse_node;
             mooseAssert(i <= 5, "We went too far in this index");
           }

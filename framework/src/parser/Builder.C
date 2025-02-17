@@ -454,7 +454,9 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
   if (_warnmsg.size() > 0)
     mooseUnused(_warnmsg);
   if (_errmsg.size() > 0)
-    mooseError(_errmsg);
+    mooseError(
+        _errmsg +
+        "\n\nAppend --allow-unused (or -w) on the command line to ignore unused parameters.");
 }
 
 void
