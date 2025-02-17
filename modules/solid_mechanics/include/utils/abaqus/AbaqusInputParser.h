@@ -18,7 +18,7 @@
 #include "MooseUtils.h"
 #include "MooseError.h"
 
-namespace AbaqusInputParser
+namespace Abaqus
 {
 
 /**
@@ -34,6 +34,8 @@ public:
   bool has(const std::string & key) const;
   template <typename T>
   T get(const std::string & key) const;
+  template <typename T>
+  T get(const std::string & key, T default_value) const;
 
 private:
   std::map<std::string, std::string> _map;
@@ -82,10 +84,10 @@ struct BlockNode : public Node
 /**
  * Build a syntax tree from an abaqus input file
  */
-class AbaqusInputParser : public BlockNode
+class InputParser : public BlockNode
 {
 public:
-  AbaqusInputParser() : BlockNode({"ROOT"}) {}
+  InputParser() : BlockNode({"ROOT"}) {}
   void parse(std::istream & in);
 
 private:
@@ -114,7 +116,14 @@ HeaderMap::get(const std::string & key) const
   return MooseUtils::convert<T>(it->second);
 }
 
+template <typename T>
+T
+HeaderMap::get(const std::string & key, T default_value) const
+{
+  return has(key) ? get<T>(key) : default_value;
+}
+
 template <>
 bool HeaderMap::get(const std::string & key) const;
 
-} // namespace AbaqusInputParser
+} // namespace Abaqus
