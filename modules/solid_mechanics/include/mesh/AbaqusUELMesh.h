@@ -99,7 +99,7 @@ public:
   void addNodeset(BoundaryID id);
 
 protected:
-  AbaqusInputParser::AbaqusInputParser _input;
+  Abaqus::InputParser _input;
 
   void readNodes();
   void readUserElement(const std::string & header);
