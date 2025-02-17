@@ -32,8 +32,8 @@ build:
 outputs:
   - name: moose-wasp-base
     build:
-      number: 0
-      string: build_0
+      number: __VERSIONER_WASP_BUILD_NUMBER__
+      string: build___VERSIONER_WASP_BUILD_NUMBER__
       script: ${RECIPE_DIR}/build_wasp.sh
       script_env:
         - MOOSE_JOBS
@@ -53,7 +53,8 @@ outputs:
 
   - name: moose-pyhit
     build:
-      number: 0
+      number: __VERSIONER_WASP_BUILD_NUMBER__
+      string: build___VERSIONER_WASP_BUILD_NUMBER__
       script: ${RECIPE_DIR}/build_pyhit.sh
       script_env:
         - MOOSE_JOBS
@@ -78,6 +79,9 @@ outputs:
       script: test_pyhit.py
 
   - name: moose-wasp
+    build:
+      number: __VERSIONER_WASP_BUILD_NUMBER__
+      string: build___VERSIONER_WASP_BUILD_NUMBER__
     requirements:
       build: []
       run:

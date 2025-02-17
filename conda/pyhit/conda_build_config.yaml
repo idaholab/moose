@@ -1,5 +1,5 @@
 moose_wasp:
-  moose-wasp __VERSIONER_WASP_VERSION__
+  moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
 
 moose_python:
   - python 3.10
