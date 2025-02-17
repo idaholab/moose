@@ -24,7 +24,7 @@ SCMQuadPowerIC::validParams()
                              "or is assigned to the fuel pins, in a square lattice arrangement");
   // params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
   params.addRequiredParam<PostprocessorName>(
-    "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
+      "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
       "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
   params.addParam<FunctionName>(
