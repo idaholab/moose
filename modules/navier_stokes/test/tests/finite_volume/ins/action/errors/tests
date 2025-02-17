@@ -280,13 +280,6 @@
                  "exist!|Variable \(T_fuid\) supplied to the WCNSFVFluidHeatTransferPhysics does not "
                  "exist!)"
   []
-  [porous_scalar_error]
-    type = 'RunException'
-    input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the user requests the currently unimplemented porous flow scalar quantity advection'
-    cli_args = 'Modules/NavierStokesFV/porous_medium_treatment=true Modules/NavierStokesFV/add_scalar_equation=true'
-    expect_err = "Porous media scalar advection is currently unimplemented"
-  []
   [thermal-conductivity-type-error]
     type = 'RunException'
     input = 2d-rc-error-action-no-scalar.i
