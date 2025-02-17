@@ -27,7 +27,7 @@ public:
 
 protected:
   /// The total power of the assembly
-  const PostprocessorValue &  _power;
+  const PostprocessorValue & _power;
   /// The number of lines associated with the radial power profile .txt file
   unsigned int _numberoflines;
   /// The name of the radial power profile file
