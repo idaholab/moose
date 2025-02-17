@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.12.23" %}
+{% set version = "2025.01.30" %}
 
 # HDF5 Version
 {% set hdf5_version = "1.14.2" %}
@@ -97,7 +97,7 @@ outputs:
         - zlib
         - m4
       run_constrained:
-        - python >=3.9,<3.12
+        - python >=3.9,<3.13
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -110,7 +110,7 @@ outputs:
   - name: moose-python
     requirements:
       run:
-        - python >=3.9,<3.12
+        - python >=3.9,<3.13
         - packaging
         - paramiko
         - requests
