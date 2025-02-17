@@ -12,6 +12,7 @@
 #include "Marker.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
+#include "MooseVariableInterface.h"
 
 class QuadraturePointMarker : public Marker,
                               public MooseVariableInterface<Real>,

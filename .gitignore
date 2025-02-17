@@ -339,3 +339,6 @@ share/
 *.hpc_out.txt
 *.hpc_result
 *.hpc_submit
+
+# clangd cache data
+.cache

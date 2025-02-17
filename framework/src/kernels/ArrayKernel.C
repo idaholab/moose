@@ -14,6 +14,7 @@
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"

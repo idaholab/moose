@@ -11,6 +11,7 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
 #include "MaterialBase.h"
+#include "FEProblemBase.h"
 
 const std::string MaterialPropertyInterface::_interpolated_old = "_interpolated_old";
 const std::string MaterialPropertyInterface::_interpolated_older = "_interpolated_older";

@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "FEProblemBase.h"
 
 InputParameters
 SmoothSuperellipsoidBaseIC::validParams()

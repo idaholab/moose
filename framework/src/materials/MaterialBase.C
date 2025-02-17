@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "MaterialBase.h"
 #include "MaterialPropertyStorage.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
 #include "Assembly.h"
 #include "Executioner.h"
 #include "Transient.h"
@@ -245,4 +245,28 @@ MaterialBase::checkExecutionStage()
   if (_fe_problem.startedInitialSetup())
     mooseError("Material properties must be retrieved during material object construction to "
                "ensure correct dependency resolution.");
+}
+
+void
+MaterialBase::markMatPropRequested(const std::string & name)
+{
+  _fe_problem.markMatPropRequested(name);
+}
+
+void
+MaterialBase::storeSubdomainZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name)
+{
+  _fe_problem.storeSubdomainZeroMatProp(block_id, name);
+}
+
+void
+MaterialBase::storeBoundaryZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name)
+{
+  _fe_problem.storeBoundaryZeroMatProp(boundary_id, name);
+}
+
+unsigned int
+MaterialBase::getMaxQps() const
+{
+  return _fe_problem.getMaxQps();
 }

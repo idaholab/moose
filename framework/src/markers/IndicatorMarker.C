@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IndicatorMarker.h"
+#include "SubProblem.h"
+#include "MooseVariableFieldBase.h"
 
 InputParameters
 IndicatorMarker::validParams()

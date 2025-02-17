@@ -22,6 +22,7 @@
 #include "SubProblem.h"
 #include "FVKernel.h"
 #include "ADUtils.h"
+#include "MooseLinearVariableFV.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -165,6 +166,13 @@ MooseVariableDataLinearFV<OutputType>::getDofIndices(const Elem * elem,
                                                      std::vector<dof_id_type> & dof_indices) const
 {
   _dof_map.dof_indices(elem, dof_indices, _var_num);
+}
+
+template <typename OutputType>
+const MooseLinearVariableFV<OutputType> &
+MooseVariableDataLinearFV<OutputType>::var() const
+{
+  return _var;
 }
 
 template class MooseVariableDataLinearFV<Real>;

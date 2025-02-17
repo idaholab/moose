@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseLinearFromVectorPostprocessor.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", PiecewiseLinearFromVectorPostprocessor);
 registerMooseObjectRenamed("MooseApp",

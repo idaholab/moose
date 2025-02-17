@@ -17,6 +17,7 @@
 
 // Forward Declarations
 enum class ExplicitDynamicsContactModel;
+class DisplacedProblem;
 
 /**
  * A ExplicitDynamicsContactConstraint does mechanical contact for explicit dynamics simulations.

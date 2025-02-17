@@ -10,6 +10,7 @@
 #include "SetupTimeIntegratorAction.h"
 #include "Transient.h"
 #include "Factory.h"
+#include "FEProblemBase.h"
 
 registerMooseAction("MooseApp", SetupTimeIntegratorAction, "setup_time_integrator");
 registerMooseAction("MooseApp", SetupTimeIntegratorAction, "setup_time_integrators");

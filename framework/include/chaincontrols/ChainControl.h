@@ -109,6 +109,12 @@ protected:
 
   /// List of chain control data that this control depends upon
   std::vector<std::string> _control_data_depends_on;
+
+private:
+  /**
+   * Retrieve the chain control data system from the \p MooseApp
+   */
+  ChainControlDataSystem & getChainControlDataSystem();
 };
 
 template <typename T>
@@ -116,8 +122,7 @@ T &
 ChainControl::declareChainControlData(const std::string & data_name, bool apply_object_prefix)
 {
   const std::string full_data_name = fullControlDataName(data_name, apply_object_prefix);
-  auto & data =
-      getMooseApp().getChainControlDataSystem().declareChainControlData<T>(full_data_name, *this);
+  auto & data = getChainControlDataSystem().declareChainControlData<T>(full_data_name, *this);
   return data.set();
 }
 
@@ -139,7 +144,7 @@ template <typename T>
 const T &
 ChainControl::getChainControlDataByName(const std::string & data_name)
 {
-  auto & system = getMooseApp().getChainControlDataSystem();
+  auto & system = getChainControlDataSystem();
 
   if (system.hasChainControlData(data_name) && !system.hasChainControlDataOfType<T>(data_name))
     mooseError("The chain control data '",
@@ -161,7 +166,7 @@ template <typename T>
 const T &
 ChainControl::getChainControlDataOldByName(const std::string & data_name)
 {
-  auto & data = getMooseApp().getChainControlDataSystem().getChainControlData<T>(data_name);
+  auto & data = getChainControlDataSystem().getChainControlData<T>(data_name);
 
   return data.getOld();
 }

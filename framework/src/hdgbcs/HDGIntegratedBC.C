@@ -9,6 +9,7 @@
 
 #include "HDGIntegratedBC.h"
 #include "AuxiliarySystem.h"
+#include "FEProblemBase.h"
 
 InputParameters
 HDGIntegratedBC::validParams()

@@ -11,6 +11,7 @@
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
 #include "PetscVectorReader.h"
+#include "FEProblemBase.h"
 
 ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFaceThread(
     FEProblemBase & fe_problem, const unsigned int linear_system_num)

@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "ClosePackIC.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/mesh_tools.h"
 

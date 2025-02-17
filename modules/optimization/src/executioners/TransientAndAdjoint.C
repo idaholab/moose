@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "TransientAndAdjoint.h"
 #include "OptimizationAppTypes.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("OptimizationApp", TransientAndAdjoint);
 

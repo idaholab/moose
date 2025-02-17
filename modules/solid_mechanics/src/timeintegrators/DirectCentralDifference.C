@@ -15,6 +15,7 @@
 #include "MooseVariableFieldBase.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+
 // libMesh includes
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
@@ -66,11 +67,17 @@ DirectCentralDifference::computeTimeDerivatives()
   return;
 }
 
+TagID
+DirectCentralDifference::massMatrixTagID() const
+{
+  return _sys.subproblem().getMatrixTagID(_mass_matrix);
+}
+
 void
 DirectCentralDifference::solve()
 {
   // Getting the tagID for the mass matrix
-  auto mass_tag = _sys.subproblem().getMatrixTagID(_mass_matrix);
+  auto mass_tag = massMatrixTagID();
 
   // Reset iteration counts
   _n_nonlinear_iterations = 0;

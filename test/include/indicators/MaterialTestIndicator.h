@@ -15,6 +15,10 @@
 
 #include "libmesh/quadrature.h"
 
+template <typename>
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+
 /**
  * Computes the minimum element size.
  */
@@ -33,7 +37,7 @@ protected:
   const MaterialProperty<Real> & _property;
 
   /// The current quadrature rule
-  const QBase * const & _qrule;
+  const libMesh::QBase * const & _qrule;
 
   /// The variable for storing indicator value
   MooseVariable & _indicator_var;
