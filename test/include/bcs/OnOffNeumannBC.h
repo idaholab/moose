@@ -21,7 +21,7 @@ public:
 
   OnOffNeumannBC(const InputParameters & parameters);
 
-  virtual bool shouldApply();
+  virtual bool shouldApply() const;
 
 protected:
 };

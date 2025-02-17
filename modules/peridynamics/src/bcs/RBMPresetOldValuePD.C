@@ -39,7 +39,7 @@ RBMPresetOldValuePD::computeQpValue()
 }
 
 bool
-RBMPresetOldValuePD::shouldApply()
+RBMPresetOldValuePD::shouldApply() const
 {
   // check whether the number of active bonds is less than number of problem dimension
   unsigned int active_bonds = 0;
