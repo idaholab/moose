@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "INSFVScalarAdvectionKernel.h"
+#include "INSFVScalarFieldAdvection.h"
 
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics and that advects arbitrary scalar quantities in porous medium
  */
-class PINSFVScalarFieldAdvection : public INSFVScalarAdvectionKernel
+class PINSFVScalarFieldAdvection : public INSFVScalarFieldAdvection
 {
 public:
   static InputParameters validParams();
