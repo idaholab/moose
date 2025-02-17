@@ -9,11 +9,7 @@
 
 #include "MooseApp.h"
 #include "CSGOnlyAction.h"
-<<<<<<< HEAD
 #include "CSGBase.h"
-=======
-#include "MeshGenerator.h"
->>>>>>> 1cdf47d43b (Preliminary design of csg_only action)
 
 registerMooseAction("MooseApp", CSGOnlyAction, "csg_only");
 registerMooseAction("MooseApp", CSGOnlyAction, "setup_mesh");
@@ -38,7 +34,6 @@ CSGOnlyAction::act()
   }
   else if (_current_task == "execute_csg_generators")
   {
-<<<<<<< HEAD
     const auto final_mg_name = _app.getMeshGeneratorSystem().getFinalMeshGeneratorName();
     const auto ordered_mg = _app.getMeshGeneratorSystem().getOrderedMeshGenerators();
 
@@ -70,16 +65,5 @@ CSGOnlyAction::act()
 
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
     _csg_mesh->generateOutput();
-=======
-    const auto ordered_mg = _app.getMeshGeneratorSystem().getOrderedMeshGenerators();
-    for (const auto & generator_set : ordered_mg)
-      for (const auto & generator : generator_set)
-        generator->generateInternalCSG();
-  }
-  else if (_current_task == "csg_only")
-  {
-    // TODO fill out this logic to output CSGBase object to file
-    Moose::out << "Outputting CSGBase object at this step\n";
->>>>>>> 1cdf47d43b (Preliminary design of csg_only action)
   }
 }
