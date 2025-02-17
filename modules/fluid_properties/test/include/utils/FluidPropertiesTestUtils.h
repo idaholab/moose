@@ -28,7 +28,7 @@
 // difference approximation
 #define REL_TOL_DERIVATIVE 1e-6
 
-// Macro for computing relative error
+// Macro for performing relative error test
 #define REL_TEST(value, ref_value, tol)                                                            \
   if (std::abs(ref_value) < 1e-15)                                                                 \
     ABS_TEST(value, ref_value, tol);                                                               \
@@ -36,6 +36,15 @@
     EXPECT_LE(std::abs(((MetaPhysicL::raw_value(value)) - (MetaPhysicL::raw_value(ref_value))) /   \
                        (MetaPhysicL::raw_value(ref_value))),                                       \
               tol);
+
+// Macro for performing relative or absolute error test
+#define REL_ABS_TEST(value, ref_value, rel_tol, abs_tol)                                           \
+  if (std::abs(ref_value - value) < abs_tol)                                                       \
+    EXPECT_TRUE(true);                                                                             \
+  else                                                                                             \
+    EXPECT_LE(std::abs(((MetaPhysicL::raw_value(value)) - (MetaPhysicL::raw_value(ref_value))) /   \
+                       (MetaPhysicL::raw_value(ref_value))),                                       \
+              rel_tol);
 
 // Macro for computing absolute error
 #define ABS_TEST(value, ref_value, tol)                                                            \

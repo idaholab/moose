@@ -309,13 +309,13 @@ SinglePhaseFluidProperties::criticalTemperature() const
 Real
 SinglePhaseFluidProperties::criticalDensity() const
 {
-  mooseError(__PRETTY_FUNCTION__, " not implemented.");
+  return rho_from_p_T(criticalPressure(), criticalTemperature());
 }
 
 Real
 SinglePhaseFluidProperties::criticalInternalEnergy() const
 {
-  mooseError(__PRETTY_FUNCTION__, " not implemented.");
+  return e_from_p_rho(criticalPressure(), criticalDensity());
 }
 
 Real
