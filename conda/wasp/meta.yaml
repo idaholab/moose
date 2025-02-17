@@ -1,14 +1,6 @@
-# Making a Change to this package?
-# REMEMBER TO UPDATE the .yaml files for the following packages:
-#   moose-dev/*
-#
-# As well as any directions pertaining to modifying those files.
-# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.12.23" %}
-
 package:
   name: moose-wasp
-  version: {{ version }}
+  version: __VERSIONER_WASP_VERSION__
 
 source:
   - path: ../../framework/contrib/wasp
@@ -34,8 +26,8 @@ source:
       - message.patch
 
 build:
-  number: 0
-  string: build_0
+  number: __VERSIONER_WASP_BUILD_NUMBER__
+  string: build___VERSIONER_WASP_BUILD_NUMBER__
 
 outputs:
   - name: moose-wasp-base

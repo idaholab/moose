@@ -3,12 +3,12 @@ mpi:
   - openmpi
 
 moose_petsc:
-  - moose-petsc 3.22.1.193.g72c1e49ee3d mpich_1
-  - moose-petsc 3.22.1.193.g72c1e49ee3d openmpi_1
+  - moose-petsc __VERSIONER_PETSC_VERSION__ mpich___VERSIONER_PETSC_BUILD_NUMBER__
+  - moose-petsc __VERSIONER_PETSC_VERSION__ openmpi___VERSIONER_PETSC_BUILD_NUMBER__
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.3.0 mpich_5
-  - moose-libmesh-vtk 9.3.0 openmpi_5
+  - moose-libmesh-vtk __VERSIONER_LIBMESH_VTK_VERSION__ mpich___VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
+  - moose-libmesh-vtk __VERSIONER_LIBMESH_VTK_VERSION__ openmpi___VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
 
 zip_keys:
   - mpi

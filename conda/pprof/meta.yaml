@@ -1,18 +1,14 @@
-{% set version = "2024.12.23" %}
-{% set build = 0 %}
-{% set strbuild = "build_" + build|string %}
-
 package:
   name: moose-pprof
-  version: {{ version }}
+  version: __VERSIONER_PPROF_VERSION__
 
 source:
   - path: ../pprof
   - path: ../functions/retry_build.sh
 
 build:
-  number: {{ build }}
-  string: {{ strbuild }}
+  number: __VERSIONER_PPROF_BUILD_NUMBER__
+  string: build___VERSIONER_PPROF_BUILD_NUMBER__
   skip: true  # [win]
 
 requirements:

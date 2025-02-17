@@ -1,20 +1,13 @@
-# Making a Change to this package?
-# REMEMBER TO UPDATE the .yaml files for the following packages:
-#   moose-dev/*
-#
-# As well as any directions pertaining to modifying those files.
-{% set version = "2024.12.23" %}
-
 package:
   name: moose-peacock
-  version: {{ version }}
+  version: __VERSIONER_PEACOCK_VERSION__
 
 source:
   path: ../peacock
 
 build:
-  number: 0
-  string: {{ mpi }}_0
+  number: __VERSIONER_PEACOCK_BUILD_NUMBER__
+  string: {{ mpi }}___VERSIONER_PEACOCK_BUILD_NUMBER__
 
 requirements:
   run:

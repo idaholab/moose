@@ -1,15 +1,6 @@
-# Making a Change to this package?
-# REMEMBER TO UPDATE the .yaml files for the following packages:
-#   moose-dev/*
-#
-# As well as any directions pertaining to modifying those files.
-# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
-{% set version = "2024.12.02" %}
-
 package:
   name: moose-libmesh
-  version: {{ version }}
+  version: __VERSIONER_LIBMESH_VERSION__
 
 source:
   - path: ../../libmesh
@@ -17,8 +8,8 @@ source:
   - path: ../functions/retry_build.sh
 
 build:
-  number: {{ build }}
-  string: {{ mpi }}_{{ build }}
+  number: __VERSIONER_LIBMESH_BUILD_NUMBER__
+  string: {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
   skip: true                                            # [win]
   script_env:
     - MOOSE_JOBS

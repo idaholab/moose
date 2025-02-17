@@ -4,8 +4,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 {% set build = 5 %}
-{% set vtk_version = "9.3.0" %}
-{% set vtk_friendly_version = "9.3" %}
+{% set vtk_version = "__VERSIONER_LIBMESH_VTK_VERSION__" %}
+{% set vtk_friendly_version = '.'.join(vtk_version.split('.')[:2]) %}
 {% set sha256 = "fdc7b9295225b34e4fdddc49cd06e66e94260cb00efee456e0f66568c9681be9" %}
 
 package:
@@ -19,8 +19,8 @@ source:
   - path: ../functions/retry_build.sh
 
 build:
-  number: {{ build }}
-  string: {{ mpi }}_{{ build }}
+  number: __VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
+  string: {{ mpi }}___VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
   skip: true             # [win]
   script_env:
     - MOOSE_JOBS

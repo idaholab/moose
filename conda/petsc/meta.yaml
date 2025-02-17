@@ -1,18 +1,6 @@
-# Making a Change to this package?
-# REMEMBER TO UPDATE the .yaml files for the following packages:
-#   libmesh/*
-#
-#   And documentation:
-#   framework/doc/packages_config.yml
-#
-# As well as any directions pertaining to modifying those files.
-# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
-{% set version = "3.22.1.193.g72c1e49ee3d" %}
-
 package:
   name: moose-petsc
-  version: {{ version }}
+  version: __VERSIONER_PETSC_VERSION__
 
 source:
   - path: ../../petsc
@@ -22,8 +10,8 @@ source:
       - no-cppflags-in-pkgconfig-cflags.patch
 
 build:
-  number: {{ build }}
-  string: {{ mpi }}_{{ build }}
+  number: __VERSIONER_PETSC_BUILD_NUMBER__
+  string: {{ mpi }}___VERSIONER_PETSC_BUILD_NUMBER__
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS

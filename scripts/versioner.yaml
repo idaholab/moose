@@ -4,11 +4,15 @@
 # If adding a new control key, a change to versioner.py:influential_list will be required
 # (add that control key to 'not_libraries').
 packages:
+  # dependencies: moose-dev
   tools:
+    version: 2024.12.23
     influential:
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
+  # dependencies: petsc, libmesh, moose-dev, libmesh-vtk, peacock
   mpi:
+    version: 2024.12.23
     influential:
       - apptainer/set_prompt.bash
       - apptainer/mpi.def
@@ -17,7 +21,10 @@ packages:
       - conda/mpi/conda_build_config.yaml
       - conda/mpi/base_build.sh
     apptainer:
+  # dependencies: libmesh, moose-dev
   petsc:
+    version: 3.22.1.193.g72c1e49ee3d
+    build_number: 1
     dependencies:
       - mpi
     apptainer:
@@ -31,7 +38,10 @@ packages:
       - scripts/configure_petsc.sh
       - scripts/update_and_rebuild_petsc.sh
       - scripts/apple-silicon-hdf5-autogen.patch
+  # dependencies: moose-dev
   libmesh:
+    version: 2024.12.02
+    build_number: 1
     dependencies:
       - petsc
       - libmesh-vtk
@@ -45,7 +55,10 @@ packages:
       - conda/libmesh/build.sh
       - scripts/configure_libmesh.sh
       - scripts/update_and_rebuild_libmesh.sh
+  # dependencies: moose-dev, pyhit
   wasp:
+    version: 2024.12.23
+    build_number: 0
     influential:
       - scripts/update_and_rebuild_wasp.sh
       - framework/contrib/wasp
@@ -59,7 +72,9 @@ packages:
       - python/mooseutils/message.py
       - python/mooseutils/mooseutils.py
       - python/pyhit/pyhit.py
+  # dependencies: none
   moose-dev:
+    version: 2024.12.23
     dependencies:
       - libmesh
       - wasp
@@ -74,31 +89,47 @@ packages:
       - conda/moose-dev/meta.yaml
       - conda/moose-dev/conda_build_config.yaml
       - scripts/setup_libtorch.sh
+  # dependencies: libmesh, moose-dev
   libmesh-vtk:
+    version: 9.3.0
+    build_number: 5
     dependencies:
       - mpi
     influential:
       - conda/libmesh-vtk/build.sh
       - conda/libmesh-vtk/meta.yaml
       - conda/libmesh-vtk/conda_build_config.yaml
+  # dependencies: moose-dev
   peacock:
+    version: 2024.12.23
+    build_number: 0
     dependencies:
       - mpi
     influential:
       - conda/peacock/meta.yaml
       - conda/peacock/conda_build_config.yaml
+  # dependencies: none
   pprof:
+    version: 2024.12.23
+    build_number: 0
     influential:
       - conda/pprof/build.sh
       - conda/pprof/meta.yaml
       - conda/pprof/conda_build_config.yaml
+  # dependencies: none
   pyhit:
+    version: 2024.05.08
+    build_number: 0
     dependencies:
       - wasp
+  # dependencies: none
   seacas:
+    version: 2024.08.15
+    build_number: 2
     influential:
       - conda/seacas/meta.yaml
       - conda/seacas/conda_build_config.yaml
+  # dependencies: none
   app:
     dependencies:
       - moose-dev
