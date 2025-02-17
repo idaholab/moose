@@ -32,15 +32,11 @@ class Test(unittest.TestCase):
         for commit, libraries in OLD_HASHES.items():
             packages = versioner.get_packages(commit)
             for name, values in libraries.items():
-                full_version = None
-                if isinstance(values, str) or isinstance(values, int):
-                    hash = str(values)
-                else:
-                    hash = str(values['hash'])
-                    full_version = str(values['full_version'])
+                hash = values['hash']
+                self.assertEqual(hash, packages[name].hash)
+                full_version = values.get('full_version')
                 if full_version is not None:
                     self.assertEqual(full_version, packages[name].full_version)
-                self.assertEqual(hash, packages[name].hash)
 
     def testBadCommit(self):
         with self.assertRaises(Exception) as e:
