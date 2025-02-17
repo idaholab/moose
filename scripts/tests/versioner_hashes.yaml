@@ -397,3 +397,10 @@ cece3f711bd9c235af31c9d5a4c54e292400ecc1: #29074
   libmesh: b8b3d69
   wasp: 2fbcef5
   moose-dev: 5e9be02
+f5cc8765d1bbadbaced3f7c0d2ff029fd4b1acb5: #29882 (mooseframework.org to inl.gov change)
+  tools: 18d5e37
+  mpi: feef878
+  petsc: 4845658
+  libmesh: 1dd36a9
+  wasp: ebe96bc
+  moose-dev: 8875bf1
