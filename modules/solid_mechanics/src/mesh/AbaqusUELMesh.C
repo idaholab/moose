@@ -409,18 +409,6 @@ AbaqusUELMesh::readProperties(const std::string & header)
   }
 }
 
-AbaqusUELMesh::AbaqusInputBlock
-AbaqusUELMesh::readInputBlock(const std::string & header)
-{
-  AbaqusInputBlock block(header);
-  std::string s;
-  while (false)
-    block._data_lines.push_back(s);
-  if (_debug)
-    mooseInfoRepeated("Block: ", header, "\n", Moose::stringify(block._data_lines));
-  return block;
-}
-
 void
 AbaqusUELMesh::setupLibmeshSubdomains()
 {
