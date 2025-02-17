@@ -108,10 +108,6 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
   if (_passive_scalar_sources_coef.size())
     checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
                                                             "passive_scalar_coupled_source_coeff");
-
-  if (_porous_medium_treatment)
-    _flow_equations_physics->paramError("porous_medium_treatment",
-                                        "Porous media scalar advection is currently unimplemented");
 }
 
 void
