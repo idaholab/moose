@@ -25,7 +25,7 @@ PINSFVScalarFieldAdvection::validParams()
 }
 
 PINSFVScalarFieldAdvection::PINSFVScalarFieldAdvection(const InputParameters & params)
-  : INSFVScalarAdvectionKernel(params), _eps(getFunctor<ADReal>(NS::porosity))
+  : INSFVScalarFieldAdvection(params), _eps(getFunctor<ADReal>(NS::porosity))
 
 {
   if (_add_slip_model)
