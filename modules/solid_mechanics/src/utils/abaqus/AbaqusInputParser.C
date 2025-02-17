@@ -10,7 +10,7 @@
 #include "AbaqusInputParser.h"
 #include "MooseError.h"
 
-namespace AbaqusInputParser
+namespace Abaqus
 {
 
 HeaderMap::HeaderMap(std::vector<std::string> fields)
@@ -76,7 +76,7 @@ const static std::set<std::string> abaqus_options = {
 };
 
 void
-AbaqusInputParser::parse(std::istream & in)
+InputParser::parse(std::istream & in)
 {
   // load and preprocess entire file
   loadFile(in);
@@ -86,7 +86,7 @@ AbaqusInputParser::parse(std::istream & in)
 }
 
 void
-AbaqusInputParser::loadFile(std::istream & in)
+InputParser::loadFile(std::istream & in)
 {
   _current_line = 0;
 
@@ -127,7 +127,7 @@ AbaqusInputParser::loadFile(std::istream & in)
 }
 
 BlockNode
-AbaqusInputParser::parseBlock(const std::string & end, const std::vector<std::string> & head_line)
+InputParser::parseBlock(const std::string & end, const std::vector<std::string> & head_line)
 {
   BlockNode node(head_line);
   parseBlockInternal(node, end);
@@ -135,7 +135,7 @@ AbaqusInputParser::parseBlock(const std::string & end, const std::vector<std::st
 }
 
 void
-AbaqusInputParser::parseBlockInternal(BlockNode & node, const std::string & end)
+InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
 {
   while (_current_line < _lines.size())
   {
@@ -167,12 +167,12 @@ AbaqusInputParser::parseBlockInternal(BlockNode & node, const std::string & end)
     else
       mooseError("Unknown keyword '" + line[0] +
                  "' in Abaqus input file. Add this to abaqus_blocks or abaqus_options in "
-                 "AbaqusInputParser.C to parse it.");
+                 "InputParser.C to parse it.");
   }
 }
 
 OptionNode
-AbaqusInputParser::parseOption(const std::vector<std::string> & head_line)
+InputParser::parseOption(const std::vector<std::string> & head_line)
 {
   OptionNode node(head_line);
   while (_current_line < _lines.size())
@@ -216,4 +216,4 @@ BlockNode::stringify(const std::string & indent) const
   return s;
 }
 
-} // namespace AbaqusInputParser
+} // namespace Abaqus
