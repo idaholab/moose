@@ -444,6 +444,7 @@ SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 template <class T>
+
 PetscErrorCode
 SubChannel1PhaseProblem::populateSolutionGap(const Vec & x,
                                              T & loc_solution,
@@ -2923,6 +2924,7 @@ SubChannel1PhaseProblem::externalSolve()
   }
 }
 void
+
 SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/)
 {
 }

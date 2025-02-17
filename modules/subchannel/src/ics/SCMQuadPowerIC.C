@@ -22,7 +22,9 @@ SCMQuadPowerIC::validParams()
   InputParameters params = QuadSubChannelBaseIC::validParams();
   params.addClassDescription("Computes axial heat rate (W/m) that goes into the subchannel cells "
                              "or is assigned to the fuel pins, in a square lattice arrangement");
-  params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
+  // params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
+  params.addRequiredParam<PostprocessorName>(
+    "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
       "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
   params.addParam<FunctionName>(
@@ -35,7 +37,7 @@ SCMQuadPowerIC::validParams()
 
 SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
   : QuadSubChannelBaseIC(params),
-    _power(getParam<Real>("power")),
+    _power(getPostprocessorValue("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
