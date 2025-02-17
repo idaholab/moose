@@ -66,7 +66,6 @@
     type = 'PetscJacobianTester'
     input = 'ad_coupled_curl_product.i'
     cli_args = 'Outputs/exodus=false'
-    run_sim = True
     difference_tol = 1e10
     issues = '#29868'
     requirement = "The system shall be able to solve a problem that supplies the product "
