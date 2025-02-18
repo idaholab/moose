@@ -19,17 +19,19 @@ class Function;
 /**
  * Computes fluid properties in (P, T) formulation using functor material properties
  */
-class GeneralFunctorFluidProps : public FunctorMaterial, DerivativeMaterialPropertyNameInterface
+template <bool is_ad>
+class GeneralFunctorFluidPropsTempl : public FunctorMaterial,
+                                      public DerivativeMaterialPropertyNameInterface
 {
 public:
   static InputParameters validParams();
-  GeneralFunctorFluidProps(const InputParameters & parameters);
+  GeneralFunctorFluidPropsTempl(const InputParameters & parameters);
 
 protected:
   const SinglePhaseFluidProperties & _fluid;
 
   /// Porosity
-  const Moose::Functor<ADReal> & _eps;
+  const Moose::Functor<GenericReal<is_ad>> & _eps;
 
   /**
    * Characteristic length $d$ used in computing the Reynolds number
@@ -47,15 +49,15 @@ protected:
   const Point _gravity_vec;
 
   /// variables
-  const Moose::Functor<ADReal> & _pressure;
-  const Moose::Functor<ADReal> & _T_fluid;
-  const Moose::Functor<ADReal> & _speed;
+  const Moose::Functor<GenericReal<is_ad>> & _pressure;
+  const Moose::Functor<GenericReal<is_ad>> & _T_fluid;
+  const Moose::Functor<GenericReal<is_ad>> & _speed;
 
   /// A parameter to force definition of a functor material property for density
   const bool _force_define_density;
 
   /// Density as a functor, which could be from the variable set or the property
-  const Moose::Functor<ADReal> & _rho;
+  const Moose::Functor<GenericReal<is_ad>> & _rho;
 
   /// Function to ramp down the viscosity, useful for relaxation transient
   const Function & _mu_rampdown;
@@ -66,3 +68,6 @@ protected:
   using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;
   using UserObjectInterface::getUserObject;
 };
+
+typedef GeneralFunctorFluidPropsTempl<false> NonADGeneralFunctorFluidProps;
+typedef GeneralFunctorFluidPropsTempl<true> GeneralFunctorFluidProps;
