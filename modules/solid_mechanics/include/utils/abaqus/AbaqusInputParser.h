@@ -106,6 +106,41 @@ private:
   std::size_t _current_line;
 };
 
+class InputParserInterface
+{
+public:
+  InputParserInterface(InputParser & parser) : _parser(parser)
+  {
+    // too early?
+    while (parse())
+      ;
+  }
+
+  virtual void onOption(const HeaderMap &, std::vector<std::vector<std::string>>) = 0;
+  virtual void onBlock(const HeaderMap &, InputParserInterface &) = 0;
+
+  template <typename OC, typename BC>
+  bool parse()
+  {
+    return _parser.parse(
+        [this](const HeaderMap & header, std::vector<std::vector<std::string>> & data_lines)
+        { onOption(header, data_lines); },
+        [this](const HeaderMap & header, InputParser & parser) { onBlock(header, _parser); });
+  }
+
+private:
+  InputParser & _parser;
+}
+
+bool
+InputParser::parse(
+    std::function<void(const HeaderMap &, std::vector<std::vector<std::string>>)> & option_callback,
+    std::function<void(const HeaderMap &, InputParser &)> & block_callback)
+{
+  // block_callback(header, *this)
+  return true;
+}
+
 template <typename T>
 T
 HeaderMap::get(const std::string & key) const
