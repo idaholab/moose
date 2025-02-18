@@ -1,14 +1,14 @@
-#include "Multilinear6DInterpolationModel.h"
+#include "LAROMANCE6DInterpolation.h"
 #include <fstream>
 #include <initializer_list>
 #include "neml2/misc/math.h"
 
 namespace neml2
 {
-register_NEML2_object(Multilinear6DInterpolationModel);
+register_NEML2_object(LAROMANCE6DInterpolation);
 
 OptionSet
-Multilinear6DInterpolationModel::expected_options()
+LAROMANCE6DInterpolation::expected_options()
 {
   auto options = Model::expected_options();
   options.doc() = "Multilinear interpolation over six dimensions (von_mises_stress, temperature, "
@@ -33,7 +33,7 @@ Multilinear6DInterpolationModel::expected_options()
   return options;
 }
 
-Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet & options)
+LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
   : Model(options),
     _s(declare_input_variable<Scalar>("von_mises_stress")),
     _T(declare_input_variable<Scalar>("temperature")),
@@ -99,7 +99,7 @@ Multilinear6DInterpolationModel::Multilinear6DInterpolationModel(const OptionSet
 }
 
 void
-Multilinear6DInterpolationModel::set_value(bool out, bool dout_din, bool d2out_din2)
+LAROMANCE6DInterpolation::set_value(bool out, bool dout_din, bool d2out_din2)
 {
   neml_assert_dbg(!dout_din || !d2out_din2,
                   "Only AD derivatives are currently supported for this model");
@@ -107,8 +107,8 @@ Multilinear6DInterpolationModel::set_value(bool out, bool dout_din, bool d2out_d
     _output_rate = interpolate_and_transform();
 }
 
-Multilinear6DInterpolationModel::TransformEnum
-Multilinear6DInterpolationModel::get_transform_enum(const std::string & name) const
+LAROMANCE6DInterpolation::TransformEnum
+LAROMANCE6DInterpolation::get_transform_enum(const std::string & name) const
 {
   if (name == "COMPRESS")
     return TransformEnum::COMPRESS;
@@ -125,7 +125,7 @@ Multilinear6DInterpolationModel::get_transform_enum(const std::string & name) co
 }
 
 std::pair<Scalar, Scalar>
-Multilinear6DInterpolationModel::findLeftIndexAndFraction(const Scalar & grid,
+LAROMANCE6DInterpolation::findLeftIndexAndFraction(const Scalar & grid,
                                                           const Scalar & interp_points)
 {
   // idx is for the left grid point.
@@ -143,7 +143,7 @@ Multilinear6DInterpolationModel::findLeftIndexAndFraction(const Scalar & grid,
 }
 
 Scalar
-Multilinear6DInterpolationModel::compute_interpolation(
+LAROMANCE6DInterpolation::compute_interpolation(
     const std::vector<std::pair<Scalar, Scalar>> index_and_fraction, const Scalar grid_values)
 {
   Scalar result = Scalar::zeros_like(_T);
@@ -181,7 +181,7 @@ Multilinear6DInterpolationModel::compute_interpolation(
 
 /// compute interpolated value
 Scalar
-Multilinear6DInterpolationModel::interpolate_and_transform()
+LAROMANCE6DInterpolation::interpolate_and_transform()
 {
   // These transform constants should be given in the json file.
   auto cell_dd_transformed = transform_data(_cell_dd, _cell_transform_values, _cell_transform_enum);
@@ -207,7 +207,7 @@ Multilinear6DInterpolationModel::interpolate_and_transform()
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform_data(const Scalar & data,
+LAROMANCE6DInterpolation::transform_data(const Scalar & data,
                                                 const std::vector<Real> & param,
                                                 TransformEnum transform_type) const
 {
@@ -242,7 +242,7 @@ Multilinear6DInterpolationModel::transform_data(const Scalar & data,
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform_compress(const Scalar & data,
+LAROMANCE6DInterpolation::transform_compress(const Scalar & data,
                                                     const std::vector<Real> & param) const
 {
   Real factor = param[0];
@@ -254,7 +254,7 @@ Multilinear6DInterpolationModel::transform_compress(const Scalar & data,
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform_decompress(const Scalar & data,
+LAROMANCE6DInterpolation::transform_decompress(const Scalar & data,
                                                       const std::vector<Real> & param) const
 {
   Real factor = param[0];
@@ -266,7 +266,7 @@ Multilinear6DInterpolationModel::transform_decompress(const Scalar & data,
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform_log10_bounded(const Scalar & data,
+LAROMANCE6DInterpolation::transform_log10_bounded(const Scalar & data,
                                                          const std::vector<Real> & param) const
 
 {
@@ -282,7 +282,7 @@ Multilinear6DInterpolationModel::transform_log10_bounded(const Scalar & data,
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform_exp10_bounded(const Scalar & data,
+LAROMANCE6DInterpolation::transform_exp10_bounded(const Scalar & data,
                                                          const std::vector<Real> & param) const
 {
   Real factor = param[0];
@@ -297,7 +297,7 @@ Multilinear6DInterpolationModel::transform_exp10_bounded(const Scalar & data,
 }
 
 Scalar
-Multilinear6DInterpolationModel::transform_min_max(const Scalar & data,
+LAROMANCE6DInterpolation::transform_min_max(const Scalar & data,
                                                    const std::vector<Real> & param) const
 {
   Real data_min = param[0];
@@ -310,7 +310,7 @@ Multilinear6DInterpolationModel::transform_min_max(const Scalar & data,
 }
 
 std::string
-Multilinear6DInterpolationModel::json_to_string(std::string key)
+LAROMANCE6DInterpolation::json_to_string(std::string key)
 {
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
@@ -320,7 +320,7 @@ Multilinear6DInterpolationModel::json_to_string(std::string key)
 }
 
 std::vector<Real>
-Multilinear6DInterpolationModel::json_to_vector(std::string key)
+LAROMANCE6DInterpolation::json_to_vector(std::string key)
 {
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
@@ -330,7 +330,7 @@ Multilinear6DInterpolationModel::json_to_vector(std::string key)
 }
 
 Scalar
-Multilinear6DInterpolationModel::json_vector_to_torch(std::string key)
+LAROMANCE6DInterpolation::json_vector_to_torch(std::string key)
 {
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
@@ -341,7 +341,7 @@ Multilinear6DInterpolationModel::json_vector_to_torch(std::string key)
 }
 
 Scalar
-Multilinear6DInterpolationModel::json_6Dvector_to_torch(std::string key)
+LAROMANCE6DInterpolation::json_6Dvector_to_torch(std::string key)
 {
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
