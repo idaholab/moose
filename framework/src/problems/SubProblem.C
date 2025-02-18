@@ -1273,10 +1273,10 @@ SubProblem::getCoordSystem(SubdomainID sid) const
 }
 
 void
-SubProblem::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
+SubProblem::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi, bool areFE)
 {
   for (const auto nl : make_range(numNonlinearSystems()))
-    assembly(tid, nl).reinitFVFace(fi);
+    assembly(tid, nl).reinitFVFace(fi, areFE);
 }
 
 void
