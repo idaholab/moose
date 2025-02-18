@@ -24,7 +24,7 @@ OnOffDirichletBC::OnOffDirichletBC(const InputParameters & parameters) : Dirichl
 OnOffDirichletBC::~OnOffDirichletBC() {}
 
 bool
-OnOffDirichletBC::shouldApply()
+OnOffDirichletBC::shouldApply() const
 {
   return (_t_step == 1) ? true : false;
 }

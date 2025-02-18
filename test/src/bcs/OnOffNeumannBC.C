@@ -22,7 +22,7 @@ OnOffNeumannBC::validParams()
 OnOffNeumannBC::OnOffNeumannBC(const InputParameters & parameters) : NeumannBC(parameters) {}
 
 bool
-OnOffNeumannBC::shouldApply()
+OnOffNeumannBC::shouldApply() const
 {
   return (_t_step == 1) ? false : true;
 }
