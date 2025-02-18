@@ -15,12 +15,12 @@ the mesh. The user selects the dimensionality of the cylinder using the [!param]
 parameter. This parameter accepts a vector of names of `Physics`. The name of the `Physics` is generally
 found in the innermost block. For example, in the snippet below, the diffusion `Physics` is called `added_from_component`.
 
-!listing test/tests/actioncomponents/component_with_physics.i block=Physics
+!listing test/tests/actioncomponents/interfaces/component_with_physics.i block=Physics
 
 The cylinder component on which the `component_with_physics` [DiffusionCG.md] is active is then
 created as shown below:
 
-!listing test/tests/actioncomponents/component_with_physics.i block=ActionComponents
+!listing test/tests/actioncomponents/interfaces/component_with_physics.i block=ActionComponents
 
 !syntax parameters /ActionComponents/CylinderComponent
 

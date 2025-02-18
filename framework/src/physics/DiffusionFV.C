@@ -23,13 +23,19 @@ DiffusionFV::validParams()
   params.addClassDescription("Add diffusion physics discretized with cell-centered finite volume");
   // No kernel implemented in the framework for a material property diffusivity
   params.suppressParameter<MaterialPropertyName>("diffusivity_matprop");
+  params.addRequiredParam<MooseFunctorName>("diffusivity_functor",
+                                            "Functor specifying the diffusivity");
+
   params.addParam<unsigned short>(
       "ghost_layers", 2, "Number of ghosting layers for distributed memory parallel calculations");
   params.addParamNamesToGroup("ghost_layers", "Advanced");
   return params;
 }
 
-DiffusionFV::DiffusionFV(const InputParameters & parameters) : DiffusionPhysicsBase(parameters) {}
+DiffusionFV::DiffusionFV(const InputParameters & parameters)
+  : PhysicsBase(parameters), PhysicsComponentInterface(parameters), DiffusionPhysicsBase(parameters)
+{
+}
 
 void
 DiffusionFV::initializePhysicsAdditional()
@@ -46,9 +52,7 @@ DiffusionFV::addFVKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    params.set<MooseFunctorName>("coeff") = isParamValid("diffusivity_functor")
-                                                ? getParam<MooseFunctorName>("diffusivity_functor")
-                                                : "1";
+    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>("diffusivity_functor");
     getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }
   // Source term

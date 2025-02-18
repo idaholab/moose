@@ -21,7 +21,10 @@ ActionComponent::validParams()
 }
 
 ActionComponent::ActionComponent(const InputParameters & params)
-  : Action(params), _dimension(libMesh::invalid_uint), _verbose(getParam<bool>("verbose"))
+  : Action(params),
+    InputParametersChecksUtils<ActionComponent>(this),
+    _dimension(libMesh::invalid_uint),
+    _verbose(getParam<bool>("verbose"))
 {
 }
 
@@ -49,6 +52,12 @@ ActionComponent::act()
   // sense to include the physics than to split it off into its own block
   else if (_current_task == "add_variable")
     addSolverVariables();
+  // Useful for declaring materials on a component, which helps keep the input of local material
+  // properties on the component
+  else if (_current_task == "add_material")
+    addMaterials();
+  else if (_current_task == "check_integrity")
+    checkIntegrity();
   else
     // For a new task that isn't registered to ActionComponent in the framework
     actOnAdditionalTasks();
