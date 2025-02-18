@@ -99,17 +99,50 @@ Part::Part(const BlockNode & block) : SetContainer(this)
   block.forOption("user element",
                   [&](const OptionNode & option)
                   {
-                    UserElement uel(option);
-                    uel._type_id = _element_definition.size();
-                    _element_definition.push_back(uel);
-
-                    // duplicate type name check
-                    if (_element_type_to_typeid.find(uel._type) != _element_type_to_typeid.end())
-                      throw std::runtime_error("Duplicate user element definition '" + uel._type +
-                                               "' in Abaqus input.");
-
-                    _element_type_to_typeid[uel._type] = uel._type_id;
+                    const auto type = block._header.get<std::string>("type");
+                    const auto id = _element_definition.add(type, block);
+                    _element_definition[id]._type_id = id;
                   });
+
+  // Nodes
+  block.forOption(
+      "node",
+      [&](const OptionNode & option)
+      {
+        const auto & map = option._header;
+        if (map.get<std::string>("system", "R") != "R")
+          throw std::runtime_error("Only cartesian coordinates are currently supported");
+
+        // this should not be hard to add though
+        if (map.has("input"))
+          throw std::runtime_error("External coordinate inputs are not yet supported");
+
+        auto * nset = map.has("nset") ? &_node_set[map.get<std::string>("nset")] : nullptr;
+        std::set<std::size_t> unique_ids;
+        if (elset)
+          unique_ids.insert(nset->begin(), nset->end());
+
+        // loop over data lines
+        for (const auto & data : option._data) // or loop over external input lines
+        {
+          if (data.size() < 4)
+            throw std::runtime_error("Insufficient data in node data line");
+          if (data.size() > 4)
+            throw std::runtime_error("Normal directions are not yet supported");
+
+          const auto id = MooseUtils::convert<int>(data[0]);
+          Point p(MooseUtils::convert<Real>(data[1]),
+                  MooseUtils::convert<Real>(data[2]),
+                  MooseUtils::convert<Real>(data[3]));
+          _node.emplace_back(id, p);
+
+          if (nset)
+            unique_ids.insert(id);
+        }
+
+        if (nset)
+          nset->assign(unique_ids.begin(), unique_ids.end());
+      });
 
   // Elements
   block.forOption(
@@ -140,18 +173,15 @@ Part::Part(const BlockNode & block) : SetContainer(this)
                                      "' in Abaqus input.");
 
           // prepare empty element
-          const auto elem_id = col[0] - 1;
-          Element elem{type_id, DofObject::invalid_processor_id, {}, {nullptr, nullptr}};
-
-          // make room in the vector
-          if (elem_id >= _element.size())
-            _element.resize(elem_id + 1);
+          const auto elem_id = col[0];
+          Element elem{type_id, {}};
 
           // copy in node numbers (converting from 1-base to 0-base)
           for (const auto i : index_range(col))
             if (i > 0)
-              elem._node.push_back(col[i] - 1);
+              elem._node_list.push_back(col[i] - 1);
 
+          // insert into unordered map
           _element[elem_id] = elem;
 
           if (elset)
@@ -278,21 +308,15 @@ SetContainer::processSetHelper(std::map<std::string, std::vector<std::size_t>> &
 }
 
 // Entry point for the final parsing stage
-Global::Global(const BlockNode & root)
+void
+Root::process(const BlockNode & root)
 {
   // Parts
   root.forBlock("part",
                 [&](const BlockNode & block)
                 {
                   const auto name = block._header.get<std::string>("name");
-                  Part part(block);
-
-                  // duplicate type name check
-                  if (_part.find(name) != _part.end())
-                    throw std::runtime_error("Duplicate part definition '" + name +
-                                             "' in Abaqus input.");
-
-                  _part.insert(std::make_pair(name, part));
+                  _part.add(name, block);
                 });
 
   // Assembly
@@ -300,14 +324,7 @@ Global::Global(const BlockNode & root)
                 [&](const BlockNode & block)
                 {
                   const auto name = block._header.get<std::string>("name");
-                  Assembly assembly(block);
-
-                  // duplicate type name check
-                  if (_assembly.find(name) != _assembly.end())
-                    throw std::runtime_error("Duplicate assembly definition '" + name +
-                                             "' in Abaqus input.");
-
-                  _assembly.insert(std::make_pair(name, assembly));
+                  _assembly.add(name, block, *this);
                 });
 
   // we can have Part data at the root level. In that cae we automatically generate an assembly and
@@ -315,21 +332,69 @@ Global::Global(const BlockNode & root)
   // Part root_part(root); // TODO
 }
 
-Assembly::Assembly(const BlockNode & block) : SetContainer(nullptr)
+Instance::Instance(const OptionNode & option, const Root & root)
+{
+  const auto & data = option._data;
+  _part_id = root._part.id(option._header.get<std::string>("part"));
+
+  // translation
+  if (data.size() > 0)
+  {
+    const auto col = vecTo<Real>(data);
+    if (col.size() > 3)
+      throw std::runtime_error("Too many values in instance translation data line");
+    for (const auto i : col)
+      _translation(i) = col[i];
+  }
+
+  // rotation
+  if (data.size() > 1)
+  {
+    const auto col = vecTo<Real>(data);
+    if (col.size() != 7)
+      throw std::runtime_error("Invalid number of values in instance rotation data line");
+
+    // axis of rotation (normalized)
+    RealVectorValue a(col[0], col[1], col[2]);
+    RealVectorValue b(col[3], col[4], col[5]);
+    auto n = b - a;
+    const auto norm = n.norm();
+    if (norm == 0)
+      throw std::runtime_error("Zero-length rotation axis");
+    n /= norm;
+
+    // angle
+    Real theta = col[6] / 180.0 * libMesh::pi;
+
+    // rotation matrix
+    const Real c = std::cos(theta);
+    const Real s = std::sin(theta);
+    const Real oc = 1.0 - c;
+    _rotation = RealVectorValue(c + ux * ux * oc,
+                                ux * uy * oc - uz * s,
+                                ux * uz * oc + uy * s,
+
+                                uy * ux * oc + uz * s,
+                                c + uy * uy * oc,
+                                uy * uz * oc - ux * s,
+
+                                uz * ux * oc - uy * s,
+                                uz * uy * oc + ux * s,
+                                c + uz * uz * oc, );
+  }
+  else
+    // no rotation - set to identity
+    _rotation = RealVectorValue(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+Assembly::Assembly(const BlockNode & block, const Root & root) : SetContainer(nullptr)
 {
   // Instance
   block.forOption("instance",
                   [&](const OptionNode & option)
                   {
-                    const auto name = option._header.get<std::string>("name");
-                    Instance instance(option);
-
-                    // duplicate type name check
-                    if (_instance.find(name) != _instance.end())
-                      throw std::runtime_error("Duplicate instance definition '" + name +
-                                               "' in Abaqus input.");
-
-                    _instance.insert(std::make_pair(name, instance));
+                    const auto name = block._header.get<std::string>("name");
+                    _instance.add(name, block, root);
                   });
 
   // assembly sets (might be instance specific)
