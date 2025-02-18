@@ -26,10 +26,10 @@ struct FECollectionParameters
   }
 };
 
-class MFEMFECollectionUnitTest : public testing::TestWithParam<FECollectionParameters>
+class MFEMFESpaceUnitTest : public testing::TestWithParam<FECollectionParameters>
 {
 public:
-  MFEMFECollectionUnitTest()
+  MFEMFESpaceUnitTest()
     : _app(Moose::createMooseApp("PlatypusApp", 0, nullptr)), _factory(_app->getFactory())
   {
     auto test_params = GetParam();
@@ -50,16 +50,16 @@ public:
   void buildFECollection()
   {
     auto test_params = GetParam();
-    InputParameters fec_params = _factory.getValidParams("MFEMFECollection");
+    InputParameters fec_params = _factory.getValidParams("MFEMFESpace");
     fec_params.set<MooseEnum>("fec_type") = test_params.fec_type;
     fec_params.set<int>("vdim") = test_params.vector_dim;
-    auto objects = _mfem_problem->addObject<MFEMFECollection>(
-        "MFEMFECollection", "TestCollection", fec_params);
+    auto objects =
+        _mfem_problem->addObject<MFEMFESpace>("MFEMFESpace", "TestCollection", fec_params);
     mooseAssert(objects.size() == 1, "Doesn't work with threading");
-    collection = objects[0];
+    fespace = objects[0];
   }
 
-  std::shared_ptr<MFEMFECollection> collection;
+  std::shared_ptr<MFEMFESpace> fespace;
 
 protected:
   std::unique_ptr<MFEMMesh> _mfem_mesh_ptr;
@@ -68,17 +68,17 @@ protected:
   std::shared_ptr<MFEMProblem> _mfem_problem;
 };
 
-TEST_P(MFEMFECollectionUnitTest, TestExpectedFECollection)
+TEST_P(MFEMFESpaceUnitTest, TestExpectedFECollection)
 {
   buildFECollection();
   auto params = GetParam();
-  EXPECT_EQ(collection->getFEC()->Name(), params.expected_name);
-  EXPECT_EQ(collection->getFESpaceVDim(), params.expected_fespace_vdim);
+  EXPECT_EQ(fespace->getFEC()->Name(), params.expected_name);
+  EXPECT_EQ(fespace->getFESpace()->GetVDim(), params.expected_fespace_vdim);
 }
 
 INSTANTIATE_TEST_CASE_P(
     ScalarFECollections,
-    MFEMFECollectionUnitTest,
+    MFEMFESpaceUnitTest,
     testing::Values(FECollectionParameters("ref-segment.mesh", "H1", 0, "H1_1D_P1", 1),
                     FECollectionParameters("ref-segment.mesh", "H1", 1, "H1_1D_P1", 1),
                     FECollectionParameters("ref-segment.mesh", "H1", 2, "H1_1D_P1", 2),
@@ -106,7 +106,7 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     VectorFECollections,
-    MFEMFECollectionUnitTest,
+    MFEMFESpaceUnitTest,
     testing::Values(FECollectionParameters("ref-square.mesh", "RT", 0, "RT_2D_P1", 1),
                     FECollectionParameters("ref-cube.mesh", "RT", 0, "RT_3D_P1", 1),
                     FECollectionParameters("ref-square.mesh", "RT", 2, "RT_2D_P1", 1),
@@ -122,7 +122,7 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     LowerDimVectorFECollections,
-    MFEMFECollectionUnitTest,
+    MFEMFESpaceUnitTest,
     testing::Values(FECollectionParameters("ref-segment.mesh", "RT", 3, "RT_R1D_1D_P1", 1),
                     FECollectionParameters("ref-square.mesh", "RT", 3, "RT_R2D_2D_P1", 1),
                     FECollectionParameters("ref-segment.mesh", "ND", 3, "ND_R1D_1D_P1", 1),
@@ -130,17 +130,17 @@ INSTANTIATE_TEST_CASE_P(
 
                         ));
 
-class InvalidMFEMFECollectionUnitTest : public MFEMFECollectionUnitTest
+class InvalidMFEMFESpaceUnitTest : public MFEMFESpaceUnitTest
 {
 };
 
-TEST_P(InvalidMFEMFECollectionUnitTest, TestFECollectionError)
+TEST_P(InvalidMFEMFESpaceUnitTest, TestFECollectionError)
 {
   EXPECT_THROW(buildFECollection(), std::runtime_error);
 }
 
 INSTANTIATE_TEST_CASE_P(ExpectError,
-                        InvalidMFEMFECollectionUnitTest,
+                        InvalidMFEMFESpaceUnitTest,
                         testing::Values(FECollectionParameters("ref-segment.mesh", "RT", 2, "", -1),
                                         FECollectionParameters("ref-square.mesh", "RT", 1, "", -1),
                                         FECollectionParameters("ref-cube.mesh", "RT", 1, "", -1),
