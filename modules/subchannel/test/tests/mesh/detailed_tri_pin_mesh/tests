@@ -8,5 +8,6 @@
     exodiff = coords_in.e
     cli_args = "--mesh-only"
     recover = false
+    requirement = 'The system will create a detailed mesh of the fuel pins for triangular assemblies'
   []
 []

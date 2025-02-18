@@ -1,7 +1,6 @@
 [Tests]
   design = 'TriSubChannel1PhaseProblem.md'
   issues = '#29194 #29490 #29505'
-  requirement = 'The system will examine the subchannel solver for a 19pin liquid sodium cooled assembly'
   [test_explicit]
     type = Exodiff
     input = test19.i
@@ -12,6 +11,7 @@
     recover = false
     allow_warnings = true
     max_parallel = 1
+    requirement = 'The system will examine the subchannel explicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_implicit]
     type = Exodiff
@@ -23,6 +23,7 @@
     recover = false
     allow_warnings = true
     max_parallel = 1
+    requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_monolithic]
     type = Exodiff
@@ -34,6 +35,7 @@
     valgrind = NONE
     recover = false
     max_parallel = 1
+    requirement = 'The system will examine the subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
   []
   [test_monolithic_csv]
     type = CSVDiff
@@ -42,5 +44,6 @@
     recover = False
     rel_err = 3e-4
     max_parallel = 1
+    requirement = 'The system will examine the subchannel monolithic solver printouts for a 19pin liquid sodium cooled assembly'
   []
 []

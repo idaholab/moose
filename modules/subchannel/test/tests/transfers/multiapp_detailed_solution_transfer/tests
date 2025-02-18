@@ -1,12 +1,12 @@
 [Tests]
   design = 'SCMSolutionTransfer.md'
   issues = '#29251'
-  requirement = 'The system shall be able to transger the subchannel/pin solution onto a detailed mesh'
   [quad]
     type = Exodiff
     input = 'quad.i'
     exodiff = 'quad_out.e quad_out_viz0.e'
     recover = false
     max_parallel = 1
+    requirement = 'The system shall be able to transger the subchannel/pin solution onto a detailed mesh'
   []
 []

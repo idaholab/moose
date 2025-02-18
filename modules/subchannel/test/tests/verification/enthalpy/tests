@@ -1,7 +1,6 @@
 [Tests]
   design = 'SubChannel1PhaseProblem.md'
   issues = '#29196'
-  requirement = 'The system shall model the turbulent enthalpy diffusion'
   [enthalpy]
     type = Exodiff
     input = two_channel.i
@@ -11,5 +10,6 @@
     valgrind = NONE
     recover = false
     max_parallel = 1
+    requirement = 'The system shall model the turbulent enthalpy diffusion'
   []
 []

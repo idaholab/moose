@@ -1,7 +1,6 @@
 [Tests]
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29196 #29199 #29237 #29505'
-  requirement = 'The system will examine the subchannel solver for the psbt case'
   [psbt_explicit]
     type = Exodiff
     input = psbt.i
@@ -13,6 +12,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the explicit subchannel solver for the psbt case'
   []
   [psbt_explicit_friction2]
     type = Exodiff
@@ -25,6 +25,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the explicit subchannel solvers for the psbt case using the non-default friction model'
   []
   [psbt_implicit]
     type = Exodiff
@@ -38,6 +39,7 @@
     rel_err = 2e-2
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the implicit subchannel solver for the psbt case'
   []
   [psbt_implicit_csv]
     type = CSVDiff
@@ -59,5 +61,6 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the monolithic subchannel solver for the psbt case'
   []
 []
