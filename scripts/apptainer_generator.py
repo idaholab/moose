@@ -11,7 +11,7 @@ import shutil
 import platform
 import getpass
 import re
-from datetime import datetime, timezone
+from typing import Union
 
 import jinja2
 from jinja2 import meta
@@ -362,7 +362,7 @@ class ApptainerGenerator:
         new_suffix = suffix + '-' + package.apptainer.name_suffix
         return package.apptainer.name.replace(current_suffix, new_suffix)
 
-    def _find_dependency_package(self, library: str) -> Package | None:
+    def _find_dependency_package(self, library: str) -> Union[Package, None]:
         """
         Find the dependency package for the given library (if any)
         """

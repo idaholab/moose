@@ -24,7 +24,7 @@ import json
 import jinja2
 from graphlib import TopologicalSorter
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 import concurrent.futures
 
 @dataclass
@@ -40,7 +40,7 @@ class ApptainerPackage:
     # Name suffix (arch) of the apptainer container
     name_suffix: str
     # The apptainer package this package depends on (if any)
-    from_name: str | None
+    from_name: Union[str, None]
     # Tag (version for apptainer)
     tag: str
     # URI for the container (name:tag)
@@ -61,7 +61,7 @@ class CondaPackage:
     # version identifier for meta.yaml
     version: str
     # build/number identifier for meta.yaml
-    build_number: int | None
+    build_number: Union[int, None]
     # build/string identifier for meta.yaml
     build_string: str
     # The conda install string for this package (conda install ...)
@@ -84,7 +84,7 @@ class Package:
     # The global version for the package
     version: str
     # The build number for the package (if any)
-    build_number: int | None
+    build_number: Union[int, None]
     # The full version (version + build_number)
     full_version: str
     # The hash for the packaged based on influential files
@@ -94,9 +94,9 @@ class Package:
     # The Packages this package depends on
     dependencies: list
     # The apptainer information for this package (if any)
-    apptainer: ApptainerPackage | None
+    apptainer: Union[ApptainerPackage, None]
     # The conda information for this package
-    conda: CondaPackage | None
+    conda: Union[CondaPackage, None]
     # Whether or not the package is the "app" package
     is_app: bool
 
@@ -715,7 +715,7 @@ class Versioner:
         return meta_render
 
     @staticmethod
-    def get_app_info() -> AppInfo | None:
+    def get_app_info() -> Union[AppInfo, None]:
         """ gets the current application name/dir/commit the cwd is in, if any """
         # If we're not within a git rep, we're not within an app
         tree_command = ['git', 'rev-parse', '--is-inside-work-tree']
