@@ -28,7 +28,7 @@ namespace fp
  * @return Reynolds number
  */
 Real reynolds(Real rho, Real vel, Real L, Real mu);
-ADReal reynolds(ADReal rho, ADReal vel, ADReal L, ADReal mu);
+ADReal reynolds(const ADReal & rho, const ADReal & vel, const ADReal & L, const ADReal & mu);
 
 /**
  * Compute Prandtl number
@@ -39,7 +39,7 @@ ADReal reynolds(ADReal rho, ADReal vel, ADReal L, ADReal mu);
  * @return Prandtl number
  */
 Real prandtl(Real cp, Real mu, Real k);
-ADReal prandtl(ADReal cp, ADReal mu, ADReal k);
+ADReal prandtl(const ADReal & cp, const ADReal & mu, const ADReal & k);
 
 /**
  * Compute Grashof number
@@ -54,13 +54,13 @@ ADReal prandtl(ADReal cp, ADReal mu, ADReal k);
  * @return Grashof number
  */
 Real grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real gravity_magnitude);
-ADReal grashof(ADReal beta,
-               ADReal T_s,
-               ADReal T_bulk,
-               ADReal L,
-               ADReal rho,
-               ADReal mu,
-               ADReal gravity_magnitude);
+ADReal grashof(const ADReal & beta,
+               const ADReal & T_s,
+               const ADReal & T_bulk,
+               const ADReal & L,
+               const ADReal & rho,
+               const ADReal & mu,
+               const ADReal & gravity_magnitude);
 
 /**
  * Compute Laplace number
@@ -72,7 +72,7 @@ ADReal grashof(ADReal beta,
  * @return Laplace number
  */
 Real laplace(Real sigma, Real rho, Real L, Real mu);
-ADReal laplace(ADReal sigma, ADReal rho, ADReal L, ADReal mu);
+ADReal laplace(const ADReal & sigma, const ADReal & rho, const ADReal & L, const ADReal & mu);
 
 /**
  * Compute thermal diffusivity
@@ -83,7 +83,7 @@ ADReal laplace(ADReal sigma, ADReal rho, ADReal L, ADReal mu);
  * @return Thermal diffusivity
  */
 Real thermalDiffusivity(Real k, Real rho, Real cp);
-ADReal thermalDiffusivity(ADReal k, ADReal rho, ADReal cp);
+ADReal thermalDiffusivity(const ADReal & k, const ADReal & rho, const ADReal & cp);
 
 /**
  * Compute Peclet number
@@ -94,6 +94,6 @@ ADReal thermalDiffusivity(ADReal k, ADReal rho, ADReal cp);
  * @return Peclet number
  */
 Real peclet(Real vel, Real L, Real diffusivity);
-ADReal peclet(ADReal vel, ADReal L, ADReal diffusivity);
+ADReal peclet(const ADReal & vel, const ADReal & L, const ADReal & diffusivity);
 
 } // namespace fp

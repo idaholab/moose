@@ -19,7 +19,7 @@ reynolds(Real rho, Real vel, Real L, Real mu)
 }
 
 ADReal
-reynolds(ADReal rho, ADReal vel, ADReal L, ADReal mu)
+reynolds(const ADReal & rho, const ADReal & vel, const ADReal & L, const ADReal & mu)
 {
   return rho * std::fabs(vel) * L / mu;
 }
@@ -31,7 +31,7 @@ prandtl(Real cp, Real mu, Real k)
 }
 
 ADReal
-prandtl(ADReal cp, ADReal mu, ADReal k)
+prandtl(const ADReal & cp, const ADReal & mu, const ADReal & k)
 {
   return cp * mu / k;
 }
@@ -44,13 +44,13 @@ grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real gravit
 }
 
 ADReal
-grashof(ADReal beta,
-        ADReal T_s,
-        ADReal T_bulk,
-        ADReal L,
-        ADReal rho,
-        ADReal mu,
-        ADReal gravity_magnitude)
+grashof(const ADReal & beta,
+        const ADReal & T_s,
+        const ADReal & T_bulk,
+        const ADReal & L,
+        const ADReal & rho,
+        const ADReal & mu,
+        const ADReal & gravity_magnitude)
 {
   return gravity_magnitude * beta * std::abs(T_s - T_bulk) * std::pow(L, 3) * (rho * rho) /
          (mu * mu);
@@ -63,7 +63,7 @@ laplace(Real sigma, Real rho, Real L, Real mu)
 }
 
 ADReal
-laplace(ADReal sigma, ADReal rho, ADReal L, ADReal mu)
+laplace(const ADReal & sigma, const ADReal & rho, const ADReal & L, const ADReal & mu)
 {
   return sigma * rho * L / (mu * mu);
 }
@@ -75,7 +75,7 @@ thermalDiffusivity(Real k, Real rho, Real cp)
 }
 
 ADReal
-thermalDiffusivity(ADReal k, ADReal rho, ADReal cp)
+thermalDiffusivity(const ADReal & k, const ADReal & rho, const ADReal & cp)
 {
   return k / (rho * cp);
 }
@@ -87,7 +87,7 @@ peclet(Real vel, Real L, Real diffusivity)
 }
 
 ADReal
-peclet(ADReal vel, ADReal L, ADReal diffusivity)
+peclet(const ADReal & vel, const ADReal & L, const ADReal & diffusivity)
 {
   return std::fabs(vel) * L / diffusivity;
 }
