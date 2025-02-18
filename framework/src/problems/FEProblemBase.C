@@ -5608,6 +5608,16 @@ FEProblemBase::hasVariable(const std::string & var_name) const
   return false;
 }
 
+bool
+FEProblemBase::hasSolverVariable(const std::string & var_name) const
+{
+  for (auto & sys : _solver_systems)
+    if (sys->hasVariable(var_name))
+      return true;
+
+  return false;
+}
+
 const MooseVariableFieldBase &
 FEProblemBase::getVariable(const THREAD_ID tid,
                            const std::string & var_name,
