@@ -1,12 +1,9 @@
-# MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "2" %}
-{% set seacas_version = "2024.08.15" %}
+# MAKE SURE THAT seacas version and seacas_git_rev match if performing a version update!
 {% set seacas_git_rev = "v2024-08-15" %}
-{% set strbuild = "build_" + build|string %}
 
 package:
   name: moose-seacas
-  version: {{ seacas_version }}
+  version: __VERSIONER_SEACAS_VERSION__
 
 source:
   - git_url: https://github.com/sandialabs/seacas
@@ -14,8 +11,8 @@ source:
   - path: ../functions/retry_build.sh
 
 build:
-  number: {{ build }}
-  string: {{ strbuild }}
+  number: __VERSIONER_SEACAS_BUILD_NUMBER__
+  string: build___VERSIONER_SEACAS_BUILD_NUMBER__
   script_env:
     - MOOSE_JOBS
 

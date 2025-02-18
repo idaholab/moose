@@ -29,29 +29,31 @@ with open(os.path.join(MOOSE_DIR, 'scripts', 'tests', 'versioner_hashes.yaml'), 
 class Test(unittest.TestCase):
     def testOldHashes(self):
         versioner = Versioner()
-        for hash, packages in OLD_HASHES.items():
-            meta = versioner.version_meta(hash)
-            for package, package_hash in packages.items():
-                actual_package_hash = str(meta[package]['hash'])
-                message = f'Commit {hash}, package {package}: expected = {package_hash}, actual = {actual_package_hash}'
-                self.assertEqual(str(package_hash), actual_package_hash, message)
+        for commit, libraries in OLD_HASHES.items():
+            packages = versioner.get_packages(commit)
+            for name, values in libraries.items():
+                hash = values['hash']
+                self.assertEqual(hash, packages[name].hash)
+                full_version = values.get('full_version')
+                if full_version is not None:
+                    self.assertEqual(full_version, packages[name].full_version)
 
     def testBadCommit(self):
         with self.assertRaises(Exception) as e:
-            Versioner().version_meta('foobar')
-        self.assertIn('foobar is not a commit', str(e.exception))
+            Versioner().get_packages('foobar')
+        self.assertIn('Reference foobar is not valid', str(e.exception))
 
     def testCLI(self):
         versioner = Versioner()
-        meta = versioner.version_meta()
+        packages = versioner.get_packages('HEAD')
 
         for hash in [None, 'HEAD']:
-            for package in versioner.entities:
+            for name in versioner.entities:
                 # TODO: deprecate mpich by skipping it. It populates in entities because we are
                 #       allowing 'mpich' as a deprecated library in versioner.yaml. But we do not
                 #       have any hashes to verify with here in unittests. Remove this deprecation
                 #       when it gets removed from versioner.yaml keys
-                if package in ['app', 'mpich']:
+                if name in ['app', 'mpich']:
                     continue
 
                 def run(library, args=[]):
@@ -59,27 +61,24 @@ class Test(unittest.TestCase):
                     if hash is not None:
                         full_args += [hash]
                     full_args += args
+
                     return mooseutils.check_output(['./versioner.py'] + full_args,
-                                                cwd=os.path.join(mooseutils.git_root_dir(), 'scripts')).rstrip()
-                package_meta = meta[package]
+                                                   cwd=os.path.join(mooseutils.git_root_dir(), 'scripts')).rstrip()
+                package = packages[name]
 
                 # default: just the hash
-                cli_hash = run(package)
-                self.assertEqual(cli_hash, package_meta['hash'])
+                cli_version = run(name)
+                self.assertEqual(cli_version, package.full_version)
 
                 # --json
-                cli_json = run(package, ['--json'])
-                self.assertEqual(cli_json, json.dumps(package_meta))
+                cli_json = run(name, ['--json'])
+                self.assertIn(f'"name": "{name}"', cli_json)
+                self.assertIn(f'"full_version": "{package.full_version}"', cli_json)
 
-        # Can't pass multiple arguments
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            mooseutils.check_output(['./versioner.py', '--json', '--yaml'],
-                                    cwd=os.path.join(MOOSE_DIR, 'scripts'))
-
-    def testIsGitObject(self):
-        self.assertTrue(Versioner.is_git_object('HEAD'))
-        self.assertTrue(Versioner.is_git_object('21bace124ee2bfc46350b1f3540accab5d1ab0bb'))
-        self.assertFalse(Versioner.is_git_object('foobar'))
+                # --yaml
+                cli_yaml = run(name, ['--yaml'])
+                self.assertIn(f'name: {name}', cli_yaml)
+                self.assertIn(f'full_version: {package.full_version}', cli_yaml)
 
     def testGitHash(self):
         self.assertEqual(Versioner.git_hash('LICENSE', '6724fe26513b2a4f458f5fe8dbd253c2059bda59'), '4362b49151d7b34ef83b3067a8f9c9f877d72a0e')
@@ -113,28 +112,10 @@ class Test(unittest.TestCase):
         self.assertEqual(f'Supplied path {out_of_repo_path} is not in {MOOSE_DIR}', str(e.exception))
 
     def testGetApp(self):
-        app_name, git_root, git_hash = Versioner.get_app()
-        self.assertEqual('moose', app_name)
-        self.assertEqual(MOOSE_DIR, git_root)
-
-        # still need to test _in_ an app
-
-    def testApptainerMeta(self):
-        package_hash = 'abc1234'
-        for package in ['libmesh', 'Some_app']:
-            is_app = package != 'libmesh'
-            def_package = 'app' if is_app else package
-            name_prefix = '' if is_app else 'moose-'
-            meta = Versioner.apptainer_meta(package, {'from': 'some_package'}, package_hash, is_app)
-            if is_app:
-                package = package.lower()
-            self.assertEqual(meta['name'], f'{name_prefix}{package}-{platform.machine()}')
-            self.assertEqual(meta['name_base'], f'{name_prefix}{package}')
-            self.assertEqual(meta['name_suffix'], platform.machine())
-            self.assertEqual(meta['tag'], package_hash)
-            self.assertEqual(meta['uri'], f'{name_prefix}{package}-{platform.machine()}:{package_hash}')
-            self.assertEqual(meta['def'], os.path.realpath(os.path.join(MOOSE_DIR, f'apptainer/{def_package}.def')))
-            self.assertEqual(meta['from'], 'some_package')
+        app_info = Versioner.get_app_info()
+        self.assertEqual('moose', app_info.name)
+        self.assertEqual(MOOSE_DIR, app_info.git_root)
+        self.assertEqual(Versioner.git_rev_parse('HEAD')[0:7], app_info.hash)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

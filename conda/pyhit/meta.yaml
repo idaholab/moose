@@ -2,14 +2,14 @@
 
 package:
   name: moose-pyhit
-  version: {{ version }}
+  version: __VERSIONER_PYHIT_VERSION__
 
 source:
   git_url: https://github.com/milljm/moose-pyhit.git
 
 build:
-  number: 0
-  string: build_0
+  number: __VERSIONER_PYHIT_BUILD_NUMBER__
+  string: build___VERSIONER_PYHIT_BUILD_NUMBER__
   skip: true           # [win]
   pin_depends: record
 

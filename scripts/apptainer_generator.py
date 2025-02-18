@@ -11,12 +11,12 @@ import shutil
 import platform
 import getpass
 import re
-from datetime import datetime, timezone
+from typing import Union
 
 import jinja2
 from jinja2 import meta
 
-from versioner import Versioner
+from versioner import Versioner, Package
 
 MOOSE_DIR = os.environ.get('MOOSE_DIR',
                            os.path.abspath(os.path.join(os.path.dirname(
@@ -28,30 +28,30 @@ class ApptainerGenerator:
     MOOSE and MOOSE-based applications.
     """
     def __init__(self):
-        self.meta = Versioner().version_meta()
+        self.packages = Versioner().get_packages('HEAD')
 
         # Get the packages that have an 'apptainer' key in versioner.yaml
         apptainer_packages = []
-        for library, values in self.meta.items():
-            if 'apptainer' in values:
-                apptainer_packages.append(library)
+        for name, package in self.packages.items():
+            if package.apptainer:
+                apptainer_packages.append(name)
 
         self.args = self.parse_args(apptainer_packages)
         self.args = self.verify_args(self.args)
 
-        library_meta = self.meta[self.args.library]['apptainer'].copy()
-        self.project = library_meta['name_base']
-        self.name = library_meta['name']
-        self.tag = library_meta['tag']
-        self.version = library_meta['tag']
+        self.package = self.packages[self.args.library]
+        self.project = self.package.apptainer.name_base
+        self.name = self.package.apptainer.name
+        self.tag = self.package.apptainer.tag
+        self.version = self.package.apptainer.tag
 
         if hasattr(self.args, 'modify') and self.args.modify is not None:
             self.def_path = os.path.abspath(self.args.modify)
         else:
-            self.def_path = library_meta['def']
+            self.def_path = self.package.apptainer.def_path
 
         if getattr(self.args, 'suffix', None):
-            self.name = self.add_name_suffix(library_meta, self.args.suffix)
+            self.name = self.add_name_suffix(self.package, self.args.suffix)
         if self.args.tag is not None:
             self.tag = self.args.tag
         if self.args.tag_prefix is not None:
@@ -354,32 +354,32 @@ class ApptainerGenerator:
         raise Exception('Failed to check ORAS image existance')
 
     @staticmethod
-    def add_name_suffix(meta, suffix):
+    def add_name_suffix(package: Package, suffix: str) -> str:
         """
-        Adds a suffix to the name for the given library meta
+        Adds a suffix to the name for the given package
         """
-        current_suffix = meta['name_suffix']
-        new_suffix = suffix + '-' + meta['name_suffix']
-        return meta['name'].replace(current_suffix, new_suffix)
+        current_suffix = package.apptainer.name_suffix
+        new_suffix = suffix + '-' + package.apptainer.name_suffix
+        return package.apptainer.name.replace(current_suffix, new_suffix)
 
-    def _find_dependency_meta(self, library):
+    def _find_dependency_package(self, library: str) -> Union[Package, None]:
         """
-        Find the dependency meta for the given library (if any)
+        Find the dependency package for the given library (if any)
         """
-        apptainer_meta = self.meta[library]['apptainer']
-        if 'from' in apptainer_meta:
-            return self.meta[apptainer_meta['from']]['apptainer']
+        from_name = self.packages[library].apptainer.from_name
+        if from_name:
+            return self.packages[from_name]
         return None
 
-    def _dependency_from(self, meta):
+    def _dependency_from(self, package: Package) -> str:
         """
         Finds the BootStrap and From options based on the given dependency
         """
-        project = meta['name_base']
-        name = meta['name']
-        tag = meta['tag']
+        project = package.apptainer.name_base
+        name = package.apptainer.name
+        tag = package.apptainer.tag
         if self.args.dep_suffix is not None:
-            name = self.add_name_suffix(meta, self.args.dep_suffix)
+            name = self.add_name_suffix(package, self.args.dep_suffix)
 
         # localimage (with --local option)
         if self.args.local:
@@ -567,21 +567,21 @@ class ApptainerGenerator:
         if self.args.library != 'app':
             return
 
-        app_name, app_root, _ = Versioner.get_app()
+        app_info = Versioner.get_app_info()
         sections = ['environment', 'post_begin', 'post_pre_make', 'post_pre_install',
                     'post_post_install', 'post_end', 'test_begin', 'test_end']
 
         for section in sections:
             filename = f'apptainer/app_{section}'
-            full_filename = os.path.join(app_root, filename)
+            full_filename = os.path.join(app_info.git_root, filename)
             if not os.path.isfile(full_filename):
                 continue
 
             var = f'SECTION_{section.upper()}'
             file_contents = open(full_filename, 'r').read()
-            contents = f"# Begin include from '{filename}' in {app_name}\n"
+            contents = f"# Begin include from '{filename}' in {app_info.name}\n"
             contents += file_contents
-            contents += f"# End include from '{filename}' in {app_name}\n"
+            contents += f"# End include from '{filename}' in {app_info.name}\n"
             contents = self.add_def_whitespace(contents)
 
             jinja_data[var] = contents
@@ -594,38 +594,25 @@ class ApptainerGenerator:
 
         # Set application-related variables
         if self.args.library == 'app':
-            app_name, app_root, _ = Versioner.get_app()
-            jinja_data['APPLICATION_DIR'] = app_root
-            jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
-            jinja_data['BINARY_NAME'] = app_name
+            app_info = Versioner.get_app_info()
+            jinja_data['APPLICATION_DIR'] = app_info.git_root
+            jinja_data['APPLICATION_NAME'] = os.path.basename(app_info.git_root)
+            jinja_data['BINARY_NAME'] = app_info.name
 
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
         if self.args.library == 'moose-dev':
-            # test-tools is deprecated, but leave it here, so this scripts continues
-            # to function properly against older hashes.
-            for package in ['tools']:
-                meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-                if os.path.exists(meta_yaml):
-                    with open(meta_yaml, 'r') as meta_contents:
-                        _, version, _, _, _, = Versioner.conda_meta_jinja(meta_contents.read())
-                        variable_name = 'MOOSE_'
-                        variable_name += package.upper().replace('-', '_')
-                        variable_name += '_VERSION'
-                        jinja_data[variable_name] = version
+            for name in ['tools']:
+                package = self.packages[name]
+                variable_name = f'MOOSE_{package.name.upper()}_VERSION'
+                jinja_data[variable_name] = package.conda.install
         elif self.args.library == 'libmesh':
-            package = 'libmesh-vtk'
-            meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-            with open(meta_yaml, 'r') as meta_contents:
-                _, _, _, _, meta = Versioner.conda_meta_jinja(meta_contents.read())
+            package = self.packages['libmesh-vtk']
 
-            # Jinja returns a list of dictionaries, when variants are involved.
-            # Dictionary comprehensions: https://stackoverflow.com/questions/28243504/convert-list-of-dictionaries-into-dict
-            # Thankfully, the value of 'var' below will always be the same no matter the variant
-            kv_pairs = {k:v for element in meta['source'] for k,v in element.items()}
-
+            # Jinja returns a list of dictionaries when variants are involved
+            source = {k:v for element in package.conda.meta['source'] for k,v in element.items()}
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
-                jinja_data[jinja_var] = kv_pairs[var]
+                jinja_data[jinja_var] = source[var]
 
         # Set petsc and libmesh versions
         need_versions = {'petsc': {'package': 'petsc', 'submodule': 'petsc'},
@@ -689,10 +676,10 @@ class ApptainerGenerator:
 
         # Find the dependent library (if any)
         if self.args.modify is None:
-            dep_meta = self._find_dependency_meta(self.args.library)
+            dep_package = self._find_dependency_package(self.args.library)
         else:
             self.print(f'Modifying container with definition {self.def_path}')
-            dep_meta = self.meta[self.args.library]['apptainer']
+            dep_package = self.package
 
         # Whether or not the definition file has a dependency
         needs_from = '{{ APPTAINER_BOOTSTRAP }}' in definition
@@ -703,7 +690,7 @@ class ApptainerGenerator:
             if not needs_from:
                 self.error(f'Library {self.name} does not need a dependency, but --dep was provided')
         # No dependent library needed
-        if dep_meta is None:
+        if dep_package is None:
             if needs_from:
                 self.error(f'Library {self.name} needs a dependency, but none found')
         # Dependency library is needed, figure out how to get it
@@ -719,7 +706,7 @@ class ApptainerGenerator:
                     apptainer_bootstrap = 'localimage'
                     apptainer_from = self.args.dep
             else:
-                apptainer_bootstrap, apptainer_from = self._dependency_from(dep_meta)
+                apptainer_bootstrap, apptainer_from = self._dependency_from(dep_package)
             jinja_data['APPTAINER_BOOTSTRAP'] = apptainer_bootstrap
             jinja_data['APPTAINER_FROM'] = apptainer_from
 

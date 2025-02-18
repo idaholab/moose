@@ -1,19 +1,9 @@
-# Making a Change to this package?
-# REMEMBER TO UPDATE the .yaml files for the following packages:
-#   petsc/*
-#   libmesh-vtk/*
-#   peacock/*
-#
-# As well as any directions pertaining to modifying those files.
-# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2024.12.23" %}
-
 # HDF5 Version
 {% set hdf5_version = "1.14.2" %}
 
 package:
   name: moose-mpi
-  version: {{ version }}
+  version: __VERSIONER_MPI_VERSION__
 
 source:
   - path: .
