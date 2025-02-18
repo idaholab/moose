@@ -171,9 +171,6 @@ FlowChannelBase::init()
     const auto & closures_names = getParam<std::vector<std::string>>("closures");
     for (const auto & closures_name : closures_names)
       _closures_objects.push_back(getTHMProblem().getClosures(closures_name));
-    // _closures should be removed after transition:
-    if (_closures_objects.size() >= 1)
-      _closures = _closures_objects[0];
   }
 }
 
