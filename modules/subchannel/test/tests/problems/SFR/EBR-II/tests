@@ -1,7 +1,6 @@
 [Tests]
   design = 'TriSubChannel1PhaseProblem.md'
   issues = '#28497 #29481'
-  requirement = 'The system will examine the subchannel solver for the EBR-II case'
   [SHRT-17_SS_test]
     type = Exodiff
     input = 'XX09_SS_SHRT17.i'
@@ -12,5 +11,6 @@
     valgrind = NONE
     recover = false
     max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the EBR-II case'
   []
 []

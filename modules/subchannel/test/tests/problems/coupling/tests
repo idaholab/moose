@@ -1,7 +1,6 @@
 [Tests]
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29247'
-  requirement = 'The system will examine the coupling using SCM as main app'
   [main]
     type = Exodiff
     input = main.i
@@ -10,6 +9,7 @@
     mesh_mode = 'replicated'
     allow_warnings = true
     max_parallel = 1
+    requirement = 'The system will examine the coupling using SCM as main app'
   []
   [sub]
     type = Exodiff
@@ -19,5 +19,6 @@
     mesh_mode = 'replicated'
     allow_warnings = true
     max_parallel = 1
+    requirement = 'The system will examine the coupling using heat concution as a sub app'
   []
 []

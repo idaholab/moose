@@ -1,11 +1,11 @@
 [Tests]
   design = 'SCMMassFlowRateIC.md'
   issues = '#29513'
-  requirement = 'The system will apply initial massflow rate'
   [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
     recover = False
+    requirement = 'The system will apply initial massflow rate'
   []
 []

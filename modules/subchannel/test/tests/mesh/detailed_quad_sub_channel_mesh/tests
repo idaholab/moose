@@ -8,6 +8,7 @@
     exodiff = coords_3x3.e
     cli_args = "--mesh-only coords_3x3.e"
     recover = false
+    requirement = 'The system will create a detailed mesh of the subchannels for quadrilateral assemblies (3x3)'
   []
 
   [1x2]
@@ -16,6 +17,7 @@
     exodiff = coords_1x2.e
     cli_args = "--mesh-only coords_1x2.e Mesh/subchannel/nx=1 Mesh/subchannel/ny=2"
     recover = false
+    requirement = 'The system will create a detailed mesh of the subchannels for quadrilateral assemblies (1x2)
   []
 
   [1x3]
@@ -24,6 +26,7 @@
     exodiff = coords_1x3.e
     cli_args = "--mesh-only coords_1x3.e Mesh/subchannel/nx=1 Mesh/subchannel/ny=3"
     recover = false
+    requirement = 'The system will create a detailed mesh of the subchannels for quadrilateral assemblies (1x3)
   []
 
   [3x1]
@@ -32,5 +35,6 @@
     exodiff = coords_3x1.e
     cli_args = "--mesh-only coords_3x1.e Mesh/subchannel/nx=3 Mesh/subchannel/ny=1"
     recover = false
+    requirement = 'The system will create a detailed mesh of the subchannels for quadrilateral assemblies (3x1)
   []
 []

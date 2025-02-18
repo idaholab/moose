@@ -1,7 +1,6 @@
 [Tests]
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29217 #29196'
-  requirement = 'The system will examine the subchannel transient solver for the psbt case'
   [psbt_transient_explicit]
     type = Exodiff
     input = psbt.i
@@ -13,6 +12,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the subchannel transient explicit solver for the psbt case'
   []
   [psbt_transient_implicit]
     type = Exodiff
@@ -25,6 +25,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the subchannel transient implicit solver for the psbt case'
   []
   [psbt_transient_monolithic]
     type = Exodiff
@@ -37,5 +38,6 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the subchannel transient monolithic solver for the psbt case'
   []
 []
