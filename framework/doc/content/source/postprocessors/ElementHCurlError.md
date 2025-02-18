@@ -12,7 +12,7 @@ All input parameters and their restrictions are the same as those for
 
 ## Example Input File Syntax
 
-!listing vector_kernel.i block=Postprocessors/HCurlError
+!listing /vector_kernel.i block=Postprocessors/HCurlError
 
 !syntax parameters /Postprocessors/ElementHCurlError
 
