@@ -76,13 +76,11 @@ const static std::set<std::string> abaqus_options = {
 };
 
 void
-InputParser::parse(std::istream & in)
+InputParser::InputParser(std::istream & in)
+  : _current_line(0)
 {
   // load and preprocess entire file
   loadFile(in);
-
-  // build the parse tree
-  parseBlockInternal(*this);
 }
 
 void
