@@ -4,7 +4,6 @@
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
-    compiler = 'GCC CLANG'
 
     requirement = "The PresetAcceleration class shall accurately prescribe the"
                   " acceleration at the given boundary."
@@ -16,7 +15,6 @@
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
-    compiler = 'GCC CLANG'
 
     requirement = "The PresetAcceleration class shall accurately prescribe the"
                   " acceleration at the given boundary when the Newmark-Beta time"

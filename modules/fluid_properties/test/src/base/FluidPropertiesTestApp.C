@@ -44,7 +44,7 @@ FluidPropertiesTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 FluidPropertiesTestApp::registerApps()
 {
-  registerApp(FluidPropertiesApp);
+  FluidPropertiesApp::registerApps();
   registerApp(FluidPropertiesTestApp);
 }
 
