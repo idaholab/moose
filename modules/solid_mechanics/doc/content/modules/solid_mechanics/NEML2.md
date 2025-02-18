@@ -41,6 +41,12 @@ After that, you can follow the [getting started](getting_started/installation/in
 A dedicated input file syntax block is reserved for MOOSE-NEML2 interaction. The entry point to the syntax block is `[NEML2]`.
 Please refer to the [NEML2 syntax](syntax/NEML2/index.md) documentation for more details.
 
+## NEML2 MOOSE materials
+
+A list of custom NEML2 material models that reside in MOOSE:
+
+- [Los Alamos Reduced Order Model (LAROMance)](solid_mechanics/common/LAROMANCE6DInterpolation.md)
+
 ## Citing NEML2
 
 ```text

@@ -77,7 +77,7 @@
     invariant = 'state/s'
   []
   [rom_ep]
-    type = Multilinear6DInterpolationModel
+    type = LAROMANCE6DInterpolation
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_ep'
     output_rate = 'state/ep_rate'
@@ -109,7 +109,7 @@
   # Extra materials that evolve dislocation densities FIXME lynn I don't know how to evolve these
   #####################################################################################
   [rom_cell]
-    type = Multilinear6DInterpolationModel
+    type = LAROMANCE6DInterpolation
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_cell'
     output_rate = 'state/cell_rate'
@@ -122,7 +122,7 @@
     env_factor = 'forces/env_fac'
   []
   [rom_wall]
-    type = Multilinear6DInterpolationModel
+    type = LAROMANCE6DInterpolation
     model_file_name = 'models/random_value_6d_grid.json'
     model_file_variable_name = 'out_wall'
     output_rate = 'state/wall_rate'
