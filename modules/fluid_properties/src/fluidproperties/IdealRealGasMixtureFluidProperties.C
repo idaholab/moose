@@ -136,7 +136,7 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
       {                                                                                            \
         if (j == i)                                                                                \
           continue;                                                                                \
-        const Real dxj_dxi = -x[j] / (1. - x[i]);                                                  \
+        const Real dxj_dxi = 0;                                                                    \
         dy_dx[i] += dxj_dxi * y_sec[j] - x[j] * dy_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;        \
       }                                                                                            \
       const Real dx_primary_dxi = -x_primary / (1. - x[i]);                                        \
@@ -274,6 +274,13 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
   _fp_secondary.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
     _fp_secondary[i] = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_secondary_names[i]);
+
+  // The derivatives w.r.t. secondary mass fractions need to be tested for mixtures
+  // of 3 or more gases. See the comment in p_from_T_v about dxj_dxi. This also
+  // appears in the define_mass_specific_prop_from_T_v macro.
+  if (_n_secondary_vapors > 1)
+    mooseError(
+        "IdealRealGasMixtureFluidProperties has not been tested for mixtures of 3 or more gases.");
 }
 
 const SinglePhaseFluidProperties &
@@ -562,7 +569,11 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
     {
       if (j == i)
         continue;
-      dxj_dxi = -x[j] / (1. - x[i]);
+      // Note: this was previously as follows, but we were unable to understand
+      // why and this is not currently tested (requires 3 or more components in
+      // the mixture):
+      // dxj_dxi = -x[j] / (1. - x[i]);
+      dxj_dxi = 0;
       dp_dx[i] += -dp_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;
     }
     dp_dx[i] += -dp_dv_primary * v / (x_primary * x_primary) * (-x_primary / (1. - x[i]));
