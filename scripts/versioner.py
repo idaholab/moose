@@ -22,6 +22,7 @@ import platform
 import yaml
 import json
 import jinja2
+import copy
 from graphlib import TopologicalSorter
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
@@ -70,9 +71,13 @@ class CondaPackage:
     meta_yaml: str
     # Path to the build config file
     build_yaml: str
+    # The contents of the meta yaml
+    meta: dict
 
     def to_dict(self) -> dict:
-        return self.__dict__
+        result = copy.deepcopy(self.__dict__)
+        del result['meta'] # hide this; it's loud
+        return result
 
 @dataclass
 class Package:
@@ -533,7 +538,8 @@ class Versioner:
                   'version': str(meta['package']['version']),
                   'build_string': meta['build'].get('string', None),
                   'meta_yaml': meta_yaml,
-                  'build_yaml': build_yaml}
+                  'build_yaml': build_yaml,
+                  'meta': meta}
         values['install'] = values['version']
         if values['build_string']:
             values['install'] += '=' + values['build_string']
