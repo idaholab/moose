@@ -37,8 +37,10 @@ bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2)
     std::stringstream debug_ss;
     while (f1 * f2 > 0.0)
     {
+#ifdef DEBUG
       debug_ss << "  iteration " << iter << ": (x1,x2) = (" << x1 << "," << x2 << "), (f1,f2) = ("
                << f1 << "," << f2 << ")\n";
+#endif
       if (std::abs(f1) < std::abs(f2))
       {
         x1 += factor * (x1 - x2);
@@ -55,7 +57,7 @@ bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2)
       iter++;
       if (iter >= n)
         throw MooseException("No bracketing interval found by BrentsMethod::bracket after " +
-                             Moose::stringify(n) + " iterations:\n" + debug_ss.str());
+                             Moose::stringify(n) + " iterations.\n" + debug_ss.str());
     }
   }
 }
@@ -77,8 +79,10 @@ root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol)
   std::stringstream debug_ss;
   for (unsigned int i = 1; i <= iter_max; ++i)
   {
+#ifdef DEBUG
     debug_ss << "  iteration " << i << ": dx = " << xm << ", x = " << b << ", f(x) = " << fb
              << "\n";
+#endif
     if (fb * fc > 0.0)
     {
       // Rename a,b and c and adjust bounding interval d
@@ -160,7 +164,7 @@ root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol)
     fb = f(b);
   }
 
-  throw MooseException("Maximum number of iterations exceeded in BrentsMethod::root:\n" +
+  throw MooseException("Maximum number of iterations exceeded in BrentsMethod::root.\n" +
                        debug_ss.str());
   return 0.0; // Should never get here
 }
