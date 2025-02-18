@@ -5,10 +5,10 @@
 
 namespace neml2
 {
-class Multilinear6DInterpolationModel : public Model
+class LAROMANCE6DInterpolation : public Model
 {
 public:
-  Multilinear6DInterpolationModel(const OptionSet & options);
+  LAROMANCE6DInterpolation(const OptionSet & options);
 
   static OptionSet expected_options();
 
