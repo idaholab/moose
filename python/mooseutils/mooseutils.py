@@ -139,7 +139,7 @@ def find_moose_executable(loc, **kwargs):
             exe_name = os.path.join(loc, name + '-' + method)
             if os.path.isfile(exe_name):
                 exe = exe_name
-            break
+                break
 
     # Returns the executable or error code
     if (exe is None) and show_error:
