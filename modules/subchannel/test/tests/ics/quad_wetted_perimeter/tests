@@ -1,11 +1,11 @@
 [Tests]
   design = 'SCMQuadWettedPerimIC.md'
   issues = '#29233'
-  requirement = 'The system will calculate the wetted perimeter of subchannels in a quadrilateral lattice'
   [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
     recover = False
+    requirement = 'The system will calculate the wetted perimeter of subchannels in a quadrilateral lattice'
   []
 []

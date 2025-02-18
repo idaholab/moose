@@ -1,7 +1,6 @@
 [Tests]
   design = 'SCMTriDuctMeshGenerator.md'
   issues = '#29484'
-  requirement = 'The system will create a hexagonal duct mesh and a pin mesh for triangular assemblies'
   [coords]
     type = Exodiff
     input = coords.i
@@ -9,5 +8,6 @@
     cli_args = "--mesh-only"
     recover = false
     mesh_mode = 'replicated'
+    requirement = 'The system will create a hexagonal duct mesh and a pin mesh for triangular assemblies'
   []
 []

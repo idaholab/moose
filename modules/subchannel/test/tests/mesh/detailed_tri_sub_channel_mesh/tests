@@ -1,12 +1,12 @@
 [Tests]
   design = 'SCMDetailedTriSubChannelMeshGenerator.md'
   issues = '#29493'
-  requirement = 'The system will create a detailed mesh of the subchannels in triangular assemblies'
   [coords]
     type = Exodiff
     input = coords.i
     exodiff = coords_in.e
     cli_args = "--mesh-only"
     recover = false
+    requirement = 'The system will create a detailed mesh of the subchannels in triangular assemblies'
   []
 []

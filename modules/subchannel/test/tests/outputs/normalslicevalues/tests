@@ -1,12 +1,12 @@
 [Tests]
-  design = 'QuadSubChannelNornmalSliceValues.md'
+  design = 'QuadSubChannelNormalSliceValues.md'
   issues = '#29226'
-  requirement = 'The system will print a variable on a plane in a quadrilateral assembly'
   [test]
     type = CSVDiff
     input = 'test.i'
     csvdiff = 'Temp_out_matrix.csv'
     recover = False
     max_parallel = 1
+    requirement = 'The system will print a variable on a plane in a quadrilateral assembly'
   []
 []

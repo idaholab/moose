@@ -1,11 +1,11 @@
 [Tests]
   design = 'SCMTriFlowAreaIC.md'
   issues = '#29194'
-  requirement = 'The system will calculate the subchannel flow area for triangular assemblies'
   [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
     recover = false
+    requirement = 'The system will calculate the subchannel flow area for triangular assemblies'
   []
 []

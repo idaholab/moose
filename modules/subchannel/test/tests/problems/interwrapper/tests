@@ -1,7 +1,6 @@
 [Tests]
   design = 'QuadInterWrapper1PhaseProblem.md'
   issues = '#29489 #29258'
-  requirement = 'The system will examine the interwrapper solver for quadrilateral assemblies'
   [quad_interwrapper]
     type = Exodiff
     input = quad_interwrapper.i
@@ -13,6 +12,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the explicit interwrapper solver for quadrilateral assemblies'
   []
   [quad_interwrapper_monolithic]
     type = Exodiff
@@ -25,6 +25,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the monolithic interwrapper solver for quadrilateral assemblies'
   []
   [quad_interwrapper_monolithic_staggered]
     type = Exodiff
@@ -37,6 +38,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the monolitich staggered grid interwrapper solver for quadrilateral assemblies'
   []
   [tri_interwrapper]
     type = Exodiff
@@ -49,6 +51,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the explicit interwrapper solver for triangular assemblies'
   []
   [tri_interwrapper_tight_side]
     type = Exodiff
@@ -63,6 +66,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the explicit interwrapper solver for triangular assemblies and side bypass'
   []
   [tri_interwrapper_implicit]
     type = Exodiff
@@ -75,6 +79,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the implicit interwrapper solver for triangular assemblies'
   []
 
   [tri_interwrapper_monolithic]
@@ -88,6 +93,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the monolithic interwrapper solver for triangular assemblies'
   []
   [tri_interwrapper_monolithic_staggered]
     type = Exodiff
@@ -100,5 +106,6 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the monolithic staggered grif interwrapper solver for triangular assemblies'
   []
 []

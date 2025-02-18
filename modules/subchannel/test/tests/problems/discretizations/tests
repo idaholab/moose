@@ -1,7 +1,6 @@
 [Tests]
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29193'
-  requirement = 'The system will examine the discretizations of various algorithms'
   [psbt_explicit]
     type = Exodiff
     input = psbt_explicit.i
@@ -13,6 +12,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the discretizations of the explicit quad solver'
   []
   [psbt_explicit_staggered]
     type = Exodiff
@@ -25,6 +25,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the discretizations of the explicit quad solver in a staggered grid'
   []
   [psbt_implicit]
     type = Exodiff
@@ -37,6 +38,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the discretizations of the implicit quad solver'
   []
   [psbt_monolithic]
     type = Exodiff
@@ -49,6 +51,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the discretizations of the monolithic quad solver'
   []
   [psbt_full_monolithic]
     type = Exodiff
@@ -61,6 +64,7 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the discretizations of the full monolithic quad solver'
   []
   [psbt_full_monolithic_staggered]
     type = Exodiff
@@ -73,5 +77,6 @@
     abs_zero = 5e-6
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the discretizations of the full monolithic quad solver in a staggered grid'
   []
 []
