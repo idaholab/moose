@@ -144,6 +144,8 @@ protected:
 
   /// Check whether a variable already exists
   bool variableExists(const VariableName & var_name, bool error_if_aux) const;
+  /// Check whether a variable already exists and is a solver variable
+  bool solverVariableExists(const VariableName & var_name) const;
 
   /// Get the solver system for this variable index. The index should be the index of the variable in solver
   /// var_names (currently _solver_var_names) vector

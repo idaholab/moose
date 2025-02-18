@@ -339,10 +339,14 @@ PhysicsBase::variableExists(const VariableName & var_name, bool error_if_aux) co
                "' is supposed to be nonlinear for physics '",
                name(),
                "' but it is already defined as auxiliary");
-  else if (_problem->hasVariable(var_name))
-    return true;
   else
-    return false;
+    return _problem->hasVariable(var_name);
+}
+
+bool
+PhysicsBase::solverVariableExists(const VariableName & var_name) const
+{
+  return _problem->hasSolverVariable(var_name);
 }
 
 const SolverSystemName &
