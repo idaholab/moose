@@ -31,6 +31,9 @@ WCNSLinearFVScalarTransportPhysics::WCNSLinearFVScalarTransportPhysics(
     const InputParameters & parameters)
   : WCNSFVScalarTransportPhysicsBase(parameters)
 {
+  if (_porous_medium_treatment)
+    _flow_equations_physics->paramError("porous_medium_treatment",
+                                        "Porous media scalar advection is currently unimplemented");
 }
 
 void

@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#29901'
+  design = 'navier_stokes/pinsfv.md PINSFVScalarFieldAdvection.md'
+  [2d-rc-scalar-physics]
+    type = 'CSVDiff'
+    input = 2d-rc-physics.i
+    csvdiff =  2d-rc-physics_out.csv
+    requirement = 'The system shall be able to model passive scalar field advection in porous media.'
+    abs_zero = 1e-9
+  []
+[]
