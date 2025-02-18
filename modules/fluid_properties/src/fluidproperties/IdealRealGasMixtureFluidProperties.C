@@ -34,19 +34,19 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
                                                            Real & dy_de,                           \
                                                            std::vector<Real> & dy_dx) const        \
   {                                                                                                \
-    Real T, dT_dv, dT_de;                                                                          \
-    std::vector<Real> dT_dx(_n_secondary_vapors);                                                  \
-    T_from_v_e(v, e, x, T, dT_dv, dT_de, dT_dx);                                                   \
+    Real T, dT_dv_e, dT_de_v;                                                                      \
+    std::vector<Real> dT_dx_ve(_n_secondary_vapors);                                               \
+    T_from_v_e(v, e, x, T, dT_dv_e, dT_de_v, dT_dx_ve);                                            \
                                                                                                    \
     Real dy_dT_v, dy_dv_T;                                                                         \
     std::vector<Real> dy_dx_Tv;                                                                    \
     prop##_from_T_v(T, v, x, y, dy_dT_v, dy_dv_T, dy_dx_Tv);                                       \
                                                                                                    \
-    dy_dv = dy_dv_T + dy_dT_v * dT_dv;                                                             \
-    dy_de = dy_dT_v * dT_de;                                                                       \
+    dy_dv = dy_dv_T + dy_dT_v * dT_dv_e;                                                           \
+    dy_de = dy_dT_v * dT_de_v;                                                                     \
     dy_dx.resize(_n_secondary_vapors);                                                             \
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
-      dy_dx[i] = dy_dx_Tv[i] + dy_dT_v * dT_dx[i];                                                 \
+      dy_dx[i] = dy_dx_Tv[i] + dy_dT_v * dT_dx_ve[i];                                              \
   }
 
 /**
@@ -69,19 +69,19 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
                                                            Real & dy_dT,                           \
                                                            std::vector<Real> & dy_dx) const        \
   {                                                                                                \
-    Real v, dv_dp, dv_dT;                                                                          \
-    std::vector<Real> dv_dx;                                                                       \
-    v_from_p_T(p, T, x, v, dv_dp, dv_dT, dv_dx);                                                   \
+    Real v, dv_dp_T, dv_dT_p;                                                                      \
+    std::vector<Real> dv_dx_pT;                                                                    \
+    v_from_p_T(p, T, x, v, dv_dp_T, dv_dT_p, dv_dx_pT);                                            \
                                                                                                    \
     Real dy_dT_v, dy_dv_T;                                                                         \
     std::vector<Real> dy_dx_Tv;                                                                    \
     prop##_from_T_v(T, v, x, y, dy_dT_v, dy_dv_T, dy_dx_Tv);                                       \
                                                                                                    \
-    dy_dp = dy_dv_T * dv_dp;                                                                       \
-    dy_dT = dy_dT_v + dy_dv_T * dv_dT;                                                             \
+    dy_dp = dy_dv_T * dv_dp_T;                                                                     \
+    dy_dT = dy_dT_v + dy_dv_T * dv_dT_p;                                                           \
     dy_dx.resize(_n_secondary_vapors);                                                             \
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
-      dy_dx[i] = dy_dx_Tv[i] + dy_dv_T * dv_dx[i];                                                 \
+      dy_dx[i] = dy_dx_Tv[i] + dy_dv_T * dv_dx_pT[i];                                              \
   }
 
 /**
@@ -109,6 +109,7 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
                                                            std::vector<Real> & dy_dx) const        \
   {                                                                                                \
     const Real x_primary = primaryMassFraction(x);                                                 \
+    mooseAssert(!MooseUtils::absoluteFuzzyEqual(x_primary, 0.0), "Mass fraction may not be zero"); \
                                                                                                    \
     Real y_primary, dy_dT_primary, dy_dv_primary;                                                  \
     _fp_primary->prop##_from_T_v(T, v / x_primary, y_primary, dy_dT_primary, dy_dv_primary);       \
@@ -120,6 +121,7 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
     std::vector<Real> y_sec(_n_secondary_vapors), dy_dv_sec(_n_secondary_vapors);                  \
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
     {                                                                                              \
+      mooseAssert(!MooseUtils::absoluteFuzzyEqual(x[i], 0.0), "Mass fraction may not be zero");    \
       _fp_secondary[i]->prop##_from_T_v(T, v / x[i], y_sec[i], dy_dT_sec, dy_dv_sec[i]);           \
       y += x[i] * y_sec[i];                                                                        \
       dy_dT += x[i] * dy_dT_sec;                                                                   \
@@ -221,17 +223,26 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
     }                                                                                              \
   }
 
-define_mass_specific_prop_from_T_v(e) define_mass_specific_prop_from_T_v(s)
+// clang-format off
+define_mass_specific_prop_from_T_v(e)
+define_mass_specific_prop_from_T_v(s)
 
-    define_transport_prop_from_T_v(mu) define_transport_prop_from_T_v(k)
+define_transport_prop_from_T_v(mu)
+define_transport_prop_from_T_v(k)
 
-        define_from_p_T_using_T_v(e) define_from_p_T_using_T_v(s) define_from_p_T_using_T_v(c)
-            define_from_p_T_using_T_v(cp) define_from_p_T_using_T_v(cv)
-                define_from_p_T_using_T_v(mu) define_from_p_T_using_T_v(k)
+define_from_p_T_using_T_v(e)
+define_from_p_T_using_T_v(s)
+define_from_p_T_using_T_v(c)
+define_from_p_T_using_T_v(cp)
+define_from_p_T_using_T_v(cv)
+define_from_p_T_using_T_v(mu)
+define_from_p_T_using_T_v(k)
 
-                    define_from_v_e_using_T_v(p) define_from_v_e_using_T_v(c)
+define_from_v_e_using_T_v(p)
+define_from_v_e_using_T_v(c)
+    // clang-format on
 
-                        InputParameters IdealRealGasMixtureFluidProperties::validParams()
+    InputParameters IdealRealGasMixtureFluidProperties::validParams()
 {
   InputParameters params = VaporMixtureFluidProperties::validParams();
   params += NaNInterface::validParams();
