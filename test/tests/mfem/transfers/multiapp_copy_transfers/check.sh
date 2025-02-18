@@ -29,16 +29,16 @@ FIELD_LEFT=${1}
 FIELD_RIGHT=${3}
 awk -v var="${FIELD_LEFT}" \
     '/<DataArray/ && $0 ~ var {INSIDE=1; next}
-     /<\/DataArray/ && INSIDE==1 {INSIDE=0; next};
-     INSIDE==1 {print $0}' "${FILE_LEFT}" >tmp_left
+    /<\/DataArray/ && INSIDE==1 {INSIDE=0; next};
+    INSIDE==1 {print $0}' "${FILE_LEFT}" > tmp_left
 
 awk -v var="${FIELD_RIGHT}" \
     '/<DataArray/ && $0 ~ var {INSIDE=1; next};
-     /<\/DataArray>/ && INSIDE==1 {INSIDE=0; next};
-     INSIDE==1 {print $0}' "${FILE_RIGHT}" >tmp_right
+    /<\/DataArray>/ && INSIDE==1 {INSIDE=0; next};
+    INSIDE==1 {print $0}' "${FILE_RIGHT}" > tmp_right
 #Should be identical
 #exit code will be 0 if no diff
-diff tmp_left tmp_right >/dev/null
+diff tmp_left tmp_right > /dev/null
 code=$?
 rm tmp_left tmp_right
 if [ ! $code -eq 0 ]; then
