@@ -173,14 +173,14 @@ class Versioner:
     def output_summary(self, args):
         """ generate summary report that can be used to generate versioner_hash blocks """
         head = self.version_meta(args.commit, full_hash=True)["app"]["hash"]
-        formatted_output = f'{head}: #PR\n'
+        output = {head: {}}
         for library in TRACKING_LIBRARIES:
             if library == 'app':
                 continue
             meta = self.version_meta(args.commit).get(library, {})
             meta_hash = meta['hash']
-            formatted_output+=f'  {library}: {meta_hash}\n'
-        return formatted_output
+            output[head][library] = str(meta_hash)
+        return yaml.dump(output, sort_keys=False)
 
     def output_cli(self, args):
         """ performs command line actions """
