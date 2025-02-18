@@ -27,6 +27,10 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
 void
 MFEMExecutioner::setDevice()
 {
+  // TODO: might not be enough should check the device
+  // your trying to donfigure is the same one that has been configured
+  if (_device.IsConfigured())
+    return;
   _device.Configure(getParam<std::string>("device"));
   _device.Print(std::cout);
 }

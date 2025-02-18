@@ -47,6 +47,10 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
 
+  mooseAssert(mfem_ser_mesh.Dimension() == 3, "Only 3D meshes are currently supported");
+  mooseAssert(isParamSetByUser("dim") ? getParam<MooseEnum>("dim") == 3 : true,
+              "Only 3D meshes are currently supported");
+
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError(
         "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
@@ -56,7 +60,9 @@ MFEMMesh::buildMesh()
                     isParamSetByUser("serial_refine") ? getParam<int>("serial_refine")
                                                       : getParam<int>("uniform_refine"));
 
-  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mfem_ser_mesh);
+  // multi app should take the mpi comm from moose so is split correctly??
+  auto comm = _app.comm().get();
+  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(comm, mfem_ser_mesh);
 
   // Perform parallel refinements
   uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_refine"));
