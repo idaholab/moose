@@ -14,6 +14,7 @@
 #include "libmesh/dense_vector.h"
 
 #include "ADReal.h"
+#include "NavierStokesMethods.h"
 
 using namespace libMesh;
 
@@ -222,20 +223,7 @@ viscosityNumber(const T1 & viscosity,
          std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_magnitude / delta_rho));
 }
 
-/**
- * Compute wall heat transfer coefficient
- * @param Nu Nusselt number
- * @param k Thermal conductivity
- * @param D_h Hydraulic diameter
- *
- * @return the wall heat transfer coefficient
- */
-template <typename T1, typename T2, typename T3>
-auto
-wallHeatTransferCoefficient(const T1 & Nu, const T2 & k, const T3 & D_h)
-{
-  return Nu * k / D_h;
-}
+using NS::wallHeatTransferCoefficient;
 
 /**
  * Compute Dean number
