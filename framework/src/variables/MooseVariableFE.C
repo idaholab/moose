@@ -442,7 +442,8 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeAdGradFaceAvg(const FaceInfo & /*fi*/)
 {
-  mooseError("computeAdGradFaceAvg(const FaceInfo & fi) are only implemented for MooseVariableFE<Real>.");
+  mooseError(
+      "computeAdGradFaceAvg(const FaceInfo & fi) are only implemented for MooseVariableFE<Real>.");
 }
 
 template <>

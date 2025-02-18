@@ -12,7 +12,6 @@
 
 registerMooseObject("MooseTestApp", ElementCenterL2Error);
 
-
 InputParameters
 ElementCenterL2Error::validParams()
 {

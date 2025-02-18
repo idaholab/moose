@@ -944,14 +944,16 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
             for (const auto qp : make_range(nqp))
               _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
         else
-          _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
+          for (const auto i : make_range(num_dofs))
+            for (const auto qp : make_range(nqp))
+              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
       }
       else if (!_time_integrator)
         for (const auto qp : make_range(nqp))
           _ad_grad_u_dot[qp] = _grad_u_dot[qp];
     }
   }
-  
+
   // Averaging FE values for FE -> FV coupling
   if (_need_averaging)
     computeADAveraging();
