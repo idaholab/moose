@@ -98,13 +98,13 @@ AdvancedExtruderGenerator::validParams()
       "A vector that points in the direction to extrude (note, this will be "
       "normalized internally - so don't worry about it here)");
 
-  params.addParam<boundary_id_type>(
+  params.addParam<BoundaryName>(
       "top_boundary",
-      "The boundary ID to set on the top boundary.  If omitted one will be generated.");
+      "The boundary name to set on the top boundary. If omitted an ID will be generated.");
 
-  params.addParam<boundary_id_type>(
+  params.addParam<BoundaryName>(
       "bottom_boundary",
-      "The boundary ID to set on the bottom boundary.  If omitted one will be generated.");
+      "The boundary name to set on the bottom boundary. If omitted an ID will be generated.");
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "upward_boundary_source_blocks", "Block ids used to generate upward interface boundaries.");
@@ -145,10 +145,11 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
         getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("elem_integers_swaps")),
     _direction(getParam<Point>("direction")),
     _has_top_boundary(isParamValid("top_boundary")),
-    _top_boundary(isParamValid("top_boundary") ? getParam<boundary_id_type>("top_boundary") : 0),
+    _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary")
+                                               : BoundaryName(std::to_string(0))),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
-    _bottom_boundary(isParamValid("bottom_boundary") ? getParam<boundary_id_type>("bottom_boundary")
-                                                     : 0),
+    _bottom_boundary(isParamValid("bottom_boundary") ? getParam<BoundaryName>("bottom_boundary")
+                                                     : BoundaryName(std::to_string(0))),
     _upward_boundary_source_blocks(
         isParamValid("upward_boundary_source_blocks")
             ? getParam<std::vector<std::vector<subdomain_id_type>>>("upward_boundary_source_blocks")
@@ -372,6 +373,19 @@ AdvancedExtruderGenerator::generate()
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   const BoundaryInfo & input_boundary_info = input->get_boundary_info();
 
+  // Determine boundary IDs for the new user provided boundary names
+  std::vector<BoundaryName> new_boundary_names;
+  if (_has_bottom_boundary)
+    new_boundary_names.push_back(_bottom_boundary);
+  if (_has_top_boundary)
+    new_boundary_names.push_back(_top_boundary);
+  std::vector<boundary_id_type> new_boundary_ids =
+      MooseMeshUtils::getBoundaryIDs(*input, new_boundary_names, true);
+  const auto user_bottom_boundary_id =
+      _has_bottom_boundary ? new_boundary_ids.front() : libMesh::BoundaryInfo::invalid_id;
+  const auto user_top_boundary_id =
+      _has_top_boundary ? new_boundary_ids.back() : libMesh::BoundaryInfo::invalid_id;
+
   // We know a priori how many elements we'll need
   mesh->reserve_elem(total_num_layers * orig_elem);
 
@@ -489,7 +503,7 @@ AdvancedExtruderGenerator::generate()
     }
   }
 
-  const std::set<boundary_id_type> & side_ids = input_boundary_info.get_side_boundary_ids();
+  const auto & side_ids = input_boundary_info.get_side_boundary_ids();
 
   boundary_id_type next_side_id =
       side_ids.empty() ? 0 : cast_int<boundary_id_type>(*side_ids.rbegin() + 1);
@@ -1043,7 +1057,11 @@ AdvancedExtruderGenerator::generate()
           const unsigned short top_id =
               added_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
           if (_has_bottom_boundary)
-            boundary_info.add_side(added_elem, is_flipped ? top_id : 0, _bottom_boundary);
+          {
+            mooseAssert(user_bottom_boundary_id != libMesh::BoundaryInfo::invalid_id,
+                        "We should have retrieved a proper boundary ID");
+            boundary_info.add_side(added_elem, is_flipped ? top_id : 0, user_bottom_boundary_id);
+          }
           else
             boundary_info.add_side(added_elem, is_flipped ? top_id : 0, next_side_id);
         }
@@ -1057,7 +1075,11 @@ AdvancedExtruderGenerator::generate()
               added_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
 
           if (_has_top_boundary)
-            boundary_info.add_side(added_elem, is_flipped ? 0 : top_id, _top_boundary);
+          {
+            mooseAssert(user_top_boundary_id != libMesh::BoundaryInfo::invalid_id,
+                        "We should have retrieved a proper boundary ID");
+            boundary_info.add_side(added_elem, is_flipped ? 0 : top_id, user_top_boundary_id);
+          }
           else
             boundary_info.add_side(
                 added_elem, is_flipped ? 0 : top_id, cast_int<boundary_id_type>(next_side_id + 1));
@@ -1086,6 +1108,11 @@ AdvancedExtruderGenerator::generate()
   if (!input_nodeset_map.empty())
     mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
                                                             input_nodeset_map.end());
+
+  if (_has_bottom_boundary)
+    boundary_info.sideset_name(new_boundary_ids.front()) = new_boundary_names.front();
+  if (_has_top_boundary)
+    boundary_info.sideset_name(new_boundary_ids.back()) = new_boundary_names.back();
 
   mesh->set_isnt_prepared();
   // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
