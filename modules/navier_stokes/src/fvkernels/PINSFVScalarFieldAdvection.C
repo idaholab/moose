@@ -18,8 +18,8 @@ PINSFVScalarFieldAdvection::validParams()
   auto params = INSFVScalarFieldAdvection::validParams();
   params.addClassDescription(
       "Advects an arbitrary quantity, the associated nonlinear 'variable' in porous medium.");
-  params.addParam<MooseFunctorName>(NS::porosity,
-                                    "The name of the functor giving the local porosity");
+  params.addRequiredParam<MooseFunctorName>(NS::porosity,
+                                            "The name of the functor giving the local porosity");
 
   return params;
 }
@@ -38,12 +38,7 @@ PINSFVScalarFieldAdvection::computeQpResidual()
   const auto state = determineState();
   // Note that we do not use the advected quantity interpolation because we expect to use this
   // with a functor material that does not support upwinding
-  const auto eps_face = _eps(makeFace(*_face_info,
-                                      Moose::FV::LimiterType::CentralDifference,
-                                      MetaPhysicL::raw_value(velocity()) * _normal > 0,
-                                      false,
-                                      nullptr),
-                             state);
+  const auto eps_face = _eps(makeCDFace(*_face_info, false), state);
 
   return INSFVScalarFieldAdvection::computeQpResidual() / eps_face;
 }

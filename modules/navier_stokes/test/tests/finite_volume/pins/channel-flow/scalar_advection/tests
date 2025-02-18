@@ -5,7 +5,7 @@
     type = 'CSVDiff'
     input = 2d-rc-physics.i
     csvdiff =  2d-rc-physics_out.csv
-    requirement = 'The system shall be able to model passive scalar field advection and '
+    requirement = 'The system shall be able to model passive scalar field advection in porous media.'
     abs_zero = 1e-9
   []
 []
