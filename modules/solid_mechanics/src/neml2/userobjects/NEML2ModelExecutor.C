@@ -267,7 +267,7 @@ NEML2ModelExecutor::fillInputs()
 void
 NEML2ModelExecutor::applyPredictor()
 {
-  if (!model().input_axis().has_state())
+  if (!model().input_axis().has_state() || !model().input_axis().has_subaxis(neml2::OLD_STATE))
     return;
 
   // Set trial state variables (i.e., initial guesses).
