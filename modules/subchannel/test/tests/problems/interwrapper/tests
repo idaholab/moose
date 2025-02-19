@@ -1,0 +1,111 @@
+[Tests]
+  design = 'QuadInterWrapper1PhaseProblem.md'
+  issues = '#29489 #29258'
+  [quad_interwrapper]
+    type = Exodiff
+    input = quad_interwrapper.i
+    exodiff = quad_interwrapper_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the explicit interwrapper solver for quadrilateral assemblies'
+  []
+  [quad_interwrapper_monolithic]
+    type = Exodiff
+    input = quad_interwrapper_monolithic.i
+    exodiff = quad_interwrapper_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the monolithic interwrapper solver for quadrilateral assemblies'
+  []
+  [quad_interwrapper_monolithic_staggered]
+    type = Exodiff
+    input = quad_interwrapper_monolithic_staggered.i
+    exodiff = quad_interwrapper_monolithic_staggered_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the monolitich staggered grid interwrapper solver for quadrilateral assemblies'
+  []
+  [tri_interwrapper]
+    type = Exodiff
+    input = tri_interwrapper.i
+    exodiff = tri_interwrapper_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the explicit interwrapper solver for triangular assemblies'
+  []
+  [tri_interwrapper_tight_side]
+    type = Exodiff
+    input = tri_interwrapper.i
+    exodiff = tri_interwrapper_tight_side.e
+    cli_args = "TriInterWrapperMesh/sub_channel/tight_side_bypass=true "
+               "Outputs/file_base=tri_interwrapper_tight_side"
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the explicit interwrapper solver for triangular assemblies and side bypass'
+  []
+  [tri_interwrapper_implicit]
+    type = Exodiff
+    input = tri_interwrapper_implicit.i
+    exodiff = tri_interwrapper_implicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the implicit interwrapper solver for triangular assemblies'
+  []
+
+  [tri_interwrapper_monolithic]
+    type = Exodiff
+    input = tri_interwrapper_monolithic.i
+    exodiff = tri_interwrapper_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the monolithic interwrapper solver for triangular assemblies'
+  []
+  [tri_interwrapper_monolithic_staggered]
+    type = Exodiff
+    input = tri_interwrapper_monolithic_staggered.i
+    exodiff = tri_interwrapper_monolithic_staggered_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the monolithic staggered grif interwrapper solver for triangular assemblies'
+  []
+[]

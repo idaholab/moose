@@ -1,0 +1,49 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#29194 #29490 #29505'
+  [test_explicit]
+    type = Exodiff
+    input = test19.i
+    exodiff = test19_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    allow_warnings = true
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel explicit solver for a 19pin liquid sodium cooled assembly'
+  []
+  [test_implicit]
+    type = Exodiff
+    input = test19_implicit.i
+    exodiff = test19_implicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    allow_warnings = true
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
+  []
+  [test_monolithic]
+    type = Exodiff
+    input = test19_monolithic.i
+    exodiff = test19_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    abs_zero = 1e-7
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
+  []
+  [test_monolithic_csv]
+    type = CSVDiff
+    input = 'test19_monolithic.i'
+    csvdiff = 'test19_monolithic_out.csv'
+    recover = False
+    rel_err = 3e-4
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel monolithic solver printouts for a 19pin liquid sodium cooled assembly'
+  []
+[]
