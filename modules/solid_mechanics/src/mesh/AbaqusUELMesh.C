@@ -75,16 +75,17 @@ AbaqusUELMesh::buildMesh()
 bool
 AbaqusUELMesh::prepare(const MeshBase * mesh_to_clone)
 {
-  // set the correct processor ID for each element
-  for (const auto i : index_range(_elements))
-    _elements[i].pid = elemPtr(_elements[i].nodes[i % _elements[i].nodes.size()])->processor_id();
+  // // set the correct processor ID for each element
+  // for (const auto i : index_range(_elements))
+  //   _elements[i].pid = elemPtr(_elements[i].nodes[i %
+  //   _elements[i].nodes.size()])->processor_id();
 
-  if (_debug)
-  {
-    for (auto & elem : _elements)
-      _console << elem.pid << ' ';
-    _console << std::endl;
-  }
+  // if (_debug)
+  // {
+  //   for (auto & elem : _elements)
+  //     _console << elem.pid << ' ';
+  //   _console << std::endl;
+  // }
 
   return MooseMesh::prepare(mesh_to_clone);
 }
@@ -92,114 +93,38 @@ AbaqusUELMesh::prepare(const MeshBase * mesh_to_clone)
 void
 AbaqusUELMesh::instantiateElements()
 {
-  // let's hope 0 is ok here...
-  _max_node_id = 0;
-
-  for (const auto & assembly : _root._assembly)
-    for (const auto & instance : assembly._instance)
-    {
-      // part to instantiate
-      const auto & part = _root._part[instance._part_id];
-
-      // loop over nodes
-      for (const auto & [abaqus_node_id, pp] : part._node)
-      {
-        // transform part point pp to instance point ip
-        Point ip = instance._rotation * (pp + instance._transform);
-
-        // add the point node and element
-        auto * node = _mesh->add_point(ip, _max_node_id);
-        auto node_elem = Elem::build(NODEELEM);
-        node_elem->set_node(0) = node;
-        node_elem->set_id() = _max_node_id;
-        _mesh->add_elem(std::move(node_elem));
-        _part._libmesh_node_id[abaqus_node_id] = _max_node_id;
-        _max_node_id++;
-      }
-
-      // add elements
-      for (const auto & [abaqus_elem_id, abaqus_elem] : part._element)
-      {
-        LibMeshUElement elem(part._element_definition[abaqus_elem._type_id]);
-        // translate abaqus node ids to libmesh node ids
-        for (const auto abaqus_node_id : abaqus_elem._node_list )
-          elem._libmesh_node_list.push_back(_part._libmesh_node_id[abaqus_node_id]);
-
-         _part._moose_elem_id[abaqus_elem_id] = _elements.size();
-         _elements.push_back(elem);
-      }
-
-      // deal with elset/nset at the part and root level
-    }
-}
-
-void
-AbaqusUELMesh::readProperties(const std::string & header)
-{
-  // process header
-  HeaderMap map(header);
-  const auto & elset = getElementSet(map.get<std::string>("elset"));
-
-  // read data lines
-  _properties.emplace_back();
-  auto & props = _properties.back();
-
-  std::string s;
-  while (false)
+  // add mesh points (libmesh node elements)
+  for (const auto id : index_range(_mesh_points))
   {
-    // tokenize all data as both integer and float. this should always succeed. we leter iterate
-    // over elements and only then know from the uel type how many entries are float and int.
-    std::vector<Real> rcol;
-    std::vector<int> icol;
-    MooseUtils::tokenizeAndConvert(s, rcol, ",");
-    props.first.insert(props.first.end(), rcol.begin(), rcol.end());
-    MooseUtils::tokenizeAndConvert(s, icol, ",");
-    props.second.insert(props.second.end(), icol.begin(), icol.end());
-  }
+    const auto & [p, mask] = _mesh_points[id];
 
-  // assign properties to elements
-  for (const auto uel_id : elset)
-  {
-    auto & elem = _elements[uel_id];
-    const auto & uel = _element_definition[elem.type_id];
-    if (uel.n_properties > 0)
-      elem.properties.first = props.first.data();
-    if (uel.n_iproperties > 0)
-      elem.properties.second = &(props.second[uel.n_properties]);
+    // add the point node and element
+    auto * node = _mesh->add_point(p, id);
+    auto node_elem = Elem::build(NODEELEM);
+    node_elem->set_node(0) = node;
+    node_elem->set_id() = id;
+    node_elem->subdomain_id = mask;
+    _mesh->add_elem(std::move(node_elem));
   }
 }
 
 void
 AbaqusUELMesh::setupLibmeshSubdomains()
 {
-  // verify variable numbers are below number of bits in BoundaryID
-  const auto bits = sizeof(SubdomainID) * 8;
-  for (const auto & uel : _element_definition)
-    for (const auto & nodes : uel.vars)
-      for (const auto & var : nodes)
-        if (var >= bits)
-          mooseError("Currently variables numbers >= ", bits, " are not supported.");
 
-  // iterate over all elements
-  for (const auto & elem_id : index_range(_elements))
-  {
-    const auto & elem = _elements[elem_id];
-    const auto & nodes = elem.nodes;
-    const auto & uel = _element_definition[elem.type_id];
+  // // iterate over all elements
+  // for (const auto & elem_id : index_range(_elements))
+  // {
+  //   const auto & elem = _elements[elem_id];
+  //   const auto & nodes = elem.nodes;
+  //   const auto & uel = _element_definition[elem.type_id];
 
-    for (const auto i : index_range(nodes))
-    {
-      // build node to elem map
-      _node_to_uel_map[nodes[i]].push_back(elem_id);
-
-      // add node element to variable-specific block
-      auto * node_elem = _mesh->elem_ptr(nodes[i]);
-      if (!node_elem)
-        mooseError("Element not found. Internal error.");
-      for (const auto & var : uel.vars[i])
-        node_elem->subdomain_id() |= (1 << var);
-    }
-  }
+  //   for (const auto i : index_range(nodes))
+  //   {
+  //     // build node to elem map
+  //     _node_to_uel_map[nodes[i]].push_back(elem_id);
+  //   }
+  // }
 }
 
 void
@@ -226,32 +151,32 @@ AbaqusUELMesh::setupNodeSets()
   }
 }
 
-const AbaqusUELMesh::UELDefinition &
+const Abaqus::UserElement &
 AbaqusUELMesh::getUEL(const std::string & type) const
 {
-  const auto it = _element_type_to_typeid.find(type);
-  if (it == _element_type_to_typeid.end())
-    mooseError("Unknown UEL type '", type, "'");
-  return _element_definition[it->second];
+  for (const auto & part : _root._part)
+    if (part._element_definition.has(type))
+      return part._element_definition[type];
+  mooseError("Unknown UEL type '", type, "'");
 }
 
-const std::vector<std::size_t> &
-AbaqusUELMesh::getNodeSet(const std::string & nset) const
-{
-  const auto it = _node_set.find(MooseUtils::toUpper(nset));
-  if (it == _node_set.end())
-    mooseError("Node set '", nset, "' does not exist.");
-  return it->second;
-}
+// const std::vector<std::size_t> &
+// AbaqusUELMesh::getNodeSet(const std::string & nset) const
+// {
+//   const auto it = _node_set.find(MooseUtils::toUpper(nset));
+//   if (it == _node_set.end())
+//     mooseError("Node set '", nset, "' does not exist.");
+//   return it->second;
+// }
 
-const std::vector<std::size_t> &
-AbaqusUELMesh::getElementSet(const std::string & elset) const
-{
-  const auto it = _element_set.find(MooseUtils::toUpper(elset));
-  if (it == _element_set.end())
-    mooseError("Element set '", elset, "' does not exist.");
-  return it->second;
-}
+// const std::vector<std::size_t> &
+// AbaqusUELMesh::getElementSet(const std::string & elset) const
+// {
+//   const auto it = _element_set.find(MooseUtils::toUpper(elset));
+//   if (it == _element_set.end())
+//     mooseError("Element set '", elset, "' does not exist.");
+//   return it->second;
+// }
 
 std::string
 AbaqusUELMesh::getVarName(std::size_t id) const
