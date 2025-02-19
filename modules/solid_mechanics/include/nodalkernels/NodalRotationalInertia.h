@@ -14,6 +14,7 @@
 
 // Forward Declarations
 class TimeIntegrator;
+class AuxiliarySystem;
 
 /**
  * Calculates the inertial torque and inertia proportional damping

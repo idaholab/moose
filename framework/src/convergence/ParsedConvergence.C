@@ -10,6 +10,7 @@
 #include "ParsedConvergence.h"
 #include "MooseUtils.h"
 #include "Function.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", ParsedConvergence);
 

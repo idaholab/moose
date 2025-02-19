@@ -10,6 +10,7 @@
 #include "GapHeatConductanceTest.h"
 #include "Function.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
 
 using namespace Moose;
 

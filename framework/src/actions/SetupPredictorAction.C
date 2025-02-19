@@ -13,6 +13,7 @@
 #include "Predictor.h"
 #include "Factory.h"
 #include "NonlinearSystemBase.h"
+#include "FEProblemBase.h"
 
 registerMooseAction("MooseApp", SetupPredictorAction, "setup_predictor");
 

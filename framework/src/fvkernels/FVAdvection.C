@@ -9,6 +9,7 @@
 
 #include "FVAdvection.h"
 #include "Steady.h"
+#include "FEProblemBase.h"
 
 registerADMooseObject("MooseApp", FVAdvection);
 

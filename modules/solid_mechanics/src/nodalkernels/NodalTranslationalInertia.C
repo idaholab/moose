@@ -13,6 +13,7 @@
 #include "MooseUtils.h"
 #include "DelimitedFileReader.h"
 #include "TimeIntegrator.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("SolidMechanicsApp", NodalTranslationalInertia);
 

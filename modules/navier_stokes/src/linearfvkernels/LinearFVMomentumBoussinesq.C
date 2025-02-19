@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "NS.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumBoussinesq);
 

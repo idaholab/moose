@@ -10,6 +10,7 @@
 #include "BlkResTestDiffusion.h"
 #include "MooseEnum.h"
 #include "MooseTypes.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseTestApp", BlkResTestDiffusion);
 

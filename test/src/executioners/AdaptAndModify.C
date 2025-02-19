@@ -9,6 +9,7 @@
 
 #include "AdaptAndModify.h"
 #include "TimeStepper.h"
+#include "FEProblemBase.h"
 
 // Moose includes
 
