@@ -15,6 +15,7 @@
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFluidHeatTransferPhysics);
 registerWCNSFVFluidHeatTransferPhysicsBaseTasks("NavierStokesApp",
                                                 WCNSLinearFVFluidHeatTransferPhysics);
+registerMooseAction("NavierStokesApp", WCNSLinearFVFluidHeatTransferPhysics, "add_aux_kernel");
 
 InputParameters
 WCNSLinearFVFluidHeatTransferPhysics::validParams()
@@ -27,8 +28,9 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
       "orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
-  params.addParam<bool>(
-      "solve_for_enthalpy", false, "Whether to use an enthalpy variable or a temperature variable");
+
+  params.addParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
+  params.addParamNamesToGroup(NS::fluid, "Material properties");
 
   // We could split between discretization and solver here.
   params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
@@ -40,13 +42,11 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
 
 WCNSLinearFVFluidHeatTransferPhysics::WCNSLinearFVFluidHeatTransferPhysics(
     const InputParameters & parameters)
-  : WCNSFVFluidHeatTransferPhysicsBase(parameters),
-    _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy"))
+  : WCNSFVFluidHeatTransferPhysicsBase(parameters)
 {
   if (_porous_medium_treatment)
     paramError("porous_medium_treatment", "Porous media not supported at this time");
-  if (_solve_for_enthalpy)
-    paramError("solve_for_enthalpy", "Enthalpy solve not supported at this time with Physics");
+  checkSecondParamSetOnlyIfFirstOneTrue("solve_for_enthalpy", NS::fluid);
 }
 
 void
@@ -56,23 +56,24 @@ WCNSLinearFVFluidHeatTransferPhysics::addSolverVariables()
   if (!_has_energy_equation)
     return;
 
+  const auto variable_name = _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
   // Dont add if the user already defined the variable
-  if (variableExists(_fluid_temperature_name,
+  if (variableExists(variable_name,
                      /*error_if_aux=*/true))
-    checkBlockRestrictionIdentical(_fluid_temperature_name,
-                                   getProblem().getVariable(0, _fluid_temperature_name).blocks());
+    checkBlockRestrictionIdentical(variable_name,
+                                   getProblem().getVariable(0, variable_name).blocks());
   else if (_define_variables)
   {
     const auto var_type = "MooseLinearVariableFVReal";
     auto params = getFactory().getValidParams(var_type);
     assignBlocks(params, _blocks);
-    params.set<std::vector<Real>>("scaling") = {getParam<Real>("energy_scaling")};
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_fluid_temperature_name);
-    getProblem().addVariable(var_type, _fluid_temperature_name, params);
+    params.set<SolverSystemName>("solver_sys") = getSolverSystem(variable_name);
+    getProblem().addVariable(var_type, variable_name, params);
   }
   else
-    paramError("fluid_temperature_variable",
-               "Variable (" + _fluid_temperature_name +
+    paramError(_solve_for_enthalpy ? "solve_for_enthalpy" : "fluid_temperature_variable",
+               "Variable (" + variable_name +
                    ") supplied to the WCNSLinearFVFluidHeatTransferPhysics does not exist!");
 }
 
@@ -83,9 +84,13 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyTimeKernels()
   std::string kernel_name = prefix() + "ins_energy_time";
 
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<LinearVariableName>("variable") =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
   assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>("factor") = "rho_cp";
+  if (!_solve_for_enthalpy)
+    params.set<MooseFunctorName>("factor") = "rho_cp";
+  else
+    params.set<MooseFunctorName>("factor") = "rho";
 
   getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
@@ -97,15 +102,17 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
   std::string kernel_name = prefix() + "ins_energy_advection";
 
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<LinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
   if (!getParam<bool>("solve_for_enthalpy"))
   {
+    params.set<LinearVariableName>("variable") = _fluid_temperature_name;
     params.set<MooseEnum>("advected_quantity") = "temperature";
     if (!MooseUtils::isFloat(_specific_heat_name))
       paramError(NS::cp, "Must be a Real number. Functors not supported at this time");
     params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
   }
+  else
+    params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");
@@ -129,12 +136,27 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
 
     const std::string kernel_type = "LinearFVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
-    params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+    if (!_solve_for_enthalpy)
+    {
+      params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
+    }
+    else
+    {
+      params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
+      params.set<MooseFunctorName>("diffusion_coeff") =
+          _thermal_conductivity_name[block_i] + "_by_cp";
+    }
     std::vector<SubdomainName> block_names =
         num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
     assignBlocks(params, block_names);
     // NOTE: vector conductivities not supported at this time
-    params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
+    bool has_vector = processThermalConductivity();
+    if (has_vector)
+      paramError("thermal_conductivity",
+                 "Vector thermal conductivities not currently supported with the linear finite "
+                 "volume discretization");
+
     params.set<bool>("use_nonorthogonal_correction") =
         getParam<bool>("use_nonorthogonal_correction");
 
@@ -151,7 +173,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAmbientConvection()
 
   const std::string kernel_type = "LinearFVVolumetricHeatTransfer";
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<LinearVariableName>("variable") =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
   params.set<VariableName>(NS::T_fluid) = _fluid_temperature_name;
   params.set<bool>("is_solid") = false;
 
@@ -182,13 +205,30 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
 {
   const std::string kernel_type = "LinearFVSource";
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<LinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<LinearVariableName>("variable") =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("source_density") =
       getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
+}
+
+void
+WCNSLinearFVFluidHeatTransferPhysics::addAuxiliaryKernels()
+{
+  if (_solve_for_enthalpy)
+  {
+    // Keep temperature updated
+    const std::string kernel_type = "FunctorAux";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    params.set<AuxVariableName>("variable") = _fluid_temperature_name;
+    assignBlocks(params, _blocks);
+    params.set<MooseFunctorName>("functor") = "T_from_p_h";
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+    getProblem().addAuxKernel(kernel_type, prefix() + "update_temperature", params);
+  }
 }
 
 void
@@ -220,6 +260,15 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyInletBC()
 
       getProblem().addLinearFVBC(
           bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
+
+      // Boundary condition on temperature must be forwarded to enthalpy
+      if (_solve_for_enthalpy)
+      {
+        params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
+        params.set<MooseFunctorName>("functor") = "h_from_p_T";
+        getProblem().addLinearFVBC(
+            bc_type, _fluid_enthalpy_name + "_" + inlet_boundaries[bc_ind], params);
+      }
     }
     else if (_energy_inlet_types[bc_ind] == "heatflux")
       paramError("energy_inlet_types", "Heat flux inlet boundary conditions not yet supported");
@@ -256,6 +305,15 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
 
       getProblem().addLinearFVBC(
           bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+
+      // Boundary condition on temperature must be forwarded to enthalpy
+      if (_solve_for_enthalpy)
+      {
+        params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
+        params.set<MooseFunctorName>("functor") = "h_from_p_T";
+        getProblem().addLinearFVBC(
+            bc_type, _fluid_enthalpy_name + "_" + wall_boundaries[bc_ind], params);
+      }
     }
     else if (_energy_wall_types[bc_ind] == "heatflux")
       paramError("energy_inlet_types", "Heat flux wall boundary conditions not yet supported");
@@ -277,11 +335,36 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyOutletBC()
   for (const auto & outlet_bdy : outlet_boundaries)
   {
     const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
+    const auto variable_name = _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
     InputParameters params = getFactory().getValidParams(bc_type);
     params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
     params.set<bool>("use_two_term_expansion") = getParam<bool>("energy_two_term_bc_expansion");
 
-    params.set<LinearVariableName>("variable") = _fluid_temperature_name;
-    getProblem().addLinearFVBC(bc_type, _fluid_temperature_name + "_" + outlet_bdy, params);
+    params.set<LinearVariableName>("variable") = variable_name;
+    getProblem().addLinearFVBC(bc_type, variable_name + "_" + outlet_bdy, params);
+  }
+}
+
+void
+WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
+{
+  WCNSFVFluidHeatTransferPhysicsBase::addMaterials();
+
+  if (_solve_for_enthalpy)
+  {
+    // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
+    for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
+    {
+      const auto object_type = "ADParsedFunctorMaterial";
+      InputParameters params = getFactory().getValidParams(object_type);
+      assignBlocks(params, _blocks);
+      params.set<std::vector<std::string>>("functor_names") = {_thermal_conductivity_name[i],
+                                                               getSpecificHeatName()};
+      params.set<std::string>("expression") =
+          _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
+      params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
+      getProblem().addMaterial(
+          object_type, prefix() + "alpha_from_" + _thermal_conductivity_name[i], params);
+    }
   }
 }

@@ -23,12 +23,10 @@ public:
 
   WCNSLinearFVFluidHeatTransferPhysics(const InputParameters & parameters);
 
-protected:
-  /// User-selected option to solve for enthalpy
-  const bool _solve_for_enthalpy;
-
 private:
   virtual void addSolverVariables() override;
+  virtual void addAuxiliaryKernels() override;
+  virtual void addMaterials() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly compressible energy equation
