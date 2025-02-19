@@ -69,6 +69,7 @@ protected:
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("fp_primary") = fp_steam_name;
       params.set<std::vector<UserObjectName>>("fp_secondary") = {fp_nitrogen_name};
+      params.set<bool>("allow_imperfect_jacobians") = true;
       _fe_problem->addUserObject(class_name, fp_mix_name, params);
       _fp_mix = &_fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>(fp_mix_name);
     }

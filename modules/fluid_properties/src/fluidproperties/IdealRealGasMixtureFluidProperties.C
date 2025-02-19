@@ -136,6 +136,11 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
       {                                                                                            \
         if (j == i)                                                                                \
           continue;                                                                                \
+        if (_n_secondary_vapors > 1)                                                               \
+          imperfectJacobianMessage(                                                                \
+              "The mass fraction derivatives in the following "                                    \
+              "function have not been tested for mixtures of 3 or more components:\n\n",           \
+              __PRETTY_FUNCTION__);                                                                \
         const Real dxj_dxi = 0;                                                                    \
         dy_dx[i] += dxj_dxi * y_sec[j] - x[j] * dy_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;        \
       }                                                                                            \
@@ -277,13 +282,6 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
   _fp_secondary.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
     _fp_secondary[i] = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_secondary_names[i]);
-
-  // The derivatives w.r.t. secondary mass fractions need to be tested for mixtures
-  // of 3 or more gases. See the comment in p_from_T_v about dxj_dxi. This also
-  // appears in the define_mass_specific_prop_from_T_v macro.
-  if (_n_secondary_vapors > 1)
-    mooseError(
-        "IdealRealGasMixtureFluidProperties has not been tested for mixtures of 3 or more gases.");
 }
 
 const SinglePhaseFluidProperties &
@@ -576,6 +574,11 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
       // why and this is not currently tested (requires 3 or more components in
       // the mixture):
       // dxj_dxi = -x[j] / (1. - x[i]);
+      if (_n_secondary_vapors > 1)
+        imperfectJacobianMessage(
+            "The mass fraction derivatives in the following "
+            "function have not been tested for mixtures of 3 or more components:\n\n",
+            __PRETTY_FUNCTION__);
       dxj_dxi = 0;
       dp_dx[i] += -dp_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;
     }
