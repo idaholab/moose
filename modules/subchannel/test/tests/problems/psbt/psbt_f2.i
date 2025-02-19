@@ -102,13 +102,6 @@ pin_diameter = 0.00950
     variable = w_perim
   []
 
-  [q_prime_IC]
-    type = SCMQuadPowerIC
-    variable = q_prime
-    power = 1.0e6 # W
-    filename = "power_profile.txt" #type in name of file that describes radial power profile
-  []
-
   [T_ic]
     type = ConstantIC
     variable = T
@@ -179,6 +172,13 @@ pin_diameter = 0.00950
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
+  []
+  [q_prime_IC]
+    type = SCMQuadPowerAux
+    variable = q_prime
+    power = 1.0e6 # W
+    filename = "power_profile.txt" #type in name of file that describes radial power profile
+    execute_on = 'initial timestep_begin'
   []
 []
 
