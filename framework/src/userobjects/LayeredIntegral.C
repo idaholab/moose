@@ -24,7 +24,9 @@ LayeredIntegral::validParams()
 }
 
 LayeredIntegral::LayeredIntegral(const InputParameters & parameters)
-  : ElementIntegralVariableUserObject(parameters), LayeredBase(parameters)
+  : ElementIntegralVariableUserObject(parameters),
+    LayeredBase(parameters),
+    Moose::FunctorBase<Real>(name())
 {
 }
 
@@ -71,4 +73,49 @@ LayeredIntegral::spatialPoints() const
   }
 
   return points;
+}
+
+template <typename SpatialArg>
+Real
+LayeredIntegral::evaluateTemplate(const SpatialArg & position,
+                                  const Moose::StateArg & /*state*/) const
+{
+  return spatialValue(position.getPoint());
+}
+
+Real
+LayeredIntegral::evaluate(const ElemArg & elem, const Moose::StateArg & state) const
+{
+  return evaluateTemplate(elem, state);
+}
+Real
+LayeredIntegral::evaluate(const FaceArg & face, const Moose::StateArg & state) const
+{
+  return evaluateTemplate(face, state);
+}
+Real
+LayeredIntegral::evaluate(const ElemQpArg & qp, const Moose::StateArg & state) const
+{
+  return evaluateTemplate(qp, state);
+}
+Real
+LayeredIntegral::evaluate(const ElemSideQpArg & elem_side_qp, const Moose::StateArg & state) const
+{
+  return evaluateTemplate(elem_side_qp, state);
+}
+Real
+LayeredIntegral::evaluate(const ElemPointArg & elem_point, const Moose::StateArg & state) const
+{
+  return evaluateTemplate(elem_point, state);
+}
+Real
+LayeredIntegral::evaluate(const NodeArg & node, const Moose::StateArg & state) const
+{
+  return evaluateTemplate(node, state);
+}
+
+bool
+LayeredIntegral::hasBlocks(const SubdomainID sub) const
+{
+  return ElementIntegralVariableUserObject::hasBlocks(sub);
 }
