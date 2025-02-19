@@ -13,7 +13,7 @@
 #include "Output.h"
 
 /**
- * Class for output information regarding Controls to the screen
+ * Class for output solution invalidity history summary to console
  */
 class SolutionInvalidityOutput : public Output
 {
@@ -24,7 +24,9 @@ public:
 
 protected:
   virtual bool shouldOutput() override;
+
   virtual void output() override;
 
+  /// @brief define the time interval to report the solution invalidity occurances
   unsigned int _time_interval;
 };

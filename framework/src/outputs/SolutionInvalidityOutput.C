@@ -19,17 +19,15 @@ registerMooseObject("MooseApp", SolutionInvalidityOutput);
 InputParameters
 SolutionInvalidityOutput::validParams()
 {
-  // Get the base class parameters
   InputParameters params = Output::validParams();
 
   params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
 
   params.addParam<unsigned int>(
-      "time_interval", 1, "The time interval to report the solution invalidity occurances.");
+      "time_interval", 1, "The time step interval to report the solution invalidity occurances.");
 
   params.addClassDescription("Controls output of the time history of solution invalidity object");
 
-  // Return the InputParameters
   return params;
 }
 
@@ -52,7 +50,7 @@ SolutionInvalidityOutput::output()
   if (solution_invalidity.hasInvalidSolution())
   {
     _console << '\n';
-    solution_invalidity.printHistory(_console);
+    solution_invalidity.printHistory(_console, _time_interval);
 
     _console << std::flush;
   }

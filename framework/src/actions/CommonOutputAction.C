@@ -227,9 +227,6 @@ CommonOutputAction::act()
     if (getParam<bool>("gnuplot"))
       create("Gnuplot", "gnuplot");
 
-    if (getParam<bool>("solution_history"))
-      create("SolutionHistory", "solution_history");
-
     if (getParam<bool>("progress"))
       create("Progress", "progress");
 
