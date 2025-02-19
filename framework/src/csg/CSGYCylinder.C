@@ -12,21 +12,8 @@
 namespace CSG
 {
 
-CSGYCylinder::CSGYCylinder(const std::string name, const Real r)
-  : CSGSurface(name, SurfaceType::ycylinder)
-{
-  _x0 = 0.0;
-  _z0 = 0.0;
-  _r = r;
-}
-
 CSGYCylinder::CSGYCylinder(const std::string name, const Real x0, const Real z0, const Real r)
   : CSGSurface(name, SurfaceType::ycylinder), _x0(x0), _z0(z0), _r(r)
-{
-}
-
-CSGYCylinder::CSGYCylinder(const std::string name, const Point center, const Real r)
-  : CSGSurface(name, SurfaceType::ycylinder), _x0(center(0)), _z0(center(2)), _r(r)
 {
 }
 
