@@ -2,8 +2,6 @@ H = 0.015 #halfwidth of the channel, 10 cm of channel height
 L = 1
 bulk_u = 0.01
 p_ref = 101325.0
-#inlet_temp = 860.
-#flux = 4000.0
 
 advected_interp_method = 'upwind'
 
@@ -226,7 +224,7 @@ advected_interp_method = 'upwind'
 []
 
 [FluidProperties]
-  [salt]
+  [lead]
     type = LeadFluidProperties
   []
 []
@@ -234,7 +232,7 @@ advected_interp_method = 'upwind'
 [FunctorMaterials]
   [fluid_props_to_mat_props]
     type = GeneralFunctorFluidProps
-    fp = salt
+    fp = lead
     pressure = ${p_ref}
     T_fluid = 'T'
     speed = 1
@@ -252,7 +250,7 @@ advected_interp_method = 'upwind'
     pressure = ${p_ref}
     T_fluid = T
     h = h
-    fp = salt
+    fp = lead
   []
 []
 
