@@ -39,19 +39,25 @@ public:
   ///@{ Look up object by id or name
   T & operator[](std::size_t i);
   const T & operator[](std::size_t i) const;
-  T & operator[](const std::string & name) { return _object[id(name)] }
-  const T & operator[](const std::string & name) const { return _object[id(name)] }
+  T & operator[](const std::string & name) { return _object[id(name)]; }
+  const T & operator[](const std::string & name) const { return _object[id(name)]; }
   ///@}
 
   /// Add a new object to the store. Takes name and constructor parameters, returns id.
   template <typename... Args>
   std::size_t add(const std::string & name, Args &&... args);
 
+  /// check if a key is in the store
+  bool has(const std::string & name) const { return _name_to_id.find(name) != _name_to_id.end(); }
+
+  /// number of contained objects
+  std::size_t size() const { return _object.size(); }
+
   ///@{ Iterators
   auto begin() { return _object.begin(); }
-  const auto begin() const { return _object.begin(); }
+  auto begin() const { return _object.begin(); }
   auto end() { return _object.end(); }
-  const auto end() const { return _object.end(); }
+  auto end() const { return _object.end(); }
   ///@}
 
 private:
@@ -97,6 +103,12 @@ struct Root
 
   /// Assemblies
   ObjectStore<Assembly> _assembly;
+
+  /// mesh points and dof bitmask
+  std::vector<std::pair<Point, SubdomainID> _mesh_points;
+
+  /// A map from nodes (i.e. node elements) to user elements (ids)
+  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
 };
 
 /**
@@ -115,6 +127,9 @@ struct UserElement
   std::string _type;
   std::size_t _type_id;
   std::vector<std::vector<std::size_t>> _vars;
+
+  // bitmask encoding the dof selection in _vars at each node
+  std::vector<SubdomainID> _var_mask;
 };
 
 /**
@@ -137,10 +152,6 @@ struct Part : public SetContainer
 
   std::vector<std::pair<int, Point>> _node;
   std::vector<std::pair<int, Element>> _element;
-
-  // once nodes are created we map local abaqus node ids to global libmesh node IDs
-  std::unordered_map<int, dof_id_type> _libmesh_node_id;
-  std::unordered_map<int, dof_id_type> _moose_elem_id;
 };
 
 /**
@@ -148,12 +159,17 @@ struct Part : public SetContainer
  */
 struct Instance : public SetContainer
 {
-  Instance(std::size_t part_id) : _part_id(part_id), _rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
+  Instance(std::size_t part_id)
+    : SetContainer(*this), _part_id(part_id), _rotation(1, 0, 0, 0, 1, 0, 0, 0, 1)
+  {
+  }
   Instance(const OptionNode & option, const Root & root);
 
-  std::size_t _part_id;
-  RealVectorValue _translation;
-  RealTensorValue _rotation;
+  // upon instantiation when nodes are created...
+  // ...we map local abaqus node ids to global libmesh node/node_element IDs
+  std::unordered_map<int, dof_id_type> _libmesh_node_id;
+  // ...and abaqus elements to indices into the uel elements in the moose mesh
+  std::unordered_map<int, dof_id_type> _moose_elem_id;
 };
 
 /**
@@ -161,6 +177,7 @@ struct Instance : public SetContainer
  */
 struct Assembly : public SetContainer
 {
+  Assembly() = default;
   Assembly(const BlockNode & block, const Root & root);
 
   ObjectStore<Instance> _instance;
@@ -177,6 +194,7 @@ struct Step
 /**
  * Object store functions
  */
+template <typename T>
 std::size_t
 ObjectStore<T>::id(const std::string & name) const
 {
@@ -204,9 +222,10 @@ ObjectStore<T>::operator[](std::size_t i) const
   throw std::runtime_error("Invalid index in ObjectStore lookup.");
 }
 
+template <typename T>
 template <typename... Args>
 std::size_t
-add(const std::string & name, Args &&... args)
+ObjectStore<T>::add(const std::string & name, Args &&... args)
 {
   const auto id = _object.size();
   _object.emplace_back(std::forward<Args>(args)...);
