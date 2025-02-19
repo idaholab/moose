@@ -850,7 +850,7 @@ class Versioner:
         """
         Whether or not
         """
-        changed_commit = '36e3d4a5761a4c3d9e64ce15190a45c1db2ed401'
+        changed_commit = '9da58ad93351b19cb23d850361f00ab98db3330b'
         return Versioner.git_ancestor(changed_commit, commit)
 
     @staticmethod
