@@ -21,6 +21,9 @@
 namespace Abaqus
 {
 
+const static std::set<std::string> abaqus_blocks;
+const static std::set<std::string> abaqus_options;
+
 /**
  * Helper class to get a map of header fields from a header string
  */
@@ -44,6 +47,7 @@ private:
 struct Node
 {
   Node(std::vector<std::string> line);
+  virtual ~Node() = default;
 
   std::string _type;
   HeaderMap _header;
@@ -62,23 +66,31 @@ struct BlockNode : public Node
   BlockNode(std::vector<std::string> line) : Node(line) {}
   std::string stringify(const std::string & indent = "") const;
 
-  template <typename T>
-  void forBlock(const std::string & name, T && func) const
+  template <typename To, typename Tc>
+  void forAll(To && option_func, Tc && block_func) const
   {
     for (const auto & child : _children)
-      if (child._type == name)
-        func(child);
-  }
-  template <typename T>
-  void forOption(const std::string & name, T && func) const
-  {
-    for (const auto & option : _options)
-      if (option._type == name)
-        func(option);
+    {
+      const auto & key = child->_type;
+      auto * option = dynamic_cast<OptionNode *>(child.get());
+      auto * block = dynamic_cast<BlockNode *>(child.get());
+
+      if (option)
+      {
+        if constexpr (!std::is_same_v<To, std::nullptr_t>)
+          option_func(key, *option);
+      }
+      else if (block)
+      {
+        if constexpr (!std::is_same_v<Tc, std::nullptr_t>)
+          block_func(key, *block);
+      }
+      else
+        throw std::runtime_error("Internal error (mismatching block type)");
+    }
   }
 
-  std::vector<BlockNode> _children;
-  std::vector<OptionNode> _options;
+  std::vector<std::unique_ptr<Node>> _children;
 };
 
 /**
@@ -105,41 +117,6 @@ private:
   /// currently parsed line
   std::size_t _current_line;
 };
-
-class InputParserInterface
-{
-public:
-  InputParserInterface(InputParser & parser) : _parser(parser)
-  {
-    // too early?
-    while (parse())
-      ;
-  }
-
-  virtual void onOption(const HeaderMap &, std::vector<std::vector<std::string>>) = 0;
-  virtual void onBlock(const HeaderMap &, InputParserInterface &) = 0;
-
-  template <typename OC, typename BC>
-  bool parse()
-  {
-    return _parser.parse(
-        [this](const HeaderMap & header, std::vector<std::vector<std::string>> & data_lines)
-        { onOption(header, data_lines); },
-        [this](const HeaderMap & header, InputParser & parser) { onBlock(header, _parser); });
-  }
-
-private:
-  InputParser & _parser;
-}
-
-bool
-InputParser::parse(
-    std::function<void(const HeaderMap &, std::vector<std::vector<std::string>>)> & option_callback,
-    std::function<void(const HeaderMap &, InputParser &)> & block_callback)
-{
-  // block_callback(header, *this)
-  return true;
-}
 
 template <typename T>
 T
