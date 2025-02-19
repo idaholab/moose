@@ -48,8 +48,7 @@
                                              ADReal & d##want##d2,                                 \
                                              std::vector<ADReal> & d##want##dx) const              \
   {                                                                                                \
-    fluidPropError(                                                                                \
-        name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not  implemented.");           \
+    imperfectJacobianMessage(__PRETTY_FUNCTION__, " derivative derivatives not  implemented.");    \
     Real dummy, tmp1, tmp2;                                                                        \
     std::vector<Real> x_raw(x.size(), 0);                                                          \
     std::vector<Real> tmp3(x.size(), 0);                                                           \
@@ -81,7 +80,7 @@
                                              Real & d##want##d2,                                   \
                                              std::vector<Real> & d##want##dx) const                \
   {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
+    imperfectJacobianMessage(__PRETTY_FUNCTION__, " derivatives not implemented.");                \
     d##want##d1 = 0;                                                                               \
     d##want##d2 = 0;                                                                               \
     std::fill(d##want##dx.begin(), d##want##dx.end(), 0.);                                         \
@@ -166,9 +165,9 @@ public:
   std::vector<Real> massFractionsFromMolarFractions(const std::vector<Real> & molar_fractions,
                                                     const std::vector<Real> & molar_masses) const;
 
-private:
+protected:
   template <typename... Args>
-  void fluidPropError(Args... args) const
+  void imperfectJacobianMessage(Args... args) const
   {
     if (_allow_imperfect_jacobians)
       mooseDoOnce(mooseWarning(std::forward<Args>(args)...));
