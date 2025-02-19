@@ -404,3 +404,10 @@ d5e5defe99e1214278c8353e136b2ec38ffeab67: #29874
   libmesh: b8b3d69
   wasp: 2fbcef5
   moose-dev: '0443606'
+a29438b9ccb11dc2dddf2b9b0a5d5c0bbaf96472: #29624
+  tools: 5abb5f2
+  mpi: 82bbd28
+  petsc: e78a9a4
+  libmesh: b8b3d69
+  wasp: e97f1e3
+  moose-dev: 5b49120
