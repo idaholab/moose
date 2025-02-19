@@ -80,4 +80,6 @@ private:
   std::vector<std::vector<std::string>> _friction_types;
   /// The coefficients used for each item if friction type
   std::vector<std::vector<std::string>> _friction_coeffs;
+
+  UserObjectName _rc_uo_name;
 };
