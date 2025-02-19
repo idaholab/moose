@@ -186,10 +186,10 @@ heated_length = 1.0
 
 [AuxKernels]
   [T_in_bc]
-    type = PostprocessorAux
+    type = FunctorAux
+    functor = report_temperature_inlet
     variable = T
     boundary = inlet
-    postprocessor = report_temperature_inlet
     execute_on = 'timestep_begin'
     block = subchannel
   []
