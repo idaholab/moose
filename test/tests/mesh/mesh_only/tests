@@ -78,13 +78,34 @@
     issues = '#23386'
     requirement = 'The system shall throw a warning if user-provided extra element id names do not exist on mesh.'
   []
-  [mesh_only_with_incompatible_parameter]
-    type = 'RunException'
+  [mesh_only_with_check_input]
+    type = 'RunApp'
     input = 'mesh_only.i'
     cli_args = '--check-input --mesh-only'
-    expect_err = "Incompatible command line arguments provided. --check-input cannot be called with --mesh-only."
+    expect_out = 'Syntax OK'
+    max_parallel = 1
+    issues = '#29788'
+    requirement = 'The system shall report the successful parsing and interpretation of input file sytax when using the "--check-input" and "--mesh-only" command line flags'
+  []
+  [mesh_only_with_check_input_unused_param]
+    type = 'RunException'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --check-input --mesh-only'
+    expect_err = "unused parameter 'Mesh/extrude/x"
     method = '!dbg'
     issues = '#29788'
-    requirement = 'The system shall throw an error if the user specifies incompatible command line arguments that would access an uninitialized executor or executor.'
+    requirement = 'The system shall throw an error about unused parameters if --mesh-only is used with --check-input'
+    should_crash = true
+  []
+  [mesh_only_warning_unused]
+    type = 'RunException'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --mesh-only'
+    expect_err = "unused parameter 'Mesh/extrude/x"
+    recover = false
+    method = '!dbg'
+    issues = '#14550'
+    requirement = 'The system shall throw a warning if an unused parameter exists in Mesh block in --mesh-only mode'
+    should_crash = true
   []
 []
