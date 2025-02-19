@@ -24,11 +24,7 @@ namespace CSG
 class CSGZCylinder : public CSGSurface
 {
 public:
-  CSGZCylinder(const std::string name, const Real r);
-
   CSGZCylinder(const std::string name, const Real x0, const Real y0, const Real r);
-
-  CSGZCylinder(const std::string name, const Point center, const Real r);
 
   /**
    * Destructor
