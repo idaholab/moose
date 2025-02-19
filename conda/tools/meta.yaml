@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2025.02.17" %}
+{% set version = "2025.02.19" %}
 
 package:
   name: moose-tools
