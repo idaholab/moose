@@ -248,9 +248,9 @@ define_from_p_T_using_T_v(k)
 
 define_from_v_e_using_T_v(p)
 define_from_v_e_using_T_v(c)
-    // clang-format on
 
-    InputParameters IdealRealGasMixtureFluidProperties::validParams()
+InputParameters IdealRealGasMixtureFluidProperties::validParams()
+// clang-format on
 {
   InputParameters params = VaporMixtureFluidProperties::validParams();
   params += NaNInterface::validParams();
