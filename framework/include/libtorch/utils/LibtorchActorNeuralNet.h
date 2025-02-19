@@ -54,18 +54,24 @@ public:
    */
   virtual torch::Tensor forward(torch::Tensor & x) override;
 
+  virtual torch::Tensor evaluate(torch::Tensor & input, bool sampled);
+
+  virtual torch::Tensor sample();
+
   /// Construct the neural network
   virtual void constructNeuralNetwork() override;
 
-  const std::vector<Real> & std() const {return _std;};
+  const std::vector<Real> & std() const {return _std;}
 
   const torch::Tensor & stdTensor() const {return  _std_tensor;}
 
-  torch::Tensor computeLogProbability(const torch::Tensor & action,
-                                                const torch::Tensor & signal);
+  const torch::Tensor & alphaTensor() const {return  _alpha_tensor;}
 
-  torch::Tensor logProbability() {return _log_probability;}
-  torch::Tensor logProbability(torch::Tensor other) {return computeLogProbability(_mean, other);}
+  const torch::Tensor & betaTensor() const {return  _beta_tensor;}
+
+  void resetDistributionParams(torch::Tensor input);
+
+  torch::Tensor logProbability(const torch::Tensor & other);
 
   torch::Tensor entropy();
 
@@ -74,8 +80,15 @@ protected:
 
   torch::Tensor _std_tensor;
 
+  std::vector<torch::nn::Linear> _alpha_module;
+  std::vector<torch::nn::Linear> _beta_module;
+
+  torch::Tensor _alpha_tensor;
+  torch::Tensor _beta_tensor;
+  torch::Tensor _alpha_beta_tensor;
+  torch::Tensor _log_norm;
+
   torch::Tensor _mean;
-  torch::Tensor _log_probability;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchActorNeuralNet * const & network);

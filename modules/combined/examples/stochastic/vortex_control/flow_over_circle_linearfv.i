@@ -241,8 +241,8 @@
     lift = lift_coeff
     drag = drag_coeff
     averaging_window = 50
-    coeff_1 = 0.0
-    coeff_2 = 0.2
+    coeff_1 = 0.159
+    coeff_2 = 0.25
     execute_on = 'TIMESTEP_END'
   []
   # [p1]
@@ -365,9 +365,9 @@
 
     # keep consistent with LibtorchDRLControlTrainer
     input_timesteps = 1
-    response_scaling_factors = '13.33 15.38 16.66 38.46 15.38 33.33 40 11.76 4.711 15.38'
-    response_shift_factors = '2.055 2.055 1.93 -0.171 1.945 0.449 -0.525 0.029 0.17675 1.945'
-    action_scaling_factors = 0.5
+    response_shift_factors = '1.98 1.825 2.015 0.03 1.9 0.58 -0.425 0.06 0.12 -0.02'
+    response_scaling_factors = '1.47 1.03 2.60 3.45 2.0 1.19 1.6 2.7 1.47 2.08'
+    action_scaling_factors = 1.0
 
     # response_scaling_factors = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0'
     # response_shift_factors = '0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0'
