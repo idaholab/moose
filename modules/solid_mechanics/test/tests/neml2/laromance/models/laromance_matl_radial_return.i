@@ -40,7 +40,6 @@
   [ep_rate]
     type = ScalarVariableRate
     variable = 'state/ep'
-    #  rate = 'state/ep_rate' #fixme do I need this
   []
   [plastic_strain_rate]
     type = AssociativePlasticFlow
@@ -84,8 +83,6 @@
     # grid nodes
     von_mises_stress = 'state/s'
     equivalent_plastic_strain = 'state/ep'
-    # fixme lynn sort out forces from old_forces from state.
-    # wall & cell_dd should be old_forces.  env_fac never changes.
     cell_dd_density = 'old_state/cell_dd'
     wall_dd_density = 'old_state/wall_dd'
     temperature = 'forces/T'
@@ -106,7 +103,7 @@
     solver = 'newton'
   []
   #####################################################################################
-  # Extra materials that evolve dislocation densities FIXME lynn I don't know how to evolve these
+  # Extra materials that evolve dislocation densities
   #####################################################################################
   [rom_cell]
     type = LAROMANCE6DInterpolation
