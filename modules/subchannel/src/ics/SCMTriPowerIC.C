@@ -20,7 +20,6 @@ SCMTriPowerIC::validParams()
   params.addClassDescription(
       "Computes axial power rate (W/m) that goes into the subchannel cells "
       "or is assigned to the fuel pins, in a triangular lattice arrangement");
-  // params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
   params.addRequiredParam<PostprocessorName>(
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
