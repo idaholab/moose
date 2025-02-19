@@ -133,4 +133,21 @@
       detail = 'restarting from the output data'
     []
   []
+
+  [show_solution_warning_history]
+    type = 'RunApp'
+    input = 'solution_invalid_timehistory.i'
+    design = 'SolutionInvalidity.md SolutionInvalidityOutput.md'
+    expect_out = "Solution Invalid Warnings History:
+-----------------------------------------------------------------------------------------
+|                   Object                    | Time | Timeinterval Count | Total Count |
+-----------------------------------------------------------------------------------------
+| NonsafeMaterial : Solution invalid warning! | 0-2  |                 48 |         288 |
+| NonsafeMaterial : Solution invalid warning! | 1-3  |                 96 |         288 |
+| NonsafeMaterial : Solution invalid warning! | 2-4  |                 96 |         288 |
+-----------------------------------------------------------------------------------------
+"
+    issues = '#29731'
+    requirement = 'The system shall output a time history summary table of all solution warnings in the end of the simulation .'
+  []
 []

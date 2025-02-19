@@ -18,10 +18,15 @@
     type = NonsafeMaterial
     diffusivity = 0.5
     threshold = 0.3
+    flag_solution_warning = true
   []
 []
 
 [Kernels]
+  [du_dt]
+    type = TimeDerivative
+    variable = u
+  []
   [diffusion]
     type = MatDiffusion
     variable = u
@@ -51,7 +56,9 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 6
+  error_on_dtmin = false
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu superlu_dist'
@@ -70,5 +77,9 @@
     type = JSON
     execute_on = 'FINAL'
     execute_system_information_on = none
+  []
+  [solution_invalid]
+    type = SolutionInvalidityOutput
+    time_interval = 2
   []
 []

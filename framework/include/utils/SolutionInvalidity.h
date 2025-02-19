@@ -87,7 +87,7 @@ public:
   struct TimestepCounts
   {
     TimestepCounts() : timestep_index(std::numeric_limits<unsigned int>::max()) {}
-    TimestepCounts(const unsigned int timestep_index) : timestep_index(timestep_index) {}
+    TimestepCounts(unsigned int timestep_index) : timestep_index(timestep_index) {}
     unsigned int timestep_index;
     unsigned int counts = 0;
   };
@@ -114,7 +114,7 @@ public:
    * Print the time history table of Solution Invalid warnings
    * @param console The output stream to output to
    */
-  void printHistory(const ConsoleStream & console) const;
+  void printHistory(const ConsoleStream & console, unsigned int & time_interval) const;
 
   /**
    * Immediately print the section and message for debug purpose
@@ -144,10 +144,10 @@ private:
   /// Build a VariadicTable for solution invalidity
   FullTable summaryTable() const;
 
-  typedef VariadicTable<std::string, unsigned long int, unsigned long int, unsigned long int>
-      TimeTable;
+  typedef VariadicTable<std::string, std::string, unsigned long int, unsigned long int> TimeTable;
 
-  TimeTable transientTable() const;
+  /// Build a VariadicTable for solution invalidity history
+  TimeTable transientTable(unsigned int & time_interval) const;
 
   /// Create a registry to keep track of the names and occurrences of the solution invalidity
   SolutionInvalidityRegistry & _solution_invalidity_registry;

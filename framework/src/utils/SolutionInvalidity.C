@@ -124,10 +124,10 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 }
 
 void
-SolutionInvalidity::printHistory(const ConsoleStream & console) const
+SolutionInvalidity::printHistory(const ConsoleStream & console, unsigned int & time_interval) const
 {
-  console << "\nSolution Invalid Warnings:\n";
-  transientTable().print(console);
+  console << "\nSolution Invalid Warnings History:\n";
+  transientTable(time_interval).print(console);
 }
 
 void
@@ -253,11 +253,11 @@ SolutionInvalidity::summaryTable() const
 }
 
 SolutionInvalidity::TimeTable
-SolutionInvalidity::transientTable() const
+SolutionInvalidity::transientTable(unsigned int & time_interval) const
 {
   mooseAssert(_has_synced, "Has not synced");
 
-  TimeTable vtable({"Object", "Time", "Timestep Count", "Total Count"}, 4);
+  TimeTable vtable({"Object", "Time", "Timeinterval Count", "Total Count"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object information
@@ -268,29 +268,52 @@ SolutionInvalidity::transientTable() const
 
   vtable.setColumnPrecision({
       1, // Object information
-      0, // Simulation Time Step
+      1, // Simulation Time Step
       0, // Latest Time Step Warnings
       0, // Total Iteration Warnings
   });
 
   if (processor_id() == 0)
   {
-
     for (const auto id : index_range(_counts))
     {
       const auto & entry = _counts[id];
-      for (const auto time_step : index_range(entry.timestep_counts))
+      const auto & info = _solution_invalidity_registry.item(id);
+      std::vector<unsigned int> interval_counts;
+
+      for (unsigned int timestep = 0; timestep < entry.timestep_counts.back().timestep_index;
+           timestep += time_interval)
       {
-        const auto & info = _solution_invalidity_registry.item(id);
-        vtable.addRow(info.object_type + " : " + info.message,         // Object information
-                      entry.timestep_counts[time_step].timestep_index, // Simulation Time Step
-                      entry.timestep_counts[time_step].counts,         // Latest Time Step Warnings
-                      entry.total_counts                               // Total Iteration Warnings
+
+        auto start_it = timestep;
+        auto end_it = (timestep + time_interval < entry.timestep_counts.back().timestep_index)
+                          ? start_it + time_interval
+                          : entry.timestep_counts.back().timestep_index;
+
+        int interval_sum = 0;
+        for (auto ts_count : entry.timestep_counts)
+        {
+          if (ts_count.timestep_index >= start_it && ts_count.timestep_index < end_it)
+            interval_sum += ts_count.counts;
+        }
+
+        interval_counts.push_back(interval_sum);
+      }
+
+      for (unsigned int interval_index : index_range(interval_counts))
+      {
+        std::string interval_index_str =
+            std::to_string(interval_index) + "-" + std::to_string(interval_index + time_interval);
+
+        vtable.addRow(info.object_type + " : " + info.message, // Object information
+                      interval_index_str,                      // Interval Index
+                      interval_counts[interval_index],         // Interval Counts
+                      entry.total_counts                       // Total Iteration Warnings
+
         );
       }
     }
   }
-
   return vtable;
 }
 
