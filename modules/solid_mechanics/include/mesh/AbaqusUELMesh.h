@@ -17,6 +17,8 @@
 #include <list>
 #include <stdexcept>
 
+class AbaqusUELMeshUserElement;
+
 /**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
@@ -48,7 +50,7 @@ public:
   auto & getElements(Moose::PassKey<AbaqusUELMeshUserElement>) { return _elements; }
 
   std::string getVarName(std::size_t id) const;
-  const UELDefinition & getUEL(const std::string & type) const;
+  const Abaqus::UserElement & getUEL(const std::string & type) const;
 
   void addNodeset(BoundaryID id);
 
@@ -69,6 +71,7 @@ protected:
   Abaqus::InputParser _input;
   Abaqus::Root _root;
 
+  void instantiateElements();
   void setupLibmeshSubdomains();
   void setupNodeSets();
 
@@ -77,8 +80,8 @@ protected:
   /// Element connectivity
   std::vector<LibMeshUElement> _elements;
 
-  /// A map from nodes (i.e. node elements) to user elements (ids)
-  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
+  // /// A map from nodes (i.e. node elements) to user elements (ids)
+  // std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
 
   /// all subdomain IDs used for UEL variable restriction
   std::set<SubdomainID> _uel_block_ids;
