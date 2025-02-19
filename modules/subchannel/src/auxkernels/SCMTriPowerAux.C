@@ -41,8 +41,7 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
   auto n_pins = _triMesh.getNumOfPins();
-  auto heated_length = _triMesh.getHeatedLength();
-
+  // Matrix sizing
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
   _pin_power_correction.resize(n_pins, 1);
@@ -74,7 +73,12 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
   }
   inFile.close();
   _console << " Power distribution matrix :\n" << _power_dis << " \n";
+}
 
+void
+SCMTriPowerAux::initialSetup()
+{
+  auto heated_length = _triMesh.getHeatedLength();
   auto sum = _power_dis.sum();
   // full (100%) power of one pin [W]
   auto fpin_power = _power / sum;
@@ -82,15 +86,10 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
   _ref_power = _power_dis * fpin_power;
   // Convert the actual pin power to a linear heat rate [W/m]
   _ref_qprime = _ref_power / heated_length;
-}
 
-void
-SCMTriPowerAux::initialSetup()
-{
   auto n_pins = _triMesh.getNumOfPins();
   auto nz = _triMesh.getNumOfAxialCells();
   auto z_grid = _triMesh.getZGrid();
-  auto heated_length = _triMesh.getHeatedLength();
   auto unheated_length_entry = _triMesh.getHeatedLengthEntry();
 
   _estimate_power.resize(n_pins, 1);

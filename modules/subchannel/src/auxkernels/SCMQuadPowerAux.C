@@ -42,8 +42,7 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
 {
   auto nx = _quadMesh.getNx();
   auto ny = _quadMesh.getNy();
-  auto heated_length = _quadMesh.getHeatedLength();
-
+  // Matrix sizing
   _power_dis.resize((ny - 1) * (nx - 1), 1);
   _power_dis.setZero();
   _pin_power_correction.resize((ny - 1) * (nx - 1), 1);
@@ -75,7 +74,12 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
   }
   inFile.close();
   _console << " Power distribution matrix :\n" << _power_dis << " \n";
+}
 
+void
+SCMQuadPowerAux::initialSetup()
+{
+  auto heated_length = _quadMesh.getHeatedLength();
   auto sum = _power_dis.sum();
   // full (100%) power of one pin [W]
   auto fpin_power = _power / sum;
@@ -83,16 +87,11 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
   _ref_power = _power_dis * fpin_power;
   // Convert the actual pin power to a linear heat rate [W/m]
   _ref_qprime = _ref_power / heated_length;
-}
 
-void
-SCMQuadPowerAux::initialSetup()
-{
   auto nx = _quadMesh.getNx();
   auto ny = _quadMesh.getNy();
   auto nz = _quadMesh.getNumOfAxialCells();
   auto z_grid = _quadMesh.getZGrid();
-  auto heated_length = _quadMesh.getHeatedLength();
   auto unheated_length_entry = _quadMesh.getHeatedLengthEntry();
 
   _estimate_power.resize((ny - 1) * (nx - 1), 1);
