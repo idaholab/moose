@@ -29,8 +29,6 @@ ConservativeAdvectionTempl<is_ad>::generalParams()
   params.addParam<MaterialPropertyName>("advected_quantity",
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");
-  params.addCoupledVar("velocity_variable", "Velocity vector given as a variable");
-  params.addParam<MaterialPropertyName>("velocity_material", "Velocity vector given as a material");
   return params;
 }
 
@@ -40,10 +38,8 @@ ConservativeAdvectionTempl<false>::validParams()
 {
   InputParameters params = generalParams();
   params.addCoupledVar("velocity", "Velocity vector");
-  params.renameCoupledVar("velocity",
-                          "velocity_variable",
-                          "Velocity vector given as a variable. 'velocity' is deprecated and will "
-                          "be removed on 12/31/2025. Please use velocity_variable.");
+  params.deprecateCoupledVar("velocity", "velocity_variable", "12/31/2025");
+  params.addParam<MaterialPropertyName>("velocity_material", "Velocity vector given as a material");
   return params;
 }
 
@@ -52,23 +48,21 @@ InputParameters
 ConservativeAdvectionTempl<is_ad>::validParams()
 {
   InputParameters params = generalParams();
-  params.addParam<MaterialPropertyName>("velocity", "Velocity vector");
-  params.renameParam("velocity",
-                     "velocity_material",
-                     "Velocity vector given as a material. 'velocity' is deprecated and will be "
-                     "removed on 12/31/2025. Please use velocity_material.");
+  params.addCoupledVar("velocity_variable", "Velocity vector given as a variable");
+  params.addParam<MaterialPropertyName>("velocity", "Velocity vector given as a material");
+  params.deprecateParam("velocity", "velocity_material", "12/31/2025");
   return params;
 }
 
 template <bool is_ad>
 ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _velocity(isParamValid("velocity_material")
-                  ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
-                             "velocity_material")
-                         .get()
-                  : (this->isParamValid("velocity_variable")
-                         ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
+    _velocity(this->isParamValid("velocity_variable")
+                  ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
+                  : (this->isParamValid("velocity_material")
+                         ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
+                                    "velocity_material")
+                                .get()
                          : nullptr)),
     _adv_quant(
         isParamValid("advected_quantity")
@@ -84,10 +78,12 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
     paramError(
         "advected_quantity",
         "Upwinding is not compatable with an advected quantity that is not the primary variable.");
-  if ((!this->isParamValid("velocity_variable") && !isParamValid("velocity_material")) ||
-      (this->isParamValid("velocity_variable") && isParamValid("velocity_material")))
+
+  if (!_velocity ||
+      (this->isParamValid("velocity_variable") && this->isParamValid("velocity_material")))
     paramError("velocity_variable",
-               "Either velocity_variable or velocity_material must be specificied, not both.");
+               "Either velocity_variable or velocity_material must be specificied, not both, nor "
+               "velocity.");
 }
 
 template <bool is_ad>
