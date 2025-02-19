@@ -44,6 +44,9 @@ MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters)
 Real
 MooseParsedFunction::value(Real t, const Point & p) const
 {
+  // if (name() == "gap_x" || name() == "gap_y")
+  //   std::cout << name() << std::endl;
+
   mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluate<Real>(t, p);
 }

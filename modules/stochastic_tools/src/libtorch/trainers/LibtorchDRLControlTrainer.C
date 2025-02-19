@@ -383,9 +383,13 @@ LibtorchDRLControlTrainer::trainController()
         value = evaluateValue(obs_batch);
 
 
-        _control_nn->forward(obs_batch);
+        auto new_action = _control_nn->evaluate(obs_batch, false);
+
+        // std::cout << "new action " << new_action << std::endl;
         // Get the approximate logarithmic action probability using the control neural net
         auto curr_log_probability = _control_nn->logProbability(action_batch);
+
+        // std::cout << "log probability " << curr_log_probability << std::endl;
 
         // Prepare the ratio by using the e^(logx-logy)=x/y expression
         auto ratio = (curr_log_probability - log_prob_batch).exp();
@@ -428,7 +432,8 @@ LibtorchDRLControlTrainer::trainController()
         batch_begin = batch_end;
       }
       std::cout << _control_nn->stdTensor() << std::endl;
-
+      std::cout << _control_nn->alphaTensor().mean() << std::endl;
+      std::cout << _control_nn->betaTensor().mean() << std::endl;
     }
   }
 
