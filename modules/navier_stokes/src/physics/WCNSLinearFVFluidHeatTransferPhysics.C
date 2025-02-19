@@ -37,6 +37,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
 
   // Not implemented
   params.suppressParameter<bool>("effective_conductivity");
+  // Not needed
+  params.suppressParameter<bool>("add_energy_equation");
   return params;
 }
 
