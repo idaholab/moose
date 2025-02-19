@@ -81,5 +81,6 @@ private:
   /// The coefficients used for each item if friction type
   std::vector<std::vector<std::string>> _friction_coeffs;
 
+  /// Name of the user object in charge of computing the Rhie Chow coefficients
   UserObjectName _rc_uo_name;
 };
