@@ -1,6 +1,6 @@
 Content:
     intro_slides:
-        root_dir: modules/navier_stokes/doc/intro_slides
+        root_dir: modules/navier_stokes/doc/intro
 
 Executioner:
     type: MooseDocs.base.Serial
@@ -38,6 +38,6 @@ Extensions:
     MooseDocs.extensions.listing:
         modal-link: False
     MooseDocs.extensions.reveal:
-        translate: slides/index.md
+        translate: modules/navier_stokes/intro/index.md
         background_image: INL_Hex_Light_Presentation_Background_Thin.png
     MooseDocs.extensions.datetime: default

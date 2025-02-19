@@ -67,7 +67,7 @@ to consolidating fluid dynamics modeling, SAM capabilities are being migrated
 upstream as appropriate into the common module layer. In the not-too-distant
 future these kernel sets will be consolidated into a single set.
 
-For an introductory slideshow on the use of the Navier Stokes Finite Volume solvers in MOOSE, we refer the visitor to the [Navier Stokes Workshop Slides](slides/index.md optional=True).
+For an introductory slideshow on the use of the Navier Stokes Finite Volume solvers in MOOSE, we refer the visitor to the [Navier Stokes Workshop Slides](modules/navier_stokes/intro/index.md optional=True).
 
 As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new solvers have been added to the Navier-Stokes module. The following table provides a summary of the readiness of different solvers and the capabilities they support. Since many of these solvers are still under active development, feel free to reach out to the MOOSE team for updates on the latest progress or follow our monthly newsletter updates.
 
