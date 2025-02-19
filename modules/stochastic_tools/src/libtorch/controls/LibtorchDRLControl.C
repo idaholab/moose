@@ -49,6 +49,7 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
 void
 LibtorchDRLControl::execute()
 {
+  // std::cout << _nn << " " << (_current_execute_flag == EXEC_TIMESTEP_BEGIN) << std::endl;
   if (_nn)
   {
     unsigned int n_controls = _control_names.size();
@@ -74,11 +75,14 @@ LibtorchDRLControl::execute()
         // Organize the old an current solution into a tensor so we can evaluate the neural net
         torch::Tensor input_tensor = prepareInputTensor();
 
+        // std::cout << "Std" << _actor_nn->stdTensor() << std::endl;
+        // std::cout << "Input" << input_tensor << std::endl;
         // Evaluate the neural network to get the expected control value
-        torch::Tensor action = _actor_nn->forward(input_tensor);
+        torch::Tensor action = _actor_nn->evaluate(input_tensor, true);
 
+        // std::cout << "in za control " << action << std::endl;
         // Compute log probability
-        torch::Tensor log_probability = _actor_nn->logProbability();
+        torch::Tensor log_probability = _actor_nn->logProbability(action);
 
         _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
 
@@ -91,6 +95,7 @@ LibtorchDRLControl::execute()
         _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
                                                     log_probability.data_ptr<Real>() +
                                                       log_probability.size(1)};
+        // std::cout << "Logprob: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
       }
 
 

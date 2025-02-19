@@ -50,7 +50,8 @@ void
 PointValue::execute()
 {
   _value = _system.point_value(_var_number, _point, false);
-
+  // if (name() == "p1y")
+  //   std::cout << "executing" << name() << " " << _value << std::endl;
   /**
    * If we get exactly zero, we don't know if the locator couldn't find an element, or
    * if the solution is truly zero, more checking is needed.
@@ -72,5 +73,7 @@ PointValue::execute()
 Real
 PointValue::getValue() const
 {
+  // if (name() == "p1y")
+  //   std::cout << name() << " " << _value << std::endl;
   return _value;
 }
