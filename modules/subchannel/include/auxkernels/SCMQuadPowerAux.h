@@ -24,6 +24,7 @@ class SCMQuadPowerAux : public AuxKernel
   SCMQuadPowerAux(const InputParameters & params);
   virtual Real computeValue() override;
   virtual void initialSetup() override;
+  virtual void timestepSetup() override { initialSetup(); }
 
 protected:
   const QuadSubChannelMesh & _quadMesh;
