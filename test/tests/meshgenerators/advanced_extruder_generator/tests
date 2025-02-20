@@ -174,5 +174,6 @@
     design = 'AdvancedExtruderGenerator.md'
     requirement = 'The system shall be able to assign names to the top and bottom boundaries of an extrusion.'
     cli_args = '--mesh-only'
+    recover = false
   []
 []
