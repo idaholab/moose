@@ -9,12 +9,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../step10_finite_volume/mesh2d_in.e'
-  []
-  [remove_solid]
-    type = BlockDeletionGenerator
-    input = fmg
-    block = 'concrete_hd concrete Al'
+    file = 'mesh2d_coarse_in.e'
   []
 []
 
@@ -28,12 +23,6 @@ power = '${fparse 5e4 / 144 * 0.1}'
     type = INSFVVelocityVariable
     block = 'water'
     initial_condition = 1e-4
-  []
-  # This isn't used in simulation, but useful for visualization
-  [vel_z]
-    type = INSFVVelocityVariable
-    block = 'water'
-    initial_condition = 0
   []
   [pressure]
     type = INSFVPressureVariable
@@ -193,13 +182,13 @@ power = '${fparse 5e4 / 144 * 0.1}'
 [FVBCs]
   [vel_x_water_boundary]
     type = INSFVNoSlipWallBC
-    boundary = 'water_boundary water_bottom inner_cavity_water'
+    boundary = 'water_boundary inner_cavity_water'
     function = 0
     variable = vel_x
   []
   [vel_y_water_boundary]
     type = INSFVNoSlipWallBC
-    boundary = 'water_boundary water_bottom inner_cavity_water'
+    boundary = 'water_boundary inner_cavity_water'
     function = 0
     variable = vel_y
   []
@@ -214,18 +203,12 @@ power = '${fparse 5e4 / 144 * 0.1}'
   []
   [T_fluid_water_boundary]
     type = FVFunctorConvectiveHeatFluxBC
-    boundary = water_boundary
+    boundary = 'water_boundary'
     variable = T_fluid
     T_bulk = T_fluid
     T_solid = T_solid
     heat_transfer_coefficient = 600
-    is_solid = true
-  []
-  [T_fluid_bottom]
-    type = FVDirichletBC
-    boundary = water_bottom
-    variable = T_fluid
-    value = 300
+    is_solid = false
   []
 []
 
@@ -242,6 +225,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
 # This is the variable that is transferred from the main app
 [AuxVariables]
   [T_solid]
+    block = 'concrete_hd concrete Al'
     initial_condition = 300
   []
 []
@@ -269,6 +253,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
   steady_state_detection = true
 
   start_time = -1
+  dtmax = '${units 12 h -> s}'
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
