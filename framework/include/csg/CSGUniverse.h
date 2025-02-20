@@ -43,6 +43,8 @@ public:
 
   const std::map<unsigned int, std::shared_ptr<CSGCell>> getAllCells() const { return _cells; }
 
+  const std::string getName() const { return _name; }
+
 protected:
   /// Name of surface
   std::string _name;
