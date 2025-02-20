@@ -208,39 +208,6 @@ class Versioner:
     def __init__(self):
         self.entities = LIBRARIES
 
-    @dataclass
-    class VerifyEntry:
-        """
-        Helper for an entry within the verification
-        """
-        package: str
-        package_color: str
-        status: str
-        status_color: str
-        base_hash: str
-        base_version: str
-        head_hash: str
-        head_hash_color: str
-        head_version: str
-        head_version_color: str
-
-        def values(self):
-            """
-            Helper for getting colored values
-            """
-            values = copy.deepcopy(self.__dict__)
-            delete = []
-            for key, value in values.items():
-                if key.endswith('_color'):
-                    if value:
-                        to_key = key.replace('_color', '')
-                        if values[to_key]:
-                            values[to_key] = colorText(values[to_key], value)
-                    delete.append(key)
-            for key in delete:
-                del values[key]
-            return list(values.values())
-
     def verify_recipes(self, args) -> None:
         """ provide hints as to version and build information for all conda stack libraries """
         from tabulate import tabulate
@@ -255,7 +222,7 @@ class Versioner:
             length = len(table.splitlines()[1])
             return f'{header.center(length)}\n{table}'
 
-        # Build table for template status
+        # Build template table
         entries = []
         for package in head.values():
             for template_path, to_path in package.templates.items():
@@ -267,53 +234,67 @@ class Versioner:
                 if changes:
                     failure = True
                     entries[-1] = [colorText(v, 'RED') for v in entries[-1]]
+
+        # Print template table
         table = build_table(entries, 'template summary',
                             keys=['package', 'status', 'file', 'from'])
         print(f'{table}\n')
 
-        # Build table for version status
+        # Build version table
         entries = []
-        for name, hp in head.items():
+        for name, head_package in head.items():
             # we do not care about app or non-conda packages
-            if hp.is_app or not hp.conda:
+            if head_package.is_app or not head_package.conda:
                 continue
 
-            # create shorter dictionaries with only the things we need
-            hc = hp.conda
-            bp = base[name]
-            bc = bp.conda
+            head_conda = head_package.conda
+            base_package = base[name]
+            base_conda = base_package.conda
 
-            entry = Versioner.VerifyEntry(package=name,
-                                          package_color=None,
-                                          status='OK',
-                                          status_color='GREEN',
-                                          base_hash=bp.hash,
-                                          base_version=bc.install,
-                                          head_hash=hp.hash,
-                                          head_hash_color=None,
-                                          head_version=hc.install,
-                                          head_version_color=None)
+            status = 'OK'
+            status_color = 'GREEN'
+            package = name
+            package_color = None
+            hash_color = None
+            version_color = None
 
             # Hashes are different
-            if entry.base_hash != entry.head_hash:
-                entry.head_hash_color = 'YELLOW'
+            if base_package.hash != head_package.hash:
+                hash_color = 'YELLOW'
                 # Version is different, which means it was bumped
-                if entry.base_version != entry.head_version:
-                    entry.head_version_color = 'GREEN'
-                    entry.package_color = 'GREEN'
-                    entry.status = 'CHANGE OK'
+                if base_conda.install != head_conda.install:
+                    # Version is bumped, but build isn't zero
+                    if head_package.build_number is not None and head_package.build_number != 0:
+                        version_color = 'RED'
+                        package_color = 'RED'
+                        status = 'BUILD NONZERO'
+                        status_color = 'RED'
+                        failure = True
+                    # Version is bumped correctly
+                    else:
+                        version_color = 'GREEN'
+                        package_color = 'GREEN'
+                        status = 'CHANGE OK'
                 # Version is not different, forgot to bump
                 else:
-                    entry.head_version_color = 'RED'
-                    entry.package_color = 'RED'
-                    entry.status = 'NEED BUMP'
-                    entry.status_color = 'RED'
+                    status = 'NEED BUMP'
+                    status_color = 'RED'
+                    version_color = 'RED'
+                    package_color = 'RED'
                     failure = True
 
-            entries.append(entry)
-        values = [list(v.values()) for v in entries]
+            def colorize(value, color):
+                return colorText(value, color) if color else value
+            entries.append([colorize(name, package_color),
+                            colorize(status, status_color),
+                            base_package.hash,
+                            base_conda.install,
+                            colorize(head_package.hash, hash_color),
+                            colorize(head_conda.install, version_color)])
+
+        # Print version table
         keys = ['package', 'status', 'hash', 'version', 'to hash', 'to version']
-        table = build_table(values, header='version summary', keys=keys)
+        table = build_table(entries, header='version summary', keys=keys)
         print(table)
 
         if failure:
