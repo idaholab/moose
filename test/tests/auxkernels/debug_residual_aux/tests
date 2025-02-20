@@ -1,0 +1,18 @@
+[Tests]
+  design = 'source/auxkernels/DebugResidualAux.md'
+  [test]
+    type = 'Exodiff'
+    input = 'debug_residual_aux_test.i'
+    exodiff = 'debug_residual_aux_test_out.e'
+    requirement = "The system shall have the ability to create an auxillary variable that keeps track of another variable's residuals."
+    [errors]
+      issues = '#27633'
+      [mismatched_params]
+        type = RunException
+        input = mismatch_residual_test.i
+        expect_err = "A mismatch was found between family and order parameters for u_residual and u in debug_aux"
+        detail = "family and order parameters must be the same for a Variable and its corresponding AuxVariable"
+      []
+    []
+  []
+[]
