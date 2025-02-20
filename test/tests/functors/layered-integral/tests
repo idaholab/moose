@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to use a layered integral object as a functor.'
+    design = 'LayeredIntegral.md'
+    issues = '#29910'
+  []
+[]
