@@ -1,5 +1,5 @@
 [Tests]
-  design = 'syntax/AuxKernels/DebugResidualAux.md'
+  design = 'source/auxkernels/DebugResidualAux.md'
   [test]
     type = 'Exodiff'
     input = 'debug_residual_aux_test.i'
