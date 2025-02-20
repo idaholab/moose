@@ -1,6 +1,6 @@
 # SCMQuadPowerAux
 
-!syntax description /ICs/SCMQuadPowerAux
+!syntax description /AuxKernels/SCMQuadPowerAux
 
 ## Overview
 
