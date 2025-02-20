@@ -22,6 +22,7 @@ IdealGasFluidProperties::validParams()
 
   params.addRangeCheckedParam<Real>("gamma", 1.4, "gamma > 1", "gamma value (cp/cv)");
   params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
+  params.addParam<Real>("e_ref", 0, "Reference specific internal energy [J/kg]");
   params.addParam<Real>("mu", 18.23e-6, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 25.68e-3, "Thermal conductivity, W/(m-K)");
   params.addParam<Real>("T_c", 0, "Critical temperature, K");
@@ -39,6 +40,7 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
 
     _gamma(getParam<Real>("gamma")),
     _molar_mass(getParam<Real>("molar_mass")),
+    _e_ref(getParam<Real>("e_ref")),
 
     _R_specific(_R / _molar_mass),
     _cp(_gamma * _R_specific / (_gamma - 1.0)),
@@ -67,7 +69,7 @@ IdealGasFluidProperties::p_from_v_e(Real v, Real e) const
   if (v == 0.0)
     return getNaN("Invalid value of specific volume detected (v = " + Moose::stringify(v) + ").");
 
-  return (_gamma - 1.0) * e / v;
+  return (_gamma - 1.0) * (e - _e_ref) / v;
 }
 
 ADReal
@@ -77,14 +79,14 @@ IdealGasFluidProperties::p_from_v_e(const ADReal & v, const ADReal & e) const
     return getNaN("Invalid value of specific volume detected (v = " + Moose::stringify(v.value()) +
                   ").");
 
-  return (_gamma - 1.0) * e / v;
+  return (_gamma - 1.0) * (e - _e_ref) / v;
 }
 
 void
 IdealGasFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
   p = p_from_v_e(v, e);
-  dp_dv = -(_gamma - 1.0) * e / v / v;
+  dp_dv = -(_gamma - 1.0) * (e - _e_ref) / v / v;
   dp_de = (_gamma - 1.0) / v;
 }
 
@@ -93,20 +95,20 @@ IdealGasFluidProperties::p_from_v_e(
     const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
 {
   p = p_from_v_e(v, e);
-  dp_dv = -(_gamma - 1.0) * e / v / v;
+  dp_dv = -(_gamma - 1.0) * (e - _e_ref) / v / v;
   dp_de = (_gamma - 1.0) / v;
 }
 
 Real
 IdealGasFluidProperties::T_from_v_e(Real /*v*/, Real e) const
 {
-  return e / _cv;
+  return (e - _e_ref) / _cv;
 }
 
 ADReal
 IdealGasFluidProperties::T_from_v_e(const ADReal & /*v*/, const ADReal & e) const
 {
-  return e / _cv;
+  return (e - _e_ref) / _cv;
 }
 
 void
@@ -313,7 +315,7 @@ IdealGasFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real
 Real
 IdealGasFluidProperties::s_from_h_p(Real h, Real p) const
 {
-  const Real aux = p * std::pow(h / (_gamma * _cv), -_gamma / (_gamma - 1));
+  const Real aux = p * std::pow((h - _e_ref) / (_gamma * _cv), -_gamma / (_gamma - 1));
   if (aux <= 0.0)
     return getNaN("Non-positive argument in the ln() function.");
   return -(_gamma - 1) * _cv * std::log(aux);
@@ -324,10 +326,10 @@ IdealGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real
 {
   s = s_from_h_p(h, p);
 
-  const Real aux = p * std::pow(h / (_gamma * _cv), -_gamma / (_gamma - 1));
-  const Real daux_dh = p * std::pow(h / (_gamma * _cv), -_gamma / (_gamma - 1) - 1) *
+  const Real aux = p * std::pow((h - _e_ref) / (_gamma * _cv), -_gamma / (_gamma - 1));
+  const Real daux_dh = p * std::pow((h - _e_ref) / (_gamma * _cv), -_gamma / (_gamma - 1) - 1) *
                        (-_gamma / (_gamma - 1)) / (_gamma * _cv);
-  const Real daux_dp = std::pow(h / (_gamma * _cv), -_gamma / (_gamma - 1));
+  const Real daux_dp = std::pow((h - _e_ref) / (_gamma * _cv), -_gamma / (_gamma - 1));
   ds_dh = -(_gamma - 1) * _cv / aux * daux_dh;
   ds_dp = -(_gamma - 1) * _cv / aux * daux_dp;
 }
@@ -368,7 +370,7 @@ IdealGasFluidProperties::rho_from_p_s(
 Real
 IdealGasFluidProperties::e_from_v_h(Real /*v*/, Real h) const
 {
-  return h / _gamma;
+  return (h + (_gamma - 1.0) * _e_ref) / _gamma;
 }
 
 void
@@ -412,13 +414,13 @@ IdealGasFluidProperties::rho_from_p_T(
 Real
 IdealGasFluidProperties::e_from_p_rho(Real p, Real rho) const
 {
-  return p / (_gamma - 1.0) / rho;
+  return p / (_gamma - 1.0) / rho + _e_ref;
 }
 
 ADReal
 IdealGasFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
 {
-  return p / (_gamma - 1.0) / rho;
+  return p / (_gamma - 1.0) / rho + _e_ref;
 }
 
 void
@@ -442,13 +444,13 @@ IdealGasFluidProperties::e_from_p_rho(
 Real
 IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/) const
 {
-  return _cv * T;
+  return _cv * T + _e_ref;
 }
 
 void
 IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/, Real & e, Real & de_dT, Real & de_dv) const
 {
-  e = _cv * T;
+  e = _cv * T + _e_ref;
   de_dT = _cv;
   de_dv = 0.0;
 }
@@ -456,14 +458,14 @@ IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/, Real & e, Real & de_dT, 
 ADReal
 IdealGasFluidProperties::e_from_T_v(const ADReal & T, const ADReal & /*v*/) const
 {
-  return _cv * T;
+  return _cv * T + _e_ref;
 }
 
 void
 IdealGasFluidProperties::e_from_T_v(
     const ADReal & T, const ADReal & /*v*/, ADReal & e, ADReal & de_dT, ADReal & de_dv) const
 {
-  e = _cv * T;
+  e = _cv * T + _e_ref;
   de_dT = _cv;
   de_dv = 0.0;
 }
@@ -485,13 +487,13 @@ IdealGasFluidProperties::p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real
 Real
 IdealGasFluidProperties::h_from_T_v(Real T, Real /*v*/) const
 {
-  return _gamma * _cv * T;
+  return _gamma * _cv * T + _e_ref;
 }
 
 void
 IdealGasFluidProperties::h_from_T_v(Real T, Real /*v*/, Real & h, Real & dh_dT, Real & dh_dv) const
 {
-  h = _gamma * _cv * T;
+  h = _gamma * _cv * T + _e_ref;
   dh_dT = _gamma * _cv;
   dh_dv = 0.0;
 }
@@ -528,7 +530,7 @@ IdealGasFluidProperties::v_e_spndl_from_T(Real /*T*/, Real & v, Real & e) const
 Real
 IdealGasFluidProperties::h_from_p_T(Real /*p*/, Real T) const
 {
-  return _cp * T;
+  return _cp * T + _e_ref;
 }
 
 void
@@ -542,7 +544,7 @@ IdealGasFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real
 Real
 IdealGasFluidProperties::e_from_p_T(Real /*p*/, Real T) const
 {
-  return _cv * T;
+  return _cv * T + _e_ref;
 }
 
 void
@@ -556,7 +558,7 @@ IdealGasFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real
 Real
 IdealGasFluidProperties::p_from_h_s(Real h, Real s) const
 {
-  return std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1.0)) *
+  return std::pow((h - _e_ref) / (_gamma * _cv), _gamma / (_gamma - 1.0)) *
          std::exp(-s / ((_gamma - 1.0) * _cv));
 }
 
@@ -565,9 +567,9 @@ IdealGasFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real
 {
   p = p_from_h_s(h, s);
   dp_dh = _gamma / (_gamma - 1.0) / (_gamma * _cv) *
-          std::pow(h / (_gamma * _cv), 1.0 / (_gamma - 1.0)) *
+          std::pow((h - _e_ref) / (_gamma * _cv), 1.0 / (_gamma - 1.0)) *
           std::exp(-s / ((_gamma - 1.0) * _cv));
-  dp_ds = std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1)) *
+  dp_ds = std::pow((h - _e_ref) / (_gamma * _cv), _gamma / (_gamma - 1)) *
           std::exp(-s / ((_gamma - 1) * _cv)) / ((1 - _gamma) * _cv);
 }
 
@@ -614,13 +616,13 @@ IdealGasFluidProperties::criticalInternalEnergy() const
 Real
 IdealGasFluidProperties::T_from_p_h(Real, Real h) const
 {
-  return h / _gamma / _cv;
+  return (h - _e_ref) / _gamma / _cv;
 }
 
 void
 IdealGasFluidProperties::T_from_p_h(Real /*p*/, Real h, Real & T, Real & dT_dp, Real & dT_dh) const
 {
-  T = h / (_gamma * _cv);
+  T = (h - _e_ref) / (_gamma * _cv);
   dT_dp = 0;
   dT_dh = 1.0 / (_gamma * _cv);
 }

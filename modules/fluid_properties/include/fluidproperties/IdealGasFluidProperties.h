@@ -27,6 +27,13 @@ public:
   IdealGasFluidProperties(const InputParameters & parameters);
   virtual ~IdealGasFluidProperties();
 
+  using SinglePhaseFluidProperties::cp_from_p_T;
+  using SinglePhaseFluidProperties::cv_from_p_T;
+  using SinglePhaseFluidProperties::e_from_p_T;
+  using SinglePhaseFluidProperties::k_from_p_T;
+  using SinglePhaseFluidProperties::mu_from_p_T;
+  using SinglePhaseFluidProperties::s_from_p_T;
+
   virtual Real p_from_v_e(Real v, Real e) const override;
   virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
@@ -131,6 +138,8 @@ public:
 
   virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
 
+  Real referenceSpecificInternalEnergy() const { return _e_ref; }
+
   // Methods used by Navier-Stokes module
   virtual Real gamma() const { return _gamma; };
   virtual Real cv() const { return _cv; };
@@ -141,6 +150,8 @@ protected:
   const Real & _gamma;
   /// molar mass
   const Real & _molar_mass;
+  /// Reference specific internal energy
+  const Real & _e_ref;
 
   /// Specific gas constant (R / molar mass)
   const Real _R_specific;

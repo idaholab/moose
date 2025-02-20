@@ -416,7 +416,8 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
     p = getParam<Real>("p");
     T = getParam<Real>("T");
     x_ncg = getParam<std::vector<Real>>("x_ncg");
-    rho = _fp_vapor_mixture->rho_from_p_T(p, T, x_ncg);
+    const Real v = _fp_vapor_mixture->v_from_p_T(p, T, x_ncg);
+    rho = 1.0 / v;
     e = _fp_vapor_mixture->e_from_p_T(p, T, x_ncg);
     if (isParamValid("vel"))
       vel = getParam<Real>("vel");
@@ -428,7 +429,8 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
     p = getParam<Real>("p");
     T = getParam<Real>("T");
     x_ncg = {_fp_2phase_ncg_partial_pressure->x_sat_ncg_from_p_T(p, T)};
-    rho = _fp_vapor_mixture->rho_from_p_T(p, T, x_ncg);
+    const Real v = _fp_vapor_mixture->v_from_p_T(p, T, x_ncg);
+    rho = 1.0 / v;
     e = _fp_vapor_mixture->e_from_p_T(p, T, x_ncg);
     if (isParamValid("vel"))
       vel = getParam<Real>("vel");
