@@ -329,6 +329,7 @@ Density:                                   0.8972309616  kg/m\^3
 Specific volume:                            1.114540227  m\^3/kg
 Specific internal energy:              1.0334658129e\+06  J/kg
 Specific enthalpy:                     1.1449198356e\+06  J/kg
+Specific entropy:                      1.4838960040e\+04  J/kg
 
 Sound speed:                                351.3883482  m/s
 Dynamic viscosity:                     1.8230000000e-05  Pa-s
@@ -374,7 +375,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
                  '"k":0.[0-9]+,"mu":1.823e-05,"p":100000.0,"rho":0.[0-9]+,"s":2486.[0-9]+,'
                  '"v":1.[0-9]+}},"vapor-mixture":{"static":{"T":372.[0-9]+,"c":351.[0-9]+,'
                  '"cp":3071.[0-9]+,"cv":2772.[0-9]+,"e":1033465.[0-9]+,"h":1144919.[0-9]+,'
-                 '"k":0.[0-9]+,"mu":1.[0-9]+e-05,"p":100000.0,"rho":0.[0-9]+,"v":1.[0-9]+}}}'
+                 '"k":0.[0-9]+,"mu":1.[0-9]+e-05,"p":100000.0,"rho":0.[0-9]+,"s":14838.[0-9]+,"v":1.[0-9]+}}}'
 
     requirement = "The fluid properties interrogator shall output two-phase "
       "and static-state, single-phase fluid properties for (p, T) input with "
@@ -399,6 +400,7 @@ Density:                                    1.187005237  kg/m\^3
 Specific volume:                           0.8424562661  m\^3/kg
 Specific internal energy:              2.4771659033e\+06  J/kg
 Specific enthalpy:                     3.2387829780e\+06  J/kg
+Specific entropy:                           5966.595696  J/kg
 
 Sound speed:                                997.8878004  m/s
 Dynamic viscosity:                     1.8230000000e-05  Pa-s
@@ -422,7 +424,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     threading = '!pthreads'
     expect_out = '{"static":{"T":2547.[0-9]+,"c":997.[0-9]+,"cp":1271.[0-9]+,'
                  '"cv":972.[0-9]+,"e":2477165.[0-9]+,"h":3238782.[0-9]+,"k":0.[0-9]+,'
-                 '"mu":1.[0-9]+e-05,"p":904043.[0-9]+,"rho":1.[0-9]+,"v":0.[0-9]+}}'
+                 '"mu":1.[0-9]+e-05,"p":904043.[0-9]+,"rho":1.[0-9]+,"s":5966.[0-9]+,"v":0.[0-9]+}}'
 
     requirement = "The fluid properties interrogator shall output static-state, "
       "single-phase fluid properties for (rho, e) input with a vapor mixture "
