@@ -320,12 +320,12 @@ class Versioner:
                 entries.append([colorize(name, package_color),
                                 colorize(status, status_color),
                                 base_package.hash,
-                                base_conda.install,
                                 colorize(head_package.hash, hash_color),
+                                base_conda.install,
                                 colorize(head_conda.install, version_color)])
 
         # Print version table
-        keys = ['package', 'status', 'hash', 'version', 'to hash', 'to version']
+        keys = ['package', 'status', 'hash', 'to hash', 'version', 'to version']
         print_result(entries,
                      'Versioner versions',
                      keys,
