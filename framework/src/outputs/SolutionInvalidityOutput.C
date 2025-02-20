@@ -9,6 +9,7 @@
 
 // Moose includes
 #include "SolutionInvalidityOutput.h"
+#include "SolutionInvalidity.h"
 #include "MooseApp.h"
 #include "MooseObjectParameterName.h"
 #include "InputParameterWarehouse.h"
