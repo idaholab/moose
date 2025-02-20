@@ -29,6 +29,14 @@ ParsedFunctorMaterialTempl<is_ad>::validParams()
       {},
       "Symbolic name to use for each functor in 'functor_names' in the parsed expression. If not "
       "provided, then the actual functor names must be used in the parsed expression.");
+  params.addParam<std::vector<std::string>>(
+      "constant_names",
+      {},
+      "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>(
+      "constant_expressions",
+      {},
+      "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addRequiredParam<std::string>("property_name",
                                        "Name to give the new functor material property");
 
@@ -93,6 +101,11 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
   _parsed_function = std::make_shared<SymFunction>();
 
   setParserFeatureFlags(_parsed_function);
+
+  // add the constant expressions
+  addFParserConstants(_parsed_function,
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // Add constants
   _parsed_function->AddConstant("pi", std::acos(Real(-1)));
