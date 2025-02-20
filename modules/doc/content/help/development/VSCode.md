@@ -37,46 +37,46 @@ well as the installed extensions.
 
 Note that letters shown upper case in commands do not mean literal upper case. You do not have to press shift when typing these letters. This is just the notation (confusing I know). A good reference for hotkeys can be found [here](https://go.microsoft.com/fwlink/?linkid=832143). Linux hotkeys can be found [here](https://go.microsoft.com/fwlink/?linkid=832144). The hotkeys we give below assume MacOS.
 
-- +`Cmd+Shift+P`+ opens the command palette. Every available command can be accessed by typing a
+- +`Cmd-Shift-P`+ opens the command palette. Every available command can be accessed by typing a
   few letters here. The dropdown list shows the keyboard shortcuts.
-- +`Cmd+P`+ opens a file anywhere in the current project tree (i.e. below the directory in which you
+- +`Cmd-P`+ opens a file anywhere in the current project tree (i.e. below the directory in which you
   issued the `code .` command. No need to know the precise path or even the precise spelling of the
   filename!
-- +`Cmd+[`+ Decrease indent (Outdent)
-- +`Cmd+]`+ Increase indent (Indent)
-- +`Cmd+F`+ Find
-- +`Cmd+Option+F`+ Find and replace
+- +`Cmd-[`+ Decrease indent (Outdent)
+- +`Cmd-]`+ Increase indent (Indent)
+- +`Cmd-F`+ Find
+- +`Cmd-Option-F`+ Find and replace
   - +`Enter`+ Find next match without replacement
-  - +`Ctrl+Enter`+ Replace
-- +`Cmd+Option+Left/Right Arrow`+ Tab between open editor files as ordered on the screen
-- +`Ctrl+Tab`+ Tab between editor files in the order they were opened
-- +`Shift+Option+Drag Mouse`+ Rectangular text selection
-- +`Option+Repeated Clicks`+ Place multiple cursors (one per each click)
-- +`Cmd+S`+ Save current file
-- +`Cmd+J`+ Toggle terminal visibility
-- +`` Ctrl+` ``+ Toggles on terminal visibility if not currently visible. Switch focus to terminal if focus is elsewhere. If focus is already on terminal, toggles off terminal visibility
-- +`Cmd+1`+ Change focus to code editor
-- +`Cmd+\`+ Split screen vertically
-- +`Cmd+W`+ Close current file. If last file in split, then split will disappear
-- +`Ctrl+G`+ Goto line
-- +`Ctrl+N`+ Move cursor to next line
-- +`Ctrl+P`+ Move cursor to previous line
-- +`Ctrl+E`+ Move cursor to end of line
-- +`Ctrl+A`+ Move cursor to beginning of line
-- +`Ctrl+K`+ Kill from cursor to end of line
-- +`Ctrl+Y`+ Redo last undone action (not yank like in emacs)
-- +`Ctrl+F`+ Move cursor to next character
-- +`Ctrl+B`+ Move cursor to previous character
-- +`Cmd+B`+ Toggle left sidebar visibility
-- +`Cmd+Left/Right Arrow`+ Move cursor to beginning/end of line
-- +`Option+Left/Right Arrow`+ Move cursor over one word to left/right
-- +`Cmd+K Cmd+M`+ Maximize/Unmaximize current editor group
-- +`Cmd+Up/Down Arrow`+ Go to beginning/end of file
-- +`Fn+Up/Down Arrow`+ Page Up/Down in file
-- +`Cmd+Shift+\`+ Go to matching brace
-- +`Ctrl+-`+ Go to previous cursor location (useful after doing things like +`Cmd+Click`+)
-- +`Cmd+L`+ Select current line
-- +`Cmd+D`+ Select current word. Repeated invocations will also select next matches of that word.
+  - +`Ctrl-Enter`+ Replace
+- +`Cmd-Option-Left/Right Arrow`+ Tab between open editor files as ordered on the screen
+- +`Ctrl-Tab`+ Tab between editor files in the order they were opened
+- +`Shift-Option-Drag Mouse`+ Rectangular text selection
+- +`Option-Repeated Clicks`+ Place multiple cursors (one per each click)
+- +`Cmd-S`+ Save current file
+- +`Cmd-J`+ Toggle terminal visibility
+- +`` Ctrl-` ``+ Toggles on terminal visibility if not currently visible. Switch focus to terminal if focus is elsewhere. If focus is already on terminal, toggles off terminal visibility
+- +`Cmd-1`+ Change focus to code editor
+- +`Cmd-\`+ Split screen vertically
+- +`Cmd-W`+ Close current file. If last file in split, then split will disappear
+- +`Ctrl-G`+ Goto line
+- +`Ctrl-N`+ Move cursor to next line
+- +`Ctrl-P`+ Move cursor to previous line
+- +`Ctrl-E`+ Move cursor to end of line
+- +`Ctrl-A`+ Move cursor to beginning of line
+- +`Ctrl-K`+ Kill from cursor to end of line
+- +`Ctrl-Y`+ Redo last undone action (not yank like in emacs)
+- +`Ctrl-F`+ Move cursor to next character
+- +`Ctrl-B`+ Move cursor to previous character
+- +`Cmd-B`+ Toggle left sidebar visibility
+- +`Cmd-Left/Right Arrow`+ Move cursor to beginning/end of line
+- +`Option-Left/Right Arrow`+ Move cursor over one word to left/right
+- +`Cmd-K Cmd-M`+ Maximize/Unmaximize current editor group
+- +`Cmd-Up/Down Arrow`+ Go to beginning/end of file
+- +`Fn-Up/Down Arrow`+ Page Up/Down in file
+- +`Cmd-Shift-\`+ Go to matching brace
+- +`Ctrl--`+ Go to previous cursor location (useful after doing things like +`Cmd-Click`+)
+- +`Cmd-L`+ Select current line
+- +`Cmd-D`+ Select current word. Repeated invocations will also select next matches of that word.
   This is useful if wanting to edit multiple occurrences of the word without going through the
   Find/Replace focus.
 
