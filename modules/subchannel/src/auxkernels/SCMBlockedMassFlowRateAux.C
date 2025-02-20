@@ -19,10 +19,10 @@ SCMBlockedMassFlowRateAux::validParams()
   params.addClassDescription("Computes inlet mass flow rate BCs, from specified mass flux and "
                              "cross-sectional area and applies blocked inlet conditions");
   params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
-  params.addRequiredParam<Real>("unblocked_mass_flux",
-                                "Specified mass flux for unblocked subchannels [kg/s-m^2]");
-  params.addRequiredParam<Real>("blocked_mass_flux",
-                                "Specified mass flux for blocked subchannels [kg/s-m^2]]");
+  params.addRequiredParam<PostprocessorName>(
+      "unblocked_mass_flux", "Specified mass flux for unblocked subchannels [kg/s-m^2]");
+  params.addRequiredParam<PostprocessorName>(
+      "blocked_mass_flux", "Specified mass flux for blocked subchannels [kg/s-m^2]]");
   params.declareControllable("unblocked_mass_flux");
   params.declareControllable("blocked_mass_flux");
   params.addRequiredParam<std::vector<unsigned int>>("index_blockage",
@@ -33,8 +33,8 @@ SCMBlockedMassFlowRateAux::validParams()
 SCMBlockedMassFlowRateAux::SCMBlockedMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_mesh)),
-    _unblocked_mass_flux(getParam<Real>("unblocked_mass_flux")),
-    _blocked_mass_flux(getParam<Real>("blocked_mass_flux")),
+    _unblocked_mass_flux(getPostprocessorValue("unblocked_mass_flux")),
+    _blocked_mass_flux(getPostprocessorValue("blocked_mass_flux")),
     _area(coupledValue("area")),
     _index_blockage(getParam<std::vector<unsigned int>>("index_blockage"))
 {

@@ -28,9 +28,9 @@ public:
 protected:
   const SubChannelMesh & _subchannel_mesh;
   /// Specified mass flux of unblocked channels
-  const Real & _unblocked_mass_flux;
+  const PostprocessorValue & _unblocked_mass_flux;
   /// Specified mass flux of blocked channels
-  const Real & _blocked_mass_flux;
+  const PostprocessorValue & _blocked_mass_flux;
   /// Cross-sectional area
   const VariableValue & _area;
   /// index of subchannels affected by blockage
