@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGBase.h"
-#include "MooseApp.h"
 
 namespace CSG
 {
@@ -65,7 +64,9 @@ CSGBase::generateOutput() const
   }
 
   // write generated json to file
-  std::string json_out = _root_universe->getName() +  "_csg.json";  // this needs to be the inp file name but I cannot figure out how to gather that
+  auto fname = _root_universe->getName(); // this needs to be the inp file name but I cannot figure
+                                          // out how to gather that (_app.getOutputFileBase())
+  std::string json_out = fname +  "_csg.json";
   std::ofstream csg_file;
   csg_file.open(json_out);
   csg_file << csg_json.dump(2);
