@@ -22,7 +22,7 @@
       detail = 'by throwing a deprecation warning when no velocity is given when using AD,'
       cli_args = "Kernels/advection/velocity='1 0 0'"
       allow_deprecated = False
-      expect_err = "'velocity' has been deprecated and will be removed on 12/31/2025. Please use 'velocity_variable ' instead."
+      expect_err = "'velocity' has been deprecated and will be removed on 12/31/2025. Please use 'velocity_variable' instead."
     []
     [ad_deprecated_velocity]
       type = RunException
@@ -30,7 +30,7 @@
       detail = 'by throwing a deprecation warning when velocity is given when using AD,'
       cli_args = "Kernels/advection/velocity=v Materials/v/type=ADGenericConstantVectorMaterial Materials/v/prop_names=v Materials/v/prop_values='1 0 0'"
       allow_deprecated = False
-      expect_err = "The velocity parameter in ADConservativeAdvection will be removed on 12/31/2025. Use velocity_material or velocity_variable instead."
+      expect_err = "'velocity' has been deprecated and will be removed on 12/31/2025. Please use 'velocity_material' instead."
     []
   []
 
