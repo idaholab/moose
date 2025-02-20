@@ -1,6 +1,6 @@
 # SCMTriPowerAux
 
-!syntax description /ICs/SCMTriPowerAux
+!syntax description /AuxKernels/SCMTriPowerAux
 
 ## Overview
 
