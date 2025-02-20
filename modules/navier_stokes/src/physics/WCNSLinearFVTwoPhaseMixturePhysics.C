@@ -160,7 +160,23 @@ WCNSLinearFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & para
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 {
-  mooseError("Phase interface term not implemented at this time for linear finite volume");
+  // Re-create the phase interface term from existing kernels
+  {
+    auto params = getFactory().getValidParams("LinearFVReaction");
+    assignBlocks(params, _blocks);
+    params.set<LinearVariableName>("variable") = _phase_2_fraction_name;
+    params.set<MooseFunctorName>("coeff") = getParam<MooseFunctorName>(NS::alpha_exchange);
+    getProblem().addLinearFVKernel(
+        "LinearFVReaction", prefix() + "phase_interface_reaction", params);
+  }
+  {
+    auto params = getFactory().getValidParams("LinearFVSource");
+    assignBlocks(params, _blocks);
+    params.set<LinearVariableName>("variable") = _phase_2_fraction_name;
+    params.set<MooseFunctorName>("source_density") = _phase_1_fraction_name;
+    params.set<MooseFunctorName>("scaling_factor") = getParam<MooseFunctorName>(NS::alpha_exchange);
+    getProblem().addLinearFVKernel("LinearFVSource", prefix() + "phase_interface_source", params);
+  }
 }
 
 void
@@ -172,7 +188,6 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
 {
-  mooseError("Phase drift flux not implemented at this time for linear finite volume");
 }
 
 void
@@ -187,14 +202,14 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   // Add the phase fraction variable, for output purposes mostly
   if (!getProblem().hasFunctor(_phase_1_fraction_name, /*thread_id=*/0))
   {
-    auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
+    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
     assignBlocks(params, _blocks);
     params.set<std::string>("expression") = "1 - " + _phase_2_fraction_name;
     params.set<std::vector<std::string>>("functor_names") = {_phase_2_fraction_name};
     params.set<std::string>("property_name") = _phase_1_fraction_name;
     params.set<std::vector<std::string>>("output_properties") = {_phase_1_fraction_name};
     params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "phase_1_fraction", params);
+    getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "phase_1_fraction", params);
 
     // One of the phase fraction should exist though (either as a variable or set by a
     // NSLiquidFractionAux)
@@ -203,14 +218,14 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   }
   if (!getProblem().hasFunctor(_phase_2_fraction_name, /*thread_id=*/0))
   {
-    auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
+    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
     assignBlocks(params, _blocks);
     params.set<std::string>("expression") = "1 - " + _phase_1_fraction_name;
     params.set<std::vector<std::string>>("functor_names") = {_phase_1_fraction_name};
     params.set<std::string>("property_name") = _phase_2_fraction_name;
     params.set<std::vector<std::string>>("output_properties") = {_phase_2_fraction_name};
     params.set<std::vector<OutputName>>("outputs") = {"all"};
-    getProblem().addMaterial("ADParsedFunctorMaterial", prefix() + "phase_2_fraction", params);
+    getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "phase_2_fraction", params);
   }
 
   // Compute mixture properties
@@ -234,6 +249,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
     params.set<MooseFunctorName>("phase_1_fraction") = _phase_2_fraction_name;
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
+    params.set<bool>("limit_phase_fraction") = true;
     getProblem().addMaterial("NSFVMixtureFunctorMaterial", prefix() + "mixture_material", params);
   }
 
