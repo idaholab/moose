@@ -609,8 +609,8 @@ LinearAssemblySegregatedSolve::solve()
                                 _active_scalar_linear_control,
                                 _active_scalar_l_abs_tol);
     }
-
-    _problem.execute(EXEC_NONLINEAR);
+    else
+      _problem.execute(EXEC_NONLINEAR);
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
