@@ -631,6 +631,17 @@ protected:
                                                             unsigned int comp = 0) const;
 
   /**
+   * Returns gradient of a coupled variable at an element face for FV Kernel / BC coupling
+   * @param var_name Name of coupled array variable
+   * @param fi The face for which to retrieve the gradient
+   * @param state State argument which describes at what time / solution iteration  state we want to
+   * evaluate the variable
+   */
+  virtual ADRealVectorValue adCoupledGradientFace(const std::string & var_name,
+                                                  const FaceInfo & fi,
+                                                  const Moose::StateArg & state);
+
+  /**
    * Returns gradient of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
