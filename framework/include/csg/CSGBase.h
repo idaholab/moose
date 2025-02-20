@@ -146,16 +146,6 @@ public:
   }
 
   /**
-   * @brief Get all surface objects
-   *
-   * @return map of names to CSGSurface objects
-   */
-  const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllCells() const
-  {
-    return _root_universe.getAllCells();
-  }
-
-  /**
    * @brief Get a Surface object by name
    *
    * @param name surface name
