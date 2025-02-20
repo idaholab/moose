@@ -188,6 +188,21 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
 {
+  const std::vector<std::string> components = {"x", "y", "z"};
+  for (const auto dim : make_range(dimension()))
+  {
+    const auto object_type = "LinearWCNSFV2PMomentumDriftFlux";
+    auto params = getFactory().getValidParams(object_type);
+    assignBlocks(params, _blocks);
+    params.set<LinearVariableName>("variable") = _flow_equations_physics->getVelocityNames()[dim];
+    setSlipVelocityParams(params);
+    params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+    params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
+    params.set<MooseEnum>("momentum_component") = components[dim];
+    params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
+    params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+    getProblem().addLinearFVKernel(object_type, prefix() + "drift_flux_" + components[dim], params);
+  }
 }
 
 void
