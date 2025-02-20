@@ -116,6 +116,8 @@ WCNSFVTwoPhaseMixturePhysics::commonMixtureParams()
                               "use_external_mixture_properties",
                               "Mixture material properties");
 
+  params.addParamNamesToGroup("slip_linear_friction_name use_dispersed_phase_drag_model",
+                              "Friction model");
   params.addParamNamesToGroup(NS::alpha_exchange + " add_phase_change_energy_term", "Phase change");
   params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method",
                               "Drift flux model");
