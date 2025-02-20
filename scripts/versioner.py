@@ -318,7 +318,7 @@ class Versioner:
             print(f'Changes were found in {changed} packages.')
         if failure:
             print('Verification failed.')
-            sys.exit(1)
+            sys.exit(2)
         else:
             print('Verification succeeded.')
 
