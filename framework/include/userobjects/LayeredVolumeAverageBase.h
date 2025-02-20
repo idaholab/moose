@@ -12,28 +12,28 @@
 #include "LayeredAverageBase.h"
 
 /**
- * Base class for computing layered side averages
+ * Base class for computing layered Volume averages
  */
 template <typename BaseType>
-class LayeredSideAverageBase : public LayeredAverageBase<BaseType>
+class LayeredVolumeAverageBase : public LayeredAverageBase<BaseType>
 {
 public:
   static InputParameters validParams();
-  LayeredSideAverageBase(const InputParameters & parameters);
+  LayeredVolumeAverageBase(const InputParameters & parameters);
 
 protected:
-  virtual Real volume() const override { return this->_current_side_volume; };
+  virtual Real volume() const override { return this->_current_elem_volume; };
 };
 
 template <typename BaseType>
 InputParameters
-LayeredSideAverageBase<BaseType>::validParams()
+LayeredVolumeAverageBase<BaseType>::validParams()
 {
   return LayeredAverageBase<BaseType>::validParams();
 }
 
 template <typename BaseType>
-LayeredSideAverageBase<BaseType>::LayeredSideAverageBase(const InputParameters & parameters)
+LayeredVolumeAverageBase<BaseType>::LayeredVolumeAverageBase(const InputParameters & parameters)
   : LayeredAverageBase<BaseType>(parameters)
 {
 }
