@@ -19,8 +19,8 @@ SCMQuadPowerAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
-    "Computes axial power rate (W/m) that goes into the subchannel cells "
-    "or is assigned to the fuel pins, in a quadrilateral lattice arrangement");
+      "Computes axial power rate (W/m) that goes into the subchannel cells "
+      "or is assigned to the fuel pins, in a quadrilateral lattice arrangement");
   params.addRequiredParam<PostprocessorName>(
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
@@ -29,7 +29,7 @@ SCMQuadPowerAux::validParams()
                                 "1.0",
                                 "user provided normalized function of axial heat rate [Unitless]. "
                                 "The integral over pin length should equal the heated length");
-return params;
+  return params;
 }
 
 SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
