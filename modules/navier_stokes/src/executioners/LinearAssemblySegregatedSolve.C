@@ -592,9 +592,7 @@ LinearAssemblySegregatedSolve::solve()
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with pressure
     // and velocity
-    // We wait one iteration for the slip velocity to be updated (phase fraction active scalar)
-    // NOTE: we are lagging slip velocity by 1 iteration
-    if (_has_active_scalar_systems && simple_iteration_counter > 1)
+    if (_has_active_scalar_systems)
     {
       _problem.execute(EXEC_NONLINEAR);
 
