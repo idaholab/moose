@@ -221,49 +221,64 @@ class Versioner:
         """ provide hints as to version and build information for all conda stack libraries """
         from tabulate import tabulate
 
-        failure = False
-        changed = 0
         head = self.get_packages('HEAD')
         base = self.get_packages(args.verify[0])
-        markdown = args.markdown
+        brief = args.brief
 
-        # Helper for getting a package
-        def build_table(data, header, keys):
-            tablefmt = 'github' if markdown else 'rounded_grid'
-            table = tabulate(data, headers=keys, tablefmt=tablefmt)
-            length = len(table.splitlines()[1])
-            prefix = f'## {header}\n' if markdown else header.center(length)
-            return f'{prefix}\n{table}'
+        # Helper for building a result
+        def print_result(data, header, keys, summary):
+            tablefmt = 'github' if brief else 'rounded_grid'
+            contents = ''
+            length = 0
+            if brief:
+                contents = f'{summary}\n'
+            if data:
+                table = tabulate(data, headers=keys, tablefmt=tablefmt)
+                length = len(table.splitlines()[1])
+                contents += '\n' + tabulate(data, headers=keys, tablefmt=tablefmt)
+            prefix = f'### {header}\n' if brief else (header.center(length))
+            print(f'{prefix}\n{contents}')
 
         # Helper for coloring
         def colorize(value, color):
-            return colorText(value, color) if (color and not markdown) else value
+            return colorText(value, color) if (color and not brief) else value
 
         # Build template table
         entries = []
+        num_templates = 0
+        num_templates_failed = 0
         for package in head.values():
             for template_path, to_path in package.templates.items():
+                num_templates += 1
                 template_contents = Versioner.augment_template(package, template_path)
                 contents = Versioner.git_file(to_path, 'HEAD')
                 changes = template_contents != contents
+                if not changes and brief:
+                    continue
                 change_text = 'BEHIND' if changes else colorize('OK', 'GREEN')
                 entries.append((package.name, change_text, to_path, template_path))
                 if changes:
-                    failure = True
+                    num_templates_failed += 1
                     entries[-1] = [colorize(v, 'RED') for v in entries[-1]]
 
         # Print template table
-        table = build_table(entries, 'template summary',
-                            keys=['package', 'status', 'file', 'from'])
-        print(f'{table}\n')
+        print_result(entries,
+                     'Versioner templates',
+                     ['package', 'status', 'file', 'from'],
+                     f'Found {num_templates} templates, {num_templates_failed} failed')
+        print()
 
         # Build version table
         entries = []
+        num_packages = 0
+        num_packages_changed = 0
+        num_packages_failed = 0
         for name, head_package in head.items():
             # we do not care about app or non-conda packages
             if head_package.is_app or not head_package.conda:
                 continue
 
+            num_packages += 1
             head_conda = head_package.conda
             base_package = base[name]
             base_conda = base_package.conda
@@ -277,7 +292,7 @@ class Versioner:
 
             # Hashes are different
             if base_package.hash != head_package.hash:
-                changed += 1
+                num_packages_changed += 1
                 hash_color = 'YELLOW'
                 # Version is different, which means it was bumped
                 if base_conda.install != head_conda.install:
@@ -287,7 +302,7 @@ class Versioner:
                         package_color = 'RED'
                         status = 'BUILD NONZERO'
                         status_color = 'RED'
-                        failure = True
+                        num_packages_failed += 1
                     # Version is bumped correctly
                     else:
                         version_color = 'GREEN'
@@ -299,28 +314,31 @@ class Versioner:
                     status_color = 'RED'
                     version_color = 'RED'
                     package_color = 'RED'
-                    failure = True
+                    num_packages_failed += 1
 
-            entries.append([colorize(name, package_color),
-                            colorize(status, status_color),
-                            base_package.hash,
-                            base_conda.install,
-                            colorize(head_package.hash, hash_color),
-                            colorize(head_conda.install, version_color)])
+            if not brief or status != 'OK':
+                entries.append([colorize(name, package_color),
+                                colorize(status, status_color),
+                                base_package.hash,
+                                base_conda.install,
+                                colorize(head_package.hash, hash_color),
+                                colorize(head_conda.install, version_color)])
 
         # Print version table
         keys = ['package', 'status', 'hash', 'version', 'to hash', 'to version']
-        table = build_table(entries, header='version summary', keys=keys)
-        print(table)
+        print_result(entries,
+                     'Versioner versions',
+                     keys,
+                     f'Found {num_packages} packages, {num_packages_changed} changed, '
+                     f'{num_packages_failed} failed')
 
-        print()
-        if changed:
-            print(f'Changes were found in {changed} packages.')
-        if failure:
-            print('Verification failed.')
+        if num_packages_changed and not brief:
+            print(f'\nChanges were found in {num_packages_changed} packages.')
+        if num_packages_failed or num_templates_failed:
+            print('\nVerification failed.')
             sys.exit(2)
-        else:
-            print('Verification succeeded.')
+        elif not brief:
+            print('\nVerification succeeded.')
 
     @staticmethod
     def build_templates() -> None:
@@ -683,8 +701,8 @@ class Versioner:
         parser.add_argument('-v', '--verify', nargs=1, metavar='base_ref', default=None,
                             help='Output version/build number hints against supplied base reference'
                             ' hash')
-        parser.add_argument('--markdown', action='store_true', default=False,
-                            help='Output table in markdown form (with --verify)')
+        parser.add_argument('--brief', action='store_true', default=False,
+                            help='Output in brief form with brief (with --verify)')
         parser.add_argument('--build-templates', action='store_true',
                             help='Builds the templates')
         return parser.parse_args(argv)
@@ -703,8 +721,8 @@ class Versioner:
         if args.verify and args.verify == 'HEAD':
             Versioner.error('You cannot verify against HEAD. You must choose a hash'
                             ' (preferably something like upstream/master)')
-        if args.markdown and not args.verify:
-            Versioner.error('Cannot use --markdown without --verify')
+        if args.brief and not args.verify:
+            Versioner.error('Cannot use --brief without --verify')
 
     @staticmethod
     def git_is_diff(repo_dir: os.PathLike = MOOSE_DIR,
