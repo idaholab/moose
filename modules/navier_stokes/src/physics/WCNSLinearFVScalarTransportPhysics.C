@@ -24,6 +24,10 @@ WCNSLinearFVScalarTransportPhysics::validParams()
                         true,
                         "If the nonorthogonal correction should be used when computing the normal "
                         "gradient, notably in the diffusion term.");
+
+  // Not supported
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   return params;
 }
 

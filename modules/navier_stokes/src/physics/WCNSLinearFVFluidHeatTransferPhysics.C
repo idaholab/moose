@@ -35,6 +35,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
 
   // Not implemented
   params.suppressParameter<bool>("effective_conductivity");
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   return params;
 }
 

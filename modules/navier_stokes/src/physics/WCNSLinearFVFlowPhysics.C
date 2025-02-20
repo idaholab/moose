@@ -48,6 +48,7 @@ WCNSLinearFVFlowPhysics::validParams()
   params.set<MooseFunctorName>("porosity") = "1";
   params.suppressParameter<MooseFunctorName>("porosity");
   params.suppressParameter<MooseEnum>("mu_interp_method");
+  params.suppressParameter<MooseEnum>("preconditioning");
 
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
