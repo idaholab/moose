@@ -35,5 +35,5 @@ protected:
   const Moose::Functor<Real> & _source_density;
 
   /// Scale factor
-  const Real _scale;
+  const Moose::Functor<Real> & _scale;
 };
