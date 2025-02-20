@@ -13,6 +13,8 @@
 
 TEST_F(IdealRealGasMixtureFluidPropertiesTest, test)
 {
+  // save this setting so that it can be restored later
+  const bool original_throw_on_warning = Moose::_throw_on_warning;
   Moose::_throw_on_warning = false;
 
   Real T = 400.;
@@ -120,4 +122,7 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, test)
   REL_TEST(_fp_mix->c_from_p_T(p, T, x), 428.1928, 0.017535);
   REL_TEST(_fp_mix->cp_from_p_T(p, T, x), 1479.7114, 0.146444);
   REL_TEST(_fp_mix->cv_from_p_T(p, T, x), 1090.5912, 0.183001);
+
+  // restore original setting
+  Moose::_throw_on_warning = original_throw_on_warning;
 }
