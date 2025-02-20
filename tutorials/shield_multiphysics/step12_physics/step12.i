@@ -1,12 +1,12 @@
 # Speeds up the transient if < 1
-cp_water_multiplier = 1e-4
+cp_water_multiplier = 1e-10
 # Makes the problem more diffusive if > 1
 mu_multiplier = 1e4
 
 # Power
 # Real facility uses forced convection to cool the water tank at full power
 # Need to lower power for natural convection so water doesn't boil.
-power = ${fparse 5e4 / 144 * 0.5}
+power = ${fparse 5e4 / 144 * 0.1}
 
 # Coupling
 h_water = 600
@@ -21,7 +21,7 @@ h_water = 600
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../step07_conjugate_heat_transfer/mesh2d_in.e'
+    file = '../step11_multiapps/mesh2d_coarse_in.e'
   []
 []
 
@@ -55,9 +55,7 @@ h_water = 600
         boundary_heat_fluxes = '${power}'
 
         fixed_convection_boundaries = "water_boundary_inwards air_boundary"
-        # TODO: enable using a field instead of postprocessor
-        fixed_convection_T_fluid = "T_fluid_interface_avg 300"
-        # Note: should come from a correlation
+        fixed_convection_T_fluid = "T_fluid 300"
         fixed_convection_htc = "${h_water} 10"
       []
     []
@@ -109,8 +107,8 @@ h_water = 600
         initial_temperature = 300
 
         # This is a rough coupling to heat conduction
-        energy_wall_types = 'heatflux heatflux'
-        energy_wall_functors = 'h_dT ${power}'
+        energy_wall_types = 'convection heatflux'
+        energy_wall_functors = 'T:${h_water} ${power}'
 
         energy_scaling = 1e-5
       []
@@ -127,7 +125,6 @@ h_water = 600
     block = 'concrete_hd concrete Al'
   []
 []
-# TODO: add volumetric heat deposition, either in the Kernels or Physics blocks
 
 # The solid mechanics boundary conditions are defined outside the physics
 [BCs]
@@ -152,14 +149,6 @@ h_water = 600
     block = 'water'
     prop_names = 'rho    k     cp      mu alpha_wall alpha'
     prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse 7.98e-4 * mu_multiplier} 30 2e-4'
-  []
-
-  # Boundary condition functor computing the heat flux with a set heat transfer coefficient
-  [heat_flux]
-    type = ADParsedFunctorMaterial
-    expression = '${h_water} * (T_solid_interface_avg - T_fluid)'
-    functor_names = 'T_solid_interface_avg T_fluid'
-    property_name = 'h_dT'
   []
 []
 
@@ -257,18 +246,21 @@ h_water = 600
 
   # Time stepping parameters
   start_time = -1
+  dtmax = '${units 12 h -> s}'
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
   []
 
   # Let it develop
-  steady_state_tolerance = 1e-6
   steady_state_detection = true
+  steady_state_tolerance = 5e-5
+  normalize_solution_diff_norm_by_dt = false
 
   # Solver parameters
   solve_type = NEWTON
   automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
   line_search = none
 
   # Tolerances
@@ -298,22 +290,6 @@ h_water = 600
 []
 
 [Postprocessors]
-  # Postprocessors used for coupling
-  [T_solid_interface_avg]
-    type = SideAverageValue
-    boundary = water_boundary_inwards
-    variable = T
-    # Want to compute initial value and after each timestep for coupling
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [T_fluid_interface_avg]
-    type = SideAverageValue
-    boundary = water_boundary
-    variable = T_fluid
-    # Want to compute initial value and after each timestep for coupling
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-
   # Useful information
   [T_fluid_average]
     type = ElementAverageValue

@@ -1,23 +1,21 @@
-cp_water_multiplier = 1e-4
+cp_water_multiplier = 1e-10
 mu_multiplier = 1e4
-
-# Notes:
-# While it solves, it's clearly not refined enough to show the true behavior
-# See step 7c
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
     file = 'mesh2d_in.e'
   []
-  [remove_solid]
-    type = BlockDeletionGenerator
-    input = fmg
-    block = 'concrete_hd concrete Al'
-  []
 []
 
 [Variables]
+  [T_solid]
+    type = INSFVEnergyVariable
+    block = 'concrete_hd concrete Al'
+    initial_condition = 300
+    scaling = 1e-05
+  []
+
   [vel_x]
     type = INSFVVelocityVariable
     block = 'water'
@@ -59,6 +57,12 @@ mu_multiplier = 1e4
 []
 
 [FVKernels]
+  [solid_heat_conduction]
+    type = FVDiffusion
+    variable = T_solid
+    coeff = 'k'
+  []
+
   [water_ins_mass_advection]
     type = INSFVMassAdvection
     advected_interp_method = upwind
@@ -168,6 +172,27 @@ mu_multiplier = 1e4
 []
 
 [FunctorMaterials]
+  [concrete_hd]
+    type = ADParsedFunctorMaterial
+    block = 'concrete_hd'
+    expression = '5.0 + 0.001 * T_solid'
+    functor_names = 'T_solid'
+    property_name = 'k'
+  []
+  [concrete]
+    type = ADParsedFunctorMaterial
+    block = 'concrete'
+    expression = '2.25 + 0.001 * T_solid'
+    functor_names = 'T_solid'
+    property_name = 'k'
+  []
+  [Al]
+    type = ADGenericFunctorMaterial
+    block = 'Al'
+    prop_names = 'k'
+    prop_values = '175'
+  []
+
   [water]
     type = ADGenericFunctorMaterial
     block = 'water'
@@ -190,6 +215,28 @@ mu_multiplier = 1e4
 []
 
 [FVBCs]
+  [T_solid_inner_cavity]
+    type = FVFunctorNeumannBC
+    boundary = 'inner_cavity_solid'
+    variable = T_solid
+    functor = '${fparse 5e4 / 144 * 0.1}'
+  []
+  [T_solid_air]
+    type = FVFunctorConvectiveHeatFluxBC
+    boundary = 'air_boundary'
+    variable = T_solid
+    T_bulk = 300
+    T_solid = T_solid
+    heat_transfer_coefficient = 10
+    is_solid = true
+  []
+  [T_solid_ground]
+    type = FVDirichletBC
+    boundary = 'ground'
+    variable = T_solid
+    value = 300
+  []
+
   [vel_x_water_boundary]
     type = INSFVNoSlipWallBC
     boundary = 'water_boundary inner_cavity_water'
@@ -208,17 +255,23 @@ mu_multiplier = 1e4
     boundary = inner_cavity_water
     # Real facility uses forced convection to cool the water tank at full power
     # Need to lower power for natural convection so water doesn't boil.
-    functor = ${fparse 5e4 / 144 * 0.1}
+    functor = '${fparse 5e4 / 144 * 0.1}'
     variable = T_fluid
   []
-  [T_fluid_water_boundary]
-    type = FVFunctorConvectiveHeatFluxBC
-    boundary = water_boundary
-    variable = T_fluid
-    T_bulk = T_fluid
-    T_solid = 300
-    heat_transfer_coefficient = 600
-    is_solid = true
+[]
+
+[FVInterfaceKernels]
+  [water_boundary]
+    type = FVConvectionCorrelationInterface
+    boundary = 'water_boundary_inwards'
+    variable1 = T_solid
+    variable2 = T_fluid
+    T_fluid = T_fluid
+    T_solid = T_solid
+    h = 600
+    subdomain1 = 'concrete concrete_hd Al'
+    subdomain2 = 'water'
+    wall_cell_is_bulk = true
   []
 []
 
@@ -251,10 +304,12 @@ mu_multiplier = 1e4
   nl_max_its = 10
   l_max_its = 3
 
-  steady_state_tolerance = 1e-6
+  steady_state_tolerance = 1e-8
   steady_state_detection = true
+  normalize_solution_diff_norm_by_dt = false
 
   start_time = -1
+  dtmax = 43200
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'

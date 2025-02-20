@@ -3,7 +3,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../step10_finite_volume/mesh2d_in.e'
+    file = 'mesh2d_coarse_in.e'
   []
 []
 
@@ -18,6 +18,16 @@ power = '${fparse 5e4 / 144 * 0.1}'
   [diffusion_concrete]
     type = ADHeatConduction
     variable = T
+  []
+[]
+
+[DiracKernels]
+  [detector_heat]
+    type = ReporterPointSource
+    variable = T
+    block = Al
+    point_name = 'detector_positions/positions_1d'
+    value_name = 'receiver/detector_heat'
   []
 []
 
@@ -87,6 +97,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
   solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
   petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
   petsc_options_value = 'hypre boomeramg'
+  nl_abs_tol = 1e-8
 
   # For steady-state fixed-point iteration
   # type = Transient
@@ -96,13 +107,20 @@ power = '${fparse 5e4 / 144 * 0.1}'
   # For pseudo-transient
   type = Transient
   steady_state_detection = true
-  steady_state_tolerance = 1e-6
+  steady_state_tolerance = 5e-5
   normalize_solution_diff_norm_by_dt = false
   start_time = -1
   dtmax = '${units 12 h -> s}'
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
+  []
+[]
+
+[Positions]
+  [detector_positions]
+    type = FilePositions
+    files = detector_positions_2d.txt
   []
 []
 
@@ -118,36 +136,110 @@ power = '${fparse 5e4 / 144 * 0.1}'
     execute_on = 'TIMESTEP_END'
     cli_args = 'power=${power}'
   []
+  [detectors]
+    type = FullSolveMultiApp
+    input_files = 'step11_local.i'
+    # Create one app at each position
+    positions_objects = 'detector_positions'
+
+    # displace the subapp output to their position in the parent app frame
+    output_in_position = true
+
+    # compute the global temperature first
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [Transfers]
   # transfers solid temperature to nearest node on fluid mesh
   [send_T_solid]
-    type = MultiAppGeneralFieldNearestLocationTransfer
+    type = MultiAppCopyTransfer
     to_multi_app = fluid
     source_variable = T
     variable = T_solid
-    # Setting to true will cause an irrelevant warning in regions not on the boundary
-    search_value_conflicts = false
   []
-
   # Receive fluid temperature
   [recv_T_fluid]
-    type = MultiAppGeneralFieldNearestLocationTransfer
+    type = MultiAppCopyTransfer
     from_multi_app = fluid
     source_variable = T_fluid
     variable = T_fluid
-    # Setting to true will cause an irrelevant warning in regions not on the boundary
-    search_value_conflicts = false
+    to_blocks = 'water'
+    from_blocks = 'water'
+  []
+
+  # transfers local boundary temperature to the each child app
+  [send_exterior_temperature]
+    type = MultiAppVariableValueSamplePostprocessorTransfer
+    to_multi_app = detectors
+    source_variable = T
+    postprocessor = T_boundary
+  []
+  # transfers local flux conditions to each child app
+  [send_local_flux]
+    type = MultiAppVariableValueSampleTransfer
+    to_multi_app = detectors
+    source_variable = flux
+    variable = flux
+  []
+  # retrieve outputs from the child apps
+  [detector_heat]
+    type = MultiAppReporterTransfer
+    from_multi_app = detectors
+    from_reporters = 'heat_flux/value'
+    to_reporters = 'receiver/detector_heat'
+    distribute_reporter_vector = true
+  []
+  [hdpe_temperature]
+    type = MultiAppPostprocessorInterpolationTransfer
+    from_multi_app = detectors
+    postprocessor = T_hdpe_inner
+    variable = T_hdpe_inner
+  []
+  [boron_temperature]
+    type = MultiAppPostprocessorInterpolationTransfer
+    from_multi_app = detectors
+    postprocessor = T_boron_inner
+    variable = T_boron_inner
   []
 []
 
+reactor_x = 3.25
+reactor_y = 2.225
 [AuxVariables]
   [T_fluid]
-    # This FE family-order is consistent with finite volume
+    # family = MONOMIAL
+    # order = CONSTANT
+    type = INSFVEnergyVariable
+    initial_condition = 300
+    block = 'water'
+  []
+
+  [flux]
+    [InitialCondition]
+      type = FunctionIC
+      function = '1e4 * exp(-((x-${reactor_x})^2 + (y-${reactor_y})^2))'
+    []
+  []
+
+  # We only output two fields as an example
+  [T_hdpe_inner]
     family = MONOMIAL
     order = CONSTANT
-    initial_condition = 300
+    block = Al
+  []
+  [T_boron_inner]
+    family = MONOMIAL
+    order = CONSTANT
+    block = Al
+  []
+[]
+
+[Reporters]
+  [receiver]
+    type = ConstantReporter
+    real_vector_names = 'detector_heat'
+    real_vector_values = '0 0 0 0 0 0 0 0'
   []
 []
 
