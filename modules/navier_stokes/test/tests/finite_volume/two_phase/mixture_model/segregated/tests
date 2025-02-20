@@ -6,11 +6,22 @@
     input = 'lid-driven-two-phase-physics.i'
     csvdiff = 'lid-driven-two-phase-physics_out.csv'
     requirement = 'The system shall be able to model a lid-driven cavity with a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
   []
   [rayleigh-bernard]
     type = CSVDiff
     input = 'rayleigh-bernard-two-phase-physics.i'
     csvdiff = 'rayleigh-bernard-two-phase-physics_out.csv'
     requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Bernard convection with a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [channel]
+    type = Exodiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Physics/NavierStokes/FlowSegregated/flow/initial_velocity='0 0 0'"
+    exodiff = 'channel-drift-flux-physics_out.e'
+    requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+    custom_cmp = 'mixture_physics_diff.cmp'
   []
 []
