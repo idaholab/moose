@@ -49,6 +49,16 @@ private:
   /// matrix and right hand side contribution
   Real _volumetric_face_flux;
 
+  /// slip velocity in direction x
+  const Moose::Functor<ADReal> * const _u_slip;
+  /// slip velocity in direction y
+  const Moose::Functor<ADReal> * const _v_slip;
+  /// slip velocity in direction z
+  const Moose::Functor<ADReal> * const _w_slip;
+
+  /// Whether to use an additional slip velocity to compute the face flux
+  bool _add_slip_model;
+
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
 };

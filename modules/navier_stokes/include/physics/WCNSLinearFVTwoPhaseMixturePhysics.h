@@ -9,23 +9,21 @@
 
 #pragma once
 
-#include "WCNSFVScalarTransportPhysics.h"
+#include "WCNSLinearFVScalarTransportPhysics.h"
 
-class WCNSFVFluidHeatTransferPhysics;
+class WCNSLinearFVFluidHeatTransferPhysics;
 
 /**
  * Creates all the objects needed to solve the mixture terms for the weakly-compressible
  * and incompressible two-phase equations.
  * Can also add a phase transport equation
  */
-class WCNSFVTwoPhaseMixturePhysics final : public WCNSFVScalarTransportPhysics
+class WCNSLinearFVTwoPhaseMixturePhysics final : public WCNSLinearFVScalarTransportPhysics
 {
 public:
   static InputParameters validParams();
-  static InputParameters commonMixtureParams();
-  static void renamePassiveScalarToMixtureParams(InputParameters & params);
 
-  WCNSFVTwoPhaseMixturePhysics(const InputParameters & parameters);
+  WCNSLinearFVTwoPhaseMixturePhysics(const InputParameters & parameters);
 
 private:
   virtual void addFVKernels() override;
@@ -43,7 +41,7 @@ private:
   void addAdvectionSlipTerm();
 
   /// Fluid heat transfer physics
-  const WCNSFVFluidHeatTransferPhysics * _fluid_energy_physics;
+  const WCNSLinearFVFluidHeatTransferPhysics * _fluid_energy_physics;
 
   /// Convenience boolean to keep track of whether the phase transport equation is requested
   const bool _add_phase_equation;
@@ -57,7 +55,7 @@ private:
 
   /// Name of the density of the other phase
   const MooseFunctorName _phase_1_density;
-  /// Name of the dyanmic viscosity of the other phase
+  /// Name of the dynamic viscosity of the other phase
   const MooseFunctorName _phase_1_viscosity;
   /// Name of the specific heat of the other phase
   const MooseFunctorName _phase_1_specific_heat;
