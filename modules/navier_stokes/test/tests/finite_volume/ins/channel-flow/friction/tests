@@ -59,4 +59,21 @@
                "Outputs/file_base='2d-rc-friction-exp-factor-action_out' "
     design = 'ExponentialFrictionFunctorMaterial.md'
   []
+
+  [standard]
+    requirement = 'The system shall be able to use the standard Darcy friction formulation using the shorthand Physics syntax for'
+    [nonlinear]
+      type = CSVDiff
+      input = '2d-rc-friction-standard-nonlinear-physics.i'
+      csvdiff = '2d-rc-friction-standard-nonlinear-physics_out.csv'
+      detail = 'the Newton solve method,'
+    []
+    [linear]
+      type = CSVDiff
+      input = '2d-rc-friction-standard-linear-physics.i'
+      csvdiff = '2d-rc-friction-standard-linear-physics_out.csv'
+      detail = 'and the segregated solve method.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
 []
