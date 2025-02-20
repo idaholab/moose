@@ -29,6 +29,15 @@
     mesh_mode = REPLICATED
     requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file, where one mesh generator modifies the mesh created by another mesh generator'
   []
+  [csg_only_sphere_point]
+    type = 'RunApp'
+    input = 'csg_only_sphere_point.i'
+    cli_args = '--csg-only'
+    expect_out = 'Outputting CSGBase object for csg_sphere_point'
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file, where one mesh generator modifies the mesh created by another mesh generator'
+  []
 
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG only mode when'
