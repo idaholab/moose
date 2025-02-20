@@ -1682,7 +1682,6 @@ InputParameters::renameCoupledVarInternal(const std::string & old_name,
                "' but that coupled variable name doesn't exist in the parameters object.");
 
   _coupled_vars.insert(new_name);
-  _new_to_deprecated_coupled_vars.emplace(new_name, old_name);
   _coupled_vars.erase(coupled_vars_it);
 
   renameParamInternal(old_name, new_name, docstring, removal_date);
