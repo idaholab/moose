@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "SpatialUserObjectFunctor.h"
 #include "ElementVectorPostprocessor.h"
 #include "NonADFunctorInterface.h"
 
@@ -16,8 +17,9 @@
  * This MeshDivisionFunctorReductionVectorPostprocessor serves to integrate functors based
  * on the index of the elements in the mesh division
  */
-class MeshDivisionFunctorReductionVectorPostprocessor : public ElementVectorPostprocessor,
-                                                        public NonADFunctorInterface
+class MeshDivisionFunctorReductionVectorPostprocessor
+  : public SpatialUserObjectFunctor<ElementVectorPostprocessor>,
+    public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -43,6 +45,8 @@ public:
     MIN,
     MAX
   };
+
+  virtual bool hasBlocks(SubdomainID sub) const override;
 
 protected:
   /// Reduction operation to be performed
