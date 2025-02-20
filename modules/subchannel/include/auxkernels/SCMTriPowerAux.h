@@ -20,7 +20,7 @@ class TriSubChannelMesh;
  */
 class SCMTriPowerAux : public AuxKernel
 {
-  public:
+public:
   SCMTriPowerAux(const InputParameters & params);
   virtual Real computeValue() override;
   virtual void initialSetup() override;
