@@ -145,11 +145,10 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
         getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("elem_integers_swaps")),
     _direction(getParam<Point>("direction")),
     _has_top_boundary(isParamValid("top_boundary")),
-    _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary")
-                                               : BoundaryName(std::to_string(0))),
+    _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary") : "0"),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
     _bottom_boundary(isParamValid("bottom_boundary") ? getParam<BoundaryName>("bottom_boundary")
-                                                     : BoundaryName(std::to_string(0))),
+                                                     : "0"),
     _upward_boundary_source_blocks(
         isParamValid("upward_boundary_source_blocks")
             ? getParam<std::vector<std::vector<subdomain_id_type>>>("upward_boundary_source_blocks")
