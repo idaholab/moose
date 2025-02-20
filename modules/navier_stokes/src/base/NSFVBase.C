@@ -182,6 +182,7 @@ NSFVBase::commonMomentumBoundaryFluxesParams()
       "flux direction with respect to the normal. If the inlet surface is defined on an internal "
       "face, this is necessary to ensure the arbitrary orientation of the normal does not result "
       "in non-physical results.");
+  params.addParamNamesToGroup("flux_inlet_pps flux_inlet_directions", "Boundary condition");
 
   return params;
 }

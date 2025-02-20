@@ -50,6 +50,7 @@ WCNSLinearFVFlowPhysics::validParams()
   params.suppressParameter<MooseEnum>("mu_interp_method");
   // Not needed
   params.suppressParameter<bool>("add_flow_equations");
+  params.suppressParameter<MooseEnum>("preconditioning");
 
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
