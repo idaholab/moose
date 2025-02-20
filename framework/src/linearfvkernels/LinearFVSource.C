@@ -21,14 +21,15 @@ LinearFVSource::validParams()
       "Represents the matrix and right hand side contributions of a "
       "solution-independent source term in a partial differential equation.");
   params.addParam<MooseFunctorName>("source_density", 1.0, "The source density.");
-  params.addParam<Real>("scaling_factor", 1.0, "Coefficient to multiply the body force term with.");
+  params.addParam<MooseFunctorName>(
+      "scaling_factor", 1.0, "Coefficient to multiply the body force term with.");
   return params;
 }
 
 LinearFVSource::LinearFVSource(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _source_density(getFunctor<Real>("source_density")),
-    _scale(getParam<Real>("scaling_factor"))
+    _scale(getFunctor<Real>("scaling_factor"))
 {
 }
 
@@ -43,7 +44,9 @@ LinearFVSource::computeMatrixContribution()
 Real
 LinearFVSource::computeRightHandSideContribution()
 {
+  const auto elem_arg = makeElemArg(_current_elem_info->elem());
+  const auto state_arg = determineState();
+
   // The contribution to the right hand side is s_C*V_C
-  return _scale * _source_density(makeElemArg(_current_elem_info->elem()), determineState()) *
-         _current_elem_volume;
+  return _scale(elem_arg, state_arg) * _source_density(elem_arg, state_arg) * _current_elem_volume;
 }
