@@ -222,14 +222,22 @@ class Versioner:
         from tabulate import tabulate
 
         failure = False
+        changed = 0
         head = self.get_packages('HEAD')
         base = self.get_packages(args.verify[0])
+        markdown = args.markdown
 
         # Helper for getting a package
         def build_table(data, header, keys):
-            table = tabulate(data, headers=keys, tablefmt='rounded_grid')
+            tablefmt = 'github' if markdown else 'rounded_grid'
+            table = tabulate(data, headers=keys, tablefmt=tablefmt)
             length = len(table.splitlines()[1])
-            return f'{header.center(length)}\n{table}'
+            prefix = f'## {header}\n' if markdown else header.center(length)
+            return f'{prefix}\n{table}'
+
+        # Helper for coloring
+        def colorize(value, color):
+            return colorText(value, color) if (color and not markdown) else value
 
         # Build template table
         entries = []
@@ -238,11 +246,11 @@ class Versioner:
                 template_contents = Versioner.augment_template(package, template_path)
                 contents = Versioner.git_file(to_path, 'HEAD')
                 changes = template_contents != contents
-                change_text = 'BEHIND' if changes else colorText('OK', 'GREEN')
+                change_text = 'BEHIND' if changes else colorize('OK', 'GREEN')
                 entries.append((package.name, change_text, to_path, template_path))
                 if changes:
                     failure = True
-                    entries[-1] = [colorText(v, 'RED') for v in entries[-1]]
+                    entries[-1] = [colorize(v, 'RED') for v in entries[-1]]
 
         # Print template table
         table = build_table(entries, 'template summary',
@@ -269,6 +277,7 @@ class Versioner:
 
             # Hashes are different
             if base_package.hash != head_package.hash:
+                changed += 1
                 hash_color = 'YELLOW'
                 # Version is different, which means it was bumped
                 if base_conda.install != head_conda.install:
@@ -292,8 +301,6 @@ class Versioner:
                     package_color = 'RED'
                     failure = True
 
-            def colorize(value, color):
-                return colorText(value, color) if color else value
             entries.append([colorize(name, package_color),
                             colorize(status, status_color),
                             base_package.hash,
@@ -306,8 +313,14 @@ class Versioner:
         table = build_table(entries, header='version summary', keys=keys)
         print(table)
 
+        print()
+        if changed:
+            print(f'Changes were found in {changed} packages.')
         if failure:
+            print('Verification failed.')
             sys.exit(1)
+        else:
+            print('Verification succeeded.')
 
     @staticmethod
     def build_templates() -> None:
@@ -667,9 +680,11 @@ class Versioner:
                             help='Output in YAML format (itemized information)')
         parser.add_argument('-s','--summary', action='store_true', default=False,
                             help='Output summary as should be entered in versioner_hashes.yaml')
-        parser.add_argument('-v', '--verify', nargs=1, metavar='base_ref hash', default=None,
+        parser.add_argument('-v', '--verify', nargs=1, metavar='base_ref', default=None,
                             help='Output version/build number hints against supplied base reference'
                             ' hash')
+        parser.add_argument('--markdown', action='store_true', default=False,
+                            help='Output table in markdown form (with --verify)')
         parser.add_argument('--build-templates', action='store_true',
                             help='Builds the templates')
         return parser.parse_args(argv)
@@ -688,6 +703,8 @@ class Versioner:
         if args.verify and args.verify == 'HEAD':
             Versioner.error('You cannot verify against HEAD. You must choose a hash'
                             ' (preferably something like upstream/master)')
+        if args.markdown and not args.verify:
+            Versioner.error('Cannot use --markdown without --verify')
 
     @staticmethod
     def git_is_diff(repo_dir: os.PathLike = MOOSE_DIR,
