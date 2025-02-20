@@ -53,6 +53,7 @@ PhysicsBase::validParams()
   params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
                               "Restart from Exodus");
   params.addParamNamesToGroup("active inactive", "Advanced");
+  params.addParamNamesToGroup("preconditioning", "Numerical scheme");
   return params;
 }
 
