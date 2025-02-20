@@ -20,6 +20,7 @@
 #include "CSGVoidCell.h"
 #include "CSGIntersection.h"
 #include "CSGHalfspace.h"
+#include "nlohmann/json.h"
 
 namespace CSG
 {
@@ -142,6 +143,16 @@ public:
   const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
   {
     return _surface_list.getAllSurfaces();
+  }
+
+  /**
+   * @brief Get all surface objects
+   *
+   * @return map of names to CSGSurface objects
+   */
+  const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllCells() const
+  {
+    return _root_universe.getAllCells();
   }
 
   /**
