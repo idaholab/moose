@@ -19,14 +19,17 @@ WCNSFVFluidHeatTransferPhysics::validParams()
 {
   InputParameters params = WCNSFVFluidHeatTransferPhysicsBase::validParams();
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
-  params.addParamNamesToGroup("energy_face_interpolation", "Numerical scheme");
+  params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
+
+  params.addParamNamesToGroup("energy_face_interpolation energy_scaling", "Numerical scheme");
   return params;
 }
 
 WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
   : WCNSFVFluidHeatTransferPhysicsBase(parameters)
-
 {
+  if (_solve_for_enthalpy)
+    paramError("solve_for_enthalpy", "Enthalpy solve not supported at this time with Physics");
 }
 
 void

@@ -24,6 +24,9 @@ WCNSLinearFVScalarTransportPhysics::validParams()
                         true,
                         "If the nonorthogonal correction should be used when computing the normal "
                         "gradient, notably in the diffusion term.");
+
+  // Not needed
+  params.suppressParameter<bool>("add_scalar_equation");
   return params;
 }
 
