@@ -338,6 +338,26 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
       getProblem().addFVBC(
           bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
     }
+    else if (_energy_wall_types[bc_ind] == "convection")
+    {
+      const std::string bc_type = "FVFunctorConvectiveHeatFluxBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<MooseFunctorName>("T_bulk") = _fluid_temperature_name;
+      params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
+      params.set<bool>("is_solid") = false;
+      const auto Tinf_htc_functors =
+          MooseUtils::split(_energy_wall_functors[bc_ind], /*delimiter=*/":", /*max_count=*/1);
+      if (Tinf_htc_functors.size() != 2)
+        paramError("energy_wall_functors",
+                   "'convective' wall types require two functors specified as "
+                   "<Tinf_functor>:<htc_functor>.");
+      params.set<MooseFunctorName>("T_solid") = Tinf_htc_functors[0];
+      params.set<MooseFunctorName>("heat_transfer_coefficient") = Tinf_htc_functors[1];
+
+      getProblem().addFVBC(
+          bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+    }
     // We add this boundary condition here to facilitate the input of wall boundaries / functors for
     // energy. If there are too many turbulence options and this gets out of hand we will have to
     // move this to the turbulence Physics
@@ -373,5 +393,8 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
       params.set<bool>("newton_solve") = true;
       getProblem().addFVBC(bc_type, prefix() + "wallfunction_" + wall_boundaries[bc_ind], params);
     }
+    else
+      paramError(
+          "energy_wall_types", _energy_wall_types[bc_ind], " wall type is currently unsupported.");
   }
 }
