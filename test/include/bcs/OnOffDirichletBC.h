@@ -19,7 +19,7 @@ public:
   OnOffDirichletBC(const InputParameters & parameters);
   virtual ~OnOffDirichletBC();
 
-  virtual bool shouldApply();
+  virtual bool shouldApply() const;
 
 protected:
 };

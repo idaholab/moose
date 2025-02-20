@@ -38,7 +38,7 @@ RichardsExcav::RichardsExcav(const InputParameters & parameters)
 }
 
 bool
-RichardsExcav::shouldApply()
+RichardsExcav::shouldApply() const
 {
   if (_func.value(_t, *_current_node) == 0.0)
     return false;
