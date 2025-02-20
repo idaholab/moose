@@ -19,16 +19,16 @@ import argparse
 import hashlib
 import subprocess
 import platform
-import yaml
 import json
-import jinja2
-import copy
 import itertools
 import re
+import concurrent.futures
 from graphlib import TopologicalSorter
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
-import concurrent.futures
+
+import yaml
+import jinja2
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 MOOSE_DIR = os.environ.get('MOOSE_DIR',
@@ -61,8 +61,11 @@ class ApptainerPackage:
     # Path to the definition file for this container
     def_path: str
 
-    def to_dict(self) -> dict:
-        return self.__dict__
+    def output(self) -> dict:
+        """
+        Helper for outputting this object to screen
+        """
+        return self.__dict__.copy()
 
 @dataclass
 class CondaPackage:
@@ -84,10 +87,13 @@ class CondaPackage:
     # The meta yaml contents
     meta: dict
 
-    def to_dict(self) -> dict:
-        result = copy.deepcopy(self.__dict__)
-        result['meta'] = 'hidden'
-        return result
+    def output(self) -> dict:
+        """
+        Helper for outputting this object to screen
+        """
+        out = self.__dict__.copy()
+        out['meta'] = 'hidden'
+        return out
 
 @dataclass
 class Package:
@@ -119,18 +125,21 @@ class Package:
     # Whether or not the package is the "app" package
     is_app: bool
 
-    def to_dict(self) -> dict:
-        result = {}
-        for key, value in self.__dict__.items():
+    def output(self) -> dict:
+        """
+        Helper for outputting this object to screen
+        """
+        out = {}
+        for key, value in self.__dict__.copy().items():
             if key in ['apptainer', 'conda'] and value is not None:
-                result[key] = value.to_dict()
+                out[key] = value.output()
             elif key == 'dependencies':
-                result[key] = [package.name for package in self.dependencies]
+                out[key] = [package.name for package in self.dependencies]
             elif key in ['config']:
                 continue
             else:
-                result[key] = value
-        return result
+                out[key] = value
+        return out
 
 @dataclass
 class TemplateConfig:
@@ -188,7 +197,7 @@ def undefined(arg, *args, **kwargs):
 packages_config = os.path.join(MOOSE_DIR, 'framework', 'doc', 'packages_config.yml')
 packages_yaml = {'default_mpi' : 'mpich'}
 if os.path.exists(packages_config):
-    with open(packages_config, 'r') as pkg_file:
+    with open(packages_config, 'r', encoding="utf-8") as pkg_file:
         packages_yaml.update(yaml.safe_load(pkg_file))
 
 # Allow jinja template variables to return a value when otherwise it would not
@@ -302,17 +311,22 @@ class Versioner:
 
     @staticmethod
     def build_templates() -> None:
+        """
+        Performs the --build-templates action
+
+        Writes all of the templated files
+        """
         for package in Versioner.get_packages('HEAD').values():
             for template_path, to_path in package.templates.items():
                 template_contents = Versioner.augment_template(package, template_path)
 
-                with open(to_path, 'r') as f:
+                with open(to_path, 'r', encoding="utf-8") as f:
                     to_contents = f.read()
 
                 changed = template_contents != to_contents
                 print('MODIFIED ' if changed else 'UNCHANGED', to_path)
                 if changed:
-                    with open(os.path.join(MOOSE_DIR, to_path), 'w') as f:
+                    with open(os.path.join(MOOSE_DIR, to_path), 'w', encoding="utf-8") as f:
                         f.write(template_contents)
 
     def output_summary(self) -> str:
@@ -345,9 +359,9 @@ class Versioner:
             print(f'{args.library} not tracked in {args.commit}')
             sys.exit(2)
         if args.json:
-            return json.dumps(package.to_dict())
+            return json.dumps(package.output())
         if args.yaml:
-            return yaml.dump(package.to_dict())
+            return yaml.dump(package.output())
 
         return package.full_version
 
@@ -378,11 +392,11 @@ class Versioner:
         old_versions = not Versioner.using_managed_versions(commit)
 
         # Load the packages from versioner.yaml
-        packages_yaml = Versioner.load_versioner_yaml(commit)['packages']
+        config = Versioner.load_versioner_yaml(commit)['packages']
 
         all_packages: list[str] = []
         packages: dict[str, Package] = {}
-        for name, values in packages_yaml.items():
+        for name, values in config.items():
             if old_influential:
                 # Originally, the values were just a list and not
                 # a dict where that list was the influential files;
@@ -417,7 +431,7 @@ class Versioner:
             for dep in package['dependencies']:
                 if dep == name:
                     Versioner.error(f'{name} depends on itself')
-                if dep not in packages_yaml:
+                if dep not in config:
                     Versioner.error(f'{name} missing dependency {dep}')
 
             packages[name] = Package(**package)
@@ -618,7 +632,7 @@ class Versioner:
         config = Versioner.get_template_config()
 
         path = os.path.join(MOOSE_DIR, file)
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding="utf-8") as f:
             contents = f.read()
 
         # config = Versioner.get_template_config('HEAD')
@@ -739,7 +753,7 @@ class Versioner:
         if os.path.isabs(file):
             relative = os.path.relpath(file, MOOSE_DIR)
             if relative.startswith('..'):
-                raise Exception(f'Supplied path {file} is not in {MOOSE_DIR}')
+                raise ValueError(f'Supplied path {file} is not in {MOOSE_DIR}')
             file = relative
 
         command = ['git', 'show', f'{commit}:{file}']
@@ -790,16 +804,16 @@ class Versioner:
                        hash=str(git_hash[0:7]))
 
     @staticmethod
-    def git_rev_parse(ref: str, dir: os.PathLike = MOOSE_DIR) -> str:
+    def git_rev_parse(ref: str, directory: os.PathLike = MOOSE_DIR) -> str:
         """
         Calls `git rev-parse` with the given reference
         """
         cmd = ['git', 'rev-parse', ref]
         try:
-            return subprocess.check_output(cmd, text=True, cwd=dir).rstrip()
+            return subprocess.check_output(cmd, text=True, cwd=directory).rstrip()
         except subprocess.CalledProcessError as e:
             if e.returncode == 128:
-                raise Exception(f'Reference {ref} is not valid in repo {dir}')
+                raise ValueError(f'Reference {ref} is not valid in repo {directory}') from e
             raise
 
     @staticmethod
