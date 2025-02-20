@@ -27,6 +27,9 @@ WCNSLinearFVScalarTransportPhysics::validParams()
 
   // Not needed
   params.suppressParameter<bool>("add_scalar_equation");
+  // Not supported
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   return params;
 }
 

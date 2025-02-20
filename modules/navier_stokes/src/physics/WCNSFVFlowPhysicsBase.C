@@ -86,8 +86,9 @@ WCNSFVFlowPhysicsBase::validParams()
   params.addParamNamesToGroup("wall_boundaries momentum_wall_types momentum_wall_functors",
                               "Wall boundary conditions");
   params.addParamNamesToGroup(
-      "velocity_interpolation momentum_advection_interpolation momentum_face_interpolation "
-      "momentum_two_term_bc_expansion pressure_two_term_bc_expansion mu_interp_method",
+      "include_deviatoric_stress velocity_interpolation momentum_advection_interpolation "
+      "momentum_two_term_bc_expansion pressure_two_term_bc_expansion mu_interp_method "
+      "momentum_face_interpolation",
       "Numerical scheme");
   params.addParamNamesToGroup("thermal_expansion", "Gravity treatment");
 
