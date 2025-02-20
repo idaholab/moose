@@ -39,8 +39,6 @@ CSGBase::generateOutput() const
 {
     nlohmann::json csg_json;
 
-    auto all_cells = _root_universe->getAllCells();
-
     csg_json["SURFACES"] = {};
     csg_json["CELLS"] = {};
     csg_json["UNIVERSES"] = {};
