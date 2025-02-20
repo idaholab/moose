@@ -124,6 +124,9 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
+    _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
+    _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
+    _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs")),
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
@@ -171,6 +174,12 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                        " is already reserved for the automatically-computed interstitial velocity. "
                        "Please choose another name for your external velocity variable!");
     }
+
+  // Friction parameter checks
+  if (_friction_blocks.size())
+    checkVectorParamsSameLength<std::vector<SubdomainName>, std::vector<std::string>>(
+        "friction_blocks", "friction_types");
+  checkTwoDVectorParamsSameLength<std::string, std::string>("friction_types", "friction_coeffs");
 
   // Create maps for boundary-restricted parameters
   _momentum_inlet_types = Moose::createMapFromVectorAndMultiMooseEnum<BoundaryName>(

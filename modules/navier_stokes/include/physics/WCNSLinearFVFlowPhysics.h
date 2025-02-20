@@ -48,6 +48,7 @@ private:
   void addMomentumFluxKernels();
   virtual void addMomentumPressureKernels() override;
   virtual void addMomentumGravityKernels() override;
+  virtual void addMomentumFrictionKernels() override;
   virtual void addMomentumBoussinesqKernels() override;
 
   virtual void addInletBC() override;

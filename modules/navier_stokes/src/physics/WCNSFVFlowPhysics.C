@@ -91,10 +91,7 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVFlowPhysicsBase(parameters),
     _porosity_smoothing_layers(isParamValid("porosity_smoothing_layers")
                                    ? getParam<unsigned short>("porosity_smoothing_layers")
-                                   : 0),
-    _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
-    _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
-    _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs"))
+                                   : 0)
 {
   _flow_porosity_functor_name = isParamValid("porosity_smoothing_layers") &&
                                         getParam<unsigned short>("porosity_smoothing_layers")
@@ -105,12 +102,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   if (getParam<bool>("pin_pressure") &&
       getParam<std::vector<MooseFunctorName>>("pressure_functors").size())
     paramError("pin_pressure", "Cannot pin the pressure if a pressure boundary exists");
-
-  // Friction parameter checks
-  if (_friction_blocks.size())
-    checkVectorParamsSameLength<std::vector<SubdomainName>, std::vector<std::string>>(
-        "friction_blocks", "friction_types");
-  checkTwoDVectorParamsSameLength<std::string, std::string>("friction_types", "friction_coeffs");
 
   // Pressure pin checks
   checkSecondParamSetOnlyIfFirstOneTrue("pin_pressure", "pinned_pressure_type");
@@ -636,6 +627,11 @@ WCNSFVFlowPhysics::addMomentumFrictionKernels()
           params.set<MooseFunctorName>(NS::speed) = NS::speed;
           params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
         }
+        else
+          paramError("momentum_friction_types",
+                     "Friction type '",
+                     _friction_types[block_i][type_i],
+                     "' is not implemented");
       }
 
       getProblem().addFVKernel(kernel_type,
