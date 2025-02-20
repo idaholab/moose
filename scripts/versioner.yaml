@@ -1,14 +1,17 @@
-# Add additional libraries and their influential files, along with any dependencies which
-# shall be included when creating a HASH for said library. Order is not important.
+# Configuration for defining distributed packages (conda and apptainer)
+# along with their versions, dependencies, and files that they depend on
 #
-# If adding a new control key, a change to versioner.py:influential_list will be required
-# (add that control key to 'not_libraries').
+# See github.com/idaholab/moose/wiki/Updating-packages for information
+# on updating packages.
+
 packages:
+  # dependers: moose-dev
   tools:
     version: 2024.12.23
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
+  # dependers: petsc, libmesh, moose-dev, libmesh-vtk, peacock
   mpi:
     version: 2024.12.23
     conda: conda/mpi
@@ -20,6 +23,7 @@ packages:
       - apptainer/files/mpi
       - conda/mpi/base_build.sh
     apptainer:
+  # dependers: libmesh, moose-dev
   petsc:
     version: 3.22.1.193.g72c1e49ee3d
     build_number: 1
@@ -38,6 +42,7 @@ packages:
       - scripts/configure_petsc.sh
       - scripts/update_and_rebuild_petsc.sh
       - scripts/apple-silicon-hdf5-autogen.patch
+  # dependers: moose-dev
   libmesh:
     version: 2024.12.02
     build_number: 1
@@ -56,6 +61,7 @@ packages:
       - conda/libmesh/build.sh
       - scripts/configure_libmesh.sh
       - scripts/update_and_rebuild_libmesh.sh
+  # dependers: moose-dev
   wasp:
     version: 2025.01.07
     build_number: 0
@@ -73,6 +79,7 @@ packages:
       - python/mooseutils/message.py
       - python/mooseutils/mooseutils.py
       - python/pyhit/pyhit.py
+  # dependers: none
   moose-dev:
     version: 2025.02.18
     conda: conda/moose-dev
@@ -91,6 +98,7 @@ packages:
       - apptainer/remove_channels.def
       - apptainer/files/moose-dev
       - scripts/setup_libtorch.sh
+  # dependers: libmesh, moose-dev
   libmesh-vtk:
     version: 9.3.0
     build_number: 5
@@ -102,6 +110,7 @@ packages:
       - mpi
     influential:
       - conda/libmesh-vtk/build.sh
+  # dependers: peacock
   peacock:
     version: 2024.12.23
     conda: conda/peacock
@@ -110,6 +119,7 @@ packages:
       conda/peacock/meta.yaml.template: conda/peacock/meta.yaml
     dependencies:
       - mpi
+  # dependers: none
   pprof:
     version: 2024.12.23
     build_number: 0
@@ -118,12 +128,14 @@ packages:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
     influential:
       - conda/pprof/build.sh
+  # dependers: none
   seacas:
     version: 2024.08.15
     build_number: 2
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
+  # dependers: none
   app:
     templates:
       conda/moose/conda_build_config.yaml.template: conda/moose/conda_build_config.yaml
