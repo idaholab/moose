@@ -11,6 +11,10 @@
 #include "libmesh/mesh_smoother_laplace.h"
 #include "MooseUtils.h"
 #include "PolygonalMeshGenerationUtils.h"
+#include "MooseMeshUtils.h"
+
+#include "libmesh/parsed_function.h"
+#include "libmesh/poly2tri_triangulator.h"
 
 #include <cmath>
 
@@ -130,6 +134,19 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       false,
       "Whether to rotate the generated polygon mesh to ensure that one flat side faces up.");
 
+  params.addParam<bool>("replace_inner_ring_with_delaunay_mesh",
+                        false,
+                        "True to replace the inner ring mesh with a Delaunay unstructured mesh");
+  params.addRangeCheckedParam<Real>(
+      "inner_ring_desired_area",
+      0,
+      "inner_ring_desired_area>=0",
+      "Desired (maximum) triangle area, or 0 to skip uniform refinement");
+  params.addParam<std::string>(
+      "inner_ring_desired_area_func",
+      std::string(),
+      "Desired area as a function of x,y; omit to skip non-uniform refinement");
+
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names",
       "Customized Subdomain/Boundary");
@@ -141,6 +158,9 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "ring_inner_boundary_layer_intervals ring_outer_boundary_layer_biases "
       "ring_outer_boundary_layer_widths ring_outer_boundary_layer_intervals",
       "Mesh Boundary Layers and Biasing Options");
+  params.addParamNamesToGroup(
+      "replace_inner_ring_with_delaunay_mesh inner_ring_desired_area inner_ring_desired_area_func",
+      "Inner ring");
 
   addRingAndSectorIDParams(params);
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
@@ -738,12 +758,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);
     mesh0->prepare_for_use();
     other_mesh.prepare_for_use();
-    mesh0->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+    mesh0->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true, false);
     other_mesh.clear();
   }
 
   // An extra step to stich the first and last slices together
-  mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+  mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true, false);
 
   if (!_has_rings && !_has_ducts && _background_intervals == 1)
     MooseMesh::changeBoundaryId(*mesh0, 1 + _interface_boundary_id_shift, OUTER_SIDESET_ID, false);
@@ -928,5 +948,110 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   if (flat_side_up)
     MeshTools::Modification::rotate(*mesh0, 180.0 / (Real)_num_sides, 0.0, 0.0);
   mesh0->set_isnt_prepared();
+
+  if (_ring_block_ids.size() > 2 && getParam<bool>("replace_inner_ring_with_delaunay_mesh"))
+  {
+    // remove elements of the inner ring and add the boundary side set
+    std::set<Elem *> deleteable_elems;
+    for (auto & elem : mesh0->element_ptr_range())
+      if (elem->vertex_average().norm() < _ring_radii[0])
+        deleteable_elems.insert(elem);
+
+    const boundary_id_type boundary_id = MooseMeshUtils::getBoundaryIDs(*mesh0, {"_foo"}, true)[0];
+    BoundaryInfo & boundary_info = mesh0->get_boundary_info();
+    for (auto & elem : deleteable_elems)
+    {
+      unsigned int n_sides = elem->n_sides();
+      for (unsigned int n = 0; n != n_sides; ++n)
+      {
+        Elem * neighbor = elem->neighbor_ptr(n);
+        if (!neighbor)
+          continue;
+
+        const unsigned int return_side = neighbor->which_neighbor_am_i(elem);
+
+        if (neighbor->neighbor_ptr(return_side) == elem)
+        {
+          neighbor->set_neighbor(return_side, nullptr);
+          boundary_info.add_side(neighbor, return_side, boundary_id);
+        }
+      }
+
+      mesh0->delete_elem(elem);
+    }
+
+    // build the 1d mesh from the new boundary
+    libMesh::ReplicatedMesh poly_mesh(comm());
+    std::vector<dof_id_type> element_id_list;
+    std::vector<unsigned short int> side_list;
+    std::vector<boundary_id_type> bc_id_list;
+    boundary_info.build_side_list(element_id_list, side_list, bc_id_list);
+    Real min_side = std::numeric_limits<Real>::max();
+    const unsigned int nsides = element_id_list.size();
+    std::unordered_map<dof_id_type, dof_id_type> old_new_node_map;
+    for (const auto i : make_range(nsides))
+    {
+      if (bc_id_list[i] != boundary_id)
+        continue;
+
+      Elem * elem = mesh0->elem_ptr(element_id_list[i]);
+      auto side = side_list[i];
+      std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side));
+      auto copy = side_elem->build(side_elem->type());
+
+      Real l = side_elem->volume();
+      if (l < min_side)
+        min_side = l;
+
+      for (dof_id_type i : side_elem->node_index_range())
+      {
+        auto & n = side_elem->node_ref(i);
+
+        if (old_new_node_map.count(n.id()))
+          copy->set_node(i) = poly_mesh.node_ptr(old_new_node_map[n.id()]);
+        else
+        {
+          Node * node = poly_mesh.add_point(side_elem->point(i));
+          copy->set_node(i) = node;
+          old_new_node_map[n.id()] = node->id();
+        }
+      }
+      poly_mesh.add_elem(copy.release());
+    }
+    poly_mesh.skip_partitioning(true);
+    poly_mesh.prepare_for_use();
+
+    // triangulate with the 1d mesh
+    libMesh::Poly2TriTriangulator poly2tri(poly_mesh);
+    poly2tri.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
+    poly2tri.set_interpolate_boundary_points(0);
+    poly2tri.set_refine_boundary_allowed(false);
+    poly2tri.set_verify_hole_boundaries(false);
+    const auto desired_area = getParam<Real>("inner_ring_desired_area");
+    const auto desired_area_func = getParam<std::string>("inner_ring_desired_area_func");
+    if (desired_area != 0)
+      poly2tri.desired_area() = desired_area;
+    else if (desired_area_func != "")
+    {
+      poly2tri.desired_area() = 0;
+      libMesh::ParsedFunction<Real> area_func{desired_area_func};
+      poly2tri.set_desired_area_function(&area_func);
+    }
+    else
+      poly2tri.desired_area() = min_side * min_side;
+    poly2tri.minimum_angle() = 0;
+    poly2tri.smooth_after_generating() = true;
+    poly2tri.elem_type() = libMesh::ElemType::TRI3;
+    // let us keep the center point
+    poly_mesh.add_point(libMesh::Point());
+    poly2tri.triangulate();
+    // keep the old subdomain id
+    for (auto elem : poly_mesh.element_ptr_range())
+      elem->subdomain_id() = _ring_block_ids[0];
+
+    // stitch the triangulated mesh and the original mesh without the inner ring
+    mesh0->stitch_meshes(poly_mesh, boundary_id, 0, TOLERANCE, true, false);
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh0);
 }

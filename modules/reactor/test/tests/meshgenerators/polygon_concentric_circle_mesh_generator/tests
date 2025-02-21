@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PolygonConcentricCircleMeshGenerator.md'
-  issues = '#18628 #20514 #20637 #21420 #23367 #23520 #24025 #26986'
+  issues = '#18628 #20514 #20637 #21420 #23367 #23520 #24025 #26986 #29934'
   [back_only]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -168,6 +168,35 @@
                 Mesh/gen/outward_interface_boundary_names="int1 int2"
                 --mesh-only "poly_2d_rings_sb.e"'
     requirement = 'The system shall generate a hexagon mesh with rings, with the innermost ring having multilayer QUAD elements and being assigned by a single set of block id and name.'
+    recover = false
+  []
+  [rings_delaunay]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_delaunay.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/replace_inner_ring_with_delaunay_mesh=true
+                Mesh/gen/uniform_mesh_on_sides=true
+                Mesh/gen/outward_interface_boundary_names="int1 int2"
+                --mesh-only "poly_2d_delaunay.e"'
+    requirement = 'The system shall generate a hexagon mesh with rings with a Delaunay mesh in the inner ring.'
+    recover = false
+  []
+  [rings_delaunay_func]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_delaunay_func.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/replace_inner_ring_with_delaunay_mesh=true
+                Mesh/gen/inner_ring_desired_area_func=(1-(x*x+y*y)/2/2)+(x*x+y*y)/2/2*0.2
+                Mesh/gen/uniform_mesh_on_sides=true
+                Mesh/gen/outward_interface_boundary_names="int1 int2"
+                --mesh-only "poly_2d_delaunay_func.e"'
+    requirement = 'The system shall generate a hexagon mesh with rings with Delaunay mesh with spatially varying element sizes in the inner ring.'
     recover = false
   []
   [ducts]
