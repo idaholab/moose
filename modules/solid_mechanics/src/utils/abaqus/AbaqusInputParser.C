@@ -76,11 +76,22 @@ const static std::set<std::string> abaqus_options = {
 };
 
 void
-InputParser::InputParser(std::istream & in)
-  : _current_line(0)
+InputParser::parse(std::istream & in)
 {
   // load and preprocess entire file
   loadFile(in);
+
+  _current_line(0);
+  parseBlockInternal(*this);
+
+  // check if this is a flat or assembly based file
+  _is_flat = true;
+  forAll(nullptr,
+         [this]()(const std::string & key, BlockNode &)
+         {
+           if (key == "assembly")
+             _is_flat = false;
+         })
 }
 
 void
@@ -184,7 +195,7 @@ InputParser::parseOption(const std::vector<std::string> & head_line)
   return node;
 }
 
-Node::Node(std::vector<std::string> line)
+InputNode::InputNode(std::vector<std::string> line)
 {
   _type = line[0];
   _header = HeaderMap(line);
