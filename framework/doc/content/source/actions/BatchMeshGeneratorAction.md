@@ -4,7 +4,7 @@
 
 This Action is capable of batch generating a series of meshes using a single type of mesh generator with variation in one or multiple input parameters.
 
-The type of mesh generator to be used for batch generation is provided by [!param](/Mesh/BatchMeshGeneratorAction/mesh_generator_name). To batch generate meshes using the selected type of mesh generator, users need to provide both `fixed` input parameters, which keep constant throughout the batch generator, and `batch` input parameters, which vary among generated meshes. For both `fixed` anf `batch` input parameters, they are either be scalar or vector type.
+The type of mesh generator to be used for batch generation is provided by [!param](/Mesh/BatchMeshGeneratorAction/mesh_generator_name). To batch generate meshes using the selected type of mesh generator, users need to provide both "fixed" input parameters, which keep constant throughout the batch mesh generation, and "batch" input parameters, which vary among generated meshes. For both "fixed" and "batch" input parameters, they can be either `scalar` or `vector` types.
 
 ## Specifying Input Parameters
 
@@ -38,12 +38,40 @@ The supported input parameter types are summarized in [supported_types] for both
 | `MultiMooseEnum` | `MooseEnum` | `ENUM` |
 | `vector<bool>` | `bool` | `BOOL` |
 
-## Multiple Batch Input Parameter Processing Methods
+## Methods to Process Multiple Batch Input Parameters
+
+### Cartesian Product and Corresponding Methods
 
 If more than one batch input parameters (either `scalar` or `vector`) are provided, two methods can be selected using [!param](/Mesh/BatchMeshGeneratorAction/multi_batch_params_method). 
 
 The default method is `cartesian_product`, which batch generates mesh generators based on the Cartessian product of all the batch input parameters. For example, if `m` scalar input parameters are specified using [!param](/Mesh/BatchMeshGeneratorAction/batch_scalar_input_param_names), with the corresponding [!param](/Mesh/BatchMeshGeneratorAction/batch_scalar_input_params) containing $N_{s,1}$, $N_{s,2}$,..., and $N_{s,m}$ variations, respectively. Meanwhile, if `n` vector input parameters are specified using [!param](/Mesh/BatchMeshGeneratorAction/batch_vector_input_param_names), with the corresponding [!param](/Mesh/BatchMeshGeneratorAction/batch_vector_input_params) containing $N_{v,1}$, $N_{v,2}$,..., and $N_{v,n}$ variations. Using the Cartesian product approach leads to a total of $\prod_{i=0}^{m} N_{s,i}\prod_{j=0}^{n} N_{v,j}$ mesh generators.
 
 On the other hand, an alternative method is `corresponding`, which requires the numbers of variations for all [!param](/Mesh/BatchMeshGeneratorAction/batch_scalar_input_param_names) and [!param](/Mesh/BatchMeshGeneratorAction/batch_vector_input_param_names) to be the same (e.g., $N$). In that case, only $N$ mesh generators are created.
+
+### Naming and Indexing of the Generated Meshes
+
+The generated meshes are named with a prefix as defined in [!param](/Mesh/BatchMeshGeneratorAction/mesh_name_prefix), followed by an index. 
+
+For the `corresponding` method, the index is determined by the order of the provided batch input parameters starting from 0. For example, if $N$ sets of batch input parameters are provided, the generated meshes are named as `[mesh_name_prefix]_0`, `[mesh_name_prefix]_1`, ..., `[mesh_name_prefix]_{N-1}`.
+
+For the `cartesian_product` method, by default, the a single index is used for all the batch input parameters. The indexing will first transverse the batch scalar input parameters from the first to the last, and then the batch vector input parameters from the first to the last. Optionally, users can choose to decompose the index into multiple indices for each batch input parameter by setting [!param](/Mesh/BatchMeshGeneratorAction/use_decomposed_index) as `true`. In that case, the generated meshes are named as `mesh_name_prefix`_{$i_{s_1}$}_{$i_{s_2}$}_..._{$i_{s_m}$}_{$i_{v_1}$}_{$i_{v_2}$}_..._{$i_{v_n}$}, where $i_{s_1}$, $i_{s_2}$, ...,$i_{s_m}$ are the indices for the batch scalar input parameters starting from 0, and $i_{v_1}$, $i_{v_2}$, ...,$i_{v_n}$ are the indices for the batch vector input parameters starting from 0.
+
+For example, if there are two batch scalar input parameters, $s_1$ with 2 variations and $s_2$ with 3 variations, and one batch vector input parameter, $v_1$ with 2 variations, the generated meshes are named and indexed as shown in [indexing].
+
+!table id=indexing caption=Comparison between single and decomposed indexing.
+| $s_1$ | $s_2$ | $v_1$ | Single Indexing | Decomposed Indexing |
+| - | - | - | - | - |
+| 0 | 0 | 0 | `mesh_name_prefix_0` | `mesh_name_prefix_0_0_0` |
+| 1 | 0 | 0 | `mesh_name_prefix_1` | `mesh_name_prefix_1_0_0` |
+| 0 | 1 | 0 | `mesh_name_prefix_2` | `mesh_name_prefix_0_1_0` |
+| 1 | 1 | 0 | `mesh_name_prefix_3` | `mesh_name_prefix_1_1_0` |
+| 0 | 2 | 0 | `mesh_name_prefix_4` | `mesh_name_prefix_0_2_0` |
+| 1 | 2 | 0 | `mesh_name_prefix_5` | `mesh_name_prefix_1_2_0` |
+| 0 | 0 | 1 | `mesh_name_prefix_6` | `mesh_name_prefix_0_0_1` |
+| 1 | 0 | 1 | `mesh_name_prefix_7` | `mesh_name_prefix_1_0_1` |
+| 0 | 1 | 1 | `mesh_name_prefix_8` | `mesh_name_prefix_0_1_1` |
+| 1 | 1 | 1 | `mesh_name_prefix_9` | `mesh_name_prefix_1_1_1` |
+| 0 | 2 | 1 | `mesh_name_prefix_10` | `mesh_name_prefix_0_2_1` |
+| 1 | 2 | 1 | `mesh_name_prefix_11` | `mesh_name_prefix_1_2_1` |
 
 !syntax parameters /Mesh/BatchMeshGeneratorAction
