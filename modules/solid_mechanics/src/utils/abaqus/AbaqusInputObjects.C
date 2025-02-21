@@ -10,6 +10,7 @@
 #include "AbaqusInputObjects.h"
 #include "MooseUtils.h"
 
+#include <memory>
 #include <stdexcept>
 
 namespace Abaqus
@@ -107,10 +108,17 @@ UserElement::UserElement(const OptionNode & option)
     }
 }
 
-Part::Part(const BlockNode & block) : SetContainer(this)
+Part::parse(const BlockNode & block) : SetContainer(this)
 {
-  auto option_func =
-      [&](const std::string & key, const OptionNode & option)
+  auto option_func = [this](const std::string & key, const OptionNode & option)
+  { Part::optionFunc(key, option); };
+  block.forAll(option_func, nullptr);
+}
+
+void
+Part::optionFunc(const std::string & key, const OptionNode & option)
+{
+  auto option_func = [&](const std::string & key, const OptionNode & option)
   {
     // User element definitions
     if (key == "user element")
@@ -131,9 +139,9 @@ Part::Part(const BlockNode & block) : SetContainer(this)
       if (map.has("input"))
         throw std::runtime_error("External coordinate inputs are not yet supported");
 
-      auto * nset = map.has("nset") ? &_node_set[map.get<std::string>("nset")] : nullptr;
-      std::set<std::size_t> unique_ids;
-      if (elset)
+      auto * nset = map.has("nset") ? &_nsets[map.get<std::string>("nset")] : nullptr;
+      std::set<Index> unique_ids;
+      if (nset)
         unique_ids.insert(nset->begin(), nset->end());
 
       // loop over data lines
@@ -144,14 +152,17 @@ Part::Part(const BlockNode & block) : SetContainer(this)
         if (data.size() > 4)
           throw std::runtime_error("Normal directions are not yet supported");
 
-        const auto id = MooseUtils::convert<int>(data[0]);
+        const auto id = MooseUtils::convert<AbaqusID>(data[0]);
         Point p(MooseUtils::convert<Real>(data[1]),
                 MooseUtils::convert<Real>(data[2]),
                 MooseUtils::convert<Real>(data[3]));
-        _node.emplace_back(id, p);
+
+        Index index = _nodes.size();
+        _nodes.push_back(Node{id, p, 0});
+        _node_id_to_index[id] = index;
 
         if (nset)
-          unique_ids.insert(id);
+          unique_ids.insert(index);
       }
 
       if (nset)
@@ -163,10 +174,7 @@ Part::Part(const BlockNode & block) : SetContainer(this)
     {
       const auto & map = option._header;
       const auto type = map.get<std::string>("type");
-      const auto it = _element_type_to_typeid.find(type);
-      if (it == _element_type_to_typeid.end())
-        throw std::runtime_error("Unknown user element type '" + type + "' in Abaqus input.");
-      const auto type_id = it->second;
+      const UserElement & uel = _element_definition[type];
 
       // add new elements to an element set?
       auto * elset = map.has("elset") ? &_element_set[map.get<std::string>("elset")] : nullptr;
@@ -177,27 +185,29 @@ Part::Part(const BlockNode & block) : SetContainer(this)
       // loop over data lines
       for (const auto & data : option._data)
       {
-        const auto col = vecTo<std::size_t>(data);
+        const auto col = vecTo<AbaqusID>(data);
 
         // check number of nodes
-        if (col.size() - 1 != _element_definition[type_id]._n_nodes)
+        if (col.size() - 1 != uel._n_nodes)
           throw std::runtime_error("Wrong number of nodes for user element of type '" + type +
                                    "' in Abaqus input.");
 
         // prepare empty element
-        const auto elem_id = col[0];
-        Element elem{type_id, {}};
+        const auto id = col[0];
+        Element element{id, uel, {}, {nullptr, nullptr}};
 
         // copy in node numbers (converting from 1-base to 0-base)
         for (const auto i : index_range(col))
           if (i > 0)
-            elem._node_list.push_back(col[i] - 1);
+            element._nodes.push_back(_node_id_to_index.at(col[i]));
 
         // insert into unordered map
-        _element[elem_id] = elem;
+        Index index = _elements.size();
+        _elements.push_back(element);
+        _element_id_to_index[id] = index;
 
         if (elset)
-          unique_ids.insert(elem_id);
+          unique_ids.insert(index);
       }
 
       if (elset)
@@ -248,66 +258,49 @@ Part::Part(const BlockNode & block) : SetContainer(this)
       // }
     }
   }
-
-      block.forAll(option_func, nullptr);
 }
 
 void
-SetContainer::processNodeSet(const OptionNode & option)
+Part::processNodeSet(const OptionNode & option)
 {
   const auto & map = option._header;
+
+  // copy nodes from element set
   if (map.has("elset"))
   {
-    if (!_part)
-      throw std::runtime_error("elset option can only be use at the part level");
-    // copy nodes from element set
-    const auto & elset = getElementSet(map.get<std::string>("elset"));
+    // get element set to copy nodes from
+    const auto & elset = _elsets.at(map.get<std::string>("elset"));
+
+    // get or create node set
     auto & nset = _node_set[map.get<std::string>("nset")];
-    std::set<std::size_t> unique_nodes(nset.begin(), nset.end());
-    for (const auto elem_id : elset)
-      for (const auto node_id : _part->_element[elem_id]._node)
-        unique_nodes.insert(node_id);
+
+    // make set unique and copy nodes into it
+    std::set<Index> unique_nodes(nset.begin(), nset.end());
+    for (const auto elem_index : elset)
+      for (const auto node_index : _elements[elem_index]._nodes)
+        unique_nodes.insert(node_index);
     nset.assign(unique_nodes.begin(), unique_nodes.end());
   }
   else
-    processSetHelper(_node_set, option, "nset");
+    // data lines are only present if elset parameter is _not_ specified
+    processSetHelper(_nsets, _node_id_to_index, option, "nset");
 }
 
 void
-SetContainer::processElementSet(const OptionNode & option)
+Part::processElementSet(const OptionNode & option)
 {
-  processSetHelper(_element_set, option, "elset");
-}
-
-const std::vector<std::size_t> &
-SetContainer::getNodeSet(const std::string & nset) const
-{
-  const auto it = _node_set.find(MooseUtils::toUpper(nset));
-  if (it == _node_set.end())
-    throw std::runtime_error("Node set '" + nset + "' does not exist.");
-  return it->second;
-}
-
-const std::vector<std::size_t> &
-SetContainer::getElementSet(const std::string & elset) const
-{
-  const auto it = _element_set.find(MooseUtils::toUpper(elset));
-  if (it == _element_set.end())
-    throw std::runtime_error("Element set '" + elset + "' does not exist.");
-  return it->second;
+  processSetHelper(_elsets, _element_id_to_index, option, "elset");
 }
 
 void
-SetContainer::processSetHelper(std::map<std::string, std::vector<std::size_t>> & set_map,
-                               const OptionNode & option,
-                               const std::string & name_key)
+Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
+                       std::unordered_map<AbaqusID, Index> & id_to_index,
+                       const OptionNode & option,
+                       const std::string & name_key)
 {
   // parse the header line
   const auto & map = option._header;
   const auto name = map.get<std::string>(name_key);
-  if (set_map.count(name))
-    throw std::runtime_error("Repeated " + name_key + " declaration for '" + name +
-                             "' in Abaqus input.");
 
   // implement GENERATE keyword
   const auto generate = map.get<bool>("generate");
@@ -315,6 +308,7 @@ SetContainer::processSetHelper(std::map<std::string, std::vector<std::size_t>> &
   if (map.has("unsorted"))
     throw std::runtime_error("The UNSORTED keyword is not supported.");
 
+  // get or create the set
   auto & set = set_map[name];
   std::set<std::size_t> unique_items(set.begin(), set.end());
   for (const auto & data : option._data)
@@ -327,16 +321,17 @@ SetContainer::processSetHelper(std::map<std::string, std::vector<std::size_t>> &
                                  "' with GENERATE keyword in Abaqus input.");
 
       // generate range
-      const auto begin = MooseUtils::convert<std::size_t>(data[0]);
-      const auto end = MooseUtils::convert<std::size_t>(data[1]);
-      const auto step = MooseUtils::convert<std::size_t>(data[2]);
+      const auto begin = MooseUtils::convert<AbaqusID>(data[0]);
+      const auto end = MooseUtils::convert<AbaqusID>(data[1]);
+      const auto step = MooseUtils::convert<AbaqusID>(data[2]);
       if (step == 0)
         throw std::runtime_error("Zero step in generated set.");
-      for (std::size_t item = begin; item <= end; item += step)
-        unique_items.insert(item - 1);
+      for (AbaqusID item = begin; item <= end; item += step)
+        unique_items.insert(id_to_index.at(item));
     }
     else
     {
+      // TODO: here we need to to implement instance.node_id syntax!
       for (const auto i : index_range(data))
       {
         // check for existing set first
@@ -348,12 +343,8 @@ SetContainer::processSetHelper(std::map<std::string, std::vector<std::size_t>> &
         }
         else
         {
-          const auto item = MooseUtils::convert<std::size_t>(data[i]);
-          if (item > 0)
-            unique_items.insert(item - 1);
-          else
-            throw std::runtime_error("Invalid ID in " + name_key + " '" + name +
-                                     "' in Abaqus input.");
+          const auto item = MooseUtils::convert<AbaqusID>(data[i]);
+          unique_items.insert(id_to_index.at(item));
         }
       }
     }
@@ -362,51 +353,7 @@ SetContainer::processSetHelper(std::map<std::string, std::vector<std::size_t>> &
   set.assign(unique_items.begin(), unique_items.end());
 }
 
-// Entry point for the final parsing stage
-void
-process::Root(const BlockNode & root)
-{
-  _libmesh_id = 0;
-  _mesh = buildTypedMesh<ReplicatedMesh>(3);
-
-  auto block_func = [&](const std::string & key, const BlockNode & block)
-  {
-    if (key == "part")
-    {
-      const auto name = block._header.get<std::string>("name");
-      _part.add(name, block);
-    }
-
-    if (key == "assembly")
-    {
-      const auto name = block._header.get<std::string>("name");
-      if (_assembly.size() > 0)
-        throw std::runtime_error("Only one Assembly per model is supported");
-      _assembly.add(name, block, *this);
-    }
-  };
-
-  root.forAll(nullptr, block_func);
-
-  // we can have Part data at the root level. In that case we automatically generate
-  // an assembly and an instance to instantiate the part. Note that this is happens OUT
-  // OF ORDER and might cause a problem if assembly based models mix elsets/nsets with
-  // a root_part model. :/
-  Part root_part(root);
-  if (!root_parts.element.empty * ())
-  {
-    if (_assembly.size() > 0)
-      throw std::runtime_error(
-          "You cannot mix part/assembly/instance based syntax with flat input syntax");
-
-    const auto part_id = _part.add(root_part);
-    Instance root_instance(part_id);
-    // add assembly and add instance to assembly
-    throw std::runtime_error("Assembly-less models are not yet supported");
-  }
-}
-
-Instance::Instance(const OptionNode & option, const Root & root)
+Instance::Instance(const OptionNode & option, AssemblyRoot & root)
 {
   const auto & data = option._data;
   const auto & part = root._part[option._header.get<std::string>("part")];
@@ -417,7 +364,7 @@ Instance::Instance(const OptionNode & option, const Root & root)
   // translation
   if (data.size() > 0)
   {
-    const auto col = vecTo<Real>(data);
+    const auto col = vecTo<Real>(data[0]);
     if (col.size() > 3)
       throw std::runtime_error("Too many values in instance translation data line");
     for (const auto i : col)
@@ -427,7 +374,7 @@ Instance::Instance(const OptionNode & option, const Root & root)
   // rotation
   if (data.size() > 1)
   {
-    const auto col = vecTo<Real>(data);
+    const auto col = vecTo<Real>(data[1]);
     if (col.size() != 7)
       throw std::runtime_error("Invalid number of values in instance rotation data line");
 
@@ -447,61 +394,54 @@ Instance::Instance(const OptionNode & option, const Root & root)
     const Real c = std::cos(theta);
     const Real s = std::sin(theta);
     const Real oc = 1.0 - c;
-    rotation = RealVectorValue(c + ux * ux * oc,
-                               ux * uy * oc - uz * s,
-                               ux * uz * oc + uy * s,
+    rotation = RealTensorValue(c + n(0) * n(0) * oc,
+                               n(0) * n(1) * oc - n(2) * s,
+                               n(0) * n(2) * oc + n(1) * s,
 
-                               uy * ux * oc + uz * s,
-                               c + uy * uy * oc,
-                               uy * uz * oc - ux * s,
+                               n(1) * n(0) * oc + n(2) * s,
+                               c + n(1) * n(1) * oc,
+                               n(1) * n(2) * oc - n(0) * s,
 
-                               uz * ux * oc - uy * s,
-                               uz * uy * oc + ux * s,
-                               c + uz * uz * oc, );
+                               n(2) * n(0) * oc - n(1) * s,
+                               n(2) * n(1) * oc + n(0) * s,
+                               c + n(2) * n(2) * oc);
   }
 
-  // generate mesh points
-  for (const auto & [abaqus_node_id, pp] : part._node)
+  // store offsets
+  _local_to_global_node_index_offset = root._nodes.size();
+  _local_to_global_element_index_offset = root._elements.size();
+
+  // instantiate mesh points
+  for (const auto & part_node : part._nodes)
   {
-    // transform part point pp to instance point ip
-    Point ip = rotation * (pp + translation);
+    // make a copy of the part node
+    auto root_node = part_node;
 
-    // add the mesh point
-    _libmesh_node_id[abaqus_node_id] = root._mesh_points.size();
-    root._mesh_points.emplace_back(ip, 0);
+    // transform instantiated node
+    root_node._point = rotation * (root_node._point + translation);
+
+    // add the mesh point to the root level list
+    root._nodes.push_back(root_node);
   }
 
-  // add elements
-  const auto elem_id  = _elements.size();
-  for (const auto & [abaqus_elem_id, abaqus_elem] : part._element)
+  // instantiate elements
+  for (const auto & part_element : part._elements)
   {
-    const auto & uel = part._element_definition[abaqus_elem._type_id];
-    LibMeshUElement elem(uel);
-    // translate abaqus node ids to libmesh node ids
-    for (const auto i : index_range(abaqus_elem._node_list))
-    {
-      const auto abaqus_node_id = abaqus_elem._node_list[i];
-      const auto & var_mask = uel._var_mask[i];
+    // make a copy of the part element
+    auto root_element = part_element;
 
-      // get index into mesh point list
-      const auto node_id = _libmesh_node_id[abaqus_node_id];
+    // shift part node indices to root node indices
+    for (auto & index : root_element._nodes)
+      index += _local_to_global_node_index_offset;
 
-      // add global node id to element
-      elem._libmesh_node_list.push_back(node_id);
-
-      // build node to elem map
-      _root._node_to_uel_map[node_id].push_back(elem_id);
-
-      // update dof mask at global mesh point
-      root._mesh_points[node_id].second |= var_mask;
-    }
-
-    _moose_elem_id[abaqus_elem_id] = elem_id;
-    _elements.push_back(elem);
+    root._elements.push_back(root_element);
   }
+
+  // apply node sets
+  for (const auto & [nset_name, nset] : part._nsets)
 }
 
-Assembly::Assembly(const BlockNode & block, const Root & root) : SetContainer(nullptr)
+Assembly::Assembly(const BlockNode & block, AssemblyRoot & root) : SetContainer(nullptr)
 {
   auto option_func = [&](const std::string & key, const OptionNode & option)
   {
@@ -515,14 +455,15 @@ Assembly::Assembly(const BlockNode & block, const Root & root) : SetContainer(nu
     {
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
-        processElementSet(option);
+      {
+      } //  processElementSet(option); // What do we do here????? Iterate over all instances?
       else
       {
-        auto it = _instance.find(instance_name);
-        if (it == _instance.end())
+        if (!_instance.has(instance_name))
           throw std::runtime_error("Instance '" + instance_name +
                                    "' not found in elset declaration.");
-        it->second.processElementSet(option);
+        //_instance[instance_name].processElementSet(option);
+        // .. and here?
       }
     }
 
@@ -530,19 +471,69 @@ Assembly::Assembly(const BlockNode & block, const Root & root) : SetContainer(nu
     {
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
-        processNodeSet(option);
+      {
+      } //   processNodeSet(option); // What do we do here????? Iterate over all instances?
       else
       {
-        auto it = _instance.find(instance_name);
-        if (it == _instance.end())
+        if (!_instance.has(instance_name))
           throw std::runtime_error("Instance '" + instance_name +
-                                   "' not found in elset declaration.");
-        it->second.processNodeSet(option);
+                                   "' not found in nset declaration.");
+        //_instance[instance_name].processNodeSet(option);
+        // .. and here?
+        // look up the instance offset and the part node set and add the listed nodes via
+        // _node_id_to_index[listed_id]+offset to root
       }
     }
   };
 
   root.forAll(option_func, nullptr);
+}
+
+// Entry point for the final parsing stage
+void
+FlatRoot::parse(const BlockNode & root)
+{
+  auto option_func = [this](const std::string & key, const OptionNode & option)
+  { Part::optionFunc(key, option); };
+
+  root.forAll(option_func, nullptr);
+}
+
+// Entry point for the final parsing stage
+void
+AssemblyRoot::parse(const BlockNode & root)
+{
+  auto block_func = [&](const std::string & key, const BlockNode & block)
+  {
+    if (key == "part")
+    {
+      const auto name = block._header.get<std::string>("name");
+      _part.add(name, block);
+    }
+
+    else if (key == "assembly")
+    {
+      // const auto name = block._header.get<std::string>("name");
+      if (_assembly)
+        throw std::runtime_error("Only one Assembly per model is supported");
+      _assembly = std::make_unique<Assembly>();
+      _assembly->parse(block, *this);
+    }
+
+    else if (key == "step")
+    {
+    }
+
+    else
+      throw std::runtime_error("Unsupported block found in input: " + key);
+  };
+
+  root.forAll(nullptr, block_func);
+}
+
+Boundary::Boundary(const OptionNode & option, Root & root)
+{
+  // get the current state of the node set
 }
 
 } // namespace Abaqus
