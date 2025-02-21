@@ -44,26 +44,26 @@ private:
   std::map<std::string, std::string> _map;
 };
 
-struct Node
+struct InputNode
 {
-  Node(std::vector<std::string> line);
-  virtual ~Node() = default;
+  InputNode(std::vector<std::string> line);
+  virtual ~InputNode() = default;
 
   std::string _type;
   HeaderMap _header;
 };
-struct OptionNode : public Node
+struct OptionNode : public InputNode
 {
-  OptionNode(std::vector<std::string> line) : Node(line) {}
+  OptionNode(std::vector<std::string> line) : InputNode(line) {}
   std::string stringify(const std::string & indent = "") const;
 
   std::vector<std::vector<std::string>> _data;
 };
 
 struct BlockNode;
-struct BlockNode : public Node
+struct BlockNode : public InputNode
 {
-  BlockNode(std::vector<std::string> line) : Node(line) {}
+  BlockNode(std::vector<std::string> line) : InputNode(line) {}
   std::string stringify(const std::string & indent = "") const;
 
   template <typename To, typename Tc>
@@ -90,7 +90,7 @@ struct BlockNode : public Node
     }
   }
 
-  std::vector<std::unique_ptr<Node>> _children;
+  std::vector<std::unique_ptr<InputNode>> _children;
 };
 
 /**
@@ -101,6 +101,8 @@ class InputParser : public BlockNode
 public:
   InputParser() : BlockNode({"ROOT"}) {}
   void parse(std::istream & in);
+
+  bool isFlat() const { return _is_flat; }
 
 private:
   void loadFile(std::istream & in);
@@ -116,6 +118,9 @@ private:
 
   /// currently parsed line
   std::size_t _current_line;
+
+  /// are we parsing a flat or assembly based input?
+  bool _is_flat;
 };
 
 template <typename T>
