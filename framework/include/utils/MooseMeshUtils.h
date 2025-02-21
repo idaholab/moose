@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "libmesh/mesh_base.h"
+#include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
 
 #include "MooseUtils.h"
@@ -402,4 +402,16 @@ void extraElemIntegerSwapParametersProcessor(
     const unsigned int num_integers,
     const std::vector<std::vector<std::vector<dof_id_type>>> & elem_integers_swaps,
     std::vector<std::unordered_map<dof_id_type, dof_id_type>> & elem_integers_swap_pairs);
+
+/**
+ * Build a lower-dimensional mesh from a boundary of an input mesh
+ * Note: The lower-dimensional mesh will only have one subdomain and one boundary.
+ *       Error will be thrown if the mesh does not have the boundary.
+ *       This function works only with replicated mesh, for similar functionality with
+ *       distributed meshes, please refer to LowerDBlockFromSidesetGenerator generator.
+ * @param input_mesh  The input mesh
+ * @param boundary_id The boundary id
+ */
+std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_mesh,
+                                                  const boundary_id_type boundary_id);
 }
