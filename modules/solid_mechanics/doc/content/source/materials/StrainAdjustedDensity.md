@@ -1,9 +1,11 @@
 # StrainAdjustedDensity / ADStrainAdjustedDensity
 
-!syntax description /Materials/StrainAdjustedDensity
+## Example Input File
 
-!syntax parameters /Materials/Density
+!listing modules/solid_mechanics/test/tests/strain_adjusted_density/exact.i block=Materials
 
-!syntax inputs /Materials/Density
+!syntax parameters /Materials/StrainAdjustedDensity
 
-!syntax children /Materials/Density
+!syntax inputs /Materials/StrainAdjustedDensity
+
+!syntax children /Materials/StrainAdjustedDensity
