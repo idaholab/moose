@@ -84,6 +84,11 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
     paramError("velocity_variable",
                "Either velocity_variable or velocity_material must be specificied, not both, nor "
                "velocity.");
+
+  if (this->_has_diag_save_in)
+    paramError("diag_save_in",
+               "_local_ke not computed for global AD indexing. Save-in is deprecated anyway. Use "
+               "the tagging system instead.");
 }
 
 template <bool is_ad>
@@ -231,21 +236,7 @@ ConservativeAdvectionTempl<is_ad>::fullUpwind(JacRes res_or_jac)
   }
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-  {
     accumulateTaggedLocalMatrix();
-
-    if (this->_has_diag_save_in)
-    {
-      unsigned int rows = _local_ke.m();
-      DenseVector<Number> diag(rows);
-      for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i, i);
-
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (const auto & var : this->_diag_save_in)
-        var->sys().solution().add_vector(diag, var->dofIndices());
-    }
-  }
 }
 
 template class ConservativeAdvectionTempl<false>;
