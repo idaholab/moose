@@ -181,8 +181,8 @@ class Test(unittest.TestCase):
         pre_make = PreMake()
         package = 'moose-dev'
         version = copy.copy(pre_make.conda_env[package]['version'])
-        current_version = copy.copy(pre_make.versioner_meta[package]['conda']['version'])
-        build_number = copy.copy(pre_make.conda_env[package]['build_number'])
+        current_version = copy.copy(pre_make.packages[package].conda.version)
+        build_number = copy.copy(pre_make.packages[package].conda.build_number)
 
         # Same version and build
         pre_make = PreMake()
@@ -238,15 +238,15 @@ class Test(unittest.TestCase):
         self.assertEqual(apptainer_env, PreMake.getApptainerEnv())
 
     @patch.object(PreMake, "getApptainerEnv")
-    def testCheckApptainer(self, mock_get_apptainer_env):
+    def testCheckApptainer(self, mock_get_app_infotainer_env):
         # So that we can still test this on systems outside of apptainer
-        mock_get_apptainer_env.return_value = gold_apptainer_env
+        mock_get_app_infotainer_env.return_value = gold_apptainer_env
         library = gold_apptainer_library
 
         # The current apptainer info for moose-dev
         pre_make = PreMake()
-        apptainer_meta = pre_make.versioner_meta[library]['apptainer']
-        tag = apptainer_meta['tag']
+        package = pre_make.packages[library]
+        tag = package.apptainer.tag
 
         # Same version
         pre_make = PreMake()
@@ -262,7 +262,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(PreMake.ApptainerVersionMismatch) as e:
             pre_make._checkApptainer()
         self.assertEqual(e.exception.name, gold_apptainer_env['NAME'])
-        self.assertEqual(e.exception.name_base, apptainer_meta['name_base'])
+        self.assertEqual(e.exception.name_base, package.apptainer.name_base)
         self.assertEqual(e.exception.current_version, different_tag)
         self.assertEqual(e.exception.required_version, tag)
         self.assertIn(f'oras://harbor.hpc.inl.gov/{library}/{gold_apptainer_env["NAME"]}:{tag}', str(e.exception))

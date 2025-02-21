@@ -1,0 +1,50 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
+{% set version = "__VERSIONER_PEACOCK_VERSION__" %}
+
+package:
+  name: moose-peacock
+  version: {{ version }}
+
+source:
+  path: ../peacock
+
+build:
+  number: 0
+  string: {{ mpi }}_0
+
+requirements:
+  run:
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - pyaml
+    - numpy
+    - pandas
+    - pyqt
+    - matplotlib !=3.9.0
+    - libgl                           # [linux]
+    - vtk
+  run_constrained:
+    # Python max constraints
+    - python <{{3.12}}
+
+test:
+  imports:
+    - PyQt5
+    - pandas
+    - matplotlib
+    - vtk
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: >
+    This superficial module (moose-peacock) acts as a top-level module designed to provide all
+    dependencies required in order to run Peacock.
+
+extra:
+  recipe-maintainers:
+    - milljm

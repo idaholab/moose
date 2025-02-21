@@ -1,0 +1,70 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   libmesh/*
+#
+#   And documentation:
+#   framework/doc/packages_config.yml
+#
+# As well as any directions pertaining to modifying those files.
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set build = __VERSIONER_PETSC_BUILD_NUMBER__ %}
+{% set version = "__VERSIONER_PETSC_VERSION__" %}
+
+package:
+  name: moose-petsc
+  version: {{ version }}
+
+source:
+  - path: ../../petsc
+  - path: ../../scripts/configure_petsc.sh
+  - path: ../functions/retry_build.sh
+  - patches:
+      - no-cppflags-in-pkgconfig-cflags.patch
+
+build:
+  number: {{ build }}
+  string: {{ mpi }}_{{ build }}
+  skip: true  # [win]
+  script_env:
+    - MOOSE_JOBS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+  run_exports:
+    - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
+
+requirements:
+  build:
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - pkg-config
+  run:
+    - {{ mpi }}
+    - {{ moose_mpi }}
+    - pkg-config
+
+test:
+  requires:
+    - pkg-config
+    - {{ mpi }}
+    - {{ moose_mpi }}
+  files:
+    - tests/ex1.c
+    - tests/ex1f.F90
+    - tests/makefile
+  commands:
+    - pkg-config --validate PETSc
+    - pkg-config --cflags PETSc
+    - pkg-config --libs PETSc
+
+about:
+  home: https://petsc.org
+  summary: 'PETSc: Portable, Extensible Toolkit for Scientific Computation'
+  license: BSD 2-Clause
+  license_file: LICENSE
+  license_family: BSD
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour
