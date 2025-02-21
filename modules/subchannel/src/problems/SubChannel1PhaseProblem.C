@@ -2457,17 +2457,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-          if (xx[iz_ind * _n_channels + i_ch] < 0)
+          auto h_out = xx[iz_ind * _n_channels + i_ch];
+          if (h_out < 0)
           {
-            _console << "Wij = : " << _Wij << "\n";
             mooseError(name(),
                        " : Calculation of negative Enthalpy h_out = : ",
-                       xx[iz_ind * _n_channels + i_ch],
+                       h_out,
                        " Axial Level= : ",
                        iz);
           }
-          _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
+          _h_soln->set(node_out, h_out);
         }
       }
       LibmeshPetscCall(KSPDestroy(&ksploc));
@@ -2486,17 +2485,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          PetscScalar value = sol_h_array[iz_ind * _n_channels + i_ch];
-          _h_soln->set(node_out, value);
-
-          if (value < 0)
+          auto h_out = sol_h_array[iz_ind * _n_channels + i_ch];
+          if (h_out < 0)
           {
             mooseError(name(),
                        " : Calculation of negative Enthalpy h_out = : ",
-                       value,
+                       h_out,
                        " Axial Level= : ",
                        iz);
           }
+          _h_soln->set(node_out, h_out);
         }
       }
       LibmeshPetscCall(VecDestroy(&sol_h));

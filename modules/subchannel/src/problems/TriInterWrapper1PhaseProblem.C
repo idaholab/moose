@@ -299,7 +299,13 @@ TriInterWrapper1PhaseProblem::computeh(int iblock)
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      _h_soln->set(node, _fp->h_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
+      auto h_out = _fp->h_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+      if (h_out < 0)
+      {
+        mooseError(
+            name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", 0);
+      }
+      _h_soln->set(node, h_out);
     }
   }
 

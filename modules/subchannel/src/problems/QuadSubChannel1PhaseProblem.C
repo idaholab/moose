@@ -605,7 +605,13 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      _h_soln->set(node, _fp->h_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
+      auto h_out = _fp->h_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+      if (h_out < 0)
+      {
+        mooseError(
+            name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", 0);
+      }
+      _h_soln->set(node, h_out);
     }
   }
 
@@ -660,7 +666,6 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
                 (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
         if (h_out < 0)
         {
-          _console << "Wij = : " << _Wij << "\n";
           mooseError(name(),
                      " : Calculation of negative Enthalpy h_out = : ",
                      h_out,
@@ -958,17 +963,16 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-          if (xx[iz_ind * _n_channels + i_ch] < 0)
+          auto h_out = xx[iz_ind * _n_channels + i_ch];
+          if (h_out < 0)
           {
-            _console << "Wij = : " << _Wij << "\n";
             mooseError(name(),
                        " : Calculation of negative Enthalpy h_out = : ",
-                       xx[iz_ind * _n_channels + i_ch],
+                       h_out,
                        " Axial Level= : ",
                        iz);
           }
-          _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
+          _h_soln->set(node_out, h_out);
         }
       }
       LibmeshPetscCall(KSPDestroy(&ksploc));
