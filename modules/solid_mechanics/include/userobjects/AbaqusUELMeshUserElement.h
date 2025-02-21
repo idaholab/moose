@@ -109,7 +109,7 @@ protected:
   const AbaqusUELMesh::UELDefinition & _uel_definition;
 
   /// all elements in the UEL mesh
-  std::vector<Abaqus::UserElement> & _uel_elements;
+  std::vector<AbaqusUELMesh::UserElement> & _uel_elements;
 
   /// selected set names
   const std::vector<std::string> & _element_set_names;

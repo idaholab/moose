@@ -21,8 +21,13 @@
 
 namespace Abaqus
 {
-struct Part;
-struct Assembly;
+struct AssemblyRoot;
+
+// Any Abaqus ID should use this type
+using AbaqusID = int;
+
+// Any index into a std::vector should use this type
+using Index = std::size_t;
 
 /**
  * Store objects of type T accessible under a name and a contiguous id.
@@ -66,11 +71,72 @@ private:
 };
 
 /**
- * Common base class for objects that can contain sets
+ * User element option
  */
-struct SetContainer
+struct UserElement
 {
-  SetContainer(Part * part) : _part(part) {}
+  UserElement(const OptionNode & option);
+
+  /// needed by the UEL plugin
+  int _coords;
+  std::size_t _n_nodes;
+  int _n_statev;
+  int _n_properties;
+  int _n_iproperties;
+  bool _symmetric;
+
+  std::string _type;    // TODO: is this needed?
+  std::size_t _type_id; // TODO: is this needed?
+
+  /// list of abaqus variables active at each node
+  std::vector<std::vector<std::size_t>> _vars;
+
+  /// bitmask encoding the DOF selection in _vars at each node
+  std::vector<SubdomainID> _var_mask;
+};
+
+/**
+ * Mesh node
+ */
+struct Node
+{
+  /// original Abaqus ID (unique only at the part level)
+  AbaqusID _id;
+
+  /// location of the node
+  Point _point;
+
+  /// bit set for every Abaqus Variable number (-1) that is active on this node
+  SubdomainID _var_mask;
+};
+
+/**
+ * Mesh element
+ */
+struct Element
+{
+  /// original Abaqus ID (unique only at the part level)
+  AbaqusID _id;
+
+  /// UEL Defintion
+  const UserElement & _uel;
+
+  /// index into the corresponding node list (either at part level or root level)
+  std::vector<Index> _nodes;
+
+  /// pointer to the assigned property list
+  std::pair<Real *, int *> _properties;
+};
+
+/**
+ * Part Block
+ */
+struct Part
+{
+  Part() = default;
+  parse(const BlockNode & block);
+
+  optionFunc(const std::string & key, const OptionNode & option);
 
   void processNodeSet(const OptionNode & option);
   void processElementSet(const OptionNode & option);
@@ -78,98 +144,40 @@ struct SetContainer
   const std::vector<std::size_t> & getNodeSet(const std::string & nset) const;
   const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
 
-  /// UEL node sets
-  std::map<std::string, std::vector<std::size_t>> _node_set;
-
-  /// UEL element sets
-  std::map<std::string, std::vector<std::size_t>> _element_set;
-
-  void processSetHelper(std::map<std::string, std::vector<std::size_t>> & set_map,
+  void processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
+                        std::unordered_map<AbaqusID, Index> & id_to_index,
                         const OptionNode & option,
                         const std::string & name_key);
-  Part * _part;
-};
-
-/**
- * Root input file scope
- */
-struct Root
-{
-  Root() = default;
-  void process(const BlockNode & root);
-
-  /// Parts
-  ObjectStore<Part> _part;
-
-  /// Assemblies
-  ObjectStore<Assembly> _assembly;
-
-  /// mesh points and dof bitmask
-  std::vector<std::pair<Point, SubdomainID> _mesh_points;
-
-  /// A map from nodes (i.e. node elements) to user elements (ids)
-  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
-};
-
-/**
- * User element option
- */
-struct UserElement
-{
-  UserElement(const OptionNode & option);
-
-  int _coords;
-  std::size_t _n_nodes;
-  int _n_statev;
-  int _n_properties;
-  int _n_iproperties;
-  bool _symmetric;
-  std::string _type;
-  std::size_t _type_id;
-  std::vector<std::vector<std::size_t>> _vars;
-
-  // bitmask encoding the dof selection in _vars at each node
-  std::vector<SubdomainID> _var_mask;
-};
-
-/**
- * Part Block
- */
-struct Part : public SetContainer
-{
-  Part(const BlockNode & block);
 
   ObjectStore<UserElement> _element_definition;
 
   /// float and int property storage. elements will point to their respective entries in this vector
   std::list<std::pair<std::vector<Real>, std::vector<int>>> _properties;
 
-  struct Element
-  {
-    std::size_t _type_id;
-    std::vector<int> _node_list;
-  };
+  /// connectivity
+  std::vector<Node> _nodes;
+  std::vector<Element> _elements;
 
-  std::vector<std::pair<int, Point>> _node;
-  std::vector<std::pair<int, Element>> _element;
+  /// map from abaqus node id to part local index
+  std::unordered_map<AbaqusID, Index> _node_id_to_index;
+  std::unordered_map<AbaqusID, Index> _element_id_to_index;
+
+  /// sets
+  std::map<std::string, std::vector<Index>> _elsets;
+  std::map<std::string, std::vector<Index>> _nsets;
 };
 
 /**
  * Instance option
  */
-struct Instance : public SetContainer
+struct Instance
 {
-  Instance(std::size_t part_id)
-    : SetContainer(*this), _part_id(part_id), _rotation(1, 0, 0, 0, 1, 0, 0, 0, 1)
-  {
-  }
-  Instance(const OptionNode & option, const Root & root);
+  Instance(const OptionNode & option, AssemblyRoot & root);
 
-  // upon instantiation when nodes are created...
-  // ...we map local abaqus node ids to global libmesh node/node_element IDs
-  std::unordered_map<int, dof_id_type> _libmesh_node_id;
-  // ...and abaqus elements to indices into the uel elements in the moose mesh
-  std::unordered_map<int, dof_id_type> _moose_elem_id;
+  // upon instantiation when nodes are created we map
+  // part local indices to global indices in the Root
+  Index _local_to_global_node_index_offset;
+  Index _local_to_global_element_index_offset;
 };
 
 /**
@@ -178,9 +186,47 @@ struct Instance : public SetContainer
 struct Assembly : public SetContainer
 {
   Assembly() = default;
-  Assembly(const BlockNode & block, const Root & root);
+  void parse(const BlockNode & block, AssemblyRoot & root);
 
   ObjectStore<Instance> _instance;
+};
+
+/**
+ * Root input file scope
+ */
+struct Root : public Part
+{
+  Root() = default;
+
+  /// mesh points and dof bitmask
+  std::vector<std::pair<Point, SubdomainID>> _mesh_points;
+
+  /// A map from nodes (i.e. node elements) to user elements (ids)
+  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
+};
+
+/**
+ * Root node for flat input files
+ */
+struct FlatRoot : public Root
+{
+  FlatRoot() = default;
+  void parse(const BlockNode & root);
+};
+
+/**
+ * Root node for assembly based input files
+ */
+struct AssemblyRoot : public Root
+{
+  AssemblyRoot() = default;
+  void parse(const BlockNode & root);
+
+  /// Parts
+  ObjectStore<Part> _part;
+
+  /// Assemblies
+  std::unique_ptr<Assembly> _assembly;
 };
 
 /**
@@ -189,6 +235,17 @@ struct Assembly : public SetContainer
 struct Step
 {
   Step(const BlockNode &, Root &) {}
+};
+
+/**
+ * Essential boundary condition (Dirichlet)
+ */
+struct Boundary
+{
+  Boundary(const OptionNode & option, Root & root);
+
+  /// list of nodes this BC applies to
+  std::vector<dof_id_type> _node_set;
 };
 
 /**
