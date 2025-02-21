@@ -1464,7 +1464,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          h_out = xx[iz_ind * _n_channels + i_ch];
+          auto h_out = xx[iz_ind * _n_channels + i_ch];
           if (h_out < 0)
           {
             mooseError(name(),
