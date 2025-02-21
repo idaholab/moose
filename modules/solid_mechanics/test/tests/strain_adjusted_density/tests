@@ -1,0 +1,10 @@
+[Tests]
+  [exact]
+    type = 'CSVDiff'
+    input = 'exact.i'
+    csvdiff = 'exact_out.csv'
+    issues = '#29556'
+    design = 'StrainAdjustedDensity.md'
+    requirement = 'The system shall compute a density modified by strain.'
+  []
+[]
