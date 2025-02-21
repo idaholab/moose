@@ -67,38 +67,27 @@ template <bool is_ad>
 void
 StrainAdjustedDensityTempl<is_ad>::computeQpProperties()
 {
-  _density[_qp] = _strain_free_density[_qp];
-
-  const auto Axx = (*_grad_disp[0])[_qp](0) + 1.0;
-  const auto & Axy = (*_grad_disp[0])[_qp](1);
-  const auto & Axz = (*_grad_disp[0])[_qp](2);
-  const auto & Ayx = (*_grad_disp[1])[_qp](0);
-  auto Ayy = (*_grad_disp[1])[_qp](1) + 1.0;
-  const auto & Ayz = (*_grad_disp[1])[_qp](2);
-  const auto & Azx = (*_grad_disp[2])[_qp](0);
-  const auto & Azy = (*_grad_disp[2])[_qp](1);
-  auto Azz = (*_grad_disp[2])[_qp](2) + 1.0;
+  auto A = GenericRankTwoTensor<is_ad>::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  A.addIa(1.0);
 
   switch (_coord_system)
   {
     case Moose::COORD_XYZ:
-      Azz = (*_grad_disp[2])[_qp](2) + 1.0;
       break;
 
     case Moose::COORD_RZ:
       if (_q_point[_qp](0) != 0.0)
-        Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
+        A(2, 2) = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
       break;
 
     case Moose::COORD_RSPHERICAL:
       if (_q_point[_qp](0) != 0.0)
-        Ayy = Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
+        A(1, 1) = A(2, 2) = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
       break;
   }
 
-  const auto detF = Axx * Ayy * Azz + Axy * Ayz * Azx + Axz * Ayx * Azy - Azx * Ayy * Axz -
-                    Azy * Ayz * Axx - Azz * Ayx * Axy;
-  _density[_qp] /= detF;
+  _density[_qp] = _strain_free_density[_qp] / A.det();
 }
 
 template class StrainAdjustedDensityTempl<false>;
