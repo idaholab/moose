@@ -1,0 +1,16 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#29496'
+  # Regression check for THORS model
+  [THORS_FFM-5B]
+    type = Exodiff
+    input = FFM-5B.i
+    exodiff = 'FFM-5B_out.e'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    rel_err = 4e-4
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for THORS liquid sodium cooled assembly with blockage'
+  []
+[]

@@ -1,0 +1,49 @@
+Content:
+    - framework/doc/content
+    - modules/subchannel/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/heat_transfer/doc/content
+    - modules/ray_tracing/doc/content
+    - modules/reactor/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+
+Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE SubChannel Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/subchannel/index.md
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/subchannel
+        remove:
+            framework: !include framework/doc/remove.yml
+            subchannel: !include modules/subchannel/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
+        includes:
+            - framework/include
+            - modules/subchannel/include
+            - modules/fluid_properties/include
+            - modules/heat_transfer/include
+            - modules/navier_stokes/include
+            - modules/ray_tracing/include
+            - modules/reactor/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.template:
+        active: True
+    MooseDocs.extensions.bibtex:
+        duplicate_warning: False
+    MooseDocs.extensions.sqa:
+            active: True
+            reports: !include modules/subchannel/doc/sqa_reports.yml
+            categories:
+                framework: !include framework/doc/sqa_framework.yml
+                subchannel: !include modules/subchannel/doc/sqa_subchannel.yml
+                fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
+                heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
+                ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
+                reactor: !include modules/reactor/doc/sqa_reactor.yml
