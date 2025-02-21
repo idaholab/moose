@@ -1370,7 +1370,7 @@ TEST_F(MooseServerTest, CompletionPartialInputCases)
 [Outputs]
   [out]
     type = Exodus
-    output_dimension =
+    output_dimension :=
     lin
 )INPUT";
 
