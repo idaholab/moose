@@ -374,10 +374,10 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
         << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, ", ") << '\n';
 
   for (const std::size_t i : make_range(problem.numSolverSystems()))
-    oss << std::setw(console_field_width) << "  Solver Mode"
-        << (problem.numSolverSystems() > 1 ? std::string("for system " + std::to_string(i))
-                                           : std::string(""))
-        << ": " << problem.solverTypeString(i) << '\n';
+    oss << std::setw(console_field_width)
+        << "  Solver Mode" +
+               (problem.numSolverSystems() > 1 ? " - system " + std::to_string(i) : "") + ": "
+        << problem.solverTypeString(i) << '\n';
 
   const std::string & pc_desc = problem.getPetscOptions().pc_description;
   if (!pc_desc.empty())
