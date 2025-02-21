@@ -226,7 +226,7 @@ DiffusionCG::addSolverVariables()
   // If the variable was added outside the Physics
   if (variableExists(_var_name, /*error_if_aux*/ true))
   {
-    if (isParamValid("variable_order"))
+    if (isParamSetByUser("variable_order"))
       paramError("variable_order",
                  "Cannot specify the variable order if variable " + _var_name +
                      " is defined outside the Physics block");

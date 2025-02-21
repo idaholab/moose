@@ -150,7 +150,9 @@ DiffusionPhysicsBase::addInitialConditions()
   // then obey the user specification of initial conditions
   // NOTE: we may conflict with ICs in the input
   // there are no default initial conditions
-  mooseAssert(!parameters().hasDefault("initial_condition"), "Should not have a default");
+  mooseAssert(parameters().isParamSetByUser("initial_condition") ||
+                  !parameters().hasDefault("initial_condition"),
+              "Should not have a default");
   if (parameters().isParamSetByUser("initial_condition") && remaining_blocks.size())
   {
     params.set<VariableName>("variable") = _var_name;
