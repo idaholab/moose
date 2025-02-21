@@ -227,7 +227,7 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
     wasp::HITNodeView backup_context = request_context;
     for (int backup_char = character; backup_context == request_context && --backup_char > 0;)
       backup_context = wasp::findNodeUnderLineColumn(request_context, line + 1, backup_char + 1);
-    if (backup_context.type() == wasp::ASSIGN)
+    if (backup_context.type() == wasp::ASSIGN || backup_context.type() == wasp::OVERRIDE_ASSIGN)
       request_context = backup_context;
   }
 
@@ -307,7 +307,8 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
                                is_request_on_block_decl(request_context));
 
   // add valid parameter value options to completion list using input range
-  if ((request_context.type() == wasp::VALUE || request_context.type() == wasp::ASSIGN) &&
+  if ((request_context.type() == wasp::VALUE || request_context.type() == wasp::ASSIGN ||
+       request_context.type() == wasp::OVERRIDE_ASSIGN) &&
       valid_params.getParametersList().count(parent_name))
     pass &= addValuesToList(completionItems,
                             valid_params,
