@@ -54,7 +54,7 @@
     type = RunException
     input = 'layered_side_average.i'
     cli_args = 'UserObjects/layered_side_average/block=0'
-    expect_err = "Both block and boundary cannot be specified in LayeredSideIntegral. If you want to define the geometric bounds of the layers from a specified block set layer_bounding_block instead."
+    expect_err = "Both block and boundary cannot be specified for a layered integral user object. If you want to define the geometric bounds of the layers from a specified block set layer_bounding_block instead."
     requirement = "The system shall not allow both the block and boundary parameter to be specified for layered side integrals."
   [../]
 []
