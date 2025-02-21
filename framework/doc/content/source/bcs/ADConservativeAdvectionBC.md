@@ -3,7 +3,7 @@
 ## Description
 
 The `ADConservativeAdvectionBC` boundary condition pairs with the
-[ADConservativeAdvection.md] kernel. It can be used for both Dirichlet and
+[ConservativeAdvection.md] kernel. It can be used for both Dirichlet and
 "implicit" boundary conditions which use only information from the equation
 systems solution vectors. Velocity must be provided, either through the
 `velocity_mat_prop` parameter (implicit information) or through the
