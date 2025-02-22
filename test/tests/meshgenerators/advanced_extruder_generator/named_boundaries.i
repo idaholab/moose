@@ -16,8 +16,8 @@
     heights = '1 2 3'
     num_layers = '1 2 3'
     direction = '0 0 1'
-    bottom_boundary = '4'
-    top_boundary = '5'
+    bottom_boundary = 'back'
+    top_boundary = 'front'
     subdomain_swaps = '0 1;
                        0 2;
                        0 3'
