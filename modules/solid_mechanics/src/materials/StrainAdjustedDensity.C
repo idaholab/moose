@@ -60,7 +60,7 @@ template <bool is_ad>
 void
 StrainAdjustedDensityTempl<is_ad>::initQpStatefulProperties()
 {
-  _density[_qp] = _strain_free_density[_qp];
+  computeQpProperties();
 }
 
 template <bool is_ad>
