@@ -9,14 +9,19 @@
 
 #include "Density.h"
 
-registerMooseObject("MiscApp", Density);
-registerMooseObject("MiscApp", ADDensity);
+registerMooseObjectDeprecated("MiscApp", Density, "12/31/2025 24:00");
+registerMooseObjectDeprecated("MiscApp", ADDensity, "12/31/2025 24:00");
 
 template <bool is_ad>
 InputParameters
 DensityTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
+
+  params.addClassDescription(
+      "Creates density material property. This class is deprecated in favor of "
+      "StrainAdjustedDensity if coupled to displacements, or another general material class like "
+      "GenericConstantMaterial or ParsedMaterial if not modified by strain.");
 
   params.addCoupledVar(
       "displacements",
@@ -27,7 +32,6 @@ DensityTempl<is_ad>::validParams()
                                "multiple material systems on the same block, "
                                "e.g. for multiple phases");
   params.addRequiredParam<Real>("density", "Density");
-  params.addClassDescription("Creates density material property");
 
   return params;
 }
