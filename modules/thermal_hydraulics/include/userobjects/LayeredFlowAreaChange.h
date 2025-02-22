@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "SpatialUserObjectFunctor.h"
 #include "SideIntegralVariableUserObject.h"
 #include "LayeredBase.h"
 
@@ -16,7 +17,8 @@
  * This layered user object computes the change in cross sectional area
  * of a flow channel
  */
-class LayeredFlowAreaChange : public SideIntegralUserObject, public LayeredBase
+class LayeredFlowAreaChange : public SpatialUserObjectFunctor<SideIntegralUserObject>,
+                              public LayeredBase
 {
 public:
   LayeredFlowAreaChange(const InputParameters & parameters);

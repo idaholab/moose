@@ -9,18 +9,16 @@
 
 #pragma once
 
-#include "LayeredIntegralBase.h"
-#include "SideIntegralVariableUserObject.h"
+#include "LayeredVolumeAverageBase.h"
+#include "LayeredIntegralFunctor.h"
 
 /**
- * This UserObject computes volume integrals of a variable storing
- * partial sums for the specified number of intervals in a direction
- * (x,y,z).
+ * Computes layered element averages of a functor.
  */
-class LayeredSideIntegral : public LayeredIntegralBase<SideIntegralVariableUserObject>
+class LayeredAverageFunctor : public LayeredVolumeAverageBase<LayeredIntegralFunctor>
 {
 public:
   static InputParameters validParams();
 
-  LayeredSideIntegral(const InputParameters & parameters);
+  LayeredAverageFunctor(const InputParameters & parameters);
 };
