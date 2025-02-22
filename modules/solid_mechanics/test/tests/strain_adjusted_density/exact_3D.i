@@ -1,7 +1,14 @@
+x_length = 0.2
+y_length = 0.1
+z_length = 0.3
+
 [Mesh]
   [mesh]
     type = ExamplePatchMeshGenerator
     dim = 3
+    x_length = ${x_length}
+    y_length = ${y_length}
+    z_length = ${z_length}
   []
 []
 
@@ -90,7 +97,7 @@
   [density_exact]
     type = ParsedPostprocessor
     pp_names = 'disp_x disp_y disp_z'
-    expression = 't / (1 + disp_x) / (1 + disp_y) / (1 + disp_z)'
+    expression = 't / (1 + disp_x / ${x_length}) / (1 + disp_y / ${y_length}) / (1 + disp_z / ${z_length})'
     use_t = true
     outputs = console
   []
