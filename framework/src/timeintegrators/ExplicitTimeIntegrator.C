@@ -49,7 +49,7 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
     _solve_type(getParam<MooseEnum>("solve_type")),
     _explicit_residual(addVector("explicit_residual", false, PARALLEL)),
     _solution_update(addVector("solution_update", true, PARALLEL)),
-    _mass_matrix_diag(addVector("mass_matrix_diag", false, PARALLEL))
+    _mass_matrix_diag_inverted(addVector("mass_matrix_diag_inverted", true, GHOSTED))
 {
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
@@ -59,8 +59,7 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
     _fe_problem.solverParams(_nl->number())._type = Moose::ST_LINEAR;
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
-    _ones = addVector("ones", false, PARALLEL);
-
+    _ones = addVector("ones", true, PARALLEL);
   // don't set any of the common SNES-related petsc options to prevent unused option warnings
   Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
 }
@@ -166,7 +165,7 @@ ExplicitTimeIntegrator::meshChanged()
 
   if (_solve_type == LUMP_PRECONDITIONED)
   {
-    _preconditioner = std::make_unique<LumpedPreconditioner>(*_mass_matrix_diag);
+    _preconditioner = std::make_unique<LumpedPreconditioner>(*_mass_matrix_diag_inverted);
     _linear_solver->attach_preconditioner(_preconditioner.get());
     _linear_solver->init();
   }
@@ -193,13 +192,13 @@ ExplicitTimeIntegrator::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
       // Computes the sum of each row (lumping)
       // Note: This is actually how PETSc does it
       // It's not "perfectly optimal" - but it will be fast (and universal)
-      mass_matrix.vector_mult(*_mass_matrix_diag, *_ones);
+      mass_matrix.vector_mult(*_mass_matrix_diag_inverted, *_ones);
 
       // "Invert" the diagonal mass matrix
-      _mass_matrix_diag->reciprocal();
+      _mass_matrix_diag_inverted->reciprocal();
 
       // Multiply the inversion by the RHS
-      _solution_update->pointwise_mult(*_mass_matrix_diag, *_explicit_residual);
+      _solution_update->pointwise_mult(*_mass_matrix_diag_inverted, *_explicit_residual);
 
       // Check for convergence by seeing if there is a nan or inf
       auto sum = _solution_update->sum();
@@ -212,8 +211,8 @@ ExplicitTimeIntegrator::performExplicitSolve(SparseMatrix<Number> & mass_matrix)
     }
     case LUMP_PRECONDITIONED:
     {
-      mass_matrix.vector_mult(*_mass_matrix_diag, *_ones);
-      _mass_matrix_diag->reciprocal();
+      mass_matrix.vector_mult(*_mass_matrix_diag_inverted, *_ones);
+      _mass_matrix_diag_inverted->reciprocal();
 
       converged = solveLinearSystem(mass_matrix);
 
