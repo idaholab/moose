@@ -10,7 +10,7 @@ continuing. Please see MOOSE's
 information on how to reach us in the event troubleshooting fails.
 
 If you need to update {{ApplicationName}}, know that by following through the
-'[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build)' steps again,
+[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build) steps again,
 effectively performs an update each time.
 
 ## Environment
@@ -122,12 +122,12 @@ either a Conda update, or rebuild PETSc/libMesh:
 
 - If +Personal Machine (Conda)+:
 
-  !package! code
+  !versioner! code
   conda activate base
   conda env remove -n moose
-  conda create -n moose moose-dev=__MOOSE_DEV__ __DEFAULT_MPI__
+  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
   conda activate moose
-  !package-end!
+  !versioner-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
 
