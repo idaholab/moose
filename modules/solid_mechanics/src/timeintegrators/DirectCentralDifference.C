@@ -21,6 +21,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "DirichletBCBase.h"
 #include "libmesh/vector_value.h"
+#include <iostream>
 
 registerMooseObject("SolidMechanicsApp", DirectCentralDifference);
 
@@ -47,7 +48,9 @@ DirectCentralDifference::validParams()
 DirectCentralDifference::DirectCentralDifference(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
-    _mass_matrix(getParam<TagName>("mass_matrix_tag"))
+    _mass_matrix(getParam<TagName>("mass_matrix_tag")),
+    _solution_older(_sys.solutionState(2)),
+    _compute_once(false)
 {
   _fe_problem.setUDotRequested(true);
   _fe_problem.setUDotOldRequested(true);
@@ -102,6 +105,9 @@ DirectCentralDifference::solve()
     _mass_matrix_diag_inverted->close();
   }
 
+  if (_t_step == 1)
+    computeICs();
+
   // Set time to the time at which to evaluate the residual
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
@@ -142,6 +148,7 @@ DirectCentralDifference::postResidual(NumericVector<Number> & residual)
 bool
 DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
 {
+
   bool converged = false;
 
   // Calculate acceleration
@@ -171,4 +178,18 @@ DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
   vel.close();
   accel.close();
   return converged;
+}
+void
+DirectCentralDifference::computeICs()
+{
+  auto vel = _sys.solutionUDotOld();
+  *vel = *_solution;
+  *vel -= _solution_older;
+  *vel *= 1.0 / (2.0 * _dt);
+  vel->close();
+
+  // std::cout << "sol: " << _solution->linfty_norm() << std::endl;
+  // std::cout << "sol_old: " << _solution_old.linfty_norm() << std::endl;
+  // std::cout << "sol_older: " << _solution_older.linfty_norm() << std::endl;
+  // std::cout << "vel: " << vel->linfty_norm() << std::endl;
 }
