@@ -29,7 +29,6 @@ public:
    * @param model The model prediction
    * @param noise The standard deviation
    */
-  static Real function(const std::vector<Real> & exp,
-                       const std::vector<Real> & model,
-                       const Real & noise);
+  static Real
+  function(const std::vector<Real> & exp, const std::vector<Real> & model, const Real & noise);
 };
