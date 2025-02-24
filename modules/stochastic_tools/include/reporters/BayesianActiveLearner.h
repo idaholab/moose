@@ -24,6 +24,7 @@ public:
   static InputParameters validParams();
 
   BayesianActiveLearner(const InputParameters & parameters);
+  virtual void initialize() override;
 
 protected:
   virtual void setupGPData(const std::vector<Real> & data_out,
@@ -47,7 +48,7 @@ private:
   const BayesianActiveLearningSampler * const _bayes_al_sampler;
 
   /// Storage for all the proposed samples to test the GP model
-  const std::vector<std::vector<Real>> & _inputs_test;
+  // std::vector<std::vector<Real>> _inputs_test;
 
   /// Storage for new proposed variance samples
   const std::vector<Real> & _new_var_samples;
