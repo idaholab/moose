@@ -1,6 +1,7 @@
 [Tests]
   design = 'MeshGenerator.md'
   issues = '#29095'
+  requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file by '
 
   [csg_only]
     type = 'JSONDiff'
@@ -9,7 +10,7 @@
     jsondiff = 'csg_only_inf_planes_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file'
+    detail = 'correctly constructing planes from 3 points'
   []
   [csg_only_chained]
     type = 'JSONDiff'
@@ -18,7 +19,7 @@
     jsondiff = 'csg_only_chained_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file, where one mesh generator modifies the mesh created by another mesh generator'
+    detail = 'passing a single CSGBase object between MeshGenerators to be updated'
   []
   [csg_only_sphere_origin]
     type = 'JSONDiff'
@@ -27,7 +28,7 @@
     jsondiff = 'csg_only_sphere_origin_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file, where one mesh generator modifies the mesh created by another mesh generator'
+    detail = 'correctly constructing a sphere at the origin when no center is provided'
   []
   [csg_only_sphere_point]
     type = 'JSONDiff'
@@ -36,7 +37,7 @@
     jsondiff = 'csg_only_sphere_point_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file, where one mesh generator modifies the mesh created by another mesh generator'
+    detail = 'correctly constructing a sphere at a specified point'
   []
 
   [errors]
