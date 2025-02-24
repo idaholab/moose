@@ -50,7 +50,7 @@ template <typename T, bool is_ad>
 void
 MatDiffusionBaseTempl<T, is_ad>::initialSetup()
 {
-  this->template validateNonlinearCoupling<Real>("diffusivity");
+  this->template validateNonlinearCoupling<T>("diffusivity");
 }
 
 template <typename T, bool is_ad>
