@@ -172,10 +172,10 @@ public:
   std::shared_ptr<CSGUniverse> getRootUniverse();
 
   /**
-   * @brief generate the output for the CSG object
+   * @brief generate the JSON representation output for the CSG object
    *
    */
-  void generateOutput() const;
+  nlohmann::json generateOutput() const;
 
 private:
   /// List of surfaces associated with CSG mesh

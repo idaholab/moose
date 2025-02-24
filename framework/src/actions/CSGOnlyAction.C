@@ -64,6 +64,14 @@ CSGOnlyAction::act()
     // TODO add error checking here to check that there aren't any hanging mesh objects
 
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
-    _csg_mesh->generateOutput();
+
+    auto csg_json = _csg_mesh->generateOutput();
+
+    // write generated json to file
+    std::string json_out = _app.getOutputFileBase() + "_csg.json";
+    std::ofstream csg_file;
+    csg_file.open(json_out);
+    csg_file << csg_json.dump(2);
+    csg_file.close();
   }
 }

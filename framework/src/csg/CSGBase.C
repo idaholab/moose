@@ -33,7 +33,7 @@ CSGBase::CSGBase() : _surface_list(CSGSurfaceList()) {}
 
 CSGBase::~CSGBase() {}
 
-void
+nlohmann::json
 CSGBase::generateOutput() const
 {
     nlohmann::json csg_json;
@@ -62,14 +62,7 @@ CSGBase::generateOutput() const
                                                  << std::endl;
     }
   }
+  return csg_json;
 
-  // write generated json to file
-  auto fname = _root_universe->getName(); // this needs to be the inp file name but I cannot figure
-                                          // out how to gather that (_app.getOutputFileBase())
-  std::string json_out = fname +  "_csg.json";
-  std::ofstream csg_file;
-  csg_file.open(json_out);
-  csg_file << csg_json.dump(2);
-  csg_file.close();
 }
 } // namespace CSG
