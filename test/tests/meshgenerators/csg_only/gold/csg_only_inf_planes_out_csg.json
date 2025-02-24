@@ -1,0 +1,42 @@
+{
+  "CELLS": null,
+  "SURFACES": {
+    "surf_minus_x": {
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": 1
+    },
+    "surf_minus_y": {
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": -1.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": 1
+    },
+    "surf_plus_x": {
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": 1
+    },
+    "surf_plus_y": {
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": 1
+    }
+  },
+  "UNIVERSES": null
+}
