@@ -37,6 +37,11 @@ protected:
   virtual typename OutputTools<typename Moose::ADType<T>::type>::OutputGradient
   precomputeQpResidual() = 0;
 
+  /**
+   * Added for downstream consistancy with nonAD members
+   */
+  virtual RealGradient precomputeQpJacobian() { return RealGradient(0); }
+
   virtual ADReal computeQpResidual() override final;
 
   using ADKernelTempl<T>::_assembly;
