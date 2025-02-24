@@ -124,10 +124,11 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 }
 
 void
-SolutionInvalidity::printHistory(const ConsoleStream & console, unsigned int & time_interval) const
+SolutionInvalidity::printHistory(const ConsoleStream & console,
+                                 unsigned int & timestep_interval_size) const
 {
   console << "\nSolution Invalid Warnings History:\n";
-  transientTable(time_interval).print(console);
+  transientTable(timestep_interval_size).print(console);
 }
 
 void
@@ -257,7 +258,7 @@ SolutionInvalidity::transientTable(unsigned int & time_interval) const
 {
   mooseAssert(_has_synced, "Has not synced");
 
-  TimeTable vtable({"Object", "Time", "Timeinterval Count", "Total Count"}, 4);
+  TimeTable vtable({"Object", "Time", "Timestep Count", "Total Count"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object information
@@ -280,6 +281,7 @@ SolutionInvalidity::transientTable(unsigned int & time_interval) const
       const auto & entry = _counts[id];
       const auto & info = _solution_invalidity_registry.item(id);
       std::vector<unsigned int> interval_counts;
+      std::vector<unsigned int> total_counts;
 
       for (unsigned int timestep = 0; timestep < entry.timestep_counts.back().timestep_index;
            timestep += time_interval)
@@ -300,15 +302,17 @@ SolutionInvalidity::transientTable(unsigned int & time_interval) const
         interval_counts.push_back(interval_sum);
       }
 
+      unsigned int interval_sum = 0;
       for (unsigned int interval_index : index_range(interval_counts))
       {
         std::string interval_index_str =
             std::to_string(interval_index) + "-" + std::to_string(interval_index + time_interval);
 
+        interval_sum += interval_counts[interval_index];
         vtable.addRow(info.object_type + " : " + info.message, // Object information
                       interval_index_str,                      // Interval Index
                       interval_counts[interval_index],         // Interval Counts
-                      entry.total_counts                       // Total Iteration Warnings
+                      interval_sum                             // Total Iteration Warnings
 
         );
       }

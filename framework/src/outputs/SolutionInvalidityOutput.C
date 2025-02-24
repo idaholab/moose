@@ -9,7 +9,6 @@
 
 // Moose includes
 #include "SolutionInvalidityOutput.h"
-#include "SolutionInvalidity.h"
 #include "MooseApp.h"
 #include "MooseObjectParameterName.h"
 #include "InputParameterWarehouse.h"
@@ -22,10 +21,12 @@ SolutionInvalidityOutput::validParams()
 {
   InputParameters params = Output::validParams();
 
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL, EXEC_FAILED};
 
-  params.addParam<unsigned int>(
-      "time_interval", 1, "The time step interval to report the solution invalidity occurances.");
+  params.addParam<unsigned int>("timestep_interval",
+                                1,
+                                "The number of time steps to group together in the table reporting "
+                                "the solution invalidity occurrences.");
 
   params.addClassDescription("Controls output of the time history of solution invalidity object");
 
@@ -33,26 +34,24 @@ SolutionInvalidityOutput::validParams()
 }
 
 SolutionInvalidityOutput::SolutionInvalidityOutput(const InputParameters & parameters)
-  : Output(parameters), _time_interval(getParam<unsigned int>("time_interval"))
+  : Output(parameters),
+    _timestep_interval(getParam<unsigned int>("timestep_interval")),
+    _solution_invalidity(_app.solutionInvalidity())
 {
 }
 
 bool
 SolutionInvalidityOutput::shouldOutput()
 {
-  return _execute_on.isValueSet(_current_execute_flag);
+  return _execute_on.isValueSet(_current_execute_flag) &&
+         (isParamSetByUser("timestep_interval") || (_solution_invalidity.hasInvalidSolution()));
 }
 
 void
 SolutionInvalidityOutput::output()
 {
-  auto & solution_invalidity = _app.solutionInvalidity();
+  _console << '\n';
+  _solution_invalidity.printHistory(_console, _timestep_interval);
 
-  if (solution_invalidity.hasInvalidSolution())
-  {
-    _console << '\n';
-    solution_invalidity.printHistory(_console, _time_interval);
-
-    _console << std::flush;
-  }
+  _console << std::flush;
 }

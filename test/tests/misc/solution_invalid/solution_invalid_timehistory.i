@@ -80,6 +80,6 @@
   []
   [solution_invalid]
     type = SolutionInvalidityOutput
-    time_interval = 2
+    timestep_interval = 2
   []
 []

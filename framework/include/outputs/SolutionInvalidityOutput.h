@@ -11,9 +11,10 @@
 
 // MOOSE includes
 #include "Output.h"
+#include "SolutionInvalidity.h"
 
 /**
- * Class for output solution invalidity history summary to console
+ * Class to output the solution invalidity history summary to console
  */
 class SolutionInvalidityOutput : public Output
 {
@@ -27,6 +28,9 @@ protected:
 
   virtual void output() override;
 
-  /// @brief define the time interval to report the solution invalidity occurances
-  unsigned int _time_interval;
+  /// @brief define The number of time steps to group together in the table reporting the solution invalidity occurrences.
+  unsigned int _timestep_interval;
+
+  /// @brief get SolutionInvalidity reference
+  SolutionInvalidity & _solution_invalidity;
 };

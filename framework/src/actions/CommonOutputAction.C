@@ -149,13 +149,14 @@ CommonOutputAction::validParams()
                         "screen. This parameter only affects the output of the third-party solver "
                         "(e.g. PETSc), not MOOSE itself.");
 
-  params.addParam<bool>("solution_invalidity_history",
-                        false,
-                        "Enable printing of the time history of the solution invalidity occurances "
-                        "to the screen(Console)");
+  params.addParam<bool>(
+      "solution_invalidity_history",
+      false,
+      "Enable printing of the time history of the solution invalidity occurrences "
+      "to the screen(console)");
   params.addParam<unsigned int>("solution_invalidity_time_interval",
                                 1,
-                                "The time interval to report the solution invalidity occurances.");
+                                "The time interval to report the solution invalidity occurrences.");
 
   // Return object
   return params;

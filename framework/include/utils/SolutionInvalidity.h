@@ -114,7 +114,7 @@ public:
    * Print the time history table of Solution Invalid warnings
    * @param console The output stream to output to
    */
-  void printHistory(const ConsoleStream & console, unsigned int & time_interval) const;
+  void printHistory(const ConsoleStream & console, unsigned int & timestep_interval_size) const;
 
   /**
    * Immediately print the section and message for debug purpose
