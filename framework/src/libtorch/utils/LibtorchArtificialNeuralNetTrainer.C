@@ -29,26 +29,26 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::computeBatchSize(const unsigned
   // If we have more requested batches than the number of samples, we automatically decrease
   // the number of batches and put one sample in each
   if (num_samples < num_batches)
-    return num_samples; // 1
+    return 1;
   // If the samples can be divided between the batches equally, we do that
-  else // if (num_samples % num_batches == 0)
-    return num_batches; // num_samples /
+  else if (num_samples % num_batches == 0)
+    return num_samples / num_batches;
   // In all other cases, we compute the batch sizes with the specified number of batches
   // and we check if we could divide the data more evenly if we put one less sample in each
   // batch and potentially create a new batch.
-  // else
-  // {
-  //   const unsigned int sample_per_batch_1 = num_samples / num_batches;
-  //   const unsigned int remainder_1 = num_samples % num_batches;
-  //   const unsigned int sample_per_batch_2 = sample_per_batch_1 - 1;
-  //   const unsigned int remainder_2 =
-  //       num_samples - (num_samples / sample_per_batch_2) * sample_per_batch_2;
+  else
+  {
+    const unsigned int sample_per_batch_1 = num_samples / num_batches;
+    const unsigned int remainder_1 = num_samples % num_batches;
+    const unsigned int sample_per_batch_2 = sample_per_batch_1 - 1;
+    const unsigned int remainder_2 =
+        num_samples - (num_samples / sample_per_batch_2) * sample_per_batch_2;
 
-  //   const Real rel_remainder1 = Real(remainder_1) / Real(sample_per_batch_1);
-  //   const Real rel_remainder2 = Real(remainder_2) / Real(sample_per_batch_2);
+    const Real rel_remainder1 = Real(remainder_1) / Real(sample_per_batch_1);
+    const Real rel_remainder2 = Real(remainder_2) / Real(sample_per_batch_2);
 
-  //   return rel_remainder2 > rel_remainder1 ? sample_per_batch_2 : sample_per_batch_1;
-  // }
+    return rel_remainder2 > rel_remainder1 ? sample_per_batch_2 : sample_per_batch_1;
+  }
 }
 
 template <typename SamplerType>
@@ -110,23 +110,20 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::train(LibtorchDataset & dataset
   // The real rank of the current process
   int real_rank = processor_id();
   // The capped rank (or used rank) of the current process.
-  int used_rank = 0; // real_rank < num_ranks ? real_rank : 0;
+  int used_rank = real_rank < num_ranks ? real_rank : 0;
 
   const auto num_samples = dataset.size().value();
 
-  // std::cout << "num_samples " << num_samples << std::endl;
-
-  // if (num_ranks * options.num_batches > num_samples)
-  //   mooseError("The number of used processors* number of requestedf batches " +
-  //              std::to_string(num_ranks * options.num_batches) +
-  //              " is greater than the number of samples used for the training!");
+  if (num_ranks * options.num_batches > num_samples)
+    mooseError("The number of used processors* number of requestedf batches " +
+               std::to_string(num_ranks * options.num_batches) +
+               " is greater than the number of samples used for the training!");
 
   // Compute the number of samples in each batch
   const unsigned int sample_per_batch = computeBatchSize(num_samples, options.num_batches);
-  std::cout << "sample_per_batch " << sample_per_batch << std::endl;
+
   // Compute the number of samples for this process
   const unsigned int sample_per_proc = computeLocalBatchSize(sample_per_batch, num_ranks);
-  // std::cout << "sample_per_proc " << sample_per_proc << std::endl;
 
   // Transform the dataset se that the loader has an easier time
   auto transformed_data_set = dataset.map(torch::data::transforms::Stack<>());
@@ -157,11 +154,10 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::train(LibtorchDataset & dataset
       optimizer->zero_grad();
 
       // Compute prediction
-      torch::Tensor prediction = _nn.forward(batch.data, options.classify);
+      torch::Tensor prediction = _nn.forward(batch.data);
 
-      // Compute loss values using a MSE (regression) or binary cross entropy (classification)
-      torch::Tensor loss = options.classify ? torch::binary_cross_entropy(prediction, batch.target)
-                                            : torch::mse_loss(prediction, batch.target);
+      // Compute loss values using a MSE ( mean squared error)
+      torch::Tensor loss = torch::mse_loss(prediction, batch.target);
 
       // Propagate error back
       loss.backward();

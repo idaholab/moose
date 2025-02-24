@@ -24,7 +24,7 @@ class PMCMCDecision : public GeneralReporter, public LikelihoodInterface
 public:
   static InputParameters validParams();
   PMCMCDecision(const InputParameters & parameters);
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void finalize() override {}
   virtual void execute() override;
 
@@ -62,12 +62,6 @@ protected:
    */
   virtual void nextSeeds() {}
 
-  /// Model output value from SubApp
-  const std::vector<Real> & _output_value;
-
-  /// Transfer the right outputs to the file
-  std::vector<Real> & _outputs_required;
-
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
 
@@ -103,6 +97,12 @@ protected:
 
   /// Storage for the prior over the variance
   const Distribution * _var_prior;
+
+  /// Flag to specify if a pre-trained Gaussian process model is used
+  bool _using_GP;
+
+  /// Transfer the right outputs to the file
+  std::vector<Real> & _outputs_required;
 
   /// Storage for the number of experimental configuration values
   dof_id_type _num_confg_values;

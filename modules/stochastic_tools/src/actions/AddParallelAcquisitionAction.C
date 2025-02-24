@@ -22,7 +22,8 @@ AddParallelAcquisitionAction::validParams()
   return params;
 }
 
-AddParallelAcquisitionAction::AddParallelAcquisitionAction(const InputParameters & params) : MooseObjectAction(params)
+AddParallelAcquisitionAction::AddParallelAcquisitionAction(const InputParameters & params)
+  : MooseObjectAction(params)
 {
 }
 

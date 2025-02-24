@@ -35,14 +35,15 @@ GenericActiveLearner::validParams()
       "acquisition_function",
       "acquisition_function",
       "The values of the acquistion function in the current iteration.");
-  params.addParam<ReporterValueName>("convergence_value",
-                                     "convergence_value",
-                                     "Value to measure convergence of active learning.");
+  params.addParam<ReporterValueName>(
+      "convergence_value", "convergence_value", "Value to measure convergence of active learning.");
   params.addParam<ReporterValueName>(
       "inputs", "inputs", "Modified value of the model inputs from this reporter class.");
   params.addRequiredParam<UserObjectName>("acquisition", "Name of the acquisition function.");
-  params.addParam<bool>("penalize_acquisition", true,
-                        "Set true to prevent clustering of the best batch inputs when operating in parallel.");
+  params.addParam<bool>(
+      "penalize_acquisition",
+      true,
+      "Set true to prevent clustering of the best batch inputs when operating in parallel.");
   return params;
 }
 
@@ -54,9 +55,7 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
     _output_comm(declareValue<std::vector<Real>>("outputs_required")),
     _sampler(getSampler("sampler")),
     _al_sampler(dynamic_cast<const GenericActiveLearningSampler *>(&_sampler)),
-    _sorted_indices(declareValue<std::vector<unsigned int>>(
-        "sorted_indices", std::vector<unsigned int>(_al_sampler->getNumParallelProposals(), 0))),
-    _inputs_test(_al_sampler->getSampleTries()),
+    _sorted_indices(declareValue<std::vector<unsigned int>>("sorted_indices")),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
     _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _acquisition_obj(getParallelAcquisitionFunctionByName(getParam<UserObjectName>("acquisition"))),
@@ -67,6 +66,11 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
     _check_step(std::numeric_limits<int>::max()),
     _local_comm(_sampler.getLocalComm())
 {
+}
+
+void
+GenericActiveLearner::initialize()
+{
   // Check whether the selected sampler is the right type
   if (!_al_sampler)
     paramError("sampler", "The selected sampler is not of type GenericActiveLearningSampler.");
@@ -76,6 +80,7 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
   _props = _al_sampler->getNumParallelProposals();
 
   // Setting up the variable sizes to facilitate active learning
+  _inputs_test = _al_sampler->getSampleTries();
   _gp_outputs_test.resize(_inputs_test.size());
   _gp_std_test.resize(_inputs_test.size());
   _acquisition_value.resize(_props);
@@ -83,11 +88,12 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
   _eval_outputs_current.resize(_props);
   _generic.resize(1);
   _inputs_required.resize(_props, std::vector<Real>(_n_dim, 0.0));
+  _sorted_indices.resize(_props);
 }
 
 void
 GenericActiveLearner::setupGPData(const std::vector<Real> & data_out,
-                                   const DenseMatrix<Real> & data_in)
+                                  const DenseMatrix<Real> & data_in)
 {
   std::vector<Real> tmp;
   tmp.resize(_n_dim);
@@ -109,23 +115,11 @@ GenericActiveLearner::computeGPOutput(std::vector<Real> & eval_outputs)
 }
 
 void
-GenericActiveLearner::convertToEigen(const std::vector<Real> & vec, RealEigenMatrix & mat)
-{
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    mat(i, 0) = vec[i];
-}
-
-void
-GenericActiveLearner::convertToVector(const RealEigenMatrix & mat, std::vector<Real> & vec)
-{
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    vec[i] = mat(i, 0);
-}
-
-void
 GenericActiveLearner::setupGeneric()
 {
-  _generic.resize(1);
+  std::vector<Real> norm_gp_outputs = _gp_outputs;
+  _al_gp.getNormTrainingOuts(norm_gp_outputs);
+  _generic = norm_gp_outputs;
 }
 
 void
@@ -168,18 +162,6 @@ GenericActiveLearner::evaluateGPTest()
       tmp[j] = _inputs_test[i][j];
     _gp_outputs_test[i] = _gp_eval.evaluate(tmp, _gp_std_test[i]);
   }
-
-  // Converting the GP mean and std to the standardized domain
-  RealEigenMatrix eval_outputs_mat(_gp_outputs_test.size(), 1);
-  RealEigenMatrix eval_std_mat(_gp_outputs_test.size(), 1);
-  convertToEigen(_gp_outputs_test, eval_outputs_mat);
-  convertToEigen(_gp_std_test, eval_std_mat);
-  StochasticTools::Standardizer standardizer;
-  _al_gp.getTrainingStandardizer(standardizer);
-  standardizer.getStandardized(eval_outputs_mat);
-  standardizer.getScaled(eval_std_mat);
-  convertToVector(eval_outputs_mat, _gp_outputs_test);
-  convertToVector(eval_std_mat, _gp_std_test);
 }
 
 void

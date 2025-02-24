@@ -20,8 +20,7 @@ PMCMCDecision::validParams()
   params += LikelihoodInterface::validParams();
   params.addClassDescription("Generic reporter which decides whether or not to accept a proposed "
                              "sample in parallel Markov chain Monte Carlo type of algorithms.");
-  params.addRequiredParam<ReporterName>("output_value",
-                                        "Value of the model output from the SubApp.");
+  params.addParam<ReporterName>("output_value", "Value of the model output from the SubApp.");
   params.addParam<ReporterValueName>(
       "outputs_required",
       "outputs_required",
@@ -39,8 +38,6 @@ PMCMCDecision::validParams()
 PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
-    _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
     _variance(declareValue<std::vector<Real>>("variance")),
@@ -51,6 +48,7 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _new_var_samples(_pmcmc->getVarSamples()),
     _priors(_pmcmc->getPriors()),
     _var_prior(_pmcmc->getVarPrior()),
+    _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
     _local_comm(_sampler.getLocalComm()),
     _check_step(std::numeric_limits<int>::max())
 {
@@ -74,6 +72,14 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   _outputs_required.resize(_sampler.getNumberOfRows());
   _tpm.resize(_props);
   _variance.resize(_props);
+}
+
+void
+PMCMCDecision::initialize()
+{
+  _using_GP = false;
+  if (!isParamValid("output_value"))
+    paramError("output_value", "Value of the model output from the SubApp should be specified.");
 }
 
 void
@@ -160,8 +166,13 @@ PMCMCDecision::execute()
       data_in(ss, j) = data[j];
   }
   _local_comm.sum(data_in.get_values());
-  _outputs_required = _output_value;
-  _local_comm.allgather(_outputs_required);
+  if (!_using_GP)
+  {
+    const auto & _output_value =
+        getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED);
+    _outputs_required = _output_value;
+    _local_comm.allgather(_outputs_required);
+  }
 
   // Compute the evidence and transition vectors
   std::vector<Real> evidence(_props);
@@ -186,8 +197,9 @@ PMCMCDecision::execute()
 
   // Store data from previous step
   _data_prev = data_in;
-  _outputs_prev = _outputs_required;
   _var_prev = _variance;
+  if (!_using_GP)
+    _outputs_prev = _outputs_required;
 
   // Track the current step
   _check_step = _t_step;

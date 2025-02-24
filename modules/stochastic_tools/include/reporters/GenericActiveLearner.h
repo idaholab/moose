@@ -21,7 +21,8 @@
 #include <Eigen/Dense>
 
 /**
- * A generic reporter to support parallel active learning: re-trains GP and picks the next best batch
+ * A generic reporter to support parallel active learning: re-trains GP and picks the next best
+ * batch
  */
 class GenericActiveLearner : public GeneralReporter,
                              public ParallelAcquisitionInterface,
@@ -31,7 +32,7 @@ class GenericActiveLearner : public GeneralReporter,
 public:
   static InputParameters validParams();
   GenericActiveLearner(const InputParameters & parameters);
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void finalize() override {}
   virtual void execute() override;
 
@@ -67,7 +68,7 @@ protected:
 
   /**
    * Include additional inputs before evaluating the acquisition function.
-   * Has trivial function in base, but can be modified in derived if necessary depending 
+   * Has trivial function in base, but can be modified in derived if necessary depending
    * upon the objective of active learning (i.e., forward UQ, inverse UQ, optimization, etc.)
    */
   virtual void includeAdditionalInputs();
@@ -78,16 +79,6 @@ protected:
    * @param indices The indices ordered according to the acqusition values to be sent to Sampler
    */
   virtual void getAcquisition(std::vector<Real> & acq_new, std::vector<unsigned int> & indices);
-
-  /**
-   * Convert vector to Eigen matrix
-   */
-  virtual void convertToEigen(const std::vector<Real> & vec, RealEigenMatrix & mat);
-
-  /**
-   * Convert Eigen matrix to vector
-   */
-  virtual void convertToVector(const RealEigenMatrix & mat, std::vector<Real> & vec);
 
   /// Model output value from SubApp
   const std::vector<Real> & _output_value;
@@ -105,7 +96,7 @@ protected:
   std::vector<unsigned int> & _sorted_indices;
 
   /// Storage for all the proposed samples to test the GP model
-  const std::vector<std::vector<Real>> & _inputs_test;
+  std::vector<std::vector<Real>> _inputs_test;
 
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
