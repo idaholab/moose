@@ -1,0 +1,15 @@
+{
+  "CELLS": null,
+  "SURFACES": {
+    "sphere_surf": {
+      "COEFFICIENTS": {
+        "r": 5.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "TYPE": 2
+    }
+  },
+  "UNIVERSES": null
+}
