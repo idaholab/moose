@@ -46,6 +46,16 @@ protected:
   /// Whether to contribute to RC coefficients
   const bool _contribute_to_rc_coeffs;
 
+  /// Whether to contribute to RC coefficients with a fixed time step
+  const bool _use_fixed_dt_rc_contrib;
+
+  /// Time at which to start using the fixed time step for RC coefficients
+  const Real _fixed_dt_rc_contrib_start;
+
+  /// Fixed time step to use for RC coefficients
+  const Real & _fixed_dt_rc_contrib;
+
 private:
   using FVFunctorTimeKernel::_current_elem;
+  const Real _zero = 0;
 };
