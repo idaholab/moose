@@ -267,6 +267,7 @@ share/
 # Ignore vscode stuff
 .vscode/*
 *.code-workspace
+.cache
 
 # App Resource file (including modules/)
 /test/moose_test.yaml
