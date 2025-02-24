@@ -20,15 +20,12 @@ LinearSum::validParams()
   return params;
 }
 
-LinearSum::LinearSum(const InputParameters & parameters)
-  : Gaussian(parameters)
-{
-}
+LinearSum::LinearSum(const InputParameters & parameters) : Gaussian(parameters) {}
 
 Real
 LinearSum::function(const std::vector<Real> & exp,
-                   const std::vector<Real> & model,
-                   const Real & noise)
+                    const std::vector<Real> & model,
+                    const Real & noise)
 {
   Real result = 0.0;
   Real val1;

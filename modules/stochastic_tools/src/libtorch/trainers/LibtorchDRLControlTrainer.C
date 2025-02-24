@@ -392,7 +392,7 @@ LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & 
 torch::Tensor
 LibtorchDRLControlTrainer::evaluateValue(torch::Tensor & input)
 {
-  return _critic_nn->forward(input, false);
+  return _critic_nn->forward(input);
 }
 
 torch::Tensor
@@ -401,7 +401,7 @@ LibtorchDRLControlTrainer::evaluateAction(torch::Tensor & input, torch::Tensor &
   torch::Tensor var = torch::matmul(_std, _std);
 
   // Compute an action and get it's logarithmic proability based on an assumed Gaussian distribution
-  torch::Tensor action = _control_nn->forward(input, false);
+  torch::Tensor action = _control_nn->forward(input);
   return -((action - output) * (action - output)) / (2 * var) - torch::log(_std) -
          std::log(std::sqrt(2 * M_PI));
 }
