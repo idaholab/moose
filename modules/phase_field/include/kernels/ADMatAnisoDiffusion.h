@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMatDiffusionBase.h"
+#include "MatDiffusionBase.h"
 
 /**
  * Anisotropic diffusion kernel that takes a diffusion coefficient of type

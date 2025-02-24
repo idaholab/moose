@@ -50,4 +50,5 @@ public:
   using GenericKernelGrad<is_ad>::getVar;                                                          \
   using Coupleable::coupled;                                                                       \
   using Coupleable::isCoupled;                                                                     \
+  using Coupleable::coupledGenericGradient;                                                        \
   using Coupleable::coupledComponents
