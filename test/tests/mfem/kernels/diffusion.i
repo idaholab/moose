@@ -10,12 +10,12 @@
 
 [FESpaces]
   [H1FESpace]
-    type = MFEMFESpace
+    type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
   []
   [HCurlFESpace]
-    type = MFEMFESpace
+    type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
   []  

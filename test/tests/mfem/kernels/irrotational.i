@@ -15,12 +15,12 @@ centre_y = 0.1
 
 [FESpaces]
   [H1FESpace]
-    type = MFEMFESpace
+    type = MFEMScalarFESpace
     fec_type = H1
     fec_order = SEVENTH
   []
   [HCurlFESpace]
-    type = MFEMFESpace
+    type = MFEMVectorFESpace
     fec_type = ND
     fec_order = SEVENTH
   []

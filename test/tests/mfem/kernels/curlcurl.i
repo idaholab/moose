@@ -13,12 +13,12 @@
 
 [FESpaces]
   [HCurlFESpace]
-    type = MFEMFESpace
+    type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
   []
   [HDivFESpace]
-    type = MFEMFESpace
+    type = MFEMVectorFESpace
     fec_type = RT
     fec_order = CONSTANT
   []  

@@ -14,13 +14,13 @@
 
 [FESpaces]
   [HDivFESpace]
-    type = MFEMFESpace
+    type = MFEMVectorFESpace
     fec_type = RT
     fec_order = CONSTANT
     ordering = "vdim"
   []
   [L2FESpace]
-    type = MFEMFESpace
+    type = MFEMScalarFESpace
     fec_type = L2
     fec_order = CONSTANT
   []  

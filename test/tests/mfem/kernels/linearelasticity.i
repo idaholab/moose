@@ -12,10 +12,10 @@
 
 [FESpaces]
   [H1FESpace]
-    type = MFEMFESpace
+    type = MFEMVectorFESpace
     fec_type = H1
     fec_order = FIRST
-    vdim = 3
+    range_dim = 3
     ordering = "vdim"
   []
 []
