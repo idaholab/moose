@@ -43,9 +43,10 @@ ExpectedImprovementGlobalFit::computeAcquisition(
 }
 
 void
-ExpectedImprovementGlobalFit::computeDistance(unsigned int & req_index,
-                                              const std::vector<Real> & current_input,
-                                              const std::vector<std::vector<Real>> & train_inputs) const
+ExpectedImprovementGlobalFit::computeDistance(
+    unsigned int & req_index,
+    const std::vector<Real> & current_input,
+    const std::vector<std::vector<Real>> & train_inputs) const
 {
   Real ref_distance = std::numeric_limits<Real>::max();
   Real distance;

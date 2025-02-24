@@ -1,13 +1,15 @@
 left_bc = 2.8833503
 right_bc = 2.5709298
+mesh1 = 1
 
 param1 = '${fparse left_bc}'
 param2 = '${fparse right_bc}'
+param3 = '${fparse mesh1}'
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmax = 1
+  xmax = ${param3}
   xmin = 0
   ymax = 1
   ymin = 0

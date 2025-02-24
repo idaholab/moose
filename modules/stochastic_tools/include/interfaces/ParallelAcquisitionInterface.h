@@ -22,7 +22,8 @@ public:
 
 protected:
   /// Lookup a ParallelAcquisitionFunction object by name and return pointer
-  ParallelAcquisitionFunctionBase * getParallelAcquisitionFunctionByName(const UserObjectName & name) const;
+  ParallelAcquisitionFunctionBase *
+  getParallelAcquisitionFunctionByName(const UserObjectName & name) const;
 
 private:
   /// Reference to FEProblemBase instance
