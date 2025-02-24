@@ -13,7 +13,8 @@
 #include "ReporterInterface.h"
 
 /**
- * Fast Bayesian inference with the parallel active learning (partly inspired from El Gammal et al. 2023)
+ * Fast Bayesian inference with the parallel active learning (partly inspired from El Gammal et al.
+ * 2023)
  */
 class BayesianActiveLearningSampler : public PMCMCBase
 {

@@ -19,12 +19,12 @@ BayesianActiveLearningSampler::validParams()
   InputParameters params = PMCMCBase::validParams();
   params.addClassDescription("Fast Bayesian inference with the parallel active learning (partly "
                              "inspired from El Gammal et al. 2023).");
-  params.addRequiredParam<ReporterName>("sorted_indices",
-                                        "The sorted sample indices in order of importance to evaluate the subApp.");
+  params.addRequiredParam<ReporterName>(
+      "sorted_indices", "The sorted sample indices in order of importance to evaluate the subApp.");
   params.addRequiredRangeCheckedParam<unsigned int>(
-    "num_tries",
-    "num_tries>0",
-    "Number of samples to propose in each iteration (not all are sent for subApp evals).");
+      "num_tries",
+      "num_tries>0",
+      "Number of samples to propose in each iteration (not all are sent for subApp evals).");
   return params;
 }
 
@@ -39,7 +39,8 @@ BayesianActiveLearningSampler::BayesianActiveLearningSampler(const InputParamete
 }
 
 void
-BayesianActiveLearningSampler::fillVector(std::vector<Real> & vector, const unsigned int & seed_value)
+BayesianActiveLearningSampler::fillVector(std::vector<Real> & vector,
+                                          const unsigned int & seed_value)
 {
   for (unsigned int i = 0; i < _priors.size(); ++i)
     vector[i] = _priors[i]->quantile(getRand(seed_value));

@@ -232,25 +232,13 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
   }
 
-  unsigned int count = 1;
-  _length_scales.resize(_num_tunable - count);
-  for (unsigned int i = 0; i < _num_tunable - count; ++i)
-    _length_scales[i] = theta[i+1];
-  // for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  // {
-  //   const auto first_index = std::get<0>(iter->second);
-  //   const auto num_entries = std::get<1>(iter->second);
-  //   std::string hyper_param_name = iter->first;
-  //   for (unsigned int ii = 0; ii < num_entries; ++ii)
-  //   {
-  //     const auto global_index = first_index + ii;
-  //     if (global_index >= count)
-  //     {
-  //       _length_scales[count - 2] = theta[count];
-  //       ++count;
-  //     }
-  //   }
-  // }
+  if (theta.size() > 0)
+  {
+    unsigned int count = 1;
+    _length_scales.resize(_num_tunable - count);
+    for (unsigned int i = 0; i < _num_tunable - count; ++i)
+      _length_scales[i] = theta[i + 1];
+  }
 }
 
 Real

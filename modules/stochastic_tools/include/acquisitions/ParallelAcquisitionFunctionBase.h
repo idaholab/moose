@@ -29,7 +29,8 @@ public:
    * @param gp_std The provided GP standard deviation values
    * @param test_inputs All the input values under which the GP has to be tested
    * @param train_inputs All the input values under which the GP has been trained
-   * @param generic A generic parameter (can be output values under which the GP has been trained or threshold parameter under the U-Function etc.)
+   * @param generic A generic parameter (can be output values under which the GP has been trained or
+   * threshold parameter under the U-Function etc.)
    */
   virtual void computeAcquisition(std::vector<Real> & acq,
                                   const std::vector<Real> & gp_mean,
@@ -39,8 +40,8 @@ public:
                                   const std::vector<Real> & generic) const = 0;
 
   /**
-   * Return the modified acquisition function values and sorted indices considering local penalization
-   * (inspired from Zhan et al. 2017)
+   * Return the modified acquisition function values and sorted indices considering local
+   * penalization (inspired from Zhan et al. 2017)
    * @param modified_acq The modified acquisition function values
    * @param sorted_indices The sorted indices modified acquisition function values
    * @param acq The originally acquisition function values

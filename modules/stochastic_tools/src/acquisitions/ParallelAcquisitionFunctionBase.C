@@ -60,7 +60,6 @@ ParallelAcquisitionFunctionBase::computeCorrelation(Real & corr,
 {
   corr = 0.0;
   for (unsigned int i = 0; i < input1.size(); ++i)
-    corr -= Utility::pow<2>(input1[i] - input2[i]) /
-            (2.0 * Utility::pow<2>(length_scales[i]));
+    corr -= Utility::pow<2>(input1[i] - input2[i]) / (2.0 * Utility::pow<2>(length_scales[i]));
   corr = 1.0 - std::exp(corr);
 }

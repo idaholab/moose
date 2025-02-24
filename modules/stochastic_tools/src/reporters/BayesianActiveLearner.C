@@ -28,11 +28,15 @@ BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
   : GenericActiveLearner(parameters),
     LikelihoodInterface(parameters),
     _bayes_al_sampler(dynamic_cast<const BayesianActiveLearningSampler *>(&_sampler)),
-    _inputs_test(_bayes_al_sampler->getSampleTries()),
     _new_var_samples(_bayes_al_sampler->getVarSamples()),
     _var_prior(_bayes_al_sampler->getVarPrior()),
     _var_test(_bayes_al_sampler->getVarSampleTries()),
     _noise(declareValue<Real>("noise"))
+{
+}
+
+void
+BayesianActiveLearner::initialize()
 {
   // Check whether the selected sampler is BayesianActiveLearningSampler or not
   if (!_bayes_al_sampler)
@@ -51,20 +55,22 @@ BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
   else
     _length_scales.resize(_n_dim);
 
+  // Fetching the sampler characteristics
+  _n_dim = _sampler.getNumberOfCols() - _bayes_al_sampler->getNumberOfConfigParams();
+  _props = _bayes_al_sampler->getNumParallelProposals();
+
   // Resize the log-likelihood vector to the number of parallel proposals
   _log_likelihood.resize(_props);
 
-  // Fetching the sampler characteristics
-  _n_dim = _sampler.getNumberOfCols();
-  _props = _bayes_al_sampler->getNumParallelProposals();
-
   // Setting up the variable sizes to facilitate active learning
+  _inputs_test = _bayes_al_sampler->getSampleTries();
   _gp_outputs_test.resize(_inputs_test.size());
   _gp_std_test.resize(_inputs_test.size());
   _acquisition_value.resize(_props);
   _length_scales.resize(_n_dim);
   _eval_outputs_current.resize(_props);
   _generic.resize(1);
+  _sorted_indices.resize(_props);
 }
 
 void
@@ -105,12 +111,10 @@ BayesianActiveLearner::computeLogLikelihood(const std::vector<Real> & data_out)
     if (_var_prior)
     {
       _noise = std::sqrt(_new_var_samples[i]);
-      _log_likelihood[i] +=
-          _likelihoods[0]->function(out1);
+      _log_likelihood[i] += _likelihoods[0]->function(out1);
     }
     else
-      _log_likelihood[i] +=
-          _likelihoods[0]->function(out1);
+      _log_likelihood[i] += _likelihoods[0]->function(out1);
   }
 }
 
