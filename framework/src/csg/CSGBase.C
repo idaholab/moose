@@ -46,8 +46,6 @@ CSGBase::generateOutput() const
   auto all_surfs = getAllSurfaces();
   for (const auto & s : all_surfs)
   {
-    // print surface name
-    Moose::out << s.first << std::endl;
     auto surf_obj = s.second;
     auto coeffs = surf_obj->getCoeffs();
     csg_json["SURFACES"][s.first] = {{"TYPE", surf_obj->getSurfaceType() }, // not sure how to convert type to str
