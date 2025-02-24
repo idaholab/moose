@@ -25,13 +25,9 @@ CSGSurfaceList::getSurface(const std::string name)
 {
   auto surf = _surfaces.find(name);
   if (surf == _surfaces.end())
-  {
     mooseError("No surface by name " + name + " exists in the geometry.");
-  }
   else
-  {
     return surf->second;
-  }
 }
 
 std::shared_ptr<CSGSurface>
@@ -78,22 +74,16 @@ CSGSurfaceList::addCylinder(const std::string name,
 {
   checkSurfaceName(name);
   std::shared_ptr<CSGSurface> surf;
+
   if (axis == "x" || axis == "X")
-  {
     surf = std::make_shared<CSGXCylinder>(name, x0, x1, r);
-  }
   else if (axis == "y" || axis == "Y")
-  {
     surf = std::make_shared<CSGYCylinder>(name, x0, x1, r);
-  }
   else if (axis == "z" || axis == "Z")
-  {
     surf = std::make_shared<CSGZCylinder>(name, x0, x1, r);
-  }
   else
-  {
-    mooseError("Axis " + axis + " not recognized for CSG cylinder. Options are x, y, z.");
-  }
+    mooseError("Axis " + axis + " not recognized for CSG cylinder. Options are x, y, or z.");
+
   _surfaces.insert(std::make_pair(name, surf));
   return _surfaces[name];
 }
