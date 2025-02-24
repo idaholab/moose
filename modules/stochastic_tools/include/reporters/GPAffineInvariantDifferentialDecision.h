@@ -19,15 +19,13 @@
 /**
  * A class to perform decision making for Affine Invariant differential MCMC using a GP
  */
-class GPAffineInvariantDifferentialDecision : public PMCMCDecision,
-                                              public SurrogateModelInterface
+class GPAffineInvariantDifferentialDecision : public PMCMCDecision, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
 
   GPAffineInvariantDifferentialDecision(const InputParameters & parameters);
-
-  virtual void execute() override;
+  virtual void initialize() override;
 
 protected:
   virtual void computeEvidence(std::vector<Real> & evidence,

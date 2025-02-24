@@ -21,7 +21,8 @@ ParallelAcquisitionInterface::ParallelAcquisitionInterface(const InputParameters
 }
 
 ParallelAcquisitionFunctionBase *
-ParallelAcquisitionInterface::getParallelAcquisitionFunctionByName(const UserObjectName & name) const
+ParallelAcquisitionInterface::getParallelAcquisitionFunctionByName(
+    const UserObjectName & name) const
 {
   std::vector<ParallelAcquisitionFunctionBase *> models;
   _parallelacquisition_feproblem.theWarehouse()

@@ -17,7 +17,6 @@
 [ParallelAcquisition]
   [expectedimprovement]
     type = ExpectedImprovement
-    tuning = 1.0
   []
 []
 
@@ -27,7 +26,7 @@
     distributions = 'left right'
     sorted_indices = 'conditional/sorted_indices'
     num_parallel_proposals = 5
-    num_tries = 10
+    num_tries = 100
     seed = 100
     execute_on = PRE_MULTIAPP_SETUP
   []
@@ -106,11 +105,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5 # 50
+  num_steps = 5
 []
 
 [Outputs]
-  csv = false
+  file_base = 'al1'
   [out1_parallelAL]
     type = JSON
     execute_system_information_on = NONE
