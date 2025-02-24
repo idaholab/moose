@@ -45,7 +45,7 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  virtual Real integralValue(Point p) const;
+  virtual Real integralValue(const Point & p) const;
 
   /**
    * Get the value for a given layer
@@ -59,7 +59,7 @@ public:
    * @param p The point.
    * @return The layer the Point is found in.
    */
-  virtual unsigned int getLayer(Point p) const;
+  virtual unsigned int getLayer(const Point & p) const;
 
   /**
    * Get the center coordinates for the layers (along given direction)
