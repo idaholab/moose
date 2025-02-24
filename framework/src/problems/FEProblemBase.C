@@ -4280,20 +4280,19 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
       break;
   }
 
-  // Add as a Functor if it is one
-  // At the timing of adding this, this is only Postprocessors... but technically it
-  // should enable any UO that is a Real Functor to be used as one
-  // The ternary operator used in getting the functor is there because some UOs
-  // are threaded and some are not. When a UO is not threaded, we need to add
-  // the functor from thread 0 as the registered functor for all threads
+  // Add as a Functor if it is one. We usually need to add the user object from thread 0 as the
+  // registered functor for all threads because when user objects are thread joined, generally only
+  // the primary thread copy ends up with all the data
   for (const auto tid : make_range(libMesh::n_threads()))
-    if (const auto functor =
-            dynamic_cast<Moose::FunctorBase<Real> *>(uos[uos.size() == 1 ? 0 : tid].get()))
+  {
+    const decltype(uos)::size_type uo_index = uos.front()->needThreadedCopy() ? tid : 0;
+    if (const auto functor = dynamic_cast<Moose::FunctorBase<Real> *>(uos[uo_index].get()))
     {
       this->addFunctor(name, *functor, tid);
       if (_displaced_problem)
         _displaced_problem->addFunctor(name, *functor, tid);
     }
+  }
 
   return uos;
 }
