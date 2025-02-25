@@ -43,9 +43,9 @@ ConservativeAdvectionTempl<false>::validParams()
   return params;
 }
 
-template <bool is_ad>
+template <>
 InputParameters
-ConservativeAdvectionTempl<is_ad>::validParams()
+ConservativeAdvectionTempl<true>::validParams()
 {
   InputParameters params = generalParams();
   params.addCoupledVar("velocity_variable", "Velocity vector given as a variable");
@@ -82,8 +82,7 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
   if (!_velocity ||
       (this->isParamValid("velocity_variable") && this->isParamValid("velocity_material")))
     paramError("velocity_variable",
-               "Either velocity_variable or velocity_material must be specificied, not both, nor "
-               "velocity.");
+               "Either velocity_variable or velocity_material must be specified");
 
   if (this->_has_diag_save_in)
     paramError("diag_save_in",
@@ -112,7 +111,7 @@ Real
 ConservativeAdvectionTempl<false>::computeQpJacobian()
 {
   // This is the no-upwinded version
-  // It gets called via GenericKernel<is_ad>::computeJacobian()
+  // It gets called via GenericKernel<false>::computeJacobian()
   return negSpeedQp() * _phi[_j][_qp];
 }
 
