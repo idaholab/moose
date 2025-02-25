@@ -13,6 +13,14 @@ public:
 
   MFEMFESpace(const InputParameters & parameters);
 
+  // Note: The simplest way to handle the boilerplate of constructing
+  // FiniteElementCollection and FiniteElementSpace objects in the
+  // base class while deferring their arguments to the subclasses was
+  // to build them after construction was finished. Rather than
+  // requiring the user to call an additional Init() function (which
+  // could easily be forgotten) instead they get built lazily, when
+  // required.
+
   /// Returns a shared pointer to the constructed fespace.
   inline std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace() const
   {
@@ -22,7 +30,7 @@ public:
   }
 
   /// Returns a shared pointer to the constructed fec.
-  inline std::shared_ptr<mfem::FiniteElementCollection> getFEC()
+  inline std::shared_ptr<mfem::FiniteElementCollection> getFEC() const
   {
     if (!_fec)
       buildFEC(getFECName());

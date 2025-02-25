@@ -1,9 +1,11 @@
 #include "MFEMScalarFESpace.h"
 
+registerMooseObject("PlatypusApp", MFEMScalarFESpace);
+
 InputParameters
 MFEMScalarFESpace::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMSimplifiedFESpace::validParams();
   params.registerBase("MFEMSimplifiedFESpace");
   params.addClassDescription("Convenience class to construct scalar finite element spaces.");
   MooseEnum fec_types("H1 L2", "H1", true);

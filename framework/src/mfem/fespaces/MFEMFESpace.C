@@ -1,16 +1,11 @@
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMFESpace);
-
 InputParameters
 MFEMFESpace::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMFESpace");
-  params.addRequiredParam<std::string>("fec_name",
-                                       "The name of the finite element collection to use for this "
-                                       "space. See MFEM documentation for details.");
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>("ordering", ordering, "Ordering style to use for vector DoFs.");
   params.addParam<int>("vdim", 1, "The number of degrees of freedom per basis function.");
@@ -54,5 +49,5 @@ MFEMFESpace::buildFESpace(const int vdim) const
 {
   mfem::ParMesh & pmesh = getMFEMProblem().mesh().getMFEMParMesh();
 
-  _fespace = std::make_shared<mfem::ParFiniteElementSpace>(&pmesh, _fec.get(), vdim, _ordering);
+  _fespace = std::make_shared<mfem::ParFiniteElementSpace>(&pmesh, getFEC().get(), vdim, _ordering);
 }

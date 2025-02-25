@@ -1,9 +1,11 @@
 #include "MFEMVectorFESpace.h"
 
+registerMooseObject("PlatypusApp", MFEMVectorFESpace);
+
 InputParameters
 MFEMVectorFESpace::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMSimplifiedFESpace::validParams();
   params.registerBase("MFEMSimplifiedFESpace");
   params.addClassDescription(
       "Convenience class to construct vector finite element spaces, abstracting away some of the "
@@ -30,17 +32,16 @@ std::string
 MFEMVectorFESpace::getFECName() const
 {
   const int pdim = getProblemDim();
-  std::string dim_qualifier = "";
+  std::string actual_type = _fec_type;
   if ((_fec_type == "ND" || _fec_type == "RT") && _range_dim != 0 && _range_dim != pdim)
   {
     if (_range_dim != 3)
       mooseError("No  " + _fec_type + " finite element collection available for " +
                  std::to_string(_range_dim) + "D vectors in " + std::to_string(pdim) + "D space.");
-    dim_qualifier = "R";
+    actual_type += "_R" + std::to_string(pdim) + "D";
   }
 
-  return _fec_type + "_" + dim_qualifier + std::to_string(pdim) + "D_P" +
-         std::to_string(_fec_order);
+  return actual_type + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
 
 int

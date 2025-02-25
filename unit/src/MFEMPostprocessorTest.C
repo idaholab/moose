@@ -18,12 +18,12 @@ public:
     vecfunc_params.set<std::string>("expression_z") = "1";
     _mfem_problem->addFunction("ParsedVectorFunction", "vector_ones", vecfunc_params);
     _mfem_problem->getFunction("vector_ones").initialSetup();
-    InputParameters H1FE_params = _factory.getValidParams("MFEMFESpace");
+    InputParameters H1FE_params = _factory.getValidParams("MFEMScalarFESpace");
     H1FE_params.set<MooseEnum>("fec_type") = "H1";
-    _mfem_problem->addFESpace("MFEMFESpace", "H1_scalar", H1FE_params);
-    InputParameters NDFE_params = _factory.getValidParams("MFEMFESpace");
+    _mfem_problem->addFESpace("MFEMScalarFESpace", "H1_scalar", H1FE_params);
+    InputParameters NDFE_params = _factory.getValidParams("MFEMVectorFESpace");
     NDFE_params.set<MooseEnum>("fec_type") = "ND";
-    _mfem_problem->addFESpace("MFEMFESpace", "ND_vector", NDFE_params);
+    _mfem_problem->addFESpace("MFEMVectorFESpace", "ND_vector", NDFE_params);
     InputParameters scalar_params = _factory.getValidParams("MFEMVariable");
     scalar_params.set<UserObjectName>("fespace") = "H1_scalar";
     _mfem_problem->addVariable("MFEMVariable", "scalar_var", scalar_params);

@@ -7,6 +7,7 @@
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
 #include "MFEMGMRESSolver.h"
+#include "MFEMVectorFESpace.h"
 
 class MFEMSolverTest : public MFEMObjectUnitTest
 {
@@ -198,13 +199,14 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
 TEST_F(MFEMSolverTest, MFEMHypreADS)
 {
   // Build required FESpace
-  InputParameters fespace_params = _factory.getValidParams("MFEMFESpace");
+  InputParameters fespace_params = _factory.getValidParams("MFEMVectorFESpace");
 
   fespace_params.set<MooseEnum>("fec_order") = "CONSTANT";
   fespace_params.set<MooseEnum>("fec_type") = "RT";
 
   // Construct fespace
-  MFEMFESpace & fespace = addObject<MFEMFESpace>("MFEMFESpace", "HDivFESpace", fespace_params);
+  MFEMFESpace & fespace =
+      addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HDivFESpace", fespace_params);
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreADS");
@@ -224,13 +226,14 @@ TEST_F(MFEMSolverTest, MFEMHypreADS)
 TEST_F(MFEMSolverTest, MFEMHypreAMS)
 {
   // Build required FESpace
-  InputParameters fespace_params = _factory.getValidParams("MFEMFESpace");
+  InputParameters fespace_params = _factory.getValidParams("MFEMVectorFESpace");
 
   fespace_params.set<MooseEnum>("fec_order") = "FIRST";
   fespace_params.set<MooseEnum>("fec_type") = "ND";
 
   // Construct fespace
-  MFEMFESpace & fespace = addObject<MFEMFESpace>("MFEMFESpace", "HCurlFESpace", fespace_params);
+  MFEMFESpace & fespace =
+      addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HCurlFESpace", fespace_params);
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreAMS");
