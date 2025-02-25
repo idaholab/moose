@@ -14,12 +14,12 @@ registerMooseObject("MooseApp", LayeredSideAverageFunctor);
 InputParameters
 LayeredSideAverageFunctor::validParams()
 {
-  InputParameters params = LayeredSideAverageBase<LayeredSideIntegralFunctor>::validParams();
+  InputParameters params = LayeredSideAverageBase<SideIntegralFunctorUserObject>::validParams();
   params.addClassDescription("Computes layered side averages of a functor.");
   return params;
 }
 
 LayeredSideAverageFunctor::LayeredSideAverageFunctor(const InputParameters & parameters)
-  : LayeredSideAverageBase<LayeredSideIntegralFunctor>(parameters)
+  : LayeredSideAverageBase<SideIntegralFunctorUserObject>(parameters)
 {
 }

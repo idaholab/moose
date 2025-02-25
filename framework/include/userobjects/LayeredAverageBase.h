@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "SideUserObject.h"
-#include "LayeredBase.h"
+#include "LayeredIntegralBase.h"
 
 /**
  * Base class for computing layered averages
  */
 template <typename BaseType>
-class LayeredAverageBase : public BaseType
+class LayeredAverageBase : public LayeredIntegralBase<BaseType>
 {
 public:
   static InputParameters validParams();
@@ -28,36 +27,37 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 
-  using BaseType::gatherSum;
-  using BaseType::getLayer;
-  using BaseType::getLayerValue;
+  using LayeredIntegralBase<BaseType>::gatherSum;
+  using LayeredIntegralBase<BaseType>::getLayer;
+  using LayeredIntegralBase<BaseType>::getLayerValue;
 
 protected:
   /**
-   * @returns The local integration volume (or area in the case of a side integral). This is not the layer volume
+   * @returns The local integration volume (or area in the case of a side integral). This is not the
+   * layer volume
    */
   virtual Real volume() const = 0;
 
   /// Value of the volume (area for side integrals) for each layer
   std::vector<Real> _layer_volumes;
 
-  using BaseType::_current_elem;
-  using BaseType::_num_layers;
-  using BaseType::layerHasValue;
-  using BaseType::setLayerValue;
+  using LayeredIntegralBase<BaseType>::_current_elem;
+  using LayeredIntegralBase<BaseType>::_num_layers;
+  using LayeredIntegralBase<BaseType>::layerHasValue;
+  using LayeredIntegralBase<BaseType>::setLayerValue;
 };
 
 template <typename BaseType>
 InputParameters
 LayeredAverageBase<BaseType>::validParams()
 {
-  InputParameters params = BaseType::validParams();
+  InputParameters params = LayeredIntegralBase<BaseType>::validParams();
   return params;
 }
 
 template <typename BaseType>
 LayeredAverageBase<BaseType>::LayeredAverageBase(const InputParameters & parameters)
-  : BaseType(parameters)
+  : LayeredIntegralBase<BaseType>(parameters)
 {
   _layer_volumes.resize(_num_layers);
 }
@@ -66,7 +66,7 @@ template <typename BaseType>
 void
 LayeredAverageBase<BaseType>::initialize()
 {
-  BaseType::initialize();
+  LayeredIntegralBase<BaseType>::initialize();
 
   for (auto & vol : _layer_volumes)
     vol = 0.0;
@@ -76,7 +76,7 @@ template <typename BaseType>
 void
 LayeredAverageBase<BaseType>::execute()
 {
-  BaseType::execute();
+  LayeredIntegralBase<BaseType>::execute();
 
   const auto layer = getLayer(_current_elem->vertex_average());
   _layer_volumes[layer] += volume();
@@ -86,7 +86,7 @@ template <typename BaseType>
 void
 LayeredAverageBase<BaseType>::finalize()
 {
-  BaseType::finalize();
+  LayeredIntegralBase<BaseType>::finalize();
 
   gatherSum(_layer_volumes);
 
@@ -100,7 +100,7 @@ template <typename BaseType>
 void
 LayeredAverageBase<BaseType>::threadJoin(const UserObject & y)
 {
-  BaseType::threadJoin(y);
+  LayeredIntegralBase<BaseType>::threadJoin(y);
   const auto & lsa = static_cast<const LayeredAverageBase<BaseType> &>(y);
   for (const auto i : index_range(_layer_volumes))
     if (lsa.layerHasValue(i))

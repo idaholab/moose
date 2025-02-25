@@ -14,13 +14,14 @@ registerMooseObject("MooseApp", LayeredAverage);
 InputParameters
 LayeredAverage::validParams()
 {
-  InputParameters params = LayeredVolumeAverageBase<LayeredIntegral>::validParams();
+  InputParameters params =
+      LayeredVolumeAverageBase<ElementIntegralVariableUserObject>::validParams();
   params.addClassDescription("Computes averages of variables over layers");
 
   return params;
 }
 
 LayeredAverage::LayeredAverage(const InputParameters & parameters)
-  : LayeredVolumeAverageBase<LayeredIntegral>(parameters)
+  : LayeredVolumeAverageBase<ElementIntegralVariableUserObject>(parameters)
 {
 }

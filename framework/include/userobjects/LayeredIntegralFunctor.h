@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "LayeredVolumeIntegralBase.h"
+#include "LayeredIntegralBase.h"
 #include "ElementIntegralFunctorUserObject.h"
 
 /**
  * Computes layered element integrals of a functor.
  */
-class LayeredIntegralFunctor : public LayeredVolumeIntegralBase<ElementIntegralFunctorUserObject>
+class LayeredIntegralFunctor : public LayeredIntegralBase<ElementIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();

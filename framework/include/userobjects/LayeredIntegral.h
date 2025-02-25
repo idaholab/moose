@@ -10,14 +10,14 @@
 #pragma once
 
 // MOOSE includes
-#include "LayeredVolumeIntegralBase.h"
+#include "LayeredIntegralBase.h"
 #include "ElementIntegralVariableUserObject.h"
 
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified
  * number of intervals in a direction (x,y,z).
  */
-class LayeredIntegral : public LayeredVolumeIntegralBase<ElementIntegralVariableUserObject>
+class LayeredIntegral : public LayeredIntegralBase<ElementIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();

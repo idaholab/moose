@@ -16,13 +16,12 @@ registerMooseObject("MooseApp", LayeredIntegral);
 InputParameters
 LayeredIntegral::validParams()
 {
-  InputParameters params =
-      LayeredVolumeIntegralBase<ElementIntegralVariableUserObject>::validParams();
+  auto params = LayeredIntegralBase<ElementIntegralVariableUserObject>::validParams();
   params.addClassDescription("Compute variable integrals over layers.");
   return params;
 }
 
 LayeredIntegral::LayeredIntegral(const InputParameters & parameters)
-  : LayeredVolumeIntegralBase<ElementIntegralVariableUserObject>(parameters)
+  : LayeredIntegralBase<ElementIntegralVariableUserObject>(parameters)
 {
 }

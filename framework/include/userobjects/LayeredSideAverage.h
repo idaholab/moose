@@ -10,13 +10,13 @@
 #pragma once
 
 #include "LayeredSideAverageBase.h"
-#include "LayeredSideIntegral.h"
+#include "SideIntegralVariableUserObject.h"
 
 /**
  * This UserObject computes side averages of a variable storing partial sums for the specified
  * number of intervals in a direction (x,y,z).
  */
-class LayeredSideAverage : public LayeredSideAverageBase<LayeredSideIntegral>
+class LayeredSideAverage : public LayeredSideAverageBase<SideIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();
