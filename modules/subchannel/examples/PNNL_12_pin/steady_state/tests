@@ -2,9 +2,9 @@
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29238'
   [PNNL-12_ss]
-      type = Exodiff
+      type = CSVDiff
       input = 2X6_ss.i
-      exodiff = 2X6_ss_out.e
+      csvdiff = 2X6_ss_out.csv
       # custom_cmp = 'test.exodiff'
       method = '!DBG'
       valgrind = NONE

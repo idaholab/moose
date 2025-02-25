@@ -2,9 +2,9 @@
     design = 'TriSubChannel1PhaseProblem.md'
     issues = '#1209 #29491 #29513'
     [toshiba-37]
-        type = Exodiff
+        type = CSVDiff
         input = toshiba_37_pin.i
-        exodiff = toshiba_37_pin_out.e
+        csvdiff = toshiba_37_pin_out.csv
         # custom_cmp = 'test.exodiff'
         method = '!DBG'
         valgrind = NONE

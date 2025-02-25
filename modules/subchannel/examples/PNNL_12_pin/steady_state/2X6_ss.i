@@ -184,6 +184,7 @@ P_out = 101325 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
   [mdot_in_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = mdot
@@ -238,6 +239,58 @@ P_out = 101325 # Pa
     execute_on = final
     file_base = "T_out.txt"
     height = 1.2192
+  []
+[]
+
+[Postprocessors]
+  [mdot7]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 7
+    execute_on = 'initial timestep_end'
+    height = 0.9144
+  []
+  [mdot8]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 8
+    execute_on = 'initial timestep_end'
+    height = 0.9144
+  []
+  [mdot9]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 9
+    execute_on = 'initial timestep_end'
+    height = 0.9144
+  []
+  [mdot10]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 10
+    execute_on = 'initial timestep_end'
+    height = 0.9144
+  []
+  [mdot11]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 11
+    execute_on = 'initial timestep_end'
+    height = 0.9144
+  []
+  [mdot12]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 12
+    execute_on = 'initial timestep_end'
+    height = 0.9144
+  []
+  [mdot13]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 13
+    execute_on = 'initial timestep_end'
+    height = 0.9144
   []
 []
 

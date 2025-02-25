@@ -2,9 +2,9 @@
     design = 'TriSubChannel1PhaseProblem.md'
     issues = '#29237'
     [ORNL-19]
-        type = Exodiff
+        type = CSVDiff
         input = ORNL_19.i
-        exodiff = ORNL_19_out.e
+        csvdiff = ORNL_19_out.csv
         # custom_cmp = 'test.exodiff'
         method = '!DBG'
         valgrind = NONE
