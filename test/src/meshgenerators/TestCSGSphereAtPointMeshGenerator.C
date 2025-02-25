@@ -50,7 +50,7 @@ TestCSGSphereAtPointMeshGenerator::generateCSG()
   auto root_univ = csg_mesh->createRootUniverse(root_univ_name);
 
   csg_mesh->createSphereAtPoint("sphere_surf", _center, _radius);
-  //auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
+  // TODO: make cells: auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
 
   return csg_mesh;
 }
