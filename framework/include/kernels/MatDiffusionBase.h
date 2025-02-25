@@ -59,3 +59,6 @@ protected:
 
   usingGenericKernelGradMembers;
 };
+
+template <typename T>
+using MatDiffusionBase = MatDiffusionBaseTempl<T, false>;
