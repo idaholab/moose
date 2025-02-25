@@ -9,45 +9,45 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 10
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./test_material]
+  [test_material]
     type = OutputTestMaterial
     block = 0
     variable = u
     stdvector_property_name = vec
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
