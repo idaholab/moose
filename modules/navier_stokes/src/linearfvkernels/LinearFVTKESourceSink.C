@@ -102,6 +102,7 @@ LinearFVTKESourceSink::computeMatrixContribution()
     const Real TKE = _var.getElemValue(*_current_elem_info, state);
 
     // Assembly variables
+    Real production = 0.0;
     Real destruction = 0.0;
     Real tot_weight = 0.0;
     std::vector<Real> y_plus_vec, velocity_grad_norm_vec;
@@ -150,7 +151,9 @@ LinearFVTKESourceSink::computeMatrixContribution()
       const Moose::FaceArg facearg = {
           fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
 
+      const Real wall_mut = _mu_t(facearg, state);
       const Real wall_mu = _mu(facearg, state);
+      const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
       const auto destruction_visc = 2.0 * wall_mu / Utility::pow<2>(distance_vec[i]) / tot_weight;
       const auto destruction_log = std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 0.5) /
                                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
@@ -158,11 +161,15 @@ LinearFVTKESourceSink::computeMatrixContribution()
       if (y_plus < 11.25)
         destruction += destruction_visc;
       else
+      {
         destruction += destruction_log;
+        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE) /
+                      (NS::von_karman_constant * distance_vec[i]) / tot_weight;
+      }
     }
 
     // Assign terms to matrix to solve implicitly (they get multiplied by TKE)
-    return destruction * _current_elem_volume;
+    return (destruction - production) * _current_elem_volume;
   }
   else
   {
@@ -184,71 +191,7 @@ LinearFVTKESourceSink::computeRightHandSideContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
 
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end()) // Wall bounded
-  {
-    // Useful variables
-    const Real rho = _rho(elem_arg, state);
-    const Real mu = _mu(elem_arg, state);
-    const Real TKE = _var.getElemValue(*_current_elem_info, state);
-
-    // Assembly variables
-    Real production = 0.0;
-    Real tot_weight = 0.0;
-    std::vector<Real> y_plus_vec, velocity_grad_norm_vec;
-
-    // Get near-wall element velocity vector
-    RealVectorValue velocity(_u_var(elem_arg, state));
-    if (_v_var)
-      velocity(1) = (*_v_var)(elem_arg, state);
-    if (_w_var)
-      velocity(2) = (*_w_var)(elem_arg, state);
-
-    // Get faceInfo and distance vector for between all walls and elements
-    const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem_info->elem());
-    const auto & distance_vec = libmesh_map_find(_dist, _current_elem_info->elem());
-    mooseAssert(distance_vec.size(), "Should have found a distance vector");
-    mooseAssert(distance_vec.size() == face_info_vec.size(),
-                "Should be as many distance vectors as face info vectors");
-
-    // Populate y+, near wall velocity gradient, and update weights
-    for (unsigned int i = 0; i < distance_vec.size(); i++)
-    {
-      const auto parallel_speed = NS::computeSpeed<Real>(
-          velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
-      const auto distance = distance_vec[i];
-
-      Real y_plus;
-      if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium --> Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
-      else // Equilibrium --> Iterative
-        y_plus = NS::findyPlus<Real>(mu, rho, std::max(parallel_speed, 1e-10), distance);
-
-      y_plus_vec.push_back(y_plus);
-      const Real velocity_grad_norm = parallel_speed / distance;
-      velocity_grad_norm_vec.push_back(velocity_grad_norm);
-      tot_weight += 1.0;
-    }
-
-    // Compute near-wall production
-    for (unsigned int i = 0; i < y_plus_vec.size(); i++)
-    {
-      const auto y_plus = y_plus_vec[i];
-
-      const auto fi = face_info_vec[i];
-      const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
-      const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
-      const Moose::FaceArg facearg = {
-          fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
-
-      const Real wall_mut = _mu_t(facearg, state);
-      const Real wall_mu = _mu(facearg, state);
-      const auto tau_w = (wall_mut + wall_mu) * velocity_grad_norm_vec[i];
-
-      if (y_plus > 11.25)
-        production += tau_w * std::pow(_C_mu, 0.25) * std::sqrt(TKE) /
-                      (NS::von_karman_constant * distance_vec[i]) / tot_weight;
-    }
-    return production * _current_elem_volume;
-  }
+    return 0.0; // Do nothing
   else // Not wall bounded
   {
     // Compute TKE production

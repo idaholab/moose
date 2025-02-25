@@ -453,7 +453,9 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
                                                    LinearSystem & system,
                                                    const Real relaxation_factor,
                                                    SolverConfiguration & solver_config,
-                                                   const Real absolute_tol)
+                                                   const Real absolute_tol,
+                                                   const bool relax_fields,
+                                                   const Real field_relaxation)
 {
   _problem.setCurrentLinearSystem(system_num);
 
@@ -506,6 +508,13 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
     _console << system.name() << " solution " << std::endl;
     solution.print();
     _console << " Norm factor " << norm_factor << std::endl;
+  }
+
+  // Relax the field update for the next momentum predictor
+  if (relax_fields)
+  {
+    auto & old_local_solution = *(system.solutionPreviousNewton());
+    NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
   }
 
   system.setSolution(current_local_solution);
@@ -634,13 +643,26 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
+      {
         ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
                      _active_scalar_system_names.size() + i] =
             solveAdvectedSystem(_turbulence_system_numbers[i],
                                 *_turbulence_systems[i],
                                 _turbulence_equation_relaxation[i],
                                 _turbulence_linear_control,
-                                _turbulence_l_abs_tol);
+                                _turbulence_l_abs_tol,
+                                true,
+                                _turbulence_field_relaxation[i]);
+
+        // Limiting turbulence solution
+        LinearImplicitSystem & li_system =
+            libMesh::cast_ref<LinearImplicitSystem &>(_turbulence_systems[i]->system());
+        NumericVector<Number> & current_solution = *(li_system.solution);
+        NS::FV::limitSolutionUpdate(current_solution, _turbulence_field_min_limit[i]);
+
+        // Overwrite old solution
+        _turbulence_systems[i]->setSolution(current_solution);
+      }
     }
 
     _problem.execute(EXEC_NONLINEAR);

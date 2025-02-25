@@ -294,6 +294,18 @@ SIMPLESolveBase::validParams()
                                      "equations. (=1 for no relaxation, "
                                      "diagonal dominance will still be enforced)");
 
+  params.addParam<std::vector<Real>>("turbulence_field_relaxation",
+                                     std::vector<Real>(),
+                                     "The relaxation which should be used for the turbulence "
+                                     "equations. (=1 for no relaxation, "
+                                     "diagonal dominance will still be enforced)");
+
+  params.addParam<std::vector<Real>>(
+  "turbulence_field_min_limit",
+  std::vector<Real>(),
+  "The lower limit imposed on turbulent quantities. The recommended value for robustness "
+  "is 1e-8.");
+
   params.addParam<MultiMooseEnum>("turbulence_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "Singleton PETSc options for the turbulence equation(s)");
@@ -324,7 +336,11 @@ SIMPLESolveBase::validParams()
       "The maximum allowed iterations in the linear solver of the turbulence equation.");
 
   params.addParamNamesToGroup(
-      "turbulence_systems turbulence_equation_relaxation turbulence_petsc_options "
+      "turbulence_systems "
+      "turbulence_equation_relaxation "
+      "turbulence_field_relaxation "
+      "turbulence_field_min_limit "
+      "turbulence_petsc_options "
       "turbulence_petsc_options_iname "
       "turbulence_petsc_options_value turbulence_petsc_options_value "
       "turbulence_absolute_tolerance "
@@ -373,6 +389,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _turbulence_system_names(getParam<std::vector<SolverSystemName>>("turbulence_systems")),
     _has_turbulence_systems(!_turbulence_system_names.empty()),
     _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
+    _turbulence_field_relaxation(getParam<std::vector<Real>>("turbulence_field_relaxation")),
+    _turbulence_field_min_limit(getParam<std::vector<Real>>("turbulence_field_min_limit")),
     _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
@@ -538,6 +556,14 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
       paramError("turbulence_absolute_tolerance",
                  "The number of absolute tolerances does not match the number of "
                  "passive scalar equations!");
+    if (_turbulence_field_min_limit.empty())
+      // If no minimum bounds are given, initialize to default value 1e-8
+      _turbulence_field_min_limit.resize(_turbulence_system_names.size(), 1e-8);
+
+    // Assign turbulence field relaxation as 1.0 if not defined
+    if (_turbulence_field_relaxation.empty())
+        _turbulence_field_relaxation.resize(_turbulence_system_names.size(), 1.0);
+
 
     const auto & turbulence_petsc_options = getParam<MultiMooseEnum>("turbulence_petsc_options");
     const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(
@@ -564,6 +590,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "turbulence_l_abs_tol",
                                   "turbulence_l_max_its",
                                   "turbulence_equation_relaxation",
+                                  "turbulence_field_relaxation",
+                                  "turbulence_field_min_limit",
                                   "turbulence_absolute_tolerance"},
                                  false);
 }
