@@ -86,7 +86,7 @@ template <>
 RealGradient
 MatDiffusionBaseTempl<Real, false>::precomputeQpJacobian()
 {
-  RealGradient sum = _phi[_j][_qp] * (*_ddiffusivity_dc)[_qp] * _grad_v[_qp];
+  RealGradient sum = (*_ddiffusivity_dc)[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (!_is_coupled)
     sum += computeQpCJacobian();
 
@@ -97,7 +97,7 @@ template <>
 RealGradient
 MatDiffusionBaseTempl<RealTensorValue, false>::precomputeQpJacobian()
 {
-  RealGradient sum = _phi[_j][_qp] * (*_ddiffusivity_dc)[_qp] * _grad_v[_qp];
+  RealGradient sum = (*_ddiffusivity_dc)[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (!_is_coupled)
     sum += computeQpCJacobian();
 
@@ -117,13 +117,13 @@ Real
 MatDiffusionBaseTempl<Real, false>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  const unsigned int cvar = this->mapJvarToCvar(jvar);
+  const auto cvar = this->mapJvarToCvar(jvar);
 
-  Real sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  auto sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (_v_var == jvar)
-    sum += computeQpCJacobian() * _grad_test[_i][_qp];
+    sum += computeQpCJacobian();
 
-  return sum;
+  return sum * _grad_test[_i][_qp];
 }
 
 template <>
@@ -131,13 +131,13 @@ Real
 MatDiffusionBaseTempl<RealTensorValue, false>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  const unsigned int cvar = this->mapJvarToCvar(jvar);
+  const auto cvar = this->mapJvarToCvar(jvar);
 
-  Real sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  auto sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (_v_var == jvar)
-    sum += computeQpCJacobian() * _grad_test[_i][_qp];
+    sum += computeQpCJacobian();
 
-  return sum;
+  return sum * _grad_test[_i][_qp];
 }
 
 template <typename T, bool is_ad>
@@ -150,5 +150,5 @@ MatDiffusionBaseTempl<T, is_ad>::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 
 template class MatDiffusionBaseTempl<Real, false>;
 template class MatDiffusionBaseTempl<Real, true>;
-template class MatDiffusionBaseTempl<RealVectorValue, false>;
-template class MatDiffusionBaseTempl<RealVectorValue, true>;
+template class MatDiffusionBaseTempl<RealTensorValue, false>;
+template class MatDiffusionBaseTempl<RealTensorValue, true>;
