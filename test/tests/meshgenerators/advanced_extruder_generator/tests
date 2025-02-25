@@ -166,4 +166,14 @@
       expect_err = 'The block \'1234\' was not found within the mesh'
     []
   []
+  [named_boundaries]
+    type = Exodiff
+    input = named_boundaries.i
+    exodiff = named_boundaries_in.e
+    issues = '#29908'
+    design = 'AdvancedExtruderGenerator.md'
+    requirement = 'The system shall be able to assign names to the top and bottom boundaries of an extrusion.'
+    cli_args = '--mesh-only'
+    recover = false
+  []
 []

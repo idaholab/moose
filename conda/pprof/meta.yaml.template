@@ -1,0 +1,54 @@
+{% set version = "__VERSIONER_PPROF_VERSION__" %}
+{% set build = __VERSIONER_PPROF_BUILD_NUMBER__ %}
+{% set strbuild = "build_" + build|string %}
+
+package:
+  name: moose-pprof
+  version: {{ version }}
+
+source:
+  - path: ../pprof
+  - path: ../functions/retry_build.sh
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: true  # [win]
+
+requirements:
+  build:
+    - make
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - gperftools
+    - libunwind                          # [linux]
+    - sysroot_linux-64 2.17              # [linux64]
+    - gnuconfig                          # [unix]
+    - go
+
+  run:
+    - gperftools
+    - graphviz
+    - perl
+
+test:
+  commands:
+    - pprof --help
+
+about:
+  home: https://github.com/google/pprof
+  license: Apache
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'pprof is a tool for visualization and analysis of profiling data.'
+  description: |
+    pprof reads a collection of profiling samples in profile.proto format and
+    generates reports to visualize and help analyze the data. It can generate
+    both text and graphical reports (through the use of the dot visualization
+    package).
+  doc_url: https://github.com/google/pprof
+  dev_url: https://github.com/google/pprof
+
+extra:
+  recipe-maintainers:
+    - milljm

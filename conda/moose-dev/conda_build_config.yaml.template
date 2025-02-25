@@ -1,0 +1,20 @@
+mpi:
+  - mpich
+  - openmpi
+
+moose_libmesh:
+  - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
+  - moose-libmesh __VERSIONER_LIBMESH_VERSION__ openmpi___VERSIONER_LIBMESH_BUILD_NUMBER__
+
+moose_wasp:
+  - moose-wasp __VERSIONER_WASP_VERSION__
+
+moose_tools:
+  - moose-tools __VERSIONER_TOOLS_VERSION__
+
+moose_peacock:
+  - moose-peacock __VERSIONER_PEACOCK_VERSION__
+
+zip_keys:
+  - mpi
+  - moose_libmesh

@@ -734,10 +734,9 @@ class Tester(MooseObject, OutputInterface):
         if self.specs['working_directory']:
             if self.specs['working_directory'][:1] == os.path.sep:
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
-
-        # We can't offer the option of reading output files outside of initial TestDir
-        if self.specs['working_directory'] and options.sep_files:
-            reasons['working_directory'] = '--sep-files* enabled'
+            # We can't offer the option of reading output files outside of initial TestDir
+            if '..' in self.specs['working_directory'] and options.sep_files:
+                reasons['working_directory'] = '--sep-files enabled'
 
         # Explicitly skip HPC tests
         if not self.specs['hpc'] and options.hpc:

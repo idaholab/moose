@@ -1,0 +1,109 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
+{% set version = "__VERSIONER_TOOLS_VERSION__" %}
+
+package:
+  name: moose-tools
+  version: {{ version }}
+
+source:
+  path: ../tools
+
+build:
+  number: 0
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+
+requirements:
+  build:
+    - {{ moose_python }}
+    - setuptools
+  run:
+    # NOTE: If you are here to add a Python package in order to make the TestHarness or
+    #       versioner.py work, you also have to add that package in mpi/meta.yaml, under
+    #       moose-python. This allows folks that build their own PETSc, libMesh, WASP,
+    #       etc combos, to continue to do so with only needing the moose-mpi package.
+    - beautifulsoup4
+    - {{ clang_format }}
+    - clang-tools
+    - deepdiff
+    - git-lfs <3.5.1
+    - gitpython
+    - graphviz
+    - h5py
+    - jinja2
+    - livereload
+    - lxml
+    - mako
+    - matplotlib-base !=3.9.0
+    - mock
+    - numpy
+    - packaging
+    - pandas
+    - paramiko
+    - psutil
+    - psycopg2
+    - pyarrow
+    - pybtex
+    - pycobertura
+    - pyflakes
+    - pylatexenc
+    - pylint
+    - python
+    - pyyaml
+    - requests
+    - scikit-image
+    - setuptools
+    - sympy
+    - tabulate
+    - uncertainties
+    - xmltodict <0.14
+    - yaml
+test:
+  commands:
+    - clang-format --version
+    - dot -V
+    - git-lfs --version
+    - pg_config --help
+  imports:
+    - bs4
+    - deepdiff
+    - git
+    - jinja2
+    - livereload
+    - lxml
+    - matplotlib
+    - mock
+    - numpy
+    - pandas
+    - psycopg2
+    - pyarrow
+    - pybtex
+    - pycobertura
+    - pyflakes
+    - pylatexenc
+    - pylint
+    - requests
+    - skimage
+    - sympy
+    - tabulate
+    - xmltodict
+    - yaml
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: >
+    This superficial module (moose-tools) acts as a top-level module designed to provide all
+    dependencies required in order to run the TestHarness, clang-format, and create MOOSE
+    Documentation.
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour
+    - loganharbour

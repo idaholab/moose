@@ -31,7 +31,7 @@ class VersionerExtension(command.CommandExtension):
     def __init__(self, **kwargs):
       super().__init__(**kwargs)
 
-      self.version_meta = Versioner().version_meta()
+      self.packages = Versioner().get_packages('HEAD')
 
     def extend(self, reader, renderer):
         self.requires(core, command)
@@ -39,18 +39,18 @@ class VersionerExtension(command.CommandExtension):
         self.addCommand(reader, VersionerVersionReplace())
         self.addCommand(reader, VersionerCondaVersionReplace())
 
-    def getVersion(self, package, versioner_keys, must_exist=True):
+    def getVersion(self, package_name, versioner_keys, must_exist=True):
         """
         Helper for getting a version in the commands
         """
-        version_meta = self.version_meta.get(package)
-        if version_meta is None:
+        package = self.packages.get(package_name)
+        if package is None:
             if must_exist:
-                raise exceptions.MooseDocsException(f'Unknown package "{package}"')
+                raise exceptions.MooseDocsException(f'Unknown package "{package_name}"')
             return None
-        value = version_meta
+        value = package
         for key in versioner_keys:
-            value = value.get(key)
+            value = getattr(value, key)
         return value
 
 class VersionerCodeReplace(command.CommandComponent):
@@ -88,8 +88,8 @@ class VersionerCodeReplace(command.CommandComponent):
                 return self.extension.getVersion(package_dashed, versioner_keys)
             return re.sub(r'__VERSIONER_' + re.escape(prefix) + r'_(?P<package>[A-Z][A-Z_]+)__',
                           sub_function, content, flags=re.UNICODE)
-        content = replace(content, 'VERSION', ['hash'])
-        content = replace(content, 'CONDA_VERSION', ['conda', 'version_and_build'])
+        content = replace(content, 'VERSION', ['full_version'])
+        content = replace(content, 'CONDA_VERSION', ['conda', 'install'])
 
         core.Code(parent, style="max-height:{};".format(settings['max-height']),
                   language=settings['language'], content=content)
@@ -125,7 +125,7 @@ class VersionerVersionReplace(VersionerReplaceBase):
     SUBCOMMAND = 'version'
 
     def createToken(self, parent, info, page, settings):
-        return self.createTokenBase(parent, info, page, settings, ['hash'])
+        return self.createTokenBase(parent, info, page, settings, ['full_version'])
 
 class VersionerCondaVersionReplace(VersionerReplaceBase):
     """
@@ -140,4 +140,4 @@ class VersionerCondaVersionReplace(VersionerReplaceBase):
     SUBCOMMAND = 'conda_version'
 
     def createToken(self, parent, info, page, settings):
-        return self.createTokenBase(parent, info, page, settings, ['conda', 'version_and_build'])
+        return self.createTokenBase(parent, info, page, settings, ['conda', 'install'])

@@ -1,0 +1,61 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set build = __VERSIONER_LIBMESH_BUILD_NUMBER__ %}
+{% set version = "__VERSIONER_LIBMESH_VERSION__" %}
+
+package:
+  name: moose-libmesh
+  version: {{ version }}
+
+source:
+  - path: ../../libmesh
+  - path: ../../scripts/configure_libmesh.sh
+  - path: ../functions/retry_build.sh
+
+build:
+  number: {{ build }}
+  string: {{ mpi }}_{{ build }}
+  skip: true                                            # [win]
+  script_env:
+    - MOOSE_JOBS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+
+requirements:
+  build:
+    - {{ moose_petsc }}
+    - {{ moose_libmesh_vtk }}
+    - pkg-config
+    - libpng
+    - zlib
+  run:
+    - {{ mpi }}
+    - {{ moose_petsc }}
+    - {{ moose_libmesh_vtk }}
+    - pkg-config
+    - packaging
+
+test:
+  commands:
+    - test -f $PREFIX/libmesh/lib/libmesh_opt.dylib     # [osx]
+    - test -f $PREFIX/libmesh/lib/libmesh_opt.so        # [linux]
+    - test -f $PREFIX/libmesh/lib/libmetaphysicl.dylib  # [osx]
+    - test -f $PREFIX/libmesh/lib/libmetaphysicl.so     # [linux]
+    - test -f $PREFIX/libmesh/lib/libtimpi_opt.dylib    # [osx]
+    - test -f $PREFIX/libmesh/lib/libtimpi_opt.so       # [linux]
+
+about:
+  home: http://libmesh.github.io/
+  license: LGPL
+  summary: >
+    The libMesh library provides a framework for the numerical simulation of partial differential
+    equations using arbitrary unstructured discretizations on serial and parallel platforms
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour
