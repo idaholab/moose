@@ -6,7 +6,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 4
-    n_cells = 100
+    n_cells = 20
     flat_to_flat = 0.085
     heated_length = 1.0
     pin_diameter = 0.01
@@ -40,6 +40,8 @@ P_out = 2.0e5 # Pa
   [q_prime]
   []
   [mu]
+  []
+  [displacement]
   []
 []
 
@@ -167,7 +169,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "toshiba_39_pin_viz.i"
+    input_files = "toshiba_37_pin_viz.i"
     execute_on = "timestep_end"
   []
 []

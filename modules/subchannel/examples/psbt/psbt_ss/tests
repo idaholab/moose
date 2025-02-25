@@ -1,7 +1,6 @@
 [Tests]
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29196 #29199 #29237 #29505'
-  requirement = 'The system will examine the subchannel solver for the psbt case'
   [psbt_case_01-5237]
     type = Exodiff
     input = psbt.i
@@ -13,5 +12,6 @@
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the psbt case'
   []
 []

@@ -2,7 +2,7 @@
     [subchannel]
       type = SCMDetailedTriSubChannelMeshGenerator
       nrings = 4
-      n_cells = 100
+      n_cells = 20
       flat_to_flat = 0.085
       heated_length = 1.0
       pin_diameter = 0.01

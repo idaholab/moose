@@ -105,20 +105,11 @@ P_out = 101325 # Pa
 []
 
 [Functions]
-  [mass_flux_in]
+  [mass_flux]
     type = PiecewiseLinear
     xy_data = '
       5.0 122.2645
       10.0 42.7926'
-  []
-[]
-
-[Controls]
-  [mass_flux_ctrl]
-    type = RealFunctionControl
-    parameter = 'AuxKernels/mdot_in_bc/mass_flux'
-    function = 'mass_flux_in'
-    execute_on = 'initial timestep_begin'
   []
 []
 
@@ -135,12 +126,17 @@ P_out = 101325 # Pa
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = 0.0
+    mass_flux = mass_flux_in
     execute_on = 'timestep_begin'
   []
 []
 
 [Postprocessors]
+  [mass_flux_in]
+    type = FunctionValuePostprocessor
+    function = mass_flux
+    execute_on = 'initial timestep_end'
+  []
   [mdot]
     type = SubChannelPointValue
     variable = mdot
