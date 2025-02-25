@@ -12,6 +12,9 @@
 #include "MooseFunctor.h"
 #include "InputParameters.h"
 
+/**
+ * Base class for creating a user object with the SpatialUserObject and Moose::Functor APIs
+ */
 template <typename UserObjectType>
 class SpatialUserObjectFunctor : public UserObjectType, public Moose::FunctorBase<Real>
 {
