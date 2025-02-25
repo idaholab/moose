@@ -192,6 +192,12 @@ protected:
   /// The user-defined relaxation parameter(s) for the turbulence equation(s)
   const std::vector<Real> _turbulence_equation_relaxation;
 
+  /// The user-defined relaxation parameter(s) for the turbulence field(s)
+  std::vector<Real> _turbulence_field_relaxation;
+
+  /// The user-defined lower limit for turbulent quantities e.g. k, eps/omega, etc..
+  std::vector<Real> _turbulence_field_min_limit;
+
   /// Options which hold the petsc settings for the turbulence equation(s)
   Moose::PetscSupport::PetscOptions _turbulence_petsc_options;
 
