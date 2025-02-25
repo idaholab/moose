@@ -130,11 +130,11 @@ DiffusionPhysicsBase::addInitialConditions()
 
   // Get the list of blocks that have ics from components
   std::vector<SubdomainName> component_ic_blocks;
-  for (const auto & comp_pair : _components_initial_conditions)
+  for (const auto & [component_name, component_bc_map] : _components_initial_conditions)
   {
-    if (!comp_pair.second.count(_var_name))
+    if (!component_bc_map.count(_var_name))
       continue;
-    const auto & comp_blocks = getActionComponent(comp_pair.first).blocks();
+    const auto & comp_blocks = getActionComponent(component_name).blocks();
     component_ic_blocks.insert(component_ic_blocks.end(), comp_blocks.begin(), comp_blocks.end());
   }
 
@@ -167,15 +167,15 @@ DiffusionPhysicsBase::addInitialConditionsFromComponents()
 {
   InputParameters params = getFactory().getValidParams("FunctorIC");
 
-  for (const auto & comp_pair : _components_initial_conditions)
+  for (const auto & [component_name, component_bc_map] : _components_initial_conditions)
   {
-    if (!comp_pair.second.count(_var_name))
+    if (!component_bc_map.count(_var_name))
       continue;
-    assignBlocks(params, getActionComponent(comp_pair.first).blocks());
+    assignBlocks(params, getActionComponent(component_name).blocks());
     params.set<VariableName>("variable") = _var_name;
-    params.set<MooseFunctorName>("functor") = libmesh_map_find(comp_pair.second, _var_name);
+    params.set<MooseFunctorName>("functor") = libmesh_map_find(component_bc_map, _var_name);
 
     getProblem().addInitialCondition(
-        "FunctorIC", prefix() + _var_name + "_ic_" + comp_pair.first, params);
+        "FunctorIC", prefix() + _var_name + "_ic_" + component_name, params);
   }
 }

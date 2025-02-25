@@ -5,7 +5,7 @@
     csvdiff = 'component_with_physics_out.csv'
     design = 'ComponentPhysicsInterface.md'
     issues = '#24103'
-    requirement = 'The system shall be able to add equations onto the mesh of (action)components using the Physics syntax.'
+    requirement = 'The system shall be able to add equations onto the mesh of (action)components using physics syntax.'
   []
   [materials]
     type = CSVDiff

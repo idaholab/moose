@@ -214,10 +214,10 @@ PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(
 {
   std::vector<SubdomainID> block_ids;
   block_ids.reserve(functors.size());
-  for (const auto & [key, value] : functors)
+  for (const auto & [available_sub_id, functor] : functors)
   {
-    libmesh_ignore(value);
-    block_ids.push_back(key);
+    libmesh_ignore(functor);
+    block_ids.push_back(available_sub_id);
   }
   mooseError("The provided subdomain ID ",
              std::to_string(sub_id),

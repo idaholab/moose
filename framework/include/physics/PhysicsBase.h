@@ -105,8 +105,8 @@ protected:
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  virtual Factory & getFactory() { return _factory; }
-  virtual Factory & getFactory() const { return _factory; }
+  Factory & getFactory() { return _factory; }
+  Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem()

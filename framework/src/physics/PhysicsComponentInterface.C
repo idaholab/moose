@@ -56,7 +56,7 @@ PhysicsComponentInterface::addComponent(const ActionComponent & comp)
   {
     for (const auto & var_name : solverVariableNames())
       if (comp_bc->hasBoundaryCondition(var_name))
-        for (const auto & boundary : comp_bc->getBoundaryConditionsBoundaries(var_name))
+        for (const auto & boundary : comp_bc->getBoundaryConditionBoundaries(var_name))
         {
           ComponentBoundaryConditionInterface::BoundaryConditionType bc_type;
           const auto boundary_functor =
@@ -65,7 +65,7 @@ PhysicsComponentInterface::addComponent(const ActionComponent & comp)
         }
     for (const auto & var_name : auxVariableNames())
       if (comp_bc->hasBoundaryCondition(var_name))
-        for (const auto & boundary : comp_bc->getBoundaryConditionsBoundaries(var_name))
+        for (const auto & boundary : comp_bc->getBoundaryConditionBoundaries(var_name))
         {
           ComponentBoundaryConditionInterface::BoundaryConditionType bc_type;
           const auto boundary_functor =

@@ -21,7 +21,7 @@ ComponentPhysicsInterface::validParams()
 ComponentPhysicsInterface::ComponentPhysicsInterface(const InputParameters & params)
   : ActionComponent(params), _physics_names(getParam<std::vector<PhysicsName>>("physics"))
 {
-  // Adding ActionComponents must be done after adding adding Physics
+  // Adding ActionComponents must be done after adding Physics
   for (const auto & physics_name : getParam<std::vector<PhysicsName>>("physics"))
     _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
 

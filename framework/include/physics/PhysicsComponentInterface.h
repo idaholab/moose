@@ -57,14 +57,12 @@ public:
 protected:
   // TODO: add hash constructor to ComponentName to be able to use it as a key
   /// Map of components to variables and initial conditions
-  std::unordered_map<std::string, std::map<VariableName, MooseFunctorName>>
-      _components_initial_conditions;
+  std::map<std::string, std::map<VariableName, MooseFunctorName>> _components_initial_conditions;
   /// Map of components to variables and boundary conditions
-  std::unordered_map<
-      std::string,
-      std::map<
-          std::pair<VariableName, BoundaryName>,
-          std::pair<MooseFunctorName, ComponentBoundaryConditionInterface::BoundaryConditionType>>>
+  std::map<std::string,
+           std::map<std::pair<VariableName, BoundaryName>,
+                    std::pair<MooseFunctorName,
+                              ComponentBoundaryConditionInterface::BoundaryConditionType>>>
       _components_boundary_conditions;
 
 private:

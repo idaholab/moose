@@ -58,6 +58,7 @@ ComponentBoundaryConditionInterface::ComponentBoundaryConditionInterface(
     _fixed_value_bc_variables(getParam<std::vector<VariableName>>("fixed_value_bc_variables")),
     _flux_bc_variables(getParam<std::vector<VariableName>>("flux_bc_variables"))
 {
+  addRequiredTask("init_component_physics");
   addRequiredTask("check_integrity");
 
   // Check for unique elements
@@ -164,7 +165,7 @@ ComponentBoundaryConditionInterface::getBoundaryCondition(const VariableName & v
 }
 
 std::vector<BoundaryName>
-ComponentBoundaryConditionInterface::getBoundaryConditionsBoundaries(
+ComponentBoundaryConditionInterface::getBoundaryConditionBoundaries(
     const VariableName & var_name) const
 {
   // if there exists at least one BC of that type for that variable

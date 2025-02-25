@@ -34,7 +34,7 @@ public:
   };
 
   /**
-   * Whether the component has a boundary condition parameter is specified for the requested
+   * Whether the component has a boundary condition parameter specified for the requested
    * variable
    * @param variable the name of the variable
    * @return Whether the component has a boundary condition parameter specified for the requested
@@ -56,7 +56,7 @@ public:
    * message
    * @return the name of the boundaries
    */
-  std::vector<BoundaryName> getBoundaryConditionsBoundaries(const VariableName & variable) const;
+  std::vector<BoundaryName> getBoundaryConditionBoundaries(const VariableName & variable) const;
   /**
    * Get the name of the functor providing the boundary condition for the requested variable and
    * boundary
@@ -64,13 +64,13 @@ public:
    * @param boundary the name of the boundary concerned
    * @param requestor name of the requestor for the boundary condition, used in a potential error
    * message
-   * @param bc_type the type of the boundary condition (flux or fixed value)
+   * @return bc_type the type of the boundary condition (flux or fixed value)
    * @return the name of the functor providing the value of the boundary condition
    */
-  const MooseFunctorName getBoundaryCondition(const VariableName & variable,
-                                              const BoundaryName & boundary,
-                                              const std::string & requestor_name,
-                                              BoundaryConditionType & bc_type) const;
+  MooseFunctorName getBoundaryCondition(const VariableName & variable,
+                                        const BoundaryName & boundary,
+                                        const std::string & requestor_name,
+                                        BoundaryConditionType & bc_type) const;
 
 protected:
   virtual void checkIntegrity() override { checkBoundaryConditionsAllRequested(); }
@@ -84,9 +84,9 @@ protected:
   // This would let us return the boundary condition functor name by reference too
 
   /// Maps of the fixed value boundary conditions
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _fixed_value_bcs;
+  std::map<std::string, std::map<std::string, std::string>> _fixed_value_bcs;
   /// Maps of the flux boundary conditions
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _flux_bcs;
+  std::map<std::string, std::map<std::string, std::string>> _flux_bcs;
 
   /// Requested variables. If the IC for a variable was never requested, error
   mutable std::set<std::pair<VariableName, BoundaryName>> _requested_bc_variables;

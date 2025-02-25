@@ -91,7 +91,7 @@ protected:
   }
 
   /// Get the factory to build (often physics-related but not always) objects (for example a Positions)
-  virtual Factory & getFactory() const { return _factory; }
+  Factory & getFactory() const { return _factory; }
 
   /// Maximum dimension of the component
   unsigned int _dimension;
