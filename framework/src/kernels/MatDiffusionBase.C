@@ -38,7 +38,7 @@ MatDiffusionBaseTempl<T, is_ad>::MatDiffusionBaseTempl(const InputParameters & p
     _ddiffusivity_darg(!is_ad ? _coupled_moose_vars.size() : 0.0),
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : _var.number()),
-    _grad_v(_is_coupled ? coupledGenericGradient<is_ad>("v") : _grad_u)
+    _grad_v(_is_coupled ? this->template coupledGenericGradient<is_ad>("v") : _grad_u)
 {
   // fetch derivatives
   for (unsigned int i = 0; i < _ddiffusivity_darg.size(); ++i)
