@@ -57,12 +57,16 @@ protected:
   /// @param relaxation_factor The relaxation factor for matrix relaxation
   /// @param solver_config The solver configuration object for the linear solve
   /// @param abs_tol The scaled absolute tolerance for the linear solve
+  /// @param relax_fields (optional) A boolean flag to indicate whether to relax fields during the solve. Default value is false.
+  /// @param field_relaxation (optional) The relaxation factor for fields if relax_fields is true. Default value is 1.0.
   /// @return The normalized residual norm of the equation.
   std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
                                                     LinearSystem & system,
                                                     const Real relaxation_factor,
                                                     libMesh::SolverConfiguration & solver_config,
-                                                    const Real abs_tol);
+                                                    const Real abs_tol,
+                                                    const bool relax_fields = false,
+                                                    const Real field_relaxation = 1.0);
 
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
