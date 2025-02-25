@@ -1,0 +1,16 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#28497 #29481'
+  [EBR-II_SHRT-17_SS_test]
+    type = CSVDiff
+    input = 'XX09_SCM_SS17.i'
+    csvdiff  = 'XX09_SCM_SS17_out.csv'
+    # custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the EBR-II case'
+  []
+[]

@@ -1,6 +1,14 @@
-# J. T. Han 1977,
+################################################################################
+## THORS bundle 5B partial edge blockage benchmark                            ##
+## Pronghorn Subchannel simulation                                            ##
+## POC : Vasileios Kyriakopoulos, vasileios.kyriakopoulos@inl.gov             ##
+################################################################################
+# Details on the experimental facility modeled can be found at:
+# Han, J. T. "Blockages in LMFBR fuel assemblies: A review of experimental and theoretical studies." (1977).
 # This input file models a block next to the duct of  the of the assembly
 # 102 mm above the start of the heated section.
+
+# Boundary conditions
 # T_in = 596.75 # K, high flow case
 T_in = 541.55 #K, low flow case
 A12 = 1.00423e3
@@ -28,33 +36,47 @@ P_out = 2.0e5 # Pa
     spacer_k = '0.0'
     z_blockage = '0.49 0.52'
     index_blockage = '29 31 30 32 34 33 35 15 16 8 17 18 9 19'
-    reduction_blockage = '0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08 0.08'
-    k_blockage = '6 6 6 6 6 6 6 6 6 6 6 6 6 6 '
+    reduction_blockage = '0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168'
+    k_blockage = '0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 '
   []
 []
 
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [w_perim]
-  []
-  [q_prime]
+    block = subchannel
   []
   [mu]
+    block = subchannel
+  []
+  [q_prime]
+    block = subchannel
+  []
+  [displacement]
+    block = subchannel
   []
 []
 
@@ -241,7 +263,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "FFM-5Bdetailed.i"
+    input_files = "FFM-5B_viz.i"
     execute_on = "timestep_end"
   []
 []
@@ -250,6 +272,6 @@ P_out = 2.0e5 # Pa
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    variable = 'mdot SumWij P DP h T rho mu q_prime S displacement w_perim'
   []
 []
