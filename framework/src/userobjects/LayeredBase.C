@@ -179,7 +179,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
 }
 
 Real
-LayeredBase::integralValue(Point p) const
+LayeredBase::integralValue(const Point & p) const
 {
   unsigned int layer = getLayer(p);
 
