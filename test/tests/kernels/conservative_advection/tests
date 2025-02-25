@@ -8,13 +8,13 @@
       type = RunException
       input = no_upwinding_1D.i
       detail = 'by throwing an error when no velocity is given,'
-      expect_err = "Either velocity_variable or velocity_material must be specificied, not both, nor velocity."
+      expect_err = "Either velocity_variable or velocity_material must be specified"
     []
     [ad_no_velocity]
       type = RunException
       input = ad_no_upwinding_1D.i
       detail = 'by throwing an error when no velocity is given when using AD,'
-      expect_err = "Either velocity_variable or velocity_material must be specificied, not both, nor velocity."
+      expect_err = "Either velocity_variable or velocity_material must be specified"
     []
     [deprecated_velocity]
       type = RunException

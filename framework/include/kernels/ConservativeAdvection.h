@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GenericKernel.h"
+#include "libmesh/dense_vector.h"
 
 /**
  * Advection of the variable by the velocity provided by the user.
@@ -47,13 +48,13 @@ protected:
   const enum class UpwindingType { none, full } _upwinding;
 
   /// Nodal value of u, used for full upwinding
-  const VariableValue & _u_nodal;
+  const GenericVariableValue<is_ad> & _u_nodal;
 
   /// In the full-upwind scheme, whether a node is an upwind node
   std::vector<bool> _upwind_node;
 
   /// In the full-upwind scheme d(total_mass_out)/d(variable_at_node_i)
-  std::vector<Real> _dtotal_mass_out;
+  std::vector<GenericReal<is_ad>> _dtotal_mass_out;
 
   /// Returns - _grad_test * velocity
   GenericReal<is_ad> negSpeedQp() const;
@@ -62,6 +63,10 @@ protected:
   void fullUpwind(JacRes res_or_jac);
 
   usingGenericKernelMembers;
+
+private:
+  /// A container for holding the local residuals
+  libMesh::DenseVector<GenericReal<is_ad>> _my_local_re;
 };
 
 typedef ConservativeAdvectionTempl<false> ConservativeAdvection;
