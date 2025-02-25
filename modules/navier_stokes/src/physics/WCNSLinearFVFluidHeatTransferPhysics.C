@@ -15,6 +15,7 @@
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFluidHeatTransferPhysics);
 registerWCNSFVFluidHeatTransferPhysicsBaseTasks("NavierStokesApp",
                                                 WCNSLinearFVFluidHeatTransferPhysics);
+registerMooseAction("NavierStokesApp", WCNSLinearFVFluidHeatTransferPhysics, "add_aux_variable");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFluidHeatTransferPhysics, "add_aux_kernel");
 
 InputParameters
@@ -215,6 +216,30 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
   params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
+}
+
+void
+WCNSLinearFVFluidHeatTransferPhysics::addAuxiliaryVariables()
+{
+  if (_solve_for_enthalpy)
+  {
+    // Dont add if the user already defined the variable
+    if (variableExists(_fluid_temperature_name,
+                       /*error_if_aux=*/false))
+      checkBlockRestrictionIdentical(_fluid_temperature_name,
+                                     getProblem().getVariable(0, _fluid_temperature_name).blocks());
+    else if (_define_variables)
+    {
+      const auto var_type = "MooseLinearVariableFVReal";
+      auto params = getFactory().getValidParams(var_type);
+      assignBlocks(params, _blocks);
+      getProblem().addAuxVariable(var_type, _fluid_temperature_name, params);
+    }
+    else
+      paramError("fluid_temperature_variable",
+                 "Variable (" + _fluid_temperature_name +
+                     ") supplied to the WCNSLinearFVFluidHeatTransferPhysics does not exist!");
+  }
 }
 
 void

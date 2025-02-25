@@ -80,12 +80,6 @@ advected_interp_method = 'upwind'
   []
 []
 
-[AuxVariables]
-  [T]
-    type = MooseLinearVariableFVReal
-  []
-[]
-
 [FluidProperties]
   [lead]
     type = LeadFluidProperties
