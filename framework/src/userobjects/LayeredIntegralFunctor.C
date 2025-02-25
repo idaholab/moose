@@ -14,13 +14,12 @@ registerMooseObject("MooseApp", LayeredIntegralFunctor);
 InputParameters
 LayeredIntegralFunctor::validParams()
 {
-  InputParameters params =
-      LayeredVolumeIntegralBase<ElementIntegralFunctorUserObject>::validParams();
+  auto params = LayeredIntegralBase<ElementIntegralFunctorUserObject>::validParams();
   params.addClassDescription("Computes layered element integrals of a functor.");
   return params;
 }
 
 LayeredIntegralFunctor::LayeredIntegralFunctor(const InputParameters & parameters)
-  : LayeredVolumeIntegralBase<ElementIntegralFunctorUserObject>(parameters)
+  : LayeredIntegralBase<ElementIntegralFunctorUserObject>(parameters)
 {
 }

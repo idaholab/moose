@@ -10,12 +10,12 @@
 #pragma once
 
 #include "LayeredVolumeAverageBase.h"
-#include "LayeredIntegralFunctor.h"
+#include "ElementIntegralFunctorUserObject.h"
 
 /**
  * Computes layered element averages of a functor.
  */
-class LayeredAverageFunctor : public LayeredVolumeAverageBase<LayeredIntegralFunctor>
+class LayeredAverageFunctor : public LayeredVolumeAverageBase<ElementIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();

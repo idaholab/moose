@@ -10,13 +10,13 @@
 #pragma once
 
 #include "LayeredVolumeAverageBase.h"
-#include "LayeredIntegral.h"
+#include "ElementIntegralVariableUserObject.h"
 
 /**
  * This UserObject computes averages of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).
  */
-class LayeredAverage : public LayeredVolumeAverageBase<LayeredIntegral>
+class LayeredAverage : public LayeredVolumeAverageBase<ElementIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();

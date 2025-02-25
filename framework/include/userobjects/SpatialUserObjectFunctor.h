@@ -11,6 +11,7 @@
 
 #include "MooseFunctor.h"
 #include "InputParameters.h"
+#include "BlockRestrictable.h"
 
 /**
  * Base class for creating a user object with the SpatialUserObject and Moose::Functor APIs
@@ -22,6 +23,7 @@ public:
   static InputParameters validParams() { return UserObjectType::validParams(); }
 
   SpatialUserObjectFunctor(const InputParameters & params);
+  virtual bool hasBlocks(SubdomainID sub) const override;
 
 protected:
   using ElemArg = Moose::ElemArg;
@@ -113,4 +115,14 @@ SpatialUserObjectFunctor<UserObjectType>::evaluate(const NodeArg & node,
                                                    const Moose::StateArg & state) const
 {
   return evaluateTemplate(node, state);
+}
+
+template <typename UserObjectType>
+bool
+SpatialUserObjectFunctor<UserObjectType>::hasBlocks(const SubdomainID sub_id) const
+{
+  if constexpr (std::is_base_of<BlockRestrictable, UserObjectType>::value)
+    return UserObjectType::hasBlocks(sub_id);
+  else
+    return Moose::FunctorBase<Real>::hasBlocks(sub_id);
 }
