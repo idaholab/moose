@@ -47,10 +47,14 @@ CSGPlane::coeffsFromPoints(const Point p1, const Point p2, const Point p3)
 
   // for consistency and clarity, always make _d positive
   if (_d < 0){  // avoid printing "-0.0" if a coefficient is already 0.0
-    if (_a != 0) _a = -1.0 * _a;
-    if (_b != 0) _b = -1.0 * _b;
-    if (_c != 0) _c = -1.0 * _c;
-    if (_d != 0) _d = -1.0 * _d;
+    if (_a != 0)
+      _a = -1.0 * _a;
+    if (_b != 0)
+      _b = -1.0 * _b;
+    if (_c != 0)
+      _c = -1.0 * _c;
+    if (_d != 0)
+      _d = -1.0 * _d;
   }
 }
 
