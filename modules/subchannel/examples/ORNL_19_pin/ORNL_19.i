@@ -164,6 +164,7 @@ P_out = 2.0e5 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Executioner]

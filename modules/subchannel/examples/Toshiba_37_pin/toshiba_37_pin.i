@@ -156,12 +156,27 @@ P_out = 2.0e5 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Executioner]
   type = Steady
 []
 
+[Postprocessors]
+  [T_Planar_Mean]
+    type = SCMPlanarMean
+    variable = T
+    execute_on = 'TIMESTEP_END'
+    height = 1.0
+  []
+
+  [DP_SubchannelDelta]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'TIMESTEP_END'
+  []
+[]
 ################################################################################
 # A multiapp that projects data to a detailed mesh
 ################################################################################

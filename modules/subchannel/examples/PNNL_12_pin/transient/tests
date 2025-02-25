@@ -4,7 +4,7 @@
   [PNNL-12_tr]
       type = CSVDiff
       input = 2X6_transient.i
-      csvdiff= 2X6_transient_out.csv
+      csvdiff = 2X6_transient_out.csv
       # custom_cmp = 'test.exodiff'
       method = '!DBG'
       valgrind = NONE
