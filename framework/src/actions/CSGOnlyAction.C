@@ -67,8 +67,12 @@ CSGOnlyAction::act()
 
     auto csg_json = _csg_mesh->generateOutput();
 
-    // write generated json to file
-    std::string json_out = _app.getOutputFileBase() + "_csg.json";
+    // write generated json to file. Filename will be based on optional argument to
+    // --csg-only. If not provided, the output name will be based on the filename
+    std::string json_out = _app.parameters().get<std::string>("csg_only");
+    if (json_out.empty())
+      json_out = _app.getOutputFileBase() + "_csg.json";
+
     std::ofstream csg_file;
     csg_file.open(json_out);
     csg_file << csg_json.dump(2);
