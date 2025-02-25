@@ -60,9 +60,10 @@ SpatialUserObjectFunctor<UserObjectType>::SpatialUserObjectFunctor(const InputPa
 template <typename UserObjectType>
 template <typename SpatialArg>
 Real
-SpatialUserObjectFunctor<UserObjectType>::evaluateTemplate(const SpatialArg & position,
-                                                           const Moose::StateArg & /*state*/) const
+SpatialUserObjectFunctor<UserObjectType>::evaluateTemplate(
+    const SpatialArg & position, const Moose::StateArg & libmesh_dbg_var(state)) const
 {
+  mooseAssert(state.state == 0, "We do not currently support evaluating at old states");
   return this->spatialValue(position.getPoint());
 }
 
