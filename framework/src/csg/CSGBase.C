@@ -48,17 +48,11 @@ CSGBase::generateOutput() const
   {
     auto surf_obj = s.second;
     auto coeffs = surf_obj->getCoeffs();
-    csg_json["SURFACES"][s.first] = {{"TYPE", surf_obj->getSurfaceType() }, // not sure how to convert type to str
+    csg_json["SURFACES"][s.first] = {{"TYPE", surf_obj->getSurfaceType() }, // TODO: not sure how to convert type to str
         {"COEFFICIENTS", {}}
     };
-
     for (const auto & c : coeffs)
-    {
-        // print coefficients
         csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
-        Moose::out << '\t' << c.first << '\t' << c.second
-                                                 << std::endl;
-    }
   }
   return csg_json;
 

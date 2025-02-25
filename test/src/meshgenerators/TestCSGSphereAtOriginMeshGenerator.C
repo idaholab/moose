@@ -46,7 +46,7 @@ TestCSGSphereAtOriginMeshGenerator::generateCSG()
   auto root_univ = csg_mesh->createRootUniverse(root_univ_name);
 
   csg_mesh->createSphereAtOrigin("sphere_surf", _radius);
-  //auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
+  // TODO: make cells: auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
 
   return csg_mesh;
 }
