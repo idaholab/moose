@@ -50,17 +50,18 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
   // subdomains
   const auto & inner_subdomains = getParam<std::vector<SubdomainName>>("inner_subdomains");
   const auto & outer_subdomains = getParam<std::vector<SubdomainName>>("outer_subdomains");
-  for (const auto & name : inner_subdomains)
-    if (!MooseMeshUtils::hasSubdomainName(_mesh.getMesh(), name))
-      paramError("inner_subdomains", "The block '", name, "' was not found in the mesh");
-  for (const auto & name : outer_subdomains)
-    if (!MooseMeshUtils::hasSubdomainName(_mesh.getMesh(), name))
-      paramError("outer_subdomains", "The block '", name, "' was not found in the mesh");
-
   for (const auto id : MooseMeshUtils::getSubdomainIDs(_mesh.getMesh(), inner_subdomains))
     _inner_ids.insert(id);
   for (const auto id : MooseMeshUtils::getSubdomainIDs(_mesh.getMesh(), outer_subdomains))
     _outer_ids.insert(id);
+  std::set<SubdomainID> mesh_subdomains = _mesh.getSubdomains();
+
+  for (const auto & id : _inner_ids)
+    if (mesh_subdomains.find(id) == mesh_subdomains.end())
+      paramError("inner_subdomains", "The block '", id, "' was not found in the mesh");
+  for (const auto & id : _outer_ids)
+    if (mesh_subdomains.find(id) == mesh_subdomains.end())
+      paramError("outer_subdomains", "The block '", id, "' was not found in the mesh");
 
   // save boundary name
   _boundary_info.sideset_name(_boundary_id) = _boundary_name;
