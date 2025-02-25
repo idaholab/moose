@@ -10,6 +10,8 @@
 #include "ConservativeAdvection.h"
 #include "SystemBase.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", ConservativeAdvection);
 registerMooseObject("MooseApp", ADConservativeAdvection);
 
@@ -70,7 +72,7 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
             : _u),
     _upwinding(
         this->template getParam<MooseEnum>("upwinding_type").template getEnum<UpwindingType>()),
-    _u_nodal(_var.dofValues()),
+    _u_nodal(_var.template genericDofValues<is_ad>()),
     _upwind_node(0),
     _dtotal_mass_out(0)
 {
@@ -115,9 +117,9 @@ ConservativeAdvectionTempl<false>::computeQpJacobian()
   return negSpeedQp() * _phi[_j][_qp];
 }
 
-template <bool is_ad>
+template <>
 Real
-ConservativeAdvectionTempl<is_ad>::computeQpJacobian()
+ConservativeAdvectionTempl<true>::computeQpJacobian()
 {
   mooseError("Internal error, should never get here when using AD");
   return 0.0;
@@ -162,80 +164,85 @@ ConservativeAdvectionTempl<is_ad>::fullUpwind(JacRes res_or_jac)
 
   // Even if we are computing the Jacobian we still need to compute the outflow from each node to
   // see which nodes are upwind and which are downwind
-  prepareVectorTag(this->_assembly, _var.number());
+  _my_local_re.resize(_var.dofIndices().size());
 
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+  if (!is_ad && (res_or_jac == JacRes::CALCULATE_JACOBIAN))
     prepareMatrixTag(this->_assembly, _var.number(), _var.number());
 
-  // Compute the outflux from each node and store in _local_re
-  // If _local_re is positive at the node, mass (or whatever the Variable represents) is flowing out
-  // of the node
+  // Compute the outflux from each node and store in _my_local_re
+  // If _my_local_re is positive at the node, mass (or whatever the Variable represents) is flowing
+  // out of the node
   _upwind_node.resize(num_nodes);
   for (_i = 0; _i < num_nodes; ++_i)
   {
     for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
-      _local_re(_i) += this->_JxW[_qp] * this->_coord[_qp] * MetaPhysicL::raw_value(negSpeedQp());
-    _upwind_node[_i] = (_local_re(_i) >= 0.0);
+      _my_local_re(_i) += this->_JxW[_qp] * this->_coord[_qp] * negSpeedQp();
+    _upwind_node[_i] = (MetaPhysicL::raw_value(_my_local_re(_i)) >= 0.0);
   }
 
   // Variables used to ensure mass conservation
-  Real total_mass_out = 0.0;
-  Real total_in = 0.0;
+  GenericReal<is_ad> total_mass_out = 0.0;
+  GenericReal<is_ad> total_in = 0.0;
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
     _dtotal_mass_out.assign(num_nodes, 0.0);
 
-  for (unsigned int n = 0; n < num_nodes; ++n)
+  for (const auto n : make_range(num_nodes))
   {
     if (_upwind_node[n])
     {
-      if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-      {
-        if (_test.size() == _phi.size())
-          /* u at node=n depends only on the u at node=n, by construction.  For
-           * linear-lagrange variables, this means that Jacobian entries involving the derivative
-           * will only be nonzero for derivatives wrt variable at node=n.  Hence the
-           * (n, n) in the line below.  The above "if" statement catches other variable types
-           * (eg constant monomials)
-           */
-          _local_ke(n, n) += _local_re(n);
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+        {
+          if (_test.size() == _phi.size())
+            /* u at node=n depends only on the u at node=n, by construction.  For
+             * linear-lagrange variables, this means that Jacobian entries involving the derivative
+             * will only be nonzero for derivatives wrt variable at node=n.  Hence the
+             * (n, n) in the line below.  The above "if" statement catches other variable types
+             * (eg constant monomials)
+             */
+            _local_ke(n, n) += _my_local_re(n);
 
-        _dtotal_mass_out[n] += _local_ke(n, n);
-      }
-      _local_re(n) *= _u_nodal[n];
-      total_mass_out += _local_re(n);
+          _dtotal_mass_out[n] += _local_ke(n, n);
+        }
+      _my_local_re(n) *= _u_nodal[n];
+      total_mass_out += _my_local_re(n);
     }
-    else                        // downwind node
-      total_in -= _local_re(n); // note the -= means the result is positive
+    else                           // downwind node
+      total_in -= _my_local_re(n); // note the -= means the result is positive
   }
 
   // Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes,
   // weighted by their local_re values
-  for (unsigned int n = 0; n < num_nodes; ++n)
-  {
+  for (const auto n : make_range(num_nodes))
     if (!_upwind_node[n]) // downwind node
     {
-      if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-        for (_j = 0; _j < _phi.size(); _j++)
-          _local_ke(n, _j) += _local_re(n) * _dtotal_mass_out[_j] / total_in;
-      _local_re(n) *= total_mass_out / total_in;
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+          for (_j = 0; _j < _phi.size(); _j++)
+            _local_ke(n, _j) += _my_local_re(n) * _dtotal_mass_out[_j] / total_in;
+      _my_local_re(n) *= total_mass_out / total_in;
     }
-  }
 
   // Add the result to the residual and jacobian
   if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
   {
-    accumulateTaggedLocalResidual();
+    this->addResiduals(this->_assembly, _my_local_re, _var.dofIndices(), _var.scalingFactor());
 
     if (this->_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (const auto & var : this->_save_in)
-        var->sys().solution().add_vector(_local_re, var->dofIndices());
+        var->sys().solution().add_vector(MetaPhysicL::raw_value(_my_local_re), var->dofIndices());
     }
   }
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-    accumulateTaggedLocalMatrix();
+  {
+    if constexpr (is_ad)
+      this->addJacobian(this->_assembly, _my_local_re, _var.dofIndices(), _var.scalingFactor());
+    else
+      accumulateTaggedLocalMatrix();
+  }
 }
 
 template class ConservativeAdvectionTempl<false>;
