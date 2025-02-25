@@ -95,6 +95,30 @@ MooseVariableField<OutputType>::isVector() const
   return std::is_same<OutputType, RealVectorValue>::value;
 }
 
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableField<Real>::genericDofValues<false>() const
+{
+  return dofValues();
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableField<RealVectorValue>::genericDofValues<false>() const
+{
+  return dofValues();
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableField<RealEigenVector>::genericDofValues<false>() const
+{
+  mooseError("genericDofValues not implemented for array variables");
+}
+
 template class MooseVariableField<Real>;
 template class MooseVariableField<RealVectorValue>;
 template class MooseVariableField<RealEigenVector>;
