@@ -13,7 +13,7 @@
 #include "LayeredBase.h"
 
 /**
- * Base class for computing layered side averages
+ * Base class for computing layered averages
  */
 template <typename BaseType>
 class LayeredAverageBase : public BaseType
@@ -34,11 +34,11 @@ public:
 
 protected:
   /**
-   * @returns The integration volume (or area in the case of a side integral)
+   * @returns The local integration volume (or area in the case of a side integral). This is not the layer volume
    */
   virtual Real volume() const = 0;
 
-  /// Value of the volume for each layer
+  /// Value of the volume (area for side integrals) for each layer
   std::vector<Real> _layer_volumes;
 
   using BaseType::_current_elem;
