@@ -91,7 +91,7 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
 {
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
     // TKED value for near wall element will be directly assigned for this cell
-    return _current_elem_volume;
+    return 1.0;
   else
   {
     // Convenient definitions
@@ -99,26 +99,13 @@ LinearFVTKEDSourceSink::computeMatrixContribution()
     const auto elem_arg = makeElemArg(_current_elem_info->elem());
     const Real rho = _rho(elem_arg, state);
     const Real TKE = _k(elem_arg, state);
+    const auto epsilon = _var.getElemValue(*_current_elem_info, state);
 
-    // Convenient variables
-    Real production = 0.0;
-    Real destruction = 0.0;
-
-    // Compute production of TKE
-    const auto symmetric_strain_tensor_sq_norm =
-        NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
-    Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
-
-    // Limit TKE production (needed for flows with stagnation zones)
-    const Real production_limit = _C_pl * rho * _var.getElemValue(*_current_elem_info, state);
-    production_k = std::min(production_k, production_limit);
-
-    // Compute production and destruction
-    production = _C1_eps * production_k / TKE;
-    destruction = _C2_eps * rho * _var.getElemValue(*_current_elem_info, state) / TKE;
+    // Compute destruction
+    const auto destruction = _C2_eps * rho * epsilon / TKE;
 
     // Assign to matrix (term gets multiplied by TKED)
-    return (destruction - production * 0.0) * _current_elem_volume;
+    return destruction * _current_elem_volume;
   }
 }
 
@@ -179,32 +166,17 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
       const auto y_plus = y_plus_vec[i];
 
       if (y_plus < 11.25)
-      {
-        const auto fi = face_info_vec[i];
-        const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
-        const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
-        const Moose::FaceArg facearg = {
-            fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
         destruction +=
-            2.0 * TKE * _mu(facearg, state) / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
-      }
+            2.0 * TKE * mu / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
       else
         destruction += std::pow(_C_mu, 0.75) * std::pow(TKE, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
-
-      // _console << "position: " << _current_elem_info->elem()->vertex_average() << std::endl;
-      // _console << "y_plus: " << y_plus << std::endl;
-      // _console << "TKE: " << TKE << std::endl;
-      // _console << "distance_vec[i]: " << distance_vec[i] << std::endl;
-      // _console << "destruction: " << destruction << std::endl;
     }
 
     // Assign the computed value of TKED for element near the wall
-    return destruction * _current_elem_volume;
+    return destruction;
   }
   else
-  // Do nothing
-  // return 0.0;
   {
     // Convenient definitions
     const auto state = determineState();
@@ -212,20 +184,17 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     const Real rho = _rho(elem_arg, state);
     const Real TKE = _k(elem_arg, state);
 
-    // Convenient variables
-    Real production = 0.0;
-
     // Compute production of TKE
     const auto symmetric_strain_tensor_sq_norm =
         NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
-    Real production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+    Real production_k = symmetric_strain_tensor_sq_norm;
 
     // Limit TKE production (needed for flows with stagnation zones)
-    const Real production_limit = _C_pl * rho * _var.getElemValue(*_current_elem_info, state);
+    const Real production_limit = _C_pl * rho * _var.getElemValue(*_current_elem_info, state) / _mu_t(elem_arg, state);
     production_k = std::min(production_k, production_limit);
 
-    // Compute production and destruction
-    production = _C1_eps * production_k / TKE * _var.getElemValue(*_current_elem_info, state);
+    // Compute production - recasted with mu_t definition to avoid division by epsilon
+    const auto production = _C1_eps * _C_mu * TKE * rho * production_k;
 
     // Assign to matrix (term gets multiplied by TKED)
     return production * _current_elem_volume;
