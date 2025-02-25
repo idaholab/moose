@@ -30,5 +30,17 @@
       detail = "with the fluid flow problem as the main application using a Physics shorthand syntax, "
       cli_args = "Executioner/fixed_point_max_its=10 Executioner/fixed_point_rel_tol=1e-12 MultiApps/inactive='' Transfers/inactive=''"
     []
+    [simple-main-physics-BCs-energy]
+      type = 'Exodiff'
+      input = fluid-physics.i
+      exodiff = 'fluid-physics_out.e fluid-physics_out_solid0.e'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "with the fluid flow problem as the main application using a Physics shorthand syntax, "
+      cli_args = "Physics/NavierStokes/FluidHeatTransferSegregated/energy/energy_wall_boundaries='top bottom' "
+                  "Executioner/fixed_point_max_its=10 Executioner/fixed_point_rel_tol=1e-12 "
+                  "MultiApps/inactive='' Transfers/inactive=''"
+      prereq = 'multiapp/simple-main-physics'
+    []
   []
 []

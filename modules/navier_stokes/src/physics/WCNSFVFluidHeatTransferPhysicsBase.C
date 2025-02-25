@@ -113,6 +113,9 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
   if (isParamValid("energy_inlet_types"))
     checkVectorParamAndMultiMooseEnumLength<MooseFunctorName>("energy_inlet_functors",
                                                               "energy_inlet_types");
+  if (isParamSetByUser("energy_wall_boundaries"))
+    checkVectorParamsSameLengthIfSet<BoundaryName, MooseFunctorName>(
+        "energy_wall_boundaries", "energy_wall_functors", false);
   if (isParamValid("energy_wall_types"))
     checkVectorParamAndMultiMooseEnumLength<MooseFunctorName>("energy_wall_functors",
                                                               "energy_wall_types");
