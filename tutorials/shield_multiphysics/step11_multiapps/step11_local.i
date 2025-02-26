@@ -4,6 +4,7 @@
     type = SphereMeshGenerator
     radius = 10
     nr = 3
+    n_smooth = 10
   []
   # Dimensions of each layer are not realistic
   [HDPE_inner]

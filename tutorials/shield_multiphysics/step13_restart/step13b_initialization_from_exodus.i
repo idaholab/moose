@@ -1,7 +1,8 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../step03_boundary_conditions/mesh_in.e'
+    file = 'step13a_base_calc_out.e'
+    use_for_exodus_restart = true
   []
 []
 
@@ -9,7 +10,7 @@
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete_hd concrete Al'
-    initial_condition = 300
+    initial_from_file_var = 'T'
   []
 []
 
@@ -109,8 +110,9 @@
 
 [Executioner]
   type = Transient
-  num_steps = 4
-  dt = ${units 12 h -> s}
+  start_time = '${units 2 day -> s}'
+  num_steps = 6
+  dt = '${units 12 h -> s}'
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -118,5 +120,4 @@
 
 [Outputs]
   exodus = true
-  checkpoint = true
 []

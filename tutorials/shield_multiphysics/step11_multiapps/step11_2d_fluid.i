@@ -1,10 +1,9 @@
 cp_water_multiplier = 1e-10
 mu_multiplier = 1e4
-power = '${fparse 5e4 / 144 * 0.1}'
 
-# Notes:
-# While it solves, it's clearly not refined enough to show the true behavior
-# See step 7c
+# Real facility uses forced convection to cool the water tank at full power
+# Need to lower power for natural convection so water doesn't boil.
+power = '${fparse 5e4 / 144 * 0.1}'
 
 [Mesh]
   [fmg]
@@ -196,14 +195,12 @@ power = '${fparse 5e4 / 144 * 0.1}'
   [T_fluid_inner_cavity]
     type = FVFunctorNeumannBC
     boundary = inner_cavity_water
-    # Real facility uses forced convection to cool the water tank at full power
-    # Need to lower power for natural convection so water doesn't boil.
-    functor = '${power}'
+    functor = ${power}
     variable = T_fluid
   []
   [T_fluid_water_boundary]
     type = FVFunctorConvectiveHeatFluxBC
-    boundary = 'water_boundary'
+    boundary = water_boundary
     variable = T_fluid
     T_bulk = T_fluid
     T_solid = T_solid
@@ -257,14 +254,6 @@ power = '${fparse 5e4 / 144 * 0.1}'
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
-  []
-[]
-
-[Postprocessors]
-  [T_fluid_interface_avg]
-    type = SideAverageValue
-    boundary = water_boundary
-    variable = T_fluid
   []
 []
 

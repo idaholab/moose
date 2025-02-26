@@ -66,7 +66,6 @@
 []
 
 [Problem]
-  type = FEProblem
   # No kernels on the water domain
   kernel_coverage_check = false
 []

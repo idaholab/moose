@@ -27,21 +27,18 @@
     # we specify a function of time, temperature is passed as the time argument
     # in the material
     thermal_conductivity_temperature_function = '5.0 + 0.001 * t'
-    specific_heat = '1050'
   []
   [concrete]
     type = ADHeatConductionMaterial
     block = concrete
     temp = 'T'
     thermal_conductivity_temperature_function = '2.25 + 0.001 * t'
-    specific_heat = '1050'
   []
   [Al]
     type = ADHeatConductionMaterial
     block = Al
     temp = T
     thermal_conductivity_temperature_function = '175'
-    specific_heat = '875'
   []
 []
 
@@ -78,9 +75,9 @@
 []
 
 [Problem]
-  type = FEProblem
   # No kernels on the water domain
   kernel_coverage_check = false
+  # No materials on the water domain
   material_coverage_check = false
 []
 
