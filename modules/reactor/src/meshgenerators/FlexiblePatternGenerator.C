@@ -341,8 +341,8 @@ FlexiblePatternGenerator::FlexiblePatternGenerator(const InputParameters & param
       params.set<bool>("loop") = true;
       params.set<unsigned int>("num_edges_between_points") = 1;
       // We enforce radius correction here for area preservation
-      const Real corr_factor =
-          2 * M_PI / (Real)_boundary_sectors / std::sin(2 * M_PI / (Real)_boundary_sectors);
+      const Real corr_factor = std::sqrt(2 * M_PI / (Real)_boundary_sectors /
+                                         std::sin(2 * M_PI / (Real)_boundary_sectors));
       std::vector<Point> circular_points;
       for (unsigned int i = 0; i < _boundary_sectors; i++)
       {
