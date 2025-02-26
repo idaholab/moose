@@ -14,7 +14,7 @@
 /**
  *  Computes the heating due to the electic field (E) in the form of
  *  0.5 Re( J * E^* )
- *  where J is the current.
+ *  where J is the current and E^* is the complex conjugate of the electric field.
  */
 class SourceCurrentHeating : public AuxKernel
 {
