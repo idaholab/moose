@@ -8,6 +8,16 @@
     design = 'meshgenerators/BoundaryDeletionGenerator.md'
     issues = '#11174'
   []
+  [boundary_keep_test]
+    type = JSONDiff
+    input = 'boundary_deletion.i'
+    cli_args = 'Mesh/boundary_removal/operation=keep Outputs/file_base=boundary_keep_out Outputs/out/execute_system_information_on=none'
+    jsondiff = 'boundary_keep_out.json'
+    recover = false
+    requirement = 'The system shall have the capability to keep only certain boundaries in an existing mesh.'
+    design = 'meshgenerators/BoundaryDeletionGenerator.md'
+    issues = '#29972'
+  []
   [invalid_boundary]
     type = RunException
     input = boundary_deletion.i
