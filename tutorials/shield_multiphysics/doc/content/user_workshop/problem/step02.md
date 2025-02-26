@@ -21,9 +21,9 @@ volume integrals of a [!ac](PDE).
 
 ## CoefDiffusion Kernel
 
-To implement the coefficient a new Kernel object must be created: `CoefDiffusion`.
+To implement the coefficient a new Kernel object must be used: `CoefDiffusion`.
 
-This object will inherit from Diffusion and will use input parameters for specifying the
+This object inherits from `Diffusion` and will use input parameters for specifying the
 diffusivity.
 
 !---
@@ -43,15 +43,6 @@ block = 'concrete'
 
 ## Step 2: Run
 
-Using the tutorial executable:
-
-```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step02_coef_diffusion
-../executable/shield_multiphysics-opt -i step2.i
-```
-
-Using a MOOSE executable from conda:
-
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step02_coef_diffusion
 moose-opt -i step2.i
@@ -62,4 +53,4 @@ moose-opt -i step2.i
 
 ## Step 2: Result
 
-!media shield_multiphysics/results/step02.png style=width:70%;;margin-left:auto;margin-right:auto
+!media shield_multiphysics/results/step02.png
