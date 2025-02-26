@@ -1,7 +1,10 @@
 [Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29219'
   [friction_model_verification]
     type = CSVDiff
     input = two_channel.i
     csvdiff = two_channel_out.csv
+    requirement = 'The system shall use the default friction model v2'
   []
 []
