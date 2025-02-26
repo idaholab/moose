@@ -254,11 +254,11 @@ SolutionInvalidity::summaryTable() const
 }
 
 SolutionInvalidity::TimeTable
-SolutionInvalidity::transientTable(unsigned int & time_interval) const
+SolutionInvalidity::transientTable(unsigned int & step_interval) const
 {
   mooseAssert(_has_synced, "Has not synced");
 
-  TimeTable vtable({"Object", "Time", "Timestep Count", "Total Count"}, 4);
+  TimeTable vtable({"Object", "Time", "Stepinterval Count", "Total Count"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object information
@@ -284,12 +284,12 @@ SolutionInvalidity::transientTable(unsigned int & time_interval) const
       std::vector<unsigned int> total_counts;
 
       for (unsigned int timestep = 0; timestep < entry.timestep_counts.back().timestep_index;
-           timestep += time_interval)
+           timestep += step_interval)
       {
 
         auto start_it = timestep;
-        auto end_it = (timestep + time_interval < entry.timestep_counts.back().timestep_index)
-                          ? start_it + time_interval
+        auto end_it = (timestep + step_interval < entry.timestep_counts.back().timestep_index)
+                          ? start_it + step_interval
                           : entry.timestep_counts.back().timestep_index;
 
         int interval_sum = 0;
@@ -306,7 +306,7 @@ SolutionInvalidity::transientTable(unsigned int & time_interval) const
       for (unsigned int interval_index : index_range(interval_counts))
       {
         std::string interval_index_str =
-            std::to_string(interval_index) + "-" + std::to_string(interval_index + time_interval);
+            std::to_string(interval_index) + "-" + std::to_string(interval_index + step_interval);
 
         interval_sum += interval_counts[interval_index];
         vtable.addRow(info.object_type + " : " + info.message, // Object information

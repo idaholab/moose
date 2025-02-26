@@ -23,7 +23,7 @@ SolutionInvalidityOutput::validParams()
 
   params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL, EXEC_FAILED};
 
-  params.addParam<unsigned int>("timestep_interval",
+  params.addParam<unsigned int>("solution_invalidity_timestep_interval",
                                 1,
                                 "The number of time steps to group together in the table reporting "
                                 "the solution invalidity occurrences.");
@@ -35,7 +35,7 @@ SolutionInvalidityOutput::validParams()
 
 SolutionInvalidityOutput::SolutionInvalidityOutput(const InputParameters & parameters)
   : Output(parameters),
-    _timestep_interval(getParam<unsigned int>("timestep_interval")),
+    _timestep_interval(getParam<unsigned int>("solution_invalidity_timestep_interval")),
     _solution_invalidity(_app.solutionInvalidity())
 {
 }
@@ -43,15 +43,17 @@ SolutionInvalidityOutput::SolutionInvalidityOutput(const InputParameters & param
 bool
 SolutionInvalidityOutput::shouldOutput()
 {
-  return _execute_on.isValueSet(_current_execute_flag) &&
-         (isParamSetByUser("timestep_interval") || (_solution_invalidity.hasInvalidSolution()));
+  return Output::shouldOutput() && (_solution_invalidity.hasInvalidSolution());
 }
 
 void
 SolutionInvalidityOutput::output()
 {
+  if (isParamSetByUser("solution_invalidity_timestep_interval"))
+    mooseInfo("Set Outputs/solution_invalidity_history=false to silence the default Solution "
+              "Invalid Warnings History "
+              "table above.");
   _console << '\n';
   _solution_invalidity.printHistory(_console, _timestep_interval);
-
   _console << std::flush;
 }

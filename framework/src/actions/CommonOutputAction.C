@@ -151,12 +151,9 @@ CommonOutputAction::validParams()
 
   params.addParam<bool>(
       "solution_invalidity_history",
-      false,
+      true,
       "Enable printing of the time history of the solution invalidity occurrences "
-      "to the screen(console)");
-  params.addParam<unsigned int>("solution_invalidity_time_interval",
-                                1,
-                                "The time interval to report the solution invalidity occurrences.");
+      "to the screen (console)");
 
   // Return object
   return params;
@@ -292,20 +289,13 @@ CommonOutputAction::act()
     perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
     perfGraph().setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));
 
-    if (!getParam<bool>("color"))
-      Moose::setColorConsole(false);
-
     if (getParam<bool>("solution_invalidity_history"))
     {
-      std::optional<std::string> from_param_name;
-      const InputParameters * from_params = nullptr;
-
-      from_param_name = "solution_invalidity_history";
-      from_params = &parameters();
-
-      if (from_param_name)
-        create("SolutionInvalidityOutput", *from_param_name, from_params);
+      create("SolutionInvalidityOutput", "solution_invalidity_history");
     }
+
+    if (!getParam<bool>("color"))
+      Moose::setColorConsole(false);
   }
   else if (_current_task == "add_output")
   {

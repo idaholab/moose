@@ -122,7 +122,7 @@ public:
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
   /**
-   * Sync iteration counts to master processor
+   * Sync iteration counts to main processor
    */
   void syncIteration();
 

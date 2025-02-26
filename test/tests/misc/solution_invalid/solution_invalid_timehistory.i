@@ -78,8 +78,4 @@
     execute_on = 'FINAL'
     execute_system_information_on = none
   []
-  [solution_invalid]
-    type = SolutionInvalidityOutput
-    timestep_interval = 2
-  []
 []
