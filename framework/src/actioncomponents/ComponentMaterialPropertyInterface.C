@@ -94,3 +94,27 @@ ComponentMaterialPropertyInterface::addMaterials()
     getProblem().addMaterial(mat_type, name() + "_local_functor_properties", params);
   }
 }
+
+bool
+ComponentMaterialPropertyInterface::hasProperty(const std::string & property_name) const
+{
+  return std::find(_property_names.begin(), _property_names.end(), property_name) !=
+         _property_names.end();
+}
+
+/// Return the name of the functor for that property
+const MooseFunctorName &
+ComponentMaterialPropertyInterface::getPropertyValue(const std::string & property_name,
+                                                     const std::string & requestor_name) const
+{
+  for (const auto i : index_range(_property_names))
+    if (_property_names[i] == property_name)
+      return _property_functors[i];
+  mooseError("Property '",
+             property_name,
+             "' was requested on Component '",
+             name(),
+             "' by Physics '",
+             requestor_name,
+             "'");
+}

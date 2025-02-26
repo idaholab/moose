@@ -27,6 +27,12 @@ public:
 
   ComponentMaterialPropertyInterface(const InputParameters & params);
 
+  /// Whether the component has a property with that name
+  bool hasProperty(const std::string & property_name) const;
+  /// Return the name of the functor for that property
+  const MooseFunctorName & getPropertyValue(const std::string & property_name,
+                                            const std::string & requestor_name) const;
+
 protected:
   virtual void addMaterials() override;
 

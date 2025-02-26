@@ -133,7 +133,7 @@ ComponentBoundaryConditionInterface::hasBoundaryCondition(const VariableName & v
     return false;
 }
 
-const MooseFunctorName
+MooseFunctorName
 ComponentBoundaryConditionInterface::getBoundaryCondition(const VariableName & var_name,
                                                           const BoundaryName & boundary,
                                                           const std::string & requestor_name,
