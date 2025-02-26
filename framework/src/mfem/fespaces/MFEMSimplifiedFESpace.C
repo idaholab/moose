@@ -5,7 +5,6 @@ InputParameters
 MFEMSimplifiedFESpace::validParams()
 {
   InputParameters params = MFEMFESpace::validParams();
-  params.registerBase("MFEMFESpace");
   params.addClassDescription("Base class for the simplified interfaces to build MFEM finite "
                              "element spaces. It provides the common parameters.");
   MooseEnum fec_order(

@@ -33,6 +33,7 @@ options available in this class, you can use
 [MFEMGenericFESpace](MFEMGenericFESpace.md) instead.
 
 ## Example Input File Syntax
+
 !listing test/tests/kernels/gravity.i block=FESpaces Variables
 
 !syntax parameters /FESpaces/MFEMVectorFESpace

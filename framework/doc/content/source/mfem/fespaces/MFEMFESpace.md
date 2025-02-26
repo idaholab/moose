@@ -15,8 +15,8 @@ first should return a name to be passed to [MFEM factory method
 `FiniteElementCollection::New()`](https://docs.mfem.org/html/classmfem_1_1FiniteElementCollection.html#a15fcfa553d4949eb08f9926ac74d1e80).
 The second should specify the number of degrees of freedom per basis
 function in the finite element space and will be passed as the
-argument `vdim` in the [FiniteElementSpace
-constructor](https://docs.mfem.org/html/classmfem_1_1FiniteElementSpace.html#ab27f0e0f58113cbdb287c3128773a11d).
+argument `vdim` in the
+[FiniteElementSpace constructor](https://docs.mfem.org/html/classmfem_1_1FiniteElementSpace.html#ab27f0e0f58113cbdb287c3128773a11d).
 
 Note that the actual `mfem::FiniteElementCollection` and
 `mfem::FiniteElementSpace` objects are lazily constructed. They will

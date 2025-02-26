@@ -6,7 +6,6 @@ InputParameters
 MFEMVectorFESpace::validParams()
 {
   InputParameters params = MFEMSimplifiedFESpace::validParams();
-  params.registerBase("MFEMSimplifiedFESpace");
   params.addClassDescription(
       "Convenience class to construct vector finite element spaces, abstracting away some of the "
       "mathematical complexity of specifying the dimensions.");

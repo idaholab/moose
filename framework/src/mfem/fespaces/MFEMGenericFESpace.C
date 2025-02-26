@@ -7,7 +7,6 @@ InputParameters
 MFEMGenericFESpace::validParams()
 {
   InputParameters params = MFEMFESpace::validParams();
-  params.registerBase("MFEMGenericFESpace");
   params.addClassDescription("Class for creating arbitrary MFEM finite element spaces. It requires "
                              "the user to have some knowledge of how MFEM works.");
   params.addRequiredParam<std::string>("fec_name",

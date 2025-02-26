@@ -6,7 +6,6 @@ InputParameters
 MFEMScalarFESpace::validParams()
 {
   InputParameters params = MFEMSimplifiedFESpace::validParams();
-  params.registerBase("MFEMSimplifiedFESpace");
   params.addClassDescription("Convenience class to construct scalar finite element spaces.");
   MooseEnum fec_types("H1 L2", "H1", true);
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
