@@ -18,7 +18,7 @@ where
 
 ## Example Input File Syntax
 
-!listing vector_kernels.i block=Kernels/curl_curl
+!listing /vector_kernels.i block=Kernels/curl_curl
 
 !syntax parameters /Kernels/CurlCurlField
 

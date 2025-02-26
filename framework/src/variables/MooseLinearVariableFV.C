@@ -844,6 +844,20 @@ MooseLinearVariableFV<OutputType>::adGradSln() const
 }
 
 template <typename OutputType>
+const ADTemplateVariableCurl<OutputType> &
+MooseLinearVariableFV<OutputType>::adCurlSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableCurl<OutputType> &
+MooseLinearVariableFV<OutputType>::adCurlSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
 const MooseArray<ADReal> &
 MooseLinearVariableFV<OutputType>::adDofValues() const
 {

@@ -337,6 +337,10 @@ public:
   {
     return _element_data->adGradSlnDot();
   }
+  const ADTemplateVariableCurl<OutputType> & adCurlSln() const override
+  {
+    mooseError("We don't currently implement curl for FV");
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
@@ -362,6 +366,10 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const override
   {
     return _neighbor_data->adGradSlnDot();
+  }
+  const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const override
+  {
+    mooseError("We don't currently implement curl for FV");
   }
 
   /// Initializes/computes variable values from the solution vectors for the
