@@ -64,5 +64,12 @@
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
-  []  
+  []
+  [./MFEMIrrotational]
+    type = CSVDiff
+    input = irrotational.i
+    csvdiff = 'OutputData/Irrotational.csv'
+    requirement = 'Platypus shall have the ability to solve for an irrotational vortext in two dimensions.'
+    abs_zero = 1e-6
+  []
 []

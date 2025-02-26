@@ -194,14 +194,20 @@ MFEMProblem::addKernel(const std::string & kernel_name,
     auto object_ptr = getUserObject<MFEMKernel<mfem::LinearFormIntegrator>>(name).getSharedPtr();
     auto lf_kernel = std::dynamic_pointer_cast<MFEMKernel<mfem::LinearFormIntegrator>>(object_ptr);
 
-    addKernel(parameters.get<std::string>("variable"), lf_kernel);
+    addKernel(lf_kernel->getTestVariableName(), lf_kernel);
+  }
+  else if (dynamic_cast<const MFEMMixedBilinearFormKernel *>(kernel) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMMixedBilinearFormKernel>(name).getSharedPtr();
+    auto mblf_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(object_ptr);
+    addKernel(mblf_kernel->getTrialVariableName(), mblf_kernel->getTestVariableName(), mblf_kernel);
   }
   else if (dynamic_cast<const MFEMKernel<mfem::BilinearFormIntegrator> *>(kernel) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMKernel<mfem::BilinearFormIntegrator>>(name).getSharedPtr();
     auto blf_kernel =
         std::dynamic_pointer_cast<MFEMKernel<mfem::BilinearFormIntegrator>>(object_ptr);
-    addKernel(parameters.get<std::string>("variable"), blf_kernel);
+    addKernel(blf_kernel->getTestVariableName(), blf_kernel);
   }
   else
   {
@@ -209,10 +215,60 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   }
 }
 
+/**
+ * Method for adding mixed bilinear kernels. We can only add kernels using equation system problem
+ * builders.
+ */
+void
+MFEMProblem::addKernel(std::string trial_var_name,
+                       std::string test_var_name,
+                       std::shared_ptr<MFEMMixedBilinearFormKernel> kernel)
+{
+  using namespace platypus;
+  if (getProblemData()._eqn_system)
+  {
+    getProblemData()._eqn_system->AddKernel(trial_var_name, test_var_name, std::move(kernel));
+  }
+  else
+  {
+    mooseError("Cannot add kernel with name '" + test_var_name +
+               "' because there is no equation system.");
+  }
+}
+
 libMesh::Point
 pointFromMFEMVector(const mfem::Vector & vec)
 {
-  return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
+  return libMesh::Point(
+      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
+}
+
+int
+vectorFunctionDim(const std::string & type, const InputParameters & parameters)
+{
+  if (type == "LevelSetOlssonVortex")
+  {
+    return 2;
+  }
+  else if (type == "ParsedVectorFunction")
+  {
+    if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
+    {
+      return 3;
+    }
+    else if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y"))
+    {
+      return 2;
+    }
+    else
+    {
+      return 1;
+    }
+  }
+  else
+  {
+    return 3;
+  }
 }
 
 const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction",
@@ -266,22 +322,22 @@ MFEMProblem::addFunction(const std::string & type,
   // are only of space or only of time.
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
   {
-    // FIXME: Ideally this would support arbitrary spatial dimensions
     _scalar_functions[name] = makeScalarCoefficient<mfem::FunctionCoefficient>(
         [&func](const mfem::Vector & p, double t) -> mfem::real_t
         { return func.value(t, pointFromMFEMVector(p)); });
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
-    // FIXME: Ideally this would support arbitrary spatial and vector dimensions
+    int dim = vectorFunctionDim(type, parameters);
     _vector_functions[name] = makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
-        3,
-        [&func](const mfem::Vector & p, double t, mfem::Vector & u)
+        dim,
+        [&func, dim](const mfem::Vector & p, double t, mfem::Vector & u)
         {
           libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-          u[0] = vector_value(0);
-          u[1] = vector_value(1);
-          u[2] = vector_value(2);
+          for (int i = 0; i < dim; i++)
+          {
+            u[i] = vector_value(i);
+          }
         });
   }
   else
@@ -295,7 +351,8 @@ MFEMProblem::addFunction(const std::string & type,
 InputParameters
 MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 {
-  InputParameters fespace_params = _factory.getValidParams("MFEMFESpace");
+
+  InputParameters fespace_params = _factory.getValidParams("MFEMGenericFESpace");
   InputParameters mfem_variable_params = _factory.getValidParams("MFEMVariable");
 
   auto moose_fe_type =
@@ -328,19 +385,19 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
       break;
   }
 
-  // Set all fespace parameters.
-  fespace_params.set<MooseEnum>("fec_order") = moose_fe_type.order;
-  fespace_params.set<MooseEnum>("fec_type") = mfem_family;
-  fespace_params.set<int>("vdim") = mfem_vdim;
-
-  // Create unique fespace name. If this already exists, we will reuse this for
+  // Create fespace name. If this already exists, we will reuse this for
   // the mfem variable ("gridfunction").
-  const std::string fespace_name =
-      mfem_family + "_3D_P" + std::to_string(moose_fe_type.order.get_order());
+  const std::string fespace_name = mfem_family + "_" +
+                                   std::to_string(mesh().getMFEMParMesh().Dimension()) + "D_P" +
+                                   std::to_string(moose_fe_type.order.get_order());
+
+  // Set all fespace parameters.
+  fespace_params.set<std::string>("fec_name") = fespace_name;
+  fespace_params.set<int>("vdim") = mfem_vdim;
 
   if (!hasUserObject(fespace_name)) // Create the fespace (implicit).
   {
-    addFESpace("MFEMFESpace", fespace_name, fespace_params);
+    addFESpace("MFEMGenericFESpace", fespace_name, fespace_params);
   }
 
   mfem_variable_params.set<UserObjectName>("fespace") = fespace_name;

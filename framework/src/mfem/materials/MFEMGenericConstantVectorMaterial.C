@@ -14,6 +14,7 @@ MFEMGenericConstantVectorMaterial::validParams()
                                              "The values associated with the named properties");
 
   params.declareControllable("prop_values");
+  params.addParam<int>("dim", 3, "The dimension of the vector properties.");
   return params;
 }
 
@@ -21,23 +22,26 @@ MFEMGenericConstantVectorMaterial::MFEMGenericConstantVectorMaterial(
     const InputParameters & parameters)
   : MFEMMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(getParam<std::vector<Real>>("prop_values"))
+    _prop_values(getParam<std::vector<Real>>("prop_values")),
+    _prop_dims(getParam<int>("dim"))
 {
   unsigned int num_names = _prop_names.size();
   unsigned int num_values = _prop_values.size();
 
-  if (num_names * LIBMESH_DIM != num_values)
-    mooseError("Number of prop_values must be equal to dim * number of prop_values for a "
+  if (num_names * _prop_dims != num_values)
+    mooseError("Number of prop_values must be equal to dim * number of properties for a "
                "GenericConstantMaterial!");
 
   _num_props = num_names;
   for (unsigned int i = 0; i < _num_props; i++)
   {
-    const int j = i * LIBMESH_DIM;
+    mfem::Vector vec(_prop_dims);
+    for (int j = 0; j < _prop_dims; j++)
+    {
+      vec[j] = _prop_values[i * _prop_dims + j];
+    }
     _properties.declareVector<mfem::VectorConstantCoefficient>(
-        _prop_names[i],
-        subdomainsToStrings(_block_ids),
-        mfem::Vector({_prop_values[j], _prop_values[j + 1], _prop_values[j + 2]}));
+        _prop_names[i], subdomainsToStrings(_block_ids), vec);
   }
 }
 
