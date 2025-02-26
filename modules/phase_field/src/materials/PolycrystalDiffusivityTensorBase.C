@@ -102,26 +102,24 @@ PolycrystalDiffusivityTensorBase::computeProperties()
 
         Dgb += (*_vals[i])[_qp] * (*_vals[j])[_qp] * Tgb;
         Dgb += (*_vals[j])[_qp] * (*_vals[i])[_qp] * Tgb;
-        dDgbdeta[i] += 4.0 * (*_vals[j])[_qp] * Tgb;
-        dDgbdeta[j] += 4.0 * (*_vals[i])[_qp] * Tgb;
+        dDgbdeta[i] += 2.0 * (*_vals[j])[_qp] * Tgb;
+        dDgbdeta[j] += 2.0 * (*_vals[i])[_qp] * Tgb;
       }
 
     // Compute surface diffusivity matrix
-    RealGradient ns(0), dns(0);
+    RealGradient ns(0);
     if (_grad_c[_qp].norm() > 1.0e-10)
       ns = _grad_c[_qp] / _grad_c[_qp].norm();
 
     RealTensorValue Ts;
-    RealTensorValue dTs;
     for (unsigned int a = 0; a < 3; ++a)
       for (unsigned int b = 0; b < 3; ++b)
       {
         Ts(a, b) = I(a, b) - ns(a) * ns(b);
-        dTs(a, b) = -2.0 * dns(a) * ns(b);
       }
 
     RealTensorValue Dsurf = c * c * mc * mc * Ts;
-    RealTensorValue dDsurfdc = (2.0 * c * mc * mc - 2.0 * c * c * mc) * Ts + c * c * mc * mc * dTs;
+    RealTensorValue dDsurfdc = (2.0 * c * mc * mc - 2.0 * c * c * mc) * Ts;
 
     // Compute bulk properties
     _Dbulk = _D0 * std::exp(-_Em / _kb / _T[_qp]);
