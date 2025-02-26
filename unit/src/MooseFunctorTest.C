@@ -136,7 +136,8 @@ TEST(MooseFunctorTest, testArgs)
   auto elem_qp = ElemQpArg({elem.get(), 0, &qrule, Point(0)});
   auto elem_side_qp = ElemSideQpArg({elem.get(), 0, 0, &qrule, Point(0)});
   auto elem_point = ElemPointArg({elem.get(), Point(0), false});
-  auto node_arg = NodeArg({&node0, 0});
+  const std::set<SubdomainID> sub = {0};
+  auto node_arg = NodeArg({&node0, &sub});
   const auto current_time = Moose::currentState();
 
   // Test not-implemented errors

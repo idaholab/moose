@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADNodalKernel.h"
-#include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
@@ -19,11 +18,13 @@
 InputParameters
 ADNodalKernel::validParams()
 {
-  return NodalKernelBase::validParams();
+  auto params = NodalKernelBase::validParams();
+  params += ADFunctorInterface::validParams();
+  return params;
 }
 
 ADNodalKernel::ADNodalKernel(const InputParameters & parameters)
-  : NodalKernelBase(parameters), _u(_var.adDofValues())
+  : NodalKernelBase(parameters), ADFunctorInterface(this), _u(_var.adDofValues())
 {
   if (getParam<std::vector<AuxVariableName>>("save_in").size())
     paramError("save_in",

@@ -10,11 +10,12 @@
 #pragma once
 
 #include "NodalKernelBase.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for creating nodal kernels with AD-computed Jacobians
  */
-class ADNodalKernel : public NodalKernelBase
+class ADNodalKernel : public NodalKernelBase, public ADFunctorInterface
 {
 public:
   /**

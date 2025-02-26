@@ -18,6 +18,8 @@
 #include "libmesh/point.h"
 #include "libmesh/quadrature.h"
 
+#include <set>
+
 namespace Moose
 {
 /**
@@ -226,11 +228,22 @@ struct NodeArg
 {
   /// The node which defines our location in space
   const libMesh::Node * node;
-  /// Indicates what subdomain this argument should be associated with. This removes ambiguity when
-  /// this argument is used to evaluate functors at the intersection of different blocks
-  SubdomainID subdomain_id;
+
+  /**
+   * Indicates what subdomains this argument should be associated with. If a single subdomain is
+   * given, then there is no ambiguity when this argument is used to evaluate functors at the
+   * intersection of different blocks. If multiple subdomains are given at such an intersection
+   * point, it is up to the functor whether it can be evaluated unambiguously, perform an average,
+   * or error
+   */
+  const std::set<SubdomainID> * subdomain_ids;
 
   libMesh::Point getPoint() const { return *node; }
+
+  /// A static member that can be used when the connection of a node to subdomains is unknown.
+  /// Functors may still be able to evaluate a NodeArg with this as the provided \p subdomain_ids
+  /// if the functor has no "sidedness", e.g. like a H1 finite element family variable
+  static const std::set<SubdomainID> undefined_subdomain_connection;
 };
 
 /**

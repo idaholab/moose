@@ -1615,7 +1615,7 @@ MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
                                        const MooseMesh & mesh,
                                        const Node * node) const
 {
-  const std::set<SubdomainID> & node_blocks = mesh.getNodeBlockIds(*node);
+  const auto & node_blocks = mesh.getNodeBlockIds(*node);
   std::set<SubdomainID> u;
   std::set_intersection(blocks.begin(),
                         blocks.end(),
