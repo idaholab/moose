@@ -158,15 +158,19 @@
 
 !---
 
-!include workshop/numerical/fvm_overview.md
+!include user_workshop/problem/step07.md end=end-intro
 
 !---
 
-!include user_workshop/problem/step07.md
+!include workshop/modules/modules.md
 
 !---
 
-!include workshop/infrastructure/troubleshooting.md
+# Step 7: Mechanics id=step07b
+
+## (continued)
+
+!include user_workshop/problem/step07.md start=end-intro
 
 !---
 
@@ -216,19 +220,15 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/problem/step10.md end=end-intro
+!include workshop/numerical/fvm_overview.md
 
 !---
 
-!include workshop/modules/modules.md
+!include user_workshop/problem/step10.md
 
 !---
 
-# Step 10: Mechanics id=step10b
-
-## (continued)
-
-!include user_workshop/problem/step10.md start=end-intro
+!include workshop/infrastructure/troubleshooting.md
 
 !---
 

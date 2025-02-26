@@ -12,7 +12,8 @@
 [#step09]\\
 [#step10]\\
 [#step11]\\
-[#step12]
+[#step12]\\
+[#step13]
 
 !---
 
@@ -79,18 +80,8 @@ Solve the transient heat equation using the "heat transfer" module.
 
 ## [#step07]
 
-Solve the pressure, velocity and temperature in a coupled system of equations by solving for conjugate heat transfer
-with the fluid region
-
-!equation
-\rho_c c_c \frac{\partial T_c}{\partial t} - \nabla \cdot k_c \nabla T_c = 0
-\\
-\nabla \cdot \vec{u} = 0
-\\
-\frac{\partial \rho_w  \vec{u}}{\partial t} + \nabla \cdot \left(\rho_w \vec{u} \otimes \vec{u}\right)
-= \nabla \cdot \left(\mu_{w,\text{eff}} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\nabla p + \rho_w \vec{g}
-\\
-\rho_w c_w \left( \frac{\partial T_w}{\partial t} + \vec{u}\cdot\nabla T_w \right) - \nabla\cdot k_w \nabla T_w = 0
+Thermal expansion of the concrete can be added to the coupled set of equations
+using the "solid mechanics" module, without adding additional code.
 
 !---
 
@@ -111,8 +102,18 @@ within the solution domain.
 
 ## [#step10]
 
-Thermal expansion of the concrete can be added to the coupled set of equations
-using the "solid mechanics" module, without adding additional code.
+Solve the pressure, velocity and temperature in a coupled system of equations by solving for conjugate heat transfer
+with the fluid region
+
+!equation
+\rho_c c_c \frac{\partial T_c}{\partial t} - \nabla \cdot k_c \nabla T_c = 0
+\\
+\nabla \cdot \vec{u} = 0
+\\
+\frac{\partial \rho_w  \vec{u}}{\partial t} + \nabla \cdot \left(\rho_w \vec{u} \otimes \vec{u}\right)
+= \nabla \cdot \left(\mu_{w,\text{eff}} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\nabla p + \rho_w \vec{g}
+\\
+\rho_w c_w \left( \frac{\partial T_w}{\partial t} + \vec{u}\cdot\nabla T_w \right) - \nabla\cdot k_w \nabla T_w = 0
 
 !---
 
@@ -130,3 +131,9 @@ in various locations in the concrete.
 
 MOOSE includes a system to create custom input syntax for common tasks, in this step the syntax
 for the sets of equations are simplified for end-users.
+
+!---
+
+## [#step13]
+
+Learn how to recover a MOOSE simulation that ended prematurely.

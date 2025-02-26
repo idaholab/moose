@@ -51,13 +51,11 @@ occurs in the element interiors.
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step05_auxiliary_variables
-../executable/shield_multiphysics-opt -i step5.i
-```
-
-Using a prebuilt MOOSE from conda:
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step05_auxiliary_variables
 moose-opt -i step5.i
 ```
+
+!---
+
+## Step 5: Result
+
+!media shield_multiphysics/results/step05.png

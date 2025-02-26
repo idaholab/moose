@@ -52,9 +52,15 @@ First declare the names of the systems to use in the [Problem](syntax/Problem/in
 
 !listing step12_physics/step12.i block=Problem
 
-then specify those systems in each `Physics`
+then specify those systems in each `Physics`.
 
-!listing step12_physics/step12.i start=system_names
+!---
+
+## Step 12: Preconditioning
+
+Multi-system allows for customization of solvers via preconditioning.
+
+!listing step12_physics/step12.i block=Preconditioning
 
 !---
 
@@ -62,13 +68,13 @@ then specify those systems in each `Physics`
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step12_physics
-../executable/shield_multiphysics-opt -i step12.i
-```
-
-With a conda MOOSE executable:
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step11_physics
 moose-opt -i step12.i
 ```
+
+!---
+
+## Step 12: Results
+
+!style halign=center
+!media shield_multiphysics/results/step12.png style=width:80%
+

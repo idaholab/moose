@@ -22,7 +22,7 @@ Simplified geometry:
 
 !media shield_multiphysics/shield.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
 
-Water region in blue, concrete in grey. 10m x 13m x 8m concrete box
+6.5m x 9.7m x 5.25m concrete box with 4m x 7.6m x 3.6m room
 
 !---
 
@@ -33,9 +33,9 @@ Concrete domain
 Conservation of Energy:
 
 !equation id=solid_energy_intro
-\rho_c c_c \frac{\partial T}{\partial t} - \nabla\cdot k_c \nabla T = 0
+\rho c_p \frac{\partial T}{\partial t} - \nabla\cdot k \nabla T = 0
 
-where $\rho_c$ is the density, $c_c$ the specific heat, $k_c$ the thermal diffusivity and $T$ the temperature.
+where $\rho$ is the density, $c_p$ the specific heat capacity, $k$ the thermal conductivity, and $T$ the temperature.
 
 !---
 
@@ -55,7 +55,7 @@ Conservation of momentum:
 Conservation of Energy:
 
 !equation id=fluid_energy_intro
-C\left( \frac{\partial T}{\partial t} + \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
+\rho c_p\left( \frac{\partial T}{\partial t} + \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
 
 
 where $\vec{u}$ is the fluid velocity, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\vec{g}$ is the gravity vector, and $T$ is the temperature.
@@ -64,14 +64,14 @@ where $\vec{u}$ is the fluid velocity, $\mu$ is fluid viscosity, $p$ is the pres
 
 ## Material Properties
 
-Source: Google suggested answer
-
-| Property | Value | Units |
-| :- | :- | :- |
-| Density of concrete, $\rho_c$ | 2400 | $\textrm{kg}/\textrm{m}^3$ |
-| Thermal conductivity of concrete, $k_c$ | 2.25 | $\textrm{W}/\textrm{m}\,\textrm{K}$ |
-| Specific heat capacity of concrete, $c_p{_c}$ | 1170 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
-| Viscosity of water, $\mu_f$ | $7.98\times10^{-4}$ |  $\textrm{P}\cdot\textrm{s}$ |
-| Density of water, $\rho_f$ | 995.7 | $\textrm{kg}/\textrm{m}^3$ |
-| Thermal conductivity of water, $k_f$ | 0.6 | $\textrm{W}/\textrm{m}\,\textrm{K}$ |
-| Specific heat capacity of water, $c_p{_f}$ | 4181.3 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
+| Property | Units | Magnetite Concrete | Ordinary Concrete | Aluminum | Water |
+| :- | :- | -: | -: | -: | -: |
+| Thermal conductivity, $k$ | W/(mK) | 5.0 | 2.25 | 175 | 0.6 |
+| Density, $\rho$ | kg/m$^3$ | 3,524 | 2,403 | 2,270 | 955.7 |
+| Heat capacity, $c_p$ | J/(kgK) | 1,050 | 1,050 | 875 | 4,181 |
+| Viscosity, $\mu$ | mPa$\cdot$s | --- | --- | --- | 0.798 |
+| Water heat transfer coefficient | W/m$^2$ K | 600 | 600 | 600 | --- |
+| Air heat transfer coefficient | W/m$^2$ K | 10 | --- | --- | --- |
+| Young's modulus | GPa | 2.75 | 30 | 68 | --- |
+| Poisson's ratio | --- | 0.15 | 0.2 | 0.36 |
+| Thermal expansion coefficient | 10$^\text{-5}$/K | 1.0 | 1.0 | 2.4 | --- |

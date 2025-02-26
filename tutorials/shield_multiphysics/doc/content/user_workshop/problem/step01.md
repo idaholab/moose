@@ -55,21 +55,9 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 
 ## Step 1: Run
 
-An executable is produced by compiling an application or a MOOSE module. It can be used
-to run input files.
-
-If using the local tutorial executable
+An executable is available from loading the MOOSE conda or HPC module.
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step01_diffusion
-../executable/shield_multiphysics-opt -i mesh.i --mesh-only
-../executable/shield_multiphysics-opt -i step1.i
-```
-
-If using the conda MOOSE executable:
-
-```bash
-conda activate moose
 cd ~/projects/moose/tutorials/shield_multiphysics/step01_diffusion
 moose-opt -i mesh.i --mesh-only
 moose-opt -i step1.i
@@ -79,4 +67,4 @@ moose-opt -i step1.i
 
 ## Step 1: Result
 
-!media shield_multiphysics/results/step01.png style=width:70%;margin-left:auto;margin-right:auto
+!media shield_multiphysics/results/step01.png

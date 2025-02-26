@@ -2,12 +2,39 @@
 
 !---
 
-We want to study the effects of the local environment on sensors placed anywhere in the shield.
+We want to
 
-!media shield_sensor_spread.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+1. Couple the solid heat conduction solve with the fluid solve and
+2. Study the effects of the local environment on sensors placed in the shield.
+
+!row!
+
+!col! width=50%
+
+!media shield_sensor_spread.png style=width:55%;margin-left:auto;margin-right:auto;display:block
+
+!col-end!
+
+!col! width=50%
+
+!media sensor_xs.png
+
+!col-end!
+
+!row-end!
 
 !!end-intro
+
+!---
+
+## Step 11: Fluid Input File
+
+Primary difference is the addition of the `T_solid` auxiliary variable, which is
+used as the "container" for solid heat-conduction app to transfer its solution
+into.
+
+!listing step11_multiapps/step11_2d_fluid.i
+         diff=step10_finite_volume/step10.i
 
 !---
 
@@ -22,24 +49,18 @@ We want to study the effects of the local environment on sensors placed anywhere
 Before setting up the multiapp and the transfers, we must make sure
 each input file runs well separately.
 
-With the tutorial executable:
-
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
-../executable/shield_multiphysics-opt -i step11_local.i
-```
-
-With a conda MOOSE executable:
-
-```bash
-conda activate moose
 cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
 moose-opt -i step11_local.i
 ```
 
 !---
 
-!media results/step11_local.png caption="Sensor temperature field with dummy fixed boundary conditions"
+!media results/step11_local.png
+       style=width:60%;margin-left:auto;margin-right:auto;display:block
+
+!style halign=center
+Sensor temperature field with dummy fixed boundary conditions
 
 !---
 
@@ -48,31 +69,29 @@ moose-opt -i step11_local.i
 We distribute these simulations using a `MultiApp`.
 The positions of each child app are specified using a `Positions` object.
 
-!listing step11_multiapps/step11_global.i
+!listing step11_multiapps/step11_2d_heat_conduction.i
 
 !---
 
 ## Step 11: Run Multi-scale
 
-With the tutorial executable:
+Run stand-alone heat-conduction to test input:
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
-../executable/shield_multiphysics-opt -i step11_global.i
+moose-opt -i step11_2d_heat_conduction.i MultiApps/active='' Transfers/active=''
 ```
 
-With a conda MOOSE executable:
+Run full model:
 
 ```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
-moose-opt -i step11_global.i
+moose-opt -i step11_2d_heat_conduction.i
 ```
+
 
 !---
 
-!media results/step11_global_distrib.png caption="The individual sensor results can be plotted 'in-position' in the global geometry"
+The individual sensor results can be plotted 'in-position' in the global geometry.
 
-!---
+Postprocessed quantities can be transferred from the local child app meshes to the global mesh.
 
-!media results/step11_global.png caption="Postprocessed quantities can be transferred from the local child app meshes to the global mesh"
+!media results/step11_global.png style=width:70%;margin-left:auto;margin-right:auto;display:block
