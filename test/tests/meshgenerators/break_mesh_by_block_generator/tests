@@ -224,7 +224,6 @@
     max_parallel = 12
     recover = false
     cli_args = '--oversubscribe'
-    allow_unused = true
   []
 
   [invalid_block_pair]
