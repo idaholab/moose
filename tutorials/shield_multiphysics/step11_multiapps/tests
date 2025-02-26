@@ -1,23 +1,39 @@
 [Tests]
   issues = '#4522'
   design = 'examples_and_tutorials/index.md'
-  [mesh]
+  [generate_2d_coarse_mesh]
     type = RunApp
-    input = 'mesh_coarse.i'
+    input = 'mesh2d_coarse.i'
     cli_args = '--mesh-only'
     requirement = "The shield multiphysics tutorial shall include a mesh generation step before the multiscale simulation example."
   []
-  [step_a]
+  [local]
     type = RunApp
     input = 'step11_local.i'
     requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
                   "lower-scale simulation individually."
   []
-  [step_b]
+  [fluid]
     type = RunApp
-    input = 'step11_global.i'
-    min_parallel = 3
+    input = 'step11_2d_fluid.i'
+    prereq = generate_2d_coarse_mesh
     requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
-                  "multi-scale simulation."
+                  "fluid simulation meant for coupling individually."
+  []
+  [heat_conduction]
+    type = RunApp
+    input = 'step11_2d_heat_conduction.i'
+    cli_args = "MultiApps/active='' Transfers/active=''"
+    prereq = generate_2d_coarse_mesh
+    requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
+                  "heat conduction simulation meant for coupling individually."
+  []
+  [coupled]
+    type = RunApp
+    input = 'step11_2d_heat_conduction.i'
+    cli_args = 'Executioner/steady_state_tolerance=1e-2'
+    min_parallel = 4
+    requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
+                  "coupled multi-scale simulation."
   []
 []
