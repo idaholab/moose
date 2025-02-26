@@ -61,8 +61,7 @@
     allow_warnings = true
     method = '!dbg'
     cli_args ='Executioner/TimeIntegrator/use_constant_mass=true Mesh/patch_update_strategy=always'
-    requirement = 'The system shall be able to solve an explicit contact problem'
-    'with the constant mass option and with updating the contact patch often.'
+    requirement = 'The system shall be able to solve an explicit contact problem with the constant mass option and with updating the contact patch often.'
   []
   [optimized_contact]
     type = 'Exodiff'
@@ -72,7 +71,7 @@
     abs_zero = 1.0e-4
     allow_warnings = true
     method = '!dbg'
-    requirement = 'The system shall be able to solve an explicit contact problem quickly and without extra actions.'
+    requirement = 'The system shall be able to solve an explicit contact problem quickly, omitting verbose output.'
   []
   [deep_impact]
     type = 'Exodiff'
@@ -82,6 +81,6 @@
     allow_warnings = true
     method = '!dbg'
     heavy = true
-    requirement = 'The system shall be able to solve for a large displacemnt explicit contact problem'
+    requirement = 'The system shall be able to solve for a large displacemnt explicit contact problem.'
   []
 []

@@ -55,7 +55,7 @@ protected:
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 
-  /// Whether to run in an optimized form.
+  /// Verbose output, may increase runtime
   const bool _verbose;
 
 private:

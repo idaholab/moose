@@ -263,5 +263,4 @@
 [Outputs]
   interval = 100
   exodus = true
-  checkpoint = true # for regression testing purposes
 []

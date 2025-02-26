@@ -130,7 +130,6 @@ private:
   std::unordered_map<dof_id_type, Real> _dof_to_position;
 
   /**
-   *
    * @param lumped_mass The inverted lumped mass vector
    * @return Effictive mass of the face
    */

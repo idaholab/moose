@@ -269,6 +269,5 @@
   interval = 10
   exodus = true
   csv = true
-  checkpoint = true # for regression testing purposes
   file_base = test_balance_out
 []
