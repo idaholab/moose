@@ -961,6 +961,11 @@ public:
    */
   const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
 
+  /**
+   * @returns A prefix for solvers
+   */
+  std::string prefix() const;
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.

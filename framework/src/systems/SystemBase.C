@@ -1647,6 +1647,12 @@ SystemBase::getSubdomainsForVar(const std::string & var_name) const
   return getSubdomainsForVar(getVariable(0, var_name).number());
 }
 
+std::string
+SystemBase::prefix() const
+{
+  return "-" + (system().prefix_with_name() ? system().prefix() : "");
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 
