@@ -1,24 +1,17 @@
 [Tests]
   issues = '#4522'
   design = 'examples_and_tutorials/index.md'
-  [step_a]
+  [generate_2d_mesh]
     type = RunApp
-    input = '../step03_boundary_conditions/mesh.i step7a_concrete_decoupled.i'
-    cli_args = "Executioner/num_steps=2 Mesh/inactive='fmg'"
-    requirement = "The shield multiphysics tutorial shall demonstrate ."
+    input = 'mesh2d.i'
+    cli_args = '--mesh-only'
+    requirement = "The shield multiphysics tutorial shall demonstrate simplifying a problem by using a 2D mesh."
   []
-  [step_b]
+  [step]
     type = RunApp
-    input = '../step03_boundary_conditions/mesh.i step7b_water_decoupled.i'
-    cli_args = "Executioner/num_steps=2
-                Mesh/inactive='fmg' Mesh/pin_node/input=remove_cavity
-                Mesh/refine_water/refinement=0"
-    requirement = "The shield multiphysics tutorial shall demonstrate ."
-  []
-  [step_c]
-    type = RunApp
-    input = 'step7c_2dcoupled.i'
+    input = 'step10.i'
     cli_args = "Executioner/num_steps=2"
-    requirement = "The shield multiphysics tutorial shall demonstrate ."
+    prereq = generate_2d_mesh
+    requirement = "The shield multiphysics tutorial shall demonstrate a fluids simulation with finite volume."
   []
 []

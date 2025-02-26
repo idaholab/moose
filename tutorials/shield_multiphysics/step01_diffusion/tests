@@ -12,5 +12,6 @@
     input = 'step1.i'
     requirement = "The shield multiphysics tutorial shall include a step that solves a pure "
                   "diffusion problem."
+    prereq = generate_mesh
   []
 []
