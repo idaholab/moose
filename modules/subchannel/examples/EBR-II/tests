@@ -11,6 +11,6 @@
     valgrind = NONE
     recover = false
     max_parallel = 1
-    requirement = 'The system will examine the subchannel solver for the EBR-II case'
+    requirement = 'The system will examine the subchannel solver for the EBR-II case v2'
   []
 []

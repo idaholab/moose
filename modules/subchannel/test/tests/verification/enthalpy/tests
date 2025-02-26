@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SubChannel1PhaseProblem.md'
+  design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29196'
   [enthalpy]
     type = Exodiff
