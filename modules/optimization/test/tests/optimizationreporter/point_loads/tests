@@ -59,7 +59,7 @@
       type = CSVDiff
       input = main_auto_adjoint.i
       absent_out = 'type: ilu'
-      cli_args = 'Outputs/file_base=main_out -nl0_ksp_view -adjoint_ksp_view'
+      cli_args = 'Outputs/file_base=main_out -nl0_ksp_view -adjoint_ksp_view -ksp_view'
       csvdiff = main_out_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
