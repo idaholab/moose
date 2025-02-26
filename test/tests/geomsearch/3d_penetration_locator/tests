@@ -38,6 +38,6 @@
     input = 'close_tet.i'
     exodiff = 'close_tet_out.e'
     recover = false # steady solve
-    requirement = "The system shall ensure contact points are within tangential tolerances."
+    requirement = "The system shall ensure all points identified as being in contact are within a distance of the tangential tolerance to the primary surface."
   []
 []
