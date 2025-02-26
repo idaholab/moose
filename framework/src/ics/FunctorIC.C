@@ -35,7 +35,7 @@ FunctorIC::FunctorIC(const InputParameters & parameters)
     _scaling(getParam<Real>("scaling_factor")),
     _pl(_fe_problem.mesh().getPointLocator())
 {
-  // Check supported an unsupported functors
+  // Check supported and unsupported functors
   const auto & functor_name = getParam<MooseFunctorName>("functor");
   // See https://github.com/idaholab/moose/issues/19396 for discussion of the functor restrictions.
   // Variables: need to be initialized before. we dont support this at the time

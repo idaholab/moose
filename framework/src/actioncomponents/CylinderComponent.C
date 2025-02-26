@@ -12,7 +12,7 @@
 #include "RotationMatrix.h"
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
-// CylinderComponent is an exmaple of ComponentPhysicsInterface
+// CylinderComponent is an example of ComponentPhysicsInterface
 registerMooseAction("MooseApp", CylinderComponent, "init_component_physics");
 // CylinderComponent is an example of ComponentMaterialPropertyInterface
 registerMooseAction("MooseApp", CylinderComponent, "add_material");

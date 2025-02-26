@@ -35,6 +35,7 @@ ComponentInitialConditionInterface::ComponentInitialConditionInterface(
         getParam<std::vector<VariableName>>("initial_condition_variables")),
     _variable_ic_functors(getParam<std::vector<MooseFunctorName>>("initial_condition_values"))
 {
+  addRequiredTask("init_component_physics");
   addRequiredTask("check_integrity");
 
   // Parameter checks
