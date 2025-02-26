@@ -165,7 +165,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
                "Computed number of processors per node (" + std::to_string(procs_per_node) +
                    ") does not match");
 
-  if (procs_per_node * total_nodes != mesh.n_partitions())
+  if (procs_per_node * total_nodes != mesh.n_partitions() && processor_id() == 0)
     mooseError("Partitioning creates ",
                procs_per_node * total_nodes,
                " partitions, which does not add up to the total number of processors: ",
