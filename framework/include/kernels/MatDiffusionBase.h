@@ -31,13 +31,8 @@ public:
 
   MatDiffusionBaseTempl(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-
 protected:
   virtual GenericRealVectorValue<is_ad> precomputeQpResidual() override;
-  virtual RealGradient precomputeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-  virtual RealGradient computeQpCJacobian();
 
   /// diffusion coefficient
   const GenericMaterialProperty<T, is_ad> & _diffusivity;
@@ -61,4 +56,27 @@ protected:
 };
 
 template <typename T>
-using MatDiffusionBase = MatDiffusionBaseTempl<T, false>;
+class MatDiffusionBase : public MatDiffusionBaseTempl<T, false>
+{
+public:
+  using MatDiffusionBaseTempl<T, false>::MatDiffusionBaseTempl;
+
+protected:
+  virtual void initialSetup() override;
+  virtual RealGradient precomputeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual RealGradient computeQpCJacobian();
+
+  using MatDiffusionBaseTempl<T, false>::_diffusivity;
+  using MatDiffusionBaseTempl<T, false>::_ddiffusivity_darg;
+  using MatDiffusionBaseTempl<T, false>::_qp;
+  using MatDiffusionBaseTempl<T, false>::_grad_phi;
+  using MatDiffusionBaseTempl<T, false>::_j;
+  using MatDiffusionBaseTempl<T, false>::_i;
+  using MatDiffusionBaseTempl<T, false>::_ddiffusivity_dc;
+  using MatDiffusionBaseTempl<T, false>::_phi;
+  using MatDiffusionBaseTempl<T, false>::_grad_v;
+  using MatDiffusionBaseTempl<T, false>::_grad_test;
+  using MatDiffusionBaseTempl<T, false>::_v_var;
+  using MatDiffusionBaseTempl<T, false>::_is_coupled;
+};

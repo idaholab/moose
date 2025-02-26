@@ -47,55 +47,29 @@ MatDiffusionBaseTempl<T, is_ad>::MatDiffusionBaseTempl(const InputParameters & p
 }
 
 template <typename T, bool is_ad>
-void
-MatDiffusionBaseTempl<T, is_ad>::initialSetup()
-{
-  this->template validateNonlinearCoupling<T>("diffusivity");
-}
-
-template <>
-void
-MatDiffusionBaseTempl<Real, true>::initialSetup()
-{
-}
-
-template <>
-void
-MatDiffusionBaseTempl<RealTensorValue, true>::initialSetup()
-{
-}
-
-template <typename T, bool is_ad>
 GenericRealVectorValue<is_ad>
 MatDiffusionBaseTempl<T, is_ad>::precomputeQpResidual()
 {
   return _diffusivity[_qp] * _grad_v[_qp];
 }
 
-template <>
+template <typename T>
+void
+MatDiffusionBase<T>::initialSetup()
+{
+  this->template validateNonlinearCoupling<T>("diffusivity");
+}
+
+template <typename T>
 RealGradient
-MatDiffusionBaseTempl<Real, false>::computeQpCJacobian()
+MatDiffusionBase<T>::computeQpCJacobian()
 {
   return _diffusivity[_qp] * _grad_phi[_j][_qp];
 }
 
-template <>
+template <typename T>
 RealGradient
-MatDiffusionBaseTempl<RealTensorValue, false>::computeQpCJacobian()
-{
-  return _diffusivity[_qp] * _grad_phi[_j][_qp];
-}
-
-template <typename T, bool is_ad>
-RealGradient
-MatDiffusionBaseTempl<T, is_ad>::computeQpCJacobian()
-{
-  mooseError("Internal error, incorrect template specialization");
-}
-
-template <>
-RealGradient
-MatDiffusionBaseTempl<Real, false>::precomputeQpJacobian()
+MatDiffusionBase<T>::precomputeQpJacobian()
 {
   auto sum = (*_ddiffusivity_dc)[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (!_is_coupled)
@@ -104,27 +78,9 @@ MatDiffusionBaseTempl<Real, false>::precomputeQpJacobian()
   return sum;
 }
 
-template <>
-RealGradient
-MatDiffusionBaseTempl<RealTensorValue, false>::precomputeQpJacobian()
-{
-  auto sum = (*_ddiffusivity_dc)[_qp] * _phi[_j][_qp] * _grad_v[_qp];
-  if (!_is_coupled)
-    sum += computeQpCJacobian();
-
-  return sum;
-}
-
-template <typename T, bool is_ad>
-RealGradient
-MatDiffusionBaseTempl<T, is_ad>::precomputeQpJacobian()
-{
-  mooseError("Internal error, incorrect template specialization");
-}
-
-template <>
+template <typename T>
 Real
-MatDiffusionBaseTempl<Real, false>::computeQpOffDiagJacobian(unsigned int jvar)
+MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
   const auto cvar = this->mapJvarToCvar(jvar);
@@ -134,27 +90,6 @@ MatDiffusionBaseTempl<Real, false>::computeQpOffDiagJacobian(unsigned int jvar)
     sum += computeQpCJacobian();
 
   return sum * _grad_test[_i][_qp];
-}
-
-template <>
-Real
-MatDiffusionBaseTempl<RealTensorValue, false>::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  // get the coupled variable jvar is referring to
-  const auto cvar = this->mapJvarToCvar(jvar);
-
-  auto sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp];
-  if (_v_var == jvar)
-    sum += computeQpCJacobian();
-
-  return sum * _grad_test[_i][_qp];
-}
-
-template <typename T, bool is_ad>
-Real
-MatDiffusionBaseTempl<T, is_ad>::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  mooseError("Internal error, incorrect template specialization");
 }
 
 template class MatDiffusionBaseTempl<Real, false>;
