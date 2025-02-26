@@ -28,8 +28,16 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.addParam<bool>("add_energy_equation",
                         "Whether to add the energy equation. This parameter is not necessary if "
                         "using the Physics syntax");
+  params.addParam<bool>("solve_for_enthalpy",
+                        false,
+                        "Whether to solve for the enthalpy or the temperature of the fluid");
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
+
+  // Initial conditions
+  params.addParam<FunctionName>(
+      "initial_enthalpy",
+      "Initial value of the enthalpy variable, only to be used when solving for enthalpy");
 
   // New functor boundary conditions
   params.deprecateParam("energy_inlet_function", "energy_inlet_functors", "01/01/2025");
@@ -40,14 +48,11 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
   params.transferParam<bool>(NSFVBase::validParams(), "energy_two_term_bc_expansion");
 
-  // Nonlinear equation solver scaling
-  params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
-
   params.addParamNamesToGroup("specific_heat thermal_conductivity thermal_conductivity_blocks "
                               "use_external_enthalpy_material",
                               "Material properties");
   params.addParamNamesToGroup("energy_advection_interpolation energy_face_interpolation "
-                              "energy_two_term_bc_expansion energy_scaling",
+                              "energy_two_term_bc_expansion",
                               "Numerical scheme");
   params.addParamNamesToGroup("energy_inlet_types energy_inlet_functors",
                               "Inlet boundary conditions");
@@ -64,6 +69,8 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
         isParamValid("add_energy_equation")
             ? getParam<bool>("add_energy_equation")
             : (usingNavierStokesFVSyntax() ? isParamSetByUser("energy_inlet_function") : true)),
+    _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy")),
+    _fluid_enthalpy_name(getSpecificEnthalpyName()),
     _fluid_temperature_name(getParam<NonlinearVariableName>("fluid_temperature_variable")),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_blocks(
@@ -84,7 +91,10 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
   if (!_has_energy_equation)
     return;
 
-  saveSolverVariableName(_fluid_temperature_name);
+  if (_solve_for_enthalpy)
+    saveSolverVariableName(_fluid_enthalpy_name);
+  else
+    saveSolverVariableName(_fluid_temperature_name);
 
   // set block restrictions if not set by user
   // This should probably be done for all the coupled physics, tbd
@@ -92,6 +102,7 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
     _blocks = _flow_equations_physics->blocks();
 
   // Parameter checks
+  checkSecondParamSetOnlyIfFirstOneTrue("solve_for_enthalpy", "initial_enthalpy");
   checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
                                                                        "ambient_temperature");
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
@@ -162,7 +173,9 @@ WCNSFVFluidHeatTransferPhysicsBase::processThermalConductivity()
     else
     {
       if (getProblem().hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],
-                                                  /*thread_id=*/0))
+                                                  /*thread_id=*/0) ||
+          getProblem().hasFunctorWithType<Real>(_thermal_conductivity_name[i],
+                                                /*thread_id=*/0))
         have_scalar = true;
       else
       {
@@ -171,7 +184,7 @@ WCNSFVFluidHeatTransferPhysicsBase::processThermalConductivity()
           have_vector = true;
         else
           paramError("thermal_conductivity",
-                     "We only allow functor of type ADReal or ADRealVectorValue for thermal "
+                     "We only allow functor of type Real/ADReal or ADRealVectorValue for thermal "
                      "conductivity! Functor '" +
                          _thermal_conductivity_name[i] + "' is not of the requested type.");
       }
@@ -216,6 +229,14 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 
     getProblem().addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
   }
+  if ((!_app.isRestarting() && parameters().isParamValid("initial_enthalpy")) ||
+      parameters().isParamSetByUser("initial_enthalpy"))
+  {
+    params.set<VariableName>("variable") = _fluid_enthalpy_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_enthalpy");
+
+    getProblem().addInitialCondition("FunctionIC", _fluid_enthalpy_name + "_ic", params);
+  }
 }
 
 void
@@ -225,15 +246,29 @@ WCNSFVFluidHeatTransferPhysicsBase::addMaterials()
   if (!_has_energy_equation)
     return;
 
-  InputParameters params = getFactory().getValidParams("INSFVEnthalpyFunctorMaterial");
+  // Note that this material choice would not work for Newton-INSFV + solve_for_enthalpy
+  const auto object_type =
+      _solve_for_enthalpy ? "LinearFVEnthalpyFunctorMaterial" : "INSFVEnthalpyFunctorMaterial";
+
+  InputParameters params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
 
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
+  if (_solve_for_enthalpy)
+  {
+    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+    if (isParamValid(NS::fluid))
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+  }
+  else
+  {
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
+  }
 
-  getProblem().addMaterial(
-      "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);
+  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 }
 
 unsigned short

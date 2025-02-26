@@ -31,4 +31,13 @@
     requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [2d-fp-physics]
+    type = 'Exodiff'
+    input = 'enthalpy_equation-physics.i'
+    exodiff = 'enthalpy_equation-physics_out.e'
+    abs_zero = 1e-5
+    rel_err = 1e-5
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 []
