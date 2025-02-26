@@ -143,6 +143,7 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<BoundaryName>("output_boundary") = _external_boundary_name;
     params.set<SubdomainName>("output_subdomain_name") = _peripheral_ring_block_name;
     params.set<MooseEnum>("tri_element_type") = getParam<MooseEnum>("tri_element_type");
+    params.set<bool>("verbose_stitching") = false;
     addMeshSubgenerator("XYDelaunayGenerator", _input_name + "_periphery", params);
     _build_mesh = &getMeshByName(_input_name + "_periphery");
   }
