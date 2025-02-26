@@ -4,87 +4,61 @@
 
 !---
 
-## Step 8a: Coarse Solution
+## Step 8: Uniform Refinement
 
-!listing step8a_coarse.i
+!listing step08_adaptivity/step8_uniform.i diff=step04_heat_conduction/step4.i block=Mesh
 
 !---
 
-## Step 8a: Run
+## Step 8: Run coarse problem
 
-With the tutorial executable:
+Without modification, running the input will produce the same solution as in Step 4:
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
-../executable/shield_multiphysics-opt -i step8a_coarse.i
-```
-
-With a conda MOOSE executable:
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
-moose-opt -i step8a_coarse.i
+moose-opt -i step8_uniform.i
 ```
 
 !---
 
-!media results/step8_coarse.png caption="Coarse mesh"
+## Step 8: Run Uniform Refinement
+
+There are several ways to instigate uniform refinement:
+
+1. Directly modify the input to change `uniform_refine = 0` to `uniform_refine = 2`
+
+2. Modify parameter using command-line interface:
+
+   ```bash
+   moose-opt -i step8_uniform.i Mesh/uniform_refine=2
+   ```
+
+3. Use the `-r` command-line option:
+
+   ```bash
+   moose-opt -i step8_uniform.i -r 2
+   ```
 
 !---
 
-## Step 8b: Fine Solution
+Each refinement increases the number of elements by a factor of $2^{\texttt{dim}}$
 
-!listing step8b_fine.i
+!media results/step8_uniform.png
 
 !---
 
-## Step 8b: Run
+## Step 8: Mesh Adaptivity
 
-With the tutorial executable:
+!listing step8_adapt.i block=Adaptivity
+
+!---
+
+## Step 8c: Run Mesh Adaptivity
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
-../executable/shield_multiphysics-opt -i step8b_fine.i
-```
-
-With a conda MOOSE executable:
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
-moose-opt -i step8b_fine.i
-```
-
-!---
-
-!media results/step8_fine.png caption="2x uniform refinement"
-
-!---
-
-## Step 8c: Adaptive Mesh Solution
-
-!listing step8c_adapt.i
-
-!---
-
-## Step 8c: Run
-
-With the tutorial executable:
-
-```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
-../executable/shield_multiphysics-opt -i step8c_adapt.i
-```
-
-With a conda MOOSE executable:
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
-moose-opt -i step8c_adapt.i
+moose-opt -i step8_adapt.i
 ```
 
 !---
 
-!media results/step8_adapt.png caption="Using adaptivity"
+!media results/step8_adapt.mp4

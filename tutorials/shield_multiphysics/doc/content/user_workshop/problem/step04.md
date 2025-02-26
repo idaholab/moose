@@ -36,8 +36,9 @@ Both shall be computed with a single `Material` object: `HeatConductionMaterial`
 
 ## HeatConduction Kernel
 
-The `CoefDiffusion` Kernel object uses input parameters for defining the thermal conductivity.
-We modify it to to consume the newly created material properties.
+The `CoefDiffusion` Kernel object uses input parameters for defining the thermal
+conductivity. Instead, the `HeatConduction` Kernel utilizes the material
+properties defined in `HeatConductionMaterial` automatically.
 
 !---
 
@@ -57,19 +58,11 @@ We modify it to to consume the newly created material properties.
 
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step04_heat_conduction
-../executable/shield_multiphysics-opt -i step4.i
-```
-
-Using a prebuilt MOOSE from conda:
-
-```bash
-conda activate moose
-cd ~/projects/moose/tutorials/shield_multiphysics/step04_heat_conduction
-moose-opt -i step2.i
+moose-opt -i step4.i
 ```
 
 !---
 
 ## Step 4: Result
 
-!media shield_multiphysics/results/step04.png style=width:70%;margin-left:auto;margin-right:auto
+!media shield_multiphysics/results/step04.png
