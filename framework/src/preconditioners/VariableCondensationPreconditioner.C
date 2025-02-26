@@ -45,7 +45,7 @@ VariableCondensationPreconditioner::validParams()
   InputParameters params = MoosePreconditioner::validParams();
 
   params.addClassDescription(
-      "Varialble condensation preconditioner (VCP) condenses out specified variable(s) "
+      "Variable condensation preconditioner (VCP) condenses out specified variable(s) "
       "from the Jacobian matrix and produces a system of equations with less unkowns to "
       "be solved by the underlying preconditioners.");
 
@@ -315,7 +315,7 @@ VariableCondensationPreconditioner::getDofColRow()
         _cols_to_idx.insert(std::make_pair(primary_idx, _global_cols_to_idx[primary_idx]));
       }
     }
-    else // if the dof does not correspond to the lm nor primary varialble, just add to _global_cols
+    else // if the dof does not correspond to the lm nor primary variable, just add to _global_cols
     {
       _global_cols.push_back(i);
       _global_cols_to_idx.insert(std::make_pair(i, _global_cols.size() - 1));
