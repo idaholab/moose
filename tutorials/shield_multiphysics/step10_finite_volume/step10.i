@@ -1,19 +1,14 @@
-cp_water_multiplier = 1e-4
+cp_water_multiplier = 1e-10
 mu_multiplier = 1e4
 
-# Notes:
-# While it solves, it's clearly not refined enough to show the true behavior
-# See step 7c
+# Real facility uses forced convection to cool the water tank at full power
+# Need to lower power for natural convection so water doesn't boil.
+power = '${fparse 5e4 / 144 * 0.1}'
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
     file = 'mesh2d_in.e'
-  []
-  [remove_solid]
-    type = BlockDeletionGenerator
-    input = fmg
-    block = 'concrete_hd concrete Al'
   []
 []
 
@@ -206,9 +201,7 @@ mu_multiplier = 1e4
   [T_fluid_inner_cavity]
     type = FVFunctorNeumannBC
     boundary = inner_cavity_water
-    # Real facility uses forced convection to cool the water tank at full power
-    # Need to lower power for natural convection so water doesn't boil.
-    functor = ${fparse 5e4 / 144 * 0.1}
+    functor = ${power}
     variable = T_fluid
   []
   [T_fluid_water_boundary]
@@ -218,7 +211,7 @@ mu_multiplier = 1e4
     T_bulk = T_fluid
     T_solid = 300
     heat_transfer_coefficient = 600
-    is_solid = true
+    is_solid = false
   []
 []
 
@@ -255,6 +248,7 @@ mu_multiplier = 1e4
   steady_state_detection = true
 
   start_time = -1
+  dtmax = '${units 12 h -> s}'
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
