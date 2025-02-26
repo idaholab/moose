@@ -351,7 +351,8 @@ MFEMProblem::addFunction(const std::string & type,
 InputParameters
 MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 {
-  InputParameters fespace_params = _factory.getValidParams("MFEMFESpace");
+
+  InputParameters fespace_params = _factory.getValidParams("MFEMGenericFESpace");
   InputParameters mfem_variable_params = _factory.getValidParams("MFEMVariable");
 
   auto moose_fe_type =
@@ -384,19 +385,19 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
       break;
   }
 
-  // Set all fespace parameters.
-  fespace_params.set<MooseEnum>("fec_order") = moose_fe_type.order;
-  fespace_params.set<MooseEnum>("fec_type") = mfem_family;
-  fespace_params.set<int>("vdim") = mfem_vdim;
-
-  // Create unique fespace name. If this already exists, we will reuse this for
+  // Create fespace name. If this already exists, we will reuse this for
   // the mfem variable ("gridfunction").
-  const std::string fespace_name =
-      mfem_family + "_3D_P" + std::to_string(moose_fe_type.order.get_order());
+  const std::string fespace_name = mfem_family + "_" +
+                                   std::to_string(mesh().getMFEMParMesh().Dimension()) + "D_P" +
+                                   std::to_string(moose_fe_type.order.get_order());
+
+  // Set all fespace parameters.
+  fespace_params.set<std::string>("fec_name") = fespace_name;
+  fespace_params.set<int>("vdim") = mfem_vdim;
 
   if (!hasUserObject(fespace_name)) // Create the fespace (implicit).
   {
-    addFESpace("MFEMFESpace", fespace_name, fespace_params);
+    addFESpace("MFEMGenericFESpace", fespace_name, fespace_params);
   }
 
   mfem_variable_params.set<UserObjectName>("fespace") = fespace_name;
