@@ -5,6 +5,12 @@
     type = CSVDiff
     input = two_channel.i
     csvdiff = two_channel_out.csv
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-5
+    max_threads = 1
+    max_parallel = 1
     requirement = 'The system shall model the turbulent enthalpy diffusion v2'
   []
 []

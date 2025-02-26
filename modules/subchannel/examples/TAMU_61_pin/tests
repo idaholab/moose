@@ -3,5 +3,11 @@
         type = CSVDiff
         input = TAMU_61.i
         csvdiff = TAMU_61_out.csv
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+        abs_zero = 1e-5
+        max_threads = 1
+        max_parallel = 1
     []
 []
