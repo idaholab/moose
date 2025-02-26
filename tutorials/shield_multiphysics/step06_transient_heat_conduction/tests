@@ -1,11 +1,18 @@
 [Tests]
   issues = '#4522'
   design = 'examples_and_tutorials/index.md'
-  [step]
+  [transient]
     type = RunApp
     input = '../step03_boundary_conditions/mesh.i step6_transient.i'
     cli_args = "Mesh/inactive='fmg' Executioner/num_steps=2"
     requirement = "The shield multiphysics tutorial shall include a demonstration of solving the "
                   "transient heat equation."
+  []
+  [pseudo_transient]
+    type = RunApp
+    input = '../step03_boundary_conditions/mesh.i step6_pseudo_transient.i'
+    cli_args = "Mesh/inactive='fmg' Executioner/steady_state_tolerance=1e-2"
+    requirement = "The shield multiphysics tutorial shall include a demonstration of solving the "
+                  "transient heat equation into a steady-state solution."
   []
 []
