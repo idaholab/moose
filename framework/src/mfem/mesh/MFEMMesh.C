@@ -47,10 +47,6 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
 
-  mooseAssert(mfem_ser_mesh.Dimension() == 3, "Only 3D meshes are currently supported");
-  mooseAssert(isParamSetByUser("dim") ? getParam<MooseEnum>("dim") == 3 : true,
-              "Only 3D meshes are currently supported");
-
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError(
         "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
