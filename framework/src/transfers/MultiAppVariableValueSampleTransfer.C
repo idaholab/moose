@@ -56,7 +56,7 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 {
   MultiAppTransfer::initialSetup();
 
-  variableIntegrityCheck(_to_var_name);
+  variableIntegrityCheck(_to_var_name, false);
 
   if (isParamValid("from_multi_app"))
     getFromMultiApp()->problemBase().mesh().errorIfDistributedMesh(
