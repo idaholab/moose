@@ -68,48 +68,6 @@
   []
 []
 
-[AuxVariables]
-  [heat_flux_x]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-  [heat_flux_y]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-  [heat_flux_z]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-[]
-
-[AuxKernels]
-  [diff_flux_x]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'x'
-  []
-  [diff_flux_y]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'y'
-  []
-  [diff_flux_z]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'z'
-  []
-[]
-
 [BCs]
   [from_reactor]
     type = NeumannBC
@@ -143,9 +101,9 @@
 []
 
 [Problem]
-  type = FEProblem
   # No kernels on the water domain
   kernel_coverage_check = false
+  # No materials on the water domain
   material_coverage_check = false
 []
 

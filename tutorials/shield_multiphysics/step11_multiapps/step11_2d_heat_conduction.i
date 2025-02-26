@@ -89,21 +89,11 @@ power = '${fparse 5e4 / 144 * 0.1}'
 [Problem]
   # No kernels on the water domain
   kernel_coverage_check = false
-  # No materials defined on the water domain
+  # No materials on the water domain
   material_coverage_check = false
 []
 
 [Executioner]
-  solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
-  petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
-  petsc_options_value = 'hypre boomeramg'
-  nl_abs_tol = 1e-8
-
-  # For steady-state fixed-point iteration
-  # type = Transient
-  # fixed_point_max_its = 20
-  # accept_on_max_fixed_point_iteration = true
-
   # For pseudo-transient
   type = Transient
   steady_state_detection = true
@@ -115,6 +105,16 @@ power = '${fparse 5e4 / 144 * 0.1}'
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
   []
+
+  # For steady-state fixed-point iteration
+  # type = Steady
+  # fixed_point_max_its = 20
+  # accept_on_max_fixed_point_iteration = true
+
+  solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
+  petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
+  petsc_options_value = 'hypre boomeramg'
+  nl_abs_tol = 1e-8
 []
 
 [Positions]
@@ -126,11 +126,11 @@ power = '${fparse 5e4 / 144 * 0.1}'
 
 [MultiApps]
   [fluid]
-    # For steady-state fixed-point iteration
-    # type = FullSolveMultiApp
-
     # For pseudo-transient
     type = TransientMultiApp
+
+    # For steady-state fixed-point iteration
+    # type = FullSolveMultiApp
 
     input_files = step11_2d_fluid.i
     execute_on = 'TIMESTEP_END'
@@ -240,14 +240,6 @@ reactor_y = 2.225
     type = ConstantReporter
     real_vector_names = 'detector_heat'
     real_vector_values = '0 0 0 0 0 0 0 0'
-  []
-[]
-
-[Postprocessors]
-  [T_solid_interface_avg]
-    type = SideAverageValue
-    boundary = water_boundary_inwards
-    variable = T
   []
 []
 

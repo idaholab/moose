@@ -70,48 +70,6 @@ cp_multiplier = 1e-6
   []
 []
 
-[AuxVariables]
-  [heat_flux_x]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-  [heat_flux_y]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-  [heat_flux_z]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-[]
-
-[AuxKernels]
-  [diff_flux_x]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'x'
-  []
-  [diff_flux_y]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'y'
-  []
-  [diff_flux_z]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'z'
-  []
-[]
-
 [BCs]
   [from_reactor]
     type = NeumannBC
@@ -145,9 +103,9 @@ cp_multiplier = 1e-6
 []
 
 [Problem]
-  type = FEProblem
   # No kernels on the water domain
   kernel_coverage_check = false
+  # No materials on the water domain
   material_coverage_check = false
 []
 
@@ -157,6 +115,7 @@ cp_multiplier = 1e-6
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  # Difficult to converge with relative tolerance close to steady-state
   nl_abs_tol = 1e-8
 []
 

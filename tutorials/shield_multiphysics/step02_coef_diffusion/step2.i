@@ -1,5 +1,9 @@
-# Start by running meshing script
-!include ../step01_diffusion/mesh.i
+[Mesh]
+  [fmg]
+    type = FileMeshGenerator
+    file = '../step01_diffusion/mesh_in.e'
+  []
+[]
 
 [Variables]
   [T]
@@ -38,13 +42,13 @@
   [left]
     type = DirichletBC  # Simple u=value BC
     variable = T        # Variable to be set
-    boundary = left     # Name of a sideset in the mesh
+    boundary = front    # Name of a sideset in the mesh
     value = 330
   []
   [right]
     type = DirichletBC
     variable = T
-    boundary = right
+    boundary = back
     value = 300
   []
 []

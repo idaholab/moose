@@ -20,7 +20,7 @@
       type = ValueThresholdMarker
       coarsen = 0.3
       variable = temperature_jump
-      refine = 3
+      refine = 2
       block = 'concrete_hd concrete Al'
     []
   []
@@ -122,14 +122,15 @@
 []
 
 [Problem]
-  type = FEProblem
+  # No kernels on the water domain
   kernel_coverage_check = false
+  # No materials on the water domain
   material_coverage_check = false
 []
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 5
   dt = ${units 12 h -> s}
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -137,5 +138,5 @@
 []
 
 [Outputs]
-  exodus = true # Output Exodus format
+  exodus = true
 []

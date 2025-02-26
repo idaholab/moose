@@ -1,16 +1,23 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = 'step13a_base_calc_out.e'
-    use_for_exodus_restart = true
+    file = 'step13a_base_calc_out_cp/LATEST'
   []
+[]
+
+[Problem]
+  # all variables, both nonlinear and auxiliary, are 'restarted'
+  restart_file_base = 'step13a_base_calc_out_cp/LATEST'
+  # No kernels on the water domain
+  kernel_coverage_check = false
+  # No materials on the water domain
+  material_coverage_check = false
 []
 
 [Variables]
   [T]
     # Adds a Linear Lagrange variable by default
     block = 'concrete_hd concrete Al'
-    initial_from_file_var = 'T'
   []
 []
 
@@ -69,48 +76,6 @@
   []
 []
 
-[AuxVariables]
-  [heat_flux_x]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-  [heat_flux_y]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-  [heat_flux_z]
-    family = MONOMIAL
-    order = CONSTANT
-    block = 'concrete_hd concrete'
-  []
-[]
-
-[AuxKernels]
-  [diff_flux_x]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'x'
-  []
-  [diff_flux_y]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'y'
-  []
-  [diff_flux_z]
-    type = DiffusionFluxAux
-    variable = heat_flux_x
-    diffusion_variable = T
-    diffusivity = 'thermal_conductivity'
-    component = 'z'
-  []
-[]
-
 [BCs]
   [from_reactor]
     type = NeumannBC
@@ -143,16 +108,8 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-  # No kernels on the water domain
-  kernel_coverage_check = false
-  material_coverage_check = false
-[]
-
 [Executioner]
   type = Transient
-  start_time = '${units 2 day -> s}'
   num_steps = 6
   dt = '${units 12 h -> s}'
   solve_type = NEWTON
