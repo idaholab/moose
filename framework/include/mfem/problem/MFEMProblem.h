@@ -157,7 +157,7 @@ public:
    * properties and converting them to MFEM coefficients. This is used
    * by Material and Kernel classes (among others).
    */
-  MooseMFEM::PropertyManager & getProperties() { return _problem_data._properties; }
+  MooseMFEM::PropertyManager & getProperties() { return _problem_data.properties; }
 
   /**
    * Method to get the current MFEMProblemData object storing the
@@ -172,7 +172,7 @@ public:
   template <class T, class... Args>
   std::shared_ptr<T> makeScalarCoefficient(Args &&... args)
   {
-    return this->_problem_data._scalar_manager.make<T>(args...);
+    return this->_problem_data.scalar_manager.make<T>(args...);
   }
 
   /**
@@ -182,7 +182,7 @@ public:
   template <class T, class... Args>
   std::shared_ptr<T> makeVectorCoefficient(Args &&... args)
   {
-    return this->_problem_data._vector_manager.make<T>(args...);
+    return this->_problem_data.vector_manager.make<T>(args...);
   }
 
   /**
@@ -192,7 +192,7 @@ public:
   template <class T, class... Args>
   std::shared_ptr<T> makeMatrixCoefficient(Args &&... args)
   {
-    return this->_problem_data._matrix_manager.make<T>(args...);
+    return this->_problem_data.matrix_manager.make<T>(args...);
   }
 
   /**
@@ -227,10 +227,10 @@ protected:
   void addKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
     using namespace MooseMFEM;
-    if (getProblemData()._eqn_system)
+    if (getProblemData().eqn_system)
     {
-      getProblemData()._eqn_system->AddTrialVariableNameIfMissing(var_name);
-      getProblemData()._eqn_system->AddKernel(var_name, std::move(kernel));
+      getProblemData().eqn_system->AddTrialVariableNameIfMissing(var_name);
+      getProblemData().eqn_system->AddKernel(var_name, std::move(kernel));
     }
     else
     {

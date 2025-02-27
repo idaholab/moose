@@ -19,7 +19,7 @@ MFEMConduitDataCollection::validParams()
 
 MFEMConduitDataCollection::MFEMConduitDataCollection(const InputParameters & parameters)
   : MFEMDataCollection(parameters),
-    _conduit_dc((_file_base).c_str(), _problem_data._pmesh.get()),
+    _conduit_dc((_file_base).c_str(), _problem_data.pmesh.get()),
     _protocol(getParam<MooseEnum>("protocol"))
 {
   _conduit_dc.SetProtocol(_protocol);

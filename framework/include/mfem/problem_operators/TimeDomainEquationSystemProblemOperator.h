@@ -15,7 +15,7 @@ public:
   TimeDomainEquationSystemProblemOperator(MFEMProblemData & problem)
     : TimeDomainProblemOperator(problem),
       _equation_system(
-          std::dynamic_pointer_cast<MooseMFEM::TimeDependentEquationSystem>(problem._eqn_system))
+          std::dynamic_pointer_cast<MooseMFEM::TimeDependentEquationSystem>(problem.eqn_system))
   {
   }
 

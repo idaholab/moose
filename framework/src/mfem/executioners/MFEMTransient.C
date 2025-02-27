@@ -37,7 +37,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
 void
 MFEMTransient::constructProblemOperator()
 {
-  _problem_data._eqn_system = std::make_shared<MooseMFEM::TimeDependentEquationSystem>();
+  _problem_data.eqn_system = std::make_shared<MooseMFEM::TimeDependentEquationSystem>();
   auto problem_operator =
       std::make_unique<MooseMFEM::TimeDomainEquationSystemProblemOperator>(_problem_data);
   _problem_operator.reset();
@@ -54,13 +54,13 @@ MFEMTransient::step(double dt, int) const
   }
 
   // Advance time step.
-  _problem_data._ode_solver->Step(_problem_data._f, _t, dt);
+  _problem_data.ode_solver->Step(_problem_data.f, _t, dt);
 
   // Synchonise time dependent GridFunctions with updated DoF data.
   _problem_operator->SetTestVariablesFromTrueVectors();
 
   // Sync Host/Device
-  _problem_data._f.HostRead();
+  _problem_data.f.HostRead();
 
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
@@ -75,18 +75,18 @@ MFEMTransient::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _problem_data._eqn_system->Init(
-      _problem_data._gridfunctions,
-      _problem_data._fespaces,
-      _problem_data._bc_map,
+  _problem_data.eqn_system->Init(
+      _problem_data.gridfunctions,
+      _problem_data.fespaces,
+      _problem_data.bc_map,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_problem_data._f);
+  _problem_operator->Init(_problem_data.f);
 
   // Set timestepper
-  _problem_data._ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
-  _problem_data._ode_solver->Init(*(_problem_operator));
+  _problem_data.ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
+  _problem_data.ode_solver->Init(*(_problem_operator));
   _problem_operator->SetTime(0.0);
 }
 
