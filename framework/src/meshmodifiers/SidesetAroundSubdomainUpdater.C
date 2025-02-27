@@ -54,7 +54,7 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
     _inner_ids.insert(id);
   for (const auto id : MooseMeshUtils::getSubdomainIDs(_mesh.getMesh(), outer_subdomains))
     _outer_ids.insert(id);
-  std::set<SubdomainID> mesh_subdomains = _mesh.getSubdomains();
+  std::set<SubdomainID> mesh_subdomains = _mesh.meshSubdomains();
 
   for (const auto & id : _inner_ids)
     if (mesh_subdomains.find(id) == mesh_subdomains.end())

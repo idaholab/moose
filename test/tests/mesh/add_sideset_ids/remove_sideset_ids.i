@@ -70,6 +70,10 @@
 
 [Variables]
   [u]
+    block = 1
+  []
+  [v]
+    block = 9999
   []
 []
 
@@ -91,14 +95,29 @@
 
 [Kernels]
   [diff]
-    type = NullKernel
+   type = Diffusion
     variable = u
     block = '1'
   []
   [fake]
     type = NullKernel
-    variable = u
+    variable = v
     block = '9999'
+  []
+[]
+
+[BCs]
+  [left]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 0
+  []
+  [right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
   []
 []
 
@@ -120,6 +139,11 @@
     type = VolumePostprocessor
     block = 9999
     execute_on = 'initial timestep_end'
+  []
+  [flux]
+    type = AreaPostprocessor
+    boundary = 'right'
+    execute_on = 'TIMESTEP_END'
   []
 []
 

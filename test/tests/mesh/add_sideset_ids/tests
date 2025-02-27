@@ -29,6 +29,6 @@
     input = remove_sideset_ids.i
     csvdiff = remove_sideset_ids_out.csv
     design = MooseMesh.md
-    requirement = 'The system shall remove specifying sidesets that exist on the initial multiple blocks when elements are moved to new blocks.'
+    requirement = 'The system shall be able to remove sides from sidesets when tese sides elements are moved to new blocks.'
   []
 []

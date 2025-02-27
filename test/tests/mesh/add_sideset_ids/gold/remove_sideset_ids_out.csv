@@ -1,4 +1,4 @@
-time,volume1,volume9999
-0,10,0
-1,10,0
-2,8,2
+time,flux,volume1,volume9999
+0,0,10,0
+1,10,10,0
+2,18,8,2

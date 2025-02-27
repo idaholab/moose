@@ -741,11 +741,6 @@ public:
   std::vector<SubdomainID> getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) const;
 
   /**
-   * Get the list of subdomains for the mesh (no active elements included)
-   */
-  std::set<SubdomainID> getSubdomains() const;
-
-  /**
    * This method sets the name for \p subdomain_id to \p name
    */
   void setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name);
