@@ -191,7 +191,7 @@ TEST(CheckData, NonlinearIntegratorTest)
 
   // clang-format off
   //* in weak form
-  //* (\rho\nabla\times H, \nanbla\times v) + (\mu dH/dt, v) + (dB^e/dt, v) - <(\rho\nabla\times H)\times n, v>  = 0
+  //* (\rho\nabla\times H, \nabla\times v) + (\mu dH/dt, v) + (dB^e/dt, v) - <(\rho\nabla\times H)\times n, v>  = 0
   // clang-format on
   mfem::ParNonlinearForm nlf_test(&h_curl_fe_space);
   mfem::ParBilinearForm blf_test(&h_curl_fe_space);
