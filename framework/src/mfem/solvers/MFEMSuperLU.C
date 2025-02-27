@@ -22,8 +22,8 @@ MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : MFEMSolverBase(pa
 void
 MFEMSuperLU::constructSolver(const InputParameters &)
 {
-  _solver =
-      std::make_shared<MooseMFEM::SuperLUSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  _solver = std::make_shared<MooseMFEM::SuperLUSolver>(
+      getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 }
 
 #endif
