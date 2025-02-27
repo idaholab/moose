@@ -13,20 +13,7 @@
 #include "ADKernelGrad.h"
 
 template <bool is_ad>
-class GenericKernelGrad : public KernelGrad
-{
-public:
-  static InputParameters validParams() { return KernelGrad::validParams(); };
-  GenericKernelGrad(const InputParameters & parameters) : KernelGrad(parameters) {}
-};
-
-template <>
-class GenericKernelGrad<true> : public ADKernelGrad
-{
-public:
-  static InputParameters validParams() { return ADKernelGrad::validParams(); };
-  GenericKernelGrad(const InputParameters & parameters) : ADKernelGrad(parameters) {}
-};
+using GenericKernelGrad = std::conditional_t<is_ad, ADKernelGrad, KernelGrad>;
 
 #define usingGenericKernelGradMembers                                                              \
   usingFunctionInterfaceMembers;                                                                   \
