@@ -30,10 +30,10 @@ public:
   virtual void cp_from_p_T(
       Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
   virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
-  virtual Real mu_from_rho_T(Real rho, Real temprature) const override;
+  virtual Real mu_from_rho_T(Real rho, Real temperature) const override;
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual Real T_from_p_h(Real temperature, Real enthalpy) const override;
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
 
 protected:
   static const std::vector<Real> _temperature_vec;
