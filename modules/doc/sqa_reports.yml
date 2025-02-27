@@ -433,7 +433,6 @@ Requirements:
     subchannel:
         directories:
             - modules/subchannel
-        log_missing: WARNING
 
     thermal_hydraulics:
         directories:
