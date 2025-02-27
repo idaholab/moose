@@ -17,7 +17,7 @@ magnetic vector potential in magnetostatic systems in the steady state - users s
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/curlcurl.i block=FESpace Preconditioner Solver
+!listing test/tests/mfem/kernels/curlcurl.i block=FESpace Preconditioner Solver
 
 !syntax parameters /Solver/MFEMHypreAMS
 

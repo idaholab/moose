@@ -21,6 +21,6 @@ By default, legacy assembly of the FE problem on CPUs will be selected for robus
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/diffusion.i block=Executioner
+!listing test/tests/mfem/kernels/diffusion.i block=Executioner
 
-!listing test/tests/kernels/diffusion_partial.i block=Executioner
+!listing test/tests/mfem/kernels/diffusion_partial.i block=Executioner

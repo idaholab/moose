@@ -11,7 +11,7 @@ boundary, fixing its values to the input on the boundary.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/heatconduction.i block=BCs
+!listing test/tests/mfem/kernels/heatconduction.i block=BCs
 
 !syntax parameters /BCs/MFEMScalarDirichletBC
 

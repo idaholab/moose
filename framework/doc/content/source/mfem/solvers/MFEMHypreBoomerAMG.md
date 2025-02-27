@@ -10,7 +10,7 @@ Defines and builds an `mfem::HypreBoomerAMG` solver to use as a preconditioner o
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/diffusion.i block=Preconditioner Solver
+!listing test/tests/mfem/kernels/diffusion.i block=Preconditioner Solver
 
 !syntax parameters /Solver/MFEMHypreBoomerAMG
 

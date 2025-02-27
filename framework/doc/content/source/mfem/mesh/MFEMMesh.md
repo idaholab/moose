@@ -17,7 +17,7 @@ the `getMFEMParMesh()` accessor as needed.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/diffusion.i block=Problem Mesh
+!listing test/tests/mfem/kernels/diffusion.i block=Problem Mesh
 
 !syntax parameters /Mesh/MFEMMesh
 
