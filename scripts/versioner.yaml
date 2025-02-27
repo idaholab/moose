@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2024.12.23
+    version: 2025.02.27
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: petsc, libmesh, moose-dev, libmesh-vtk, peacock
   mpi:
-    version: 2024.12.23
+    version: 2025.02.27
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -26,7 +26,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.22.1.193.g72c1e49ee3d
-    build_number: 1
+    build_number: 2
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -45,7 +45,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2024.12.02
-    build_number: 1
+    build_number: 2
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -64,7 +64,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.02.25
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -81,7 +81,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.02.25
+    version: 2025.02.27
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -101,7 +101,7 @@ packages:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
     version: 9.3.0
-    build_number: 5
+    build_number: 6
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -112,7 +112,7 @@ packages:
       - conda/libmesh-vtk/build.sh
   # dependers: peacock
   peacock:
-    version: 2024.12.23
+    version: 2025.02.27
     conda: conda/peacock
     templates:
       conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml
@@ -121,7 +121,7 @@ packages:
       - mpi
   # dependers: none
   pprof:
-    version: 2024.12.23
+    version: 2025.02.27
     build_number: 0
     conda: conda/pprof
     templates:
@@ -131,7 +131,7 @@ packages:
   # dependers: none
   seacas:
     version: 2024.08.15
-    build_number: 2
+    build_number: 3
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml

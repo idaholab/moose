@@ -39,7 +39,7 @@ test:
     - vtk
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: >
     This superficial module (moose-peacock) acts as a top-level module designed to provide all
