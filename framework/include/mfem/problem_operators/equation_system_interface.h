@@ -3,7 +3,7 @@
 #pragma once
 #include "MFEMProblemData.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 /**
  * Interface required for:
@@ -17,7 +17,7 @@ public:
   virtual ~EquationSystemInterface() = default;
 
   /// Returns a pointer to the operator's equation system.
-  [[nodiscard]] virtual platypus::EquationSystem * GetEquationSystem() const = 0;
+  [[nodiscard]] virtual MooseMFEM::EquationSystem * GetEquationSystem() const = 0;
 };
 }
 

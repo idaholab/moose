@@ -3,7 +3,7 @@
 #pragma once
 #include "MFEMProblemData.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 /// Interface inherited by ProblemOperator and TimeDomainProblemOperator. Removes duplicated code in both classes.
 class ProblemOperatorInterface

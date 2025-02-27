@@ -9,7 +9,7 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 /**
  * Factory class to create tracked objects. The objects may be either

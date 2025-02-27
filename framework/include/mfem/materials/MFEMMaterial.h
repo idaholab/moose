@@ -22,7 +22,7 @@ public:
 
 protected:
   std::vector<SubdomainName> _block_ids;
-  platypus::PropertyManager & _properties;
+  MooseMFEM::PropertyManager & _properties;
 };
 
 #endif

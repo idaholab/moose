@@ -2,7 +2,7 @@
 
 #include "time_domain_problem_operator.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 std::vector<std::string>
 GetTimeDerivativeNames(std::vector<std::string> gridfunction_names)
@@ -22,6 +22,6 @@ TimeDomainProblemOperator::SetGridFunctions()
   width = height = _block_true_offsets[_trial_variables.size()];
 }
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

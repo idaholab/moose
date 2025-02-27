@@ -8,7 +8,7 @@
 #include "problem_operator_interface.h"
 #include "equation_system_interface.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 
 /// Problem operator for time-dependent problems with an equation system.
@@ -19,7 +19,7 @@ public:
   TimeDomainEquationSystemProblemOperator(MFEMProblemData & problem)
     : TimeDomainProblemOperator(problem),
       _equation_system(
-          std::dynamic_pointer_cast<platypus::TimeDependentEquationSystem>(problem._eqn_system))
+          std::dynamic_pointer_cast<MooseMFEM::TimeDependentEquationSystem>(problem._eqn_system))
   {
   }
 
@@ -28,7 +28,7 @@ public:
 
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
 
-  [[nodiscard]] platypus::TimeDependentEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] MooseMFEM::TimeDependentEquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -43,9 +43,9 @@ protected:
 
 private:
   std::vector<mfem::ParGridFunction *> _trial_variable_time_derivatives;
-  std::shared_ptr<platypus::TimeDependentEquationSystem> _equation_system{nullptr};
+  std::shared_ptr<MooseMFEM::TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

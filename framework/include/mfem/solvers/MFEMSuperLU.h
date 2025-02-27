@@ -7,7 +7,7 @@
 #include "libmesh/restore_warnings.h"
 #include <memory>
 
-namespace platypus
+namespace MooseMFEM
 {
 
 /**
@@ -27,7 +27,7 @@ public:
 private:
   std::unique_ptr<mfem::SuperLURowLocMatrix> _a_superlu{nullptr};
 };
-} // namespace platypus
+} // namespace MooseMFEM
 
 /**
  * Wrapper for mfem::mfem::SuperLUSolver.
@@ -46,7 +46,7 @@ protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
-  std::shared_ptr<platypus::SuperLUSolver> _solver{nullptr};
+  std::shared_ptr<MooseMFEM::SuperLUSolver> _solver{nullptr};
 };
 
 #endif

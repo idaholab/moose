@@ -36,9 +36,9 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
 void
 MFEMTransient::constructProblemOperator()
 {
-  _problem_data._eqn_system = std::make_shared<platypus::TimeDependentEquationSystem>();
+  _problem_data._eqn_system = std::make_shared<MooseMFEM::TimeDependentEquationSystem>();
   auto problem_operator =
-      std::make_unique<platypus::TimeDomainEquationSystemProblemOperator>(_problem_data);
+      std::make_unique<MooseMFEM::TimeDomainEquationSystemProblemOperator>(_problem_data);
   _problem_operator.reset();
   _problem_operator = std::move(problem_operator);
 }

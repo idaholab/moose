@@ -157,7 +157,7 @@ public:
    * properties and converting them to MFEM coefficients. This is used
    * by Material and Kernel classes (among others).
    */
-  platypus::PropertyManager & getProperties() { return _problem_data._properties; }
+  MooseMFEM::PropertyManager & getProperties() { return _problem_data._properties; }
 
   /**
    * Method to get the current MFEMProblemData object storing the
@@ -226,7 +226,7 @@ protected:
   template <class T>
   void addKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
   {
-    using namespace platypus;
+    using namespace MooseMFEM;
     if (getProblemData()._eqn_system)
     {
       getProblemData()._eqn_system->AddTrialVariableNameIfMissing(var_name);

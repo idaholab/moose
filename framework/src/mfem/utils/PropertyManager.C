@@ -4,7 +4,7 @@
 #include "MooseError.h"
 #include <algorithm>
 
-namespace platypus
+namespace MooseMFEM
 {
 ;
 

@@ -2,7 +2,7 @@
 
 #include "equation_system_problem_operator.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 void
 EquationSystemProblemOperator::SetGridFunctions()
@@ -31,6 +31,6 @@ EquationSystemProblemOperator::Solve(mfem::Vector &)
   GetEquationSystem()->RecoverFEMSolution(_true_x, _problem._gridfunctions);
 }
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

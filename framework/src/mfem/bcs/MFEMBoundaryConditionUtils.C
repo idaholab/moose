@@ -2,7 +2,7 @@
 
 #include "MFEMBoundaryConditionUtils.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 
 mfem::Array<int>
@@ -106,6 +106,6 @@ BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::BilinearForm & blf, m
   }
 };
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

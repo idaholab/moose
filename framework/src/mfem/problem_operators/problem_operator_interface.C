@@ -2,7 +2,7 @@
 
 #include "problem_operator_interface.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 void
 ProblemOperatorInterface::SetGridFunctions()

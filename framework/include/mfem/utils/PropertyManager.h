@@ -17,7 +17,7 @@
 #include "property_map.h"
 #include "ObjectManager.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 
 /**
