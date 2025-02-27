@@ -13,7 +13,8 @@ SetMFEMMeshFESpaceAction::validParams()
   return params;
 }
 
-SetMFEMMeshFESpaceAction::SetMFEMMeshFESpaceAction(const InputParameters & parameters) : Action(parameters)
+SetMFEMMeshFESpaceAction::SetMFEMMeshFESpaceAction(const InputParameters & parameters)
+  : Action(parameters)
 {
 }
 
