@@ -16,7 +16,7 @@ template <bool is_ad>
 InputParameters
 MatAnisoDiffusionTempl<is_ad>::validParams()
 {
-  InputParameters params = MatDiffusionBaseTempl<RealTensorValue, is_ad>::validParams();
+  InputParameters params = MatAnisoDiffusionBaseParent<is_ad>::validParams();
   params.addClassDescription(
       "Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property");
   return params;
@@ -24,7 +24,7 @@ MatAnisoDiffusionTempl<is_ad>::validParams()
 
 template <bool is_ad>
 MatAnisoDiffusionTempl<is_ad>::MatAnisoDiffusionTempl(const InputParameters & parameters)
-  : MatDiffusionBaseTempl<RealTensorValue, is_ad>(parameters)
+  : MatAnisoDiffusionBaseParent<is_ad>(parameters)
 {
 }
 
