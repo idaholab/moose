@@ -81,7 +81,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.03.03
+    version: 2025.03.05
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -97,8 +97,10 @@ packages:
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
       - apptainer/files/moose-dev
+      - framework/contrib/mfem
       - scripts/setup_libtorch.sh
-  # dependers: libmesh, moose-dev
+      - scripts/update_and_rebuild_mfem.sh
+      - scripts/update_and_rebuild_conduit.sh
   libmesh-vtk:
     version: 9.3.0
     build_number: 5
