@@ -4,7 +4,7 @@ The EquationSystem is responsible for defining and assembling the weak form of t
 [`mfem::Operator`](https://docs.mfem.org/html/classmfem_1_1Operator.html) used to solve an iteration
 of the FE problem. This operator is passed to an
 [`mfem::NewtonSolver`](https://docs.mfem.org/html/classmfem_1_1NewtonSolver.html) in a
-[ProblemOperator](source/problem_operators/ProblemOperator.md), which handles the update of the
+[ProblemOperator](source/mfem/problem_operators/ProblemOperator.md), which handles the update of the
 state of all variables (including any required nonlinear iterations).
 
 !equation
@@ -24,8 +24,8 @@ ${b_i=\left(f,\varphi_i\right)_{\Omega}}$.
 !equation
 {\sum_j A_{ij} u_j = b_i}
 
-[MFEMKernels](source/kernels/MFEMKernel.md) contribute domain integrators to the weak form, and
-[MFEMIntegratedBCs](source/bcs/MFEMIntegratedBC.md) contribute boundary integrators to the weak
+[MFEMKernels](source/mfem/kernels/MFEMKernel.md) contribute domain integrators to the weak form, and
+[MFEMIntegratedBCs](source/mfem/bcs/MFEMIntegratedBC.md) contribute boundary integrators to the weak
 form. [`mfem::BilinearFormIntegrators`](https://mfem.org/bilininteg/) add contributions to
 $A_{ij}(\varphi_i, \phi_j)$ and [`mfem::LinearFormIntegrators`](https://mfem.org/lininteg/) add
 contributions to $b_i(\varphi_i)$ when assembled.
@@ -41,7 +41,7 @@ present in the weak form.
 
 Contributions to $\left(\mathcal{T}(\phi_j), \varphi_i\right)_{\Omega}$ are given by
 time derivative kernels such as
- [MFEMTimeDerivativeMassKernel](source/kernels/MFEMTimeDerivativeMassKernel.md)
+ [MFEMTimeDerivativeMassKernel](source/mfem/kernels/MFEMTimeDerivativeMassKernel.md)
 
 Currently, transient problems in Platypus are solved using an implicit backwards Euler method.
 Denoting $u_n=u(t+\delta t)$, $u_{n-1}=u(t)$ and approximating
