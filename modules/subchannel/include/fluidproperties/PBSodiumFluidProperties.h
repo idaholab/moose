@@ -18,6 +18,15 @@ class PBSodiumFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   PBSodiumFluidProperties(const InputParameters & parameters);
+  using SinglePhaseFluidProperties::beta_from_p_T;
+  using SinglePhaseFluidProperties::cp_from_p_T;
+  using SinglePhaseFluidProperties::cv_from_p_T;
+  using SinglePhaseFluidProperties::h_from_p_T;
+  using SinglePhaseFluidProperties::k_from_p_T;
+  using SinglePhaseFluidProperties::mu_from_p_T;
+  using SinglePhaseFluidProperties::mu_from_rho_T;
+  using SinglePhaseFluidProperties::rho_from_p_T;
+  using SinglePhaseFluidProperties::T_from_p_h;
 
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
   virtual void rho_from_p_T(
