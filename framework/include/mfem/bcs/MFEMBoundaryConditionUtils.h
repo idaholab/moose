@@ -5,10 +5,10 @@
 #include "MFEMEssentialBC.h"
 #include "MFEMContainers.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 
-class BCMap : public platypus::NamedFieldsMap<MFEMBoundaryCondition>
+class BCMap : public MooseMFEM::NamedFieldsMap<MFEMBoundaryCondition>
 {
 public:
   mfem::Array<int> GetEssentialBdrMarkers(const std::string & name_, mfem::Mesh * mesh_);
@@ -23,6 +23,6 @@ public:
   void ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem::Mesh * mesh_);
 };
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

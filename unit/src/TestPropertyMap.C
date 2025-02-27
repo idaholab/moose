@@ -14,9 +14,9 @@ class CheckPropertyMap : public testing::Test
 protected:
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point1, point2;
-  platypus::ScalarCoefficientManager _scalar_manager;
-  platypus::VectorCoefficientManager _vector_manager;
-  platypus::MatrixCoefficientManager _matrix_manager;
+  MooseMFEM::ScalarCoefficientManager _scalar_manager;
+  MooseMFEM::VectorCoefficientManager _vector_manager;
+  MooseMFEM::MatrixCoefficientManager _matrix_manager;
   CheckPropertyMap()
   {
     point1.Init(2);
@@ -29,7 +29,7 @@ protected:
 
 TEST_F(CheckPropertyMap, HasCoefficient)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addProperty("test", std::make_unique<mfem::ConstantCoefficient>(1.));
   EXPECT_TRUE(prop_map.hasCoefficient("test"));
   EXPECT_FALSE(prop_map.hasCoefficient("missing"));
@@ -37,7 +37,7 @@ TEST_F(CheckPropertyMap, HasCoefficient)
 
 TEST_F(CheckPropertyMap, GetCoefficient)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addProperty("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&prop_map.getCoefficient("resistivity"));
@@ -48,7 +48,7 @@ TEST_F(CheckPropertyMap, GetCoefficient)
 
 TEST_F(CheckPropertyMap, GetPWCoefficient)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addPiecewiseBlocks("test", std::make_shared<mfem::ConstantCoefficient>(2.), {"1", "2"});
   prop_map.addPiecewiseBlocks("test", std::make_shared<mfem::ConstantCoefficient>(1.), {"3"});
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&prop_map.getCoefficient("test"));
@@ -66,7 +66,7 @@ TEST_F(CheckPropertyMap, GetPWCoefficient)
 
 TEST_F(CheckPropertyMap, HasVecCoefficient)
 {
-  platypus::VectorMap prop_map(_vector_manager);
+  MooseMFEM::VectorMap prop_map(_vector_manager);
   prop_map.addProperty(
       "test", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
   EXPECT_TRUE(prop_map.hasCoefficient("test"));
@@ -75,7 +75,7 @@ TEST_F(CheckPropertyMap, HasVecCoefficient)
 
 TEST_F(CheckPropertyMap, GetVecCoefficient)
 {
-  platypus::VectorMap prop_map(_vector_manager);
+  MooseMFEM::VectorMap prop_map(_vector_manager);
   prop_map.addProperty(
       "resistivity", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
   mfem::VectorConstantCoefficient * c =
@@ -90,7 +90,7 @@ TEST_F(CheckPropertyMap, GetVecCoefficient)
 
 TEST_F(CheckPropertyMap, GetPWVecCoefficient)
 {
-  platypus::VectorMap prop_map(_vector_manager);
+  MooseMFEM::VectorMap prop_map(_vector_manager);
   prop_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
@@ -125,7 +125,7 @@ TEST_F(CheckPropertyMap, GetPWVecCoefficient)
 
 TEST_F(CheckPropertyMap, HasMatCoefficient)
 {
-  platypus::MatrixMap prop_map(_matrix_manager);
+  MooseMFEM::MatrixMap prop_map(_matrix_manager);
   prop_map.addProperty(
       "test",
       std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
@@ -135,7 +135,7 @@ TEST_F(CheckPropertyMap, HasMatCoefficient)
 
 TEST_F(CheckPropertyMap, GetMatCoefficient)
 {
-  platypus::MatrixMap prop_map(_matrix_manager);
+  MooseMFEM::MatrixMap prop_map(_matrix_manager);
   prop_map.addProperty(
       "resistivity",
       std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
@@ -152,7 +152,7 @@ TEST_F(CheckPropertyMap, GetMatCoefficient)
 
 TEST_F(CheckPropertyMap, GetPWMatCoefficient)
 {
-  platypus::MatrixMap prop_map(_matrix_manager);
+  MooseMFEM::MatrixMap prop_map(_matrix_manager);
   prop_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
@@ -193,7 +193,7 @@ TEST_F(CheckPropertyMap, GetPWMatCoefficient)
 
 TEST_F(CheckPropertyMap, CoefficientDefinedOnBlock)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addPiecewiseBlocks("a", std::make_shared<mfem::ConstantCoefficient>(2.), {"1", "2"});
   prop_map.addProperty("b", std::make_unique<mfem::ConstantCoefficient>(5.));
   EXPECT_TRUE(prop_map.coefficientDefinedOnBlock("a", "1"));
@@ -210,7 +210,7 @@ TEST_F(CheckPropertyMap, CoefficientDefinedOnBlock)
 
 TEST_F(CheckPropertyMap, OverwriteProperty)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addProperty("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
   EXPECT_THROW(prop_map.addProperty("resistivity", std::make_unique<mfem::ConstantCoefficient>(4.)),
                MooseException);
@@ -218,13 +218,13 @@ TEST_F(CheckPropertyMap, OverwriteProperty)
 
 TEST_F(CheckPropertyMap, PropertyNotDeclared)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   EXPECT_THROW(prop_map.getCoefficient("NotDeclared"), MooseException);
 }
 
 TEST_F(CheckPropertyMap, AddBlocksForUniformProperty)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addProperty("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
   EXPECT_THROW(prop_map.addPiecewiseBlocks(
                    "resistivity", std::make_shared<mfem::ConstantCoefficient>(1.), {"1", "2"}),
@@ -233,7 +233,7 @@ TEST_F(CheckPropertyMap, AddBlocksForUniformProperty)
 
 TEST_F(CheckPropertyMap, OverwriteBlocks)
 {
-  platypus::ScalarMap prop_map(_scalar_manager);
+  MooseMFEM::ScalarMap prop_map(_scalar_manager);
   prop_map.addPiecewiseBlocks(
       "resistivity", std::make_shared<mfem::ConstantCoefficient>(2.), {"2", "3"});
   EXPECT_THROW(prop_map.addPiecewiseBlocks(
@@ -243,7 +243,7 @@ TEST_F(CheckPropertyMap, OverwriteBlocks)
 
 TEST_F(CheckPropertyMap, DifferentVecSize)
 {
-  platypus::VectorMap prop_map(_vector_manager);
+  MooseMFEM::VectorMap prop_map(_vector_manager);
   prop_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
@@ -256,7 +256,7 @@ TEST_F(CheckPropertyMap, DifferentVecSize)
 
 TEST_F(CheckPropertyMap, DifferentMatSize)
 {
-  platypus::MatrixMap prop_map(_matrix_manager);
+  MooseMFEM::MatrixMap prop_map(_matrix_manager);
   prop_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),

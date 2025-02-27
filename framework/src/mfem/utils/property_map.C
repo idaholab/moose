@@ -2,7 +2,7 @@
 
 #include <property_map.h>
 
-namespace platypus
+namespace MooseMFEM
 {
 template <>
 VectorMap::PWData

@@ -23,7 +23,7 @@ void
 MFEMSuperLU::constructSolver(const InputParameters &)
 {
   _solver =
-      std::make_shared<platypus::SuperLUSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+      std::make_shared<MooseMFEM::SuperLUSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 }
 
 #endif
