@@ -2,7 +2,7 @@
 
 #pragma once
 #include "MFEMExecutioner.h"
-#include "time_domain_equation_system_problem_operator.h"
+#include "TimeDomainProblemOperator.h"
 
 class MFEMTransient : public MFEMExecutioner
 {

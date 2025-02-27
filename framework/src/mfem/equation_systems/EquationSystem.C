@@ -1,6 +1,6 @@
 #ifdef MFEM_ENABLED
 
-#include "equation_system.h"
+#include "EquationSystem.h"
 #include "libmesh/int_range.h"
 
 namespace MooseMFEM

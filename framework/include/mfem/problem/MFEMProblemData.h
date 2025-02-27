@@ -1,7 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "equation_system.h"
+#include "EquationSystem.h"
 #include "MFEMContainers.h"
 #include "ObjectManager.h"
 #include "PropertyManager.h"

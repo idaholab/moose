@@ -1,9 +1,8 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "problem_operator.h"
-#include "problem_operator_interface.h"
-#include "equation_system_interface.h"
+#include "ProblemOperator.h"
+#include "EquationSystemInterface.h"
 
 namespace MooseMFEM
 {

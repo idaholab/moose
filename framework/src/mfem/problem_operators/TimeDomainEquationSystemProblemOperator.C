@@ -1,6 +1,6 @@
 #ifdef MFEM_ENABLED
 
-#include "time_domain_equation_system_problem_operator.h"
+#include "TimeDomainEquationSystemProblemOperator.h"
 
 namespace MooseMFEM
 {

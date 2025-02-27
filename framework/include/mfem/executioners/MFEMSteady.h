@@ -2,7 +2,7 @@
 
 #pragma once
 #include "MFEMExecutioner.h"
-#include "equation_system_problem_operator.h"
+#include "EquationSystemProblemOperator.h"
 
 class MFEMSteady : public MFEMExecutioner
 {

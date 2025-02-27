@@ -2,6 +2,7 @@
 
 #include "MFEMTransient.h"
 #include "MFEMProblem.h"
+#include "TimeDomainEquationSystemProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
 
