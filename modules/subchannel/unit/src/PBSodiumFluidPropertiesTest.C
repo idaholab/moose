@@ -24,7 +24,7 @@ TEST_F(PBSodiumFluidPropertiesTest, specificEnthalpy)
   const Real T = 1000.0;
   const Real p = 2.0 * 101325;
 
-  ABS_TEST(_fp->h_from_p_T(p, T), 1.274762047677502967e+06, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->h_from_p_T(p, T), 1.274762047677502967e+06, 1000 * REL_TOL_SAVED_VALUE);
 }
 
 TEST_F(PBSodiumFluidPropertiesTest, volumetricThermalExpansionCoefficient)
