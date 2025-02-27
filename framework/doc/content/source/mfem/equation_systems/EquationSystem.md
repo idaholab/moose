@@ -4,8 +4,8 @@ The EquationSystem is responsible for defining and assembling the weak form of t
 [`mfem::Operator`](https://docs.mfem.org/html/classmfem_1_1Operator.html) used to solve an iteration
 of the FE problem. This operator is passed to an
 [`mfem::NewtonSolver`](https://docs.mfem.org/html/classmfem_1_1NewtonSolver.html) in a
-[ProblemOperator](source/problem_operators/problem_operator.md), which handles the update of the
-state of all variables (including any required nonlinear iterations).  
+[ProblemOperator](source/problem_operators/ProblemOperator.md), which handles the update of the
+state of all variables (including any required nonlinear iterations).
 
 !equation
 {\left(\mathcal{L}(u), v\right)_{\Omega}=\left(f,v\right)_{\Omega}\,\,\,\forall v \in V}
