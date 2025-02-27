@@ -22,7 +22,7 @@ public:
   MomentumFreeSlipBC(const InputParameters & parameters);
   virtual ~MomentumFreeSlipBC();
 
-  virtual bool shouldApply() override;
+  virtual bool shouldApply() const override;
   virtual void computeResidual() override;
 
 protected:

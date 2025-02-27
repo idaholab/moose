@@ -24,7 +24,7 @@ public:
   RBMPresetOldValuePD(const InputParameters & parameters);
 
   virtual Real computeQpValue() override;
-  virtual bool shouldApply() override;
+  virtual bool shouldApply() const override;
 
 protected:
   /// Peridynamic mesh

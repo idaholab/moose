@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#29360'
+  design = 'syntax/MeshModifiers/index.md'
+  [integrated_bc_no_longer_near_domain]
+    type = Exodiff
+    input = 'var_block_id.i'
+    exodiff = 'var_block_id_out.e-s002'
+    requirement = 'The system shall be able to define integrated boundary conditions and skip their execution when the variable no longer touches the boundary.'
+  []
+  [error]
+    type = RunException
+    input = 'var_block_id.i'
+    cli_args= 'BCs/neum/skip_execution_outside_variable_domain=false'
+    requirement = 'The system shall error in debug mode if an integrated boundary condition is being executed outside the domain of definition of variable, without explicitly allowing this.'
+    expect_err = "This boundary condition is being executed outside the domain of definition of its variable"
+    method = 'dbg'
+  []
+[]
