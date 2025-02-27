@@ -10,6 +10,7 @@
 #include "TriSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 #include "TriSubChannelMesh.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", TriSubChannel1PhaseProblem);
 
