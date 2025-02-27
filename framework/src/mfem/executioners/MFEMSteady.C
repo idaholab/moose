@@ -27,7 +27,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 void
 MFEMSteady::constructProblemOperator()
 {
-  _problem_data._eqn_system = std::make_shared<MooseMFEM::EquationSystem>();
+  _problem_data.eqn_system = std::make_shared<MooseMFEM::EquationSystem>();
   auto problem_operator = std::make_unique<MooseMFEM::EquationSystemProblemOperator>(_problem_data);
 
   _problem_operator.reset();
@@ -41,14 +41,14 @@ MFEMSteady::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _problem_data._eqn_system->Init(
-      _problem_data._gridfunctions,
-      _problem_data._fespaces,
-      _problem_data._bc_map,
+  _problem_data.eqn_system->Init(
+      _problem_data.gridfunctions,
+      _problem_data.fespaces,
+      _problem_data.bc_map,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_problem_data._f);
+  _problem_operator->Init(_problem_data.f);
 }
 
 void
@@ -75,9 +75,7 @@ MFEMSteady::execute()
 
   // Solve equation system.
   if (_mfem_problem.shouldSolve())
-  {
-    _problem_operator->Solve(_problem_data._f);
-  }
+    _problem_operator->Solve(_problem_data.f);
 
   // Displace mesh, if required
   _mfem_problem.displaceMesh();
