@@ -11,6 +11,15 @@
       recover = false
       detail = "within an input polyline"
     []
+    [id_name_assignment]
+      type = 'Exodiff'
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = 'Mesh/triang/output_subdomain_id=99 Mesh/triang/output_subdomain_name=ablock --mesh-only xydelaunay_mesh_generator_with_name.e'
+      exodiff = 'xydelaunay_mesh_generator_with_name.e'
+      recover = false
+      exodiff_opts = '-pedantic'
+      detail = "allowing users to assign subdomain id and names for the triangulated area"
+    []
     [open_line]
       type = 'RunException'
       input = 'xydelaunay_open_polyline.i'
