@@ -11,12 +11,12 @@
  * [FESpaces]
  * []
  */
-class AddFESpaceAction : public MooseObjectAction
+class AddMFEMFESpaceAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddFESpaceAction(const InputParameters & parameters);
+  AddMFEMFESpaceAction(const InputParameters & parameters);
 
   virtual void act() override;
 };
