@@ -1,6 +1,6 @@
 #ifdef MFEM_ENABLED
 
-#include "boundary_conditions.h"
+#include "MFEMBoundaryConditionUtils.h"
 
 namespace platypus
 {
