@@ -166,15 +166,6 @@ cp_d = 1
   []
 []
 
-[AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
-[]
-
 [Postprocessors]
   [average_void]
     type = ElementAverageValue
