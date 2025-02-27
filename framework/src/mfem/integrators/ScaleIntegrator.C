@@ -2,7 +2,7 @@
 
 #include "ScaleIntegrator.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 
 void
@@ -118,6 +118,6 @@ ScaleIntegrator::~ScaleIntegrator()
     delete _integrator;
 }
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

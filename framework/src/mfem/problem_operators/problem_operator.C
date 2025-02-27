@@ -2,7 +2,7 @@
 
 #include "problem_operator.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 
 void
@@ -12,6 +12,6 @@ ProblemOperator::SetGridFunctions()
   width = height = _block_true_offsets[_trial_variables.size()];
 };
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

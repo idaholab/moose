@@ -7,7 +7,7 @@
 #include "MFEMProblemData.h"
 #include "problem_operator_interface.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 std::vector<std::string> GetTimeDerivativeNames(std::vector<std::string> gridfunction_names);
 
@@ -25,6 +25,6 @@ public:
   void ImplicitSolve(const double, const mfem::Vector &, mfem::Vector &) override {}
 };
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

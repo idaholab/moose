@@ -16,7 +16,7 @@ MFEMTimeDerivativeMassKernel::validParams()
 }
 
 MFEMTimeDerivativeMassKernel::MFEMTimeDerivativeMassKernel(const InputParameters & parameters)
-  : MFEMMassKernel(parameters), _var_dot_name(platypus::GetTimeDerivativeName(_test_var_name))
+  : MFEMMassKernel(parameters), _var_dot_name(MooseMFEM::GetTimeDerivativeName(_test_var_name))
 {
 }
 

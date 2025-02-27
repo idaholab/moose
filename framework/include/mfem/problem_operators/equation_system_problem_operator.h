@@ -5,7 +5,7 @@
 #include "problem_operator_interface.h"
 #include "equation_system_interface.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 /// Steady-state problem operator with an equation system.
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
@@ -22,7 +22,7 @@ public:
 
   ~EquationSystemProblemOperator() override = default;
 
-  [[nodiscard]] platypus::EquationSystem * GetEquationSystem() const override
+  [[nodiscard]] MooseMFEM::EquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -33,9 +33,9 @@ public:
   }
 
 private:
-  std::shared_ptr<platypus::EquationSystem> _equation_system{nullptr};
+  std::shared_ptr<MooseMFEM::EquationSystem> _equation_system{nullptr};
 };
 
-} // namespace platypus
+} // namespace MooseMFEM
 
 #endif

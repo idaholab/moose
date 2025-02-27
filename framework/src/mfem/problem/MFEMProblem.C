@@ -137,7 +137,7 @@ MFEMProblem::addVariable(const std::string & var_type,
   // GridFunctions for time derivatives.
   if (isTransient())
   {
-    addGridFunction(var_type, platypus::GetTimeDerivativeName(var_name), parameters);
+    addGridFunction(var_type, MooseMFEM::GetTimeDerivativeName(var_name), parameters);
   }
 }
 

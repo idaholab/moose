@@ -17,23 +17,23 @@ public:
   virtual ~MFEMProblemData() { _ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
-  platypus::ScalarCoefficientManager _scalar_manager;
-  platypus::VectorCoefficientManager _vector_manager;
-  platypus::MatrixCoefficientManager _matrix_manager;
-  platypus::PropertyManager _properties{_scalar_manager, _vector_manager, _matrix_manager};
-  platypus::BCMap _bc_map;
+  MooseMFEM::ScalarCoefficientManager _scalar_manager;
+  MooseMFEM::VectorCoefficientManager _vector_manager;
+  MooseMFEM::MatrixCoefficientManager _matrix_manager;
+  MooseMFEM::PropertyManager _properties{_scalar_manager, _vector_manager, _matrix_manager};
+  MooseMFEM::BCMap _bc_map;
 
   std::unique_ptr<mfem::ODESolver> _ode_solver{nullptr};
   mfem::BlockVector _f;
 
-  std::shared_ptr<platypus::EquationSystem> _eqn_system{nullptr};
+  std::shared_ptr<MooseMFEM::EquationSystem> _eqn_system{nullptr};
   std::shared_ptr<mfem::Solver> _jacobian_preconditioner{nullptr};
   std::shared_ptr<mfem::Solver> _jacobian_solver{nullptr};
   std::shared_ptr<mfem::NewtonSolver> _nonlinear_solver{nullptr};
 
-  platypus::FECollections _fecs;
-  platypus::FESpaces _fespaces;
-  platypus::GridFunctions _gridfunctions;
+  MooseMFEM::FECollections _fecs;
+  MooseMFEM::FESpaces _fespaces;
+  MooseMFEM::GridFunctions _gridfunctions;
 
   MPI_Comm _comm;
   int _myid;

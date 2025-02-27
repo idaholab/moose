@@ -6,7 +6,7 @@
 #include "MFEMContainers.h"
 #include "Function.h"
 
-namespace platypus
+namespace MooseMFEM
 {
 class BCMap;
 }
@@ -32,7 +32,7 @@ protected:
 private:
   mfem::Array<int> _bdr_markers;
 
-  friend class platypus::BCMap;
+  friend class MooseMFEM::BCMap;
 };
 
 #endif
