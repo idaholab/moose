@@ -98,8 +98,7 @@ LinearWCNSFV2PMomentumDriftFlux::computeFlux()
 
   Real face_rho_fd;
   if (on_boundary)
-    face_rho_fd = _rho_d(makeCDFace(*_current_face_info), state) *
-                  _f_d(makeCDFace(*_current_face_info), state);
+    face_rho_fd = _rho_d(face_arg, state) * _f_d(face_arg, state);
   else
   {
     const auto elem_arg = makeElemArg(_current_face_info->elemPtr());
@@ -133,7 +132,7 @@ LinearWCNSFV2PMomentumDriftFlux::computeNeighborMatrixContribution()
   if (std::abs(u_old) > 1e-6)
     return _velocity_interp_coeffs.second * _face_flux / u_old * _current_face_area;
   else
-    // place term on RHS is u_old is too close to 0
+    // place term on RHS if u_old is too close to 0
     return 0.;
 }
 
@@ -146,7 +145,7 @@ LinearWCNSFV2PMomentumDriftFlux::computeElemRightHandSideContribution()
   if (std::abs(u_old) > 1e-6)
     return _velocity_interp_coeffs.first * _face_flux * (u / u_old - 1) * _current_face_area;
   else
-    return _face_flux * _current_face_area;
+    return -_face_flux * _current_face_area;
 }
 
 Real
@@ -158,7 +157,7 @@ LinearWCNSFV2PMomentumDriftFlux::computeNeighborRightHandSideContribution()
   if (std::abs(u_old) > 1e-6)
     return _velocity_interp_coeffs.second * _face_flux * (u / u_old - 1) * _current_face_area;
   else
-    return _face_flux * _current_face_area;
+    return -_face_flux * _current_face_area;
 }
 
 Real
@@ -167,7 +166,7 @@ LinearWCNSFV2PMomentumDriftFlux::computeBoundaryRHSContribution(
 {
   // Lagging the whole term for now
   // TODO: make sure this only gets called once, and not once per BC
-  return _face_flux * _current_face_area;
+  return -_face_flux * _current_face_area;
 }
 
 void
