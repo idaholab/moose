@@ -14,7 +14,7 @@
 class WCNSLinearFVFluidHeatTransferPhysics;
 
 /**
- * Creates all the objects needed to solve the mixture terms for the weakly-compressible
+ * Creates all the objects needed to solve the mixture model for the weakly-compressible
  * and incompressible two-phase equations.
  * Can also add a phase transport equation
  */
@@ -53,13 +53,13 @@ private:
   /// Name of the second phase fraction (usually, dispersed or advected by the liquid)
   const MooseFunctorName _phase_2_fraction_name;
 
-  /// Name of the density of the other phase
+  /// Name of the density of the first phase
   const MooseFunctorName _phase_1_density;
-  /// Name of the dynamic viscosity of the other phase
+  /// Name of the dynamic viscosity of the first phase
   const MooseFunctorName _phase_1_viscosity;
-  /// Name of the specific heat of the other phase
+  /// Name of the specific heat of the first phase
   const MooseFunctorName _phase_1_specific_heat;
-  /// Name of the thermal conductivity of the other phase
+  /// Name of the thermal conductivity of the first phase
   const MooseFunctorName _phase_1_thermal_conductivity;
 
   /// Name of the density of the other phase
