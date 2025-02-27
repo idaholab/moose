@@ -160,7 +160,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & para
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 {
-  // Re-create the phase interface term from existing kernels
+  // Recreate the phase interface term from existing kernels
   {
     auto params = getFactory().getValidParams("LinearFVReaction");
     assignBlocks(params, _blocks);
