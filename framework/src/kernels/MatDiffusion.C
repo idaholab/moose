@@ -16,7 +16,7 @@ template <bool is_ad>
 InputParameters
 MatDiffusionTempl<is_ad>::validParams()
 {
-  InputParameters params = MatDiffusionBaseTempl<Real, is_ad>::validParams();
+  InputParameters params = MatDiffusionBaseParent<is_ad>::validParams();
   params.addClassDescription(
       "Diffusion equation Kernel that takes an isotropic Diffusivity from a material property");
   return params;
@@ -24,7 +24,7 @@ MatDiffusionTempl<is_ad>::validParams()
 
 template <bool is_ad>
 MatDiffusionTempl<is_ad>::MatDiffusionTempl(const InputParameters & parameters)
-  : MatDiffusionBaseTempl<Real, is_ad>(parameters)
+  : MatDiffusionBaseParent<is_ad>(parameters)
 {
 }
 
