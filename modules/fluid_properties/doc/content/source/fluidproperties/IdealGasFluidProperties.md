@@ -24,7 +24,7 @@ The specific internal energy is computed as
 !equation
 e = e_\text{ref} + c_v T \,,
 
-where $e_\text{ref}$ is a reference specific internal energy value.
+where $e_\text{ref}$ is a reference specific internal energy value (corresponding to $T = 0$).
 
 The dynamic viscosity $\mu$ and thermal conductivity $k$ are assumed constant,
 though this assumption could later be dropped.

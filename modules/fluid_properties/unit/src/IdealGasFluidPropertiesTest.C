@@ -34,18 +34,6 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   const Real k = 0.02568;
   const Real beta = 0.00254355843825512;
 
-  // const Real rho = 0.897875065343506;
-  // const Real v = 1.1137406957809;
-  // const Real e = 2.752433560975611e+05;
-  // const Real h = 3.880931320975610e+05;
-  // const Real s = 2588.90011905277;
-  // const Real c = 398.896207251962;
-  // const Real cp = 987.13756097561;
-  // const Real cv = 700.09756097561;
-  // const Real mu = 1.823000000000000e-05;
-  // const Real k = 0.02568;
-  // const Real beta = 0.00254355843825512;
-
   // Because the ideal gas equation of state is exact, we expect consistency
   // to roundoff error:
   const Real rel_tol_consistency = REL_TOL_SAVED_VALUE;

@@ -263,10 +263,6 @@ InputParameters IdealRealGasMixtureFluidProperties::validParams()
       "fp_secondary", "Name of fluid properties user object(s) for secondary vapor component(s)");
   params.addParam<Real>("_T_mix_max", 1300., "Maximum temperature of the mixture");
 
-  // This is necessary because initialize() must be called before any interface
-  // can be used (which can occur as early as initialization of variables).
-  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
-
   return params;
 }
 

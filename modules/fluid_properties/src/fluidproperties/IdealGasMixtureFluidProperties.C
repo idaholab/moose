@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IdealGasMixtureFluidProperties.h"
+#include "IdealGasFluidProperties.h"
 
 registerMooseObject("FluidPropertiesApp", IdealGasMixtureFluidProperties);
 
@@ -97,10 +98,6 @@ InputParameters IdealGasMixtureFluidProperties::validParams()
       "Name of component fluid properties user objects. The first entry should be the primary "
       "component.");
 
-  // This is necessary because initialize() must be called before any interface
-  // can be used (which can occur as early as initialization of variables).
-  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
-
   return params;
 }
 
@@ -139,6 +136,26 @@ IdealGasMixtureFluidProperties::getSecondaryFluidProperties(unsigned int i) cons
   return *_component_fps[i + 1];
 }
 
+template <typename CppType>
+std::vector<CppType>
+IdealGasMixtureFluidProperties::secondaryToAllMassFractions_templ(
+    const std::vector<CppType> & x_secondary) const
+{
+  mooseAssert(x_secondary.size() == _n_secondary_components, "Size mismatch");
+
+  CppType sum = 0;
+  for (const auto i : make_range(_n_secondary_components))
+    sum += x_secondary[i];
+
+  const CppType x_primary = 1.0 - sum;
+
+  std::vector<CppType> x;
+  x.push_back(x_primary);
+  x.insert(x.end(), x_secondary.begin(), x_secondary.end());
+
+  return x;
+}
+
 std::vector<ADReal>
 IdealGasMixtureFluidProperties::secondaryToAllMassFractions(
     const std::vector<ADReal> & x_secondary) const
@@ -153,6 +170,19 @@ IdealGasMixtureFluidProperties::secondaryToAllMassFractions(
   return secondaryToAllMassFractions_templ(x_secondary);
 }
 
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::mixtureMolarMass_templ(const std::vector<CppType> & x) const
+{
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+
+  CppType sum = 0;
+  for (const auto i : make_range(_n_components))
+    sum += x[i] / _component_fps[i]->molarMass();
+
+  return 1.0 / sum;
+}
+
 ADReal
 IdealGasMixtureFluidProperties::mixtureMolarMass(const std::vector<ADReal> & x) const
 {
@@ -165,6 +195,50 @@ IdealGasMixtureFluidProperties::mixtureMolarMass(const std::vector<Real> & x) co
   return mixtureMolarMass_templ(x);
 }
 
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio_templ(const std::vector<CppType> & x) const
+{
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+
+  CppType cp_mix = 0, cv_mix = 0;
+  for (const auto i : make_range(_n_components))
+  {
+    // cp and cv are constant due to ideal gas assumption; any (p, T) is fine:
+    cp_mix += x[i] * _component_fps[i]->cp_from_p_T(0, 0);
+    cv_mix += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
+  }
+
+  return cp_mix / cv_mix;
+}
+
+ADReal
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const std::vector<ADReal> & x) const
+{
+  return mixtureSpecificHeatRatio_templ(x);
+}
+
+Real
+IdealGasMixtureFluidProperties::mixtureSpecificHeatRatio(const std::vector<Real> & x) const
+{
+  return mixtureSpecificHeatRatio_templ(x);
+}
+
+template <typename CppType>
+std::vector<CppType>
+IdealGasMixtureFluidProperties::molarFractionsFromMassFractions_templ(
+    const std::vector<CppType> & x) const
+{
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+
+  const auto M = mixtureMolarMass(x);
+  std::vector<CppType> psi(_n_components);
+  for (const auto i : make_range(_n_components))
+    psi[i] = x[i] * M / _component_fps[i]->molarMass();
+
+  return psi;
+}
+
 std::vector<ADReal>
 IdealGasMixtureFluidProperties::molarFractionsFromMassFractions(const std::vector<ADReal> & x) const
 {
@@ -175,6 +249,18 @@ std::vector<Real>
 IdealGasMixtureFluidProperties::molarFractionsFromMassFractions(const std::vector<Real> & x) const
 {
   return molarFractionsFromMassFractions_templ(x);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::p_from_v_e_templ(const CppType & v,
+                                                 const CppType & e,
+                                                 const std::vector<CppType> & x_secondary) const
+{
+  const auto x = secondaryToAllMassFractions(x_secondary);
+  const auto M = mixtureMolarMass(x);
+
+  return _R * T_from_v_e(v, e, x_secondary) / (M * v);
 }
 
 ADReal
@@ -193,6 +279,27 @@ IdealGasMixtureFluidProperties::p_from_v_e(Real v,
   return p_from_v_e_templ(v, e, x_secondary);
 }
 
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & /*v*/,
+                                                 const CppType & e,
+                                                 const std::vector<CppType> & x_secondary) const
+{
+  const auto x = secondaryToAllMassFractions(x_secondary);
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+
+  CppType e_ref_sum = 0;
+  CppType cv_sum = 0;
+  for (const auto i : make_range(_n_components))
+  {
+    e_ref_sum += x[i] * _component_fps[i]->referenceSpecificInternalEnergy();
+    // cv is constant due to ideal gas assumption; any (p, T) is fine:
+    cv_sum += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
+  }
+
+  return (e - e_ref_sum) / cv_sum;
+}
+
 ADReal
 IdealGasMixtureFluidProperties::T_from_v_e(const ADReal & v,
                                            const ADReal & e,
@@ -207,6 +314,19 @@ IdealGasMixtureFluidProperties::T_from_v_e(Real v,
                                            const std::vector<Real> & x_secondary) const
 {
   return T_from_v_e_templ(v, e, x_secondary);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::c_from_p_T_templ(const CppType & /*p*/,
+                                                 const CppType & T,
+                                                 const std::vector<CppType> & x_secondary) const
+{
+  const auto x = secondaryToAllMassFractions(x_secondary);
+  const auto M = mixtureMolarMass(x);
+  const auto gamma = mixtureSpecificHeatRatio(x);
+
+  return std::sqrt(gamma * _R * T / M);
 }
 
 ADReal

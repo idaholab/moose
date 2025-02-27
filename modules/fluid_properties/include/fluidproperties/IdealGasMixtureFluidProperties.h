@@ -11,10 +11,6 @@
 
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
-#include "IdealGasFluidProperties.h"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 class SinglePhaseFluidProperties;
 class IdealGasFluidProperties;
@@ -61,6 +57,16 @@ public:
   std::vector<Real> secondaryToAllMassFractions(const std::vector<Real> & x_secondary) const;
 
   /**
+   * Computes the mixture specific heat ratio
+   *
+   * @param[in] x   All mass fractions
+   */
+  template <typename CppType>
+  CppType mixtureSpecificHeatRatio_templ(const std::vector<CppType> & x) const;
+  ADReal mixtureSpecificHeatRatio(const std::vector<ADReal> & x) const;
+  Real mixtureSpecificHeatRatio(const std::vector<Real> & x) const;
+
+  /**
    * Computes the mixture molar mass
    *
    * @param[in] x   All mass fractions
@@ -104,97 +110,3 @@ protected:
   /// Component fluid properties objects
   std::vector<const IdealGasFluidProperties *> _component_fps;
 };
-
-#pragma GCC diagnostic pop
-
-template <typename CppType>
-std::vector<CppType>
-IdealGasMixtureFluidProperties::secondaryToAllMassFractions_templ(
-    const std::vector<CppType> & x_secondary) const
-{
-  mooseAssert(x_secondary.size() == _n_secondary_components, "Size mismatch");
-
-  CppType sum = 0;
-  for (const auto i : make_range(_n_secondary_components))
-    sum += x_secondary[i];
-
-  const CppType x_primary = 1.0 - sum;
-
-  std::vector<CppType> x;
-  x.push_back(x_primary);
-  x.insert(x.end(), x_secondary.begin(), x_secondary.end());
-
-  return x;
-}
-
-template <typename CppType>
-CppType
-IdealGasMixtureFluidProperties::mixtureMolarMass_templ(const std::vector<CppType> & x) const
-{
-  mooseAssert(x.size() == _n_components, "Size mismatch");
-
-  CppType sum = 0;
-  for (const auto i : make_range(_n_components))
-    sum += x[i] / _component_fps[i]->molarMass();
-
-  return 1.0 / sum;
-}
-
-template <typename CppType>
-std::vector<CppType>
-IdealGasMixtureFluidProperties::molarFractionsFromMassFractions_templ(
-    const std::vector<CppType> & x) const
-{
-  mooseAssert(x.size() == _n_components, "Size mismatch");
-
-  const auto M = mixtureMolarMass(x);
-  std::vector<CppType> psi(_n_components);
-  for (const auto i : make_range(_n_components))
-    psi[i] = x[i] * M / _component_fps[i]->molarMass();
-
-  return psi;
-}
-
-template <typename CppType>
-CppType
-IdealGasMixtureFluidProperties::p_from_v_e_templ(const CppType & v,
-                                                 const CppType & e,
-                                                 const std::vector<CppType> & x_secondary) const
-{
-  const auto x = secondaryToAllMassFractions(x_secondary);
-  const auto M = mixtureMolarMass(x);
-
-  return _R * T_from_v_e(v, e, x_secondary) / (M * v);
-}
-
-template <typename CppType>
-CppType
-IdealGasMixtureFluidProperties::T_from_v_e_templ(const CppType & /*v*/,
-                                                 const CppType & e,
-                                                 const std::vector<CppType> & x_secondary) const
-{
-  const auto x = secondaryToAllMassFractions(x_secondary);
-  mooseAssert(x.size() == _n_components, "Size mismatch");
-
-  CppType e_ref_sum = 0;
-  CppType cv_sum = 0;
-  for (const auto i : make_range(_n_components))
-  {
-    e_ref_sum += x[i] * _component_fps[i]->referenceSpecificInternalEnergy();
-    cv_sum += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
-  }
-
-  return (e - e_ref_sum) / cv_sum;
-}
-
-template <typename CppType>
-CppType
-IdealGasMixtureFluidProperties::c_from_p_T_templ(const CppType & /*p*/,
-                                                 const CppType & T,
-                                                 const std::vector<CppType> & x_secondary) const
-{
-  const auto x = secondaryToAllMassFractions(x_secondary);
-  const auto M = mixtureMolarMass(x);
-
-  return std::sqrt(_R * T / M);
-}

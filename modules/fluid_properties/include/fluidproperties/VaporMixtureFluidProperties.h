@@ -129,7 +129,7 @@ public:
   propfunc(T, v, e)
   propfunc(c, v, e)
   propfunc(v, p, T)
-  propfunc(rho, p, T) // TODO: deprecate this one in favor of v(p,T)
+  propfunc(rho, p, T)
   propfunc(e, p, T)
   propfunc(s, p, T)
   propfunc(c, p, T)
