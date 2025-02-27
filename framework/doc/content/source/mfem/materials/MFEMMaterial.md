@@ -16,7 +16,7 @@ manner consistent with the standard MOOSE Materials system.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/diffusion.i block=Materials
+!listing test/tests/mfem/kernels/diffusion.i block=Materials
 
 !syntax parameters /Materials/MFEMMaterial
 

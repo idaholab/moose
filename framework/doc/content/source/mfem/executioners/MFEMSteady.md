@@ -12,7 +12,7 @@ level to use during problem set-up and solution can be selected.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/diffusion.i block=Executioner
+!listing test/tests/mfem/kernels/diffusion.i block=Executioner
 
 !syntax parameters /Executioner/MFEMSteady
 

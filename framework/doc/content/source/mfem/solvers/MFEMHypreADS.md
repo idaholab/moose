@@ -13,7 +13,7 @@ Raviart-Thomas elements, in which case the $H(\mathrm{div})$ FE space should be 
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/graddiv.i block=FESpace Preconditioner Solver
+!listing test/tests/mfem/kernels/graddiv.i block=FESpace Preconditioner Solver
 
 !syntax parameters /Solver/MFEMHypreADS
 

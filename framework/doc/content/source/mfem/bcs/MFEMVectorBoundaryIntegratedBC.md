@@ -15,7 +15,7 @@ where $\vec v \in \vec H^1$ and $\vec f$ is a constant vector of the same dimens
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/linearelasticity.i block=BCs
+!listing test/tests/mfem/kernels/linearelasticity.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorBoundaryIntegratedBC
 

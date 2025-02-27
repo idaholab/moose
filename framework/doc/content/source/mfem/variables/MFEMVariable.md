@@ -14,12 +14,12 @@ respect to the same `MFEMFESpace`.
 
 Preferentially, users should create an  `MFEMVariable` with respect to an `MFEMFESpace`:
 
-!listing test/tests/kernels/diffusion.i block=Problem FESpaces Variables
+!listing test/tests/mfem/kernels/diffusion.i block=Problem FESpaces Variables
 
 However, if a user creates a MOOSE variable in an `MFEMProblem`, then Platypus should automatically
 create the corresponding `MFEMFESpace` and `MFEMVariable` for that type:
 
-!listing test/tests/variables/mfem_variables_from_moose.i block=Problem Variables
+!listing test/tests/mfem/variables/mfem_variables_from_moose.i block=Problem Variables
 
 !syntax parameters /Variables/MFEMVariable
 

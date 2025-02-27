@@ -12,7 +12,7 @@ output fields is desired.
 
 ## Example Input File Syntax
 
-!listing test/tests/outputs/datacollections.i block=Outputs/VisItDataCollection
+!listing test/tests/mfem/outputs/datacollections.i block=Outputs/VisItDataCollection
 
 !syntax parameters /Outputs/MFEMVisItDataCollection
 

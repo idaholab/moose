@@ -11,7 +11,7 @@ vector $H^1$ conforming variable on the boundary. The boundary value is a functi
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/linearelasticity.i block=BCs
+!listing test/tests/mfem/kernels/linearelasticity.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorFunctionDirichletBC
 

@@ -16,4 +16,4 @@ Child classes should override the `getDataCollection()` method to return a refer
 
 ## Example Input File Syntax
 
-!listing test/tests/outputs/datacollections.i block=Outputs
+!listing test/tests/mfem/outputs/datacollections.i block=Outputs
