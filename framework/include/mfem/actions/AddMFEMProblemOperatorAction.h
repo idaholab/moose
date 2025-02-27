@@ -8,12 +8,12 @@
  * This class implements the action controlling the construction of the
  * required MFEM ProblemOperator.
  */
-class AddProblemOperatorAction : public Action
+class AddMFEMProblemOperatorAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  AddProblemOperatorAction(const InputParameters & parameters);
+  AddMFEMProblemOperatorAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

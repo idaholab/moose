@@ -1,24 +1,24 @@
 #ifdef MFEM_ENABLED
 
-#include "AddFESpaceAction.h"
+#include "AddMFEMFESpaceAction.h"
 
-registerMooseAction("MooseApp", AddFESpaceAction, "add_mfem_fespaces");
+registerMooseAction("MooseApp", AddMFEMFESpaceAction, "add_mfem_fespaces");
 
 InputParameters
-AddFESpaceAction::validParams()
+AddMFEMFESpaceAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Add a MFEM FESpace object to the simulation.");
   return params;
 }
 
-AddFESpaceAction::AddFESpaceAction(const InputParameters & parameters)
+AddMFEMFESpaceAction::AddMFEMFESpaceAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }
 
 void
-AddFESpaceAction::act()
+AddMFEMFESpaceAction::act()
 {
   MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
   if (mfem_problem)
