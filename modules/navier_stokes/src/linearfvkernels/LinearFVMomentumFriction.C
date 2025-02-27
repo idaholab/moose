@@ -17,11 +17,10 @@ InputParameters
 LinearFVMomentumFriction::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
-  params.addClassDescription(
-      "Computes a friction force term on fluid in porous media in the "
-      "Navier Stokes i-th momentum equation in Rhie-Chow (incompressible) contexts.");
+  params.addClassDescription("Computes a Darcy friction force term on fluid in the "
+                             "Navier Stokes i-th momentum equation.");
   params.addParam<MooseFunctorName>("Darcy_name", "Name of the Darcy coefficients property.");
-  params.addParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
 
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -36,38 +35,9 @@ LinearFVMomentumFriction::LinearFVMomentumFriction(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _D(isParamValid("Darcy_name") ? &getFunctor<RealVectorValue>("Darcy_name") : nullptr),
-    _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _mu(isParamValid(NS::mu) ? &getFunctor<Real>(NS::mu) : nullptr)
 {
-  if (!_use_Darcy_friction_model)
-    mooseError("At least one friction model needs to be specified.");
-
-  if (_use_Darcy_friction_model && !_mu)
-    mooseError("If using the standard Darcy friction model, then the '",
-               NS::mu,
-               "' parameter must be provided");
 }
-
-// We are going to follow the formulations in
-// https://holzmann-cfd.com/community/blog-and-tools/darcy-forchheimer and
-// https://www.simscale.com/knowledge-base/predict-darcy-and-forchheimer-coefficients-for-perforated-plates-using-analytical-approach/
-// for Darcy and Forchheimer which define:
-//
-// \nabla p = \mu D v + \frac{\rho}{2} F |v| v
-//
-// where v denotes the superficial velocity.
-// Both monolithic and segregated solves get multiplied by v in the gatherRCData and
-// computeSegregatedContribution methods respectively, it is the job of the
-// computeFrictionWCoefficient method to compute, for the Darcy term:
-//
-// \mu D
-//
-// and for the Forchheimer term (not implemented yet)
-//
-// \frac{\rho}{2} F |v|
-//
-// For the non standard formulation we define :
-// \nabla p = D v + F |v| v
 
 Real
 LinearFVMomentumFriction::computeMatrixContribution()
@@ -87,20 +57,5 @@ Real
 LinearFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
                                                       const Moose::StateArg & state)
 {
-  // Forward declaration of the coeffcients to be used and returned by the model
-  Real coefficient = 0.0;
-  Real mu = 0.0;
-
-  /// Fluid properties
-  if (_use_Darcy_friction_model)
-    mu = (*_mu)(elem_arg, state);
-
-  ////////////////////////////////////////////////////////////////////
-  ///// Switching across formulation cases
-  ////////////////////////////////////////////////////////////////////
-
-  if (_use_Darcy_friction_model)
-    coefficient += mu * (*_D)(elem_arg, state)(_index);
-
-  return coefficient;
+  return (*_mu)(elem_arg, state) * (*_D)(elem_arg, state)(_index);
 }

@@ -45,7 +45,7 @@ Phase exchange is not currently supported in the linear finite volume discretiza
 ## Mixture fluid properties id=materials
 
 The fluid properties of mixture fluids depend on the phase fraction of each phase.
-For two-phases, the properties can currently be computed with a [NSFVMixtureFunctorMaterial.md].
+For two phases, the properties can currently be computed with a [NSFVMixtureFunctorMaterial.md].
 This material is defined by default by the `WCNSLinearFVTwoPhaseMixturePhysics` unless the
 [!param](/Physics/NavierStokes/TwoPhaseMixtureSegregated/WCNSLinearFVTwoPhaseMixturePhysics/use_external_mixture_properties)
 is set to true.

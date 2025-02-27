@@ -30,8 +30,6 @@ protected:
 
   /// Darcy coefficient
   const Moose::Functor<RealVectorValue> * const _D;
-  /// Booleans to select the right models
-  const bool _use_Darcy_friction_model;
 
   /// Dynamic viscosity
   const Moose::Functor<Real> * const _mu;

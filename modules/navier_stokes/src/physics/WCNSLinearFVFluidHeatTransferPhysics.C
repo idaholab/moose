@@ -213,7 +213,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("source_density") =
       getParam<MooseFunctorName>("external_heat_source");
-  params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
+  params.set<MooseFunctorName>("scaling_factor") =
+      std::to_string(getParam<Real>("external_heat_source_coeff"));
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
 }
