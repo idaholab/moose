@@ -2,8 +2,6 @@
 
 The `SolutionInvalidityOutput` handles the output of the time history of solution invalidity object.
 
-!syntax description /Outputs/SolutionInvalidityOutput
-
 ## Description
 
 The easiest way to print out the `SolutionInvalidityOutput` is simply to add `solution_invalidity_history = true` to your `[Outputs]` block like so:
@@ -41,6 +39,7 @@ If you want to custimized the time interval, you can create a sub-block in `[Out
 []
 ```
 The new solution warning table is as below:
+
 ```
 Solution Invalid Warnings History:
 -----------------------------------------------------------------------------------------
@@ -51,7 +50,9 @@ Solution Invalid Warnings History:
 | NonsafeMaterial : Solution invalid warning! | 2-4  |                 96 |         240 |
 -----------------------------------------------------------------------------------------
 ```
-!alert no table will be output when there are no invalid solution warnings.
+
+!alert note
+No table will be output when there are no invalid solution warnings.
 
 
 
