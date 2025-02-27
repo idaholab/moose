@@ -1,6 +1,6 @@
 #ifdef MFEM_ENABLED
 
-#include "problem_operator.h"
+#include "ProblemOperator.h"
 
 namespace MooseMFEM
 {

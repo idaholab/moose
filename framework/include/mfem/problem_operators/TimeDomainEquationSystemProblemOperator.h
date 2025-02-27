@@ -1,12 +1,8 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "libmesh/ignore_warnings.h"
-#include "mfem/miniapps/common/pfem_extras.hpp"
-#include "libmesh/restore_warnings.h"
-#include "time_domain_problem_operator.h"
-#include "problem_operator_interface.h"
-#include "equation_system_interface.h"
+#include "TimeDomainProblemOperator.h"
+#include "EquationSystemInterface.h"
 
 namespace MooseMFEM
 {
