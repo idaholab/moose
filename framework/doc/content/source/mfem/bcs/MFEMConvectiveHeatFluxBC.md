@@ -24,7 +24,7 @@ for the temperature, $v=T'$ as the test variable, and $u_0=T_{inf}$ as the equil
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/heattransfer.i block=BCs
+!listing test/tests/mfem/kernels/heattransfer.i block=BCs
 
 !syntax parameters /BCs/MFEMConvectiveHeatFluxBC
 

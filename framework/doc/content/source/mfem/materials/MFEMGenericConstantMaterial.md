@@ -13,7 +13,7 @@ entire mesh if missing. The scalar material properties are named according to me
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/heatconduction.i block=Materials
+!listing test/tests/mfem/kernels/heatconduction.i block=Materials
 
 !syntax parameters /Materials/MFEMGenericConstantMaterial
 

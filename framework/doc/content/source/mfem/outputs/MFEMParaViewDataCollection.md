@@ -16,7 +16,7 @@ BINARY VTK format.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/diffusion.i block=Outputs
+!listing test/tests/mfem/kernels/diffusion.i block=Outputs
 
 !syntax parameters /Outputs/MFEMParaViewDataCollection
 

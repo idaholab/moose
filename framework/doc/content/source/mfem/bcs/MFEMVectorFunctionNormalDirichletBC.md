@@ -12,7 +12,7 @@ a function of space and/or time.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/graddiv.i block=BCs
+!listing test/tests/mfem/kernels/graddiv.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorFunctionNormalDirichletBC
 

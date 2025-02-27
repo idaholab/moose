@@ -12,6 +12,6 @@ the `Problem` type is set to [`MFEMProblem`](source/problem/MFEMProblem.md).
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/curlcurl.i block=Problem FESpaces Preconditioner
+!listing test/tests/mfem/kernels/curlcurl.i block=Problem FESpaces Preconditioner
 
 !syntax parameters /Preconditioner/AddMFEMPreconditionerAction

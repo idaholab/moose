@@ -15,4 +15,4 @@ and the `displacement` field is set.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/linearelasticity.i block=Mesh
+!listing test/tests/mfem/kernels/linearelasticity.i block=Mesh

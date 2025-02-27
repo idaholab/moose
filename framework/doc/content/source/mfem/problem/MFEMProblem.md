@@ -21,7 +21,7 @@ The order in which these actions are executed respects the dependencies declared
 In order to build the FE problem using the MFEM library on the backend, the `MFEMProblem` type must
  be used in `Problem` block in the user input.
 
-!listing test/tests/kernels/diffusion.i block=Problem
+!listing test/tests/mfem/kernels/diffusion.i block=Problem
 
 !syntax parameters /Problem/MFEMProblem
 

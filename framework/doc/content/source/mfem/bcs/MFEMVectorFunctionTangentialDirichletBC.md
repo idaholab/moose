@@ -12,7 +12,7 @@ a function of space and/or time.
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/curlcurl.i block=BCs
+!listing test/tests/mfem/kernels/curlcurl.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorFunctionTangentialDirichletBC
 
