@@ -92,7 +92,9 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return sum * _grad_test[_i][_qp];
 }
 
+template class MatDiffusionBase<Real>;
+template class MatDiffusionBase<RealTensorValue>;
 template class MatDiffusionBaseTempl<Real, false>;
-template class MatDiffusionBaseTempl<Real, true>;
 template class MatDiffusionBaseTempl<RealTensorValue, false>;
+template class MatDiffusionBaseTempl<Real, true>;
 template class MatDiffusionBaseTempl<RealTensorValue, true>;
