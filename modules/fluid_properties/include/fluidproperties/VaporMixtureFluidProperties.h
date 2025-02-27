@@ -208,6 +208,8 @@ protected:
   using VaporMixtureFluidProperties::T_from_v_e;                                                   \
   using VaporMixtureFluidProperties::c_from_v_e;                                                   \
   using VaporMixtureFluidProperties::rho_from_p_T;                                                 \
+  using VaporMixtureFluidProperties::v_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::s_from_p_T;                                                   \
   using VaporMixtureFluidProperties::e_from_p_T;                                                   \
   using VaporMixtureFluidProperties::c_from_p_T;                                                   \
   using VaporMixtureFluidProperties::cp_from_p_T;                                                  \
