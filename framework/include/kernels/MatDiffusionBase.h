@@ -37,18 +37,6 @@ protected:
   /// diffusion coefficient
   const GenericMaterialProperty<T, is_ad> & _diffusivity;
 
-  /// diffusion coefficient derivative w.r.t. the kernel variable
-  const MaterialProperty<T> * _ddiffusivity_dc;
-
-  /// diffusion coefficient derivatives w.r.t. coupled variables
-  std::vector<const MaterialProperty<T> *> _ddiffusivity_darg;
-
-  /// is the kernel used in a coupled form?
-  const bool _is_coupled;
-
-  /// int label for the Concentration
-  unsigned int _v_var;
-
   /// Gradient of the concentration
   const GenericVariableGradient<is_ad> & _grad_v;
 
@@ -59,6 +47,10 @@ template <typename T>
 class MatDiffusionBase : public MatDiffusionBaseTempl<T, false>
 {
 public:
+  static InputParameters validParams();
+
+  MatDiffusionBase(const InputParameters & parameters);
+
   using MatDiffusionBaseTempl<T, false>::MatDiffusionBaseTempl;
 
 protected:
@@ -67,16 +59,26 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   virtual RealGradient computeQpCJacobian();
 
+  /// diffusion coefficient derivative w.r.t. the kernel variable
+  const MaterialProperty<T> & _ddiffusivity_dc;
+
+  /// diffusion coefficient derivatives w.r.t. coupled variables
+  std::vector<const MaterialProperty<T> *> _ddiffusivity_darg;
+
+  /// is the kernel used in a coupled form?
+  const bool _is_coupled;
+
+  /// int label for the Concentration
+  unsigned int _v_var;
+
   using MatDiffusionBaseTempl<T, false>::_diffusivity;
-  using MatDiffusionBaseTempl<T, false>::_ddiffusivity_darg;
   using MatDiffusionBaseTempl<T, false>::_qp;
   using MatDiffusionBaseTempl<T, false>::_grad_phi;
   using MatDiffusionBaseTempl<T, false>::_j;
   using MatDiffusionBaseTempl<T, false>::_i;
-  using MatDiffusionBaseTempl<T, false>::_ddiffusivity_dc;
   using MatDiffusionBaseTempl<T, false>::_phi;
   using MatDiffusionBaseTempl<T, false>::_grad_v;
   using MatDiffusionBaseTempl<T, false>::_grad_test;
-  using MatDiffusionBaseTempl<T, false>::_v_var;
-  using MatDiffusionBaseTempl<T, false>::_is_coupled;
+  using MatDiffusionBaseTempl<T, false>::_var;
+  using MatDiffusionBaseTempl<T, false>::_coupled_moose_vars;
 };
