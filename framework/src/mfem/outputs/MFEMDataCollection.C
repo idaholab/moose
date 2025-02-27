@@ -20,7 +20,7 @@ void
 MFEMDataCollection::registerFields()
 {
   mfem::DataCollection & dc(getDataCollection());
-  for (auto const & [gf_name, gf_ptr] : _problem_data._gridfunctions)
+  for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
   {
     dc.RegisterField(gf_name, gf_ptr.get());
   }

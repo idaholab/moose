@@ -29,10 +29,10 @@ void
 MFEMProblem::setMesh()
 {
   auto pmesh = mesh().getMFEMParMeshPtr();
-  getProblemData()._pmesh = pmesh;
-  getProblemData()._comm = pmesh->GetComm();
-  MPI_Comm_size(pmesh->GetComm(), &(getProblemData()._num_procs));
-  MPI_Comm_rank(pmesh->GetComm(), &(getProblemData()._myid));
+  getProblemData().pmesh = pmesh;
+  getProblemData().comm = pmesh->GetComm();
+  MPI_Comm_size(pmesh->GetComm(), &(getProblemData().num_procs));
+  MPI_Comm_rank(pmesh->GetComm(), &(getProblemData().myid));
 }
 
 void
@@ -58,7 +58,7 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_preconditioner = getUserObject<MFEMSolverBase>(name);
 
-  getProblemData()._jacobian_preconditioner = mfem_preconditioner.getSolver();
+  getProblemData().jacobian_preconditioner = mfem_preconditioner.getSolver();
 }
 
 void
@@ -69,20 +69,20 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   const MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
 
-  getProblemData()._jacobian_solver = mfem_solver.getSolver();
+  getProblemData().jacobian_solver = mfem_solver.getSolver();
 }
 
 void
 MFEMProblem::addMFEMNonlinearSolver()
 {
-  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData()._comm);
+  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData().comm);
 
   // Defaults to one iteration, without further nonlinear iterations
   nl_solver->SetRelTol(0.0);
   nl_solver->SetAbsTol(0.0);
   nl_solver->SetMaxIter(1);
 
-  getProblemData()._nonlinear_solver = nl_solver;
+  getProblemData().nonlinear_solver = nl_solver;
 }
 
 void
@@ -95,13 +95,13 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   auto object_ptr = getUserObject<MFEMBoundaryCondition>(name).getSharedPtr();
   auto mfem_bc = std::dynamic_pointer_cast<MFEMBoundaryCondition>(object_ptr);
 
-  if (getProblemData()._bc_map.Has(name))
+  if (getProblemData().bc_map.Has(name))
   {
     const std::string error_message = "A boundary condition with the name " + name +
                                       " has already been added to the problem boundary conditions.";
     mfem::mfem_error(error_message.c_str());
   }
-  getProblemData()._bc_map.Register(name, std::move(mfem_bc));
+  getProblemData().bc_map.Register(name, std::move(mfem_bc));
 }
 
 void
@@ -122,8 +122,8 @@ MFEMProblem::addFESpace(const std::string & user_object_name,
   MFEMFESpace & mfem_fespace(getUserObject<MFEMFESpace>(name));
 
   // Register fespace and associated fe collection.
-  getProblemData()._fecs.Register(name, mfem_fespace.getFEC());
-  getProblemData()._fespaces.Register(name, mfem_fespace.getFESpace());
+  getProblemData().fecs.Register(name, mfem_fespace.getFEC());
+  getProblemData().fespaces.Register(name, mfem_fespace.getFESpace());
 }
 
 void
@@ -163,7 +163,7 @@ MFEMProblem::addGridFunction(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  getProblemData()._gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
 }
 
 void
@@ -425,7 +425,7 @@ MFEMProblem::getMeshDisplacementGridFunction()
   auto const displacement_variable = mesh().getMeshDisplacementVariable();
   if (displacement_variable)
   {
-    return *_problem_data._gridfunctions.Get(displacement_variable.value());
+    return *_problem_data.gridfunctions.Get(displacement_variable.value());
   }
   else
   {

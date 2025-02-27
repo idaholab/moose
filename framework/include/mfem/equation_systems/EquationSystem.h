@@ -27,26 +27,6 @@ public:
   EquationSystem() = default;
   ~EquationSystem() override;
 
-  // Test variables are associated with LinearForms,
-  // whereas trial variables are associated with gridfunctions.
-
-  // Names of all variables corresponding to gridfunctions. This may differ
-  // from test_var_names when time derivatives are present.
-  std::vector<std::string> _trial_var_names;
-  // Pointers to trial variables.
-  MooseMFEM::GridFunctions _trial_variables;
-  // Names of all test variables corresponding to linear forms in this equation
-  // system
-  std::vector<std::string> _test_var_names;
-  std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
-
-  // Components of weak form. // Named according to test variable
-  MooseMFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
-  MooseMFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  MooseMFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  MooseMFEM::NamedFieldsMap<MooseMFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
-      _mblfs; // named according to trial variable
-
   // add test variable to EquationSystem;
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
   virtual void AddTrialVariableNameIfMissing(const std::string & trial_var_name);
@@ -122,9 +102,32 @@ public:
     kernels_map.GetRef(test_var_name).push_back(std::move(kernel));
   }
 
+  const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
+  const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
+
 protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
+
+  // Test variables are associated with LinearForms,
+  // whereas trial variables are associated with gridfunctions.
+
+  // Names of all variables corresponding to gridfunctions. This may differ
+  // from test_var_names when time derivatives are present.
+  std::vector<std::string> _trial_var_names;
+  // Pointers to trial variables.
+  MooseMFEM::GridFunctions _trial_variables;
+  // Names of all test variables corresponding to linear forms in this equation
+  // system
+  std::vector<std::string> _test_var_names;
+  std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
+
+  // Components of weak form. // Named according to test variable
+  MooseMFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
+  MooseMFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
+  MooseMFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  MooseMFEM::NamedFieldsMap<MooseMFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+      _mblfs; // named according to trial variable
 
   // gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
@@ -162,13 +165,6 @@ public:
 
   virtual void SetTimeStep(double dt);
   virtual void UpdateEquationSystem(MooseMFEM::BCMap & bc_map);
-  mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
-  std::vector<std::string> _trial_var_time_derivative_names;
-
-  MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>
-      _td_blf_kernels_map;
-  // Container to store contributions to weak form of the form (F du/dt, v)
-  MooseMFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 
   virtual void AddKernel(const std::string & test_var_name,
                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel) override;
@@ -179,7 +175,24 @@ public:
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
+
+  const std::vector<std::string> & TrialVarTimeDerivativeNames() const;
+
+protected:
+  mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
+  std::vector<std::string> _trial_var_time_derivative_names;
+
+  MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>
+      _td_blf_kernels_map;
+  // Container to store contributions to weak form of the form (F du/dt, v)
+  MooseMFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 };
+
+inline const std::vector<std::string> &
+TimeDependentEquationSystem::TrialVarTimeDerivativeNames() const
+{
+  return _trial_var_time_derivative_names;
+}
 
 } // namespace MooseMFEM
 
