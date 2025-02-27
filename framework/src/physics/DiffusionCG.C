@@ -71,10 +71,6 @@ DiffusionCG::addFEKernels()
           getParam<MaterialPropertyName>("diffusivity_matprop");
     else if (isParamValid("diffusivity_functor"))
       params.set<FunctionName>("function") = getParam<MooseFunctorName>("diffusivity_functor");
-    else
-      // TODO: From components
-      params.set<MaterialPropertyName>("diffusivity") =
-          getParam<MaterialPropertyName>("diffusivity_matprop");
 
     getProblem().addKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }

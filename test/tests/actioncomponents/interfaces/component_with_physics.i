@@ -56,6 +56,7 @@
     direction = '0 0 1'
     physics = 'added_from_component'
     block = 'cyl2'
+    verbose = true
   []
 []
 
