@@ -8,12 +8,12 @@
  * This class implements the action ensuring the mesh uses the same FE space as
  * the displacement for mesh updates.
  */
-class SetMeshFESpaceAction : public Action
+class SetMFEMMeshFESpaceAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  SetMeshFESpaceAction(const InputParameters & parameters);
+  SetMFEMMeshFESpaceAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

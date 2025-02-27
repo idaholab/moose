@@ -1,8 +1,8 @@
-# AddFESpaceAction
+# AddMFEMFESpaceAction
 
 ## Summary
 
-!syntax description /FESpaces/AddFESpaceAction
+!syntax description /FESpaces/AddMFEMFESpaceAction
 
 ## Overview
 
@@ -14,4 +14,4 @@ Action called to add an MFEM finite element space to the problem, parsing conten
 
 !listing test/tests/kernels/heatconduction.i block=Problem FESpaces
 
-!syntax parameters /FESpaces/AddFESpaceAction
+!syntax parameters /FESpaces/AddMFEMFESpaceAction

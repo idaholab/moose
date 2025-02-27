@@ -1,11 +1,11 @@
 #ifdef MFEM_ENABLED
 
-#include "SetMeshFESpaceAction.h"
+#include "SetMFEMMeshFESpaceAction.h"
 
-registerMooseAction("MooseApp", SetMeshFESpaceAction, "set_mesh_fe_space");
+registerMooseAction("MooseApp", SetMFEMMeshFESpaceAction, "set_mesh_fe_space");
 
 InputParameters
-SetMeshFESpaceAction::validParams()
+SetMFEMMeshFESpaceAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Set the mesh nodal finite element space to the same as the mesh "
@@ -13,12 +13,12 @@ SetMeshFESpaceAction::validParams()
   return params;
 }
 
-SetMeshFESpaceAction::SetMeshFESpaceAction(const InputParameters & parameters) : Action(parameters)
+SetMFEMMeshFESpaceAction::SetMFEMMeshFESpaceAction(const InputParameters & parameters) : Action(parameters)
 {
 }
 
 void
-SetMeshFESpaceAction::act()
+SetMFEMMeshFESpaceAction::act()
 {
   auto * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
 

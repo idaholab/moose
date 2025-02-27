@@ -1,11 +1,11 @@
 #ifdef MFEM_ENABLED
 
-#include "AddProblemOperatorAction.h"
+#include "AddMFEMProblemOperatorAction.h"
 
-registerMooseAction("MooseApp", AddProblemOperatorAction, "add_mfem_problem_operator");
+registerMooseAction("MooseApp", AddMFEMProblemOperatorAction, "add_mfem_problem_operator");
 
 InputParameters
-AddProblemOperatorAction::validParams()
+AddMFEMProblemOperatorAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription(
@@ -13,13 +13,13 @@ AddProblemOperatorAction::validParams()
   return params;
 }
 
-AddProblemOperatorAction::AddProblemOperatorAction(const InputParameters & parameters)
+AddMFEMProblemOperatorAction::AddMFEMProblemOperatorAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }
 
 void
-AddProblemOperatorAction::act()
+AddMFEMProblemOperatorAction::act()
 {
   MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
   if (mfem_problem)

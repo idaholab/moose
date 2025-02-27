@@ -692,7 +692,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateApplicationBlockAction", "Application");
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerSyntaxTask("AddFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
+  registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif
