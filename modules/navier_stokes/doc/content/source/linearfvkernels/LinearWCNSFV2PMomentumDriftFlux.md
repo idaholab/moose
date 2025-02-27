@@ -14,7 +14,7 @@ where:
 - $\bm{v}_{slip,d}$ is the slip velocity of the dispersed phase $d$.
 
 The user can set the slip velocity from their specific calculations.
-However, we recommend the usage of [LinearWCNSFV2PSlipVelocityFunctorMaterial.md] for
+However, we recommend the usage of [WCNSFV2PSlipVelocityFunctorMaterial.md] for
 computing the slip velocity.
 
 This term can be interpreted as the extra convection that is added
