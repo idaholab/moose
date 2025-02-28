@@ -369,6 +369,16 @@
     response_scaling_factors = '1.47 1.03 2.60 3.45 2.0 1.19 1.6 2.7 1.47 2.08'
     action_scaling_factors = 1.0
 
+    filename = "control.net"
+
+    num_neurons_per_layer = '512 512'
+    activation_function = 'tanh tanh'
+
+    min_control_value = ${fparse -0.108}
+    max_control_value = ${fparse 0.108}
+
+    action_standard_deviations = '0.1'
+
     # response_scaling_factors = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0'
     # response_shift_factors = '0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0'
     # action_scaling_factors = 1.0
@@ -376,6 +386,8 @@
     execute_on = 'TIMESTEP_BEGIN'
     smoother = 0.1
     num_stems_in_period = 50
+
+    deterministic = false
   []
 []
 
@@ -409,6 +421,6 @@
     type = JSON
     execute_on = final
   []
-  console = false
+  # console = false
   # execute_on = FINAL
 []

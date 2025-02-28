@@ -41,6 +41,8 @@ public:
 
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn) override;
 
+  virtual void loadControlNeuralNetFromFile(const InputParameters & parameters) override;
+
 protected:
   /**
    * Function which computes the logarithmic probability of given actions.
@@ -58,11 +60,13 @@ protected:
   std::vector<Real> _previous_control_signal;
   std::vector<Real> _current_smoothed_signal;
 
-  Moose::LibtorchActorNeuralNet * _actor_nn;
+  std::shared_ptr<Moose::LibtorchActorNeuralNet> _actor_nn;
 
   unsigned int _call_counter;
   const unsigned int _num_steps_in_period;
   const Real _smoother;
+  const bool _deterministic;
+
 };
 
 #endif
