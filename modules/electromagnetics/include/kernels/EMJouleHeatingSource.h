@@ -36,5 +36,5 @@ protected:
   const ADMaterialProperty<Real> & _cond;
 
   /// Coefficient to multiply by heating term
-  const Real & _scale;
+  const Real _scale;
 };

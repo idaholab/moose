@@ -54,8 +54,8 @@ AzimuthMagneticTimeDerivRZ::computeValue()
     /* NOTE: The curl for a axisymmetric cylindrical vector is equal and opposite to
      * the curl for 2D cartesian vector, such that:
      *    curl u_z = - curl u_theta
-     * For Faraday's law of induction, this means we use the positive cartesian curl,
-     * in place of the negitive axisymmetric cylindrical curl.
+     * For Faraday's law of induction, this means we use the positive Cartesian curl,
+     * in place of the negative axisymmetric cylindrical curl.
      */
     return _efield_curl[_qp](2);
   }
