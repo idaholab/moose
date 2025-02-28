@@ -19,12 +19,10 @@
     method = 'opt'
   []
   [channel]
-    type = Exodiff
+    type = CSVDiff
     input = 'channel-drift-flux-physics.i'
-    cli_args = "Physics/NavierStokes/FlowSegregated/flow/initial_velocity='0 0 0'"
-    exodiff = 'channel-drift-flux-physics_out.e'
+    csvdiff = 'channel-drift-flux-physics_out.csv'
     requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
-    custom_cmp = 'mixture_physics_diff.cmp'
   []
 []
