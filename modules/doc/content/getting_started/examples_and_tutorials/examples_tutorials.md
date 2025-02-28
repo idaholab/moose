@@ -92,7 +92,7 @@ for some of the individual physics modules as listed below.
 - [Geochemistry](modules/geochemistry/tests_and_examples/index.md)
 - [Heat Transfer](modules/heat_transfer/tutorials/introduction/index.md)
 - [Level Set](modules/level_set/level_set_examples.md)
-- [Navier Stokes](modules/navier_stokes/doc/intro_slides/slides/index.md)
+- [Navier Stokes](modules/navier_stokes/intro/index.md)
 - [Porous Flow](modules/porous_flow/porous_flow_examples.md)
 - [Reactor](tutorial04_meshing/index.md)
 - [Reconstructed Discontinuous Galerkin](modules/rdg/index.md#example)
