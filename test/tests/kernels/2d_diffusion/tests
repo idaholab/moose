@@ -150,4 +150,26 @@
       design = '/ADBodyForce.md'
     []
   []
+  [matdiffusion_coupled]
+    requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property coupled with two variables'
+    [nonad]
+      type = 'Exodiff'
+      input = 'matdiffusion_coupled.i'
+      exodiff = 'matdiffusion_coupled_out.e'
+      detail = 'without automatic differentiation, '
+      cli_args = 'Kernels/u_diff/args=v Kernels/v_diff/args=u'
+      issues = '#12074'
+      design = '/MatDiffusion.md'
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'matdiffusion_coupled.i'
+      exodiff = 'ad_matdiffusion_coupled_out.e'
+      scale_refine = 5
+      detail = "with automatic differentiation, and"
+      cli_args = 'AD=AD Outputs/file_base=ad_matdiffusion_coupled_out'
+      issues = '#13260'
+      design = '/ADBodyForce.md'
+    []
+  []
 []
