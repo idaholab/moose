@@ -33,6 +33,7 @@
   [dirichletbc]
     requirement = 'The system shall provide an ability to solve a 2D diffusion problem with Dirichlet '
                   'boundary conditions using'
+    design = '/ADDirichletBC.md /DirichletBC.md'
     [nonad]
       type = 'Exodiff'
       input = 'dirichletbc.i'
@@ -40,7 +41,6 @@
       scale_refine = 5
       detail = 'without automatic differentiation, '
       issues = '#6397'
-      design = '/DirichletBC.md'
     []
     [ad]
       type = 'Exodiff'
@@ -49,7 +49,6 @@
       scale_refine = 5
       detail = "with automatic differentiation, and"
       cli_args = 'AD=AD Outputs/file_base=ad_dirichletbc_out'
-      design = '/ADDirichletBC.md'
       issues = '#13260'
     []
     [ad-jac]
@@ -59,7 +58,6 @@
       difference_tol = 1e-7
       detail = "compute the correct Jacobian matrix."
       cli_args = 'AD=AD Outputs/exodus=false'
-      design = '/ADDirichletBC.md'
       issues = '#13260'
     []
   []
@@ -67,6 +65,7 @@
   [neumannbc]
     requirement = 'The system shall provide an ability to solve a 2D diffusion problem Neumann boundary '
                   'conditions using'
+    design = '/NeumannBC.md /ADNeumannBC.md'
     [nonad]
       type = 'Exodiff'
       input = 'neumannbc.i'
@@ -74,7 +73,6 @@
       scale_refine = 5
       detail = 'without automatic differentiation, '
       issues = '#1410'
-      design = '/NeumannBC.md'
     []
     [ad]
       type = 'Exodiff'
@@ -84,7 +82,6 @@
       detail = "with automatic differentiation, and"
       cli_args = 'AD=AD Outputs/file_base=ad_neumannbc_out'
       issues = '#12903'
-      design = '/ADNeumannBC.md'
     []
     [ad-jac]
       type = 'PetscJacobianTester'
@@ -94,12 +91,12 @@
       detail = "compute the correct Jacobian matrix."
       cli_args = 'AD=AD Outputs/exodus=false'
       issues = '#12903'
-      design = '/ADNeumannBC.md'
     []
   []
   [bodyforce]
     requirement = 'The system shall provide an ability to solve a 2D diffusion problem including a '
                   'volumetric source term using'
+    design = '/BodyForce.md /ADBodyForce.md'
     [nonad]
       type = 'Exodiff'
       input = 'bodyforce.i'
@@ -107,7 +104,6 @@
       scale_refine = 5
       detail = 'without automatic differentiation, '
       issues = '#6136'
-      design = '/BodyForce.md'
     []
     [ad]
       type = 'Exodiff'
@@ -117,7 +113,6 @@
       detail = "with automatic differentiation, and"
       cli_args = 'AD=AD Outputs/file_base=ad_bodyforce_out'
       issues = '#13260'
-      design = '/ADBodyForce.md'
     []
     [ad-jac]
       type = 'PetscJacobianTester'
@@ -126,18 +121,17 @@
       detail = "compute the correct Jacobian matrix."
       cli_args = 'AD=AD Outputs/exodus=false'
       issues = '#13260'
-      design = '/ADBodyForce.md'
     []
   []
   [matdiffusion]
     requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
+    design = '/MatDiffusion.md /ADMatDiffusion.md'
     [nonad]
       type = 'Exodiff'
       input = 'matdiffusion.i'
       exodiff = 'matdiffusion_out.e'
       detail = 'without automatic differentiation, '
       issues = '#12074'
-      design = '/MatDiffusion.md'
     []
     [ad]
       type = 'Exodiff'
@@ -147,7 +141,6 @@
       detail = "with automatic differentiation, and"
       cli_args = 'AD=AD Outputs/file_base=ad_matdiffusion_out'
       issues = '#13260'
-      design = '/ADBodyForce.md'
     []
   []
   [matdiffusion_coupled]
@@ -159,7 +152,6 @@
       detail = 'without automatic differentiation, '
       cli_args = 'Kernels/u_diff/args=v Kernels/v_diff/args=u'
       issues = '#12074'
-      design = '/MatDiffusion.md'
     []
     [ad]
       type = 'Exodiff'
@@ -169,7 +161,6 @@
       detail = "with automatic differentiation, and"
       cli_args = 'AD=AD Outputs/file_base=ad_matdiffusion_coupled_out'
       issues = '#13260'
-      design = '/ADBodyForce.md'
     []
   []
 []
