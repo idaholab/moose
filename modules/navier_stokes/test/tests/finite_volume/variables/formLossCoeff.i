@@ -23,33 +23,34 @@
     [pressVar]
       type = BernoulliPressureVariable
       pressure_drop_sidesets = 'area_change'
-      pressure_drop_form_factors = '0.2973'
+      # pressure_drop_form_factors = '0.2973'
+      pressure_drop_form_factors = '0.25'
       porosity = porosity
-      u = u
+      u = superficial_vel_x
       rho = 988.0
       # pressure = pressure
       initial_condition = 1.01e5
       block = '1 2'
   []
 []
-  
+
 #   [Problem]
 #     solve = false
 #   []
-  
+
   [AuxVariables]
     [porosity_var]
       family = MONOMIAL
       order = CONSTANT
       initial_condition = 1
     []
-  
+
     [forchheimer]
       family = MONOMIAL
       order = CONSTANT
     []
   []
-  
+
   [AuxKernels]
     [porosity_var]
       type = FunctorAux
@@ -64,39 +65,41 @@
     #   execute_on = 'initial timestep_end'
     # []
   []
-  
+
   [Materials]
     [all_constant_props]
       type = ADGenericConstantFunctorMaterial
-      prop_names = 'u rho  mu   '
-      prop_values = '10.0 988  1e-3 '
+      prop_names = 'rho  mu   '
+      prop_values = '988  1e-3 '
     []
     [porosityMat]
         type = ADPiecewiseByBlockFunctorMaterial
         prop_name = porosity
-        subdomain_to_prop_value = '1 1.00
-                                   2 0.50'
+        # subdomain_to_prop_value = '1 1.00
+        #                            2 0.50'
+        subdomain_to_prop_value = '1 0.50
+                                   2 1.00'
     []
-    [DhMat]
-      type = PiecewiseByBlockFunctorMaterial
-      prop_name = characteristic_length
-      subdomain_to_prop_value = '1  1.00
-                                 2  0.71'
-    []
-    [churchill1]
-      type = FunctorChurchillDragCoefficients
-      # Dh_channel = ${fparse sqrt(4*1/pi)}
-      # porosity = porosity_var
-      block = 1
-      multipliers = '0 0 0'
-    []
-    [churchill2]
-        type = FunctorChurchillDragCoefficients
-        # Dh_channel = ${fparse sqrt(4*0.25/pi)}
-        # porosity = porosity_var
-        block = 2
-        multipliers = '1e-6 1e-6 1e-6'
-    []
+    # [DhMat]
+    #   type = PiecewiseByBlockFunctorMaterial
+    #   prop_name = characteristic_length
+    #   subdomain_to_prop_value = '1  1.00
+    #                              2  0.71'
+    # []
+    # [churchill1]
+    #   type = FunctorChurchillDragCoefficients
+    #   # Dh_channel = ${fparse sqrt(4*1/pi)}
+    #   # porosity = porosity_var
+    #   block = 1
+    #   multipliers = '0 0 0'
+    # []
+    # [churchill2]
+    #     type = FunctorChurchillDragCoefficients
+    #     # Dh_channel = ${fparse sqrt(4*0.25/pi)}
+    #     # porosity = porosity_var
+    #     block = 2
+    #     multipliers = '1e-6 1e-6 1e-6'
+    # []
   []
 [Modules]
 [NavierStokesFV]
@@ -105,14 +108,14 @@
     porous_medium_treatment = true
     add_energy_equation = false
 
-     # Material property parameters
-     density = rho
-     dynamic_viscosity = mu
-     pressure_variable = pressVar
- 
-     # Porous medium parameters
-     porosity = porosity
-     porosity_interface_pressure_treatment = 'bernoulli'
+    # Material property parameters
+    density = rho
+    dynamic_viscosity = mu
+    pressure_variable = pressVar
+
+    # Porous medium parameters
+    porosity = porosity
+    porosity_interface_pressure_treatment = 'bernoulli'
 
     #  #Boundary conditions
     #  inlet_boundaries = 'left'
@@ -122,13 +125,13 @@
     inlet_boundaries = 'left'
     outlet_boundaries = 'right'
     momentum_inlet_types = fixed-velocity
-    momentum_inlet_functors = '1.2 0.0'
+    momentum_inlet_functors = '0.5 0.0'
     momentum_outlet_types = fixed-pressure
     pressure_functors = '1.01e5'
 
     # Friction control parameters
-    friction_types = 'darcy forchheimer'
-    friction_coeffs = 'Darcy_coefficient Forchheimer_coefficient'
+    # friction_types = 'darcy forchheimer'
+    # friction_coeffs = 'Darcy_coefficient Forchheimer_coefficient'
 []
 []
   [Executioner]
@@ -138,7 +141,7 @@
     petsc_options_value = 'lu NONZERO'
     nl_rel_tol = 1e-12
   []
-  
+
   [Postprocessors]
     [forchheimer]
       type = ElementAverageValue
@@ -152,7 +155,7 @@
     [outlet_pressure]
       type = ElementAverageValue
       variable = pressVar
-      block = 2  
+      block = 2
     []
       [pressure_drop]
         type = ParsedPostprocessor
@@ -160,7 +163,7 @@
         expression = 'inlet_pressure - outlet_pressure'
       []
   []
-  
+
   [Outputs]
     exodus = true
   []

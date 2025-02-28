@@ -121,7 +121,7 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
     return true;
 
   if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
-    // We choose to apply the Dirichlet condition for the upwind 
+    // We choose to apply the Dirichlet condition for the upwind
     return std::get<0>(elemIsUpwind(*elem, fi, time));
 
   return false;
@@ -151,11 +151,18 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
       &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr(), nullptr};
 
   const auto [elem_is_upwind, vel_face] = elemIsUpwind(*elem, fi, time);
-  const auto & vel_elem = vel_face;
-  const auto & vel_neighbor = vel_face;
 
   const bool fi_elem_is_upwind = elem == &fi.elem() ? elem_is_upwind : !elem_is_upwind;
   const auto & downwind_face = fi_elem_is_upwind ? face_neighbor : face_elem;
+
+  const auto & upwind_elem = makeElemArg(fi_elem_is_upwind ? fi.elemPtr() : fi.neighborPtr());
+  const auto & downwind_elem = makeElemArg(fi_elem_is_upwind ? fi.neighborPtr() : fi.elemPtr());
+
+  const auto & vel_upwind = vel_face;
+  const auto & vel_downwind = vel_face;
+
+  const auto & eps_upwind = fi_elem_is_upwind ? eps_elem : eps_neighbor;
+  const auto & eps_downwind = fi_elem_is_upwind ? eps_neighbor : eps_elem;
 
   /*
      If a weakly compressible material is used where the density slightly
@@ -164,69 +171,37 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
      density. This protects against an infinite recursion between pressure and
      density.
   */
-  ADReal rho_elem = (*_rho)(makeElemArg(fi.elemPtr()), time);
-  ADReal rho_neighbor = (*_rho)(makeElemArg(fi.neighborPtr()), time);
+ const auto & rho_upwind = (*_rho)(upwind_elem, time);
+ const auto & rho_downwind = (*_rho)(downwind_elem, time);
 
-  const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
-  const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
-  const auto v_dot_n_elem = interstitial_vel_elem * fi.normal();
-  const auto v_dot_n_neighbor = interstitial_vel_neighbor * fi.normal();
+  const VectorValue<ADReal> interstitial_vel_upwind = vel_upwind * (1 / eps_upwind);
+  const VectorValue<ADReal> interstitial_vel_downwind = vel_downwind * (1 / eps_downwind);
 
-  ADReal factor_downwind = 0.0;
-  ADReal factor_upwind = 0.0;
-// Iterate through sidesets to see if they are boundary faces or not
+  const auto v_dot_n_upwind = interstitial_vel_upwind * fi.normal();
+  const auto v_dot_n_downwind = interstitial_vel_downwind * fi.normal();
+
+  ADReal factor = 0.0;
+  // Iterate through sidesets to see if they are boundary faces or not
 //How do I access the variable I defined above titled num_pressure_drop_sidesets?
+  for (const auto & bd_id : fi.boundaryIDs())
+    for(const auto i : index_range(_pressure_drop_sideset_ids))
+     if (_pressure_drop_sideset_ids[i] == bd_id)
+      factor += _pressure_drop_form_factors[i];
 
-if (isParamSetByUser("pressure_drop_sidesets"))
-{
-  int num_pressure_drop_sidesets = _pressure_drop_sideset_ids.size();
-  int num_boundaries = _theBoundaries.size() ;
- 
-  for(int i =0; i < num_pressure_drop_sidesets; i++)
-  {
-    int isItBoundary = 0;
-    for(const auto & bd_id : _theBoundaries)
-    {
-      if (_pressure_drop_sideset_ids[i] == bd_id)
-      {     
-        isItBoundary = 1;
-      }
-    }
-    if (isItBoundary)
-    { 
-      factor_downwind += _pressure_drop_form_factors[i];
-      factor_upwind += _pressure_drop_form_factors[i];
-    }
-  }
-}
-auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem ;
-auto bernoulli_vel_chunk_neighbor = 0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor ;
+  auto upwind_bernoulli_vel_chunk = 0.5 * rho_upwind * v_dot_n_upwind * v_dot_n_upwind ;
+  auto downwind_bernoulli_vel_chunk = 0.5 * rho_downwind * v_dot_n_downwind * v_dot_n_downwind ;
 
-if (eps_elem > eps_neighbor)
-{
-  //  std::cout <<  factor_downwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor << std::endl;
-  bernoulli_vel_chunk_neighbor += 0.5*factor_upwind * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
-}
-else
-{
-  // std::cout <<  0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem << std::endl;
-   bernoulli_vel_chunk_elem += -0.5 * factor_downwind * rho_elem * v_dot_n_elem * v_dot_n_elem  ;
-}
-  const auto & upwind_bernoulli_vel_chunk =
-      fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
-      // if(fi_elem_is_upwind)
-      //   std::cout << elem->id() << std::endl ;
-  const auto & downwind_bernoulli_vel_chunk =
-      fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
-      // if(!fi_elem_is_upwind)
-      //   std::cout << elem->id() << std::endl;
+  // If it is a contraction we have to use the downwind values, otherwise hte upwind values
+  if (eps_downwind < eps_upwind)
+    downwind_bernoulli_vel_chunk += 0.5*factor * rho_downwind * v_dot_n_downwind * v_dot_n_downwind;
+  else
+    upwind_bernoulli_vel_chunk += -0.5 * factor * rho_upwind * v_dot_n_upwind * v_dot_n_upwind;
 
   ADReal p_downwind;
   if (_allow_two_term_expansion_on_bernoulli_faces)
     p_downwind = (*this)(downwind_face, time);
   else
-    p_downwind = fi_elem_is_upwind ? (*this)(makeElemArg(fi.neighborPtr()), time)
-                                   : (*this)(makeElemArg(fi.elemPtr()), time);
+    p_downwind = (*this)(downwind_elem, time);
 
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }
