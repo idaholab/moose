@@ -3,52 +3,49 @@
   dim = 2
   nx = 2
   ny = 2
-  xmax = 1.0
-  ymax = 1.0
-  elem_type = QUAD4
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = MatDiffusion
     variable = u
     diffusivity = Du
-  [../]
-  [./ctime]
+  []
+  [ctime]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Materials]
-  [./Dc]
+  [Dc]
     type = DerivativeParsedMaterial
     property_name = Du
     expression = '0.01+u^2'
     coupled_variables = 'u'
     derivative_order = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
