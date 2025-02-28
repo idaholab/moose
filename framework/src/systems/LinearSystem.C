@@ -118,7 +118,7 @@ LinearSystem::initialSetup()
                  "which is assigned to the wrong system: ",
                  name);
 
-  // Calling initial setpup for the linear kernels
+  // Calling initial setup for the linear kernels
   // Note: if we ever create a kernel not inheriting from LinearFVElementalKernel
   // or LinearFVFluxKernel, we will need to add the initialsetup here
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)

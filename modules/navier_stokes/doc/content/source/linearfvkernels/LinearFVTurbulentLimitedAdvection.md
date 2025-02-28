@@ -1,9 +1,9 @@
 # LinearFVTurbulentLimitedAdvection
 
 This object adds a $\nabla \cdot \vec u \phi$ term for an arbitrary scalar field
-$\phi$, where $\phi$ corresponds to the nonlinear variable that this kernel acts
-on. This kernel acts in a linear solve. 
-The linear `variable` can be of type `MooseLinearVariableFVReal`.
+$\phi$, where $\phi$ corresponds to the variable that this kernel acts
+on.
+The [!param](/LinearFVKernels/LinearFVTurbulentLimitedAdvection/variable) can be of type `MooseLinearVariableFVReal`.
 
 The particularity of this kernel is that it allows us to skip computing advection
 for near-wall elements. The key for this skip are the boundaries identified in
