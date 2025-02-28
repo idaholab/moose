@@ -137,10 +137,11 @@
   [solution_warning_history]
     design = 'SolutionInvalidity.md SolutionInvalidityOutput.md'
     issues = '#29731'
-    requirement = 'The system shall output a time history summary table of all solution warnings in the end of the simulation .'
+    requirement = 'The system shall output a time history summary table of all solution warnings in the end of the simulation.'
     [show_default_solution_warning]
       type = 'RunApp'
       input = 'solution_invalid_timehistory.i'
+      detail = "when solution invalid warning is detected and output with default time step interval"
       expect_out = "Solution Invalid Warnings History:
       -----------------------------------------------------------------------------------------
       |                   Object                    | Time | Stepinterval Count | Total Count |
@@ -158,6 +159,7 @@
       type = 'RunApp'
       input = 'solution_invalid_timehistory.i'
       cli_args = "Outputs/solution_invalidity_history=false Outputs/solution_invalid/type=SolutionInvalidityOutput Outputs/solution_invalid/solution_invalidity_timestep_interval=2"
+      detail = "when user provides a SolutionInvalidityOutput subblock under [Outputs]"
       expect_out = "Solution Invalid Warnings History:
 -----------------------------------------------------------------------------------------
 |                   Object                    | Time | Stepinterval Count | Total Count |
