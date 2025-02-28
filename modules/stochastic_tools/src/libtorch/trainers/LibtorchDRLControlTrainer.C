@@ -107,6 +107,12 @@ LibtorchDRLControlTrainer::validParams()
       "Decay factor for calculating the return. This accounts for decreased "
       "reward values from the later steps.");
 
+  params.addRangeCheckedParam<Real>(
+        "lambda_factor",
+        1.0,
+        "0.0<=lambda_factor<=1.0",
+        "GAE lambda.");
+
   params.addParam<bool>(
       "read_from_file", false, "Switch to read the neural network parameters from a file.");
   params.addParam<bool>(
@@ -124,28 +130,32 @@ LibtorchDRLControlTrainer::validParams()
   params.addParam<unsigned int>("batch_size", 100, "Batch size");
   params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
   params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
+
+  params.addParam<unsigned int>("timestep_window", 1, "Data acquisition timesteps (every nth)");
+
   return params;
 }
 
 LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & parameters)
   : SurrogateTrainerBase(parameters),
-    _response_names(getParam<std::vector<ReporterName>>("response")),
-    _response_shift_factors(isParamValid("response_shift_factors")
+    _state_names(getParam<std::vector<ReporterName>>("response")),
+    _state_shift_factors(isParamValid("response_shift_factors")
                                 ? getParam<std::vector<Real>>("response_shift_factors")
-                                : std::vector<Real>(_response_names.size(), 0.0)),
-    _response_scaling_factors(isParamValid("response_scaling_factors")
+                                : std::vector<Real>(_state_names.size(), 0.0)),
+    _state_scaling_factors(isParamValid("response_scaling_factors")
                                   ? getParam<std::vector<Real>>("response_scaling_factors")
-                                  : std::vector<Real>(_response_names.size(), 1.0)),
-    _control_names(getParam<std::vector<ReporterName>>("control")),
+                                  : std::vector<Real>(_state_names.size(), 1.0)),
+    _action_names(getParam<std::vector<ReporterName>>("control")),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability")),
     _reward_name(getParam<ReporterName>("reward")),
     _reward_value_pointer(&getReporterValueByName<std::vector<std::vector<Real>>>(_reward_name)),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
-    _num_inputs(_input_timesteps * _response_names.size()),
-    _num_outputs(_control_names.size()),
-    _input_data(std::vector<std::vector<Real>>(_num_inputs)),
-    _output_data(std::vector<std::vector<Real>>(_num_outputs)),
-    _log_probability_data(std::vector<std::vector<Real>>(_num_outputs)),
+    _num_inputs(_input_timesteps * _state_names.size()),
+    _num_outputs(_action_names.size()),
+    _state_data(std::vector<std::vector<std::vector<Real>>>(_num_inputs)),
+    _next_state_data(std::vector<std::vector<std::vector<Real>>>(_num_inputs)),
+    _action_data(std::vector<std::vector<std::vector<Real>>>(_num_outputs)),
+    _log_probability_data(std::vector<std::vector<std::vector<Real>>>(_num_outputs)),
     _num_epochs(getParam<unsigned int>("num_epochs")),
     _num_critic_neurons_per_layer(
         getParam<std::vector<unsigned int>>("num_critic_neurons_per_layer")),
@@ -156,6 +166,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _update_frequency(getParam<unsigned int>("update_frequency")),
     _clip_param(getParam<Real>("clip_parameter")),
     _decay_factor(getParam<Real>("decay_factor")),
+    _lambda_factor(getParam<Real>("lambda_factor")),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
     _filename_base(isParamValid("filename_base") ? getParam<std::string>("filename_base") : ""),
     _read_from_file(getParam<bool>("read_from_file")),
@@ -165,20 +176,21 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
     _min_values(getParam<std::vector<Real>>("min_control_value")),
     _max_values(getParam<std::vector<Real>>("max_control_value")),
-    _update_counter(_update_frequency)
+    _update_counter(_update_frequency),
+    _timestep_window(getParam<unsigned int>("timestep_window"))
 {
-  if (_response_names.size() != _response_shift_factors.size())
+  if (_state_names.size() != _state_shift_factors.size())
     paramError("response_shift_factors",
                "The number of shift factors is not the same as the number of responses!");
 
-  if (_response_names.size() != _response_scaling_factors.size())
+  if (_state_names.size() != _state_scaling_factors.size())
     paramError(
         "response_scaling_factors",
         "The number of normalization coefficients is not the same as the number of responses!");
 
   // We establish the links with the chosen reporters
-  getReporterPointers(_response_names, _response_value_pointers);
-  getReporterPointers(_control_names, _control_value_pointers);
+  getReporterPointers(_state_names, _state_value_pointers);
+  getReporterPointers(_action_names, _action_value_pointers);
   getReporterPointers(_log_probability_names, _log_probability_value_pointers);
 
   // Fixing the RNG seed to make sure every experiment is the same.
@@ -223,6 +235,11 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_critic_neurons_per_layer,
       getParam<std::vector<std::string>>("critic_activation_functions"));
 
+  _actor_optimizer = std::make_unique<torch::optim::Adam>(_control_nn->parameters(),
+    torch::optim::AdamOptions(_control_learning_rate));
+  _critic_optimizer = std::make_unique<torch::optim::Adam>(_critic_nn->parameters(),
+    torch::optim::AdamOptions(_critic_learning_rate));
+
   // We read parameters for the critic neural net if it is requested
   if (_read_from_file)
   {
@@ -239,37 +256,167 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   }
   else if (filename_valid)
     torch::save(_critic_nn, _critic_nn->name());
+
+  // Define the optimizers for the training
+  // torch::optim::Adam actor_optimizer(_control_nn->parameters(),
+  // torch::optim::AdamOptions(_control_learning_rate));
+
+  // torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
+  // torch::optim::AdamOptions(_critic_learning_rate));
+
+  // auto obs = torch::zeros({4,10}, torch::TensorOptions().dtype(torch::kFloat64));
+  // for (int i : make_range(10))
+  //   for (int j : make_range(4))
+  //     obs.index_put_({j, i}, j+0.1*(i+1));
+
+  // auto action = torch::zeros({4,1}, torch::TensorOptions().dtype(torch::kFloat64));
+  // for (int j : make_range(4))
+  //   action.index_put_({j, 0}, 0.01+j*0.005);
+
+  // auto log_prob = torch::zeros({4,1}, torch::TensorOptions().dtype(torch::kFloat64));
+  // for (int j : make_range(4))
+  //   log_prob.index_put_({j, 0}, 2.3-j*0.2);
+
+  // auto reward = torch::zeros({4,1}, torch::TensorOptions().dtype(torch::kFloat64));
+  // for (int j : make_range(4))
+  //   reward.index_put_({j, 0}, -2.9-j*0.1);
+
+  // auto ret = torch::zeros({4,1}, torch::TensorOptions().dtype(torch::kFloat64));
+  // Real v = 0.0;
+  // for (int j : make_range(4))
+  // {
+  //   v = reward.index({3-j, 0}).item<Real>()+0.95*v;
+  //   ret.index_put_({3-j, 0}, v);
+  // }
+
+  // std::cout << "states" << std::endl;
+  // std::cout << obs << std::endl;
+  // std::cout << "actions" << std::endl;
+  // std::cout << action << std::endl;
+  // std::cout << "logprobs" << std::endl;
+  // std::cout << log_prob << std::endl;
+  // std::cout << "reward" << std::endl;
+  // std::cout << reward << std::endl;
+  // std::cout << "return" << std::endl;
+  // std::cout << ret << std::endl;
+
+  // auto value = evaluateValue(obs).detach();
+
+  // std::cout << "evaluate V" << std::endl;
+  // std::cout << value << std::endl;
+
+  // auto advantage = ret - value;
+
+  // std::cout << "advantage" << std::endl;
+  // std::cout << advantage << std::endl;
+
+  // // Get the approximate return from the neural net again (this one does have an associated
+  // // gradient)
+  // value = evaluateValue(obs);
+
+  // auto new_action = _control_nn->evaluate(obs, true);
+
+  // std::cout << "new action" << std::endl;
+  // std::cout << new_action << std::endl;
+
+  // // std::cout << "new action " << new_action << std::endl;
+  // // Get the approximate logarithmic action probability using the control neural net
+  // auto curr_log_probability = _control_nn->logProbability(action);
+
+  // // std::cout << "log probability " << curr_log_probability << std::endl;
+
+  // // Prepare the ratio by using the e^(logx-logy)=x/y expression
+  // auto ratio = (curr_log_probability - log_prob).exp();
+
+  // std::cout << "ratio" << std::endl;
+  // std::cout << ratio << std::endl;
+
+  // // Use clamping for limiting
+  // auto surr1 = ratio * advantage;
+  // auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage;
+
+  // // Compute loss values for the critic and the control neural net
+  // auto actor_loss = -(torch::min(surr1, surr2) + 0.01*_control_nn->entropy()).mean();
+  // auto critic_loss = torch::mse_loss(value, ret);
+
+  // std::cout << "actor loss" << std::endl;
+  // std::cout << actor_loss << std::endl;
+
+  // std::cout << "critic loss" << std::endl;
+  // std::cout << critic_loss << std::endl;
+
+  // // Update the weights in the neural nets
+  // actor_optimizer.zero_grad();
+  // actor_loss.backward();
+  // actor_optimizer.step();
+
+  // critic_optimizer.zero_grad();
+  // critic_loss.backward();
+  // critic_optimizer.step();
+
+  _control_nn->initializeNeuralNetwork();
+
+  // std::cout << "Control NN" << std::endl;
+  // const auto & control_params = _control_nn->named_parameters();
+  // for (const auto & param_i : make_range(control_params.size()))
+  // {
+  //   // We cast the parameters into a 1D vector
+  //   std::cout << Moose::stringify(std::vector<Real>(
+  //       control_params[param_i].value().data_ptr<Real>(),
+  //       control_params[param_i].value().data_ptr<Real>() +control_params[param_i].value().numel())) << std::endl;
+  // }
+
+  _critic_nn->initializeNeuralNetwork();
+
+  // std::cout << "Critic NN" << std::endl;
+  // const auto & critic_params = _critic_nn->named_parameters();
+  // for (const auto & param_i : make_range(critic_params.size()))
+  // {
+  //   // We cast the parameters into a 1D vector
+  //   std::cout << Moose::stringify(std::vector<Real>(
+  //     critic_params[param_i].value().data_ptr<Real>(),
+  //     critic_params[param_i].value().data_ptr<Real>() + critic_params[param_i].value().numel())) << std::endl;
+  // }
+
+  // mooseError("Bazinga");
 }
 
 void
 LibtorchDRLControlTrainer::execute()
 {
   // Extract data from the reporters
-  getResponseDataFromReporter(_input_data, _response_value_pointers, _input_timesteps);
-  getSignalDataFromReporter(_output_data, _control_value_pointers);
+  getResponseDataFromReporter(_state_data, _next_state_data, _state_value_pointers, _input_timesteps);
+  getSignalDataFromReporter(_action_data, _action_value_pointers);
   getSignalDataFromReporter(_log_probability_data, _log_probability_value_pointers);
   getRewardDataFromReporter(_reward_data, _reward_value_pointer);
-
-  // Calculate return from the reward (discounting the reward)
-  computeRewardToGo(_return_data, _reward_value_pointer);
 
   _update_counter--;
 
   // Only update the NNs when
   if (_update_counter == 0)
   {
+    // Calculate return from the reward (discounting the reward)
+    computeReturn(_return_data, _reward_data, _decay_factor);
+
     // We compute the average reward first
     computeAverageEpisodeReward();
 
-    normalizeResponseData(_input_data, _response_value_pointers.size(), _input_timesteps);
+    normalizeResponseData(_state_data, _input_timesteps);
+    normalizeResponseData(_next_state_data, _input_timesteps);
+
+    computeCumulativeRewardEstimate(_delta_data, _state_data, _next_state_data, _reward_data);
+
+    computeReturn(_gae_data, _delta_data, _decay_factor*_lambda_factor);
 
     // Transform input/output/return data to torch::Tensor
-    convertDataToTensor(_input_data, _input_tensor);
-    convertDataToTensor(_output_data, _output_tensor);
+    convertDataToTensor(_state_data, _state_tensor);
+    convertDataToTensor(_next_state_data, _next_state_tensor);
+    convertDataToTensor(_action_data, _action_tensor);
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
 
     // Discard (detach) the gradient info for return data
-    LibtorchUtils::vectorToTensor<Real>(_return_data, _return_tensor, true);
+    convertDataToTensor(_return_data, _return_tensor, true);
+    convertDataToTensor(_gae_data, _gae_tensor, true);
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
@@ -283,46 +430,103 @@ void
 LibtorchDRLControlTrainer::computeAverageEpisodeReward()
 {
   if (_reward_data.size())
-    _average_episode_reward =
-        std::accumulate(_reward_data.begin(), _reward_data.end(), 0.0) / _reward_data.size();
+  {
+    _average_episode_reward = 0.0;
+    unsigned int combined_sizes = 0;
+    for (const auto & sample : _reward_data)
+    {
+      _average_episode_reward +=
+        std::accumulate(sample.begin(), sample.end(), 0.0);
+      combined_sizes += sample.size();
+    }
+    _average_episode_reward = _average_episode_reward/combined_sizes;
+  }
   else
     _average_episode_reward = 0.0;
 }
 
 void
-LibtorchDRLControlTrainer::computeRewardToGo(std::vector<Real> & data,
-                                             const std::vector<std::vector<Real>> * const reporter_link)
+LibtorchDRLControlTrainer::computeReturn(std::vector<std::vector<Real>> & data,
+                                         const std::vector<std::vector<Real>> & reward,
+                                         const Real decay_factor)
 {
-  // Get reward data from one simulation
-  std::vector<Real> reward_data_per_sim;
-  std::vector<Real> return_data_per_sim;
-  getRewardDataFromReporter(reward_data_per_sim, reporter_link);
-
   // Discount the reward to get the return value, we need this to be able to anticipate
   // rewards based on the current behavior. We go backwards in samples and backwards in
   // accumulation.
-  unsigned int reward_i = reward_data_per_sim.size();
-  for (const auto sample_i : index_range(*reporter_link))
+  for (const auto sample_i : index_range(reward))
   {
-    const auto backward_sample_i = reporter_link->size() - sample_i - 1;
+    std::vector<Real> sample_return;
     Real discounted_reward(0.0);
-    const auto history_size = (*reporter_link)[backward_sample_i].size() - _shift_outputs;
-
-    for (const auto i : make_range(history_size))
-  {
-      discounted_reward = reward_data_per_sim[reward_i - i - 1] + discounted_reward * _decay_factor;
+    const auto sample_size = reward[sample_i].size();
+    for (const auto time_i : make_range(sample_size))
+    {
+      discounted_reward = reward[sample_i][sample_size - time_i - 1] + discounted_reward * decay_factor;
 
       // We are inserting to the front of the vector and push the rest back, this will
       // ensure that the first element of the vector is the discounter reward for the whole transient
-      return_data_per_sim.insert(return_data_per_sim.begin(), discounted_reward);
+      sample_return.insert(sample_return.begin(), discounted_reward);
     }
 
-    // Update the global index
-    reward_i -= history_size;
+    // Save and accumulate the return values
+    data.push_back(std::move(sample_return));
   }
+}
 
-  // Save and accumulate the return values
-  data.insert(_return_data.end(), return_data_per_sim.begin(), return_data_per_sim.end());
+void
+LibtorchDRLControlTrainer::computeCumulativeRewardEstimate(std::vector<std::vector<Real>> & data,
+  std::vector<std::vector<std::vector<Real>>> & state,
+  std::vector<std::vector<std::vector<Real>>> & next_state,
+  std::vector<std::vector<Real>> & reward)
+{
+  for (const auto sample_i : index_range(reward))
+  {
+    torch::Tensor observations;
+    torch::Tensor next_observations;
+    torch::Tensor reward_tensor;
+
+    LibtorchUtils::vectorToTensor(reward[sample_i], reward_tensor, true);
+
+    for (const auto feature_i : index_range(state))
+    {
+      torch::Tensor input_row;
+      torch::Tensor next_input_row;
+      LibtorchUtils::vectorToTensor(state[feature_i][sample_i], input_row, true);
+      LibtorchUtils::vectorToTensor(next_state[feature_i][sample_i], next_input_row, true);
+
+      if (feature_i == 0)
+      {
+        observations = input_row;
+        next_observations = next_input_row;
+      }
+      else
+      {
+        observations = torch::cat({observations, input_row}, 1);
+        next_observations = torch::cat({next_observations, next_input_row}, 1);
+      }
+    }
+
+    // std::cout << "going to GAE" << std::endl;
+    // std::cout << observations << std::endl;
+    // std::cout << next_observations << std::endl;
+
+
+    auto value = evaluateValue(observations).detach();
+    auto value_next = evaluateValue(next_observations).detach();
+
+    // std::cout << "values" << std::endl;
+    // std::cout << value << std::endl;
+    // std::cout << value_next << std::endl;
+
+    auto delta = reward_tensor + _decay_factor*value_next - value;
+
+    // std::cout << "delta" << std::endl;
+    // std::cout << delta << std::endl;
+
+    std::vector<Real> delta_vector;
+    LibtorchUtils::tensorToVector(delta, delta_vector);
+
+    data.push_back(std::move(delta_vector));
+  }
 }
 
 void
@@ -333,32 +537,26 @@ LibtorchDRLControlTrainer::trainController()
   if (processor_id() == 0)
   {
     // std::cout << "Training" << std::endl;
-    // std::cout << "Input tensor" << std::endl << _input_tensor << std::endl;
-    // std::cout << "Signal tensor" << std::endl << _output_tensor << std::endl;
+    // std::cout << "Input tensor" << std::endl << _state_tensor << std::endl;
+    // std::cout << "Input tensor" << std::endl << _next_state_tensor << std::endl;
+    // std::cout << "Signal tensor" << std::endl << _action_tensor << std::endl;
     // std::cout << "Logprob tensor" << std::endl << _log_probability_tensor << std::endl;
     // std::cout << "reward" << std::endl << Moose::stringify(_reward_data) << std::endl;
     // std::cout << "Return tensor" << std::endl << _return_tensor << std::endl;
+    // std::cout << "GAE" << std::endl << _gae_tensor << std::endl;
 
     // Define the optimizers for the training
-    torch::optim::Adam actor_optimizer(_control_nn->parameters(),
-                                      torch::optim::AdamOptions(_control_learning_rate));
+    // torch::optim::Adam actor_optimizer(_control_nn->parameters(),
+    //                                   torch::optim::AdamOptions(_control_learning_rate));
 
-    torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
-                                        torch::optim::AdamOptions(_critic_learning_rate));
+    // torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
+    //                                     torch::optim::AdamOptions(_critic_learning_rate));
 
     // Compute the approximate value (return) from the critic neural net and use it to compute an
     // advantage
-    auto value = evaluateValue(_input_tensor).detach();
-    auto advantage = _return_tensor - value;
-
-    // If requested, standardize the advantage
-    if (_standardize_advantage)
-      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
-
-    // auto data_set = DRLDataset({_input_tensor, _output_tensor, _log_probability_tensor, _return_tensor});
 
     // Transform the dataset se that the loader has an easier time
-    auto input_size = _input_tensor.sizes()[0];
+    auto input_size = _state_tensor.sizes()[0];
     auto batch_size = getParam<unsigned int>("batch_size");
     // auto data_loader = torch::data::make_data_loader(std::move(transformed_data_set), batch_size);
 
@@ -372,16 +570,18 @@ LibtorchDRLControlTrainer::trainController()
         batch_end = batch_begin + batch_size > input_size ? input_size : batch_begin + batch_size;
         unsigned int offset = batch_end - batch_begin;
         auto batch_permutation = permutation.narrow(0, batch_begin, offset);
-        auto obs_batch = _input_tensor.index({batch_permutation});
-        auto action_batch = _output_tensor.index({batch_permutation});
+        auto obs_batch = _state_tensor.index({batch_permutation});
+        auto action_batch = _action_tensor.index({batch_permutation});
         auto log_prob_batch = _log_probability_tensor.index({batch_permutation});
         auto return_batch = _return_tensor.index({batch_permutation});
-        auto advantage_batch = advantage.index({batch_permutation});
+        auto advantage_batch = _gae_tensor.index({batch_permutation});
+
+        if (_standardize_advantage)
+          advantage_batch = (advantage_batch - advantage_batch.mean()) / (advantage_batch.std() + 1e-10);
 
         // Get the approximate return from the neural net again (this one does have an associated
         // gradient)
-        value = evaluateValue(obs_batch);
-
+        auto value = evaluateValue(obs_batch);
 
         auto new_action = _control_nn->evaluate(obs_batch, false);
 
@@ -403,21 +603,32 @@ LibtorchDRLControlTrainer::trainController()
         auto critic_loss = torch::mse_loss(value, return_batch);
 
         // Update the weights in the neural nets
-        actor_optimizer.zero_grad();
+        _actor_optimizer->zero_grad();
         actor_loss.backward();
-        actor_optimizer.step();
+        _actor_optimizer->step();
 
-        critic_optimizer.zero_grad();
+        _critic_optimizer->zero_grad();
         critic_loss.backward();
-        critic_optimizer.step();
+        _critic_optimizer->step();
 
-        //           const auto & named_params = _control_nn->named_parameters();
-        // for (const auto & param_i : make_range(named_params.size()))
+        // std::cout << "Control NN" << std::endl;
+        // const auto & control_params = _control_nn->named_parameters();
+        // for (const auto & param_i : make_range(control_params.size()))
         // {
         //   // We cast the parameters into a 1D vector
         //   std::cout << Moose::stringify(std::vector<Real>(
-        //       named_params[param_i].value().data_ptr<Real>(),
-        //       named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel())) << std::endl;
+        //       control_params[param_i].value().data_ptr<Real>(),
+        //       control_params[param_i].value().data_ptr<Real>() +control_params[param_i].value().numel())) << std::endl;
+        // }
+
+        // std::cout << "Critic NN" << std::endl;
+        // const auto & critic_params = _critic_nn->named_parameters();
+        // for (const auto & param_i : make_range(critic_params.size()))
+        // {
+        //   // We cast the parameters into a 1D vector
+        //   std::cout << Moose::stringify(std::vector<Real>(
+        //     critic_params[param_i].value().data_ptr<Real>(),
+        //     critic_params[param_i].value().data_ptr<Real>() + critic_params[param_i].value().numel())) << std::endl;
         // }
 
               // print loss per epoch
@@ -431,7 +642,7 @@ LibtorchDRLControlTrainer::trainController()
 
         batch_begin = batch_end;
       }
-      std::cout << _control_nn->stdTensor() << std::endl;
+      // std::cout << _control_nn->stdTensor() << std::endl;
       std::cout << _control_nn->alphaTensor().mean() << std::endl;
       std::cout << _control_nn->betaTensor().mean() << std::endl;
     }
@@ -464,23 +675,49 @@ LibtorchDRLControlTrainer::trainController()
 }
 
 void
-LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
+LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<std::vector<Real>>> & vector_data,
                                                torch::Tensor & tensor_data,
                                                const bool detach)
 {
-  for (unsigned int i = 0; i < vector_data.size(); ++i)
+  for (const auto feature_i : index_range(vector_data))
   {
-    torch::Tensor input_row;
-    LibtorchUtils::vectorToTensor(vector_data[i], input_row, detach);
+    if (vector_data[feature_i].size())
+    {
+      torch::Tensor concatenated_feature;
+      convertDataToTensor(vector_data[feature_i], concatenated_feature, detach);
 
-    if (i == 0)
-      tensor_data = input_row;
-    else
-      tensor_data = torch::cat({tensor_data, input_row}, 1);
+      if (feature_i == 0)
+        tensor_data = concatenated_feature;
+      else
+        tensor_data = torch::cat({tensor_data, concatenated_feature}, 1);
+    }
   }
 
   if (detach)
     tensor_data.detach();
+}
+
+void
+LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
+                                               torch::Tensor & tensor_data,
+                                               const bool detach)
+{
+  if (vector_data.size())
+  {
+    for (const auto vector_i : index_range(vector_data))
+    {
+      torch::Tensor input_row;
+      LibtorchUtils::vectorToTensor(vector_data[vector_i], input_row, detach);
+
+      if (vector_i == 0)
+        tensor_data = input_row;
+      else
+        tensor_data = torch::cat({tensor_data, input_row}, 0);
+    }
+
+    if (detach)
+      tensor_data.detach();
+  }
 }
 
 torch::Tensor
@@ -492,94 +729,169 @@ LibtorchDRLControlTrainer::evaluateValue(torch::Tensor & input)
 void
 LibtorchDRLControlTrainer::resetData()
 {
-  for (auto & data : _input_data)
+  for (auto & data : _state_data)
     data.clear();
-  for (auto & data : _output_data)
+  for (auto & data : _next_state_data)
+    data.clear();
+  for (auto & data : _action_data)
     data.clear();
   for (auto & data : _log_probability_data)
     data.clear();
 
   _reward_data.clear();
   _return_data.clear();
+  _gae_data.clear();
+  _delta_data.clear();
+
 
   _update_counter = _update_frequency;
 }
 
 void
 LibtorchDRLControlTrainer::getResponseDataFromReporter(
-    std::vector<std::vector<Real>> & data,
+    std::vector<std::vector<std::vector<Real>>> & data_current,
+    std::vector<std::vector<std::vector<Real>>> & data_next,
     const std::vector<const std::vector<std::vector<Real>> *> & reporter_links,
     const unsigned int num_timesteps)
 {
-  // We have multiple reporters, each has a time series for each sample
-  for (const auto & rep_i : index_range(reporter_links))
+  for (const auto & state_i : index_range(reporter_links))
   {
     // Fetch the vector of time series for a given reporter
-    const std::vector<std::vector<Real>> & reporter_data = *reporter_links[rep_i];
+    const std::vector<std::vector<Real>> & reporter_data = *reporter_links[state_i];
 
-    // std::cout << "Adding response: " << Moose::stringify(reporter_data) << std::endl;
-
-    // We might consider using older time steps too which requires adding new
-    // rows and populating them with staggered data
-    for (const auto & start_step : make_range(num_timesteps))
+    // Made it to the inner loop which is just the different samples
+    for (const auto & start_i : make_range(num_timesteps))
     {
-      unsigned int row = reporter_links.size() * start_step + rep_i;
-
-      // Made it to the inner loop which is just the different samples
-      for (const auto sample_i : index_range(reporter_data))
+      const auto input_i = start_i*reporter_links.size() + state_i;
+      for (const auto & sample : reporter_data)
       {
-        for (unsigned int fill_i = 1; fill_i < num_timesteps - start_step; ++fill_i)
-          data[row].push_back(reporter_data[sample_i][0]);
+        const unsigned int sample_vector_size = sample.size() - _shift_outputs;
+        const unsigned int num_entries_kept = sample_vector_size / _timestep_window;
+        std::vector<Real> split_sample(num_entries_kept, 0.0);
+        std::vector<Real> next_split_sample(num_entries_kept, 0.0);
 
-        data[row].insert(data[row].end(),
-                         reporter_data[sample_i].begin(),
-                         reporter_data[sample_i].begin() + start_step + reporter_data[sample_i].size() -
-                           (num_timesteps - 1) - _shift_outputs);
+        unsigned int current_real_i = 0;
+        unsigned int next_current_real_i = 0;
+        for (unsigned int time_i = 0; time_i < sample_vector_size; ++time_i)
+        {
+          if (!(time_i % _timestep_window))
+          {
+            if (time_i < start_i)
+              split_sample[current_real_i] = sample[0];
+            else
+            {
+              const auto shifted_i = time_i - start_i;
+              split_sample[current_real_i] = sample[shifted_i];
+            }
+            current_real_i++;
+          }
+
+          if (!(time_i % _timestep_window) && (time_i + _timestep_window < sample_vector_size + _shift_outputs))
+          {
+              const auto shifted_i = time_i + _timestep_window - start_i;
+              next_split_sample[next_current_real_i] = sample[shifted_i];
+              next_current_real_i++;
+          }
+        }
+
+        data_current[input_i].push_back(std::move(split_sample));
+        data_next[input_i].push_back(std::move(next_split_sample));
       }
     }
   }
+  // std::cout << " finished " << std::endl;
 }
 
-void LibtorchDRLControlTrainer::normalizeResponseData(std::vector<std::vector<Real>> & data, const unsigned int num_reporters, const unsigned int num_timesteps)
+void LibtorchDRLControlTrainer::normalizeResponseData(std::vector<std::vector<std::vector<Real>>> & data,
+                                                      const unsigned int num_timesteps)
 {
   // std::cout << " Normalizing " << Moose::stringify(data) << std::endl;
   // We have multiple reporters, each has a time series for each sample
+  const auto num_reporters = data.size() / num_timesteps;
   for (const auto & rep_i : make_range(num_reporters))
   {
     // We shift and scale the inputs to get better training efficiency
     for (const auto & start_step : make_range(num_timesteps))
     {
-      unsigned int row = num_reporters * start_step + rep_i;
-      std::transform(
-          data[row].begin(),
-          data[row].end(),
-          data[row].begin(),
-          [this, &rep_i](Real value) -> Real
-          { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
+      unsigned int real_i = num_reporters * start_step + rep_i;
+
+      for (const auto sample_i : index_range(data[real_i]))
+      {
+        std::transform(
+            data[real_i][sample_i].begin(),
+            data[real_i][sample_i].end(),
+            data[real_i][sample_i].begin(),
+            [this, &rep_i](Real value) -> Real
+            { return (value - _state_shift_factors[rep_i]) * _state_scaling_factors[rep_i]; });
+      }
     }
   }
 }
 
 void
 LibtorchDRLControlTrainer::getSignalDataFromReporter(
-    std::vector<std::vector<Real>> & data,
+    std::vector<std::vector<std::vector<Real>>> & data,
     const std::vector<const std::vector<std::vector<Real>> *> & reporter_links)
 {
-  for (const auto & rep_i : index_range(reporter_links))
-    for (const auto sample_i : index_range(*reporter_links[rep_i]))
-      // Fill the corresponding containers
-      data[rep_i].insert(data[rep_i].end(),
-                        (*reporter_links[rep_i])[sample_i].begin() + _shift_outputs,
-                        (*reporter_links[rep_i])[sample_i].end());
+  for (const auto & action_i : index_range(reporter_links))
+  {
+    // Fetch the vector of time series for a given reporter
+    const std::vector<std::vector<Real>> & reporter_data = *reporter_links[action_i];
+
+    for (const auto & sample : reporter_data)
+    {
+      const unsigned int sample_vector_size = sample.size() - _shift_outputs;
+      const unsigned int num_entries_kept = sample_vector_size / _timestep_window;
+      std::vector<Real> action_for_sample(num_entries_kept, 0.0);
+
+      unsigned int real_i = 0;
+      for (const auto time_i : make_range(sample_vector_size))
+        if (!(time_i % _timestep_window))
+        {
+          action_for_sample[real_i] = sample[time_i + _shift_outputs];
+          real_i++;
+        }
+
+      data[action_i].push_back(std::move(action_for_sample));
+    }
+  }
 }
 
 void
-LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
+LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<std::vector<Real>> & data,
                                                      const std::vector<std::vector<Real>> * const reporter_link)
 {
+  // Fetch the vector of time series for a given reporter
+  const std::vector<std::vector<Real>> & reporter_data = *reporter_link;
+
+  for (const auto & sample : reporter_data)
+  {
+    const unsigned int sample_vector_size = sample.size() - _shift_outputs;
+    const unsigned int num_entries_kept = sample_vector_size / _timestep_window;
+
+    std::vector<Real> reward_for_sample(num_entries_kept, 0.0);
+
+    unsigned int real_i = 0;
+    for (const auto time_i : make_range(sample_vector_size))
+      if (!(time_i % _timestep_window) && (time_i + _timestep_window < sample_vector_size + _shift_outputs))
+      {
+        reward_for_sample[real_i] = sample[time_i + _timestep_window];
+        real_i++;
+      }
+
+    data.push_back(std::move(reward_for_sample));
+  }
+
   // Fill the corresponding container
-  for (const auto sample_i : index_range(*reporter_link))
-    data.insert(data.end(), (*reporter_link)[sample_i].begin() + _shift_outputs, (*reporter_link)[sample_i].end());
+  // for (const auto sample_i : index_range(*reporter_link))
+  // {
+  //   for (const unsigned int state_i = _shift_outputs; state_i <  (*reporter_link)[sample_i].size(); state_i++)
+  //       {
+  //         if (!((state_i - _shift_outputs) % _timestep_window))
+  //           data.push_back((*reporter_link)[sample_i][state_i]);
+  //       }
+  // }
+    // data.insert(data.end(), (*reporter_link)[sample_i].begin() + _shift_outputs, (*reporter_link)[sample_i].end());
 }
 
 void

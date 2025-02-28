@@ -96,6 +96,32 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
   }
 }
 
+Real
+LibtorchArtificialNeuralNet::determineGain(const std::string & activation)
+{
+  if (activation == "relu")
+    return std::sqrt(2);
+  if (activation == "tanh")
+    return 5.0/3.0;
+
+  return 1.0;
+}
+
+void
+LibtorchArtificialNeuralNet::initializeNeuralNetwork()
+{
+  for (unsigned int i = 0; i < numHiddenLayers(); ++i)
+  {
+    const auto & activation = _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
+    const Real gain = determineGain(activation);
+    torch::nn::init::orthogonal_(_weights[i]->weight, gain);
+    torch::nn::init::zeros_(_weights[i]->bias);
+  }
+
+  torch::nn::init::orthogonal_(_weights.back()->weight);
+  torch::nn::init::zeros_(_weights.back()->bias);
+}
+
 void
 LibtorchArtificialNeuralNet::constructNeuralNetwork()
 {

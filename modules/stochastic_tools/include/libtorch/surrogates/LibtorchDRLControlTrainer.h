@@ -56,9 +56,19 @@ protected:
    * @param tensor_data The tensor where we would like to save the results
    * @param detach If the gradient info needs to be detached from the tensor
    */
-  void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
+  void convertDataToTensor(std::vector<std::vector<std::vector<Real>>> & vector_data,
                            torch::Tensor & tensor_data,
                            const bool detach = false);
+
+  /**
+   * Function to convert input/output data from std::vector<std::vector> to torch::tensor
+   * @param vector_data The input data in vector-vectors format
+   * @param tensor_data The tensor where we would like to save the results
+   * @param detach If the gradient info needs to be detached from the tensor
+   */
+  void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
+    torch::Tensor & tensor_data,
+    const bool detach = false);
 
   /**
    * Function which evaluates the critic to get the value (discounter reward)
@@ -77,31 +87,32 @@ protected:
   torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);
 
   /// Compute the return value by discounting the rewards and summing them
-  void computeRewardToGo(std::vector<Real> & data,
-                         const std::vector<std::vector<Real>> * const reporter_link);
+  void computeReturn(std::vector<std::vector<Real>> & data,
+                         const std::vector<std::vector<Real>> & reward,
+                        const Real decay_factor);
 
   /// Reset data after updating the neural network
   void resetData();
 
   /// Response reporter names
-  const std::vector<ReporterName> _response_names;
+  const std::vector<ReporterName> _state_names;
 
   /// Pointers to the current values of the responses
   /// We can have multiple responses, multiple samples, multiple timesteps
-  std::vector<const std::vector<std::vector<Real>> *> _response_value_pointers;
+  std::vector<const std::vector<std::vector<Real>> *> _state_value_pointers;
 
   /// Shifting constants for the responses
-  const std::vector<Real> _response_shift_factors;
+  const std::vector<Real> _state_shift_factors;
 
   /// Scaling constants for the responses
-  const std::vector<Real> _response_scaling_factors;
+  const std::vector<Real> _state_scaling_factors;
 
   /// Control reporter names
-  const std::vector<ReporterName> _control_names;
+  const std::vector<ReporterName> _action_names;
 
   /// Pointers to the current values of the control signals
   /// We can have multiple control signals, multiple samples, multiple timesteps
-  std::vector<const std::vector<std::vector<Real>> *> _control_value_pointers;
+  std::vector<const std::vector<std::vector<Real>> *> _action_value_pointers;
 
   /// Log probability reporter names
   const std::vector<ReporterName> _log_probability_names;
@@ -126,16 +137,18 @@ protected:
   unsigned int _num_outputs;
 
   ///@{
-  /// The gathered data from the reporters, each row represents one QoI, each column represents one time step
-  std::vector<std::vector<Real>> _input_data;
-  std::vector<std::vector<Real>> _output_data;
-  std::vector<std::vector<Real>> _log_probability_data;
+  std::vector<std::vector<std::vector<Real>>> _state_data;
+  std::vector<std::vector<std::vector<Real>>> _next_state_data;
+  std::vector<std::vector<std::vector<Real>>> _action_data;
+  std::vector<std::vector<std::vector<Real>>> _log_probability_data;
   ///@}
 
   ///@{
   /// The reward and return data. The return is calculated using the _reward_data
-  std::vector<Real> _reward_data;
-  std::vector<Real> _return_data;
+  std::vector<std::vector<Real>> _reward_data;
+  std::vector<std::vector<Real>> _return_data;
+  std::vector<std::vector<Real>> _delta_data;
+  std::vector<std::vector<Real>> _gae_data;
   ///@}
 
   /// Number of epochs for the training of the emulator
@@ -161,6 +174,7 @@ protected:
 
   /// Decaying factor that is used when calculating the return from the reward
   const Real _decay_factor;
+  const Real _lambda_factor;
 
   /// Standard deviation for the actions
   const std::vector<Real> _action_std;
@@ -199,15 +213,18 @@ protected:
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _critic_nn;
 
   /// Torch::tensor version of the input and action data
-  torch::Tensor _input_tensor;
-  torch::Tensor _output_tensor;
+  torch::Tensor _state_tensor;
+  torch::Tensor _next_state_tensor;
+  torch::Tensor _action_tensor;
+  torch::Tensor _gae_tensor;
   torch::Tensor _return_tensor;
+  torch::Tensor _delta_tensor;
   torch::Tensor _log_probability_tensor;
 
+  std::unique_ptr<torch::optim::Adam> _actor_optimizer;
+  std::unique_ptr<torch::optim::Adam> _critic_optimizer;
+
 private:
-
-  torch::Tensor gaussianEntropy(const torch::Tensor std);
-
   /**
    * Extract the response values from the postprocessors of the controlled system.
    * This assumes that they are stored in an AccumulateReporter
@@ -215,7 +232,8 @@ private:
    * @param reporter_names The names of the reporters which need to be extracted
    * @param num_timesteps The number of timesteps we want to use for training
    */
-  void getResponseDataFromReporter(std::vector<std::vector<Real>> & data,
+  void getResponseDataFromReporter(std::vector<std::vector<std::vector<Real>>> & data,
+                                  std::vector<std::vector<std::vector<Real>>> & next_data,
                                   const std::vector<const std::vector<std::vector<Real>> *> & reporter_links,
                                   const unsigned int num_timesteps);
   /**
@@ -224,10 +242,16 @@ private:
    * @param data The data where we would like to store the output values
    * @param reporter_names The names of the reporters which need to be extracted
    */
-  void getSignalDataFromReporter(std::vector<std::vector<Real>> & data,
+  void getSignalDataFromReporter(std::vector<std::vector<std::vector<Real>>> & data,
                                  const std::vector<const std::vector<std::vector<Real>> *> & reporter_links);
 
-  void normalizeResponseData(std::vector<std::vector<Real>> & data, const unsigned int num_reporters, const unsigned int num_timesteps);
+  void computeCumulativeRewardEstimate(std::vector<std::vector<Real>> & data,
+                                  std::vector<std::vector<std::vector<Real>>> & state,
+                                  std::vector<std::vector<std::vector<Real>>> & next_state,
+                                  std::vector<std::vector<Real>> & reward);
+
+  void normalizeResponseData(std::vector<std::vector<std::vector<Real>>> & data,
+          const unsigned int num_timesteps);
 
   /**
    * Extract the reward values from the postprocessors of the controlled system
@@ -235,7 +259,7 @@ private:
    * @param data The data where we would like to store the reward values
    * @param reporter_names The name of the reporter which need to be extracted
    */
-  void getRewardDataFromReporter(std::vector<Real> & data,
+  void getRewardDataFromReporter(std::vector<std::vector<Real>> & data,
                                  const std::vector<std::vector<Real>> * const reporter_link);
 
   /// Getting reporter pointers with given names
@@ -244,6 +268,8 @@ private:
 
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
+
+  unsigned int _timestep_window;
 };
 
 #endif

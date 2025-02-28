@@ -86,6 +86,10 @@ public:
   /// Construct the neural network
   virtual void constructNeuralNetwork();
 
+  Real determineGain(const std::string & activation);
+
+  virtual void initializeNeuralNetwork();
+
   const std::vector<Real> & minValues() const {return _minimum_values;};
 
   const std::vector<Real> & maxValues() const {return _maximum_values;};

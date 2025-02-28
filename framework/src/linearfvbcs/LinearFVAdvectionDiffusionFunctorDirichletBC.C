@@ -58,6 +58,8 @@ LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryValueMatrixContribu
 Real
 LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryValueRHSContribution() const
 {
+  // if (name() == "gap_x")
+  //   std::cout << name() << std::endl;
   // Fetch the boundary value from the provided functor.
   return _functor(singleSidedFaceArg(_current_face_info), determineState());
 }

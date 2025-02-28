@@ -104,41 +104,48 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
 
   // If the user wants to read the neural net from file, we do it. We can read it from a
   // torchscript file, or we can create a shell and read back the parameters
-  if (isParamValid("filename"))
-  {
-    std::string filename = getParam<std::string>("filename");
-    if (getParam<bool>("torch_script_format"))
-      _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
-    else
-    {
-      unsigned int num_inputs = _response_names.size() * _input_timesteps;
-      unsigned int num_outputs = _control_names.size();
-      std::vector<unsigned int> num_neurons_per_layer =
-          getParam<std::vector<unsigned int>>("num_neurons_per_layer");
-      std::vector<std::string> activation_functions =
-          parameters.isParamSetByUser("activation_function")
-              ? getParam<std::vector<std::string>>("activation_function")
-              : std::vector<std::string>({"relu"});
-      auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-          filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
+  // if (isParamValid("filename"))
+  //   this->loadControlNeuralNetFromFile(parameters);
+}
 
-      try
-      {
-        torch::load(nn, filename);
-        _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*nn);
-      }
-      catch (const c10::Error & e)
-      {
-        mooseError(
-            "The requested pytorch parameter file could not be loaded. This can either be the"
-            "result of the file not existing or a misalignment in the generated container and"
-            "the data in the file. Make sure the dimensions of the generated neural net are the"
-            "same as the dimensions of the parameters in the input file!\n",
-            e.msg());
-      }
+void
+LibtorchNeuralNetControl::loadControlNeuralNetFromFile(const InputParameters & parameters)
+{
+  const auto & filename = getParam<std::string>("filename");
+  if (getParam<bool>("torch_script_format"))
+    _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
+  else
+  {
+    unsigned int num_inputs = _response_names.size() * _input_timesteps;
+    unsigned int num_outputs = _control_names.size();
+    std::vector<unsigned int> num_neurons_per_layer =
+        getParam<std::vector<unsigned int>>("num_neurons_per_layer");
+    std::vector<std::string> activation_functions =
+        parameters.isParamSetByUser("activation_function")
+            ? getParam<std::vector<std::string>>("activation_function")
+            : std::vector<std::string>({"relu"});
+    auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
+        filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
+
+    try
+    {
+      torch::load(nn, filename);
+      _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*nn);
+    }
+    catch (const c10::Error & e)
+    {
+      mooseError(
+          "The requested pytorch parameter file could not be loaded. This can either be the"
+          "result of the file not existing or a misalignment in the generated container and"
+          "the data in the file. Make sure the dimensions of the generated neural net are the"
+          "same as the dimensions of the parameters in the input file!\n",
+          e.msg());
     }
   }
+
+  execute();
 }
+
 
 void
 LibtorchNeuralNetControl::execute()

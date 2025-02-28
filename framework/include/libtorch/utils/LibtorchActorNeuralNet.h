@@ -75,6 +75,8 @@ public:
 
   torch::Tensor entropy();
 
+  virtual void initializeNeuralNetwork() override;
+
 protected:
   const std::vector<Real> & _std;
 
