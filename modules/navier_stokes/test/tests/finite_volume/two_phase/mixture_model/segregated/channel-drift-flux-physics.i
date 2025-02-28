@@ -149,12 +149,10 @@ k_d = 1
 [Outputs]
   print_linear_residuals = true
   print_nonlinear_residuals = true
+  csv = true
   [out]
     type = Exodus
     hide = 'Re dp'
-  []
-  [perf]
-    type = PerfGraphOutput
   []
   execute_on = 'INITIAL TIMESTEP_END'
 []
@@ -170,5 +168,13 @@ k_d = 1
     upstream_boundary = 'left'
     downstream_boundary = 'right'
     boundary = 'left right'
+  []
+  [average_phase2]
+    type = ElementAverageValue
+    variable = 'phase_2'
+  []
+  [max_phase2]
+    type = ElementExtremeValue
+    variable = 'phase_2'
   []
 []
