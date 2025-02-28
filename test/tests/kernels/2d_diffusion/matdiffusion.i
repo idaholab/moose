@@ -35,17 +35,16 @@ AD = ''
 []
 
 [BCs]
-  [left]
+  [right]
     type = ${AD}DirichletBC
     variable = u
-    boundary = 1
+    boundary = right
     value = 0
   []
-
-  [right]
+  [top]
     type = ${AD}NeumannBC
     variable = u
-    boundary = 2
+    boundary = top
     value = 1
   []
 []
