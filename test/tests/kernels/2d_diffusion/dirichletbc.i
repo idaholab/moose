@@ -7,6 +7,8 @@
 # @Requirement F3.30
 ###########################################################
 
+AD = ''
+
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
@@ -23,7 +25,7 @@
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = ${AD}Diffusion
     variable = u
   []
 []
@@ -31,14 +33,14 @@
 [BCs]
   # BCs cannot be preset due to Jacobian test
   [left]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     preset = false
     boundary = left
     value = 0
   []
   [right]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     preset = false
     boundary = right
