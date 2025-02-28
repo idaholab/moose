@@ -2,66 +2,74 @@
 # This is a simple test of the Kernel System.
 # It solves the Laplacian equation on a small 2x2 grid.
 # The "Diffusion" kernel is used to calculate the
-# residuals of the weak form of this operator.
-#
-# @Requirement F3.30
+# residuals of the weak form of this operator. The
+# "BodyForce" kernel is used to apply a time-dependent
+# volumetric source.
 ###########################################################
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
-  active = 'u'
-
-  [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  active = 'diff'
-
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
+  [bf]
+    type = BodyForce
+    variable = u
+    postprocessor = ramp
+  []
+[]
+
+[Functions]
+  [ramp]
+    type = ParsedFunction
+    expression = 't'
+  []
+[]
+
+[Postprocessors]
+  [ramp]
+    type = FunctionValuePostprocessor
+    function = ramp
+    execute_on = linear
+  []
 []
 
 [BCs]
-  # BCs cannot be preset due to Jacobian test
-  active = 'left right'
-
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
-    preset = false
-    boundary = 3
+    boundary = left
     value = 0
-  [../]
-
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
-    preset = false
-    boundary = 1
-    value = 1
-  [../]
+    boundary = right
+    value = 0
+  []
 []
 
 [Executioner]
-  type = Steady
-
+  type = Transient
+  dt = 1.0
+  end_time = 1.0
   solve_type = 'NEWTON'
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []
