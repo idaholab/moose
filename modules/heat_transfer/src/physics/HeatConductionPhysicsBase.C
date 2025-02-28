@@ -97,7 +97,7 @@ HeatConductionPhysicsBase::addInitialConditions()
     return;
 
   // Always obey the user, but dont set a hidden default when restarting
-  if (!_app.isRestarting() && parameters().isParamSetByUser("initial_temperature"))
+  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
   {
     InputParameters params = getFactory().getValidParams("FunctionIC");
     params.set<VariableName>("variable") = _temperature_name;
