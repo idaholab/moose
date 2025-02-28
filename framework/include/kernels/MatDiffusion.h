@@ -29,5 +29,5 @@ public:
   MatDiffusionTempl(const InputParameters & parameters);
 };
 
-typedef MatDiffusionBaseParent<false> MatDiffusion;
-typedef MatDiffusionBaseParent<true> ADMatDiffusion;
+typedef MatDiffusionTempl<false> MatDiffusion;
+typedef MatDiffusionTempl<true> ADMatDiffusion;
