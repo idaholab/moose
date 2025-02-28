@@ -124,7 +124,8 @@ SetupMeshAction::SetupMeshAction(const InputParameters & params)
   : MooseObjectAction(params),
     _use_split(getParam<bool>("use_split") || _app.getParam<bool>("use_split")),
     _split_file(_app.isParamSetByUser("split_file") ? _app.getParam<std::string>("split_file")
-                                                    : getParam<std::string>("split_file"))
+                                                    : getParam<std::string>("split_file")),
+    _file_mesh_supersedes_mesh_generators(false)
 {
 }
 
@@ -286,7 +287,11 @@ SetupMeshAction::act()
             {
               mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
                            _type,
-                           "\" mesh, which does not use Mesh Generators in constructing the mesh.");
+                           "\" mesh, which does not use Mesh Generators in constructing the mesh. ",
+                           "The ",
+                           _type,
+                           " will supersede the Mesh Generators.");
+              _file_mesh_supersedes_mesh_generators = true;
               break;
             }
         }
@@ -311,8 +316,8 @@ SetupMeshAction::act()
       // 1. We have mesh generators
       // 2. We are not using the pre-split mesh
       // 3. We are not: recovering/restarting and we are the master application
-      if (!_app.getMeshGeneratorNames().empty() && !_use_split &&
-          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
+      if ((!_app.getMeshGeneratorNames().empty() && !_file_mesh_supersedes_mesh_generators) &&
+          !_use_split && !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
       {
         auto & mesh_generator_system = _app.getMeshGeneratorSystem();
         auto mesh_base =
