@@ -1,3 +1,5 @@
+AD = ''
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -8,44 +10,37 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./cres]
-    type = MatAnisoDiffusion
+  [cres]
+    type = ${AD}MatAnisoDiffusion
     diffusivity = D
     variable = c
-  [../]
-  [./time]
-    type = TimeDerivative
+  []
+  [time]
+    type = ${AD}TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
-  [./D]
-    type = ConstantAnisotropicMobility
+  [D]
+    type = ${AD}ConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
     M_name = D
-  [../]
-[]
-
-[Preconditioning]
-  [./SMP]
-   type = SMP
-   full = true
-  [../]
+  []
 []
 
 [Executioner]
