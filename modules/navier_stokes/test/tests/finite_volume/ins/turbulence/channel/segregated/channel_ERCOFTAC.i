@@ -305,21 +305,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = TKED
     value = '${eps_init}'
   []
-  # [inlet_TKE]
-  #   type = INSFVInletIntensityTKEBC
-  #   boundary = 'left'
-  #   variable = TKE
-  #   u = vel_x
-  #   v = vel_y
-  #   intensity = ${intensity}
-  # []
-  # [inlet_TKED]
-  #   type = INSFVMixingLengthTKEDBC
-  #   boundary = 'left'
-  #   variable = TKED
-  #   k = TKE
-  #   characteristic_length = '${fparse 2*H}'
-  # []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
     boundary = 'bottom top'
@@ -332,39 +317,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     k = TKE
     wall_treatment = ${wall_treatment}
   []
-  # [sym-u]
-  #   type = INSFVSymmetryVelocityBC
-  #   boundary = 'bottom'
-  #   variable = vel_x
-  #   u = vel_x
-  #   v = vel_y
-  #   mu = 'mu_t'
-  #   momentum_component = x
-  # []
-  # [sym-v]
-  #   type = INSFVSymmetryVelocityBC
-  #   boundary = 'bottom'
-  #   variable = vel_y
-  #   u = vel_x
-  #   v = vel_y
-  #   mu = 'mu_t'
-  #   momentum_component = y
-  # []
-  # [symmetry_pressure]
-  #   type = INSFVSymmetryPressureBC
-  #   boundary = 'bottom'
-  #   variable = pressure
-  # []
-  # [symmetry_TKE]
-  #   type = INSFVSymmetryScalarBC
-  #   boundary = 'bottom'
-  #   variable = TKE
-  # []
-  # [symmetry_TKED]
-  #   type = INSFVSymmetryScalarBC
-  #   boundary = 'bottom'
-  #   variable = TKED
-  # []
 []
 
 [AuxVariables]

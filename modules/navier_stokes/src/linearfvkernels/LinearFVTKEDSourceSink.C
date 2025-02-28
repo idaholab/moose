@@ -19,8 +19,6 @@ LinearFVTKEDSourceSink::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
   params.addClassDescription("Elemental kernel to compute the production and destruction "
-                             " terms of turbulent kinetic energy (TKE).");
-  params.addClassDescription("Elemental kernel to compute the production and destruction "
                              " terms of turbulent kinetic energy dissipation (TKED).");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
