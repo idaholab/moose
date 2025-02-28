@@ -7,6 +7,8 @@
 # volumetric source.
 ###########################################################
 
+AD = ''
+
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
@@ -23,11 +25,11 @@
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = ${AD}Diffusion
     variable = u
   []
   [bf]
-    type = BodyForce
+    type = ${AD}BodyForce
     variable = u
     postprocessor = ramp
   []
@@ -50,13 +52,13 @@
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     boundary = left
     value = 0
   []
   [right]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     boundary = right
     value = 0

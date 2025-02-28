@@ -1,3 +1,5 @@
+AD = ''
+
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
@@ -14,20 +16,20 @@
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = ${AD}Diffusion
     variable = u
   []
 []
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     boundary = 3
     value = 0
   []
   [right]
-    type = NeumannBC
+    type = ${AD}NeumannBC
     variable = u
     boundary = 1
     value = 1
