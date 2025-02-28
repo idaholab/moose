@@ -1,3 +1,5 @@
+AD = ''
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -11,20 +13,20 @@
 []
 
 [Kernels]
-  [cres]
-    type = MatDiffusion
+  [diff]
+    type = ${AD}MatDiffusion
     variable = u
     diffusivity = Du
   []
-  [ctime]
-    type = TimeDerivative
+  [dt]
+    type = ${AD}TimeDerivative
     variable = u
   []
 []
 
 [Materials]
   [Dc]
-    type = DerivativeParsedMaterial
+    type = ${AD}DerivativeParsedMaterial
     property_name = Du
     expression = '0.01+u^2'
     coupled_variables = 'u'
@@ -34,14 +36,14 @@
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     boundary = 1
     value = 0
   []
 
   [right]
-    type = NeumannBC
+    type = ${AD}NeumannBC
     variable = u
     boundary = 2
     value = 1
