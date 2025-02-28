@@ -31,5 +31,5 @@ public:
   MatAnisoDiffusionTempl(const InputParameters & parameters);
 };
 
-typedef MatAnisoDiffusionBaseParent<false> MatAnisoDiffusion;
-typedef MatAnisoDiffusionBaseParent<true> ADMatAnisoDiffusion;
+typedef MatAnisoDiffusionTempl<false> MatAnisoDiffusion;
+typedef MatAnisoDiffusionTempl<true> ADMatAnisoDiffusion;
