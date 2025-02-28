@@ -29,13 +29,6 @@
   []
 []
 
-[Functions]
-  [forcing]
-    type = ParsedFunction
-    expression = 't*t*t+4'
-  []
-[]
-
 [NodalKernels]
   [td]
     type = TimeDerivativeNodalKernel
@@ -75,6 +68,10 @@
   [exact_solution_function]
     type = ParsedFunction
     expression = (1.0/4.0)*(16*t+t*t*t*t)
+  []
+  [forcing]
+    type = ParsedFunction
+    expression = 't*t*t+4'
   []
 []
 

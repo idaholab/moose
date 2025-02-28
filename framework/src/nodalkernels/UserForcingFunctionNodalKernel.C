@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerMooseObject("MooseApp", UserForcingFunctionNodalKernel);
+registerMooseObjectDeprecated("MooseApp", UserForcingFunctionNodalKernel, "01/01/2026 00:00");
 
 InputParameters
 UserForcingFunctionNodalKernel::validParams()

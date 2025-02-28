@@ -37,10 +37,10 @@
 
 [NodalKernels]
   [source]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = u
     block = '1'
-    function = '1'
+    functor = '1'
   []
   [bc_all]
     type = PenaltyDirichletNodalKernel
