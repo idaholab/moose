@@ -4,7 +4,7 @@
 !datetime today format=%B %Y
 
 !style halign=center
-[www.mooseframework.org](index.md exact=True)
+[www.mooseframework.inl.gov](index.md exact=True)
 
 !---
 

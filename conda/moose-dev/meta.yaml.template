@@ -27,7 +27,7 @@ requirements:
     - {{ moose_peacock }}
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: >
     A simple package which installs all necessary Conda packages for MOOSE based development.
