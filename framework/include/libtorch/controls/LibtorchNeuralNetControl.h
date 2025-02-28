@@ -50,6 +50,8 @@ public:
    */
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
+  virtual void loadControlNeuralNetFromFile(const InputParameters & parameters);
+
   /// Return a reference to the stored neural network
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 

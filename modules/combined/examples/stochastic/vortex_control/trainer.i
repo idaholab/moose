@@ -4,9 +4,9 @@
 [Samplers]
   [dummy]
     type = CartesianProduct
-    linear_space_items = '0 0.01 1'
-    min_procs_per_row = 30
-    max_procs_per_row = 30
+    linear_space_items = '0 0.01 5'
+    min_procs_per_row = 20
+    max_procs_per_row = 20
   []
 []
 
@@ -16,8 +16,8 @@
     sampler = dummy
     input_files = 'flow_over_circle_linearfv.i'
     mode = batch-reset
-    min_procs_per_app = 30
-    max_procs_per_app = 30
+    min_procs_per_app = 20
+    max_procs_per_app = 20
   []
 []
 
@@ -49,14 +49,15 @@
     log_probability = 'storage/r_transfer:results:log_prob_Q:value'
     reward = 'storage/r_transfer:results:reward:value'
 
-    num_epochs = 25
-    update_frequency = 10
-    decay_factor = 0.995
+    num_epochs = 50
+    update_frequency = 2
+    decay_factor = 0.99
+    lambda_factor = 0.97
 
     loss_print_frequency = 1
 
     critic_learning_rate = 0.001
-    num_critic_neurons_per_layer = '64 64'
+    num_critic_neurons_per_layer = '128 128'
     critic_activation_functions = 'relu relu'
 
     control_learning_rate = 0.001
@@ -75,7 +76,7 @@
     # response_scaling_factors = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0'
     # response_shift_factors = '0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0'
 
-    action_standard_deviations = '0.01'
+    action_standard_deviations = '0.1'
 
     standardize_advantage = true
 
@@ -84,10 +85,11 @@
     # min_control_value = ${fparse -0.108}
     # max_control_value = ${fparse 0.108}
 
-    min_control_value = ${fparse -0.080}
-    max_control_value = ${fparse 0.080}
+    min_control_value = ${fparse -0.108}
+    max_control_value = ${fparse 0.108}
 
-    batch_size = 1600
+    batch_size = 160
+    timestep_window = 50
   []
 []
 

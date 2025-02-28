@@ -44,8 +44,7 @@ LiftDragRewardPostprocessor::LiftDragRewardPostprocessor(const InputParameters &
     _avg_lift(0.0),
     _avg_drag(0.0),
     _lift_history(std::vector<Real>(_averaging_window,0.0)),
-    _drag_history(std::vector<Real>(_averaging_window,0.0)),
-    _replace_counter(0)
+    _drag_history(std::vector<Real>(_averaging_window,0.0))
 {
 }
 
@@ -59,15 +58,26 @@ LiftDragRewardPostprocessor::getValue() const
 void
 LiftDragRewardPostprocessor::execute()
 {
-  auto rolling_index = _replace_counter % _averaging_window;
-  auto normalization = std::min(_replace_counter + 1, _averaging_window);
+  auto rolling_index = _t_step % _averaging_window;
+  // std::cout << " Rolling index " << rolling_index << std::endl;
 
   // std::cout << "Lift" << _lift << " drag " << _drag << std::endl;
   _lift_history[rolling_index] = _lift;
   _drag_history[rolling_index] = _drag;
 
-  _avg_lift = std::reduce(_lift_history.begin(), _lift_history.end())/normalization;
-  _avg_drag = std::reduce(_drag_history.begin(), _drag_history.end())/normalization;
+  // std::cout << Moose::stringify(_lift_history) << std::endl;
+  // std::cout << Moose::stringify(_drag_history) << std::endl;
+
+  if (!rolling_index)
+  {
+    const auto normalization = _t_step ? _averaging_window : 1;
+    // std::cout << Moose::stringify(_lift_history) << std::endl;
+    // std::cout << Moose::stringify(_drag_history) << std::endl;
+    _avg_lift = std::reduce(_lift_history.begin(), _lift_history.end())/normalization;
+    _avg_drag = std::reduce(_drag_history.begin(), _drag_history.end())/normalization;
+    _lift_history = std::vector<Real>(_averaging_window,0.0);
+    _drag_history = std::vector<Real>(_averaging_window,0.0);
+  }
 
   _replace_counter++;
 }

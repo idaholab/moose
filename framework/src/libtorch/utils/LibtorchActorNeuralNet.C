@@ -58,6 +58,24 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
 }
 
 void
+LibtorchActorNeuralNet::initializeNeuralNetwork()
+{
+  for (unsigned int i = 0; i < numHiddenLayers(); ++i)
+  {
+    const auto & activation = _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
+    const Real gain = determineGain(activation);
+    torch::nn::init::orthogonal_(_weights[i]->weight, gain);
+    torch::nn::init::zeros_(_weights[i]->bias);
+  }
+
+  if (_minimum_values.size())
+  {
+    torch::nn::init::orthogonal_(_alpha_module[0]->weight);
+    torch::nn::init::orthogonal_(_beta_module[0]->weight);
+  }
+}
+
+void
 LibtorchActorNeuralNet::constructNeuralNetwork()
 {
   // Adding hidden layers
@@ -138,7 +156,7 @@ LibtorchActorNeuralNet::forward(torch::Tensor & x)
   if (_device_type != output.device().type())
     output.to(_device_type);
 
-  for (unsigned int i = 0; i < _weights.size() - 1; ++i)
+  for (unsigned int i = 0; i < _weights.size(); ++i)
   {
     std::string activation =
         _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
@@ -154,6 +172,8 @@ LibtorchActorNeuralNet::forward(torch::Tensor & x)
       output = torch::gelu(_weights[i]->forward(output));
     else if (activation == "linear")
       output = _weights[i]->forward(output);
+
+    // std::cout << "midresult" << i << output << std::endl;
   }
 
   return output;
@@ -163,6 +183,7 @@ torch::Tensor
 LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
 {
   torch::Tensor output(x);
+  // std::cout << output << std::endl;
   if (_data_type != output.scalar_type())
     output.to(_data_type);
   if (_device_type != output.device().type())
@@ -171,13 +192,13 @@ LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
   // std::cout << "input" << output << std::endl;
   output = forward(output);
 
-  // std::cout << "out" << output << std::endl;
+  // std::cout << "midresult" << output << std::endl;
   resetDistributionParams(output);
 
   if (sampled)
     return sample();
 
-  return _mean;
+  return _min_tensor + (_max_tensor - _min_tensor)*_mean;
 }
 
 torch::Tensor
