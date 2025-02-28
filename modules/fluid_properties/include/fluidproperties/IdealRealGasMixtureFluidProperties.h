@@ -57,28 +57,18 @@ public:
 
   IdealRealGasMixtureFluidProperties(const InputParameters & parameters);
 
-  /**
-   * Gets the primary component single-phase fluid properties
-   */
-  const SinglePhaseFluidProperties & getPrimaryFluidProperties() const;
+  usingVaporMixtureFluidPropertiesMembers;
 
-  /**
-   * Gets a secondary component single-phase fluid properties
-   *
-   * @param[in] i  Index of the secondary fluid properties (0 is first secondary)
-   */
-  const SinglePhaseFluidProperties & getSecondaryFluidProperties(unsigned int i = 0) const;
+  virtual const SinglePhaseFluidProperties & getPrimaryFluidProperties() const override;
+  virtual const SinglePhaseFluidProperties &
+  getSecondaryFluidProperties(unsigned int i = 0) const override;
 
-  /**
-   * Number of secondary vapors (non-condensable components)
-   *
-   * @return number of secondary vapors
-   */
-  virtual unsigned int getNumberOfSecondaryVapors() const override { return _n_secondary_vapors; }
+  virtual unsigned int numberOfComponents() const override { return _n_secondary_vapors + 1; }
 
   override_property(p, v, e);
   override_property(T, v, e);
   override_property(c, v, e);
+  override_property(v, p, T);
   override_property(rho, p, T);
   override_property(e, p, T);
   override_property(s, p, T);
@@ -89,7 +79,6 @@ public:
   override_property(k, p, T);
   override_property(e, p, rho);
 
-  declare_property(v, p, T);
   declare_property(T, p, v);
   declare_property(p, T, v);
   declare_property(e, T, v);

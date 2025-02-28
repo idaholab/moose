@@ -1,17 +1,33 @@
 # IdealGasFluidProperties
 
-!syntax description /FluidProperties/IdealGasFluidProperties
+These fluid properties implement the ideal gas law:
 
-A simple formulation that is suitable for ideal gases, where properties are derived from
-the ideal gas law
-\begin{equation}
-  P = \rho R T.
-\end{equation}
+!equation
+p v = \frac{R T}{M} \,,
 
-Temperature is calculated using the internal energy of an ideal gas
-\begin{equation}
-  u = c_v T.
-\end{equation}
+where
+
+- $p$ is pressure,
+- $v$ is specific volume,
+- $R$ is the universal gas constant,
+- $T$ is the temperature (in absolute units), and
+- $M$ is the molar mass.
+
+The specific heats (isobaric, $c_p$, and isochoric, $c_v$) are assumed constant,
+and thus their ratio is constant as well:
+
+!equation
+\gamma = \frac{c_p}{c_v} \,.
+
+The specific internal energy is computed as
+
+!equation
+e = e_\text{ref} + c_v T \,,
+
+where $e_\text{ref}$ is a reference specific internal energy value (corresponding to $T = 0$).
+
+The dynamic viscosity $\mu$ and thermal conductivity $k$ are assumed constant,
+though this assumption could later be dropped.
 
 !syntax parameters /FluidProperties/IdealGasFluidProperties
 
