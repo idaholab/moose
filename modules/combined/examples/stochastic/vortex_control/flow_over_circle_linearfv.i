@@ -376,6 +376,7 @@
     execute_on = 'TIMESTEP_BEGIN'
     smoother = 0.1
     num_stems_in_period = 50
+    stochastic = true
   []
 []
 
@@ -400,7 +401,7 @@
   print_fields = false
   continue_on_max_its = true
   dt = 0.0005
-  num_steps = 2000
+  num_steps = 4000
 []
 
 [Outputs]

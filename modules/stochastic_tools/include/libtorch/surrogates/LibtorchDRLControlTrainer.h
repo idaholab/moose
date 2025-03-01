@@ -40,6 +40,10 @@ public:
    * at the end of every episode.
    */
   Real averageEpisodeReward() { return _average_episode_reward; }
+  Real stdEpisodeReward() { return _std_episode_reward; }
+
+  std::vector<Real> sampleAverageEpsiodeRewards() { return _sample_average_episode_reward; }
+  std::vector<Real> sampleStdEpsiodeRewards() { return _sample_std_episode_reward; }
 
   /// The condensed training function
   void trainController();
@@ -48,7 +52,7 @@ public:
 
 protected:
   /// Compute the average eposiodic reward
-  void computeAverageEpisodeReward();
+  void computeEpisodeRewardStatistics();
 
   /**
    * Function to convert input/output data from std::vector<std::vector> to torch::tensor
@@ -195,6 +199,11 @@ protected:
 
   /// Storage for the current average episode reward
   Real _average_episode_reward;
+  Real _std_episode_reward;
+
+  std::vector<Real> _sample_average_episode_reward;
+  std::vector<Real> _sample_std_episode_reward;
+  std::vector<unsigned int> _sample_lengths;
 
   /// Switch to enable the standardization of the advantages
   const bool _standardize_advantage;
@@ -220,6 +229,8 @@ protected:
   torch::Tensor _return_tensor;
   torch::Tensor _delta_tensor;
   torch::Tensor _log_probability_tensor;
+
+  Real _highest_reward;
 
   std::unique_ptr<torch::optim::Adam> _actor_optimizer;
   std::unique_ptr<torch::optim::Adam> _critic_optimizer;

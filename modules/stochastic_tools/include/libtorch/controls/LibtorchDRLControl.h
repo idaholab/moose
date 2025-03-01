@@ -65,7 +65,7 @@ protected:
   unsigned int _call_counter;
   const unsigned int _num_steps_in_period;
   const Real _smoother;
-  const bool _deterministic;
+  const bool _stochastic;
 
 };
 
