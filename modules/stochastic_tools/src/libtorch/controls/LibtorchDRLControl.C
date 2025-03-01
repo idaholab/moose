@@ -29,10 +29,10 @@ LibtorchDRLControl::validParams()
   params.addParam<unsigned int>("num_stems_in_period", 1, "Blabla");
   params.addParam<Real>("smoother", 1.0, "Blabla");
 
-  params.addParam<bool>("deterministic", false, "Blabla");
+  params.addParam<bool>("stochastic", true, "Blabla");
 
-  params.addRequiredParam<std::vector<Real>>(
-    "action_standard_deviations", "Standard deviation value used while sampling the actions.");
+  params.addParam<std::vector<Real>>(
+    "action_standard_deviations", {}, "Standard deviation value used while sampling the actions.");
 
   params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
   params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
@@ -48,13 +48,14 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _call_counter(0),
     _num_steps_in_period(getParam<unsigned int>("num_stems_in_period")),
     _smoother(getParam<Real>("smoother")),
-    _deterministic(getParam<bool>("deterministic"))
+    _stochastic(getParam<bool>("stochastic"))
 {
   // Fixing the RNG seed to make sure every experiment is the same.
   if (isParamValid("seed"))
     torch::manual_seed(getParam<unsigned int>("seed"));
 
-  loadControlNeuralNetFromFile(parameters);
+  if (isParamValid("filename"))
+    loadControlNeuralNetFromFile(parameters);
 }
 
 void
@@ -129,7 +130,7 @@ LibtorchDRLControl::execute()
         // std::cout << "Std" << _actor_nn->stdTensor() << std::endl;
         // std::cout << "Input" << input_tensor << std::endl;
         // Evaluate the neural network to get the expected control value
-        torch::Tensor action = _actor_nn->evaluate(input_tensor, _deterministic);
+        torch::Tensor action = _actor_nn->evaluate(input_tensor, _stochastic);
 
         // std::cout << "in za control " << action << std::endl;
         // Compute log probability
@@ -145,7 +146,7 @@ LibtorchDRLControl::execute()
         // for (const auto i : index_range(_current_control_signals))
         //   _current_control_signals[i] = std::min(std::max(_current_control_signals[i], _minimum_actions[i]), _maximum_actions[i]);
 
-        if (!_deterministic)
+        if (!_stochastic)
         {
           torch::Tensor log_probability = _actor_nn->logProbability(action);
 

@@ -176,6 +176,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
     _min_values(getParam<std::vector<Real>>("min_control_value")),
     _max_values(getParam<std::vector<Real>>("max_control_value")),
+    _highest_reward(-1e8),
     _update_counter(_update_frequency),
     _timestep_window(getParam<unsigned int>("timestep_window"))
 {
@@ -399,7 +400,10 @@ LibtorchDRLControlTrainer::execute()
     computeReturn(_return_data, _reward_data, _decay_factor);
 
     // We compute the average reward first
-    computeAverageEpisodeReward();
+    computeEpisodeRewardStatistics();
+
+    if(_average_episode_reward > _highest_reward)
+      torch::save(_control_nn, _control_nn->name()+"_best");
 
     normalizeResponseData(_state_data, _input_timesteps);
     normalizeResponseData(_next_state_data, _input_timesteps);
@@ -427,22 +431,49 @@ LibtorchDRLControlTrainer::execute()
 }
 
 void
-LibtorchDRLControlTrainer::computeAverageEpisodeReward()
+LibtorchDRLControlTrainer::computeEpisodeRewardStatistics()
 {
   if (_reward_data.size())
   {
     _average_episode_reward = 0.0;
+    _std_episode_reward = 0.0;
     unsigned int combined_sizes = 0;
+
+    _sample_average_episode_reward.clear();
+    _sample_std_episode_reward.clear();
+
     for (const auto & sample : _reward_data)
     {
-      _average_episode_reward +=
-        std::accumulate(sample.begin(), sample.end(), 0.0);
-      combined_sizes += sample.size();
+      const unsigned int sample_size = sample.size();
+
+      Real sum = std::accumulate(sample.begin(), sample.end(), 0.0);
+      Real mean = sum / sample_size;
+      _sample_average_episode_reward.push_back(mean);
+
+
+      Real variance = std::transform_reduce(sample.begin(), sample.end(),
+        0.0,
+        std::plus<>(),
+        [mean](double value) {
+            return (value - mean) * (value - mean);
+        }
+      );
+      _sample_std_episode_reward.push_back(std::sqrt(variance / sample_size));
+
+      _average_episode_reward += sum;
+      _std_episode_reward += variance;
+      combined_sizes += sample_size;
     }
     _average_episode_reward = _average_episode_reward/combined_sizes;
+    _std_episode_reward = std::sqrt(_std_episode_reward/combined_sizes);
+
+
   }
   else
+  {
     _average_episode_reward = 0.0;
+    _std_episode_reward = 0.0;
+  }
 }
 
 void
@@ -645,6 +676,7 @@ LibtorchDRLControlTrainer::trainController()
       // std::cout << _control_nn->stdTensor() << std::endl;
       std::cout << _control_nn->alphaTensor().mean() << std::endl;
       std::cout << _control_nn->betaTensor().mean() << std::endl;
+      _console << "Best model so far: " << _highest_reward << std::endl;
     }
   }
 
