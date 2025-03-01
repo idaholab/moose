@@ -3813,6 +3813,7 @@ Assembly::elementVolume(const Elem * elem) const
 void
 Assembly::addCachedJacobian(GlobalDataKey)
 {
+#ifndef NDEBUG
   if (!_subproblem.checkNonlocalCouplingRequirement())
   {
     mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
@@ -3821,6 +3822,7 @@ Assembly::addCachedJacobian(GlobalDataKey)
       mooseAssert(_cached_jacobian_rows[i].size() == _cached_jacobian_cols[i].size(),
                   "Error: Cached data sizes MUST be the same for a given tag!");
   }
+#endif
 
   for (MooseIndex(_cached_jacobian_rows) i = 0; i < _cached_jacobian_rows.size(); i++)
     if (_sys.hasMatrix(i))
