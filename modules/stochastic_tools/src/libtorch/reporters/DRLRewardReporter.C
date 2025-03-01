@@ -21,7 +21,7 @@ DRLRewardReporter::validParams()
 
   params.addClassDescription("Reporter containing the reward values of a DRL controller trainer.");
   params.addRequiredParam<UserObjectName>(
-      "drl_trainer_name", "The name of the RDL controller trainer which computes the rewards.");
+      "drl_trainer_name", "The name of the DRL controller trainer which computes the rewards.");
 
   return params;
 }
@@ -29,7 +29,10 @@ DRLRewardReporter::validParams()
 DRLRewardReporter::DRLRewardReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     SurrogateModelInterface(this),
-    _reward(declareValueByName<Real>("average_reward", REPORTER_MODE_ROOT)),
+    _average_reward(declareValueByName<Real>("average_reward", REPORTER_MODE_ROOT)),
+    _std_reward(declareValueByName<Real>("std_reward", REPORTER_MODE_ROOT)),
+    _sample_average_reward(declareValueByName<std::vector<Real>>("sample_average_reward", REPORTER_MODE_ROOT)),
+    _sample_std_reward(declareValueByName<std::vector<Real>>("sample_std_reward", REPORTER_MODE_ROOT)),
     _trainer(getSurrogateTrainer<LibtorchDRLControlTrainer>("drl_trainer_name"))
 {
 }
@@ -37,7 +40,10 @@ DRLRewardReporter::DRLRewardReporter(const InputParameters & parameters)
 void
 DRLRewardReporter::execute()
 {
-  _reward = _trainer.averageEpisodeReward();
+  _average_reward = _trainer.averageEpisodeReward();
+  _std_reward = _trainer.stdEpisodeReward();
+  _sample_average_reward = _trainer.sampleAverageEpsiodeRewards();
+  _sample_std_reward = _trainer.sampleStdEpsiodeRewards();
 }
 
 #endif

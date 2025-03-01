@@ -27,7 +27,14 @@ public:
 
 protected:
   /// The reward values which will be saved
-  Real & _reward;
+  Real & _average_reward;
+
+  Real & _std_reward;
+
+  std::vector<Real> & _sample_average_reward;
+
+  std::vector<Real> & _sample_std_reward;
+
   /// The DRL trainer which computes the reward values
   LibtorchDRLControlTrainer & _trainer;
 };

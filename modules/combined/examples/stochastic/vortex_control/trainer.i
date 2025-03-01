@@ -57,8 +57,8 @@
     loss_print_frequency = 1
 
     critic_learning_rate = 0.001
-    num_critic_neurons_per_layer = '128 128'
-    critic_activation_functions = 'relu relu'
+    num_critic_neurons_per_layer = '64 64'
+    critic_activation_functions = 'tanh tanh'
 
     control_learning_rate = 0.001
     num_control_neurons_per_layer = '512 512'
