@@ -18,6 +18,7 @@ DiffusionPhysicsBase::validParams()
   params += PhysicsComponentInterface::validParams();
   params.addClassDescription("Base class for creating a diffusion equation");
 
+  // Variable parameters
   params.addParam<VariableName>("variable_name", "u", "Variable name for the equation");
   params.addParam<FunctionName>("initial_condition", "Initial condition for the diffused variable");
 
