@@ -65,6 +65,9 @@ public:
   auto end() const { return _object.end(); }
   ///@}
 
+  /// merge object stores
+  void merge(const ObjectStore & other);
+
 private:
   std::vector<T> _object;
   std::map<std::string, std::size_t> _name_to_id;
@@ -134,9 +137,10 @@ struct Element
 struct Part
 {
   Part() = default;
-  parse(const BlockNode & block);
+  Part(const BlockNode & block) { parse(block); }
+  void parse(const BlockNode & block);
 
-  optionFunc(const std::string & key, const OptionNode & option);
+  void optionFunc(const std::string & key, const OptionNode & option);
 
   void processNodeSet(const OptionNode & option);
   void processElementSet(const OptionNode & option);
@@ -172,7 +176,7 @@ struct Part
  */
 struct Instance
 {
-  Instance(const OptionNode & option, AssemblyRoot & root);
+  Instance(const BlockNode & option, AssemblyRoot & root);
 
   // upon instantiation when nodes are created we map
   // part local indices to global indices in the Root
@@ -183,9 +187,10 @@ struct Instance
 /**
  * Assembly Block
  */
-struct Assembly : public SetContainer
+struct Assembly
 {
   Assembly() = default;
+  Assembly(const BlockNode & block, AssemblyRoot & root) { parse(block, root); }
   void parse(const BlockNode & block, AssemblyRoot & root);
 
   ObjectStore<Instance> _instance;
@@ -197,6 +202,7 @@ struct Assembly : public SetContainer
 struct Root : public Part
 {
   Root() = default;
+  virtual void parse(const BlockNode & root) = 0;
 
   /// mesh points and dof bitmask
   std::vector<std::pair<Point, SubdomainID>> _mesh_points;
@@ -211,7 +217,7 @@ struct Root : public Part
 struct FlatRoot : public Root
 {
   FlatRoot() = default;
-  void parse(const BlockNode & root);
+  virtual void parse(const BlockNode & root);
 };
 
 /**
@@ -220,7 +226,7 @@ struct FlatRoot : public Root
 struct AssemblyRoot : public Root
 {
   AssemblyRoot() = default;
-  void parse(const BlockNode & root);
+  virtual void parse(const BlockNode & root);
 
   /// Parts
   ObjectStore<Part> _part;
@@ -289,6 +295,17 @@ ObjectStore<T>::add(const std::string & name, Args &&... args)
   if (_name_to_id.find(name) != _name_to_id.end())
     throw std::runtime_error("Duplicate name in ObjectStore.");
   _name_to_id[name] = id;
+  return id;
+}
+
+template <typename T>
+void
+ObjectStore<T>::merge(const ObjectStore & other)
+{
+  const auto offset = _object.size();
+  _object.insert(_object.end(), other._object.begin(), other._object.end());
+  for (const auto & [name, id] : other._name_to_id)
+    _name_to_id[name] = id + offset;
 }
 
 } // namespace Abaqus

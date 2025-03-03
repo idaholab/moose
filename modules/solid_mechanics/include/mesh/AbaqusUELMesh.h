@@ -36,40 +36,38 @@ public:
 
   virtual bool prepare(const MeshBase * mesh_to_clone) override;
 
-  //  const auto & getVarBlocks() const { return _uel_block_ids; }
-  // const auto & getUELs() const { return _element_definition; }
-  // const auto & getElements() const { return _elements; }
   // const std::vector<std::size_t> & getNodeSet(const std::string & elset) const;
   // const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
-  // const auto & getElementSets() const { return _element_set; }
-  // const auto & getNodeToUELMap() const { return _node_to_uel_map; }
   // const auto & getICBlocks() const { return _abaqus_ics; }
   // const auto & getProperties() const { return _properties; }
 
-  /// privileged write access
-  auto & getElements(Moose::PassKey<AbaqusUELMeshUserElement>) { return _elements; }
-
   std::string getVarName(std::size_t id) const;
   const Abaqus::UserElement & getUEL(const std::string & type) const;
+  const auto & getUELs() const { return _root->_element_definition; }
+
+  /// get a set of all SubdomainIDs used for restricting variable-node assignment
+  const auto & getVarBlocks() const { return _uel_block_ids; }
+
+  /// get a vector of all user elements
+  const auto & getElements() const { return _root->_elements; }
+
+  /// privileged write access
+  auto & getElements(Moose::PassKey<AbaqusUELMeshUserElement>) { return _root->_elements; }
+
+  /// get a vector of all nodes
+  const auto & getNodes() const { return _root->_nodes; }
+
+  /// get a map of all nodes to user elements
+  const auto & getNodeToUELMap() const { return _node_to_uel_map; }
+
+  const auto & getElementSets() const { return _root->_elsets; }
+  const auto & getNodeSets() const { return _root->_nsets; }
 
   void addNodeset(BoundaryID id);
 
-  /// The instantiation of Abaqus::Part::Element
-  struct LibMeshUElement
-  {
-    LibMeshUElement(Abaqus::UserElement & uel)
-      : _uel(uel), _pid(DofObject::invalid_processor_id), _properties({nullptr, nullptr})
-    {
-    }
-    Abaqus::UserElement & _uel;
-    processor_id_type _pid;
-    std::vector<dof_id_type> _libmesh_node_list;
-    std::pair<Real *, int *> _properties;
-  };
-
 protected:
   Abaqus::InputParser _input;
-  Abaqus::Root _root;
+  std::unique_ptr<Abaqus::Root> _root;
 
   void instantiateElements();
   void setupLibmeshSubdomains();
@@ -77,11 +75,9 @@ protected:
 
   dof_id_type _max_node_id;
 
-  /// Element connectivity
-  std::vector<LibMeshUElement> _elements;
-
-  // /// A map from nodes (i.e. node elements) to user elements (ids)
-  // std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
+  /// A map from nodes (i.e. node elements) to user elements (index into _root->_elements)
+  /// libMesh node IDs are AbaqusIDs.
+  std::unordered_map<dof_id_type, std::vector<Abaqus::Index>> _node_to_uel_map;
 
   /// all subdomain IDs used for UEL variable restriction
   std::set<SubdomainID> _uel_block_ids;
