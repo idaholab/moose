@@ -44,7 +44,7 @@ Material properties now include specific heat capacity and density for the time-
 ## Step 6: Running Transient Simulation
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step06_transient_heat_conduction
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step06_transient_heat_conduction
 moose-opt -i step6_transient.i
 ```
 
@@ -87,7 +87,7 @@ The `Transient` executioner has a `steady_state_detection` option to determine i
 ## Step 6: Running Pseudo-Transient Simulation
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step06_transient_heat_conduction
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step06_transient_heat_conduction
 moose-opt -i step6_pseudo_transient.i
 ```
 

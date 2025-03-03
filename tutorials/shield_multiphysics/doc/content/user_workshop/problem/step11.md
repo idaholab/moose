@@ -50,7 +50,7 @@ Before setting up the multiapp and the transfers, we must make sure
 each input file runs well separately.
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step11_multiapps
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step11_multiapps
 moose-opt -i step11_local.i
 ```
 

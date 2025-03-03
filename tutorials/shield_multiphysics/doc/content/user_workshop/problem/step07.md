@@ -32,7 +32,7 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 ## Step 7: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step07_mechanics
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step07_mechanics
 moose-opt -i step7.i
 ```
 

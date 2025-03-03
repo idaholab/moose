@@ -20,7 +20,7 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 ## Step 9: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step09_postprocessing
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step09_postprocessing
 moose-opt -i step9.i
 ```
 

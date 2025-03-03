@@ -1,4 +1,4 @@
-app_name = ../../modules/combined/combined
+app_name = ../../../modules/combined/combined
 allow_warnings = false
 allow_unused = false
 allow_override = false
