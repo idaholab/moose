@@ -300,7 +300,9 @@ EquationSystem::BuildLinearForms(Moose::MFEM::BCMap & bc_map)
 
       for (auto & lf_kernel : lf_kernels)
       {
-        lf->AddDomainIntegrator(lf_kernel->createIntegrator());
+        lf_kernel->isSubdomainRestricted()
+            ? lf->AddDomainIntegrator(lf_kernel->createIntegrator(), lf_kernel->getSubdomains())
+            : lf->AddDomainIntegrator(lf_kernel->createIntegrator());
       }
     }
     lf->Assemble();
@@ -328,7 +330,9 @@ EquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
 
       for (auto & blf_kernel : blf_kernels)
       {
-        blf->AddDomainIntegrator(blf_kernel->createIntegrator());
+        blf_kernel->isSubdomainRestricted()
+            ? blf->AddDomainIntegrator(blf_kernel->createIntegrator(), blf_kernel->getSubdomains())
+            : blf->AddDomainIntegrator(blf_kernel->createIntegrator());
       }
     }
     // Assemble
@@ -362,7 +366,10 @@ EquationSystem::BuildMixedBilinearForms()
         // Apply all mixed kernels with this test/trial pair
         for (auto & mblf_kernel : mblf_kernels)
         {
-          mblf->AddDomainIntegrator(mblf_kernel->createIntegrator());
+          mblf_kernel->isSubdomainRestricted()
+              ? mblf->AddDomainIntegrator(mblf_kernel->createIntegrator(),
+                                          mblf_kernel->getSubdomains())
+              : mblf->AddDomainIntegrator(mblf_kernel->createIntegrator());
         }
         // Assemble mixed bilinear forms
         mblf->Assemble();
@@ -457,7 +464,10 @@ TimeDependentEquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
 
       for (auto & td_blf_kernel : td_blf_kernels)
       {
-        td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator());
+        td_blf_kernel->isSubdomainRestricted()
+            ? td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator(),
+                                          td_blf_kernel->getSubdomains())
+            : td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator());
       }
     }
 
