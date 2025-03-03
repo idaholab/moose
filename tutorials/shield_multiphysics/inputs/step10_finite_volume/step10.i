@@ -23,12 +23,6 @@ power = '${fparse 5e4 / 144 * 0.1}'
     block = 'water'
     initial_condition = 1e-4
   []
-  # This isn't used in simulation, but useful for visualization
-  [vel_z]
-    type = INSFVVelocityVariable
-    block = 'water'
-    initial_condition = 0
-  []
   [pressure]
     type = INSFVPressureVariable
     block = 'water'
@@ -44,6 +38,15 @@ power = '${fparse 5e4 / 144 * 0.1}'
     type = MooseVariableScalar
     family = SCALAR
     order = FIRST
+  []
+[]
+
+[AuxVariables]
+  # This isn't used in simulation, but useful for visualization
+  [vel_z]
+    type = INSFVVelocityVariable
+    block = 'water'
+    initial_condition = 0
   []
 []
 

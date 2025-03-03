@@ -88,14 +88,13 @@ moose-opt -i step10.i Executioner/num_steps=1 Executioner/automatic_scaling=0 -p
 ```
 
 ```text
-Time Step 1, time = 0.1, dt = 0.1
-
- 0 Nonlinear |R| = 5.071028e+04
-      SVD: condition number 1.165776227500e+11, 0 of 2490 singular values are (nearly) zero
-      SVD: smallest singular values: 1.338172056200e-06 4.273321891855e-06 6.470317390884e-06 6.823445823264e-06 9.510905641771e-06
-      SVD: largest singular values : 1.403643648521e+05 1.433352087376e+05 1.484948030786e+05 1.553257174022e+05 1.560009171422e+05
-      0 Linear |R| = 5.071028e+04
-      1 Linear |R| = 1.794202e-06
+Time Step 1, time = -0.9, dt = 0.1
+ 0 Nonlinear |R| = 1.555021e+03
+      SVD: condition number 2.487578074181e+10, 0 of 1313 singular values are (nearly) zero
+      SVD: smallest singular values: 7.611317045923e-09 1.708134680767e-08 4.190012116989e-08 1.010995179237e-07 1.374565073482e-07
+      SVD: largest singular values : 1.824098672066e+02 1.870387496055e+02 1.871937194624e+02 1.888655324055e+02 1.893374539908e+02
+      0 Linear |R| = 1.555021e+03
+      1 Linear |R| = 7.108241e-08
 ```
 
 !---
@@ -106,15 +105,17 @@ Time Step 1, time = 0.1, dt = 0.1
 moose-opt -i step10.i Executioner/num_steps=1 Executioner/automatic_scaling=true -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
-```bash
-Time Step 1, time = 0.1, dt = 0.1
- 0 Nonlinear |R| = 2.510679e+04
-      SVD: condition number 2.038170935394e+09, 0 of 2490 singular values are (nearly) zero
-      SVD: smallest singular values: 2.662856988266e-06 8.978788356612e-06 1.424754114799e-05 1.508130484488e-05 2.196178581229e-05
-      SVD: largest singular values : 4.786693460120e+03 4.873545109249e+03 4.874535146130e+03 5.190883760615e+03 5.427357718595e+03
-      0 Linear |R| = 2.510679e+04
-      1 Linear |R| = 1.820331e-07
- 1 Nonlinear |R| = 2.777102e+03
+```text
+Time Step 1, time = -0.9, dt = 0.1
+
+Performing automatic scaling calculation
+
+ 0 Nonlinear |R| = 1.025510e+01
+      SVD: condition number 1.471119164321e+07, 0 of 1313 singular values are (nearly) zero
+      SVD: smallest singular values: 1.248782233114e-06 4.015976514919e-06 9.864276118040e-06 2.246290567975e-05 2.535962989263e-05
+      SVD: largest singular values : 1.767452311492e+01 1.767930840726e+01 1.768272100899e+01 1.768476342681e+01 1.837107475197e+01
+      0 Linear |R| = 1.025510e+01
+      1 Linear |R| = 1.388368e-09
 ```
 
 !---
