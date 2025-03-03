@@ -34,6 +34,7 @@ public:
   virtual bool nlConverged(const unsigned int) override { return true; }
   virtual void syncSolutions(Direction) override {}
 
+  using ExternalProblem::mesh;
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
    * MFEMMesh.
@@ -90,6 +91,7 @@ public:
                        const std::string & var_name,
                        InputParameters & parameters);
 
+  using ExternalProblem::addAuxVariable;
   /**
    * Override of ExternalProblem::addAuxVariable. Sets a
    * MFEM grid function to be used in the MFEM solve.
