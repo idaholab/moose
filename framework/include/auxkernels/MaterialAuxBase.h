@@ -13,6 +13,10 @@
 #include "AuxKernel.h"
 #include "Assembly.h"
 
+// Forward declarations
+template <typename T, bool is_ad, bool is_functor, typename RT>
+struct PropSetter;
+
 /**
  * A base class for the various Material related AuxKernal objects.
  * \p RT is short for return type
@@ -61,6 +65,9 @@ private:
 
   /// ID of the subdomain currently being iterated over
   const SubdomainID & _current_subdomain_id;
+
+  /// Hack to avoid "dangling reference" warnings from gcc 13
+  friend struct PropSetter<T, is_ad, is_functor, RT>;
 };
 
 template <typename T, bool is_ad, bool is_functor, typename RT>
@@ -91,15 +98,30 @@ MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::validParams()
 }
 
 template <typename T, bool is_ad, bool is_functor, typename RT>
+struct PropSetter
+{
+  static const Moose::Functor<Moose::GenericType<T, is_ad>> &
+  prop(MaterialAuxBaseTempl<T, is_ad, is_functor, RT> & mabt)
+  {
+    return mabt.template getFunctor<Moose::GenericType<T, is_ad>>("functor");
+  }
+};
+
+template <typename T, bool is_ad, typename RT>
+struct PropSetter<T, is_ad, false, RT>
+{
+  static const GenericMaterialProperty<T, is_ad> &
+  prop(MaterialAuxBaseTempl<T, is_ad, false, RT> & mabt)
+  {
+    return mabt.template getGenericMaterialProperty<T, is_ad>("property");
+  }
+};
+
+template <typename T, bool is_ad, bool is_functor, typename RT>
 MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<RT>(parameters),
-    _prop([this]() -> const auto & {
-      if constexpr (is_functor)
-        return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
-      else
-        return this->template getGenericMaterialProperty<T, is_ad>("property");
-    }()),
+    _prop(PropSetter<T, is_ad, is_functor, RT>::prop(*this)),
     _selected_qp(this->isParamValid("selected_qp")
                      ? this->template getParam<unsigned int>("selected_qp")
                      : libMesh::invalid_uint),
