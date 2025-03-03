@@ -113,7 +113,7 @@ ADConvectiveHeatFluxBC::initialSetup()
 
   const std::string error_msg =
       "Functor must either be defined on all of the primary side of the boundary or on all "
-      "of the neighboring side.";
+      "of the secondary side.";
   if (_T_infinity_use_neighbor && !T_inf_can_use_neighbor)
     paramError("T_infinity_functor", error_msg);
   if (_htc_use_neighbor && !htc_can_use_neighbor)
