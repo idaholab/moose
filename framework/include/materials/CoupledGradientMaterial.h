@@ -26,10 +26,8 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  GenericMaterialProperty<Real, is_ad> * _mat_prop;
-  GenericMaterialProperty<RealVectorValue, is_ad> * _grad_mat_prop;
+  GenericMaterialProperty<RealVectorValue, is_ad> & _grad_mat_prop;
   const GenericMaterialProperty<Real, is_ad> & _scalar_property;
-  const GenericVariableValue<is_ad> & _u;
   const GenericVariableGradient<is_ad> & _grad_u;
 };
 

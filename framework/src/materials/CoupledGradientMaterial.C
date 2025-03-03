@@ -17,17 +17,16 @@ InputParameters
 CoupledGradientMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addParam<MaterialPropertyName>(
-      "mat_prop",
-      "If provided, this will create a material property equal to the coupled variable.");
-  params.addParam<MaterialPropertyName>("grad_mat_prop",
-                                        "If provided, this will create a material property "
-                                        "equal to the gradient of the coupled variable.");
+  params.addClassDescription("Create a gradient material coupled to a variable.");
+  params.addRequiredParam<MaterialPropertyName>(
+      "grad_mat_prop", "Name of the gradient material property that will be created.");
+  params.deprecateParam("grad_mat_prop", "gradient_material_name", "12/12/25");
   params.addParam<MaterialPropertyName>(
       "scalar_property",
       1.0,
       "Scalar material property multiplied by the coupled variable value and gradient.");
   params.addRequiredCoupledVar("u", "The coupled variable");
+  params.deprecateCoupledVar("u", "coupled_variable", "12/12/25");
   return params;
 }
 
@@ -35,13 +34,8 @@ template <bool is_ad>
 CoupledGradientMaterialTempl<is_ad>::CoupledGradientMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
-    _mat_prop(isParamValid("mat_prop") ? &declareGenericProperty<Real, is_ad>("mat_prop")
-                                       : nullptr),
-    _grad_mat_prop(isParamValid("grad_mat_prop")
-                       ? &declareGenericProperty<RealVectorValue, is_ad>("grad_mat_prop")
-                       : nullptr),
+    _grad_mat_prop(declareGenericProperty<RealVectorValue, is_ad>("grad_mat_prop")),
     _scalar_property(getGenericMaterialProperty<Real, is_ad>("scalar_property")),
-    _u(coupledGenericValue<is_ad>("u")),
     _grad_u(coupledGenericGradient<is_ad>("u"))
 {
 }
@@ -50,8 +44,5 @@ template <bool is_ad>
 void
 CoupledGradientMaterialTempl<is_ad>::computeQpProperties()
 {
-  if (_mat_prop)
-    (*_mat_prop)[_qp] = _u[_qp] * _scalar_property[_qp];
-  if (_grad_mat_prop)
-    (*_grad_mat_prop)[_qp] = _grad_u[_qp] * _scalar_property[_qp];
+  _grad_mat_prop[_qp] = _grad_u[_qp] * _scalar_property[_qp];
 }
