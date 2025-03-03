@@ -12,23 +12,26 @@
 #include "Material.h"
 
 /**
- * A material that computes two properties, one corresponding to the value of the coupled variable
- * and the other corresponding to the gradient of the coupled variable
+ * A material that optinally computes two properties, one corresponding to the value of the coupled
+ * variable and the other corresponding to the gradient of the coupled variable
  */
-class ADCoupledGradientMaterial : public Material
+template <bool is_ad>
+class CoupledGradientMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  ADCoupledGradientMaterial(const InputParameters & parameters);
+  CoupledGradientMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
-  const std::string _mat_prop_name;
-  const std::string _grad_mat_prop_name;
-  ADMaterialProperty<Real> & _mat_prop;
-  ADMaterialProperty<RealVectorValue> & _grad_mat_prop;
-  const ADVariableValue & _u;
-  const ADVariableGradient & _grad_u;
+  GenericMaterialProperty<Real, is_ad> * _mat_prop;
+  GenericMaterialProperty<RealVectorValue, is_ad> * _grad_mat_prop;
+  const GenericMaterialProperty<Real, is_ad> & _scalar_property;
+  const GenericVariableValue<is_ad> & _u;
+  const GenericVariableGradient<is_ad> & _grad_u;
 };
+
+typedef CoupledGradientMaterialTempl<false> CoupledGradientMaterial;
+typedef CoupledGradientMaterialTempl<true> ADCoupledGradientMaterial;
