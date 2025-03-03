@@ -7,6 +7,7 @@
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind and produce results consistent with MFEM Example 3'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMDiffusion]
     type = XMLDiff
@@ -15,6 +16,7 @@
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a diffusion problem set up from MOOSE and produce the same result as a native run.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMDiffusionPartial]
     type = XMLDiff
@@ -23,6 +25,7 @@
                 OutputData/DiffusionPartial/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a diffusion problem with partial assembly set up from MOOSE and produce the same result as a native run.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMGradDiv]
     type = XMLDiff
@@ -31,6 +34,7 @@
                 OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a grad-div problem with Raviart-Thomas elements set up from MOOSE and produce the same result as a native run.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMHeatConduction]
     type = XMLDiff
@@ -40,6 +44,7 @@
                 OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem set up from MOOSE and produce the same result as a native run.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMHeatConductionElement]
     type = XMLDiff
@@ -49,6 +54,7 @@
                 OutputData/HeatConductionElement/Run0/Cycle000004/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem with element assembly set up from MOOSE and produce the same result as a native run.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMHeatTransfer]
     type = XMLDiff
@@ -57,6 +63,7 @@
                 OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary set up from MOOSE.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMLinearElasticity]
     type = XMLDiff
@@ -65,6 +72,7 @@
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem set up from MOOSE and produce the same result as a native run.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMGravity]
     type = XMLDiff
@@ -73,6 +81,7 @@
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'Platypus shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
     mfem = true
+    max_parallel = 1
   []
   [./MFEMIrrotational]
     type = CSVDiff
