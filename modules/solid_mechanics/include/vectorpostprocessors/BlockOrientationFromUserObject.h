@@ -13,7 +13,7 @@
 #include "libmesh/communicator.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
-#include "ComputeBlockOrientationByRotation.h"
+#include "ComputeBlockOrientationBase.h"
 
 // Forward Declarations
 class MooseMesh;

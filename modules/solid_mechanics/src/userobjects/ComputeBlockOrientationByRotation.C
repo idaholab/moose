@@ -66,7 +66,7 @@ ComputeBlockOrientationByRotation::execute()
 void
 ComputeBlockOrientationByRotation::threadJoin(const UserObject & y)
 {
-  ElementUserObject::threadJoin(y);
+  ComputeBlockOrientationBase::threadJoin(y);
 
   // We are joining with another class like this one so do a cast so we can get to it's data
   const ComputeBlockOrientationByRotation & cbo =
