@@ -111,21 +111,23 @@ ADKernelTempl<T>::computeResidual()
 {
   precalculateResidual();
 
-  // We use a non-AD residual vector
-  std::vector<Real> residuals(_test.size(), 0);
+  if (_residuals_nonad.size() != _test.size())
+    _residuals_nonad.resize(_test.size(), 0);
+  for (auto & r : _residuals_nonad)
+    r = 0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     const auto jxw_c = _JxW[_qp] * _coord[_qp];
     for (_i = 0; _i < _test.size(); _i++)
-      residuals[_i] += jxw_c * raw_value(computeQpResidual());
+      _residuals_nonad[_i] += jxw_c * raw_value(computeQpResidual());
   }
 
-  addResiduals(_assembly, residuals, _var.dofIndices(), _var.scalingFactor());
+  addResiduals(_assembly, _residuals_nonad, _var.dofIndices(), _var.scalingFactor());
 
   if (_has_save_in)
     for (unsigned int i = 0; i < _save_in.size(); i++)
-      _save_in[i]->sys().solution().add_vector(residuals.data(), _save_in[i]->dofIndices());
+      _save_in[i]->sys().solution().add_vector(_residuals_nonad.data(), _save_in[i]->dofIndices());
 }
 
 template <typename T>
