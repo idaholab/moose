@@ -10,6 +10,7 @@
 #include "AbaqusInputObjects.h"
 #include "MooseUtils.h"
 
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -27,27 +28,6 @@ vecTo(const std::vector<std::string> & in)
   return out;
 }
 
-Nodes::Nodes(const OptionNode & option)
-{
-  for (const auto & data : option._data)
-  {
-    // node id
-    int id = MooseUtils::convert<int>(data[0]);
-
-    // check that we don't have too many coordinate components
-    if (data.size() > 4)
-      throw std::runtime_error(
-          "Node coordinates with more than 3 components encountered in input.");
-
-    // parse coordinates
-    Point p;
-    for (const auto i : make_range(data.size() - 1))
-      p(i) = MooseUtils::convert<Real>(data[i + 1]);
-
-    _node.emplace_back(id, p);
-  }
-}
-
 UserElement::UserElement(const OptionNode & option)
 {
   const auto & map = option._header;
@@ -59,8 +39,12 @@ UserElement::UserElement(const OptionNode & option)
   _symmetric = !map.get<bool>("unsym");
   _type = map.get<std::string>("type");
 
-  // to be filled in later
-  _type_id = -1;
+  // parse type string (should be UX with X being an integer from 1 to 9,999)
+  if (_type.empty() || (_type[0] != 'U' && _type[0] != 'u'))
+    throw std::runtime_error("Invalid type string in UEL definition: " + _type);
+  _type_id = std::stoi(_type.substr(1));
+  if (_type_id < 1 || _type_id > 9999)
+    throw std::runtime_error("Invalid type string in UEL definition: " + _type);
 
   // available bits for the dof mask
   const auto bits = sizeof(SubdomainID) * 8;
@@ -108,7 +92,8 @@ UserElement::UserElement(const OptionNode & option)
     }
 }
 
-Part::parse(const BlockNode & block) : SetContainer(this)
+void
+Part::parse(const BlockNode & block)
 {
   auto option_func = [this](const std::string & key, const OptionNode & option)
   { Part::optionFunc(key, option); };
@@ -118,144 +103,140 @@ Part::parse(const BlockNode & block) : SetContainer(this)
 void
 Part::optionFunc(const std::string & key, const OptionNode & option)
 {
-  auto option_func = [&](const std::string & key, const OptionNode & option)
+  std::cout << "Part::optionFunc " << key << "\n";
+  // User element definitions
+  if (key == "user element")
   {
-    // User element definitions
-    if (key == "user element")
+    const auto type = option._header.get<std::string>("type");
+    _element_definition.add(type, option);
+  }
+
+  // Nodes
+  if (key == "node")
+  {
+    const auto & map = option._header;
+    if (map.get<std::string>("system", "R") != "R")
+      throw std::runtime_error("Only cartesian coordinates are currently supported");
+
+    // this should not be hard to add though
+    if (map.has("input"))
+      throw std::runtime_error("External coordinate inputs are not yet supported");
+
+    auto * nset = map.has("nset") ? &_nsets[map.get<std::string>("nset")] : nullptr;
+    std::set<Index> unique_ids;
+    if (nset)
+      unique_ids.insert(nset->begin(), nset->end());
+
+    // loop over data lines
+    for (const auto & data : option._data) // or loop over external input lines
     {
-      const auto type = block._header.get<std::string>("type");
-      const auto id = _element_definition.add(type, block);
-      _element_definition[id]._type_id = id;
-    }
+      if (data.size() < 2)
+        throw std::runtime_error("Insufficient data in node data line");
+      if (data.size() > 4)
+        throw std::runtime_error("Normal directions are not yet supported");
 
-    // Nodes
-    if (key == "node")
-    {
-      const auto & map = option._header;
-      if (map.get<std::string>("system", "R") != "R")
-        throw std::runtime_error("Only cartesian coordinates are currently supported");
+      const auto id = MooseUtils::convert<AbaqusID>(data[0]);
+      Point p(MooseUtils::convert<Real>(data[1]),
+              data.size() > 2 ? MooseUtils::convert<Real>(data[2]) : 0,
+              data.size() > 3 ? MooseUtils::convert<Real>(data[3]) : 0);
 
-      // this should not be hard to add though
-      if (map.has("input"))
-        throw std::runtime_error("External coordinate inputs are not yet supported");
-
-      auto * nset = map.has("nset") ? &_nsets[map.get<std::string>("nset")] : nullptr;
-      std::set<Index> unique_ids;
-      if (nset)
-        unique_ids.insert(nset->begin(), nset->end());
-
-      // loop over data lines
-      for (const auto & data : option._data) // or loop over external input lines
-      {
-        if (data.size() < 4)
-          throw std::runtime_error("Insufficient data in node data line");
-        if (data.size() > 4)
-          throw std::runtime_error("Normal directions are not yet supported");
-
-        const auto id = MooseUtils::convert<AbaqusID>(data[0]);
-        Point p(MooseUtils::convert<Real>(data[1]),
-                MooseUtils::convert<Real>(data[2]),
-                MooseUtils::convert<Real>(data[3]));
-
-        Index index = _nodes.size();
-        _nodes.push_back(Node{id, p, 0});
-        _node_id_to_index[id] = index;
-
-        if (nset)
-          unique_ids.insert(index);
-      }
+      Index index = _nodes.size();
+      _nodes.push_back(Node{id, p, 0});
+      _node_id_to_index[id] = index;
 
       if (nset)
-        nset->assign(unique_ids.begin(), unique_ids.end());
+        unique_ids.insert(index);
     }
 
-    // Elements
-    if (key == "element")
+    if (nset)
+      nset->assign(unique_ids.begin(), unique_ids.end());
+  }
+
+  // Elements
+  if (key == "element")
+  {
+    const auto & map = option._header;
+    const auto type = map.get<std::string>("type");
+    const UserElement & uel = _element_definition[type];
+
+    // add new elements to an element set?
+    auto * elset = map.has("elset") ? &_elsets[map.get<std::string>("elset")] : nullptr;
+    std::set<std::size_t> unique_ids;
+    if (elset)
+      unique_ids.insert(elset->begin(), elset->end());
+
+    // loop over data lines
+    for (const auto & data : option._data)
     {
-      const auto & map = option._header;
-      const auto type = map.get<std::string>("type");
-      const UserElement & uel = _element_definition[type];
+      const auto col = vecTo<AbaqusID>(data);
 
-      // add new elements to an element set?
-      auto * elset = map.has("elset") ? &_element_set[map.get<std::string>("elset")] : nullptr;
-      std::set<std::size_t> unique_ids;
+      // check number of nodes
+      if (col.size() - 1 != uel._n_nodes)
+        throw std::runtime_error("Wrong number of nodes for user element of type '" + type +
+                                 "' in Abaqus input.");
+
+      // prepare empty element
+      const auto id = col[0];
+      Element element{id, uel, {}, {nullptr, nullptr}};
+
+      // copy in node numbers (converting from 1-base to 0-base)
+      for (const auto i : index_range(col))
+        if (i > 0)
+          element._nodes.push_back(_node_id_to_index.at(col[i]));
+
+      // insert into unordered map
+      Index index = _elements.size();
+      _elements.push_back(element);
+      _element_id_to_index[id] = index;
+
       if (elset)
-        unique_ids.insert(elset->begin(), elset->end());
+        unique_ids.insert(index);
+    }
 
-      // loop over data lines
-      for (const auto & data : option._data)
+    if (elset)
+      elset->assign(unique_ids.begin(), unique_ids.end());
+  }
+
+  if (key == "elset")
+    processElementSet(option);
+  if (key == "nset")
+    processNodeSet(option);
+
+  // UEL properties
+  if (key == "uel property")
+  {
+    const auto & map = option._header;
+    const auto & elset = _elsets.at(map.get<std::string>("elset"));
+
+    // locate space
+    _properties.emplace_back();
+    auto & props = _properties.back();
+
+    for (const auto & data : option._data)
+    {
+      const auto dprop = vecTo<Real>(data);
+      // const auto iprop = vecTo<int>(data);
+      props.first.insert(props.first.end(), dprop.begin(), dprop.end());
+      // props.second.insert(props.second.end(), iprop.begin(), iprop.end());
+    }
+
+    // assign properties to elements
+    for (const auto index : elset)
+    {
+      auto & elem = _elements[index];
+      const auto & uel = elem._uel;
+      if (uel._n_properties > 0)
+        elem._properties.first = props.first.data();
+      else
+        elem._properties.first = nullptr;
+
+      if (uel._n_iproperties > 0)
       {
-        const auto col = vecTo<AbaqusID>(data);
-
-        // check number of nodes
-        if (col.size() - 1 != uel._n_nodes)
-          throw std::runtime_error("Wrong number of nodes for user element of type '" + type +
-                                   "' in Abaqus input.");
-
-        // prepare empty element
-        const auto id = col[0];
-        Element element{id, uel, {}, {nullptr, nullptr}};
-
-        // copy in node numbers (converting from 1-base to 0-base)
-        for (const auto i : index_range(col))
-          if (i > 0)
-            element._nodes.push_back(_node_id_to_index.at(col[i]));
-
-        // insert into unordered map
-        Index index = _elements.size();
-        _elements.push_back(element);
-        _element_id_to_index[id] = index;
-
-        if (elset)
-          unique_ids.insert(index);
+        mooseError("integer properties not supported yet (fix conversion to skip floats in data)");
+        elem._properties.second = &(props.second[uel._n_properties]);
       }
-
-      if (elset)
-        elset->assign(unique_ids.begin(), unique_ids.end());
-    }
-
-    if (key == "elset")
-      processElementSet(option);
-    if (key == "nset")
-      processNodeSet(option);
-
-    // UEL properties
-    if (key == "uel property")
-    {
-      const auto & map = option._header;
-      const auto type = map.get<std::string>("type");
-
-      // // process header
-      // HeaderMap map(header);
-      // const auto & elset = getElementSet(map.get<std::string>("elset"));
-
-      // // read data lines
-      // _properties.emplace_back();
-      // auto & props = _properties.back();
-
-      // std::string s;
-      // while (false)
-      // {
-      //   // tokenize all data as both integer and float. this should always succeed. we leter iterate
-      //   // over elements and only then know from the uel type how many entries are float and int.
-      //   std::vector<Real> rcol;
-      //   std::vector<int> icol;
-      //   MooseUtils::tokenizeAndConvert(s, rcol, ",");
-      //   props.first.insert(props.first.end(), rcol.begin(), rcol.end());
-      //   MooseUtils::tokenizeAndConvert(s, icol, ",");
-      //   props.second.insert(props.second.end(), icol.begin(), icol.end());
-      // }
-
-      // // assign properties to elements
-      // for (const auto uel_id : elset)
-      // {
-      //   auto & elem = _elements[uel_id];
-      //   const auto & uel = _element_definition[elem.type_id];
-      //   if (uel.n_properties > 0)
-      //     elem.properties.first = props.first.data();
-      //   if (uel.n_iproperties > 0)
-      //     elem.properties.second = &(props.second[uel.n_properties]);
-      // }
+      else
+        elem._properties.second = nullptr;
     }
   }
 }
@@ -272,7 +253,7 @@ Part::processNodeSet(const OptionNode & option)
     const auto & elset = _elsets.at(map.get<std::string>("elset"));
 
     // get or create node set
-    auto & nset = _node_set[map.get<std::string>("nset")];
+    auto & nset = _nsets[map.get<std::string>("nset")];
 
     // make set unique and copy nodes into it
     std::set<Index> unique_nodes(nset.begin(), nset.end());
@@ -301,6 +282,8 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
   // parse the header line
   const auto & map = option._header;
   const auto name = map.get<std::string>(name_key);
+
+  std::cout << "Processing " << name_key << " " << name << std::endl;
 
   // implement GENERATE keyword
   const auto generate = map.get<bool>("generate");
@@ -353,14 +336,15 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
   set.assign(unique_items.begin(), unique_items.end());
 }
 
-Instance::Instance(const OptionNode & option, AssemblyRoot & root)
+Instance::Instance(const BlockNode & block, AssemblyRoot & root)
 {
-  const auto & data = option._data;
-  const auto & part = root._part[option._header.get<std::string>("part")];
+  // const auto & data = block._data;
+  const auto & part = root._part[block._header.get<std::string>("part")];
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
+  /*
   // translation
   if (data.size() > 0)
   {
@@ -406,6 +390,9 @@ Instance::Instance(const OptionNode & option, AssemblyRoot & root)
                                n(2) * n(1) * oc + n(0) * s,
                                c + n(2) * n(2) * oc);
   }
+*/
+
+  // TODO: block can have _data lines, too!!! :-O
 
   // store offsets
   _local_to_global_node_index_offset = root._nodes.size();
@@ -437,19 +424,32 @@ Instance::Instance(const OptionNode & option, AssemblyRoot & root)
     root._elements.push_back(root_element);
   }
 
+  // merge uel definitions
+  root._element_definition.merge(part._element_definition);
+
   // apply node sets
   for (const auto & [nset_name, nset] : part._nsets)
+  {
+    auto & root_nset = root._nsets[nset_name];
+    for (const auto & index : nset)
+      root_nset.push_back(index + _local_to_global_node_index_offset);
+  }
+
+  // apply element sets
+  for (const auto & [elset_name, elset] : part._elsets)
+  {
+    auto & root_elset = root._elsets[elset_name];
+    for (const auto & index : elset)
+      root_elset.push_back(index + _local_to_global_element_index_offset);
+  }
 }
 
-Assembly::Assembly(const BlockNode & block, AssemblyRoot & root) : SetContainer(nullptr)
+void
+Assembly::parse(const BlockNode & block, AssemblyRoot & root)
 {
   auto option_func = [&](const std::string & key, const OptionNode & option)
   {
-    if (key == "instance")
-    {
-      const auto name = option._header.get<std::string>("name");
-      _instance.add(name, option, root);
-    }
+    std::cout << "Processing option " << key << std::endl;
 
     if (key == "elset")
     {
@@ -486,7 +486,18 @@ Assembly::Assembly(const BlockNode & block, AssemblyRoot & root) : SetContainer(
     }
   };
 
-  root.forAll(option_func, nullptr);
+  auto block_func = [&](const std::string & key, const BlockNode & block)
+  {
+    std::cout << "Processing block " << key << std::endl;
+    if (key == "instance")
+    {
+      const auto name = block._header.get<std::string>("name");
+      std::cout << "Adding instance " << name << std::endl;
+      _instance.add(name, block, root);
+    }
+  };
+
+  block.forAll(option_func, block_func);
 }
 
 // Entry point for the final parsing stage
@@ -494,7 +505,10 @@ void
 FlatRoot::parse(const BlockNode & root)
 {
   auto option_func = [this](const std::string & key, const OptionNode & option)
-  { Part::optionFunc(key, option); };
+  {
+    std::cout << key << '\n';
+    Part::optionFunc(key, option);
+  };
 
   root.forAll(option_func, nullptr);
 }

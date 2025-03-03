@@ -43,9 +43,12 @@ AddUELVariables::act()
     mooseError("Must use an AbaqusUELMesh for UEL support.");
   const auto uels = uel_mesh->getUELs();
   std::set<std::size_t> all_vars;
+  // iterate over all UEL types
   for (const auto & uel : uels)
-    for (const auto & node : uel.vars)
-      for (const auto & var : node)
+    // each UEL has a list ov vars on each node; iterate over the nodal lists
+    for (const auto & node_vars : uel._vars)
+      // iterate over the variables active on the current node
+      for (const auto & var : node_vars)
         all_vars.insert(var);
 
   // get all variable blocks

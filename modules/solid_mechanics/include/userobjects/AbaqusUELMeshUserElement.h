@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "AbaqusInputObjects.h"
 #include "GeneralUserObject.h"
 #include "BlockRestrictable.h"
 #include "TaggingInterface.h"
@@ -106,16 +107,16 @@ protected:
   AbaqusUELMesh & _uel_mesh;
 
   /// definition of the UEL this object is operating on
-  const AbaqusUELMesh::UELDefinition & _uel_definition;
+  const Abaqus::UserElement & _uel_definition;
 
   /// all elements in the UEL mesh
-  std::vector<AbaqusUELMesh::UserElement> & _uel_elements;
+  std::vector<Abaqus::Element> & _uel_elements;
 
   /// selected set names
   const std::vector<std::string> & _element_set_names;
 
   /// active elements for each element set
-  std::vector<std::size_t> _active_elements;
+  std::vector<Abaqus::Index> _active_elements;
 
   /// Auxiliary variable names
   std::vector<AuxVariableName> _aux_variable_names;
@@ -134,7 +135,7 @@ protected:
 
   /// stateful data
   int _nstatev;
-  std::array<std::map<std::size_t, std::vector<Real>>, 2> _statev;
+  std::array<std::unordered_map<Abaqus::AbaqusID, std::vector<Real>>, 2> _statev;
   std::size_t _statev_index_current;
   std::size_t _statev_index_old;
 
