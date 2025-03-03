@@ -74,29 +74,35 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     _normals(_assembly.normals()),
 
     _u_neighbor(_var.slnNeighbor()),
-    _grad_u_neighbor(_var.gradSlnNeighbor())
+    _grad_u_neighbor(_var.gradSlnNeighbor()),
+    _use_nodal_values(_var.isNodalDefined())
 {
   const std::vector<MooseVariableFieldBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 
   addMooseVariableDependency(&mooseVariableField());
+
+  // Only supports lagrange or constant monomial
 }
 
 void
 InternalSideIndicator::computeIndicator()
 {
+  // Derived class decides the contribution at each qp to the indicator value
   Real sum = 0;
-
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
 
+  // Contribution is added to the two elements
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    // We use the nodal dof index but these are constant monomial variables
-    _solution.add(_field_var.nodalDofIndex(), sum * _current_elem->hmax());
-    _solution.add(_field_var.nodalDofIndexNeighbor(), sum * _neighbor_elem->hmax());
+    const auto sys_num = _field_var.sys().number();
+    const auto var_num = _field_var.number();
+    _solution.add(_current_elem->dof_number(sys_num, var_num, 0), sum * _current_elem->hmax());
+    if (_field_var.hasBlocks(_neighbor_elem->subdomain_id()))
+      _solution.add(_neighbor_elem->dof_number(sys_num, var_num, 0), sum * _neighbor_elem->hmax());
   }
 }
 
@@ -123,8 +129,11 @@ InternalSideIndicator::finalize()
   Real value = _field_var.dofValues()[0];
 
   {
+    const auto sys_num = _field_var.sys().number();
+    const auto var_num = _field_var.number();
+
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    // We use the nodal dof index but these are constant monomial variables
-    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value) / static_cast<Real>(n_flux_faces));
+    _solution.set(_current_elem->dof_number(sys_num, var_num, 0),
+                  std::sqrt(value) / static_cast<Real>(n_flux_faces));
   }
 }
