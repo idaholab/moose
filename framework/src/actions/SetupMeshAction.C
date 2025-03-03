@@ -125,7 +125,7 @@ SetupMeshAction::SetupMeshAction(const InputParameters & params)
     _use_split(getParam<bool>("use_split") || _app.getParam<bool>("use_split")),
     _split_file(_app.isParamSetByUser("split_file") ? _app.getParam<std::string>("split_file")
                                                     : getParam<std::string>("split_file")),
-    _file_mesh_supersedes_mesh_generators(false)
+    _are_mesh_generators_superseded(false)
 {
 }
 
@@ -291,7 +291,7 @@ SetupMeshAction::act()
                          "The ",
                          _type,
                          " will supersede the Mesh Generators.");
-              _file_mesh_supersedes_mesh_generators = true;
+              _are_mesh_generators_superseded = true;
               break;
             }
         }
@@ -316,7 +316,7 @@ SetupMeshAction::act()
       // 1. We have mesh generators
       // 2. We are not using the pre-split mesh
       // 3. We are not: recovering/restarting and we are the master application
-      if ((!_app.getMeshGeneratorNames().empty() && !_file_mesh_supersedes_mesh_generators) &&
+      if ((!_app.getMeshGeneratorNames().empty() && !_are_mesh_generators_superseded) &&
           !_use_split && !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
       {
         auto & mesh_generator_system = _app.getMeshGeneratorSystem();

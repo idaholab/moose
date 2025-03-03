@@ -37,5 +37,5 @@ private:
   const std::string _split_file;
 
   /// Whether to ignore mesh generators and use FileMesh when both are present in input
-  bool _file_mesh_supersedes_mesh_generators;
+  bool _are_mesh_generators_superseded;
 };
