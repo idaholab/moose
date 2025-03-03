@@ -57,7 +57,7 @@ properties defined in `HeatConductionMaterial` automatically.
 ## Step 4: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step04_heat_conduction
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step04_heat_conduction
 moose-opt -i step4.i
 ```
 

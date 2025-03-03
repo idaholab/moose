@@ -15,7 +15,7 @@
 Without modification, running the input will produce the same solution as in Step 4:
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step08_adaptivity
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step08_adaptivity
 moose-opt -i step8_uniform.i
 ```
 
