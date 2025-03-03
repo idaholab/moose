@@ -25,7 +25,7 @@ public:
   static InputParameters validParams();
 
   /**
-   * Given a block ID return the average value for a variable on that block
+   * Given a block ID return the block orientation of that block
    *
    * Note that accessor functions on UserObjects like this _must_ be const.
    * That is because the UserObject system returns const references to objects
