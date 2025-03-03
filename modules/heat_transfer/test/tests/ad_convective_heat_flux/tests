@@ -34,7 +34,7 @@
     [error]
       type = RunException
       input = 'fe_fv_coupled_error.i'
-      expect_err = 'Functor must either be defined on all of the primary side of the boundary or on all of the neighboring side.'
+      expect_err = 'Functor must either be defined on all of the primary side of the boundary or on all of the secondary side.'
       detail = 'throw an error if coupled quantity is not consistently on one side of boundary.'
     []
   []
