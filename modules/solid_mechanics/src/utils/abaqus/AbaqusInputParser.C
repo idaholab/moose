@@ -9,6 +9,7 @@
 
 #include "AbaqusInputParser.h"
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 namespace Abaqus
 {
@@ -81,17 +82,19 @@ InputParser::parse(std::istream & in)
   // load and preprocess entire file
   loadFile(in);
 
-  _current_line(0);
+  _current_line = 0;
   parseBlockInternal(*this);
 
   // check if this is a flat or assembly based file
   _is_flat = true;
   forAll(nullptr,
-         [this]()(const std::string & key, BlockNode &)
+         [this](const std::string & key, BlockNode &)
          {
+           std::cout << "key: " << key << std::endl;
+           // if we find an assembly block, this is not a flat file
            if (key == "assembly")
              _is_flat = false;
-         })
+         });
 }
 
 void
@@ -135,11 +138,11 @@ InputParser::loadFile(std::istream & in)
   }
 }
 
-BlockNode
+std::unique_ptr<BlockNode>
 InputParser::parseBlock(const std::string & end, const std::vector<std::string> & head_line)
 {
-  BlockNode node(head_line);
-  parseBlockInternal(node, end);
+  auto node = std::make_unique<BlockNode>(head_line);
+  parseBlockInternal(*node, end);
   return node;
 }
 
@@ -164,13 +167,13 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
     if (abaqus_blocks.count(keyword))
     {
       _current_line++;
-      node._children.push_back(parseBlock(keyword, line));
+      node._children.push_back(std::move(parseBlock(keyword, line)));
     }
 
     else if (abaqus_options.count(keyword))
     {
       _current_line++;
-      node._options.push_back(parseOption(line));
+      node._children.push_back(std::move(parseOption(line)));
     }
 
     else
@@ -180,16 +183,16 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
   }
 }
 
-OptionNode
+std::unique_ptr<OptionNode>
 InputParser::parseOption(const std::vector<std::string> & head_line)
 {
-  OptionNode node(head_line);
+  auto node = std::make_unique<OptionNode>(head_line);
   while (_current_line < _lines.size())
   {
     const auto & line = _lines[_current_line];
     if (line[0][0] == '*')
       break;
-    node._data.push_back(line);
+    node->_data.push_back(line);
     _current_line++;
   }
   return node;
@@ -198,6 +201,10 @@ InputParser::parseOption(const std::vector<std::string> & head_line)
 InputNode::InputNode(std::vector<std::string> line)
 {
   _type = line[0];
+  if (!_type.empty() && _type[0] == '*')
+    _type = MooseUtils::toLower(_type.substr(1));
+  else if (line[0] != "ROOT")
+    mooseError("Invalid line for InputNode: ", Moose::stringify(line));
   _header = HeaderMap(line);
 }
 
@@ -218,9 +225,7 @@ BlockNode::stringify(const std::string & indent) const
   std::string s = indent + "[" + _type + "]\n";
   s += _header.stringify(indent + "  ");
   for (const auto & child : _children)
-    s += child.stringify(indent + "  ");
-  for (const auto & option : _options)
-    s += option.stringify(indent + "  ");
+    s += child->stringify(indent + "  ");
   s += indent + "[]\n";
   return s;
 }

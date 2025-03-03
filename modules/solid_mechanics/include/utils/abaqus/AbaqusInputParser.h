@@ -21,9 +21,6 @@
 namespace Abaqus
 {
 
-const static std::set<std::string> abaqus_blocks;
-const static std::set<std::string> abaqus_options;
-
 /**
  * Helper class to get a map of header fields from a header string
  */
@@ -48,6 +45,7 @@ struct InputNode
 {
   InputNode(std::vector<std::string> line);
   virtual ~InputNode() = default;
+  virtual std::string stringify(const std::string & indent = "") const = 0;
 
   std::string _type;
   HeaderMap _header;
@@ -55,16 +53,16 @@ struct InputNode
 struct OptionNode : public InputNode
 {
   OptionNode(std::vector<std::string> line) : InputNode(line) {}
-  std::string stringify(const std::string & indent = "") const;
+  virtual std::string stringify(const std::string & indent = "") const;
 
-  std::vector<std::vector<std::string>> _data;
+  std::vector<std::vector<std::string>> _data; // TODO: hoist this up to parent!
 };
 
 struct BlockNode;
 struct BlockNode : public InputNode
 {
   BlockNode(std::vector<std::string> line) : InputNode(line) {}
-  std::string stringify(const std::string & indent = "") const;
+  virtual std::string stringify(const std::string & indent = "") const;
 
   template <typename To, typename Tc>
   void forAll(To && option_func, Tc && block_func) const
@@ -107,9 +105,9 @@ public:
 private:
   void loadFile(std::istream & in);
 
-  BlockNode parseBlock(const std::string & end,
-                       const std::vector<std::string> & head_line = {"ROOT"});
-  OptionNode parseOption(const std::vector<std::string> & head_line = {"ROOT"});
+  std::unique_ptr<BlockNode> parseBlock(const std::string & end,
+                                        const std::vector<std::string> & head_line = {"ROOT"});
+  std::unique_ptr<OptionNode> parseOption(const std::vector<std::string> & head_line = {"ROOT"});
 
   void parseBlockInternal(BlockNode & node, const std::string & end = "");
 

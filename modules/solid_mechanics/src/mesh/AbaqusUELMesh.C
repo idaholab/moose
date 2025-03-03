@@ -7,9 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "AbaqusInputObjects.h"
 #include "AbaqusUELMesh.h"
+#include "MooseError.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
+#include <memory>
 
 registerMooseObject("SolidMechanicsApp", AbaqusUELMesh);
 
@@ -52,8 +55,19 @@ AbaqusUELMesh::buildMesh()
     paramError("file", "Error opening mesh file.");
   _input.parse(in);
 
+  if (_input.isFlat())
+  {
+    mooseInfo("Flat input file format detected.");
+    _root = std::make_unique<Abaqus::FlatRoot>();
+  }
+  else
+  {
+    mooseInfo("Hierarchical input file format detected.");
+    _root = std::make_unique<Abaqus::AssemblyRoot>();
+  }
+
   // build data structures
-  _root.process(_input);
+  _root->parse(_input);
 
   // instantiate elements
   instantiateElements();
@@ -94,16 +108,16 @@ void
 AbaqusUELMesh::instantiateElements()
 {
   // add mesh points (libmesh node elements)
-  for (const auto id : index_range(_mesh_points))
+  _mesh->reserve_nodes(_root->_nodes.size());
+  for (const auto & [abaqus_id, p, mask] : _root->_nodes)
   {
-    const auto & [p, mask] = _mesh_points[id];
-
     // add the point node and element
-    auto * node = _mesh->add_point(p, id);
+    auto * node = _mesh->add_point(p, abaqus_id);
     auto node_elem = Elem::build(NODEELEM);
     node_elem->set_node(0) = node;
-    node_elem->set_id() = id;
-    node_elem->subdomain_id = mask;
+    node_elem->set_id() = abaqus_id;
+    node_elem->subdomain_id() = mask;
+    _uel_block_ids.insert(mask);
     _mesh->add_elem(std::move(node_elem));
   }
 }
@@ -112,19 +126,17 @@ void
 AbaqusUELMesh::setupLibmeshSubdomains()
 {
 
-  // // iterate over all elements
-  // for (const auto & elem_id : index_range(_elements))
-  // {
-  //   const auto & elem = _elements[elem_id];
-  //   const auto & nodes = elem.nodes;
-  //   const auto & uel = _element_definition[elem.type_id];
+  // iterate over all elements
+  for (const auto & elem_index : index_range(_root->_elements))
+  {
+    const auto & elem = _root->_elements[elem_index];
+    const auto & nodes = elem._nodes;
+    // const auto & uel = elem._uel;
 
-  //   for (const auto i : index_range(nodes))
-  //   {
-  //     // build node to elem map
-  //     _node_to_uel_map[nodes[i]].push_back(elem_id);
-  //   }
-  // }
+    // build node to elem map
+    for (const auto i : index_range(nodes))
+      _node_to_uel_map[nodes[i]].push_back(elem_index);
+  }
 }
 
 void
@@ -154,9 +166,8 @@ AbaqusUELMesh::setupNodeSets()
 const Abaqus::UserElement &
 AbaqusUELMesh::getUEL(const std::string & type) const
 {
-  for (const auto & part : _root._part)
-    if (part._element_definition.has(type))
-      return part._element_definition[type];
+  if (_root->_element_definition.has(type))
+    return _root->_element_definition[type];
   mooseError("Unknown UEL type '", type, "'");
 }
 
