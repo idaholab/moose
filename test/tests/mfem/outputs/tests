@@ -1,5 +1,6 @@
 [Tests]
   design = 'syntax/Problem/index.md'
+  issues = '#29632'
   [./MFEMDataCollections]
     type = 'CheckFiles'
     input = 'datacollections.i'

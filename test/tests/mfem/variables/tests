@@ -1,5 +1,6 @@
 [Tests]
   design = 'syntax/Problem/index.md'
+  issues = '#29632'
   [./MFEMVariableSetupFromMOOSEVariables]
     type = XMLDiff
     input = mfem_variables_from_moose.i
