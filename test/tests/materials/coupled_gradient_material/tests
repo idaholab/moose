@@ -5,13 +5,13 @@
     type = Exodiff
     input = exact.i
     exodiff = exact_out.e
-    requirement = "The system shall be able to make a scalar and gradient material property from a coupled variable."
+    requirement = "The system shall be able to make a scalar and a gradient material property from a coupled variable."
   []
   [ad]
     type = Exodiff
     input = exact.i
     exodiff = ad_exact_out.e
     cli_args = 'AD=AD Outputs/file_base=ad_exact_out'
-    requirement = "The system shall be able to make a scalar and gradient material property from a coupled variable."
+    requirement = "The system shall be able to make a scalar and a gradient material property from a coupled variable using."
   []
 []
