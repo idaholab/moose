@@ -70,13 +70,13 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
     _uel_definition(_uel_mesh.getUEL(_uel_type)),
     _uel_elements(_uel_mesh.getElements({})),
     _element_set_names(getParam<std::vector<std::string>>("element_sets")),
-    _variables(_uel_definition.nodes),
-    _nstatev(_uel_definition.n_statev),
+    _variables(_uel_definition._n_nodes),
+    _nstatev(_uel_definition._n_statev),
     _use_energy(getParam<bool>("use_energy"))
 {
   // get coupled variables from UEL type
-  for (const auto i : make_range(_uel_definition.nodes))
-    for (const auto var : _uel_definition.vars[i])
+  for (const auto i : make_range(_uel_definition._n_nodes))
+    for (const auto var : _uel_definition._vars[i])
       _variables[i].push_back(
           &UserObject::_subproblem.getVariable(0,
                                                _uel_mesh.getVarName(var),
@@ -92,17 +92,19 @@ void
 AbaqusUELMeshUserElement::setupElementSet()
 {
   _active_elements.clear();
-
+  const auto & elsets = _uel_mesh.getElementSets();
   // use set to avoid duplicate elements
   std::set<std::size_t> selected_elements;
   for (const auto & elset_name : _element_set_names)
   {
-    const auto & elset = _uel_mesh.getElementSet(elset_name);
-    for (const auto uel_elem_id : elset)
+    const auto elset = elsets.find(elset_name);
+    if (elset == elsets.end())
+      mooseError("Element set '", elset_name, "' not found in UEL mesh");
+    for (const auto uel_elem_index : elset->second)
     {
       // TODO: check pid! && _uel_elements[uel_elem_id].pid == processor_id()
-      if (_uel_elements[uel_elem_id].type_id == _uel_definition.type_id)
-        selected_elements.insert(uel_elem_id);
+      if (_uel_elements[uel_elem_index]._uel._type_id == _uel_definition._type_id)
+        selected_elements.insert(uel_elem_index);
     }
   }
   _active_elements.assign(selected_elements.begin(), selected_elements.end());
@@ -143,9 +145,9 @@ AbaqusUELMeshUserElement::execute()
 
   // parameters for the UEL plugin
   std::array<int, 5> lflags;
-  int dim = _uel_definition.coords;
+  int dim = _uel_definition._coords;
 
-  std::vector<Real> coords(_uel_definition.nodes * dim);
+  std::vector<Real> coords(_uel_definition._n_nodes * dim);
 
   DenseVector<Real> local_re;
   DenseMatrix<Real> local_ke;
@@ -158,24 +160,24 @@ AbaqusUELMeshUserElement::execute()
   std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
 
   // loop over active element sets
-  for (const auto & uel_elem_id : _active_elements)
+  for (const auto & uel_elem_index : _active_elements)
   {
 
-    auto & uel_elem = _uel_elements[uel_elem_id];
-    mooseAssert(_uel_definition.nodes == uel_elem.nodes.size(),
+    auto & uel_elem = _uel_elements[uel_elem_index];
+    mooseAssert(_uel_definition._n_nodes == uel_elem._nodes.size(),
                 "Inconsistent node numbers between element and UEL definition");
 
     // clear dof indices (TODO: consider caching those for all UEL elements!)
     all_dof_indices.clear();
 
     // get the list of dofs, looping over nodes first
-    for (const auto i : make_range(_uel_definition.nodes))
+    for (const auto i : make_range(_uel_definition._n_nodes))
     {
-      const auto * node_elem = _uel_mesh.elemPtr(uel_elem.nodes[i]);
+      const auto * node_elem = _uel_mesh.elemPtr(uel_elem._nodes[i]);
       mooseAssert(node_elem, "Node element not found for UEL element");
 
       // loop over variables at the node
-      for (const auto j : index_range(_uel_definition.vars[i]))
+      for (const auto j : index_range(_uel_definition._vars[i]))
       {
         _variables[i][j]->getDofIndices(node_elem, var_dof_indices);
         mooseAssert(var_dof_indices.size() == 1,
@@ -231,9 +233,9 @@ AbaqusUELMeshUserElement::execute()
     local_re.resize(ndofel);
     local_ke.resize(ndofel, ndofel);
 
-    int jtype = _uel_definition.type_id + 1;
-    int jelem = uel_elem_id + 1;
-    int nnode = _uel_definition.nodes;
+    int jtype = _uel_definition._type_id;
+    int jelem = uel_elem._id;
+    int nnode = _uel_definition._n_nodes;
     int nrhs = 1; // : RHS should contain the residual vector
 
     // dummy vars
@@ -241,18 +243,18 @@ AbaqusUELMeshUserElement::execute()
     int idummy = 0;
 
     // make sure stateful data storage is sized correctly
-    _statev[_statev_index_current][uel_elem_id].resize(_nstatev);
+    _statev[_statev_index_current][jelem].resize(_nstatev);
 
     // call the plugin
     _uel(local_re.get_values().data(),
          local_ke.get_values().data(),
-         _statev[_statev_index_current][uel_elem_id].data(),
-         _use_energy ? _energy[uel_elem_id].data() : dummy_energy.data(),
+         _statev[_statev_index_current][jelem].data(),
+         _use_energy ? _energy[jelem].data() : dummy_energy.data(),
          &ndofel,
          &nrhs,
          &_nstatev,
-         uel_elem.properties.first, // fortran forces us to do terrible things
-         const_cast<int *>(&_uel_definition.n_properties),
+         uel_elem._properties.first, // fortran forces us to do terrible things
+         const_cast<int *>(&_uel_definition._n_properties),
          coords.data(),
          &dim,
          &nnode,
@@ -260,7 +262,7 @@ AbaqusUELMeshUserElement::execute()
          all_dof_increments.data() /* DU[] */,
          all_udot_dof_values.data() /* V[] */,
          all_udotdot_dof_values.data() /* A[] */,
-         &jtype,
+         &jtype, ///???? what does this ID even mean?
          times.data(),
          &dt,
          &idummy /* KSTEP */,
@@ -277,8 +279,8 @@ AbaqusUELMeshUserElement::execute()
          nullptr /* DDLMAG[] */,
          &idummy /* MDLOAD */,
          &pnewdt,
-         uel_elem.properties.second,
-         const_cast<int *>(&_uel_definition.n_iproperties),
+         uel_elem._properties.second,
+         const_cast<int *>(&_uel_definition._n_iproperties),
          &rdummy /* PERIOD */
     );
 
