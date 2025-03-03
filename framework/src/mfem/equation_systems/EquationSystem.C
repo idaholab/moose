@@ -103,8 +103,9 @@ EquationSystem::ApplyBoundaryConditions(MooseMFEM::BCMap & bc_map)
     // overwritten in applyEssentialBCs
     *(_xs.at(i)) = 0.0;
     *(_dxdts.at(i)) = 0.0;
-    bc_map.ApplyEssentialBCs(
-        test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), _test_pfespaces.at(i)->GetParMesh());
+    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
+    mooseAssert(par_mesh, "parallel mesh is null");
+    bc_map.ApplyEssentialBCs(test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), *par_mesh);
   }
 }
 
@@ -282,8 +283,9 @@ EquationSystem::BuildLinearForms(MooseMFEM::BCMap & bc_map)
     auto test_var_name = _test_var_names.at(i);
     _lfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
     _lfs.GetRef(test_var_name) = 0.0;
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _lfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
+    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
+    mooseAssert(par_mesh, "parallel mesh is null");
+    bc_map.ApplyIntegratedBCs(test_var_name, _lfs.GetRef(test_var_name), *par_mesh);
   }
   // Apply boundary conditions
   ApplyBoundaryConditions(bc_map);
@@ -314,8 +316,9 @@ EquationSystem::BuildBilinearForms(MooseMFEM::BCMap & bc_map)
     auto test_var_name = _test_var_names.at(i);
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
 
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
+    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
+    mooseAssert(par_mesh, "parallel mesh is null");
+    bc_map.ApplyIntegratedBCs(test_var_name, _blfs.GetRef(test_var_name), *par_mesh);
     // Apply kernels
     auto blf = _blfs.Get(test_var_name);
     if (_blf_kernels_map.Has(test_var_name))
@@ -441,8 +444,9 @@ TimeDependentEquationSystem::BuildBilinearForms(MooseMFEM::BCMap & bc_map)
 
     _td_blfs.Register(test_var_name,
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
-    bc_map.ApplyIntegratedBCs(
-        test_var_name, _td_blfs.GetRef(test_var_name), _test_pfespaces.at(i)->GetParMesh());
+    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
+    mooseAssert(par_mesh, "parallel mesh is null");
+    bc_map.ApplyIntegratedBCs(test_var_name, _td_blfs.GetRef(test_var_name), *par_mesh);
 
     // Apply kernels to td_blf
     auto td_blf = _td_blfs.Get(test_var_name);

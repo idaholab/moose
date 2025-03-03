@@ -20,10 +20,10 @@ MFEMVectorDirichletBC::MFEMVectorDirichletBC(const InputParameters & parameters)
 }
 
 void
-MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_)
+MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
 {
-  mfem::Array<int> ess_bdrs(mesh_->bdr_attributes.Max());
-  ess_bdrs = GetMarkers(*mesh_);
+  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
+  ess_bdrs = GetMarkers(mesh);
   gridfunc.ProjectBdrCoefficient(*_vec_coef, ess_bdrs);
 }
 

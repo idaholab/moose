@@ -6,25 +6,23 @@ namespace MooseMFEM
 {
 
 mfem::Array<int>
-BCMap::GetEssentialBdrMarkers(const std::string & name_, mfem::Mesh * mesh_)
+BCMap::GetEssentialBdrMarkers(const std::string & test_var_name, mfem::Mesh & mesh)
 {
-  mfem::Array<int> global_ess_markers(mesh_->bdr_attributes.Max());
+  mfem::Array<int> global_ess_markers(mesh.bdr_attributes.Max());
   global_ess_markers = 0;
-  mfem::Array<int> ess_bdrs(mesh_->bdr_attributes.Max());
+  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
   ess_bdrs = 0;
 
-  for (auto const & [name, bc_] : *this)
+  for (auto const & [bc_name, bc] : *this)
   {
-    if (bc_->getTestVariableName() == name_)
+    if (bc->getTestVariableName() == test_var_name)
     {
-      auto bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc_);
-      if (bc != nullptr)
+      auto essential_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc);
+      if (essential_bc != nullptr)
       {
-        ess_bdrs = bc->GetMarkers(*mesh_);
-        for (auto it = 0; it != mesh_->bdr_attributes.Max(); ++it)
-        {
+        ess_bdrs = essential_bc->GetMarkers(mesh);
+        for (auto it = 0; it != mesh.bdr_attributes.Max(); ++it)
           global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
-        }
       }
     }
   }
@@ -32,77 +30,65 @@ BCMap::GetEssentialBdrMarkers(const std::string & name_, mfem::Mesh * mesh_)
 }
 
 void
-BCMap::ApplyEssentialBCs(const std::string & name_,
+BCMap::ApplyEssentialBCs(const std::string & test_var_name,
                          mfem::Array<int> & ess_tdof_list,
                          mfem::GridFunction & gridfunc,
-                         mfem::Mesh * mesh_)
+                         mfem::Mesh & mesh)
 {
-  for (auto const & [name, bc_] : *this)
-  {
-    if (bc_->getTestVariableName() == name_)
+  for (auto const & [bc_name, bc] : *this)
+    if (bc->getTestVariableName() == test_var_name)
     {
-      auto bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc_);
-      if (bc != nullptr)
-      {
-        bc->ApplyBC(gridfunc, mesh_);
-      }
+      auto essential_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc);
+      if (essential_bc != nullptr)
+        essential_bc->ApplyBC(gridfunc, mesh);
     }
-  }
-  mfem::Array<int> ess_bdr = GetEssentialBdrMarkers(name_, mesh_);
+  mfem::Array<int> ess_bdr = GetEssentialBdrMarkers(test_var_name, mesh);
   gridfunc.FESpace()->GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
 }
 
 void
-BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::LinearForm & lf, mfem::Mesh * mesh_)
+BCMap::ApplyIntegratedBCs(const std::string & test_var_name,
+                          mfem::LinearForm & lf,
+                          mfem::Mesh & mesh)
 {
-  for (auto const & [name, bc_] : *this)
+  for (auto const & [bc_name, bc] : *this)
   {
-    if (bc_->getTestVariableName() != name_)
-    {
+    if (bc->getTestVariableName() != test_var_name)
       continue;
-    }
 
-    auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_);
-    if (!bc)
-    {
+    auto integrated_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc);
+    if (!integrated_bc)
       continue;
-    }
 
-    bc->GetMarkers(*mesh_);
-    mfem::LinearFormIntegrator * lfi = bc->createLinearFormIntegrator();
+    integrated_bc->GetMarkers(mesh);
+    mfem::LinearFormIntegrator * lfi = integrated_bc->createLinearFormIntegrator();
     if (!lfi)
-    {
       continue;
-    }
 
-    lf.AddBoundaryIntegrator(lfi, bc->_bdr_markers);
+    lf.AddBoundaryIntegrator(lfi, integrated_bc->_bdr_markers);
   }
 };
 
 void
-BCMap::ApplyIntegratedBCs(const std::string & name_, mfem::BilinearForm & blf, mfem::Mesh * mesh_)
+BCMap::ApplyIntegratedBCs(const std::string & test_var_name,
+                          mfem::BilinearForm & blf,
+                          mfem::Mesh & mesh)
 {
-  for (auto const & [name, bc_] : *this)
+  for (auto const & [bc_name, bc] : *this)
   {
-    if (bc_->getTestVariableName() != name_)
-    {
+    if (bc->getTestVariableName() != test_var_name)
       continue;
-    }
 
-    auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_);
-    if (!bc)
-    {
+    auto integrated_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc);
+    if (!integrated_bc)
       continue;
-    }
 
-    bc->GetMarkers(*mesh_);
-    mfem::BilinearFormIntegrator * blfi = bc->createBilinearFormIntegrator();
+    integrated_bc->GetMarkers(mesh);
+    mfem::BilinearFormIntegrator * blfi = integrated_bc->createBilinearFormIntegrator();
     if (!blfi)
-    {
       continue;
-    }
 
-    blf.AddBoundaryIntegrator(blfi, bc->_bdr_markers);
+    blf.AddBoundaryIntegrator(blfi, integrated_bc->_bdr_markers);
   }
 };
 
