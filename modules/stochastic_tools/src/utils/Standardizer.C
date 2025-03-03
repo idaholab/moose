@@ -63,12 +63,14 @@ Standardizer::computeSet(const RealEigenMatrix & input)
   unsigned int n = input.cols();
   // comptue mean
   RealEigenVector mean = input.colwise().mean();
+  std::cout << "center mean: " << mean << std::endl;
   // Compute standard deviation
   RealEigenVector stdev =
       ((input.rowwise() - mean.transpose()).colwise().squaredNorm() / num_samples)
           .transpose()
           .array()
           .sqrt();
+  std::cout << "center std: " << stdev << std::endl;
   // Store in std:vector format
   _mean.resize(n);
   _stdev.resize(n);
@@ -89,8 +91,16 @@ Standardizer::getDestandardized(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
+  // std::cout << "mean data: " << _mean.data() << ", " << _mean.size() << std::endl;
+  // std::cout << "std: " << _stdev.data() << ", " << _mean.size() << std::endl;
+  // std::cout << "mean: " << mean << std::endl;
+  // std::cout << "stdev: " << stdev << std::endl;
+  // std::cout << "input: " << input << std::endl;
+  // std::cout << "input array1: " << input.array() << "," << std::endl;
+  // std::cout << "input array rowwise: " << input.array().rowwise() << std::endl;
   input =
       (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
+  // std::cout << "input array2: " << input.array() <<  "," << std::endl;
 }
 
 void
