@@ -19,10 +19,10 @@ MFEMVectorTangentialDirichletBC::MFEMVectorTangentialDirichletBC(const InputPara
 }
 
 void
-MFEMVectorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_)
+MFEMVectorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
 {
-  mfem::Array<int> ess_bdrs(mesh_->bdr_attributes.Max());
-  ess_bdrs = GetMarkers(*mesh_);
+  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
+  ess_bdrs = GetMarkers(mesh);
   gridfunc.ProjectBdrCoefficientTangent(*_vec_coef, ess_bdrs);
 }
 
