@@ -60,6 +60,7 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
   LOG_SCOPE("operator()", "AbaqusUELRelationshipManager");
 
   const auto & elements = _uel_mesh->getElements();
+  const auto & nodes = _uel_mesh->getNodes();
   const auto & node_to_uel_map = _uel_mesh->getNodeToUELMap();
 
   // loop over each NodeElement
@@ -71,11 +72,11 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
       mooseError("Element not found in NodeToUELMap.");
 
     // iterate over the UEL Elements connected to the current node elem
-    for (const auto uel_elem_id : it->second)
+    for (const auto uel_elem_index  : it->second)
       // iterate over the NodeElements
-      for (const auto nodeelem_id : elements[uel_elem_id].nodes)
+      for (const auto nodeelem_index : elements[uel_elem_index]._nodes)
       {
-        const auto coupled_elem = _mesh->elem_ptr(nodeelem_id);
+        const auto coupled_elem = _mesh->elem_ptr(nodes[nodeelem_index]._id);
         mooseAssert(coupled_elem, "Element not found. Internal error");
         if (coupled_elem->processor_id() != p)
           coupled_elements.emplace(coupled_elem, nullptr);
