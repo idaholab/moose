@@ -294,10 +294,13 @@ class Versioner:
             if base_package.hash != head_package.hash:
                 num_packages_changed += 1
                 hash_color = 'YELLOW'
-                # Version is different, which means it was bumped
+                # Full version is different, which means it was bumped
                 if base_conda.install != head_conda.install:
+                    different_version = base_package.version != head_package.version
                     # Version is bumped, but build isn't zero
-                    if head_package.build_number is not None and head_package.build_number != 0:
+                    if different_version and \
+                        head_package.build_number is not None and \
+                        head_package.build_number != 0:
                         version_color = 'RED'
                         package_color = 'RED'
                         status = 'BUILD NONZERO'
