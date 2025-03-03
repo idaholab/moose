@@ -86,8 +86,8 @@ ExtremeValueBase<T>::threadJoin(const UserObject & y)
   const auto & pps = static_cast<const ExtremeValueBase<T> &>(y);
 
   if (((_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS) &&
-       pps._proxy_value.first > _proxy_value.first) ||
-      (_type == ExtremeType::MIN && pps._proxy_value.first < _proxy_value.first))
+       pps._proxy_value > _proxy_value) ||
+      (_type == ExtremeType::MIN && pps._proxy_value < _proxy_value))
     _proxy_value = pps._proxy_value;
 }
 
