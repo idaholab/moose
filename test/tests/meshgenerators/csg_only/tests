@@ -39,6 +39,15 @@
     mesh_mode = REPLICATED
     detail = 'correctly constructing a sphere at a specified point'
   []
+  [csg_only_sphere_xyz]
+    type = 'JSONDiff'
+    input = 'csg_only_sphere_xyz.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_only_sphere_xyz_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'correctly constructing a sphere at a specified (x, y, z) coordinate'
+  []
 
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG only mode when'
