@@ -285,12 +285,12 @@ SetupMeshAction::act()
           for (auto generator_action_ptr : generator_actions)
             if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
             {
-              mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                           _type,
-                           "\" mesh, which does not use Mesh Generators in constructing the mesh. ",
-                           "The ",
-                           _type,
-                           " will supersede the Mesh Generators.");
+              mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                         _type,
+                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ",
+                         "The ",
+                         _type,
+                         " will supersede the Mesh Generators.");
               _file_mesh_supersedes_mesh_generators = true;
               break;
             }

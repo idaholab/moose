@@ -86,9 +86,9 @@
     input = 'generated_mesh_generator.i'
     cli_args = '--mesh-only Mesh/type=GeneratedMesh'
     expect_err = 'Mesh Generators present but the \[Mesh\] block is set to construct a "GeneratedMesh" mesh, which does not use Mesh Generators in constructing the mesh.'
-    requirement = 'The system shall generate a warning if Mesh Generators are used with a mesh type that does not accept them'
+    requirement = 'The system shall generate an error if Mesh Generators are used with a mesh type that does not accept them'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
-    issues = '#13959'
+    issues = '#13959 #29992'
   []
 
   [with_subdomain_ids_test]
