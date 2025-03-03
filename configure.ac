@@ -73,7 +73,7 @@ AS_IF([test "$mfem_support" = yes],
               [
                     AS_IF([test "${MFEM_DIR+set}" = set],
                           [mfem_library="${MFEM_DIR}"],
-                          [mfem_library="$ac_pwd/framework/contrib/mfem"])
+                          [mfem_library="$ac_pwd/framework/contrib/mfem/installed"])
               ])
         AC_DEFINE_UNQUOTED(MFEM_DIR, [$mfem_library], [The directory where mfem is installed])
         AC_SUBST([mfem_library])
