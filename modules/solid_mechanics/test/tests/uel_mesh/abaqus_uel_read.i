@@ -9,7 +9,10 @@
   []
 []
 
-[Variables/AddUELVariables]
+[Variables]
+
+  [AddUELVariables]
+  []
 []
 
 # [ICs/AddUELICs]
@@ -37,7 +40,7 @@
     type = AbaqusUELMeshUserElement
     uel_type = U1
     plugin = elasticity_uel/uel
-    element_sets = cube
+    element_sets = CUBE
   []
 []
 
