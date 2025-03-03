@@ -67,7 +67,7 @@ Multi-system allows for customization of solvers via preconditioning.
 ## Step 12: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step12_physics
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step12_physics
 moose-opt -i step12.i
 ```
 

@@ -58,7 +58,7 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 An executable is available from loading the MOOSE conda or HPC module.
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step01_diffusion
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step01_diffusion
 moose-opt -i mesh.i --mesh-only
 moose-opt -i step1.i
 ```

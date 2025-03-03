@@ -50,7 +50,7 @@ occurs in the element interiors.
 ## Step 5: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step05_auxiliary_variables
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step05_auxiliary_variables
 moose-opt -i step5.i
 ```
 

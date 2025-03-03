@@ -55,7 +55,7 @@ water temperature, we will revisit this.
 ## Step 3: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step03_boundary_conditions
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step03_boundary_conditions
 moose-opt -i mesh.i --mesh-only
 moose-opt -i step3.i
 ```

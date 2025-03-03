@@ -83,7 +83,7 @@ The condition number of the Jacobian can be used to determine if variable
 scaling is required. (This command will take a while.)
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step10_finite_volume
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step10_finite_volume
 moose-opt -i step10.i Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor
 ```
 

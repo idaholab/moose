@@ -17,7 +17,7 @@
 !---
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step13_restart
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step13_restart
 # Generate the initialization file
 moose-opt -i step13a_base_calc.i
 # Use the exodus file to initialize some variables

@@ -44,7 +44,7 @@ block = 'concrete'
 ## Step 2: Run
 
 ```bash
-cd ~/projects/moose/tutorials/shield_multiphysics/step02_coef_diffusion
+cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step02_coef_diffusion
 moose-opt -i step2.i
 ```
 
