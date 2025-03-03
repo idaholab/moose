@@ -1,3 +1,6 @@
+# Include variables defined by MOOSE configure if it's been run
+-include $(MOOSE_DIR)/conf_vars.mk
+
 # Whether or not to do a Unity build
 MOOSE_UNITY ?= true
 MOOSE_HEADER_SYMLINKS ?= true

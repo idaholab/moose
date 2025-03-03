@@ -1860,7 +1860,7 @@ then :
 then :
   mfem_library="${MFEM_DIR}"
 else $as_nop
-  mfem_library="$ac_pwd/framework/contrib/mfem"
+  mfem_library="$ac_pwd/framework/contrib/mfem/installed"
 fi
 
 fi
