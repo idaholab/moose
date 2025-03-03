@@ -19,7 +19,9 @@ CoupledGradientMaterialTempl<is_ad>::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Create a gradient material coupled to a variable.");
   params.addRequiredParam<MaterialPropertyName>(
-      "grad_mat_prop", "Name of the gradient material property that will be created.");
+      "grad_mat_prop",
+      "Name of gradient material property equal to the gradient of the coupled variable gradient "
+      "times the scalar.");
   params.deprecateParam("grad_mat_prop", "gradient_material_name", "12/12/25");
   params.addParam<MaterialPropertyName>(
       "scalar_property",
