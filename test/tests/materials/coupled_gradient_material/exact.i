@@ -58,9 +58,8 @@ AD = ''
 [Materials]
   [mat]
     type = ${AD}CoupledGradientMaterial
-    u = u
-    mat_prop = value
-    grad_mat_prop = gradient
+    coupled_variable = u
+    gradient_material_name = gradient
     outputs = all
     scalar_property = 0.5
   []
@@ -70,10 +69,6 @@ AD = ''
   [u_avg]
     type = ElementAverageValue
     variable = u
-  []
-  [u_value_avg]
-    type = ElementAverageValue
-    variable = value
   []
   [u_gradient_x_avg]
     type = ElementAverageValue
