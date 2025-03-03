@@ -111,16 +111,15 @@ ADKernelTempl<T>::computeResidual()
 {
   precalculateResidual();
 
+  // We use a non-AD residual vector
   std::vector<Real> residuals(_test.size(), 0);
 
-  if (_use_displaced_mesh)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < _test.size(); _i++)
-        residuals[_i] += raw_value(_ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual());
-  else
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < _test.size(); _i++)
-        residuals[_i] += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    const auto jxw_c = _JxW[_qp] * _coord[_qp];
+    for (_i = 0; _i < _test.size(); _i++)
+      residuals[_i] += jxw_c * raw_value(computeQpResidual());
+  }
 
   addResiduals(_assembly, residuals, _var.dofIndices(), _var.scalingFactor());
 
@@ -149,8 +148,11 @@ ADKernelTempl<T>::computeResidualsForJacobian()
     }
   else
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      const auto jxw_c = _JxW[_qp] * _coord[_qp];
       for (_i = 0; _i < _test.size(); _i++)
-        _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+        _residuals[_i] += jxw_c * computeQpResidual();
+    }
 }
 
 template <typename T>
