@@ -17,6 +17,9 @@ TimestepSize::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Reports the timestep size");
+
+  // Not supported
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 

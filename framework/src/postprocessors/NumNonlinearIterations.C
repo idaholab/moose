@@ -24,6 +24,9 @@ NumNonlinearIterations::validParams()
       false,
       "When set to true, accumulates to count the total over all Picard iterations for each step");
   params.addClassDescription("Outputs the number of nonlinear iterations");
+
+  // Not supported
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 
