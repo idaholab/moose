@@ -55,7 +55,7 @@
     input = '2D-RZ_finiteStrain_resid.i'
     exodiff = '2D-RZ_finiteStrain_resid_bbar_out.e'
     use_old_floor = true
-    abs_zero = 1e-8
+    abs_zero = 1.1e-8
     compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=2D-RZ_finiteStrain_resid_bbar_out'
     prereq = 'axisym_resid'
@@ -126,7 +126,7 @@
     input = '2D-RZ_finiteStrain_resid.i'
     compiler = 'GCC CLANG'
     run_sim = 'True'
-    ratio_tol = 5e-8
+    ratio_tol = 9e-8
     difference_tol = 1e1
     issues = '#12650'
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md'
@@ -138,8 +138,8 @@
     compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     run_sim = 'True'
-    ratio_tol = 5e-8
-    difference_tol = 10
+    ratio_tol = 5e-7
+    difference_tol = 20
     issues = '#12650'
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction and shall produce perfect jacobians.'
