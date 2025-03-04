@@ -29,6 +29,7 @@ public:
 
   // Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
+  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   virtual void AddBC(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc);
 
   virtual void ApplyBoundaryConditions();
@@ -140,6 +141,50 @@ protected:
     }
   }
 
+  template <class FormType>
+  void ApplyBoundaryBLFIntegrators(
+      const std::string & trial_var_name,
+      const std::string & test_var_name,
+      std::shared_ptr<FormType> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+          integrated_bc_map)
+  {
+    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::BilinearFormIntegrator * integ = bc->createBilinearFormIntegrator();
+      if (integ != nullptr)
+      {
+        form->AddBoundaryIntegrator(std::move(integ), bc->_bdr_markers);
+        // bc->isBoundaryRestricted()
+        //     ? form->AddBoundaryIntegrator(std::move(integ), bc->_bdr_markers)
+        //     : form->AddBoundaryIntegrator(std::move(integ));
+      }
+    }
+  }
+
+  void ApplyBoundaryLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+          integrated_bc_map)
+  {
+    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::LinearFormIntegrator * integ = bc->createLinearFormIntegrator();
+      if (integ != nullptr)
+      {
+        form->AddBoundaryIntegrator(std::move(integ), bc->_bdr_markers);
+        // bc->isBoundaryRestricted()
+        //     ? form->AddBoundaryIntegrator(std::move(integ), bc->_bdr_markers)
+        //     : form->AddBoundaryIntegrator(std::move(integ));
+      }
+    }
+  }
+
   // gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
@@ -153,8 +198,9 @@ protected:
 
   Moose::MFEM::BCMap _bc_map;
 
-  // Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>
-  //     _integrated_bc_map;
+  Moose::MFEM::NamedFieldsMap<
+      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>
+      _integrated_bc_map;
 
   // Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 

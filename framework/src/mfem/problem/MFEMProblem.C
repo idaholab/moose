@@ -92,10 +92,26 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
   const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMBoundaryCondition *>(mfem_bc_uo) != nullptr)
+  if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo) != nullptr)
   {
-    auto object_ptr = getUserObject<MFEMBoundaryCondition>(name).getSharedPtr();
-    auto mfem_bc = std::dynamic_pointer_cast<MFEMBoundaryCondition>(object_ptr);
+    auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
+    auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
+    bc->GetMarkers(*mesh().getMFEMParMeshPtr());
+    if (getProblemData().eqn_system)
+    {
+      getProblemData().eqn_system->AddIntegratedBC(std::move(bc));
+    }
+    else
+    {
+      mooseError("Cannot add integrated BC with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+  else if (dynamic_cast<const MFEMEssentialBC *>(mfem_bc_uo) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMEssentialBC>(name).getSharedPtr();
+    auto mfem_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
+    mfem_bc->GetMarkers(*mesh().getMFEMParMeshPtr());
     if (getProblemData().eqn_system)
     {
       getProblemData().eqn_system->AddBC(name, std::move(mfem_bc));

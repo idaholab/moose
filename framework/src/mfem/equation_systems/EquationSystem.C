@@ -47,7 +47,6 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
   {
     auto kernel_field_map =
         std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
-
     _kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
   // Register new kernels map if not present for the test/trial variable
@@ -55,10 +54,32 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
   if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
     auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-
     _kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
   _kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
+}
+
+void
+EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
+{
+  AddTestVariableNameIfMissing(bc->getTestVariableName());
+  AddTrialVariableNameIfMissing(bc->getTrialVariableName());
+  auto trial_var_name = bc->getTrialVariableName();
+  auto test_var_name = bc->getTestVariableName();
+  if (!_integrated_bc_map.Has(test_var_name))
+  {
+    auto integrated_bc_field_map = std::make_shared<
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
+    _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
+  }
+  // Register new integrated bc map if not present for the test/trial variable
+  // pair
+  if (!_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMIntegratedBC>>>();
+    _integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
+  }
+  _integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));
 }
 
 void
@@ -263,9 +284,6 @@ EquationSystem::BuildLinearForms()
     auto test_var_name = _test_var_names.at(i);
     _lfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
     _lfs.GetRef(test_var_name) = 0.0;
-    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(par_mesh, "parallel mesh is null");
-    _bc_map.ApplyIntegratedBCs(test_var_name, _lfs.GetRef(test_var_name), *par_mesh);
   }
   // Apply boundary conditions
   ApplyBoundaryConditions();
@@ -277,6 +295,10 @@ EquationSystem::BuildLinearForms()
     if (_kernels_map.Has(test_var_name))
     {
       ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
+    }
+    if (_integrated_bc_map.Has(test_var_name))
+    {
+      ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     }
     lf->Assemble();
   }
@@ -291,11 +313,14 @@ EquationSystem::BuildBilinearForms()
     auto test_var_name = _test_var_names.at(i);
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
 
-    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(par_mesh, "parallel mesh is null");
-    _bc_map.ApplyIntegratedBCs(test_var_name, _blfs.GetRef(test_var_name), *par_mesh);
     // Apply kernels
     auto blf = _blfs.GetShared(test_var_name);
+    if (_integrated_bc_map.Has(test_var_name) &&
+        _integrated_bc_map.Get(test_var_name)->Has(test_var_name))
+    {
+      ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
+          test_var_name, test_var_name, blf, _integrated_bc_map);
+    }
     if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       blf->SetAssemblyLevel(_assembly_level);
@@ -428,12 +453,15 @@ TimeDependentEquationSystem::BuildBilinearForms()
 
     _td_blfs.Register(test_var_name,
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
-    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(par_mesh, "parallel mesh is null");
-    _bc_map.ApplyIntegratedBCs(test_var_name, _td_blfs.GetRef(test_var_name), *par_mesh);
 
     // Apply kernels to td_blf
     auto td_blf = _td_blfs.GetShared(test_var_name);
+    if (_integrated_bc_map.Has(test_var_name) &&
+        _integrated_bc_map.Get(test_var_name)->Has(test_var_name))
+    {
+      ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
+          test_var_name, test_var_name, td_blf, _integrated_bc_map);
+    }
     if (_td_kernels_map.Has(test_var_name) &&
         _td_kernels_map.Get(test_var_name)->Has(test_var_name))
     {
