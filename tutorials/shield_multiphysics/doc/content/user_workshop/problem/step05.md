@@ -7,7 +7,7 @@
 ## Example use: creating a constant field
 
 We are not solving for the temperature in the water yet. To represent it as a variable that is
-not in the nonlinear system, we use an auxiliary variable.
+not in the nonlinear system, we use an [auxiliary variable](AuxVariables/index.md).
 
 !listing step05_auxiliary_variables/step5.i block=AuxVariables
 
@@ -28,8 +28,8 @@ q = - k \nabla T
 
 The primary unknown ("nonlinear variable") is the temperature
 
-Once the temperature is computed, the AuxiliarySystem can compute and output the heat flux field using
-the coupled temperature variable and the thermal conductivity property.
+Once the temperature is computed, the [AuxiliarySystem](AuxKernels/index.md) can compute and output the heat flux field using
+the coupled temperature variable and the thermal conductivity property via [DiffusionFluxAux](DiffusionFluxAux.md).
 
 Auxiliary variables come in two flavors: Nodal and Elemental.
 
@@ -44,6 +44,7 @@ occurs in the element interiors.
 ## Step 5: Input File
 
 !listing step05_auxiliary_variables/step5.i
+         diff=step04_heat_conduction/step4.i
 
 !---
 

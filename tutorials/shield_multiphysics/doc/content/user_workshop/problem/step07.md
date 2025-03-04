@@ -25,6 +25,8 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 
 ## Step 7: Input File
 
+We utilize the custom syntax (more on this in Step 12) to automatically add the necessary objects (Variables, Kernels, Materials, etc.) for this problem: [Physics/SolidMechanics/QuasiStatic](Physics/SolidMechanics/QuasiStatic/index.md)
+
 !listing step07_mechanics/step7.i
 
 !---

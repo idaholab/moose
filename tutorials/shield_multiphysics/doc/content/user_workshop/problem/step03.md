@@ -19,25 +19,33 @@ Fixed temperatures at the boundary conditions are simple but not realistic. We w
 First, the sidesets must be added / present in the mesh.
 We modified the meshing script to generate sidesets for our boundary conditions
 
+- [RenameBoundaryGenerator](RenameBoundaryGenerator.md)
+- [SideSetsBetweenSubdomainsGenerator](SideSetsBetweenSubdomainsGenerator.md)
+- [SideSetsAroundSubdomainGenerator](SideSetsAroundSubdomainGenerator.md)
+
 !listing step03_boundary_conditions/mesh.i
 
 !---
 
-Fixed heat flux
-
+We apply a [NeumannBC](NeumannBC.md) for fixed heat flux on the inner cavity.
 
 !listing step03_boundary_conditions/step3.i block=BCs/from_reactor
 
 !---
 
-Natural convection with air
+We apply a [DirichletBC](DirichletBC.md) for a fixed temperature with the `ground`.
 
+!listing step03_boundary_conditions/step3.i block=BCs/ground
+
+!---
+
+Convection with air using [ConvectiveHeatFluxBC](ConvectiveHeatFluxBC.md).
 
 !listing step03_boundary_conditions/step3.i block=BCs/air_convection
 
 !---
 
-Convective boundary conditions
+Convection with water
 
 We use the same boundary condition as for with for now. When we introduce a separate variable for the
 water temperature, we will revisit this.

@@ -1,4 +1,4 @@
-# Step 10: Equation Coupling id=step10
+# Step 10: Finite Volume id=step10
 
 !---
 

@@ -132,7 +132,7 @@
 
 !---
 
-!include user_workshop/problem/step06.md end=end-steady
+!include user_workshop/problem/step06.md end=end-intro
 
 !---
 
@@ -152,9 +152,7 @@
 
 ## (continued)
 
-!---
-
-!include user_workshop/problem/step06.md start=start-transient end=end-transient
+!include user_workshop/problem/step06.md start=end-intro
 
 !---
 
