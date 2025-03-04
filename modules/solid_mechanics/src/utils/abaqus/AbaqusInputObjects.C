@@ -8,7 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusInputObjects.h"
+#include "MooseError.h"
 #include "MooseUtils.h"
+#include "libmesh/libmesh_common.h"
 
 #include <iostream>
 #include <memory>
@@ -194,7 +196,11 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
       // copy in node numbers (converting from 1-base to 0-base)
       for (const auto i : index_range(col))
         if (i > 0)
-          element._nodes.push_back(_node_id_to_index.at(col[i]));
+        {
+          const auto node_index = _node_id_to_index.at(col[i]);
+          element._nodes.push_back(node_index);
+          _nodes[node_index]._var_mask |= uel._var_mask[i - 1];
+        }
 
       // insert into unordered map
       Index index = _elements.size();
@@ -348,10 +354,10 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
   set.assign(unique_items.begin(), unique_items.end());
 }
 
-Instance::Instance(const BlockNode & block, AssemblyRoot & root)
+Instance::Instance(const BlockNode & block, AssemblyModel & model)
 {
   // const auto & data = block._data;
-  const auto & part = root._part[block._header.get<std::string>("part")];
+  const auto & part = model._part[block._header.get<std::string>("part")];
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
@@ -407,57 +413,57 @@ Instance::Instance(const BlockNode & block, AssemblyRoot & root)
   // TODO: block can have _data lines, too!!! :-O
 
   // store offsets
-  _local_to_global_node_index_offset = root._nodes.size();
-  _local_to_global_element_index_offset = root._elements.size();
+  _local_to_global_node_index_offset = model._nodes.size();
+  _local_to_global_element_index_offset = model._elements.size();
 
   // instantiate mesh points
   for (const auto & part_node : part._nodes)
   {
     // make a copy of the part node
-    auto root_node = part_node;
+    auto model_node = part_node;
 
     // transform instantiated node
-    root_node._point = rotation * (root_node._point + translation);
+    model_node._point = rotation * (model_node._point + translation);
 
-    // add the mesh point to the root level list
-    root._nodes.push_back(root_node);
+    // add the mesh point to the model level list
+    model._nodes.push_back(model_node);
   }
 
   // instantiate elements
   for (const auto & part_element : part._elements)
   {
     // make a copy of the part element
-    auto root_element = part_element;
+    auto model_element = part_element;
 
-    // shift part node indices to root node indices
-    for (auto & index : root_element._nodes)
+    // shift part node indices to model node indices
+    for (auto & index : model_element._nodes)
       index += _local_to_global_node_index_offset;
 
-    root._elements.push_back(root_element);
+    model._elements.push_back(model_element);
   }
 
   // merge uel definitions
-  root._element_definition.merge(part._element_definition);
+  model._element_definition.merge(part._element_definition);
 
   // apply node sets
   for (const auto & [nset_name, nset] : part._nsets)
   {
-    auto & root_nset = root._nsets[nset_name];
+    auto & model_nset = model._nsets[nset_name];
     for (const auto & index : nset)
-      root_nset.push_back(index + _local_to_global_node_index_offset);
+      model_nset.push_back(index + _local_to_global_node_index_offset);
   }
 
   // apply element sets
   for (const auto & [elset_name, elset] : part._elsets)
   {
-    auto & root_elset = root._elsets[elset_name];
+    auto & model_elset = model._elsets[elset_name];
     for (const auto & index : elset)
-      root_elset.push_back(index + _local_to_global_element_index_offset);
+      model_elset.push_back(index + _local_to_global_element_index_offset);
   }
 }
 
 void
-Assembly::parse(const BlockNode & block, AssemblyRoot & root)
+Assembly::parse(const BlockNode & block, AssemblyModel & model)
 {
   auto option_func = [&](const std::string & key, const OptionNode & option)
   {
@@ -493,7 +499,7 @@ Assembly::parse(const BlockNode & block, AssemblyRoot & root)
         //_instance[instance_name].processNodeSet(option);
         // .. and here?
         // look up the instance offset and the part node set and add the listed nodes via
-        // _node_id_to_index[listed_id]+offset to root
+        // _node_id_to_index[listed_id]+offset to model
       }
     }
   };
@@ -505,21 +511,57 @@ Assembly::parse(const BlockNode & block, AssemblyRoot & root)
     {
       const auto name = block._header.get<std::string>("name");
       std::cout << "Adding instance " << name << std::endl;
-      _instance.add(name, block, root);
+      _instance.add(name, block, model);
     }
   };
 
   block.forAll(option_func, block_func);
 }
 
+FieldIC::FieldIC(const OptionNode & option, const Model & model)
+{
+  _var = option._header.get<int>("variable") - 1;
+  if (_var < 0)
+    mooseError("invalid variable number ", _var + 1);
+
+  // loop over data lines
+  for (const auto & data : option._data)
+  {
+    if (data.size() != 2)
+      mooseError("Expected two items in data line for field IC");
+    const auto name = data[0];
+    const auto value = MooseUtils::convert<Real>(data[1]);
+
+    // freeze state of the node set
+    if (_nsets.find(name) == _nsets.end())
+      _nsets[name] = model._nsets.at(name);
+
+    // add node set name and initial value to the list
+    _value.emplace_back(name, value);
+  }
+}
+
+void
+Model::optionFunc(const std::string & key, const OptionNode & option)
+{
+  if (key == "initial conditions")
+  {
+    const auto type = option._header.get<std::string>("type");
+    if (MooseUtils::toLower(type) == "field")
+      _field_ics.emplace_back(option, *this);
+    else
+      mooseError("Unsupported IC type");
+  }
+}
+
 // Entry point for the final parsing stage
 void
-FlatRoot::parse(const BlockNode & root)
+FlatModel::parse(const BlockNode & root)
 {
   auto option_func = [this](const std::string & key, const OptionNode & option)
   {
-    std::cout << key << '\n';
     Part::optionFunc(key, option);
+    Model::optionFunc(key, option);
   };
 
   root.forAll(option_func, nullptr);
@@ -527,7 +569,7 @@ FlatRoot::parse(const BlockNode & root)
 
 // Entry point for the final parsing stage
 void
-AssemblyRoot::parse(const BlockNode & root)
+AssemblyModel::parse(const BlockNode & root)
 {
   auto block_func = [&](const std::string & key, const BlockNode & block)
   {
@@ -554,10 +596,13 @@ AssemblyRoot::parse(const BlockNode & root)
       throw std::runtime_error("Unsupported block found in input: " + key);
   };
 
-  root.forAll(nullptr, block_func);
+  auto option_func = [this](const std::string & key, const OptionNode & option)
+  { Model::optionFunc(key, option); };
+
+  root.forAll(option_func, block_func);
 }
 
-Boundary::Boundary(const OptionNode & option, Root & root)
+Boundary::Boundary(const OptionNode & option, Model & model)
 {
   // get the current state of the node set
 }
