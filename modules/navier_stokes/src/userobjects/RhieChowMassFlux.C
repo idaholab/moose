@@ -53,10 +53,10 @@ RhieChowMassFlux::validParams()
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
   // Pressure projection
-  params.addParam<MooseEnum>(
-      "pressure_projection_method",
-      MooseEnum("SIMPLE SIMPLEC", "SIMPLE"),
-      "The method to use in the pressure projection for Ainv - SIMPLE or SIMPLEC");
+  params.addParam<MooseEnum>("pressure_projection_method",
+                             MooseEnum("standard consistent", "standard"),
+                             "The method to use in the pressure projection for Ainv - "
+                             "standard (SIMPLE) or consistent (SIMPLEC)");
 
   return params;
 }
@@ -571,7 +571,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
       HbyA.print();
     }
 
-    if (_pressure_projection_method == "SIMPLEC")
+    if (_pressure_projection_method == "consistent")
     {
 
       // Consistent Corrections to SIMPLE
@@ -609,11 +609,10 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
       // Create a temporary vector to store the sum of diagonal and neighbor coefficients
       auto row_sum = current_local_solution.zero_clone();
-      get_row_sum_excluding_diagonal(*row_sum);
+      get_row_sum(*row_sum);
 
       // Create vector with new inverse projection matrix
       auto Ainv_full = current_local_solution.zero_clone();
-      PetscVector<Number> * Ainv_full_vec = cast_ptr<PetscVector<Number> *>(Ainv_full.get());
       *working_vector_petsc = 1.0;
       Ainv_full->pointwise_divide(*working_vector_petsc, *row_sum);
       const auto Ainv_full_old = Ainv_full->clone();

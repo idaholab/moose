@@ -29,7 +29,7 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    pressure_projection_method = SIMPLEC
+    pressure_projection_method = consistent
   []
 []
 
