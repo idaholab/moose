@@ -4,9 +4,10 @@
 
 Add custom syntax to build objects that are common to all conjugate heat transfer thermal mechanical problems:
 
-- kernels for heat conduction equation
-- kernels for solid mechanics
-- kernels for Navier Stokes equation
+- Kernels and BCs for solid heat conduction
+- Objects for solid mechanics
+- Kernels and BCs for fluid flow
+- Kernels and BCs for fluid heat transfer
 
 !!end-intro
 
@@ -17,6 +18,8 @@ Add custom syntax to build objects that are common to all conjugate heat transfe
 Defines the kernels, the boundary conditions of selected supported types,
 and some numerical parameters
 
+[Physics/HeatConduction/FiniteElement](Physics/HeatConduction/FiniteElement/index.md)
+
 !listing step12_physics/step12.i block=Physics/HeatConduction
 
 !---
@@ -24,6 +27,8 @@ and some numerical parameters
 ## Step 12: Solid Mechanics Physics
 
 Defines the kernels and some helper materials for computing strain.
+
+[Physics/SolidMechanics/QuasiStatic](Physics/SolidMechanics/QuasiStatic/index.md)
 
 !listing step12_physics/step12.i block=Physics/SolidMechanics
 
@@ -36,11 +41,15 @@ for readability purposes.
 
 Defines both the kernels and the boundary conditions.
 
+[Physics/NavierStokes/Flow](Physics/NavierStokes/Flow/index.md)
+
 !listing step12_physics/step12.i block=Physics/NavierStokes/Flow
 
 !---
 
 ## Step 12: Fluid Energy conservation Physics
+
+[Physics/NavierStokes/FluidHeatTransfer](Physics/NavierStokes/FluidHeatTransfer/index.md)
 
 !listing step12_physics/step12.i block=Physics/NavierStokes/FluidHeatTransfer
 
@@ -58,7 +67,9 @@ then specify those systems in each `Physics`.
 
 ## Step 12: Preconditioning
 
-Multi-system allows for customization of solvers via preconditioning.
+Multi-system allows for customization of solvers via [Preconditioning](Preconditioning/index.md).
+
+[Single Matrix Preconditioner (SMP)](SingleMatrixPreconditioner.md)
 
 !listing step12_physics/step12.i block=Preconditioning
 

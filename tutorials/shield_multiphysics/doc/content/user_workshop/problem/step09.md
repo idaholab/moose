@@ -13,7 +13,15 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 
 ## Step 9: Input File
 
-!listing step09_postprocessing/step9.i
+Postprocessors and VectorPostprocessors in this example:
+
+- [NumElements](NumElements.md)
+- [NodalExtremeValue](NodalExtremeValue.md)
+- [SideDiffusiveFluxIntegral](SideDiffusiveFluxIntegral.md)
+- [LineValueSampler](LineValueSampler.md)
+
+!style fontsize=60%
+!listing step09_postprocessing/step9.i max-height=300px
 
 !---
 
