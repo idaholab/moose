@@ -48,6 +48,33 @@
     mesh_mode = REPLICATED
     detail = 'correctly constructing a sphere at a specified (x, y, z) coordinate'
   []
+  [csg_only_cylinder_x]
+    type = 'JSONDiff'
+    input = 'csg_only_cylinder_x.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_only_cylinder_x_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'correctly constructing cylinders that are aligned with the x-axis'
+  []
+  [csg_only_cylinder_y]
+    type = 'JSONDiff'
+    input = 'csg_only_cylinder_y.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_only_cylinder_y_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'correctly constructing cylinders that are aligned with the y-axis'
+  []
+  [csg_only_cylinder_z]
+    type = 'JSONDiff'
+    input = 'csg_only_cylinder_z.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_only_cylinder_z_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'correctly constructing cylinders that are aligned with the z-axis'
+  []
 
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG only mode when'
