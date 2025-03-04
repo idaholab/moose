@@ -28,6 +28,18 @@ vecTo(const std::vector<std::string> & in)
   return out;
 }
 
+// do not complain when trying to convert floating point numbers to int
+std::vector<int>
+vecToInt(const std::vector<std::string> & in)
+{
+  std::vector<int> out;
+  std::transform(in.begin(),
+                 in.end(),
+                 std::back_inserter(out),
+                 [](const std::string & str) { return std::stoi(str); });
+  return out;
+}
+
 UserElement::UserElement(const OptionNode & option)
 {
   const auto & map = option._header;
@@ -215,9 +227,9 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
     for (const auto & data : option._data)
     {
       const auto dprop = vecTo<Real>(data);
-      // const auto iprop = vecTo<int>(data);
+      const auto iprop = vecToInt(data);
       props.first.insert(props.first.end(), dprop.begin(), dprop.end());
-      // props.second.insert(props.second.end(), iprop.begin(), iprop.end());
+      props.second.insert(props.second.end(), iprop.begin(), iprop.end());
     }
 
     // assign properties to elements
