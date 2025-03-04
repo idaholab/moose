@@ -1,12 +1,13 @@
 # Step 6: Transient Heat Conduction id=step06
 
+!! end-intro
+
 To create a time-dependent problem add in the time derivative:
 
 !equation
-\rho c \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
+\rho c_p \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
 
-The time term exists in the heat transfer module as `ADHeatConductionTimeDerivative`, thus
-only an update to the input file is required to run the transient case.
+The time term exists in the heat transfer module as [HeatConductionTimeDerivative](/HeatConductionTimeDerivative.md).
 
 !---
 
@@ -18,7 +19,7 @@ We introduce a time derivative kernel to model the contribution to the residual/
 
 !---
 
-Time stepping parameters are passed to the Executioner block
+Time stepping parameters are passed to the Executioner block with the [Transient](Transient.md) executioner type.
 
 !listing step06_transient_heat_conduction/step6_transient.i block=Executioner
 
@@ -34,6 +35,9 @@ There are generally two uses for time-dependent runs:
 !---
 
 Material properties now include specific heat capacity and density for the time-derivative term.
+
+- [HeatConductionMaterial](HeatConductionMaterial.md) has a parameter for the heat capacity.
+- [GenericConstantMaterial](GenericConstantMaterial.md) is used to define the density.
 
 !listing step06_transient_heat_conduction/step6_transient.i
          diff=step04_heat_conduction/step4.i

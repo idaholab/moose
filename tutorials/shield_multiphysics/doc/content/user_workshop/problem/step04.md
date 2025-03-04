@@ -17,32 +17,25 @@ in the simulation.
 
 !---
 
-## HeatConduction Material
+## HeatConductionMaterial
 
 Three material properties must be produced for consumption by kernels of the heat conduction equation:
 
 - thermal conductivity by the conduction term
 - density and specific heat by the time derivative of the energy
 
-Both shall be computed with a single `Material` object: `HeatConductionMaterial`.
+Both shall be computed with a single [Material](Materials/index.md) object: [HeatConductionMaterial](HeatConductionMaterial.md).
 
-!---
-
-## HeatConductionMaterial
-
-!listing step04_heat_conduction/step4.i block=Materials
+!style fontsize=60%
+!listing step04_heat_conduction/step4.i block=Materials max-height=300px
 
 !---
 
 ## HeatConduction Kernel
 
-The `CoefDiffusion` Kernel object uses input parameters for defining the thermal
-conductivity. Instead, the `HeatConduction` Kernel utilizes the material
-properties defined in `HeatConductionMaterial` automatically.
-
-!---
-
-## ADHeatConduction
+The [CoefDiffusion](CoefDiffusion.md) Kernel object uses input parameters for defining the thermal
+conductivity. Instead, the [HeatConduction](HeatConduction.md) Kernel utilizes the material
+properties defined in [HeatConductionMaterial](HeatConductionMaterial.md) automatically.
 
 !listing step04_heat_conduction/step4.i block=Kernels
 

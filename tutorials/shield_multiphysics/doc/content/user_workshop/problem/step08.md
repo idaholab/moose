@@ -49,6 +49,12 @@ Each refinement increases the number of elements by a factor of $2^{\texttt{dim}
 
 ## Step 8: Mesh Adaptivity
 
+The [Adaptivity System](syntax/Adaptivity/index.md) is used to perfrom adaptive mesh refinement.
+
+[Indicators](Indicators/index.md) provide a measure of the error in the simulation, see [GradientJumpIndicator](GradientJumpIndicator.md).
+
+[Markers](Markers/index.md) flag elements for refinement or coarsening, see [ValueThresholdMarker](ValueThresholdMarker.md)
+
 !listing step8_adapt.i block=Adaptivity
 
 !---

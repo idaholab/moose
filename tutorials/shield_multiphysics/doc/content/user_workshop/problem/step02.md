@@ -4,7 +4,7 @@
 
 ## Implementing equations in MOOSE
 
-To implement the Heat Conduction equation, we will use a `Kernel`  object to compute the
+To implement the Heat Conduction equation, we will use a [Kernel](Kernels/index.md) object to compute the
 residual and the Jacobian of the diffusion term:
 
 !equation
@@ -12,7 +12,7 @@ residual and the Jacobian of the diffusion term:
 
 where  $k$  is the thermal diffusivity.
 
-A `Kernel`  is C++ class, which inherits from `MooseObject` that is used by MOOSE for coding
+A `Kernel` is C++ class, which inherits from `MooseObject` that is used by MOOSE for coding
 volume integrals of a [!ac](PDE).
 
 !!end-intro
@@ -21,9 +21,9 @@ volume integrals of a [!ac](PDE).
 
 ## CoefDiffusion Kernel
 
-To implement the coefficient a new Kernel object must be used: `CoefDiffusion`.
+To implement the coefficient a new Kernel object must be used: [CoefDiffusion](CoefDiffusion.md).
 
-This object inherits from `Diffusion` and will use input parameters for specifying the
+This object inherits from [Diffusion](Diffusion.md) and will use input parameters for specifying the
 diffusivity.
 
 !---
