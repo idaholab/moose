@@ -1,0 +1,2 @@
+GLOBAL VARIABLES relative 5e-5 floor 1e-10
+	lambda    absolute 1e-2
