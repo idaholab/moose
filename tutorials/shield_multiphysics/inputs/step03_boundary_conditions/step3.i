@@ -42,7 +42,7 @@
     value = '${fparse 5e4 / 144}'
   []
   [air_convection]
-    type = ADConvectiveHeatFluxBC
+    type = ConvectiveHeatFluxBC
     variable = T
     boundary = 'air_boundary'
     T_infinity = 300.0
@@ -56,7 +56,7 @@
     boundary = 'ground'
   []
   [water_convection]
-    type = ADConvectiveHeatFluxBC
+    type = ConvectiveHeatFluxBC
     variable = T
     boundary = 'water_boundary_inwards'
     T_infinity = 300.0
@@ -72,7 +72,7 @@
 
 [Executioner]
   type = Steady # Steady state problem
-  solve_type = NEWTON # Perform a Newton solve, uses AD to compute Jacobian terms
+  solve_type = NEWTON # Perform a Newton solve
   petsc_options_iname = '-pc_type -pc_hypre_type' # PETSc option pairs with values below
   petsc_options_value = 'hypre boomeramg'
 []
