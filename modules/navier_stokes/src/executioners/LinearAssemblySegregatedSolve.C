@@ -547,7 +547,8 @@ LinearAssemblySegregatedSolve::solve()
                                 _turbulence_field_relaxation[i]);
 
         // Limiting turbulence solution
-        LinearImplicitSystem & li_system = libMesh::cast_ref<LinearImplicitSystem &>(_turbulence_systems[i]->system());
+        LinearImplicitSystem & li_system =
+            libMesh::cast_ref<LinearImplicitSystem &>(_turbulence_systems[i]->system());
         NumericVector<Number> & current_solution = *(li_system.solution);
         NS::FV::limitSolutionUpdate(current_solution, _turbulence_field_min_limit[i]);
 
