@@ -23,7 +23,22 @@ We modified the meshing script to generate sidesets for our boundary conditions
 - [SideSetsBetweenSubdomainsGenerator](SideSetsBetweenSubdomainsGenerator.md)
 - [SideSetsAroundSubdomainGenerator](SideSetsAroundSubdomainGenerator.md)
 
+!row!
+
+!col! width=50%
+
+!style fontsize=40%
 !listing step03_boundary_conditions/mesh.i
+
+!col-end!
+
+!col! width=50%
+
+!media shield_multiphysics/results/step03_mesh.png style=width:100%;margin-left:auto;margin-right:auto;display:block
+
+!col-end!
+
+!row-end!
 
 !---
 
