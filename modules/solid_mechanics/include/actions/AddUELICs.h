@@ -23,8 +23,9 @@ public:
   virtual void act() override;
 
 protected:
-  std::string
-  setupBoundary(std::size_t var_id, const std::string & var_name, const std::string & nodeset_name);
+  void setupBoundary(std::size_t var_id,
+                     const std::string & boundary_name,
+                     const std::vector<Abaqus::Index> & nodeset);
 
 private:
   AbaqusUELMesh * _uel_mesh;

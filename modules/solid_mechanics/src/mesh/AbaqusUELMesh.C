@@ -58,16 +58,16 @@ AbaqusUELMesh::buildMesh()
   if (_input.isFlat())
   {
     mooseInfo("Flat input file format detected.");
-    _root = std::make_unique<Abaqus::FlatRoot>();
+    _model = std::make_unique<Abaqus::FlatModel>();
   }
   else
   {
     mooseInfo("Hierarchical input file format detected.");
-    _root = std::make_unique<Abaqus::AssemblyRoot>();
+    _model = std::make_unique<Abaqus::AssemblyModel>();
   }
 
   // build data structures
-  _root->parse(_input);
+  _model->parse(_input);
 
   // instantiate elements
   instantiateElements();
@@ -108,9 +108,11 @@ void
 AbaqusUELMesh::instantiateElements()
 {
   // add mesh points (libmesh node elements)
-  _mesh->reserve_nodes(_root->_nodes.size());
-  for (const auto & [abaqus_id, p, mask] : _root->_nodes)
+  _mesh->reserve_nodes(_model->_nodes.size());
+  for (const auto node_index : index_range(_model->_nodes))
   {
+    const auto & [abaqus_id, p, mask] = _model->_nodes[node_index];
+
     // add the point node and element
     auto * node = _mesh->add_point(p, abaqus_id);
     auto node_elem = Elem::build(NODEELEM);
@@ -127,9 +129,9 @@ AbaqusUELMesh::setupLibmeshSubdomains()
 {
 
   // iterate over all elements
-  for (const auto & elem_index : index_range(_root->_elements))
+  for (const auto & elem_index : index_range(_model->_elements))
   {
-    const auto & elem = _root->_elements[elem_index];
+    const auto & elem = _model->_elements[elem_index];
     const auto & nodes = elem._nodes;
     // const auto & uel = elem._uel;
 
@@ -166,8 +168,8 @@ AbaqusUELMesh::setupNodeSets()
 const Abaqus::UserElement &
 AbaqusUELMesh::getUEL(const std::string & type) const
 {
-  if (_root->_element_definition.has(type))
-    return _root->_element_definition[type];
+  if (_model->_element_definition.has(type))
+    return _model->_element_definition[type];
   mooseError("Unknown UEL type '", type, "'");
 }
 
