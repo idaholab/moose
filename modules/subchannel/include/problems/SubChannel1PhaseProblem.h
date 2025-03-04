@@ -77,18 +77,6 @@ protected:
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat flux added by the duct
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
-  /// compute massflow that matches the given dp/dz.
-  virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
-  /*
-   * solver with iterative option to enforce uniform inlet
-   * pressure distribution option
-   */
-  virtual void enforceUniformDPDZAtInlet();
-  /*
-   * computeInletMassFlowDist corrects the inlet mass flow rate distribution
-   * in order to satisfy the uniform inlet pressure condition, iteratively.
-   */
-  virtual void computeInletMassFlowDist();
   /// Computes Residual per gap for block iblock
   virtual libMesh::DenseVector<Real> residualFunction(int iblock,
                                                       libMesh::DenseVector<Real> solution);
