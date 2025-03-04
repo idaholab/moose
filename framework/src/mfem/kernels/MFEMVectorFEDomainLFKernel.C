@@ -24,7 +24,7 @@ MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & p
 }
 
 mfem::LinearFormIntegrator *
-MFEMVectorFEDomainLFKernel::createIntegrator()
+MFEMVectorFEDomainLFKernel::createLFIntegrator()
 {
   return new mfem::VectorFEDomainLFIntegrator(*_vec_coef);
 }

@@ -8,7 +8,7 @@
  * (\alpha \nabla \times u, \nabla \times u')
  * \f]
  */
-class MFEMCurlCurlKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMCurlCurlKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();

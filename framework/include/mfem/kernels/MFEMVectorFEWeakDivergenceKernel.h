@@ -8,7 +8,7 @@
  * (\sigma u, \nabla V')
  * \f]
  */
-class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();

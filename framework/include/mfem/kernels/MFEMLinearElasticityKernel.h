@@ -15,7 +15,7 @@
  * \f]
 */
 // clang-format on
-class MFEMLinearElasticityKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMLinearElasticityKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();

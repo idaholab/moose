@@ -7,10 +7,7 @@
 
 /*
 Class to construct an MFEM integrator to apply to the equation system.
-
-TODO: Support for marker arrays specifying the block each kernel is applied on.
 */
-template <typename T>
 class MFEMKernel : public MFEMGeneralUserObject
 {
 public:
@@ -43,7 +40,8 @@ public:
   virtual ~MFEMKernel() = default;
 
   // Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
-  virtual T * createIntegrator() = 0;
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; }
+  virtual mfem::BilinearFormIntegrator * createIntegrator() { return nullptr; }
 
   // Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }

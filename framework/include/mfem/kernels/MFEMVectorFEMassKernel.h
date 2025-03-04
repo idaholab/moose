@@ -8,7 +8,7 @@
  * (\beta u, u')
  * \f]
  */
-class MFEMVectorFEMassKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMVectorFEMassKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();

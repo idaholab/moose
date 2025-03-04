@@ -8,7 +8,7 @@
  * (\alpha \nabla \cdot u, \nabla \cdot u')
  * \f]
  */
-class MFEMDivDivKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMDivDivKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();

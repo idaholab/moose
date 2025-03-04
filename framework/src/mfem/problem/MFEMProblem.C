@@ -191,25 +191,12 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   FEProblemBase::addUserObject(kernel_name, name, parameters);
   const UserObject * kernel = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMKernel<mfem::LinearFormIntegrator> *>(kernel) != nullptr)
+  if (dynamic_cast<const MFEMKernel *>(kernel) != nullptr)
   {
-    auto object_ptr = getUserObject<MFEMKernel<mfem::LinearFormIntegrator>>(name).getSharedPtr();
-    auto lf_kernel = std::dynamic_pointer_cast<MFEMKernel<mfem::LinearFormIntegrator>>(object_ptr);
+    auto object_ptr = getUserObject<MFEMKernel>(name).getSharedPtr();
+    auto kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
 
-    addKernel(lf_kernel->getTestVariableName(), lf_kernel);
-  }
-  else if (dynamic_cast<const MFEMMixedBilinearFormKernel *>(kernel) != nullptr)
-  {
-    auto object_ptr = getUserObject<MFEMMixedBilinearFormKernel>(name).getSharedPtr();
-    auto mblf_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(object_ptr);
-    addKernel(mblf_kernel->getTrialVariableName(), mblf_kernel->getTestVariableName(), mblf_kernel);
-  }
-  else if (dynamic_cast<const MFEMKernel<mfem::BilinearFormIntegrator> *>(kernel) != nullptr)
-  {
-    auto object_ptr = getUserObject<MFEMKernel<mfem::BilinearFormIntegrator>>(name).getSharedPtr();
-    auto blf_kernel =
-        std::dynamic_pointer_cast<MFEMKernel<mfem::BilinearFormIntegrator>>(object_ptr);
-    addKernel(blf_kernel->getTestVariableName(), blf_kernel);
+    addKernel(kernel->getTrialVariableName(), kernel->getTestVariableName(), kernel);
   }
   else
   {
@@ -224,7 +211,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 void
 MFEMProblem::addKernel(std::string trial_var_name,
                        std::string test_var_name,
-                       std::shared_ptr<MFEMMixedBilinearFormKernel> kernel)
+                       std::shared_ptr<MFEMKernel> kernel)
 {
   if (getProblemData().eqn_system)
     getProblemData().eqn_system->AddKernel(trial_var_name, test_var_name, std::move(kernel));

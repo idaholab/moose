@@ -37,59 +37,13 @@ EquationSystem::AddTestVariableNameIfMissing(const std::string & test_var_name)
 }
 
 void
-EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel)
-{
-  AddTestVariableNameIfMissing(test_var_name);
-  AddTrialVariableNameIfMissing(test_var_name);
-  addKernelToMap<MFEMBilinearFormKernel>(blf_kernel, _blf_kernels_map);
-}
-
-void
-EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<MFEMLinearFormKernel> lf_kernel)
-{
-  AddTestVariableNameIfMissing(test_var_name);
-  addKernelToMap<MFEMLinearFormKernel>(lf_kernel, _lf_kernels_map);
-}
-
-void
-EquationSystem::AddKernel(const std::string & test_var_name,
-                          std::shared_ptr<MFEMNonlinearFormKernel> nlf_kernel)
-{
-  AddTestVariableNameIfMissing(test_var_name);
-  AddTrialVariableNameIfMissing(nlf_kernel->getTrialVariableName());
-  addKernelToMap<MFEMNonlinearFormKernel>(nlf_kernel, _nlf_kernels_map);
-}
-
-void
 EquationSystem::AddKernel(const std::string & trial_var_name,
                           const std::string & test_var_name,
-                          std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel)
+                          std::shared_ptr<MFEMKernel> kernel)
 {
   AddTestVariableNameIfMissing(test_var_name);
   AddTrialVariableNameIfMissing(trial_var_name);
-  // Register new mblf kernels map if not present for this test variable
-  if (!_mblf_kernels_map_map.Has(test_var_name))
-  {
-    auto kernel_field_map = std::make_shared<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>();
-
-    _mblf_kernels_map_map.Register(test_var_name, std::move(kernel_field_map));
-  }
-
-  // Register new mblf kernels map if not present for the test/trial variable
-  // pair
-  if (!_mblf_kernels_map_map.Get(test_var_name)->Has(trial_var_name))
-  {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>();
-
-    _mblf_kernels_map_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
-  }
-
-  _mblf_kernels_map_map.GetRef(test_var_name)
-      .Get(trial_var_name)
-      ->push_back(std::move(mblf_kernel));
+  addKernelToMap<MFEMKernel>(kernel, _kernels_map);
 }
 
 void
@@ -123,7 +77,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
     default:
       MFEM_VERIFY(_test_var_names.size() == 1,
                   "Non-legacy assembly is only supported for single-variable systems");
-      MFEM_VERIFY(!_mblf_kernels_map_map.size(),
+      MFEM_VERIFY(_test_var_names.size() == _trial_var_names.size(),
                   "Non-legacy assembly is only supported for square systems");
       FormSystem(op, trueX, trueRHS);
   }
@@ -294,15 +248,18 @@ EquationSystem::BuildLinearForms(Moose::MFEM::BCMap & bc_map)
   {
     // Apply kernels
     auto lf = _lfs.Get(test_var_name);
-    if (_lf_kernels_map.Has(test_var_name))
+    if (_kernels_map.Has(test_var_name))
     {
-      auto lf_kernels = _lf_kernels_map.GetRef(test_var_name);
-
-      for (auto & lf_kernel : lf_kernels)
+      auto kernels = _kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+      for (auto & kernel : kernels)
       {
-        lf_kernel->isSubdomainRestricted()
-            ? lf->AddDomainIntegrator(lf_kernel->createIntegrator(), lf_kernel->getSubdomains())
-            : lf->AddDomainIntegrator(lf_kernel->createIntegrator());
+        mfem::LinearFormIntegrator * lf_integ(kernel->createLFIntegrator());
+        if (lf_integ != nullptr)
+        {
+          kernel->isSubdomainRestricted()
+              ? lf->AddDomainIntegrator(std::move(lf_integ), kernel->getSubdomains())
+              : lf->AddDomainIntegrator(std::move(lf_integ));
+        }
       }
     }
     lf->Assemble();
@@ -323,16 +280,19 @@ EquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
     bc_map.ApplyIntegratedBCs(test_var_name, _blfs.GetRef(test_var_name), *par_mesh);
     // Apply kernels
     auto blf = _blfs.Get(test_var_name);
-    if (_blf_kernels_map.Has(test_var_name))
+    if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       blf->SetAssemblyLevel(_assembly_level);
-      auto blf_kernels = _blf_kernels_map.GetRef(test_var_name);
-
-      for (auto & blf_kernel : blf_kernels)
+      auto kernels = _kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+      for (auto & kernel : kernels)
       {
-        blf_kernel->isSubdomainRestricted()
-            ? blf->AddDomainIntegrator(blf_kernel->createIntegrator(), blf_kernel->getSubdomains())
-            : blf->AddDomainIntegrator(blf_kernel->createIntegrator());
+        mfem::BilinearFormIntegrator * blf_integ = kernel->createIntegrator();
+        if (blf_integ != nullptr)
+        {
+          kernel->isSubdomainRestricted()
+              ? blf->AddDomainIntegrator(std::move(blf_integ), kernel->getSubdomains())
+              : blf->AddDomainIntegrator(std::move(blf_integ));
+        }
       }
     }
     // Assemble
@@ -357,19 +317,22 @@ EquationSystem::BuildMixedBilinearForms()
 
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
-      if (_mblf_kernels_map_map.Has(test_var_name) &&
-          _mblf_kernels_map_map.Get(test_var_name)->Has(trial_var_name))
+      if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(trial_var_name) &&
+          test_var_name != trial_var_name)
       {
-        auto mblf_kernels = _mblf_kernels_map_map.GetRef(test_var_name).GetRef(trial_var_name);
+        auto kernels = _kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
         auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                  _test_pfespaces.at(i));
         // Apply all mixed kernels with this test/trial pair
-        for (auto & mblf_kernel : mblf_kernels)
+        for (auto & kernel : kernels)
         {
-          mblf_kernel->isSubdomainRestricted()
-              ? mblf->AddDomainIntegrator(mblf_kernel->createIntegrator(),
-                                          mblf_kernel->getSubdomains())
-              : mblf->AddDomainIntegrator(mblf_kernel->createIntegrator());
+          mfem::BilinearFormIntegrator * blf_integ = kernel->createIntegrator();
+          if (blf_integ != nullptr)
+          {
+            kernel->isSubdomainRestricted()
+                ? mblf->AddDomainIntegrator(std::move(blf_integ), kernel->getSubdomains())
+                : mblf->AddDomainIntegrator(std::move(blf_integ));
+          }
         }
         // Assemble mixed bilinear forms
         mblf->Assemble();
@@ -424,18 +387,40 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
 }
 
 void
-TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
-                                       std::shared_ptr<MFEMBilinearFormKernel> blf_kernel)
+TimeDependentEquationSystem::AddKernel(const std::string & trial_var_name,
+                                       const std::string & test_var_name,
+                                       std::shared_ptr<MFEMKernel> kernel)
 {
-  if (blf_kernel->getTrialVariableName() == GetTimeDerivativeName(test_var_name))
+  if (kernel->getTrialVariableName() == GetTimeDerivativeName(test_var_name))
   {
     AddTestVariableNameIfMissing(test_var_name);
     AddTrialVariableNameIfMissing(test_var_name);
-    addKernelToMap<MFEMBilinearFormKernel>(blf_kernel, _td_blf_kernels_map);
+    // addKernelToMap<MFEMKernel>(kernel, _td_kernels_map);
+
+    auto trial_var_name = kernel->getTrialVariableName();
+    auto test_var_name = kernel->getTestVariableName();
+    if (!_td_kernels_map.Has(test_var_name))
+    {
+      auto kernel_field_map =
+          std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+
+      _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
+    }
+
+    // Register new mblf kernels map if not present for the test/trial variable
+    // pair
+    if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
+    {
+      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+
+      _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
+    }
+
+    _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
   }
   else
   {
-    EquationSystem::AddKernel(test_var_name, blf_kernel);
+    EquationSystem::AddKernel(trial_var_name, test_var_name, kernel);
   }
 }
 
@@ -457,17 +442,20 @@ TimeDependentEquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
 
     // Apply kernels to td_blf
     auto td_blf = _td_blfs.Get(test_var_name);
-    if (_td_blf_kernels_map.Has(test_var_name))
+    if (_td_kernels_map.Has(test_var_name) &&
+        _td_kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       td_blf->SetAssemblyLevel(_assembly_level);
-      auto td_blf_kernels = _td_blf_kernels_map.GetRef(test_var_name);
-
-      for (auto & td_blf_kernel : td_blf_kernels)
+      auto td_kernels = _td_kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+      for (auto & td_kernel : td_kernels)
       {
-        td_blf_kernel->isSubdomainRestricted()
-            ? td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator(),
-                                          td_blf_kernel->getSubdomains())
-            : td_blf->AddDomainIntegrator(td_blf_kernel->createIntegrator());
+        mfem::BilinearFormIntegrator * td_blf_integ = td_kernel->createIntegrator();
+        if (td_blf_integ != nullptr)
+        {
+          td_kernel->isSubdomainRestricted()
+              ? td_blf->AddDomainIntegrator(std::move(td_blf_integ), td_kernel->getSubdomains())
+              : td_blf->AddDomainIntegrator(std::move(td_blf_integ));
+        }
       }
     }
 

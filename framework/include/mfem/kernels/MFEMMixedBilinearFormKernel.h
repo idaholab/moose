@@ -6,7 +6,7 @@
 /*
 Class to construct an MFEM mixed bilinear form integrator to apply to the equation system.
 */
-class MFEMMixedBilinearFormKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMMixedBilinearFormKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();

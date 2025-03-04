@@ -8,7 +8,7 @@
  * (\sigma \nabla q, \nabla q')
  * \f]
  */
-class MFEMDiffusionKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMDiffusionKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
