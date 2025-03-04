@@ -130,54 +130,45 @@ PrintMatricesNSProblem::onTimestepEnd()
       Mat B, M, Minv;
 
       // Create B
-      auto ierr = MatCreateDense(_communicator.get(),
-                                 mass_matrix.local_m(),
-                                 mass_matrix.local_n(),
-                                 mass_matrix.m(),
-                                 mass_matrix.n(),
-                                 nullptr,
-                                 &B);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatCreateDense(_communicator.get(),
+                                      mass_matrix.local_m(),
+                                      mass_matrix.local_n(),
+                                      mass_matrix.m(),
+                                      mass_matrix.n(),
+                                      nullptr,
+                                      &B));
       const PetscScalar one = 1.0;
       for (const auto i : make_range(mass_matrix.row_start(), mass_matrix.row_stop()))
       {
         const auto petsc_i = cast_int<PetscInt>(i);
-        ierr = MatSetValues(B, 1, &petsc_i, 1, &petsc_i, &one, INSERT_VALUES);
-        LIBMESH_CHKERR(ierr);
+        LibmeshPetscCall(MatSetValues(B, 1, &petsc_i, 1, &petsc_i, &one, INSERT_VALUES));
       }
-      ierr = MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY));
+      LibmeshPetscCall(MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY));
 
       // Create Minv
-      ierr = MatCreateDense(_communicator.get(),
-                            mass_matrix.local_m(),
-                            mass_matrix.local_n(),
-                            mass_matrix.m(),
-                            mass_matrix.n(),
-                            nullptr,
-                            &Minv);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatCreateDense(_communicator.get(),
+                                      mass_matrix.local_m(),
+                                      mass_matrix.local_n(),
+                                      mass_matrix.m(),
+                                      mass_matrix.n(),
+                                      nullptr,
+                                      &Minv));
 
       // Factor mass matrix
-      ierr = MatConvert(mass_matrix.mat(), MATDENSE, MAT_INITIAL_MATRIX, &M);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatLUFactor(M, nullptr, nullptr, nullptr);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatConvert(mass_matrix.mat(), MATDENSE, MAT_INITIAL_MATRIX, &M));
+      LibmeshPetscCall(MatLUFactor(M, nullptr, nullptr, nullptr));
 
       // Solve for Minv
-      ierr = MatMatSolve(M, B, Minv);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatMatSolve(M, B, Minv));
 
       //
       // Compute triple product and write the result
       //
 
       Mat triple_product_mat;
-      ierr = MatMatMatMult(
-          lhs.mat(), Minv, rhs.mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &triple_product_mat);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatMatMatMult(
+          lhs.mat(), Minv, rhs.mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &triple_product_mat));
 
       PetscMatrix<Number> triple_product(triple_product_mat, _communicator);
       if (print)
@@ -187,14 +178,10 @@ PrintMatricesNSProblem::onTimestepEnd()
       }
       write_matrix(triple_product.mat(), inner_matrix_name + std::string(".mat"));
 
-      ierr = MatDestroy(&triple_product_mat);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatDestroy(&B);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatDestroy(&M);
-      LIBMESH_CHKERR(ierr);
-      ierr = MatDestroy(&Minv);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCall(MatDestroy(&triple_product_mat));
+      LibmeshPetscCall(MatDestroy(&B));
+      LibmeshPetscCall(MatDestroy(&M));
+      LibmeshPetscCall(MatDestroy(&Minv));
     };
 
     system_size_pressure_mass_matrix.create_submatrix(
