@@ -112,10 +112,6 @@
 
 !---
 
-!include workshop/infrastructure/testing.md
-
-!---
-
 !include user_workshop/problem/step05.md end=end-intro
 
 !---
@@ -214,7 +210,7 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include workshop/infrastructure/mms.md
+!include user_workshop/problem/step10.md end=end-intro
 
 !---
 
@@ -222,7 +218,11 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 
 !---
 
-!include user_workshop/problem/step10.md
+# Step 10: Finite Volume
+
+## (continued)
+
+!include user_workshop/problem/step10.md start=end-intro
 
 !---
 

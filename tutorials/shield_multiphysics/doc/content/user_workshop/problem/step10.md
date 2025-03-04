@@ -24,6 +24,8 @@ Conservation of Energy:
 
 where $\vec{u}$ is the fluid velocity, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\vec{g}$ is the gravity vector, and $T$ is the temperature.
 
+!! end-intro
+
 !---
 
 ## Step 10: Natural convection
