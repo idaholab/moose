@@ -164,8 +164,7 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
       const auto y_plus = y_plus_vec[i];
 
       if (y_plus < 11.25)
-        destruction +=
-            2.0 * TKE * mu / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
+        destruction += 2.0 * TKE * mu / rho / Utility::pow<2>(distance_vec[i]) / tot_weight;
       else
         destruction += std::pow(_C_mu, 0.75) * std::pow(TKE, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
@@ -188,7 +187,8 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     Real production_k = symmetric_strain_tensor_sq_norm;
 
     // Limit TKE production (needed for flows with stagnation zones)
-    const Real production_limit = _C_pl * rho * _var.getElemValue(*_current_elem_info, state) / _mu_t(elem_arg, state);
+    const Real production_limit =
+        _C_pl * rho * _var.getElemValue(*_current_elem_info, state) / _mu_t(elem_arg, state);
     production_k = std::min(production_k, production_limit);
 
     // Compute production - recasted with mu_t definition to avoid division by epsilon

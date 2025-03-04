@@ -37,9 +37,6 @@ ShearStressNormAux::ShearStressNormAux(const InputParameters & params)
 Real
 ShearStressNormAux::computeValue()
 {
-  return NS::computeShearStrainRateNormSquared<Real>(_u_var,
-                                                     _v_var,
-                                                     _w_var,
-                                                     makeElemArg(_current_elem),
-                                                     determineState());
+  return NS::computeShearStrainRateNormSquared<Real>(
+      _u_var, _v_var, _w_var, makeElemArg(_current_elem), determineState());
 }

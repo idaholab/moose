@@ -301,10 +301,10 @@ SIMPLESolveBase::validParams()
                                      "diagonal dominance will still be enforced)");
 
   params.addParam<std::vector<Real>>(
-  "turbulence_field_min_limit",
-  std::vector<Real>(),
-  "The lower limit imposed on turbulent quantities. The recommended value for robustness "
-  "is 1e-8.");
+      "turbulence_field_min_limit",
+      std::vector<Real>(),
+      "The lower limit imposed on turbulent quantities. The recommended value for robustness "
+      "is 1e-8.");
 
   params.addParam<MultiMooseEnum>("turbulence_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
@@ -335,17 +335,16 @@ SIMPLESolveBase::validParams()
       10000,
       "The maximum allowed iterations in the linear solver of the turbulence equation.");
 
-  params.addParamNamesToGroup(
-      "turbulence_systems "
-      "turbulence_equation_relaxation "
-      "turbulence_field_relaxation "
-      "turbulence_field_min_limit "
-      "turbulence_petsc_options "
-      "turbulence_petsc_options_iname "
-      "turbulence_petsc_options_value turbulence_petsc_options_value "
-      "turbulence_absolute_tolerance "
-      "turbulence_l_tol turbulence_l_abs_tol turbulence_l_max_its",
-      "turbulence Equation");
+  params.addParamNamesToGroup("turbulence_systems "
+                              "turbulence_equation_relaxation "
+                              "turbulence_field_relaxation "
+                              "turbulence_field_min_limit "
+                              "turbulence_petsc_options "
+                              "turbulence_petsc_options_iname "
+                              "turbulence_petsc_options_value turbulence_petsc_options_value "
+                              "turbulence_absolute_tolerance "
+                              "turbulence_l_tol turbulence_l_abs_tol turbulence_l_max_its",
+                              "turbulence Equation");
 
   /*
    * SIMPLE iteration control
@@ -562,8 +561,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
 
     // Assign turbulence field relaxation as 1.0 if not defined
     if (_turbulence_field_relaxation.empty())
-        _turbulence_field_relaxation.resize(_turbulence_system_names.size(), 1.0);
-
+      _turbulence_field_relaxation.resize(_turbulence_system_names.size(), 1.0);
 
     const auto & turbulence_petsc_options = getParam<MultiMooseEnum>("turbulence_petsc_options");
     const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(

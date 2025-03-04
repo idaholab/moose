@@ -191,8 +191,8 @@ LinearFVTKESourceSink::computeRightHandSideContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
 
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end()) // Wall bounded
-    return 0.0; // Do nothing
-  else // Not wall bounded
+    return 0.0;                                                              // Do nothing
+  else                                                                       // Not wall bounded
   {
     // Compute TKE production
     const auto symmetric_strain_tensor_sq_norm =
