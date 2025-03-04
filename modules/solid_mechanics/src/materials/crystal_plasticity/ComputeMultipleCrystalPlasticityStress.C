@@ -320,7 +320,18 @@ ComputeMultipleCrystalPlasticityStress::postSolveQp(RankTwoTensor & cauchy_stres
 
   // Calculate the misorientation
   auto _misorientation_mat = _updated_rotation[_qp] * _updated_rotation_old[_qp].inverse();
-  _misorientation[_qp] = std::acos((_misorientation_mat.trace() - 1.0) / 2.0);
+  auto cos_val = (_misorientation_mat.trace() - 1.0) / 2.0;
+  // Make sure the value is in feasible range
+  if (cos_val > 1.0 || cos_val < -1.0)
+  {
+    if (MooseUtils::absoluteFuzzyEqual(cos_val, -1.0))
+      cos_val = -1.0;
+    else if (MooseUtils::absoluteFuzzyEqual(cos_val, 1.0))
+      cos_val = 1.0;
+    else
+      mooseError("Misorientation value is undefined. This should not happen.");
+  }
+  _misorientation[_qp] = std::acos(cos_val);
 }
 
 void
