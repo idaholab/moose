@@ -35,7 +35,4 @@ private:
   const bool _use_split;
   /// The split mesh file (if any); comes from either Mesh/split_file or --split-file
   const std::string _split_file;
-
-  /// Whether to ignore mesh generators and use FileMesh when both are present in input
-  bool _are_mesh_generators_superseded;
 };
