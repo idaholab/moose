@@ -182,11 +182,6 @@ public:
    *
    * @return The closures object(s)
    */
-  std::shared_ptr<ClosuresBase> getClosures() const
-  {
-    mooseDeprecated("getClosures() is deprecated. Use getClosuresObjects() instead.");
-    return _closures;
-  }
   std::vector<std::shared_ptr<ClosuresBase>> getClosuresObjects() const
   {
     return _closures_objects;
@@ -221,7 +216,6 @@ protected:
   FunctionName _area_function;
 
   /// Closures object(s)
-  std::shared_ptr<ClosuresBase> _closures;
   std::vector<std::shared_ptr<ClosuresBase>> _closures_objects;
 
   const bool & _pipe_pars_transferred;

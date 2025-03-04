@@ -33,4 +33,11 @@
                   "point search leads to element Jacobian computations too far from the element for "
                   "the Jacobian to be non-negative."
   []
+  [close_tet_mesh]
+    type = Exodiff
+    input = 'close_tet.i'
+    exodiff = 'close_tet_out.e'
+    recover = false # steady solve
+    requirement = "The system shall ensure all points identified as being in contact are within a distance of the tangential tolerance to the primary surface."
+  []
 []

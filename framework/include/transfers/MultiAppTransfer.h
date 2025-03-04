@@ -38,7 +38,7 @@ public:
   /**
    * Utility to verify that the variable in the destination system exists.
    */
-  void variableIntegrityCheck(const AuxVariableName & var_name) const;
+  void variableIntegrityCheck(const AuxVariableName & var_name, bool is_from_multiapp) const;
 
   void initialSetup() override;
 

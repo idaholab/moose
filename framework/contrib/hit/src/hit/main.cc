@@ -90,16 +90,30 @@ main(int argc, char ** argv)
     return profile(argc - 2, argv + 2);
   else if (subcmd == "braceexpr")
   {
-    std::stringstream ss;
-    for (std::string line; std::getline(std::cin, line);)
-      ss << line << std::endl;
+    // verify number of arguments
+    if (argc != 3)
+    {
+      std::cerr << "Usage: hit braceexpr filename.i" << std::endl;
+      return 1;
+    }
 
-    hit::BraceExpander expander;
-    hit::EnvEvaler env;
+    // load file and parse string
+    std::string fname(argv[2]);
+    std::string input = readInput(fname);
+    std::unique_ptr<hit::Node> root(hit::parse(fname, input));
+
+    // evaluate brace expressions
     hit::RawEvaler raw;
-    expander.registerEvaler("env", env);
-    expander.registerEvaler("raw", raw);
-    std::cout << expander.expand(nullptr, ss.str()) << "\n";
+    hit::EnvEvaler env;
+    hit::ReplaceEvaler repl;
+    hit::BraceExpander exw;
+    exw.registerEvaler("raw", raw);
+    exw.registerEvaler("env", env);
+    exw.registerEvaler("replace", repl);
+    root->walk(&exw);
+
+    // output expanded input file
+    std::cout << root->render() << std::endl;
 
     return 0;
   }

@@ -5,6 +5,7 @@
     type = CSVDiff
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    allow_test_objects = true
     threading = '!pthreads'
     requirement = 'The system shall be able to compute properties from a two-phase with non-condensable gas user object.'
   []

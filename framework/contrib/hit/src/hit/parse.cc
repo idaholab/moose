@@ -725,7 +725,8 @@ Field::setVal(const std::string & value, Kind kind)
     for (std::size_t i = 0, count = node.child_count(); i < count; i++)
     {
       auto ch = node.child_at(i);
-      if (i > 1 || (ch.type() != wasp::DECL && ch.type() != wasp::ASSIGN))
+      if (i > 1 || (ch.type() != wasp::DECL && ch.type() != wasp::ASSIGN &&
+                    ch.type() != wasp::OVERRIDE_ASSIGN))
         if (ch.is_leaf())
         {
           ch.set_data("");

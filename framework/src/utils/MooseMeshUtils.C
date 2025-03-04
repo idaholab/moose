@@ -12,7 +12,6 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
-#include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/utility.h"
@@ -570,5 +569,46 @@ extraElemIntegerSwapParametersProcessor(
                                     elem_integer_swap_pairs.begin(),
                                     elem_integer_swap_pairs.end());
   }
+}
+
+std::unique_ptr<ReplicatedMesh>
+buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+{
+  auto poly_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
+
+  auto side_list = input_mesh.get_boundary_info().build_side_list();
+
+  std::unordered_map<dof_id_type, dof_id_type> old_new_node_map;
+  for (const auto & bside : side_list)
+  {
+    if (std::get<2>(bside) != boundary_id)
+      continue;
+
+    const Elem * elem = input_mesh.elem_ptr(std::get<0>(bside));
+    const auto side = std::get<1>(bside);
+    auto side_elem = elem->build_side_ptr(side);
+    auto copy = side_elem->build(side_elem->type());
+
+    for (const auto i : side_elem->node_index_range())
+    {
+      auto & n = side_elem->node_ref(i);
+
+      if (old_new_node_map.count(n.id()))
+        copy->set_node(i) = poly_mesh->node_ptr(old_new_node_map[n.id()]);
+      else
+      {
+        Node * node = poly_mesh->add_point(side_elem->point(i));
+        copy->set_node(i) = node;
+        old_new_node_map[n.id()] = node->id();
+      }
+    }
+    poly_mesh->add_elem(copy.release());
+  }
+  poly_mesh->skip_partitioning(true);
+  poly_mesh->prepare_for_use();
+  if (poly_mesh->n_elem() == 0)
+    mooseError("The input mesh does not have a boundary with id ", boundary_id);
+
+  return poly_mesh;
 }
 }

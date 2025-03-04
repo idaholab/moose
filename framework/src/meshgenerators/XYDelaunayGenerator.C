@@ -49,6 +49,7 @@ XYDelaunayGenerator::validParams()
 
   params.addParam<SubdomainName>("output_subdomain_name",
                                  "Subdomain name to set on new triangles.");
+  params.addParam<SubdomainID>("output_subdomain_id", "Subdomain id to set on new triangles.");
 
   params.addParam<BoundaryName>(
       "output_boundary",
@@ -328,32 +329,50 @@ XYDelaunayGenerator::generate()
 
   poly2tri.triangulate();
 
+  if (isParamValid("output_subdomain_id"))
+    _output_subdomain_id = getParam<SubdomainID>("output_subdomain_id");
+
   if (isParamValid("output_subdomain_name"))
   {
     auto output_subdomain_name = getParam<SubdomainName>("output_subdomain_name");
-    _output_subdomain_id = MooseMeshUtils::getSubdomainID(output_subdomain_name, *mesh);
+    auto id = MooseMeshUtils::getSubdomainID(output_subdomain_name, *mesh);
 
-    if (_output_subdomain_id == Elem::invalid_subdomain_id)
+    if (id == Elem::invalid_subdomain_id)
     {
-      // We'll probably need to make a new ID, then
-      _output_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
-
-      // But check the hole meshes for our output subdomain name too
-      for (auto & hole_ptr : hole_ptrs)
+      if (!isParamValid("output_subdomain_id"))
       {
-        auto possible_sbdid = MooseMeshUtils::getSubdomainID(output_subdomain_name, *hole_ptr);
-        // Huh, it was in one of them
-        if (possible_sbdid != Elem::invalid_subdomain_id)
-        {
-          _output_subdomain_id = possible_sbdid;
-          break;
-        }
-        _output_subdomain_id =
-            std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(*hole_ptr));
-      }
+        // We'll probably need to make a new ID, then
+        _output_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
 
-      mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
+        // But check the hole meshes for our output subdomain name too
+        for (auto & hole_ptr : hole_ptrs)
+        {
+          auto possible_sbdid = MooseMeshUtils::getSubdomainID(output_subdomain_name, *hole_ptr);
+          // Huh, it was in one of them
+          if (possible_sbdid != Elem::invalid_subdomain_id)
+          {
+            _output_subdomain_id = possible_sbdid;
+            break;
+          }
+          _output_subdomain_id =
+              std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(*hole_ptr));
+        }
+      }
     }
+    else
+    {
+      if (isParamValid("output_subdomain_id"))
+      {
+        if (id != _output_subdomain_id)
+          paramError("output_subdomain_name",
+                     "name has been used by the input meshes and the corresponding id is not equal "
+                     "to 'output_subdomain_id'");
+      }
+      else
+        _output_subdomain_id = id;
+    }
+
+    mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
   }
 
   if (_smooth_tri || _output_subdomain_id)

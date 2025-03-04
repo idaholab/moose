@@ -38,16 +38,16 @@ MultiAppFieldTransfer::initialSetup()
 
   if (_current_direction == TO_MULTIAPP)
     for (auto & to_var : getToVarNames())
-      variableIntegrityCheck(to_var);
+      variableIntegrityCheck(to_var, false);
   else if (_current_direction == FROM_MULTIAPP)
     for (auto & from_var : getFromVarNames())
-      variableIntegrityCheck(from_var);
+      variableIntegrityCheck(from_var, true);
   else
   {
     for (auto & to_var : getToVarNames())
-      variableIntegrityCheck(to_var);
+      variableIntegrityCheck(to_var, false);
     for (auto & from_var : getFromVarNames())
-      variableIntegrityCheck(from_var);
+      variableIntegrityCheck(from_var, true);
   }
 }
 

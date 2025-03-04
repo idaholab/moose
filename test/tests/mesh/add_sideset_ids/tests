@@ -24,4 +24,11 @@
     design = MooseMesh.md
     requirement = 'The system shall allow specifying valid sideset names that do not exist on the initial mesh, and assign IDs automatically.'
   []
+  [remove_sidesets]
+    type = CSVDiff
+    input = remove_sideset_ids.i
+    csvdiff = remove_sideset_ids_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall be able to remove sides from sidesets when tese sides elements are moved to new blocks.'
+  []
 []
