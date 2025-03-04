@@ -27,9 +27,9 @@ LAROMANCE6DInterpolation::expected_options()
   // JSON
   options.set<std::string>("model_file_name");
   options.set<std::string>("model_file_variable_name");
-
-  options.set<bool>("_use_AD_first_derivative") = true;
-  options.set<bool>("_use_AD_second_derivative") = true;
+  // jit doe snot currently work with this
+  options.set<bool>("jit") = false; // false;
+  options.set("jit").suppressed() = true;
   return options;
 }
 
@@ -72,21 +72,21 @@ LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
   _env_transform_values = json_to_vector("in_env_transform_values");
 
   // Storing values for interpolation
-  std::string filename_variable = options.get<std::string>("model_file_variable_name");
-  _grid_values = json_6Dvector_to_torch(filename_variable);
+  _output_rate_name = options.get<std::string>("model_file_variable_name");
+  _grid_values = json_6Dvector_to_torch(_output_rate_name);
 
   // set up output transforms
-  if (filename_variable == "out_ep")
+  if (_output_rate_name == "out_ep")
   {
     _output_transform_enum = get_transform_enum(json_to_string("out_strain_rate_transform_type"));
     _output_transform_values = json_to_vector("out_strain_rate_transform_values");
   }
-  else if (filename_variable == "out_cell")
+  else if (_output_rate_name == "out_cell")
   {
     _output_transform_enum = get_transform_enum(json_to_string("out_cell_rate_transform_type"));
     _output_transform_values = json_to_vector("out_cell_rate_transform_values");
   }
-  else if (filename_variable == "out_wall")
+  else if (_output_rate_name == "out_wall")
   {
     _output_transform_enum = get_transform_enum(json_to_string("out_wall_rate_transform_type"));
     _output_transform_values = json_to_vector("out_wall_rate_transform_values");
@@ -94,7 +94,18 @@ LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
   else
   {
     throw NEMLException("This ouput variable is not implemented, model_file_variable_name: " +
-                        std::string(filename_variable));
+                        std::string(_output_rate_name));
+  }
+}
+
+void
+LAROMANCE6DInterpolation::request_AD()
+{
+  if (_output_rate_name == "out_ep")
+  {
+    std::vector<const VariableBase *> inputs = {&_s};
+    // First derivatives
+    _output_rate.request_AD(inputs);
   }
 }
 
