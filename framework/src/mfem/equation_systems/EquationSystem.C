@@ -62,7 +62,19 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 }
 
 void
-EquationSystem::ApplyBoundaryConditions(Moose::MFEM::BCMap & bc_map)
+EquationSystem::AddBC(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc)
+{
+  if (_bc_map.Has(name))
+  {
+    const std::string error_message = "A boundary condition with the name " + name +
+                                      " has already been added to the problem boundary conditions.";
+    mfem::mfem_error(error_message.c_str());
+  }
+  _bc_map.Register(name, std::move(bc));
+}
+
+void
+EquationSystem::ApplyBoundaryConditions()
 {
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
@@ -74,7 +86,7 @@ EquationSystem::ApplyBoundaryConditions(Moose::MFEM::BCMap & bc_map)
     *(_dxdts.at(i)) = 0.0;
     auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
     mooseAssert(par_mesh, "parallel mesh is null");
-    bc_map.ApplyEssentialBCs(test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), *par_mesh);
+    _bc_map.ApplyEssentialBCs(test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), *par_mesh);
   }
 }
 
@@ -218,8 +230,7 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 
 void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     const Moose::MFEM::FESpaces &,
-                     Moose::MFEM::BCMap &,
+                     const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -244,7 +255,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 }
 
 void
-EquationSystem::BuildLinearForms(Moose::MFEM::BCMap & bc_map)
+EquationSystem::BuildLinearForms()
 {
   // Register linear forms
   for (const auto i : index_range(_test_var_names))
@@ -254,10 +265,10 @@ EquationSystem::BuildLinearForms(Moose::MFEM::BCMap & bc_map)
     _lfs.GetRef(test_var_name) = 0.0;
     auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
     mooseAssert(par_mesh, "parallel mesh is null");
-    bc_map.ApplyIntegratedBCs(test_var_name, _lfs.GetRef(test_var_name), *par_mesh);
+    _bc_map.ApplyIntegratedBCs(test_var_name, _lfs.GetRef(test_var_name), *par_mesh);
   }
   // Apply boundary conditions
-  ApplyBoundaryConditions(bc_map);
+  ApplyBoundaryConditions();
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -282,7 +293,7 @@ EquationSystem::BuildLinearForms(Moose::MFEM::BCMap & bc_map)
 }
 
 void
-EquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
+EquationSystem::BuildBilinearForms()
 {
   // Register bilinear forms
   for (const auto i : index_range(_test_var_names))
@@ -292,7 +303,7 @@ EquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
 
     auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
     mooseAssert(par_mesh, "parallel mesh is null");
-    bc_map.ApplyIntegratedBCs(test_var_name, _blfs.GetRef(test_var_name), *par_mesh);
+    _bc_map.ApplyIntegratedBCs(test_var_name, _blfs.GetRef(test_var_name), *par_mesh);
     // Apply kernels
     auto blf = _blfs.Get(test_var_name);
     if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(test_var_name))
@@ -363,11 +374,11 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
-EquationSystem::BuildEquationSystem(Moose::MFEM::BCMap & bc_map)
+EquationSystem::BuildEquationSystem()
 {
-  BuildBilinearForms(bc_map);
+  BuildBilinearForms();
   BuildMixedBilinearForms();
-  BuildLinearForms(bc_map);
+  BuildLinearForms();
 }
 
 TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
@@ -434,9 +445,9 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 }
 
 void
-TimeDependentEquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
+TimeDependentEquationSystem::BuildBilinearForms()
 {
-  EquationSystem::BuildBilinearForms(bc_map);
+  EquationSystem::BuildBilinearForms();
 
   // Build and assemble bilinear forms acting on time derivatives
   for (const auto i : index_range(_test_var_names))
@@ -447,7 +458,7 @@ TimeDependentEquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
     auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
     mooseAssert(par_mesh, "parallel mesh is null");
-    bc_map.ApplyIntegratedBCs(test_var_name, _td_blfs.GetRef(test_var_name), *par_mesh);
+    _bc_map.ApplyIntegratedBCs(test_var_name, _td_blfs.GetRef(test_var_name), *par_mesh);
 
     // Apply kernels to td_blf
     auto td_blf = _td_blfs.Get(test_var_name);
@@ -577,11 +588,11 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem(Moose::MFEM::BCMap & bc_map)
+TimeDependentEquationSystem::UpdateEquationSystem()
 {
-  BuildBilinearForms(bc_map);
+  BuildBilinearForms();
   BuildMixedBilinearForms();
-  BuildLinearForms(bc_map);
+  BuildLinearForms();
 }
 
 } // namespace Moose::MFEM

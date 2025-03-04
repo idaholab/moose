@@ -21,7 +21,6 @@ public:
   Moose::MFEM::VectorCoefficientManager vector_manager;
   Moose::MFEM::MatrixCoefficientManager matrix_manager;
   Moose::MFEM::PropertyManager properties{scalar_manager, vector_manager, matrix_manager};
-  Moose::MFEM::BCMap bc_map;
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
   mfem::BlockVector f;

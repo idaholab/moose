@@ -78,7 +78,6 @@ MFEMTransient::init()
   _problem_data.eqn_system->Init(
       _problem_data.gridfunctions,
       _problem_data.fespaces,
-      _problem_data.bc_map,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   _problem_operator->SetGridFunctions();

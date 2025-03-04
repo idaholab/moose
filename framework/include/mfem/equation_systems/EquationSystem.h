@@ -29,18 +29,18 @@ public:
 
   // Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
+  virtual void AddBC(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc);
 
-  virtual void ApplyBoundaryConditions(Moose::MFEM::BCMap & bc_map);
+  virtual void ApplyBoundaryConditions();
 
   // Build forms
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
-                    Moose::MFEM::BCMap & bc_map,
                     mfem::AssemblyLevel assembly_level);
-  virtual void BuildLinearForms(Moose::MFEM::BCMap & bc_map);
-  virtual void BuildBilinearForms(Moose::MFEM::BCMap & bc_map);
+  virtual void BuildLinearForms();
+  virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
-  virtual void BuildEquationSystem(Moose::MFEM::BCMap & bc_map);
+  virtual void BuildEquationSystem();
 
   // Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -107,6 +107,13 @@ protected:
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _kernels_map;
 
+  Moose::MFEM::BCMap _bc_map;
+
+  // Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>
+  //     _integrated_bc_map;
+
+  // Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+
   mutable mfem::OperatorHandle _jacobian;
 
   mfem::AssemblyLevel _assembly_level;
@@ -123,10 +130,10 @@ public:
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
-  virtual void UpdateEquationSystem(Moose::MFEM::BCMap & bc_map);
+  virtual void UpdateEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
-  virtual void BuildBilinearForms(Moose::MFEM::BCMap & bc_map) override;
+  virtual void BuildBilinearForms() override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
