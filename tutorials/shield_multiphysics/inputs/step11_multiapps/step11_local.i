@@ -126,14 +126,6 @@
     default = 320
   []
 
-  # Compute the heat transfer into the surroundings
-  [heat_flux]
-    type = SideDiffusiveFluxIntegral
-    boundary = outer
-    variable = T
-    diffusivity = thermal_conductivity
-  []
-
   # Compute those then send to the main app
   [T_hdpe_out]
     type = ElementAverageValue

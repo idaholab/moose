@@ -219,8 +219,14 @@ power = '${fparse 5e4 / 144 * 0.1}'
   []
 []
 
-# This is the variable that is transferred from the main app
 [AuxVariables]
+  # This isn't used in simulation, but useful for visualization
+  [vel_z]
+    type = INSFVVelocityVariable
+    block = 'water'
+    initial_condition = 0
+  []
+  # This is the variable that is transferred from the main app
   [T_solid]
     block = 'concrete_hd concrete Al'
     initial_condition = 300

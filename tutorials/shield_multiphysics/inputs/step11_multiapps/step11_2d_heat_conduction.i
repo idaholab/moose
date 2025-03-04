@@ -21,16 +21,6 @@ power = '${fparse 5e4 / 144 * 0.1}'
   []
 []
 
-[DiracKernels]
-  [detector_heat]
-    type = ReporterPointSource
-    variable = T
-    block = Al
-    point_name = 'detector_positions/positions_1d'
-    value_name = 'receiver/detector_heat'
-  []
-[]
-
 [Materials]
   [concrete_hd]
     type = ADHeatConductionMaterial
@@ -183,13 +173,6 @@ power = '${fparse 5e4 / 144 * 0.1}'
     variable = flux
   []
   # retrieve outputs from the child apps
-  [detector_heat]
-    type = MultiAppReporterTransfer
-    from_multi_app = detectors
-    from_reporters = 'heat_flux/value'
-    to_reporters = 'receiver/detector_heat'
-    distribute_reporter_vector = true
-  []
   [hdpe_temperature]
     type = MultiAppPostprocessorInterpolationTransfer
     from_multi_app = detectors
@@ -204,8 +187,6 @@ power = '${fparse 5e4 / 144 * 0.1}'
   []
 []
 
-reactor_x = 3.25
-reactor_y = 2.225
 [AuxVariables]
   [T_fluid]
     # family = MONOMIAL
@@ -218,7 +199,7 @@ reactor_y = 2.225
   [flux]
     [InitialCondition]
       type = FunctionIC
-      function = '1e4 * exp(-((x-${reactor_x})^2 + (y-${reactor_y})^2))'
+      function = '1e4 * exp(-((x-3.25)^2 + (y-2.225)^2))'
     []
   []
 
@@ -232,14 +213,6 @@ reactor_y = 2.225
     family = MONOMIAL
     order = CONSTANT
     block = Al
-  []
-[]
-
-[Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = 'detector_heat'
-    real_vector_values = '0 0 0 0 0 0 0 0'
   []
 []
 
