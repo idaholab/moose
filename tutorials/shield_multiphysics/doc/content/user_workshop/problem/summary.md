@@ -19,7 +19,7 @@
 
 ## [#step01]
 
-The first step is to solve a simple "Diffusion" problem, which requires no code. This step
+The first step is to solve a simple "Diffusion" problem. This step
 will introduce the basic system of MOOSE.
 
 !equation
@@ -86,7 +86,7 @@ Solve the transient heat equation using the "heat transfer" module.
 ## [#step07]
 
 Thermal expansion of the concrete can be added to the coupled set of equations
-using the "solid mechanics" module, without adding additional code.
+using the "solid mechanics" module.
 
 !equation
 \nabla \cdot (\boldsymbol{\sigma} + \boldsymbol{\sigma}_0) + \boldsymbol{b} = \boldsymbol{0}
