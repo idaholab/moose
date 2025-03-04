@@ -96,6 +96,50 @@ protected:
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
 
+  /**
+   * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
+   * or MixedBilinearForm
+   */
+  template <class FormType>
+  void ApplyDomainBLFIntegrators(
+      const std::string & trial_var_name,
+      const std::string & test_var_name,
+      std::shared_ptr<FormType> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::BilinearFormIntegrator * integ = kernel->createIntegrator();
+      if (integ != nullptr)
+      {
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomains())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+
+  void ApplyDomainLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
+      if (integ != nullptr)
+      {
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomains())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+
   // gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;

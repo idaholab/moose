@@ -273,20 +273,10 @@ EquationSystem::BuildLinearForms()
   for (auto & test_var_name : _test_var_names)
   {
     // Apply kernels
-    auto lf = _lfs.Get(test_var_name);
+    auto lf = _lfs.GetShared(test_var_name);
     if (_kernels_map.Has(test_var_name))
     {
-      auto kernels = _kernels_map.GetRef(test_var_name).GetRef(test_var_name);
-      for (auto & kernel : kernels)
-      {
-        mfem::LinearFormIntegrator * lf_integ(kernel->createLFIntegrator());
-        if (lf_integ != nullptr)
-        {
-          kernel->isSubdomainRestricted()
-              ? lf->AddDomainIntegrator(std::move(lf_integ), kernel->getSubdomains())
-              : lf->AddDomainIntegrator(std::move(lf_integ));
-        }
-      }
+      ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
     }
     lf->Assemble();
   }
@@ -305,21 +295,12 @@ EquationSystem::BuildBilinearForms()
     mooseAssert(par_mesh, "parallel mesh is null");
     _bc_map.ApplyIntegratedBCs(test_var_name, _blfs.GetRef(test_var_name), *par_mesh);
     // Apply kernels
-    auto blf = _blfs.Get(test_var_name);
+    auto blf = _blfs.GetShared(test_var_name);
     if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       blf->SetAssemblyLevel(_assembly_level);
-      auto kernels = _kernels_map.GetRef(test_var_name).GetRef(test_var_name);
-      for (auto & kernel : kernels)
-      {
-        mfem::BilinearFormIntegrator * blf_integ = kernel->createIntegrator();
-        if (blf_integ != nullptr)
-        {
-          kernel->isSubdomainRestricted()
-              ? blf->AddDomainIntegrator(std::move(blf_integ), kernel->getSubdomains())
-              : blf->AddDomainIntegrator(std::move(blf_integ));
-        }
-      }
+      ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
+          test_var_name, test_var_name, blf, _kernels_map);
     }
     // Assemble
     blf->Assemble();
@@ -346,20 +327,11 @@ EquationSystem::BuildMixedBilinearForms()
       if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(trial_var_name) &&
           test_var_name != trial_var_name)
       {
-        auto kernels = _kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
         auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                  _test_pfespaces.at(i));
         // Apply all mixed kernels with this test/trial pair
-        for (auto & kernel : kernels)
-        {
-          mfem::BilinearFormIntegrator * blf_integ = kernel->createIntegrator();
-          if (blf_integ != nullptr)
-          {
-            kernel->isSubdomainRestricted()
-                ? mblf->AddDomainIntegrator(std::move(blf_integ), kernel->getSubdomains())
-                : mblf->AddDomainIntegrator(std::move(blf_integ));
-          }
-        }
+        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+            trial_var_name, test_var_name, mblf, _kernels_map);
         // Assemble mixed bilinear forms
         mblf->Assemble();
         // Register mixed bilinear forms associated with a single trial variable
@@ -461,22 +433,13 @@ TimeDependentEquationSystem::BuildBilinearForms()
     _bc_map.ApplyIntegratedBCs(test_var_name, _td_blfs.GetRef(test_var_name), *par_mesh);
 
     // Apply kernels to td_blf
-    auto td_blf = _td_blfs.Get(test_var_name);
+    auto td_blf = _td_blfs.GetShared(test_var_name);
     if (_td_kernels_map.Has(test_var_name) &&
         _td_kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       td_blf->SetAssemblyLevel(_assembly_level);
-      auto td_kernels = _td_kernels_map.GetRef(test_var_name).GetRef(test_var_name);
-      for (auto & td_kernel : td_kernels)
-      {
-        mfem::BilinearFormIntegrator * td_blf_integ = td_kernel->createIntegrator();
-        if (td_blf_integ != nullptr)
-        {
-          td_kernel->isSubdomainRestricted()
-              ? td_blf->AddDomainIntegrator(std::move(td_blf_integ), td_kernel->getSubdomains())
-              : td_blf->AddDomainIntegrator(std::move(td_blf_integ));
-        }
-      }
+      ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
+          test_var_name, test_var_name, td_blf, _td_kernels_map);
     }
 
     // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
