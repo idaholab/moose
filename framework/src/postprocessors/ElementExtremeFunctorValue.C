@@ -37,7 +37,6 @@ ElementExtremeFunctorValueTempl<is_ad>::ElementExtremeFunctorValueTempl(
     _proxy_functor(isParamValid("proxy_functor") ? getFunctor<GenericReal<is_ad>>("proxy_functor")
                                                  : getFunctor<GenericReal<is_ad>>("functor"))
 {
-  _use_proxy = isParamValid("proxy_functor");
 }
 
 template <bool is_ad>

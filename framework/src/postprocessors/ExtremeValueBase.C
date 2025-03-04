@@ -21,19 +21,18 @@ InputParameters
 ExtremeValueBase<T>::validParams()
 {
   InputParameters params = T::validParams();
-  params.addParam<MooseEnum>("value_type",
-                             MooseEnum("max=0 min=1 max_abs=2", "max"),
-                             "Type of extreme value to return. 'max' "
-                             "returns the maximum value. 'min' returns "
-                             "the minimum value.");
+  params.addParam<MooseEnum>(
+      "value_type",
+      MooseEnum("max=0 min=1 max_abs=2", "max"),
+      "Type of extreme value to return. 'max' "
+      "returns the maximum value. 'min' returns "
+      "the minimum value. 'max_abs' returns the maximum of the absolute value.");
   return params;
 }
 
 template <class T>
 ExtremeValueBase<T>::ExtremeValueBase(const InputParameters & parameters)
-  : T(parameters),
-    _type(parameters.get<MooseEnum>("value_type").getEnum<ExtremeType>()),
-    _use_proxy(true)
+  : T(parameters), _type(parameters.get<MooseEnum>("value_type").getEnum<ExtremeType>())
 {
 }
 

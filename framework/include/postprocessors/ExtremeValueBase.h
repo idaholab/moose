@@ -40,7 +40,4 @@ protected:
 
   /// Extreme value and proxy value at the same point
   std::pair<Real, Real> _proxy_value;
-
-  /// use proxy value. Requires more expensive MPI communication
-  bool _use_proxy;
 };

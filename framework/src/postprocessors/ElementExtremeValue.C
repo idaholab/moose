@@ -28,7 +28,6 @@ ElementExtremeValue::ElementExtremeValue(const InputParameters & parameters)
   : ExtremeValueBase<ElementVariablePostprocessor>(parameters),
     _proxy_variable(isParamValid("proxy_variable") ? coupledValue("proxy_variable") : _u)
 {
-  _use_proxy = isParamValid("proxy_variable");
 }
 
 std::pair<Real, Real>
