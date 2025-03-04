@@ -1,59 +1,81 @@
-# M. H. Fontana et al 1973, 1976, Inlet blockage, Case 719.
-# This input file models a block at the inlet of the assembly,
-# using the aux kernel SCMBlockedMassFlowRateAux. The affected subchannels get a mass flux BC that is
-# user defined to be very low.
-T_in = 589.15
+################################################################################
+## THORS bundle 5B partial edge blockage benchmark                            ##
+## Pronghorn Subchannel simulation                                            ##
+## POC : Vasileios Kyriakopoulos, vasileios.kyriakopoulos@inl.gov             ##
+################################################################################
+# Details on the experimental facility modeled can be found at:
+# Han, J. T. "Blockages in LMFBR fuel assemblies: A review of experimental and theoretical studies." (1977).
+# This input file models a block next to the duct of  the of the assembly
+# 102 mm above the start of the heated section.
+
+# Boundary conditions
+T_in = 541.55 #K, low flow case
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
 rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
-Total_surface_area = 0.000452826 #m2
-Blocked_surface_area = '${fparse 8.65158e-06 * 13}'
-Flow_area = '${fparse Total_surface_area - Blocked_surface_area}'
-vol_flow = 0.00341 #m3/sec
-mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
+inlet_vel = 0.48 #m/sec, low flow case
+mass_flux_in = '${fparse rho *  inlet_vel}'
 P_out = 2.0e5 # Pa
-
 [TriSubChannelMesh]
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 50
-    flat_to_flat = 0.0338514
-    heated_length = 0.5334
-    unheated_length_entry = 0.0762
-    unheated_length_exit = 0.3048
+    flat_to_flat = 0.0324290
+    heated_length = 0.4572
+    unheated_length_entry = 0.4064
+    unheated_length_exit = 0.1524
     pin_diameter = 0.005842
     pitch = 7.2644e-3
     dwire = 0.0014224
     hwire = 0.3048
     spacer_z = '0.0'
     spacer_k = '0.0'
+    z_blockage = '0.49 0.52'
+    index_blockage = '29 31 30 32 34 33 35 15 16 8 17 18 9 19'
+    reduction_blockage = '0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166'
+    k_blockage = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 '
+
   []
 []
 
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [w_perim]
-  []
-  [q_prime]
+    block = subchannel
   []
   [mu]
+    block = subchannel
+  []
+  [q_prime]
+    block = subchannel
+  []
+  [displacement]
+    block = subchannel
   []
 []
 
@@ -68,11 +90,11 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 1.0
+  CT = 10
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
+  P_tol = 1.0e-3
   T_tol = 1.0e-4
   implicit = true
   segregated = false
@@ -93,7 +115,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 162153.6 #W
+    power = 52800 #W, low flow case
     filename = "pin_power_profile_19.txt"
   []
 
@@ -155,13 +177,11 @@ P_out = 2.0e5 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = SCMBlockedMassFlowRateAux
+    type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
-    index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
     area = S
-    unblocked_mass_flux = ${mass_flux_in}
-    blocked_mass_flux = '${fparse 0.1 * mass_flux_in}'
+    mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
   []
 []
@@ -175,44 +195,58 @@ P_out = 2.0e5 # Pa
   [1]
     type = SubChannelPointValue
     variable = T
-    index = 0
+    index = 34
     execute_on = 'initial timestep_end'
-    height = 0.152
+    height = 0.94
   []
   [2]
     type = SubChannelPointValue
     variable = T
-    index = 5
+    index = 33
     execute_on = 'initial timestep_end'
-    height = 0.152
+    height = 0.94
   []
   [3]
     type = SubChannelPointValue
     variable = T
-    index = 3
+    index = 18
     execute_on = 'initial timestep_end'
-    height = 0.152
+    height = 0.94
   []
   [4]
     type = SubChannelPointValue
     variable = T
-    index = 1
+    index = 9
     execute_on = 'initial timestep_end'
-    height = 0.152
+    height = 0.94
   []
   [5]
     type = SubChannelPointValue
     variable = T
-    index = 6
+    index = 3
     execute_on = 'initial timestep_end'
-    height = 0.152
+    height = 0.94
   []
   [6]
     type = SubChannelPointValue
     variable = T
-    index = 36
+    index = 0
     execute_on = 'initial timestep_end'
-    height = 0.152
+    height = 0.94
+  []
+  [7]
+    type = SubChannelPointValue
+    variable = T
+    index = 12
+    execute_on = 'initial timestep_end'
+    height = 0.94
+  []
+  [8]
+    type = SubChannelPointValue
+    variable = T
+    index = 25
+    execute_on = 'initial timestep_end'
+    height = 0.94
   []
 []
 
@@ -227,7 +261,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "FFM-2Bdetailed.i"
+    input_files = "FFM-5B_viz.i"
     execute_on = "timestep_end"
   []
 []
@@ -236,6 +270,6 @@ P_out = 2.0e5 # Pa
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    variable = 'mdot SumWij P DP h T rho mu q_prime S displacement w_perim'
   []
 []

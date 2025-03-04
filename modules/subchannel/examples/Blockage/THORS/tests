@@ -1,0 +1,38 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#29488'
+  [FFM-5B_low]
+    type = CSVDiff
+    input = 'FFM-5B_low.i'
+    csvdiff  = 'FFM-5B_low_out.csv'
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the FFM-5B low flow case'
+  []
+  [FFM-5B_high]
+    type = CSVDiff
+    input = 'FFM-5B_high.i'
+    csvdiff  = 'FFM-5B_high_out.csv'
+    heavy = true
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the FFM-5B high flow case'
+  []
+  [FFM-3A]
+    type = CSVDiff
+    input = 'FFM-3A.i'
+    csvdiff  = 'FFM-3A_out.csv'
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the FFM-3A case'
+  []
+[]

@@ -5,7 +5,7 @@ Information on the THORS facility and experiments can be found in the following 
 
 ## Central blockage of 6 channels in a 19-pin sodium-cooled bundle
 
-THORS bundle 3A simulates the Fast Flux Test Facility and Clinch River Breeder Reactor configurations.  Nineteen electrically heated pins are contained inside a round duct, which has unheated dummy pins along the duct wall. The central six channels ($1, 2, 3, 4, 5, 6$) are blocked by a non-heat-generating 35-mm-thick stainless-steel plate. The bundle cross section is shown in [fig:thors]. The circles with the crosses indicate the position of thermocouples at the assembly exit. SCM modeled the THORS bundle 3A blockage with a $92$% area reduction on the affected subchannels and a local form loss coefficient of $6$. The SCM model's geometry and subchannel/pin index notation is shown in [fig:hex_index]. The experimental parameters are presented in [parameters].
+THORS bundle 3A simulates the Fast Flux Test Facility and Clinch River Breeder Reactor configurations.  Nineteen electrically heated pins are contained inside a round duct, which has unheated dummy pins along the duct wall. The central six channels ($1, 2, 3, 4, 5, 6$) are blocked by a non-heat-generating 35-mm-thick stainless-steel plate. The bundle cross section is shown in [fig:thors]. The circles with the crosses indicate the position of thermocouples at the assembly exit. SCM modeled the THORS bundle 3A blockage with a $92$% area reduction on the affected subchannels and a local form loss coefficient of $3.5$. The SCM model's geometry and subchannel/pin index notation is shown in [fig:hex_index]. The experimental parameters are presented in [parameters].
 
 !media subchannel/v&v/thors.png
     style=width:60%;margin-bottom:2%;margin:auto;
@@ -89,15 +89,15 @@ It should be noted that the effect of the simulated blockage, depends on the axi
 
 The input file to run the central blockage case is presented below:
 
-!listing /examples/Blockage/FFM-3A.i language=cpp
+!listing /examples/Blockage/THORS/FFM-3A.i language=cpp
 
 The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
 
-!listing /examples/Blockage/FFM-3Adetailed.i language=cpp
+!listing /examples/Blockage/THORS/FFM-3Adetailed.i language=cpp
 
 ## Edge blockage of 14 channels in 19-pin sodium-cooled bundles
 
-THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711-cm-diam wire-wrap spacers are used to separate the peripheral pins from the duct wall. The half-size spacers are used to reduce the flow in the peripheral flow channels and to cause a flatter radial temperature profile across the bundle. It also means that the flat-to-flat distance is reduced appropiately. The pins have a heated length of $45.7 cm$. A 3175-cm-thick stainless steel blockage plate is located $10.2 cm$  above the start of the heated zone to block $14$ edge and internal channels along the duct wall. The test section layout is shown in Fig [fig:thors2]. The experimental parameters for the chosen case are presented in [parameters2]. SCM modeled the THORS bundle 5B blockage with a $92$% area reduction on the affected subchannels and a local form loss coefficient of $6$. $C_T$ was set to $10$ as in the previous case. The SCM model's geometry and subchannel/pin index notation is shown in [fig:hex_index].
+THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711-cm-diam wire-wrap spacers are used to separate the peripheral pins from the duct wall. The half-size spacers are used to reduce the flow in the peripheral flow channels and to cause a flatter radial temperature profile across the bundle. It also means that the flat-to-flat distance is reduced appropiately. The pins have a heated length of $45.7 cm$. A 3175-cm-thick stainless steel blockage plate is located $10.2 cm$  above the start of the heated zone to block $14$ edge and internal channels along the duct wall. The test section layout is shown in Fig [fig:thors2]. The experimental parameters for the chosen case are presented in [parameters2]. SCM modeled the THORS bundle 5B blockage with a $83.4$% area reduction on the affected subchannels and a local form loss coefficient of $1$. $C_T$ was set to $10$ as in the previous case. The SCM model's geometry and subchannel/pin index notation is shown in [fig:hex_index].
 
 !media subchannel/v&v/thors2.png
     style=width:60%;margin-bottom:2%;margin:auto;
@@ -127,20 +127,22 @@ THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711
 
 The case presented here is the high flow case (FFM Series 6, Test 12, Run 101). The thermocouples are located at the middle of the exit region. There is a subchannel index correspondence between the Figure [fig:thors2] and the Pronhorn-SC model shown in Figure[fig:hex_index] as follows: 34(39), 33(38), 18(20), 9(19), 3(4), 0(1), 12(11) and 25(30). Where the number outside the parentheses refers to the SCM model and the number inside the parentheses, refers to the experimental convention. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B]. The code calculations excibits generally good agreement with the experimental measurements. The least agreement occurs at the edge subchannels ($34,33$) which is likely due to the model not accuretally replicating the flow area there. Prongohorn-SC uses an assembly-wide constant wire diameter, while in the experimental assembly the wires at the edge subchannels had half the diameter.
 
-!media subchannel/v&v/FFM-5B.png
+!media subchannel/v&v/FFM-5B_high.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:FFM-5B
     caption= Exit temperature profile for high flow case ($C_T = 10$).
 
 The second case presented here is the low flow case (FFM Series 6, Test 12, Run 109). The thermocouples are located at the middle of the exit region, same as before. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B2]. The code calculations excibits good agreement with the experimental measurements.
 
-!media subchannel/v&v/FFM-5B2.png
+!media subchannel/v&v/FFM-5B_low.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:FFM-5B2
     caption= Exit temperature profile for low flow case ($C_T = 10$).
 
 ## SCM Input
 
-The input file to run the edge blockage case is presented below:
+The input files to run the edge blockage case is presented below:
 
-!listing /examples/Blockage/FFM-5B.i language=cpp
+!listing /examples/Blockage/THORS/FFM-5B_high.i language=cpp
+
+!listing /examples/Blockage/THORS/FFM-5B_low.i language=cpp
