@@ -574,7 +574,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
     if (_pressure_projection_method == "SIMPLEC")
     {
 
-      // Consistent Corrections to Simple
+      // Consistent Corrections to SIMPLE
       // 1. Ainv_old = 1/a_p <- Ainv = 1/(a_p + \sum_n a_n)
       // 2. H(u) <- H(u*) + H(u') = H(u*) - (Ainv - Ainv_old) * grad(p) * Vc
 
@@ -582,23 +582,23 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
         _console << "Performing SIMPLEC projection." << std::endl;
 
       // Lambda function to calculate the sum of diagonal and neighbor coefficients
-      auto get_row_sum_excluding_diagonal = [mmat](NumericVector<Number> & sum_vector)
+      auto get_row_sum = [mmat](NumericVector<Number> & sum_vector)
       {
         // Ensure the sum_vector is zeroed out
         sum_vector.zero();
 
         // Local row size
-        const unsigned int local_size = mmat->row_stop() - mmat->row_start();
+        const auto local_size = mmat->local_m();
 
         for (const auto row_i : make_range(local_size))
         {
           // Get all non-zero components of the row of the matrix
-          const unsigned int global_index = mmat->row_start() + row_i;
+          const auto global_index = mmat->row_start() + row_i;
           std::vector<numeric_index_type> indices;
           std::vector<Real> values;
           mmat->get_row(global_index, indices, values);
 
-          // Use std::accumulate with a lambda to sum row elements (no absolute values)
+          // Sum row elements (no absolute values)
           const Real row_sum = std::accumulate(values.cbegin(), values.cend(), 0.0);
 
           // Add the sum of diagonal and elements to the sum_vector
@@ -608,29 +608,24 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
       };
 
       // Create a temporary vector to store the sum of diagonal and neighbor coefficients
-      auto neighbor_sum = current_local_solution.zero_clone();
-      PetscVector<Number> * neighbor_sum_petsc =
-          dynamic_cast<PetscVector<Number> *>(neighbor_sum.get());
-      mooseAssert(neighbor_sum_petsc,
-                  "The vectors used in the RhieChowMassFlux objects need to be convertable "
-                  "to PetscVectors!");
-      get_row_sum_excluding_diagonal(*neighbor_sum_petsc);
+      auto row_sum = current_local_solution.zero_clone();
+      get_row_sum_excluding_diagonal(*row_sum);
 
       // Create vector with new inverse projection matrix
       auto Ainv_full = current_local_solution.zero_clone();
-      PetscVector<Number> * Ainv_full_vec = dynamic_cast<PetscVector<Number> *>(Ainv_full.get());
+      PetscVector<Number> * Ainv_full_vec = cast_ptr<PetscVector<Number> *>(Ainv_full.get());
       *working_vector_petsc = 1.0;
-      Ainv_full_vec->pointwise_divide(*working_vector_petsc, *neighbor_sum_petsc);
-      const auto Ainv_full_vec_hold = Ainv_full_vec->clone();
+      Ainv_full->pointwise_divide(*working_vector_petsc, *row_sum);
+      const auto Ainv_full_old = Ainv_full->clone();
 
       // Correct HbyA
-      Ainv_full_vec->add(-1.0, Ainv);
-      working_vector_petsc->pointwise_mult(*Ainv_full_vec, *pressure_gradient[system_i]);
+      Ainv_full->add(-1.0, Ainv);
+      working_vector_petsc->pointwise_mult(*Ainv_full, *pressure_gradient[system_i]);
       working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
       HbyA.add(-1.0, *working_vector_petsc);
 
       // Correct Ainv
-      Ainv = *Ainv_full_vec_hold;
+      Ainv = *Ainv_full_old;
     }
 
     Ainv.pointwise_mult(Ainv, *_cell_volumes);

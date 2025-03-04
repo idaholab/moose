@@ -1,6 +1,6 @@
 [Tests]
   issues = '#27280'
-  design = 'SIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md'
+  design = 'RhieChowMassFlux.md SIMPLE.md'
   [momentum-pressure]
     type = 'Exodiff'
     input = 3d-velocity-pressure.i
