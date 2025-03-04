@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30015'
+  design = 'syntax/Adaptivity/index.md'
+  [test]
+    type = 'Exodiff'
+    input = 'cycles_per_step.i'
+    exodiff = 'cycles_per_step_out.e-s004'
+    cli_args = "GlobalParams/displacements='disp_x disp_y' GlobalParams/use_displaced_mesh=true
+                AuxVariables/disp_x/family=LAGRANGE AuxVariables/disp_y/family=LAGRANGE
+                Adaptivity/Indicators/indicator/use_displaced_mesh=false"
+    requirement = "The system shall allow for using internal side indicators on the displaced mesh."
+  []
+[]

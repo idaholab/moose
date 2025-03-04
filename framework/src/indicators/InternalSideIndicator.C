@@ -83,7 +83,11 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
 
   addMooseVariableDependency(&mooseVariableField());
 
-  // Only supports lagrange or constant monomial
+  // Not supported with the base linear lagrange case
+  if (_use_displaced_mesh)
+    paramError("use_displaced_mesh",
+               "Internal side indicators do not support using the displaced mesh at this time. "
+               "They can be used on the undisplaced mesh in a Problem with displaced mesh");
 }
 
 void
