@@ -66,4 +66,6 @@ MatBodyForce::computeQpOffDiagJacobian(unsigned int jvar)
   return (*_dpropertydarg[cvar])[_qp] * BodyForce::computeQpResidual() * _phi[_j][_qp];
 }
 
+template class MatBodyForceTempl<false,
+                                 DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>>;
 template class MatBodyForceTempl<true, ADBodyForce>;
