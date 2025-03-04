@@ -287,10 +287,7 @@ SetupMeshAction::act()
             {
               mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
                          _type,
-                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ",
-                         "The ",
-                         _type,
-                         " will supersede the Mesh Generators.");
+                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
               _are_mesh_generators_superseded = true;
               break;
             }
