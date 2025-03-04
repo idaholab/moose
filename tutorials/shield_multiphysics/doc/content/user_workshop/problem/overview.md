@@ -26,39 +26,17 @@ Simplified geometry:
 
 !---
 
-## Governing Equations
+## Physics of Interest
 
-Concrete domain
+- Concrete Domain: +Thermal Mechanics+
 
-Conservation of Energy:
+  - Heat conduction of the thermal radiation from the reactor to the boundary of shield.
+  - Mechanical displacement and stress from the thermal expansion.
 
-!equation id=solid_energy_intro
-\rho c_p \frac{\partial T}{\partial t} - \nabla\cdot k \nabla T = 0
+- Water Domain: +Thermal Fluids+
 
-where $\rho$ is the density, $c_p$ the specific heat capacity, $k$ the thermal conductivity, and $T$ the temperature.
-
-!---
-
-Water domain
-
-Conservation of Mass (incompressible):
-
-!equation id=fluid_mass_intro
-\nabla \cdot \vec{u} = 0
-
-Conservation of momentum:
-
-!equation id=fluid_velocity_intro
-\frac{\partial \rho  \vec{u}}{\partial t} + \nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right)
-= \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\nabla p + \rho \vec{g}
-
-Conservation of Energy:
-
-!equation id=fluid_energy_intro
-\rho c_p\left( \frac{\partial T}{\partial t} + \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
-
-
-where $\vec{u}$ is the fluid velocity, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\vec{g}$ is the gravity vector, and $T$ is the temperature.
+  - Heat transfer through the fluid and back-and-forth from the concrete.
+  - Natural convection of the fluid due to the temperature gradients.
 
 !---
 

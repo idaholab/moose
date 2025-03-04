@@ -41,12 +41,17 @@ In order to implement the heat conduction equation, a `Kernel` object is needed 
 We represent the boundary conditions using `BC` objects. For example, Dirichlet boundary conditions:
 
 !equation
-T = 300 K
+T = T_{\mathrm{b}} [K] \in \Omega_D
 
-or Neumann boundary conditions
+Neumann boundary conditions:
 
 !equation
-q = 30 W/m^2
+-k\nabla T\cdot\vec{n} = q'' [W/m^2] \in \Omega_N
+
+or convective boundary conditions:
+
+!equation
+-k\nabla T\cdot\vec{n} = h\left(T - T_{\inf}\right) \in \Omega_C
 
 !---
 
@@ -63,7 +68,7 @@ as well as be coupled to variables in the simulation.
 The heat flux can be compute from the temperature as:
 
 !equation
-q = -k \nabla T
+[q_x, q_y, q_z] = -k \nabla T
 
 This velocity can be computed using the Auxiliary system.
 
@@ -74,7 +79,7 @@ This velocity can be computed using the Auxiliary system.
 Solve the transient heat equation using the "heat transfer" module.
 
 !equation
-\rho c \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
+\rho c_p \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
 
 !---
 
@@ -82,6 +87,9 @@ Solve the transient heat equation using the "heat transfer" module.
 
 Thermal expansion of the concrete can be added to the coupled set of equations
 using the "solid mechanics" module, without adding additional code.
+
+!equation
+\nabla \cdot (\boldsymbol{\sigma} + \boldsymbol{\sigma}_0) + \boldsymbol{b} = \boldsymbol{0}
 
 !---
 
@@ -98,22 +106,31 @@ Adaptivity lets us resolve the temperature gradient at lower computational cost.
 simulation, such as the average temperature on the boundary or the temperatures along a line
 within the solution domain.
 
+!equation
+\bar{T} = \frac{\int_{\Omega} T d\Omega}{\int_{\Omega}d\Omega}
+
 !---
 
 ## [#step10]
 
-Solve the pressure, velocity and temperature in a coupled system of equations by solving for conjugate heat transfer
-with the fluid region
+Solve the pressure, velocity and temperature in a coupled system of equations by solving for heat transfer
+in the fluid region
+
+Conservation of Mass (incompressible):
 
 !equation
-\rho_c c_c \frac{\partial T_c}{\partial t} - \nabla \cdot k_c \nabla T_c = 0
-\\
 \nabla \cdot \vec{u} = 0
-\\
-\frac{\partial \rho_w  \vec{u}}{\partial t} + \nabla \cdot \left(\rho_w \vec{u} \otimes \vec{u}\right)
-= \nabla \cdot \left(\mu_{w,\text{eff}} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\nabla p + \rho_w \vec{g}
-\\
-\rho_w c_w \left( \frac{\partial T_w}{\partial t} + \vec{u}\cdot\nabla T_w \right) - \nabla\cdot k_w \nabla T_w = 0
+
+Conservation of momentum:
+
+!equation
+\frac{\partial \rho  \vec{u}}{\partial t} + \nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right)
+= \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\nabla p + \rho \vec{g}
+
+Conservation of Energy:
+
+!equation
+\rho c_p\left( \frac{\partial T}{\partial t} + \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
 
 !---
 
