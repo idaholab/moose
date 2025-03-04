@@ -17,7 +17,7 @@ The user may opt to apply that condition at the inlet [!param](/AuxKernels/SCMBl
 
 !listing /test/tests/auxkernels/mass_flow_rate/blocked_test.i block=AuxKernels language=cpp
 
-!listing /examples/Blockage/FFM-2B.i block=AuxKernels language=cpp
+!listing /examples/Blockage/THORS/FFM-2B.i block=AuxKernels language=cpp
 
 !syntax parameters /AuxKernels/SCMBlockedMassFlowRateAux
 
