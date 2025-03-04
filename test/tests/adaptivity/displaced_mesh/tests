@@ -1,13 +1,28 @@
 [Tests]
   issues = '#30015'
   design = 'syntax/Adaptivity/index.md'
-  [test]
+  [linear_lagrange_source]
     type = 'Exodiff'
     input = 'cycles_per_step.i'
     exodiff = 'cycles_per_step_out.e-s004'
     cli_args = "GlobalParams/displacements='disp_x disp_y' GlobalParams/use_displaced_mesh=true
                 AuxVariables/disp_x/family=LAGRANGE AuxVariables/disp_y/family=LAGRANGE
-                Adaptivity/Indicators/indicator/use_displaced_mesh=false"
+                Adaptivity/Indicators/indicator/use_displaced_mesh=false
+                Outputs/hide='disp_x disp_y'"
     requirement = "The system shall allow for using internal side indicators on the displaced mesh."
+  []
+  [linear_monomial_source]
+    type = 'Exodiff'
+    input = 'cycles_per_step.i'
+    exodiff = 'cycles_per_step_out.e-s002'
+    cli_args = "Variables/u/family=MONOMIAL
+                BCs/left/type=NeumannBC BCs/right/type=NeumannBC
+                GlobalParams/displacements='disp_x disp_y' GlobalParams/use_displaced_mesh=true
+                AuxVariables/disp_x/family=LAGRANGE AuxVariables/disp_y/family=LAGRANGE
+                Adaptivity/Indicators/indicator/use_displaced_mesh=false
+                Adaptivity/Markers/marker/refine=0.2"
+    requirement = "The system shall allow for using internal side indicators on the displaced mesh that depend on a monomial variable."
+    # uses same output file names
+    prereq = 'linear_lagrange_source'
   []
 []
