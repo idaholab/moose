@@ -1,0 +1,14 @@
+{
+  "CELLS": null,
+  "SURFACES": {
+    "cylinder_surf_z": {
+      "COEFFICIENTS": {
+        "r": 7.0,
+        "x0": 8.0,
+        "y0": 9.0
+      },
+      "TYPE": 5
+    }
+  },
+  "UNIVERSES": null
+}
