@@ -8,9 +8,11 @@ namespace neml2
 class LAROMANCE6DInterpolation : public Model
 {
 public:
+  static OptionSet expected_options();
+
   LAROMANCE6DInterpolation(const OptionSet & options);
 
-  static OptionSet expected_options();
+  void request_AD() override;
 
   enum class TransformEnum
   {
@@ -107,8 +109,8 @@ private:
   std::vector<Real> _wall_transform_values;
   std::vector<Real> _env_transform_values;
 
-  /// output transform strings
-  std::string _output_transform_name;
+  /// output transform rate name
+  std::string _output_rate_name;
   /// output transform values
   std::vector<Real> _output_transform_values;
   /// output transform enum
