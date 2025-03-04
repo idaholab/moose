@@ -222,14 +222,6 @@ public:
   getMeshDisplacementGridFunction();
 
 protected:
-  /**
-   * Template method for adding kernels. We can only add kernels using equation system problem
-   * builders.
-   */
-  void addKernel(std::string trial_var_name,
-                 std::string test_var_name,
-                 std::shared_ptr<MFEMKernel> kernel);
-
   MFEMProblemData _problem_data;
   std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;
   std::map<std::string, std::shared_ptr<mfem::VectorFunctionCoefficient>> _vector_functions;

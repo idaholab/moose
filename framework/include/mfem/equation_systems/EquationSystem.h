@@ -28,9 +28,7 @@ public:
   virtual void AddTrialVariableNameIfMissing(const std::string & trial_var_name);
 
   // Add kernels.
-  virtual void AddKernel(const std::string & trial_var_name,
-                         const std::string & test_var_name,
-                         std::shared_ptr<MFEMKernel> kernel);
+  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
 
   virtual void ApplyBoundaryConditions(Moose::MFEM::BCMap & bc_map);
 
@@ -70,37 +68,6 @@ public:
                                   Moose::MFEM::GridFunctions & gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
-
-  /**
-   * Template method for storing kernels.
-   */
-  template <class T>
-  void addKernelToMap(
-      std::shared_ptr<T> kernel,
-      Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>>> &
-          kernels_map)
-  {
-    auto trial_var_name = kernel->getTrialVariableName();
-    auto test_var_name = kernel->getTestVariableName();
-    if (!kernels_map.Has(test_var_name))
-    {
-      auto kernel_field_map =
-          std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>>>();
-
-      kernels_map.Register(test_var_name, std::move(kernel_field_map));
-    }
-
-    // Register new mblf kernels map if not present for the test/trial variable
-    // pair
-    if (!kernels_map.Get(test_var_name)->Has(trial_var_name))
-    {
-      auto kernels = std::make_shared<std::vector<std::shared_ptr<T>>>();
-
-      kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
-    }
-
-    kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
-  }
 
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
@@ -158,9 +125,7 @@ public:
   virtual void SetTimeStep(double dt);
   virtual void UpdateEquationSystem(Moose::MFEM::BCMap & bc_map);
 
-  virtual void AddKernel(const std::string & trial_var_name,
-                         const std::string & test_var_name,
-                         std::shared_ptr<MFEMKernel> kernel) override;
+  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms(Moose::MFEM::BCMap & bc_map) override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,

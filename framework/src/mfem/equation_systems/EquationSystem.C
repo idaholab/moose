@@ -37,13 +37,28 @@ EquationSystem::AddTestVariableNameIfMissing(const std::string & test_var_name)
 }
 
 void
-EquationSystem::AddKernel(const std::string & trial_var_name,
-                          const std::string & test_var_name,
-                          std::shared_ptr<MFEMKernel> kernel)
+EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  AddTestVariableNameIfMissing(test_var_name);
-  AddTrialVariableNameIfMissing(trial_var_name);
-  addKernelToMap<MFEMKernel>(kernel, _kernels_map);
+  AddTestVariableNameIfMissing(kernel->getTestVariableName());
+  AddTrialVariableNameIfMissing(kernel->getTrialVariableName());
+  auto trial_var_name = kernel->getTrialVariableName();
+  auto test_var_name = kernel->getTestVariableName();
+  if (!_kernels_map.Has(test_var_name))
+  {
+    auto kernel_field_map =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+
+    _kernels_map.Register(test_var_name, std::move(kernel_field_map));
+  }
+  // Register new kernels map if not present for the test/trial variable
+  // pair
+  if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+
+    _kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+  }
+  _kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
 }
 
 void
@@ -387,18 +402,14 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
 }
 
 void
-TimeDependentEquationSystem::AddKernel(const std::string & trial_var_name,
-                                       const std::string & test_var_name,
-                                       std::shared_ptr<MFEMKernel> kernel)
+TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  if (kernel->getTrialVariableName() == GetTimeDerivativeName(test_var_name))
+  if (kernel->getTrialVariableName() == GetTimeDerivativeName(kernel->getTestVariableName()))
   {
-    AddTestVariableNameIfMissing(test_var_name);
-    AddTrialVariableNameIfMissing(test_var_name);
-    // addKernelToMap<MFEMKernel>(kernel, _td_kernels_map);
-
     auto trial_var_name = kernel->getTrialVariableName();
     auto test_var_name = kernel->getTestVariableName();
+    AddTestVariableNameIfMissing(test_var_name);
+    AddTrialVariableNameIfMissing(test_var_name);
     if (!_td_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
@@ -406,8 +417,7 @@ TimeDependentEquationSystem::AddKernel(const std::string & trial_var_name,
 
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
-
-    // Register new mblf kernels map if not present for the test/trial variable
+    // Register new kernels map if not present for the test/trial variable
     // pair
     if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
     {
@@ -415,12 +425,11 @@ TimeDependentEquationSystem::AddKernel(const std::string & trial_var_name,
 
       _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
     }
-
     _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
   }
   else
   {
-    EquationSystem::AddKernel(trial_var_name, test_var_name, kernel);
+    EquationSystem::AddKernel(kernel);
   }
 }
 

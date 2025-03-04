@@ -189,35 +189,26 @@ MFEMProblem::addKernel(const std::string & kernel_name,
                        InputParameters & parameters)
 {
   FEProblemBase::addUserObject(kernel_name, name, parameters);
-  const UserObject * kernel = &(getUserObjectBase(name));
+  const UserObject * kernel_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMKernel *>(kernel) != nullptr)
+  if (dynamic_cast<const MFEMKernel *>(kernel_uo) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
-
-    addKernel(kernel->getTrialVariableName(), kernel->getTestVariableName(), kernel);
+    if (getProblemData().eqn_system)
+    {
+      getProblemData().eqn_system->AddKernel(std::move(kernel));
+    }
+    else
+    {
+      mooseError("Cannot add kernel with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
   }
   else
   {
     mooseError("Unsupported kernel of type '", kernel_name, "' and name '", name, "' detected.");
   }
-}
-
-/**
- * Method for adding mixed bilinear kernels. We can only add kernels using equation system problem
- * builders.
- */
-void
-MFEMProblem::addKernel(std::string trial_var_name,
-                       std::string test_var_name,
-                       std::shared_ptr<MFEMKernel> kernel)
-{
-  if (getProblemData().eqn_system)
-    getProblemData().eqn_system->AddKernel(trial_var_name, test_var_name, std::move(kernel));
-  else
-    mooseError("Cannot add kernel with name '" + test_var_name +
-               "' because there is no equation system.");
 }
 
 libMesh::Point
