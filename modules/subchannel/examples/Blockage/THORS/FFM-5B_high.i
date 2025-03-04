@@ -9,14 +9,12 @@
 # 102 mm above the start of the heated section.
 
 # Boundary conditions
-# T_in = 596.75 # K, high flow case
-T_in = 541.55 #K, low flow case
+T_in = 596.75 # K, high flow case
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
 rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
-# inlet_vel = 6.93 #m/sec, high flow case
-inlet_vel = 0.48 #m/sec, low flow case
+inlet_vel = 6.93 #m/sec, high flow case
 mass_flux_in = '${fparse rho *  inlet_vel}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
@@ -36,8 +34,9 @@ P_out = 2.0e5 # Pa
     spacer_k = '0.0'
     z_blockage = '0.49 0.52'
     index_blockage = '29 31 30 32 34 33 35 15 16 8 17 18 9 19'
-    reduction_blockage = '0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168 0.168'
-    k_blockage = '0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 '
+    reduction_blockage = '0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166 0.166'
+    k_blockage = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 '
+
   []
 []
 
@@ -95,7 +94,7 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
+  P_tol = 1.0e-3
   T_tol = 1.0e-4
   implicit = true
   segregated = false
@@ -116,8 +115,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    # power = 145000  #W, high flow case
-    power = 52800 #W, low flow case
+    power = 145000  #W, high flow case
     filename = "pin_power_profile_19.txt"
   []
 

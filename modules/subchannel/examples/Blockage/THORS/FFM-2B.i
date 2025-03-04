@@ -1,36 +1,34 @@
-# M. H. Fontana et al 1973, 1976
-# This input file models a partial block at the center of the assembly
-# The affected subchannels get an area reduction and a form loss coefficient
-T_in = 714.261
+# M. H. Fontana et al 1973, 1976, Inlet blockage, Case 719.
+# This input file models a block at the inlet of the assembly,
+# using the aux kernel SCMBlockedMassFlowRateAux. The affected subchannels get a mass flux BC that is
+# user defined to be very low.
+T_in = 589.15
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
 rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
 Total_surface_area = 0.000452826 #m2
-Blocked_surface_area = 0.0 #m2
+Blocked_surface_area = '${fparse 8.65158e-06 * 13}'
 Flow_area = '${fparse Total_surface_area - Blocked_surface_area}'
-vol_flow = 3.4E-03 #m3/s
+vol_flow = 0.00341 #m3/sec
 mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
 P_out = 2.0e5 # Pa
+
 [TriSubChannelMesh]
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 36
+    n_cells = 50
     flat_to_flat = 0.0338514
     heated_length = 0.5334
-    unheated_length_entry = 0.3048
-    unheated_length_exit = 0.0762
+    unheated_length_entry = 0.0762
+    unheated_length_exit = 0.3048
     pin_diameter = 0.005842
     pitch = 7.2644e-3
     dwire = 0.0014224
     hwire = 0.3048
     spacer_z = '0.0'
     spacer_k = '0.0'
-    z_blockage = '0.6858 0.69215'
-    index_blockage = '0 1 2 3 4 5'
-    reduction_blockage = '0.08 0.08 0.08 0.08 0.08 0.08'
-    k_blockage = '6 6 6 6 6 6'
   []
 []
 
@@ -57,6 +55,8 @@ P_out = 2.0e5 # Pa
   []
   [mu]
   []
+  [displacement]
+  []
 []
 
 [FluidProperties]
@@ -70,12 +70,12 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 10
+  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-3
-  T_tol = 1.0e-3
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
@@ -95,7 +95,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 332500.0 #W
+    power = 162153.6 #W
     filename = "pin_power_profile_19.txt"
   []
 
@@ -116,6 +116,7 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
+
   [Viscosity_ic]
     type = ViscosityIC
     variable = mu
@@ -156,11 +157,13 @@ P_out = 2.0e5 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = SCMMassFlowRateAux
+    type = SCMBlockedMassFlowRateAux
     variable = mdot
     boundary = inlet
+    index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
     area = S
-    mass_flux = ${mass_flux_in}
+    unblocked_mass_flux = ${mass_flux_in}
+    blocked_mass_flux = '${fparse 0.1 * mass_flux_in}'
     execute_on = 'timestep_begin'
   []
 []
@@ -170,67 +173,71 @@ P_out = 2.0e5 # Pa
   csv = true
 []
 
-[Executioner]
-  type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
-[]
-
 [Postprocessors]
   [1]
     type = SubChannelPointValue
     variable = T
-    index = 37
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+    index = 0
+    execute_on = 'initial timestep_end'
+    height = 0.152
   []
   [2]
     type = SubChannelPointValue
     variable = T
-    index = 36
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+    index = 5
+    execute_on = 'initial timestep_end'
+    height = 0.152
   []
   [3]
     type = SubChannelPointValue
     variable = T
-    index = 20
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+    index = 3
+    execute_on = 'initial timestep_end'
+    height = 0.152
   []
   [4]
     type = SubChannelPointValue
     variable = T
-    index = 10
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+    index = 1
+    execute_on = 'initial timestep_end'
+    height = 0.152
   []
   [5]
     type = SubChannelPointValue
     variable = T
-    index = 4
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+    index = 6
+    execute_on = 'initial timestep_end'
+    height = 0.152
   []
   [6]
     type = SubChannelPointValue
     variable = T
-    index = 1
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+    index = 36
+    execute_on = 'initial timestep_end'
+    height = 0.152
   []
-  [7]
-    type = SubChannelPointValue
-    variable = T
-    index = 14
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+################################################################################
+# A multiapp that projects data to a detailed mesh
+################################################################################
+
+[MultiApps]
+  [viz]
+    type = FullSolveMultiApp
+    input_files = "FFM-2Bdetailed.i"
+    execute_on = "timestep_end"
   []
-  [8]
-    type = SubChannelPointValue
-    variable = T
-    index = 28
-    execute_on = 'TIMESTEP_END'
-    height = 0.9144
+[]
+
+[Transfers]
+  [xfer]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
