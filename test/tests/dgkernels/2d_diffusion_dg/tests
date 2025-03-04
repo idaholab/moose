@@ -41,7 +41,6 @@
     requirement = 'The system shall not perform memory allocation automatic scaling when computing values using discontinuous finite element methods.'
     issues = '#12601'
     design = 'FEProblemSolve.md'
-    petsc_version = '>=3.9.0'
     max_parallel = 4 # Can't have zero dofs on any process for MatResetPreallocation
   []
   [proper_ghosting_with_action_serial]
