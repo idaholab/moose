@@ -11,6 +11,7 @@
 
 #include "ComputeElasticityTensorBase.h"
 #include "GrainDataTracker.h"
+#include "EulerAngleProvider.h"
 
 // Forward Declarations
 class EulerAngleProvider;
