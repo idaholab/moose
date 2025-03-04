@@ -1,6 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
-  file = CUBE_UEL.inp
+  file = PATCH_UEL.inp
   debug = true
 
   [Partitioner]
@@ -10,13 +10,12 @@
 []
 
 [Variables]
-
   [AddUELVariables]
   []
 []
 
-# [ICs/AddUELICs]
-# []
+[ICs/AddUELICs]
+[]
 
 [AuxVariables]
   [pid]

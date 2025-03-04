@@ -21,7 +21,8 @@
 
 namespace Abaqus
 {
-struct AssemblyRoot;
+struct Model;
+struct AssemblyModel;
 
 // Any Abaqus ID should use this type
 using AbaqusID = int;
@@ -124,7 +125,7 @@ struct Element
   /// UEL Defintion
   const UserElement & _uel;
 
-  /// index into the corresponding node list (either at part level or root level)
+  /// index into the corresponding node list (either at part level or model level)
   std::vector<Index> _nodes;
 
   /// pointer to the assigned property list
@@ -176,10 +177,10 @@ struct Part
  */
 struct Instance
 {
-  Instance(const BlockNode & option, AssemblyRoot & root);
+  Instance(const BlockNode & option, AssemblyModel & model);
 
   // upon instantiation when nodes are created we map
-  // part local indices to global indices in the Root
+  // part local indices to global indices in the Model
   Index _local_to_global_node_index_offset;
   Index _local_to_global_element_index_offset;
 };
@@ -190,42 +191,63 @@ struct Instance
 struct Assembly
 {
   Assembly() = default;
-  Assembly(const BlockNode & block, AssemblyRoot & root) { parse(block, root); }
-  void parse(const BlockNode & block, AssemblyRoot & root);
+  Assembly(const BlockNode & block, AssemblyModel & model) { parse(block, model); }
+  void parse(const BlockNode & block, AssemblyModel & model);
 
   ObjectStore<Instance> _instance;
 };
 
 /**
- * Root input file scope
+ * Field initial condition
  */
-struct Root : public Part
+struct FieldIC
 {
-  Root() = default;
-  virtual void parse(const BlockNode & root) = 0;
+  FieldIC(const OptionNode & option, const Model & model);
 
-  /// mesh points and dof bitmask
-  std::vector<std::pair<Point, SubdomainID>> _mesh_points;
+  /// variable number (0-based)
+  int _var;
 
-  /// A map from nodes (i.e. node elements) to user elements (ids)
-  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
+  /// state of the coupled node sets at parse time
+  std::map<std::string, std::vector<Index>> _nsets;
+
+  /// values assigned to each nodeset
+  std::vector<std::pair<std::string, Real>> _value;
 };
 
 /**
- * Root node for flat input files
+ * Model input file scope
  */
-struct FlatRoot : public Root
+struct Model : public Part
 {
-  FlatRoot() = default;
+  Model() = default;
+  virtual ~Model() = default;
+
+  virtual void parse(const BlockNode & root) = 0;
+
+  void optionFunc(const std::string & key, const OptionNode & option);
+
+  /// A map from nodes (i.e. node elements) to user elements (ids)
+  std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
+
+  /// field initial conditions
+  std::vector<FieldIC> _field_ics;
+};
+
+/**
+ * Model node for flat input files
+ */
+struct FlatModel : public Model
+{
+  FlatModel() = default;
   virtual void parse(const BlockNode & root);
 };
 
 /**
- * Root node for assembly based input files
+ * Model node for assembly based input files
  */
-struct AssemblyRoot : public Root
+struct AssemblyModel : public Model
 {
-  AssemblyRoot() = default;
+  AssemblyModel() = default;
   virtual void parse(const BlockNode & root);
 
   /// Parts
@@ -240,7 +262,7 @@ struct AssemblyRoot : public Root
  */
 struct Step
 {
-  Step(const BlockNode &, Root &) {}
+  Step(const BlockNode &, Model &) {}
 };
 
 /**
@@ -248,7 +270,7 @@ struct Step
  */
 struct Boundary
 {
-  Boundary(const OptionNode & option, Root & root);
+  Boundary(const OptionNode & option, Model & model);
 
   /// list of nodes this BC applies to
   std::vector<dof_id_type> _node_set;

@@ -43,31 +43,34 @@ public:
 
   std::string getVarName(std::size_t id) const;
   const Abaqus::UserElement & getUEL(const std::string & type) const;
-  const auto & getUELs() const { return _root->_element_definition; }
+  const auto & getUELs() const { return _model->_element_definition; }
 
   /// get a set of all SubdomainIDs used for restricting variable-node assignment
   const auto & getVarBlocks() const { return _uel_block_ids; }
 
   /// get a vector of all user elements
-  const auto & getElements() const { return _root->_elements; }
+  const auto & getElements() const { return _model->_elements; }
 
   /// privileged write access
-  auto & getElements(Moose::PassKey<AbaqusUELMeshUserElement>) { return _root->_elements; }
+  auto & getElements(Moose::PassKey<AbaqusUELMeshUserElement>) { return _model->_elements; }
 
   /// get a vector of all nodes
-  const auto & getNodes() const { return _root->_nodes; }
+  const auto & getNodes() const { return _model->_nodes; }
 
   /// get a map of all nodes to user elements
   const auto & getNodeToUELMap() const { return _node_to_uel_map; }
 
-  const auto & getElementSets() const { return _root->_elsets; }
-  const auto & getNodeSets() const { return _root->_nsets; }
+  const auto & getElementSets() const { return _model->_elsets; }
+  const auto & getNodeSets() const { return _model->_nsets; }
+
+  // initial condition getters
+  const auto & getFieldICs() const { return _model->_field_ics; }
 
   void addNodeset(BoundaryID id);
 
 protected:
   Abaqus::InputParser _input;
-  std::unique_ptr<Abaqus::Root> _root;
+  std::unique_ptr<Abaqus::Model> _model;
 
   void instantiateElements();
   void setupLibmeshSubdomains();
@@ -75,7 +78,7 @@ protected:
 
   dof_id_type _max_node_id;
 
-  /// A map from nodes (i.e. node elements) to user elements (index into _root->_elements)
+  /// A map from nodes (i.e. node elements) to user elements (index into _model->_elements)
   /// libMesh node IDs are AbaqusIDs.
   std::unordered_map<dof_id_type, std::vector<Abaqus::Index>> _node_to_uel_map;
 
