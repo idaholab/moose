@@ -55,10 +55,10 @@ UserElement::UserElement(const OptionNode & option)
 
   // parse type string (should be UX with X being an integer from 1 to 9,999)
   if (_type.empty() || (_type[0] != 'U' && _type[0] != 'u'))
-    throw std::runtime_error("Invalid type string in UEL definition: " + _type);
+    mooseError("Invalid type string in UEL definition: ", _type);
   _type_id = std::stoi(_type.substr(1));
   if (_type_id < 1 || _type_id > 9999)
-    throw std::runtime_error("Invalid type string in UEL definition: " + _type);
+    mooseError("Invalid type string in UEL definition: ", _type);
 
   // available bits for the dof mask
   const auto bits = sizeof(SubdomainID) * 8;
@@ -74,11 +74,11 @@ UserElement::UserElement(const OptionNode & option)
     // number of the current node (0-based)
     const auto node_number = line ? (col[0] - 1) : 0u;
     if (node_number >= _n_nodes)
-      throw std::runtime_error("Invalid node number in Abaqus input.");
+      mooseError("Invalid node number in Abaqus input.");
 
     // mark off node as seen and check for duplicates
     if (seen_node.count(node_number))
-      throw std::runtime_error("Duplicate node in '*user element' section.");
+      mooseError("Duplicate node in '*user element' section.");
     seen_node.insert(node_number);
 
     // copy in var numbers (converting from 1-base to 0-base)
@@ -90,8 +90,7 @@ UserElement::UserElement(const OptionNode & option)
       {
         const auto v = col[i] - 1;
         if (v >= bits)
-          throw std::runtime_error("Currently variables numbers >= " + Moose::stringify(bits) +
-                                   " are not supported.");
+          mooseError("Currently variables numbers >= ", bits, " are not supported.");
         var.push_back(v);
         var_mask |= (1 << v);
       }
@@ -130,11 +129,11 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
   {
     const auto & map = option._header;
     if (map.get<std::string>("system", "R") != "R")
-      throw std::runtime_error("Only cartesian coordinates are currently supported");
+      mooseError("Only cartesian coordinates are currently supported");
 
     // this should not be hard to add though
     if (map.has("input"))
-      throw std::runtime_error("External coordinate inputs are not yet supported");
+      mooseError("External coordinate inputs are not yet supported");
 
     auto * nset = map.has("nset") ? &_nsets[map.get<std::string>("nset")] : nullptr;
     std::set<Index> unique_ids;
@@ -145,9 +144,9 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
     for (const auto & data : option._data) // or loop over external input lines
     {
       if (data.size() < 2)
-        throw std::runtime_error("Insufficient data in node data line");
+        mooseError("Insufficient data in node data line");
       if (data.size() > 4)
-        throw std::runtime_error("Normal directions are not yet supported");
+        mooseError("Normal directions are not yet supported");
 
       const auto id = MooseUtils::convert<AbaqusID>(data[0]);
       Point p(MooseUtils::convert<Real>(data[1]),
@@ -186,8 +185,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
 
       // check number of nodes
       if (col.size() - 1 != uel._n_nodes)
-        throw std::runtime_error("Wrong number of nodes for user element of type '" + type +
-                                 "' in Abaqus input.");
+        mooseError("Wrong number of nodes for user element of type '", type, "' in Abaqus input.");
 
       // prepare empty element
       const auto id = col[0];
@@ -307,7 +305,7 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
   const auto generate = map.get<bool>("generate");
 
   if (map.has("unsorted"))
-    throw std::runtime_error("The UNSORTED keyword is not supported.");
+    mooseError("The UNSORTED keyword is not supported.");
 
   // get or create the set
   auto & set = set_map[name];
@@ -318,15 +316,18 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
     {
       // syntax check
       if (data.size() != 3)
-        throw std::runtime_error("Expected three values in " + name_key + " definition '" + name +
-                                 "' with GENERATE keyword in Abaqus input.");
+        mooseError("Expected three values in ",
+                   name_key,
+                   " definition '",
+                   name,
+                   "' with GENERATE keyword in Abaqus input.");
 
       // generate range
       const auto begin = MooseUtils::convert<AbaqusID>(data[0]);
       const auto end = MooseUtils::convert<AbaqusID>(data[1]);
       const auto step = MooseUtils::convert<AbaqusID>(data[2]);
       if (step == 0)
-        throw std::runtime_error("Zero step in generated set.");
+        mooseError("Zero step in generated set.");
       for (AbaqusID item = begin; item <= end; item += step)
         unique_items.insert(id_to_index.at(item));
     }
@@ -355,9 +356,9 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
 }
 
 Instance::Instance(const BlockNode & block, AssemblyModel & model)
+  : _part(model._part[block._header.get<std::string>("part")])
 {
   // const auto & data = block._data;
-  const auto & part = model._part[block._header.get<std::string>("part")];
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
@@ -368,7 +369,7 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
   {
     const auto col = vecTo<Real>(data[0]);
     if (col.size() > 3)
-      throw std::runtime_error("Too many values in instance translation data line");
+      mooseError("Too many values in instance translation data line");
     for (const auto i : col)
       translation(i) = col[i];
   }
@@ -378,7 +379,7 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
   {
     const auto col = vecTo<Real>(data[1]);
     if (col.size() != 7)
-      throw std::runtime_error("Invalid number of values in instance rotation data line");
+      mooseError("Invalid number of values in instance rotation data line");
 
     // axis of rotation (normalized)
     RealVectorValue a(col[0], col[1], col[2]);
@@ -386,7 +387,7 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
     auto n = b - a;
     const auto norm = n.norm();
     if (norm == 0)
-      throw std::runtime_error("Zero-length rotation axis");
+      mooseError("Zero-length rotation axis");
     n /= norm;
 
     // angle
@@ -417,9 +418,9 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
   _local_to_global_element_index_offset = model._elements.size();
 
   // instantiate mesh points
-  for (const auto & part_node : part._nodes)
+  for (const auto & part_node : _part._nodes)
   {
-    // make a copy of the part node
+    // make a copy of the _part node
     auto model_node = part_node;
 
     // transform instantiated node
@@ -430,7 +431,7 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
   }
 
   // instantiate elements
-  for (const auto & part_element : part._elements)
+  for (const auto & part_element : _part._elements)
   {
     // make a copy of the part element
     auto model_element = part_element;
@@ -443,10 +444,10 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
   }
 
   // merge uel definitions
-  model._element_definition.merge(part._element_definition);
+  model._element_definition.merge(_part._element_definition);
 
   // apply node sets
-  for (const auto & [nset_name, nset] : part._nsets)
+  for (const auto & [nset_name, nset] : _part._nsets)
   {
     auto & model_nset = model._nsets[nset_name];
     for (const auto & index : nset)
@@ -454,7 +455,7 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
   }
 
   // apply element sets
-  for (const auto & [elset_name, elset] : part._elsets)
+  for (const auto & [elset_name, elset] : _part._elsets)
   {
     auto & model_elset = model._elsets[elset_name];
     for (const auto & index : elset)
@@ -467,8 +468,6 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
 {
   auto option_func = [&](const std::string & key, const OptionNode & option)
   {
-    std::cout << "Processing option " << key << std::endl;
-
     if (key == "elset")
     {
       const auto & instance_name = option._header.get<std::string>("instance", "");
@@ -478,8 +477,7 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       else
       {
         if (!_instance.has(instance_name))
-          throw std::runtime_error("Instance '" + instance_name +
-                                   "' not found in elset declaration.");
+          mooseError("Instance '", instance_name, "' not found in elset declaration.");
         //_instance[instance_name].processElementSet(option);
         // .. and here?
       }
@@ -494,19 +492,15 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       else
       {
         if (!_instance.has(instance_name))
-          throw std::runtime_error("Instance '" + instance_name +
-                                   "' not found in nset declaration.");
-        //_instance[instance_name].processNodeSet(option);
-        // .. and here?
-        // look up the instance offset and the part node set and add the listed nodes via
-        // _node_id_to_index[listed_id]+offset to model
+          mooseError("Instance '", instance_name, "' not found in nset declaration.");
+        // model.processNodeSet(option, // TODO specify source instance(?) pointer for elset and
+        // offset _instance[instance_name]._local_to_global_node_index_offset);
       }
     }
   };
 
   auto block_func = [&](const std::string & key, const BlockNode & block)
   {
-    std::cout << "Processing block " << key << std::endl;
     if (key == "instance")
     {
       const auto name = block._header.get<std::string>("name");
@@ -546,6 +540,7 @@ Model::optionFunc(const std::string & key, const OptionNode & option)
 {
   if (key == "initial conditions")
   {
+    std::cout << "IC!!!!\n";
     const auto type = option._header.get<std::string>("type");
     if (MooseUtils::toLower(type) == "field")
       _field_ics.emplace_back(option, *this);
@@ -583,7 +578,7 @@ AssemblyModel::parse(const BlockNode & root)
     {
       // const auto name = block._header.get<std::string>("name");
       if (_assembly)
-        throw std::runtime_error("Only one Assembly per model is supported");
+        mooseError("Only one Assembly per model is supported");
       _assembly = std::make_unique<Assembly>();
       _assembly->parse(block, *this);
     }
@@ -593,7 +588,7 @@ AssemblyModel::parse(const BlockNode & root)
     }
 
     else
-      throw std::runtime_error("Unsupported block found in input: " + key);
+      mooseError("Unsupported block found in input: ", key);
   };
 
   auto option_func = [this](const std::string & key, const OptionNode & option)
@@ -602,7 +597,7 @@ AssemblyModel::parse(const BlockNode & root)
   root.forAll(option_func, block_func);
 }
 
-Boundary::Boundary(const OptionNode & option, Model & model)
+Boundary::Boundary(const OptionNode & /*option*/, Model & /*model*/)
 {
   // get the current state of the node set
 }
