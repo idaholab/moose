@@ -52,6 +52,12 @@ RhieChowMassFlux::validParams()
   exec_enum = {EXEC_NONE};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
+  // Pressure projection
+  params.addParam<MooseEnum>("pressure_projection_method",
+                             MooseEnum("standard consistent", "standard"),
+                             "The method to use in the pressure projection for Ainv - "
+                             "standard (SIMPLE) or consistent (SIMPLEC)");
+
   return params;
 }
 
@@ -69,7 +75,8 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _face_mass_flux(
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
-    _rho(getFunctor<Real>(NS::density))
+    _rho(getFunctor<Real>(NS::density)),
+    _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method"))
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a MooseLinearVariableFVReal.");
@@ -562,6 +569,62 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
     {
       _console << " (H(u)-rhs)/A" << std::endl;
       HbyA.print();
+    }
+
+    if (_pressure_projection_method == "consistent")
+    {
+
+      // Consistent Corrections to SIMPLE
+      // 1. Ainv_old = 1/a_p <- Ainv = 1/(a_p + \sum_n a_n)
+      // 2. H(u) <- H(u*) + H(u') = H(u*) - (Ainv - Ainv_old) * grad(p) * Vc
+
+      if (verbose)
+        _console << "Performing SIMPLEC projection." << std::endl;
+
+      // Lambda function to calculate the sum of diagonal and neighbor coefficients
+      auto get_row_sum = [mmat](NumericVector<Number> & sum_vector)
+      {
+        // Ensure the sum_vector is zeroed out
+        sum_vector.zero();
+
+        // Local row size
+        const auto local_size = mmat->local_m();
+
+        for (const auto row_i : make_range(local_size))
+        {
+          // Get all non-zero components of the row of the matrix
+          const auto global_index = mmat->row_start() + row_i;
+          std::vector<numeric_index_type> indices;
+          std::vector<Real> values;
+          mmat->get_row(global_index, indices, values);
+
+          // Sum row elements (no absolute values)
+          const Real row_sum = std::accumulate(values.cbegin(), values.cend(), 0.0);
+
+          // Add the sum of diagonal and elements to the sum_vector
+          sum_vector.add(global_index, row_sum);
+        }
+        sum_vector.close();
+      };
+
+      // Create a temporary vector to store the sum of diagonal and neighbor coefficients
+      auto row_sum = current_local_solution.zero_clone();
+      get_row_sum(*row_sum);
+
+      // Create vector with new inverse projection matrix
+      auto Ainv_full = current_local_solution.zero_clone();
+      *working_vector_petsc = 1.0;
+      Ainv_full->pointwise_divide(*working_vector_petsc, *row_sum);
+      const auto Ainv_full_old = Ainv_full->clone();
+
+      // Correct HbyA
+      Ainv_full->add(-1.0, Ainv);
+      working_vector_petsc->pointwise_mult(*Ainv_full, *pressure_gradient[system_i]);
+      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
+      HbyA.add(-1.0, *working_vector_petsc);
+
+      // Correct Ainv
+      Ainv = *Ainv_full_old;
     }
 
     Ainv.pointwise_mult(Ainv, *_cell_volumes);
