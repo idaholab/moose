@@ -1,6 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
-  file = PATCH_UEL.inp
+  file = CUBE_UEL.inp
   debug = true
 
   [Partitioner]
