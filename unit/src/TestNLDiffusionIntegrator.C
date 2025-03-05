@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 double
 f(double u)
