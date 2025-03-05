@@ -10,7 +10,7 @@
 visualisation in ParaView. The VTK output format can be chosen (ASCII, BINARY, or BINARY32) as well
 as whether to output the data on high-order elements or on a refined set of output points.
 
-Many of Platypus's tests use ASCII MFEMParaViewDataCollection outputs for portability of the
+Many of the MOOSE-MFEM tests use ASCII MFEMParaViewDataCollection outputs for portability of the
 reference files on different systems; however, for speed, it is recommended to prefer use of the
 BINARY VTK format.
 
