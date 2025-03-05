@@ -87,7 +87,7 @@ EulerAngleUpdateFromReporter::UpdateEulerAngle()
   // re-assign euler angles based on the new data
   auto max_grain_id = ea_data.rbegin()->first;
   _angles.clear();
-  _angles.resize(max_grain_id);
+  _angles.resize(max_grain_id + 1); // make sure _angles[max_grain_id] is valid
 
   for (const auto it : ea_data)
   {
