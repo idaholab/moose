@@ -41,18 +41,6 @@ public:
   virtual void initialize() override;
 
   /**
-   * Called on every "object" (like every element or node).
-   * In this case, it is called at every quadrature point on every element.
-   */
-  virtual void execute() override{};
-
-  /**
-   * Called when using threading.  You need to combine the data from "y"
-   * into _this_ object.
-   */
-  virtual void threadJoin(const UserObject & /*y*/) override{};
-
-  /**
    * Called _once_ after execute has been called all all "objects".
    */
   virtual void finalize() override{};

@@ -104,14 +104,3 @@ BlockOrientationFromUserObject::execute()
     row++;
   }
 }
-
-void
-BlockOrientationFromUserObject::threadJoin(const UserObject & y)
-{
-  const auto & vpp = static_cast<const BlockOrientationFromUserObject &>(y);
-  for (const auto i : make_range(_num_cols))
-  {
-    _output_vector[i]->insert(
-        _output_vector[i]->begin(), vpp._output_vector[i]->begin(), vpp._output_vector[i]->end());
-  }
-}

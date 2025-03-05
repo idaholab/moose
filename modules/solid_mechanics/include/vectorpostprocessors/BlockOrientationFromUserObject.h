@@ -27,7 +27,6 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
 
 protected:
