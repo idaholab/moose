@@ -44,7 +44,7 @@ Split::validParams()
   MooseEnum SplittingTypeEnum("additive multiplicative symmetric_multiplicative schur", "additive");
   params.addParam<MooseEnum>("splitting_type", SplittingTypeEnum, "Split decomposition type");
 
-  MooseEnum SchurTypeEnum("full upper lower", "full");
+  MooseEnum SchurTypeEnum("diag upper lower full", "full");
   params.addParam<MooseEnum>("schur_type", SchurTypeEnum, "Type of Schur complement");
 
   /**
@@ -150,7 +150,7 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
       // set Schur Type
       const std::string petsc_schur_type[] = {"diag", "upper", "lower", "full"};
       po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_fact_type",
-                            petsc_schur_type[_splitting_type]);
+                            petsc_schur_type[_schur_type]);
 
       // set Schur Preconditioner
       const std::string petsc_schur_pre[] = {"self", "selfp", "a11"};
