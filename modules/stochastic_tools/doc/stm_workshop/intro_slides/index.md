@@ -4,10 +4,10 @@
 !datetime today format=%B %Y
 
 !style halign=center
-STM Documentation: [https://mooseframework.inl.gov/modules/stochastic_tools/index.html](https://mooseframework.inl.gov/modules/stochastic_tools/index.html)
+[STM Documentation](modules/stochastic_tools/index.md)
 
 !style halign=center
-STM Repository: [https://github.com/idaholab/moose/tree/next/modules/stochastic_tools](https://github.com/idaholab/moose/tree/next/modules/stochastic_tools)
+[STM Repository](https://github.com/idaholab/moose/tree/next/modules/stochastic_tools)
 
 !---
 
