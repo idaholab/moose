@@ -20,8 +20,8 @@ TestCSGCylindersMeshGenerator::validParams()
   params.addRequiredParam<Real>("x0", "first coordinate of center.");
   params.addRequiredParam<Real>("x1", "second coordinate of center.");
   params.addRequiredParam<std::string>("axis", "axis alignment");
-      // Declare that this generator has a generateData method
-      MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;
