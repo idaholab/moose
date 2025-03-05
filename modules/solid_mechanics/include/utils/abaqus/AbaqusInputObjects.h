@@ -179,6 +179,8 @@ struct Instance
 {
   Instance(const BlockNode & option, AssemblyModel & model);
 
+  const Part & _part;
+
   // upon instantiation when nodes are created we map
   // part local indices to global indices in the Model
   Index _local_to_global_node_index_offset;
