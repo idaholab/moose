@@ -1,6 +1,6 @@
 #include "MFEMScalarFESpace.h"
 
-registerMooseObject("PlatypusApp", MFEMScalarFESpace);
+registerMooseObject("MooseApp", MFEMScalarFESpace);
 
 InputParameters
 MFEMScalarFESpace::validParams()

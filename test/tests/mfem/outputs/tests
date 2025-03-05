@@ -9,7 +9,7 @@
                 OutputData/VisItDataCollection/Run0_000000/mesh.000000
                 OutputData/VisItDataCollection/Run0_000001/diffused.000000
                 OutputData/VisItDataCollection/Run0_000001.mfem_root'
-    requirement = 'Platypus shall have the ability to write out solutions to VisIt or ParaView mfem::DataCollections'
+    requirement = 'MOOSE shall have the ability to write out solutions to VisIt or ParaView mfem::DataCollections'
     mfem = true
   []
 []

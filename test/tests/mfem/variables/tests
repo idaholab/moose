@@ -6,7 +6,7 @@
     input = mfem_variables_from_moose.i
     xmldiff = 'OutputData/VariableSetupTest/Run0/Cycle000000/data.pvtu
                 OutputData/VariableSetupTest/Run0/Cycle000001/data.pvtu'
-    requirement = 'Platypus shall have the ability to add an MFEMVariable from a user specification of a MOOSE variable, inferring the FESpace.'
+    requirement = 'MOOSE shall have the ability to add an MFEMVariable from a user specification of a MOOSE variable, inferring the FESpace.'
     mfem = true
     max_parallel = 1
   []

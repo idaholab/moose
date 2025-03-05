@@ -1,7 +1,7 @@
 #include "MFEMVectorL2Error.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorL2Error);
+registerMooseObject("MooseApp", MFEMVectorL2Error);
 
 InputParameters
 MFEMVectorL2Error::validParams()

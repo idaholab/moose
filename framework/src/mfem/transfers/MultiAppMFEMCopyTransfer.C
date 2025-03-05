@@ -6,7 +6,7 @@
 #include "MFEMProblem.h"
 #include "MFEMMesh.h"
 
-registerMooseObject("PlatypusApp", MultiAppMFEMCopyTransfer);
+registerMooseObject("MooseApp", MultiAppMFEMCopyTransfer);
 
 InputParameters
 MultiAppMFEMCopyTransfer::validParams()
