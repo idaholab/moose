@@ -7,11 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "TorchPlasticityStressUpdate.h"
 
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 #include "TorchScriptUserObject.h"
+#include "LibtorchUtils.h"
 
 registerMooseObject("SolidMechanicsApp", TorchPlasticityStressUpdate);
 
@@ -105,6 +108,7 @@ TorchPlasticityStressUpdate::computeResidual(
 
   if (_yield_condition > 0.0)
   {
+    
     _hardening_slope = computeHardeningDerivative(scalar);
     _hardening_variable[_qp] = computeHardeningValue(scalar);
 
@@ -144,26 +148,44 @@ Real
 TorchPlasticityStressUpdate::computeHardeningValue(
     const Real & scalar)
 {
-  // if (_hardening_function)
-  // {
-  //   const Real strain_old = this->_effective_inelastic_strain_old[_qp];
-  //   return _hardening_function->value(strain_old + scalar) - _yield_stress;
-  // }
+  std::vector<Real> input_vector(2, 0.0);
+  input_vector[0] = this->_effective_inelastic_strain_old[_qp] + scalar;
+  input_vector[1] = this->_temperature[_qp];
 
-  return _hardening_variable_old[_qp] + _hardening_slope * scalar;
+  torch::Tensor input_tensor;
+  LibtorchUtils::vectorToTensor(input_vector, input_tensor);
+
+  torch::Tensor dislocation_density = _dislocation_density.evaluate(input_tensor);
+
+  // Random function, we can make this whatever we want in the future
+  torch::Tensor hardening_value = dislocation_density + 50.0; 
+
+  return hardening_value.item<Real>() - _yield_stress;
 }
 
 Real
 TorchPlasticityStressUpdate::computeHardeningDerivative(
     const Real & /*scalar*/)
 {
-  // if (_hardening_function)
-  // {
-  //   const Real strain_old = this->_effective_inelastic_strain_old[_qp];
-  //   return _hardening_function->timeDerivative(strain_old);
-  // }
+  std::vector<Real> input_vector(2, 0.0);
+  input_vector[0] = this->_effective_inelastic_strain_old[_qp];
+  input_vector[1] = this->_temperature[_qp];
 
-  return 0.0; //_hardening_constant;
+  torch::Tensor input_tensor;
+  LibtorchUtils::vectorToTensor(input_vector, input_tensor);
+
+  input_tensor.requires_grad();
+
+  torch::Tensor dislocation_density = _dislocation_density.evaluate(input_tensor);
+
+  // Random function, we can make this whatever we want in the future
+  torch::Tensor hardening_value = dislocation_density + 50.0;
+  
+  // We get the gradients of the hardening_value with respect to the 
+  // strain
+  hardening_value.backward();  
+
+  return hardening_value.grad().index({1,0}).item<Real>();
 }
 
 void
@@ -183,3 +205,5 @@ TorchPlasticityStressUpdate::computeYieldStress(
                  ") is less than zero");
   }
 }
+
+#endif

@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
 #include "RadialReturnStressUpdate.h"
@@ -48,6 +50,8 @@ protected:
   virtual Real computeHardeningValue(const Real & scalar);
   virtual Real computeHardeningDerivative(const Real & scalar);
 
+  void computeHardeningSlope();
+
   /// a string to prepend to the plastic strain Material Property name
   const std::string _plastic_prepend;
 
@@ -70,3 +74,5 @@ protected:
   const MaterialProperty<Real> & _hardening_variable_old;
   const GenericVariableValue<false> & _temperature;
 };
+
+#endif
