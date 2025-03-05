@@ -52,7 +52,7 @@ centre_y = 0.1
     expression = 'atan2(y-y0, x-x0)'
     symbol_names = 'x0 y0'
     symbol_values = '${centre_x} ${centre_y}'
-  []  
+  []
   [exact_velocity]
     type = ParsedVectorFunction
     expression_x = '-v * sin(th)'
