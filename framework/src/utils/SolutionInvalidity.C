@@ -283,23 +283,26 @@ SolutionInvalidity::transientTable(unsigned int & step_interval) const
       std::vector<unsigned int> interval_counts;
       std::vector<unsigned int> total_counts;
 
-      for (unsigned int timestep = 0; timestep < entry.timestep_counts.back().timestep_index;
-           timestep += step_interval)
+      if (!entry.timestep_counts.empty())
       {
-
-        auto start_it = timestep;
-        auto end_it = (timestep + step_interval < entry.timestep_counts.back().timestep_index)
-                          ? start_it + step_interval
-                          : entry.timestep_counts.back().timestep_index;
-
-        int interval_sum = 0;
-        for (auto ts_count : entry.timestep_counts)
+        for (unsigned int timestep = 0; timestep < entry.timestep_counts.back().timestep_index;
+             timestep += step_interval)
         {
-          if (ts_count.timestep_index >= start_it && ts_count.timestep_index < end_it)
-            interval_sum += ts_count.counts;
-        }
 
-        interval_counts.push_back(interval_sum);
+          auto start_it = timestep;
+          auto end_it = (timestep + step_interval < entry.timestep_counts.back().timestep_index)
+                            ? start_it + step_interval
+                            : entry.timestep_counts.back().timestep_index;
+
+          int interval_sum = 0;
+          for (auto ts_count : entry.timestep_counts)
+          {
+            if (ts_count.timestep_index >= start_it && ts_count.timestep_index < end_it)
+              interval_sum += ts_count.counts;
+          }
+
+          interval_counts.push_back(interval_sum);
+        }
       }
 
       unsigned int interval_sum = 0;
