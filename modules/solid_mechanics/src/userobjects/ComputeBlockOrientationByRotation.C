@@ -20,6 +20,7 @@ ComputeBlockOrientationByRotation::validParams()
   InputParameters params = ComputeBlockOrientationBase::validParams();
   params.addParam<unsigned int>("bins", 20, "Number of bins to segregate quaternions");
   params.addParam<Real>("L_norm", 1, "Specifies the type of average the user intends to perform");
+  params.addClassDescription("This object determines the orientation of each grain (block) by identifying the most common orientation direction among the material points within the grain.");
   return params;
 }
 
