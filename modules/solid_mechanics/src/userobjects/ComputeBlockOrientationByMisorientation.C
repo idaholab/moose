@@ -32,6 +32,8 @@ ComputeBlockOrientationByMisorientation::ComputeBlockOrientationByMisorientation
 void
 ComputeBlockOrientationByMisorientation::initialize()
 {
+  ComputeBlockOrientationBase::initialize();
+
   _block_ea_values.clear();
   _grain_misorientation.clear();
 }
@@ -69,20 +71,6 @@ ComputeBlockOrientationByMisorientation::execute()
   // save EulerAngle in tuple so that we can gather the data from all processors
   _grain_misorientation[_current_elem->subdomain_id()].push_back(
       std::make_tuple(misorient, ea.phi1, ea.Phi, ea.phi2));
-}
-
-void
-ComputeBlockOrientationByMisorientation::threadJoin(const UserObject & y)
-{
-  ComputeBlockOrientationBase::threadJoin(y);
-
-  // We are joining with another class like this one so do a cast so we can get to it's data
-  const ComputeBlockOrientationByMisorientation & cbo =
-      dynamic_cast<const ComputeBlockOrientationByMisorientation &>(y);
-
-  for (auto it = cbo._grain_misorientation.begin(); it != cbo._grain_misorientation.end(); ++it)
-    _grain_misorientation[it->first].insert(
-        _grain_misorientation[it->first].end(), it->second.begin(), it->second.end());
 }
 
 void
