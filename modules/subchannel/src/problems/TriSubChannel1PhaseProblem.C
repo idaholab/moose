@@ -1010,8 +1010,10 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
           auto dz_up = _z_grid[iz + 1] - _z_grid[iz];
           auto dz_down = _z_grid[iz] - _z_grid[iz - 1];
-          auto S_up = 0.5 * ((*_S_flow_soln)(node_top) + (*_S_flow_soln)(node_center));
-          auto S_down = 0.5 * ((*_S_flow_soln)(node_center) + (*_S_flow_soln)(node_bottom));
+          auto S_up =
+              computeInterpolatedValue((*_S_flow_soln)(node_top), (*_S_flow_soln)(node_center));
+          auto S_down =
+              computeInterpolatedValue((*_S_flow_soln)(node_center), (*_S_flow_soln)(node_bottom));
           auto diff_up = 0.5 * (diff_top + diff_center);
           auto diff_down = 0.5 * (diff_center + diff_bottom);
 
