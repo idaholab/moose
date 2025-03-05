@@ -21,7 +21,7 @@
     type = MFEMVectorFESpace
     fec_type = RT
     fec_order = CONSTANT
-  []  
+  []
 []
 
 [Variables]
