@@ -35,7 +35,8 @@ namespace Moose
  * @param p_info The penetration info object, contains primary_elem, side, various other information
  * @param fe_elem FE object for the element
  * @param fe_side FE object for the side
- * @param fe_side_type The type of fe_side, needed for inverse_map routines
+ * @param fe_side_type Unused; was used for a now-deprecated
+ * inverse_map overload.
  * @param start_with_centroid if true, start inverse mapping procedure from element centroid
  * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a
  * side
@@ -49,7 +50,7 @@ void
 findContactPoint(PenetrationInfo & p_info,
                  FEBase * fe_elem,
                  FEBase * fe_side,
-                 FEType & fe_side_type,
+                 FEType & /* fe_side_type */,
                  const libMesh::Point & secondary_point,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
@@ -109,8 +110,7 @@ findContactPoint(PenetrationInfo & p_info,
   libMesh::Point ref_point;
 
   if (start_with_centroid)
-    ref_point = FEInterface::inverse_map(
-        dim - 1, fe_side_type, side, side->vertex_average(), TOLERANCE, false);
+    ref_point = FEMap::inverse_map(dim - 1, side, side->vertex_average(), TOLERANCE, false);
   else
     ref_point = p_info._closest_point_ref;
 

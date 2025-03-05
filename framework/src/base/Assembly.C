@@ -1790,11 +1790,7 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
-  FEInterface::inverse_map(elem->dim(),
-                           _holder_fe_helper[elem->dim()]->get_fe_type(),
-                           elem,
-                           physical_points,
-                           _temp_reference_points);
+  FEMap::inverse_map(elem->dim(), elem, physical_points, _temp_reference_points);
 
   reinit(elem, _temp_reference_points);
 
@@ -2004,11 +2000,8 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
   if (neighbor_reference_points)
     _current_neighbor_ref_points = *neighbor_reference_points;
   else
-    FEInterface::inverse_map(neighbor_dim,
-                             FEType(),
-                             neighbor,
-                             _current_q_points_face.stdVector(),
-                             _current_neighbor_ref_points);
+    FEMap::inverse_map(
+        neighbor_dim, neighbor, _current_q_points_face.stdVector(), _current_neighbor_ref_points);
 
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
@@ -2417,8 +2410,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(
-      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
+  FEMap::inverse_map(neighbor_dim, neighbor, physical_points, _current_neighbor_ref_points);
 
   if (_need_JxW_neighbor)
   {
@@ -2453,8 +2445,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(
-      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
+  FEMap::inverse_map(neighbor_dim, neighbor, physical_points, _current_neighbor_ref_points);
 
   reinitFENeighbor(neighbor, _current_neighbor_ref_points);
   reinitNeighbor(neighbor, _current_neighbor_ref_points);
