@@ -22,7 +22,7 @@ MFEMDivAux::validParams()
 MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
-    _source_var(*getMFEMProblem().getProblemData()._gridfunctions.Get(_source_var_name)),
+    _source_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
