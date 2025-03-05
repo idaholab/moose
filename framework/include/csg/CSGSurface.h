@@ -60,6 +60,8 @@ public:
 
   SurfaceType getSurfaceType() const { return _surface_type; }
 
+  const std::string getSurfaceTypeString();
+
   void setBoundaryType(const BoundaryType boundary_type) { _boundary_type = boundary_type; }
 
   BoundaryType getBoundaryType() const { return _boundary_type; }

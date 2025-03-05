@@ -7,7 +7,7 @@
         "x0": 5.0,
         "z0": 6.0
       },
-      "TYPE": 4
+      "TYPE": "ycylinder"
     }
   },
   "UNIVERSES": null
