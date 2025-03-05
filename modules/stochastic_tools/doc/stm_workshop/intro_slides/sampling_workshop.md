@@ -1,11 +1,8 @@
 # Sampling Methods
 
-!style halign=center
-[https://mooseframework.inl.gov/syntax/Samplers/index.html](https://mooseframework.inl.gov/syntax/Samplers/index.html)
-
 !---
 
-# Sampler Matrix
+# [Samplers](Samplers/index.md)
 
 - Samplers define a "sampling matrix" used for stochastic analysis
 
@@ -66,32 +63,21 @@ x_{N,1} & x_{N,2} & \dots & x_{N,M}
 
 !---
 
-# Distributions
+# [Distributions](Distributions/index.md)
 
-!style halign=center
-[https://mooseframework.inl.gov/syntax/Distributions/index.html](https://mooseframework.inl.gov/syntax/Distributions/index.html)
+Distribution objects are stand-alone classes that can be invoked by other objects as needed, very similar to the `Functions` system.
 
 !row!
+
 !col! width=50%
 
-- Distribution objects are stand-alone classes that can be invoked by other objects as needed, very similar to the `Functions` system.
-
-```C++
-/**
- * Compute the probability with given probability distribution function (PDF) at x
- */
-virtual Real pdf(const Real & x) const;
-
-/**
- * Compute the cumulative probability with given cumulative probability distribution (CDF) at x
- */
-virtual Real cdf(const Real & x) const;
-
-/**
- * Compute the inverse CDF (quantile function) value for given variable value y
- */
-virtual Real quantile(const Real & y) const;
-```
+!style fontsize=60%
+!listing framework/include/distributions/Distribution.h
+         start=Distribution(
+         end=quantile(
+         include-start=False
+         include-end=True
+         style=width:500px
 
 !col-end!
 
@@ -99,7 +85,10 @@ virtual Real quantile(const Real & y) const;
 !!
 !col-end!
 
-!col! width=40%
+!col! width=50%
+
+!style! fontsize=60%
+
 ```
 [Distributions]
   [uniform]
@@ -114,7 +103,11 @@ virtual Real quantile(const Real & y) const;
   []
 []
 ```
+
+!style-end!
+
 !col-end!
+
 !row-end!
 
 !---
@@ -132,6 +125,7 @@ virtual Real quantile(const Real & y) const;
 !col-end!
 
 !col! width=40%
+!style! fontsize=60%
 ```
 [Samplers]
   [cartesian_product]
@@ -142,6 +136,7 @@ virtual Real quantile(const Real & y) const;
   []
 []
 ```
+!style-end!
 !col-end!
 !row-end!
 
@@ -161,6 +156,7 @@ virtual Real quantile(const Real & y) const;
 !col-end!
 
 !col! width=40%
+!style! fontsize=60%
 ```
 [Samplers]
   [quadrature]
@@ -171,6 +167,7 @@ virtual Real quantile(const Real & y) const;
   []
 []
 ```
+!style-end!
 !col-end!
 !row-end!
 
@@ -207,4 +204,60 @@ virtual Real quantile(const Real & y) const;
 []
 ```
 !col-end!
+!row-end!
+
+!---
+
+# Workshop Distributions and Sampler
+
+!row!
+
+!col! width=30%
+
+- [Uniform](Uniform.md)
+- [Normal](Normal.md)
+- [Weibull](Weibull.md)
+- [LatinHypercube](LatinHypercubeSampler.md)
+
+!style fontsize=50%
+!listing examples/workshop/step01.i
+
+!col-end!
+
+!col! width=35%
+
+!plot histogram filename=stochastic_tools/workshop/results.csv
+                vectors=D
+                legend=False
+                layout={'width': 300, 'height': 250,
+                        'xaxis': {'title': 'Diffusivity'},
+                        'margin': {'b': 40, 't': 0, 'l': 50, 'r':10}}
+
+!plot histogram filename=stochastic_tools/workshop/results.csv
+                vectors=T_0
+                legend=False
+                layout={'width': 300, 'height': 250,
+                        'xaxis': {'title': 'Fixed Left Temperature'},
+                        'margin': {'b': 40, 't': 0, 'l': 50, 'r':10}}
+
+!col-end!
+
+!col! width=35%
+
+!plot histogram filename=stochastic_tools/workshop/results.csv
+                vectors=q
+                legend=False
+                layout={'width': 300, 'height': 250,
+                        'xaxis': {'title': 'Source'},
+                        'margin': {'b': 40, 't': 0, 'l': 50, 'r':10}}
+
+!plot histogram filename=stochastic_tools/workshop/results.csv
+                vectors=q_0
+                legend=False
+                layout={'width': 300, 'height': 250,
+                        'xaxis': {'title': 'Right Heat Flux'},
+                        'margin': {'b': 40, 't': 0, 'l': 50, 'r':10}}
+
+!col-end!
+
 !row-end!

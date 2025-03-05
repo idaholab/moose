@@ -41,3 +41,4 @@ Extensions:
         translate: intro_slides/index.md
         background_image: INL_Hex_Light_Presentation_Background_Thin.png
     MooseDocs.extensions.datetime: default
+    MooseDocs.extensions.graph: default

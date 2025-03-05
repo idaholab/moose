@@ -1,8 +1,5 @@
 # Execution Using MultiApps
 
-!style halign=center
-[https://mooseframework.inl.gov/source/multiapps/SamplerFullSolveMultiApp.html](https://mooseframework.inl.gov/source/multiapps/SamplerFullSolveMultiApp.html)
-
 !---
 
 # Parallelism of Sampling Matrix
@@ -86,7 +83,7 @@ x_{5,1} & \dots & x_{5,M}
 !row-end!
 !style-end!
 
-- This matrix partitioning all happens within the `Sampler` and `MultiApp` objects based on `num_rows` and `mpiexec -n <nprocs>`
+- This matrix partitioning all happens within the [Sampler](Samplers/index.md) and [MultiApp](MultiApps/index.md) objects based on `num_rows` and `mpiexec -n <nprocs>`
 
 !---
 
@@ -95,11 +92,11 @@ x_{5,1} & \dots & x_{5,M}
 !row!
 !col! width=60%
 - Create/run sub-applications for each sampler row.
-- `SamplerFullSolveMultiApp` fully evaluates each row before transferring data.
+- [SamplerFullSolveMultiApp](SamplerFullSolveMultiApp.md) fully evaluates each row before transferring data.
 
-  - The +vast majority+ of applications will use `SamplerFullSolveMultiApp`
+  - The +vast majority+ of applications will use [SamplerFullSolveMultiApp](SamplerFullSolveMultiApp.md)
 
-- `SamplerTransientMultiApp` progresses each sample in time and transfers data at each step.
+- [SamplerTransientMultiApp](SamplerTransientMultiApp.md) progresses each sample in time and transfers data at each step.
 
 - `min_procs_per_app = <n>` parameter ensures that at least `n` processor are used for each sample
 
@@ -107,33 +104,17 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=40%
-```
-[MultiApps]
-  [runner]
-    type = SamplerFullSolveMultiApp
-    sampler = mc
-    input_files = 'sub.i'
-    mode = batch-reset
-  []
-[]
-```
 
-```
-[MultiApps]
-  [runner]
-    type = SamplerTransientMultiApp
-    sampler = mc
-    input_files = 'sub.i'
-    mode = batch-restore
-  []
-[]
+!style fontsize=60%
+!listing batch_full_solve_multiapp/parent_full_solve.i
+         block=MultiApps
+         link=False
 
-[Executioner]
-  type = Transient
-  num_steps = 5
-  end_time = 5
-[]
-```
+!style fontsize=60%
+!listing sampler_transient_multiapp/parent_transient_cmd_control.i
+         block=MultiApps Executioner
+         link=False
+
 !col-end!
 !row-end!
 
@@ -212,7 +193,8 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-```
+!style fontsize=60%
+!listing max-height=70px
 [MultiApps]
   [runner]
     type = SamplerFullSolveMultiApp
@@ -220,7 +202,6 @@ x_{5,1} & \dots & x_{5,M}
     mode = normal
   []
 []
-```
 !col-end!
 !row-end!
 
@@ -237,14 +218,14 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-```
+!style fontsize=60%
+!listing max-height=70px
 [MultiApps]
   [runner]
     ...
     mode = batch-reset
   []
 []
-```
 !col-end!
 !row-end!
 
@@ -260,14 +241,14 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-```
+!style fontsize=60%
+!listing max-height=70px
 [MultiApps]
   [runner]
     ...
     mode = batch-restore
   []
 []
-```
 !col-end!
 !row-end!
 
@@ -284,7 +265,8 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-```
+!style fontsize=60%
+!listing max-height=70px
 [MultiApps]
   [runner]
     ...
@@ -292,7 +274,6 @@ x_{5,1} & \dots & x_{5,M}
     keep_solution_during_restore = true
   []
 []
-```
 !col-end!
 !row-end!
 
@@ -309,7 +290,8 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-```
+!style fontsize=60%
+!listing max-height=70px
 [MultiApps]
   [runner]
     ...
@@ -317,7 +299,6 @@ x_{5,1} & \dots & x_{5,M}
     no_backup_and_restore = true
   []
 []
-```
 !col-end!
 !row-end!
 !style-end!
@@ -337,34 +318,13 @@ x_{5,1} & \dots & x_{5,M}
 !style! fontsize=90%
 !row!
 !col! width=48%
+
 Using command-line syntax (+normal+ and +batch-reset+ modes)
 
-```
-[Samplers]
-  [sample]
-    ...
-    execute_on = PRE_MULTIAPP_SETUP
-  []
-[]
+!style fontsize=60%
+!listing batch_commandline_control/parent_single.i
+         block=MultiApps Controls
 
-[MultiApps]
-  [runner]
-    type = SamplerFullSolveMultiApp
-    input = sub.i
-    sampler = sample
-    mode = batch-reset
-  []
-[]
-
-[Controls]
-  [cmdline]
-    type = MultiAppSamplerControl
-    multi_app = runner
-    sampler = sample
-    param_names = 'Mesh/xmax Mesh/ymax'
-  []
-[]
-```
 !col-end!
 
 !col! width=4%
@@ -372,79 +332,30 @@ Using command-line syntax (+normal+ and +batch-reset+ modes)
 !col-end!
 
 !col! width=48%
+
 Using controllable parameters (+batch-restore+ modes)
 
-```
-[MultiApps]
-  [runner]
-    type = SamplerFullSolveMultiApp
-    input = sub.i
-    sampler = sample
-    mode = batch-restore
-  []
-[]
-
-[Transfers]
-  [params]
-    type = SamplerParameterTransfer
-    to_multi_app = runner
-    sampler = sample
-    parameters = 'Mesh/xmax Mesh/ymax'
-    to_control = stochastic
-  []
-[]
-```
+!style fontsize=60%
+!listing sampler_reporter/main_batch.i
+         block=MultiApps Transfers/runner
+         max-height=250px
 
 In `sub.i`:
 
-```
-[Controls]
-  [stochastic]
-    type = SamplerReceiver
-  []
-[]
-```
+!style fontsize=60%
+!listing sampler_reporter/sub.i
+         block=Controls
+
 !col-end!
 !row-end!
 !style-end!
 
 !---
 
-# Quantities of Interest (QoIs)
-
-- First we define a QoIs using `Postprocessors`, `VectorPostprocessors`, or `Reporters`:
-
-```
-[Postprocessors]
-  [avg_u]
-    type = ElementAverageValue
-    variable = u
-  []
-[]
-
-[VectorPostprocessors]
-  [u_line]
-    type = LineValueSampler
-    variable = u
-    start_point = '0 0.5 0'
-    end_point = '1 0.5 0'
-    num_points = 11
-  []
-[]
-```
-
-- STM is able to process scalar values (postprocessors), vector values (vector-postprocessors), and/or matrix values.
-
-  - This is easily extendable as the need arises.
-
-!---
 
 # Transferring QoIs
 
-!row!
-!col! width=70%
-!style! fontsize=85%
-- `SamplerReporterTransfer` can gather all the different types of values into a single object
+- [SamplerReporterTransfer](SamplerReporterTransfer.md) can gather all the different types of values into a single object
 
   - Postprocessors have the syntax `<pp_name>/value`
   - VectorPostprocessors have the syntax `<vpp_name>/<vector_name>`
@@ -452,7 +363,7 @@ In `sub.i`:
 
 - Unlike other transfers, the data does not need to be declared explicitly on the main application.
 
-  - A `StochasticReporter` object just needs to exist.
+  - A [StochasticReporter](StochasticReporter.md) object just needs to exist.
   - The transfer will declare values programmatically into the `stochastic_reporter` object.
 
 - The resulting value will be a vector of with the length of the number of sampler rows
@@ -461,35 +372,6 @@ In `sub.i`:
   - A vector of vectors for vector-postprocessors
 
 - `parallel_type = ROOT` gathers all the data accross processors so that there is a single file on output.
-!style-end!
-!col-end!
-
-!col! width=30%
-```
-[Transfers]
-  [data]
-    type = SamplerReporterTransfer
-    from_multi_app = runner
-    sampler = sample
-    from_reporters = 'avg_u/value u_line/u'
-    stochastic_reporter = storage
-  []
-[]
-
-[Reporters]
-  [storage]
-    type = StochasticReporter
-    parallel_type = ROOT
-  []
-[]
-
-[Outputs]
-  csv = true
-  json = true
-[]
-```
-!col-end!
-!row-end!
 
 !---
 
@@ -583,4 +465,40 @@ data:avg_u:value,data:converged
 []
 ```
 !col-end!
+!row-end!
+
+!---
+
+# Workshop MultiApps and Transfers
+
+!row!
+
+!col! width=50%
+
+!style fontsize=60%
+!listing examples/workshop/step02.i
+         diff=examples/workshop/step01.i
+         style=width:500px
+
+!col-end!
+
+!col! width=50%
+
+!plot histogram filename=stochastic_tools/workshop/results.csv
+                vectors=results:T_avg:value
+                legend=False
+                layout={'width': 400, 'height': 300,
+                        'xaxis': {'title': 'Average Temperature'},
+                        'margin': {'b': 40, 't': 10, 'l': 50, 'r':10}}
+
+!plot histogram filename=stochastic_tools/workshop/results.csv
+                vectors=results:q_left:value
+                legend=False
+                layout={'width': 400, 'height': 300,
+                        'xaxis': {'title': 'Left Heat Flux'},
+                        'margin': {'b': 40, 't': 10, 'l': 50, 'r':10}}
+
+
+!col-end!
+
 !row-end!

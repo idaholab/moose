@@ -63,3 +63,78 @@ Provide a +pluggable+ interface for these surrogates.
   - Variables
   - Kernels
   - Executioner
+
+!--
+
+# Example Problem Statement
+
+### Governing Equation
+
+!equation
+\frac{\partial T}{\partial t} - \nabla\cdot D \nabla T = q,\, x\in [0, 1],\, y\in [0, 1]
+
+!equation
+T(t, x=0, y) = T_0 ,\quad
+\left. -D\frac{\partial T}{\partial x}\right|_{x=1} = q_0,\quad
+\left. D\frac{\partial T}{\partial y}\right|_{y=0, y=1} = 0,\quad
+T(t=0, x, y) = 300
+
+!---
+
+### Physics Input
+
+!row!
+
+!col! width=50%
+
+!style fontsize=60%
+!listing examples/workshop/diffusion.i
+
+!col-end!
+
+!col! width=50%
+
+!style halign=center style=width:80%;margin-left:auto;margin-right:auto;display:block
+```bash
+moose-opt -i diffusion.i
+```
+
+!style fontsize=60% halign=center style=width:80%;margin-left:auto;margin-right:auto;display:block
+```
+Postprocessor Values:
++----------------+----------------+----------------+
+| time           | T_avg          | q_left         |
++----------------+----------------+----------------+
+|   0.000000e+00 |   3.000000e+02 |   1.026734e-13 |
+|   2.500000e-01 |   2.945503e+02 |   1.691165e+01 |
+|   5.000000e-01 |   2.903864e+02 |   1.162035e+01 |
+|   7.500000e-01 |   2.876841e+02 |   5.770252e+00 |
+|   1.000000e+00 |   2.859939e+02 |   1.733798e+00 |
++----------------+----------------+----------------+
+```
+
+!col-end!
+
+!row-end!
+
+!--
+
+### Parameters and Quantities of Interest (QoIs)
+
+Four uncertain parameters:
+
+!table
+| Parameter | Symbol | Syntax | Distribution |
+| :- | - | :- | - |
+| Diffusivity | $D$ | `Materials/constant/prop_values` | Uniform(0.5, 2.5) |
+| Source | $q$ | `Kernel/source/function` | Normal(100, 25) |
+| Temperature | $T_0$ | `BCs/left/value` | Normal(300, 45) |
+| Flux | $q_0$ | `BCs/right/value` | Weibull(1, 20, -110) |
+
+Two quantities of interest:
+
+!table
+| QoI | Symbol | Syntax |
+| :- | - | :- |
+| Average Temperature | $T_{\mathrm{avg}}$ | `Postprocessors/T_avg` |
+| Left Heat Flux | $q_{\mathrm{left}}$ | `Postprocessors/q_left` |
