@@ -75,7 +75,7 @@ public:
   void mooseWarning(Args &&... args) const
   {
     moose::internal::mooseWarningStream(
-        _console, _moose_base.errorPrefix("warning"), std::forward<Args>(args)...);
+        _console, _moose_base.messagePrefix(), std::forward<Args>(args)...);
   }
 
   /**
@@ -91,14 +91,14 @@ public:
   void mooseDeprecated(Args &&... args) const
   {
     moose::internal::mooseDeprecatedStream(
-        _console, false, true, _moose_base.errorPrefix("deprecation"), std::forward<Args>(args)...);
+        _console, false, true, _moose_base.messagePrefix(), std::forward<Args>(args)...);
   }
 
   template <typename... Args>
   void mooseInfo(Args &&... args) const
   {
     moose::internal::mooseInfoStream(
-        _console, _moose_base.errorPrefix("information"), std::forward<Args>(args)...);
+        _console, _moose_base.messagePrefix(), std::forward<Args>(args)...);
   }
 
 private:
