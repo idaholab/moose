@@ -276,7 +276,7 @@ findContactPoint(PenetrationInfo & p_info,
   if (dot > 0.0)
     p_info._distance = -p_info._distance;
 
-  contact_point_on_side = FEInterface::on_reference_element(ref_point, side->type());
+  contact_point_on_side = side->on_reference_element(ref_point);
 
   p_info._tangential_distance = 0.0;
 
