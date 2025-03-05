@@ -27,8 +27,9 @@ public:
 protected:
   /// radius of cylinder
   const Real _radius;
-  /// center of cylinder (x, y) for z aligned, (y, z) for x aligned, (x, z) for y aligned
+  /// First coordinate of center of cylinder
   const Real _x0;
+  /// Second coordinate of center of cylinder
   const Real _x1;
   /// axis: x, y, or z
   const std::string _axis;
