@@ -154,7 +154,7 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
     const auto & line = _lines[_current_line];
     // std::cout << Moose::stringify(line) << '\n';
     if (line[0][0] != '*')
-      mooseError("Expected a keyword line in Abaqus input file");
+      node._data.push_back(line);
     const auto keyword = MooseUtils::toLower(line[0].substr(1));
 
     // subblock end
