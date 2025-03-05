@@ -2,8 +2,10 @@
 #include "MFEMMixedBilinearFormKernel.h"
 
 /*
-(λ∇×u, v)
-*/
+ * \f[
+ * (\lambda \nabla \times u, v)
+ * \f]
+ */
 class MFEMMixedScalarCurlKernel : public MFEMMixedBilinearFormKernel
 {
 public:
