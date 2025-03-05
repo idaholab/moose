@@ -32,15 +32,15 @@
 1.0E+07, 0.0, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0
 1.0
 *End Part
-**  
+**
 **
 ** ASSEMBLY
 **
 *Assembly, name=Assembly
-**  
+**
 *Instance, name=Cube-1, part=Cube
 *End Instance
-**  
+**
 *Nset, nset=ALL, instance=Cube-1
  1, 2, 3, 4, 5, 6, 7, 8
  9
@@ -51,10 +51,10 @@
 *Elset, elset=SURF, instance=Cube-1
  1
 *End Assembly
-** 
-** 
+**
+**
 ** BOUNDARY CONDITIONS
-** 
+**
 ** Name: XSYMM Type: Symmetry/Antisymmetry/Encastre
 *Boundary
 XSYMM, 1, 1
@@ -68,13 +68,13 @@ ALL, 70.0
 *Initial Conditions, type=FIELD, variable=2
 ALL, 0.0
 ** ----------------------------------------------------------------
-** 
+**
 ** STEP: Step-1
-** 
+**
 *Step, name=Step-1, nlgeom=NO, unsymm=YES
 *Static
 0.1, 1., 1e-05, 0.1
-** 
+**
 ** BOUNDARY CONDITIONS
 *Boundary
 Cube-1.2, 1, 1, -0.02
@@ -84,16 +84,16 @@ Cube-1.6, 1, 1, +0.00
 *Dload
 SURF, U3, -10.0
 SURF, U3, -20.0
-** 
+**
 ** OUTPUT REQUESTS
-** 
+**
 *Restart, write, frequency=0
-** 
+**
 ** FIELD OUTPUT: F-Output-1
-** 
+**
 *Output, field, variable=PRESELECT
-** 
+**
 ** HISTORY OUTPUT: H-Output-1
-** 
+**
 *Output, history, variable=PRESELECT
 *End Step
