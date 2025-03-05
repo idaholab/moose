@@ -18,6 +18,7 @@ InputParameters
 ComputeBlockOrientationByMisorientation::validParams()
 {
   InputParameters params = ComputeBlockOrientationBase::validParams();
+  params.addClassDescription("This object computes the orientation of each grain (block) by calculating the maximum misorientation within the grain.");
   return params;
 }
 
