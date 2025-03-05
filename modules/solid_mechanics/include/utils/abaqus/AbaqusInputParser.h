@@ -49,13 +49,15 @@ struct InputNode
 
   std::string _type;
   HeaderMap _header;
+
+  // some blocks have data lines (like Instance for example)
+  std::vector<std::vector<std::string>> _data;
 };
+
 struct OptionNode : public InputNode
 {
   OptionNode(std::vector<std::string> line) : InputNode(line) {}
   virtual std::string stringify(const std::string & indent = "") const;
-
-  std::vector<std::vector<std::string>> _data; // TODO: hoist this up to parent!
 };
 
 struct BlockNode;
