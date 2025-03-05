@@ -1070,13 +1070,19 @@ MooseVariableFE<OutputType>::faceEvaluate(const FaceArg & face_arg,
   };
 
   const auto continuity = this->getContinuity();
-  const bool on_elem = !face_arg.face_side || (face_arg.face_side == face_arg.fi->elemPtr());
-  const bool on_neighbor =
-      !face_arg.face_side || (face_arg.face_side == face_arg.fi->neighborPtr());
-  if (on_neighbor)
-    mooseAssert(
-        face_arg.fi->neighborPtr(),
-        "If we are signaling we should evaluate on the neighbor, we better have a neighbor");
+  bool on_elem;
+  bool on_neighbor;
+  if (!face_arg.face_side)
+  {
+    on_elem = this->hasBlocks(face_arg.fi->elemPtr()->subdomain_id());
+    on_neighbor =
+        face_arg.fi->neighborPtr() && this->hasBlocks(face_arg.fi->neighborPtr()->subdomain_id());
+  }
+  else
+  {
+    on_elem = face_arg.face_side == face_arg.fi->elemPtr();
+    on_neighbor = face_arg.face_side == face_arg.fi->neighborPtr();
+  }
 
   // Only do multiple evaluations if we are not continuous and we are on an internal face
   if ((continuity != C_ZERO && continuity != C_ONE) && on_elem && on_neighbor)

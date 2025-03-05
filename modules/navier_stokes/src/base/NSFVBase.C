@@ -212,14 +212,16 @@ NSFVBase::commonFluidEnergyEquationParams()
       std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction");
+  MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction convection");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "energy_wall_function",
       std::vector<MooseFunctorName>(),
-      "Functions for Dirichlet/Neumann boundaries in the energy equation.");
+      "Functions for Dirichlet/Neumann boundaries in the energy equation. For wall types requiring "
+      "multiple functions, the syntax is <function_1>:<function_2>:... So, 'convection' types are "
+      "'<Tinf_function>:<htc_function>'.");
 
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "ambient_convection_blocks",

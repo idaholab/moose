@@ -102,6 +102,7 @@ HeatConductionPhysicsBase::addInitialConditions()
     InputParameters params = getFactory().getValidParams("FunctionIC");
     params.set<VariableName>("variable") = _temperature_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
+    assignBlocks(params, _blocks);
     getProblem().addInitialCondition("FunctionIC", _temperature_name + "_ic", params);
   }
 }

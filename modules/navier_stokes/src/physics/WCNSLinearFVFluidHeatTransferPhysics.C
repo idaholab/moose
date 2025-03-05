@@ -342,13 +342,9 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
             bc_type, _fluid_enthalpy_name + "_" + wall_boundaries[bc_ind], params);
       }
     }
-    else if (_energy_wall_types[bc_ind] == "heatflux")
-      paramError("energy_inlet_types", "Heat flux wall boundary conditions not yet supported");
-    // We add this boundary condition here to facilitate the input of wall boundaries / functors for
-    // energy. If there are too many turbulence options and this gets out of hand we will have to
-    // move this to the turbulence Physics
-    else if (_energy_wall_types[bc_ind] == "wallfunction")
-      mooseError("Wall-function boundary condition not supported at this time.");
+    else
+      paramError(
+          "energy_wall_types", _energy_wall_types[bc_ind], " wall type is currently unsupported.");
   }
 }
 

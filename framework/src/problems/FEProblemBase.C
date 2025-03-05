@@ -8855,15 +8855,15 @@ FEProblemBase::getFVMatsAndDependencies(
     for (std::shared_ptr<MaterialBase> face_mat : this_face_mats)
       if (face_mat->ghostable())
       {
-        mooseAssert(!face_mat->hasStatefulProperties(),
-                    "Finite volume materials do not currently support stateful properties.");
         face_materials.push_back(face_mat);
         auto & var_deps = face_mat->getMooseVariableDependencies();
         for (auto * var : var_deps)
         {
-          mooseAssert(
-              var->isFV(),
-              "Ghostable materials should only have finite volume variables coupled into them.");
+          if (!var->isFV())
+            mooseError(
+                "Ghostable materials should only have finite volume variables coupled into them.");
+          else if (face_mat->hasStatefulProperties())
+            mooseError("Finite volume materials do not currently support stateful properties.");
           variables.insert(var);
         }
       }
@@ -8876,16 +8876,16 @@ FEProblemBase::getFVMatsAndDependencies(
     for (std::shared_ptr<MaterialBase> neighbor_mat : this_neighbor_mats)
       if (neighbor_mat->ghostable())
       {
-        mooseAssert(!neighbor_mat->hasStatefulProperties(),
-                    "Finite volume materials do not currently support stateful properties.");
         neighbor_materials.push_back(neighbor_mat);
 #ifndef NDEBUG
         auto & var_deps = neighbor_mat->getMooseVariableDependencies();
         for (auto * var : var_deps)
         {
-          mooseAssert(
-              var->isFV(),
-              "Ghostable materials should only have finite volume variables coupled into them.");
+          if (!var->isFV())
+            mooseError(
+                "Ghostable materials should only have finite volume variables coupled into them.");
+          else if (neighbor_mat->hasStatefulProperties())
+            mooseError("Finite volume materials do not currently support stateful properties.");
           auto pr = variables.insert(var);
           mooseAssert(!pr.second,
                       "We should not have inserted any new variables dependencies from our "
