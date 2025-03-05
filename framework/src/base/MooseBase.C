@@ -35,22 +35,22 @@ MooseBase::callMooseError(std::string msg, const bool with_prefix) const
   _app.getOutputWarehouse().mooseConsole();
   const std::string prefix = _app.isUltimateMaster() ? "" : _app.name();
   if (with_prefix)
-    msg = errorPrefix("error") + msg;
+    msg = messagePrefix() + msg;
   moose::internal::mooseErrorRaw(msg, prefix);
 }
 
 std::string
-MooseBase::errorPrefix(const std::string & error_type) const
+MooseBase::messagePrefix() const
 {
   std::stringstream oss;
   if (const auto node = _params.getHitNode())
     if (!node->isRoot())
       oss << node->fileLocation() << ":\n";
-  oss << "The following " << error_type << " occurred in the ";
-  if (const auto base_ptr = _params.getBase())
-    oss << *base_ptr;
-  else
-    oss << "object";
-  oss << " '" << name() << "' of type " << type() << ".\n\n";
+  oss << "The following occurred in the ";
+  const std::string base = _params.getBase() ? *_params.getBase() : "object";
+  oss << base;
+  if (base != name())
+    oss << " '" << name() << "'";
+  oss << " of type " << type() << ".\n\n";
   return oss.str();
 }
