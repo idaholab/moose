@@ -2949,6 +2949,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Add in Jacobian contributions from other Constraints
     if (_fe_problem._has_constraints && tags.count(systemMatrixTag()))
     {
+      // Some constraints need to be able to read values from the Jacobian, which requires that it
+      // be closed/assembled
       auto & system_matrix = getMatrix(systemMatrixTag());
 #if PETSC_RELEASE_GREATER_EQUALS(3, 23, 0)
       SparseMatrix<Number> * view_jac_ptr;
@@ -2964,6 +2966,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 #else
       auto & jacobian_to_view = system_matrix;
 #endif
+      if (&jacobian_to_view == &system_matrix)
+        system_matrix.close();
 
       // Nodal Constraints
       enforceNodalConstraintsJacobian();
