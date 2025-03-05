@@ -2,11 +2,11 @@
 
 ## Summary
 
-`ObjectManager` is a factory class used to create tracked objects in Platypus.
+`ObjectManager` is a factory class used to create tracked objects in MOOSE's wrapping of MFEM.
 
 ## Overview
 
-`ObjectManager` is used to create and manage tracked objects in Platypus. Iterator methods are
+`ObjectManager` is used to create and manage tracked objects in MOOSE's wrapping of MFEM. Iterator methods are
 provided to allow access to all of the objects that have been created.
 
 `ObjectManager` objects are used to create and store `mfem::Coefficient`, `mfem::VectorCoefficient`,
