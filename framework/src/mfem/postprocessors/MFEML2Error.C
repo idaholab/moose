@@ -21,7 +21,7 @@ MFEML2Error::MFEML2Error(const InputParameters & parameters)
     _var_name(getParam<VariableName>("variable")),
     _coeff_name(getParam<FunctionName>("function")),
     _coeff(getMFEMProblem().getScalarFunctionCoefficient(_coeff_name)),
-    _var(getMFEMProblem().getProblemData()._gridfunctions.GetRef(_var_name))
+    _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(_var_name))
 {
 }
 
