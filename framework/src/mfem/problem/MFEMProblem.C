@@ -226,16 +226,11 @@ MFEMProblem::addKernel(std::string trial_var_name,
                        std::string test_var_name,
                        std::shared_ptr<MFEMMixedBilinearFormKernel> kernel)
 {
-  using namespace platypus;
-  if (getProblemData()._eqn_system)
-  {
-    getProblemData()._eqn_system->AddKernel(trial_var_name, test_var_name, std::move(kernel));
-  }
+  if (getProblemData().eqn_system)
+    getProblemData().eqn_system->AddKernel(trial_var_name, test_var_name, std::move(kernel));
   else
-  {
     mooseError("Cannot add kernel with name '" + test_var_name +
                "' because there is no equation system.");
-  }
 }
 
 libMesh::Point

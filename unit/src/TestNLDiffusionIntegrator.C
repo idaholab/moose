@@ -7,7 +7,7 @@ f(double u)
   return u;
 }
 double
-df(double u)
+df(double /*u*/)
 {
   return 1.0;
 }

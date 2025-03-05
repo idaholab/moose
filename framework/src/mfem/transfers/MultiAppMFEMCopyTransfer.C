@@ -38,8 +38,8 @@ MultiAppMFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_
     mooseError("Number of variables transferred must be same in both systems.");
   for (unsigned v = 0; v < numToVar(); ++v)
   {
-    auto & to_var = to_problem.getProblemData()._gridfunctions.GetRef(getToVarName(v));
-    auto & from_var = from_problem.getProblemData()._gridfunctions.GetRef(getFromVarName(v));
+    auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getToVarName(v));
+    auto & from_var = from_problem.getProblemData().gridfunctions.GetRef(getFromVarName(v));
     // TODO: Probably need more checking here to make sure the variables are
     // copyable - as per the MultiAppDofCopyTransfer
     to_var = from_var;
