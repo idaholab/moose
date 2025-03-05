@@ -37,7 +37,7 @@ public:
   addPlaneFromCoefficients(const std::string name, const Real a, const Real b, const Real c, const Real d);
 
   std::shared_ptr<CSGSurface>
-  addSphere(const std::string name, const Real x, const Real y, const Real z, const Real r);
+  addSphere(const std::string name, const Point center, const Real r);
 
   std::shared_ptr<CSGSurface>
   addCylinder(const std::string name, const Real x0, const Real x1, const Real r, const std::string axis);

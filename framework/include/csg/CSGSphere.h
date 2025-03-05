@@ -24,7 +24,7 @@ namespace CSG
 class CSGSphere : public CSGSurface
 {
 public:
-  CSGSphere(const std::string name, const Real x0, const Real y0, const Real z0, const Real r);
+  CSGSphere(const std::string name, const Point center, const Real r);
 
   /**
    * Destructor
