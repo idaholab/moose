@@ -12,16 +12,16 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- *  Fluid properties for LeadBismuth \cite richard.
+ *  Fluid properties for 83Pb17Li (LeadLithium) \cite richard.
  */
-class LeadBismuthFluidProperties : public SinglePhaseFluidProperties
+class LeadLithiumFluidProperties : public SinglePhaseFluidProperties
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   static InputParameters validParams();
 
-  LeadBismuthFluidProperties(const InputParameters & parameters);
+  LeadLithiumFluidProperties(const InputParameters & parameters);
 
   virtual std::string fluidName() const override;
   Real molarMass() const override;
@@ -108,6 +108,6 @@ public:
 
 private:
   /// Melting temperature of 2LiF-BeF2
-  static constexpr Real _T_mo = 398.;
+  static constexpr Real _T_mo = 508.;
 };
 #pragma GCC diagnostic pop
