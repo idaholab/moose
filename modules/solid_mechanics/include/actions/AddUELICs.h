@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Action.h"
+#include "AbaqusInputObjects.h"
 
 class AbaqusUELMesh;
 
