@@ -825,12 +825,13 @@ Assembly::reinitFE(const Elem * elem)
         computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
     }
     else
+    {
       for (unsigned qp = 0; qp < n_qp; ++qp)
-      {
         _ad_JxW[qp] = _current_JxW[qp];
-        if (_calculate_xyz)
+      if (_calculate_xyz)
+        for (unsigned qp = 0; qp < n_qp; ++qp)
           _ad_q_points[qp] = _current_q_points[qp];
-      }
+    }
 
     for (const auto & it : _fe[dim])
     {
@@ -1414,13 +1415,13 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         _ad_d2xyzdxi2_map.resize(n_qp);
 
       for (unsigned int p = 0; p < n_qp; p++)
-      {
         _ad_dxyzdxi_map[p].zero();
-        if (_calculate_face_xyz)
+      if (_calculate_face_xyz)
+        for (unsigned int p = 0; p < n_qp; p++)
           _ad_q_points_face[p].zero();
-        if (_calculate_curvatures)
+      if (_calculate_curvatures)
+        for (unsigned int p = 0; p < n_qp; p++)
           _ad_d2xyzdxi2_map[p].zero();
-      }
 
       const auto n_mapping_shape_functions =
           FE<2, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
@@ -1436,13 +1437,13 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
                 side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
-        {
           _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
-          if (_calculate_face_xyz)
+        if (_calculate_face_xyz)
+          for (unsigned int p = 0; p < n_qp; p++)
             _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
-          if (_calculate_curvatures)
+        if (_calculate_curvatures)
+          for (unsigned int p = 0; p < n_qp; p++)
             _ad_d2xyzdxi2_map[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
-        }
       }
 
       for (unsigned int p = 0; p < n_qp; p++)
@@ -1478,15 +1479,17 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       {
         _ad_dxyzdxi_map[p].zero();
         _ad_dxyzdeta_map[p].zero();
-        if (_calculate_face_xyz)
+      }
+      if (_calculate_face_xyz)
+        for (unsigned int p = 0; p < n_qp; p++)
           _ad_q_points_face[p].zero();
-        if (_calculate_curvatures)
+      if (_calculate_curvatures)
+        for (unsigned int p = 0; p < n_qp; p++)
         {
           _ad_d2xyzdxi2_map[p].zero();
           _ad_d2xyzdxideta_map[p].zero();
           _ad_d2xyzdeta2_map[p].zero();
         }
-      }
 
       const unsigned int n_mapping_shape_functions =
           FE<3, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
@@ -1505,15 +1508,17 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         {
           _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
           _ad_dxyzdeta_map[p].add_scaled(side_point, dpsideta_map[i][p]);
-          if (_calculate_face_xyz)
+        }
+        if (_calculate_face_xyz)
+          for (unsigned int p = 0; p < n_qp; p++)
             _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
-          if (_calculate_curvatures)
+        if (_calculate_curvatures)
+          for (unsigned int p = 0; p < n_qp; p++)
           {
             _ad_d2xyzdxi2_map[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
             _ad_d2xyzdxideta_map[p].add_scaled(side_point, (*d2psidxideta_map)[i][p]);
             _ad_d2xyzdeta2_map[p].add_scaled(side_point, (*d2psideta2_map)[i][p]);
           }
-        }
       }
 
       for (unsigned int p = 0; p < n_qp; p++)
