@@ -83,7 +83,7 @@ public:
   std::shared_ptr<CSGSurface>
   createSphereAtOrigin(const std::string name, const Real r)
   {
-    return _surface_list.addSphere(name, 0.0, 0.0, 0.0, r);
+    return _surface_list.addSphere(name, Point(0.0, 0.0, 0.0), r);
   }
 
   /**
@@ -97,23 +97,7 @@ public:
   std::shared_ptr<CSGSurface>
   createSphereAtPoint(const std::string name, const Point center, const Real r)
   {
-    return _surface_list.addSphere(name, center(0), center(1), center(2), r);
-  }
-
-  /**
-   * @brief Create a Sphere at a point (x, y, z)
-   *
-   * @param name surface name
-   * @param x x coordinate for center
-   * @param y y coordinate for center
-   * @param z z coordinate for center
-   * @param r radius
-   * @return shared pointer to CSGSurface object
-   */
-  std::shared_ptr<CSGSurface>
-  createSphereAtXYZ(const std::string name, const Real x, const Real y, const Real z, const Real r)
-  {
-    return _surface_list.addSphere(name, x, y, z, r);
+    return _surface_list.addSphere(name, center, r);
   }
 
   /**
