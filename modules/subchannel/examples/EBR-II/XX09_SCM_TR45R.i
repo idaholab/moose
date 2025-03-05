@@ -320,7 +320,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [MultiApps]
   [viz]
     type = TransientMultiApp
-    input_files = '3d_SCM_tr.i'
+    input_files = '3d_SCM_TR.i'
     execute_on = 'INITIAL TIMESTEP_END'
     catch_up = true
   []
