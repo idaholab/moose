@@ -3,7 +3,6 @@
 #pragma once
 
 #include "MFEMEssentialBC.h"
-#include "MFEMBoundaryConditionUtils.h"
 
 class MFEMVectorDirichletBCBase : public MFEMEssentialBC
 {

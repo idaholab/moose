@@ -83,19 +83,20 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 }
 
 void
-EquationSystem::AddBC(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc)
+EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 {
-  if (_bc_map.Has(name))
+  AddTestVariableNameIfMissing(bc->getTestVariableName());
+  auto test_var_name = bc->getTestVariableName();
+  if (!_essential_bc_map.Has(test_var_name))
   {
-    const std::string error_message = "A boundary condition with the name " + name +
-                                      " has already been added to the problem boundary conditions.";
-    mfem::mfem_error(error_message.c_str());
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialBC>>>();
+    _essential_bc_map.Register(test_var_name, std::move(bcs));
   }
-  _bc_map.Register(name, std::move(bc));
+  _essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
 }
 
 void
-EquationSystem::ApplyBoundaryConditions()
+EquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
@@ -103,11 +104,27 @@ EquationSystem::ApplyBoundaryConditions()
     auto test_var_name = _test_var_names.at(i);
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
-    *(_xs.at(i)) = 0.0;
-    *(_dxdts.at(i)) = 0.0;
-    auto * const par_mesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(par_mesh, "parallel mesh is null");
-    _bc_map.ApplyEssentialBCs(test_var_name, _ess_tdof_lists.at(i), *(_xs.at(i)), *par_mesh);
+    mfem::ParGridFunction & trial_gf(*(_xs.at(i)));
+    mfem::ParGridFunction & trial_gf_time_derivatives(*(_dxdts.at(i)));
+    auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
+    mooseAssert(pmesh, "parallel mesh is null");
+    trial_gf = 0.0;
+    trial_gf_time_derivatives = 0.0;
+
+    auto bcs = _essential_bc_map.GetRef(test_var_name);
+    mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
+    global_ess_markers = 0;
+    for (auto & bc : bcs)
+    {
+      bc->ApplyBC(trial_gf, *pmesh);
+
+      mfem::Array<int> ess_bdrs(bc->getBoundaries());
+      for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
+      {
+        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+      }
+    }
+    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
 }
 
@@ -286,7 +303,7 @@ EquationSystem::BuildLinearForms()
     _lfs.GetRef(test_var_name) = 0.0;
   }
   // Apply boundary conditions
-  ApplyBoundaryConditions();
+  ApplyEssentialBCs();
 
   for (auto & test_var_name : _test_var_names)
   {

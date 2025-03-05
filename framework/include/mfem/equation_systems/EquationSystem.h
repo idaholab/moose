@@ -4,7 +4,8 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
-#include "MFEMBoundaryConditionUtils.h"
+#include "MFEMIntegratedBC.h"
+#include "MFEMEssentialBC.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
@@ -30,9 +31,8 @@ public:
   // Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
-  virtual void AddBC(const std::string & name, std::shared_ptr<MFEMBoundaryCondition> bc);
-
-  virtual void ApplyBoundaryConditions();
+  virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  virtual void ApplyEssentialBCs();
 
   // Build forms
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
@@ -206,14 +206,10 @@ protected:
   // according to test variable
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _kernels_map;
-
-  Moose::MFEM::BCMap _bc_map;
-
   Moose::MFEM::NamedFieldsMap<
       Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>
       _integrated_bc_map;
-
-  // Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
   mutable mfem::OperatorHandle _jacobian;
 
