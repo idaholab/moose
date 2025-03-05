@@ -11,7 +11,7 @@
 #include "EulerAngleProvider.h"
 #include "Assembly.h"
 
-registerMooseObject("SolidMechanicsApp", BlockOrientationVectorPostprocessor);
+registerMooseObject("SolidMechanicsTestApp", BlockOrientationVectorPostprocessor);
 
 InputParameters
 BlockOrientationVectorPostprocessor::validParams()
@@ -20,6 +20,7 @@ BlockOrientationVectorPostprocessor::validParams()
   params += SamplerBase::validParams();
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
                                           "The EulerAngleProvider User object");
+  params.addClassDescription("This object outputs the coordinates, block id, and Euler Angles associated with each element from a EulerAngleProvider.");
   return params;
 }
 
