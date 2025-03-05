@@ -1,7 +1,7 @@
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("PlatypusApp", MFEMMixedScalarCurlKernel);
+registerMooseObject("MooseApp", MFEMMixedScalarCurlKernel);
 
 InputParameters
 MFEMMixedScalarCurlKernel::validParams()

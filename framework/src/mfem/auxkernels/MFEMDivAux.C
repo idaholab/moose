@@ -1,7 +1,7 @@
 #pragma once
 #include "MFEMDivAux.h"
 
-registerMooseObject("PlatypusApp", MFEMDivAux);
+registerMooseObject("MooseApp", MFEMDivAux);
 
 /*
 Class to set an L2 auxvariable to be the divergence of a H(div) vector variable.

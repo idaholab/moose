@@ -6,7 +6,7 @@ class MFEMPostprocessorTest : public MFEMObjectUnitTest
 {
 public:
   mfem::GridFunction *_scalar_var, *_vector_var;
-  MFEMPostprocessorTest() : MFEMObjectUnitTest("PlatypusApp")
+  MFEMPostprocessorTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
     InputParameters func_params = _factory.getValidParams("ParsedFunction");
     func_params.set<std::string>("expression") = "1";

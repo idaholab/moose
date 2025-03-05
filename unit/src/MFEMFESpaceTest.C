@@ -17,7 +17,7 @@ class MFEMFESpaceUnitTest : public testing::TestWithParam<FESpaceParameters<Args
 {
 public:
   MFEMFESpaceUnitTest()
-    : _app(Moose::createMooseApp("PlatypusApp", 0, nullptr)), _factory(_app->getFactory())
+    : _app(Moose::createMooseApp("MooseUnitApp", 0, nullptr)), _factory(_app->getFactory())
   {
     InputParameters mesh_params = _factory.getValidParams("MFEMMesh");
     mesh_params.set<MeshFileName>("file") = "data/" + std::get<0>(this->GetParam());

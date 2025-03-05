@@ -1,6 +1,6 @@
 #include "MFEMVectorFESpace.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorFESpace);
+registerMooseObject("MooseApp", MFEMVectorFESpace);
 
 InputParameters
 MFEMVectorFESpace::validParams()
