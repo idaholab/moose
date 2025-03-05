@@ -25,6 +25,7 @@ class KernelBase;
 class Kernel;
 class ResidualObject;
 class FVElementalKernel;
+class HDGKernel;
 
 class NonlinearThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -48,7 +49,9 @@ public:
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
   virtual void postElement(const Elem * /*elem*/) override;
   virtual void post() override;
+  bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const override;
 
+protected:
   /**
    * Reinitialize variables and materials on a face
    * @param fe_problem The finite element problem to call reinit methods on
@@ -59,20 +62,18 @@ public:
    * @param lower_d_elem If provided, lower dimensional variables coincident with the element face
    * will be reinit'd
    */
-  static void prepareFace(FEProblemBase & fe_problem,
-                          THREAD_ID tid,
-                          const Elem * elem,
-                          unsigned int side,
-                          BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
-                          const Elem * lower_d_elem = nullptr);
+  void prepareFace(const Elem * elem,
+                   unsigned int side,
+                   BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
+                   const Elem * lower_d_elem = nullptr);
 
-protected:
   ///@{
   /// Base class version just calls compute on each object for the element
   virtual void computeOnElement();
   virtual void computeOnBoundary(BoundaryID bnd_id, const Elem * lower_d_elem);
   virtual void computeOnInterface(BoundaryID bnd_id);
   virtual void computeOnInternalFace(const Elem * neighbor);
+  virtual void computeOnInternalFace() = 0;
   ///@}
 
   /**
@@ -150,6 +151,13 @@ protected:
   MooseObjectTagWarehouse<KernelBase> & _kernels;
 
   MooseObjectWarehouse<KernelBase> * _tag_kernels;
+  ///@}
+
+  ///@{
+  /// Reference to HDGKernel storage structures
+  MooseObjectTagWarehouse<HDGKernel> & _hdg_kernels;
+
+  MooseObjectWarehouse<HDGKernel> * _hdg_warehouse;
   ///@}
 
   /// Current subdomain FVElementalKernels
