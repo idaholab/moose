@@ -126,7 +126,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   _face_info = &fi;
   _normal = fi.normal();
   _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
-  auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
+  auto r = fi.faceArea() * fi.faceCoord() * MetaPhysicL::raw_value(computeQpResidual());
 
   // residual contributions for a flux kernel go to both neighboring faces.
   // They are equal in magnitude but opposite in direction due to the outward
