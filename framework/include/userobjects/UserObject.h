@@ -151,22 +151,22 @@ public:
   }
 
   /**
-   * Gather the parallel value of a variable according to which process has the parallel
-   * maximum of the provided value.
-   * @param[in] value process with maximum value will be selected
-   * @param[in] proxy value to be obtained on process with maximum value
+   * Deteremine the value of a variable according to the parallel
+   * maximum of the provided proxy.
+   * @param[in] proxy maximum proxy will be selected
+   * @param[in] value value to be obtained corresponding to the location of maximum proxy
    */
   template <typename T1, typename T2>
-  void gatherProxyValueMax(T1 & value, T2 & proxy);
+  void gatherProxyValueMax(T1 & proxy, T2 & value);
 
   /**
-   * Gather the parallel value of a variable according to which process has the parallel
-   * minimum of the provided value.
-   * @param[in] value process with minimum value will be selected
-   * @param[in] proxy value to be obtained on process with minimum value
+   * Determine the value of a variable according to which process has the parallel
+   * minimum of the provided proxy.
+   * @param[in] proxy minimum proxy will be selected
+   * @param[in] value value to be obtained corresponding to the location of minimum proxy
    */
   template <typename T1, typename T2>
-  void gatherProxyValueMin(T1 & value, T2 & proxy);
+  void gatherProxyValueMin(T1 & proxy, T2 & value);
 
   void setPrimaryThreadCopy(UserObject * primary);
 
@@ -234,31 +234,31 @@ private:
 
 template <typename T1, typename T2>
 void
-UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
+UserObject::gatherProxyValueMax(T1 & proxy, T2 & value)
 {
-  // get all value, proxy pairs, _communicator.maxloc would be faster but leads to
-  // partitioning dependent results if the maximum value is not unique.
+  // Get all proxy, value pairs. _communicator.maxloc would be faster but leads to
+  // partitioning dependent results if the maximum proxy is not unique.
   std::vector<std::pair<T1, T2>> all(n_processors());
-  auto pair = std::make_pair(value, proxy);
+  const auto pair = std::make_pair(proxy, value);
   _communicator.allgather(pair, all);
 
-  // find maximum, disambiguated by the proxy value
+  // find maximum, disambiguated by the value
   const auto it = std::max_element(all.begin(), all.end());
-  value = it->first;
-  proxy = it->second;
+  proxy = it->first;
+  value = it->second;
 }
 
 template <typename T1, typename T2>
 void
-UserObject::gatherProxyValueMin(T1 & value, T2 & proxy)
+UserObject::gatherProxyValueMin(T1 & proxy, T2 & value)
 {
-  // get all value, proxy pairs
+  // get all proxy, value pairs
   std::vector<std::pair<T1, T2>> all(n_processors());
-  auto pair = std::make_pair(value, proxy);
+  const auto pair = std::make_pair(proxy, value);
   _communicator.allgather(pair, all);
 
-  // find minimum, disambiguated by the proxy value
+  // find minimum, disambiguated by the value
   const auto it = std::min_element(all.begin(), all.end());
-  value = it->first;
-  proxy = it->second;
+  proxy = it->first;
+  value = it->second;
 }

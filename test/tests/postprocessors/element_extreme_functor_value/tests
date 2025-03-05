@@ -19,4 +19,11 @@
 
     requirement = 'The system shall compute the value of a functor at the element where a proxy functor reaches the extreme (max/min) value over the domain.'
   []
+
+  [abs_extreme]
+    type = RunApp
+    input = extreme_abs_value.i
+    requirement = 'The system shall compute the extreme absolute value of a functor over the domain '
+                  'or the value at the element where a proxy functor reaches its extreme absolute value.'
+  []
 []
