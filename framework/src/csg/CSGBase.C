@@ -48,9 +48,9 @@ CSGBase::generateOutput() const
   {
     auto surf_obj = s.second;
     auto coeffs = surf_obj->getCoeffs();
-    csg_json["SURFACES"][s.first] = {{"TYPE", surf_obj->getSurfaceTypeString() },
-        {"COEFFICIENTS", {}}
-    };
+    csg_json["SURFACES"][s.first] = {{"TYPE", surf_obj->getSurfaceTypeString()},
+                                     {"BOUNDARY", surf_obj->getBoundaryTypeString()},
+                                     {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
         csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
   }

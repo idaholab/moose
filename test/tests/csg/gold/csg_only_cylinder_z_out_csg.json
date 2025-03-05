@@ -2,6 +2,7 @@
   "CELLS": null,
   "SURFACES": {
     "cylinder_surf_z": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "r": 7.0,
         "x0": 8.0,

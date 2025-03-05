@@ -66,6 +66,8 @@ public:
 
   BoundaryType getBoundaryType() const { return _boundary_type; }
 
+  const std::string getBoundaryTypeString();
+
   virtual std::map<std::string, Real> getCoeffs() = 0; // Pure virtual function
 
   virtual CSGSurface::Direction directionFromPoint(const Point p) = 0; // Pure virtual function
