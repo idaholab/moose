@@ -24,7 +24,8 @@ CSGSurface::CSGSurface(const std::string name, SurfaceType surf_type)
     mooseError("Surface type of surface " + _name + " is being set to invalid");
 }
 
-const std::string CSGSurface::getSurfaceTypeString()
+const std::string
+CSGSurface::getSurfaceTypeString()
 {
   switch (_surface_type)
   {

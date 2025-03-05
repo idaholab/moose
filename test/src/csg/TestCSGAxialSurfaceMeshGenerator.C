@@ -58,8 +58,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
   {
     const auto surf_name = "surf_" + surf_names[i];
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
-    auto plane_ptr =
-        input_mesh->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+    auto plane_ptr = input_mesh->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     const auto elem_direction = plane_ptr->directionFromPoint(centroid);
     auto elem_halfspace = CSG::CSGHalfspace(plane_ptr, elem_direction);
     elem_cell_ptr->addRegionHalfspace(elem_halfspace);
