@@ -143,15 +143,11 @@ Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
     const auto & jvar = getVariable(jvar_num);
     prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
-#ifndef NDEBUG
+    // phi_size may not be equal to _phi.size(), e.g. when jvar is a vector variable
     const auto phi_size = jvar.dofIndices().size();
     mooseAssert(
         phi_size * jvar.count() == _local_ke.n(),
         "The size of the phi container does not match the number of local Jacobian columns");
-    mooseAssert(phi_size == _phi.size(),
-                "These should definitely be the same and if we don't fail this assert anywhere, we "
-                "are going to remove phi_size from this code");
-#endif
 
     mooseAssert(_local_ke.m() == _test.size(),
                 "If these are not the same, then we shouldn't even be calling this method");
@@ -160,20 +156,21 @@ Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
     if (jvar.count() == 1)
     {
       for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < _phi.size(); _j++)
+        for (_j = 0; _j < phi_size; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
             _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
     }
     else
     {
-      unsigned int n = _phi.size();
+      const auto n = cast_int<unsigned int>(phi_size);
       for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < n; _j++)
+        for (_j = 0; _j < phi_size; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
-            RealEigenVector v = _JxW[_qp] * _coord[_qp] *
-                                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(
-                                    const_cast<MooseVariableFieldBase &>(jvar)));
+            const RealEigenVector v =
+                _JxW[_qp] * _coord[_qp] *
+                computeQpOffDiagJacobianArray(
+                    static_cast<ArrayMooseVariable &>(const_cast<MooseVariableFieldBase &>(jvar)));
             for (unsigned int k = 0; k < v.size(); ++k)
               _local_ke(_i, _j + k * n) += v(k);
           }
