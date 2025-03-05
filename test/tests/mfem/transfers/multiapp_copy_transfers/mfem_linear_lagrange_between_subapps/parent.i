@@ -48,7 +48,7 @@
         source_variable = send
         variable = recv
         from_multi_app = send_app
-        to_multi_app = recv_app 
+        to_multi_app = recv_app
     [../]
 []
 
