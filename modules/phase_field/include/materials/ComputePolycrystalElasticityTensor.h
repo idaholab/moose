@@ -42,10 +42,10 @@ protected:
   const std::vector<const VariableValue *> _vals;
 
   /// object providing the Euler angles
-  const EulerAngleProvider & _euler;
+  const EulerAngleProvider * const _euler;
 
   /// Crystal Rotation Matrix used to rotate the slip system direction and normal
-  MaterialProperty<RankTwoTensor> & _crysrot;
+  MaterialProperty<RankTwoTensor> * _crysrot;
 
   /// vector of elasticity tensor material properties
   std::vector<MaterialProperty<RankFourTensor> *> _D_elastic_tensor;
