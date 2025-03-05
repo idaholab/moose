@@ -1,6 +1,7 @@
 [Mesh]
   type = AbaqusUELMesh
-  file = CUBE_UEL.inp
+  file = PATCH_UEL.inp
+  # file = CUBE_UEL.inp
   debug = true
 
   [Partitioner]
@@ -34,14 +35,14 @@
   kernel_coverage_check = false
 []
 
-[UserObjects]
-  [uel]
-    type = AbaqusUELMeshUserElement
-    uel_type = U1
-    plugin = elasticity_uel/uel
-    element_sets = CUBE
-  []
-[]
+# [UserObjects]
+#   [uel]
+#     type = AbaqusUELMeshUserElement
+#     uel_type = U1
+#     plugin = elasticity_uel/uel
+#     element_sets = CUBE
+#   []
+# []
 
 [Executioner]
   type = Steady
