@@ -1,7 +1,7 @@
 #pragma once
 #include "MFEMGradAux.h"
 
-registerMooseObject("PlatypusApp", MFEMGradAux);
+registerMooseObject("MooseApp", MFEMGradAux);
 
 /*
 Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
