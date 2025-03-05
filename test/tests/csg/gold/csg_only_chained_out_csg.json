@@ -2,6 +2,7 @@
   "CELLS": null,
   "SURFACES": {
     "surf_minus_x": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -11,6 +12,7 @@
       "TYPE": "plane"
     },
     "surf_minus_y": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": -1.0,
@@ -20,6 +22,7 @@
       "TYPE": "plane"
     },
     "surf_minus_z": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -29,6 +32,7 @@
       "TYPE": "plane"
     },
     "surf_plus_x": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -38,6 +42,7 @@
       "TYPE": "plane"
     },
     "surf_plus_y": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -47,6 +52,7 @@
       "TYPE": "plane"
     },
     "surf_plus_z": {
+      "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,

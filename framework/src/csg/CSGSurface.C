@@ -43,4 +43,18 @@ const std::string CSGSurface::getSurfaceTypeString()
   }
 }
 
+const std::string
+CSGSurface::getBoundaryTypeString()
+{
+  switch (_boundary_type)
+  {
+    case BoundaryType::transmission:
+      return "transmission";
+    case BoundaryType::vacuum:
+      return "vacuum";
+    default:
+      return "invalid";
+  }
+}
+
 } // namespace CSG
