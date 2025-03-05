@@ -135,6 +135,7 @@ struct Element
 /**
  * Part Block
  */
+struct Instance;
 struct Part
 {
   Part() = default;
@@ -143,16 +144,14 @@ struct Part
 
   void optionFunc(const std::string & key, const OptionNode & option);
 
-  void processNodeSet(const OptionNode & option);
-  void processElementSet(const OptionNode & option);
+  void processNodeSet(const OptionNode & option, Instance * instance = nullptr);
+  void processElementSet(const OptionNode & option, Instance * instance = nullptr);
 
   const std::vector<std::size_t> & getNodeSet(const std::string & nset) const;
   const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
 
-  void processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
-                        std::unordered_map<AbaqusID, Index> & id_to_index,
-                        const OptionNode & option,
-                        const std::string & name_key);
+  template <bool is_nodal>
+  void processSetHelper(const OptionNode & option, Instance * instance);
 
   ObjectStore<UserElement> _element_definition;
 
