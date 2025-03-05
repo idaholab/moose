@@ -60,7 +60,6 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
   LOG_SCOPE("operator()", "AbaqusUELRelationshipManager");
 
   const auto & elements = _uel_mesh->getElements();
-  const auto & nodes = _uel_mesh->getNodes();
   const auto & node_to_uel_map = _uel_mesh->getNodeToUELMap();
 
   // loop over each NodeElement
