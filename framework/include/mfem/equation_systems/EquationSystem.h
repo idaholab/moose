@@ -165,10 +165,9 @@ protected:
         mfem::BilinearFormIntegrator * integ = bc->createBilinearFormIntegrator();
         if (integ != nullptr)
         {
-          form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaries());
-          // bc->isBoundaryRestricted()
-          //     ? form->AddBoundaryIntegrator(std::move(integ), bc->_bdr_markers)
-          //     : form->AddBoundaryIntegrator(std::move(integ));
+          bc->isBoundaryRestricted()
+              ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaries())
+              : form->AddBoundaryIntegrator(std::move(integ));
         }
       }
     }
@@ -189,10 +188,9 @@ protected:
         mfem::LinearFormIntegrator * integ = bc->createLinearFormIntegrator();
         if (integ != nullptr)
         {
-          form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaries());
-          // bc->isBoundaryRestricted()
-          //     ? form->AddBoundaryIntegrator(std::move(integ), bc->_bdr_markers)
-          //     : form->AddBoundaryIntegrator(std::move(integ));
+          bc->isBoundaryRestricted()
+              ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaries())
+              : form->AddBoundaryIntegrator(std::move(integ));
         }
       }
     }

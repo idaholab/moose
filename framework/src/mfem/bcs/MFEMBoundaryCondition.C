@@ -15,7 +15,9 @@ MFEMBoundaryCondition::validParams()
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
-      "The list of boundaries (ids or names) from the mesh where this boundary condition applies");
+      {"-1"},
+      "The list of boundaries (ids or names) from the mesh where this boundary condition applies. "
+      "Defaults to applying BC on all boundaries.");
   params.addParam<VariableName>("variable", "Variable on which to apply the boundary condition");
   return params;
 }
