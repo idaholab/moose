@@ -23,6 +23,11 @@ SCMRZPinQPrimeAux ::validParams()
 SCMRZPinQPrimeAux ::SCMRZPinQPrimeAux(const InputParameters & parameters)
   : DiffusionFluxAux(parameters)
 {
+  for (auto & b : blockIDs())
+  {
+    if (_subproblem.getCoordSystem(b) != Moose::COORD_RZ)
+      mooseError(this->name(), ": This kernel must be calculated on an -RZ Mesh");
+  }
 }
 
 Real
