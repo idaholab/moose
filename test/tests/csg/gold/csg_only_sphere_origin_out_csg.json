@@ -8,7 +8,7 @@
         "y0": 0.0,
         "z0": 0.0
       },
-      "TYPE": 2
+      "TYPE": "sphere"
     }
   },
   "UNIVERSES": null

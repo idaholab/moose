@@ -23,4 +23,24 @@ CSGSurface::CSGSurface(const std::string name, SurfaceType surf_type)
   if (_surface_type == SurfaceType::invalid)
     mooseError("Surface type of surface " + _name + " is being set to invalid");
 }
+
+const std::string CSGSurface::getSurfaceTypeString()
+{
+  switch (_surface_type)
+  {
+    case SurfaceType::plane:
+      return "plane";
+    case SurfaceType::sphere:
+      return "sphere";
+    case SurfaceType::xcylinder:
+      return "xcylinder";
+    case SurfaceType::ycylinder:
+      return "ycylinder";
+    case SurfaceType::zcylinder:
+      return "zcylinder";
+    default:
+      return "invalid";
+  }
+}
+
 } // namespace CSG
