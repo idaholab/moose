@@ -510,7 +510,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
   registerSyntaxTask("AddHDGKernelAction", "HDGKernels/*", "add_hybridized_kernel");
-  registerSyntaxTask("AddHDGBCAction", "HDGBCs/*", "add_hybridized_integrated_bc");
 
   registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
 
