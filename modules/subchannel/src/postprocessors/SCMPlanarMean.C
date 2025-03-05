@@ -15,6 +15,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "libmesh/system.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMPlanarMean);
 
@@ -31,7 +32,7 @@ SCMPlanarMean::validParams()
 
 SCMPlanarMean::SCMPlanarMean(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _variable(getParam<AuxVariableName>("variable")),
     _height(getParam<Real>("height")),
     _mean_value(0)

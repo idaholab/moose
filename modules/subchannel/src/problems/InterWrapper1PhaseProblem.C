@@ -2086,7 +2086,6 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
             VecSetValues(_cmc_time_derivative_rhs, 1, &row_td, &value_td_rhs, INSERT_VALUES));
 
         // Assembling inertial term
-        PetscScalar Pe = 0.5;
         auto alpha = 0.0; // hard code downwind;
         auto mass_term_out = (*_mdot_soln)(node_out_i) / S_i_out / rho_i_out +
                              (*_mdot_soln)(node_out_j) / S_j_out / rho_j_out;
@@ -2154,7 +2153,7 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
             _cmc_friction_force_mat, 1, &row_ff, 1, &col_ff, &value_ff, INSERT_VALUES));
 
         // Assembling pressure force
-        alpha = computeInterpolationCoefficients(Pe);
+        alpha = computeInterpolationCoefficients(0.5);
 
         if (!_staggered_pressure_bool)
         {

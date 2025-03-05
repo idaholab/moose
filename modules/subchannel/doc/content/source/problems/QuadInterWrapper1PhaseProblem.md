@@ -11,6 +11,8 @@ This kernel solves for the flow variables in that area, for the case of sub-asse
 
 The inter-wrapper solver is very similar to the subchannel solver. Information regarding the subchannel solver can be found in [subchannel_theory.md].
 
+Duct surface temperature is calculated at the end of the solve, if there is a PinMesh using Dittus Boelter correlation.
+
 ## Example Input File Syntax
 
 !listing /test/tests/problems/interwrapper/quad_interwrapper_monolithic.i block=SubChannel language=cpp

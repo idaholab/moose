@@ -27,7 +27,7 @@ public:
 
 protected:
   /// geometric information
-  SubChannelMesh & _mesh;
+  const SubChannelMesh & _mesh;
   /// axial location [m]
   const Real & _height;
   /// subchannel index

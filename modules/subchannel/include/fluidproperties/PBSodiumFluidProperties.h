@@ -51,14 +51,23 @@ protected:
   Real temperature_correction(Real & temperature) const;
   Real F_enthalpy(Real temperature) const;
 
+  /// reference pressure
   const Real & _p_0;
+  /// reference temperature
   static constexpr Real _T0 = 628.15;
+  /// max temperature
   static constexpr Real _Tmax = 1154.55;
+  /// min temperature
   static constexpr Real _Tmin = 373.15;
+  /// reference enthalpy
   Real _H0;
+  /// max enthalpy
   Real _H_Tmax;
+  /// min enthalpy
   Real _H_Tmin;
+  /// max cp
   Real _Cp_Tmax;
+  /// min cp
   Real _Cp_Tmin;
 
 public:

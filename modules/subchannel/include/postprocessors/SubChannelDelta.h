@@ -28,7 +28,7 @@ public:
 
 protected:
   /// geometric information
-  SubChannelMesh & _mesh;
+  const SubChannelMesh & _mesh;
   /// variable name
   AuxVariableName const & _variable;
   /// value we want to calculate
