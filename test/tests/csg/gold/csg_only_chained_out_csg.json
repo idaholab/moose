@@ -8,7 +8,7 @@
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": 1
+      "TYPE": "plane"
     },
     "surf_minus_y": {
       "COEFFICIENTS": {
@@ -17,7 +17,7 @@
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": 1
+      "TYPE": "plane"
     },
     "surf_minus_z": {
       "COEFFICIENTS": {
@@ -26,7 +26,7 @@
         "c": 1.0,
         "d": -2.5
       },
-      "TYPE": 1
+      "TYPE": "plane"
     },
     "surf_plus_x": {
       "COEFFICIENTS": {
@@ -35,7 +35,7 @@
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": 1
+      "TYPE": "plane"
     },
     "surf_plus_y": {
       "COEFFICIENTS": {
@@ -44,7 +44,7 @@
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": 1
+      "TYPE": "plane"
     },
     "surf_plus_z": {
       "COEFFICIENTS": {
@@ -53,7 +53,7 @@
         "c": 1.0,
         "d": 2.5
       },
-      "TYPE": 1
+      "TYPE": "plane"
     }
   },
   "UNIVERSES": null
