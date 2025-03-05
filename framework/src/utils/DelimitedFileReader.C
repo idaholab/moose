@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iterator>
+#include <type_traits>
 
 // MOOSE includes
 #include "DelimitedFileReader.h"
@@ -361,8 +362,17 @@ DelimitedFileReaderTempl<T>::processLine(const std::string & line,
                                          std::vector<T> & row,
                                          const unsigned int & num)
 {
+  std::string line_copy = line;
+  // Convert booleans to numeric
+  if constexpr (!std::is_same_v<T, std::string>)
+  {
+    line_copy = MooseUtils::toLower(line_copy);
+    line_copy = MooseUtils::replaceAll(line_copy, "true", "1");
+    line_copy = MooseUtils::replaceAll(line_copy, "false", "0");
+  }
+
   // Separate the row and error if it fails
-  bool status = MooseUtils::tokenizeAndConvert<T>(line, row, delimiter(line));
+  bool status = MooseUtils::tokenizeAndConvert<T>(line_copy, row, delimiter(line));
   if (!status)
     mooseError("Failed to convert a delimited data into double when reading line ",
                num,
