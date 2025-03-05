@@ -292,14 +292,8 @@ EquationSystem::BuildLinearForms()
   {
     // Apply kernels
     auto lf = _lfs.GetShared(test_var_name);
-    if (_kernels_map.Has(test_var_name))
-    {
-      ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
-    }
-    if (_integrated_bc_map.Has(test_var_name))
-    {
-      ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
-    }
+    ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
+    ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     lf->Assemble();
   }
 }
@@ -315,18 +309,11 @@ EquationSystem::BuildBilinearForms()
 
     // Apply kernels
     auto blf = _blfs.GetShared(test_var_name);
-    if (_integrated_bc_map.Has(test_var_name) &&
-        _integrated_bc_map.Get(test_var_name)->Has(test_var_name))
-    {
-      ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
-          test_var_name, test_var_name, blf, _integrated_bc_map);
-    }
-    if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(test_var_name))
-    {
-      blf->SetAssemblyLevel(_assembly_level);
-      ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
-          test_var_name, test_var_name, blf, _kernels_map);
-    }
+    blf->SetAssemblyLevel(_assembly_level);
+    ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
+        test_var_name, test_var_name, blf, _integrated_bc_map);
+    ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
+        test_var_name, test_var_name, blf, _kernels_map);
     // Assemble
     blf->Assemble();
   }
@@ -346,14 +333,14 @@ EquationSystem::BuildMixedBilinearForms()
     for (const auto j : index_range(_test_var_names))
     {
       auto trial_var_name = _test_var_names.at(j);
+      auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
+                                                               _test_pfespaces.at(i));
 
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
       if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(trial_var_name) &&
           test_var_name != trial_var_name)
       {
-        auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
-                                                                 _test_pfespaces.at(i));
         // Apply all mixed kernels with this test/trial pair
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
             trial_var_name, test_var_name, mblf, _kernels_map);
@@ -422,7 +409,6 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     {
       auto kernel_field_map =
           std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
-
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
     // Register new kernels map if not present for the test/trial variable
@@ -430,7 +416,6 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-
       _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
     }
     _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
@@ -456,19 +441,11 @@ TimeDependentEquationSystem::BuildBilinearForms()
 
     // Apply kernels to td_blf
     auto td_blf = _td_blfs.GetShared(test_var_name);
-    if (_integrated_bc_map.Has(test_var_name) &&
-        _integrated_bc_map.Get(test_var_name)->Has(test_var_name))
-    {
-      ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
-          test_var_name, test_var_name, td_blf, _integrated_bc_map);
-    }
-    if (_td_kernels_map.Has(test_var_name) &&
-        _td_kernels_map.Get(test_var_name)->Has(test_var_name))
-    {
-      td_blf->SetAssemblyLevel(_assembly_level);
-      ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
-          test_var_name, test_var_name, td_blf, _td_kernels_map);
-    }
+    td_blf->SetAssemblyLevel(_assembly_level);
+    ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
+        test_var_name, test_var_name, td_blf, _integrated_bc_map);
+    ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
+        test_var_name, test_var_name, td_blf, _td_kernels_map);
 
     // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
     // operator on the trial variable in the implicit integration scheme
