@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#29991'
+  design = 'ComputePolycrystalElasticityTensor.md'
+  [polycrystal_elasticity_tensor]
+    type = 'Exodiff'
+    input = 'polycrystal_elasticity_tensor.i'
+    exodiff = 'polycrystal_elasticity_tensor_out.e'
+    requirement = 'The system shall correctly compute an evolving elasticity tensor coupled to a grain growth phase field model.'
+  []
+[]
