@@ -15,6 +15,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "libmesh/system.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMPinSurfaceTemperature);
 
@@ -32,7 +33,7 @@ SCMPinSurfaceTemperature::validParams()
 
 SCMPinSurfaceTemperature::SCMPinSurfaceTemperature(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(libMesh::cast_ref<SubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _height(getParam<Real>("height")),
     _i_pin(getParam<int>("index")),
     _value(0)

@@ -5,7 +5,7 @@
     type = CSVDiff
     input = 'XX09_SCM_SS17.i'
     csvdiff  = 'XX09_SCM_SS17_out.csv'
-    # custom_cmp = 'test.exodiff'
+    heavy = true
     method = '!DBG'
     abs_zero = 1e-5
     valgrind = NONE
@@ -18,7 +18,6 @@
     input = 'XX09_SCM_SS45R.i'
     csvdiff  = 'XX09_SCM_SS45R_out.csv'
     heavy = true
-    # custom_cmp = 'test.exodiff'
     method = '!DBG'
     abs_zero = 1e-5
     valgrind = NONE
@@ -31,7 +30,6 @@
     input = 'XX09_SCM_TR17.i'
     csvdiff  = 'XX09_SCM_TR17_out.csv'
     heavy = true
-    # custom_cmp = 'test.exodiff'
     method = '!DBG'
     abs_zero = 1e-5
     valgrind = NONE
@@ -44,7 +42,6 @@
     input = 'XX09_SCM_TR45R.i'
     csvdiff  = 'XX09_SCM_TR45R_out.csv'
     heavy = true
-    # custom_cmp = 'test.exodiff'
     method = '!DBG'
     abs_zero = 1e-5
     valgrind = NONE

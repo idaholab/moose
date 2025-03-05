@@ -241,6 +241,8 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct frictio
     Real aT, b1T, b2T, cT;
     auto pitch = _subchannel_mesh.getPitch();
     auto pin_diameter = _subchannel_mesh.getPinDiameter();
+    // This gap is a constant value for the whole assembly. Might want to make it
+    // subchannel specific in the future if we have duct deformation.
     auto gap = _subchannel_mesh.getGap();
     auto w = (pin_diameter / 2.0) + (pitch / 2.0) + gap;
     auto p_over_d = pitch / pin_diameter;
@@ -703,8 +705,7 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         auto volume = dz * S_interp;
 
         // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients(Pe);
+        auto alpha = computeInterpolationCoefficients(0.5);
 
         /// Time derivative term
         if (iz == first_node)
@@ -733,9 +734,9 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
 
         // Adding RHS elements
         PetscScalar rho_old_interp =
-            computeInterpolatedValue(_rho_soln->old(node_out), _rho_soln->old(node_in), Pe);
+            computeInterpolatedValue(_rho_soln->old(node_out), _rho_soln->old(node_in), 0.5);
         PetscScalar h_old_interp =
-            computeInterpolatedValue(_h_soln->old(node_out), _h_soln->old(node_in), Pe);
+            computeInterpolatedValue(_h_soln->old(node_out), _h_soln->old(node_in), 0.5);
         PetscScalar value_vec_tt = _TR * rho_old_interp * h_old_interp * volume / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(

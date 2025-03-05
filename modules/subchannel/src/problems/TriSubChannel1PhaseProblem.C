@@ -266,6 +266,8 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   auto p_over_d = pitch / pin_diameter;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+  // This gap is a constant value for the whole assembly. Might want to make it
+  // subchannel specific in the future if we have duct deformation.
   auto gap = _tri_sch_mesh.getDuctToPinGap();
   auto w_over_d = (pin_diameter + gap) / pin_diameter;
   auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;

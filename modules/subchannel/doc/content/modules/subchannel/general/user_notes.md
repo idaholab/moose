@@ -31,6 +31,10 @@ In order for the user to print the index notation for subchannels and pins in a 
 
 SCM's solver is designed to solve for relative pressure: $P_{relative} = P_{absolute} - P_{boundary}$, such that the relative pressure at the outlet boundary is always zero. The pressure boundary condition is only explicitly used in the calculation of fluid properties. The user should be careful to initialize/set the pressure at the assembly outlet to zero (not setting it at all will also define the default value of zero).
 
+## The displacement variable
+
+The 'displacement' variable is used as a way to model a deformed duct. It's a per subchannel variable that affects the calculation of the geometric parameters (wetted perimeter, flow area) [!cite](kyriakopoulos2024validation) of the subchannels next to the duct.
+
 ## Naming/Branding
 
 Initially SCM was part of [Pronghorn](https://mooseframework.inl.gov/ncrc/applications/ncrc_root_pronghorn.html). It was called `Pronghorn-Subchannel`, `Pr-Sub`. Once the code became a [MOOSE](https://mooseframework.inl.gov/index.html) module it has been re-branded as SCM.
