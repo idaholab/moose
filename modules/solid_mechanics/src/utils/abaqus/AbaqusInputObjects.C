@@ -289,7 +289,6 @@ Part::processNodeSet(const OptionNode & option, Instance * instance)
 void
 Part::processElementSet(const OptionNode & option, Instance * instance)
 {
-  const Index offset = instance ? instance->_local_to_global_element_index_offset : 0;
   processSetHelper<false>(option, instance);
 }
 
@@ -545,12 +544,16 @@ FieldIC::FieldIC(const OptionNode & option, const Model & model)
   }
 }
 
+Boundary::Boundary(const OptionNode & /*option*/, Model & /*model*/)
+{
+  // get the current state of the node set
+}
+
 void
 Model::optionFunc(const std::string & key, const OptionNode & option)
 {
   if (key == "initial conditions")
   {
-    std::cout << "IC!!!!\n";
     const auto type = option._header.get<std::string>("type");
     if (MooseUtils::toLower(type) == "field")
       _field_ics.emplace_back(option, *this);
@@ -605,11 +608,6 @@ AssemblyModel::parse(const BlockNode & root)
   { Model::optionFunc(key, option); };
 
   root.forAll(option_func, block_func);
-}
-
-Boundary::Boundary(const OptionNode & /*option*/, Model & /*model*/)
-{
-  // get the current state of the node set
 }
 
 } // namespace Abaqus
