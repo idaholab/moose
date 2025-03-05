@@ -56,7 +56,8 @@ FunctorCoordinatesFunctionAux::computeValue()
   const auto state = determineState();
   if (isNodal())
   {
-    const Moose::NodeArg node_arg = {_current_node, Moose::INVALID_BLOCK_ID};
+    const Moose::NodeArg node_arg = {_current_node,
+                                     &Moose::NodeArg::undefined_subdomain_connection};
     return _factor(node_arg, state) * _func.value(_t_functor(node_arg, state),
                                                   Point(_x_functor(node_arg, state),
                                                         _y_functor(node_arg, state),

@@ -293,9 +293,12 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
                                            const Moose::StateArg & time) const
 {
   mooseAssert(node_arg.node, "The node must be non-null in functor material properties");
-  auto it = _node_functor.find(node_arg.subdomain_id);
+  if (node_arg.subdomain_ids->size() != 1)
+    mooseError("We do not currently support multi-subdomain evaluation of nodal arguments");
+  const auto sub_id = *(node_arg.subdomain_ids->begin());
+  auto it = _node_functor.find(sub_id);
   if (it == _node_functor.end())
-    subdomainErrorMessage(node_arg.subdomain_id);
+    subdomainErrorMessage(sub_id);
 
   return it->second(node_arg, time);
 }

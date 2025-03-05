@@ -723,6 +723,7 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
 {
+  mooseAssert(node.subdomain_ids, "Subdomain IDs must be supplied to the node argument");
   return evaluate(node, state);
 }
 

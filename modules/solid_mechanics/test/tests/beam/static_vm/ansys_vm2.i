@@ -143,29 +143,29 @@
 
 [NodalKernels]
   [./force_z2]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'two'
-    function = force_50e3
+    functor = force_50e3
   [../]
   [./force_z8]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'eight'
-    function = force_50e3
+    functor = force_50e3
   [../]
 
   [./force_z1]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'one'
-    function = force_25e3
+    functor = force_25e3
   [../]
   [./force_z9]
-    type =  UserForcingFunctionNodalKernel
+    type =  UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'nine'
-    function = force_25e3
+    functor = force_25e3
   [../]
 []
 

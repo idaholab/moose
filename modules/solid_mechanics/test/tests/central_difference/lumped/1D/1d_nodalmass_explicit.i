@@ -51,10 +51,10 @@
 
 [NodalKernels]
   [./force_x]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_x
     boundary = right
-    function = force_x
+    functor = force_x
   [../]
   [./nodal_masses]
     type = NodalTranslationalInertia
