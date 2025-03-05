@@ -258,15 +258,18 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
 }
 
 void
-Part::processNodeSet(const OptionNode & option)
+Part::processNodeSet(const OptionNode & option, Instance * instance)
 {
   const auto & map = option._header;
+  const Index offset = instance ? instance->_local_to_global_node_index_offset : 0;
 
   // copy nodes from element set
   if (map.has("elset"))
   {
+    const auto & source_part = instance ? instance->_part : *this;
+
     // get element set to copy nodes from
-    const auto & elset = _elsets.at(map.get<std::string>("elset"));
+    const auto & elset = source_part._elsets.at(map.get<std::string>("elset"));
 
     // get or create node set
     auto & nset = _nsets[map.get<std::string>("nset")];
@@ -275,31 +278,37 @@ Part::processNodeSet(const OptionNode & option)
     std::set<Index> unique_nodes(nset.begin(), nset.end());
     for (const auto elem_index : elset)
       for (const auto node_index : _elements[elem_index]._nodes)
-        unique_nodes.insert(node_index);
+        unique_nodes.insert(node_index + offset);
     nset.assign(unique_nodes.begin(), unique_nodes.end());
   }
   else
     // data lines are only present if elset parameter is _not_ specified
-    processSetHelper(_nsets, _node_id_to_index, option, "nset");
+    processSetHelper<true>(option, instance);
 }
 
 void
-Part::processElementSet(const OptionNode & option)
+Part::processElementSet(const OptionNode & option, Instance * instance)
 {
-  processSetHelper(_elsets, _element_id_to_index, option, "elset");
+  const Index offset = instance ? instance->_local_to_global_element_index_offset : 0;
+  processSetHelper<false>(option, instance);
 }
 
+template <bool is_nodal>
 void
-Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
-                       std::unordered_map<AbaqusID, Index> & id_to_index,
-                       const OptionNode & option,
-                       const std::string & name_key)
+Part::processSetHelper(const OptionNode & option, Instance * instance)
 {
+  const auto & id_to_index = is_nodal ? _node_id_to_index : _element_id_to_index;
+  const auto & name_key = is_nodal ? "nset" : "elset";
+  auto & set_map = is_nodal ? _nsets : _elsets;
+
   // parse the header line
   const auto & map = option._header;
   const auto name = map.get<std::string>(name_key);
+  const auto offset = instance ? (is_nodal ? instance->_local_to_global_node_index_offset
+                                           : instance->_local_to_global_element_index_offset)
+                               : 0.0;
 
-  std::cout << "Processing " << name_key << " " << name << std::endl;
+  std::cout << "Processing " << name_key << ' ' << name << std::endl;
 
   // implement GENERATE keyword
   const auto generate = map.get<bool>("generate");
@@ -329,11 +338,12 @@ Part::processSetHelper(std::map<std::string, std::vector<Index>> & set_map,
       if (step == 0)
         mooseError("Zero step in generated set.");
       for (AbaqusID item = begin; item <= end; item += step)
-        unique_items.insert(id_to_index.at(item));
+        unique_items.insert(id_to_index.at(item) + offset);
     }
     else
     {
       // TODO: here we need to to implement instance.node_id syntax!
+      // TODO: we'll need the root model here!!! Assembly->Instance->Part
       for (const auto i : index_range(data))
       {
         // check for existing set first
@@ -473,13 +483,13 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
       {
-      } //  processElementSet(option); // What do we do here????? Iterate over all instances?
+        model.processElementSet(option); // What do we do here????? Iterate over all instances?
+      }
       else
       {
         if (!_instance.has(instance_name))
           mooseError("Instance '", instance_name, "' not found in elset declaration.");
-        //_instance[instance_name].processElementSet(option);
-        // .. and here?
+        model.processElementSet(option, &_instance[instance_name]);
       }
     }
 
@@ -488,13 +498,13 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
       {
-      } //   processNodeSet(option); // What do we do here????? Iterate over all instances?
+        model.processNodeSet(option); // What do we do here????? Iterate over all instances?
+      }
       else
       {
         if (!_instance.has(instance_name))
           mooseError("Instance '", instance_name, "' not found in nset declaration.");
-        // model.processNodeSet(option, // TODO specify source instance(?) pointer for elset and
-        // offset _instance[instance_name]._local_to_global_node_index_offset);
+        model.processNodeSet(option, &_instance[instance_name]);
       }
     }
   };
