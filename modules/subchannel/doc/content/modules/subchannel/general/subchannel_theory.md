@@ -283,3 +283,6 @@ In this case, the conservation equations are recast in matrix form and combined 
 \vec{b_h}
 \end{bmatrix}
 \end{equation}
+
+As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to achieve realizable solutions. This is done by an initial calculation of the axial mass flows, crossflows, and the sum of crossflows.
+The defined relaxation factor is the average crossflow divided by the maximum and added to 0.5. The added cross-flow resistance is a blending of a current value and the previous one using the relaxation factor calculated above. The current value is the maximum of the sum of cross-flows per subchannel over the minimum axial mass-flow rate. The added cross-flow resistance is added to the diagonal of $M_{ww}$ matrix.

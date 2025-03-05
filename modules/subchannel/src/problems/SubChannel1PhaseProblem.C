@@ -1866,7 +1866,6 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   KSP ksp;
   PC pc;
   Vec x, r;
-  PetscErrorCode ierr;
   PetscMPIInt size;
   PetscScalar * xx;
 
@@ -1874,62 +1873,42 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
   if (size > 1)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
-  ierr = SNESCreate(PETSC_COMM_WORLD, &snes);
-  CHKERRQ(ierr);
-  ierr = VecCreate(PETSC_COMM_WORLD, &x);
-  CHKERRQ(ierr);
-  ierr = VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps);
-  CHKERRQ(ierr);
-  ierr = VecSetFromOptions(x);
-  CHKERRQ(ierr);
-  ierr = VecDuplicate(x, &r);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(SNESCreate(PETSC_COMM_WORLD, &snes));
+  LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &x));
+  LibmeshPetscCall(VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps));
+  LibmeshPetscCall(VecSetFromOptions(x));
+  LibmeshPetscCall(VecDuplicate(x, &r));
 
 #if PETSC_VERSION_LESS_THAN(3, 13, 0)
-  PetscOptionsSetValue(PETSC_NULL, "-snes_mf", PETSC_NULL);
+  LibmeshPetscCall(PetscOptionsSetValue(PETSC_NULL, "-snes_mf", PETSC_NULL));
 #else
-  ierr = SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE);
+  LibmeshPetscCall(SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE));
 #endif
-  CHKERRQ(ierr);
   Ctx ctx;
   ctx.iblock = iblock;
   ctx.schp = this;
-  ierr = SNESSetFunction(snes, r, formFunction, &ctx);
-  CHKERRQ(ierr);
-  ierr = SNESGetKSP(snes, &ksp);
-  CHKERRQ(ierr);
-  ierr = KSPGetPC(ksp, &pc);
-  CHKERRQ(ierr);
-  ierr = PCSetType(pc, PCNONE);
-  CHKERRQ(ierr);
-  ierr = KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit);
-  CHKERRQ(ierr);
-  ierr = SNESSetFromOptions(snes);
-  CHKERRQ(ierr);
-  ierr = VecGetArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(SNESSetFunction(snes, r, formFunction, &ctx));
+  LibmeshPetscCall(SNESGetKSP(snes, &ksp));
+  LibmeshPetscCall(KSPGetPC(ksp, &pc));
+  LibmeshPetscCall(PCSetType(pc, PCNONE));
+  LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
+  LibmeshPetscCall(SNESSetFromOptions(snes));
+  LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
   {
     xx[i] = solution(i);
   }
-  ierr = VecRestoreArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(VecRestoreArray(x, &xx));
 
-  ierr = SNESSolve(snes, NULL, x);
-  CHKERRQ(ierr);
-  ierr = VecGetArray(x, &xx);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(SNESSolve(snes, NULL, x));
+  LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
     root(i) = xx[i];
 
-  ierr = VecRestoreArray(x, &xx);
-  CHKERRQ(ierr);
-  ierr = VecDestroy(&x);
-  CHKERRQ(ierr);
-  ierr = VecDestroy(&r);
-  CHKERRQ(ierr);
-  ierr = SNESDestroy(&snes);
-  CHKERRQ(ierr);
+  LibmeshPetscCall(VecRestoreArray(x, &xx));
+  LibmeshPetscCall(VecDestroy(&x));
+  LibmeshPetscCall(VecDestroy(&r));
+  LibmeshPetscCall(SNESDestroy(&snes));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
