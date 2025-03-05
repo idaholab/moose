@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from sympy import * # use star so all functions are available to supplied strings
-from sympy.vector import divergence, gradient, Vector, CoordSys3D
+from sympy.vector import divergence, curl, gradient, Vector, CoordSys3D
 from mms.fparser import print_fparser
 from mms.moosefunction import print_moose
 

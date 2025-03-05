@@ -9,4 +9,15 @@
     verification = 'benchmarks/EvanescentWave.md'
     issues = '#13744'
   []
+
+  [time_harmonic_with_AD_materials]
+    type = Exodiff
+    input = 'evanescent_wave_with_ADMaterials.i'
+    exodiff = 'evanescent_wave_out.e'
+    valgrind = heavy
+    requirement = 'The system shall calculate the evanescent wave decay for a waveguide structure below the cutoff frequency using material properties leveraging automatic differentiation.'
+    design = 'benchmarks/EvanescentWave.md'
+    verification = 'benchmarks/EvanescentWave.md'
+    issues = '#28758'
+  []
 []
