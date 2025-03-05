@@ -179,6 +179,7 @@ NSFVBase::commonMomentumBoundaryFluxesParams()
       "flux direction with respect to the normal. If the inlet surface is defined on an internal "
       "face, this is necessary to ensure the arbitrary orientation of the normal does not result "
       "in non-physical results.");
+  params.addParamNamesToGroup("flux_inlet_pps flux_inlet_directions", "Boundary condition");
 
   return params;
 }
@@ -211,6 +212,12 @@ NSFVBase::commonFluidEnergyEquationParams()
       "energy_inlet_function",
       std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
+
+  params.addParam<std::vector<BoundaryName>>(
+      "energy_wall_boundaries",
+      {},
+      "Wall boundaries to apply energy boundary conditions on. If not specified, the flow equation "
+      "Physics wall boundaries will be used");
 
   MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction");
   params.addParam<MultiMooseEnum>(
@@ -590,9 +597,9 @@ NSFVBase::validParams()
 
   params.addParamNamesToGroup(
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
-      "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_types "
-      "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function "
-      "passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps "
+      "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_boundaries "
+      "energy_wall_types energy_wall_function outlet_boundaries momentum_outlet_types "
+      "pressure_function passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps "
       "flux_inlet_directions",
       "Boundary condition");
 

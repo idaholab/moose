@@ -12,28 +12,25 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds contributions from a external source term discretized using the finite volume
- * method to a linear system.
+ * Imposes a friction force on the momentum equation
  */
-class LinearFVSource : public LinearFVElementalKernel
+class LinearFVMomentumFriction : public LinearFVElementalKernel
 {
 public:
   static InputParameters validParams();
-
-  /**
-   * Class constructor.
-   * @param params The InputParameters for the kernel.
-   */
-  LinearFVSource(const InputParameters & params);
-
-  virtual Real computeMatrixContribution() override;
-
-  virtual Real computeRightHandSideContribution() override;
+  LinearFVMomentumFriction(const InputParameters & params);
 
 protected:
-  /// The functor for the source density
-  const Moose::Functor<Real> & _source_density;
+  virtual Real computeMatrixContribution() override;
+  virtual Real computeRightHandSideContribution() override;
+  Real computeFrictionWCoefficient(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
 
-  /// Scale factor
-  const Moose::Functor<Real> & _scale;
+  /// Index x|y|z of the momentum equation component
+  const unsigned int _index;
+
+  /// Darcy coefficient
+  const Moose::Functor<RealVectorValue> * const _D;
+
+  /// Dynamic viscosity
+  const Moose::Functor<Real> * const _mu;
 };
