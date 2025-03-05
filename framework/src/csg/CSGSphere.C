@@ -12,8 +12,8 @@
 namespace CSG
 {
 
-CSGSphere::CSGSphere(const std::string name, const Real x0, const Real y0, const Real z0, const Real r)
-  : CSGSurface(name, SurfaceType::sphere), _x0(x0), _y0(y0), _z0(z0), _r(r)
+CSGSphere::CSGSphere(const std::string name, const Point center, const Real r)
+  : CSGSurface(name, SurfaceType::sphere), _x0(center(0)), _y0(center(1)), _z0(center(2)), _r(r)
 {
     if (r < 0.0 || r == 0.0)
       mooseError("Radius of sphere must be postive.");
