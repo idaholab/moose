@@ -43,7 +43,7 @@ Contributions to $\left(\mathcal{T}(\phi_j), \varphi_i\right)_{\Omega}$ are give
 time derivative kernels such as
  [MFEMTimeDerivativeMassKernel](source/mfem/kernels/MFEMTimeDerivativeMassKernel.md)
 
-Currently, transient problems in Platypus are solved using an implicit backwards Euler method.
+Currently, transient problems in MOOSE's wrapping of MFEM are solved using an implicit backwards Euler method.
 Denoting $u_n=u(t+\delta t)$, $u_{n-1}=u(t)$ and approximating
 $u(t+\delta t) \approx u(t) + \delta t \dot{u}(t+\delta t)$, we have
 
