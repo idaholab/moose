@@ -25,8 +25,8 @@ public:
   EulerAngleFileReader(const InputParameters & parameters);
 
   virtual void initialize(){};
-  virtual void execute() {}
-  virtual void finalize() {}
+  virtual void execute(){};
+  virtual void finalize(){};
 
 protected:
   void readFile();

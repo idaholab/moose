@@ -79,7 +79,6 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
     angles = _euler.getEulerAngles(grain_id);
 
     RotationTensor R(angles);
-    // R.update(angles);
     if ((*_vals[op_index])[_qp] > 0.5)
       _crysrot[_qp] = R; // this is done for the crystal plasticity model compatibility
   }

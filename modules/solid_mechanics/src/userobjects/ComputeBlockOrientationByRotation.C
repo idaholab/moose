@@ -35,6 +35,8 @@ ComputeBlockOrientationByRotation::ComputeBlockOrientationByRotation(
 void
 ComputeBlockOrientationByRotation::initialize()
 {
+  ComputeBlockOrientationBase::initialize();
+
   _block_ea_values.clear();
   _quat.clear();
 }
@@ -61,19 +63,6 @@ ComputeBlockOrientationByRotation::execute()
   Eigen::Quaternion<Real> q(rot_mat);
   // store quaternion values for the current element
   _quat[_current_elem->subdomain_id()].push_back(std::make_tuple(q.w(), q.x(), q.y(), q.z()));
-}
-
-void
-ComputeBlockOrientationByRotation::threadJoin(const UserObject & y)
-{
-  ComputeBlockOrientationBase::threadJoin(y);
-
-  // We are joining with another class like this one so do a cast so we can get to it's data
-  const ComputeBlockOrientationByRotation & cbo =
-      dynamic_cast<const ComputeBlockOrientationByRotation &>(y);
-
-  for (auto it = cbo._quat.begin(); it != cbo._quat.end(); ++it)
-    _quat[it->first].insert(_quat[it->first].end(), it->second.begin(), it->second.end());
 }
 
 void
