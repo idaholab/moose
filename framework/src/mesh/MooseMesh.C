@@ -2373,8 +2373,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     qrule->init(elem->type(), elem->p_level());
     volume_ref_points_coarse = qrule->get_points();
     fe_face->reinit(elem, (unsigned int)0);
-    libMesh::FEInterface::inverse_map(
-        dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_coarse);
+    libMesh::FEMap::inverse_map(dim, elem, face_phys_points, face_ref_points_coarse);
 
     p_levels.resize(max_p_level + 1);
     std::iota(p_levels.begin(), p_levels.end(), 0);
@@ -2386,8 +2385,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
       qrule->init(elem->type(), elem->p_level());
       volume_ref_points_fine = qrule->get_points();
       fe_face->reinit(elem, (unsigned int)0);
-      libMesh::FEInterface::inverse_map(
-          dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_fine);
+      libMesh::FEMap::inverse_map(dim, elem, face_phys_points, face_ref_points_fine);
 
       const auto map_key = std::make_pair(elem_type, p_level);
       auto & volume_refine_map = _elem_type_to_p_refinement_map[map_key];
@@ -2627,7 +2625,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
   std::vector<Point> parent_ref_points;
 
-  libMesh::FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, parent_ref_points);
+  libMesh::FEMap::inverse_map(elem->dim(), elem, *q_points, parent_ref_points);
   libMesh::MeshRefinement mesh_refinement(mesh);
   mesh_refinement.uniformly_refine(1);
 
@@ -2673,7 +2671,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
     std::vector<Point> child_ref_points;
 
-    libMesh::FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, child_ref_points);
+    libMesh::FEMap::inverse_map(elem->dim(), elem, *q_points, child_ref_points);
     child_to_ref_points[child] = child_ref_points;
 
     std::vector<QpMap> & qp_map = refinement_map[child];
