@@ -55,8 +55,6 @@ InitialConditionTempl<T>::compute()
 
   // The dimension of the current element
   _dim = _current_elem->dim();
-  // The element type
-  const ElemType elem_type = _current_elem->type();
   // The number of nodes on the new element
   const unsigned int n_nodes = _current_elem->n_nodes();
 
@@ -125,7 +123,7 @@ InitialConditionTempl<T>::compute()
 
   for (_n = 0; _n != n_nodes; ++_n)
   {
-    _nc = FEInterface::n_dofs_at_node(_dim, _fe_type, elem_type, _n);
+    _nc = FEInterface::n_dofs_at_node(_fe_type, _current_elem, _n);
 
     // for nodes that are in more than one subdomain, only compute the initial
     // condition once on the lowest numbered block
