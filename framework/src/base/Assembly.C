@@ -1135,15 +1135,15 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
           _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), dx_deta = _ad_dxyzdeta_map[p](0),
-                 dy_dxi = _ad_dxyzdxi_map[p](1), dy_deta = _ad_dxyzdeta_map[p](1),
-                 dz_dxi = _ad_dxyzdxi_map[p](2), dz_deta = _ad_dxyzdeta_map[p](2);
+      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), &dx_deta = _ad_dxyzdeta_map[p](0),
+                 &dy_dxi = _ad_dxyzdxi_map[p](1), &dy_deta = _ad_dxyzdeta_map[p](1),
+                 &dz_dxi = _ad_dxyzdxi_map[p](2), &dz_deta = _ad_dxyzdeta_map[p](2);
 
       const auto g11 = (dx_dxi * dx_dxi + dy_dxi * dy_dxi + dz_dxi * dz_dxi);
 
       const auto g12 = (dx_dxi * dx_deta + dy_dxi * dy_deta + dz_dxi * dz_deta);
 
-      const auto g21 = g12;
+      const auto & g21 = g12;
 
       const auto g22 = (dx_deta * dx_deta + dy_deta * dy_deta + dz_deta * dz_deta);
 
@@ -1212,11 +1212,11 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
           _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      const auto dx_dxi = _ad_dxyzdxi_map[p](0), dy_dxi = _ad_dxyzdxi_map[p](1),
-                 dz_dxi = _ad_dxyzdxi_map[p](2), dx_deta = _ad_dxyzdeta_map[p](0),
-                 dy_deta = _ad_dxyzdeta_map[p](1), dz_deta = _ad_dxyzdeta_map[p](2),
-                 dx_dzeta = _ad_dxyzdzeta_map[p](0), dy_dzeta = _ad_dxyzdzeta_map[p](1),
-                 dz_dzeta = _ad_dxyzdzeta_map[p](2);
+      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), &dy_dxi = _ad_dxyzdxi_map[p](1),
+                 &dz_dxi = _ad_dxyzdxi_map[p](2), &dx_deta = _ad_dxyzdeta_map[p](0),
+                 &dy_deta = _ad_dxyzdeta_map[p](1), &dz_deta = _ad_dxyzdeta_map[p](2),
+                 &dx_dzeta = _ad_dxyzdzeta_map[p](0), &dy_dzeta = _ad_dxyzdzeta_map[p](1),
+                 &dz_dzeta = _ad_dxyzdzeta_map[p](2);
 
       _ad_jac[p] = (dx_dxi * (dy_deta * dz_dzeta - dz_deta * dy_dzeta) +
                     dy_dxi * (dz_deta * dx_dzeta - dx_deta * dz_dzeta) +
@@ -1520,15 +1520,15 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       {
         _ad_normals[p] = _ad_dxyzdxi_map[p].cross(_ad_dxyzdeta_map[p]).unit();
 
-        const auto &dxdxi = _ad_dxyzdxi_map[p](0), dxdeta = _ad_dxyzdeta_map[p](0),
-                   dydxi = _ad_dxyzdxi_map[p](1), dydeta = _ad_dxyzdeta_map[p](1),
-                   dzdxi = _ad_dxyzdxi_map[p](2), dzdeta = _ad_dxyzdeta_map[p](2);
+        const auto &dxdxi = _ad_dxyzdxi_map[p](0), &dxdeta = _ad_dxyzdeta_map[p](0),
+                   &dydxi = _ad_dxyzdxi_map[p](1), &dydeta = _ad_dxyzdeta_map[p](1),
+                   &dzdxi = _ad_dxyzdxi_map[p](2), &dzdeta = _ad_dxyzdeta_map[p](2);
 
         const auto g11 = (dxdxi * dxdxi + dydxi * dydxi + dzdxi * dzdxi);
 
         const auto g12 = (dxdxi * dxdeta + dydxi * dydeta + dzdxi * dzdeta);
 
-        const auto g21 = g12;
+        const auto & g21 = g12;
 
         const auto g22 = (dxdeta * dxdeta + dydeta * dydeta + dzdeta * dzdeta);
 
