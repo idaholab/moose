@@ -148,16 +148,21 @@ Real
 TorchPlasticityStressUpdate::computeHardeningValue(
     const Real & scalar)
 {
+  // We collect the inputs to the neural net into a vector
   std::vector<Real> input_vector(2, 0.0);
   input_vector[0] = this->_effective_inelastic_strain_old[_qp] + scalar;
-  input_vector[1] = this->_temperature[_qp];
+  input_vector[1] = 300; // should be a temperature
 
+  // We convert the vector to tensor
   torch::Tensor input_tensor;
   LibtorchUtils::vectorToTensor(input_vector, input_tensor);
+  input_tensor = input_tensor.transpose(0, 1);
 
+  // We get the dislocation density based on these inputs
   torch::Tensor dislocation_density = _dislocation_density.evaluate(input_tensor);
 
-  // Random function, we can make this whatever we want in the future
+  // We assume that the hardening constant is a linear function of the 
+  // dislocation density. This function can be whatever we want.
   torch::Tensor hardening_value = dislocation_density + 50.0; 
 
   return hardening_value.item<Real>() - _yield_stress;
@@ -167,25 +172,32 @@ Real
 TorchPlasticityStressUpdate::computeHardeningDerivative(
     const Real & /*scalar*/)
 {
+  // We collect the inputs to the neural net into a vector
   std::vector<Real> input_vector(2, 0.0);
   input_vector[0] = this->_effective_inelastic_strain_old[_qp];
-  input_vector[1] = this->_temperature[_qp];
+  input_vector[1] = 300;  // should be a temperature
 
+  // We convert the vector to tensor and and make sure we track the 
+  // gradients to that
   torch::Tensor input_tensor;
   LibtorchUtils::vectorToTensor(input_vector, input_tensor);
+  input_tensor = input_tensor.transpose(0, 1);
+  input_tensor.set_requires_grad(true);
+  input_tensor.retain_grad();
 
-  input_tensor.requires_grad();
-
+  // Okay we get the dislocation density based on these inputs
   torch::Tensor dislocation_density = _dislocation_density.evaluate(input_tensor);
 
-  // Random function, we can make this whatever we want in the future
+  // We assume that the hardening constant is a linear function of the 
+  // dislocation density. This function can be whatever we want.
   torch::Tensor hardening_value = dislocation_density + 50.0;
   
-  // We get the gradients of the hardening_value with respect to the 
-  // strain
-  hardening_value.backward();  
+  // We do a backpropagation to get d hardening / d strain. We also need 
+  // to de-normalize the gradient with the standard deviation.
+  hardening_value.sum().backward();  
+  auto std = _dislocation_density.network()->attr("std").toTensor();
 
-  return hardening_value.grad().index({1,0}).item<Real>();
+  return (input_tensor.grad() * std).index({0,0}).item<Real>();
 }
 
 void

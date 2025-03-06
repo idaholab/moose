@@ -27,7 +27,7 @@ public:
   virtual void execute() override;
   virtual void finalize() override {};
 
-  const std::shared_ptr<Moose::LibtorchTorchScriptNeuralNet> & network() {return _nn;}
+  const std::shared_ptr<Moose::LibtorchTorchScriptNeuralNet> & network() const {return _nn;}
 
   /**
    * Function to evaluate the neural network at certain input
