@@ -43,14 +43,14 @@ protected:
     Vec x;
   };
 
-  struct _FrictionStruct
+  struct FrictionStruct
   {
     int i_ch;
     Real Re, S, w_perim;
   } _friction_args;
 
   /// Returns friction factor
-  virtual Real computeFrictionFactor(_FrictionStruct friction_args) = 0;
+  virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
   /// Computes diversion crossflow per gap for block iblock
   virtual void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock

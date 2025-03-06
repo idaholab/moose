@@ -30,7 +30,7 @@ protected:
    * for each subchannel.
    * Upgraded Cheng-Todreas Correlation (2018).
    */
-  virtual Real computeFrictionFactor(_FrictionStruct friction_args) override;
+  virtual Real computeFrictionFactor(FrictionStruct friction_args) override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
   virtual void computeWijPrime(int iblock) override;
   virtual void computeh(int iblock) override;
