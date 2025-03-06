@@ -78,14 +78,27 @@ public:
   void solutionInvalidAccumulation();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
-  void solutionInvalidAccumulationTimeStep();
+  void solutionInvalidAccumulationTimeStep(const unsigned int timestep_index);
+
+  /// Compute the total number of solution invalid occurrences
+  void computeTotalCounts();
+
+  /// Struct used in InvalidCounts for storing the time history of invalid occurrences
+  struct TimestepCounts
+  {
+    TimestepCounts() : timestep_index(std::numeric_limits<unsigned int>::max()) {}
+    TimestepCounts(unsigned int timestep_index) : timestep_index(timestep_index) {}
+    unsigned int timestep_index;
+    unsigned int counts = 0;
+  };
 
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {
-    unsigned int counts = 0;
-    unsigned int timestep_counts = 0;
+    unsigned int current_counts = 0;
+    unsigned int current_timestep_counts = 0;
     unsigned int total_counts = 0;
+    std::vector<TimestepCounts> timestep_counts;
   };
 
   /// Access the private solution invalidity counts
@@ -98,11 +111,20 @@ public:
   void print(const ConsoleStream & console) const;
 
   /**
+   * Print the time history table of Solution Invalid warnings
+   * @param console The output stream to output to
+   */
+  void printHistory(const ConsoleStream & console, unsigned int & timestep_interval_size) const;
+
+  /**
    * Immediately print the section and message for debug purpose
    */
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
-  void sync();
+  /**
+   * Sync iteration counts to main processor
+   */
+  void syncIteration();
 
   friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
   friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
@@ -122,6 +144,11 @@ private:
   /// Build a VariadicTable for solution invalidity
   FullTable summaryTable() const;
 
+  typedef VariadicTable<std::string, std::string, unsigned long int, unsigned long int> TimeTable;
+
+  /// Build a VariadicTable for solution invalidity history
+  TimeTable transientTable(unsigned int & time_interval) const;
+
   /// Create a registry to keep track of the names and occurrences of the solution invalidity
   SolutionInvalidityRegistry & _solution_invalidity_registry;
 
@@ -137,5 +164,11 @@ private:
 };
 
 // datastore and dataload for recover
+void dataStore(std::ostream & stream,
+               SolutionInvalidity::TimestepCounts & timestep_counts,
+               void * context);
+void dataLoad(std::istream & stream,
+              SolutionInvalidity::TimestepCounts & timestep_counts,
+              void * context);
 void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context);
 void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context);

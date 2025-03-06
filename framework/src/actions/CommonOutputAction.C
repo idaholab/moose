@@ -149,6 +149,12 @@ CommonOutputAction::validParams()
                         "screen. This parameter only affects the output of the third-party solver "
                         "(e.g. PETSc), not MOOSE itself.");
 
+  params.addParam<bool>(
+      "solution_invalidity_history",
+      true,
+      "Enable printing of the time history of the solution invalidity occurrences "
+      "to the screen (console)");
+
   // Return object
   return params;
 }
@@ -282,6 +288,11 @@ CommonOutputAction::act()
 
     perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
     perfGraph().setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));
+
+    if (getParam<bool>("solution_invalidity_history"))
+    {
+      create("SolutionInvalidityOutput", "solution_invalidity_history");
+    }
 
     if (!getParam<bool>("color"))
       Moose::setColorConsole(false);

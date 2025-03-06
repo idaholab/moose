@@ -18,7 +18,7 @@
     type = NonsafeMaterial
     diffusivity = 0.5
     threshold = 0.3
-    invalid_after_time = 1
+    flag_solution_warning = true
   []
 []
 
@@ -51,13 +51,13 @@
 
 [Problem]
   type = FEProblem
-  allow_invalid_solution = true
+  allow_invalid_solution = false
   immediately_print_invalid_solution = false
 []
 
 [Executioner]
   type = Transient
-  num_steps = 3
+  num_steps = 6
   error_on_dtmin = false
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
@@ -65,13 +65,17 @@
 []
 
 [Reporters]
-
   [solution_invalidity]
     type = SolutionInvalidityReporter
+    execute_on = FINAL
   []
 []
 
 [Outputs]
-  file_base = 'solution_invalid_recover'
-  json = true
+  file_base = 'solution_invalid'
+  [out]
+    type = JSON
+    execute_on = 'FINAL'
+    execute_system_information_on = none
+  []
 []
