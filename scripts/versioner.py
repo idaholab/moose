@@ -392,15 +392,17 @@ class Versioner:
         """
         for package in Versioner.get_packages('HEAD').values():
             for template_path, to_path in package.templates.items():
+                abs_to_path = os.path.join(MOOSE_DIR, to_path)
+                rel_to_path = os.path.relpath(abs_to_path)
                 template_contents = Versioner.augment_template(package, template_path)
 
-                with open(to_path, 'r', encoding="utf-8") as f:
+                with open(abs_to_path, 'r', encoding="utf-8") as f:
                     to_contents = f.read()
 
                 changed = template_contents != to_contents
-                print('MODIFIED ' if changed else 'UNCHANGED', to_path)
+                print('MODIFIED ' if changed else 'UNCHANGED', rel_to_path)
                 if changed:
-                    with open(os.path.join(MOOSE_DIR, to_path), 'w', encoding="utf-8") as f:
+                    with open(abs_to_path, 'w', encoding="utf-8") as f:
                         f.write(template_contents)
 
     def output_summary(self) -> str:
