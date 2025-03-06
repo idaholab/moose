@@ -61,7 +61,7 @@ AD = ''
     coupled_variable = u
     gradient_material_name = gradient
     outputs = all
-    scalar_property = 0.5
+    scalar_property_factor = 0.5
   []
 []
 
