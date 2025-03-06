@@ -1257,10 +1257,12 @@ class TestHarness:
     # container on INL HPC
     inl_modules = ['use.moose', 'moose-dev-container-openmpi/5.0.5_0']
     # Define INL HPC clusters
+    # Bitterroot and windriver share software
+    br_wr_config = HPCCluster(scheduler='slurm', apptainer_modules=inl_modules)
     hpc_configs = {'sawtooth': HPCCluster(scheduler='pbs',
                                           apptainer_modules=inl_modules),
-                   'bitterroot': HPCCluster(scheduler='slurm',
-                                            apptainer_modules=inl_modules)}
+                   'bitterroot': br_wr_config,
+                   'windriver': br_wr_config}
 
     @staticmethod
     def queryHPCCluster(hostname: str):
