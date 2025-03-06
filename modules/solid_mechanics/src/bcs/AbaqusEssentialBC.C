@@ -8,81 +8,54 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusEssentialBC.h"
+#include "AbaqusInputObjects.h"
 
 registerMooseObject("SolidMechanicsApp", AbaqusEssentialBC);
 
 InputParameters
 AbaqusEssentialBC::validParams()
 {
-  InputParameters params = BoundaryCondition::validParams();
+  InputParameters params = DirichletBCBase::validParams();
   params.addClassDescription(
-      "Applies boundary conditions from an Abaqus input read throug AbaqusUELMesh");
+      "Applies boundary conditions from an Abaqus input read through AbaqusUELMesh");
+  params.addRequiredParam<Abaqus::AbaqusID>("abaqus_var_id", "Abaqus variable (DOF) id number.");
+  params.addParam<std::string>("abaqus_step", "If specified take the BC data from the given step");
+  // we generate a union of all nodes where any BC applies and suss in the individual case
+  // if we really need to set a value for the current variable (shouldApply)
+  params.set<std::vector<BoundaryName>>("boundary") = {"abaqus_bc_union_boundary"};
   return params;
 }
 
 AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
-  : BoundaryCondition(parameters, true),
-    _uel_mesh(dynamic_cast<AbaqusUELMesh *>(&_mesh)),
-    _current_node(_assembly.node())
+  : DirichletBCBase(parameters),
+    _uel_mesh(
+        [this]()
+        {
+          auto uel_mesh = dynamic_cast<AbaqusUELMesh *>(&_mesh);
+          if (!uel_mesh)
+            mooseError("Must use an AbaqusUELMesh for UEL support.");
+          return uel_mesh;
+        }()),
+    _abaqus_var_id(getParam<Abaqus::AbaqusID>("abaqus_var_id")),
+    _node_value_map(isParamValid("abaqus_step")
+                        ? _uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_step"))
+                        : _uel_mesh->getBCFor(_abaqus_var_id))
 {
-  if (!_uel_mesh)
-    mooseError("Must use an AbaqusUELMesh for UEL support.");
 }
 
-void
-AbaqusEssentialBC::timeStepSetup()
+bool
+AbaqusEssentialBC::shouldApply() const
 {
-  // get field initial conditions
-  _bc_data.clear();
-  for (const auto & ic : _uel_mesh->getFieldICs())
-  {
-    const auto var_name = _uel_mesh->getVarName(ic._var);
-    auto var = &_sys.getActualFieldVariable<Real>(_tid, var_name);
+  if (_node_value_map.find(_current_node->id()) == _node_value_map.end())
+    std::cout << "Should not apply BC on node " << _current_node->id() << std::endl;
 
-    for (const auto & [nodeset_name, value] : ic._value)
-      for (const auto node_index : ic._nsets.at(nodeset_name))
-        _bc_data[node_index].emplace_back(var, value);
-  }
-}
-
-void
-AbaqusEssentialBC::computeValue(NumericVector<Number> & current_solution)
-{
-  // loop over all variables to preset the solution
-  auto it = _ic_data.find(_current_node->id());
-  if (it == _ic_data.end())
-    return;
-
-  for (auto & [var, value] : it->second)
-  {
-    if (!var.isNodalDefined())
-      return;
-
-    std::cout << "Presetting Node  " << _current_node->id() << " var " << var->name() << " to "
-              << value << std::endl;
-
-    const dof_id_type & dof_idx = var.nodalDofIndex();
-    current_solution.set(dof_idx, value);
-  }
+  return _node_value_map.find(_current_node->id()) != _node_value_map.end();
 }
 
 Real
-AbaqusEssentialBC::computeResidual()
+AbaqusEssentialBC::computeQpValue()
 {
-  // loop over all variables to preset the solution
-  auto it = _ic_data.find(_current_node->id());
-  if (it == _ic_data.end())
-    return;
-
-  for (auto & [var, value] : it->second)
-  {
-    if (!var.isNodalDefined())
-      return;
-
-    std::cout << "Residual for Node  " << _current_node->id() << " var " << var->name() << " to "
-              << value << std::endl;
-
-    const Real res = var->getNodalValue(_current_node) - value;
-    setResidual(_sys, res, var);
-  }
+  std::cout << "Apply BC on node " << _current_node->id() << " with value "
+            << _node_value_map.at(_current_node->id()) << std::endl;
+  return _node_value_map.at(_current_node->id());
 }
