@@ -38,7 +38,4 @@ protected:
 
   /// Scaling factor, to be able to use a functor with multiple ICs
   const Real _scaling;
-
-  /// Point locator to get the element for a requested point
-  std::unique_ptr<libMesh::PointLocatorBase> _pl;
 };
