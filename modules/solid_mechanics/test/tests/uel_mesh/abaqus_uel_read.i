@@ -15,7 +15,13 @@
   []
 []
 
-[ICs/AddUELICs]
+# [ICs/AddUELICs]
+# []
+
+[UserObjects]
+  [ics]
+    type = AbaqusUELInitialCondition
+  []
 []
 
 [AuxVariables]
