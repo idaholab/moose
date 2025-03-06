@@ -250,7 +250,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
 }
 
 Real
-TriSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
+TriSubChannel1PhaseProblem::computeFrictionFactor(_FrictionStruct friction_args)
 {
   /// The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles
   auto Re = friction_args.Re;

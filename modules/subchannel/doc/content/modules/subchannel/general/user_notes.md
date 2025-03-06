@@ -7,7 +7,7 @@ periodically, so check back often!
 ## SCM index notation
 
 SCM follows the index notation presented in the two figures bellow: where in black numbers is the subchannel
-index, in white numbers the fuel-pin index and in red numbers the gap index.
+index, in white numbers the fuel-pin index and in red numbers the gap index. For both meshes (square, hexagonal) the center of the mesh is the origin.
 
 ### Square lattice
 

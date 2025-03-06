@@ -205,7 +205,7 @@ QuadSubChannel1PhaseProblem::initializeSolution()
 }
 
 Real
-QuadSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
+QuadSubChannel1PhaseProblem::computeFrictionFactor(_FrictionStruct friction_args)
 {
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;

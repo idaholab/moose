@@ -22,7 +22,7 @@ public:
 
 protected:
   virtual void initializeSolution() override;
-  virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
+  virtual Real computeFrictionFactor(_FrictionStruct friction_args) override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
   virtual void computeWijPrime(int iblock) override;
   virtual void computeh(int iblock) override;
