@@ -26,6 +26,7 @@ import concurrent.futures
 from graphlib import TopologicalSorter
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
+from datetime import date
 
 import yaml
 import jinja2
@@ -217,6 +218,16 @@ class Versioner:
     def __init__(self):
         self.entities = LIBRARIES
 
+    @staticmethod
+    def match_date(version) -> Union[Tuple, None]:
+        """
+        Matches a date to the given string, if any
+        """
+        search = re.search(r'(\d{4}).(\d{2}).(\d{2})', version)
+        if search:
+            return (int(search.group(1)), int(search.group(2)), int(search.group(3)))
+        return None
+
     def verify_recipes(self, args) -> None:
         """ provide hints as to version and build information for all conda stack libraries """
         from tabulate import tabulate
@@ -289,43 +300,72 @@ class Versioner:
             package_color = None
             hash_color = None
             version_color = None
+            build_color = None
 
-            # Hashes are different
+            # Hashes are different, something changed
             if base_package.hash != head_package.hash:
                 num_packages_changed += 1
                 hash_color = 'YELLOW'
+
+                different_version = base_package.version != head_package.version
+                different_build = base_package.build_number != head_package.build_number
+                if different_version:
+                    version_color = 'YELLOW'
+                if different_build:
+                    build_color = 'YELLOW'
+
                 # Full version is different, which means it was bumped
                 if base_conda.install != head_conda.install:
-                    different_version = base_package.version != head_package.version
-                    # Version is bumped, but build isn't zero
-                    if different_version and \
-                        head_package.build_number is not None and \
-                        head_package.build_number != 0:
-                        version_color = 'RED'
-                        package_color = 'RED'
-                        status = 'BUILD NONZERO'
-                        status_color = 'RED'
-                        num_packages_failed += 1
+                    status = 'CHANGE'
+                    if different_version:
+                        base_date = self.match_date(base_package.version)
+                        head_date = self.match_date(head_package.version)
+                        if head_date is not None:
+                            # Check that version date increased
+                            if base_date is not None and \
+                            date(*head_date) < date(*base_date):
+                                version_color = 'RED'
+                                status = 'DATE DECREASE'
+                            # Version date is not in the future
+                            elif date(*head_date) > date.today():
+                                version_color = 'RED'
+                                status = 'FUTURE DATE'
+                        # Version is bumped, but build isn't zero
+                        elif head_package.build_number is not None \
+                        and head_package.build_number != 0:
+                            build_color = 'RED'
+                            status = 'BUILD NONZERO'
                     # Version is bumped correctly
-                    else:
-                        version_color = 'GREEN'
-                        package_color = 'GREEN'
-                        status = 'CHANGE OK'
+                    if status == 'CHANGE':
+                        if different_version:
+                            version_color = 'GREEN'
+                        if different_build:
+                            build_color = 'GREEN'
                 # Version is not different, forgot to bump
                 else:
                     status = 'NEED BUMP'
-                    status_color = 'RED'
                     version_color = 'RED'
-                    package_color = 'RED'
-                    num_packages_failed += 1
+                    build_color = 'RED'
+
+            # Something went wrong, make status and package red
+            if status not in ['OK', 'CHANGE']:
+                package_color = 'RED'
+                status_color = 'RED'
+                num_packages_failed += 1
 
             if not brief or status != 'OK':
+                base_version = base_conda.version
+                if base_package.build_number is not None:
+                    base_version += f' build {base_package.build_number}'
+                head_version = colorize(head_conda.version, version_color)
+                if head_package.build_number is not None:
+                    head_version += colorize(f' build {head_package.build_number}', build_color)
                 entries.append([colorize(name, package_color),
                                 colorize(status, status_color),
                                 base_package.hash,
                                 colorize(head_package.hash, hash_color),
-                                base_conda.install,
-                                colorize(head_conda.install, version_color)])
+                                base_version,
+                                head_version])
 
         # Print version table
         keys = ['package', 'status', 'hash', 'to hash', 'version', 'to version']
