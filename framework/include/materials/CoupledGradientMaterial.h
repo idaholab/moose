@@ -26,8 +26,11 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
+  /// Material property computed, equal to the gradient of the variable times a scalar
   GenericMaterialProperty<RealVectorValue, is_ad> & _grad_mat_prop;
-  const GenericMaterialProperty<Real, is_ad> & _scalar_property;
+  /// A scalar material property that acts as a factor in the computed property
+  const GenericMaterialProperty<Real, is_ad> & _scalar_property_factor;
+  /// Gradient of the variable
   const GenericVariableGradient<is_ad> & _grad_u;
 };
 
