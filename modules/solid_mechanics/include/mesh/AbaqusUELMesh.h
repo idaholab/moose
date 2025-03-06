@@ -41,7 +41,7 @@ public:
   // const auto & getICBlocks() const { return _abaqus_ics; }
   // const auto & getProperties() const { return _properties; }
 
-  std::string getVarName(std::size_t id) const;
+  std::string getVarName(const Abaqus::AbaqusID var_id) const;
   const Abaqus::UserElement & getUEL(const std::string & type) const;
   const auto & getUELs() const { return _model->_element_definition; }
 
@@ -63,8 +63,13 @@ public:
   const auto & getElementSets() const { return _model->_elsets; }
   const auto & getNodeSets() const { return _model->_nsets; }
 
-  // initial condition getters
+  /// initial condition getters
   const auto & getFieldICs() const { return _model->_field_ics; }
+
+  /// get boundary conditions for variable
+  const std::unordered_map<Abaqus::Index, Real> & getBCFor(const Abaqus::AbaqusID var_id);
+  const std::unordered_map<Abaqus::Index, Real> & getBCFor(const Abaqus::AbaqusID var_id,
+                                                           const std::string & step_name);
 
   void addNodeset(BoundaryID id);
 

@@ -20,6 +20,9 @@ AbaqusUELInitialCondition::validParams()
 {
   auto params = NodalUserObject::validParams();
   params.addClassDescription("Add initial conditions from an Abaqus input");
+
+  // later on when we support steps, we need to be able to execute these at timestep begin for new
+  // steps
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
