@@ -17,17 +17,18 @@ InputParameters
 CoupledGradientMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Create a gradient material coupled to a variable.");
+  params.addClassDescription("Creates a gradient material equal to the gradient of the coupled "
+                             "variable gradient times a scalar material property.");
   params.addRequiredParam<MaterialPropertyName>(
       "grad_mat_prop",
       "Name of gradient material property equal to the gradient of the coupled variable gradient "
       "times the scalar.");
   params.deprecateParam("grad_mat_prop", "gradient_material_name", "12/12/25");
   params.addParam<MaterialPropertyName>(
-      "scalar_property",
+      "scalar_property_factor",
       1.0,
-      "Scalar material property multiplied by the coupled variable value and gradient.");
-  params.addRequiredCoupledVar("u", "The coupled variable");
+      "Scalar material property acting as a factor in the output gradient material property.");
+  params.addRequiredCoupledVar("u", "The coupled variable to take the gradient of");
   params.deprecateCoupledVar("u", "coupled_variable", "12/12/25");
   return params;
 }
@@ -37,7 +38,7 @@ CoupledGradientMaterialTempl<is_ad>::CoupledGradientMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _grad_mat_prop(declareGenericProperty<RealVectorValue, is_ad>("grad_mat_prop")),
-    _scalar_property(getGenericMaterialProperty<Real, is_ad>("scalar_property")),
+    _scalar_property_factor(getGenericMaterialProperty<Real, is_ad>("scalar_property_factor")),
     _grad_u(coupledGenericGradient<is_ad>("u"))
 {
 }
@@ -46,5 +47,5 @@ template <bool is_ad>
 void
 CoupledGradientMaterialTempl<is_ad>::computeQpProperties()
 {
-  _grad_mat_prop[_qp] = _grad_u[_qp] * _scalar_property[_qp];
+  _grad_mat_prop[_qp] = _grad_u[_qp] * _scalar_property_factor[_qp];
 }
