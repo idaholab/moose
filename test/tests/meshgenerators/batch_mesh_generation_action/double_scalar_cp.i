@@ -1,11 +1,11 @@
 [Mesh]
     [BatchMeshGeneratorAction]
       [batch1]
-        mesh_generator_name = 'GeneratedMeshGenerator'
+        mesh_generator_type = 'GeneratedMeshGenerator'
         mesh_name_prefix = 'gmg'
         batch_scalar_input_param_names = 'nx ny'
         batch_scalar_input_param_types = 'UINT UINT'
-        batch_scalar_input_params = '2 3; 1 2'
+        batch_scalar_input_param_values = '2 3; 1 2'
         fixed_scalar_input_param_names = 'dim'
         fixed_scalar_input_param_types = 'ENUM'
         fixed_scalar_input_param_values = '2'

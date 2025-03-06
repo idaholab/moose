@@ -12,11 +12,13 @@
 // MOOSE includes
 #include "Action.h"
 #include "ActionWarehouse.h"
+#include "InputParametersChecksUtils.h"
 
 /**
  * Action to generate batches of mesh generators from vectors of parameter values
  */
-class BatchMeshGeneratorAction : public Action
+class BatchMeshGeneratorAction : public Action,
+                                 public InputParametersChecksUtils<BatchMeshGeneratorAction>
 {
 public:
   static InputParameters validParams();
@@ -45,8 +47,8 @@ public:
 
 protected:
   virtual void addMeshGenerators();
-  /// Name of the mesh generator to use for batch generation
-  const std::string _mesh_generator_name;
+  /// Type (object name) of the mesh generator to use for batch generation
+  const std::string _mesh_generator_type;
   /// Prefix to use for naming the batch generated meshes
   const std::string _mesh_name_prefix;
   /// Names of the scalar input parameters to vary in the batch generation
@@ -54,13 +56,13 @@ protected:
   /// Types of the scalar input parameters to vary in the batch generation
   const std::vector<ParameterType> _batch_scalar_input_param_types;
   /// Values of the scalar input parameters to vary in the batch generation
-  const std::vector<std::vector<std::string>> _batch_scalar_input_params;
+  const std::vector<std::vector<std::string>> _batch_scalar_input_param_values;
   /// Names of the vector input parameters to vary in the batch generation
   const std::vector<std::string> _batch_vector_input_param_names;
   /// Types of the vector input parameters to vary in the batch generation
   const std::vector<ParameterType> _batch_vector_input_param_types;
   /// Values of the vector input parameters to vary in the batch generation
-  const std::vector<std::vector<std::vector<std::string>>> _batch_vector_input_params;
+  const std::vector<std::vector<std::vector<std::string>>> _batch_vector_input_param_values;
   /// Method to use for generating the batch parameters
   const MultiBatchParamsMethod _multi_batch_params_method;
   /// Names of the vector input parameters to keep fixed in the batch generation

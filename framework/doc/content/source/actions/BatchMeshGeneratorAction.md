@@ -4,7 +4,7 @@
 
 This Action is capable of batch generating a series of meshes using a single type of mesh generator with variation in one or multiple input parameters.
 
-The type of mesh generator to be used for batch generation is provided by [!param](/Mesh/BatchMeshGeneratorAction/mesh_generator_name). To batch generate meshes using the selected type of mesh generator, users need to provide both "fixed" input parameters, which keep constant throughout the batch mesh generation, and "batch" input parameters, which vary among generated meshes. For both "fixed" and "batch" input parameters, they can be either `scalar` or `vector` types.
+The type of mesh generator to be used for batch generation is provided by [!param](/Mesh/BatchMeshGeneratorAction/mesh_generator_type). To batch generate meshes using the selected type of mesh generator, users need to provide both "fixed" input parameters, which keep constant throughout the batch mesh generation, and "batch" input parameters, which vary among generated meshes. For both "fixed" and "batch" input parameters, they can be either `scalar` or `vector` types.
 
 ## Specifying Input Parameters
 
