@@ -1,4 +1,4 @@
-# Uncertainty Quantification and Sensitivity Analysis
+# Sensitivity Analysis
 
 !---
 
@@ -121,7 +121,7 @@
 !col! width=70%
 !style! fontsize=90%
 
-- Morris filtering is another global sensitivity analysis technique.
+- Morris filtering is another global sensitivity technique.
 - Can be much less intensive than Sobol:
 
   !equation
@@ -129,11 +129,11 @@
 
 - `MorrisReporter` computes the $\mu^{*}$ and $\sigma$ for each parameter:
 
-  1. $\mu^{*} \approx 0, \sigma \approx 0$: parameter has no influential impact on the QoI.
-  1. $\mu^{*} >> 0$: parameter has a significant impact on the QoI.
-  1. $\sigma >> 0$: parameter has nonlinear or interactive effects.
-  1. $\mu^{*} >> 0, \sigma \approx 0$: parameter is additive or linear
-  1. $\mu^{*} \approx 0, \sigma >> 0$: parameter has a negligible aggregate effect on the QoI while nonlinear perturbations (perturbing in more than one direction) can be significant.
+  1. $\mu^{*} \approx 0, \sigma \approx 0$: no influential impact on the QoI.
+  1. $\mu^{*} >> 0$: significant impact on the QoI.
+  1. $\sigma >> 0$: nonlinear or interactive effects.
+  1. $\mu^{*} >> 0, \sigma \approx 0$: additive or linear
+  1. $\mu^{*} \approx 0, \sigma >> 0$: negligible aggregate effect on the QoI while nonlinear perturbations (perturbing in more than one direction) can be significant.
 !style-end!
 !col-end!
 
@@ -212,5 +212,65 @@
 !col-end!
 
 !row-end!
+
+!---
+
+# Workshop Sobol Statistics
+
+!row!
+
+!col! width=35%
+
+!style fontsize=60%
+!listing examples/workshop/step04.i
+         diff=examples/workshop/step02.i
+         style=width:400px;height:300px
+
+!col-end!
+
+!col width=5%
+!!
+
+!col! width=60%
+
+!style fontsize=50%
+!listing! language=json
+"sobol": {
+    "sampling_matrix_results:T_avg:value": {
+        "FIRST_ORDER": [
+            [
+                0.012886805005992073,
+                -0.005371699727822437,
+                0.94356770546739,
+                0.03229000337826293
+            ],
+            [
+                [
+                    -0.05868786206191532,
+                    -0.09728839898174543,
+                    0.7882128660752169,
+                    -0.06928830708176942
+                ],
+                [
+                    0.08757250800355308,
+                    0.07145037427674986,
+                    1.0923493235473365,
+                    0.14496698804687763
+                ]
+            ]
+        ],
+!listing-end!
+
+!col-end!
+
+!row-end!
+
+!style fontsize=80%
+| $S_i$ (5.0%, 95.0%) CI   | $D$                 | $q$                 | $T_0$           | $q_0$             |
+|-------------------------:|:--------------------|:--------------------|:----------------|:------------------|
+| $T_{avg}$                | 0.01289             | -0.005372           | 0.9436          | 0.03229           |
+|                          | (-0.05869, 0.08757) | (-0.09729, 0.07145) | (0.7882, 1.092) | (-0.06929, 0.145) |
+| $q_{left}$               | 0.07813             | 0.3364              | 0.1573          | 0.2562            |
+|                          | (0.02931, 0.1329)   | (0.2908, 0.3849)    | (0.1229, 0.195) | (0.2183, 0.2961)  |
 
 !---
