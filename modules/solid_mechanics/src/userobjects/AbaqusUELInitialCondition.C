@@ -9,6 +9,7 @@
 
 #include "AbaqusUELInitialCondition.h"
 #include "AbaqusUELMesh.h"
+#include "Moose.h"
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -19,6 +20,8 @@ AbaqusUELInitialCondition::validParams()
 {
   auto params = NodalUserObject::validParams();
   params.addClassDescription("Add initial conditions from an Abaqus input");
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
@@ -27,10 +30,47 @@ AbaqusUELInitialCondition::AbaqusUELInitialCondition(const InputParameters & par
 {
   if (!_uel_mesh)
     mooseError("Must use an AbaqusUELMesh for UEL support.");
+
+  // couple required variables
+  for (const auto & ic : _uel_mesh->getFieldICs())
+    const auto var_name = _uel_mesh->getVarName(ic._var);
+}
+
+void
+AbaqusUELInitialCondition::initialize()
+{
+  // get field initial conditions
+  _ic_data.clear();
+  for (const auto & ic : _uel_mesh->getFieldICs())
+  {
+    const auto var_name = _uel_mesh->getVarName(ic._var);
+    auto var = &_sys.getActualFieldVariable<Real>(_tid, var_name);
+
+    for (const auto & [nodeset_name, value] : ic._value)
+      for (const auto node_index : ic._nsets.at(nodeset_name))
+        _ic_data[node_index].emplace_back(var, value);
+  }
 }
 
 void
 AbaqusUELInitialCondition::execute()
 {
-  std::cout << "on node " << _current_node->id() << '\n';
+  auto it = _ic_data.find(_current_node->id());
+  if (it == _ic_data.end())
+    return;
+
+  for (auto & [var, value] : it->second)
+  {
+    std::cout << "Node  " << _current_node->id() << " var " << var->name() << " to " << value
+              << std::endl;
+    var->reinitNode();
+    var->computeNodalValues();
+    var->setNodalValue(value);
+
+    // We are done, so update the solution vector
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      var->insert(var->sys().solution());
+    }
+  }
 }
