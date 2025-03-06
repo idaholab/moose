@@ -19,9 +19,11 @@ DensityTempl<is_ad>::validParams()
   InputParameters params = Material::validParams();
 
   params.addClassDescription(
-      "Creates density material property. This class is deprecated in favor of "
-      "StrainAdjustedDensity if coupled to displacements, or another general material class like "
-      "GenericConstantMaterial or ParsedMaterial if not modified by strain.");
+      "Creates density material property. This class is deprecated, and its functionality"
+      "is replaced by StrainAdjustedDensity for cases when the density should be adjusted"
+      "to account for material deformation. If it is not desired to adjust the density for"
+      "deformation, a variety of general-purpose Materials, such as GenericConstantMaterial"
+       "or ParsedMaterial can be used to define the density.");
 
   params.addCoupledVar(
       "displacements",
