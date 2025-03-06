@@ -17,9 +17,6 @@ please refer to the below pages:
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
 - [Hybridized Discontinous Galerkin (HDG) Finite Element](NavierStokesHDGKernel.md)
 - [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
-- [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
-- [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
-- [Porous media Compressible Finite Volume HLLC](PCNSFVHLLC.md)
 - [Turbulence Modeling Theory](navier_stokes/rans_theory.md)
 
 Here we give a brief tabular summary of the Navier-Stokes implementations:
@@ -37,9 +34,6 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 | WCNSFV     | AD         | weakly compressible           | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
 | WCNSFV2P   | AD         | weakly compressible; 2-phase  | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
 | PINSFV     | AD         | incompressible                | mixing length               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
-| CNSFVHLLC  | AD         | compressible                  | None                        | Not porous        | FV     | HLLC, piecewise constant data     |
-| PCNSFVHLLC | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
-| PCNSFVKT   | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
 
 Table definitions:
 
@@ -52,7 +46,6 @@ Table definitions:
 - SUPG: Streamline-Upwind Petrov-Galerkin
 - RC: Rhie-Chow interpolation
 - CD: central differencing interpolation; equivalent to average interpolation
-- HLLC: Harten Lax van Leer Contact
 - data: includes both the advector, velocity, and the advected quantities
 - limited: different limiters can be applied when interpolating cell-centered
   data to faces. A summary of limiter options can be found in
@@ -83,7 +76,6 @@ As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new sol
 | Porous Flow        |       --                  | Yes        | Yes                                                          | Yes                                                          |                        |
 | Compressibility    | Incompressible            | Yes        | Yes                                                          | Yes                                                          | Yes                    |
 |                    | Weakly compressible       |            | Yes                                                          | Yes                                                          | Yes                    |
-|                    | Compressible              |            | Yes                                                          |                                                              |                        |
 | Coupling           | Domain overlapping (SAM)  |            | Yes                                                          | Yes                                                          |                        |
 |                    | Direct to THM             |            | in [PR #28528](https://github.com/idaholab/moose/pull/28528) |                                                              |                        |
 |                    | MultiApp w/ Subchannel    |            | Yes                                                          |                                                              |                        |

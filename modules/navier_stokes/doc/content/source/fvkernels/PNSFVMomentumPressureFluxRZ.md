@@ -11,8 +11,7 @@ This object adds a residual equivalent to
 \end{equation}
 
 for use when performing axisymmetric simulations with `Mesh/coord_type=RZ`
-and when the $\epsilon \nabla p$ term has been integrated by parts as is done
-for [PCNSFVKT.md] and for [PCNSFVHLLC.md].
+and when the $\epsilon \nabla p$ term has been integrated by parts.
 
 !syntax parameters /FVKernels/PNSFVMomentumPressureFluxRZ
 

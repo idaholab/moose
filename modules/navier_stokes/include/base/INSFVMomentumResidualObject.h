@@ -18,7 +18,7 @@ class FaceInfo;
 /**
  * All objects that contribute to pressure-based (e.g. not density-based) Navier-Stokes momentum
  * equation residuals should inherit from this interface class. This holds true for INSFV, PINSFV,
- * and WCNSFV objects (but not CNSFV or PCNSFV). This interface class introduces virtual methods
+ * and WCNSFV objects. This interface class introduces virtual methods
  * that are used to gather on-diagonal 'a' coefficient data for Rhie-Chow interpolation
  */
 class INSFVMomentumResidualObject
