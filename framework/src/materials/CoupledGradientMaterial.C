@@ -41,6 +41,10 @@ CoupledGradientMaterialTempl<is_ad>::CoupledGradientMaterialTempl(
     _scalar_property_factor(getGenericMaterialProperty<Real, is_ad>("scalar_property_factor")),
     _grad_u(coupledGenericGradient<is_ad>("u"))
 {
+  const auto & var = _fe_problem.getVariable(0, "u");
+  if (var.isFV())
+    mooseError("Gradient of finite volume variables are zero, thus this material property is "
+               "irrelevant.");
 }
 
 template <bool is_ad>
