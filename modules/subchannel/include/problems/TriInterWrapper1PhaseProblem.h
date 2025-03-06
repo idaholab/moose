@@ -31,25 +31,7 @@ protected:
   virtual void computeDP(int iblock) override;
   /// computeMassFlowForDPDZ() and enforceUniformDPDZAtInlet()
   /// are overriden to define the sodium friction factor
-  /**
-   * Computes mass flow for a given pressure gradient
-   */
-  virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
-  /**
-   * Enforce uniform pressure gradient at the inlet
-   */
-  virtual void enforceUniformDPDZAtInlet();
-
   virtual void computeh(int iblock) override;
-  /**
-   * computeInletMassFlowDist corrects the inlet mass flow rate distribution
-   * in order to satisfy the uniform inlet pressure condition, iteratively.
-   */
-  virtual void computeInletMassFlowDist();
-  /**
-   * solver with iterative option to enforce uniform inlet
-   * pressure distribution option
-   */
   virtual void externalSolve() override;
   /// average relative error in pressure drop of channels
   Real _dpz_error;
