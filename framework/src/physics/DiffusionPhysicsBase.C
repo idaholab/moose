@@ -8,18 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DiffusionPhysicsBase.h"
-#include "MatDiffusion.h"
-#include "MoosePreconditioner.h"
 #include "PetscSupport.h"
 #include "MooseEnumItem.h"
-#include "ActionComponent.h"
 
 InputParameters
 DiffusionPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
+  params += PhysicsComponentInterface::validParams();
   params.addClassDescription("Base class for creating a diffusion equation");
 
+  // Variable parameters
   params.addParam<VariableName>("variable_name", "u", "Variable name for the equation");
   params.addParam<FunctionName>("initial_condition", "Initial condition for the diffused variable");
 
@@ -59,6 +58,7 @@ DiffusionPhysicsBase::validParams()
 
 DiffusionPhysicsBase::DiffusionPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters),
+    PhysicsComponentInterface(parameters),
     _var_name(getParam<VariableName>("variable_name")),
     _neumann_boundaries(getParam<std::vector<BoundaryName>>("neumann_boundaries")),
     _dirichlet_boundaries(getParam<std::vector<BoundaryName>>("dirichlet_boundaries"))
@@ -101,7 +101,11 @@ DiffusionPhysicsBase::addPostprocessors()
        getParam<std::vector<BoundaryName>>("compute_diffusive_fluxes_on"))
   {
     // Create the boundary integration of the flux
-    const std::string pp_type = "SideDiffusiveFluxIntegral";
+    const bool use_ad = isParamValid("use_automatic_differentiation")
+                            ? getParam<bool>("use_automatic_differentiation")
+                            : false;
+    const std::string pp_type =
+        use_ad ? "ADSideDiffusiveFluxIntegral" : "SideDiffusiveFluxIntegral";
     auto params = _factory.getValidParams(pp_type);
     params.set<std::vector<VariableName>>("variable") = {_var_name};
     if (isParamValid("diffusivity_matprop"))
@@ -124,15 +128,55 @@ void
 DiffusionPhysicsBase::addInitialConditions()
 {
   InputParameters params = getFactory().getValidParams("FunctionIC");
-  assignBlocks(params, _blocks);
 
-  // always obey the user specification of initial conditions
+  // Get the list of blocks that have ics from components
+  std::vector<SubdomainName> component_ic_blocks;
+  for (const auto & [component_name, component_bc_map] : _components_initial_conditions)
+  {
+    if (!component_bc_map.count(_var_name))
+      continue;
+    const auto & comp_blocks = getActionComponent(component_name).blocks();
+    component_ic_blocks.insert(component_ic_blocks.end(), comp_blocks.begin(), comp_blocks.end());
+  }
+
+  // Keep only blocks that have no component IC
+  std::vector<SubdomainName> remaining_blocks;
+  for (const auto & block : _blocks)
+    if (std::find(component_ic_blocks.begin(), component_ic_blocks.end(), block) ==
+        component_ic_blocks.end())
+      remaining_blocks.push_back(block);
+  assignBlocks(params, remaining_blocks);
+
+  // first obey any component-specific initial condition
+  // then obey the user specification of initial conditions
+  // NOTE: we may conflict with ICs in the input
   // there are no default initial conditions
-  if (parameters().isParamSetByUser("initial_condition"))
+  mooseAssert(parameters().isParamSetByUser("initial_condition") ||
+                  !parameters().hasDefault("initial_condition"),
+              "Should not have a default");
+  if (parameters().isParamSetByUser("initial_condition") && remaining_blocks.size())
   {
     params.set<VariableName>("variable") = _var_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_condition");
 
     getProblem().addInitialCondition("FunctionIC", prefix() + _var_name + "_ic", params);
+  }
+}
+
+void
+DiffusionPhysicsBase::addInitialConditionsFromComponents()
+{
+  InputParameters params = getFactory().getValidParams("FunctorIC");
+
+  for (const auto & [component_name, component_bc_map] : _components_initial_conditions)
+  {
+    if (!component_bc_map.count(_var_name))
+      continue;
+    assignBlocks(params, getActionComponent(component_name).blocks());
+    params.set<VariableName>("variable") = _var_name;
+    params.set<MooseFunctorName>("functor") = libmesh_map_find(component_bc_map, _var_name);
+
+    getProblem().addInitialCondition(
+        "FunctorIC", prefix() + _var_name + "_ic_" + component_name, params);
   }
 }

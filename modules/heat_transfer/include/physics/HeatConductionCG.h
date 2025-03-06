@@ -21,6 +21,10 @@ public:
 
   HeatConductionCG(const InputParameters & parameters);
 
+protected:
+  /// Whether to use automatic differentiation
+  const bool _use_ad;
+
 private:
   void addSolverVariables() override;
   void addFEKernels() override;

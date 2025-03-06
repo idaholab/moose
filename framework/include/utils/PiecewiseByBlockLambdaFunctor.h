@@ -93,8 +93,12 @@ private:
   /**
    * Provide a useful error message about lack of functor material property on the provided
    * subdomain \p sub_id
+   * @param sub_id subdomain id on which the functor was missing
+   * @param functors map of functors, used to show list of blocks with a definition
    */
-  void subdomainErrorMessage(SubdomainID sub_id) const;
+  template <typename C>
+  void subdomainErrorMessage(SubdomainID sub_id,
+                             const std::unordered_map<SubdomainID, C> & functors) const;
 
   /// Functors that return element average values (or cell centroid values or whatever the
   /// implementer wants to return for a given element argument)
@@ -162,6 +166,11 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & libmesh_dbg_var(m
 
   for (const auto block_id : block_ids)
     add_lammy(block_id);
+
+  // Handle special case of ANY_BLOCK_ID and empty block restriction that also cover
+  // INVALID_BLOCK_ID
+  if (block_ids.count(Moose::ANY_BLOCK_ID) || block_ids.empty())
+    add_lammy(Moose::INVALID_BLOCK_ID);
 }
 
 template <typename T>
@@ -198,15 +207,25 @@ PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID id) const
 }
 
 template <typename T>
+template <typename C>
 void
-PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(const SubdomainID sub_id) const
+PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(
+    const SubdomainID sub_id, const std::unordered_map<SubdomainID, C> & functors) const
 {
+  std::vector<SubdomainID> block_ids;
+  block_ids.reserve(functors.size());
+  for (const auto & [available_sub_id, functor] : functors)
+  {
+    libmesh_ignore(functor);
+    block_ids.push_back(available_sub_id);
+  }
   mooseError("The provided subdomain ID ",
              std::to_string(sub_id),
              " doesn't exist in the map for lambda functor '",
              this->functorName(),
              "'! This is likely because you did not provide a functor material "
-             "definition on that subdomain");
+             "definition on that subdomain.\nSubdomain IDs in the map: ",
+             Moose::stringify(block_ids));
 }
 
 template <typename T>
@@ -219,7 +238,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
               "The element must be non-null and non-remote in functor material properties");
   auto it = _elem_functor.find(elem->subdomain_id());
   if (it == _elem_functor.end())
-    subdomainErrorMessage(elem->subdomain_id());
+    subdomainErrorMessage(elem->subdomain_id(), _elem_functor);
 
   return it->second(elem_arg, time);
 }
@@ -236,7 +255,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
     const auto sub_id = face.face_side->subdomain_id();
     auto it = _face_functor.find(sub_id);
     if (it == _face_functor.end())
-      subdomainErrorMessage(sub_id);
+      subdomainErrorMessage(sub_id, _face_functor);
 
     return it->second(face, time);
   }
@@ -254,7 +273,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemQpArg & elem_qp,
   const auto sub_id = elem_qp.elem->subdomain_id();
   auto it = _elem_qp_functor.find(sub_id);
   if (it == _elem_qp_functor.end())
-    subdomainErrorMessage(sub_id);
+    subdomainErrorMessage(sub_id, _elem_qp_functor);
 
   return it->second(elem_qp, time);
 }
@@ -267,7 +286,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_sid
   const auto sub_id = elem_side_qp.elem->subdomain_id();
   auto it = _elem_side_qp_functor.find(sub_id);
   if (it == _elem_side_qp_functor.end())
-    subdomainErrorMessage(sub_id);
+    subdomainErrorMessage(sub_id, _elem_side_qp_functor);
 
   return it->second(elem_side_qp, time);
 }
@@ -282,7 +301,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
               "The element must be non-null and non-remote in functor material properties");
   auto it = _elem_point_functor.find(elem->subdomain_id());
   if (it == _elem_point_functor.end())
-    subdomainErrorMessage(elem->subdomain_id());
+    subdomainErrorMessage(elem->subdomain_id(), _elem_point_functor);
 
   return it->second(elem_point_arg, time);
 }
@@ -298,7 +317,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
   const auto sub_id = *(node_arg.subdomain_ids->begin());
   auto it = _node_functor.find(sub_id);
   if (it == _node_functor.end())
-    subdomainErrorMessage(sub_id);
+    subdomainErrorMessage(sub_id, _node_functor);
 
   return it->second(node_arg, time);
 }

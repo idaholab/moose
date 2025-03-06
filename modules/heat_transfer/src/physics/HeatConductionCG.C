@@ -33,11 +33,16 @@ HeatConductionCG::validParams()
   params.addParam<MaterialPropertyName>("density", "density", "Density material property");
   params.addParamNamesToGroup("thermal_conductivity specific_heat density", "Thermal properties");
 
+  params.addParam<bool>(
+      "use_automatic_differentiation",
+      true,
+      "Whether to use automatic differentiation for all the terms in the equation");
+
   return params;
 }
 
 HeatConductionCG::HeatConductionCG(const InputParameters & parameters)
-  : HeatConductionPhysicsBase(parameters)
+  : HeatConductionPhysicsBase(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 }
 
@@ -45,16 +50,22 @@ void
 HeatConductionCG::addFEKernels()
 {
   {
-    const std::string kernel_type = "ADHeatConduction";
+    const std::string kernel_type = _use_ad ? "ADHeatConduction" : "HeatConduction";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(parameters(), "thermal_conductivity");
+    if (_use_ad)
+      params.applyParameter(parameters(), "thermal_conductivity");
+    else
+      params.set<MaterialPropertyName>("diffusion_coefficient") =
+          getParam<MaterialPropertyName>("thermal_conductivity");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_conduction", params);
   }
   if (isParamValid("heat_source_var"))
   {
-    const std::string kernel_type = "ADCoupledForce";
+    const std::string kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
     if (isParamValid("heat_source_blocks"))
@@ -66,6 +77,7 @@ HeatConductionCG::addFEKernels()
   {
     const std::string kernel_type = "BodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
     if (MooseUtils::parsesToReal(functor_name))
@@ -80,8 +92,10 @@ HeatConductionCG::addFEKernels()
   }
   if (isTransient())
   {
-    const std::string kernel_type = "ADHeatConductionTimeDerivative";
+    const std::string kernel_type =
+        _use_ad ? "ADHeatConductionTimeDerivative" : "SpecificHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(parameters(), "density_name");
     params.applyParameter(parameters(), "specific_heat");
@@ -169,6 +183,11 @@ HeatConductionCG::addFEBCs()
     const auto & boundary_T_fluid =
         getParam<std::vector<MooseFunctorName>>("fixed_convection_T_fluid");
     const auto & boundary_htc = getParam<std::vector<MooseFunctorName>>("fixed_convection_htc");
+
+    if (!_use_ad && convective_boundaries.size())
+      paramInfo("use_automatic_differentiation",
+                "No-AD is not implemented for convection boundaries");
+
     // Optimization if all the same
     if (std::set<MooseFunctorName>(boundary_T_fluid.begin(), boundary_T_fluid.end()).size() == 1 &&
         std::set<MooseFunctorName>(boundary_htc.begin(), boundary_htc.end()).size() == 1 &&
