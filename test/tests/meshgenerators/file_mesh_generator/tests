@@ -173,6 +173,23 @@
     issues = '#18768'
   []
 
+  [iga_constraint_matrix_preconditioned]
+    type = Exodiff
+    input = 'iga_constraint_matrix.i'
+    cli_args = 'Mesh/iga_file/constraint_preconditioning=1 Outputs/file_base=iga_constraint_matrix_preconditioned_out'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = 'iga_constraint_matrix_preconditioned_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to precondition externally defined constraint matrices on 3D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
   [iga_constraint_matrix_1d]
     type = Exodiff
     input = 'iga_constraint_matrix_1d.i'
@@ -185,6 +202,27 @@
     abs_zero = 1e-08
 
     requirement = 'The system shall have the ability to apply externally defined constraint matrices to 1D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_1d_preconditioned]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    cli_args = 'Mesh/iga_file/constraint_preconditioning=1 Outputs/file_base=iga_constraint_matrix_1d_preconditioned_out'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+
+    # Just a symlink - the extraction operator in this particular case
+    # is constructed such that the preconditioning operation here is
+    # an identity
+    exodiff = 'iga_constraint_matrix_1d_preconditioned_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to precondition externally defined constraint matrices on 1D isoparametric meshes.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
