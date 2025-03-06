@@ -1125,8 +1125,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<ADReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(
-                elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+            if (node.n_dofs(sys_num, disp_num))
+              Moose::derivInsert(
+                  elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1201,8 +1202,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<ADReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(
-                elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+            if (node.n_dofs(sys_num, disp_num))
+              Moose::derivInsert(
+                  elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -3813,6 +3815,7 @@ Assembly::elementVolume(const Elem * elem) const
 void
 Assembly::addCachedJacobian(GlobalDataKey)
 {
+#ifndef NDEBUG
   if (!_subproblem.checkNonlocalCouplingRequirement())
   {
     mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
@@ -3821,6 +3824,7 @@ Assembly::addCachedJacobian(GlobalDataKey)
       mooseAssert(_cached_jacobian_rows[i].size() == _cached_jacobian_cols[i].size(),
                   "Error: Cached data sizes MUST be the same for a given tag!");
   }
+#endif
 
   for (MooseIndex(_cached_jacobian_rows) i = 0; i < _cached_jacobian_rows.size(); i++)
     if (_sys.hasMatrix(i))

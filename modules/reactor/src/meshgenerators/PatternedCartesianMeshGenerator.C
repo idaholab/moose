@@ -62,7 +62,7 @@ PatternedCartesianMeshGenerator::validParams()
                         false,
                         "Whether a positions file is generated in the core mesh mode.");
   params.addParam<bool>("assign_control_drum_id",
-                        true,
+                        false,
                         "Whether control drum id is assigned to the mesh as an extra integer.");
   std::string position_file_default = "positions_meta.data";
   params.addParam<std::string>(
@@ -860,7 +860,6 @@ PatternedCartesianMeshGenerator::generate()
     const Real azi_tol = 1E-8;
     std::vector<std::tuple<Real, Point, std::vector<Real>, dof_id_type>> control_drum_tmp;
     std::vector<dof_id_type> control_drum_id_sorted;
-    unsigned int drum_integer_index = out_mesh->get_elem_integer_index("control_drum_id");
     for (unsigned int i = 0; i < control_drum_positions_x.size(); ++i)
     {
       control_drum_positions_x[i] -= origin_x;
@@ -905,6 +904,7 @@ PatternedCartesianMeshGenerator::generate()
 
     if (_assign_control_drum_id)
     {
+      unsigned int drum_integer_index = out_mesh->get_elem_integer_index("control_drum_id");
       for (const auto & elem : out_mesh->element_ptr_range())
       {
         dof_id_type unsorted_control_drum_id = elem->get_extra_integer(drum_integer_index);

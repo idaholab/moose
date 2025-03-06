@@ -16,6 +16,7 @@
 #include "BoundaryRestrictable.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseVariableInterface.h"
+#include "MooseFunctorArguments.h"
 
 /**
  * Base class for creating new types of nodal kernels
@@ -42,7 +43,11 @@ public:
    */
   const MooseVariable & variable() const override { return _var; }
 
+  void setSubdomains(const std::set<SubdomainID> & sub_ids) { _sub_ids = &sub_ids; }
+
 protected:
+  Moose::NodeArg nodeArg() const { return Moose::NodeArg{_current_node, _sub_ids}; }
+
   /// Reference to FEProblemBase
   FEProblemBase & _fe_problem;
 
@@ -54,4 +59,7 @@ protected:
 
   /// Quadrature point index
   unsigned int _qp;
+
+  /// The set of subdomains connected to the current node
+  const std::set<SubdomainID> * _sub_ids;
 };

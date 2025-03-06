@@ -1,5 +1,5 @@
 # Test for small strain euler beam vibration in y direction
-# Test uses NodalGravity instead of UserForcingFunctionNodalKernel to apply the
+# Test uses NodalGravity instead of UserForcingFunctorNodalKernel to apply the
 # force.
 
 # An impulse load is applied at the end of a cantilever beam of length 4m.

@@ -1461,8 +1461,7 @@ MooseMesh::cacheInfo()
 const std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  std::map<dof_id_type, std::set<SubdomainID>>::const_iterator it =
-      _block_node_list.find(node.id());
+  auto it = _block_node_list.find(node.id());
 
   if (it == _block_node_list.end())
     mooseError("Unable to find node: ", node.id(), " in any block list.");

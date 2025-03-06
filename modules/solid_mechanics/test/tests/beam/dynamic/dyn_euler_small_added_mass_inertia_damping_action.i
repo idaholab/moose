@@ -81,10 +81,10 @@
 
 [NodalKernels]
   [./force_y2]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_y
     boundary = right
-    function = force
+    functor = force
   [../]
 []
 

@@ -70,6 +70,9 @@ CoreMeshGenerator::validParams()
       "desired_area_func",
       std::string(),
       "Desired (local) triangle area as a function of x,y; omit to skip non-uniform refinement");
+  params.addParam<bool>("assign_control_drum_id",
+                        true,
+                        "Whether control drum id is assigned to the mesh as an extra integer.");
   params.addParamNamesToGroup("periphery_block_name periphery_region_id outer_circle_radius "
                               "mesh_periphery periphery_generator",
                               "Periphery Meshing");
@@ -354,6 +357,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         params.set<MooseEnum>("pattern_boundary") = "none";
         params.set<bool>("generate_core_metadata") = !pin_as_assembly;
         params.set<bool>("create_outward_interface_boundaries") = false;
+        params.set<bool>("assign_control_drum_id") = getParam<bool>("assign_control_drum_id");
         if (make_empty)
         {
           params.set<std::vector<MeshGeneratorName>>("exclude_id") =

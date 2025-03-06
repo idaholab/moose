@@ -1,0 +1,72 @@
+[Tests]
+  [scalar_azim_magnetic_time_deriv]
+    type = Exodiff
+    input = scalar_azim_magnetic_time_deriv.i
+    exodiff = scalar_azim_magnetic_time_deriv_out.e
+    requirement = 'The system shall calculate the time derivative of the azimuthal component of the magnetic field based on a supplied electric field scalar components.'
+    design = 'AzimuthMagneticTimeDerivRZ.md'
+    issues = '#28758'
+  []
+  [scalar_azim_magnetic_time_deriv_csv]
+    type = CSVDiff
+    command = 'scalar_azim_magnetic_time_deriv_convergence.py'
+    csvdiff = 'scalar_azim_magnetic_time_deriv_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for the time derivative of the azimuthal component of the magnetic field based on a supplied electric field scalar components.'
+    design = 'AzimuthMagneticTimeDerivRZ.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy copy pandas os'
+  []
+
+  [vector_azim_magnetic_time_deriv]
+    type = Exodiff
+    input = vector_azim_magnetic_time_deriv.i
+    exodiff = vector_azim_magnetic_time_deriv_out.e
+    requirement = 'The system shall calculate the time derivative of the azimuthal component of the magnetic field based on a supplied electric field vector.'
+    design = 'AzimuthMagneticTimeDerivRZ.md'
+    issues = '#28758'
+  []
+  [vector_azim_magnetic_time_deriv_csv]
+    type = CSVDiff
+    command = 'vector_azim_magnetic_time_deriv_convergence.py'
+    csvdiff = 'vector_azim_magnetic_time_deriv_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for the time derivative of the azimuthal component of the magnetic field based on a supplied electric field vector.'
+    design = 'AzimuthMagneticTimeDerivRZ.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy copy pandas os'
+  []
+
+  [exceptions]
+    design = 'AzimuthMagneticTimeDerivRZ.md'
+    issues = '#28758'
+    requirement = 'The system shall throw an error if'
+    [both_scalar_and_vector_error_azim_magnetic_time_deriv]
+      type = 'RunException'
+      input = 'error_azim_magnetic_time_deriv.i'
+      cli_args = 'AuxKernels/aux_azim_dB_dt/Efield_X=aux_E_real_x AuxKernels/aux_azim_dB_dt/Efield_Y=aux_E_real_y AuxKernels/aux_azim_dB_dt/Efield=E_real'
+      expect_err = 'Both a vector and scalar components of the electric field were provided! Please only choose one.'
+      detail = 'the electric field is supplied as a vector and scalar components to the AzimuthMagneticTimeDerivRZ object.'
+    []
+    [x_comp_only_error_azim_magnetic_time_deriv]
+      type = 'RunException'
+      input = 'error_azim_magnetic_time_deriv.i'
+      cli_args = 'AuxKernels/aux_azim_dB_dt/Efield_X=aux_E_real_x'
+      expect_err = 'Neither a vector nor two scalar components of the electric field were provided! Please check the input parameters.'
+      detail = 'only the x-component of the electric field is supplied to the AzimuthMagneticTimeDerivRZ object.'
+    []
+    [y_comp_only_error_azim_magnetic_time_deriv]
+      type = 'RunException'
+      input = 'error_azim_magnetic_time_deriv.i'
+      cli_args = 'AuxKernels/aux_azim_dB_dt/Efield_Y=aux_E_real_y'
+      expect_err = 'Neither a vector nor two scalar components of the electric field were provided! Please check the input parameters.'
+      detail = 'if only the y-component of the electric field is supplied to the AzimuthMagneticTimeDerivRZ object.'
+    []
+  []
+[]

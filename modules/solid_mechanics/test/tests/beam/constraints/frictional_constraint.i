@@ -139,10 +139,10 @@
 
 [NodalKernels]
   [./force_x2]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_y
     boundary = '1004'
-    function = force_loading
+    functor = force_loading
   [../]
 []
 

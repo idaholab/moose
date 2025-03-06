@@ -54,7 +54,7 @@ void
 FVElementalKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
-  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual() * _assembly.elemVolume());
+  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual()) * _assembly.elemVolume();
   accumulateTaggedLocalResidual();
 }
 
