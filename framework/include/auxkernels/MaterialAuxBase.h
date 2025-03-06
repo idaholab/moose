@@ -94,12 +94,14 @@ template <typename T, bool is_ad, bool is_functor, typename RT>
 MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<RT>(parameters),
-    _prop([this]() -> const auto & {
-      if constexpr (is_functor)
-        return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
-      else
-        return this->template getGenericMaterialProperty<T, is_ad>("property");
-    }()),
+    _prop(
+        [this]() -> const auto &
+        {
+          if constexpr (is_functor)
+            return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
+          else
+            return this->template getGenericMaterialProperty<T, is_ad>("property");
+        }()),
     _selected_qp(this->isParamValid("selected_qp")
                      ? this->template getParam<unsigned int>("selected_qp")
                      : libMesh::invalid_uint),

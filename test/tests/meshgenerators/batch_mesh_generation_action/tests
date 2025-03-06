@@ -7,7 +7,7 @@
       exodiff = 'single_scalar_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in one single scalar parameter'
+      requirement = 'The system shall be able to generate in batches meshes of the same type with variation in one single scalar parameter'
   []
   [double_scalar_corr]
     type = 'Exodiff'

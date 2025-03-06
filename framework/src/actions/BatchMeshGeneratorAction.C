@@ -37,9 +37,10 @@ BatchMeshGeneratorAction::validParams()
                                             std::vector<std::string>(),
                                             "Names of the scalar input parameters to be altered.");
   MultiMooseEnum default_types("BOOL REAL SHORT USHORT INT UINT STRING ENUM", "");
-  params.addParam<MultiMooseEnum>("batch_scalar_input_param_types",
-                                  default_types,
-                                  "Types of the scalar input parameters to be altered.");
+  params.addParam<MultiMooseEnum>(
+      "batch_scalar_input_param_types",
+      default_types,
+      "Types of the scalar input parameters to be altered in each generator of the batch.");
   params.addParam<std::vector<std::vector<std::string>>>(
       "batch_scalar_input_params", {}, "Values of the scalar input parameters to be assigned.");
 
@@ -524,7 +525,8 @@ BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
       }
       break;
     default:
-      mooseError("impossible situation."); // as we use MultiMooseEnum to ensure the type is valid
+      mooseAssert(false,
+                  "impossible situation."); // as we use MultiMooseEnum to ensure the type is valid
   }
 }
 

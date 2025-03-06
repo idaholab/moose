@@ -13,6 +13,9 @@
 #include "Action.h"
 #include "ActionWarehouse.h"
 
+/**
+ * Action to generate batches of mesh generators from vectors of parameter values
+ */
 class BatchMeshGeneratorAction : public Action
 {
 public:
