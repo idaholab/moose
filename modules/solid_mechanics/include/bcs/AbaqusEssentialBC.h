@@ -10,30 +10,29 @@
 
 #pragma once
 
+#include "BoundaryCondition.h"
 #include "AbaqusUELMesh.h"
-#include "NodalUserObject.h"
-
-class AbaqusUELMesh;
 
 /**
- *
+ * Implements a simple constant Dashpot BC where grad(u)=value on the boundary.
+ * Uses the term produced from integrating the diffusion operator by parts.
  */
-class AbaqusUELInitialCondition : public NodalUserObject
+class AbaqusEssentialBC : public BoundaryCondition
 {
 public:
   static InputParameters validParams();
 
-  AbaqusUELInitialCondition(const InputParameters & parameters);
+  AbaqusEssentialBC(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void threadJoin(const UserObject &) override {}
-  virtual void finalize() override {}
+  virtual void timestepSetup();
 
 protected:
   AbaqusUELMesh * _uel_mesh;
 
-  // prepare IC data in a map for easy retrieval
+  /// current node being processed
+  const Node * const & _current_node;
+
+  // prepare BC data in a map for easy retrieval
   std::unordered_map<Abaqus::Index, std::vector<std::pair<MooseVariableField<Real> *, Real>>>
-      _ic_data;
+      _bc_data;
 };
