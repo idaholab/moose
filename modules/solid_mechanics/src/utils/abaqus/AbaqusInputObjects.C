@@ -81,18 +81,21 @@ UserElement::UserElement(const OptionNode & option)
       mooseError("Duplicate node in '*user element' section.");
     seen_node.insert(node_number);
 
-    // copy in var numbers (converting from 1-base to 0-base)
+    // copy in var numbers
     auto & var = _vars[node_number];
     auto & var_mask = _var_mask[node_number];
     for (const auto i : index_range(col))
       // note how abaqus treats the first data line differently from the following lines!
       if (i > 0 || !line)
       {
-        const auto v = col[i] - 1;
-        if (v >= bits)
+        const auto v = col[i];
+        if (v > bits)
           mooseError("Currently variables numbers >= ", bits, " are not supported.");
+        if (v < 1)
+          mooseError("Invalid variable number in Abaqus input.");
+
         var.push_back(v);
-        var_mask |= (1 << v);
+        var_mask |= (1 << (v - 1));
       }
   }
 
@@ -109,11 +112,14 @@ void
 Part::parse(const BlockNode & block)
 {
   auto option_func = [this](const std::string & key, const OptionNode & option)
-  { Part::optionFunc(key, option); };
+  {
+    if (!Part::optionFunc(key, option))
+      mooseError("Unsupported option ", key);
+  };
   block.forAll(option_func, nullptr);
 }
 
-void
+bool
 Part::optionFunc(const std::string & key, const OptionNode & option)
 {
   std::cout << "Part::optionFunc " << key << "\n";
@@ -125,7 +131,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
   }
 
   // Nodes
-  if (key == "node")
+  else if (key == "node")
   {
     const auto & map = option._header;
     if (map.get<std::string>("system", "R") != "R")
@@ -166,7 +172,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
   }
 
   // Elements
-  if (key == "element")
+  else if (key == "element")
   {
     const auto & map = option._header;
     const auto type = map.get<std::string>("type");
@@ -213,13 +219,13 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
       elset->assign(unique_ids.begin(), unique_ids.end());
   }
 
-  if (key == "elset")
+  else if (key == "elset")
     processElementSet(option);
-  if (key == "nset")
+  else if (key == "nset")
     processNodeSet(option);
 
   // UEL properties
-  if (key == "uel property")
+  else if (key == "uel property")
   {
     const auto & map = option._header;
     const auto & elset = _elsets.at(map.get<std::string>("elset"));
@@ -255,6 +261,9 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
         elem._properties.second = nullptr;
     }
   }
+  else
+    return false;
+  return true;
 }
 
 void
@@ -364,6 +373,83 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
   set.assign(unique_items.begin(), unique_items.end());
 }
 
+void
+Step::parse(const BlockNode & block)
+{
+  std::cout << "Step::parse!!!!";
+  auto option_func = [this](const std::string & key, const OptionNode & option)
+  {
+    if (!Step::optionFunc(key, option))
+      mooseError("Unsupported option ", key);
+  };
+  block.forAll(option_func, nullptr);
+}
+
+bool
+Step::optionFunc(const std::string & key, const OptionNode & option)
+{
+  std::cout << "Step::optionFunc " << key << "\n";
+  // User element definitions
+  if (key == "boundary")
+  {
+    // loop over data lines
+    for (const auto & data : option._data)
+    {
+      if (data.size() < 2)
+        mooseError("At least two fields are required in each Boundary data line");
+
+      // nodes this line applies to (either a nset or a single node)
+      const std::vector<Index> * node_set_ptr;
+      std::vector<Index> single_node;
+      if (_model._nsets.find(data[0]) != _model._nsets.end())
+        node_set_ptr = &_model._nsets.at(data[0]);
+      else
+      {
+        // TODO: when we redesign _node_id_to_index as a map of vectors, well simply copy into a
+        // vector
+        single_node = {_model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(data[0]))};
+        node_set_ptr = &single_node;
+      }
+
+      // starting and ending Abaqus Variable (DOF) ID
+      const auto first_dof_id = MooseUtils::convert<AbaqusID>(data[1]);
+      const auto last_dof_id =
+          data.size() > 2 ? MooseUtils::convert<AbaqusID>(data[2]) : first_dof_id;
+
+      // the applied BC value defaults to 0
+
+      const Real value = data.size() > 3 ? MooseUtils::convert<Real>(data[3]) : 0.0;
+
+      // fill in data
+      for (AbaqusID dof_id = first_dof_id; dof_id <= last_dof_id; ++dof_id)
+      {
+        auto & node_value = _bc_var_node_value_map[dof_id];
+        for (const auto node_index : *node_set_ptr)
+          node_value[node_index] = value;
+      }
+    }
+  }
+  else if (key == "static")
+  {
+    // TODO
+  }
+  else if (key == "dload")
+  {
+    // TODO
+  }
+  else if (key == "restart")
+  {
+    // TODO
+  }
+  else if (key == "output")
+  {
+    // TODO
+  }
+  else
+    return false;
+  return true;
+}
+
 Instance::Instance(const BlockNode & block, AssemblyModel & model)
   : _part(model._part[block._header.get<std::string>("part")])
 {
@@ -371,8 +457,8 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  const auto & data = block._data;
 
-  /*
   // translation
   if (data.size() > 0)
   {
@@ -418,9 +504,6 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
                                n(2) * n(1) * oc + n(0) * s,
                                c + n(2) * n(2) * oc);
   }
-*/
-
-  // TODO: block can have _data lines, too!!! :-O
 
   // store offsets
   _local_to_global_node_index_offset = model._nodes.size();
@@ -470,6 +553,10 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
     for (const auto & index : elset)
       model_elset.push_back(index + _local_to_global_element_index_offset);
   }
+
+  // TODO: we also need to add to the node ID to index map. this must be a map of vectors because
+  // the same ID can refer to multiple instantiated nodes now :-O
+  mooseError("Instantiating is missing important implementation details.");
 }
 
 void
@@ -492,7 +579,7 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       }
     }
 
-    if (key == "nset")
+    else if (key == "nset")
     {
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
@@ -506,6 +593,8 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
         model.processNodeSet(option, &_instance[instance_name]);
       }
     }
+    else
+      mooseError("Unsupported option ", key);
   };
 
   auto block_func = [&](const std::string & key, const BlockNode & block)
@@ -516,6 +605,8 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       std::cout << "Adding instance " << name << std::endl;
       _instance.add(name, block, model);
     }
+    else
+      mooseError("Unsupported block ", key);
   };
 
   block.forAll(option_func, block_func);
@@ -523,9 +614,9 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
 
 FieldIC::FieldIC(const OptionNode & option, const Model & model)
 {
-  _var = option._header.get<int>("variable") - 1;
-  if (_var < 0)
-    mooseError("invalid variable number ", _var + 1);
+  _var = option._header.get<int>("variable");
+  if (_var < 1)
+    mooseError("invalid variable number ", _var);
 
   // loop over data lines
   for (const auto & data : option._data)
@@ -544,12 +635,7 @@ FieldIC::FieldIC(const OptionNode & option, const Model & model)
   }
 }
 
-Boundary::Boundary(const OptionNode & /*option*/, Model & /*model*/)
-{
-  // get the current state of the node set
-}
-
-void
+bool
 Model::optionFunc(const std::string & key, const OptionNode & option)
 {
   if (key == "initial conditions")
@@ -560,6 +646,30 @@ Model::optionFunc(const std::string & key, const OptionNode & option)
     else
       mooseError("Unsupported IC type");
   }
+  else if (key == "heading")
+  {
+    // do nothing with this
+  }
+  else if (key == "preprint")
+  {
+    // do nothing with this
+  }
+  else
+    return Step::optionFunc(key, option) || Part::optionFunc(key, option);
+  return true;
+}
+
+bool
+Model::blockFunc(const std::string & key, const BlockNode & block)
+{
+  if (key == "step")
+  {
+    const auto name = block._header.get<std::string>("name");
+    _step.add(name, block, *this);
+  }
+  else
+    return false;
+  return true;
 }
 
 // Entry point for the final parsing stage
@@ -568,11 +678,16 @@ FlatModel::parse(const BlockNode & root)
 {
   auto option_func = [this](const std::string & key, const OptionNode & option)
   {
-    Part::optionFunc(key, option);
-    Model::optionFunc(key, option);
+    if (!Model::optionFunc(key, option))
+      mooseError("Unsupported option ", key);
+  };
+  auto block_func = [&](const std::string & key, const BlockNode & block)
+  {
+    if (!Model::blockFunc(key, block))
+      mooseError("Unsupported block ", key);
   };
 
-  root.forAll(option_func, nullptr);
+  root.forAll(option_func, block_func);
 }
 
 // Entry point for the final parsing stage
@@ -596,16 +711,15 @@ AssemblyModel::parse(const BlockNode & root)
       _assembly->parse(block, *this);
     }
 
-    else if (key == "step")
-    {
-    }
-
-    else
+    else if (!Model::blockFunc(key, block))
       mooseError("Unsupported block found in input: ", key);
   };
 
   auto option_func = [this](const std::string & key, const OptionNode & option)
-  { Model::optionFunc(key, option); };
+  {
+    if (!Model::optionFunc(key, option))
+      mooseError("Unsupported option ", key);
+  };
 
   root.forAll(option_func, block_func);
 }
