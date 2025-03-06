@@ -18,26 +18,53 @@
 
 !---
 
-!style halign=center fontsize=150%
-Perform UQ and sensitivity analysis with +distributed data+.
+!style halign=center fontsize=120%
+Perform UQ and sensitivity analysis with +distributed data+ and leveraging +advanced variance reduction+ methods.
 
-!row!
-!col width=40%
-!media dispx_center_inner_hist.png
+!media sobol_total.png style=width:50%;margin-left:auto;margin-right:auto;display:block
 
-!col width=60%
-!media sobol_total.png
-!row-end!
+!media case1_inference_results.png style=width:50%
+
+!media Parallel_Subset_Simulation_Sampler.svg style=width:35%
 
 !---
 
-!style halign=center fontsize=150%
-Train meta-models to build fast-evaluating +surrogates+ of the high-fidelity multiphysics model.
+!style halign=center fontsize=120%
+Train meta-models to build fast-evaluating +surrogates+ of the high-fidelity multiphysics model and provide a +pluggable+ interface for these surrogates.
 
-!style halign=center fontsize=150%
-Provide a +pluggable+ interface for these surrogates.
+- Harness machine learning capabilities through the C++ front end of PyTorch, i.e. +Libtorch+.
+- Use +active learning+ models for building surrogates.
 
-!media surrogate_viz.png
+!media surrogate_viz.png style=width:60%
+
+!media gp_variants.png style=width:40%
+
+!media active_learning.png style=width:75%;display:block;margin-left:auto;margin-right:auto;
+
+!---
+
+# Focus of this Training
+
+Part 1: Introduction to systems and basic parameter studies
+
+- `Distributions` and `Samplers`
+- Model execution via `MultiApps`
+- Parameter study statistics and sensitivity analysis
+- Introduction to surrogate system
+
+Part 2^*^: Bayesian (inverse) uncertainty quantification
+
+- Model parameter uncertainties
+- Model parameter + noise uncertainties
+- Model parameter + noise + model inadequacy uncertainties
+
+Part 3^*^: Active learning
+
+- Training a Gaussian process surrogate with Monte Carlo sampling
+- Use of an acquisition function
+- Solving optimization problems with Bayesian optimization
+
+[!style fontsize=80%](* Not included in these slides)
 
 !---
 

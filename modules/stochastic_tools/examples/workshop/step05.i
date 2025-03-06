@@ -1,62 +1,22 @@
-[StochasticTools]
-[]
+[ParameterStudy]
+  input = diffusion.i
+  parameters = 'Materials/constant/prop_values
+                Kernels/source/value
+                BCs/left/value
+                BCs/right/value'
+  quantities_of_interest = 'T_avg/value q_left/value'
 
-[Samplers]
-  [csv]
-    type = CSVSampler
-    samples_file = 'step02_out_sampling_matrix_0001.csv'
-    column_names = 'D q T_0 q_0 results:T_avg:value results:q_left:value'
-  []
-  [resample]
-    type = Cartesian1D
-    linear_space_items = '0.5 0.1 21
-                          50 5 21
-                          200 10 21
-                          -100 2 26'
-    nominal_values = '1 100 300 -100'
-  []
-[]
+  sampling_type = lhs
+  num_samples = 5000
+  distributions = 'uniform normal normal weibull'
+  uniform_lower_bound = 0.5
+  uniform_upper_bound = 2.5
+  weibull_location = -110
+  weibull_scale = 20
+  weibull_shape = 1
+  normal_mean = '100 300'
+  normal_standard_deviation = '25 45'
 
-[Reporters]
-  [sampling_matrix]
-    type = StochasticMatrix
-    sampler = csv
-    sampler_column_names = 'D q T_0 q_0 T_avg q_left'
-    outputs = none
-  []
-  [pr_T_avg_cv]
-    type = CrossValidationScores
-    models = pr_T_avg
-  []
-  [evaluate]
-    type = EvaluateSurrogate
-    model = pr_T_avg
-    sampler = resample
-    parallel_type = ROOT
-  []
-[]
-
-[Trainers]
-  [poly_reg_T_avg]
-    type = PolynomialRegressionTrainer
-    sampler = csv
-    predictor_cols = '0 1 2 3'
-    response = sampling_matrix/T_avg
-    max_degree = 3
-    regression_type = OLS
-
-    cv_type = K_FOLD
-    cv_surrogate = pr_T_avg
-  []
-[]
-
-[Surrogates]
-  [pr_T_avg]
-    type = PolynomialRegressionSurrogate
-    trainer = poly_reg_T_avg
-  []
-[]
-
-[Outputs]
-  json = true
+  statistics = 'mean stddev'
+  ci_levels = '0.05 0.95'
 []
