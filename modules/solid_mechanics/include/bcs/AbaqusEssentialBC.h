@@ -10,29 +10,30 @@
 
 #pragma once
 
-#include "BoundaryCondition.h"
 #include "AbaqusUELMesh.h"
+#include "DirichletBCBase.h"
 
 /**
  * Implements a simple constant Dashpot BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class AbaqusEssentialBC : public BoundaryCondition
+class AbaqusEssentialBC : public DirichletBCBase
 {
 public:
   static InputParameters validParams();
 
   AbaqusEssentialBC(const InputParameters & parameters);
 
-  virtual void timestepSetup();
+  virtual bool shouldApply() const override;
 
 protected:
+  Real computeQpValue() override;
+
   AbaqusUELMesh * _uel_mesh;
 
-  /// current node being processed
-  const Node * const & _current_node;
+  /// Abaqus ID of the current variable
+  const Abaqus::AbaqusID _abaqus_var_id;
 
-  // prepare BC data in a map for easy retrieval
-  std::unordered_map<Abaqus::Index, std::vector<std::pair<MooseVariableField<Real> *, Real>>>
-      _bc_data;
+  /// BC data for the current variable
+  const std::unordered_map<Abaqus::Index, Real> & _node_value_map;
 };

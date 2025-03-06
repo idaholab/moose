@@ -93,7 +93,7 @@ struct UserElement
   std::size_t _type_id; // TODO: is this needed?
 
   /// list of abaqus variables active at each node
-  std::vector<std::vector<std::size_t>> _vars;
+  std::vector<std::vector<AbaqusID>> _vars;
 
   /// bitmask encoding the DOF selection in _vars at each node
   std::vector<SubdomainID> _var_mask;
@@ -142,7 +142,7 @@ struct Part
   Part(const BlockNode & block) { parse(block); }
   void parse(const BlockNode & block);
 
-  void optionFunc(const std::string & key, const OptionNode & option);
+  bool optionFunc(const std::string & key, const OptionNode & option);
 
   void processNodeSet(const OptionNode & option, Instance * instance = nullptr);
   void processElementSet(const OptionNode & option, Instance * instance = nullptr);
@@ -169,6 +169,42 @@ struct Part
   /// sets
   std::map<std::string, std::vector<Index>> _elsets;
   std::map<std::string, std::vector<Index>> _nsets;
+};
+
+/**
+ * Field initial condition
+ */
+struct FieldIC
+{
+  FieldIC(const OptionNode & option, const Model & model);
+
+  /// variable number (0-based)
+  int _var;
+
+  /// state of the coupled node sets at parse time
+  std::map<std::string, std::vector<Index>> _nsets;
+
+  /// values assigned to each nodeset
+  std::vector<std::pair<std::string, Real>> _value;
+};
+
+/**
+ * Step block
+ */
+struct Step
+{
+  Step(const Model & model) : _model(model) {}
+  Step(const BlockNode & block, const Model & model) : _model(model) { parse(block); }
+  void parse(const BlockNode & block);
+
+  bool optionFunc(const std::string & key, const OptionNode & option);
+
+  /// essential boundary conditions as list of nodes this BC applies to
+  /// (mapping from Abaqus variable ID to a (node index, value) pair)
+  std::unordered_map<AbaqusID, std::unordered_map<Index, Real>> _bc_var_node_value_map;
+
+  /// Model acces to get node sets
+  const Model & _model;
 };
 
 /**
@@ -199,39 +235,26 @@ struct Assembly
 };
 
 /**
- * Field initial condition
- */
-struct FieldIC
-{
-  FieldIC(const OptionNode & option, const Model & model);
-
-  /// variable number (0-based)
-  int _var;
-
-  /// state of the coupled node sets at parse time
-  std::map<std::string, std::vector<Index>> _nsets;
-
-  /// values assigned to each nodeset
-  std::vector<std::pair<std::string, Real>> _value;
-};
-
-/**
  * Model input file scope
  */
-struct Model : public Part
+struct Model : public Part, public Step
 {
-  Model() = default;
+  Model() : Part(), Step(*this) {}
   virtual ~Model() = default;
 
   virtual void parse(const BlockNode & root) = 0;
 
-  void optionFunc(const std::string & key, const OptionNode & option);
+  bool optionFunc(const std::string & key, const OptionNode & option);
+  bool blockFunc(const std::string & key, const BlockNode & block);
 
   /// A map from nodes (i.e. node elements) to user elements (ids)
   std::unordered_map<dof_id_type, std::vector<int>> _node_to_uel_map;
 
   /// field initial conditions
   std::vector<FieldIC> _field_ics;
+
+  /// Steps
+  ObjectStore<Step> _step;
 };
 
 /**
@@ -256,25 +279,6 @@ struct AssemblyModel : public Model
 
   /// Assemblies
   std::unique_ptr<Assembly> _assembly;
-};
-
-/**
- * Step block
- */
-struct Step
-{
-  Step(const BlockNode &, Model &) {}
-};
-
-/**
- * Essential boundary condition (Dirichlet)
- */
-struct Boundary
-{
-  Boundary(const OptionNode & option, Model & model);
-
-  /// list of nodes this BC applies to
-  std::vector<dof_id_type> _node_set;
 };
 
 /**
