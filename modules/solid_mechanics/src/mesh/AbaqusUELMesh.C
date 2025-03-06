@@ -12,7 +12,9 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
+#include "libMeshReducedNamespace.h"
 #include <memory>
+#include <string>
 
 registerMooseObject("SolidMechanicsApp", AbaqusUELMesh);
 
@@ -112,12 +114,13 @@ AbaqusUELMesh::instantiateElements()
   for (const auto node_index : index_range(_model->_nodes))
   {
     const auto & [abaqus_id, p, mask] = _model->_nodes[node_index];
+    libmesh_ignore(abaqus_id); // (use extra element id for this?)
 
     // add the point node and element
-    auto * node = _mesh->add_point(p, abaqus_id);
+    auto * node = _mesh->add_point(p, node_index);
     auto node_elem = Elem::build(NODEELEM);
     node_elem->set_node(0) = node;
-    node_elem->set_id() = abaqus_id;
+    node_elem->set_id() = node_index;
     node_elem->subdomain_id() = mask;
     _uel_block_ids.insert(mask);
     _mesh->add_elem(std::move(node_elem));
@@ -147,22 +150,36 @@ AbaqusUELMesh::setupNodeSets()
   BoundaryInfo & boundary_info = _mesh->get_boundary_info();
 
   // Get the BoundaryIDs from the mesh
-  std::vector<BoundaryName> nodeset_names;
+  std::vector<BoundaryName> nodeset_names = {"abaqus_bc_union_boundary"};
   for (const auto & pair : _node_set)
     nodeset_names.push_back(pair.first);
+
   std::vector<boundary_id_type> nodeset_ids =
       MooseMeshUtils::getBoundaryIDs(*_mesh, nodeset_names, true);
 
-  for (const auto & i : index_range(nodeset_names))
+  // add BC nodes to unified set
+  auto add_bc_nodes = [&](const auto & step)
   {
-    // add nodes
-    const auto & set = _node_set[nodeset_names[i]];
-    for (const auto node_id : set)
-      boundary_info.add_node(_mesh->query_node_ptr(node_id), nodeset_ids[i]);
+    std::cout << "Step with " << step._bc_var_node_value_map.size() << " vars with BCs\n";
 
-    // set names
+    for (const auto & node_value_map : step._bc_var_node_value_map)
+      for (const auto node_value : node_value_map.second)
+      {
+        const auto node = _mesh->query_node_ptr(node_value.first);
+        if (!node)
+          mooseError("Node ", node_value.first, " not found\n");
+        boundary_info.add_node(node, nodeset_ids[0]);
+      }
+  };
+
+  for (const auto i : index_range(nodeset_names))
     boundary_info.nodeset_name(nodeset_ids[i]) = nodeset_names[i];
-  }
+
+  add_bc_nodes(*_model);
+  for (const auto & step : _model->_step)
+    add_bc_nodes(step);
+
+  _mesh->set_isnt_prepared();
 }
 
 const Abaqus::UserElement &
@@ -173,38 +190,37 @@ AbaqusUELMesh::getUEL(const std::string & type) const
   mooseError("Unknown UEL type '", type, "'");
 }
 
-// const std::vector<std::size_t> &
-// AbaqusUELMesh::getNodeSet(const std::string & nset) const
-// {
-//   const auto it = _node_set.find(MooseUtils::toUpper(nset));
-//   if (it == _node_set.end())
-//     mooseError("Node set '", nset, "' does not exist.");
-//   return it->second;
-// }
-
-// const std::vector<std::size_t> &
-// AbaqusUELMesh::getElementSet(const std::string & elset) const
-// {
-//   const auto it = _element_set.find(MooseUtils::toUpper(elset));
-//   if (it == _element_set.end())
-//     mooseError("Element set '", elset, "' does not exist.");
-//   return it->second;
-// }
-
 std::string
-AbaqusUELMesh::getVarName(std::size_t id) const
+AbaqusUELMesh::getVarName(const Abaqus::AbaqusID var_id) const
 {
-  static const char coord[] = {'x', 'y', 'z'};
-  if (id < 3)
-    return std::string("disp_") + coord[id];
-  if (id < 6)
-    return std::string("rot_") + coord[id - 3];
+  if (var_id < 1)
+    mooseError("Abaqus variables IDs start at 1");
 
-  return "var_" + Moose::stringify(id + 1);
+  static const char coord[] = {'x', 'y', 'z'};
+  if (var_id <= 3)
+    return std::string("disp_") + coord[var_id - 1];
+  if (var_id <= 6)
+    return std::string("rot_") + coord[var_id - 4];
+
+  return "var_" + Moose::stringify(var_id);
 }
 
 void
 AbaqusUELMesh::addNodeset(BoundaryID id)
 {
   _mesh_nodeset_ids.insert(id);
+}
+
+const std::unordered_map<Abaqus::Index, Real> &
+AbaqusUELMesh::getBCFor(const Abaqus::AbaqusID var_id)
+{
+  // accidental insertion... or should we throw an error
+  return _model->_bc_var_node_value_map[var_id];
+}
+
+const std::unordered_map<Abaqus::Index, Real> &
+AbaqusUELMesh::getBCFor(const Abaqus::AbaqusID var_id, const std::string & step_name)
+{
+  // accidental insertion... or should we throw an error
+  return _model->_step[step_name]._bc_var_node_value_map[var_id];
 }

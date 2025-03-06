@@ -167,13 +167,13 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
     if (abaqus_blocks.count(keyword))
     {
       _current_line++;
-      node._children.push_back(std::move(parseBlock(keyword, line)));
+      node._children.push_back(parseBlock(keyword, line));
     }
 
     else if (abaqus_options.count(keyword))
     {
       _current_line++;
-      node._children.push_back(std::move(parseOption(line)));
+      node._children.push_back(parseOption(line));
     }
 
     else
