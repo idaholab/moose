@@ -59,7 +59,4 @@ protected:
   Real _GBMobility;
   Real _GBmob0;
   const Real _Q;
-
-  /// solid phase order parameters
-  std::vector<NonlinearVariableName> _vals_name;
 };

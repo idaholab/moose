@@ -45,4 +45,8 @@ protected:
 
   const Real _kb;
   const unsigned int _op_num;
+
+  /// solid phase order parameters
+  std::vector<NonlinearVariableName> _vals_name;
+  std::vector<MaterialProperty<RealTensorValue> *> _dDdeta;
 };
