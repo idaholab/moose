@@ -21,7 +21,8 @@ equations (labeled by test variable) with the trial variable solved using them, 
 variable names is the same as the set of trial variable names for a square system.
 
 `MFEMKernel` is a purely virtual base class. Derived classes should override the `createIntegrator`
- method to return an integrator to add to the `EquationSystem`.
+and/or the `createLFIntegrator` methods to return a `BilinearFormIntegrator` and/or a
+`LinearFormIntegrator` to add to the `EquationSystem`.
 
 !if-end!
 
