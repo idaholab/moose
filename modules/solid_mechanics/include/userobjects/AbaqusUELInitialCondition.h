@@ -25,11 +25,15 @@ public:
 
   AbaqusUELInitialCondition(const InputParameters & parameters);
 
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject &) override {}
   virtual void finalize() override {}
 
 protected:
   AbaqusUELMesh * _uel_mesh;
+
+  // prepare IC data in a map for easy retrieval
+  std::unordered_map<Abaqus::Index, std::vector<std::pair<MooseVariableField<Real> *, Real>>>
+      _ic_data;
 };
