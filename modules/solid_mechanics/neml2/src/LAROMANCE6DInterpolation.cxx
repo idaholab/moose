@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "LAROMANCE6DInterpolation.h"
 #include <fstream>
 #include <initializer_list>
@@ -27,7 +36,7 @@ LAROMANCE6DInterpolation::expected_options()
   // JSON
   options.set<std::string>("model_file_name");
   options.set<std::string>("model_file_variable_name");
-  // jit doe snot currently work with this
+  // jit does not currently work with this
   options.set<bool>("jit") = false; // false;
   options.set("jit").suppressed() = true;
   return options;
@@ -46,6 +55,7 @@ LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
   std::string filename = options.get<std::string>("model_file_name");
   std::ifstream model_file(filename.c_str());
   model_file >> _json;
+
   // storing grid points for indexing.
   // these should be stored differently so that they are all read in at once.  The order of this can
   // get messed up easily
@@ -55,6 +65,7 @@ LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
   _cell_grid = json_vector_to_torch("in_cell");
   _wall_grid = json_vector_to_torch("in_wall");
   _env_grid = json_vector_to_torch("in_env");
+
   // Read in grid axes transform enums
   _stress_transform_enum = get_transform_enum(json_to_string("in_stress_transform_type"));
   _temperature_transform_enum = get_transform_enum(json_to_string("in_temperature_transform_type"));
@@ -63,6 +74,7 @@ LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
   _cell_transform_enum = get_transform_enum(json_to_string("in_cell_transform_type"));
   _wall_transform_enum = get_transform_enum(json_to_string("in_wall_transform_type"));
   _env_transform_enum = get_transform_enum(json_to_string("in_env_transform_type"));
+
   // Read in grid axes transform values
   _stress_transform_values = json_to_vector("in_stress_transform_values");
   _temperature_transform_values = json_to_vector("in_temperature_transform_values");
@@ -101,10 +113,10 @@ LAROMANCE6DInterpolation::LAROMANCE6DInterpolation(const OptionSet & options)
 void
 LAROMANCE6DInterpolation::request_AD()
 {
+  // only using first derivatives of out_ep, not out_cell and out_wall
   if (_output_rate_name == "out_ep")
   {
     std::vector<const VariableBase *> inputs = {&_s};
-    // First derivatives
     _output_rate.request_AD(inputs);
   }
 }
@@ -225,30 +237,19 @@ LAROMANCE6DInterpolation::transform_data(const Scalar & data,
   switch (transform_type)
   {
     case TransformEnum::COMPRESS:
-    {
-      Scalar transformed_result = transform_compress(data, param);
-      return transformed_result;
-    }
+      return transform_compress(data, param);
+
     case TransformEnum::DECOMPRESS:
-    {
-      Scalar transformed_result = transform_decompress(data, param);
-      return transformed_result;
-    }
+      return transform_decompress(data, param);
+
     case TransformEnum::LOG10BOUNDED:
-    {
-      Scalar transformed_result = transform_log10_bounded(data, param);
-      return transformed_result;
-    }
+      return transform_log10_bounded(data, param);
+
     case TransformEnum::EXP10BOUNDED:
-    {
-      Scalar transformed_result = transform_exp10_bounded(data, param);
-      return transformed_result;
-    }
+      return transform_exp10_bounded(data, param);
+
     case TransformEnum::MINMAX:
-    {
-      Scalar transformed_result = transform_min_max(data, param);
-      return transformed_result;
-    }
+      return transform_min_max(data, param);
   }
 }
 
@@ -347,36 +348,59 @@ LAROMANCE6DInterpolation::json_vector_to_torch(std::string key)
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
   std::vector<Real> in_data = _json[key].template get<std::vector<Real>>();
-  const long long data_dim = in_data.size();
+  const int64_t data_dim = in_data.size();
   return Scalar(torch::from_blob(in_data.data(), {data_dim}).clone());
 }
 
 Scalar
 LAROMANCE6DInterpolation::json_6Dvector_to_torch(std::string key)
 {
+  using std::vector;
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>> out_data =
-      _json[key]
-          .template get<
-              std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>>>();
+  vector<vector<vector<vector<vector<vector<Real>>>>>> out_data =
+      _json[key].template get<vector<vector<vector<vector<vector<vector<Real>>>>>>>();
+
+  const int64_t sz_l0 = out_data.size();
+  const int64_t sz_l1 = out_data[0].size();
+  const int64_t sz_l2 = out_data[0][0].size();
+  const int64_t sz_l3 = out_data[0][0][0].size();
+  const int64_t sz_l4 = out_data[0][0][0][0].size();
+  const int64_t sz_l5 = out_data[0][0][0][0][0].size();
+
+  auto check_level_size =
+      [](const int64_t current_vec_size, const int64_t sz_level, const std::string & key)
+  {
+    if (current_vec_size != sz_level)
+      throw NEMLException("Incorrect JSON interpolation grid size for '" + key + "'.");
+  };
 
   std::vector<Real> linearize_values;
-  for (auto && level0 : out_data)
-    for (auto && level1 : level0)
-      for (auto && level2 : level1)
-        for (auto && level3 : level2)
-          for (auto && level4 : level3)
-            for (auto && value : level4)
+  check_level_size(out_data.size(), sz_l0, key);
+  for (auto && level1 : out_data)
+  {
+    check_level_size(level1.size(), sz_l1, key);
+    for (auto && level2 : level1)
+    {
+      check_level_size(level2.size(), sz_l2, key);
+      for (auto && level3 : level2)
+      {
+        check_level_size(level3.size(), sz_l3, key);
+        for (auto && level4 : level3)
+        {
+          check_level_size(level4.size(), sz_l4, key);
+          for (auto && level5 : level4)
+          {
+            check_level_size(level5.size(), sz_l5, key);
+            for (auto && value : level5)
               linearize_values.push_back(value);
+          }
+        }
+      }
+    }
+  }
 
-  long long sz_l0 = out_data.size();
-  long long sz_l1 = out_data[0].size();
-  long long sz_l2 = out_data[0][0].size();
-  long long sz_l3 = out_data[0][0][0].size();
-  long long sz_l4 = out_data[0][0][0][0].size();
-  long long sz_l5 = out_data[0][0][0][0][0].size();
   return Scalar(
       torch::from_blob(linearize_values.data(), {sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
           .clone());

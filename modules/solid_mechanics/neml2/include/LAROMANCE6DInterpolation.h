@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "neml2/models/Model.h"
@@ -93,7 +102,7 @@ private:
 
   TransformEnum get_transform_enum(const std::string & name) const;
 
-  /// input transform strings
+  /// input transform enums
   TransformEnum _stress_transform_enum;
   TransformEnum _temperature_transform_enum;
   TransformEnum _plastic_strain_transform_enum;
@@ -116,7 +125,7 @@ private:
   /// output transform enum
   TransformEnum _output_transform_enum;
 
-  /// LAROMANCE transforms for input axis
+  /// LAROMANCE transforms for input axes and output axis
   // @{
   Scalar transform_compress(const Scalar & data, const std::vector<Real> & params) const;
   Scalar transform_decompress(const Scalar & data, const std::vector<Real> & params) const;
