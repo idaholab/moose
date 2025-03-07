@@ -29,7 +29,7 @@ MFEMCurlCurlKernel::MFEMCurlCurlKernel(const InputParameters & parameters)
 }
 
 mfem::BilinearFormIntegrator *
-MFEMCurlCurlKernel::createIntegrator()
+MFEMCurlCurlKernel::createBFIntegrator()
 {
   return new mfem::CurlCurlIntegrator(_coef);
 }

@@ -29,11 +29,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
 
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
-      dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
+      dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_TRUE(lf_integrator != nullptr);
   delete lf_integrator;
 
-  auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
+  auto blf_integrator = integrated_bc.createBFIntegrator();
   ASSERT_TRUE(blf_integrator == nullptr);
   delete blf_integrator;
 }
@@ -59,11 +59,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
 
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
-      dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
+      dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_TRUE(lf_integrator != nullptr);
   delete lf_integrator;
 
-  auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
+  auto blf_integrator = integrated_bc.createBFIntegrator();
   ASSERT_TRUE(blf_integrator == nullptr);
   delete blf_integrator;
 }
@@ -89,11 +89,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
 
   // Test MFEMScalarBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
-      dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
+      dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
   delete lf_integrator;
 
-  auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
+  auto blf_integrator = integrated_bc.createBFIntegrator();
   ASSERT_EQ(blf_integrator, nullptr);
   delete blf_integrator;
 }
@@ -123,12 +123,12 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
 
   // Test MFEMConvectiveHeatFluxBC returns an integrator of the expected type
   auto lf_integrator =
-      dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
+      dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
   delete lf_integrator;
 
   auto blf_integrator =
-      dynamic_cast<mfem::BoundaryMassIntegrator *>(integrated_bc.createBilinearFormIntegrator());
+      dynamic_cast<mfem::BoundaryMassIntegrator *>(integrated_bc.createBFIntegrator());
   ASSERT_NE(blf_integrator, nullptr);
   delete blf_integrator;
 }
@@ -144,12 +144,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
       addObject<MFEMVectorBoundaryIntegratedBC>("MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
-  auto lf_integrator =
-      dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLinearFormIntegrator());
+  auto lf_integrator = dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
   delete lf_integrator;
 
-  auto blf_integrator = bc.createBilinearFormIntegrator();
+  auto blf_integrator = bc.createBFIntegrator();
   ASSERT_EQ(blf_integrator, nullptr);
   delete blf_integrator;
 }
@@ -172,12 +171,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionBoundaryIntegratedBC)
       "MFEMVectorFunctionBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
-  auto lf_integrator =
-      dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLinearFormIntegrator());
+  auto lf_integrator = dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
   delete lf_integrator;
 
-  auto blf_integrator = bc.createBilinearFormIntegrator();
+  auto blf_integrator = bc.createBFIntegrator();
   ASSERT_EQ(blf_integrator, nullptr);
   delete blf_integrator;
 }

@@ -25,7 +25,7 @@ MFEMMassKernel::MFEMMassKernel(const InputParameters & parameters)
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMassKernel::createIntegrator()
+MFEMMassKernel::createBFIntegrator()
 {
   return new mfem::MassIntegrator(_coef);
 }
