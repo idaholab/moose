@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MultiAppMFEMCopyTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
@@ -108,3 +110,5 @@ MultiAppMFEMCopyTransfer::checkSiblingsTransferSupported() const
   else
     mooseError("Number of source and target child apps must match for siblings transfer");
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSimplifiedFESpace.h"
 
@@ -20,3 +22,5 @@ private:
   /// Name of the family of finite element collections to use
   const std::string _fec_type;
 };
+
+#endif

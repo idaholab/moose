@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMSimplifiedFESpace.h"
 #include "MFEMProblem.h"
 
@@ -30,3 +32,5 @@ MFEMSimplifiedFESpace::getProblemDim() const
 {
   return getMFEMProblem().mesh().getMFEMParMesh().Dimension();
 }
+
+#endif

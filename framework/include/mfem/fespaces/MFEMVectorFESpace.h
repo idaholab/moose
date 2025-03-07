@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMSimplifiedFESpace.h"
 
@@ -23,3 +25,5 @@ private:
   /// The number of vector components in the reference space.
   const int _range_dim;
 };
+
+#endif

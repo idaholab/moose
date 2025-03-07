@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMObjectUnitTest.h"
 #include "MFEML2Error.h"
 #include "MFEMVectorL2Error.h"
@@ -70,3 +72,5 @@ TEST_F(MFEMPostprocessorTest, MFEMVectorL2Error)
   _vector_var->ProjectCoefficient(*_mfem_problem->getVectorFunctionCoefficient("vector_ones"));
   EXPECT_LT(l2_pp.getValue(), 1e-12);
 }
+
+#endif

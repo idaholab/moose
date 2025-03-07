@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMScalarFESpace.h"
 
 registerMooseObject("MooseApp", MFEMScalarFESpace);
@@ -28,3 +30,5 @@ MFEMScalarFESpace::getVDim() const
 {
   return 1;
 }
+
+#endif
