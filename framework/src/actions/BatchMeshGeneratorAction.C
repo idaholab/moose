@@ -157,22 +157,35 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
   checkVectorParamsSameLength<std::string, std::vector<std::vector<std::string>>>(
       "batch_vector_input_param_names", "batch_vector_input_param_values");
 
-  // If the corresponding method is used, the number of batch parameters must be the same
+  // At least we want this action to create one mesh generator
+  if (_batch_scalar_input_param_names.empty() && _batch_vector_input_param_names.empty())
+    mooseError("BatchMeshGeneratorAction: batch_scalar_input_param_names and "
+               "batch_vector_input_param_names cannot be empty at the same time.");
+
+  // If the previous check is passed, batch_params_sizes will not be empty
+  // But we need to check if any element of the batch_params_values are empty
   std::set<unsigned int> batch_params_sizes;
-  if (_multi_batch_params_method == MultiBatchParamsMethod::corresponding)
+  for (const auto & unit_batch_scalar_param_values : _batch_scalar_input_param_values)
   {
-    for (const auto & unit_batch_scalar_params : _batch_scalar_input_param_values)
-      batch_params_sizes.emplace(unit_batch_scalar_params.size());
-    for (const auto & unit_batch_vector_params : _batch_vector_input_param_values)
-      batch_params_sizes.emplace(unit_batch_vector_params.size());
-    // The parameters should not be empty
-    if (batch_params_sizes.empty())
-      mooseError("BatchMeshGeneratorAction: batch_scalar_input_param_values and "
-                 "batch_vector_input_param_values cannot be empty.");
-    else if (batch_params_sizes.size() > 1)
-      mooseError("BatchMeshGeneratorAction: batch_scalar_input_param_values and "
-                 "batch_vector_input_param_values must have the same size.");
+    if (unit_batch_scalar_param_values.empty())
+      paramError("batch_scalar_input_param_values",
+                 "this parameter cannot contain empty elements.");
+    batch_params_sizes.emplace(unit_batch_scalar_param_values.size());
   }
+  for (const auto & unit_batch_vector_param_values : _batch_vector_input_param_values)
+  {
+    if (unit_batch_vector_param_values.empty())
+      paramError("batch_vector_input_param_values",
+                 "this parameter cannot contain empty elements.");
+    batch_params_sizes.emplace(unit_batch_vector_param_values.size());
+  }
+
+  // Then for the corresponding method, the sizes of the batch_params_values should be the same
+  if (_multi_batch_params_method == MultiBatchParamsMethod::corresponding &&
+      batch_params_sizes.size() > 1)
+    mooseError("BatchMeshGeneratorAction: elements of batch_scalar_input_param_values and "
+               "batch_vector_input_param_values must have the same size.");
+
   // Decomposed index cannot be used with the corresponding method
   if (_use_decomposed_index && _multi_batch_params_method == MultiBatchParamsMethod::corresponding)
     paramError("use_decomposed_index",
