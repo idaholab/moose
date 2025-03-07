@@ -1,12 +1,9 @@
-# Speeds up the transient if < 1
-cp_water_multiplier = 1e-10
-# Makes the problem more diffusive if > 1
-mu_multiplier = 1e4
+cp_water_multiplier = 5e-2
+mu_multiplier = 1
 
-# Power
 # Real facility uses forced convection to cool the water tank at full power
-# Need to lower power for natural convection so water doesn't boil.
-power = ${fparse 5e4 / 144 * 0.1}
+# Need to lower power for natural convection so concrete doesn't get too hot.
+power = '${fparse 5e4 / 144 / 2}'
 
 # Coupling
 h_water = 600
@@ -111,6 +108,17 @@ h_water = 600
         energy_wall_functors = 'T:${h_water} ${power}'
 
         energy_scaling = 1e-5
+      []
+    []
+    [Turbulence]
+      [mixing-length]
+        block = 'water'
+        turbulence_handling = 'mixing-length'
+        coupled_flow_physics = 'water'
+        fluid_heat_transfer_physics = 'water'
+        system_names = 'flow'
+        mixing_length_walls = 'water_boundary inner_cavity_water'
+        mixing_length_aux_execute_on = 'initial'
       []
     []
   []
@@ -246,16 +254,12 @@ h_water = 600
 
   # Time stepping parameters
   start_time = -1
-  dtmax = '${units 12 h -> s}'
+  end_time = ${units 4 h -> s}
+  dtmax = 100
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
   []
-
-  # Let it develop
-  steady_state_detection = true
-  steady_state_tolerance = 5e-5
-  normalize_solution_diff_norm_by_dt = false
 
   # Solver parameters
   solve_type = NEWTON

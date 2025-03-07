@@ -1,9 +1,9 @@
-cp_water_multiplier = 1e-10
-mu_multiplier = 1e4
+cp_water_multiplier = 5e-2
+mu_multiplier = 1
 
 # Real facility uses forced convection to cool the water tank at full power
-# Need to lower power for natural convection so water doesn't boil.
-power = '${fparse 5e4 / 144 * 0.1}'
+# Need to lower power for natural convection so concrete doesn't get too hot.
+power = '${fparse 5e4 / 144 * 0.5}'
 
 [Mesh]
   [fmg]
@@ -38,6 +38,8 @@ power = '${fparse 5e4 / 144 * 0.1}'
     type = MooseVariableScalar
     family = SCALAR
     order = FIRST
+    # Cleans up console output
+    outputs = none
   []
 []
 
@@ -79,6 +81,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
     block = water
     momentum_component = x
     variable = vel_x
+    characteristic_speed = 0.01
   []
   [water_ins_momentum_advection_y]
     type = INSFVMomentumAdvection
@@ -86,6 +89,7 @@ power = '${fparse 5e4 / 144 * 0.1}'
     block = water
     momentum_component = y
     variable = vel_y
+    characteristic_speed = 0.1
   []
   [water_ins_momentum_diffusion_x]
     type = INSFVMomentumDiffusion
@@ -154,6 +158,42 @@ power = '${fparse 5e4 / 144 * 0.1}'
     coeff = k
     variable = T_fluid
   []
+
+  # Turbulence
+  [water_ins_viscosity_rans_x]
+    type = INSFVMixingLengthReynoldsStress
+    variable = vel_x
+    mixing_length = mixing_length
+    momentum_component = 'x'
+    u = vel_x
+    v = vel_y
+  []
+  [water_ins_viscosity_rans_y]
+    type = INSFVMixingLengthReynoldsStress
+    variable = vel_y
+    mixing_length = mixing_length
+    momentum_component = 'y'
+    u = vel_x
+    v = vel_y
+  []
+  [water_ins_energy_rans]
+    type = WCNSFVMixingLengthEnergyDiffusion
+    variable = T_fluid
+    cp = cp
+    mixing_length = mixing_length
+    schmidt_number = 1
+    u = vel_x
+    v = vel_y
+  []
+[]
+
+[AuxKernels]
+  [mixing_length]
+    type = WallDistanceMixingLengthAux
+    variable = mixing_length
+    walls = 'water_boundary inner_cavity_water'
+    execute_on = 'initial'
+  []
 []
 
 [FunctorMaterials]
@@ -175,6 +215,13 @@ power = '${fparse 5e4 / 144 * 0.1}'
     execute_on = ALWAYS
     outputs = none
     temperature = T_fluid
+  []
+  [total_viscosity]
+    type = MixingLengthTurbulentViscosityFunctorMaterial
+    u = 'vel_x'
+    v = 'vel_y'
+    mixing_length = mixing_length
+    mu = mu
   []
 []
 
@@ -226,6 +273,12 @@ power = '${fparse 5e4 / 144 * 0.1}'
     block = 'water'
     initial_condition = 0
   []
+  [mixing_length]
+    block = 'water'
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
+  []
   # This is the variable that is transferred from the main app
   [T_solid]
     block = 'concrete_hd concrete Al'
@@ -245,21 +298,18 @@ power = '${fparse 5e4 / 144 * 0.1}'
 
   line_search = none
   # Direct solve works for everything small enough
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu NONZERO superlu_dist'
 
   nl_abs_tol = 1e-8
   nl_max_its = 10
   l_max_its = 3
 
-  steady_state_tolerance = 1e-6
-  steady_state_detection = true
-
   start_time = -1
-  dtmax = '${units 12 h -> s}'
+  dtmax = 100
   [TimeStepper]
     type = FunctionDT
-    function = 'if(t<0.1, 0.1, t)'
+    function = 'if(t < 0.1, 0.1, t)'
   []
 []
 
