@@ -177,6 +177,31 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
   if (_use_decomposed_index && _multi_batch_params_method == MultiBatchParamsMethod::corresponding)
     paramError("use_decomposed_index",
                "Decomposed index cannot be used with the corresponding method.");
+  // Check the parameter types are given correctly here so that we do not need to do it when setting
+  // the values.
+  auto set_params = _app.getFactory().getValidParams(_mesh_generator_type);
+  // batch scalar input parameters
+  checkInputParametersTypes(set_params,
+                            "batch_scalar_input_param_names",
+                            _batch_scalar_input_param_names,
+                            _batch_scalar_input_param_types);
+  // fix scalar input parameters
+  checkInputParametersTypes(set_params,
+                            "fixed_scalar_input_param_names",
+                            _fixed_scalar_input_param_names,
+                            _fixed_scalar_input_param_types);
+  // batch vector input parameters
+  checkInputParametersTypes(set_params,
+                            "batch_vector_input_param_names",
+                            _batch_vector_input_param_names,
+                            _batch_vector_input_param_types,
+                            true);
+  // fix vector input parameters
+  checkInputParametersTypes(set_params,
+                            "fixed_vector_input_param_names",
+                            _fixed_vector_input_param_names,
+                            _fixed_vector_input_param_types,
+                            true);
 }
 
 void
@@ -458,31 +483,28 @@ BatchMeshGeneratorAction::setScalarParams(InputParameters & params,
   switch (param_type)
   {
     case (ParameterType::REAL):
-      convertAndSetNumericScalar<Real>(params, param_name, param_value);
+      params.set<Real>(param_name) = MooseUtils::convert<Real>(param_value);
       break;
     case (ParameterType::SHORT):
-      convertAndSetNumericScalar<short>(params, param_name, param_value);
+      params.set<short>(param_name) = MooseUtils::convert<short>(param_value);
       break;
     case (ParameterType::USHORT):
-      convertAndSetNumericScalar<unsigned short>(params, param_name, param_value);
+      params.set<unsigned short>(param_name) = MooseUtils::convert<unsigned short>(param_value);
       break;
     case (ParameterType::INT):
-      convertAndSetNumericScalar<int>(params, param_name, param_value);
+      params.set<int>(param_name) = MooseUtils::convert<int>(param_value);
       break;
     case (ParameterType::UINT):
-      convertAndSetNumericScalar<unsigned int>(params, param_name, param_value);
+      params.set<unsigned int>(param_name) = MooseUtils::convert<unsigned int>(param_value);
       break;
     case (ParameterType::ENUM):
-      if (params.isType<MooseEnum>(param_name))
-        params.set<MooseEnum>(param_name) = param_value;
+      params.set<MooseEnum>(param_name) = param_value;
       break;
     case (ParameterType::STRING):
-      if (params.isType<std::string>(param_name))
-        params.set<std::string>(param_name) = param_value;
+      params.set<std::string>(param_name) = param_value;
       break;
     case (ParameterType::BOOL):
-      if (params.isType<bool>(param_name))
-        hit::toBool(param_value, &params.set<bool>(param_name));
+      hit::toBool(param_value, &params.set<bool>(param_name));
       break;
     default:
       mooseAssert(false,
@@ -514,43 +536,30 @@ BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
       convertAndSetNumericVector<unsigned int>(params, param_name, param_value);
       break;
     case (ParameterType::ENUM):
-      if (params.isType<std::vector<MooseEnum>>(param_name))
-        params.set<MultiMooseEnum>(param_name) = param_value;
+      params.set<MultiMooseEnum>(param_name) = param_value;
       break;
     case (ParameterType::STRING):
-      if (params.isType<std::vector<std::string>>(param_name))
-        params.set<std::vector<std::string>>(param_name) = param_value;
+      params.set<std::vector<std::string>>(param_name) = param_value;
       break;
     case (ParameterType::BOOL):
-      if (params.isType<std::vector<bool>>(param_name))
-      {
-        std::vector<bool> values(param_value.size());
-        std::transform(param_value.begin(),
-                       param_value.end(),
-                       values.begin(),
-                       [](const std::string & val)
-                       {
-                         bool tmp;
-                         hit::toBool(val, &tmp);
-                         return tmp;
-                       });
-        params.set<std::vector<bool>>(param_name) = values;
-      }
+    {
+      std::vector<bool> values(param_value.size());
+      std::transform(param_value.begin(),
+                     param_value.end(),
+                     values.begin(),
+                     [](const std::string & val)
+                     {
+                       bool tmp;
+                       hit::toBool(val, &tmp);
+                       return tmp;
+                     });
+      params.set<std::vector<bool>>(param_name) = values;
       break;
+    }
     default:
       mooseAssert(false,
                   "impossible situation."); // as we use MultiMooseEnum to ensure the type is valid
   }
-}
-
-template <typename T>
-void
-BatchMeshGeneratorAction::convertAndSetNumericScalar(InputParameters & params,
-                                                     const std::string & param_name,
-                                                     const std::string & param_value)
-{
-  if (params.isType<T>(param_name))
-    params.set<T>(param_name) = MooseUtils::convert<T>(param_value);
 }
 
 template <typename T>
@@ -564,6 +573,70 @@ BatchMeshGeneratorAction::convertAndSetNumericVector(InputParameters & params,
                  param_value.end(),
                  values.begin(),
                  [](const std::string & val) { return MooseUtils::convert<T>(val); });
-  if (params.isType<std::vector<T>>(param_name))
-    params.set<std::vector<T>>(param_name) = values;
+  params.set<std::vector<T>>(param_name) = values;
+}
+
+void
+BatchMeshGeneratorAction::checkInputParametersTypes(const InputParameters & params,
+                                                    const std::string & action_input_param_name,
+                                                    const std::vector<std::string> & param_names,
+                                                    const std::vector<ParameterType> & param_types,
+                                                    const bool & is_vector)
+{
+  for (const auto i : index_range(param_names))
+  {
+    switch (param_types[i])
+    {
+      case (ParameterType::REAL):
+        checkInputParameterType<Real>(params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::SHORT):
+        checkInputParameterType<short>(params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::USHORT):
+        checkInputParameterType<unsigned short>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::INT):
+        checkInputParameterType<int>(params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::UINT):
+        checkInputParameterType<unsigned int>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::ENUM):
+        if (is_vector)
+          checkInputParameterType<MultiMooseEnum>(
+              params, action_input_param_name, param_names[i], false);
+        else
+          checkInputParameterType<MooseEnum>(
+              params, action_input_param_name, param_names[i], false);
+        break;
+      case (ParameterType::STRING):
+        checkInputParameterType<std::string>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::BOOL):
+        checkInputParameterType<bool>(params, action_input_param_name, param_names[i], is_vector);
+        break;
+      default:
+        mooseAssert(
+            false,
+            "impossible situation."); // as we use MultiMooseEnum to ensure the type is valid
+    }
+  }
+}
+
+template <typename T>
+void
+BatchMeshGeneratorAction::checkInputParameterType(const InputParameters & params,
+                                                  const std::string & action_input_param_name,
+                                                  const std::string & param_name,
+                                                  const bool & is_vector)
+{
+  if ((is_vector && !params.isType<std::vector<T>>(param_name)) ||
+      (!is_vector && !params.isType<T>(param_name)))
+    paramError(action_input_param_name,
+               "the input parameter, " + param_name + ", has the wrong type. It should be " +
+                   params.type(param_name) + ".");
 }

@@ -105,18 +105,6 @@ protected:
                        const std::vector<std::string> & param_value);
 
   /**
-   * Convert a string to a numeric scalar and set it in the InputParameters object
-   * @param params InputParameters object to set the parameter
-   * @param param_name Name of the parameter to set
-   * @param param_value Value of the parameter to set in string format
-   * @param is_integer Flag to indicate if the parameter is an integer
-   */
-  template <typename T>
-  void convertAndSetNumericScalar(InputParameters & params,
-                                  const std::string & param_name,
-                                  const std::string & param_value);
-
-  /**
    * Convert a vector of strings to a numeric vector and set it in the InputParameters object
    * @param params InputParameters object to set the parameter
    * @param param_name Name of the parameter to set
@@ -127,4 +115,29 @@ protected:
   void convertAndSetNumericVector(InputParameters & params,
                                   const std::string & param_name,
                                   const std::vector<std::string> & param_value);
+  /**
+   * Check the types of the input parameters are valid, otherwise throw an error
+   * @param params InputParameters object to check the parameters
+   * @param action_input_param_name Name of the action input parameter used for error message
+   * @param param_names Names of the parameters to check
+   * @param param_types Types of the parameters to check
+   * @param is_vector Flag to indicate if the parameters are vectors
+   */
+  void checkInputParametersTypes(const InputParameters & params,
+                                 const std::string & action_input_param_name,
+                                 const std::vector<std::string> & param_names,
+                                 const std::vector<ParameterType> & param_types,
+                                 const bool & is_vector = false);
+  /**
+   * Check the type of the input parameter is valid, otherwise throw an error
+   * @param params InputParameters object to check the parameter
+   * @param action_input_param_name Name of the action input parameter used for error message
+   * @param param_name Name of the parameter to check
+   * @param is_vector Flag to indicate if the parameter is a vector
+   */
+  template <typename T>
+  void checkInputParameterType(const InputParameters & params,
+                               const std::string & action_input_param_name,
+                               const std::string & param_name,
+                               const bool & is_vector);
 };

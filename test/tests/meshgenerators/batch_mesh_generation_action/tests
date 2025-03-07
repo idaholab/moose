@@ -55,6 +55,6 @@
       exodiff = 'scalar_enum_test_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should '
+      requirement = 'The system should generate meshes of the same type with variation in one scalar parameter with a MooseEnum type.'
   []
 []
