@@ -73,7 +73,7 @@ MatDiffusionBase<T>::initialSetup()
 
 template <typename T>
 RealGradient
-MatDiffusionBase<T>::computeQpCJacobian()
+MatDiffusionBase<T>::precomputeQpCJacobian()
 {
   return _diffusivity[_qp] * _grad_phi[_j][_qp];
 }
@@ -84,7 +84,7 @@ MatDiffusionBase<T>::precomputeQpJacobian()
 {
   auto sum = _ddiffusivity_dc[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (!_is_coupled)
-    sum += computeQpCJacobian();
+    sum += precomputeQpCJacobian();
 
   return sum;
 }
@@ -98,7 +98,7 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 
   auto sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp];
   if (_v_var == jvar)
-    sum += computeQpCJacobian();
+    sum += precomputeQpCJacobian();
 
   return sum * _grad_test[_i][_qp];
 }
