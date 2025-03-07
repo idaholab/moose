@@ -11,10 +11,6 @@
   []
 []
 
-[Problem]
-  disable_p_refinement_for_families = 'lagrange'
-[]
-
 [Adaptivity]
   switch_h_to_p_refinement = true
   initial_marker = uniform
@@ -78,8 +74,11 @@
 
 [Executioner]
   type = Steady
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
-  csv = true
+  checkpoint = true
+  exodus = true
+  print_mesh_changed_info = true
 []

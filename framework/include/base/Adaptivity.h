@@ -59,8 +59,9 @@ public:
    * adaptivity cycles to perform before the simulation starts and steps indicates the
    * number of adaptivity cycles to run during a steady (not transient) solve.  steps is not used
    * for transient or eigen solves.
+   * p_refinement indicates whether the refinement will be p-refinement or h-refinement.
    */
-  void init(unsigned int steps, unsigned int initial_steps);
+  void init(const unsigned int steps, const unsigned int initial_steps, const bool p_refinement);
 
   /**
    * Set adaptivity parameter
@@ -128,14 +129,6 @@ public:
    * @param flag The flag to recompute markers
    */
   void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
-
-  /**
-   * Indicate whether the kind of adaptivity we're doing is p-refinement
-   * @param doing_p_refinement Whether we're doing p-refinement
-   * @param disable_p_refinement_for_families Families to disable p-refinement for
-   */
-  void doingPRefinement(bool doing_p_refinement,
-                        const MultiMooseEnum & disable_p_refinement_for_families);
 
   /**
    * Adapts the mesh based on the error estimator used

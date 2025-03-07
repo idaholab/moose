@@ -115,6 +115,7 @@
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
 #include "Checkpoint.h"
+#include "AddVariableAction.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -349,6 +350,12 @@ FEProblemBase::validParams()
       false,
       "If we catch an exception during residual/Jacobian evaluaton for which we don't have "
       "specific handling, immediately error instead of allowing the time step to be cut");
+
+  const auto families_enum = AddVariableAction::getNonlinearVariableFamilies();
+  MultiMooseEnum disable_p_refinement_for_families(families_enum.getRawNames());
+  params.addParam<MultiMooseEnum>("disable_p_refinement_for_families",
+                                  disable_p_refinement_for_families,
+                                  "What families we should disable p-refinement for.");
 
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
@@ -6169,6 +6176,25 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_mesh->meshChanged();
 
+  if (_mesh.doingPRefinement())
+  {
+    auto disable_p_refinement_for_families =
+        getParam<MultiMooseEnum>("disable_p_refinement_for_families");
+    if (!isParamSetByUser("disable_p_refinement_for_families"))
+      // If the user has not set this parameter we will set a logicial default
+      disable_p_refinement_for_families =
+          "LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
+    doingPRefinement(disable_p_refinement_for_families);
+
+    if (_displaced_mesh)
+      _displaced_mesh->doingPRefinement(true);
+    if (_displaced_problem)
+    {
+      _displaced_problem->mesh().doingPRefinement(true);
+      _displaced_problem->doingPRefinement(disable_p_refinement_for_families);
+    }
+  }
+
   // do not assemble system matrix for JFNK solve
   for (auto & nl : _nl)
     if (solverParams(nl->number())._type == Moose::ST_JFNK)
@@ -9049,15 +9075,6 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
     mortar_uo->setNormals();
     mortar_uo->reinit();
   }
-}
-
-void
-FEProblemBase::doingPRefinement(const bool doing_p_refinement,
-                                const MultiMooseEnum & disable_p_refinement_for_families)
-{
-  SubProblem::doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
-  if (_displaced_problem)
-    _displaced_problem->doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }
 
 void
