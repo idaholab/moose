@@ -57,7 +57,7 @@ protected:
   virtual void initialSetup() override;
   virtual RealGradient precomputeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-  virtual RealGradient computeQpCJacobian();
+  virtual RealGradient precomputeQpCJacobian();
 
   /// diffusion coefficient derivative w.r.t. the kernel variable
   const MaterialProperty<T> & _ddiffusivity_dc;
