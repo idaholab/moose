@@ -9,18 +9,21 @@
 
 #pragma once
 
-#include "StiffenedGasFluidPropertiesBase.h"
+#include "MooseObjectUnitTest.h"
 
-/**
- * Stiffened gas fluid properties from user-specified parameters.
- */
-class StiffenedGasFluidProperties : public StiffenedGasFluidPropertiesBase
+class SinglePhaseFluidProperties;
+
+class StiffenedGasMatchFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  static InputParameters validParams();
-
-  StiffenedGasFluidProperties(const InputParameters & parameters);
+  StiffenedGasMatchFluidPropertiesTest();
 
 protected:
-  virtual void initialSetupInner() override;
+  void buildObjects();
+
+  const Real _p;
+  const Real _T;
+
+  const SinglePhaseFluidProperties * _fp_ref;
+  SinglePhaseFluidProperties * _fp_sgfit;
 };
