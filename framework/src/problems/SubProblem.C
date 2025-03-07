@@ -1321,38 +1321,32 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 }
 
 void
-SubProblem::doingPRefinement(const bool doing_p_refinement,
-                             const MultiMooseEnum & disable_p_refinement_for_families_enum)
+SubProblem::doingPRefinement(const MultiMooseEnum & disable_p_refinement_for_families_enum)
 {
-  mesh().doingPRefinement(doing_p_refinement);
+  std::vector<FEFamily> disable_families(disable_p_refinement_for_families_enum.size());
+  for (const auto i : index_range(disable_families))
+    disable_families[i] =
+        Utility::string_to_enum<FEFamily>(disable_p_refinement_for_families_enum[i]);
 
-  if (doing_p_refinement)
-  {
-    std::vector<FEFamily> disable_families(disable_p_refinement_for_families_enum.size());
-    for (const auto i : index_range(disable_families))
-      disable_families[i] =
-          Utility::string_to_enum<FEFamily>(disable_p_refinement_for_families_enum[i]);
+  for (const auto tid : make_range(libMesh::n_threads()))
+    for (const auto s : make_range(numNonlinearSystems()))
+      assembly(tid, s).havePRefinement(disable_families);
 
-    for (const auto tid : make_range(libMesh::n_threads()))
-      for (const auto s : make_range(numNonlinearSystems()))
-        assembly(tid, s).havePRefinement(disable_families);
-
-    auto & eq = es();
-    for (const auto family : disable_families)
-      for (const auto i : make_range(eq.n_systems()))
+  auto & eq = es();
+  for (const auto family : disable_families)
+    for (const auto i : make_range(eq.n_systems()))
+    {
+      auto & system = eq.get_system(i);
+      auto & dof_map = system.get_dof_map();
+      for (const auto vg : make_range(system.n_variable_groups()))
       {
-        auto & system = eq.get_system(i);
-        auto & dof_map = system.get_dof_map();
-        for (const auto vg : make_range(system.n_variable_groups()))
-        {
-          const auto & var_group = system.variable_group(vg);
-          if (var_group.type().family == family)
-            dof_map.should_p_refine(vg, false);
-        }
+        const auto & var_group = system.variable_group(vg);
+        if (var_group.type().family == family)
+          dof_map.should_p_refine(vg, false);
       }
+    }
 
-    _have_p_refinement = true;
-  }
+  _have_p_refinement = true;
 }
 
 bool

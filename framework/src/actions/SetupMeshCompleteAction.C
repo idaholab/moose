@@ -13,6 +13,8 @@
 #include "Adaptivity.h"
 #include "MooseApp.h"
 #include "FEProblemBase.h"
+#include "AddVariableAction.h"
+#include "DisplacedProblem.h"
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
@@ -24,11 +26,18 @@ registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "setup_mesh_complete");
 
+registerMooseAction("MooseApp", SetupMeshCompleteAction, "ready_to_init");
+
 InputParameters
 SetupMeshCompleteAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Perform operations on the mesh in preparation for a simulation.");
+  const auto families_enum = AddVariableAction::getNonlinearVariableFamilies();
+  MultiMooseEnum disable_p_refinement_for_families(families_enum.getRawNames());
+  params.addParam<MultiMooseEnum>("disable_p_refinement_for_families",
+                                  disable_p_refinement_for_families,
+                                  "What families we should disable p-refinement for.");
   return params;
 }
 
@@ -109,6 +118,24 @@ SetupMeshCompleteAction::act()
       _mesh->deleteRemoteElements();
       if (_displaced_mesh)
         _displaced_mesh->deleteRemoteElements();
+    }
+  }
+  else if (_current_task == "ready_to_init")
+  {
+    if (_mesh->doingPRefinement())
+    {
+      auto disable_p_refinement_for_families =
+          getParam<MultiMooseEnum>("disable_p_refinement_for_families");
+      if (!isParamSetByUser("disable_p_refinement_for_families"))
+        // If the user has not set this parameter we will set a logicial default
+        disable_p_refinement_for_families =
+            "LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
+      _problem->doingPRefinement(disable_p_refinement_for_families);
+
+      if (_displaced_mesh)
+        _displaced_mesh->doingPRefinement(true);
+      if (_problem->haveDisplaced())
+        _problem->getDisplacedProblem()->doingPRefinement(disable_p_refinement_for_families);
     }
   }
   else
