@@ -36,6 +36,9 @@ MeshOnlyAction::MeshOnlyAction(const InputParameters & params) : Action(params) 
 void
 MeshOnlyAction::act()
 {
+  // Run error checking on input file first before trying to generate a mesh
+  _app.builder().errorCheck(comm(), false, true);
+
   std::string mesh_file = _app.parameters().get<std::string>("mesh_only");
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
