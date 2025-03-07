@@ -22,7 +22,7 @@ variable names is the same as the set of trial variable names for a square syste
 
 `MFEMKernel` is a purely virtual base class. Derived classes should override the `createBFIntegrator`
 and/or the `createLFIntegrator` methods to return a `BilinearFormIntegrator` and/or a
-`LinearFormIntegrator` to add to the `EquationSystem`.
+`LinearFormIntegrator` (respectively) to add to the `EquationSystem`.
 
 !if-end!
 

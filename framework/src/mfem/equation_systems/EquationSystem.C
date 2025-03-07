@@ -428,8 +428,7 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
           std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
-    // Register new kernels map if not present for the test/trial variable
-    // pair
+    // Register new kernels map if not present for the test variable
     if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
     {
       auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
