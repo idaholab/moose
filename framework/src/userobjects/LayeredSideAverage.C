@@ -14,13 +14,13 @@ registerMooseObject("MooseApp", LayeredSideAverage);
 InputParameters
 LayeredSideAverage::validParams()
 {
-  InputParameters params = LayeredSideAverageBase<LayeredSideIntegral>::validParams();
+  InputParameters params = LayeredSideAverageBase<SideIntegralVariableUserObject>::validParams();
   params.addClassDescription("Computes side averages of a variable storing partial sums for the "
                              "specified number of intervals in a direction (x,y,z).");
   return params;
 }
 
 LayeredSideAverage::LayeredSideAverage(const InputParameters & parameters)
-  : LayeredSideAverageBase<LayeredSideIntegral>(parameters)
+  : LayeredSideAverageBase<SideIntegralVariableUserObject>(parameters)
 {
 }

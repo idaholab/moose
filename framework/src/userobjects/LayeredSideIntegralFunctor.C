@@ -14,12 +14,12 @@ registerMooseObject("MooseApp", LayeredSideIntegralFunctor);
 InputParameters
 LayeredSideIntegralFunctor::validParams()
 {
-  InputParameters params = LayeredSideIntegralBase<SideIntegralFunctorUserObject>::validParams();
+  InputParameters params = LayeredIntegralBase<SideIntegralFunctorUserObject>::validParams();
   params.addClassDescription("Computes layered side integrals of a functor.");
   return params;
 }
 
 LayeredSideIntegralFunctor::LayeredSideIntegralFunctor(const InputParameters & parameters)
-  : LayeredSideIntegralBase<SideIntegralFunctorUserObject>(parameters)
+  : LayeredIntegralBase<SideIntegralFunctorUserObject>(parameters)
 {
 }

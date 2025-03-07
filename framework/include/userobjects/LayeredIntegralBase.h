@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "SpatialUserObjectFunctor.h"
 #include "LayeredBase.h"
 #include "InputParameters.h"
 
@@ -16,12 +17,12 @@
  * Base class for computing layered side integrals
  */
 template <typename UserObjectType>
-class LayeredSideIntegralBase : public UserObjectType, public LayeredBase
+class LayeredIntegralBase : public SpatialUserObjectFunctor<UserObjectType>, public LayeredBase
 {
 public:
   static InputParameters validParams();
 
-  LayeredSideIntegralBase(const InputParameters & parameters);
+  LayeredIntegralBase(const InputParameters & parameters);
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.
@@ -44,26 +45,26 @@ protected:
 
 template <typename UserObjectType>
 InputParameters
-LayeredSideIntegralBase<UserObjectType>::validParams()
+LayeredIntegralBase<UserObjectType>::validParams()
 {
-  InputParameters params = UserObjectType::validParams();
+  InputParameters params = SpatialUserObjectFunctor<UserObjectType>::validParams();
   params += LayeredBase::validParams();
   return params;
 }
 
 template <typename UserObjectType>
-LayeredSideIntegralBase<UserObjectType>::LayeredSideIntegralBase(const InputParameters & parameters)
-  : UserObjectType(parameters), LayeredBase(parameters)
+LayeredIntegralBase<UserObjectType>::LayeredIntegralBase(const InputParameters & parameters)
+  : SpatialUserObjectFunctor<UserObjectType>(parameters), LayeredBase(parameters)
 {
   if (parameters.isParamValid("block") && parameters.isParamValid("boundary"))
-    mooseError("Both block and boundary cannot be specified in LayeredSideIntegral. If you want to "
-               "define the geometric bounds of the layers from a specified block set "
+    mooseError("Both block and boundary cannot be specified for a layered integral user object. If "
+               "you want to define the geometric bounds of the layers from a specified block set "
                "layer_bounding_block instead.");
 }
 
 template <typename UserObjectType>
 void
-LayeredSideIntegralBase<UserObjectType>::initialize()
+LayeredIntegralBase<UserObjectType>::initialize()
 {
   UserObjectType::initialize();
   LayeredBase::initialize();
@@ -71,7 +72,7 @@ LayeredSideIntegralBase<UserObjectType>::initialize()
 
 template <typename UserObjectType>
 void
-LayeredSideIntegralBase<UserObjectType>::execute()
+LayeredIntegralBase<UserObjectType>::execute()
 {
   const auto integral_value = computeIntegral();
 
@@ -82,14 +83,14 @@ LayeredSideIntegralBase<UserObjectType>::execute()
 
 template <typename UserObjectType>
 void
-LayeredSideIntegralBase<UserObjectType>::finalize()
+LayeredIntegralBase<UserObjectType>::finalize()
 {
   LayeredBase::finalize();
 }
 
 template <typename UserObjectType>
 void
-LayeredSideIntegralBase<UserObjectType>::threadJoin(const UserObject & y)
+LayeredIntegralBase<UserObjectType>::threadJoin(const UserObject & y)
 {
   UserObjectType::threadJoin(y);
   LayeredBase::threadJoin(y);
@@ -97,7 +98,7 @@ LayeredSideIntegralBase<UserObjectType>::threadJoin(const UserObject & y)
 
 template <typename UserObjectType>
 const std::vector<Point>
-LayeredSideIntegralBase<UserObjectType>::spatialPoints() const
+LayeredIntegralBase<UserObjectType>::spatialPoints() const
 {
   std::vector<Point> points;
 

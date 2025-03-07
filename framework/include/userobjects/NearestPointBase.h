@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "ElementIntegralVariableUserObject.h"
+#include "SpatialUserObjectFunctor.h"
 #include "Enumerate.h"
 #include "DelimitedFileReader.h"
 #include "LayeredBase.h"
@@ -26,7 +26,7 @@ class UserObject;
  * closest to each one of those points.
  */
 template <typename UserObjectType, typename BaseType>
-class NearestPointBase : public BaseType
+class NearestPointBase : public SpatialUserObjectFunctor<BaseType>
 {
 public:
   static InputParameters validParams();
@@ -90,7 +90,7 @@ template <typename UserObjectType, typename BaseType>
 InputParameters
 NearestPointBase<UserObjectType, BaseType>::validParams()
 {
-  InputParameters params = BaseType::validParams();
+  InputParameters params = SpatialUserObjectFunctor<BaseType>::validParams();
 
   params.addParam<std::vector<Point>>("points",
                                       "Computations will be lumped into values at these points.");
@@ -115,7 +115,7 @@ NearestPointBase<UserObjectType, BaseType>::validParams()
 
 template <typename UserObjectType, typename BaseType>
 NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParameters & parameters)
-  : BaseType(parameters),
+  : SpatialUserObjectFunctor<BaseType>(parameters),
     _dist_norm(this->template getParam<MooseEnum>("dist_norm")),
     _axis(this->template getParam<MooseEnum>("axis"))
 {

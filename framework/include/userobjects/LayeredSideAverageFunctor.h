@@ -10,12 +10,12 @@
 #pragma once
 
 #include "LayeredSideAverageBase.h"
-#include "LayeredSideIntegralFunctor.h"
+#include "SideIntegralFunctorUserObject.h"
 
 /**
  * Computes layered side averages of a functor.
  */
-class LayeredSideAverageFunctor : public LayeredSideAverageBase<LayeredSideIntegralFunctor>
+class LayeredSideAverageFunctor : public LayeredSideAverageBase<SideIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();
