@@ -352,12 +352,12 @@ EquationSystem::BuildMixedBilinearForms()
       auto trial_var_name = _test_var_names.at(j);
       auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
-
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
       if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(trial_var_name) &&
           test_var_name != trial_var_name)
       {
+        mblf->SetAssemblyLevel(_assembly_level);
         // Apply all mixed kernels with this test/trial pair
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
             trial_var_name, test_var_name, mblf, _kernels_map);
