@@ -61,11 +61,16 @@ diff=1.1
 []
 
 [Materials]
-  [mat]
+  [mat_grad_u]
     type = ADCoupledGradientMaterial
-    mat_prop = 'mat_u'
     grad_mat_prop = 'mat_grad_u'
     u = v
+  []
+  [mat_u]
+    type = ADParsedMaterial
+    property_name = mat_u
+    coupled_variables = v
+    expression = v
   []
 []
 
