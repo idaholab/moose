@@ -71,6 +71,16 @@ MooseVariableBase::validParams()
                                     "nl0",
                                     "If this variable is a solver variable, this is the "
                                     "solver system to which it should be added.");
+  params.addParam<bool>(
+      "disable_p_refinement",
+      "True to disable p-refinement for this variable. Note that because this happens on the "
+      "family basis, users need to have this flag consistently for all variables in the same "
+      "family. Currently MOOSE disable p-refinement for variables in the following families by "
+      "default: LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN and "
+      "RATIONAL_BERNSTEIN.");
+
+  params.addParamNamesToGroup("scaling eigen", "Advanced");
+
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
   params.transferParam<std::vector<Real>>(AddVariableAction::validParams(), "initial_condition");
   params.transferParam<std::string>(AddVariableAction::validParams(), "initial_from_file_var");

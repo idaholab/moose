@@ -55,7 +55,7 @@ LevelSetMeshRefinementTransfer::initialSetup()
       Adaptivity & adapt = to_problem.adaptivity();
       adapt.setMarkerVariableName(to_var.name());
       adapt.setCyclesPerStep(from_problem.adaptivity().getCyclesPerStep());
-      adapt.init(1, 0);
+      adapt.init(1, 0, false);
       adapt.setUseNewSystem();
       adapt.setMaxHLevel(from_problem.adaptivity().getMaxHLevel());
       adapt.setAdaptivityOn(false);

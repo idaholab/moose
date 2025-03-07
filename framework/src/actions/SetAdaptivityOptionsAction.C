@@ -10,7 +10,6 @@
 #include "SetAdaptivityOptionsAction.h"
 #include "FEProblem.h"
 #include "RelationshipManager.h"
-#include "AddVariableAction.h"
 
 #include "libmesh/fe.h"
 
@@ -45,11 +44,6 @@ commonAdaptivityParams()
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
   params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
-  const auto families_enum = AddVariableAction::getNonlinearVariableFamilies();
-  MultiMooseEnum disable_p_refinement_for_families(families_enum.getRawNames());
-  params.addParam<MultiMooseEnum>("disable_p_refinement_for_families",
-                                  disable_p_refinement_for_families,
-                                  "What families we should disable p-refinement for.");
   return params;
 }
 }
@@ -148,22 +142,14 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
 
-    adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
+    adapt.init(getParam<unsigned int>("steps"),
+               getParam<unsigned int>("initial_steps"),
+               getParam<bool>("switch_h_to_p_refinement"));
     adapt.setUseNewSystem();
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
     adapt.setInterval(getParam<unsigned int>("interval"));
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
-    if (getParam<bool>("switch_h_to_p_refinement"))
-    {
-      auto disable_p_refinement_for_families =
-          getParam<MultiMooseEnum>("disable_p_refinement_for_families");
-      if (!isParamSetByUser("disable_p_refinement_for_families"))
-        // If the user has not set this parameter we will set a logicial default
-        disable_p_refinement_for_families =
-            "LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
-      adapt.doingPRefinement(true, disable_p_refinement_for_families);
-    }
   }
 }

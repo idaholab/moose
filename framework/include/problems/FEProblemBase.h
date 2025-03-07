@@ -2373,10 +2373,6 @@ public:
    */
   void clearCurrentJacobianMatrixTags() {}
 
-  using SubProblem::doingPRefinement;
-  virtual void doingPRefinement(bool doing_p_refinement,
-                                const MultiMooseEnum & disable_p_refinement_for_families) override;
-
   virtual void needFV() override { _have_fv = true; }
   virtual bool haveFV() const override { return _have_fv; }
 

@@ -4857,14 +4857,11 @@ Assembly::helpersRequestData()
 }
 
 void
-Assembly::havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for_families)
+Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
 {
   if (_have_p_refinement)
     // Already performed tasks for p-refinement
     return;
-
-  const std::unordered_set<FEFamily> disable_families(disable_p_refinement_for_families.begin(),
-                                                      disable_p_refinement_for_families.end());
 
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   const FEType helper_type(helper_order, LAGRANGE);

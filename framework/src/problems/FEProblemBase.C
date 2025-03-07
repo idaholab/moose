@@ -2787,8 +2787,9 @@ FEProblemBase::addVariable(const std::string & var_type,
 {
   parallel_object_only();
 
-  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+  auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
+  auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
+  auto fe_type = FEType(order, family);
 
   const auto active_subdomains_vector =
       _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
@@ -2810,6 +2811,8 @@ FEProblemBase::addVariable(const std::string & var_type,
     _displaced_problem->addVariable(var_type, var_name, params, solver_system_number);
 
   _solver_var_to_sys_num[var_name] = solver_system_number;
+
+  markFamilyPRefinement(params);
 }
 
 std::pair<bool, unsigned int>
@@ -3068,8 +3071,9 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
 {
   parallel_object_only();
 
-  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+  auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
+  auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
+  auto fe_type = FEType(order, family);
 
   const auto active_subdomains_vector =
       _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
@@ -3087,6 +3091,8 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
     _displaced_problem->addAuxVariable(var_type, var_name, params);
+
+  markFamilyPRefinement(params);
 }
 
 void
@@ -3125,6 +3131,8 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
   _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
+
+  markFamilyPRefinement(params);
 }
 
 void
@@ -3155,6 +3163,8 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
   _aux->addVariable("ArrayMooseVariable", var_name, params);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable("ArrayMooseVariable", var_name, params);
+
+  markFamilyPRefinement(params);
 }
 
 void
@@ -6170,6 +6180,13 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_mesh->meshChanged();
 
+  if (_mesh.doingPRefinement())
+  {
+    preparePRefinement();
+    if (_displaced_problem)
+      _displaced_problem->preparePRefinement();
+  }
+
   // do not assemble system matrix for JFNK solve
   for (auto & nl : _nl)
     if (solverParams(nl->number())._type == Moose::ST_JFNK)
@@ -9050,15 +9067,6 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
     mortar_uo->setNormals();
     mortar_uo->reinit();
   }
-}
-
-void
-FEProblemBase::doingPRefinement(const bool doing_p_refinement,
-                                const MultiMooseEnum & disable_p_refinement_for_families)
-{
-  SubProblem::doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
-  if (_displaced_problem)
-    _displaced_problem->doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }
 
 void
