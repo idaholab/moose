@@ -68,12 +68,12 @@ by [!cite](dalen1979).
 The residual at the downwind nodes is determined by conserving mass.
 Specifically, let
 \begin{equation}
-I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \textrm{and}\ \ \
+I_{\mathrm{up}} = \sum_{I_{a}\geq 0} m_a I_{a} \ \ \ \textrm{and}\ \ \
 I_{\mathrm{down}} = -\sum_{I_{a}<0} I_{a} \ .
 \end{equation}
 Then
 \begin{equation}
-R_{a} = m_a I_{a}\frac{I_{\mathrm{up}}}{I_{\mathrm{down}}}
+R_{a} = I_{a}\frac{I_{\mathrm{up}}}{I_{\mathrm{down}}}
 \ \ \ \textrm{for}\ \ \ I_{a}<0 \ .
 \end{equation}
 Then $\sum_{a} R_{a} = 0$ as required by mass conservation within the element (which originates from $\sum_{a} \psi_{a} = 1$).
