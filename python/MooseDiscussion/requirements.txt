@@ -1,0 +1,7 @@
+sentence-transformers
+numpy
+pandas
+llama_index
+llama-index-embeddings-huggingface
+pathlib
+certifi
