@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "Postprocessor.h"
 #include "MFEMGeneralUserObject.h"
@@ -22,3 +24,5 @@ public:
    */
   virtual void finalize() override {}
 };
+
+#endif

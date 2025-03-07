@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMAuxKernel.h"
 #include "MFEMProblem.h"
@@ -21,3 +23,5 @@ MFEMAuxKernel::MFEMAuxKernel(const InputParameters & parameters)
 {
   _result_var = 0.0;
 }
+
+#endif

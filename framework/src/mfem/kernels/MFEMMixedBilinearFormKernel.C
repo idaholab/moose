@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMMixedBilinearFormKernel.h"
 
 InputParameters
@@ -28,3 +30,5 @@ MFEMMixedBilinearFormKernel::getTrialVariableName() const
 {
   return _trial_var_name;
 }
+
+#endif

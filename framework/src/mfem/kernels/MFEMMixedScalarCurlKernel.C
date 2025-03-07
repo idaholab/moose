@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMProblem.h"
 
@@ -28,3 +30,5 @@ MFEMMixedScalarCurlKernel::createIntegrator()
 {
   return new mfem::MixedScalarCurlIntegrator(_coef);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMPostprocessor.h"
 
 InputParameters
@@ -12,3 +14,5 @@ MFEMPostprocessor::MFEMPostprocessor(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters), Postprocessor(this)
 {
 }
+
+#endif

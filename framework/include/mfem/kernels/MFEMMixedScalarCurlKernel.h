@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
@@ -20,3 +22,5 @@ protected:
   std::string _coef_name;
   mfem::Coefficient & _coef;
 };
+
+#endif

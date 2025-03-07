@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMCurlAux.h"
 
@@ -37,3 +39,5 @@ MFEMCurlAux::execute()
   _result_var = 0.0;
   _curl.AddMult(_source_var, _result_var, _scale_factor);
 }
+
+#endif

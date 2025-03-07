@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEML2Error.h"
 #include "MFEMProblem.h"
 
@@ -40,3 +42,5 @@ MFEML2Error::getValue() const
 {
   return _var.ComputeL2Error(*_coeff);
 }
+
+#endif

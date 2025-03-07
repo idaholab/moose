@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMFESpace.h"
 
@@ -27,3 +29,5 @@ private:
   /// The number of degrees of freedom per basis function
   const int _vdim;
 };
+
+#endif

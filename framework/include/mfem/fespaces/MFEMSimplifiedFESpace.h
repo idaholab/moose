@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMFESpace.h"
 
@@ -18,3 +20,5 @@ protected:
   /// reference elements in the mesh).
   int getProblemDim() const;
 };
+
+#endif
