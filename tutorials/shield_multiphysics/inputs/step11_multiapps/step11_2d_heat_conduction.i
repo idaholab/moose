@@ -1,4 +1,6 @@
-power = '${fparse 5e4 / 144 * 0.1}'
+# Real facility uses forced convection to cool the water tank at full power
+# Need to lower power for natural convection so concrete doesn't get too hot.
+power = '${fparse 5e4 / 144 * 0.5}'
 
 [Mesh]
   [fmg]
@@ -86,11 +88,9 @@ power = '${fparse 5e4 / 144 * 0.1}'
 [Executioner]
   # For pseudo-transient
   type = Transient
-  steady_state_detection = true
-  steady_state_tolerance = 5e-5
-  normalize_solution_diff_norm_by_dt = false
   start_time = -1
-  dtmax = '${units 12 h -> s}'
+  end_time = ${units 4 h -> s}
+  dtmax = 100
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0.1, 0.1, t)'
@@ -124,6 +124,8 @@ power = '${fparse 5e4 / 144 * 0.1}'
 
     input_files = step11_2d_fluid.i
     execute_on = 'TIMESTEP_END'
+
+    # Pass in parameter values as if from command line
     cli_args = 'power=${power}'
   []
   [detectors]
@@ -137,6 +139,9 @@ power = '${fparse 5e4 / 144 * 0.1}'
 
     # compute the global temperature first
     execute_on = 'TIMESTEP_END'
+
+    # Pass in parameter values as if from command line
+    cli_args = 'Outputs/console=false'
   []
 []
 

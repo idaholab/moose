@@ -35,7 +35,7 @@ Three inputs representing each region/physics:
 2. Thermal fluids: `step11_2d_fluid.i`
 3. Sensor response: `step11_local.i`
 
-!media shield_multiphysics/results/step11_flow.png
+!media shield_multiphysics/results/step11_flow.png style=width:55%;margin-left:auto;margin-right:auto;display:block
 
 !---
 

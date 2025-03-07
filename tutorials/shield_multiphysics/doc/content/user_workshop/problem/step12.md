@@ -55,6 +55,14 @@ Defines both the kernels and the boundary conditions.
 
 !---
 
+## Step 12: Fluid Turbulence Modeling Physics
+
+[Physics/NavierStokes/Turbulence](Physics/NavierStokes/Turbulence/index.md)
+
+!listing step12_physics/step12.i block=Physics/NavierStokes/Turbulence
+
+!---
+
 ## Step 12: Setting up a multi-system simulation
 
 First declare the names of the systems to use in the [Problem](syntax/Problem/index.md)
