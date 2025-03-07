@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include <vector>
 
@@ -33,3 +35,5 @@ protected:
 
   void checkSiblingsTransferSupported() const override;
 };
+
+#endif

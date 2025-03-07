@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "gtest/gtest.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
@@ -169,3 +171,5 @@ TEST(CheckData, NLDiffusionTest)
 
   EXPECT_NEAR(u1.Norml2(), 0, 1e-5);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMKernel.h"
 
@@ -20,3 +22,5 @@ protected:
   // Name of the trial variable that the kernel is applied to.
   std::string _trial_var_name;
 };
+
+#endif

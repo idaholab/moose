@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "MFEMAuxKernel.h"
@@ -27,3 +29,5 @@ protected:
   // Divergence operator
   mfem::common::ParDiscreteDivOperator _div;
 };
+
+#endif

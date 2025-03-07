@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "gtest/gtest.h"
 
 #include "MFEMMesh.h"
@@ -238,3 +240,5 @@ INSTANTIATE_TEST_CASE_P(
                     VectorFESpaceTest::makeParam("ref-square.mesh", "ND", 1, 1, "", -1),
                     VectorFESpaceTest::makeParam("ref-cube.mesh", "ND", 0, 1, "", -1),
                     VectorFESpaceTest::makeParam("ref-cube.mesh", "ND", 5, 2, "", -1)));
+
+#endif

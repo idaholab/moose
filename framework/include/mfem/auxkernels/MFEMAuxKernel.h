@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
@@ -24,3 +26,5 @@ protected:
   /// Reference to result gridfunction.
   mfem::ParGridFunction & _result_var;
 };
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMGenericFESpace.h"
 #include "MFEMProblem.h"
 
@@ -34,3 +36,5 @@ MFEMGenericFESpace::getVDim() const
 {
   return _vdim;
 }
+
+#endif

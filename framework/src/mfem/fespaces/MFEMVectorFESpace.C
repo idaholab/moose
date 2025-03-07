@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMVectorFESpace.h"
 
 registerMooseObject("MooseApp", MFEMVectorFESpace);
@@ -55,3 +57,5 @@ MFEMVectorFESpace::getVDim() const
     return 1;
   }
 }
+
+#endif

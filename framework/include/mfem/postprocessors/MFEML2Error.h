@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 #include "MFEMPostprocessor.h"
 #include "MFEMGeneralUserObject.h"
@@ -26,3 +28,5 @@ private:
   std::shared_ptr<mfem::Coefficient> _coeff;
   mfem::GridFunction & _var;
 };
+
+#endif
