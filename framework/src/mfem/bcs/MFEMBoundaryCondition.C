@@ -16,7 +16,7 @@ MFEMBoundaryCondition::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
       {"-1"},
-      "The list of boundaries (ids or names) from the mesh where this boundary condition applies. "
+      "The list of boundaries (ids) from the mesh where this boundary condition applies. "
       "Defaults to applying BC on all boundaries.");
   params.addParam<VariableName>("variable", "Variable on which to apply the boundary condition");
   return params;

@@ -19,7 +19,7 @@ public:
                                   "Variable labelling the weak form this kernel is added to");
     params.addParam<std::vector<SubdomainName>>("block",
                                                 {},
-                                                "The list of blocks (ids or names) that this "
+                                                "The list of blocks (ids) that this "
                                                 "object will be applied to. Leave empty to apply "
                                                 "to all blocks.");
     return params;
