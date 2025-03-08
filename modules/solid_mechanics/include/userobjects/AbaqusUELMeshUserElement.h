@@ -135,14 +135,14 @@ protected:
 
   /// stateful data
   int _nstatev;
-  std::array<std::unordered_map<Abaqus::AbaqusID, std::vector<Real>>, 2> _statev;
-  std::size_t _statev_index_current;
-  std::size_t _statev_index_old;
+  std::array<std::unordered_map<Abaqus::AbaqusID, std::vector<Real>>, 2> & _statev;
+  std::size_t & _statev_index_current;
+  std::size_t & _statev_index_old;
 
   /// energy data
   const bool _use_energy;
-  std::map<dof_id_type, std::array<Real, 8>> _energy;
-  std::map<dof_id_type, std::array<Real, 8>> _energy_old;
+  std::map<dof_id_type, std::array<Real, 8>> & _energy;
+  std::map<dof_id_type, std::array<Real, 8>> & _energy_old;
 
   /// timestep scaling factor
   Real _pnewdt;
