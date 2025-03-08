@@ -86,7 +86,7 @@ public:
 
   // Coupling with Components //
   /// Get a component with the requested name
-  const ActionComponent & getActionComponent(const ComponentName & comp_name);
+  const ActionComponent & getActionComponent(const ComponentName & comp_name) const;
   /// Check that the component is of the desired type
   template <typename T>
   void checkComponentType(const ActionComponent & component) const;
@@ -105,8 +105,8 @@ protected:
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  virtual Factory & getFactory() { return _factory; }
-  virtual Factory & getFactory() const { return _factory; }
+  Factory & getFactory() { return _factory; }
+  Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem()
@@ -144,6 +144,8 @@ protected:
 
   /// Check whether a variable already exists
   bool variableExists(const VariableName & var_name, bool error_if_aux) const;
+  /// Check whether a variable already exists and is a solver variable
+  bool solverVariableExists(const VariableName & var_name) const;
 
   /// Get the solver system for this variable index. The index should be the index of the variable in solver
   /// var_names (currently _solver_var_names) vector
@@ -201,6 +203,8 @@ private:
   virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
+  /// Additional checks performed near the end of the setup phase
+  virtual void checkIntegrity() const {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type

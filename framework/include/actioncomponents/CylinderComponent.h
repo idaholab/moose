@@ -11,12 +11,19 @@
 
 // MOOSE includes
 #include "ActionComponent.h"
-#include "PhysicsComponentBase.h"
+#include "ComponentPhysicsInterface.h"
+#include "ComponentMaterialPropertyInterface.h"
+#include "ComponentInitialConditionInterface.h"
+#include "ComponentBoundaryConditionInterface.h"
 
 /**
  * Cylinder on which one can define a Physics. The mesh is automatically created
  */
-class CylinderComponent : public virtual ActionComponent, public PhysicsComponentBase
+class CylinderComponent : public virtual ActionComponent,
+                          public ComponentPhysicsInterface,
+                          public ComponentMaterialPropertyInterface,
+                          public ComponentInitialConditionInterface,
+                          public ComponentBoundaryConditionInterface
 {
 public:
   static InputParameters validParams();
@@ -25,6 +32,7 @@ public:
 protected:
   virtual void addMeshGenerators() override;
   virtual void setupComponent() override;
+  virtual void checkIntegrity() override;
 
   /// Radius of the cylinder
   const Real _radius;

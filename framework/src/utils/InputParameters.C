@@ -780,7 +780,7 @@ InputParameters::hasDefault(const std::string & param_name) const
   else if (isParamSetByAddParam(name))
     return true;
   else if (isParamValid(name))
-    mooseError("No way to know if the parameter", param_name, "has a default");
+    mooseError("No way to know if the parameter '", param_name, "' has a default");
   else
     return false;
 }

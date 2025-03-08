@@ -5608,6 +5608,16 @@ FEProblemBase::hasVariable(const std::string & var_name) const
   return false;
 }
 
+bool
+FEProblemBase::hasSolverVariable(const std::string & var_name) const
+{
+  for (auto & sys : _solver_systems)
+    if (sys->hasVariable(var_name))
+      return true;
+
+  return false;
+}
+
 const MooseVariableFieldBase &
 FEProblemBase::getVariable(const THREAD_ID tid,
                            const std::string & var_name,
@@ -8207,10 +8217,14 @@ FEProblemBase::checkProblemIntegrity()
         std::copy(local_mesh_subs.begin(),
                   local_mesh_subs.end(),
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
+        /// vector is necessary to get the subdomain names
+        std::vector<SubdomainID> local_mesh_subs_vec(local_mesh_subs.begin(),
+                                                     local_mesh_subs.end());
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
                    extra_subdomain_ids.str() +
-                   "\nWhen ANY mesh block contains a Material object, "
+                   "(names: " + Moose::stringify(_mesh.getSubdomainNames(local_mesh_subs_vec)) +
+                   ")\nWhen ANY mesh block contains a Material object, "
                    "all blocks must contain a Material object.\n");
       }
     }

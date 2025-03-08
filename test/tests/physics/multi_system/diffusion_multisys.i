@@ -30,6 +30,7 @@
         source_functor = 2
         system_names = 'sys2'
         variable_name = 'v'
+        diffusivity_functor = '1'
 
         dirichlet_boundaries = 'left_to_1 right_to_1 top_to_1 bottom_to_1'
         boundary_values = '2 3 4 5'

@@ -12,14 +12,22 @@
 #include "RotationMatrix.h"
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
+// CylinderComponent is an example of ComponentPhysicsInterface
 registerMooseAction("MooseApp", CylinderComponent, "init_component_physics");
+// CylinderComponent is an example of ComponentMaterialPropertyInterface
+registerMooseAction("MooseApp", CylinderComponent, "add_material");
+// CylinderComponent is an example of ComponentInitialConditionInterface
+registerMooseAction("MooseApp", CylinderComponent, "check_integrity");
 registerActionComponent("MooseApp", CylinderComponent);
 
 InputParameters
 CylinderComponent::validParams()
 {
   InputParameters params = ActionComponent::validParams();
-  params += PhysicsComponentBase::validParams();
+  params += ComponentPhysicsInterface::validParams();
+  params += ComponentMaterialPropertyInterface::validParams();
+  params += ComponentInitialConditionInterface::validParams();
+  params += ComponentBoundaryConditionInterface::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -43,7 +51,10 @@ CylinderComponent::validParams()
 
 CylinderComponent::CylinderComponent(const InputParameters & params)
   : ActionComponent(params),
-    PhysicsComponentBase(params),
+    ComponentPhysicsInterface(params),
+    ComponentMaterialPropertyInterface(params),
+    ComponentInitialConditionInterface(params),
+    ComponentBoundaryConditionInterface(params),
     _radius(getParam<Real>("radius")),
     _height(getParam<Real>("length"))
 {
@@ -126,4 +137,11 @@ CylinderComponent::setupComponent()
 {
   if (_dimension == 2)
     _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
+}
+
+void
+CylinderComponent::checkIntegrity()
+{
+  ComponentInitialConditionInterface::checkIntegrity();
+  ComponentBoundaryConditionInterface::checkIntegrity();
 }

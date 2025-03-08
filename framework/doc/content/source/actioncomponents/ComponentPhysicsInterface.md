@@ -1,14 +1,14 @@
-# PhysicsComponentBase
+# ComponentPhysicsInterface
 
-The `PhysicsComponentBase` is a base class designed to facilitate the use of [Physics](Physics/index.md)
+The `ComponentPhysicsInterface` is a base class designed to facilitate the use of [Physics](Physics/index.md)
 by an [ActionComponent.md]. It offers:
 
 - a [!param](/ActionComponents/CylinderComponent/physics) parameter in which the user lists the [Physics](Physics/index.md)
   active on the component.
-- a default implementation of `initializeComponentPhysics()`, which simply adds the component to the `Physics`.
+- a default implementation of `addPhysics()`, which simply adds the component to the `Physics`.
   This implementation may be overriden in derived classes.
 
-An [ActionComponent.md] inheriting `PhysicsComponentBase` must be registered to the `init_component_physics`
+An [ActionComponent.md] inheriting `ComponentPhysicsInterface` must be registered to the `init_component_physics`
 task. For example,
 
 !listing framework/src/actioncomponents/CylinderComponent.C start=registerMooseAction end=InputParameters

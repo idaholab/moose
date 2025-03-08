@@ -12,9 +12,10 @@
 // MOOSE includes
 #include "Action.h"
 #include "ActionWarehouse.h"
+#include "InputParametersChecksUtils.h"
 
 class PhysicsBase;
-class FEProblem;
+class FEProblemBase;
 
 #define registerActionComponent(app_name, component_name)                                          \
   registerMooseAction(app_name, component_name, "list_component")
@@ -22,7 +23,7 @@ class FEProblem;
 /**
  * Base class for components that are defined using an action
  */
-class ActionComponent : public Action
+class ActionComponent : public Action, public InputParametersChecksUtils<ActionComponent>
 {
 public:
   static InputParameters validParams();
@@ -46,10 +47,10 @@ public:
   };
 
   /// Return the component volume
-  virtual Real volume() const { mooseError("Not implemented"); }
+  virtual Real volume() const { mooseError("Volume routine is not implemented"); }
 
   /// Return the component outer boundary area
-  virtual Real outerSurfaceArea() const { mooseError("Not implemented"); }
+  virtual Real outerSurfaceArea() const { mooseError("Outer surface area is not implemented"); }
 
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
@@ -61,11 +62,16 @@ protected:
   virtual void setupComponent() {}
 
   // These routines can help define a component that also defines a Physics
+  /// Used to add variables on a component
   virtual void addSolverVariables() {}
-
   /// Used to add one or more Physics to be active on the component.
   /// We recommend using the PhysicsComponentInterface instead of overriding this directly
   virtual void addPhysics() {}
+  /// Used to add materials or functor materials on a component
+  virtual void addMaterials() {}
+  /// Used for various checks notably:
+  /// - that all ICs in a ComponentInitialConditionInterface are used
+  virtual void checkIntegrity() {}
 
   /// Use this if registering a new task to the derived ActionComponent
   virtual void actOnAdditionalTasks() {}
@@ -78,11 +84,14 @@ protected:
   void checkRequiredTasks() const;
 
   /// Get problem from action warehouse
-  FEProblem & getProblem()
+  FEProblemBase & getProblem()
   {
-    mooseAssert(_awh.problem().get(), "There should be a problem");
-    return *_awh.problem().get();
+    mooseAssert(_awh.problemBase().get(), "There should be a problem");
+    return *_awh.problemBase().get();
   }
+
+  /// Get the factory to build (often physics-related but not always) objects (for example a Positions)
+  Factory & getFactory() const { return _factory; }
 
   /// Maximum dimension of the component
   unsigned int _dimension;
