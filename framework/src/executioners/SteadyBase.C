@@ -30,7 +30,8 @@ SteadyBase::SteadyBase(const InputParameters & parameters)
     _system_time(getParam<Real>("time")),
     _time_step(_problem.timeStep()),
     _time([this]() -> Real & { return this->_problem.time() = this->_system_time; }()),
-    _output_iteration_number(0)
+    _output_iteration_number(0),
+    _last_solve_converged(true)
 {
 }
 
