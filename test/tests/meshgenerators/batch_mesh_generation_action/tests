@@ -161,7 +161,7 @@
       type = RunException
       input = 'double_vector_corr.i'
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='0.8;1.0|2'"
-      detail = 'if the batch scalar input parameter names are not the same size as the batch scalar input parameter values.'
+      detail = 'if the batch input parameter values do not have the same size in corresponding mode.'
       expect_err = 'BatchMeshGeneratorAction: elements of'
     []
     [decomp_corr]
