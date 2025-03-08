@@ -104,7 +104,7 @@ UserElement::UserElement(const OptionNode & option)
     if (!seen_node.count(i + 1))
     {
       _vars[i + 1] = _vars[i];
-      _var_mask[i + 1] |= _var_mask[i];
+      _var_mask[i + 1] = _var_mask[i];
     }
 }
 
@@ -122,7 +122,6 @@ Part::parse(const BlockNode & block)
 bool
 Part::optionFunc(const std::string & key, const OptionNode & option)
 {
-  std::cout << "Part::optionFunc " << key << "\n";
   // User element definitions
   if (key == "user element")
   {
@@ -316,8 +315,6 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
                                            : instance->_local_to_global_element_index_offset)
                                : 0.0;
 
-  std::cout << "Processing " << name_key << ' ' << name << std::endl;
-
   // implement GENERATE keyword
   const auto generate = map.get<bool>("generate");
 
@@ -376,7 +373,6 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
 void
 Step::parse(const BlockNode & block)
 {
-  std::cout << "Step::parse!!!!";
   auto option_func = [this](const std::string & key, const OptionNode & option)
   {
     if (!Step::optionFunc(key, option))
@@ -388,7 +384,6 @@ Step::parse(const BlockNode & block)
 bool
 Step::optionFunc(const std::string & key, const OptionNode & option)
 {
-  std::cout << "Step::optionFunc " << key << "\n";
   // User element definitions
   if (key == "boundary")
   {
@@ -602,7 +597,6 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
     if (key == "instance")
     {
       const auto name = block._header.get<std::string>("name");
-      std::cout << "Adding instance " << name << std::endl;
       _instance.add(name, block, model);
     }
     else
