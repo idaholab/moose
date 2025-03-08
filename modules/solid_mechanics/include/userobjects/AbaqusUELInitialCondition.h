@@ -28,7 +28,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject &) override {}
-  virtual void finalize() override {}
+  virtual void finalize() override;
 
 protected:
   AbaqusUELMesh * _uel_mesh;

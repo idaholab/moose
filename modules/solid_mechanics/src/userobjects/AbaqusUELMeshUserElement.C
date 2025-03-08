@@ -9,6 +9,7 @@
 
 #include "AbaqusUELMeshUserElement.h"
 #include "AbaqusUELMesh.h"
+#include "MooseTypes.h"
 #include "SystemBase.h"
 #include "Executioner.h"
 
@@ -72,7 +73,13 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
     _element_set_names(getParam<std::vector<std::string>>("element_sets")),
     _variables(_uel_definition._n_nodes),
     _nstatev(_uel_definition._n_statev),
-    _use_energy(getParam<bool>("use_energy"))
+    _statev(declareRestartableData<
+            std::array<std::unordered_map<Abaqus::AbaqusID, std::vector<Real>>, 2>>("statev")),
+    _statev_index_current(declareRestartableData<std::size_t>("statev_index_current")),
+    _statev_index_old(declareRestartableData<std::size_t>("statev_index_old")),
+    _use_energy(getParam<bool>("use_energy")),
+    _energy(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy")),
+    _energy_old(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy_old"))
 {
   // get coupled variables from UEL type
   for (const auto i : make_range(_uel_definition._n_nodes))
@@ -153,9 +160,10 @@ AbaqusUELMeshUserElement::execute()
   DenseMatrix<Real> local_ke;
 
   std::array<Real, 8> dummy_energy;
-  Real pnewdt;
 
   Real dt = _fe_problem.dt();
+  Real pnewdt = dt; // ?
+  _pnewdt = pnewdt; // ?
   Real time = _fe_problem.time();
   std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
 
@@ -191,6 +199,8 @@ AbaqusUELMeshUserElement::execute()
         coords[j + dim * i] = p(j);
     }
 
+    std::cout << "Coords: " << Moose::stringify(coords) << std::endl;
+
     int ndofel = all_dof_indices.size();
 
     // Get solution values
@@ -199,6 +209,8 @@ AbaqusUELMeshUserElement::execute()
 
     _sys.currentSolution()->get(all_dof_indices, all_dof_increments);
     _sys.solutionOld().get(all_dof_indices, all_dof_values);
+
+    std::cout << "U in  : " << Moose::stringify(all_dof_increments) << std::endl;
 
     mooseAssert(all_dof_values.size() == all_dof_increments.size(), "Inconsistent solution size.");
     for (const auto i : index_range(all_dof_values))
@@ -245,6 +257,7 @@ AbaqusUELMeshUserElement::execute()
     // make sure stateful data storage is sized correctly
     _statev[_statev_index_current][jelem].resize(_nstatev);
 
+#if 1
     // call the plugin
     _uel(local_re.get_values().data(),
          local_ke.get_values().data(),
@@ -291,7 +304,11 @@ AbaqusUELMeshUserElement::execute()
     // sign of 'residuals' has been tested with external loading and matches that of moose-umat
     // setups.
     if (do_residual)
+    {
+      std::cout << "Residual for " << jelem << " is " << Moose::stringify(local_re.get_values())
+                << std::endl;
       addResiduals(_fe_problem.assembly(_tid, _sys.number()), local_re, all_dof_indices, -1.0);
+    }
 
     // write to the Jacobian (hope we don't have to transpose...)
     if (do_jacobian)
@@ -300,7 +317,10 @@ AbaqusUELMeshUserElement::execute()
                   all_dof_indices,
                   all_dof_indices,
                   -1.0);
+#endif
   }
+
+  _sys.solution().close();
 }
 
 // const std::array<Real, 8> *

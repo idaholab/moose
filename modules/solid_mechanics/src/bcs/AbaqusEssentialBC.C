@@ -46,16 +46,11 @@ AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
 bool
 AbaqusEssentialBC::shouldApply() const
 {
-  if (_node_value_map.find(_current_node->id()) == _node_value_map.end())
-    std::cout << "Should not apply BC on node " << _current_node->id() << std::endl;
-
   return _node_value_map.find(_current_node->id()) != _node_value_map.end();
 }
 
 Real
 AbaqusEssentialBC::computeQpValue()
 {
-  std::cout << "Apply BC on node " << _current_node->id() << " with value "
-            << _node_value_map.at(_current_node->id()) << std::endl;
   return _node_value_map.at(_current_node->id());
 }
