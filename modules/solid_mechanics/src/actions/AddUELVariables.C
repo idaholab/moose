@@ -59,7 +59,7 @@ AddUELVariables::act()
   {
     std::vector<SubdomainName> block;
     for (const auto b : all_blocks)
-      if (b & (1 << var))
+      if (b & (1 << (var - 1)))
         block.push_back(Moose::stringify(b));
 
     var_params.set<std::vector<SubdomainName>>("block") = block;
