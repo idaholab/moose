@@ -30,6 +30,7 @@
     csvdiff  = 'FFM-3A_out.csv'
     method = '!DBG'
     abs_zero = 1e-5
+    rel_err = 1e-5
     valgrind = NONE
     recover = false
     max_parallel = 1
