@@ -77,3 +77,9 @@ AbaqusUELInitialCondition::execute()
     }
   }
 }
+
+void
+AbaqusUELInitialCondition::finalize()
+{
+  _sys.solution().close();
+}
