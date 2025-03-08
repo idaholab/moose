@@ -145,6 +145,10 @@ DiffusionPhysicsBase::addInitialConditions()
     if (std::find(component_ic_blocks.begin(), component_ic_blocks.end(), block) ==
         component_ic_blocks.end())
       remaining_blocks.push_back(block);
+
+  // No need to add BCs on the Physics block restriction if Components are covering all of it
+  if (remaining_blocks.empty())
+    return;
   assignBlocks(params, remaining_blocks);
 
   // first obey any component-specific initial condition

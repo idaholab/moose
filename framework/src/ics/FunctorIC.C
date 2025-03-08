@@ -32,8 +32,7 @@ FunctorIC::FunctorIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     NonADFunctorInterface(this),
     _functor(getFunctor<Real>("functor")),
-    _scaling(getParam<Real>("scaling_factor")),
-    _pl(_fe_problem.mesh().getPointLocator())
+    _scaling(getParam<Real>("scaling_factor"))
 {
   // Check supported and unsupported functors
   const auto & functor_name = getParam<MooseFunctorName>("functor");
@@ -67,17 +66,35 @@ FunctorIC::value(const Point & p)
                      "Functor is a postprocessor and does not have 'force_preic' set to true");
       });
 
-  // Find the element
-  const auto elem = (*_pl)(p);
-  Moose::ElemPointArg elem_point = {elem, p, false};
-  return _scaling * _functor(elem_point, Moose::currentState());
+  // Use nodes for nodal-defined variables, elements for the others
+  if (_var.isNodalDefined())
+  {
+    Moose::NodeArg node_arg = {_current_node,
+                               blockRestricted() ? &blockIDs()
+                                                 : &Moose::NodeArg::undefined_subdomain_connection};
+    return _scaling * _functor(node_arg, Moose::currentState());
+  }
+  else
+  {
+    Moose::ElemPointArg elem_point = {_current_elem, p, false};
+    return _scaling * _functor(elem_point, Moose::currentState());
+  }
 }
 
 RealGradient
 FunctorIC::gradient(const Point & p)
 {
-  // Find the element
-  const auto elem = (*_pl)(p);
-  Moose::ElemPointArg elem_point = {elem, p, false};
-  return _scaling * _functor.gradient(elem_point, Moose::currentState());
+  // Use nodes for nodal-defined variables, elements for the others
+  if (_var.isNodalDefined())
+  {
+    Moose::NodeArg node_arg = {_current_node,
+                               blockRestricted() ? &blockIDs()
+                                                 : &Moose::NodeArg::undefined_subdomain_connection};
+    return _scaling * _functor.gradient(node_arg, Moose::currentState());
+  }
+  else
+  {
+    Moose::ElemPointArg elem_point = {_current_elem, p, false};
+    return _scaling * _functor.gradient(elem_point, Moose::currentState());
+  }
 }
