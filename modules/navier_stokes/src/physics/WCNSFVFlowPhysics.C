@@ -224,6 +224,7 @@ WCNSFVFlowPhysics::addSolverVariables()
       params.set<bool>("allow_two_term_expansion_on_bernoulli_faces") =
           getParam<bool>("pressure_allow_expansion_on_bernoulli_faces");
     }
+    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_pressure_name);
     getProblem().addVariable(pressure_type, _pressure_name, params);
   }
   else
@@ -240,7 +241,10 @@ WCNSFVFlowPhysics::addSolverVariables()
     lm_params.set<MooseEnum>("order") = "first";
 
     if (type == "point-value" || type == "average")
+    {
+      lm_params.set<SolverSystemName>("solver_sys") = getSolverSystem("lambda");
       getProblem().addVariable("MooseVariableScalar", "lambda", lm_params);
+    }
   }
 }
 
