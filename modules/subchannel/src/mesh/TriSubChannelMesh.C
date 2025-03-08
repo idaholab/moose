@@ -76,7 +76,6 @@ TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 unsigned int
 TriSubChannelMesh::channelIndex(const Point & p) const
 {
-  mooseAssert(!p.is_zero(), "Zero point");
   /// Function that returns the subchannel index given a point
   /// Determining a channel index given a point
   /// Looping over all subchannels to determine the closest one to the point
