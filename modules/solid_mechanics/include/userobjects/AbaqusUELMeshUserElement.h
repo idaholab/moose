@@ -9,23 +9,17 @@
 
 #pragma once
 
+#include "AbaqusInputObjects.h"
 #include "GeneralUserObject.h"
 #include "BlockRestrictable.h"
 #include "TaggingInterface.h"
 #include "DynamicLibraryLoader.h"
-
-class MooseMesh;
-namespace libMesh
-{
-class MeshBase;
-}
+#include "AbaqusUELMesh.h"
 
 /**
  * This user-object is a testbed for implementing a custom element.
  */
-class AbaqusUserElement : public GeneralUserObject,
-                          public BlockRestrictable,
-                          public TaggingInterface
+class AbaqusUELMeshUserElement : public GeneralUserObject, public TaggingInterface
 {
 public:
   /// function type for the external UMAT function
@@ -82,31 +76,23 @@ public:
   );
 
   static InputParameters validParams();
-  AbaqusUserElement(const InputParameters & params);
+  AbaqusUELMeshUserElement(const InputParameters & params);
 
   virtual void timestepSetup() override;
-  virtual void initialSetup() override;
-  virtual void meshChanged() override;
+  // virtual void initialSetup() override;
+  // virtual void meshChanged() override;
 
-  virtual void initialize() override final;
+  virtual void initialize() override final {}
   virtual void execute() override;
   virtual void finalize() override final {}
 
-  /// getters for the loop class
-  const std::vector<const MooseVariableFieldBase *> & getVariables() const { return _variables; }
-  const std::vector<const MooseVariableFieldBase *> & getAuxVariables() const
-  {
-    return _aux_variables;
-  }
-
-  const uel_t & getPlugin() const { return _uel; }
-
   const std::array<Real, 8> * getUELEnergy(dof_id_type element_id) const;
-  const Real & getPNewDt() const { return _pnewdt; }
 
 protected:
   /// setup the range of elements this object operates on
-  void setupElemRange();
+  void setupElementSet();
+
+  std::string _uel_type;
 
   /// The plugin file name
   FileName _plugin;
@@ -118,22 +104,25 @@ protected:
   const uel_t _uel;
 
   /// The \p MooseMesh that this user object operates on
-  MooseMesh & _moose_mesh;
+  AbaqusUELMesh & _uel_mesh;
 
-  /// The \p libMesh mesh that this object acts on
-  const libMesh::MeshBase & _mesh;
+  /// definition of the UEL this object is operating on
+  const Abaqus::UserElement & _uel_definition;
 
-  /// The dimension of the mesh, e.g. 3 for hexes and tets, 2 for quads and tris
-  const unsigned int _dim;
+  /// all elements in the UEL mesh
+  std::vector<Abaqus::Element> & _uel_elements;
 
-  /// coupled variables to provide the DOF values
-  std::vector<NonlinearVariableName> _variable_names;
+  /// selected set names
+  const std::vector<std::string> & _element_set_names;
+
+  /// active elements for each element set
+  std::vector<Abaqus::Index> _active_elements;
 
   /// Auxiliary variable names
   std::vector<AuxVariableName> _aux_variable_names;
 
   /// pointers to the variable objects
-  std::vector<const MooseVariableFieldBase *> _variables;
+  std::vector<std::vector<const MooseVariableFieldBase *>> _variables;
 
   /// pointers to the auxiliary variable objects
   std::vector<const MooseVariableFieldBase *> _aux_variables;
@@ -141,29 +130,20 @@ protected:
   /// The subdomain ids this object operates on
   const std::set<SubdomainID> _sub_ids;
 
-  /// All the active and elements local to this process that exist on this object's subdomains
-  std::unique_ptr<ConstElemRange> _elem_range;
-
-  /// props
-  std::vector<Real> _props;
-  int _nprops;
+  /// properties for each element set
+  std::vector<std::pair<std::vector<Real> *, std::vector<int> *>> _properties;
 
   /// stateful data
   int _nstatev;
-  std::array<std::map<dof_id_type, std::vector<Real>>, 2> _statev;
-  std::size_t _statev_index_current;
-  std::size_t _statev_index_old;
+  std::array<std::unordered_map<Abaqus::AbaqusID, std::vector<Real>>, 2> & _statev;
+  std::size_t & _statev_index_current;
+  std::size_t & _statev_index_old;
 
   /// energy data
   const bool _use_energy;
-  std::map<dof_id_type, std::array<Real, 8>> _energy;
-  std::map<dof_id_type, std::array<Real, 8>> _energy_old;
-
-  /// Abaqus element type
-  const int _jtype;
+  std::map<dof_id_type, std::array<Real, 8>> & _energy;
+  std::map<dof_id_type, std::array<Real, 8>> & _energy_old;
 
   /// timestep scaling factor
   Real _pnewdt;
-
-  friend class UELThread;
 };
