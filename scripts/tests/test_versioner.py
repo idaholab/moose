@@ -107,5 +107,10 @@ class Test(unittest.TestCase):
         self.assertEqual(MOOSE_DIR, app_info.git_root)
         self.assertEqual(Versioner.git_rev_parse('HEAD')[0:7], app_info.hash)
 
+    def testMatchDate(self):
+        self.assertEqual(Versioner.match_date('2025.05.05'), (2025, 5, 5))
+        self.assertEqual(Versioner.match_date('xxx2025.04.04xxx'), (2025, 4, 4))
+        self.assertEqual(Versioner.match_date('20.01.01'), None)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)
