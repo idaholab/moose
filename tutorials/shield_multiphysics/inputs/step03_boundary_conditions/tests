@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [mesh]
+    type = RunApp
+    input = 'mesh.i'
+    cli_args = '--mesh-only'
+    requirement = "The shield multiphysics tutorial shall include a step generating a mesh with "
+                  "the appropriate boundaries for demonstrating boundary conditions."
+  []
+  [step]
+    type = RunApp
+    input = 'step3.i'
+    requirement = "The shield multiphysics tutorial shall include a step demonstrating the use of "
+                  "various boundary conditions."
+  []
+[]

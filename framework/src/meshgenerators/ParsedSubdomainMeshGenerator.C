@@ -34,6 +34,11 @@ ParsedSubdomainMeshGenerator::validParams()
       "excluded_subdomains",
       "A set of subdomain names that will not changed even if "
       "they are inside/outside the combinatorial geometry");
+  params.addParam<std::vector<BoundaryName>>(
+      "included_boundaries",
+      {},
+      "A set of boundary names to restrict the subdomain changes to. If this parameter is "
+      "specified, elements that are not on those boundaries will not be included.");
   params.addDeprecatedParam<std::vector<subdomain_id_type>>(
       "excluded_subdomain_ids",
       "A set of subdomain ids that will not changed even if "
@@ -115,9 +120,16 @@ ParsedSubdomainMeshGenerator::generate()
     _excluded_ids = MooseMeshUtils::getSubdomainIDs(*mesh, excluded_subdomains);
   }
 
+  // Boundary info helps for sideset restriction
+  const auto & b_info = mesh->get_boundary_info();
+  std::vector<boundary_id_type> sideset_ids;
+  for (const auto & bname : getParam<std::vector<BoundaryName>>("included_boundaries"))
+    sideset_ids.push_back(b_info.get_id_by_name(bname));
+
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {
+    // Check spatial and EEID restrictions
     _func_params[0] = elem->vertex_average()(0);
     _func_params[1] = elem->vertex_average()(1);
     _func_params[2] = elem->vertex_average()(2);
@@ -125,8 +137,19 @@ ParsedSubdomainMeshGenerator::generate()
       _func_params[3 + i] = elem->get_extra_integer(_eeid_indices[i]);
     bool contains = evaluate(_func_F);
 
-    if (contains && std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
-                        _excluded_ids.end())
+    // Check block restrictions
+    const bool not_in_excluded_subdomains =
+        std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
+        _excluded_ids.end();
+
+    // Check boundary restrictions
+    bool in_included_boundaries = false;
+    for (const auto sideset_id : sideset_ids)
+      if ((in_included_boundaries =
+               (b_info.side_with_boundary_id(elem, sideset_id) != libMesh::invalid_uint)))
+        break;
+
+    if (contains && not_in_excluded_subdomains && (sideset_ids.empty() || in_included_boundaries))
       elem->subdomain_id() = _block_id;
   }
 

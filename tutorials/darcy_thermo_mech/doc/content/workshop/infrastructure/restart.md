@@ -65,13 +65,15 @@ more variables.
 Advanced restart and recovery in MOOSE require checkpoint files
 
 Checkpoints are automatically enabled by default and are output every 1 hour of wall time (customizable interval), but can be disabled with:
+
 ```text
 [Outputs]
   wall_time_checkpoint = false
 []
 ```
 
-Checkpoints can be output at every time step with the following shortcut syntax:
+To enable automatic checkpoints using the default options (every time step, and keep last two) in
+a simulation simply add the following flag to your input file:
 
 ```text
 [Outputs]
@@ -139,3 +141,5 @@ command-line flag, but it +requires a checkpoint file+.
 
 When running a multiapp simulation you do +not+ need to enable checkpoint output in each sub app
 input file. The parent app stores the restart data for all sub apps in its file.
+
+!---
