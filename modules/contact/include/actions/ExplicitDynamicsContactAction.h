@@ -55,6 +55,9 @@ protected:
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 
+  /// Verbose output, may increase runtime
+  const bool _verbose;
+
 private:
   /**
    * Generate constraints for node to face contact
