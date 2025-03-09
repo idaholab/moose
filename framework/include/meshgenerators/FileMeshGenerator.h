@@ -47,6 +47,10 @@ protected:
   /// the path/name of any file containing a matrix of mesh constraints
   const MatrixFileName & _matrix_file_name;
 
+  /// Whether (and later, how much) libMesh should try constraint
+  /// matrix preconditioning
+  const Real _matrix_preconditioning;
+
   /// whether to skip partitioning after loading the mesh
   const bool _skip_partitioning;
 

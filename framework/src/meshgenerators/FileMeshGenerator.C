@@ -56,6 +56,9 @@ FileMeshGenerator::validParams()
                         "mesh is non-conforming.");
   params.addParam<MatrixFileName>(
       "constraint_matrix", "", "The name of a constraint matrix file to apply to the mesh");
+  params.addParam<Real>("constraint_preconditioning",
+                        0.0,
+                        "Whether to attempt preconditioning with constraint matrix application");
   params.addClassDescription("Read a mesh from a file.");
   params.addParamNamesToGroup(
       "clear_spline_nodes discontinuous_spline_extraction constraint_matrix",
@@ -67,9 +70,19 @@ FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _file_name(getParam<MeshFileName>("file")),
     _matrix_file_name(getParam<MatrixFileName>("constraint_matrix")),
+    _matrix_preconditioning(getParam<Real>("constraint_preconditioning")),
     _skip_partitioning(getParam<bool>("skip_partitioning")),
     _allow_renumbering(getParam<bool>("allow_renumbering"))
 {
+  if (_matrix_preconditioning && _matrix_file_name.empty())
+    paramError("constraint_preconditioning",
+               "The 'constraint_preconditioning' parameter is only applicable to "
+               "meshes loaded with a corresponding 'constraint_matrix'.");
+  if (_matrix_preconditioning && _matrix_preconditioning != 1.0)
+    paramError("constraint_preconditioning",
+               "This version of MOOSE only supports a 'constraint_preconditioning' "
+               "value of 1.0 if it is enabled.  Non-binary preconditioning values "
+               "are reserved for future use.");
 }
 
 std::unique_ptr<MeshBase>
@@ -155,7 +168,7 @@ FileMeshGenerator::generate()
     // projection operator matrices is the transpose of our standard
     // for constraint equations.
     matrix->get_transpose(*matrix);
-    mesh->copy_constraint_rows(*matrix);
+    mesh->copy_constraint_rows(*matrix, _matrix_preconditioning);
 
     // libMesh should probably update this in copy_constraint_rows();
     // once it does this will be a redundant sweep we can remove.
