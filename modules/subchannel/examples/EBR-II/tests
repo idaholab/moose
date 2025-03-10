@@ -1,0 +1,52 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#28497 #29481'
+  [EBR-II_SHRT-17_SS_test]
+    type = CSVDiff
+    input = 'XX09_SCM_SS17.i'
+    csvdiff  = 'XX09_SCM_SS17_out.csv'
+    heavy = true
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case'
+  []
+  [EBR-II_SHRT-45R_SS_test]
+    type = CSVDiff
+    input = 'XX09_SCM_SS45R.i'
+    csvdiff  = 'XX09_SCM_SS45R_out.csv'
+    heavy = true
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-45R case'
+  []
+  [EBR-II_SHRT-17_TR_test]
+    type = CSVDiff
+    input = 'XX09_SCM_TR17.i'
+    csvdiff  = 'XX09_SCM_TR17_out.csv'
+    heavy = true
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the EBR-II transient SHRT-17 case'
+  []
+  [EBR-II_SHRT-45R_TR_test]
+    type = CSVDiff
+    input = 'XX09_SCM_TR45R.i'
+    csvdiff  = 'XX09_SCM_TR45R_out.csv'
+    heavy = true
+    method = '!DBG'
+    abs_zero = 1e-5
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the EBR-II transient SHRT-45R case'
+  []
+[]

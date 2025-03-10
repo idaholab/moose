@@ -1,0 +1,12 @@
+[Tests]
+  design = 'using_SubChannel.md'
+  issues = '#28497'
+  [check_syntax]
+    type = 'RunApp'
+    input = 'main.i'
+    check_input = true
+    mesh_mode = 'replicated'
+    max_parallel = 1
+    requirement = 'The system shall include an example showing how to couple a subchannel calculation to a heat conduction problem.'
+  []
+[]

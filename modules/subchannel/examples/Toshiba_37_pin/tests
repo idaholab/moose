@@ -1,0 +1,17 @@
+[Tests]
+    design = 'TriSubChannel1PhaseProblem.md'
+    issues = '#1209 #29491 #29513'
+    [toshiba-37]
+        type = CSVDiff
+        input = toshiba_37_pin.i
+        csvdiff = toshiba_37_pin_out.csv
+        # custom_cmp = 'test.exodiff'
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+        abs_zero = 1e-5
+        max_threads = 1
+        max_parallel = 1
+        requirement = 'The system will examine the subchannel solver for the toshiba 19-pin case'
+    []
+[]

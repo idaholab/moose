@@ -39,6 +39,7 @@ ifeq ($(ALL_MODULES),yes)
         SOLID_MECHANICS             := yes
         SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
+        SUBCHANNEL                  := yes
         THERMAL_HYDRAULICS          := yes
         XFEM                        := yes
 endif
@@ -72,6 +73,12 @@ endif
 
 ifeq ($(CONTACT),yes)
         SOLID_MECHANICS             := yes
+endif
+
+ifeq ($(SUBCHANNEL),yes)
+        FLUID_PROPERTIES            := yes
+        HEAT_TRANSFER               := yes
+        REACTOR                     := yes
 endif
 
 # heat_conduction was renamed to heat_transfer
@@ -326,6 +333,14 @@ ifeq ($(SCALAR_TRANSPORT),yes)
   APPLICATION_NAME   := scalar_transport
   DEPEND_MODULES     := chemical_reactions navier_stokes thermal_hydraulics fluid_properties heat_transfer rdg ray_tracing solid_properties misc
   SUFFIX             := st
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SUBCHANNEL),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/subchannel
+  APPLICATION_NAME   := subchannel
+  DEPEND_MODULES     := fluid_properties heat_transfer reactor
+  SUFFIX             := sc
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

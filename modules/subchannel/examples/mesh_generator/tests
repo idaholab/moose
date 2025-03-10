@@ -1,0 +1,25 @@
+[Tests]
+  design = 'SCMQuadSubChannelMeshGenerator.md SCMQuadInterWrapperMeshGenerator.md SCMTriInterWrapperMeshGenerator.md'
+  issues = '#28497'
+  [check_syntax_psbt]
+    type = 'RunApp'
+    input = 'psbt_mesh_generator_test.i'
+    check_input = true
+    max_parallel = 1
+    requirement = 'The system shall be able to create a mesh for a quadrilateral lattice assembly.'
+  []
+  [check_syntax_quad_interwrapper]
+    type = 'RunApp'
+    input = 'inter_wrapper_mesh_generator_test.i'
+    check_input = true
+    max_parallel = 1
+    requirement = 'The system shall be able to create a mesh for a quadrilateral inter-wrapper assembly.'
+  []
+  [check_syntax_tri_interwrapper]
+    type = 'RunApp'
+    input = 'inter_wrapper_tri_mesh_generator_test.i'
+    check_input = true
+    max_parallel = 1
+    requirement = 'The system shall be able to create a mesh for a hexagonal inter-wrapper assembly.'
+  []
+[]

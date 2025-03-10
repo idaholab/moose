@@ -1,0 +1,11 @@
+[Tests]
+  design = 'FCTFdisplacementIC.md'
+  issues = '#29501'
+  [test]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    recover = False
+    requirement = 'The system will calculate the geometric parameters for FCTF'
+  []
+[]
