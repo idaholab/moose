@@ -3,6 +3,7 @@
     [run]
       type = RunApp
       input = parent.i
+      mfem = true
     []
     [verify]
       type = RunCommand
@@ -11,7 +12,8 @@
                 OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
                 send
                 OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
-	  prereq = test/run
+  	  prereq = test/run
+      mfem = true
     []
   []
 []
