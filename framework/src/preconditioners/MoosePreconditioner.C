@@ -92,8 +92,7 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
 
   Moose::PetscSupport::processSingletonMooseWrappedOptions(_fe_problem, params);
 
-  Moose::PetscSupport::storePetscOptions(
-      _fe_problem, _fe_problem.numSolverSystems() > 1 ? ("-" + _nl.name() + "_") : "-", *this);
+  Moose::PetscSupport::storePetscOptions(_fe_problem, _nl.prefix(), *this);
 }
 
 void
