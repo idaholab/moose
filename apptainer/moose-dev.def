@@ -7,14 +7,25 @@
 
 {#- Optional jinja arguments                                                                  -#}
 {#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
+{#- CONDUIT_GIT_SHA: The git SHA to use for conduit                                           -#}
+{#- CONDUIT_GIT_REMOTE: The git remote to use to get conduit                                  -#}
+{#- CONDUIT_OPTIONS: Options to pass to conduit build                                         -#}
+{#- MFEM_GIT_SHA: The git SHA to use for MFEM                                                 -#}
+{#- MFEM_GIT_REMOTE: The git remote to use to get MFEM                                        -#}
+{#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
-{#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
+{#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
+{#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
 
 {#- Set WITH_LIBTORCH default if not set                                                      -#}
 {%- if WITH_LIBTORCH is not defined %}
 {%- set WITH_LIBTORCH = 'cpu' %}
+{%- endif %}
+{#- Set WITH_MFEM default if not set                                                          -#}
+{%- if WITH_MFEM is not defined %}
+{%- set WITH_MFEM = '1' %}
 {%- endif %}
 
 {#- The within-container build directory to use                                               -#}
@@ -23,15 +34,25 @@
 {#- Location to install miniforge3                                                            -#}
 {%- set MOOSE_MINIFORGE = '/opt/miniforge3' -%}
 
-{#- The installation location for wasp                                                        -#}
-{%- set WASP_DIR = '/opt/wasp' -%}
+{#- Name of the environment to create in conda                                                -#}
+{%- set MOOSE_CONDA_ENV_NAME = 'moose' -%}
+
 {#- The installation location for gperftools                                                  -#}
 {%- set GPERF_DIR = '/opt/gperftools' -%}
 {#- The installation location for pprof                                                       -#}
 {%- set PPROF_DIR = '/opt/pprof' -%}
 {#- The installation location for libtorch                                                    -#}
-{%- set LIBTORCH_DEST = '/opt' -%}
-
+{%- set LIBTORCH_DIR = '/opt/libtorch' -%}
+{#- The script used to install conduit                                                           -#}
+{%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
+{#- The installation location for conduit                                                        -#}
+{%- set CONDUIT_DIR = '/opt/conduit' -%}
+{#- The script used to install mfem                                                           -#}
+{%- set MFEM_BUILD_SCRIPT = 'update_and_rebuild_mfem.sh' -%}
+{#- The installation location for mfem                                                        -#}
+{%- set MFEM_DIR = '/opt/mfem' -%}
+{#- The installation location for wasp                                                        -#}
+{%- set WASP_DIR = '/opt/wasp' -%}
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
 
@@ -50,9 +71,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
 
+{%- if WITH_MFEM %}
+    export CONDUIT_DIR={{ CONDUIT_DIR }}
+    export MFEM_DIR={{ MFEM_DIR }}
+{%- endif %}
+
 {%- if WITH_LIBTORCH %}
     # Make libtorch visible to moose
-    export LIBTORCH_DIR={{ LIBTORCH_DEST }}/libtorch
+    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
 {%- endif %}
@@ -105,17 +131,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     chmod 755 /opt/code-server/bin/*
     chmod 644 /opt/code-server/extensions/*
 
-    # Clone WASP
-    cd ${ROOT_BUILD_DIR}
-    WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
-    git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
-    cd ${WASP_SRC_DIR}
-    git checkout ${WASP_GIT_SHA}
-    git submodule update --init --recursive
-
 {%- if WITH_LIBTORCH %}
     # Libtorch-related vars
-    LIBTORCH_DEST={{ LIBTORCH_DEST }}
+    LIBTORCH_DEST=$(realpath -m {{ LIBTORCH_DIR }}/..)
     LIBTORCH_VER=2.1.0
     LIBTORCH_DISTRIBUTION={{ WITH_LIBTORCH }}
 
@@ -136,6 +154,39 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         LIBNVRTC=$(ls libnvrtc-builtins-????????.so.*.* | head -n1)
         ln -s $LIBNVRTC $(echo $LIBNVRTC | cut -d. -f1 | head -c-10).$(echo $LIBNVRTC | cut -d. -f2-)
 {%- endif %}
+{%- endif %}
+
+{%- if WITH_MFEM %}
+    # Load MFEM jinja variables
+    CONDUIT_GIT_SHA={{ CONDUIT_GIT_SHA }}
+    CONDUIT_GIT_REMOTE={{ CONDUIT_GIT_REMOTE }}
+    CONDUIT_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ CONDUIT_BUILD_SCRIPT }}
+    CONDUIT_DIR={{ CONDUIT_DIR }}
+    MFEM_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ MFEM_BUILD_SCRIPT }}
+    MFEM_DIR={{ MFEM_DIR }}
+    MFEM_GIT_SHA={{ MFEM_GIT_SHA }}
+    MFEM_GIT_REMOTE={{ MFEM_GIT_REMOTE }}
+
+    # Clone conduit
+    cd ${ROOT_BUILD_DIR}
+    git clone $CONDUIT_GIT_REMOTE
+    CONDUIT_SRC_DIR=${ROOT_BUILD_DIR}/conduit
+    cd ${CONDUIT_SRC_DIR}
+    git checkout $CONDUIT_GIT_SHA
+    git submodule update --init
+
+    # Clone MFEM
+    cd ${ROOT_BUILD_DIR}
+    git clone $MFEM_GIT_REMOTE
+    MFEM_SRC_DIR=${ROOT_BUILD_DIR}/mfem
+    cd ${MFEM_SRC_DIR}
+    git checkout $MFEM_GIT_SHA
+
+    # Install conduit
+    CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }}
+
+    # Install MFEM
+    MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} {{ MFEM_OPTIONS }}
 {%- endif %}
 
     # Install miniforge in MOOSE_MINIFORGE
@@ -159,6 +210,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     conda install -yq python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
     # Needed for coverage
     pip3 --no-cache install lcov-cobertura
+
+    # Clone WASP
+    cd ${ROOT_BUILD_DIR}
+    WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
+    git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
+    cd ${WASP_SRC_DIR}
+    git checkout ${WASP_GIT_SHA}
+    git submodule update --init --recursive
 
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
@@ -208,6 +267,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 %files
     {{ FILES_DIR }}/opt/code-server/bin/code-server-setup-extensions /opt/code-server/bin/code-server-setup-extensions
     {{ FILES_DIR }}/opt/code-server/bin/code-server-start /opt/code-server/bin/code-server-start
+    {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
+    {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ WASP_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ WASP_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_wasp.sh {{ ROOT_BUILD_DIR }}/configure_wasp.sh
 {%- if WITH_LIBTORCH %}
