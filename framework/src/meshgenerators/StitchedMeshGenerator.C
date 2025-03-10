@@ -43,6 +43,8 @@ StitchedMeshGenerator::validParams()
       "merge_boundaries_with_same_name",
       true,
       "If the input meshes have boundaries with the same name (but different IDs), merge them");
+  params.addParam<bool>(
+      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
@@ -234,7 +236,7 @@ StitchedMeshGenerator::generate()
                         second,
                         TOLERANCE,
                         _clear_stitched_boundary_ids,
-                        /*verbose = */ true,
+                        getParam<bool>("verbose_stitching"),
                         use_binary_search);
 
     if (_merge_boundaries_with_same_name)
