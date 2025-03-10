@@ -614,6 +614,13 @@ MooseMesh::update()
   cacheInfo();
   buildElemIDInfo();
 
+  // this will make moose mesh aware of p-refinement added by mesh generators including
+  // a file mesh generator loading a restart checkpoint file
+  for (const auto & elem : *getActiveLocalElementRange())
+    if (elem->p_level() > 0)
+      _doing_p_refinement = true;
+  comm().max(_doing_p_refinement);
+
   _finite_volume_info_dirty = true;
 }
 

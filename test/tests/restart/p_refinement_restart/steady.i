@@ -9,7 +9,6 @@
     subdomain_id = '0 0
                     0 1'
   []
-  disable_p_refinement_for_families = 'lagrange'
 []
 
 [Adaptivity]
@@ -75,8 +74,11 @@
 
 [Executioner]
   type = Steady
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
-  csv = true
+  checkpoint = true
+  exodus = true
+  print_mesh_changed_info = true
 []
