@@ -36,5 +36,5 @@ Finally, a list of publications supporting SCM development can be found [here](p
 | :- | :- |
 | 1 | [ORNL $19$-pin, Validation](ornl_19_pin.md) |
 | 2 | [Toshiba $37$-pin, Validation](toshiba_37_pin.md) |
-| 3 | [EBR-II, SHRT-17,SHRT-45R, Validation](EBR-II.md) |
+| 3 | EBR-II, SHRT-17,SHRT-45R, Validation |
 | 4 | [ORNL Thermal-Hydraulic Out-of-Reactor Safety (THORS) Facility blockage, Validation](thors.md) |
