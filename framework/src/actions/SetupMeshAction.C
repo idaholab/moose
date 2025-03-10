@@ -284,10 +284,9 @@ SetupMeshAction::act()
           for (auto generator_action_ptr : generator_actions)
             if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
             {
-              mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                           _type,
-                           "\" mesh, which does not use Mesh Generators in constructing the mesh.");
-              break;
+              mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                         _type,
+                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
             }
         }
       }
