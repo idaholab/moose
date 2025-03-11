@@ -1,0 +1,26 @@
+[Tests]
+    design = 'TriSubChannel1PhaseProblem.md'
+    issues = '#29486'
+    [test_LBE]
+        type = Exodiff
+        input = test_LBE-19pin.i
+        exodiff = test_LBE-19pin_out.e
+        custom_cmp = 'test.exodiff'
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+        max_parallel = 1
+        requirement = 'The system will examine the tri subchannel solver for lead bismuth eutetic coolant'
+    []
+    [test_LEAD]
+        type = Exodiff
+        input = test_LEAD-19pin.i
+        exodiff = test_LEAD-19pin_out.e
+        custom_cmp = 'test.exodiff'
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+        max_parallel = 1
+        requirement = 'The system will examine the tri subchannel solver for lead coolant'
+    []
+[]

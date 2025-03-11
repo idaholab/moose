@@ -1,0 +1,11 @@
+[Tests]
+  design = 'SCMQuadPowerIC.md'
+  issues = '#29233'
+  [test]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    recover = False
+    requirement = 'The system will calculate the linear heat rate on subchannels/fuel-pins in a quadrilateral lattice'
+  []
+[]

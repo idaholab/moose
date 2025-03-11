@@ -1,0 +1,19 @@
+[Tests]
+  design = 'SCMQuadSubChannelMeshGenerator.md'
+  [coords]
+    type = Exodiff
+    input = coords.i
+    exodiff = coords_in.e
+    cli_args = "--mesh-only"
+    recover = false
+    issues = '#29241'
+    requirement = 'The system will create a mesh of the subchannels for quadrilateral assemblies'
+  []
+  [subchannel_number]
+    type = 'RunException'
+    input = 'subchannel_number.i'
+    expect_err = "The number of subchannels cannot be less than 2 in both directions \(x and y\)\. Smallest assembly allowed is either 2X1 or 1X2\."
+    issues = '#29224'
+    requirement = 'The system shall check the minimum number of subchannels'
+  []
+[]

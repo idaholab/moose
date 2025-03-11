@@ -1,0 +1,11 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29196 #29199 #29237 #29505'
+  [ss_check_syntax]
+    type = 'RunApp'
+    input = 'psbt_ss.i'
+    check_input = true
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel solver for the psbt case (null transient)'
+  []
+[]

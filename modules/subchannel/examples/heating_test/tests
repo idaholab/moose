@@ -1,0 +1,17 @@
+[Tests]
+  design = 'using_SubChannel.md'
+  issues = '#28497'
+  [heating_test]
+    type = Exodiff
+    input = 3X3_channel.i
+    exodiff = 3X3_channel_out_viz0.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    requirement = "The system  shall include an example showing how to solve a 3 by 3 quadrilateral lattice case."
+  []
+[]
