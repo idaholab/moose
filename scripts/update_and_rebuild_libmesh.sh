@@ -216,7 +216,7 @@ function run_build_cmd()
 
 if [ -z "${MOOSE_MAKE}" ]; then
   run_build_cmd make -j ${JOBS:-$LIBMESH_JOBS}
-  run_build_cmd make install
+  run_build_cmd make -j ${JOBS:-$LIBMESH_JOBS} install
 else
   run_build_cmd ${MOOSE_MAKE}
   run_build_cmd ${MOOSE_MAKE} install
