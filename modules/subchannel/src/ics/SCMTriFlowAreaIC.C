@@ -12,6 +12,7 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMTriFlowAreaIC);
+registerMooseObjectRenamed("SubChannelApp", TriFlowAreaIC, "06/30/2025 24:00", SCMTriFlowAreaIC);
 
 InputParameters
 SCMTriFlowAreaIC::validParams()

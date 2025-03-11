@@ -18,6 +18,7 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMPlanarMean);
+registerMooseObjectRenamed("SubChannelApp", PlanarMean, "06/30/2025 24:00", SCMPlanarMean);
 
 InputParameters
 SCMPlanarMean::validParams()

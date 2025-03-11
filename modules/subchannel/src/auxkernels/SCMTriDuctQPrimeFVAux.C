@@ -10,6 +10,10 @@
 #include "SCMTriDuctQPrimeFVAux.h"
 
 registerMooseObject("SubChannelApp", SCMTriDuctQPrimeFVAux);
+registerMooseObjectRenamed("SubChannelApp",
+                           TriDuctQPrimeFVAux,
+                           "06/30/2025 24:00",
+                           SCMTriDuctQPrimeFVAux);
 
 InputParameters
 SCMTriDuctQPrimeFVAux::validParams()

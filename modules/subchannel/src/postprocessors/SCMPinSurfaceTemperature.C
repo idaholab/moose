@@ -18,6 +18,10 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMPinSurfaceTemperature);
+registerMooseObjectRenamed("SubChannelApp",
+                           PinSurfaceTemperature,
+                           "06/30/2025 24:00",
+                           SCMPinSurfaceTemperature);
 
 InputParameters
 SCMPinSurfaceTemperature::validParams()

@@ -11,6 +11,10 @@
 #include "QuadSubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", SCMQuadWettedPerimIC);
+registerMooseObjectRenamed("SubChannelApp",
+                           QuadWettedPerimIC,
+                           "06/30/2025 24:00",
+                           SCMQuadWettedPerimIC);
 
 InputParameters
 SCMQuadWettedPerimIC::validParams()

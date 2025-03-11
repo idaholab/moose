@@ -13,6 +13,10 @@
 #include <numeric>
 
 registerMooseObject("SubChannelApp", SCMQuadInterWrapperMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           QuadInterWrapperMeshGenerator,
+                           "06/30/2025 24:00",
+                           SCMQuadInterWrapperMeshGenerator);
 
 InputParameters
 SCMQuadInterWrapperMeshGenerator::validParams()

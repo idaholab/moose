@@ -14,6 +14,7 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMQuadFlowAreaIC);
+registerMooseObjectRenamed("SubChannelApp", QuadFlowAreaIC, "06/30/2025 24:00", SCMQuadFlowAreaIC);
 
 InputParameters
 SCMQuadFlowAreaIC::validParams()

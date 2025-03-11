@@ -10,6 +10,7 @@
 #include "SCMRZPinQPrimeAux.h"
 
 registerMooseObject("SubChannelApp", SCMRZPinQPrimeAux);
+registerMooseObjectRenamed("SubChannelApp", RZPinQPrimeAux, "06/30/2025 24:00", SCMRZPinQPrimeAux);
 
 InputParameters
 SCMRZPinQPrimeAux ::validParams()

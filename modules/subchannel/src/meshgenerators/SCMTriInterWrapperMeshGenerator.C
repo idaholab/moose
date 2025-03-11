@@ -14,6 +14,10 @@
 #include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriInterWrapperMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           TriInterWrapperMeshGenerator,
+                           "06/30/2025 24:00",
+                           SCMTriInterWrapperMeshGenerator);
 
 InputParameters
 SCMTriInterWrapperMeshGenerator::validParams()
