@@ -38,7 +38,7 @@ TEST_F(MFEMKernelTest, MFEMCurlCurlKernel)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::CurlCurlIntegrator *>(kernel.createIntegrator());
-  ASSERT_NE(integrator, nullptr);
+  ASSERT_TRUE(integrator != nullptr);
   delete integrator;
 }
 
