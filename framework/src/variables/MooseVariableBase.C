@@ -212,12 +212,12 @@ MooseVariableBase::initialSetup()
 {
   // Currently the scaling vector is only used through AD residual computing objects
   if ((_var_kind == Moose::VAR_SOLVER) && _subproblem.haveADObjects() &&
-      (_subproblem.automaticScaling() ||
-       (std::find_if(_scaling_factor.begin(),
-                     _scaling_factor.end(),
-                     [](const Real element)
-                     { return !MooseUtils::absoluteFuzzyEqual(element, 1.); }) !=
-        _scaling_factor.end())))
+      (_subproblem.automaticScaling() || (std::find_if(_scaling_factor.begin(),
+                                                       _scaling_factor.end(),
+                                                       [](const Real element) {
+                                                         return !MooseUtils::absoluteFuzzyEqual(
+                                                             element, 1.);
+                                                       }) != _scaling_factor.end())))
 
     _sys.addScalingVector();
 }
