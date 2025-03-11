@@ -282,7 +282,9 @@ endif
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
 
 # We filter out the unnecessary include dirs from the contribs
-ignore_contrib_include := $(foreach ex_dir, $(IGNORE_CONTRIB_INC), $(if $(dir $(wildcard $(FRAMEWORK_DIR)/contrib/$(ex_dir)/.)),$(shell find $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include -type d),))
+ignore_contrib_include := $(foreach ex_dir, $(IGNORE_CONTRIB_INC), \
+    $(if $(wildcard $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include), \
+        $(shell find $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include -type d),))
 moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)
