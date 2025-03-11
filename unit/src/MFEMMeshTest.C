@@ -68,7 +68,7 @@ TEST_F(MFEMMeshTest, ExodusIIFormatReader)
   EXPECT_EQ(pmesh.attributes.Size(), 1);
 
   // Test MFEMMesh can be cloned
-  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+  ASSERT_TRUE(_mfem_mesh_ptr->safeClone() != nullptr);
 }
 
 /**
@@ -95,7 +95,7 @@ TEST_F(MFEMMeshTest, MFEMMeshFormatReader)
   EXPECT_EQ(pmesh.attributes.Size(), 2);
 
   // Test MFEMMesh can be cloned
-  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+  ASSERT_TRUE(_mfem_mesh_ptr->safeClone() != nullptr);
 }
 
 /**
@@ -122,7 +122,7 @@ TEST_F(MFEMMeshTest, MFEMHighOrderMeshFormatReader)
   EXPECT_EQ(pmesh.attributes.Size(), 1);
 
   // Test MFEMMesh can be cloned
-  ASSERT_NE(_mfem_mesh_ptr->safeClone(), nullptr);
+  ASSERT_TRUE(_mfem_mesh_ptr->safeClone() != nullptr);
 }
 
 TEST_F(MFEMMeshTest, Refinement)

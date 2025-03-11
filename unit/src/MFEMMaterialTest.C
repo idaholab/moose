@@ -69,7 +69,7 @@ TEST_F(MFEMMaterialTest, MFEMGenericConstantMaterial)
 
   mfem::Coefficient & coef1 = _mfem_problem->getProperties().getScalarProperty("coef1");
   auto c1 = dynamic_cast<mfem::ConstantCoefficient *>(&coef1);
-  EXPECT_NE(c1, nullptr);
+  EXPECT_TRUE(c1 != nullptr);
   fe_transform.Attribute = 1;
   EXPECT_EQ(coef1.Eval(fe_transform, point1), 2.0);
   EXPECT_EQ(coef1.Eval(fe_transform, point2), 2.0);

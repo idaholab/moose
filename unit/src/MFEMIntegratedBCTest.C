@@ -30,11 +30,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
-  ASSERT_NE(lf_integrator, nullptr);
+  ASSERT_TRUE(lf_integrator != nullptr);
   delete lf_integrator;
 
   auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
-  ASSERT_EQ(blf_integrator, nullptr);
+  ASSERT_TRUE(blf_integrator == nullptr);
   delete blf_integrator;
 }
 
@@ -60,11 +60,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryNormalLFIntegrator *>(integrated_bc.createLinearFormIntegrator());
-  ASSERT_NE(lf_integrator, nullptr);
+  ASSERT_TRUE(lf_integrator != nullptr);
   delete lf_integrator;
 
   auto blf_integrator = integrated_bc.createBilinearFormIntegrator();
-  ASSERT_EQ(blf_integrator, nullptr);
+  ASSERT_TRUE(blf_integrator == nullptr);
   delete blf_integrator;
 }
 

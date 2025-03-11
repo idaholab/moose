@@ -112,7 +112,7 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRES)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreGMRES>(solver.getSolver());
-  ASSERT_NE(solver_downcast.get(), nullptr);
+  ASSERT_TRUE(solver_downcast.get() != nullptr);
   testDiffusionSolve(*solver_downcast.get(), 1e-5);
 }
 
