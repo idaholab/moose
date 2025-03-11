@@ -10,6 +10,7 @@
     mfem = true
     max_parallel = 1
     recover = false
+    max_threads = 1
   []
   [./MFEMDiffusion]
     type = XMLDiff
@@ -92,6 +93,7 @@
     mfem = true
     max_parallel = 1
     recover = false
+    max_threads = 1
   []
   [./MFEMIrrotational]
     type = CSVDiff
