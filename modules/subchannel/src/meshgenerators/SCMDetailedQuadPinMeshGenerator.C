@@ -12,6 +12,10 @@
 #include "libmesh/cell_prism6.h"
 
 registerMooseObject("SubChannelApp", SCMDetailedQuadPinMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           DetailedQuadPinMeshGenerator,
+                           "06/30/2025 24:00",
+                           SCMDetailedQuadPinMeshGenerator);
 
 InputParameters
 SCMDetailedQuadPinMeshGenerator::validParams()

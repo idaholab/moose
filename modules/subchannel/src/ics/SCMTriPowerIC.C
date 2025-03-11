@@ -12,6 +12,7 @@
 #include "TriSubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriPowerIC);
+registerMooseObjectRenamed("SubChannelApp", TriPowerIC, "06/30/2025 24:00", SCMTriPowerIC);
 
 InputParameters
 SCMTriPowerIC::validParams()

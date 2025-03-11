@@ -11,6 +11,10 @@
 #include "SubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", SCMPinSolutionTransfer);
+registerMooseObjectRenamed("SubChannelApp",
+                           PinSolutionTransfer,
+                           "06/30/2025 24:00",
+                           SCMPinSolutionTransfer);
 
 InputParameters
 SCMPinSolutionTransfer::validParams()

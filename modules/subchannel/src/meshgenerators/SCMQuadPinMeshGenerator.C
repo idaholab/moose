@@ -12,6 +12,10 @@
 #include "libmesh/edge_edge2.h"
 
 registerMooseObject("SubChannelApp", SCMQuadPinMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           QuadPinMeshGenerator,
+                           "06/30/2025 24:00",
+                           SCMQuadPinMeshGenerator);
 
 InputParameters
 SCMQuadPinMeshGenerator::validParams()

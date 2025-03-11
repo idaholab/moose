@@ -11,6 +11,10 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMFlatMassFlowRateAux);
+registerMooseObjectRenamed("SubChannelApp",
+                           FlatMassFlowRateAux,
+                           "06/30/2025 24:00",
+                           SCMFlatMassFlowRateAux);
 
 InputParameters
 SCMFlatMassFlowRateAux::validParams()
