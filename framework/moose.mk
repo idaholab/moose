@@ -139,15 +139,15 @@ ifeq ($(ENABLE_MFEM),true)
     libmesh_CXXFLAGS += -DMFEM_ENABLED
 
     # Adding the include directories
-	include $(MFEM_DIR)/share/mfem/config.mk
-	libmesh_CXXFLAGS += $(MFEM_INCFLAGS)
+	  include $(MFEM_DIR)/share/mfem/config.mk
+	  libmesh_CXXFLAGS += $(MFEM_INCFLAGS)
 
     # Dynamically linking with the available MFEM library
-	ifeq ($(shell uname -s),Darwin)
-		libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
-	else
-	  libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
-	endif
+	  ifeq ($(shell uname -s),Darwin)
+	  	libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
+	  else
+	    libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
+	  endif
 
     libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
 
