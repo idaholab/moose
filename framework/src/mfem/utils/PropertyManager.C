@@ -6,8 +6,6 @@
 
 namespace MooseMFEM
 {
-;
-
 template <class T, class Tpw>
 inline void
 declareCoefficient(PropertyMap<T, Tpw> & map,
