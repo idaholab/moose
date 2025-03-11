@@ -11,5 +11,6 @@
                 OutputData/VisItDataCollection/Run0_000001.mfem_root'
     requirement = 'MOOSE shall have the ability to write out solutions to VisIt or ParaView mfem::DataCollections'
     mfem = true
+    recover = false
   []
 []

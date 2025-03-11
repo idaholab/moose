@@ -9,5 +9,6 @@
     requirement = 'MOOSE shall have the ability to add an MFEMVariable from a user specification of a MOOSE variable, inferring the FESpace.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
 []
