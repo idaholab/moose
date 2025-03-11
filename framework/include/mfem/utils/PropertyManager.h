@@ -14,7 +14,7 @@
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
-#include "property_map.h"
+#include "PropertyMap.h"
 #include "ObjectManager.h"
 
 namespace MooseMFEM
