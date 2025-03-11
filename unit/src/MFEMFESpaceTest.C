@@ -91,7 +91,7 @@ TEST_P(GenericFESpaceTest, TestExpectedGenericFESpace)
   validate();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GenericFESpaces,
     GenericFESpaceTest,
     testing::Values(
@@ -136,7 +136,7 @@ TEST_P(ScalarFESpaceTest, TestExpectedScalarFESpace)
   validate();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ScalarFESpaces,
     ScalarFESpaceTest,
     testing::Values(ScalarFESpaceTest::makeParam("ref-segment.mesh", "H1", 1, "H1_1D_P1", 1),
@@ -173,7 +173,7 @@ TEST_P(VectorFESpaceTest, TestExpectedVectorFESpace)
   validate();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VectorFESpaces,
     VectorFESpaceTest,
     testing::Values(VectorFESpaceTest::makeParam("ref-segment.mesh", "H1", 1, 0, "H1_1D_P1", 1),
@@ -229,7 +229,7 @@ TEST_P(InvalidVectorFESpaceTest, TestInvalidVectorFESpace)
   EXPECT_THROW(fespace->getFESpace(), std::runtime_error);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ExpectError,
     InvalidVectorFESpaceTest,
     testing::Values(VectorFESpaceTest::makeParam("ref-segment.mesh", "RT", 3, 2, "", -1),
