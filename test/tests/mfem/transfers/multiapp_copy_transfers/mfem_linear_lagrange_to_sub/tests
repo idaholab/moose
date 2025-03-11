@@ -4,6 +4,7 @@
       type = RunApp
       input = parent.i
       mfem = true
+      recover = false
     []
     [verify]
       type = RunCommand
@@ -14,6 +15,7 @@
                 OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
 	    prereq = test/run
       mfem = true
+      recover = false
     []
   []
 []

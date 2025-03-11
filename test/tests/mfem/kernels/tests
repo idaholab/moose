@@ -9,6 +9,7 @@
     requirement = 'MOOSE shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind and produce results consistent with MFEM Example 3'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMDiffusion]
     type = XMLDiff
@@ -18,6 +19,7 @@
     requirement = 'MOOSE shall have the ability to solve a diffusion problem set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMDiffusionPartial]
     type = XMLDiff
@@ -27,6 +29,7 @@
     requirement = 'MOOSE shall have the ability to solve a diffusion problem with partial assembly set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMGradDiv]
     type = XMLDiff
@@ -36,6 +39,7 @@
     requirement = 'MOOSE shall have the ability to solve a grad-div problem with Raviart-Thomas elements set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMHeatConduction]
     type = XMLDiff
@@ -46,6 +50,7 @@
     requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMHeatConductionElement]
     type = XMLDiff
@@ -56,6 +61,7 @@
     requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with element assembly set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMHeatTransfer]
     type = XMLDiff
@@ -65,6 +71,7 @@
     requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary set up from MOOSE.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMLinearElasticity]
     type = XMLDiff
@@ -74,6 +81,7 @@
     requirement = 'MOOSE shall have the ability to solve a linear elasticity problem set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMGravity]
     type = XMLDiff
@@ -83,6 +91,7 @@
     requirement = 'MOOSE shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
     mfem = true
     max_parallel = 1
+    recover = false
   []
   [./MFEMIrrotational]
     type = CSVDiff
@@ -91,5 +100,6 @@
     requirement = 'MOOSE shall have the ability to solve for an irrotational vortext in two dimensions.'
     abs_zero = 1e-6
     mfem = true
+    recover = false
   []
 []
