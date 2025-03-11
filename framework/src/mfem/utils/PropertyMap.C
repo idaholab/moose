@@ -1,6 +1,6 @@
 #ifdef MFEM_ENABLED
 
-#include <property_map.h>
+#include "PropertyMap.h"
 
 namespace MooseMFEM
 {

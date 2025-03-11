@@ -67,7 +67,7 @@ BCMap::ApplyIntegratedBCs(const std::string & test_var_name,
 
     lf.AddBoundaryIntegrator(lfi, integrated_bc->_bdr_markers);
   }
-};
+}
 
 void
 BCMap::ApplyIntegratedBCs(const std::string & test_var_name,
@@ -90,7 +90,7 @@ BCMap::ApplyIntegratedBCs(const std::string & test_var_name,
 
     blf.AddBoundaryIntegrator(blfi, integrated_bc->_bdr_markers);
   }
-};
+}
 
 } // namespace MooseMFEM
 

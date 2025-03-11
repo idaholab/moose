@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "gtest/gtest.h"
-#include "property_map.h"
+#include "PropertyMap.h"
 
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
