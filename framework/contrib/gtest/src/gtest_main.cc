@@ -1,4 +1,4 @@
-// Copyright 2008, Google Inc.
+// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,23 +27,40 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//
-// Google C++ Testing and Mocking Framework (Google Test)
-//
-// Sometimes it's desirable to build Google Test by compiling a single file.
-// This file serves this purpose.
+#include <cstdio>
 
-// This line ensures that gtest.h can be compiled on its own, even
-// when it's fused.
 #include "gtest/gtest.h"
 
-// The following lines pull in the real gtest *.cc files.
-#include "src/gtest-assertion-result.cc"
-#include "src/gtest-death-test.cc"
-#include "src/gtest-filepath.cc"
-#include "src/gtest-matchers.cc"
-#include "src/gtest-port.cc"
-#include "src/gtest-printers.cc"
-#include "src/gtest-test-part.cc"
-#include "src/gtest-typed-test.cc"
-#include "src/gtest.cc"
+#if defined(GTEST_OS_ESP8266) || defined(GTEST_OS_ESP32) || \
+    (defined(GTEST_OS_NRF52) && defined(ARDUINO))
+// Arduino-like platforms: program entry points are setup/loop instead of main.
+
+#ifdef GTEST_OS_ESP8266
+extern "C" {
+#endif
+
+void setup() { testing::InitGoogleTest(); }
+
+void loop() { RUN_ALL_TESTS(); }
+
+#ifdef GTEST_OS_ESP8266
+}
+#endif
+
+#elif defined(GTEST_OS_QURT)
+// QuRT: program entry point is main, but argc/argv are unusable.
+
+GTEST_API_ int main() {
+  printf("Running main() from %s\n", __FILE__);
+  testing::InitGoogleTest();
+  return RUN_ALL_TESTS();
+}
+#else
+// Normal platforms: program entry point is main, argc/argv are initialized.
+
+GTEST_API_ int main(int argc, char **argv) {
+  printf("Running main() from %s\n", __FILE__);
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+#endif

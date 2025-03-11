@@ -129,7 +129,7 @@ pcre%.$(obj-suffix) : pcre%.cc | prebuild
 gtest%.$(no-method-obj-suffix) : gtest%.cc | prebuild
 	@echo "Compiling C++ "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) -w -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(ADDITIONAL_CPPFLAGS) $(gtest_INCLUDE) $(CXXFLAGS) -w -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.cc
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
