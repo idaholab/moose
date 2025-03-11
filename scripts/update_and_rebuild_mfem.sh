@@ -111,5 +111,5 @@ cmake .. \
     -DMFEM_USE_CONDUIT=YES \
     -DCONDUIT_DIR="$CONDUIT_DIR" \
     "$@"
-make -j "${MOOSE_JOBS:-4}"
-make install
+make -j ${MOOSE_JOBS:-4}
+make -j ${MOOSE_JOBS:-4} install

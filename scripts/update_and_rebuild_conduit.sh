@@ -67,5 +67,5 @@ rm -rf "$CONDUIT_BUILD_DIR"
 mkdir -p "$CONDUIT_BUILD_DIR"
 cd "$CONDUIT_BUILD_DIR"
 cmake ../src -DCMAKE_INSTALL_PREFIX="$CONDUIT_DIR"
-make -j "${MOOSE_JOBS:-4}"
-make install
+make -j ${MOOSE_JOBS:-4}
+make -j ${MOOSE_JOBS:-4} install
