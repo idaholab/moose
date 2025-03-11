@@ -1,0 +1,49 @@
+[Tests]
+  [workshop]
+    issues = '#21242'
+    design = 'stm_workshop/intro_slides/index.md'
+    requirement = 'The system shall contain a working tutorial on how to do basic parameter studies by '
+    [diffusion]
+      type = RunApp
+      input = diffusion.i
+      detail = 'solving a time-dependent diffusion problem, '
+    []
+    [step1]
+      type = RunApp
+      input = step01.i
+      cli_args = 'Samplers/hypercube/num_rows=10'
+      detail = 'producing random parameter data, '
+    []
+    [step2]
+      type = RunApp
+      input = step02.i
+      cli_args = 'Samplers/hypercube/num_rows=10'
+      detail = 'running the diffusion input with perturbed parameters and gathering results, '
+    []
+    [step3]
+      type = RunApp
+      input = step03.i
+      cli_args = 'Samplers/hypercube/num_rows=10'
+      detail = 'computing statistics of the results, '
+    []
+    [step4]
+      type = RunApp
+      input = step04.i
+      cli_args = 'Samplers/hypercube/num_rows=10 Samplers/resample/num_rows=10'
+      detail = 'computing Sobol sensitivities of the results, '
+    []
+    [step5]
+      type = RunApp
+      input = step05.i
+      cli_args = 'ParameterStudy/num_samples=10'
+      detail = 'using a simplified syntax, '
+    []
+    [step6]
+      type = RunApp
+      input = step06.i
+      cli_args = 'Trainers/poly_reg_T_avg/max_degree=1'
+      prereq = workshop/step2
+      detail = 'and training surrogates with the data and evaluate that surrogate.'
+    []
+  []
+[]
