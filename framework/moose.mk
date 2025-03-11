@@ -215,6 +215,8 @@ gtest_objects   := $(patsubst %.cc, %.$(no-method-obj-suffix), $(gtest_srcfiles)
 gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
 gtest_deps      := $(patsubst %.cc, %.$(no-method-obj-suffix).d, $(gtest_srcfiles))
+gtest_INCLUDE := -I$(gtest_DIR)
+
 
 #
 # MooseConfigure
