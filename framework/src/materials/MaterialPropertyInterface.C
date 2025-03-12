@@ -32,6 +32,9 @@ MaterialPropertyInterface::validParams()
       false,
       "For the old and older state use projected material properties interpolated at the "
       "quadrature points. To set up projection use the ProjectedStatefulMaterialStorageAction.");
+  params.addParamNamesToGroup("use_interpolated_state prop_getter_suffix",
+                              "Material property retrieval");
+
   return params;
 }
 

@@ -292,7 +292,7 @@ AdvancedExtruderGenerator::generate()
   // Original copyright: Copyright (C) 2002-2019 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
   // Original license is LGPL so it can be used here.
 
-  auto mesh = buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject(_input->mesh_dimension() + 1);
   mesh->set_mesh_dimension(_input->mesh_dimension() + 1);
 
   // Check if the element integer names are existent in the input mesh.

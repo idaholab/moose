@@ -49,9 +49,10 @@ FEProblemSolve::feProblemDefaultConvergenceParams()
                                 "before requesting halting the current evaluation and requesting "
                                 "timestep cut for transient simulations");
 
-  params.addParamNamesToGroup("nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol "
-                              "nl_rel_step_tol nl_div_tol nl_abs_div_tol n_max_nonlinear_pingpong",
-                              "Nonlinear Solver");
+  params.addParamNamesToGroup(
+      "nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol "
+      "nl_rel_step_tol nl_abs_step_tol nl_div_tol nl_abs_div_tol n_max_nonlinear_pingpong",
+      "Nonlinear Solver");
 
   return params;
 }
@@ -196,7 +197,7 @@ FEProblemSolve::validParams()
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
   params.addParamNamesToGroup(
-      "solve_type nl_abs_step_tol snesmf_reuse_base use_pre_SMO_residual "
+      "solve_type snesmf_reuse_base use_pre_SMO_residual "
       "num_grids residual_and_jacobian_together splitting nonlinear_convergence",
       "Nonlinear Solver");
   params.addParamNamesToGroup(

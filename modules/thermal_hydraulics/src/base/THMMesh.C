@@ -26,6 +26,8 @@ THMMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
   params.addClassDescription("Creates a mesh (nodes and elements) for the Components");
+  MooseEnum dims("1=1 2 3", "3");
+  params.addParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
   // we do not allow renumbering, because we generate our meshes
   params.set<bool>("allow_renumbering") = false;
   return params;

@@ -74,7 +74,7 @@ SIMPLESolveBase::validParams()
   params.addParamNamesToGroup(
       "momentum_equation_relaxation momentum_petsc_options momentum_petsc_options_iname "
       "momentum_petsc_options_value momentum_petsc_options_value momentum_absolute_tolerance "
-      "momentum_l_tol momentum_l_abs_tol momentum_l_max_its",
+      "momentum_l_tol momentum_l_abs_tol momentum_l_max_its momentum_systems",
       "Momentum Equation");
 
   /*
@@ -121,7 +121,7 @@ SIMPLESolveBase::validParams()
   params.addParamNamesToGroup(
       "pressure_variable_relaxation pressure_petsc_options pressure_petsc_options_iname "
       "pressure_petsc_options_value pressure_petsc_options_value pressure_absolute_tolerance "
-      "pressure_l_tol pressure_l_abs_tol pressure_l_max_its",
+      "pressure_l_tol pressure_l_abs_tol pressure_l_max_its pressure_system",
       "Pressure Equation");
 
   /*

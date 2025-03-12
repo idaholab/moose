@@ -13,7 +13,6 @@ InputParameters
 InterWrapperMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
-  params.set<MooseEnum>("dim") = "3";
   params.addClassDescription("Creates an inter-wrappper mesh container");
   return params;
 }
