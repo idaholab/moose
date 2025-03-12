@@ -1,0 +1,24 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29247'
+  [main]
+    type = Exodiff
+    input = main.i
+    exodiff = main_out.e
+    recover = false
+    mesh_mode = 'replicated'
+    allow_warnings = true
+    max_parallel = 1
+    requirement = 'The system will examine the coupling using SCM as main app'
+  []
+  [sub]
+    type = Exodiff
+    input = main.i
+    exodiff = main_out_sub0.e
+    recover = false
+    mesh_mode = 'replicated'
+    allow_warnings = true
+    max_parallel = 1
+    requirement = 'The system will examine the coupling using heat concution as a sub app'
+  []
+[]

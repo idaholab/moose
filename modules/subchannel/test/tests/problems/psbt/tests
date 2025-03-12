@@ -1,0 +1,66 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29196 #29199 #29237 #29505'
+  [psbt_explicit]
+    type = Exodiff
+    input = psbt.i
+    exodiff = psbt_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the explicit subchannel solver for the psbt case'
+  []
+  [psbt_explicit_friction2]
+    type = Exodiff
+    input = psbt_f2.i
+    exodiff = psbt_f2_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the explicit subchannel solvers for the psbt case using the non-default friction model'
+  []
+  [psbt_implicit]
+    type = Exodiff
+    input = psbt_implicit.i
+    exodiff = psbt_implicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    rel_err = 2e-2
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the implicit subchannel solver for the psbt case'
+  []
+  [psbt_implicit_csv]
+    type = CSVDiff
+    input = 'psbt_implicit.i'
+    csvdiff = 'psbt_implicit_out.csv'
+    recover = False
+    rel_err = 3e-4
+    max_parallel = 1
+    requirement = 'The system will print pin surface temperatures'
+  []
+  [psbt_monolithic]
+    type = Exodiff
+    input = psbt_monolithic.i
+    exodiff = psbt_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system will examine the monolithic subchannel solver for the psbt case'
+  []
+[]

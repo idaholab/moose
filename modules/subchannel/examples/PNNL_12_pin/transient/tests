@@ -1,0 +1,18 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29238'
+  [PNNL-12_tr]
+      type = CSVDiff
+      input = 2X6_transient.i
+      csvdiff = 2X6_transient_out.csv
+      # custom_cmp = 'test.exodiff'
+      method = '!DBG'
+      valgrind = NONE
+      recover = false
+      abs_zero = 1e-5
+      rel_err = 1e-5
+      max_threads = 1
+      max_parallel = 1
+      requirement = 'The system will examine the subchannel solver for the PNNL 12-pin transient case'
+  []
+[]

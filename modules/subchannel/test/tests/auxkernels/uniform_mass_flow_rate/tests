@@ -1,0 +1,11 @@
+[Tests]
+  design = 'SCMFlatMassFlowRateAux.md'
+  issues = '#29213'
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    recover = False
+    requirement = 'The system shall calculate a uniform massflow rate inlet boundary'
+  []
+[]
