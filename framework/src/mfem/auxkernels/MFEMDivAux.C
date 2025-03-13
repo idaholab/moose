@@ -1,7 +1,7 @@
 #ifdef MFEM_ENABLED
 
-#pragma once
 #include "MFEMDivAux.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMDivAux);
 
