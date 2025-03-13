@@ -234,7 +234,7 @@ class AppSyntaxExtension(command.CommandExtension):
                                                show_error=False)
         return exe
 
-    def find(self, name, page, node_type=None):
+    def find(self, name, page=None, node_type=None):
 
         if name.endswith('<RESIDUAL>'):
             msg = "The use of <RESIDUAL> is no longer needed in the syntax name '%s', it " \
@@ -251,7 +251,7 @@ class AppSyntaxExtension(command.CommandExtension):
             node = self._cache.get(name, None)
 
         if node is None:
-            if page.external:
+            if getattr(page, 'external', False):
                 self._external_missing_syntax.add(page.uid)
             else:
                 msg = "'{}' syntax was not recognized."
