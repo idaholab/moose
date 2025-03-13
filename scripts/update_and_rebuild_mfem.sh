@@ -38,6 +38,7 @@ if [ -n "$help" ]; then
   echo "MFEM_SRC_DIR             Path to MFEM source; default: ../framework/contrib/mfem from submodule"
   echo "PETSC_ARCH               PETSc arch; default: arch-moose if PETSC_DIR not set"
   echo "PETSC_DIR                Path to PETSc install; default: ../petsc"
+  echo "HDF5_DIR                 Path to HDF5 install; default: \$PETSC_DIR/\$PETSC_ARCH"
   exit 0
 fi
 
@@ -70,6 +71,7 @@ if [ -z "$PETSC_DIR" ]; then
   PETSC_DIR=$(realpath "${SCRIPT_DIR}/../petsc")
   PETSC_ARCH="arch-moose"
 fi
+HDF5_DIR=${HDF5_DIR:-$PETSC_DIR/$PETSC_ARCH}
 
 if [ -z "$skip_sub_update" ]; then
   cd "${SCRIPT_DIR}/.."
@@ -92,7 +94,7 @@ cmake .. \
     -DMFEM_USE_SUPERLU=YES \
     -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
     -DBUILD_SHARED_LIBS=ON \
-    -DHDF5_DIR="$PETSC_DIR/$PETSC_ARCH" \
+    -DHDF5_DIR="$HDF5_DIR"
     -DBLAS_DIR="$PETSC_DIR/$PETSC_ARCH" \
     -DMFEM_ENABLE_EXAMPLES=yes \
     -DMFEM_ENABLE_MINIAPPS=yes \
