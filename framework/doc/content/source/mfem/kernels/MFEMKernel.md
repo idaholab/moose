@@ -8,7 +8,7 @@ Base class for MFEM kernels applied to the weak form being solved.
 
 MFEM kernels are responsible for providing domain integrators (inheriting from
 `mfem::BilinearFormIntegrator` or `mfem::LinearFormIntegrator` to add to the weak form of the FE
-problem accumulated in [EquationSystem](source/mfem/equation_systems/equation_system.md), along with any
+problem accumulated in [EquationSystem](source/mfem/equation_systems/EquationSystem.md), along with any
 required marker arrays to restrict the integrator(s) to subdomains.
 
 The integrator is applied to the weak form equation that is labeled according to the test variable
@@ -19,4 +19,4 @@ equations (labeled by test variable) with the trial variable solved using them, 
 variable names is the same as the set of trial variable names for a square system.
 
 `MFEMKernel` is a purely virtual base class. Derived classes should override the `createIntegrator`
- method to return an integrator to add to the `EquationSystem`.  
+ method to return an integrator to add to the `EquationSystem`.
