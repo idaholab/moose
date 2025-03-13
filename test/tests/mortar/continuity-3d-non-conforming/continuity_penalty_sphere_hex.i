@@ -18,7 +18,6 @@
     new_block_name = "primary"
     sidesets = '102'
   []
-  uniform_refine = 0
 []
 
 [Problem]

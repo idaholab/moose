@@ -260,7 +260,7 @@
   nl_max_its = 30
 
   start_time = 0.0
-  end_time = 6.5 # 6.5
+  end_time = 6.5
 
   dt = 0.0125
   dtmin = 1e-5
