@@ -34,7 +34,7 @@ options available in this class, you can use
 
 ## Example Input File Syntax
 
-!listing test/tests/kernels/gravity.i block=FESpaces Variables
+!listing test/tests/mfem/kernels/gravity.i block=FESpaces Variables
 
 !syntax parameters /FESpaces/MFEMVectorFESpace
 
