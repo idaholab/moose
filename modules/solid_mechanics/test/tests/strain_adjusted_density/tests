@@ -1,0 +1,25 @@
+[Tests]
+  [exact]
+    issues = '#29556'
+    design = 'StrainAdjustedDensity.md'
+    requirement = 'The system shall compute a density modified by strain and compare to hand calculations for, '
+    [3D]
+      type = 'CSVDiff'
+      input = 'exact_3D.i'
+      csvdiff = 'exact_3D_out.csv'
+      detail = '3D,'
+    []
+    [2drz]
+      type = 'CSVDiff'
+      input = 'exact_2drz.i'
+      csvdiff = 'exact_2drz_out.csv'
+      detail = '2D axisymmetric,'
+    []
+    [rspherical]
+      type = 'CSVDiff'
+      input = 'exact_rspherical.i'
+      csvdiff = 'exact_rspherical_out.csv'
+      detail = 'and for spherically symmetric.'
+    []
+  []
+[]
