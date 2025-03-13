@@ -12,15 +12,23 @@
 #include "StiffenedGasFluidPropertiesBase.h"
 
 /**
- * Stiffened gas fluid properties from user-specified parameters.
+ * Stiffened gas fluid properties that fit another fluid at a (p,T) state.
  */
-class StiffenedGasFluidProperties : public StiffenedGasFluidPropertiesBase
+class StiffenedGasMatchFluidProperties : public StiffenedGasFluidPropertiesBase
 {
 public:
   static InputParameters validParams();
 
-  StiffenedGasFluidProperties(const InputParameters & parameters);
+  StiffenedGasMatchFluidProperties(const InputParameters & parameters);
 
 protected:
   virtual void initialSetupInner() override;
+
+  /// Fluid properties to match
+  const SinglePhaseFluidProperties & _fp;
+
+  /// Pressure of state to match
+  const Real _p;
+  /// Temperature of state to match
+  const Real _T;
 };
