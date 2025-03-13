@@ -7227,10 +7227,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           if (_current_nl_sys->hasMatrix(tag))
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
-            if (matrix.use_hash_table())
-              matrix.reset_memory();
-            else
-              matrix.zero();
+            matrix.reset_memory();
             if (haveADObjects())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
