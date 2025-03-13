@@ -21,7 +21,7 @@ def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
 Image = tokens.newToken('Image', src='', tex='', dark='', href='')
-Video = tokens.newToken('Video', src='', tex='', quicktime='', youtube=False,
+Video = tokens.newToken('Video', src='', tex='', quicktime='', youtube=False, dark='',
                         controls=True, poster=None, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtension(command.CommandExtension):
@@ -174,6 +174,7 @@ class VideoCommand(command.CommandComponent):
         settings['tstop'] = (None, "Time (sec) to stop video.")
         settings['poster'] = (None, "Add a 'poster' image the the video")
         settings['quicktime'] = (None, "Video to utilize Macintosh codecs (for alpha transparencies)")
+        settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings.update(floats.caption_settings())
         return settings
 
@@ -191,6 +192,7 @@ class VideoCommand(command.CommandComponent):
                     autoplay=settings['autoplay'],
                     tstart=settings['tstart'],
                     tstop=settings['tstop'],
+                    dark=settings['dark_src'],
                     quicktime=settings['quicktime'])
 
         if flt is parent:
@@ -290,6 +292,9 @@ class RenderVideo(components.RenderComponent):
         div = html.Tag(parent, 'div', token, class_='moose-video-div')
         video = html.Tag(div, 'video', class_='moose-video')
         _, ext = os.path.splitext(src)
+
+        if token['dark']:
+            html.Tag(video, 'source', src=token['dark'], media='(prefers-color-scheme: dark)')
 
         if token['quicktime']:
             html.Tag(video, 'source', src=token['quicktime'], type='video/quicktime')
