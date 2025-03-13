@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NumericalFluxGasMixHLLC.h"
-#include "IdealRealGasMixtureFluidProperties.h"
+#include "VaporMixtureFluidProperties.h"
 #include "THMIndicesGasMix.h"
 #include "Numerics.h"
 
@@ -29,7 +29,7 @@ NumericalFluxGasMixHLLC::validParams()
 NumericalFluxGasMixHLLC::NumericalFluxGasMixHLLC(const InputParameters & parameters)
   : NumericalFluxGasMixBase(parameters),
     NaNInterface(this),
-    _fp(getUserObject<IdealRealGasMixtureFluidProperties>("fluid_properties"))
+    _fp(getUserObject<VaporMixtureFluidProperties>("fluid_properties"))
 {
 }
 
@@ -73,7 +73,8 @@ NumericalFluxGasMixHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal eL = EL - 0.5 * uvecL * uvecL;
   const ADReal xiL = xirhoAL / rhoAL;
   const ADReal pL = _fp.p_from_v_e(vL, eL, {xiL});
-  const ADReal cL = _fp.c_from_v_e(vL, eL, {xiL});
+  const ADReal TL = _fp.T_from_v_e(vL, eL, {xiL});
+  const ADReal cL = _fp.c_from_p_T(pL, TL, {xiL});
 
   const ADReal rhoR = rhoAR / AR;
   const ADRealVectorValue uvecR(rhouAR / rhoAR, rhovAR / rhoAR, rhowAR / rhoAR);
@@ -86,7 +87,8 @@ NumericalFluxGasMixHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal eR = ER - 0.5 * uvecR * uvecR;
   const ADReal xiR = xirhoAR / rhoAR;
   const ADReal pR = _fp.p_from_v_e(vR, eR, {xiR});
-  const ADReal cR = _fp.c_from_v_e(vR, eR, {xiR});
+  const ADReal TR = _fp.T_from_v_e(vR, eR, {xiR});
+  const ADReal cR = _fp.c_from_p_T(pR, TR, {xiR});
 
   // compute wave speeds
   const ADReal sL = std::min(unL - cL, unR - cR);

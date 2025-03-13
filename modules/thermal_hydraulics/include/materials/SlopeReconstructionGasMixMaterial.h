@@ -12,7 +12,7 @@
 #include "Material.h"
 #include "SlopeReconstruction1DInterface.h"
 
-class IdealRealGasMixtureFluidProperties;
+class VaporMixtureFluidProperties;
 
 /**
  * Computes reconstructed solution values for FlowModelGasMix.
@@ -57,7 +57,7 @@ protected:
   ADMaterialProperty<Real> & _rhoEA;
 
   /// fluid properties user object
-  const IdealRealGasMixtureFluidProperties & _fp;
+  const VaporMixtureFluidProperties & _fp;
 
   /// Solution variables vector
   std::vector<MooseVariable *> _U_vars;

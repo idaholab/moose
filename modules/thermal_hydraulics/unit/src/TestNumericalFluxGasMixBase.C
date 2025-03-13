@@ -62,10 +62,10 @@ TestNumericalFluxGasMixBase::addFluidProperties()
 
   // mixture fluid properties
   {
-    const std::string class_name = "IdealRealGasMixtureFluidProperties";
+    const std::string class_name = "IdealGasMixtureFluidProperties";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<UserObjectName>>("component_fluid_properties") = {fp_steam_name, fp_nitrogen_name};
     _fe_problem->addUserObject(class_name, _fp_mix_name, params);
-    _fp_mix = &_fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>(_fp_mix_name);
+    _fp_mix = &_fe_problem->getUserObject<IdealGasMixtureFluidProperties>(_fp_mix_name);
   }
 }

@@ -11,7 +11,7 @@
 
 #include "AuxKernel.h"
 
-class IdealRealGasMixtureFluidProperties;
+class VaporMixtureFluidProperties;
 
 /**
  * Computes various quantities for FlowModelGasMix.
@@ -42,5 +42,5 @@ protected:
   const VariableValue & _area;
 
   /// Fluid properties
-  const IdealRealGasMixtureFluidProperties & _fp;
+  const VaporMixtureFluidProperties & _fp;
 };

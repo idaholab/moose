@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FluidPropertiesGasMixMaterial.h"
-#include "IdealRealGasMixtureFluidProperties.h"
+#include "VaporMixtureFluidProperties.h"
 #include "THMNames.h"
 
 registerMooseObject("ThermalHydraulicsApp", FluidPropertiesGasMixMaterial);
@@ -25,7 +25,7 @@ FluidPropertiesGasMixMaterial::validParams()
   params.addRequiredCoupledVar("area", "Cross-sectional area variable");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-                                          "The IdealRealGasMixtureFluidProperties object");
+                                          "The VaporMixtureFluidProperties object");
 
   params.addClassDescription("Computes various fluid properties for FlowModelGasMix.");
 
@@ -56,7 +56,7 @@ FluidPropertiesGasMixMaterial::FluidPropertiesGasMixMaterial(const InputParamete
     _k(declareADProperty<Real>(THM::THERMAL_CONDUCTIVITY)),
     _mu(declareADProperty<Real>(THM::DYNAMIC_VISCOSITY)),
 
-    _fp(getUserObject<IdealRealGasMixtureFluidProperties>("fluid_properties"))
+    _fp(getUserObject<VaporMixtureFluidProperties>("fluid_properties"))
 {
 }
 

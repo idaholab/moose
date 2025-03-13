@@ -21,6 +21,7 @@ static const std::string HEAT_FLUX_WALL = "q_wall";
 static const std::string HEAT_FLUX_PERIMETER = "P_hf";
 static const std::string HEAT_TRANSFER_COEFFICIENT_WALL = "Hw";
 static const std::string HYDRAULIC_DIAMETER = "D_h";
+static const std::string MASS_DIFFUSION_COEFFICIENT = "mass_diffusion_coefficient";
 static const std::string MASS_FRACTION = "mass_fraction";
 static const std::string NUSSELT_NUMBER = "Nu";
 static const std::string PRESSURE = "p";

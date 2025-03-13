@@ -42,6 +42,7 @@ FlowModelID FM_INVALID = registerFlowModelID();
 FlowModelID FM_SINGLE_PHASE = registerFlowModelID();
 FlowModelID FM_TWO_PHASE = registerFlowModelID();
 FlowModelID FM_TWO_PHASE_NCG = registerFlowModelID();
+FlowModelID FM_GAS_MIX = registerFlowModelID();
 
 } // namespace THM
 

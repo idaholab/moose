@@ -11,7 +11,7 @@
 
 #include "InitialCondition.h"
 
-class IdealRealGasMixtureFluidProperties;
+class VaporMixtureFluidProperties;
 class Function;
 
 /**
@@ -48,5 +48,5 @@ protected:
   const VariableValue & _area;
 
   /// Fluid properties
-  const IdealRealGasMixtureFluidProperties & _fp;
+  const VaporMixtureFluidProperties & _fp;
 };

@@ -11,7 +11,7 @@
 
 #include "TestNumericalFlux1D.h"
 
-class IdealRealGasMixtureFluidProperties;
+class IdealGasMixtureFluidProperties;
 
 /**
  * Base class for testing NumericalFluxGasMix objects
@@ -36,5 +36,5 @@ protected:
   const UserObjectName _fp_mix_name;
 
   /// Fluid properties user object
-  const IdealRealGasMixtureFluidProperties * _fp_mix;
+  const IdealGasMixtureFluidProperties * _fp_mix;
 };
