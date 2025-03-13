@@ -9,4 +9,4 @@
 Data stored in the `MFEMProblemData` struct is built and added to by builder methods in
 [`MFEMProblem`](problem/MFEMProblem.md).
 
-!listing include/problem/MFEMProblemData.h
+!listing include/mfem/problem/MFEMProblemData.h
