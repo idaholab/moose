@@ -13,14 +13,14 @@
     zmax = 1
   []
   [cut_one]
-    type = CartesianMeshGenerator
+    type = GeneratedMeshGenerator
     dim = 3
-    dx = 1
-    dy = 1
-    dz = 1
-    ix = 2
-    iy = 2
-    iz = 2
+    xmax = 1
+    ymax = 1
+    zmax = 1
+    nx = 2
+    ny = 2
+    nz = 2
   []
   [cmbn]
     type = CombinerGenerator
