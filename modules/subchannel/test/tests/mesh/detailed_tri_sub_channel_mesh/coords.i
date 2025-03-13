@@ -10,10 +10,6 @@
   [subchannel]
     type = SCMDetailedTriSubChannelMeshGenerator
     pin_diameter = 0.01
-    dwire = 0.002
-    hwire = 0.0833
-    spacer_z = '0'
-    spacer_k = '5.0'
     verbose_flag =  true
   []
 []
