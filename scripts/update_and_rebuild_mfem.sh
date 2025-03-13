@@ -44,10 +44,14 @@ fi
 
 set -e
 
+get_realpath() {
+    python3 -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$1"
+}
+
 if [ -n "$MFEM_SRC_DIR" ]; then
   skip_sub_update=1
 else
-  MFEM_SRC_DIR="$(realpath "${SCRIPT_DIR}"/../framework/contrib/mfem)"
+  MFEM_SRC_DIR="$(get_realpath "${SCRIPT_DIR}"/../framework/contrib/mfem)"
 fi
 MFEM_BUILD_DIR="${MFEM_SRC_DIR}/build"
 if [ -n "$MFEM_DIR" ]; then
@@ -61,14 +65,14 @@ fi
 if [ -n "$CONDUIT_SRC_DIR" ]; then
   skip_conduit_update=1
 else
-  CONDUIT_SRC_DIR="$(realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
+  CONDUIT_SRC_DIR="$(get_realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
 fi
 CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
 
-CONDUIT_DIR=${CONDUIT_DIR:-$(realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
-LIBMESH_DIR=${LIBMESH_DIR:-$(realpath "${SCRIPT_DIR}/../libmesh/installed")}
+CONDUIT_DIR=${CONDUIT_DIR:-$(get_realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
+LIBMESH_DIR=${LIBMESH_DIR:-$(get_realpath "${SCRIPT_DIR}/../libmesh/installed")}
 if [ -z "$PETSC_DIR" ]; then
-  PETSC_DIR=$(realpath "${SCRIPT_DIR}/../petsc")
+  PETSC_DIR=$(get_realpath "${SCRIPT_DIR}/../petsc")
   PETSC_ARCH="arch-moose"
 fi
 HDF5_DIR=${HDF5_DIR:-$PETSC_DIR/$PETSC_ARCH}
@@ -94,7 +98,7 @@ cmake .. \
     -DMFEM_USE_SUPERLU=YES \
     -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
     -DBUILD_SHARED_LIBS=ON \
-    -DHDF5_DIR="$HDF5_DIR"
+    -DHDF5_DIR="$HDF5_DIR" \
     -DBLAS_DIR="$PETSC_DIR/$PETSC_ARCH" \
     -DMFEM_ENABLE_EXAMPLES=yes \
     -DMFEM_ENABLE_MINIAPPS=yes \
