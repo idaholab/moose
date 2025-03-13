@@ -39,10 +39,14 @@ fi
 
 set -e
 
+get_realpath() {
+    python3 -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$1"
+}
+
 if [ -n "$CONDUIT_SRC_DIR" ]; then
   skip_sub_update=1
 else
-  CONDUIT_SRC_DIR="$(realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
+  CONDUIT_SRC_DIR="$(get_realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
 fi
 CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
 if [ -n "$CONDUIT_DIR" ]; then
