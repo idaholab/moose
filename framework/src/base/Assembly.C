@@ -1425,7 +1425,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       }
 
       const auto n_mapping_shape_functions =
-          FE<2, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
+          FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -1491,7 +1491,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       }
 
       const unsigned int n_mapping_shape_functions =
-          FE<3, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
+          FE<3, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
