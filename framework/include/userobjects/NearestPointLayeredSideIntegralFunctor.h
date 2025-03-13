@@ -11,7 +11,7 @@
 
 #include "SideIntegralFunctorUserObject.h"
 #include "NearestPointBase.h"
-#include "LayeredSideAverageFunctor.h"
+#include "LayeredSideIntegralFunctor.h"
 
 /**
  * Computes layered side integrals of a functor nearest to a set of points.

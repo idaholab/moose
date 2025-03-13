@@ -10,9 +10,10 @@
 #pragma once
 
 // MOOSE includes
+#include "SpatialUserObjectFunctor.h"
 #include "PointVariableSamplerBase.h"
 
-class LineValueSampler : public PointVariableSamplerBase
+class LineValueSampler : public SpatialUserObjectFunctor<PointVariableSamplerBase>
 {
 public:
   static InputParameters validParams();
