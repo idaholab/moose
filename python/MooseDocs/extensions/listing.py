@@ -14,10 +14,10 @@ from .. import common
 from ..common import exceptions
 from ..base import LatexRenderer
 from ..tree import html, tokens, latex
-from . import core, command, floats, modal
+from . import core, command, floats, modal, appsyntax
 
 Listing = tokens.newToken('Listing', floats.Float)
-ListingCode = tokens.newToken('ListingCode', core.Code)
+ListingCode = tokens.newToken('ListingCode', core.Code, syntaxes=None)
 ListingLink = tokens.newToken('ListingLink', core.Link)
 
 def make_extension(**kwargs):
@@ -58,6 +58,19 @@ class ListingExtension(command.CommandExtension):
                                  "showspaces=false,"
                                  "postbreak=\\mbox{\\textcolor{red}{$\\hookrightarrow$}\\space},}")
 
+    def preExecute(self):
+        """Acquire appsyntax for linking in input listings."""
+
+        self._syntax = None
+        for ext in self.translator.extensions:
+            if isinstance(ext, appsyntax.AppSyntaxExtension):
+                self._syntax = ext.syntax
+                break
+
+    @property
+    def syntax(self):
+        return getattr(self, '_syntax', None)
+
 class LocalListingCommand(command.CommandComponent):
     COMMAND = 'listing'
     SUBCOMMAND = None
@@ -76,6 +89,11 @@ class LocalListingCommand(command.CommandComponent):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   token_type=Listing)
         content = info['inline'] if 'inline' in info else info['block']
+
+        syntaxes = None
+        if 'inline' not in info and self['language'] == 'moose':
+            syntaxes = self.getMooseSyntaxes(content)
+
         code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
                          language=settings['language'], content=content)
 
@@ -85,6 +103,23 @@ class LocalListingCommand(command.CommandComponent):
             code.name = 'ListingCode' #TODO: Find a better way
 
         return parent
+
+    def getMooseSyntaxes(self, content: str) -> dict[str, str]:
+        """Get all the moose syntaxes contained in the inputted content."""
+        if self.extension.syntax is None:
+            return None
+
+        syntax_ext: appsyntax.AppSyntaxExtension = self.extension.syntax # Convenience
+
+        syntaxes = {}
+        for node in moosetree.iterate(pyhit.parse(content)):
+            fullpath = '/'.join([n.name for n in node.path])
+            try:
+                moose_node = syntax_ext.find(fullpath)
+                syntaxes[node.name] = moose_node.markdown
+            except exceptions.MooseDocsException:
+                continue
+
 
 class FileListingCommand(LocalListingCommand):
     COMMAND = 'listing'
