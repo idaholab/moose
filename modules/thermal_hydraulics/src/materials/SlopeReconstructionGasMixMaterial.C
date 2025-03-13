@@ -30,7 +30,7 @@ SlopeReconstructionGasMixMaterial::validParams()
   params.addRequiredCoupledVar("rhoEA", "Conserved variable rho*E*A");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-                                          "The IdealRealGasMixtureFluidProperties object");
+                                          "The VaporMixtureFluidProperties object");
 
   return params;
 }
@@ -60,7 +60,7 @@ SlopeReconstructionGasMixMaterial::SlopeReconstructionGasMixMaterial(
     _rhouA(declareADProperty<Real>(THM::RHOUA)),
     _rhoEA(declareADProperty<Real>(THM::RHOEA)),
 
-    _fp(getUserObject<IdealRealGasMixtureFluidProperties>("fluid_properties"))
+    _fp(getUserObject<VaporMixtureFluidProperties>("fluid_properties"))
 {
   _U_vars.resize(THMGasMix1D::N_FLUX_INPUTS);
   _U_vars[THMGasMix1D::XIRHOA] = _xirhoA_var;

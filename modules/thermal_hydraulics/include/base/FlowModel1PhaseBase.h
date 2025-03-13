@@ -58,6 +58,9 @@ protected:
   virtual void addMomentumGravityKernel();
   virtual void addEnergyGravityKernel();
 
+  /// Adds the DG kernels
+  virtual void addDGKernels();
+
   /// Adds the aux kernels
   virtual void addAuxKernels();
   // various aux kernels

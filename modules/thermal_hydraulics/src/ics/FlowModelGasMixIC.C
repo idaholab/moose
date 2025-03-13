@@ -29,7 +29,7 @@ FlowModelGasMixIC::validParams()
   params.addRequiredCoupledVar("area", "Cross-sectional area variable");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-                                          "The IdealRealGasMixtureFluidProperties object");
+                                          "The VaporMixtureFluidProperties object");
 
   params.addClassDescription("IC for the solution variables of FlowModelGasMix.");
 
@@ -44,7 +44,7 @@ FlowModelGasMixIC::FlowModelGasMixIC(const InputParameters & parameters)
     _T(getFunction("temperature")),
     _vel(getFunction("velocity")),
     _area(coupledValue("area")),
-    _fp(getUserObject<IdealRealGasMixtureFluidProperties>("fluid_properties"))
+    _fp(getUserObject<VaporMixtureFluidProperties>("fluid_properties"))
 {
 }
 
@@ -55,7 +55,8 @@ FlowModelGasMixIC::value(const Point & pt)
   const auto p = _p.value(_t, pt);
   const auto T = _T.value(_t, pt);
 
-  const auto rho = _fp.rho_from_p_T(p, T, {xi});
+  const auto v = _fp.v_from_p_T(p, T, {xi});
+  const auto rho = 1.0 / v;
 
   switch (_quantity)
   {
@@ -67,7 +68,7 @@ FlowModelGasMixIC::value(const Point & pt)
     case Quantity::RHOEA:
     {
       const auto vel = _vel.value(_t, pt);
-      const auto e = _fp.e_from_p_rho(p, rho, {xi});
+      const auto e = _fp.e_from_p_T(p, T, {xi});
       const auto E = e + 0.5 * vel * vel;
       return rho * E * _area[_qp];
       break;

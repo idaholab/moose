@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include "IdealRealGasMixtureFluidProperties.h"
+#include "VaporMixtureFluidProperties.h"
 #include "SinglePhaseFluidProperties.h"
 #include "THMIndicesGasMix.h"
-// #include "MooseVariable.h"
 
-// #include "libmesh/elem.h"
+class VaporMixtureFluidProperties;
 
 namespace FlowModelGasMixUtils
 {
@@ -28,7 +27,7 @@ namespace FlowModelGasMixUtils
 template <bool is_ad>
 std::vector<GenericReal<is_ad>>
 computePrimitiveSolution(const std::vector<GenericReal<is_ad>> & U,
-                         const IdealRealGasMixtureFluidProperties & fp)
+                         const VaporMixtureFluidProperties & fp)
 {
   const auto & xirhoA = U[THMGasMix1D::XIRHOA];
   const auto & rhoA = U[THMGasMix1D::RHOA];
@@ -64,7 +63,7 @@ template <bool is_ad>
 std::vector<GenericReal<is_ad>>
 computeConservativeSolution(const std::vector<GenericReal<is_ad>> & W,
                             const GenericReal<is_ad> & A,
-                            const IdealRealGasMixtureFluidProperties & fp)
+                            const VaporMixtureFluidProperties & fp)
 {
   const auto & xi = W[THMGasMix1D::MASS_FRACTION];
   const auto & p = W[THMGasMix1D::PRESSURE];
@@ -97,7 +96,7 @@ template <bool is_ad>
 std::vector<GenericReal<is_ad>>
 computeFluxFromPrimitive(const std::vector<GenericReal<is_ad>> & W,
                          const GenericReal<is_ad> & A,
-                         const IdealRealGasMixtureFluidProperties & fp)
+                         const VaporMixtureFluidProperties & fp)
 {
   const auto & xi = W[THMGasMix1D::MASS_FRACTION];
   const auto & p = W[THMGasMix1D::PRESSURE];

@@ -11,7 +11,7 @@
 
 #include "Material.h"
 
-class IdealRealGasMixtureFluidProperties;
+class VaporMixtureFluidProperties;
 
 /**
  * Computes various fluid properties for FlowModelGasMix.
@@ -47,5 +47,5 @@ protected:
   ADMaterialProperty<Real> & _k;
   ADMaterialProperty<Real> & _mu;
 
-  const IdealRealGasMixtureFluidProperties & _fp;
+  const VaporMixtureFluidProperties & _fp;
 };
