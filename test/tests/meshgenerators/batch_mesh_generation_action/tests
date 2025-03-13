@@ -1,0 +1,182 @@
+[Tests]
+  design = 'BatchMeshGeneratorAction.md'
+  issues = '#29800'
+  [single_scalar]
+    type = 'Exodiff'
+      input = 'single_scalar.i'
+      exodiff = 'single_scalar_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system shall be able to generate in batches meshes of the same type with variation in one single scalar parameter'
+  []
+  [double_scalar_corr]
+    type = 'Exodiff'
+      input = 'double_scalar_corr.i'
+      exodiff = 'double_scalar_corr_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two corresponding scalar parameters'
+  []
+  [double_scalar_cp]
+    type = 'Exodiff'
+      input = 'double_scalar_cp.i'
+      exodiff = 'double_scalar_cp_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product'
+  []
+  [double_scalar_cp_decomp]
+    type = 'Exodiff'
+      input = 'double_scalar_cp.i'
+      exodiff = 'double_scalar_cp_in.e'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/use_decomposed_index=true
+                  Mesh/cmbn/inputs='gmg_0_0 gmg_1_0 gmg_0_1 gmg_1_1'
+                  --mesh-only"
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product with decomposed indexing'
+  []
+  [single_vector]
+    type = 'Exodiff'
+      input = 'single_vector.i'
+      exodiff = 'single_vector_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one single vector parameter'
+  []
+  [double_vector]
+    type = 'Exodiff'
+      input = 'double_vector_corr.i'
+      exodiff = 'double_vector_corr_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two vector parameters'
+  []
+  [scalar_vector_corr]
+    type = 'Exodiff'
+      input = 'scalar_vector_corr.i'
+      exodiff = 'scalar_vector_corr_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one scalar and one corresponding vector parameter'
+  []
+  [scalar_vector_cp]
+    type = 'Exodiff'
+      input = 'scalar_vector_cp.i'
+      exodiff = 'scalar_vector_cp_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in one scalar and one vector parameter using a Cartesian product and decomposed indexing'
+  []
+  [enum_batch]
+    type = 'Exodiff'
+      input = 'scalar_enum_test.i'
+      exodiff = 'scalar_enum_test_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should generate meshes of the same type with variation in one scalar parameter with a MooseEnum type.'
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error'
+    [fix_scalar_diff_sizes_1]
+      type = RunException
+      input = 'single_scalar.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/fixed_scalar_input_param_types='ENUM ENUM'"
+      detail = 'if the fixed scalar input parameter names are not the same size as the fixed scalar input parameter types.'
+      expect_err = 'must be the same size'
+    []
+    [fix_scalar_diff_sizes_2]
+      type = RunException
+      input = 'single_scalar.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/fixed_scalar_input_param_values='2 2'"
+      detail = 'if the fixed scalar input parameter names are not the same size as the fixed scalar input parameter values.'
+      expect_err = 'must be the same size'
+    []
+    [fix_vector_diff_sizes_1]
+      type = RunException
+      input = 'scalar_enum_test.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/fixed_vector_input_param_types='REAL'"
+      detail = 'if the fixed vector input parameter names are not the same size as the fixed vector input parameter types.'
+      expect_err = 'must be the same size'
+    []
+    [fix_vector_diff_sizes_2]
+      type = RunException
+      input = 'scalar_enum_test.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/fixed_vector_input_param_values='1.0'"
+      detail = 'if the fixed vector input parameter names are not the same size as the fixed vector input parameter values.'
+      expect_err = 'must be the same size'
+    []
+    [batch_scalar_diff_sizes_1]
+      type = RunException
+      input = 'single_scalar.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_types='UINT UINT'"
+      detail = 'if the batch scalar input parameter names are not the same size as the batch scalar input parameter types.'
+      expect_err = 'must be the same size'
+    []
+    [batch_scalar_diff_sizes_2]
+      type = RunException
+      input = 'single_scalar.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_values='2;3'"
+      detail = 'if the batch scalar input parameter names are not the same size as the batch scalar input parameter values.'
+      expect_err = 'must be the same size'
+    []
+    [batch_vector_diff_sizes_1]
+      type = RunException
+      input = 'single_vector.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_types='USHORT USHORT'"
+      detail = 'if the batch vector input parameter names are not the same size as the batch vector input parameter types.'
+      expect_err = 'must be the same size'
+    []
+    [batch_vector_diff_sizes_2]
+      type = RunException
+      input = 'single_vector.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='1|2'"
+      detail = 'if the batch vector input parameter names are not the same size as the batch vector input parameter values.'
+      expect_err = 'must be the same size'
+    []
+    [no_batch_generation]
+      type = RunException
+      input = 'single_scalar.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_names=''
+                  Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_types=''
+                  Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_values=''"
+      detail = 'if no batch input parameters are provided.'
+      expect_err = 'cannot be empty at the same time'
+    []
+    [empty_scalar_value_entry]
+      type = RunException
+      input = 'double_scalar_corr.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_values='; 1 2 3 4'"
+      detail = 'if empty entry is provided as batch scalar input parameter values.'
+      expect_err = 'this parameter cannot contain empty elements.'
+    []
+    [empty_vector_value_entry]
+      type = RunException
+      input = 'double_vector_corr.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='0.8;1.0;1.2;1.4| '"
+      detail = 'if empty entry is provided as batch vector input parameter values.'
+      expect_err = 'this parameter cannot contain empty elements.'
+    []
+    [diff_param_sizes_corr]
+      type = RunException
+      input = 'double_vector_corr.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='0.8;1.0|2'"
+      detail = 'if the batch input parameter values do not have the same size in corresponding mode.'
+      expect_err = 'BatchMeshGeneratorAction: elements of'
+    []
+    [decomp_corr]
+      type = RunException
+      input = 'double_vector_corr.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/use_decomposed_index=true"
+      detail = 'if the decomposed index is requested for the corresponding method.'
+      expect_err = 'Decomposed index cannot be used with the corresponding method'
+    []
+    [wrong_type]
+      type = RunException
+      input = 'double_vector_corr.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_types='UINT UINT'"
+      detail = 'if an incorrect input parameter type is provided.'
+      expect_err = 'has the wrong type. It should be'
+    []
+  []
+[]
