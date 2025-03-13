@@ -116,12 +116,14 @@ offset = 1e-2
     variable = disp_y
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
+    preset = false
   []
   [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
     function = '1e-2 * t'
+    preset = false
   []
 []
 
