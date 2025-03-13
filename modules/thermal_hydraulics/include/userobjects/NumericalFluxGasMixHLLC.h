@@ -12,7 +12,7 @@
 #include "NumericalFluxGasMixBase.h"
 #include "NaNInterface.h"
 
-class IdealRealGasMixtureFluidProperties;
+class VaporMixtureFluidProperties;
 
 /**
  * Computes the numerical flux for FlowModelGasMix using
@@ -43,5 +43,5 @@ protected:
                                  const std::vector<ADReal> & UR) const;
 
   /// fluid properties user object
-  const IdealRealGasMixtureFluidProperties & _fp;
+  const VaporMixtureFluidProperties & _fp;
 };

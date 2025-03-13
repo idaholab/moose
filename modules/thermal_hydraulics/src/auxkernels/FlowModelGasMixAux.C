@@ -28,7 +28,7 @@ FlowModelGasMixAux::validParams()
   params.addRequiredCoupledVar("area", "Cross-sectional area variable");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-                                          "The IdealRealGasMixtureFluidProperties object");
+                                          "The VaporMixtureFluidProperties object");
 
   params.addClassDescription("Computes various quantities for FlowModelGasMix.");
 
@@ -43,7 +43,7 @@ FlowModelGasMixAux::FlowModelGasMixAux(const InputParameters & parameters)
     _rhouA(coupledValue("rhouA")),
     _rhoEA(coupledValue("rhoEA")),
     _area(coupledValue("area")),
-    _fp(getUserObject<IdealRealGasMixtureFluidProperties>("fluid_properties"))
+    _fp(getUserObject<VaporMixtureFluidProperties>("fluid_properties"))
 {
 }
 

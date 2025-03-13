@@ -12,21 +12,20 @@
 #include "FlowBoundary1PhaseBase.h"
 
 /**
- * Base class for boundary components connected to FlowChannel1Phase components
+ * Base class for boundary components connected to FlowChannelGasMix components
  */
-class FlowBoundary1Phase : public FlowBoundary1PhaseBase
+class FlowBoundaryGasMix : public FlowBoundary1PhaseBase
 {
 public:
-  FlowBoundary1Phase(const InputParameters & params);
+  static InputParameters validParams();
+
+  FlowBoundaryGasMix(const InputParameters & params);
 
 protected:
   virtual void check() const override;
 
   /**
-   * Creates the boundary condition objects for 1-phase flow
+   * Creates the boundary condition objects for weak boundary conditions
    */
   virtual void addWeakBCs();
-
-public:
-  static InputParameters validParams();
 };
