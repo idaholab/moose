@@ -46,7 +46,7 @@ set -e
 if [ -n "$MFEM_SRC_DIR" ]; then
   skip_sub_update=1
 else
-  MFEM_SRC_DIR="$(realpath -m "${SCRIPT_DIR}"/../framework/contrib/mfem)"
+  MFEM_SRC_DIR="$(realpath "${SCRIPT_DIR}"/../framework/contrib/mfem)"
 fi
 MFEM_BUILD_DIR="${MFEM_SRC_DIR}/build"
 if [ -n "$MFEM_DIR" ]; then
@@ -60,14 +60,14 @@ fi
 if [ -n "$CONDUIT_SRC_DIR" ]; then
   skip_conduit_update=1
 else
-  CONDUIT_SRC_DIR="$(realpath -m "${SCRIPT_DIR}"/../framework/contrib/conduit)"
+  CONDUIT_SRC_DIR="$(realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
 fi
 CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
 
-CONDUIT_DIR=${CONDUIT_DIR:-$(realpath -m "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
-LIBMESH_DIR=${LIBMESH_DIR:-$(realpath -m "${SCRIPT_DIR}/../libmesh/installed")}
+CONDUIT_DIR=${CONDUIT_DIR:-$(realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
+LIBMESH_DIR=${LIBMESH_DIR:-$(realpath "${SCRIPT_DIR}/../libmesh/installed")}
 if [ -z "$PETSC_DIR" ]; then
-  PETSC_DIR=$(realpath -m "${SCRIPT_DIR}/../petsc")
+  PETSC_DIR=$(realpath "${SCRIPT_DIR}/../petsc")
   PETSC_ARCH="arch-moose"
 fi
 
