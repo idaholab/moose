@@ -42,7 +42,7 @@ set -e
 if [ -n "$CONDUIT_SRC_DIR" ]; then
   skip_sub_update=1
 else
-  CONDUIT_SRC_DIR="$(realpath -m "${SCRIPT_DIR}"/../framework/contrib/conduit)"
+  CONDUIT_SRC_DIR="$(realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
 fi
 CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
 if [ -n "$CONDUIT_DIR" ]; then
