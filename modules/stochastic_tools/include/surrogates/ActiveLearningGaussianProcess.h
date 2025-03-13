@@ -43,6 +43,24 @@ public:
   StochasticTools::GaussianProcess & gp() { return _gp; }
   const StochasticTools::GaussianProcess & getGP() const { return _gp; }
 
+  /**
+   * Fill in the provided vector with the current length scales from GP training
+   * @param length_scales The vector to be filled with the length scales
+   */
+  virtual void getLengthScales(std::vector<Real> & length_scales) const final;
+
+  /**
+   * Return the training data outputs standardizer
+   * @param standardizer The standardizer to return
+   */
+  virtual void getTrainingStandardizer(StochasticTools::Standardizer & standardizer) const final;
+
+  /**
+   * Return the normalized training outputs
+   * @param norm_training_outs The normalized traing outputs to return
+   */
+  virtual void getNormTrainingOuts(std::vector<Real> & norm_training_outs) const final;
+
 private:
   /// Name for the meta data associated with training
   const std::string _model_meta_data_name;
@@ -52,6 +70,9 @@ private:
 
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
+
+  /// Outputs (y) used for training, along with statistics
+  RealEigenMatrix & _training_data;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
