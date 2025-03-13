@@ -11,6 +11,7 @@
     max_parallel = 1
     recover = false
     max_threads = 1
+    platform = 'linux'
   []
   [./MFEMDiffusion]
     type = XMLDiff
@@ -94,6 +95,7 @@
     max_parallel = 1
     recover = false
     max_threads = 1
+    platform = 'linux'
   []
   [./MFEMIrrotational]
     type = CSVDiff
