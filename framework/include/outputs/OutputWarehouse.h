@@ -61,8 +61,10 @@ public:
   /**
    * Returns true if the output object exists
    * @param name The name of the output object for which to test for existence within the warehouse
+   * @param is_exodus Optional parameter to check if the output object associated with name must be
+   *                  Exodus type
    */
-  bool hasOutput(const std::string & name) const;
+  bool hasOutput(const std::string & name, const bool is_exodus = false) const;
 
   /**
    * Calls the meshChanged method for every output object
@@ -117,10 +119,18 @@ public:
   /**
    * Test that the output names exist
    * @param names A vector of names to check
-   * This method will produce an error if any of the supplied
-   * names do not exist in the warehouse. Reserved names are not considered.
+   * @param is_exodus Optional parameter to check if all output objects associated with names are
+   *                  all Exodus type
+   * This method will produce an error if any of the supplied names do not exist in
+   * the warehouse. Reserved names are not considered.
    */
-  void checkOutputs(const std::set<OutputName> & names);
+  void checkOutputs(const std::set<OutputName> & names, const bool is_exodus = false);
+
+  /**
+   * Returns all output names that have an associated Exodus output object
+   * @return A set of all output names that have Exodus output objects
+   */
+  const std::set<OutputName> getExodusOutputNames() const;
 
   /**
    * Return an Output object by name
