@@ -1,4 +1,3 @@
-# One element test to test the central difference time integrator in 3D.
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
@@ -52,21 +51,8 @@
     type = MeshCollectionGenerator
     inputs = ' block_one_id block_two_id'
   []
-[]
-
-[AuxVariables]
-  [penetration]
-  []
-[]
-
-[AuxKernels]
-  [penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = ball_back
-    paired_boundary = base_front
-    quantity = distance
-  []
+  allow_renumbering = false
+  patch_update_strategy = auto
 []
 
 [Variables]
@@ -93,123 +79,58 @@
   []
   [accel_z]
   []
-  [stress_zz]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [strain_zz]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [kinetic_energy_one]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [elastic_energy_one]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [kinetic_energy_two]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [elastic_energy_two]
-    order = CONSTANT
-    family = MONOMIAL
-  []
 []
 
 [AuxKernels]
-  [stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
-    variable = stress_zz
-    execute_on = 'TIMESTEP_END'
-  []
-  [strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    index_i = 2
-    index_j = 2
-    variable = strain_zz
-  []
   [accel_x]
     type = TestNewmarkTI
     variable = accel_x
     displacement = disp_x
     first = false
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [accel_y]
     type = TestNewmarkTI
     variable = accel_y
     displacement = disp_y
     first = false
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [vel_y]
     type = TestNewmarkTI
     variable = vel_y
     displacement = disp_x
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [accel_z]
     type = TestNewmarkTI
     variable = accel_z
     displacement = disp_z
     first = false
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [vel_z]
     type = TestNewmarkTI
     variable = vel_z
     displacement = disp_z
-    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
-  []
-  [kinetic_energy_one]
-    type = KineticEnergyAux
-    block = '1'
-    variable = kinetic_energy_one
-    newmark_velocity_x = vel_x
-    newmark_velocity_y = vel_y
-    newmark_velocity_z = vel_z
-    density = density
-  []
-  [elastic_energy_one]
-    type = ElasticEnergyAux
-    variable = elastic_energy_one
-    block = '1'
-  []
-  [kinetic_energy_two]
-    type = KineticEnergyAux
-    block = '2'
-    variable = kinetic_energy_two
-    newmark_velocity_x = vel_x
-    newmark_velocity_y = vel_y
-    newmark_velocity_z = vel_z
-    density = density
-  []
-  [elastic_energy_two]
-    type = ElasticEnergyAux
-    variable = elastic_energy_two
-    block = '2'
+    execute_on = 'TIMESTEP_END'
   []
 []
 
 [Kernels]
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    stiffness_damping_coefficient = 9.5e-4
-    generate_output = 'stress_zz strain_zz'
+    volumetric_locking_correction = true
+    stiffness_damping_coefficient = 0.001
+    decomposition_method = EigenSolution
   []
+
   [Mass_x]
     type = MassMatrix
     variable = disp_x
@@ -228,11 +149,13 @@
     density = density
     matrix_tags = 'mass'
   []
+[]
+
+[Kernels]
   [gravity]
     type = Gravity
     variable = disp_z
-    value = -98.10
-    block = 1
+    value = -981.0
   []
 []
 
@@ -283,7 +206,6 @@
     vel_x = 'vel_x'
     vel_y = 'vel_y'
     vel_z = 'vel_z'
-    verbose = true
   []
 []
 
@@ -293,19 +215,17 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.0
     block = 1
-    outputs = 'exodus'
-    output_properties = __all__
+    constant_on = SUBDOMAIN
   []
   [elasticity_tensor_block_two]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.0
     block = 2
-    outputs = 'exodus'
-    output_properties = __all__
+    constant_on = SUBDOMAIN
   []
   [strain_block]
-    type = ComputeFiniteStrain # ComputeIncrementalStrain
+    type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []
@@ -316,7 +236,6 @@
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 1e1
-    outputs = 'exodus'
     output_properties = 'density'
     block = '1'
   []
@@ -324,7 +243,6 @@
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 1e6
-    outputs = 'exodus'
     output_properties = 'density'
     block = '2'
   []
@@ -338,67 +256,18 @@
 [Executioner]
   type = Transient
   start_time = 0
-  end_time = 0.05
-  dt = 1.0e-4
+  end_time = 0.0025
+  dt = 0.00001
   timestep_tolerance = 1e-6
-
   [TimeIntegrator]
     type = DirectCentralDifference
     mass_matrix_tag = 'mass'
+    use_constant_mass = true
   []
 []
-
 [Outputs]
-  interval = 1
+  interval = 10
   exodus = true
   csv = true
-  execute_on = 'TIMESTEP_END'
-[]
-
-[Postprocessors]
-  [accel_58z]
-    type = NodalVariableValue
-    nodeid = 1
-    variable = accel_z
-  []
-  [vel_58z]
-    type = NodalVariableValue
-    nodeid = 1
-    variable = vel_z
-  []
-  [critical_time_step]
-    type = CriticalTimeStep
-  []
-  [contact_pressure_max]
-    type = NodalExtremeValue
-    variable = contact_pressure
-    block = '1 2'
-    value_type = max
-  []
-  [penetration_max]
-    type = NodalExtremeValue
-    variable = penetration
-    block = '1 2'
-    value_type = max
-  []
-  [total_kinetic_energy_one]
-    type = ElementIntegralVariablePostprocessor
-    variable = kinetic_energy_one
-    block = '1'
-  []
-  [total_elastic_energy_one]
-    type = ElementIntegralVariablePostprocessor
-    variable = elastic_energy_one
-    block = '1'
-  []
-  [total_kinetic_energy_two]
-    type = ElementIntegralVariablePostprocessor
-    variable = kinetic_energy_two
-    block = '2'
-  []
-  [total_elastic_energy_two]
-    type = ElementIntegralVariablePostprocessor
-    variable = elastic_energy_two
-    block = '2'
-  []
+  file_base = test_balance_out
 []
