@@ -164,6 +164,7 @@
 
 Instead of running the physics application, we load a previous CSV file with the necessary data.
 
+!style fontsize=80%
 - [CSVSampler](CSVSampler.md)
 - [Cartesian1D](Cartesian1DSampler.md)
 - [PolynomialRegressionTrainer](PolynomialRegressionTrainer.md)
@@ -172,7 +173,7 @@ Instead of running the physics application, we load a previous CSV file with the
 - [EvaluateSurrogate](EvaluateSurrogate.md)
 
 !style fontsize=60%
-!listing examples/workshop/step05.i
+!listing examples/workshop/step06.i
          style=max-height:300px;max-width:500px
 
 !col-end!

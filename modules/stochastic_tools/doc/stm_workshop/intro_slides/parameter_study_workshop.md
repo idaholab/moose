@@ -13,5 +13,5 @@
 
 # Workshop ParameterStudy
 
-!listing examples/workshop/step04.i
+!listing examples/workshop/step05.i
          style=font-size:80%
