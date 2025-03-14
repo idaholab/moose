@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYZDelaunayGenerator.md'
-  issues = '#28297 #29718'
+  issues = '#28297 #29718 #30154'
   [xyzdelaunay]
     requirement = "The system shall have the capability of tetrahedralizing a triangulated boundary"
     [basic]
@@ -47,6 +47,35 @@
       # see 29718
       valgrind = none
       capabilities = 'netgen'
+    []
+    [bcid_no_stitch]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_bcid.i'
+      csvdiff = 'xyzdelaunay_bcid_csv.csv'
+      recover = false
+      detail = "with specified boundary names assigned without stitching the hole meshes."
+    []
+    [bcid_stitch]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_bcid.i'
+      cli_args = 'bcid_shift=26
+                  Mesh/triang/stitch_holes="true true"'
+      csvdiff = 'xyzdelaunay_bcid_csv.csv'
+      recover = false
+      detail = "with specified boundary names assigned with the hole meshes stitched."
+    []
+    [bcid_numeric]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_bcid.i'
+      cli_args = 'bcid_shift=36
+                  Mesh/triang/output_boundary=36
+                  Mesh/triang/hole_boundaries="37 38"
+                  Postprocessors/ext_area_name/boundary="36"
+                  Postprocessors/h1_area_name/boundary="37"
+                  Postprocessors/h2_area_name/boundary="38"'
+      csvdiff = 'xyzdelaunay_bcid_csv.csv'
+      recover = false
+      detail = "with specified boundary ids assigned."
     []
   []
   [errors]
