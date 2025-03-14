@@ -21,9 +21,18 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r python/MooseDiscussion/requirements.txt
+
+      - name: Load environment variables
+        run: source ython/MooseDiscussion/env.list
+        shell: bash
 
       - name: Run discuss bot
-        run: python recommend_llamaIndex.py
+        run: python python/MooseDiscussion/GitHubBot.py \
+          --db_dir $DB_DIR \
+          --top_n $TOP_N \
+          --threshold $THRESHOLD \
+          --model_name $MODEL_NAME \
+          $(if [ "$DRY_RUN" = "true" ]; then echo "--dry_run"; fi)
         env:
           API_KEY: ${{ secrets.GITHUB_TOKEN }}
