@@ -1,0 +1,21 @@
+[Tests]
+  [test]
+    [run]
+      type = RunApp
+      input = parent.i
+      mfem = true
+      recover = false
+    []
+    [verify]
+      type = RunCommand
+      command = '../check.sh
+                u
+                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                u
+                OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+	    prereq = test/run
+      mfem = true
+      recover = false
+    []
+  []
+[]

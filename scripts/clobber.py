@@ -87,6 +87,7 @@ class Clobber(object):
             self.ignore_dir(root, subdirs, "moose")
             self.ignore_dir(root, subdirs, ".git")
             self.ignore_dir(root, subdirs, ".svn")
+            self.ignore_dir(root, subdirs, "contrib")
 
             self.remove_dir(root, subdirs, ".libs")
             self.remove_dir(root, subdirs, ".jitcache")
