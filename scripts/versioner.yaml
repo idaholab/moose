@@ -130,8 +130,8 @@ packages:
       - conda/pprof/build.sh
   # dependers: none
   seacas:
-    version: 2024.08.15
-    build_number: 2
+    version: 2025.02.27
+    build_number: 0
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
