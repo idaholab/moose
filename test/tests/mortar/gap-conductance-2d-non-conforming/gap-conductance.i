@@ -3,70 +3,66 @@
     type = FileMeshGenerator
     file = nodal_normals_test_offset_nonmatching_gap.e
   []
-  [./primary]
+  [primary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
-  [../]
-  [./secondary]
+  []
+  [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-  [../]
-[]
-
-[Problem]
-  kernel_coverage_check = false
+  []
 []
 
 [Variables]
-  [./T]
+  [T]
     block = '1 2'
-  [../]
-  [./lambda]
+  []
+  [lambda]
     block = '10'
-  [../]
+  []
 []
 
 [BCs]
-  [./neumann]
+  [neumann]
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln
     variable = T
     boundary = '3 4 5 6 7 8'
-  [../]
+  []
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = '1 2'
-  [../]
-  [./sink]
+  []
+  [sink]
     type = Reaction
     variable = T
     block = '1 2'
-  [../]
-  [./forcing_function]
+  []
+  [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_function]
+  [forcing_function]
     type = ParsedFunction
     expression = '-4 + x^2 + y^2'
-  [../]
-  [./exact_soln]
+  []
+  [exact_soln]
     type = ParsedFunction
     expression = 'x^2 + y^2'
-  [../]
+  []
 []
 
 [Debug]
@@ -74,7 +70,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = GapHeatConductanceTest
     primary_boundary = 2
     secondary_boundary = 1
@@ -82,7 +78,7 @@
     secondary_subdomain = 10
     variable = lambda
     secondary_variable = T
-  [../]
+  []
 []
 
 [Materials]
@@ -92,18 +88,17 @@
     prop_values = '.03'
     block = '1 2'
   []
-  [./ssm]
+  [ssm]
     type = SpatialStatefulMaterial
     block = '1 2'
-  [../]
+  []
 []
 
-
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -115,8 +110,4 @@
 
 [Outputs]
   exodus = true
-  [dofmap]
-    type = DOFMap
-    execute_on = 'initial'
-  []
 []
