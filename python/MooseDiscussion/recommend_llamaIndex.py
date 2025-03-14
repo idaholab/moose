@@ -2,6 +2,7 @@ from pathlib import Path
 import requests
 import os
 import certifi
+import argparse
 from dotenv import load_dotenv
 from llama_index.core.vector_stores import SimpleVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -13,171 +14,154 @@ from llama_index.core import (
 )
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.postprocessor import SimilarityPostprocessor
-
-# Set up GitHub credentials & variables
-load_dotenv()
-username = 'MOOSEbot'
-repo_owner = 'MengnanLi91'
-repo = 'moose'
-end_point = "https://api.github.com/graphql"
-discussion_arr = 1  # Number of discussions to fetch
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+from typing import List
 
 
-def load_database(db_dir):
-    vector_store = SimpleVectorStore.from_persist_dir(db_dir)
-    storage_context = StorageContext.from_defaults(
-        vector_store=vector_store, persist_dir=db_dir
-    )
-    index = load_index_from_storage(storage_context=storage_context)
+class GitHubBot:
+    def __init__(self, db_dir: Path, top_n: int, threshold: float, model_name: str, dry_run: bool) -> None:
+        self.username = 'MOOSEbot'
+        self.repo_owner = 'MengnanLi91'
+        self.repo = 'moose'
+        self.end_point = "https://api.github.com/graphql"
+        self.discussion_arr = 1  # Number of discussions to fetch
+        load_dotenv()
+        self.github_token = os.getenv("GITHUB_TOKEN")
+        self.top_n = top_n
+        self.threshold = threshold
+        self.dry_run = dry_run
+        self.index = self.load_database(db_dir)
 
-    return index
+        # Load the embedding model
+        try:
+            self.embed_model = HuggingFaceEmbedding(model_name=model_name)
+        except Exception as e:
+            print(f"Failed to load the model from HuggingFace: {e}")
+            print("Please provide a local path to the model as model_name")
+            self.embed_model = HuggingFaceEmbedding(model_name=model_name)
 
-def generate_solution(title, top_n, index, threshold):
+        Settings.embed_model = self.embed_model
 
-    # Compute similarities
-    retriever = VectorIndexRetriever(index=index,similarity_metric='cosine', similarity_top_k=top_n)
-    retrieved_nodes = retriever.retrieve(QueryBundle(title))
+    def load_database(self, db_dir: Path) -> SimpleVectorStore:
+        vector_store = SimpleVectorStore.from_persist_dir(db_dir)
+        storage_context = StorageContext.from_defaults(
+            vector_store=vector_store, persist_dir=db_dir
+        )
+        index = load_index_from_storage(storage_context=storage_context)
+        return index
 
-    processor = SimilarityPostprocessor(similarity_cutoff=threshold)
-    filtered_nodes = processor.postprocess_nodes(retrieved_nodes)
+    def generate_solution(self, title: str, top_n: int, index: SimpleVectorStore, threshold: float) -> str:
+        retriever = VectorIndexRetriever(index=index, similarity_metric='cosine', similarity_top_k=top_n)
+        retrieved_nodes = retriever.retrieve(QueryBundle(title))
 
-    result = []
-    result.append(f"Here are some previous posts that may related to your question: \n\n")
+        processor = SimilarityPostprocessor(similarity_cutoff=threshold)
+        filtered_nodes = processor.postprocess_nodes(retrieved_nodes)
 
-    for index, node in enumerate(filtered_nodes):
+        result: List[str] = []
+        result.append(f"Here are some previous posts that may relate to your question: \n\n")
 
-        result.append(f"    {index + 1}. Title: {node.metadata['title']}")
-        result.append(f"    URL: [{node.metadata['url']}]({node.metadata['url']})")
-        result.append(f"    Similarity: {node.score}\n")
+        for idx, node in enumerate(filtered_nodes):
+            result.append(f"    {idx + 1}. Title: {node.metadata['title']}")
+            result.append(f"    URL: [{node.metadata['url']}]({node.metadata['url']})")
+            result.append(f"    Similarity: {node.score}\n")
 
+        return "\n".join(result)
 
-    return "\n".join(result)
-
-def query_response(top_n, index, threshold):
-        # GraphQL query to fetch discussions
-    query = '''
-    query($owner: String!, $repo: String!, $first: Int!) {
-    repository(owner: $owner, name: $repo) {
-        discussions(first: $first) {
-        totalCount
-        pageInfo {
-            hasNextPage
-            endCursor
-        }
-        nodes {
-            id
-            title
-            body
-            author {
-            login
+    def query_response(self) -> None:
+        query = '''
+        query($owner: String!, $repo: String!, $first: Int!) {
+        repository(owner: $owner, name: $repo) {
+            discussions(first: $first) {
+            totalCount
+            pageInfo {
+                hasNextPage
+                endCursor
             }
-            comments(first: 1) {
             nodes {
+                id
+                title
+                body
                 author {
                 login
                 }
-                body
+                comments(first: 1) {
+                nodes {
+                    author {
+                    login
+                    }
+                    body
+                }
+                }
             }
             }
         }
         }
-    }
-    }
-    '''
+        '''
 
-    # GraphQL mutation to add a comment
-    mutation = '''
-    mutation($discussionId: ID!, $body: String!) {
-    addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
-        comment {
-        id
+        mutation = '''
+        mutation($discussionId: ID!, $body: String!) {
+        addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
+            comment {
+            id
+            }
         }
-    }
-    }
-    '''
+        }
+        '''
 
-    # Variables for the GraphQL queries/mutations
-    variables = {
-    'owner': repo_owner,
-    'repo': repo,
-    'first': discussion_arr
-    }
+        variables = {
+            'owner': self.repo_owner,
+            'repo': self.repo,
+            'first': self.discussion_arr
+        }
 
-    # Construct the request headers
-    headers = {"Authorization": "bearer {}".format(GITHUB_TOKEN)}
+        headers = {"Authorization": f"bearer {self.github_token}"}
 
+        response = requests.post(self.end_point, json={'query': query, 'variables': variables}, headers=headers, verify=certifi.where())
 
-    # Send the GraphQL request to fetch discussions
-    response = requests.post(end_point, json={'query': query, 'variables': variables}, headers=headers, verify=certifi.where())
+        if response.status_code == 200:
+            data = response.json()
+            discussions = data['data']['repository']['discussions']['nodes']
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        data = response.json()
-        # Extract discussions from the response
-        discussions = data['data']['repository']['discussions']['nodes']
+            for discussion in discussions:
+                title = discussion['title']
+                author = discussion['author']['login']
+                comments = discussion['comments']['nodes']
 
-        # Loop through each discussion
-        for discussion in discussions:
-            title = discussion['title']
-            author = discussion['author']['login']
-            comments = discussion['comments']['nodes']
-
-            # Check if a response has already been provided
-            if comments:
-                existing_comment_author = comments[0]['author']['login']
-
-                # If a response has been provided, skip to the next discussion
-                if existing_comment_author != username:
+                if comments and comments[0]['author']['login'] != self.username:
                     continue
 
-            # Generate a concise solution
-            concise_solution = generate_solution(title, top_n, index, threshold)
+                concise_solution = self.generate_solution(title, self.top_n, self.index, self.threshold)
+                response_body = f"Hey, @{author}\n\n {concise_solution} \n\nNote: This is an automated response. Please review and verify the solution. \n @{self.username} [BOT]"
 
-            # Construct the response body with the bot tag and warning
-            response_body = f"Hey, @{author}\n\n {concise_solution} \n\nNote: This is an automated response. Please review and verify the solution. \n @{username} [BOT]"
+                discussion_id = discussion['id']
 
-            # Get the discussion ID
-            discussion_id = discussion['id']
+                if not self.dry_run:
+                    response = requests.post(self.end_point, json={'query': mutation, 'variables': {'discussionId': discussion_id, 'body': response_body}}, headers=headers)
 
-            # Send the GraphQL mutation to add a comment
-            response = requests.post(end_point, json={'query': mutation, 'variables': {
-                                    'discussionId': discussion_id, 'body': response_body}}, headers=headers)
-
-            # Check if the mutation request was successful
-            if response.status_code == 200:
-                response_data = response.json()
-                comment_id = response_data['data']['addDiscussionComment']['comment']['id']
-                print(
-                    f"Successfully replied to discussion: {title} (Comment ID: {comment_id})")
-            else:
-                print(f"Failed to add comment to discussion: {title}")
-    else:
-        print(f"Request failed with status code: {response.status_code}")
-        print(response.text)
-
+                    if response.status_code == 200:
+                        response_data = response.json()
+                        comment_id = response_data['data']['addDiscussionComment']['comment']['id']
+                        print(f"Successfully replied to discussion: {title} (Comment ID: {comment_id})")
+                    else:
+                        print(f"Failed to add comment to discussion: {title}")
+                else:
+                    print(f"Dry run mode: Would have replied to discussion: {title} with the following body:\n{response_body}")
+        else:
+            print(f"Request failed with status code: {response.status_code}")
+            print(response.text)
 
 
 if __name__ == "__main__":
-    # Model used for encoding posts
-    # This model should be the same as the one used in build_db.py
+    parser = argparse.ArgumentParser(description='GitHub Bot for replying to discussions.')
+    parser.add_argument('--db_dir', type=Path, default=Path("database"), help='Path to the database directory.')
+    parser.add_argument('--top_n', type=int, default=5, help='Top N most similar posts to retrieve.')
+    parser.add_argument('--threshold', type=float, default=0.2, help='Cutoff threshold for similarity.')
+    parser.add_argument('--model_name', type=str, default="sentence-transformers/all-MiniLM-L12-v2", help='Model name for HuggingFace embedding.')
+    parser.add_argument('--dry_run', action='store_true', help='Run the bot in dry run mode without posting comments.')
 
-    embed_model = HuggingFaceEmbedding(model_name="sentence-transformers/all-MiniLM-L12-v2")
+    args = parser.parse_args()
 
-    # Database directory
-    db_dir = Path("database")
-    # Top N most similar posts to retrieve
-    top_n = 5
-    # Cutoff threshold
-    threshold = 0.2
-
-    Settings.embed_model = embed_model
-
-    #load database
-    index = load_database(db_dir)
-
-    query_response(top_n, index, threshold)
-
+    bot = GitHubBot(db_dir=args.db_dir, top_n=args.top_n, threshold=args.threshold, model_name=args.model_name, dry_run=args.dry_run)
+    bot.query_response()
 
 
 ## Reference
