@@ -29,7 +29,7 @@ requirements:
     - vtk
   run_constrained:
     # Python max constraints
-    - python <{{3.12}}
+    - python <{{3.13}}
 
 test:
   imports:
