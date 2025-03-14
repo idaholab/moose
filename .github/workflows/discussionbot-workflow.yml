@@ -3,8 +3,8 @@ on:
   discussion:
     types:
     # Use locked as trigger event until this chatbot is ready
-    #  - created
-      - locked
+      - created
+    #  - locked
 jobs:
   run_bot:
     runs-on: ubuntu-latest
@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: MOOSE_discussion_bot
 
       - name: Set up Python
         uses: actions/setup-python@v4
