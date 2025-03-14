@@ -82,7 +82,8 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
     _integral_old(0),
     _value_old(0),
     _t_step_old(-1),
-    _old_delta(0)
+    _old_delta(0),
+    _old_delta_unaffected(0)
 {
   if (!_fe_problem.isTransient())
     mooseError("PIDTransientControl is only meant to be used when the problem is transient, for "
@@ -152,7 +153,7 @@ PIDTransientControl::execute()
     _integral += delta * _dt;
     value += _Kint * _integral + _Kpro * delta;
     if (_dt > 0)
-      value += _Kder * delta / _dt;
+      value += _Kder * (delta - _old_delta_unaffected) / _dt;
 
     // If the maxmimum rate of change by the pid is fixed
     if (_maximum_change_rate != std::numeric_limits<Real>::max())
@@ -171,5 +172,6 @@ PIDTransientControl::execute()
 
     // Keep track of the previous delta for integral windup control
     _old_delta = delta;
+    _old_delta_unaffected = delta;
   }
 }
