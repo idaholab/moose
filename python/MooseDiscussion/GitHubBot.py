@@ -18,7 +18,7 @@ from typing import List
 
 
 class GitHubBot:
-    def __init__(self, db_dir: Path, top_n: int, threshold: float, model_name: str, dry_run: bool) -> None:
+    def __init__(self, db_dir: Path, model_path: str, top_n: int, threshold: float, model_name: str, load_local: bool, dry_run: bool) -> None:
         self.username = 'MOOSEbot'
         self.repo_owner = 'MengnanLi91'
         self.repo = 'moose'
@@ -29,17 +29,21 @@ class GitHubBot:
         self.top_n = top_n
         self.threshold = threshold
         self.dry_run = dry_run
+        self.load_local = load_local
         self.index = self.load_database(db_dir)
+        self.model_path = model_path
+        self.model_name = model_name
 
         # Load the embedding model
-        try:
-            self.embed_model = HuggingFaceEmbedding(model_name=model_name)
-        except Exception as e:
+        if self.load_local:
+            model_path_full = os.path.join(self.model_path, self.model_name)
+            print(f"Loading local model from {model_path_full}")
+            self.embed_model = HuggingFaceEmbedding(model_name=model_path_full)
+        else:
             print(f"Failed to load the model from HuggingFace: {e}")
             print("Please provide a local path to the model as model_name")
-            self.embed_model = HuggingFaceEmbedding(model_name=model_name)
+            self.embed_model = HuggingFaceEmbedding(model_name = f'sentence-transformers/{model_name}')
 
-        Settings.embed_model = self.embed_model
 
     def load_database(self, db_dir: Path) -> SimpleVectorStore:
         vector_store = SimpleVectorStore.from_persist_dir(db_dir)
@@ -50,7 +54,7 @@ class GitHubBot:
         return index
 
     def generate_solution(self, title: str, top_n: int, index: SimpleVectorStore, threshold: float) -> str:
-        retriever = VectorIndexRetriever(index=index, similarity_metric='cosine', similarity_top_k=top_n)
+        retriever = VectorIndexRetriever(index=index, similarity_metric='cosine', similarity_top_k=top_n, embed_model=self.embed_model)
         retrieved_nodes = retriever.retrieve(QueryBundle(title))
 
         processor = SimilarityPostprocessor(similarity_cutoff=threshold)
@@ -144,7 +148,7 @@ class GitHubBot:
                     else:
                         print(f"Failed to add comment to discussion: {title}")
                 else:
-                    print(f"Dry run mode: Would have replied to discussion: {title} with the following body:\n{response_body}")
+                    print(f"Dry run mode: Would have replied to discussion: '{title}' with the following body:\n{response_body}")
         else:
             print(f"Request failed with status code: {response.status_code}")
             print(response.text)
@@ -152,15 +156,17 @@ class GitHubBot:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='GitHub Bot for replying to discussions.')
+    parser.add_argument('--load_local', action='store_true', help="Load embedding model locally.")
     parser.add_argument('--db_dir', type=Path, default=Path("database"), help='Path to the database directory.')
+    parser.add_argument('--model_path', type=str, default=Path('../../../../../../LLM/pretrained_models/'), help="Path to the local model.")
     parser.add_argument('--top_n', type=int, default=5, help='Top N most similar posts to retrieve.')
     parser.add_argument('--threshold', type=float, default=0.2, help='Cutoff threshold for similarity.')
-    parser.add_argument('--model_name', type=str, default="sentence-transformers/all-MiniLM-L12-v2", help='Model name for HuggingFace embedding.')
+    parser.add_argument('--model_name', type=str, default="all-MiniLM-L12-v2", help='Model name for HuggingFace embedding.')
     parser.add_argument('--dry_run', action='store_true', help='Run the bot in dry run mode without posting comments.')
 
     args = parser.parse_args()
 
-    bot = GitHubBot(db_dir=args.db_dir, top_n=args.top_n, threshold=args.threshold, model_name=args.model_name, dry_run=args.dry_run)
+    bot = GitHubBot(db_dir=args.db_dir, model_path=args.model_path, top_n=args.top_n, threshold=args.threshold, model_name=args.model_name, dry_run=args.dry_run, load_local=args.load_local)
     bot.query_response()
 
 

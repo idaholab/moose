@@ -24,7 +24,7 @@ jobs:
         run: pip install -r python/MooseDiscussion/requirements.txt
 
       - name: Load environment variables
-        run: source ython/MooseDiscussion/env.list
+        run: source python/MooseDiscussion/env.list
         shell: bash
 
       - name: Run discuss bot

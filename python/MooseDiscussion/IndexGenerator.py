@@ -72,7 +72,7 @@ class IndexGenerator:
             return HuggingFaceEmbedding(model_name=model_path_full)
         else:
             print(f"Attempting to download model '{self.model_name}' from Huggingface...")
-            return SentenceTransformer(self.model_name)
+            return HuggingFaceEmbedding(model_name = f'sentence-transformers/{self.model_name}')
 
 
     def read_documents(self) -> List[Document]:
@@ -123,7 +123,7 @@ class IndexGenerator:
 
 def main():
     parser = argparse.ArgumentParser(description="Choose embedding model and load method.")
-    parser.add_argument('--load_local', action='store_true', help="Load model locally.")
+    parser.add_argument('--load_local', action='store_true', help="Load embedding model locally.")
     parser.add_argument('--show_progress', action='store_true', help="Show embedding progress.")
     # The transformer model needed to be downloaded locally due to INL block huggingface online mode. While running on Github workflow, it can successfully pull the model from Huggingface website
     parser.add_argument('--model_path', type=str, default=Path('../../../../../../LLM/pretrained_models/'), help="Path to the local model.")
