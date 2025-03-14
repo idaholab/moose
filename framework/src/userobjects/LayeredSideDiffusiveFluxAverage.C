@@ -18,7 +18,7 @@ registerMooseObjectRenamed("MooseApp",
 InputParameters
 LayeredSideDiffusiveFluxAverage::validParams()
 {
-  InputParameters params = LayeredSideIntegral::validParams();
+  InputParameters params = LayeredSideAverage::validParams();
   params.addClassDescription("Computes the diffusive flux of a variable on layers alongside "
                              "a boundary.");
   params.addRequiredParam<std::string>(

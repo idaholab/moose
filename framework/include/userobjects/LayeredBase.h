@@ -45,7 +45,7 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  virtual Real integralValue(Point p) const;
+  virtual Real integralValue(const Point & p) const;
 
   /**
    * Get the value for a given layer

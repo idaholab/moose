@@ -33,7 +33,7 @@ LayeredAverageRZ::LayeredAverageRZ(const InputParameters & parameters)
 void
 LayeredAverageRZ::execute()
 {
-  LayeredIntegral::execute();
+  LayeredIntegralBase<ElementIntegralVariableUserObject>::execute();
 
   Real current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
