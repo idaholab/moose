@@ -33,9 +33,9 @@ LibtorchTorchScriptNeuralNetTest::LibtorchTorchScriptNeuralNetTest(const InputPa
     _nn_values(declareVector("nn_values"))
 {
   // We read the neural net from a file which was prepared in python
-  std::shared_ptr<Moose::LibtorchNeuralNetBase> nn =
-      std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(getParam<std::string>("filename"));
-
+  auto nn =
+      std::make_shared<Moose::LibtorchTorchScriptNeuralNet>();
+  nn->loadNeuralNetwork(getParam<std::string>("filename"));
   // First, we evaluate the neural network at (0.0, 0.0, 0.0) and add it to the VPPs
   torch::Tensor input = at::zeros({1, 3}, at::kDouble);
   _x_values.push_back(0.0);
