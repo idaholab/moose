@@ -20,7 +20,7 @@ querying to select subsets of objects.  TheWarehouse stores customizable meta-da
 object that queries operate on. In general, meta-data is treated as static and not updated after
 objects have been added.  Results are cached and reused for repeated identical queries. For more
 information on the API and usage, see the doxygen documentation
-[here](http://mooseframework.org/docs/doxygen/moose/classAuxGroupExecuteMooseObjectWarehouse.html).
+[here](https://mooseframework.inl.gov/docs/doxygen/moose/classAuxGroupExecuteMooseObjectWarehouse.html).
 
 ## MooseObjectWarehouse
 
