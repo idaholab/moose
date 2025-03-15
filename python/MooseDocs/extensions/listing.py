@@ -9,11 +9,13 @@
 import pyhit
 import moosetree
 import difflib
+import moosesyntax
+import json
 
 from .. import common
 from ..common import exceptions
 from ..base import LatexRenderer
-from ..tree import html, tokens, latex
+from ..tree import html, tokens, latex, pages
 from . import core, command, floats, modal, appsyntax
 
 Listing = tokens.newToken('Listing', floats.Float)
@@ -64,8 +66,12 @@ class ListingExtension(command.CommandExtension):
         self._syntax = None
         for ext in self.translator.extensions:
             if isinstance(ext, appsyntax.AppSyntaxExtension):
-                self._syntax = ext.syntax
+                self._syntax = ext
                 break
+
+        if self._syntax:
+            renderer = self.translator.renderer
+            renderer.addJavaScript('moose_input_parser', "js/moose_input_parser.js")
 
     @property
     def syntax(self):
@@ -90,9 +96,8 @@ class LocalListingCommand(command.CommandComponent):
                                   token_type=Listing)
         content = info['inline'] if 'inline' in info else info['block']
 
-        syntaxes = None
-        if 'inline' not in info and self['language'] == 'moose':
-            syntaxes = self.getMooseSyntaxes(content)
+        if 'inline' not in info and settings['language'] == 'moose':
+            content = self.appendMooseSyntax(content, page)
 
         code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
                          language=settings['language'], content=content)
@@ -104,22 +109,119 @@ class LocalListingCommand(command.CommandComponent):
 
         return parent
 
-    def getMooseSyntaxes(self, content: str) -> dict[str, str]:
-        """Get all the moose syntaxes contained in the inputted content."""
+    def appendMooseSyntax(self, content: str, page: pages.Page) -> dict[str, str]:
+        """
+        Append content with syntax/object/parameter information.
+
+        This method will utilize pyhit to get syntaxes contained in the input
+        then use the appsyntax extension to associate those syntaxes with nodes
+        containing the object descriptions and documentation location. Once that
+        node is located, it appends via json format that data.
+
+        An example would be::
+
+            [Mesh] -> [Mesh<<<{'href': '...'}>>>]
+               [gmg]
+                 type = GeneratedMeshGenerator -> type = GeneratedMeshGenerator<<<{'description': '...', 'href': '...'}>>>
+                 dim = 2 -> dim<<<{'description': '...'}>>> = 2
+               []
+            []
+
+        The `framework/doc/content/contrib/prism/prism.min.js` JavaScript file
+        knows to recognize the `<<<>>>` syntax and
+        `framework/doc/content/js/moose_input_parser.js` JavaScript file knows
+        how to add the approriate HTML links and tooltips.
+        """
         if self.extension.syntax is None:
-            return None
+            return content
 
         syntax_ext: appsyntax.AppSyntaxExtension = self.extension.syntax # Convenience
 
-        syntaxes = {}
-        for node in moosetree.iterate(pyhit.parse(content)):
+        content_lines = content.splitlines()
+        try:
+            root = pyhit.parse(content)
+        except:
+            return content
+        for node in moosetree.iterate(root):
+            # Add reference to moose syntax
             fullpath = '/'.join([n.name for n in node.path])
-            try:
-                moose_node = syntax_ext.find(fullpath)
-                syntaxes[node.name] = moose_node.markdown
-            except exceptions.MooseDocsException:
+            moose_node = syntax_ext.find(fullpath, node_type=moosesyntax.SyntaxNode, throw_on_missing=False)
+            if moose_node:
+                l = node.line() - 1
+                line = content_lines[l]
+                ind = line.find(node.name) + len(node.name)
+                content_lines[l] = line[:ind] + self._stringifySyntaxData(moose_node, page) + line[ind:]
+
+            # This would be reached if it is an object or action name
+            else:
+                parent_path = '/'.join([n.name for n in node.parent.path])
+                # If it is an object, then it should have a type = object_type
+                val = node.get('type', None)
+                if val:
+                    fullpath = f'{parent_path}/{val}'
+                    moose_node = syntax_ext.find(fullpath, node_type=moosesyntax.ObjectNodeBase, throw_on_missing=False)
+                    if moose_node:
+                        pl = node.line(name='type') - 1
+                        content_lines[pl] += self._stringifySyntaxData(moose_node, page)
+                # If it isn't a object, let's try to find the action
+                else:
+                    fullpath = parent_path
+                    moose_node = syntax_ext.find(fullpath, node_type=moosesyntax.SyntaxNode, throw_on_missing=False)
+
+            # Can't do anything more if there is no moose node
+            if moose_node is None:
                 continue
 
+            # Get all parameters associated with the syntax
+            if isinstance(moose_node, moosesyntax.SyntaxNode):
+                parameters = [param for action in moose_node.actions() for param in action.parameters.values()]
+            elif moose_node.parameters:
+                parameters = list(moose_node.parameters.values())
+            else:
+                continue
+
+            # Add parameter data
+            for param, val in node.params():
+                # Let's not worry about type
+                if param == 'type':
+                    continue
+
+                # Find the parameter object with the matching name
+                param_obj = next((p for p in parameters if p['name'] == param), None)
+                if param_obj is None or not param_obj['description']:
+                    continue
+                attr = {'description': param_obj['description']}
+
+                # Append content with description
+                ci = node.line(name=param) - 1
+                line = content_lines[ci]
+                ind = line.find(param) + len(param)
+                content_lines[ci] = line[:ind] + '<<<' + json.dumps(attr) + '>>>' + line[ind:]
+
+        return '\n'.join(content_lines)
+
+    def _stringifySyntaxData(self, node: moosesyntax.SyntaxNode | moosesyntax.ObjectNodeBase, page: pages.Page) -> str:
+        # Just in case
+        if node is None:
+            return ''
+
+        attr = {}
+
+        # Get object description
+        desc = getattr(node, 'description', None)
+        if desc:
+            attr['description'] = desc
+
+        # Page that the object syntax is associated with
+        desired = self.translator.findPages(node.markdown)
+        if desired:
+            attr['href'] = str(desired[0].relativeDestination(page))
+
+        # Stringify in JSON format
+        if attr:
+            return '<<<' + json.dumps(attr) + '>>>'
+        else:
+            return ''
 
 class FileListingCommand(LocalListingCommand):
     COMMAND = 'listing'
@@ -151,12 +253,7 @@ class FileListingCommand(LocalListingCommand):
         """
         Build the tokens needed for displaying code listing.
         """
-        def get_content(filename):
-            content = self.getContent(filename, settings)
-            return common.extractContent(content, settings)[0]
-
         filename = common.check_filenames(info['subcommand'])
-        content = get_content(filename)
 
         # Create code token
         lang = settings.get('language')
@@ -164,6 +261,15 @@ class FileListingCommand(LocalListingCommand):
         # Language for the ModelSourceLink; independent of the
         # Code language when we're doing a diff
         link_lang = lang
+
+        def get_content(filename):
+            content = self.getContent(filename, settings)
+            content = common.extractContent(content, settings)[0]
+            if lang == 'moose':
+                content = self.appendMooseSyntax(content, page)
+            return content
+
+        content = get_content(filename)
 
         # Diff against a file
         if settings['diff']:
@@ -221,8 +327,10 @@ class FileListingCommand(LocalListingCommand):
         # Produce the diff here; n sets how much context to add (add all of it)
         diff = difflib.unified_diff(after_split, before_split,
                                     n=(len(before_split) + len(after_split)))
-        # Re-join the split diff but split the header (via the [3:])
-        return ' ' + ''.join(list(diff)[3:])
+        # Re-join the split diff but split the header (via the [2:])
+        # The @@ ... @@ coordinate will remain since the Prism plugin needs it,
+        # but the content of it is hidden in moose.css
+        return ' ' + ''.join(list(diff)[2:])
 
 class InputListingCommand(FileListingCommand):
     """
