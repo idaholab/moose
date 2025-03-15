@@ -2071,7 +2071,13 @@ MooseMesh::buildTypedMesh(unsigned int dim)
   }
 
   if (dim == libMesh::invalid_uint)
-    dim = getParam<MooseEnum>("dim");
+  {
+    if (isParamValid("dim"))
+      dim = getParam<MooseEnum>("dim");
+    else
+      // Legacy selection of the default for the 'dim' parameter
+      dim = 1;
+  }
 
   auto mesh = std::make_unique<T>(_communicator, dim);
 

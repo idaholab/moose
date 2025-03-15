@@ -47,6 +47,8 @@ MeshGenerator::validParams()
   params.addPrivateParam<bool>("_has_generate_data", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
   params.addPrivateParam<bool>(data_only_param, false);
+  // Controls are not created early enough
+  params.suppressParameter<std::vector<std::string>>("control_tags");
 
   return params;
 }
@@ -70,6 +72,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   if (_save_with_name == system.mainMeshGeneratorName())
     paramError(
         "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
+  if (getParam<bool>("nemesis") && !getParam<bool>("output"))
+    paramError("nemesis", "Should only be set to true if 'output=true'");
 }
 
 void

@@ -154,6 +154,7 @@ Extensions:
             constraints: syntax/Constraints/index.md
             controllogic: syntax/ControlLogic/index.md
             controls: syntax/Controls/index.md
+            convergence: syntax/Convergence/index.md
             correctors: syntax/Correctors/index.md
             covariances: syntax/Covariance/index.md
             dampers: syntax/Dampers/index.md

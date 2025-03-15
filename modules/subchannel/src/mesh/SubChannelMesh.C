@@ -13,7 +13,6 @@ InputParameters
 SubChannelMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
-  params.set<MooseEnum>("dim") = "3";
   params.addClassDescription("Base class for all mesh containers");
   return params;
 }

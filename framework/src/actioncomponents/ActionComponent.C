@@ -17,6 +17,11 @@ ActionComponent::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription("Base class for components that are defined using actions.");
   params.addParam<bool>("verbose", false, "Whether the component setup should be verbose");
+
+  // These parameters should not appear. Let's suppress them for now
+  params.suppressParameter<std::vector<std::string>>("active");
+  params.suppressParameter<std::vector<std::string>>("inactive");
+
   return params;
 }
 
