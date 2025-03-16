@@ -12,7 +12,7 @@
 #include "Marker.h"
 
 /**
- * Combines multiple marker fields.  The most conservative wins.
+ * Combines multiple marker fields.  The most conservative (requesting additional refinement) wins.
  */
 class ComboMarker : public Marker
 {
@@ -24,7 +24,15 @@ public:
 protected:
   virtual MarkerValue computeElementMarker() override;
 
-  std::vector<MarkerName> _names;
+  /// Names of the markers contributing to the combo
+  const std::vector<MarkerName> _names;
 
+  /// Pointers to the markers contributing to the Combo marker
   std::vector<const VariableValue *> _markers;
+
+  /// Boolean to keep track of whether any marker does not have the same block restriction
+  bool _block_restriction_mismatch;
+
+  /// Pointers to the variables for the markers
+  std::vector<const MooseVariableFieldBase *> _marker_variables;
 };
