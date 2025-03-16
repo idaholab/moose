@@ -1,13 +1,19 @@
 [Tests]
-  issues = '#1303'
   design = 'ComboMarker.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'combo_marker_test.i'
     exodiff = 'combo_marker_test_out.e'
     scale_refine = 2
-
     requirement = "The system shall include the ability to combine multiple mesh refinement markers into a single value."
-  [../]
+    issues = '#1303'
+  []
+  [test_block_restriction]
+    type = 'Exodiff'
+    input = 'combo_marker_block_restricted.i'
+    exodiff = 'combo_marker_block_restricted_out.e'
+    requirement = "The system shall include the ability to combine multiple mesh refinement markers into a single value even if the block restriction of each marker do not match."
+    issues = '#30103'
+  []
 []
