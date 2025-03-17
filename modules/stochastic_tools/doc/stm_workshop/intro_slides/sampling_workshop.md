@@ -177,7 +177,7 @@ Distribution objects are stand-alone classes that can be invoked by other object
 
 !row!
 !col! width=50%
-- `CSVSampler` and `InputMatrix` samplers offer a way to explicitly define the sampling matrix.
+- [CSVSampler.md] and [InputMatrix.md] samplers offer a way to explicitly define the sampling matrix.
 - Useful for using STM in a workflow where sampler values are generated externally.
 !col-end!
 

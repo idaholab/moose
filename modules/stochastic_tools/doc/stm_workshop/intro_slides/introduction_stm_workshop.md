@@ -32,7 +32,7 @@ Perform UQ and sensitivity analysis with +distributed data+ and leveraging +adva
 !style halign=center fontsize=120%
 Train meta-models to build fast-evaluating +surrogates+ of the high-fidelity multiphysics model and provide a +pluggable+ interface for these surrogates.
 
-- Harness machine learning capabilities through the C++ front end of PyTorch, i.e. +Libtorch+.
+- Harness machine learning capabilities through the C++ front end of PyTorch, i.e. +LibTorch+.
 - Use +active learning+ models for building surrogates.
 
 !media surrogate_viz.png style=width:60%
@@ -47,8 +47,8 @@ Train meta-models to build fast-evaluating +surrogates+ of the high-fidelity mul
 
 Part 1: Introduction to systems and basic parameter studies
 
-- `Distributions` and `Samplers`
-- Model execution via `MultiApps`
+- [Distributions](Distributions/index.md) and [Samplers](Samplers/index.md)
+- Model execution via [MultiApps](MultiApps/index.md)
 - Parameter study statistics and sensitivity analysis
 - Introduction to surrogate system
 
@@ -64,7 +64,7 @@ Part 3^*^: Active learning
 - Use of an acquisition function
 - Solving optimization problems with Bayesian optimization
 
-[!style fontsize=80%](* Not included in these slides)
+[!style fontsize=80%](* Not included in these slides yet)
 
 !---
 

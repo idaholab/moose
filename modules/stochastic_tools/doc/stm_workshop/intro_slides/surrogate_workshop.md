@@ -9,6 +9,7 @@
 - Usages for these surrogates:
 
   - Uncertainty quantification
+  - Sensitivity analysis
   - Parameter optimization
   - Multi-scale modeling
   - Controller design
@@ -112,7 +113,7 @@
 
 !row!
 !col! width=60%
-- Cross validation is a method to determine the quality of surrogate.
+- Cross validation is a method to determine the quality of the surrogate.
 - The method involves splitting the predictor/response data into train and test parts.
 
   - Randomly select a portion of the data to train with.

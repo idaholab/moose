@@ -50,15 +50,15 @@
 !row!
 !col! width=70%
 - Confidence intervals are a way to determining how well the computed statistic is known.
-- The `percentile` option (recommended) utilizes a bootstrap method:
+- The [!param](/Reporters/StatisticsReporter/percentile) option (recommended) utilizes a bootstrap method:
 
   - Shuffle the QoI vector a number of times to have that many new QoI vectors (shuffling causes repeated values).
   - Recompute the statistics on each QoI vector to produce a vector of statistics.
   - Sort the vector of statistics.
   - Select the value in the vector that is greater than the requested percent of values.
 
-- `ci_replicates` specifies the number of shuffles.
-- `ci_levels` specifies the percentile extracted (1%, 5%, 10%, 90%, 95%, and 99% are typical values).
+- [!param](/Reporters/StatisticsReporter/ci_replicates) specifies the number of shuffles.
+- [!param](/Reporters/StatisticsReporter/ci_levels) specifies the percentile extracted (1%, 5%, 10%, 90%, 95%, and 99% are typical values).
 !col-end!
 
 !col! width=30%
@@ -122,7 +122,7 @@
 !style! fontsize=90%
 
 - Morris filtering is another global sensitivity technique.
-- Can be much less intensive than Sobol:
+- Can require less computational effort than Sobol:
 
   !equation
   N = \texttt{trajectories}\times (M + 1)
@@ -273,4 +273,3 @@
 | $q_{left}$               | 0.07813             | 0.3364              | 0.1573          | 0.2562            |
 |                          | (0.02931, 0.1329)   | (0.2908, 0.3849)    | (0.1229, 0.195) | (0.2183, 0.2961)  |
 
-!---
