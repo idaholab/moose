@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVCoupledAdvection.h"
+#include "Steady.h"
+#include "FEProblemBase.h"
 
 registerADMooseObject("MooseTestApp", FVCoupledAdvection);
 
@@ -37,6 +39,16 @@ FVCoupledAdvection::FVCoupledAdvection(const InputParameters & params)
     // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
     getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
         ->setErrorOnJacobianNonzeroReallocation(false);
+  }
+
+  if (dynamic_cast<Steady *>(_app.getExecutioner()))
+  {
+    const MooseEnum not_available_with_steady("sou min_mod vanLeer quick venkatakrishnan");
+    const std::string chosen_scheme =
+        static_cast<std::string>(getParam<MooseEnum>("advected_interp_method"));
+    if (not_available_with_steady.find(chosen_scheme) != not_available_with_steady.items().end())
+      paramError("advected_interp_method",
+                 "The given advected interpolation cannot be used with steady-state runs!");
   }
 }
 
