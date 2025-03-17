@@ -10,7 +10,6 @@
 #pragma once
 
 #include "CSGSurface.h"
-#include "CSGHalfspace.h"
 
 #include "libmesh/point.h"
 
