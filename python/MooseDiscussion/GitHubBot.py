@@ -44,6 +44,8 @@ class GitHubBot:
             print("Please provide a local path to the model as model_name")
             self.embed_model = HuggingFaceEmbedding(model_name = f'sentence-transformers/{model_name}')
 
+        Settings.embed_model = embed_model
+
 
     def load_database(self, db_dir: Path) -> SimpleVectorStore:
         vector_store = SimpleVectorStore.from_persist_dir(db_dir)
