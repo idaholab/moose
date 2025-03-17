@@ -836,7 +836,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       FEBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
       auto & grad_phi = _ad_grad_phi_data[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -857,7 +857,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
       auto & grad_phi = _ad_vector_grad_phi_data[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -1041,7 +1041,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
-  auto num_shapes = fe->n_shape_functions();
+  auto num_shapes = FEInterface::n_shape_functions(fe->get_fe_type(), elem);
   const auto & phi_map = fe->get_fe_map().get_phi_map();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
@@ -2141,7 +2141,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     {
       FEBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
       auto & grad_phi = _ad_grad_phi_data_face[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -2161,7 +2161,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     {
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
       auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
 
       grad_phi.resize(num_shapes);
