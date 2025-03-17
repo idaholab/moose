@@ -161,7 +161,7 @@ public:
    */
   void setCoupling(Moose::CouplingType type);
 
-  Moose::CouplingType coupling() { return _coupling; }
+  Moose::CouplingType coupling() const { return _coupling; }
 
   /**
    * Set custom coupling matrix
@@ -788,9 +788,6 @@ public:
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters);
-  virtual void addHDGIntegratedBC(const std::string & kernel_name,
-                                  const std::string & name,
-                                  InputParameters & parameters);
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
