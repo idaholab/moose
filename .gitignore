@@ -349,3 +349,6 @@ share/
 
 # clangd cache data
 .cache
+
+# PETSc binary output
+binaryoutput
