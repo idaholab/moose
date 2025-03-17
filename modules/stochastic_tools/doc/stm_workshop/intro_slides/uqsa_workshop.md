@@ -50,7 +50,7 @@
 !row!
 !col! width=70%
 - Confidence intervals are a way to determining how well the computed statistic is known.
-- The [!param](/Reporters/StatisticsReporter/percentile) option (recommended) utilizes a bootstrap method:
+- The [!param](/Reporters/StatisticsReporter/ci_method) `= percentile` option (recommended) utilizes a bootstrap method:
 
   - Shuffle the QoI vector a number of times to have that many new QoI vectors (shuffling causes repeated values).
   - Recompute the statistics on each QoI vector to produce a vector of statistics.
@@ -76,33 +76,41 @@
 
 # Sobol Sensitivities
 
-!style! halign=center fontsize=150%
-[Sobol](SobolSampler.md)
+!row!
 
+!col! width=50%
+!style halign=center fontsize=150%
+[Sobol](SobolSampler.md)
+!col-end!
+
+!col! width=50%
+!style halign=center fontsize=150%
 [SobolReporter](SobolReporter.md)
-!style-end!
+!col-end!
+
+!row-end!
 
 !row!
 !col! width=70%
 - Sobol indices are a global sensitivity analysis technique that can determine influence of parameter uncertainty on QoI uncertainty.
-- The [SobolReporter](SobolReporter.md) object in conjunction with the `Sobol` sampler computes first-order, second-order, and total Sobol indices.
+- The [SobolReporter](SobolReporter.md) object in conjunction with the [SobolSampler.md] sampler computes Sobol indices:
 
   - First-order and total indices indicate QoI sensitivity to a specific parameter
   - Second-order indices indicate non-linearities between two parameters
 
-- The `Sobol` sampler requires the input of two other samplers to perform the sampling.
+- The [SobolSampler.md] sampler requires two other samplers.
 - Number of samples can be quite large with a large parameter space:
 
   !equation
   N = 2 N_a (M + 1)
 !col-end!
 
-!col! width=30%
+!col! width=30% style=margin-left:20px
 
 !style fontsize=60%
 !listing reporters/sobol/sobol_main.i
          block=Samplers Reporters/sobol
-         style=width:400px;height:400px
+         style=width:350px;height:380px
 
 !col-end!
 !row-end!

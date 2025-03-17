@@ -90,7 +90,7 @@ x_{5,1} & \dots & x_{5,M}
 # Sampling Using MultiApps
 
 !row!
-!col! width=60%
+!col! width=60% style=margin-right:20px
 - Create/run sub-applications for each sampler row.
 - [SamplerFullSolveMultiApp](SamplerFullSolveMultiApp.md) fully evaluates each row before transferring data.
 
@@ -193,14 +193,12 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-!style fontsize=60%
+!style fontsize=50%
 !listing max-height=70px
-[MultiApps]
-  [runner]
-    type = SamplerFullSolveMultiApp
-    ...
-    mode = normal
-  []
+[MultiApps/runner]
+  type = SamplerFullSolveMultiApp
+  ...
+  mode = normal
 []
 !col-end!
 !row-end!
@@ -209,7 +207,7 @@ x_{5,1} & \dots & x_{5,M}
 !col! width=65%
 - +batch-reset+ mode
 
-  - Recommended mode for general problem types and requires the least intrusion.
+  - Recommended mode for general problems and non-intrusive.
   - Not memory intensive, but not the most efficient by run-time.
 !col-end!
 
@@ -218,13 +216,11 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-!style fontsize=60%
+!style fontsize=50%
 !listing max-height=70px
-[MultiApps]
-  [runner]
-    ...
-    mode = batch-reset
-  []
+[MultiApps/runner]
+  ...
+  mode = batch-reset
 []
 !col-end!
 !row-end!
@@ -241,13 +237,11 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-!style fontsize=60%
+!style fontsize=50%
 !listing max-height=70px
-[MultiApps]
-  [runner]
-    ...
-    mode = batch-restore
-  []
+[MultiApps/runner]
+  ...
+  mode = batch-restore
 []
 !col-end!
 !row-end!
@@ -257,7 +251,7 @@ x_{5,1} & \dots & x_{5,M}
 - +batch-restore+ mode with re-used solution
 
   - Works for steady-state and pseudo-transient problems.
-  - Keeps solution around for next sample that is usually a better initial guess for the solve
+  - Keeps solution for next sample (better initial guess)
 !col-end!
 
 !col! width=5%
@@ -265,14 +259,12 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-!style fontsize=60%
+!style fontsize=50%
 !listing max-height=70px
-[MultiApps]
-  [runner]
-    ...
-    mode = batch-restore
-    keep_solution_during_restore = true
-  []
+[MultiApps/runner]
+  ...
+  mode = batch-restore
+  keep_solution_during_restore = true
 []
 !col-end!
 !row-end!
@@ -290,14 +282,12 @@ x_{5,1} & \dots & x_{5,M}
 !col-end!
 
 !col! width=30%
-!style fontsize=60%
+!style fontsize=50%
 !listing max-height=70px
-[MultiApps]
-  [runner]
-    ...
-    mode = batch-restore
-    no_backup_and_restore = true
-  []
+[MultiApps/runner]
+  ...
+  mode = batch-restore
+  no_backup_and_restore = true
 []
 !col-end!
 !row-end!
@@ -377,24 +367,35 @@ In `sub.i`:
 
 # QoI Output
 
-- The resulting data will have the name `<stochastic_reporter_name>/<transfer_name>:<object_name>:<value_name>`
+!style! fontsize=90%
+- The resulting data will have the name
+
+  `<stochastic_reporter_name>/<transfer_name>:<object_name>:<value_name>`
 
 - The `converged` vector tells you whether or not the sample's sub-application was able to solve
 
 - Vector QoIs are not able to be outputted to CSV
+!style-end!
 
 !row!
 !col! width=45%
 
+!style fontsize=75%
 `main_out.json`:
 
-!listing! language=json max-height=200px
+!style fontsize=60%
+!listing! language=json max-height=300px
 "storage": {
     "data:avg_u:value": [
         290.0493845242595,
         248.6050947481139,
         ...
     ],
+    "data:converged": [
+        true,
+        true,
+        ...
+    ]
     "data:u_line:u": [
         [
             290.0493845242595,
@@ -408,11 +409,6 @@ In `sub.i`:
         ],
         ...
     ],
-    "data:converged": [
-        true,
-        true,
-        ...
-    ]
 }
 !listing-end!
 
@@ -424,8 +420,10 @@ In `sub.i`:
 
 !col! width=45%
 
+!style fontsize=75%
 `main_out_storage_0001.csv`:
 
+!style fontsize=60%
 ```
 data:avg_u:value,data:converged
 290.0493845242595,True

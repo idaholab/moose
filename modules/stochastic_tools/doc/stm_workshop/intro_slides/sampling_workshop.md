@@ -146,9 +146,9 @@ Distribution objects are stand-alone classes that can be invoked by other object
 - Mainly meant to be used with PolynomialChaos.
 - Sparse quadrature options allow for efficient integration of monomial spaces.
 
-!media tensor_grid.svg style=width:50%;margin-left:auto;margin-right:auto;
+!media tensor_grid.svg style=width:45%;margin-left:0px;margin-right:10px;
 
-!media smolyak_grid.svg style=width:50%;margin-left:auto;margin-right:auto;
+!media smolyak_grid.svg style=width:45%;margin-left:10px;margin-right:0px;
 !col-end!
 
 !col!
@@ -177,7 +177,7 @@ Distribution objects are stand-alone classes that can be invoked by other object
 
 !row!
 !col! width=50%
-- [CSVSampler.md] and [InputMatrix.md] samplers offer a way to explicitly define the sampling matrix.
+- [CSVSampler.md] and [InputMatrixSampler.md] samplers offer a way to explicitly define the sampling matrix.
 - Useful for using STM in a workflow where sampler values are generated externally.
 !col-end!
 
@@ -212,7 +212,7 @@ Distribution objects are stand-alone classes that can be invoked by other object
 
 !row!
 
-!col! width=30%
+!col! width=30% style=margin-right:20px
 
 - [Uniform](Uniform.md)
 - [Normal](Normal.md)

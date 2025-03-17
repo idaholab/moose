@@ -121,9 +121,11 @@ T(t=0, x, y) = 300
 
 !col! width=50%
 
-!style halign=center style=width:80%;margin-left:auto;margin-right:auto;display:block
+!style fontsize=60% halign=center style=width:80%;margin-left:auto;margin-right:auto;display:block
 ```bash
 moose-opt -i diffusion.i
+# moose-opt can be any application executable
+# that includes the Stochastic Tools Module.
 ```
 
 !style fontsize=60% halign=center style=width:80%;margin-left:auto;margin-right:auto;display:block

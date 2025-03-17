@@ -12,6 +12,7 @@ Renderer:
 Extensions:
     disable_defaults: True
     MooseDocs.extensions.comment: default
+    MooseDocs.extensions.common: default
     MooseDocs.extensions.command: default
     MooseDocs.extensions.core: default
     MooseDocs.extensions.config: default
@@ -31,6 +32,20 @@ Extensions:
     MooseDocs.extensions.shortcut: default
     MooseDocs.extensions.table: default
     MooseDocs.extensions.layout: default
+    MooseDocs.extensions.alert: default
+    MooseDocs.extensions.appsyntax:
+        active: True
+        executable: ${MOOSE_DIR}/modules/stochastic_tools
+        remove:
+            framework: !include framework/doc/remove.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
+        includes:
+            - framework/include
+            - modules/stochastic_tools/include
+        markdown:
+            SurrogateModelArrayAuxKernel : SurrogateModelArrayAuxKernel.md
     MooseDocs.extensions.content: default
     MooseDocs.extensions.modal: default
     MooseDocs.extensions.acronym:
