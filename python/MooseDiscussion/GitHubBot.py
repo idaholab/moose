@@ -156,12 +156,18 @@ class GitHubBot:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='GitHub Bot for replying to discussions.')
+
+    default_db_dir = Path(os.getenv('DB_DIR', 'database'))
+    default_top_n = int(os.getenv('TOP_N', 5))
+    default_threshold = float(os.getenv('THRESHOLD', 0.2))
+    default_model_name = os.getenv('MODEL_NAME', 'all-MiniLM-L12-v2')
+
     parser.add_argument('--load_local', action='store_true', help="Load embedding model locally.")
-    parser.add_argument('--db_dir', type=Path, default=Path("database"), help='Path to the database directory.')
+    parser.add_argument('--db_dir', type=Path, default=default_db_dir, help='Path to the database directory.')
     parser.add_argument('--model_path', type=str, default=Path('../../../../../../LLM/pretrained_models/'), help="Path to the local model.")
-    parser.add_argument('--top_n', type=int, default=5, help='Top N most similar posts to retrieve.')
-    parser.add_argument('--threshold', type=float, default=0.2, help='Cutoff threshold for similarity.')
-    parser.add_argument('--model_name', type=str, default="all-MiniLM-L12-v2", help='Model name for HuggingFace embedding.')
+    parser.add_argument('--top_n', type=int, default=default_top_n, help='Top N most similar posts to retrieve.')
+    parser.add_argument('--threshold', type=float, default=default_threshold, help='Cutoff threshold for similarity.')
+    parser.add_argument('--model_name', type=str, default=default_model_name, help='Model name for HuggingFace embedding.')
     parser.add_argument('--dry_run', action='store_true', help='Run the bot in dry run mode without posting comments.')
 
     args = parser.parse_args()

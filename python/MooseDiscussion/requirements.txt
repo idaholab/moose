@@ -5,3 +5,4 @@ llama_index
 llama-index-embeddings-huggingface
 pathlib
 certifi
+requests
