@@ -12,17 +12,17 @@
 #include "FVElementalKernel.h"
 
 /*
- *  FVCoupledGradDotElementalAdvection implements:
+ *  FVElementalCoupledGradAdvectionKernel implements:
  *
  *      - strong form: \nabla v \cdot \nabla u
  *
  *      - weak form: \int_{V} \nabla v \cdot \nabla u dV
  */
-class FVCoupledGradDotElementalAdvection : public FVElementalKernel
+class FVElementalCoupledGradAdvectionKernel : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  FVCoupledGradDotElementalAdvection(const InputParameters & params);
+  FVElementalCoupledGradAdvectionKernel(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;

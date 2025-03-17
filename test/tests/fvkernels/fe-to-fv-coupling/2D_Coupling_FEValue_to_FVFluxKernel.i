@@ -33,7 +33,7 @@
     coeff = 1.0
   []
   [u_diffusion_time_v]
-    type = FVCoupledValueDotDiffusion
+    type = FVCoupledValueDiffusionKernel
     variable = u
     v = v
   []

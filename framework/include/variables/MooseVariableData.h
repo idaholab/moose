@@ -115,7 +115,8 @@ public:
    */
   void computeValuesFace(const FaceInfo & fi);
   void computeGhostValuesFace(const FaceInfo & fi, MooseVariableData<OutputType> & other_face);
-  void computeADAveraging();
+  void computeADFaceAveraging();
+  void computeADElementAveraging();
 
   /**
    * compute the variable values

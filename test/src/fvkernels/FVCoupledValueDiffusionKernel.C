@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVCoupledValueDotDiffusion.h"
+#include "FVCoupledValueDiffusionKernel.h"
 
-registerMooseObject("MooseTestApp", FVCoupledValueDotDiffusion);
+registerMooseObject("MooseTestApp", FVCoupledValueDiffusionKernel);
 
 InputParameters
-FVCoupledValueDotDiffusion::validParams()
+FVCoupledValueDiffusionKernel::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes residual for a coupled variable time the "
@@ -22,13 +22,13 @@ FVCoupledValueDotDiffusion::validParams()
   return params;
 }
 
-FVCoupledValueDotDiffusion::FVCoupledValueDotDiffusion(const InputParameters & params)
+FVCoupledValueDiffusionKernel::FVCoupledValueDiffusionKernel(const InputParameters & params)
   : FVFluxKernel(params), _v_elem(adCoupledValue("v")), _v_neighbor(adCoupledNeighborValue("v"))
 {
 }
 
 ADReal
-FVCoupledValueDotDiffusion::computeQpResidual()
+FVCoupledValueDiffusionKernel::computeQpResidual()
 {
   using namespace Moose::FV;
   const auto state = determineState();
