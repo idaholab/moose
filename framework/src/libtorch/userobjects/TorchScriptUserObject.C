@@ -18,12 +18,14 @@ TorchScriptUserObject::validParams()
   params.addClassDescription("User-facing object which loads a torch script module.");
   params.addRequiredParam<std::string>("filename", "The file name which contains the torch script module.");
   params.declareControllable("filename");
+  params.addParam<bool>("load_during_construction", false, "If we want to load this neural network while we are constructing this object.");
   return params;
 }
 
 TorchScriptUserObject::TorchScriptUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-  _filename(getParam<std::string>("filename"))
+  _filename(getParam<std::string>("filename")),
+  _torchscript_module(getParam<bool>("load_during_construction") ? std::make_shared<Moose::TorchScriptModule>(_filename) : nullptr)
 {
 }
 
