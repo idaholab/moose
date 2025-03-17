@@ -31,4 +31,4 @@ jobs:
           DB_DIR: "python/MooseDiscussion/database"
           TOP_N: 5
           THRESHOLD: 0.2
-          MODEL_NAME: "sentence-transformers/all-MiniLM-L12-v2"
+          MODEL_NAME: "all-MiniLM-L12-v2"
