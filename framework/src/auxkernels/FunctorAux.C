@@ -42,6 +42,18 @@ FunctorAux::FunctorAux(const InputParameters & parameters)
 Real
 FunctorAux::computeValue()
 {
+  mooseDoOnce( // PPs: need to execute before this auxkernel
+      const auto & functor_name = getParam<MooseFunctorName>("functor");
+      if (_c_fe_problem.hasPostprocessorValueByName(functor_name)) {
+        if (!(_c_fe_problem.getUserObjectBase(functor_name).isParamValid("force_preaux") &&
+              _c_fe_problem.getUserObjectBase(functor_name).getParam<bool>("force_preaux")))
+          paramError(
+              "functor",
+              "Functor is a postprocessor and does not have 'force_preaux' set to true. The value "
+              "of the postprocessor would be lagged in the functor evaluation. 'force_preaux' will "
+              "ensure the value is updated before the auxiliary variables computation.");
+      });
+
   const auto state = determineState();
   if (isNodal())
   {
