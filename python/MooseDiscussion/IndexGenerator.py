@@ -20,11 +20,12 @@ class IndexGenerator:
         self.model_path = model_path
         self.model_name = model_name
         self.show_progress = show_progress
-        self.database = database
+        self.database = Path(database)
         self.dry_run = dry_run
         self.rawdata_dir = Path(rawdata)
-        self.db_dir = Path(database)
         self.embed_model = self.load_model()
+
+        Settings.embed_model = self.embed_model
 
     def get_post_content(self, post: dict) -> str:
         content = ""
@@ -45,19 +46,13 @@ class IndexGenerator:
                 content += self.get_comment_content(reply["node"])
         return content
 
-    def get_reply_content(self, reply: dict) -> str:
-        return reply["bodyText"] + "\n"
-
-    def encode_content(self, content: str) -> List[float]:
-        return self.embed_model.encode(content)
-
     class MyFileReader(BaseReader):
-        def __init__(self, get_post_content_func):
-            self.get_post_content = get_post_content_func
+        def __init__(self, get_post_content):
+            self.get_post_content = get_post_content
 
         def load_data(self, file: str, extra_info: Optional[dict] = None) -> List[Document]:
             with open(file, "r") as f:
-                page = json.loads(file.read_text())
+                page = json.load(f)
                 posts = page["discussions"]["edges"]
                 for post in posts:
                     title = post["node"]["title"]
@@ -65,7 +60,7 @@ class IndexGenerator:
                     content = self.get_post_content(post["node"])
                 return [Document(text=content, metadata={"title": title, "url": url})]
 
-    def load_model(self) -> Union[HuggingFaceEmbedding, SentenceTransformer]:
+    def load_model(self) -> HuggingFaceEmbedding:
         if self.load_local:
             model_path_full = os.path.join(self.model_path, self.model_name)
             print(f"Loading local model from {model_path_full}")
@@ -106,17 +101,16 @@ class IndexGenerator:
         return index
 
     def save_index(self, index: VectorStoreIndex):
-        index.storage_context.persist(persist_dir=self.db_dir)
+        index.storage_context.persist(persist_dir=self.database)
 
     def generate_index(self):
         if self.dry_run:
             print("Dry run: Skipping actual index generation.")
             return
 
-        Settings.embed_model = self.embed_model
         documents = self.read_documents()
         index = self.create_index(documents)
-        print(f"Save index to: {self.db_dir}")
+        print(f"Save index to: {self.database}")
         self.save_index(index)
         print("Successfully generated the index database from documentation!")
 
