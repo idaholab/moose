@@ -362,3 +362,6 @@ OutputData
 !**/gold/**/OutputData/**/*.pvtu
 !**/gold/**/OutputData/**/*.xml*
 !**/gold/**/OutputData/**/*.json*
+
+# PETSc binary output
+binaryoutput
