@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#30107'
+  design = 'TorchScriptMaterial.md TorchScriptUserObject.md'
+  [parsed_material_with_functors]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_exo.e'
+    requirement = "The system shall be able to load a torch script module and use it as a material property."
+  []
+[]
