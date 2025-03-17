@@ -69,7 +69,9 @@ TorchScriptMaterial::computeQpValues()
     input_accessor[0][input_i] = (*_module_inputs[input_i]);
 
   const auto output = _torch_script_userobject.evaluate(_input_tensor);
-  mooseError(_num_props == output.numel(), "The tensor needs to be the same length as the number of properties!");
+  if (_num_props != output.numel())
+    mooseError("The tensor needs to be the same length (right now ",output.numel(),
+             ") as the number of properties (right now ",_num_props,")!");
 
   const auto output_accessor = output.accessor<Real,2>();
   for (unsigned int prop_i = 0; prop_i < _num_props; ++prop_i)
