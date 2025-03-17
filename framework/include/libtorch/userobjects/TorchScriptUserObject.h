@@ -26,23 +26,23 @@ public:
 
   TorchScriptUserObject(const InputParameters & parameters);
 
-  virtual void initialize() override {};
+  virtual void initialize() override{};
   virtual void execute() override;
-  virtual void finalize() override {};
+  virtual void finalize() override{};
 
   /**
    * Get access to the torch script module which was loaded in this object.
    */
-  const std::shared_ptr<Moose::TorchScriptModule> & module() const {return _torchscript_module;}
+  const std::shared_ptr<Moose::TorchScriptModule> & module() const { return _torchscript_module; }
 
   /**
    * Function to evaluate the torch script module at certain input.
-   * @param input The input tensor. Unfortunately, this cannot be const since it creates a graph in the background.
+   * @param input The input tensor. Unfortunately, this cannot be const since it creates a graph in
+   * the background.
    */
   torch::Tensor evaluate(torch::Tensor & input) const;
 
 protected:
-
   /// The file name that specifies the torch script model.
   const std::string & _filename;
 

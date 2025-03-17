@@ -16,14 +16,9 @@
 namespace Moose
 {
 
-TorchScriptModule::TorchScriptModule()
-{
-}
+TorchScriptModule::TorchScriptModule() {}
 
-TorchScriptModule::TorchScriptModule(const std::string & filename)
-{
-  loadNeuralNetwork(filename);
-}
+TorchScriptModule::TorchScriptModule(const std::string & filename) { loadNeuralNetwork(filename); }
 
 void
 TorchScriptModule::loadNeuralNetwork(const std::string & filename)

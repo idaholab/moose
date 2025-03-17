@@ -24,7 +24,6 @@ namespace Moose
 class TorchScriptModule : public torch::jit::script::Module, public LibtorchNeuralNetBase
 {
 public:
-
   /**
    * Construct using a filename which contains the source code in torchscript format
    */
