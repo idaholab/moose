@@ -35,49 +35,25 @@ AreMatricesTheSame::AreMatricesTheSame(const InputParameters & parameters)
 }
 
 void
-AreMatricesTheSame::initialize()
-{
-  auto load_matrix = [this](Mat mat, const std::string & mat_name)
-  {
-    PetscViewer matviewer;
-    auto ierr =
-        PetscViewerBinaryOpen(_communicator.get(), mat_name.c_str(), FILE_MODE_READ, &matviewer);
-    LIBMESH_CHKERR(ierr);
-    MatLoad(mat, matviewer);
-    LIBMESH_CHKERR(ierr);
-    ierr = PetscViewerDestroy(&matviewer);
-    LIBMESH_CHKERR(ierr);
-  };
-
-  auto ierr = MatCreate(_communicator.get(), &_petsc_mat1);
-  LIBMESH_CHKERR(ierr);
-  load_matrix(_petsc_mat1, _mat1_name);
-
-  ierr = MatCreate(_communicator.get(), &_petsc_mat2);
-  LIBMESH_CHKERR(ierr);
-  load_matrix(_petsc_mat2, _mat2_name);
-
-  _mat1 = std::make_unique<PetscMatrix<Number>>(_petsc_mat1, _communicator);
-  _mat2 = std::make_unique<PetscMatrix<Number>>(_petsc_mat2, _communicator);
-}
-
-void
 AreMatricesTheSame::execute()
 {
   _equiv = true;
 
-  if ((_mat1->row_start() != _mat2->row_start()) || (_mat1->row_stop() != _mat2->row_stop()) ||
-      (_mat1->col_start() != _mat2->col_start()) || (_mat1->col_stop() != _mat2->col_stop()))
+  auto mat1 = Moose::PetscSupport::createMatrixFromFile(_communicator, _petsc_mat1, _mat1_name);
+  auto mat2 = Moose::PetscSupport::createMatrixFromFile(_communicator, _petsc_mat2, _mat2_name);
+
+  if ((mat1->row_start() != mat2->row_start()) || (mat1->row_stop() != mat2->row_stop()) ||
+      (mat1->col_start() != mat2->col_start()) || (mat1->col_stop() != mat2->col_stop()))
   {
     _equiv = false;
     return;
   }
 
-  for (const auto i : make_range(_mat1->row_start(), _mat1->row_stop()))
-    for (const auto j : make_range(_mat1->col_start(), _mat1->col_stop()))
+  for (const auto i : make_range(mat1->row_start(), mat1->row_stop()))
+    for (const auto j : make_range(mat1->col_start(), mat1->col_stop()))
     {
-      const auto val1 = (*_mat1)(i, j);
-      const auto val2 = (*_mat2)(i, j);
+      const auto val1 = (*mat1)(i, j);
+      const auto val2 = (*mat2)(i, j);
       if (!MooseUtils::relativeFuzzyEqual(val1, val2, _equiv_tol) &&
           !MooseUtils::absoluteFuzzyEqual(val1, val2, _equiv_tol))
       {
