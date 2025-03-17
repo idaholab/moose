@@ -30,7 +30,6 @@ class GitHubBot:
         self.threshold = threshold
         self.dry_run = dry_run
         self.load_local = load_local
-        self.index = self.load_database(db_dir)
         self.model_path = model_path
         self.model_name = model_name
 
@@ -44,9 +43,10 @@ class GitHubBot:
             print("Please provide a local path to the model as model_name")
             self.embed_model = HuggingFaceEmbedding(model_name = f'sentence-transformers/{model_name}')
 
+        self.index = self.load_database(db_dir)
+
 
     def load_database(self, db_dir: Path) -> SimpleVectorStore:
-
         Settings.embed_model = self.embed_model
 
         vector_store = SimpleVectorStore.from_persist_dir(db_dir)
