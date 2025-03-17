@@ -10,7 +10,7 @@
 #ifdef LIBTORCH_ENABLED
 
 #include "LibtorchDRLControl.h"
-#include "LibtorchTorchScriptNeuralNet.h"
+#include "TorchScriptModule.h"
 #include "LibtorchArtificialNeuralNet.h"
 #include "Transient.h"
 

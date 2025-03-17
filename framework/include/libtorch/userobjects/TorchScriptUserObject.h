@@ -13,7 +13,7 @@
 
 // MOOSE includes
 #include "GeneralUserObject.h"
-#include "LibtorchTorchScriptNeuralNet.h"
+#include "TorchScriptModule.h"
 
 
 class TorchScriptUserObject : public GeneralUserObject
@@ -27,12 +27,11 @@ public:
   virtual void execute() override;
   virtual void finalize() override {};
 
-  const std::shared_ptr<Moose::LibtorchTorchScriptNeuralNet> & network() {return _nn;}
+  const std::shared_ptr<Moose::TorchScriptModule> & module() const {return _torchscript_module;}
 
   /**
-   * Function to evaluate the neural network at certain input
-   * @param input The input vector (why not const, because torch needs nonconst sadly)
-   * @param output Storage for the outputs
+   * Function to evaluate the torch script module at certain input.
+   * @param input The input tensor. Unfortunately, this cannot be const since it creates a graph in the background.
    */
   torch::Tensor evaluate(torch::Tensor & input) const;
 
@@ -42,7 +41,7 @@ protected:
   const std::string & _filename;
 
   /// The libtorch neural network that is currently stored here
-  std::shared_ptr<Moose::LibtorchTorchScriptNeuralNet> _nn;
+  std::shared_ptr<Moose::TorchScriptModule> _torchscript_module;
 };
 
 #endif

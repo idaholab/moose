@@ -20,21 +20,21 @@
 namespace Moose
 {
 
-// A class that describes a torch-script-based neural network.
-class LibtorchTorchScriptNeuralNet : public torch::jit::script::Module, public LibtorchNeuralNetBase
+// A class that describes a torch-script-based module that can be evalauted.
+class TorchScriptModule : public torch::jit::script::Module, public LibtorchNeuralNetBase
 {
 public:
 
   /**
    * Construct using a filename which contains the source code in torchscript format
    */
-  LibtorchTorchScriptNeuralNet();
+  TorchScriptModule();
 
   /**
    * Construct using a filename which contains the source code in torchscript format
    * @param filename The name of the file that contains the neural net
    */
-  LibtorchTorchScriptNeuralNet(const std::string & filename);
+  TorchScriptModule(const std::string & filename);
 
   /// Construct the neural network
   void loadNeuralNetwork(const std::string & filename);
