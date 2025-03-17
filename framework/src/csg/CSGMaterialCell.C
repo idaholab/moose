@@ -12,13 +12,13 @@
 namespace CSG
 {
 
-CSGMaterialCell::CSGMaterialCell(const std::string name)
-  : CSGCell(name, FillType::material), _fill_name("")
+CSGMaterialCell::CSGMaterialCell(const std::string name, const CSGRegion & region)
+  : CSGCell(name, FillType::MATERIAL, region), _fill_name("")
 {
 }
 
-CSGMaterialCell::CSGMaterialCell(const std::string name, const std::string fill_name)
-  : CSGCell(name, FillType::material), _fill_name(fill_name)
+CSGMaterialCell::CSGMaterialCell(const std::string name, const std::string fill_name, const CSGRegion & region)
+  : CSGCell(name, FillType::MATERIAL, region), _fill_name(fill_name)
 {
 }
 } // namespace CSG

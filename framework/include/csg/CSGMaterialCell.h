@@ -22,9 +22,9 @@ namespace CSG
 class CSGMaterialCell : public CSGCell
 {
 public:
-  CSGMaterialCell(const std::string name);
+  CSGMaterialCell(const std::string name, const CSGRegion & region);
 
-  CSGMaterialCell(const std::string name, const std::string fill_name);
+  CSGMaterialCell(const std::string name, const std::string fill_name, const CSGRegion & region);
 
   std::string getFill() const { return _fill_name; }
 

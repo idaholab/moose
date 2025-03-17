@@ -47,22 +47,25 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
 
   auto root_univ = input_mesh->getRootUniverse();
   const auto cell_name = "square_cell";
-  auto elem_cell_ptr = root_univ->getCell(cell_name);
+  auto cell_ptr = root_univ->getCell(cell_name);
+  const auto cell_region = cell_ptr->getRegion();
   const auto centroid = Point(0, 0, 0);
+  std::vector<const CSG::CSGRegion> region_halfspaces = {cell_region};
 
   // Add surfaces and halfspaces corresponding to top and bottom axial planes
   std::vector<std::string> surf_names {"plus_z", "minus_z"};
   std::vector<Real> coeffs{0.5 * _axial_height, -0.5 * _axial_height};
-
   for (unsigned int i = 0; i < coeffs.size(); ++i)
   {
     const auto surf_name = "surf_" + surf_names[i];
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
     auto plane_ptr = input_mesh->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
-    const auto elem_direction = plane_ptr->directionFromPoint(centroid);
-    auto elem_halfspace = CSG::CSGHalfspace(plane_ptr, elem_direction);
-    elem_cell_ptr->addRegionHalfspace(elem_halfspace);
+    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    const auto region_halfspace = CSG::CSGRegion(plane_ptr, region_direction, CSG::CSGRegion::Operation::HALFSPACE);
+    region_halfspaces.push_back(region_halfspace);
   }
+  const auto updated_region = CSG::CSGRegion(region_halfspaces, CSG::CSGRegion::Operation::INTERSECTION);
+  cell_ptr->updateRegion(updated_region);
 
   return input_mesh;
 }

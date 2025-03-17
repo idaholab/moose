@@ -13,14 +13,14 @@ namespace CSG
 {
 
 CSGSurface::CSGSurface(const std::string name)
-  : _name(name), _surface_type(SurfaceType::invalid), _boundary_type(BoundaryType::transmission)
+  : _name(name), _surface_type(SurfaceType::INVALID), _boundary_type(BoundaryType::transmission)
 {
 }
 
 CSGSurface::CSGSurface(const std::string name, SurfaceType surf_type)
   : _name(name), _surface_type(surf_type), _boundary_type(BoundaryType::transmission)
 {
-  if (_surface_type == SurfaceType::invalid)
+  if (_surface_type == SurfaceType::INVALID)
     mooseError("Surface type of surface " + _name + " is being set to invalid");
 }
 
@@ -29,15 +29,15 @@ CSGSurface::getSurfaceTypeString()
 {
   switch (_surface_type)
   {
-    case SurfaceType::plane:
+    case SurfaceType::PLANE:
       return "plane";
-    case SurfaceType::sphere:
+    case SurfaceType::SPHERE:
       return "sphere";
-    case SurfaceType::xcylinder:
+    case SurfaceType::XCYLINDER:
       return "xcylinder";
-    case SurfaceType::ycylinder:
+    case SurfaceType::YCYLINDER:
       return "ycylinder";
-    case SurfaceType::zcylinder:
+    case SurfaceType::ZCYLINDER:
       return "zcylinder";
     default:
       return "invalid";

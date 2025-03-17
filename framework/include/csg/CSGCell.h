@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include "CSGHalfspace.h"
-#include "CSGIntersection.h"
+#include "CSGRegion.h"
 
 namespace CSG
 {
@@ -26,15 +25,15 @@ public:
   // TODO add support for universe and lattice fill
   enum class FillType
   {
-    material,
-    empty,
-    invalid
+    MATERIAL,
+    EMPTY,
+    INVALID
   };
 
   /**
    * Default constructor
    */
-  CSGCell(const std::string name, const FillType fill_type);
+  CSGCell(const std::string name, const FillType fill_type, const CSGRegion & region);
 
   /**
    * Destructor
@@ -45,20 +44,22 @@ public:
 
   const std::string getName() const { return _name; }
 
-  void addRegionHalfspace(const CSGHalfspace & halfspace) { _region.addNode(halfspace); }
+  void updateRegion(const CSGRegion & region) { _region = region; }
+
+  const CSGRegion & getRegion() const { return _region; }
 
   std::string getRegionAsString() const { return _region.toString(); }
+
+  const std::string getFillTypeString();
 
 protected:
   /// Name of surface
   const std::string _name;
 
-  /// Cell region, represented as a CSGIntersection.
-  /// We can generalize this further in the future, but this representation should
-  /// be sufficient for now.
-  CSGIntersection _region;
-
   /// Fill type of cell
   FillType _fill_type;
+
+  /// Cell region, represented as a CSGRegion object
+  CSGRegion _region;
 };
 } // namespace CSG

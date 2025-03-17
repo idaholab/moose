@@ -12,5 +12,5 @@
 namespace CSG
 {
 
-CSGVoidCell::CSGVoidCell(const std::string name) : CSGCell(name, FillType::empty) {}
+CSGVoidCell::CSGVoidCell(const std::string name, const CSGRegion & region) : CSGCell(name, FillType::EMPTY, region) {}
 } // namespace CSG

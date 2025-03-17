@@ -21,7 +21,7 @@ namespace CSG
 class CSGVoidCell : public CSGCell
 {
 public:
-  CSGVoidCell(const std::string name);
+  CSGVoidCell(const std::string name, const CSGRegion & region);
 
   /**
    * Destructor

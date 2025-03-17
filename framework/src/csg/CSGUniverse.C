@@ -15,23 +15,23 @@ namespace CSG
 CSGUniverse::CSGUniverse(const std::string name) : _name(name) { _next_cell_id = 0; }
 
 std::shared_ptr<CSGCell>
-CSGUniverse::addMaterialCell(const std::string name, const std::string fill_name)
+CSGUniverse::addMaterialCell(const std::string name, const std::string fill_name, const CSGRegion & region)
 {
   if (_cell_name_id_mapping.find(name) != _cell_name_id_mapping.end())
     mooseError("Cell with name " + name + " already exists in universe");
   const auto cell_id = _next_cell_id++;
-  _cells.insert(std::make_pair(cell_id, std::make_shared<CSGMaterialCell>(name, fill_name)));
+  _cells.insert(std::make_pair(cell_id, std::make_shared<CSGMaterialCell>(name, fill_name, region)));
   _cell_name_id_mapping.insert({name, cell_id});
   return _cells[cell_id];
 }
 
 std::shared_ptr<CSGCell>
-CSGUniverse::addVoidCell(const std::string name)
+CSGUniverse::addVoidCell(const std::string name, const CSGRegion & region)
 {
   if (_cell_name_id_mapping.find(name) != _cell_name_id_mapping.end())
     mooseError("Cell with name " + name + " already exists in universe");
   const auto cell_id = _next_cell_id++;
-  _cells.insert(std::make_pair(cell_id, std::make_shared<CSGVoidCell>(name)));
+  _cells.insert(std::make_pair(cell_id, std::make_shared<CSGVoidCell>(name, region)));
   _cell_name_id_mapping.insert({name, cell_id});
   return _cells[cell_id];
 }
