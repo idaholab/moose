@@ -68,7 +68,7 @@ class GitHubBot:
         for idx, node in enumerate(filtered_nodes):
             result.append(f"    {idx + 1}. Title: {node.metadata['title']}")
             result.append(f"    URL: [{node.metadata['url']}]({node.metadata['url']})")
-            result.append(f"    Similarity: {node.score}\n")
+            result.append(f"    Similarity: {node.score:.4f}\n")
 
         return "\n".join(result)
 
@@ -136,7 +136,12 @@ class GitHubBot:
                     continue
 
                 concise_solution = self.generate_solution(title, self.top_n, self.index, self.threshold)
-                response_body = f"Hey, @{author}\n\n {concise_solution} \n\nNote: This is an automated response. Please review and verify the solution. \n @{self.username} [BOT]"
+                response_body = (
+                    f"Hey, @{author},\n\n"
+                    f"{concise_solution}\n\n"
+                    "Note: This is an automated response. Please review and verify the solution.\n"
+                    f"@{self.username} [BOT]"
+                )
 
                 discussion_id = discussion['id']
 
