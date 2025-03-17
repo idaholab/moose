@@ -10,7 +10,8 @@
   [my_net]
     type = TorchScriptUserObject
     filename = "my_net.pt"
-    execute_on = "TIMESTEP_BEGIN"
+    load_during_construction = true
+    execute_on = "INITIAL"
   []
 []
 
@@ -18,8 +19,8 @@
   [net_material]
     type = TorchScriptMaterial
     prop_names = diff_coeff
-    input_names = 'my_pp1 my_pp2 my_pp3'
-    torch_script_uo = my_net
+    input_names = 'pp1 pp2 pp3'
+    torch_script_userobject = my_net
   []
 []
 
@@ -51,21 +52,17 @@
 []
 
 [Postprocessors]
-  [my_pp1]
+  [pp1]
     type = ConstantPostprocessor
     value = 0
   []
-  [my_pp2]
+  [pp2]
     type = ConstantPostprocessor
     value = 0.1
   []
-  [my_pp3]
+  [pp3]
     type = ConstantPostprocessor
     value = 0.2
-  []
-  [average]
-    type = ElementAverageValue
-    variable = u
   []
 []
 
@@ -74,5 +71,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [exo]
+    type = Exodus
+    output_material_properties = true
+  []
 []

@@ -6,7 +6,7 @@ torch.manual_seed(42)
 class MyNet(nn.Module):
     def __init__(self):
         super(MyNet, self).__init__()
-        self.layer1 = nn.Linear(5, 5)
+        self.layer1 = nn.Linear(3, 5)
         self.relu1 = nn.ReLU()
         self.output_layer = nn.Linear(5, 1)
 
