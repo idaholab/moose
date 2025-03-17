@@ -15,6 +15,7 @@ InputParameters
 TorchScriptUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("User-facing object which loads a torch script module.");
   params.addRequiredParam<std::string>("filename", "The file name which contains the torch script module.");
   params.declareControllable("filename");
   return params;
