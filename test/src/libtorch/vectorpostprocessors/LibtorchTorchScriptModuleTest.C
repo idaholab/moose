@@ -33,8 +33,7 @@ TorchScriptModuleTest::TorchScriptModuleTest(const InputParameters & params)
     _nn_values(declareVector("nn_values"))
 {
   // We read the neural net from a file which was prepared in python
-  auto nn =
-      std::make_shared<Moose::TorchScriptModule>();
+  auto nn = std::make_shared<Moose::TorchScriptModule>();
   nn->loadNeuralNetwork(getParam<std::string>("filename"));
   // First, we evaluate the neural network at (0.0, 0.0, 0.0) and add it to the VPPs
   torch::Tensor input = at::zeros({1, 3}, at::kDouble);
