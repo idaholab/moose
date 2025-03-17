@@ -66,9 +66,9 @@ class GitHubBot:
         result.append(f"Here are some previous posts that may relate to your question: \n\n")
 
         for idx, node in enumerate(filtered_nodes):
-            result.append(f"    {idx + 1}. Title: {node.metadata['title']}")
-            result.append(f"    URL: [{node.metadata['url']}]({node.metadata['url']})")
-            result.append(f"    Similarity: {node.score:.4f}\n")
+            result.append(f"{idx + 1}. Title: {node.metadata['title']}")
+            result.append(f"URL: [{node.metadata['url']}]({node.metadata['url']})")
+            result.append(f"Similarity: {node.score:.4f}\n")
 
         return "\n".join(result)
 
