@@ -25,7 +25,7 @@ protected:
   virtual MarkerValue computeElementMarker() override;
 
   /// Names of the markers contributing to the combo
-  const std::vector<MarkerName> _names;
+  const std::vector<MarkerName> & _names;
 
   /// Pointers to the markers contributing to the Combo marker
   std::vector<const VariableValue *> _markers;

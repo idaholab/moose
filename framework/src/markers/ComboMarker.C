@@ -26,20 +26,22 @@ ComboMarker::validParams()
 
 ComboMarker::ComboMarker(const InputParameters & parameters)
   : Marker(parameters),
-    _names(parameters.get<std::vector<MarkerName>>("markers")),
+    _names(getParam<std::vector<MarkerName>>("markers")),
     _block_restriction_mismatch(false)
 {
   for (const auto & marker_name : _names)
     _markers.push_back(&getMarkerValue(marker_name));
 
-  for (const auto & marker_name : _names)
-    _marker_variables.push_back(&_fe_problem.getVariable(_tid, marker_name));
-
-  // Check block restrictions
   std::string other_block_restricted = "";
   for (const auto & marker_name : _names)
-    if (blockIDs() != _fe_problem.getVariable(_tid, marker_name).blockIDs())
+  {
+    const auto var_ptr = &_subproblem.getVariable(_tid, marker_name);
+    _marker_variables.push_back(var_ptr);
+
+    // Check block restrictions
+    if (blockIDs() != var_ptr->blockIDs())
       other_block_restricted += (other_block_restricted == "" ? "" : ", ") + marker_name;
+  }
 
   if (other_block_restricted != "")
   {
