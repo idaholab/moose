@@ -90,7 +90,7 @@ l = 1
     variable = pressure
     face_variable = pressure_bar
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
   []
 []
@@ -149,6 +149,35 @@ l = 1
   []
 []
 
+[DGKernels]
+  [pb_mass]
+    type = MassMatrixDGKernel
+    variable = pressure_bar
+    matrix_tags = 'mass'
+  []
+
+  [u_jump]
+    type = MassFluxPenalty
+    matrix_only = true
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    vector_tags = ''
+    matrix_tags = 'jump combined'
+  []
+  [v_jump]
+    type = MassFluxPenalty
+    matrix_only = true
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    vector_tags = ''
+    matrix_tags = 'jump combined'
+  []
+[]
+
 [BCs]
   [momentum_x_diffusion_walls]
     type = NavierStokesStressIPHDGDirichletBC
@@ -191,7 +220,7 @@ l = 1
     type = ADHDGAdvectionDirichletBC
     variable = pressure
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom top right'
   []
@@ -207,7 +236,7 @@ l = 1
     type = ADHDGAdvectionDirichletBC
     variable = pressure_bar
     velocity_function = wall_vel_func
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom right'
   []
@@ -215,7 +244,7 @@ l = 1
     type = ADHDGAdvectionDirichletBC
     variable = pressure_bar
     velocity_function = top_vel_func
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'top'
   []
