@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVCoupledGradDotElementalAdvection.h"
+#include "FVElementalCoupledGradAdvectionKernel.h"
 
-registerMooseObject("MooseTestApp", FVCoupledGradDotElementalAdvection);
+registerMooseObject("MooseTestApp", FVElementalCoupledGradAdvectionKernel);
 
 InputParameters
-FVCoupledGradDotElementalAdvection::validParams()
+FVElementalCoupledGradAdvectionKernel::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable.");
@@ -21,14 +21,14 @@ FVCoupledGradDotElementalAdvection::validParams()
   return params;
 }
 
-FVCoupledGradDotElementalAdvection::FVCoupledGradDotElementalAdvection(
+FVElementalCoupledGradAdvectionKernel::FVElementalCoupledGradAdvectionKernel(
     const InputParameters & params)
   : FVElementalKernel(params), _grad_v(adCoupledGradient("v")), _grad_u(_var.adGradSln())
 {
 }
 
 ADReal
-FVCoupledGradDotElementalAdvection::computeQpResidual()
+FVElementalCoupledGradAdvectionKernel::computeQpResidual()
 {
   return -1.0 * _grad_v[_qp] * _grad_u[_qp];
 }

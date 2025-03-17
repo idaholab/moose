@@ -297,7 +297,7 @@ public:
    * Returns the reference to a pointer to the current FV quadrature being used on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const QBase * const & qRuleFVFace() const { return _current_FV_qrule_face; }
+  const QBase * const & qRuleFVFace() const { return constify_ref(_current_FV_qrule_face); }
 
   /**
    * Returns the reference to the current quadrature being used on a current face
@@ -720,6 +720,12 @@ public:
    */
   void reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points);
 
+  /**
+   * Reinitialize the the current face.
+   *
+   * @param fi The face for which to reinitialize
+   * @param areFE Set to true if any of the variables are finite element variables
+   */
   void reinitFVFace(const FaceInfo & fi, bool areFE);
 
   /**

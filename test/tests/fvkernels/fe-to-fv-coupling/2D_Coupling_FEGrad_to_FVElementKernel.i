@@ -33,7 +33,7 @@
     coeff = 1.0
   []
   [u_v_coupled_force]
-    type = FVCoupledGradDotElementalAdvection
+    type = FVElementalCoupledGradAdvectionKernel
     variable = u
     v = v
   []

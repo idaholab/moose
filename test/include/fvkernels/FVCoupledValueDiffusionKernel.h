@@ -12,17 +12,17 @@
 #include "FVFluxKernel.h"
 
 /*
- *  FVCoupledValueDotDiffusion implements a standard diffusion term:
+ *  FVCoupledValueDiffusionKernel implements a standard diffusion term:
  *
  *      - strong form: \nabla \cdot v \nabla u
  *
  *      - weak form: \int_{A} v \nabla u \cdot \vec{n} dA
  */
-class FVCoupledValueDotDiffusion : public FVFluxKernel
+class FVCoupledValueDiffusionKernel : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
-  FVCoupledValueDotDiffusion(const InputParameters & params);
+  FVCoupledValueDiffusionKernel(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;

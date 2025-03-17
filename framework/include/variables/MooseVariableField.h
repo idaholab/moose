@@ -124,7 +124,7 @@ public:
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
 
   // /**
-  //  * AD grad solution at the face for FV problems
+  //  * AD grad solution at the face
   //  */
   virtual VectorValue<ADReal> adGradSln(const FaceInfo & fi, const Moose::StateArg & state) = 0;
 

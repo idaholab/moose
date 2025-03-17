@@ -411,9 +411,9 @@ private:
   std::pair<SubdomainName, SubdomainName> getBlockNames() const;
 
   /// Variables
-  std::set<MooseVariableFieldBase *> _fv_vars;
-  std::set<MooseVariableFieldBase *> _elem_sub_fv_vars;
-  std::set<MooseVariableFieldBase *> _neigh_sub_fv_vars;
+  std::set<MooseVariableFieldBase *> _vars;
+  std::set<MooseVariableFieldBase *> _elem_sub_vars;
+  std::set<MooseVariableFieldBase *> _neigh_sub_vars;
 
   /// FVFluxKernels
   std::set<FVFluxKernel *> _fv_flux_kernels;
@@ -449,7 +449,7 @@ template <typename RangeType, typename AttributeTagType>
 ComputeFVFluxThread<RangeType, AttributeTagType>::ComputeFVFluxThread(ComputeFVFluxThread & x,
                                                                       Threads::split split)
   : ThreadedFaceLoop<RangeType>(x, split),
-    _fv_vars(x._fv_vars),
+    _vars(x._vars),
     _scaling_jacobian(x._scaling_jacobian),
     _scaling_residual(x._scaling_residual)
 {
@@ -470,11 +470,11 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // Figure out how to do all this some day.
   // this->_subproblem.reinitFVFace(_tid, fi);
 
-  // Loops through the vars (probably should change _fv_vars to _vars) to check to any
+  // Loops through the vars to check to any
   // FE coupled variables. If there are some FE variables, then FE reinit is
   // necessary.
   bool areFE = false;
-  for (auto var : _fv_vars)
+  for (auto var : _vars)
   {
     if (!var->isFV())
     {
@@ -496,7 +496,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // need to be able to reinit the subproblems variables using its equivalent
   // face info object.  How?  See https://github.com/idaholab/moose/issues/15064
 
-  for (auto var : _fv_vars)
+  for (auto var : _vars)
     var->computeFaceValues(fi);
 
   // NOTES: When coupling FE -> FV, the quadrature rule used is the FE quadrature
@@ -592,11 +592,11 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::finalizeContainers()
   //
   // Finalize our variables
   //
-  std::set_union(_elem_sub_fv_vars.begin(),
-                 _elem_sub_fv_vars.end(),
-                 _neigh_sub_fv_vars.begin(),
-                 _neigh_sub_fv_vars.end(),
-                 std::inserter(_fv_vars, _fv_vars.begin()));
+  std::set_union(_elem_sub_vars.begin(),
+                 _elem_sub_vars.end(),
+                 _neigh_sub_vars.begin(),
+                 _neigh_sub_vars.end(),
+                 std::inserter(_vars, _vars.begin()));
 
   //
   // Finalize our kernels
@@ -648,8 +648,8 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::subdomainChanged()
   ThreadedFaceLoop<RangeType>::subdomainChanged();
 
   // Clear variables
-  _fv_vars.clear();
-  _elem_sub_fv_vars.clear();
+  _vars.clear();
+  _elem_sub_vars.clear();
 
   // Clear kernels
   _fv_flux_kernels.clear();
@@ -689,12 +689,12 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::subdomainChanged()
     const auto & deps = k->getMooseVariableDependencies();
     for (auto var : deps)
     {
-      _elem_sub_fv_vars.insert(var);
+      _elem_sub_vars.insert(var);
     }
   }
 
   _fe_problem.getFVMatsAndDependencies(
-      _subdomain, _elem_sub_elem_face_mats, _elem_sub_neigh_face_mats, _elem_sub_fv_vars, _tid);
+      _subdomain, _elem_sub_elem_face_mats, _elem_sub_neigh_face_mats, _elem_sub_vars, _tid);
 
   finalizeContainers();
 }
@@ -706,8 +706,8 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::neighborSubdomainChanged()
   ThreadedFaceLoop<RangeType>::neighborSubdomainChanged();
 
   // Clear variables
-  _fv_vars.clear();
-  _neigh_sub_fv_vars.clear();
+  _vars.clear();
+  _neigh_sub_vars.clear();
 
   // Clear kernels
   _fv_flux_kernels.clear();
@@ -747,14 +747,14 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::neighborSubdomainChanged()
     const auto & deps = k->getMooseVariableDependencies();
     for (auto var : deps)
     {
-      _neigh_sub_fv_vars.insert(var);
+      _neigh_sub_vars.insert(var);
     }
   }
 
   _fe_problem.getFVMatsAndDependencies(_neighbor_subdomain,
                                        _neigh_sub_elem_face_mats,
                                        _neigh_sub_neigh_face_mats,
-                                       _neigh_sub_fv_vars,
+                                       _neigh_sub_vars,
                                        _tid);
 
   finalizeContainers();
@@ -802,9 +802,9 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
     setup(*kernel);
 
   // Clear variables
-  _fv_vars.clear();
-  _elem_sub_fv_vars.clear();
-  _neigh_sub_fv_vars.clear();
+  _vars.clear();
+  _elem_sub_vars.clear();
+  _neigh_sub_vars.clear();
 
   // Clear kernels
   _fv_flux_kernels.clear();

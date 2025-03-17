@@ -25,7 +25,8 @@
 #include "NodeElemConstraintBase.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
-  : _c_parameters(moose_object->parameters()),
+  : _is_fv(is_fv),
+    _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
     _c_type(_c_parameters.get<std::string>("_type")),
     _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -55,7 +56,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
                              ? _c_parameters.get<bool>("_neighbor")
                              : false),
     _coupleable_max_qps(Moose::constMaxQpsPerElem),
-    _is_fv(is_fv),
     _obj(moose_object),
     _writable_coupled_variables(libMesh::n_threads())
 {

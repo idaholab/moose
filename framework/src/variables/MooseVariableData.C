@@ -459,93 +459,97 @@ MooseVariableData<OutputType>::computeGhostValuesFace(const FaceInfo & /*fi*/,
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::computeADAveraging()
+MooseVariableData<OutputType>::computeADFaceAveraging()
 {
-  _ad_zero = 0;
   unsigned int nqp = _current_qrule->n_points();
-  // NOTES: This seems like a lot of if statements. Maybe there is better way
-  // to seperate face vs element averaging...
-  if (_face_averaging)
+  const MooseArray<ADReal> & _ad_JxW = _assembly.adJxWFace();
+  const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
+  ADReal _current_elem_volume = 0.0;
+  for (unsigned int qp = 0; qp < nqp; qp++)
+    _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
+  if (_need_ad_u)
   {
-    const MooseArray<ADReal> & _ad_JxW = _assembly.adJxWFace();
-    const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
-    ADReal _current_elem_volume = 0.0;
+    _ad_u_average.resize(nqp);
     for (unsigned int qp = 0; qp < nqp; qp++)
-      _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
-    if (_need_ad_u)
     {
-      _ad_u_average.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-      {
-        _ad_u_average[qp] = _ad_zero;
-      }
-      auto value_temp = _ad_u[0];
-      value_temp = 0.0;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
-      value_temp /= _current_elem_volume;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        _ad_u_average[qp] = value_temp;
+      _ad_u_average[qp] = _ad_zero;
     }
-    if (_need_ad_grad_u)
-    {
-      _ad_grad_u_average.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-      {
-        _ad_grad_u_average[qp] = _ad_zero;
-      }
-      auto value_temp = _ad_grad_u[0];
-      value_temp = 0.0;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
-      value_temp /= _current_elem_volume;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        _ad_grad_u_average[qp] = value_temp;
-    }
+    auto value_temp = _ad_u[0];
+    value_temp = 0.0;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
+    value_temp /= _current_elem_volume;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_u_average[qp] = value_temp;
   }
-  else
+  if (_need_ad_grad_u)
   {
-    const MooseArray<ADReal> & _ad_JxW = _assembly.adJxW();
-    const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
-    ADReal _current_elem_volume = 0.0;
+    _ad_grad_u_average.resize(nqp);
     for (unsigned int qp = 0; qp < nqp; qp++)
-      _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
-    if (_need_ad_u)
     {
-      _ad_u_average.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-      {
-        _ad_u_average[qp] = _ad_zero;
-      }
-      auto value_temp = _ad_u[0];
-      value_temp = 0.0;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
-      value_temp /= _current_elem_volume;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        _ad_u_average[qp] = value_temp;
+      _ad_grad_u_average[qp] = _ad_zero;
     }
-    if (_need_ad_grad_u)
+    auto value_temp = _ad_grad_u[0];
+    value_temp = 0.0;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+    value_temp /= _current_elem_volume;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_grad_u_average[qp] = value_temp;
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeADElementAveraging()
+{
+  unsigned int nqp = _current_qrule->n_points();
+  const MooseArray<ADReal> & _ad_JxW = _assembly.adJxW();
+  const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
+  ADReal _current_elem_volume = 0.0;
+  for (unsigned int qp = 0; qp < nqp; qp++)
+    _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
+  if (_need_ad_u)
+  {
+    _ad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
     {
-      _ad_grad_u_average.resize(nqp);
-      for (unsigned int qp = 0; qp < nqp; qp++)
-      {
-        _ad_grad_u_average[qp] = _ad_zero;
-      }
-      auto value_temp = _ad_grad_u[0];
-      value_temp = 0.0;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
-      value_temp /= _current_elem_volume;
-      for (unsigned int qp = 0; qp < nqp; qp++)
-        _ad_grad_u_average[qp] = value_temp;
+      _ad_u_average[qp] = _ad_zero;
     }
+    auto value_temp = _ad_u[0];
+    value_temp = 0.0;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
+    value_temp /= _current_elem_volume;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_u_average[qp] = value_temp;
+  }
+  if (_need_ad_grad_u)
+  {
+    _ad_grad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      _ad_grad_u_average[qp] = _ad_zero;
+    }
+    auto value_temp = _ad_grad_u[0];
+    value_temp = 0.0;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+    value_temp /= _current_elem_volume;
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_grad_u_average[qp] = value_temp;
   }
 }
 
 template <>
 void
-MooseVariableData<RealEigenVector>::computeADAveraging()
+MooseVariableData<RealEigenVector>::computeADFaceAveraging()
+{
+  mooseError("AD for array variable has not been implemented");
+}
+template <>
+void
+MooseVariableData<RealEigenVector>::computeADElementAveraging()
 {
   mooseError("AD for array variable has not been implemented");
 }
@@ -956,7 +960,12 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
   // Averaging FE values for FE -> FV coupling
   if (_need_averaging)
-    computeADAveraging();
+  {
+    if (_face_averaging)
+      computeADFaceAveraging();
+    else
+      computeADElementAveraging();
+  }
 }
 
 template <>

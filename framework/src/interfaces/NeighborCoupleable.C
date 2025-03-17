@@ -19,7 +19,7 @@ NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
                                        bool nodal,
                                        bool neighbor_nodal,
                                        bool is_fv)
-  : Coupleable(moose_object, nodal, is_fv), _neighbor_nodal(neighbor_nodal), _is_fv(is_fv)
+  : Coupleable(moose_object, nodal, is_fv), _neighbor_nodal(neighbor_nodal)
 {
 }
 
@@ -72,6 +72,11 @@ NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigne
                "use old solution data which do not have derivatives so adCoupledNeighborValue is "
                "not appropriate. Please use coupledNeighborValue instead");
 
+  /*
+   *  If the simulation is defined as a FV simulation, but the coupled variable is
+   *  not a FV variable (i.e. a FE vaiable), the coupled neighbor value uses
+   *  the element / face average value.
+   */
   if (!var->isFV() && _is_fv)
     return var->adSlnAvgNeighbor();
   return var->adSlnNeighbor();
@@ -234,6 +239,11 @@ NeighborCoupleable::adCoupledNeighborGradient(const std::string & var_name, unsi
         "not appropriate. Please use coupledNeighborGradient instead");
 
   const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  /*
+   *  If the simulation is defined as a FV simulation, but the coupled variable is
+   *  not a FV variable (i.e. a FE vaiable), the coupled neighbor gradient value uses
+   *  the element / face average value.
+   */
   if (!var->isFV() && _is_fv)
     return var->adGradSlnAvgNeighbor();
   return var->adGradSlnNeighbor();
