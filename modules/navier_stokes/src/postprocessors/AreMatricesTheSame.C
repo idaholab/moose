@@ -69,15 +69,9 @@ AreMatricesTheSame::finalize()
   _communicator.min(_equiv);
 
   if (_petsc_mat1)
-  {
-    auto ierr = MatDestroy(&_petsc_mat1);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(MatDestroy(&_petsc_mat1));
   if (_petsc_mat2)
-  {
-    auto ierr = MatDestroy(&_petsc_mat2);
-    LIBMESH_CHKERR(ierr);
-  }
+    LibmeshPetscCall(MatDestroy(&_petsc_mat2));
 }
 
 Real
