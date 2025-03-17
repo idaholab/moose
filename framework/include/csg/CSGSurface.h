@@ -21,15 +21,15 @@ namespace CSG
 class CSGSurface
 {
 public:
-  /// An enum for type of surface that is being represent
+  /// An enum for type of surface that is being represented
   enum class SurfaceType
   {
-    invalid,
-    plane,
-    sphere,
-    xcylinder,
-    ycylinder,
-    zcylinder
+    INVALID,
+    PLANE,
+    SPHERE,
+    XCYLINDER,
+    YCYLINDER,
+    ZCYLINDER
   };
 
   /// An enum for boundary type of surface

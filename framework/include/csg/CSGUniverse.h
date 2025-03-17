@@ -33,9 +33,9 @@ public:
    */
   virtual ~CSGUniverse() = default;
 
-  std::shared_ptr<CSGCell> addMaterialCell(const std::string name, const std::string fill_name);
+  std::shared_ptr<CSGCell> addMaterialCell(const std::string name, const std::string fill_name, const CSGRegion & region);
 
-  std::shared_ptr<CSGCell> addVoidCell(const std::string name);
+  std::shared_ptr<CSGCell> addVoidCell(const std::string name, const CSGRegion & region);
 
   std::shared_ptr<CSGCell> getCell(const std::string name);
 

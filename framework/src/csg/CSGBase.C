@@ -22,7 +22,7 @@ CSGBase::createRootUniverse(const std::string name)
 }
 
 std::shared_ptr<CSGUniverse>
-CSGBase::getRootUniverse()
+CSGBase::getRootUniverse() const
 {
   if (!_root_universe)
     mooseError("Cannot retrieve root universe before it is initialized.");
@@ -36,11 +36,10 @@ CSGBase::~CSGBase() {}
 nlohmann::json
 CSGBase::generateOutput() const
 {
-    nlohmann::json csg_json;
+  nlohmann::json csg_json;
 
-    csg_json["SURFACES"] = {};
-    csg_json["CELLS"] = {};
-    csg_json["UNIVERSES"] = {};
+  csg_json["SURFACES"] = {};
+  csg_json["UNIVERSES"] = {};
 
   // get all surfaces information
   auto all_surfs = getAllSurfaces();
@@ -54,6 +53,23 @@ CSGBase::generateOutput() const
     for (const auto & c : coeffs)
         csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
   }
+
+  // Print out universe information. For now we are assuming there is a single
+  // root universe in the CSGBase object
+  auto root_univ = getRootUniverse();
+  auto root_univ_name = root_univ->getName();;
+  csg_json["UNIVERSES"][root_univ_name] = {{"CELLS", {}}};
+  auto all_cells = root_univ->getAllCells();
+  for (const auto & c : all_cells)
+  {
+    const auto cell_ptr = c.second;
+    const auto cell_name = cell_ptr->getName();
+    const auto cell_region = cell_ptr->getRegionAsString();
+    const auto cell_type = cell_ptr->getFillTypeString();
+    csg_json["UNIVERSES"][root_univ_name]["CELLS"][cell_name]["TYPE"] = cell_type;
+    csg_json["UNIVERSES"][root_univ_name]["CELLS"][cell_name]["REGION"] = cell_region;
+  }
+
   return csg_json;
 
 }

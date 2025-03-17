@@ -18,8 +18,7 @@
 #include "CSGUniverse.h"
 #include "CSGMaterialCell.h"
 #include "CSGVoidCell.h"
-#include "CSGIntersection.h"
-#include "CSGHalfspace.h"
+#include "CSGRegion.h"
 #include "nlohmann/json.h"
 
 namespace CSG
@@ -153,7 +152,7 @@ public:
    *
    * @return  shared pointer to CSGUniverse
    */
-  std::shared_ptr<CSGUniverse> getRootUniverse();
+  std::shared_ptr<CSGUniverse> getRootUniverse() const;
 
   /**
    * @brief generate the JSON representation output for the CSG object

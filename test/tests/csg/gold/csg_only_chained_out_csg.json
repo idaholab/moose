@@ -1,5 +1,4 @@
 {
-  "CELLS": null,
   "SURFACES": {
     "surf_minus_x": {
       "BOUNDARY": "transmission",
@@ -62,5 +61,14 @@
       "TYPE": "plane"
     }
   },
-  "UNIVERSES": null
+  "UNIVERSES": {
+    "root_universe": {
+      "CELLS": {
+        "square_cell": {
+          "REGION": "((-surf_plus_x & -surf_minus_x & -surf_plus_y & -surf_minus_y) & -surf_plus_z & +surf_minus_z)",
+          "TYPE": "material"
+        }
+      }
+    }
+  }
 }

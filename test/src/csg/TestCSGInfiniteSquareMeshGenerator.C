@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TestCSGInfiniteSquareMeshGenerator.h"
+#include "CSGBase.h"
 
 registerMooseObject("MooseTestApp", TestCSGInfiniteSquareMeshGenerator);
 
@@ -44,12 +45,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
 
   std::string root_univ_name = "root_universe";
   auto root_univ = csg_mesh->createRootUniverse(root_univ_name);
-
-  const auto cell_name = "square_cell";
-  const auto material_name = "square_material";
   const auto centroid = Point(0, 0, 0);
-
-  auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
 
   // Add surfaces and halfspaces corresponding to 4 planes of infinite square
   std::vector<std::vector<Point>> points_on_planes {
@@ -60,13 +56,21 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   };
   std::vector<std::string> surf_names {"plus_x", "minus_x", "plus_y", "minus_y"};
 
+  std::vector<const CSG::CSGRegion> region_halfspaces;
   for (unsigned int i = 0; i < points_on_planes.size(); ++i)
   {
     const auto surf_name = "surf_" + surf_names[i];
     auto plane_ptr = csg_mesh->createPlaneFromPoints(surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
-    const auto elem_direction = plane_ptr->directionFromPoint(centroid);
-    auto elem_halfspace = CSG::CSGHalfspace(plane_ptr, elem_direction);
-    elem_cell_ptr->addRegionHalfspace(elem_halfspace);
+    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    const auto region_halfspace = CSG::CSGRegion(plane_ptr, region_direction, CSG::CSGRegion::Operation::HALFSPACE);
+    region_halfspaces.push_back(region_halfspace);
   }
+
+  const auto cell_name = "square_cell";
+  const auto material_name = "square_material";
+  const auto region = CSG::CSGRegion(region_halfspaces, CSG::CSGRegion::Operation::INTERSECTION);
+
+  root_univ->addMaterialCell(cell_name, material_name, region);
+
   return csg_mesh;
 }
