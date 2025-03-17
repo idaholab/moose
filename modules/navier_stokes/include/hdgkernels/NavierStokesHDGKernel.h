@@ -21,19 +21,38 @@ class NavierStokesHDGKernel : public HDGKernel, public NavierStokesHDGAssemblyHe
 {
 public:
   static InputParameters validParams();
-
   NavierStokesHDGKernel(const InputParameters & parameters);
 
-  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeResidualOnSide() override;
+  virtual void computeJacobianOnSide() override;
+  virtual void initialSetup() override;
+  virtual void jacobianSetup() override;
+
+  virtual std::set<std::string> additionalVariablesCovered() override;
 
 protected:
-  virtual void onElement() override;
-  virtual void onInternalSide() override;
-
   // body forces
   const Moose::Functor<Real> & _body_force_x;
   const Moose::Functor<Real> & _body_force_y;
   const Moose::Functor<Real> & _body_force_z;
   std::vector<const Moose::Functor<Real> *> _body_forces;
   const Moose::Functor<Real> & _pressure_mms_forcing_function;
+
+  /// The face quadrature rule
+  const QBase * const & _qrule_face;
+
+  /// The physical locations of the quadrature points on the face
+  const MooseArray<Point> & _q_point_face;
+
+  /// transformed Jacobian weights on the current element face
+  const MooseArray<Real> & _JxW_face;
+
+  /// face normals
+  const MooseArray<Point> & _normals;
+
+  /// The current side when doing face evaluations
+  const unsigned int & _current_side;
 };

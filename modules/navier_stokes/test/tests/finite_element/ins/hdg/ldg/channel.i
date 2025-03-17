@@ -1,5 +1,6 @@
+mu=1
+
 [GlobalParams]
-  variable = face_vel_x
   u = vel_x
   v = vel_y
   grad_u = grad_vel_x
@@ -7,8 +8,8 @@
   face_u = face_vel_x
   face_v = face_vel_y
   pressure = p
-  mu = 1
-  rho = 0
+  mu = ${mu}
+  rho = 1
 []
 
 [Mesh]
@@ -19,8 +20,8 @@
     xmax = 10
     ymin = -1
     ymax = 1
-    nx = 10
-    ny = 2
+    nx = 40
+    ny = 8
     elem_type = TRI6
   []
 []
@@ -35,9 +36,6 @@
   [p]
     family = L2_LAGRANGE
   []
-[]
-
-[AuxVariables]
   [vel_x]
     family = L2_LAGRANGE
   []
@@ -58,7 +56,7 @@
   []
 []
 
-[HDGBCs]
+[BCs]
   [walls]
     type = NavierStokesHDGVelocityDirichletBC
     boundary = 'bottom top'
@@ -74,20 +72,19 @@
   []
 []
 
+[Preconditioning]
+  [sc]
+    type = StaticCondensation
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu       NONZERO'
+    dont_condense_vars = 'p'
+  []
+[]
+
 [Executioner]
   type = Steady
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
-  line_search = 'basic'
 []
 
 [Outputs]
-  csv = true
-[]
-
-[Postprocessors]
-  [symmetric]
-    type = IsMatrixSymmetric
-  []
+  exodus = true
 []

@@ -32,178 +32,321 @@ NavierStokesHDGKernel::validParams()
       "A forcing function for the pressure (mass) equation for conducting MMS studies");
   params.addClassDescription("Implements the steady incompressible Navier-Stokes equations for a "
                              "hybridized discretization");
-
+  params.renameParam("variable", "u", "The x-component of velocity");
   return params;
 }
 
 NavierStokesHDGKernel::NavierStokesHDGKernel(const InputParameters & parameters)
   : HDGKernel(parameters),
-    NavierStokesHDGAssemblyHelper(this, this, this, _sys, _aux_sys, _mesh, _tid),
+    NavierStokesHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
     // body forces
     _body_force_x(getFunctor<Real>("body_force_x")),
     _body_force_y(getFunctor<Real>("body_force_y")),
     _body_force_z(getFunctor<Real>("body_force_z")),
-    _pressure_mms_forcing_function(getFunctor<Real>("pressure_mms_forcing_function"))
+    _pressure_mms_forcing_function(getFunctor<Real>("pressure_mms_forcing_function")),
+    _qrule_face(_assembly.qRuleFace()),
+    _q_point_face(_assembly.qPointsFace()),
+    _JxW_face(_assembly.JxWFace()),
+    _normals(_assembly.normals()),
+    _current_side(_assembly.side())
 {
-  // This class handles residuals and Jacobians for multiple variables
-  _fe_problem.setKernelCoverageCheck(FEProblemBase::CoverageCheckMode::FALSE);
-
   _body_forces.push_back(&_body_force_x);
   _body_forces.push_back(&_body_force_y);
   _body_forces.push_back(&_body_force_z);
 }
 
 void
-NavierStokesHDGKernel::onElement()
+NavierStokesHDGKernel::computeResidual()
 {
-  resizeData();
-
-  // Populate LM dof indices
-  _lm_dof_indices = _lm_u_dof_indices;
-  _lm_dof_indices.insert(_lm_dof_indices.end(), _lm_v_dof_indices.begin(), _lm_v_dof_indices.end());
-  _lm_dof_indices.insert(_lm_dof_indices.end(), _p_dof_indices.begin(), _p_dof_indices.end());
-  if (_global_lm_dof_indices)
-    _lm_dof_indices.insert(
-        _lm_dof_indices.end(), _global_lm_dof_indices->begin(), _global_lm_dof_indices->end());
-
-  // Populate primal dof indices if we are computing the primal increment
-  if (!preparingForSolve())
-  {
-    _primal_dof_indices = _qu_dof_indices;
-    auto append = [this](const auto & dofs)
-    { _primal_dof_indices.insert(_primal_dof_indices.end(), dofs.begin(), dofs.end()); };
-    append(_u_dof_indices);
-    append(_qv_dof_indices);
-    append(_v_dof_indices);
-  }
+  _grad_u_vel_re.resize(_qu_dof_indices.size());
+  _grad_v_vel_re.resize(_qv_dof_indices.size());
+  _u_vel_re.resize(_u_dof_indices.size());
+  _v_vel_re.resize(_v_dof_indices.size());
+  _p_re.resize(_p_dof_indices.size());
+  _global_lm_re.resize(_global_lm_dof_indices ? _global_lm_dof_indices->size() : 0);
 
   // qu and u
-  vectorVolumeResidual(0, _qu_sol, _u_sol, _JxW, *_qrule);
+  vectorVolumeResidual(_qu_sol, _u_sol, _JxW, *_qrule, _grad_u_vel_re);
   scalarVolumeResidual(
-      _vector_n_dofs, _qu_sol, 0, _body_force_x, _JxW, *_qrule, _current_elem, _q_point);
-  vectorVolumeJacobian(0, 0, _vector_n_dofs, _JxW, *_qrule);
-  scalarVolumeJacobian(_vector_n_dofs,
-                       0,
-                       2 * _lm_n_dofs,
-                       0,
-                       _vector_n_dofs,
-                       2 * _vector_n_dofs + _scalar_n_dofs,
-                       _JxW,
-                       *_qrule);
+      _qu_sol, 0, _body_force_x, _JxW, *_qrule, _current_elem, _q_point, _u_vel_re);
 
   // qv and v
-  vectorVolumeResidual(_vector_n_dofs + _scalar_n_dofs, _qv_sol, _v_sol, _JxW, *_qrule);
-  scalarVolumeResidual(2 * _vector_n_dofs + _scalar_n_dofs,
-                       _qv_sol,
-                       1,
-                       _body_force_y,
-                       _JxW,
-                       *_qrule,
-                       _current_elem,
-                       _q_point);
-  vectorVolumeJacobian(_vector_n_dofs + _scalar_n_dofs,
-                       _vector_n_dofs + _scalar_n_dofs,
-                       2 * _vector_n_dofs + _scalar_n_dofs,
-                       _JxW,
-                       *_qrule);
-  scalarVolumeJacobian(2 * _vector_n_dofs + _scalar_n_dofs,
-                       _vector_n_dofs + _scalar_n_dofs,
-                       2 * _lm_n_dofs,
-                       1,
-                       _vector_n_dofs,
-                       2 * _vector_n_dofs + _scalar_n_dofs,
-                       _JxW,
-                       *_qrule);
+  vectorVolumeResidual(_qv_sol, _v_sol, _JxW, *_qrule, _grad_v_vel_re);
+  scalarVolumeResidual(
+      _qv_sol, 1, _body_force_y, _JxW, *_qrule, _current_elem, _q_point, _v_vel_re);
 
   // p
-  pressureVolumeResidual(2 * _lm_n_dofs,
-                         2 * _lm_n_dofs + _p_n_dofs,
-                         _pressure_mms_forcing_function,
-                         _JxW,
-                         *_qrule,
-                         _current_elem,
-                         _q_point);
-  pressureVolumeJacobian(2 * _lm_n_dofs,
-                         _vector_n_dofs,
-                         2 * _vector_n_dofs + _scalar_n_dofs,
-                         2 * _lm_n_dofs,
-                         2 * _lm_n_dofs + _p_n_dofs,
-                         _JxW,
-                         *_qrule);
+  pressureVolumeResidual(
+      _pressure_mms_forcing_function, _JxW, *_qrule, _current_elem, _q_point, _p_re, _global_lm_re);
+
+  addResiduals(_assembly, _grad_u_vel_re, _qu_dof_indices, _grad_u_var.scalingFactor());
+  addResiduals(_assembly, _grad_v_vel_re, _qv_dof_indices, _grad_v_var.scalingFactor());
+  addResiduals(_assembly, _u_vel_re, _u_dof_indices, _u_var.scalingFactor());
+  addResiduals(_assembly, _v_vel_re, _v_dof_indices, _v_var.scalingFactor());
+  addResiduals(_assembly, _p_re, _p_dof_indices, _pressure_var.scalingFactor());
+  if (_global_lm_dof_indices)
+    addResiduals(
+        _assembly, _global_lm_re, *_global_lm_dof_indices, _enclosure_lm_var->scalingFactor());
 }
 
 void
-NavierStokesHDGKernel::onInternalSide()
+NavierStokesHDGKernel::computeJacobian()
 {
-  // qu, u, lm_u
-  vectorFaceResidual(0, _lm_u_sol, _JxW_face, *_qrule_face, _normals);
-  vectorFaceJacobian(0, 0, _JxW_face, *_qrule_face, _normals);
-  scalarFaceResidual(
-      _vector_n_dofs, _qu_sol, _u_sol, _lm_u_sol, 0, _JxW_face, *_qrule_face, _normals);
-  scalarFaceJacobian(_vector_n_dofs,
-                     0,
-                     _vector_n_dofs,
-                     0,
-                     2 * _lm_n_dofs,
-                     0,
-                     0,
-                     _lm_n_dofs,
-                     _JxW_face,
-                     *_qrule_face,
-                     _normals);
-  lmFaceResidual(0, _qu_sol, _u_sol, _lm_u_sol, 0, _JxW_face, *_qrule_face, _normals, _neigh);
-  lmFaceJacobian(0,
-                 0,
-                 _vector_n_dofs,
-                 0,
-                 2 * _lm_n_dofs,
-                 0,
-                 0,
-                 _lm_n_dofs,
-                 _JxW_face,
-                 *_qrule_face,
-                 _normals,
-                 _neigh);
+  _grad_u_grad_u_jac.resize(_qu_dof_indices.size(), _qu_dof_indices.size());
+  _grad_v_grad_v_jac.resize(_qv_dof_indices.size(), _qv_dof_indices.size());
+  _grad_u_u_jac.resize(_qu_dof_indices.size(), _u_dof_indices.size());
+  _grad_v_v_jac.resize(_qv_dof_indices.size(), _v_dof_indices.size());
+  _u_grad_u_jac.resize(_u_dof_indices.size(), _qu_dof_indices.size());
+  _v_grad_v_jac.resize(_v_dof_indices.size(), _qv_dof_indices.size());
+  _u_u_jac.resize(_u_dof_indices.size(), _u_dof_indices.size());
+  _u_v_jac.resize(_u_dof_indices.size(), _v_dof_indices.size());
+  _v_u_jac.resize(_v_dof_indices.size(), _u_dof_indices.size());
+  _v_v_jac.resize(_v_dof_indices.size(), _v_dof_indices.size());
+  _u_p_jac.resize(_u_dof_indices.size(), _p_dof_indices.size());
+  _v_p_jac.resize(_v_dof_indices.size(), _p_dof_indices.size());
+  _p_u_jac.resize(_p_dof_indices.size(), _u_dof_indices.size());
+  _p_v_jac.resize(_p_dof_indices.size(), _v_dof_indices.size());
+  _p_global_lm_jac.resize(_p_dof_indices.size(),
+                          _global_lm_dof_indices ? _global_lm_dof_indices->size() : 0);
+  _global_lm_p_jac.resize(_global_lm_dof_indices ? _global_lm_dof_indices->size() : 0,
+                          _p_dof_indices.size());
 
-  // qv, v, lm_v
-  vectorFaceResidual(_vector_n_dofs + _scalar_n_dofs, _lm_v_sol, _JxW_face, *_qrule_face, _normals);
-  vectorFaceJacobian(
-      _vector_n_dofs + _scalar_n_dofs, _lm_n_dofs, _JxW_face, *_qrule_face, _normals);
-  scalarFaceResidual(2 * _vector_n_dofs + _scalar_n_dofs,
-                     _qv_sol,
-                     _v_sol,
-                     _lm_v_sol,
-                     1,
-                     _JxW_face,
-                     *_qrule_face,
-                     _normals);
-  scalarFaceJacobian(2 * _vector_n_dofs + _scalar_n_dofs,
-                     _vector_n_dofs + _scalar_n_dofs,
-                     2 * _vector_n_dofs + _scalar_n_dofs,
-                     _lm_n_dofs,
-                     2 * _lm_n_dofs,
-                     1,
-                     0,
-                     _lm_n_dofs,
-                     _JxW_face,
-                     *_qrule_face,
-                     _normals);
-  lmFaceResidual(
-      _lm_n_dofs, _qv_sol, _v_sol, _lm_v_sol, 1, _JxW_face, *_qrule_face, _normals, _neigh);
-  lmFaceJacobian(_lm_n_dofs,
-                 _vector_n_dofs + _scalar_n_dofs,
-                 2 * _vector_n_dofs + _scalar_n_dofs,
-                 _lm_n_dofs,
-                 2 * _lm_n_dofs,
-                 1,
-                 0,
-                 _lm_n_dofs,
-                 _JxW_face,
-                 *_qrule_face,
-                 _normals,
-                 _neigh);
+  // qu and u
+  vectorVolumeJacobian(_JxW, *_qrule, _grad_u_grad_u_jac, _grad_u_u_jac);
+  scalarVolumeJacobian(0, _JxW, *_qrule, _u_grad_u_jac, _u_u_jac, _u_v_jac, _u_p_jac);
+
+  // qv and v
+  vectorVolumeJacobian(_JxW, *_qrule, _grad_v_grad_v_jac, _grad_v_v_jac);
+  scalarVolumeJacobian(1, _JxW, *_qrule, _v_grad_v_jac, _v_u_jac, _v_v_jac, _v_p_jac);
 
   // p
-  pressureFaceResidual(2 * _lm_n_dofs, _JxW_face, *_qrule_face, _normals);
-  pressureFaceJacobian(2 * _lm_n_dofs, 0, _lm_n_dofs, _JxW_face, *_qrule_face, _normals);
+  pressureVolumeJacobian(_JxW, *_qrule, _p_u_jac, _p_v_jac, _p_global_lm_jac, _global_lm_p_jac);
+
+  addJacobian(
+      _assembly, _grad_u_grad_u_jac, _qu_dof_indices, _qu_dof_indices, _grad_u_var.scalingFactor());
+  addJacobian(
+      _assembly, _grad_v_grad_v_jac, _qv_dof_indices, _qv_dof_indices, _grad_v_var.scalingFactor());
+  addJacobian(
+      _assembly, _grad_u_u_jac, _qu_dof_indices, _u_dof_indices, _grad_u_var.scalingFactor());
+  addJacobian(
+      _assembly, _grad_v_v_jac, _qv_dof_indices, _v_dof_indices, _grad_v_var.scalingFactor());
+  addJacobian(_assembly, _u_grad_u_jac, _u_dof_indices, _qu_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _v_grad_v_jac, _v_dof_indices, _qv_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _u_u_jac, _u_dof_indices, _u_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _u_v_jac, _u_dof_indices, _v_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _v_u_jac, _v_dof_indices, _u_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _v_v_jac, _v_dof_indices, _v_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _u_p_jac, _u_dof_indices, _p_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _v_p_jac, _v_dof_indices, _p_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _p_u_jac, _p_dof_indices, _u_dof_indices, _pressure_var.scalingFactor());
+  addJacobian(_assembly, _p_v_jac, _p_dof_indices, _v_dof_indices, _pressure_var.scalingFactor());
+  if (_global_lm_dof_indices)
+  {
+    addJacobian(_assembly,
+                _p_global_lm_jac,
+                _p_dof_indices,
+                *_global_lm_dof_indices,
+                _pressure_var.scalingFactor());
+    addJacobian(_assembly,
+                _global_lm_p_jac,
+                *_global_lm_dof_indices,
+                _p_dof_indices,
+                _enclosure_lm_var->scalingFactor());
+  }
+}
+
+void
+NavierStokesHDGKernel::computeResidualOnSide()
+{
+  const Elem * const neigh = _current_elem->neighbor_ptr(_current_side);
+
+  _grad_u_vel_re.resize(_qu_dof_indices.size());
+  _u_vel_re.resize(_u_dof_indices.size());
+  _lm_u_vel_re.resize(_lm_u_dof_indices.size());
+  _grad_v_vel_re.resize(_qv_dof_indices.size());
+  _v_vel_re.resize(_v_dof_indices.size());
+  _lm_v_vel_re.resize(_lm_v_dof_indices.size());
+  _p_re.resize(_p_dof_indices.size());
+
+  // qu, u, lm_u
+  vectorFaceResidual(_lm_u_sol, _JxW_face, *_qrule_face, _normals, _grad_u_vel_re);
+  scalarFaceResidual(_qu_sol, _u_sol, _lm_u_sol, 0, _JxW_face, *_qrule_face, _normals, _u_vel_re);
+  lmFaceResidual(
+      _qu_sol, _u_sol, _lm_u_sol, 0, _JxW_face, *_qrule_face, _normals, neigh, _lm_u_vel_re);
+
+  // qv, v, lm_v
+  vectorFaceResidual(_lm_v_sol, _JxW_face, *_qrule_face, _normals, _grad_v_vel_re);
+  scalarFaceResidual(_qv_sol, _v_sol, _lm_v_sol, 1, _JxW_face, *_qrule_face, _normals, _v_vel_re);
+  lmFaceResidual(
+      _qv_sol, _v_sol, _lm_v_sol, 1, _JxW_face, *_qrule_face, _normals, neigh, _lm_v_vel_re);
+
+  // p
+  pressureFaceResidual(_JxW_face, *_qrule_face, _normals, _p_re);
+
+  addResiduals(_assembly, _grad_u_vel_re, _qu_dof_indices, _grad_u_var.scalingFactor());
+  addResiduals(_assembly, _u_vel_re, _u_dof_indices, _u_var.scalingFactor());
+  addResiduals(_assembly, _lm_u_vel_re, _lm_u_dof_indices, _u_face_var.scalingFactor());
+  addResiduals(_assembly, _grad_v_vel_re, _qv_dof_indices, _grad_v_var.scalingFactor());
+  addResiduals(_assembly, _v_vel_re, _v_dof_indices, _v_var.scalingFactor());
+  addResiduals(_assembly, _lm_v_vel_re, _lm_v_dof_indices, _v_face_var.scalingFactor());
+  addResiduals(_assembly, _p_re, _p_dof_indices, _pressure_var.scalingFactor());
+}
+
+void
+NavierStokesHDGKernel::computeJacobianOnSide()
+{
+  const Elem * const neigh = _current_elem->neighbor_ptr(_current_side);
+
+  _grad_u_lm_u_jac.resize(_qu_dof_indices.size(), _lm_u_dof_indices.size());
+  _u_grad_u_jac.resize(_u_dof_indices.size(), _qu_dof_indices.size());
+  _u_u_jac.resize(_u_dof_indices.size(), _u_dof_indices.size());
+  _u_lm_u_jac.resize(_u_dof_indices.size(), _lm_u_dof_indices.size());
+  _u_lm_v_jac.resize(_u_dof_indices.size(), _lm_v_dof_indices.size());
+  _u_p_jac.resize(_u_dof_indices.size(), _p_dof_indices.size());
+  _lm_u_grad_u_jac.resize(_lm_u_dof_indices.size(), _qu_dof_indices.size());
+  _lm_u_u_jac.resize(_lm_u_dof_indices.size(), _u_dof_indices.size());
+  _lm_u_lm_u_jac.resize(_lm_u_dof_indices.size(), _lm_u_dof_indices.size());
+  _lm_u_lm_v_jac.resize(_lm_u_dof_indices.size(), _lm_v_dof_indices.size());
+  _lm_u_p_jac.resize(_lm_u_dof_indices.size(), _p_dof_indices.size());
+  _grad_v_lm_v_jac.resize(_qv_dof_indices.size(), _lm_v_dof_indices.size());
+  _v_grad_v_jac.resize(_v_dof_indices.size(), _qv_dof_indices.size());
+  _v_v_jac.resize(_v_dof_indices.size(), _v_dof_indices.size());
+  _v_lm_u_jac.resize(_v_dof_indices.size(), _lm_u_dof_indices.size());
+  _v_lm_v_jac.resize(_v_dof_indices.size(), _lm_v_dof_indices.size());
+  _v_p_jac.resize(_v_dof_indices.size(), _p_dof_indices.size());
+  _lm_v_grad_v_jac.resize(_lm_v_dof_indices.size(), _qv_dof_indices.size());
+  _lm_v_v_jac.resize(_lm_v_dof_indices.size(), _v_dof_indices.size());
+  _lm_v_lm_u_jac.resize(_lm_v_dof_indices.size(), _lm_u_dof_indices.size());
+  _lm_v_lm_v_jac.resize(_lm_v_dof_indices.size(), _lm_v_dof_indices.size());
+  _lm_v_p_jac.resize(_lm_v_dof_indices.size(), _p_dof_indices.size());
+  _p_lm_u_jac.resize(_p_dof_indices.size(), _lm_u_dof_indices.size());
+  _p_lm_v_jac.resize(_p_dof_indices.size(), _lm_v_dof_indices.size());
+
+  // qu, u, lm_u
+  vectorFaceJacobian(_JxW_face, *_qrule_face, _normals, _grad_u_lm_u_jac);
+  scalarFaceJacobian(0,
+                     _JxW_face,
+                     *_qrule_face,
+                     _normals,
+                     _u_grad_u_jac,
+                     _u_u_jac,
+                     _u_lm_u_jac,
+                     _u_p_jac,
+                     _u_lm_u_jac,
+                     _u_lm_v_jac);
+  lmFaceJacobian(0,
+                 _JxW_face,
+                 *_qrule_face,
+                 _normals,
+                 neigh,
+                 _lm_u_grad_u_jac,
+                 _lm_u_u_jac,
+                 _lm_u_lm_u_jac,
+                 _lm_u_p_jac,
+                 _lm_u_lm_u_jac,
+                 _lm_u_lm_v_jac);
+
+  // qv, v, lm_v
+  vectorFaceJacobian(_JxW_face, *_qrule_face, _normals, _grad_v_lm_v_jac);
+  scalarFaceJacobian(1,
+                     _JxW_face,
+                     *_qrule_face,
+                     _normals,
+                     _v_grad_v_jac,
+                     _v_v_jac,
+                     _v_lm_v_jac,
+                     _v_p_jac,
+                     _v_lm_u_jac,
+                     _v_lm_v_jac);
+  lmFaceJacobian(1,
+                 _JxW_face,
+                 *_qrule_face,
+                 _normals,
+                 neigh,
+                 _lm_v_grad_v_jac,
+                 _lm_v_v_jac,
+                 _lm_v_lm_v_jac,
+                 _lm_v_p_jac,
+                 _lm_v_lm_u_jac,
+                 _lm_v_lm_v_jac);
+
+  // p
+  pressureFaceJacobian(_JxW_face, *_qrule_face, _normals, _p_lm_u_jac, _p_lm_v_jac);
+
+  addJacobian(
+      _assembly, _grad_u_lm_u_jac, _qu_dof_indices, _lm_u_dof_indices, _grad_u_var.scalingFactor());
+  addJacobian(_assembly, _u_grad_u_jac, _u_dof_indices, _qu_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _u_u_jac, _u_dof_indices, _u_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _u_lm_u_jac, _u_dof_indices, _lm_u_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _u_lm_v_jac, _u_dof_indices, _lm_v_dof_indices, _u_var.scalingFactor());
+  addJacobian(_assembly, _u_p_jac, _u_dof_indices, _p_dof_indices, _u_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_u_grad_u_jac, _lm_u_dof_indices, _qu_dof_indices, _u_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_u_u_jac, _lm_u_dof_indices, _u_dof_indices, _u_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_u_lm_u_jac, _lm_u_dof_indices, _lm_u_dof_indices, _u_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_u_lm_v_jac, _lm_u_dof_indices, _lm_v_dof_indices, _u_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_u_p_jac, _lm_u_dof_indices, _p_dof_indices, _u_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _grad_v_lm_v_jac, _qv_dof_indices, _lm_v_dof_indices, _grad_v_var.scalingFactor());
+  addJacobian(_assembly, _v_grad_v_jac, _v_dof_indices, _qv_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _v_v_jac, _v_dof_indices, _v_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _v_lm_u_jac, _v_dof_indices, _lm_u_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _v_lm_v_jac, _v_dof_indices, _lm_v_dof_indices, _v_var.scalingFactor());
+  addJacobian(_assembly, _v_p_jac, _v_dof_indices, _p_dof_indices, _v_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_v_grad_v_jac, _lm_v_dof_indices, _qv_dof_indices, _v_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_v_v_jac, _lm_v_dof_indices, _v_dof_indices, _v_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_v_lm_u_jac, _lm_v_dof_indices, _lm_u_dof_indices, _v_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_v_lm_v_jac, _lm_v_dof_indices, _lm_v_dof_indices, _v_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _lm_v_p_jac, _lm_v_dof_indices, _p_dof_indices, _v_face_var.scalingFactor());
+  addJacobian(
+      _assembly, _p_lm_u_jac, _p_dof_indices, _lm_u_dof_indices, _pressure_var.scalingFactor());
+  addJacobian(
+      _assembly, _p_lm_v_jac, _p_dof_indices, _lm_v_dof_indices, _pressure_var.scalingFactor());
+}
+
+void
+NavierStokesHDGKernel::initialSetup()
+{
+  // This check must occur after FEProblemBase::init()
+  checkCoupling();
+}
+
+void
+NavierStokesHDGKernel::jacobianSetup()
+{
+  _my_elem = nullptr;
+}
+
+void
+NavierStokesHDGKernel::computeOffDiagJacobian(const unsigned int)
+{
+  if (_my_elem != _current_elem)
+  {
+    computeJacobian();
+    _my_elem = _current_elem;
+  }
+}
+
+std::set<std::string>
+NavierStokesHDGKernel::additionalVariablesCovered()
+{
+  std::set<std::string> covered_vars = {_u_var.name(),
+                                        _grad_u_var.name(),
+                                        _u_face_var.name(),
+                                        _v_var.name(),
+                                        _grad_v_var.name(),
+                                        _v_face_var.name(),
+                                        _pressure_var.name()};
+  if (_enclosure_lm_var)
+    covered_vars.insert(_enclosure_lm_var->name());
+  return covered_vars;
 }

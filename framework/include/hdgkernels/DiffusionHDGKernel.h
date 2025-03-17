@@ -44,12 +44,6 @@ protected:
   /// transformed Jacobian weights on the current element face
   const MooseArray<Real> & _JxW_face;
 
-  /// coordinate transformation on the face
-  const MooseArray<Real> & _coord_face;
-
   /// face normals
   const MooseArray<Point> & _normals;
-
-  /// The current side index
-  const unsigned int & _current_side;
 };

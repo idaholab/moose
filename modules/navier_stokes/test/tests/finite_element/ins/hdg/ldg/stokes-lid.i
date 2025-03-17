@@ -1,7 +1,4 @@
-mu=1
-
 [GlobalParams]
-  variable = face_vel_x
   u = vel_x
   v = vel_y
   grad_u = grad_vel_x
@@ -9,20 +6,21 @@ mu=1
   face_u = face_vel_x
   face_v = face_vel_y
   pressure = p
-  mu = ${mu}
-  rho = 1
+  enclosure_lm = lm
+  mu = 1
+  rho = 0
 []
 
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 10
+    xmin = -1
+    xmax = 1
     ymin = -1
     ymax = 1
-    nx = 40
-    ny = 8
+    nx = 4
+    ny = 4
     elem_type = TRI6
   []
 []
@@ -37,9 +35,9 @@ mu=1
   [p]
     family = L2_LAGRANGE
   []
-[]
-
-[AuxVariables]
+  [lm]
+    family = SCALAR
+  []
   [vel_x]
     family = L2_LAGRANGE
   []
@@ -60,30 +58,40 @@ mu=1
   []
 []
 
-[HDGBCs]
+[BCs]
   [walls]
     type = NavierStokesHDGVelocityDirichletBC
-    boundary = 'bottom top'
+    boundary = 'left right bottom'
   []
-  [inlet]
+  [lid]
     type = NavierStokesHDGVelocityDirichletBC
-    boundary = 'left'
+    boundary = 'top'
     dirichlet_u = '1'
   []
-  [outlet]
-    type = NavierStokesHDGOutflowBC
-    boundary = 'right'
+[]
+
+[Preconditioning]
+  [sc]
+    type = StaticCondensation
+    petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_view_pmat'
+    petsc_options_value = 'lu       NONZERO               binary'
+    dont_condense_vars = 'p'
   []
 []
 
 [Executioner]
   type = Steady
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
-  line_search = 'basic'
+  solve_type = PJFNK
 []
 
 [Outputs]
-  exodus = true
+  hide = 'lm'
+  csv = true
+[]
+
+[Postprocessors]
+  [symmetric]
+    type = IsMatrixSymmetric
+    mat = binaryoutput
+  []
 []

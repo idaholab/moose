@@ -25,21 +25,14 @@ public:
 
   NavierStokesHDGAssemblyHelper(const MooseObject * moose_obj,
                                 MaterialPropertyInterface * mpi,
+                                MooseVariableDependencyInterface * mvdi,
                                 const TransientInterface * const ti,
-                                SystemBase & nl_sys,
-                                SystemBase & aux_sys,
+                                const FEProblemBase & fe_problem,
+                                SystemBase & sys,
                                 const MooseMesh & mesh,
                                 const THREAD_ID tid);
 
 protected:
-  virtual std::string physics() const override { return "incompressible Navier-Stokes"; }
-  virtual std::set<const MooseVariableBase *> variables() const override;
-
-  /**
-   * Set the number of degree of freedom variables and resize the Eigen data structures
-   */
-  void resizeData();
-
   /**
    * @param u_sol The x-velocity solution, can correspond to either the volumetric or face velocity
    * @param v_sol The y-velocity solution, can correspond to either the volumetric or face velocity
@@ -68,14 +61,14 @@ protected:
    * @param vel_gradient The velocity gradient component
    * @param vel_component The velocity component
    */
-  void scalarVolumeResidual(const unsigned int i_offset,
-                            const MooseArray<Gradient> & vel_gradient,
+  void scalarVolumeResidual(const MooseArray<Gradient> & vel_gradient,
                             const unsigned int vel_component,
                             const Moose::Functor<Real> & body_force,
                             const MooseArray<Real> & JxW,
                             const libMesh::QBase & qrule,
                             const Elem * const current_elem,
-                            const MooseArray<Point> & q_point);
+                            const MooseArray<Point> & q_point,
+                            DenseVector<Number> & scalar_re);
 
   /**
    * Compute the volumetric contributions to a velocity Jacobian
@@ -87,119 +80,113 @@ protected:
    * @param u_j_offset The local degree of freedom offset for the x-component velocity
    * @param v_j_offset The local degree of freedom offset for the y-component velocity
    */
-  void scalarVolumeJacobian(const unsigned int i_offset,
-                            const unsigned int vel_gradient_j_offset,
-                            const unsigned int p_j_offset,
-                            const unsigned int vel_component,
-                            const unsigned int u_j_offset,
-                            const unsigned int v_j_offset,
+  void scalarVolumeJacobian(const unsigned int vel_component,
                             const MooseArray<Real> & JxW,
-                            const libMesh::QBase & qrule);
+                            const libMesh::QBase & qrule,
+                            DenseMatrix<Number> & scalar_vector_jac,
+                            DenseMatrix<Number> & scalar_u_vel_jac,
+                            DenseMatrix<Number> & scalar_v_vel_jac,
+                            DenseMatrix<Number> & scalar_p_jac);
 
   /**
-   * Compute the volumetric contributions to the pressure residual, e.g. the conservation of mass
-   * equation
+   * Compute the volumetric contributions to the pressure residual, e.g. the conservation of
+   * mass equation
    * @param i_offset The local degree of freedom offset for the pressure
-   * @param global_lm_i_offset The local degree of freedom offset for the global Lagrange multiplier
-   * that removes the pressure nullspace
+   * @param global_lm_i_offset The local degree of freedom offset for the global Lagrange
+   * multiplier that removes the pressure nullspace
    */
-  void pressureVolumeResidual(const unsigned int i_offset,
-                              const unsigned int global_lm_i_offset,
-                              const Moose::Functor<Real> & pressure_mms_forcing_function,
+  void pressureVolumeResidual(const Moose::Functor<Real> & pressure_mms_forcing_function,
                               const MooseArray<Real> & JxW,
                               const libMesh::QBase & qrule,
                               const Elem * const current_elem,
-                              const MooseArray<Point> & q_point);
+                              const MooseArray<Point> & q_point,
+                              DenseVector<Number> & pressure_re,
+                              DenseVector<Number> & global_lm_re);
 
   /**
-   * Compute the volumetric contributions to the pressure Jacobian, e.g. the conservation of mass
-   * equation
+   * Compute the volumetric contributions to the pressure Jacobian, e.g. the conservation of
+   * mass equation
    * @param i_offset The local degree of freedom offset for the pressure
    * @param u_j_offset The local degree of freedom offset for the x-component of velocity
    * @param v_j_offset The local degree of freedom offset for the y-component of velocity
    * @param p_j_offset The local degree of freedom offset for the pressure
-   * @param global_lm_i_offset The local degree of freedom offset for the global Lagrange multiplier
-   * that removes the pressure nullspace
+   * @param global_lm_i_offset The local degree of freedom offset for the global Lagrange
+   * multiplier that removes the pressure nullspace
    */
-  void pressureVolumeJacobian(const unsigned int i_offset,
-                              const unsigned int u_j_offset,
-                              const unsigned int v_j_offset,
-                              const unsigned int p_j_offset,
-                              const unsigned int global_lm_offset,
-                              const MooseArray<Real> & JxW,
-                              const libMesh::QBase & qrule);
+  void pressureVolumeJacobian(const MooseArray<Real> & JxW,
+                              const libMesh::QBase & qrule,
+                              DenseMatrix<Number> & p_u_vel_jac,
+                              DenseMatrix<Number> & p_v_vel_jac,
+                              DenseMatrix<Number> & p_global_lm_jac,
+                              DenseMatrix<Number> & global_lm_p_jac);
 
   //
   // Methods which are leveraged both on internal sides in the kernel and by the outflow bc
   //
 
-  void pressureFaceResidual(const unsigned int i_offset,
-                            const MooseArray<Real> & JxW_face,
+  void pressureFaceResidual(const MooseArray<Real> & JxW_face,
                             const libMesh::QBase & qrule_face,
-                            const MooseArray<Point> & normals);
+                            const MooseArray<Point> & normals,
+                            DenseVector<Number> & pressure_re);
 
-  void pressureFaceJacobian(const unsigned int i_offset,
-                            const unsigned int lm_u_j_offset,
-                            const unsigned int lm_v_j_offset,
-                            const MooseArray<Real> & JxW_face,
+  void pressureFaceJacobian(const MooseArray<Real> & JxW_face,
                             const libMesh::QBase & qrule_face,
-                            const MooseArray<Point> & normals);
+                            const MooseArray<Point> & normals,
+                            DenseMatrix<Number> & p_lm_u_vel_jac,
+                            DenseMatrix<Number> & p_lm_v_vel_jac);
 
-  void scalarFaceResidual(const unsigned int i_offset,
-                          const MooseArray<Gradient> & vector_sol,
+  void scalarFaceResidual(const MooseArray<Gradient> & vector_sol,
                           const MooseArray<Number> & scalar_sol,
                           const MooseArray<Number> & lm_sol,
                           const unsigned int vel_component,
                           const MooseArray<Real> & JxW_face,
                           const libMesh::QBase & qrule_face,
-                          const MooseArray<Point> & normals);
+                          const MooseArray<Point> & normals,
+                          DenseVector<Number> & scalar_re);
 
-  void scalarFaceJacobian(const unsigned int i_offset,
-                          const unsigned int vector_j_offset,
-                          const unsigned int scalar_j_offset,
-                          const unsigned int lm_j_offset,
-                          const unsigned int p_j_offset,
-                          const unsigned int vel_component,
-                          const unsigned int lm_u_j_offset,
-                          const unsigned int lm_v_j_offset,
+  void scalarFaceJacobian(const unsigned int vel_component,
                           const MooseArray<Real> & JxW_face,
                           const libMesh::QBase & qrule_face,
-                          const MooseArray<Point> & normals);
+                          const MooseArray<Point> & normals,
+                          DenseMatrix<Number> & scalar_vector_jac,
+                          DenseMatrix<Number> & scalar_scalar_jac,
+                          DenseMatrix<Number> & scalar_lm_jac,
+                          DenseMatrix<Number> & scalar_p_jac,
+                          DenseMatrix<Number> & scalar_lm_u_vel_jac,
+                          DenseMatrix<Number> & scalar_lm_v_vel_jac);
 
-  void lmFaceResidual(const unsigned int i_offset,
-                      const MooseArray<Gradient> & vector_sol,
+  void lmFaceResidual(const MooseArray<Gradient> & vector_sol,
                       const MooseArray<Number> & scalar_sol,
                       const MooseArray<Number> & lm_sol,
                       const unsigned int vel_component,
                       const MooseArray<Real> & JxW_face,
                       const libMesh::QBase & qrule_face,
                       const MooseArray<Point> & normals,
-                      const Elem * const neigh);
+                      const Elem * const neigh,
+                      DenseVector<Number> & lm_re);
 
-  void lmFaceJacobian(const unsigned int i_offset,
-                      const unsigned int vector_j_offset,
-                      const unsigned int scalar_j_offset,
-                      const unsigned int lm_j_offset,
-                      const unsigned int p_j_offset,
-                      const unsigned int vel_component,
-                      const unsigned int lm_u_j_offset,
-                      const unsigned int lm_v_j_offset,
+  void lmFaceJacobian(const unsigned int vel_component,
                       const MooseArray<Real> & JxW_face,
                       const libMesh::QBase & qrule_face,
                       const MooseArray<Point> & normals,
-                      const Elem * const neigh);
+                      const Elem * const neigh,
+                      DenseMatrix<Number> & lm_vec_jac,
+                      DenseMatrix<Number> & lm_scalar_jac,
+                      DenseMatrix<Number> & lm_lm_jac,
+                      DenseMatrix<Number> & lm_p_jac,
+                      DenseMatrix<Number> & lm_lm_u_vel_jac,
+                      DenseMatrix<Number> & lm_lm_v_vel_jac);
 
-  void pressureDirichletResidual(const unsigned int i_offset,
-                                 const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
+  void pressureDirichletResidual(const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
                                  const MooseArray<Real> & JxW_face,
                                  const libMesh::QBase & qrule_face,
                                  const MooseArray<Point> & normals,
                                  const Elem * const current_elem,
                                  const unsigned int current_side,
-                                 const MooseArray<Point> & q_point_face);
+                                 const MooseArray<Point> & q_point_face,
+                                 DenseVector<Number> & pressure_re);
 
-  void scalarDirichletResidual(const unsigned int i_offset,
-                               const MooseArray<Gradient> & vector_sol,
+  void scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
                                const MooseArray<Number> & scalar_sol,
                                const unsigned int vel_component,
                                const std::array<const Moose::Functor<Real> *, 3> & dirichlet_vel,
@@ -208,16 +195,16 @@ protected:
                                const MooseArray<Point> & normals,
                                const Elem * const current_elem,
                                const unsigned int current_side,
-                               const MooseArray<Point> & q_point_face);
+                               const MooseArray<Point> & q_point_face,
+                               DenseVector<Number> & scalar_re);
 
-  void scalarDirichletJacobian(const unsigned int i_offset,
-                               const unsigned int vector_j_offset,
-                               const unsigned int scalar_j_offset,
-                               const unsigned int p_j_offset,
-                               const unsigned int vel_component,
+  void scalarDirichletJacobian(const unsigned int vel_component,
                                const MooseArray<Real> & JxW_face,
                                const libMesh::QBase & qrule_face,
-                               const MooseArray<Point> & normals);
+                               const MooseArray<Point> & normals,
+                               DenseMatrix<Number> & scalar_vector_jac,
+                               DenseMatrix<Number> & scalar_scalar_jac,
+                               DenseMatrix<Number> & scalar_pressure_jac);
 
   const MooseVariableFE<Real> & _v_var;
   const MooseVariableFE<Real> * const _w_var;
@@ -251,7 +238,12 @@ protected:
   /// The density
   const Real _rho;
 
-  /// Number of dofs on elem
-  std::size_t _p_n_dofs;
-  std::size_t _global_lm_n_dofs;
+  DenseVector<Number> _grad_u_vel_re, _grad_v_vel_re, _u_vel_re, _v_vel_re, _lm_u_vel_re,
+      _lm_v_vel_re, _p_re, _global_lm_re;
+  DenseMatrix<Number> _grad_u_grad_u_jac, _grad_u_u_jac, _grad_v_grad_v_jac, _grad_v_v_jac,
+      _u_grad_u_jac, _v_grad_v_jac, _u_u_jac, _u_v_jac, _v_u_jac, _v_v_jac, _u_p_jac, _v_p_jac,
+      _p_u_jac, _p_v_jac, _p_global_lm_jac, _global_lm_p_jac, _grad_u_lm_u_jac, _grad_v_lm_v_jac,
+      _u_lm_u_jac, _v_lm_v_jac, _u_lm_v_jac, _v_lm_u_jac, _lm_u_grad_u_jac, _lm_v_grad_v_jac,
+      _lm_u_u_jac, _lm_v_v_jac, _lm_u_lm_u_jac, _lm_v_lm_v_jac, _lm_u_p_jac, _lm_v_p_jac,
+      _lm_u_lm_v_jac, _lm_v_lm_u_jac, _p_lm_u_jac, _p_lm_v_jac;
 };

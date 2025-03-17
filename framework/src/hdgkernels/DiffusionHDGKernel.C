@@ -39,9 +39,7 @@ DiffusionHDGKernel::DiffusionHDGKernel(const InputParameters & params)
     _qrule_face(_assembly.qRuleFace()),
     _q_point_face(_assembly.qPointsFace()),
     _JxW_face(_assembly.JxWFace()),
-    _coord_face(_assembly.coordTransformation()),
-    _normals(_assembly.normals()),
-    _current_side(_assembly.side())
+    _normals(_assembly.normals())
 {
 }
 
