@@ -25,10 +25,10 @@ jobs:
 
       - name: Run discuss bot
         run: python python/MooseDiscussion/GitHubBot.py \
-          --db_dir $DB_DIR \
-          --top_n $TOP_N \
-          --threshold $THRESHOLD \
-          --model_name $MODEL_NAME
+          --db_dir "${{env.DB_DIR}}" \
+          --top_n "${{env.TOP_N}}" \
+          --threshold "${{env.THRESHOLD}}" \
+          --model_name "${{env.MODEL_NAME}}"
         env:
           API_KEY: ${{ secrets.GITHUB_TOKEN }}
           DB_DIR: "python/MooseDiscussion/database"
