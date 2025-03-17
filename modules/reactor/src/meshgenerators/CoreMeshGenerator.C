@@ -368,6 +368,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
         params.set<BoundaryName>("external_boundary_name") = RGMB::CORE_BOUNDARY_NAME;
         params.set<double>("rotate_angle") = 0.0;
+        params.set<bool>("allow_unused_inputs") = true;
 
         addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
       }

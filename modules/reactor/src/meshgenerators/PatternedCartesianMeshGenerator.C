@@ -123,6 +123,10 @@ PatternedCartesianMeshGenerator::validParams()
       "boundary_region_element_type",
       quad_elem_type,
       "Type of the quadrilateral elements to be generated in the boundary region.");
+  params.addParam<bool>(
+      "allow_unused_inputs",
+      false,
+      "Whether additional input assemblies can be part of inputs without being used in lattice");
   params.addParamNamesToGroup(
       "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
       "external_boundary_id external_boundary_name create_inward_interface_boundaries "
@@ -176,7 +180,8 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
     _use_exclude_id(isParamValid("exclude_id")),
     _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern")),
     _boundary_quad_elem_type(
-        getParam<MooseEnum>("boundary_region_element_type").template getEnum<QUAD_ELEM_TYPE>())
+        getParam<MooseEnum>("boundary_region_element_type").template getEnum<QUAD_ELEM_TYPE>()),
+    _allow_unused_inputs(getParam<bool>("allow_unused_inputs"))
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
   declareMeshProperty("input_pitch_meta", 0.0);
@@ -215,10 +220,11 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
     paramError(
         "pattern",
         "Elements of this parameter must be smaller than the length of inputs (0-indexing).");
-  if ((unsigned int)std::distance(pattern_1d.begin(),
-                                  std::unique(pattern_1d.begin(), pattern_1d.end())) <
-      _input_names.size())
-    paramError("pattern", "All the meshes provided in inputs must be used here.");
+  if (std::set<unsigned int>(pattern_1d.begin(), pattern_1d.end()).size() < _input_names.size() &&
+      !_allow_unused_inputs)
+    paramError("pattern",
+               "All the meshes provided in inputs must be used in the lattice pattern. To bypass "
+               "this requirement, set 'allow_unused_inputs = true'");
 
   if (isParamValid("background_block_id"))
   {
