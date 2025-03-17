@@ -17,11 +17,11 @@ InputParameters
 TorchScriptMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Material object which relies on the evaluation of a neural network read using the TorchScript format.");
+  params.addClassDescription("Material object which relies on the evaluation of a TorchScript module.");
   params.addRequiredParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will generate.");
   params.addRequiredParam<std::vector<PostprocessorName>>("input_names", "The input parameters for the neural network.");
-  params.addRequiredParam<UserObjectName>("torch_script_uo", "The name of the user object which contains the torch script network.");
+  params.addRequiredParam<UserObjectName>("torch_script_userobject", "The name of the user object which contains the torch script module.");
 
   return params;
 }
@@ -33,9 +33,8 @@ TorchScriptMaterial::TorchScriptMaterial(
     _num_props(_prop_names.size()),
     _input_names(getParam<std::vector<PostprocessorName>>("input_names")),
     _num_inputs(_input_names.size()),
-    _torch_script_uo(getUserObject<TorchScriptUserObject>("torch_script_uo")),
+    _torch_script_userobject(getUserObject<TorchScriptUserObject>("torch_script_userobject")),
     _input_tensor(torch::zeros({1, _num_inputs}, torch::TensorOptions().dtype(torch::kFloat64).device(_app.getLibtorchDevice())))
-
 {
   if (!_num_props)
     paramError("prop_names", "Must declare at least one property!");
@@ -69,8 +68,8 @@ TorchScriptMaterial::computeQpValues()
   for (unsigned int input_i = 0; input_i < _num_inputs; ++input_i)
     input_accessor[0][input_i] = (*_nn_inputs[input_i]);
 
-  const auto output = _torch_script_uo.evaluate(_input_tensor);
-  mooseAssert(_num_props == output.numel(), "The tensor needs to be the same length as the nubmer of properties!");
+  const auto output = _torch_script_userobject.evaluate(_input_tensor);
+  mooseError(_num_props == output.numel(), "The tensor needs to be the same length as the number of properties!");
 
   const auto output_accessor = output.accessor<Real,2>();
   for (unsigned int prop_i = 0; prop_i < _num_props; ++prop_i)

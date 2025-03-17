@@ -15,7 +15,7 @@ InputParameters
 TorchScriptUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addRequiredParam<std::string>("filename", "The file name which contains the saved neural network.");
+  params.addRequiredParam<std::string>("filename", "The file name which contains the torch script module.");
   params.declareControllable("filename");
   return params;
 }
@@ -28,13 +28,15 @@ TorchScriptUserObject::TorchScriptUserObject(const InputParameters & parameters)
 
 void TorchScriptUserObject::execute()
 {
-  _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(_filename);
+  // We load when the user executes this user object
+  _torchscript_module = std::make_shared<Moose::TorchScriptModule>(_filename);
 }
 
 torch::Tensor TorchScriptUserObject::evaluate(torch::Tensor & input) const
 {
-  mooseAssert(_nn, "We need a neural network to evalute!");
-  return _nn->forward(input);
+  if (!_torchscript_module)
+    mooseError("The torch script module has not been loaded yet, so it can't be evaluated! Make sure that the torch script module is loaded (execute_on flags) before calling this function!");
+  return _torchscript_module->forward(input);
 }
 
 

@@ -47,7 +47,7 @@ protected:
   std::vector<GenericMaterialProperty<Real, false> *> _properties;
 
   /// The user object that holds the neural network
-  const TorchScriptUserObject & _torch_script_uo;
+  const TorchScriptUserObject & _torch_script_userobject;
 
   /// Place holder for the inputs to the neural network
   torch::Tensor _input_tensor;

@@ -10,23 +10,23 @@
 #ifdef LIBTORCH_ENABLED
 
 #include <torch/torch.h>
-#include "LibtorchTorchScriptNeuralNet.h"
+#include "TorchScriptModule.h"
 #include "MooseError.h"
 
 namespace Moose
 {
 
-LibtorchTorchScriptNeuralNet::LibtorchTorchScriptNeuralNet()
+TorchScriptModule::TorchScriptModule()
 {
 }
 
-LibtorchTorchScriptNeuralNet::LibtorchTorchScriptNeuralNet(const std::string & filename)
+TorchScriptModule::TorchScriptModule(const std::string & filename)
 {
   loadNeuralNetwork(filename);
 }
 
 void
-LibtorchTorchScriptNeuralNet::loadNeuralNetwork(const std::string & filename)
+TorchScriptModule::loadNeuralNetwork(const std::string & filename)
 {
   try
   {
@@ -40,7 +40,7 @@ LibtorchTorchScriptNeuralNet::loadNeuralNetwork(const std::string & filename)
 }
 
 torch::Tensor
-LibtorchTorchScriptNeuralNet::forward(torch::Tensor & x)
+TorchScriptModule::forward(torch::Tensor & x)
 {
   std::vector<torch::jit::IValue> inputs(1, x);
   return torch::jit::script::Module::forward(inputs).toTensor();
