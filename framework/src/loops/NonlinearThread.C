@@ -232,11 +232,10 @@ NonlinearThread::computeOnInterface(BoundaryID bnd_id)
 void
 NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
 {
-  if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  if (const Elem * neighbor = elem->neighbor_ptr(side);
+      ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide(*elem, *neighbor) &&
+      _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor_ptr(side);
-
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
 
     // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
@@ -254,7 +253,7 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
       accumulateNeighborLower();
     }
   }
-  else if (_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  if (_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
     // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
     // still remember to swap back during stack unwinding.
