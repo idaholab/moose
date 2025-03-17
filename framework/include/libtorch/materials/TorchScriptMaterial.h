@@ -38,15 +38,17 @@ protected:
   /// The functions to use for each property
   const std::vector<PostprocessorName> _input_names;
 
-    /// Number of inputs to the neural net
+  /// Number of inputs to the neural net
   const unsigned int _num_inputs;
 
-  std::vector<const PostprocessorValue *> _nn_inputs;
+  /// The module input parameters stored as postprocessor values.
+  /// TODO: make this more generali n the future
+  std::vector<const PostprocessorValue *> _module_inputs;
 
   /// Vector of all the properties, for now we don't support AD
   std::vector<GenericMaterialProperty<Real, false> *> _properties;
 
-  /// The user object that holds the neural network
+  /// The user object that holds the torch module
   const TorchScriptUserObject & _torch_script_userobject;
 
   /// Place holder for the inputs to the neural network
@@ -54,7 +56,8 @@ protected:
 
 private:
   /**
-   * A helper method for evaluating the neural net
+   * A helper method for evaluating the torch script module and populating the
+   * material properties.
    */
   void computeQpValues();
 };

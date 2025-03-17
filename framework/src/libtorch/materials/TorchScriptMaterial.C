@@ -43,7 +43,7 @@ TorchScriptMaterial::TorchScriptMaterial(
     paramError("input_names", "Must declare at least one input to the neural net!");
 
   for (const auto & input_name : _input_names)
-    _nn_inputs.push_back(&getPostprocessorValueByName(input_name));
+    _module_inputs.push_back(&getPostprocessorValueByName(input_name));
 
   for (const auto & prop_name : _prop_names)
     _properties.push_back(&declareGenericProperty<Real, false>(prop_name));
@@ -66,7 +66,7 @@ TorchScriptMaterial::computeQpValues()
 {
   auto input_accessor = _input_tensor.accessor<Real,2>();
   for (unsigned int input_i = 0; input_i < _num_inputs; ++input_i)
-    input_accessor[0][input_i] = (*_nn_inputs[input_i]);
+    input_accessor[0][input_i] = (*_module_inputs[input_i]);
 
   const auto output = _torch_script_userobject.evaluate(_input_tensor);
   mooseError(_num_props == output.numel(), "The tensor needs to be the same length as the number of properties!");
