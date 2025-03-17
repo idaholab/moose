@@ -12,8 +12,22 @@
 namespace CSG
 {
 
-CSGCell::CSGCell(const std::string name, const FillType fill_type)
-  : _name(name), _fill_type(fill_type)
+CSGCell::CSGCell(const std::string name, const FillType fill_type, const CSGRegion & region)
+  : _name(name), _fill_type(fill_type), _region(region)
 {
+}
+
+const std::string
+CSGCell::getFillTypeString()
+{
+  switch (_fill_type)
+  {
+    case FillType::MATERIAL:
+      return "material";
+    case FillType::EMPTY:
+      return "empty";
+    default:
+      return "invalid";
+  }
 }
 } // namespace CSG
