@@ -30,15 +30,17 @@ public:
   virtual void initialSetup() override;
   virtual void initialize() override {}
   virtual void execute() override;
-  virtual void finalize() override;
-
   virtual Real getValue() const override;
 
 protected:
+  /// Whether the matrix we are checking for symmetry is from a file
+  const bool _mat_from_file;
+  /// The matrix from file name. Empty string if \p _mat_from_file is \p false
+  const std::string _mat_file_name;
   /// Tolerance for the comparison between coefficients and transpose counterparts
   const Real _symm_tol;
   /// Transpose of the system matrix
   std::unique_ptr<SparseMatrix<Number>> _mat_transpose;
   /// Whether the matrix is symmetric
-  bool _equiv = true;
+  bool _equiv;
 };
