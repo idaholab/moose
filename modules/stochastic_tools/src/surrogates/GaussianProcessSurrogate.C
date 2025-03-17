@@ -99,6 +99,8 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
   RealEigenMatrix pred_var =
       K_test - (K_train_test.transpose() * _gp.getKCholeskyDecomp().solve(K_train_test));
+  
+  std::cout << "enter onelayer prediction" << std::endl;
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
   RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
