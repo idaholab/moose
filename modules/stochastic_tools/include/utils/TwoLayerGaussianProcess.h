@@ -22,10 +22,10 @@ namespace StochasticTools
  * Gaussian Processes. It can be used to standardize parameters, manipulate
  * covariance data and compute additional stored matrices.
  */
-class GaussianProcess
+class TwoLayerGaussianProcess
 {
 public:
-  GaussianProcess();
+  TwoLayerGaussianProcess();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -44,16 +44,16 @@ public:
 
   /// Structure containing the optimization options for
   /// hyperparameter-tuning
-  struct GPOptimizerOptions
+  struct TGPOptimizerOptions
   {
     /// Default constructor
-    GPOptimizerOptions();
+    TGPOptimizerOptions();
     /**
-     * Construct a new GPOptimizerOptions object using
+     * Construct a new TGPOptimizerOptions object using
      * input parameters that will control the optimization
      * @param show_every_nth_iteration To show the loss value at every n-th iteration, if set to 0,
      * nothing is displayed
-     * @param num_iter The number of iterations we want in the optimization of the GP
+     * @param num_iter The number of iterations we want in the optimization of the TGP
      * @param batch_size The number of samples in each batch
      * @param learning_rate The learning rate for parameter updates
      * @param b1 Tuning constant for the Adam algorithm
@@ -61,7 +61,7 @@ public:
      * @param eps Tuning constant for the Adam algorithm
      * @param lambda Tuning constant for the Adam algorithm
      */
-    GPOptimizerOptions(const bool show_every_nth_iteration = 1,
+    TGPOptimizerOptions(const bool show_every_nth_iteration = 1,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
                        const Real learning_rate = 1e-3,
@@ -97,7 +97,7 @@ public:
    */
   void setupCovarianceMatrix(const RealEigenMatrix & training_params,
                              const RealEigenMatrix & training_data,
-                             const GPOptimizerOptions & opts);
+                             const TGPOptimizerOptions & opts);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -144,7 +144,8 @@ public:
    * @param l Constant parameter from the paper.
    * @param u Constant parameter from the paper.
    * @param g Noise level.
-   * @param theta Lengthscale.
+   * @param theta_w Lengthscale for inner layer.
+   * @param theta_y Lengthscale for outer layer.
    * @param alpha Parameter for gamma distribution.
    * @param beta Parameter for gamma distribution.
    */
@@ -153,18 +154,23 @@ public:
     Real u;
     struct {
       Real g;
-      Real theta;
+      Real theta_w;
+      Real theta_y;
     } alpha, beta;
   };
 
   /**
-   * Initialzed value for GP hyperparameters.
-   * @param theta Lengthscale.
+   * Initialzed value for two layer GP hyperparameters.
+   * @param w Hidden node.
+   * @param theta_w Lengthscale for inner layer.
+   * @param theta_y Lengthscale for outer layer.
    * @param g Noise level.
    * @param tau2 Scale.
    */
   struct Initial {
-    RealEigenMatrix theta;
+    RealEigenMatrix w;
+    RealEigenMatrix theta_y;
+    RealEigenMatrix theta_w;
     Real g;
     Real tau2;
   };
@@ -189,6 +195,16 @@ public:
     Real theta;
     Real ll;
     Real tau2;
+  };
+
+  /**
+   * Return value computed in the sample_w function.
+   * @param w Sampled hidden node.
+   * @param ll Log likelihood.
+   */
+  struct SampleWResult {
+    RealEigenMatrix w;
+    Real ll;
   };
 
   /**
@@ -248,7 +264,76 @@ public:
    * @param result Return value.
    */
   void sample_theta(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
-              unsigned int i, Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev);
+               unsigned int i, Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev);
+
+  /**
+   * Samples from multivariate normal distribution.
+   * @param mean Mean value.
+   * @param cov Covariance matrix.
+   * @param n_dim Dimension of data.
+   * @param n_draw Number of draws from the distribution.
+   * @param final_sample_matrix Sampled value.
+   */
+  void multiVariateNormalSampling(const RealEigenMatrix & mean,const RealEigenMatrix & cov, unsigned int n_dim, unsigned int n_draw, RealEigenMatrix & final_sample_matrix);
+
+  /**
+   * Samples lengthscale theta using MH algorithm.
+   * @param outvec Observed outputs (response values).
+   * @param w_t Current values of the hidden nodes.
+   * @param w1 Hidden node 1.
+   * @param w2 Hidden node 2.
+   * @param x1 Input data 1.
+   * @param x2 Input data 2.
+   * @param g Noise level.
+   * @param theta_y Lengthscale for outer layer.
+   * @param theta_w Lengthscale for inner layer.
+   * @param result Return value.
+   * @param ll_prev Log likelihood from the previous MCMC round.
+   * @param prior_mean Prior mean.
+   */
+  void sample_w(const RealEigenMatrix & out_vec, RealEigenMatrix & w_t, const RealEigenMatrix & w1, const RealEigenMatrix & w2, 
+              const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_y, const RealEigenMatrix & theta_w,
+              SampleWResult & result, Real ll_prev, const RealEigenMatrix & prior_mean);
+
+  /**
+   * Kernel function.
+   * @param x1 Input data 1.
+   * @param x2 Input data 2.
+   * @param tau2 Scale.
+   * @param theta Lengthscale.
+   * @param g Noise level.
+   * @param k Return value.
+   */
+  void squared_exponential_covariance(const RealEigenMatrix &x1, 
+                  const RealEigenMatrix &x2, 
+                  Real tau2, 
+                  const RealEigenMatrix &theta, 
+                  Real g, 
+                  RealEigenMatrix &k);
+
+  /**
+   * Predicts mean and covariance using Kriging interpolation.
+   * @param y Observed outputs (response values).
+   * @param x Input data.
+   * @param x_new New input data.
+   * @param theta Lengthscale.
+   * @param g Noise level.
+   * @param tau2 Scale.
+   * @param cal_sigma If covariance needs to be computed.
+   * @param prior_mean Prior mean for the observed input data.
+   * @param prior_mean_new Prior mean for the new data points.
+   * @param krig_mean Return mean.
+   * @param krig_sigma Return covariance.
+   */
+  void krig(const RealEigenMatrix & y, const RealEigenMatrix & x, const RealEigenMatrix & x_new,
+                                   const RealEigenMatrix & theta, Real g, Real tau2, bool cal_sigma,
+                                   const RealEigenMatrix & prior_mean, const RealEigenMatrix & prior_mean_new, 
+                                   RealEigenMatrix & krig_mean, RealEigenMatrix & krig_sigma);
+
+  
+
+  // void sample_theta_w(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
+  //              Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev);
 
   /**
    * Sets up constant parameter.
@@ -263,7 +348,7 @@ public:
   // Tune hyperparameters using Adam
   void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                            const RealEigenMatrix & training_data,
-                           const GPOptimizerOptions & opts);
+                           const TGPOptimizerOptions & opts);
 
   // Computes the loss function
   Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
@@ -316,6 +401,14 @@ public:
   {
     return _hyperparam_vec_map;
   }
+  RealEigenMatrix & getG() { return _g; }
+  RealEigenMatrix & getThetaY() { return _theta_y; }
+  RealEigenMatrix & getThetaW() { return _theta_w; }
+  RealEigenMatrix & getTau2() { return _tau2; }
+  std::vector<RealEigenMatrix> & getW() { return _w; }
+  Real & getNmcmc() {return _nmcmc;}
+  RealEigenMatrix & getX() { return _x; }
+  RealEigenMatrix & getY() { return _y; }
   ///@}
 
   /// @{
@@ -356,10 +449,10 @@ protected:
   /// Number of tunable hyperparameters
   unsigned int _num_tunable;
 
-  /// Type of covariance function used for this GP
+  /// Type of covariance function used for this TGP
   std::string _covar_type;
 
-  /// The name of the covariance function used in this GP
+  /// The name of the covariance function used in this TGP
   std::string _covar_name;
 
   /// The names of the covariance functions the used covariance function depends on
@@ -368,7 +461,7 @@ protected:
   /// The types of the covariance functions the used covariance function depends on
   std::map<UserObjectName, std::string> _dependent_covar_types;
 
-  /// The number of outputs of the GP
+  /// The number of outputs of the TGP
   unsigned int _num_outputs;
 
   /// Scalar hyperparameters. Stored for use in surrogate
@@ -400,16 +493,32 @@ protected:
 
   /// The batch size for Adam optimization
   unsigned int _batch_size;
+
+  RealEigenMatrix _g;
+
+  RealEigenMatrix _theta_y;
+
+  RealEigenMatrix _theta_w;
+
+  RealEigenMatrix _tau2;
+
+  std::vector<RealEigenMatrix> _w;
+
+  Real _nmcmc;
+
+  RealEigenMatrix _x;
+
+  RealEigenMatrix _y;
 };
 
 } // StochasticTools namespac
 
-template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+// template <>
+// void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+// template <>
+// void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
-void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+void dataStore(std::ostream & stream, StochasticTools::TwoLayerGaussianProcess & tgp_utils, void * context);
 template <>
-void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+void dataLoad(std::istream & stream, StochasticTools::TwoLayerGaussianProcess & tgp_utils, void * context);
