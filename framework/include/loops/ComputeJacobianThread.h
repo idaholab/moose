@@ -44,7 +44,7 @@ protected:
   void accumulateNeighbor() override;
   virtual void accumulateNeighborLower() override;
   virtual void accumulateLower() override;
-  virtual void accumulate() override {};
+  virtual void accumulate() override {}
 
   virtual void compute(ResidualObject &) override { mooseError("Not implemented"); };
   void compute(KernelBase & kernel) override;
@@ -52,6 +52,8 @@ protected:
   void compute(IntegratedBCBase & bc) override;
   void compute(DGKernelBase & dg, const Elem * neighbor) override;
   void compute(InterfaceKernelBase & ik) override;
+  using NonlinearThread::computeOnInternalFace;
+  virtual void computeOnInternalFace() override;
 
   std::string objectType() const override { return "Jacobian"; }
 

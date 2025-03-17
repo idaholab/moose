@@ -4,7 +4,13 @@ from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
 class TestLagrangeTri(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-diffusion.i', 5, "--error", "--error-unused", y_pp=['L2u'])
+        df1 = mms.run_spatial('mms-diffusion.i', 5,
+        "--error",
+        "--error-unused",
+        "--nl0-static-condensation",
+        "-ksp_type", "preonly",
+        "-nl0_condensed_pc_type", "hypre",
+        y_pp=['L2u'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -16,6 +22,9 @@ class TestLagrangeTri(unittest.TestCase):
 class TestLagrangeQuad(unittest.TestCase):
     def test(self):
         df1 = mms.run_spatial('mms-diffusion.i', 6, "--error", "--error-unused",
+                              "--nl0-static-condensation",
+                              "-ksp_type", "preonly",
+                              "-nl0_condensed_pc_type", "hypre",
                               "Mesh/gen/elem_type=QUAD9",
                               y_pp=['L2u'])
 
@@ -28,7 +37,11 @@ class TestLagrangeQuad(unittest.TestCase):
 
 class TestRTTri(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('rt-mms-diffusion.i', 5, "--error", "--error-unused", y_pp=['L2u'])
+        df1 = mms.run_spatial('rt-mms-diffusion.i', 5, "--error", "--error-unused",
+                              "--nl0-static-condensation",
+                              "-ksp_type", "preonly",
+                              "-nl0_condensed_pc_type", "hypre",
+                              y_pp=['L2u'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -41,6 +54,9 @@ class TestRTQuad(unittest.TestCase):
     def test(self):
         df1 = mms.run_spatial('rt-mms-diffusion.i', 6, "--error", "--error-unused",
                               "Mesh/gen/elem_type=QUAD9",
+                              "--nl0-static-condensation",
+                              "-ksp_type", "preonly",
+                              "-nl0_condensed_pc_type", "hypre",
                               y_pp=['L2u'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')

@@ -12,8 +12,6 @@
 #include "HDGKernel.h"
 #include "DiffusionHDGAssemblyHelper.h"
 
-#include <vector>
-
 /**
  * Implements the diffusion equation for a hybridized discretization
  */
@@ -22,15 +20,36 @@ class DiffusionHDGKernel : public HDGKernel, public DiffusionHDGAssemblyHelper
 public:
   static InputParameters validParams();
 
-  DiffusionHDGKernel(const InputParameters & parameters);
+  DiffusionHDGKernel(const InputParameters & params);
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeResidualOnSide() override;
+  virtual void computeJacobianOnSide() override;
+  virtual void initialSetup() override;
+  virtual void jacobianSetup() override;
 
-  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+  virtual std::set<std::string> additionalVariablesCovered() override;
 
 protected:
-  virtual void onElement() override;
-  virtual void onInternalSide() override;
-
-private:
   /// optional source
   const Moose::Functor<Real> & _source;
+
+  /// The face quadrature rule
+  const QBase * const & _qrule_face;
+
+  /// The physical locations of the quadrature points on the face
+  const MooseArray<Point> & _q_point_face;
+
+  /// transformed Jacobian weights on the current element face
+  const MooseArray<Real> & _JxW_face;
+
+  /// coordinate transformation on the face
+  const MooseArray<Real> & _coord_face;
+
+  /// face normals
+  const MooseArray<Point> & _normals;
+
+  /// The current side index
+  const unsigned int & _current_side;
 };

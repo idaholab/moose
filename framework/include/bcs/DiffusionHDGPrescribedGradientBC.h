@@ -9,26 +9,33 @@
 
 #pragma once
 
-#include "HDGIntegratedBC.h"
+#include "IntegratedBC.h"
 #include "DiffusionHDGAssemblyHelper.h"
 
 /**
  * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
  * the diffusion equation
  */
-class DiffusionHDGPrescribedGradientBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
+class DiffusionHDGPrescribedGradientBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
   DiffusionHDGPrescribedGradientBC(const InputParameters & parameters);
 
-  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void jacobianSetup() override;
+  virtual void initialSetup() override;
 
 protected:
-  virtual void onBoundary() override;
+  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
 
   /// Prescribed normal gradient along the boundary. The default is 0 for a natural boundary
   /// condition
   const Moose::Functor<Real> & _normal_gradient;
+
+  /// A cache variable to prevent multiple computations of Jacobians
+  unsigned int _my_side;
 };

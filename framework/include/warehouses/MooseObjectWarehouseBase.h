@@ -750,7 +750,12 @@ MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomain
                                                THREAD_ID tid /*=0*/) const
 {
   for (const auto & object : _active_objects[tid])
+  {
     unique_variables.insert(object->variable().name());
+    const auto additional_variables_covered = object->additionalVariablesCovered();
+    unique_variables.insert(additional_variables_covered.begin(),
+                            additional_variables_covered.end());
+  }
 
   for (const auto & object_pair : _active_block_objects[tid])
     subdomains_covered.insert(object_pair.first);

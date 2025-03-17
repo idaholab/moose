@@ -9,11 +9,15 @@
 
 #pragma once
 
+#include "Moose.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
 #include "MooseFunctor.h"
 #include "Function.h"
-#include "HDGData.h"
+#include "Kernel.h"
+#include "MooseVariableDependencyInterface.h"
+#include "NonADFunctorInterface.h"
+
 #include "libmesh/vector_value.h"
 #include <vector>
 
@@ -24,9 +28,9 @@ template <typename>
 class MooseArray;
 class SystemBase;
 class MooseMesh;
-class HDGData;
 class MooseObject;
 class MaterialPropertyInterface;
+class MooseVariableDependencyInterface;
 
 /**
  * Implements all the methods for assembling a hybridized local discontinuous Galerkin (LDG-H),
@@ -35,38 +39,32 @@ class MaterialPropertyInterface;
  * (but not exactly based) on "A superconvergent LDG-hybridizable Galerkin method for second-order
  * elliptic problems" by Cockburn
  */
-class DiffusionHDGAssemblyHelper : virtual public HDGData
+class DiffusionHDGAssemblyHelper : public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
   DiffusionHDGAssemblyHelper(const MooseObject * const moose_obj,
                              MaterialPropertyInterface * const mpi,
+                             MooseVariableDependencyInterface * const mvdi,
                              const TransientInterface * const ti,
-                             SystemBase & nl_sys,
-                             SystemBase & aux_sys,
+                             const FEProblemBase & fe_problem,
+                             SystemBase & sys,
                              const THREAD_ID tid);
+  void checkCoupling();
 
 protected:
-  virtual std::string physics() const override { return "diffusion"; }
-  virtual std::set<const MooseVariableBase *> variables() const override;
-
-  /**
-   * Set the number of degree of freedom variables and resize the Eigen data structures
-   */
-  void resizeData();
-
   /**
    * Computes a local residual vector for the weak form:
    * (q, v) + (u, div(v))
    * where q is the vector field representing the gradient of u, v are its associated test
    * functions, and u is the diffused scalar field
    */
-  void vectorVolumeResidual(const unsigned int i_offset,
-                            const MooseArray<libMesh::Gradient> & vector_sol,
+  void vectorVolumeResidual(const MooseArray<Gradient> & vector_sol,
                             const MooseArray<Number> & scalar_sol,
                             const MooseArray<Real> & JxW,
-                            const libMesh::QBase & qrule);
+                            const libMesh::QBase & qrule,
+                            DenseVector<Number> & vector_re);
 
   /**
    * Computes a local Jacobian matrix for the weak form:
@@ -74,11 +72,10 @@ protected:
    * where q is the vector field representing the gradient, v are its associated test functions, and
    * u is the scalar field
    */
-  void vectorVolumeJacobian(const unsigned int i_offset,
-                            const unsigned int vector_j_offset,
-                            const unsigned int scalar_j_offset,
-                            const MooseArray<Real> & JxW,
-                            const libMesh::QBase & qrule);
+  void vectorVolumeJacobian(const MooseArray<Real> & JxW,
+                            const libMesh::QBase & qrule,
+                            DenseMatrix<Number> & vector_vector_jac,
+                            DenseMatrix<Number> & vector_scalar_jac);
 
   /**
    * Computes a local residual vector for the weak form:
@@ -86,13 +83,13 @@ protected:
    * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
    * a forcing function
    */
-  void scalarVolumeResidual(const unsigned int i_offset,
-                            const MooseArray<libMesh::Gradient> & vector_field,
+  void scalarVolumeResidual(const MooseArray<Gradient> & vector_field,
                             const Moose::Functor<Real> & source,
                             const MooseArray<Real> & JxW,
                             const libMesh::QBase & qrule,
                             const Elem * const current_elem,
-                            const MooseArray<Point> & q_point);
+                            const MooseArray<Point> & q_point,
+                            DenseVector<Number> & scalar_re);
 
   /**
    * Computes a local Jacobian matrix for the weak form:
@@ -100,10 +97,9 @@ protected:
    * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
    * a forcing function
    */
-  void scalarVolumeJacobian(const unsigned int i_offset,
-                            const unsigned int vector_field_j_offset,
-                            const MooseArray<Real> & JxW,
-                            const libMesh::QBase & qrule);
+  void scalarVolumeJacobian(const MooseArray<Real> & JxW,
+                            const libMesh::QBase & qrule,
+                            DenseMatrix<Number> & scalar_vector_jac);
 
   //
   // Methods which can be leveraged both on internal sides in the kernel and by boundary conditions
@@ -115,11 +111,11 @@ protected:
    * where \hat{u} is the trace of the scalar field, n is the normal vector, and v are the test
    * functions associated with the gradient field
    */
-  void vectorFaceResidual(const unsigned int i_offset,
-                          const MooseArray<Number> & lm_sol,
+  void vectorFaceResidual(const MooseArray<Number> & lm_sol,
                           const MooseArray<Real> & JxW_face,
                           const libMesh::QBase & qrule_face,
-                          const MooseArray<Point> & normals);
+                          const MooseArray<Point> & normals,
+                          DenseVector<Number> & vector_re);
 
   /**
    * Computes a local Jacobian matrix for the weak form:
@@ -127,77 +123,73 @@ protected:
    * where \hat{u} is the trace of the scalar field, n is the normal vector, and v are the test
    * functions associated with the gradient field
    */
-  void vectorFaceJacobian(const unsigned int i_offset,
-                          const unsigned int lm_j_offset,
-                          const MooseArray<Real> & JxW_face,
+  void vectorFaceJacobian(const MooseArray<Real> & JxW_face,
                           const libMesh::QBase & qrule_face,
-                          const MooseArray<Point> & normals);
+                          const MooseArray<Point> & normals,
+                          DenseMatrix<Number> & vector_lm_jac);
 
   /**
    * Computes a local residual vector for the weak form:
    * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
    */
-  void scalarFaceResidual(const unsigned int i_offset,
-                          const MooseArray<libMesh::Gradient> & vector_sol,
+  void scalarFaceResidual(const MooseArray<Gradient> & vector_sol,
                           const MooseArray<Number> & scalar_sol,
                           const MooseArray<Number> & lm_sol,
                           const MooseArray<Real> & JxW_face,
                           const libMesh::QBase & qrule_face,
-                          const MooseArray<Point> & normals);
+                          const MooseArray<Point> & normals,
+                          DenseVector<Number> & scalar_re);
 
   /**
    * Computes a local Jacobian matrix for the weak form:
    * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
    */
-  void scalarFaceJacobian(const unsigned int i_offset,
-                          const unsigned int vector_j_offset,
-                          const unsigned int scalar_j_offset,
-                          const unsigned int lm_j_offset,
-                          const MooseArray<Real> & JxW_face,
+  void scalarFaceJacobian(const MooseArray<Real> & JxW_face,
                           const libMesh::QBase & qrule_face,
-                          const MooseArray<Point> & normals);
+                          const MooseArray<Point> & normals,
+                          DenseMatrix<Number> & scalar_vector_jac,
+                          DenseMatrix<Number> & scalar_scalar_jac,
+                          DenseMatrix<Number> & scalar_lm_jac);
 
   /**
    * Computes a local residual vector for the weak form:
    * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
    */
-  void lmFaceResidual(const unsigned int i_offset,
-                      const MooseArray<libMesh::Gradient> & vector_sol,
+  void lmFaceResidual(const MooseArray<Gradient> & vector_sol,
                       const MooseArray<Number> & scalar_sol,
                       const MooseArray<Number> & lm_sol,
                       const MooseArray<Real> & JxW_face,
                       const libMesh::QBase & qrule_face,
-                      const MooseArray<Point> & normals);
+                      const MooseArray<Point> & normals,
+                      DenseVector<Number> & lm_re);
 
   /**
    * Computes a local Jacobian matrix for the weak form:
    * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
    */
-  void lmFaceJacobian(const unsigned int i_offset,
-                      const unsigned int vector_j_offset,
-                      const unsigned int scalar_j_offset,
-                      const unsigned int lm_j_offset,
-                      const MooseArray<Real> & JxW_face,
+  void lmFaceJacobian(const MooseArray<Real> & JxW_face,
                       const libMesh::QBase & qrule_face,
-                      const MooseArray<Point> & normals);
+                      const MooseArray<Point> & normals,
+                      DenseMatrix<Number> & lm_vec_jac,
+                      DenseMatrix<Number> & lm_scalar_jac,
+                      DenseMatrix<Number> & lm_lm_jac);
 
   /**
    * Weakly imposes a Dirichlet condition for the scalar field in the vector (gradient) equation
    */
-  void vectorDirichletResidual(const unsigned int i_offset,
-                               const Moose::Functor<Real> & dirichlet_value,
+  void vectorDirichletResidual(const Moose::Functor<Real> & dirichlet_value,
                                const MooseArray<Real> & JxW_face,
                                const libMesh::QBase & qrule_face,
                                const MooseArray<Point> & normals,
                                const Elem * const current_elem,
                                const unsigned int current_side,
-                               const MooseArray<Point> & q_point_face);
+                               const MooseArray<Point> & q_point_face,
+                               DenseVector<Number> & vector_re);
 
   /**
    * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
    */
-  void scalarDirichletResidual(const unsigned int i_offset,
-                               const MooseArray<libMesh::Gradient> & vector_sol,
+  void scalarDirichletResidual(const MooseArray<Gradient> & vector_sol,
                                const MooseArray<Number> & scalar_sol,
                                const Moose::Functor<Real> & dirichlet_value,
                                const MooseArray<Real> & JxW_face,
@@ -205,18 +197,38 @@ protected:
                                const MooseArray<Point> & normals,
                                const Elem * const current_elem,
                                const unsigned int current_side,
-                               const MooseArray<Point> & q_point_face);
+                               const MooseArray<Point> & q_point_face,
+                               DenseVector<Number> & scalar_re);
 
   /**
    * Computes the Jacobian for a Dirichlet condition for the scalar field in the scalar field
    * equation
    */
-  void scalarDirichletJacobian(const unsigned int i_offset,
-                               const unsigned int vector_j_offset,
-                               const unsigned int scalar_j_offset,
-                               const MooseArray<Real> & JxW_face,
+  void scalarDirichletJacobian(const MooseArray<Real> & JxW_face,
                                const libMesh::QBase & qrule_face,
-                               const MooseArray<Point> & normals);
+                               const MooseArray<Point> & normals,
+                               DenseMatrix<Number> & scalar_vector_jac,
+                               DenseMatrix<Number> & scalar_scalar_jac);
+
+  /**
+   * Creates residuals corresponding to the weak form (v, \hat{u}), or stated simply this routine
+   * can be used to drive Lagrange multiplier values on the boundary to zero. This should be used on
+   * boundaries where there are Dirichlet conditions for the primal variables such that there is no
+   * need for the Lagrange multiplier variables
+   */
+  void createIdentityResidual(const MooseArray<Real> & JxW,
+                              const libMesh::QBase & qrule,
+                              const MooseArray<std::vector<Real>> & phi,
+                              const MooseArray<Number> & sol,
+                              DenseVector<Number> & re);
+
+  /**
+   * As above, but for the Jacobians
+   */
+  void createIdentityJacobian(const MooseArray<Real> & JxW,
+                              const libMesh::QBase & qrule,
+                              const MooseArray<std::vector<Real>> & phi,
+                              DenseMatrix<Number> & ke);
 
   const MooseVariableFE<Real> & _u_var;
   const MooseVariableFE<RealVectorValue> & _grad_u_var;
@@ -246,17 +258,30 @@ protected:
   /// The diffusivity
   const MaterialProperty<Real> & _diff;
 
-  // Number of dofs on elem
-  std::size_t _vector_n_dofs;
-  std::size_t _scalar_n_dofs;
-  std::size_t _lm_n_dofs;
-
   /// Reference to transient interface
   const TransientInterface & _ti;
 
-  /// Local sizes of the systems
-  std::size_t _primal_size, _lm_size;
-
   /// Our stabilization coefficient
   const Real _tau;
+
+  /// A data member used for determining when to compute the Jacobian
+  const Elem * _my_elem;
+
+  // Local residual vectors
+  DenseVector<Number> _vector_re, _scalar_re, _lm_re;
+
+  // Local Jacobian matrices
+  DenseMatrix<Number> _vector_vector_jac, _vector_scalar_jac, _scalar_vector_jac,
+      _scalar_scalar_jac, _scalar_lm_jac, _lm_scalar_jac, _lm_lm_jac, _vector_lm_jac,
+      _lm_vector_jac;
+
+private:
+  /// A reference to our associated MooseObject for error reporting
+  const MooseObject & _moose_obj;
+
+  /// A reference to the finite element problem used for coupling checks
+  const FEProblemBase & _dhah_fe_problem;
+
+  /// A reference to the nonlinear system used for coupling checks
+  const SystemBase & _dhah_sys;
 };

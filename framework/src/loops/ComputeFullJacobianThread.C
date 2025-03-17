@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBCBase.h"
+#include "HDGKernel.h"
 #include "DGKernel.h"
 #include "InterfaceKernelBase.h"
 #include "MooseVariableFE.h"
@@ -309,4 +310,14 @@ ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
       }
     }
   }
+}
+
+void
+ComputeFullJacobianThread::computeOnInternalFace()
+{
+  mooseAssert(_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid),
+              "We should not be called if we have no active HDG kernels");
+  for (const auto & hdg_kernel : _hdg_warehouse->getActiveBlockObjects(_subdomain, _tid))
+    if (hdg_kernel->hasBlocks(_subdomain))
+      hdg_kernel->computeJacobianOnSide();
 }

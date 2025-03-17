@@ -9,27 +9,32 @@
 
 #pragma once
 
-#include "HDGIntegratedBC.h"
+#include "IntegratedBC.h"
 #include "DiffusionHDGAssemblyHelper.h"
-
-#include <vector>
 
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of diffusion
  */
-class DiffusionHDGDirichletBC : public HDGIntegratedBC, public DiffusionHDGAssemblyHelper
+class DiffusionHDGDirichletBC : public IntegratedBC, public DiffusionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
   DiffusionHDGDirichletBC(const InputParameters & parameters);
 
-  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void jacobianSetup() override;
+  virtual void initialSetup() override;
 
 protected:
-  virtual void onBoundary() override;
+  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
 
 private:
   /// Functor computing the Dirichlet boundary value
   const Moose::Functor<Real> & _dirichlet_val;
+
+  /// A cache variable to prevent multiple computations of Jacobians
+  unsigned int _my_side;
 };

@@ -1,5 +1,4 @@
 [GlobalParams]
-  variable = face_u
   u = u
   grad_u = grad_u
   face_u = face_u
@@ -20,9 +19,6 @@
   [face_u]
     family = SIDE_HIERARCHIC
   []
-[]
-
-[AuxVariables]
   [u]
     family = L2_LAGRANGE
   []
@@ -38,7 +34,7 @@
   []
 []
 
-[HDGBCs]
+[BCs]
   [all]
     type = DiffusionHDGDirichletBC
     boundary = 'left right top bottom'
@@ -57,16 +53,22 @@
   []
 []
 
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre    boomeramg'
   line_search = 'basic'
 []
 
 [Outputs]
   csv = true
+  print_linear_residuals = false
 []
 
 [Postprocessors]
