@@ -15,7 +15,10 @@
 #include "GeneralUserObject.h"
 #include "TorchScriptModule.h"
 
-
+/**
+ * A user object the loads a torch module using the
+ * torch script format and just-in-time compilation.
+ */
 class TorchScriptUserObject : public GeneralUserObject
 {
 public:
@@ -27,6 +30,9 @@ public:
   virtual void execute() override;
   virtual void finalize() override {};
 
+  /**
+   * Get access to the torch script module which was loaded in this object.
+   */
   const std::shared_ptr<Moose::TorchScriptModule> & module() const {return _torchscript_module;}
 
   /**
@@ -37,10 +43,10 @@ public:
 
 protected:
 
-  /// The file name that specifies the torch script model
+  /// The file name that specifies the torch script model.
   const std::string & _filename;
 
-  /// The libtorch neural network that is currently stored here
+  /// The libtorch neural network that is currently stored here.
   std::shared_ptr<Moose::TorchScriptModule> _torchscript_module;
 };
 
