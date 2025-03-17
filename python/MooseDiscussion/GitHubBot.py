@@ -39,8 +39,7 @@ class GitHubBot:
             print(f"Loading local model from {model_path_full}")
             self.embed_model = HuggingFaceEmbedding(model_name=model_path_full)
         else:
-            print(f"Failed to load the model from HuggingFace: {e}")
-            print("Please provide a local path to the model as model_name")
+            print("Loading model from HuggingFace")
             self.embed_model = HuggingFaceEmbedding(model_name = f'sentence-transformers/{model_name}')
 
         self.index = self.load_database(db_dir)
