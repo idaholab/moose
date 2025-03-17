@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "HDGIntegratedBC.h"
+#include "IntegratedBC.h"
 #include "NavierStokesHDGAssemblyHelper.h"
 
 #include <vector>
@@ -25,15 +25,22 @@ class Function;
  * Implements an outflow boundary condition for use with a hybridized discretization of the
  * incompressible Navier-Stokes equations
  */
-class NavierStokesHDGOutflowBC : public HDGIntegratedBC, public NavierStokesHDGAssemblyHelper
+class NavierStokesHDGOutflowBC : public IntegratedBC, public NavierStokesHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
   NavierStokesHDGOutflowBC(const InputParameters & parameters);
 
-  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void jacobianSetup() override;
+  virtual void initialSetup() override;
 
 protected:
-  virtual void onBoundary() override;
+  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
+
+  /// A cache variable to prevent multiple computations of Jacobians
+  unsigned int _my_side;
 };
