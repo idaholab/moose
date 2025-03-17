@@ -34,7 +34,8 @@ NonlinearThread::NonlinearThread(FEProblemBase & fe_problem)
     _hdg_kernels(_nl.getHDGKernelWarehouse()),
     _has_active_objects(_integrated_bcs.hasActiveObjects() || _dg_kernels.hasActiveObjects() ||
                         _interface_kernels.hasActiveObjects() || _kernels.hasActiveObjects() ||
-                        _fe_problem.haveFV())
+                        _fe_problem.haveFV()),
+    _should_execute_dg(false)
 {
 }
 
@@ -49,7 +50,8 @@ NonlinearThread::NonlinearThread(NonlinearThread & x, Threads::split split)
     _kernels(x._kernels),
     _tag_kernels(x._tag_kernels),
     _hdg_kernels(x._hdg_kernels),
-    _has_active_objects(x._has_active_objects)
+    _has_active_objects(x._has_active_objects),
+    _should_execute_dg(x._should_execute_dg)
 {
 }
 
@@ -232,10 +234,11 @@ NonlinearThread::computeOnInterface(BoundaryID bnd_id)
 void
 NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
 {
-  if (const Elem * neighbor = elem->neighbor_ptr(side);
-      ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide(*elem, *neighbor) &&
-      _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  if (_should_execute_dg && _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
+    // Pointer to the neighbor we are currently working on.
+    const Elem * neighbor = elem->neighbor_ptr(side);
+
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
 
     // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
@@ -431,6 +434,7 @@ NonlinearThread::prepareFace(const Elem * const elem,
 bool
 NonlinearThread::shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const
 {
-  return _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid) ||
-         ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide(elem, neighbor);
+  _should_execute_dg =
+      ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide(elem, neighbor);
+  return _should_execute_dg || _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
 }

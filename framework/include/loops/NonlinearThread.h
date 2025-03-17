@@ -165,4 +165,10 @@ protected:
 
   /// Whether there are any active residual objects; otherwise we will do an early return
   const bool _has_active_objects;
+
+private:
+  /// Whether DG kernels should be executed for a given internal side. This can be false if HDG
+  /// kernels are present because in that case we visit the internal side from both sides and we
+  /// don't want to double execute DG kernels
+  mutable bool _should_execute_dg;
 };
