@@ -38,14 +38,12 @@ NumZeroEigenvalues::initialize()
 {
   PetscViewer matviewer;
 
-  auto ierr = MatCreate(_communicator.get(), &_petsc_mat);
-  LIBMESH_CHKERR(ierr);
-  ierr = PetscViewerBinaryOpen(_communicator.get(), _mat_name.c_str(), FILE_MODE_READ, &matviewer);
-  LIBMESH_CHKERR(ierr);
-  MatLoad(_petsc_mat, matviewer);
-  LIBMESH_CHKERR(ierr);
-  ierr = PetscViewerDestroy(&matviewer);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(_communicator.get(), MatCreate(_communicator.get(), &_petsc_mat));
+  LibmeshPetscCallA(
+      _communicator.get(),
+      PetscViewerBinaryOpen(_communicator.get(), _mat_name.c_str(), FILE_MODE_READ, &matviewer));
+  LibmeshPetscCallA(_communicator.get(), MatLoad(_petsc_mat, matviewer));
+  LibmeshPetscCallA(_communicator.get(), PetscViewerDestroy(&matviewer));
 
   _num_zero_eigenvalues = 0;
 }
@@ -61,30 +59,26 @@ NumZeroEigenvalues::execute()
   PetscInt nconv, nev, i;
   EPS eps;
 
-  auto ierr = EPSCreate(_communicator.get(), &eps);
-  LIBMESH_CHKERR(ierr);
-  ierr = EPSSetOperators(eps, _petsc_mat, nullptr);
-  LIBMESH_CHKERR(ierr);
-  ierr = EPSSetType(eps, EPSLAPACK);
-  LIBMESH_CHKERR(ierr);
-  ierr = EPSSolve(eps);
-  LIBMESH_CHKERR(ierr);
-  ierr = EPSGetDimensions(eps, &nev, nullptr, nullptr);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(_communicator.get(), EPSCreate(_communicator.get(), &eps));
+  LibmeshPetscCallA(_communicator.get(), EPSSetOperators(eps, _petsc_mat, nullptr));
+  LibmeshPetscCallA(_communicator.get(), EPSSetType(eps, EPSLAPACK));
+  LibmeshPetscCallA(_communicator.get(), EPSSolve(eps));
+  LibmeshPetscCallA(_communicator.get(), EPSGetDimensions(eps, &nev, nullptr, nullptr));
   if (_print)
   {
-    ierr = PetscPrintf(
-        _communicator.get(), " Number of requested eigenvalues: %" PetscInt_FMT "\n", nev);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(_communicator.get(),
+                      PetscPrintf(_communicator.get(),
+                                  " Number of requested eigenvalues: %" PetscInt_FMT "\n",
+                                  nev));
   }
 
-  ierr = EPSGetConverged(eps, &nconv);
-  LIBMESH_CHKERR(ierr);
+  LibmeshPetscCallA(_communicator.get(), EPSGetConverged(eps, &nconv));
   if (_print)
   {
-    ierr = PetscPrintf(
-        _communicator.get(), " Number of converged eigenpairs: %" PetscInt_FMT "\n\n", nconv);
-    LIBMESH_CHKERR(ierr);
+    LibmeshPetscCallA(_communicator.get(),
+                      PetscPrintf(_communicator.get(),
+                                  " Number of converged eigenpairs: %" PetscInt_FMT "\n\n",
+                                  nconv));
   }
 
   if (nconv > 0)
@@ -94,10 +88,10 @@ NumZeroEigenvalues::execute()
       /*
          Display eigenvalues and relative errors
       */
-      ierr = PetscPrintf(_communicator.get(),
-                         "           k          ||Ax-kx||/||kx||\n"
-                         "   ----------------- ------------------\n");
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(_communicator.get(),
+                        PetscPrintf(_communicator.get(),
+                                    "           k          ||Ax-kx||/||kx||\n"
+                                    "   ----------------- ------------------\n"));
     }
 
     for (i = 0; i < nconv; i++)
@@ -106,13 +100,11 @@ NumZeroEigenvalues::execute()
         Get converged eigenpairs: i-th eigenvalue is stored in kr (real part) and
         ki (imaginary part)
       */
-      ierr = EPSGetEigenpair(eps, i, &kr, &ki, nullptr, nullptr);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(_communicator.get(), EPSGetEigenpair(eps, i, &kr, &ki, nullptr, nullptr));
       /*
          Compute the relative error associated to each eigenpair
       */
-      ierr = EPSComputeError(eps, i, EPS_ERROR_RELATIVE, &error);
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(_communicator.get(), EPSComputeError(eps, i, EPS_ERROR_RELATIVE, &error));
 
 #if defined(PETSC_USE_COMPLEX)
       re = PetscRealPart(kr);
@@ -126,12 +118,14 @@ NumZeroEigenvalues::execute()
       if (_print)
       {
         if (!zero_im)
-          ierr = PetscPrintf(
-              PETSC_COMM_WORLD, " %9f%+9fi %12g\n", (double)re, (double)im, (double)error);
+          LibmeshPetscCallA(
+              _communicator.get(),
+              PetscPrintf(
+                  PETSC_COMM_WORLD, " %9f%+9fi %12g\n", (double)re, (double)im, (double)error));
         else
-          ierr =
-              PetscPrintf(_communicator.get(), "   %12f       %12g\n", (double)re, (double)error);
-        LIBMESH_CHKERR(ierr);
+          LibmeshPetscCallA(
+              _communicator.get(),
+              PetscPrintf(_communicator.get(), "   %12f       %12g\n", (double)re, (double)error));
       }
       if (zero_im && zero_re)
         ++_num_zero_eigenvalues;
@@ -139,8 +133,7 @@ NumZeroEigenvalues::execute()
 
     if (_print)
     {
-      ierr = PetscPrintf(_communicator.get(), "\n");
-      LIBMESH_CHKERR(ierr);
+      LibmeshPetscCallA(_communicator.get(), PetscPrintf(_communicator.get(), "\n"));
     }
   }
 }
