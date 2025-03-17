@@ -1,7 +1,6 @@
 mu=4e-3
 
 [GlobalParams]
-  variable = face_vel_x
   u = vel_x
   v = vel_y
   grad_u = grad_vel_x
@@ -41,9 +40,6 @@ mu=4e-3
   [lm]
     family = SCALAR
   []
-[]
-
-[AuxVariables]
   [vel_x]
     family = L2_LAGRANGE
   []
@@ -64,7 +60,7 @@ mu=4e-3
   []
 []
 
-[HDGBCs]
+[BCs]
   [walls]
     type = NavierStokesHDGVelocityDirichletBC
     boundary = 'left right bottom'
@@ -76,12 +72,18 @@ mu=4e-3
   []
 []
 
+[Preconditioning]
+  [sc]
+    type = StaticCondensation
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu       NONZERO'
+    dont_condense_vars = 'p'
+  []
+[]
+
 [Executioner]
   type = Steady
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
-  line_search = 'basic'
+  solve_type = PJFNK
 []
 
 [Outputs]
