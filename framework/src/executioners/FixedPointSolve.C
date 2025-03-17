@@ -272,10 +272,8 @@ FixedPointSolve::solve()
       else
       {
         // For every iteration other than the first, we need to restore the state of the MultiApps
-        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_END);
-        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
