@@ -11,14 +11,14 @@
 
 #include "AuxKernel.h"
 
+/**
+ * Calcualtes velocity using Newmark time integration scheme
+ */
 class NewmarkVelAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Calcualtes velocity using Newmark time integration scheme
-   */
   NewmarkVelAux(const InputParameters & parameters);
 
   virtual ~NewmarkVelAux() {}
