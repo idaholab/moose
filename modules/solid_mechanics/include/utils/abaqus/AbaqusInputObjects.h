@@ -178,8 +178,8 @@ struct FieldIC
 {
   FieldIC(const OptionNode & option, const Model & model);
 
-  /// variable number (0-based)
-  int _var;
+  /// variable number
+  AbaqusID _var;
 
   /// state of the coupled node sets at parse time
   std::map<std::string, std::vector<Index>> _nsets;
@@ -200,7 +200,7 @@ struct Step
   bool optionFunc(const std::string & key, const OptionNode & option);
 
   /// essential boundary conditions as list of nodes this BC applies to
-  /// (mapping from Abaqus variable ID to a (node index, value) pair)
+  /// (mapping from Abaqus variable ID to a (node index, value) map)
   std::unordered_map<AbaqusID, std::unordered_map<Index, Real>> _bc_var_node_value_map;
 
   /// Model acces to get node sets
