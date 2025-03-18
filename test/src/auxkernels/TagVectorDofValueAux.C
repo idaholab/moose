@@ -9,7 +9,7 @@
 
 #include "TagVectorDofValueAux.h"
 
-registerMooseObject("MooseApp", TagVectorDofValueAux);
+registerMooseObject("MooseTestApp", TagVectorDofValueAux);
 
 InputParameters
 TagVectorDofValueAux::validParams()
