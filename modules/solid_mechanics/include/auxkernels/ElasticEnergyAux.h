@@ -12,8 +12,6 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-// Forward declarations
-
 class ElasticEnergyAux : public AuxKernel
 {
 public:

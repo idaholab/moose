@@ -14,6 +14,7 @@
 #include "libmesh/elem_range.h"
 #include "AuxiliarySystem.h"
 
+class AbaqusUserElement;
 class UELThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
@@ -22,9 +23,10 @@ public:
   // Splitting Constructor
   UELThread(UELThread & x, Threads::split split);
 
-  void join(const UELThread &) {}
+  void join(const UELThread & other);
 
 protected:
+  virtual void pre() override;
   virtual void subdomainChanged() override final;
   virtual void onElement(const Elem * elem) override final;
 
@@ -69,4 +71,9 @@ private:
 
   /// state variable copy
   std::vector<Real> _statev_copy;
+
+  /// recommended timestep rescaling (minimum over all elements)
+  Real _min_pnewdt;
+
+  friend class AbaqusUserElement;
 };
