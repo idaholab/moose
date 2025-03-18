@@ -72,6 +72,13 @@
   []
 []
 
+[Preconditioning]
+  [fdp]
+    type = FDP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Steady
 []
