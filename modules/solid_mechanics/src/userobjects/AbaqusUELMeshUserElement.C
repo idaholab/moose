@@ -249,7 +249,6 @@ AbaqusUELMeshUserElement::execute()
     int idummy = 0;
 
     // make sure stateful data storage is sized correctly
-    mooseInfoRepeated(_statev_index_current, _statev_index_old);
     auto & current_state = _statev[_statev_index_current][jelem];
     current_state = _statev[_statev_index_old][jelem];
     current_state.resize(_nstatev);
