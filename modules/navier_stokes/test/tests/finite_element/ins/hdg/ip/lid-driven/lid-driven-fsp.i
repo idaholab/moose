@@ -93,7 +93,7 @@ gamma = 1e5
     variable = pressure
     face_variable = pressure_bar
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
   []
 []
@@ -103,7 +103,7 @@ gamma = 1e5
     type = MassMatrix
     variable = pressure
     matrix_tags = 'mass'
-    density = ${fparse -1/gamma}
+    density = '${fparse -1/gamma}'
   []
 
   [grad_div_x]
@@ -121,6 +121,32 @@ gamma = 1e5
     v = vel_y
     gamma = ${gamma}
     component = 1
+  []
+[]
+
+[DGKernels]
+  [pb_mass]
+    type = MassMatrixDGKernel
+    variable = pressure_bar
+    matrix_tags = 'mass'
+    density = '${fparse -1/gamma}'
+  []
+
+  [u_jump]
+    type = MassFluxPenalty
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    gamma = ${gamma}
+  []
+  [v_jump]
+    type = MassFluxPenalty
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    gamma = ${gamma}
   []
 []
 
@@ -166,7 +192,7 @@ gamma = 1e5
     type = ADHDGAdvectionDirichletBC
     variable = pressure
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom top right'
   []
@@ -182,7 +208,7 @@ gamma = 1e5
     type = ADHDGAdvectionDirichletBC
     variable = pressure_bar
     velocity_function = wall_vel_func
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom right'
   []
@@ -190,7 +216,7 @@ gamma = 1e5
     type = ADHDGAdvectionDirichletBC
     variable = pressure_bar
     velocity_function = top_vel_func
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'top'
   []
@@ -200,7 +226,7 @@ gamma = 1e5
     variable = pressure_bar
     matrix_tags = 'mass'
     boundary = 'left right bottom top'
-    density = ${fparse -1/gamma}
+    density = '${fparse -1/gamma}'
   []
 
   [u_jump]
@@ -253,22 +279,22 @@ gamma = 1e5
     topsplit = 'up'
     [up]
       splitting = 'u p'
-      splitting_type  = schur
+      splitting_type = schur
       petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol'
       petsc_options_value = 'full                            self                              300                fgmres    right        1e-4'
     []
-      [u]
-        vars = 'vel_x vel_y vel_bar_x vel_bar_y'
-        petsc_options = '-ksp_converged_reason'
-        petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type'
-        petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack'
-      []
-      [p]
-        vars = 'pressure pressure_bar'
-        petsc_options = '-ksp_converged_reason'
-        petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side'
-        petsc_options_value = 'gmres     300                1e-2      ilu      right'
-      []
+    [u]
+      vars = 'vel_x vel_y vel_bar_x vel_bar_y'
+      petsc_options = '-ksp_converged_reason'
+      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type'
+      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack'
+    []
+    [p]
+      vars = 'pressure pressure_bar'
+      petsc_options = '-ksp_converged_reason'
+      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side'
+      petsc_options_value = 'gmres     300                1e-2      ilu      right'
+    []
   []
 []
 
@@ -297,7 +323,7 @@ gamma = 1e5
   []
 []
 
-[UserObjects]
+[Correctors]
   [set_pressure]
     type = NSPressurePin
     pin_type = 'average'
