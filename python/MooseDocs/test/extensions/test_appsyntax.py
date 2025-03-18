@@ -95,7 +95,7 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), 'Optional Parameters')
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), 'ul', size=2)
+        self.assertHTMLTag(res(4), 'ul', size=3)
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
@@ -137,7 +137,7 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), 'Optional Parameters')
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), 'ul', size=2, class_='collapsible')
+        self.assertHTMLTag(res(4), 'ul', size=3, class_='collapsible')
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
@@ -156,7 +156,7 @@ class TestParameters(AppSyntaxTestCase):
         # This size should correspond to the total number of parameters for
         # Diffusion (Required + Optional + Advanced + Tagging) + 1
         # (corresponding to 'type')
-        self.assertSize(res, 18)
+        self.assertSize(res, 19)
         self.assertLatexCommand(res(0), 'chapter', size=4)
         self.assertLatexCommand(res(0,0), 'label', string=u'input-parameters')
         self.assertLatexString(res(0,1), content=u'Input')
