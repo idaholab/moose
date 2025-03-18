@@ -240,6 +240,7 @@ heated_length = 1.0
   [report_temperature_inlet]
     type = Receiver
     default = ${T_in}
+    force_preaux = true
   []
 
   [report_pressure_outlet]
