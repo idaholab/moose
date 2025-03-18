@@ -1,4 +1,6 @@
 [Tests]
+  design = 'MooseStaticCondensationPreconditioner.md'
+  issues = '#30133'
   [test]
     requirement = 'The system shall be able to solve a diffusion problem with penalty boundary conditions using a second order Lagrange basis'
     [regular]

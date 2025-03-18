@@ -1,4 +1,6 @@
 [Tests]
+  design = 'HDGKernels/index.md'
+  issues = '#30038'
   [simple_diffusion]
     requirement = 'The system shall be able to solve a two dimensional diffusion problem using a hybridizable interior penalty discontinuous Galerkin discretization'
     [noncondensed]
