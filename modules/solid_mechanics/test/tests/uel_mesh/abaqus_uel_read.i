@@ -15,8 +15,25 @@
   []
 []
 
-# [ICs/AddUELICs]
-# []
+[AuxVariables]
+  [field1]
+  []
+  [field2]
+  []
+[]
+
+[AuxKernels]
+  [field1]
+    type = AbaqusPredefAux
+    field = 1
+    variable = field1
+  []
+  [field2]
+    type = AbaqusPredefAux
+    field = 2
+    variable = field2
+  []
+[]
 
 # those will be added by the action
 [BCs]
@@ -37,12 +54,6 @@
     abaqus_var_id = 4
     variable = rot_x
     abaqus_step = Step-1
-  []
-[]
-
-[UserObjects]
-  [ics]
-    type = AbaqusUELInitialCondition
   []
 []
 
