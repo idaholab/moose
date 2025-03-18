@@ -8,7 +8,8 @@
       input = 'pid_control.i'
       csvdiff = 'out.csv'
       # Not outputting left_boundary_average to avoid regold
-      cli_args = 'Postprocessors/left_boundary_average/outputs=none'
+      cli_args = 'Postprocessors/left_boundary_average/outputs=none
+                  Executioner/nl_abs_tol=1e-14'
       detail = 'using the principle of Proportional Integral Derivative control,'
     []
     [min_max_limits]
@@ -37,7 +38,10 @@
       input = 'pid_control.i'
       csvdiff = 'windup_out.csv'
       # Not outputting left_boundary_average to avoid regold
-      cli_args = 'Outputs/file_base=windup_out Controls/integral_value/reset_integral_windup=true Postprocessors/left_boundary_average/outputs=none'
+      cli_args = "Outputs/file_base=windup_out
+                  Controls/integral_value/reset_integral_windup=true
+                  Postprocessors/left_boundary_average/outputs=none
+                  Executioner/nl_abs_tol=1e-14"
       detail = 'with integral windup control, resetting the integral term if the error crosses zero,'
     []
     [picard]
