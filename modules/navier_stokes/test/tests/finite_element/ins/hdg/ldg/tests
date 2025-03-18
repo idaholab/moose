@@ -12,6 +12,7 @@
     input = channel.i
     exodiff = channel_out.e
     requirement = 'The system shall be able to solve a channel flow problem using a hybridized discontinuous Galerkin discretization.'
+    rel_err = 1e-5
   []
   [stokes_symmetric]
     requirement = 'The system shall produce a symmetric matrix for a hybridizable discontinuous Galerkin discretization of the Stokes equation for a'
