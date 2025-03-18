@@ -92,6 +92,9 @@ protected:
   /// setup the range of elements this object operates on
   void setupElementSet();
 
+  /// Auxiliary system object
+  AuxiliarySystem * _aux_sys;
+
   std::string _uel_type;
 
   /// The plugin file name
