@@ -60,6 +60,7 @@
     expression = 200 #MPa
   []
 []
+
 [Materials]
   [init_dd]
     type = GenericConstantMaterial
