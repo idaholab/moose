@@ -109,7 +109,7 @@ class LocalListingCommand(command.CommandComponent):
 
         return parent
 
-    def appendMooseSyntax(self, content: str, page: pages.Page) -> dict[str, str]:
+    def appendMooseSyntax(self, content: str, page: pages.Page) -> str:
         """
         Append content with syntax/object/parameter information.
 
