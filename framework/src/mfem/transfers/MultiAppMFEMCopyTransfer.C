@@ -18,6 +18,7 @@ MultiAppMFEMCopyTransfer::validParams()
       "variable", "AuxVariable to store transferred value in.");
   params.addRequiredParam<std::vector<VariableName>>("source_variable",
                                                      "Variable to transfer from");
+  params.addClassDescription("Copies variable values from one MFEM application to another");
   return params;
 }
 

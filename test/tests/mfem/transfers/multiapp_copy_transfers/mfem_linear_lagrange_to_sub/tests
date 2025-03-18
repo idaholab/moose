@@ -1,10 +1,14 @@
-[ests]
+[Tests]
+  issues = '#29632'
+  design = 'MultiAppMFEMCopyTransfer.md'
   [test]
+    requirement = 'The system shall be able to copy MFEM variable data from a parent application to a sub-application, verified through'
     [run]
       type = RunApp
       input = parent.i
       mfem = true
       recover = false
+      detail = 'running the inputs, and'
     []
     [verify]
       type = RunCommand
@@ -16,6 +20,7 @@
 	    prereq = test/run
       mfem = true
       recover = false
+      detail = 'checking the results against gold output data.'
     []
   []
 []
