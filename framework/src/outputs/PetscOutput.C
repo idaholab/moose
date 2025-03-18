@@ -11,6 +11,7 @@
 #include "PetscOutput.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "CommonOutputAction.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
