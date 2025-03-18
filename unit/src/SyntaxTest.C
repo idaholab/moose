@@ -25,6 +25,7 @@ protected:
 
     _syntax.registerActionSyntax("SomeAction", "TopBlock");
     _syntax.registerActionSyntax("SomeAction", "TopBlock", "second");
+    _syntax.registerActionSyntax("AnotherAction", "AnotherTopBlock");
   }
 
   Syntax _syntax;
@@ -83,6 +84,10 @@ TEST_F(SyntaxTest, errorChecks)
     EXPECT_NE(msg.find("is not a registered task name"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
+
+  // Test de-registering syntax
+  _syntax.removeAllActionsForSyntax("AnotherTopBlock");
+  EXPECT_EQ(_syntax.getAssociatedActions().count("AnotherTopBlock"), 0);
 }
 
 TEST_F(SyntaxTest, general)
