@@ -281,6 +281,10 @@ MooseApp::validParams()
       "Run half of a transient with checkpoints enabled; used by the TestHarness");
   params.setGlobalCommandLineParam("test_checkpoint_half_transient");
 
+  params.addCommandLineParam<bool>("test_restep",
+                                   "--test-restep",
+                                   "Test re-running the middle timestep; used by the TestHarness");
+
   params.addCommandLineParam<bool>(
       "trap_fpe",
       "--trap-fpe",
@@ -476,7 +480,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #else
     _trap_fpe(false),
 #endif
-    _test_checkpoint_half_transient(false),
+    _test_checkpoint_half_transient(parameters.get<bool>("test_checkpoint_half_transient")),
+    _test_restep(parameters.get<bool>("test_restep")),
     _check_input(getParam<bool>("check_input")),
     _multiapp_level(
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
@@ -708,7 +713,11 @@ MooseApp::MooseApp(const InputParameters & parameters)
                     name(),
                     " to remove this deprecation warning.");
 
+  if (_test_restep && _test_checkpoint_half_transient)
+    mooseError("Cannot use --test-restep and --test-checkpoint-half-transient together");
+
   registerCapabilities();
+
   Moose::out << std::flush;
 }
 
@@ -1170,8 +1179,6 @@ MooseApp::setupOptions()
     setErrorOverridden();
 
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
-
-  _test_checkpoint_half_transient = getParam<bool>("test_checkpoint_half_transient");
 
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
