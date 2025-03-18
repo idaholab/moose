@@ -75,7 +75,7 @@
     requirement = 'The system shall not error if a user attempts to use a non-unity scaling factor for a variable in a hybridized Discontinuous Galerkin discretization with a statically condensed equation system.'
     input = diffusion.i
     type = CSVDiff
-    cli_args = 'Variables/face_u/scaling=2 --nl0-static-condensation -nl0_condensed_pc_type hypre -ksp_type preonly Outputs/print_linear_residuals=false Postprocessors/symmetric/mat=binaryoutput'
+    cli_args = 'Variables/face_u/scaling=2 --nl0-static-condensation -nl0_condensed_pc_type hypre -ksp_type preonly -nl0_condensed_ksp_view_pmat binary Outputs/print_linear_residuals=false Postprocessors/symmetric/mat=binaryoutput'
     csvdiff = 'diffusion_out.csv'
     prereq = 'diffusion/condensed'
   []
