@@ -75,8 +75,8 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
     _nstatev(_uel_definition._n_statev),
     _statev(declareRestartableData<
             std::array<std::unordered_map<Abaqus::AbaqusID, std::vector<Real>>, 2>>("statev")),
-    _statev_index_current(declareRestartableData<std::size_t>("statev_index_current")),
-    _statev_index_old(declareRestartableData<std::size_t>("statev_index_old")),
+    _statev_index_current(declareRestartableData<std::size_t>("statev_index_current", 0)),
+    _statev_index_old(declareRestartableData<std::size_t>("statev_index_old", 1)),
     _use_energy(getParam<bool>("use_energy")),
     _energy(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy")),
     _energy_old(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy_old"))
@@ -140,8 +140,6 @@ AbaqusUELMeshUserElement::timestepSetup()
 void
 AbaqusUELMeshUserElement::execute()
 {
-  mooseInfoRepeated("AbaqusUELMeshUserElement::execute()");
-
   // dof indices of all coupled variables
   std::vector<dof_id_type> var_dof_indices;
   std::vector<dof_id_type> all_dof_indices;
@@ -251,12 +249,15 @@ AbaqusUELMeshUserElement::execute()
     int idummy = 0;
 
     // make sure stateful data storage is sized correctly
-    _statev[_statev_index_current][jelem].resize(_nstatev);
+    mooseInfoRepeated(_statev_index_current, _statev_index_old);
+    auto & current_state = _statev[_statev_index_current][jelem];
+    current_state = _statev[_statev_index_old][jelem];
+    current_state.resize(_nstatev);
 
     // call the plugin
     _uel(local_re.get_values().data(),
          local_ke.get_values().data(),
-         _statev[_statev_index_current][jelem].data(),
+         current_state.data(),
          _use_energy ? _energy[jelem].data() : dummy_energy.data(),
          &ndofel,
          &nrhs,
