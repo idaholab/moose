@@ -38,6 +38,7 @@ using libMesh::DofMap;
 using libMesh::QBase;
 using libMesh::VectorValue;
 
+class FaceInfo;
 class TimeIntegrator;
 class Assembly;
 class SubProblem;
