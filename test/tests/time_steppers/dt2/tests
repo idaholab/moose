@@ -1,5 +1,5 @@
 [Tests]
-  design = 'DT2.md'
+  design = 'Executioner/TimeIntegrator/index.md'
   issues = '#1953'
 
   [./testdt2]

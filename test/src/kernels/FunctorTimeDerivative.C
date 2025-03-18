@@ -9,7 +9,7 @@
 
 #include "FunctorTimeDerivative.h"
 
-registerMooseObject("MooseApp", FunctorTimeDerivative);
+registerMooseObject("MooseTestApp", FunctorTimeDerivative);
 
 InputParameters
 FunctorTimeDerivative::validParams()
