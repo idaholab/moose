@@ -140,6 +140,9 @@ TransientBase::validParams()
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
+  // This Executioner supports --test-restep
+  params.set<bool>("_supports_test_restep") = true;
+
   return params;
 }
 
@@ -172,7 +175,8 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
-    _use_multiapp_dt(getParam<bool>("use_multiapp_dt"))
+    _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _testing_restep(false)
 {
   _t_step = 0;
   _dt = 0;
@@ -190,8 +194,10 @@ TransientBase::TransientBase(const InputParameters & parameters)
 
   setupTimeIntegrator();
 
-  if (_app.testCheckpointHalfTransient()) // Cut timesteps and end_time in half...
+  // Cut timesteps and end_time in half
+  if (_app.testCheckpointHalfTransient())
   {
+    mooseAssert(!_app.testReStep(), "Cannot use with restep");
     _end_time = (_start_time + _end_time) / 2.0;
     _num_steps /= 2.0;
 
@@ -207,6 +213,26 @@ TransientBase::TransientBase(const InputParameters & parameters)
     // able to signal for the Convergence object to be created in case it uses steady-state
     // detection for sub-stepping.
     _problem.setNeedToAddDefaultSteadyStateConvergence();
+
+  // Retest the middle timestep
+  if (_app.testReStep())
+  {
+    if (_problem.shouldSolve())
+    {
+      // num_steps set; set to the midpoint of all timesteps
+      if (_num_steps != std::numeric_limits<unsigned int>::max())
+        _test_restep_step = _t_step + (_num_steps + 1) / 2;
+      // num_steps not set; use the first timestep
+      else
+        _test_restep_step = _t_step + 1;
+      mooseInfo(
+          "Timestep ", *_test_restep_step, " will be forcefully retried due to --test-restep");
+    }
+    else
+      mooseInfo(
+          "A timestep is not being retried with --test-restep because Problem/solve=false.\n\nTo "
+          "avoid this test being ran, you could set `restep = false` in the test specification.");
+  }
 }
 
 void
@@ -327,11 +353,27 @@ TransientBase::execute()
 
   // This method can be overridden for user defined activities in the Executioner.
   postExecute();
+
+  if (_test_restep_step)
+    mooseError("Timestep ",
+               *_test_restep_step,
+               " was never retried because the simluation did not get to this timestep.\n\nTo "
+               "support restep testing, increase the number of timesteps.\nOtherwise, set "
+               "`restep = false` in this test specification.");
 }
 
 void
 TransientBase::computeDT()
 {
+  // We're repeating the solve of the pervious timestep,
+  // so we use the same dt
+  if (_testing_restep)
+  {
+    mooseAssert(!_test_restep_step, "Should not be set");
+    _testing_restep = false;
+    return;
+  }
+
   _time_stepper->computeStep(); // This is actually when DT gets computed
 }
 
@@ -430,6 +472,29 @@ TransientBase::takeStep(Real input_dt)
   _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
 
   _last_solve_converged = _time_stepper->converged();
+
+  // We're running with --test-restep and we have just solved
+  // the timestep we are to repeat for the first time
+  if (_test_restep_step && *_test_restep_step == _t_step)
+  {
+    mooseAssert(!_test_restep_dt, "Should not be set");
+
+    // We shouldn't try to test resolving if the last solve was
+    // a failure. This might actually not be needed, but I'm
+    // not confident
+    // if (!lastSolveConverged())
+    //   mooseError("Solve not compatible with --test-restep because timestep ",
+    //              _t_step,
+    //              " failed to converge.\n\nSet `restep = false` in the test specification to "
+    //              "disable this test.");
+
+    mooseInfo("Aborting and retrying solve for timestep ", _t_step, " due to --test-restep");
+    _last_solve_converged = false;
+    _testing_restep = true;
+    _test_restep_step.reset();
+
+    return;
+  }
 
   if (!lastSolveConverged())
   {
