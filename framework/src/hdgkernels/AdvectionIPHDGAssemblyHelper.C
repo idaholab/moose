@@ -97,7 +97,6 @@ AdvectionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & diric
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
     const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
-    mooseAssert(MetaPhysicL::raw_value(vdotn) <= 0, "The velocity must create inflow conditions");
     mooseAssert(_self_advection, "This shouldn't be called if we are not self-advecting");
     const auto dirichlet_value = dirichlet_functor(
         Moose::ElemSideQpArg{
