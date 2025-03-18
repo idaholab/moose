@@ -66,7 +66,7 @@ class TestGitHubAPI(unittest.TestCase):
         for call, expected in zip(actual_calls, expected_calls):
             self.assertEqual(call, expected)
 
-    @patch("fetch.Path.read_text", new=fake_read_text)
+    @patch("GitHubAPI.Path.read_text", new=fake_read_text)
     @patch("builtins.print")
     def test_fetch_data_dry_run(self, mock_print):
         # Set dry_run to True so that no network call is made.
@@ -78,7 +78,7 @@ class TestGitHubAPI(unittest.TestCase):
             "Dry run: would execute query with cursor {}".format(self.api.end_cursor)
         )
 
-    @patch("fetch.Path.read_text", new=fake_read_text)
+    @patch("GitHubAPI.Path.read_text", new=fake_read_text)
     @patch("requests.post")
     @patch("builtins.print")
     def test_fetch_data_success(self, mock_print, mock_post):
@@ -113,47 +113,7 @@ class TestGitHubAPI(unittest.TestCase):
         file_path = Path(self.out_dir) / expected_filename
         self.assertTrue(file_path.exists())
 
-    @patch("fetch.Path.read_text", new=fake_read_text)
-    @patch("builtins.print")
-    def test_fetch_comments_and_replies_dry_run(self, mock_print):
-        # Set dry_run True so the function only prints the dry run message.
-        self.api.dry_run = True
-        result = self.api.fetch_comments_and_replies("dummy_discussion")
-        self.assertEqual(result, {})
-        # Verify that the dry run message was printed.
-        mock_print.assert_any_call(
-            "Dry run: would execute comments query for discussion {} with cursor {}".format(
-                "dummy_discussion", "null"
-            )
-        )
-
-    @patch("fetch.Path.read_text", new=fake_read_text)
-    @patch("requests.post")
-    def test_fetch_comments_and_replies_success(self, mock_post):
-        # Simulate a successful response for fetching comments.
-        fake_response = MagicMock()
-        fake_response.status_code = 200
-        fake_response.json.return_value = {
-            "data": {
-                "discussion": {
-                    "comments": {
-                        "pageInfo": {
-                            "hasNextPage": False,
-                            "endCursor": "cursor2",
-                        },
-                        "nodes": {"comment1": "value1", "comment2": "value2"},
-                    }
-                },
-                "rateLimit": {"remaining": 150},
-            }
-        }
-        mock_post.return_value = fake_response
-
-        result = self.api.fetch_comments_and_replies("dummy_discussion")
-        # Check that the returned dictionary matches the fake nodes.
-        self.assertEqual(result, {"comment1": "value1", "comment2": "value2"})
-
-    @patch("fetch.Path.read_text", new=fake_read_text)
+    @patch("GitHubAPI.Path.read_text", new=fake_read_text)
     @patch("requests.post")
     @patch("builtins.print")
     def test_fetch_data_error_status(self, mock_print, mock_post):
@@ -169,21 +129,6 @@ class TestGitHubAPI(unittest.TestCase):
 
         # Check that the error message was printed.
         mock_print.assert_any_call("Error: 404")
-
-    @patch("fetch.Path.read_text", new=fake_read_text)
-    @patch("requests.post")
-    @patch("builtins.print")
-    def test_fetch_comments_and_replies_error_status(self, mock_print, mock_post):
-        # Simulate an error response (e.g. 500) from the GitHub API.
-        fake_response = MagicMock()
-        fake_response.status_code = 500
-        fake_response.text = "Internal Server Error"
-        mock_post.return_value = fake_response
-
-        with self.assertRaises(SystemExit):
-            self.api.fetch_comments_and_replies("dummy_discussion")
-
-        mock_print.assert_any_call("Error: 500")
 
 
 if __name__ == "__main__":

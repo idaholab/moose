@@ -1,3 +1,8 @@
+## Required Files
+#  1. Embedding model downloaded locally:
+#     - For testing within the INL network, the unit test must run locally.
+#     - Ensure the embedding model (all-MiniLM-L12-v2) is downloaded locally to pass the unit test.
+
 import unittest
 from unittest.mock import patch, mock_open, MagicMock
 import json
@@ -34,6 +39,9 @@ class TestIndexGenerator(unittest.TestCase):
       self.show_progress = False
       self.database = Path("testdatabase")
       self.dry_run = False
+
+      if not os.path.exists(self.model_path):
+        raise FileNotFoundError(f"Model path '{self.model_path}' does not exist, please downloaded f{self.model_name} to run within INL network.")
 
       self.index_generator = IndexGenerator(
           load_local=self.load_local,

@@ -1,108 +1,110 @@
+## Required Files
+#  1. testdatabase -- Dummy vector database
+#  2. Embedding model downloaded locally:
+#     - For testing within the INL network, the unit test must run locally.
+#     - Ensure the embedding model (all-MiniLM-L12-v2) is downloaded locally to pass the unit test.
+
 import unittest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 from GitHubBot import GitHubBot
 
-class TestGitHubBot(unittest.TestCase):
 
+class TestGitHubBot(unittest.TestCase):
     def setUp(self):
 
-        self.load_local = True
+        self.db_dir = Path("testdatabase")
         self.model_path = Path('../../../../../../LLM/pretrained_models/')
+        self.top_n = 5
+        self.threshold = 0.2
         self.model_name = 'all-MiniLM-L12-v2'
-        self.database = Path("testdatabase")
-        self.dry_run = False
+        self.load_local = True
+        self.dry_run = True
 
-        self.mock_index = MagicMock()
 
-        # Initialize GitHubBot with dummy data for all tests
+        if not os.path.exists(self.model_path):
+            raise FileNotFoundError(f"Model path '{self.model_path}' does not exist, please downloaded f{self.model_name} locally to run within INL network.")
+
         self.bot = GitHubBot(
-            db_dir=self.database,
+            db_dir=self.db_dir,
             model_path=self.model_path,
-            top_n=5,
-            threshold=0.2,
+            top_n=self.top_n,
+            threshold=self.threshold,
             model_name=self.model_name,
-            # load_local needs to be true within INL network because Zscalar block Huggingface online mode
-            load_local= self.load_local,
+            load_local=self.load_local,
             dry_run=self.dry_run
         )
 
-        # Mock load_database method to return a dummy index
-        self.bot.load_database = MagicMock(return_value='dummy_index')
+    @patch('GitHubBot.HuggingFaceEmbedding')
+    @patch('GitHubBot.SimpleVectorStore.from_persist_dir')
+    @patch('GitHubBot.StorageContext.from_defaults')
+    @patch('GitHubBot.load_index_from_storage')
+    def test_load_database(self, mock_load_index_from_storage, mock_storage_context, mock_from_persist_dir, mock_embedding):
+        mock_index = MagicMock()
+        mock_load_index_from_storage.return_value = mock_index
 
-        # Mock generate_solution method to return the expected formatted string
-        self.expected_solution = (
-            "Here are some previous posts that may relate to your question: \n\n"
-            "1. Title: Test Title 1\n"
-            "URL: [http://testurl1.com](http://testurl1.com)\n"
-            "Similarity: 0.9000\n\n"
-            "2. Title: Test Title 2\n"
-            "URL: [http://testurl2.com](http://testurl2.com)\n"
-            "Similarity: 0.8000\n"
-        )
-        self.bot.generate_solution = MagicMock(return_value=self.expected_solution)
+        index = self.bot.load_database(self.db_dir)
+
+        mock_from_persist_dir.assert_called_once_with(self.db_dir)
+        mock_storage_context.assert_called_once()
+        mock_load_index_from_storage.assert_called_once_with(storage_context=mock_storage_context())
+        self.assertEqual(index, mock_index)
+
+    @patch('GitHubBot.VectorIndexRetriever.retrieve')
+    @patch('GitHubBot.SimilarityPostprocessor.postprocess_nodes')
+    def test_generate_solution(self, mock_postprocess_nodes, mock_retrieve):
+        title = "Sample Title"
+        mock_node = MagicMock()
+        mock_node.metadata = {'title': 'Sample Title', 'url': 'http://example.com'}
+        mock_node.score = 0.8
+        mock_retrieve.return_value = [mock_node]
+        mock_postprocess_nodes.return_value = [mock_node]
+
+        solution = self.bot.generate_solution(title, self.top_n, self.bot.index, self.threshold)
+
+        self.assertIn("Here are some previous posts that may relate to your question:", solution)
+        self.assertIn("1. Title: Sample Title", solution)
+        self.assertIn("URL: [http://example.com](http://example.com)", solution)
+        self.assertIn("Similarity: 0.8000", solution)
 
     @patch('GitHubBot.requests.post')
-    @patch('GitHubBot.SimpleVectorStore.from_persist_dir')
-    def test_query_response_success(self, mock_from_persist_dir, mock_post):
-        # Mock the vector store loading
-        mock_from_persist_dir.return_value = MagicMock()
-
-        # Mock the response from GitHub API for the query
+    def test_query_response(self, mock_post):
         mock_query_response = MagicMock()
         mock_query_response.status_code = 200
         mock_query_response.json.return_value = {
             'data': {
                 'repository': {
                     'discussions': {
-                        'nodes': [
-                            {
-                                'id': 'discussion_1',
-                                'title': 'Sample Discussion',
-                                'author': {'login': 'author1'},
-                                'comments': {'nodes': [{'author': {'login': 'MOOSEbot'}}]}
-                            }
-                        ]
+                        'nodes': [{
+                            'id': '1',
+                            'title': 'Sample Discussion Title',
+                            'body': 'Sample body',
+                            'author': {'login': 'sample_user'},
+                            'comments': {'nodes': [{'author': {'login': 'MOOSEbot'}, 'body': 'Sample comment'}]}
+                        }]
                     }
                 }
             }
         }
-
-        # Mock the response from GitHub API for the mutation
+          # Mock the mutation response
         mock_mutation_response = MagicMock()
         mock_mutation_response.status_code = 200
         mock_mutation_response.json.return_value = {
             'data': {
                 'addDiscussionComment': {
                     'comment': {
-                        'id': 'comment_1'
+                        'id': 'comment_id'
                     }
                 }
             }
         }
 
-        # Sequence the responses for query and mutation
         mock_post.side_effect = [mock_query_response, mock_mutation_response]
 
-        # Call the method to test
-        print("Calling query_response method...")
-        self.bot.query_response()
-
-        # Check if the methods were called with expected arguments
-        # print("Checking if load_database was called...")
-        # self.bot.load_database.assert_called_once_with()
-
-        print("Checking if generate_solution was called...")
-        self.bot.generate_solution.assert_called_once_with('Sample Discussion', 5, self.mock_index, 0.2)
-
-        # Check if the requests.post was called
-        print("Checking if requests.post was called...")
-        self.assertTrue(mock_post.called, "requests.post should be called")
-        self.assertEqual(mock_post.call_count, 2, "requests.post should be called twice")
-
-        # Print the call arguments to debug
-        for call in mock_post.call_args_list:
-            print(f"requests.post called with args: {call}")
+        with patch.object(self.bot, 'generate_solution', return_value="Sample Solution"):
+            with patch('builtins.print') as mock_print:
+                self.bot.query_response()
+                mock_print.assert_called_with("Dry run mode: Would have replied to discussion: 'Sample Discussion Title' with the following body:\nHey, @sample_user,\n\nSample Solution\n\nNote: This is an automated response. Please review and verify the solution.\n@MOOSEbot [BOT]")
 
     @patch('GitHubBot.requests.post')
     @patch('GitHubBot.SimpleVectorStore.from_persist_dir')
@@ -125,28 +127,6 @@ class TestGitHubBot(unittest.TestCase):
         # Check if the requests.post was called
         self.assertTrue(mock_post.called, "requests.post should be called")
 
-
-    @patch('GitHubBot.SimpleVectorStore.from_persist_dir')
-    def test_generate_solution(self, mock_from_persist_dir):
-        # Mock the vector store loading
-        mock_from_persist_dir.return_value = MagicMock()
-
-        # Mock the retriever and processor behavior
-        self.bot.embed_model = MagicMock()
-        retriever = MagicMock()
-        retriever.retrieve.return_value = [
-            MagicMock(score=0.9, metadata={'title': 'Test Title 1', 'url': 'http://testurl1.com'}),
-            MagicMock(score=0.8, metadata={'title': 'Test Title 2', 'url': 'http://testurl2.com'})
-        ]
-        processor = MagicMock()
-        processor.postprocess_nodes.return_value = retriever.retrieve.return_value
-
-        # Mocking the VectorIndexRetriever and SimilarityPostprocessor
-        with patch('GitHubBot.VectorIndexRetriever', return_value=retriever):
-            with patch('GitHubBot.SimilarityPostprocessor', return_value=processor):
-                result = self.bot.generate_solution('Test Title', 5, 'dummy_index', 0.2)
-
-        self.assertEqual(result, self.expected_solution, "The generate_solution method did not return the expected result")
 
 if __name__ == '__main__':
     unittest.main()
