@@ -23,7 +23,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
-registerMooseObject("MooseApp", ExplicitDynamicsOverwrite);
+registerMooseObject("MooseTestApp", ExplicitDynamicsOverwrite);
 
 InputParameters
 ExplicitDynamicsOverwrite::validParams()
