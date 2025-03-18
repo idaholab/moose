@@ -83,8 +83,8 @@
     # grid nodes
     von_mises_stress = 'state/s'
     equivalent_plastic_strain = 'state/ep'
-    cell_dd_density = 'old_state/cell_dd'
-    wall_dd_density = 'old_state/wall_dd'
+    cell_dislocation_density = 'old_state/cell_dd'
+    wall_dislocation_density = 'old_state/wall_dd'
     temperature = 'forces/T'
     env_factor = 'forces/env_fac'
   []
@@ -113,8 +113,8 @@
     # grid nodes
     von_mises_stress = 'state/s'
     equivalent_plastic_strain = 'state/ep'
-    cell_dd_density = 'old_state/cell_dd'
-    wall_dd_density = 'old_state/wall_dd'
+    cell_dislocation_density = 'old_state/cell_dd'
+    wall_dislocation_density = 'old_state/wall_dd'
     temperature = 'forces/T'
     env_factor = 'forces/env_fac'
   []
@@ -126,8 +126,8 @@
     # grid nodes
     von_mises_stress = 'state/s'
     equivalent_plastic_strain = 'state/ep'
-    cell_dd_density = 'old_state/cell_dd'
-    wall_dd_density = 'old_state/wall_dd'
+    cell_dislocation_density = 'old_state/cell_dd'
+    wall_dislocation_density = 'old_state/wall_dd'
     temperature = 'forces/T'
     env_factor = 'forces/env_fac'
   []

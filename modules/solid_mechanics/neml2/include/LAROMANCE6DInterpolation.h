@@ -50,11 +50,11 @@ private:
   /// Model input for interpolation
   // @{
   /// The von Mises stress
-  const Variable<Scalar> & _s;
+  const Variable<Scalar> & _vm_stress;
   /// Temperature
-  const Variable<Scalar> & _T;
+  const Variable<Scalar> & _temperature;
   /// The creep strain
-  const Variable<Scalar> & _ep;
+  const Variable<Scalar> & _ep_strain;
   /// cell dislocation density
   const Variable<Scalar> & _cell_dd;
   /// wall dislocation density
@@ -74,10 +74,10 @@ private:
 
   /// find index of input point
   std::pair<Scalar, Scalar> findLeftIndexAndFraction(const Scalar & grid,
-                                                     const Scalar & interp_points);
+                                                     const Scalar & interp_points) const;
 
   /// compute interpolated value and transform results
-  Scalar interpolate_and_transform();
+  Scalar interpolate_and_transform() const;
 
   /// transform data
   Scalar transform_data(const Scalar & data,
@@ -85,20 +85,20 @@ private:
                         TransformEnum transform_type) const;
 
   /// read in json axes transform name
-  std::string json_to_string(std::string key);
+  std::string json_to_string(const std::string & key) const;
 
   /// read in json axes transform constants
-  std::vector<Real> json_to_vector(std::string key);
+  std::vector<Real> json_to_vector(const std::string & key) const;
 
   ///read 6D grid date from json and store in Torch tensor
-  Scalar json_6Dvector_to_torch(std::string key);
+  Scalar json_6Dvector_to_torch(const std::string & key) const;
 
   ///read 1D vector of grid points from json and store in Torch tensor
-  Scalar json_vector_to_torch(std::string key);
+  Scalar json_vector_to_torch(const std::string & key) const;
 
   /// compute interpolated value
   Scalar compute_interpolation(const std::vector<std::pair<Scalar, Scalar>> index_and_fraction,
-                               const Scalar grid_values);
+                               const Scalar grid_values) const;
 
   TransformEnum get_transform_enum(const std::string & name) const;
 

@@ -8,8 +8,8 @@
     von_mises_stress = 'state/s'
     temperature = 'forces/T'
     equivalent_plastic_strain = 'state/ep'
-    cell_dd_density = 'forces/cell_dd'
-    wall_dd_density = 'forces/wall_dd'
+    cell_dislocation_density = 'forces/cell_dd'
+    wall_dislocation_density = 'forces/wall_dd'
     env_factor = 'forces/env_fac'
   []
   [rom_cell]
@@ -21,8 +21,8 @@
     von_mises_stress = 'state/s'
     temperature = 'forces/T'
     equivalent_plastic_strain = 'state/ep'
-    cell_dd_density = 'forces/cell_dd'
-    wall_dd_density = 'forces/wall_dd'
+    cell_dislocation_density = 'forces/cell_dd'
+    wall_dislocation_density = 'forces/wall_dd'
     env_factor = 'forces/env_fac'
   []
   [rom_wall]
@@ -34,8 +34,8 @@
     von_mises_stress = 'state/s'
     temperature = 'forces/T'
     equivalent_plastic_strain = 'state/ep'
-    cell_dd_density = 'forces/cell_dd'
-    wall_dd_density = 'forces/wall_dd'
+    cell_dislocation_density = 'forces/cell_dd'
+    wall_dislocation_density = 'forces/wall_dd'
     env_factor = 'forces/env_fac'
   []
   [combined_model]

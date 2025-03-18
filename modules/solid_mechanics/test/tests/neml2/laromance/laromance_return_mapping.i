@@ -75,11 +75,11 @@
     verbose = true
     device = 'cpu'
 
-    moose_input_types = 'MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL POSTPROCESSOR POSTPROCESSOR'
-    moose_inputs =      'T        neml2_strain inelastic_strain eff_inelastic_strain cell_dd           wall_dd           init_envFac    time     time'
-    neml2_inputs =      'forces/T forces/E     old_state/Ep     old_state/ep         old_state/cell_dd old_state/wall_dd forces/env_fac forces/t old_forces/t'
+    moose_input_types = 'MATERIAL MATERIAL     MATERIAL         MATERIAL             MATERIAL          MATERIAL          MATERIAL       POSTPROCESSOR POSTPROCESSOR'
+    moose_inputs =      'T        neml2_strain inelastic_strain eff_inelastic_strain cell_dd           wall_dd           init_envFac    time          time'
+    neml2_inputs =      'forces/T forces/E     old_state/Ep     old_state/ep         old_state/cell_dd old_state/wall_dd forces/env_fac forces/t      old_forces/t'
 
-    moose_output_types = 'Material MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL'
+    moose_output_types = 'Material     MATERIAL         MATERIAL             MATERIAL                  MATERIAL        MATERIAL        MATERIAL        MATERIAL      MATERIAL'
     moose_outputs =      'neml2_stress inelastic_strain eff_inelastic_strain eff_inelastic_strain_rate vonmises_stress cell_rate       wall_rate       cell_dd       wall_dd'
     neml2_outputs =      'state/S      state/Ep         state/ep             state/ep_rate             state/s         state/cell_rate state/wall_rate state/cell_dd state/wall_dd'
 
