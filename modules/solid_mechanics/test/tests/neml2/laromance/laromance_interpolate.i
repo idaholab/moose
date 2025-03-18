@@ -6,10 +6,12 @@ sample_file = "models/sampled_combinations.csv"
     dim = 1
   []
 []
+
 [Variables]
   [dummy_var]
   []
 []
+
 [Problem]
   kernel_coverage_check = false
 []
