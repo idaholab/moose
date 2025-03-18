@@ -425,7 +425,7 @@ MultiAppProjectionTransfer::execute()
 
     for (const auto & elem : to_mesh.active_local_element_ptr_range())
     {
-      qrule.init(elem->type(), elem->p_level());
+      qrule.init(elem);
 
       bool element_is_evaled = false;
       std::vector<Real> evals(qrule.n_points(), 0.);
