@@ -1871,9 +1871,9 @@ Assembly::reinitFVFace(const FaceInfo & fi)
     // The order of the element that is used for initing here doesn't matter since this will just
     // be used for constant monomials (which only need a single integration point)
     if (dim == 3)
-      _current_qrule_face->init(QUAD4);
+      _current_qrule_face->init(QUAD4, /* p_level = */ 0, /* simple_type_only = */ true);
     else
-      _current_qrule_face->init(EDGE2);
+      _current_qrule_face->init(EDGE2, /* p_level = */ 0, /* simple_type_only = */ true);
   }
 
   _current_side_elem = &_current_side_elem_builder(*_current_elem, _current_side);
