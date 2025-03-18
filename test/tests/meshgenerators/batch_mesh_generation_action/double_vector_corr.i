@@ -14,10 +14,10 @@
     []
     [cmbn]
         type = CombinerGenerator
-        inputs = 'gmg_0 gmg_1 gmg_2 gmg_3'
-        positions = '0 0 0
-                     3 0 0
+        inputs = 'gmg_3 gmg_2 gmg_1 gmg_0'
+        positions = '3 3 0
                      0 3 0
-                     3 3 0'
+                     3 0 0
+                     0 0 0'
     []
 []

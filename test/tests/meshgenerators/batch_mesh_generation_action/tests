@@ -1,6 +1,6 @@
 [Tests]
   design = 'BatchMeshGeneratorAction.md'
-  issues = '#29800'
+  issues = '#29800 #30129'
   [single_scalar]
     type = 'Exodiff'
       input = 'single_scalar.i'
@@ -30,7 +30,7 @@
       input = 'double_scalar_cp.i'
       exodiff = 'double_scalar_cp_in.e'
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/use_decomposed_index=true
-                  Mesh/cmbn/inputs='gmg_0_0 gmg_1_0 gmg_0_1 gmg_1_1'
+                  Mesh/cmbn/inputs='gmg_1_1 gmg_0_1 gmg_1_0 gmg_0_0'
                   --mesh-only"
       recover = false
       requirement = 'The system should batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product with decomposed indexing'
