@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "IntegratedBCBase.h"
 #include "InterfaceKernelBase.h"
+#include "HDGKernel.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
 #include "SwapBackSentinel.h"
