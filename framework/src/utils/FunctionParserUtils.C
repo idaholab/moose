@@ -43,6 +43,11 @@ FunctionParserUtils<is_ad>::validParams()
       "enable_jit enable_ad_cache enable_auto_optimize disable_fpoptimizer evalerror_behavior",
       "Parsed expression advanced");
   params.addParam<Real>("epsilon", 0, "Fuzzy comparison tolerance");
+  params.addParam<Real>(
+      "fpoptimizer_epsilon",
+      "Fuzzy comparison tolerance for the FPOptimizer algebraic optimization stage. This defaults "
+      "to the selected value of the `epsilon` parameter. Use this with care, as it can lead to "
+      "optimized functions that are not equivalent to the original function.");
   return params;
 }
 
@@ -63,7 +68,10 @@ FunctionParserUtils<is_ad>::FunctionParserUtils(const InputParameters & paramete
     _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer),
     _evalerror_behavior(parameters.get<MooseEnum>("evalerror_behavior").getEnum<FailureMethod>()),
     _quiet_nan(std::numeric_limits<Real>::quiet_NaN()),
-    _epsilon(parameters.get<Real>("epsilon"))
+    _epsilon(parameters.get<Real>("epsilon")),
+    _fpoptimizer_epsilon(parameters.isParamValid("fpoptimizer_epsilon")
+                             ? parameters.get<Real>("fpoptimizer_epsilon")
+                             : _epsilon)
 {
 #ifndef LIBMESH_HAVE_FPARSER_JIT
   if (_enable_jit)
@@ -193,7 +201,7 @@ FunctionParserUtils<false>::functionsOptimize(SymFunctionPtr & parsed_function)
 {
   // set desired epsilon for optimization!
   auto tmp_eps = parsed_function->epsilon();
-  parsed_function->setEpsilon(_epsilon);
+  parsed_function->setEpsilon(_fpoptimizer_epsilon);
 
   // base function
   if (!_disable_fpoptimizer)
@@ -210,7 +218,7 @@ FunctionParserUtils<true>::functionsOptimize(SymFunctionPtr & parsed_function)
 {
   // set desired epsilon for optimization!
   auto tmp_eps = parsed_function->epsilon();
-  parsed_function->setEpsilon(_epsilon);
+  parsed_function->setEpsilon(_fpoptimizer_epsilon);
 
   // base function
   if (!_disable_fpoptimizer)

@@ -110,6 +110,9 @@ protected:
 
   /// fuzzy comparison tolerance
   const Real _epsilon;
+
+  /// fuzzy comparison tolerance for FPOptimizer algebraic optimization
+  const Real _fpoptimizer_epsilon;
 };
 
 template <>
