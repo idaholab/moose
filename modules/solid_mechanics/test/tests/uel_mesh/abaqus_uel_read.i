@@ -81,6 +81,8 @@
 
 [Executioner]
   type = Steady
+  solve_type = NEWTON
+  line_search = NONE
 []
 
 [Outputs]
