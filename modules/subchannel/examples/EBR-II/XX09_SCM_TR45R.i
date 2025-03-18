@@ -310,8 +310,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     growth_factor = 2.0
   []
   dtmax = 20
-
-  num_steps = 10
 []
 
 ################################################################################

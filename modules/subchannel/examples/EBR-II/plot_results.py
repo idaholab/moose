@@ -10,14 +10,11 @@ TTC_DASSH = np.genfromtxt("TTC_DASSH.csv", skip_header=1, delimiter=',')
 NETFLOW = np.genfromtxt("TTC-31_NETFLOW.csv", skip_header=1, delimiter=',')
 NETFLOW45 = np.genfromtxt("TTC-31_NETFLOW45.csv", skip_header=1, delimiter=',')
 TTC17_nominal = np.genfromtxt("TTC17_nominal.csv", skip_header=2, delimiter=',')
-TTC31_TR17 = np.genfromtxt("TTC31_TR17.csv", skip_header=2, delimiter=',')
-TTC31_TR45R = np.genfromtxt("TTC31_TR45R.csv", skip_header=2, delimiter=',')
+TTC31_TR17 = np.genfromtxt("XX09_SCM_TR17_out.csv", skip_header=2, delimiter=',')
+TTC31_TR45R = np.genfromtxt("XX09_SCM_TR45R_out.csv", skip_header=2, delimiter=',')
 TTC45R_nominal = np.genfromtxt("TTC45R_nominal.csv", skip_header=2, delimiter=',')
 TTC17_nominal_corrected = np.genfromtxt("TTC17_nominal_corrected.csv", skip_header=2, delimiter=',')
 TTC45R_nominal_corrected = np.genfromtxt("TTC45R_nominal_corrected.csv", skip_header=2, delimiter=',')
-SC_MTC = np.genfromtxt("SC_MTC.csv", skip_header=2, delimiter=',')
-SC_14TC = np.genfromtxt("SC_14TC.csv", skip_header=2, delimiter=',')
-SC_14TC45 = np.genfromtxt("SC_14TC45.csv", skip_header=2, delimiter=',')
 massflow_SHRT17 = np.genfromtxt(
     "massflow_SHRT17.csv", skip_header=1, delimiter=',')
 massflow_SHRT45 = np.genfromtxt(
@@ -26,13 +23,6 @@ power_SHRT17 = np.genfromtxt(
     "power_history_SHRT17.csv", skip_header=0, delimiter=',')
 power_SHRT45 = np.genfromtxt(
     "power_history_SHRT45.csv", skip_header=0, delimiter=',')
-EXP_MTC = np.genfromtxt("EXP_MTC.csv", skip_header=1, delimiter=',')
-DASSH_MTC = np.genfromtxt("DASSH_MTC.csv", skip_header=1, delimiter=',')
-EXP_14TC = np.genfromtxt("EXP_14TC.csv", skip_header=1, delimiter=',')
-EXP_14TC45 = np.genfromtxt("EXP_14TC45.csv", skip_header=1, delimiter=',')
-DASSH_14TC = np.genfromtxt("DASSH_14TC.csv", skip_header=1, delimiter=',')
-# coupled = np.genfromtxt("Pr_SC_SS_out_subchannel0.csv",
-#                         skip_header=2, delimiter=',')
 
 ############### MAKE PRETTY ###################
 plt.rcParams["font.family"] = "serif"
@@ -125,8 +115,6 @@ plt.plot(TTC17_nominal[1:], "k-.", marker='o',
          markerfacecolor="k", label="SCM")
 plt.plot(TTC17_nominal_corrected[1:], "g-.", marker='o',
          markerfacecolor="g", label="SCM power profile corrected")
-# plt.plot(coupled[1:], "k-.", marker='o',
-#          markerfacecolor="k", label="Pr-SC power profile corrected")
 plt.title(r"Temperature profile 0.322m downstream of heated section" "\n" "XX09 TTC SHRT-17, Initial steady state", fontsize=13)
 plt.xticks([i for i in range(len(TTC_EXP[:, 0]))],
            [str(int(i)) for i in TTC_EXP[:, 0]])
@@ -146,8 +134,6 @@ plt.plot(TTC45R_nominal[1:], "k-.", marker='o',
          markerfacecolor="k", label="SCM")
 plt.plot(TTC45R_nominal_corrected[1:], "g-.", marker='o',
          markerfacecolor="g", label="SCM power profile corrected")
-# plt.plot(coupled45[1:], "k-.", marker='D',
-#          markerfacecolor="k", label="Pr-SC power profile corrected")
 plt.title(r"Temperature profile 0.322m downstream of heated section" "\n" "XX09 TTC SHRT-45R, Initial steady state", fontsize=13)
 plt.xticks([i for i in range(len(TTC_EXP45[:, 0]))],
            [str(int(i)) for i in TTC_EXP45[:, 0]])
@@ -158,62 +144,6 @@ plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 plt.grid()
 # plt.savefig("XX09_TTC45.png")
-plt.show()
-
-
-plt.figure()
-plt.plot(EXP_MTC[:, 1] + 273.15, "r", marker='D',
-         markerfacecolor="r", label="EXP MTC")
-plt.plot(DASSH_MTC[:, 1] + 273.15, "b", marker='D',
-         markerfacecolor="b", label="DASSH MTC")
-plt.plot(SC_MTC[1:], "k", marker='D',
-         markerfacecolor="k", label="SCM MTC")
-plt.title(r"Temperature profile 0.172m downstream of heated section" "\n" "XX09 SHRT-17, Initial steady state", fontsize=13)
-plt.xticks([i for i in range(len(EXP_MTC[:, 0]))],
-           [str(int(i)) for i in EXP_MTC[:, 0]])
-plt.xlabel(r'$Channel~\#$', fontsize=14)
-plt.ylabel(r'$T~[K]$', fontsize=14)
-plt.legend(fontsize=12)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid()
-# plt.savefig("XX09_MTC.png")
-plt.show()
-
-plt.figure()
-plt.plot(EXP_14TC[:, 1] + 273.15, "r", marker='D',
-         markerfacecolor="r", label="EXP 14TC")
-plt.plot(DASSH_14TC[:, 1] + 273.15, "b", marker='D',
-         markerfacecolor="b", label="DASSH 14TC")
-plt.plot(SC_14TC[1:], "k", marker='D',
-         markerfacecolor="k", label="SCM 14TC")
-plt.title(r"Temperature profile 0.480m downstream of heated section" "\n" "XX09 SHRT-17, Initial steady state", fontsize=13)
-plt.xticks([i for i in range(len(EXP_14TC[:, 0]))],
-           [str(int(i)) for i in EXP_14TC[:, 0]])
-plt.xlabel(r'$Channel~\#$', fontsize=14)
-plt.ylabel(r'$T~[K]$', fontsize=14)
-plt.legend(fontsize=12)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid()
-# plt.savefig("XX09_14TC.png")
-plt.show()
-
-plt.figure()
-plt.plot(EXP_14TC45[:, 1], "r", marker='D',
-         markerfacecolor="r", label="EXP 14TC")
-plt.plot(SC_14TC45[1:], "k", marker='D',
-         markerfacecolor="k", label="SC 14TC")
-plt.title(r"Temperature profile 0.480m downstream of heated section" "\n" "XX09 SHRT-45R, Initial steady state", fontsize=13)
-plt.xticks([i for i in range(len(EXP_14TC45[:, 0]))],
-           [str(int(i)) for i in EXP_14TC45[:, 0]])
-plt.xlabel(r'$Channel~\#$', fontsize=14)
-plt.ylabel(r'$T~[K]$', fontsize=14)
-plt.legend(fontsize=12)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid()
-# plt.savefig("XX09_14TC45.png")
 plt.show()
 
 
