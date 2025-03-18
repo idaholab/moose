@@ -17,6 +17,7 @@
       cli_args = '--nl0-static-condensation -nl0_condensed_ksp_norm_type preconditioned'
       prereq = 'test/regular'
       detail = 'using an iterative preconditioner applied to only degrees of freedom remaining after static condensation.'
+      max_threads = 1
     []
   []
   [mms]
@@ -28,6 +29,7 @@
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
     valgrind = 'none'
+    max_threads = 1
   []
   [dont_condense]
     requirement = 'The system shall be able to not condense user-specified variables when peforming static condensation.'
@@ -35,5 +37,6 @@
     exodiff = 'dont-condense-test_out.e'
     type = Exodiff
     absent_out = 'Option left'
+    max_threads = 1
   []
 []

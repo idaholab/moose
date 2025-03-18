@@ -16,6 +16,7 @@
       prereq = 'lid-driven/uncondensed'
       installation_type = 'in_tree' # uses JIT
       detail = 'the system is condensed.'
+      max_threads = 1
     []
   []
   [lid-mms]

@@ -12,6 +12,7 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     valgrind = 'none'
+    max_threads = 1
   []
   [lid_hierarchic]
     type = PythonUnitTest
@@ -24,6 +25,7 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     valgrind = 'none'
+    max_threads = 1
   []
   [channel_lagrange]
     type = PythonUnitTest
@@ -36,6 +38,7 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     valgrind = 'none'
+    max_threads = 1
   []
   [channel_hierarchic]
     type = PythonUnitTest
@@ -48,5 +51,6 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     valgrind = 'none'
+    max_threads = 1
   []
 []
