@@ -7,9 +7,9 @@
     USE GAUSS_QUADRATURE
     USE CONSTANTS
     USE MATRIX_OPERATIONS
-!C     
+!C
     IMPLICIT NONE
-!C     
+!C
     REAL(R64), INTENT(OUT) :: RHS(NDOFEL,NRHS), AMATRX(NDOFEL,NDOFEL)
 !C
     REAL(R64), INTENT(INOUT) :: SVARS(NSVARS), ENERGY(8), PNEWDT
@@ -45,7 +45,7 @@
 !C
 !C  Local Variables
     REAL(R64) :: RES(NDOFEL,1), JAC(NDOFEL,NDOFEL)
-    REAL(R64) :: RES_INT(NDOFEL,1), JAC_INT(NDOFEL,NDOFEL) 
+    REAL(R64) :: RES_INT(NDOFEL,1), JAC_INT(NDOFEL,NDOFEL)
     REAL(R64) :: G_POINTS(N), G_WEIGHTS(N)
     REAL(R64) :: WEIGHT, X_POINT, Y_POINT, N_F(1,NNODE)
     REAL(R64) :: N_L(1,4), G_L(MCRD,4)
@@ -64,7 +64,7 @@
     REAL(R64) :: DU1, DU2, DU3, DP
     REAL(R64) :: U1_OLD, U2_OLD, U3_OLD, P_OLD
     REAL(R64) :: GRAD_U1(MCRD), GRAD_U2(MCRD)
-    REAL(R64) :: GRAD_DU1(MCRD), GRAD_DU2(MCRD) 
+    REAL(R64) :: GRAD_DU1(MCRD), GRAD_DU2(MCRD)
     REAL(R64) :: GRAD_U1_OLD(MCRD), GRAD_U2_OLD(MCRD)
     REAL(R64) :: GRAD_P(MCRD), GRAD_U3
     REAL(R64) :: GRAD_DP(MCRD), GRAD_DU3
@@ -122,7 +122,7 @@
 !C
             DO I = 1, NPREDF
                 LOCAL_DPRED(I) = dot_product(N_F(1,:),PREDEF(2,I,:))
-                LOCAL_PREDEF(I) = dot_product(N_F(1,:),PREDEF(1,I,:)) 
+                LOCAL_PREDEF(I) = dot_product(N_F(1,:),PREDEF(1,I,:))
                 LOCAL_PREDEF(I) = LOCAL_PREDEF(I) - LOCAL_DPRED(I)
             END DO
 !C
@@ -254,26 +254,26 @@
 !C
 !C          Guass Weights and Point
             WEIGHT = G_WEIGHTS(INT)
-!C    
+!C
 !C          Shape Functions
             CALL QUAD_SHAPE_FUNCTION(N_Q,G_Q,X_POINT,Y_POINT)
-!C    
+!C
 !C          Jacobian of Mapping
             J = matmul(G_Q,XY)
 !C
             DET_J = sqrt(J(JAC_INDEX,1)**2 + J(JAC_INDEX,2)**2)
-!C    
+!C
 !C          Field Shape Functions
             N1 = ZERO
             N2 = ZERO
             N4 = ZERO
-!C    
+!C
             DO I = 1, 8
                 N1(1,UX_ARRAY(I)) = N_Q(1,I)
                 N2(1,UY_ARRAY(I)) = N_Q(1,I)
             END DO
             N4(1,UZ_ARRAY(1)) = ONE
-!C    
+!C
             NT1 = transpose(N1)
             NT2 = transpose(N2)
 !C
@@ -282,9 +282,9 @@
 !C
             RES_INT = NT1*PRESSURE*NORMAL(1)
             RES_INT = NT2*PRESSURE*NORMAL(2)
-!C    
+!C
             RES = RES + WEIGHT*DET_J*RES_INT
-!C    
+!C
         ENDDO
     ENDDO
 !C
@@ -292,10 +292,10 @@
     RHS(1:NDOFEL,1) = - RES(:,1)
     AMATRX = + JAC
 !C
-    WRITE(OUTPUT,'(A24)') '*Solution'
-    WRITE(OUTPUT,'(3(ES24.16,","))') U(1:3*4)
-    WRITE(OUTPUT,'(2(ES24.16,","))') U(3*4+1:21)
-    WRITE(OUTPUT,'(A24)') '*State Variables'
-    WRITE(OUTPUT,'(10(ES24.16,","))') SVARS
+!C    WRITE(OUTPUT,'(A24)') '*Solution'
+!C    WRITE(OUTPUT,'(3(ES24.16,","))') U(1:3*4)
+!C    WRITE(OUTPUT,'(2(ES24.16,","))') U(3*4+1:21)
+!C    WRITE(OUTPUT,'(A24)') '*State Variables'
+!C    WRITE(OUTPUT,'(10(ES24.16,","))') SVARS
 !C
     END SUBROUTINE UEL
