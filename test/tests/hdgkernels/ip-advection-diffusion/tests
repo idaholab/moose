@@ -17,6 +17,7 @@
       prereq = 'simple_diffusion/noncondensed'
       detail = 'in which the matrix is statically condensed.'
       cli_args = '--nl0-static-condensation -nl0_condensed_pc_type hypre -ksp_type preonly -nl0_condensed_ksp_view_pmat binary Outputs/print_linear_residuals=false Postprocessors/symmetric/mat=binaryoutput'
+      max_threads = 1
     []
   []
   [mms]
