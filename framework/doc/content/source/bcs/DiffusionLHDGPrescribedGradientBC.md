@@ -8,12 +8,12 @@ prescribes the normal gradient
 \end{equation}
 
 where $q_N$ is the user-supplied normal gradient through
-the [!param](/HDGBCs/DiffusionLHDGPrescribedGradientBC/normal_gradient)
+the [!param](/BCs/DiffusionLHDGPrescribedGradientBC/normal_gradient)
 parameter. This boundary condition should be paired with a
 [DiffusionLHDGKernel.md].
 
-!syntax parameters /HDGBCs/DiffusionLHDGPrescribedGradientBC
+!syntax parameters /BCs/DiffusionLHDGPrescribedGradientBC
 
-!syntax inputs /HDGBCs/DiffusionLHDGPrescribedGradientBC
+!syntax inputs /BCs/DiffusionLHDGPrescribedGradientBC
 
-!syntax children /HDGBCs/DiffusionLHDGPrescribedGradientBC
+!syntax children /BCs/DiffusionLHDGPrescribedGradientBC
