@@ -80,6 +80,7 @@
     uel_type = U1
     plugin = elasticity_uel/uel
     element_sets = CUBE
+    external_fields = "field1 field2"
   []
 []
 
