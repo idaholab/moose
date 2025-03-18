@@ -11,6 +11,7 @@
 #include "AbaqusUELMesh.h"
 #include "MooseTypes.h"
 #include "SystemBase.h"
+#include "AuxiliarySystem.h"
 #include "Executioner.h"
 
 #define QUOTE(macro) stringifyName(macro)
@@ -32,6 +33,14 @@ AbaqusUELMeshUserElement::validParams()
 
   // Avoid uninitialized residual objects
   params.suppressParameter<bool>("force_preic");
+
+  // auxiliary variables (including temperature)
+  params.addParam<std::vector<AuxVariableName>>(
+      "external_fields",
+      {},
+      "Auxiliary field variables (or 'predefined field variables') passed to the UEL plugin. Some "
+      "plugins may assume that the first field is temperature when there are multiple external "
+      "fields.");
 
   // UEL type
   params.addRequiredParam<std::string>("uel_type", "UEL type name (from the Abaqus .inp file)");
@@ -56,6 +65,7 @@ AbaqusUELMeshUserElement::validParams()
 AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & params)
   : GeneralUserObject(params),
     TaggingInterface(this),
+    _aux_sys(&_fe_problem.getAuxiliarySystem()),
     _uel_type(getParam<std::string>("uel_type")),
     _plugin(getParam<FileName>("plugin")),
     _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
@@ -71,6 +81,7 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
     _uel_definition(_uel_mesh.getUEL(_uel_type)),
     _uel_elements(_uel_mesh.getElements({})),
     _element_set_names(getParam<std::vector<std::string>>("element_sets")),
+    _aux_variable_names(getParam<std::vector<AuxVariableName>>("external_fields")),
     _variables(_uel_definition._n_nodes),
     _nstatev(_uel_definition._n_statev),
     _statev(declareRestartableData<
@@ -89,6 +100,20 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
                                                _uel_mesh.getVarName(var),
                                                Moose::VarKindType::VAR_SOLVER,
                                                Moose::VarFieldType::VAR_FIELD_STANDARD));
+
+  // get PREDEF fields in the form of AuxVariables (set those using AbaqusPredefAux for example)
+  for (const auto & aux_variable_name : _aux_variable_names)
+  {
+    MooseVariableFEBase * aux_var =
+        &UserObject::_subproblem.getVariable(0,
+                                             aux_variable_name,
+                                             Moose::VarKindType::VAR_AUXILIARY,
+                                             Moose::VarFieldType::VAR_FIELD_STANDARD);
+    _aux_variables.push_back(aux_var);
+    // aux_var->sys().addVariableToZeroOnResidual(aux_variable_name);
+
+    // TODO: check block restriction
+  }
 
   // We set up the list of elements once for now. In the future, if the sets can change, we need to
   // call this at every timestep.
@@ -148,6 +173,13 @@ AbaqusUELMeshUserElement::execute()
   std::vector<Real> all_udot_dof_values;
   std::vector<Real> all_udotdot_dof_values;
 
+  // vectors for aux variables
+  std::vector<dof_id_type> aux_var_dof_indices;
+  std::vector<dof_id_type> all_aux_var_dof_indices;
+  std::vector<Real> all_aux_var_dof_increments;
+  std::vector<Real> all_aux_var_dof_values;
+  std::vector<Real> aux_var_values_to_uel;
+
   // parameters for the UEL plugin
   std::array<int, 5> lflags;
   int dim = _uel_definition._coords;
@@ -176,19 +208,41 @@ AbaqusUELMeshUserElement::execute()
     // clear dof indices (TODO: consider caching those for all UEL elements!)
     all_dof_indices.clear();
 
+    int jtype = _uel_definition._type_id;
+    int jelem = uel_elem._id;
+    int nnode = _uel_definition._n_nodes;
+    int nrhs = 1; // : RHS should contain the residual vector
+
+    // Prepare external fields
+    const auto nvar_aux = _aux_variables.size();
+    all_aux_var_dof_indices.resize(nnode * nvar_aux);
+    all_aux_var_dof_increments.resize(nnode * nvar_aux);
+    std::cout << "nvar_aux = " << nvar_aux << " nnode=" << nnode << '\n';
+
     // get the list of dofs, looping over nodes first
-    for (const auto i : make_range(_uel_definition._n_nodes))
+    for (const auto i : make_range(nnode))
     {
       const auto * node_elem = _uel_mesh.elemPtr(uel_elem._nodes[i]);
       mooseAssert(node_elem, "Node element not found for UEL element");
 
-      // loop over variables at the node
+      // get DOFs for all variables at the node
       for (const auto j : index_range(_uel_definition._vars[i]))
       {
         _variables[i][j]->getDofIndices(node_elem, var_dof_indices);
         mooseAssert(var_dof_indices.size() == 1,
                     "Each variable should have exactly one DOF at each node element");
         all_dof_indices.push_back(var_dof_indices[0]);
+      }
+
+      // get DOFs for predefined fields (AuxVariables)
+      for (const auto j : index_range(_aux_variables))
+      {
+        _aux_variables[j]->getDofIndices(node_elem, aux_var_dof_indices);
+
+        mooseAssert(var_dof_indices.size() == 1,
+                    "Each aux variable should have exactly one DOF at each node element");
+
+        all_aux_var_dof_indices[i * nvar_aux + j] = aux_var_dof_indices[0];
       }
 
       // copy coords
@@ -222,6 +276,28 @@ AbaqusUELMeshUserElement::execute()
       _sys.solutionUDot()->get(all_dof_indices, all_udotdot_dof_values);
     }
 
+    // Prepare external field values
+    if (nvar_aux)
+    {
+      all_aux_var_dof_values.resize(nnode * nvar_aux);
+      aux_var_values_to_uel.resize(nnode * nvar_aux * 2); // Value _and_ increment
+
+      _aux_sys->currentSolution()->get(all_aux_var_dof_indices, all_aux_var_dof_values);
+      all_aux_var_dof_increments.resize(nnode * nvar_aux);
+      _aux_sys->solutionOld().get(all_aux_var_dof_indices, all_aux_var_dof_increments);
+
+      // First, one external field and increment; then, second external field and increment, etc.
+      for (const auto i : index_range(all_aux_var_dof_values))
+        all_aux_var_dof_increments[i] = all_aux_var_dof_values[i] - all_aux_var_dof_increments[i];
+
+      for (const auto i : index_range(all_aux_var_dof_values))
+      {
+        // This is not quite right, the increment should be zero :-/
+        aux_var_values_to_uel[i * 2] = all_aux_var_dof_values[i];
+        aux_var_values_to_uel[i * 2 + 1] = 0.0; // all_aux_var_dof_increments[i];
+      }
+    }
+
     const bool do_residual = _sys.hasVector(_sys.residualVectorTag());
     const bool do_jacobian = _sys.hasMatrix(_sys.systemMatrixTag());
 
@@ -239,14 +315,14 @@ AbaqusUELMeshUserElement::execute()
     local_re.resize(ndofel);
     local_ke.resize(ndofel, ndofel);
 
-    int jtype = _uel_definition._type_id;
-    int jelem = uel_elem._id;
-    int nnode = _uel_definition._n_nodes;
-    int nrhs = 1; // : RHS should contain the residual vector
+    int npredf = nvar_aux; // Number of external fields.
 
     // dummy vars
     Real rdummy = 0;
     int idummy = 0;
+
+    std::cout << aux_var_values_to_uel.size() << ": " << Moose::stringify(aux_var_values_to_uel)
+              << '\n';
 
     // make sure stateful data storage is sized correctly
     auto & current_state = _statev[_statev_index_current][jelem];
@@ -280,8 +356,8 @@ AbaqusUELMeshUserElement::execute()
          &idummy /* NDLOAD */,
          nullptr /* JDLTYP[] */,
          nullptr /* ADLMAG[] */,
-         nullptr, //_aux_var_values_to_uel.data() /* PREDEF[] */,
-         &idummy /* NPREDF */,
+         aux_var_values_to_uel.data() /* PREDEF[] */,
+         &npredf /* NPREDF */,
          lflags.data() /* LFLAGS[] */,
          &ndofel /* MLVARX */,
          nullptr /* DDLMAG[] */,
