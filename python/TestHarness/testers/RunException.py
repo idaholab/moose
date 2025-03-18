@@ -24,6 +24,9 @@ class RunException(RunApp):
         # RunException tests executed in parallel need to have their output redirected to a file, and examined individually
         params['redirect_output'] = True
 
+        params['recover'] = False
+        params['restep'] = False
+
         return params
 
     def __init__(self, name, params):
@@ -32,10 +35,6 @@ class RunException(RunApp):
             raise RuntimeError('Either "expect_err" or "expect_assert" must be supplied in RunException')
 
     def checkRunnable(self, options):
-        if options.enable_recover:
-            self.addCaveats('type=RunException')
-            self.setStatus(self.skip)
-            return False
         # We seem to have issues with --redirect-output causing
         # "Inappropriate ioctl for device (25)" errors, so if this test
         # requires more procs, we can't run it
