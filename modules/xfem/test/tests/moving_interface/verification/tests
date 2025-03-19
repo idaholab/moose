@@ -4,7 +4,7 @@
     input = 1D_xy_homog1mat.i
     exodiff = '1D_xy_homog1mat_out.e 1D_xy_homog1mat_out.e-s002 1D_xy_homog1mat_out.e-s003 1D_xy_homog1mat_out.e-s004 1D_xy_homog1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 1D, xy problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -15,7 +15,7 @@
     input = 1D_xy_lsdep1mat.i
     exodiff = '1D_xy_lsdep1mat_out.e 1D_xy_lsdep1mat_out.e-s002 1D_xy_lsdep1mat_out.e-s003 1D_xy_lsdep1mat_out.e-s004 1D_xy_lsdep1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 1D, xy problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -26,7 +26,7 @@
     input = 1D_xy_discrete2mat.i
     exodiff = '1D_xy_discrete2mat_out.e 1D_xy_discrete2mat_out.e-s002 1D_xy_discrete2mat_out.e-s003 1D_xy_discrete2mat_out.e-s004'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 1D, xy problems with a moving interface separating two discrete materials prescribed by a user defined level set function with problem results verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
@@ -37,7 +37,7 @@
     input = 1D_rz_homog1mat.i
     exodiff = '1D_rz_homog1mat_out.e 1D_rz_homog1mat_out.e-s002 1D_rz_homog1mat_out.e-s003 1D_rz_homog1mat_out.e-s004 1D_rz_homog1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 1D, rz problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -48,7 +48,7 @@
     input = 1D_rz_lsdep1mat.i
     exodiff = '1D_rz_lsdep1mat_out.e 1D_rz_lsdep1mat_out.e-s002 1D_rz_lsdep1mat_out.e-s003 1D_rz_lsdep1mat_out.e-s004 1D_rz_lsdep1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 1D, rz problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -59,7 +59,7 @@
     input = 2D_xy_homog1mat.i
     exodiff = '2D_xy_homog1mat_out.e 2D_xy_homog1mat_out.e-s002 2D_xy_homog1mat_out.e-s003 2D_xy_homog1mat_out.e-s004 2D_xy_homog1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 2D, xy problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -70,7 +70,7 @@
     input = 2D_xy_lsdep1mat.i
     exodiff = '2D_xy_lsdep1mat_out.e 2D_xy_lsdep1mat_out.e-s002 2D_xy_lsdep1mat_out.e-s003 2D_xy_lsdep1mat_out.e-s004 2D_xy_lsdep1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 2D, xy problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -81,7 +81,7 @@
     input = 2D_rz_homog1mat.i
     exodiff = '2D_rz_homog1mat_out.e 2D_rz_homog1mat_out.e-s002 2D_rz_homog1mat_out.e-s003 2D_rz_homog1mat_out.e-s004 2D_rz_homog1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 2D, rz problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
@@ -92,7 +92,7 @@
     input = 2D_rz_lsdep1mat.i
     exodiff = '2D_rz_lsdep1mat_out.e 2D_rz_lsdep1mat_out.e-s002 2D_rz_lsdep1mat_out.e-s003 2D_rz_lsdep1mat_out.e-s004 2D_rz_lsdep1mat_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     allow_test_objects = True
     requirement = 'The XFEM module shall accurately solve 2D, rz problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
