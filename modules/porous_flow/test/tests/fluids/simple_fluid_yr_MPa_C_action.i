@@ -103,6 +103,10 @@
   dt = 1
   num_steps = 1
   solve_type = Newton
+
+  # Avoids failing first time step in parallel
+  line_search = 'none'
+  nl_abs_tol = 1e-12
 []
 
 [Outputs]

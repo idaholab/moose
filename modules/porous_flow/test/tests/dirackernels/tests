@@ -425,6 +425,11 @@
     input = 'bh05.i'
     csvdiff = 'bh05.csv'
     rel_err = 5.7e-06 # diff is ~5.6e-6 on falcon
+    abs_zero = 1e-9
+    # for parallel testing, last time step diffs by 2e-5 on 1e-5 results
+    override_columns = 'p0'
+    override_abs_zero = '1e-9'
+    override_rel_err = '3e-5'
     threading = '!pthreads'
     installation_type = in_tree
     requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in an unsaturated system'

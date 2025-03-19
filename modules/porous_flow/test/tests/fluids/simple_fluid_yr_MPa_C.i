@@ -110,6 +110,9 @@
 [Executioner]
   type = Steady
   solve_type = Newton
+
+  # Avoids failing first time step in parallel
+  line_search = 'none'
 []
 
 [Outputs]

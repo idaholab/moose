@@ -18,6 +18,9 @@
   bias_x = 1.05
   coord_type = RZ
   rz_coord_axis = Y
+
+  # To get consistent ordering of results with distributed meshes
+  allow_renumbering = false
 []
 
 [GlobalParams]

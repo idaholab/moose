@@ -211,9 +211,11 @@
 []
 
 [Preconditioning]
-  [andy]
+  [lu]
     type = SMP
     full = true
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu NONZERO'
   []
 []
 
@@ -222,6 +224,9 @@
   solve_type = Newton
   dt = 1
   end_time = 1
+
+  nl_abs_tol = 1e-12
+  line_search = 'none'
 []
 
 [Outputs]
