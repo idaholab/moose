@@ -14,7 +14,7 @@ import json
 
 from .. import common
 from ..common import exceptions
-from ..base import LatexRenderer
+from ..base import LatexRenderer, HTMLRenderer
 from ..tree import html, tokens, latex, pages
 from . import core, command, floats, modal, appsyntax
 
@@ -62,16 +62,26 @@ class ListingExtension(command.CommandExtension):
 
     def preExecute(self):
         """Acquire appsyntax for linking in input listings."""
-
         self._syntax = None
+
+        # Don't do any input parsing for the latex renderer
+        # TODO: very low priority to get this working with latex
+        renderer = self.translator.renderer
+        if not isinstance(renderer, HTMLRenderer):
+            return
+
         for ext in self.translator.extensions:
             if isinstance(ext, appsyntax.AppSyntaxExtension):
                 self._syntax = ext
                 break
 
-        if self._syntax:
-            renderer = self.translator.renderer
-            renderer.addJavaScript('moose_input_parser', "js/moose_input_parser.js")
+    def postTokenize(self, page, ast):
+        """Only add the moose input parser JavaScript if the page needs it."""
+        find_moose_code_token = lambda token: token.get('language', None) == 'moose'
+        if self.syntax and moosetree.find(ast, func=find_moose_code_token) is not None:
+            self.translator.renderer.addJavaScript(
+                "moose_input_parser", "js/moose_input_parser.js", page
+            )
 
     @property
     def syntax(self):
@@ -417,7 +427,7 @@ def get_listing_options(token):
     lang = token['language'] or ''
     if lang.lower() == 'cpp':
         lang = 'C++'
-    elif lang.lower() == 'text':
+    elif lang.lower() in ["moose", "text"]:
         lang = None
 
     if lang:
