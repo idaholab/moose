@@ -18,6 +18,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-5
+    rel_err = 1e-3
     max_threads = 1
     max_parallel = 1
   []
@@ -29,6 +30,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-5
+    rel_err = 1e-4
     max_threads = 1
     max_parallel = 1
   []

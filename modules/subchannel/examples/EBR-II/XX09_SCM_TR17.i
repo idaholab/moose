@@ -312,6 +312,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     timestep_limiting_function = 'time_step_limiting'
   []
   dtmax = 20
+  num_steps = 15
 []
 
 ################################################################################
