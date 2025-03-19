@@ -30,24 +30,32 @@ public:
   virtual void execute() override;
   virtual void finalize() override{};
 
-  /**
-   * Get access to the torch script module which was loaded in this object.
-   */
-  const std::shared_ptr<Moose::TorchScriptModule> & module() const { return _torchscript_module; }
+  ///@{
+  /// Get const access to the module pointer.
+  const std::unique_ptr<Moose::TorchScriptModule> & modulePtr() const
+  {
+    return _torchscript_module;
+  }
+  /// Get const access to the module.
+  const Moose::TorchScriptModule & module() const { return *_torchscript_module; }
+  /// Get non-const access to the module pointer. Could be used for further training within MOOSE.
+  std::unique_ptr<Moose::TorchScriptModule> & modulePtr() { return _torchscript_module; }
+  /// Get non-const access to the module. Could be used for further training within MOOSE.
+  Moose::TorchScriptModule & module() { return *_torchscript_module; }
+  ///@}
 
   /**
    * Function to evaluate the torch script module at certain input.
-   * @param input The input tensor. Unfortunately, this cannot be const since it creates a graph in
-   * the background.
+   * @param input The input tensor.
    */
-  torch::Tensor evaluate(torch::Tensor & input) const;
+  torch::Tensor evaluate(const torch::Tensor & input) const;
 
 protected:
   /// The file name that specifies the torch script model.
-  const std::string & _filename;
+  const FileName & _filename;
 
   /// The libtorch neural network that is currently stored here.
-  std::shared_ptr<Moose::TorchScriptModule> _torchscript_module;
+  std::unique_ptr<Moose::TorchScriptModule> _torchscript_module;
 };
 
 #endif

@@ -35,7 +35,7 @@ TorchScriptModule::loadNeuralNetwork(const std::string & filename)
 }
 
 torch::Tensor
-TorchScriptModule::forward(torch::Tensor & x)
+TorchScriptModule::forward(const torch::Tensor & x)
 {
   std::vector<torch::jit::IValue> inputs(1, x);
   return torch::jit::script::Module::forward(inputs).toTensor();

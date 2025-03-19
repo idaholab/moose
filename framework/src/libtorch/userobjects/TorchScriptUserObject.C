@@ -18,22 +18,25 @@ TorchScriptUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("User-facing object which loads a torch script module.");
-  params.addRequiredParam<std::string>("filename",
-                                       "The file name which contains the torch script module.");
+  params.addRequiredParam<FileName>("filename",
+                                    "The file name which contains the torch script module.");
   params.declareControllable("filename");
   params.addParam<bool>(
       "load_during_construction",
       false,
       "If we want to load this neural network while we are constructing this object.");
+
+  // By default we don't execute this user object, depending on the desired reload frequency,
+  // the user can override this in the input file.
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_NONE};
+
   return params;
 }
 
 TorchScriptUserObject::TorchScriptUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _filename(getParam<std::string>("filename")),
-    _torchscript_module(getParam<bool>("load_during_construction")
-                            ? std::make_shared<Moose::TorchScriptModule>(_filename)
-                            : nullptr)
+    _filename(getParam<FileName>("filename")),
+    _torchscript_module(std::make_unique<Moose::TorchScriptModule>(_filename))
 {
 }
 
@@ -41,16 +44,12 @@ void
 TorchScriptUserObject::execute()
 {
   // We load when the user executes this user object
-  _torchscript_module = std::make_shared<Moose::TorchScriptModule>(_filename);
+  _torchscript_module = std::make_unique<Moose::TorchScriptModule>(_filename);
 }
 
 torch::Tensor
-TorchScriptUserObject::evaluate(torch::Tensor & input) const
+TorchScriptUserObject::evaluate(const torch::Tensor & input) const
 {
-  if (!_torchscript_module)
-    mooseError(
-        "The torch script module has not been loaded yet, so it can't be evaluated! Make sure that "
-        "the torch script module is loaded (execute_on flags) before calling this function!");
   return _torchscript_module->forward(input);
 }
 
