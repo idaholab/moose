@@ -47,6 +47,15 @@ SubProblem::validParams()
   return params;
 }
 
+const std::unordered_set<FEFamily> SubProblem::_default_families_without_p_refinement = {
+    libMesh::LAGRANGE,
+    libMesh::NEDELEC_ONE,
+    libMesh::RAVIART_THOMAS,
+    libMesh::LAGRANGE_VEC,
+    libMesh::CLOUGH,
+    libMesh::BERNSTEIN,
+    libMesh::RATIONAL_BERNSTEIN};
+
 // SubProblem /////
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
@@ -62,14 +71,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _have_ad_objects(false),
     _output_functors(false),
     _typed_vector_tags(2),
-    _have_p_refinement(false),
-    _default_families_without_p_refinement({libMesh::LAGRANGE,
-                                            libMesh::NEDELEC_ONE,
-                                            libMesh::RAVIART_THOMAS,
-                                            libMesh::LAGRANGE_VEC,
-                                            libMesh::CLOUGH,
-                                            libMesh::BERNSTEIN,
-                                            libMesh::RATIONAL_BERNSTEIN})
+    _have_p_refinement(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
@@ -1366,15 +1368,13 @@ void
 SubProblem::markFamilyPRefinement(const InputParameters & params)
 {
   auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
-  bool flag = _default_families_without_p_refinement.count(family) > 0;
+  bool flag = _default_families_without_p_refinement.count(family);
   if (params.isParamValid("disable_p_refinement"))
     flag = params.get<bool>("disable_p_refinement");
 
-  auto it = _family_for_p_refinement.find(family);
-  if (it == _family_for_p_refinement.end())
-    _family_for_p_refinement[family] = flag;
-  else if (flag != it->second)
-    mooseError("'disable_p_refinement' must set consistently for variables in ", family);
+  auto [it, inserted] = _family_for_p_refinement.emplace(family, flag);
+  if (!inserted && flag != it->second)
+    mooseError("'disable_p_refinement' not set consistently for variables in ", family);
 }
 
 void

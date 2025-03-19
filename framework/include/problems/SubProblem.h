@@ -994,9 +994,9 @@ public:
   virtual bool hasNonlocalCoupling() const = 0;
 
   /**
-   * Prepare p-refinement with assembly
+   * Prepare \p DofMap and \p Assembly classes with our p-refinement information
    */
-  virtual void preparePRefinement();
+  void preparePRefinement();
 
   /**
    * @returns whether we're doing p-refinement
@@ -1209,7 +1209,7 @@ private:
   /// Indicate whether a family is disabled for p-refinement
   std::unordered_map<FEFamily, bool> _family_for_p_refinement;
   /// The set of variable families by default disable p-refinement
-  std::unordered_set<FEFamily> _default_families_without_p_refinement;
+  static const std::unordered_set<FEFamily> _default_families_without_p_refinement;
 
   friend class Restartable;
 };

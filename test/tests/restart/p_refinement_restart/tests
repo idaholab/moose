@@ -4,7 +4,7 @@
     type = 'Exodiff'
     input = 'steady.i'
     exodiff = 'steady_out.e'
-    requirement = 'The system shall support running and saving off a steady solution with p-refinement for using in a restart.'
+    requirement = 'The system shall support running and saving off a steady solution with p-refinement for use in a restart.'
     issues = '#30048'
   []
 
@@ -13,7 +13,7 @@
     input = 'restarted_steady.i'
     exodiff = 'restarted_steady_out.e'
     prereq = 'steady_solve'
-    requirement = 'The system shall support restarting a steady state solve from a steady solution with p-refinement'
+    requirement = 'The system shall support restarting a steady state solve from a steady solution with p-refinement.'
     issues = '#30048'
   []
 []

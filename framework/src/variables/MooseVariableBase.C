@@ -74,8 +74,8 @@ MooseVariableBase::validParams()
   params.addParam<bool>(
       "disable_p_refinement",
       "True to disable p-refinement for this variable. Note that because this happens on the "
-      "family basis, users need to have this flag consistently for all variables in the same "
-      "family. Currently MOOSE disable p-refinement for variables in the following families by "
+      "family basis, users need to have this flag consistently set for all variables in the same "
+      "family. Currently MOOSE disables p-refinement for variables in the following families by "
       "default: LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN and "
       "RATIONAL_BERNSTEIN.");
 

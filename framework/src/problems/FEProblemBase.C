@@ -2787,9 +2787,9 @@ FEProblemBase::addVariable(const std::string & var_type,
 {
   parallel_object_only();
 
-  auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
-  auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
-  auto fe_type = FEType(order, family);
+  const auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
+  const auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
+  const auto fe_type = FEType(order, family);
 
   const auto active_subdomains_vector =
       _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
@@ -3071,9 +3071,9 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
 {
   parallel_object_only();
 
-  auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
-  auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
-  auto fe_type = FEType(order, family);
+  const auto order = Utility::string_to_enum<Order>(params.get<MooseEnum>("order"));
+  const auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
+  const auto fe_type = FEType(order, family);
 
   const auto active_subdomains_vector =
       _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
