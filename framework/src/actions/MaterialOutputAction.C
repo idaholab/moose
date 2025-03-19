@@ -157,14 +157,14 @@ MaterialOutputAction::act()
       // the output objects
       if (outputs.find("none") == outputs.end())
       {
-        // Get all available Exodus output names from OutputWarehouse
-        const auto & all_output_names = _output_warehouse.getExodusOutputNames();
+        // Get all available output names from OutputWarehouse that support material output
+        const auto & all_output_names = _output_warehouse.getAllMaterialPropertyOutputNames();
 
-        // For reserved name "all", set outputs to match all avialable Exodus output names
+        // For reserved name "all", set outputs to match all avialable output names
         if (outputs.find("all") != outputs.end())
           outputs = all_output_names;
 
-        // Iterate through all available Exodus output names and update _material_variable_names_map
+        // Iterate through all available output names and update _material_variable_names_map
         // based on which of these output names are found in 'outputs' parameter
         for (const auto & output_name : all_output_names)
         {
