@@ -41,7 +41,7 @@
     type = OutputTestMaterial
     block = 1
     output_properties = 'real_property'
-    outputs = exodus1
+    outputs = all
     variable = u
   []
   [block_2]

@@ -69,7 +69,8 @@
       type = Exodiff
       input = output_multiple_files.i
       exodiff = 'output_exodus1_mat_block1.e output_exodus2_mat_block2.e'
-      cli_args = "Outputs/exodus1/file_base='output_exodus1_mat_block1'
+      cli_args = "Materials/block_1/outputs=exodus1
+                  Outputs/exodus1/file_base='output_exodus1_mat_block1'
                   Outputs/exodus2/file_base='output_exodus2_mat_block2'"
       detail = 'outputting certain properties within the material definition to different files;'
     []
@@ -77,7 +78,8 @@
       type = Exodiff
       input = output_multiple_files.i
       exodiff = 'output_exodus1_mat_both.e output_exodus2_varonly.e'
-      cli_args = "Materials/block_2/outputs=exodus1
+      cli_args = "Materials/block_1/outputs=exodus1
+                  Materials/block_2/outputs=exodus1
                   Outputs/exodus1/file_base='output_exodus1_mat_both'
                   Outputs/exodus2/file_base='output_exodus2_varonly'
                   Outputs/exodus2/hide=''"
@@ -100,8 +102,7 @@
       type = Exodiff
       input = output_multiple_files.i
       exodiff = 'output_exodus1_mat_block1.e output_exodus2_mat_block1.e'
-      cli_args = "Materials/block_1/outputs=all
-                  Materials/block_2/outputs=none
+      cli_args = "Materials/block_2/outputs=none
                   Outputs/exodus1/file_base=output_exodus1_mat_block1
                   Outputs/exodus2/file_base=output_exodus2_mat_block1"
       detail = 'outputting certain properties within the material definition to a single file using the "all" keyword in the presence of multiple output files;'
@@ -146,7 +147,7 @@
   [invalid_material_outputs]
     type = RunException
     input = output.i
-    expect_err = "The output object 'garbage' is not a defined Exodus output object"
+    expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Materials/test_material/outputs=garbage'
 
     requirement = "The system shall report an error if the supplied output options for material data output "
@@ -155,20 +156,20 @@
   [invalid_material_output_exodus]
     type = RunException
     input = output.i
-    expect_err = "The output object 'exodus' is not a defined Exodus output object"
+    expect_err = "The output object 'exodus' is not a defined output object"
     cli_args = 'Materials/test_material/outputs=exodus Outputs/exodus=false'
 
     requirement = "The system shall report an error if the 'exodus' output option for material data output "
                   "is invoked when Outputs/exodus=false"
   []
-  [invalid_material_output_nonexodus]
+  [invalid_material_output_unsupported]
     type = RunException
     input = output.i
-    expect_err = "The output object 'console' is not a defined Exodus output object"
-    cli_args = 'Materials/test_material/outputs=console'
+    expect_err = "The output object 'console' is not a defined output object, or it does not support material output"
+    cli_args = 'Materials/test_material/outputs=console Outputs/console=true'
 
     requirement = "The system shall report an error if the output option for material data output "
-                  "is not of an Exodus output object"
+                  "is not one that supports material output"
   []
   [invalid_output_multiple_reserved_names]
     type = RunException

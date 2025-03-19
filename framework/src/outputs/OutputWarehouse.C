@@ -120,17 +120,17 @@ OutputWarehouse::addOutput(std::shared_ptr<Output> const output)
 }
 
 bool
-OutputWarehouse::hasOutput(const std::string & name, const bool is_exodus) const
+OutputWarehouse::hasOutput(const std::string & name, const bool supports_material_output) const
 {
   const auto found_object = _object_map.find(name) != _object_map.end();
-  if (!is_exodus || !found_object)
+  if (!supports_material_output || !found_object)
     return found_object;
   else
   {
-    // This condition is met if output object was found and is_exodus is true
-    // Check if output object can be typecast to Exodus
-    auto * exodus = dynamic_cast<Exodus *>(_object_map.at(name));
-    return (exodus != NULL);
+    // This condition is met if output object was found and supports_material_output is true
+    // Check if output object supports material property output
+    auto * output_object = dynamic_cast<Output *>(_object_map.at(name));
+    return (output_object->supportsMaterialPropertyOutput());
   }
 }
 
@@ -323,7 +323,8 @@ OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name,
 }
 
 void
-OutputWarehouse::checkOutputs(const std::set<OutputName> & names, const bool is_exodus)
+OutputWarehouse::checkOutputs(const std::set<OutputName> & names,
+                              const bool supports_material_output)
 {
   std::string reserved_name = "";
   for (const auto & name : names)
@@ -331,12 +332,11 @@ OutputWarehouse::checkOutputs(const std::set<OutputName> & names, const bool is_
     const bool is_reserved_name = isReservedName(name);
     if (is_reserved_name)
       reserved_name = name;
-    if (!is_reserved_name && !hasOutput(name, is_exodus))
+    if (!is_reserved_name && !hasOutput(name, supports_material_output))
       mooseError("The output object '",
                  name,
-                 "' is not a defined ",
-                 (is_exodus ? "Exodus " : ""),
-                 "output object");
+                 "' is not a defined output object",
+                 (supports_material_output ? ", or it does not support material output." : "."));
   }
   if (!reserved_name.empty() && names.size() > 1)
     mooseError("When setting output name to reserved name '" + reserved_name +
@@ -344,16 +344,16 @@ OutputWarehouse::checkOutputs(const std::set<OutputName> & names, const bool is_
 }
 
 const std::set<OutputName>
-OutputWarehouse::getExodusOutputNames() const
+OutputWarehouse::getAllMaterialPropertyOutputNames() const
 {
-  std::set<OutputName> exodus_output_names;
+  std::set<OutputName> output_names;
   for (const auto & pair : _object_map)
   {
-    auto * exodus = dynamic_cast<Exodus *>(pair.second);
-    if (exodus != NULL)
-      exodus_output_names.insert(pair.first);
+    auto * output = dynamic_cast<Output *>(pair.second);
+    if (output->supportsMaterialPropertyOutput())
+      output_names.insert(pair.first);
   }
-  return exodus_output_names;
+  return output_names;
 }
 
 const std::set<std::string> &
