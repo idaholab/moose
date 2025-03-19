@@ -48,7 +48,7 @@ protected:
   unsigned int _my_side;
 };
 
-const IPHDGAssemblyHelper &
+inline const IPHDGAssemblyHelper &
 IPHDGBC::iphdgHelper() const
 {
   return const_cast<IPHDGBC *>(this)->iphdgHelper();
