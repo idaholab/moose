@@ -36,7 +36,7 @@
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
     cli_args = 'Problem/library_name=libphase_field-opt.la'
-    method = OPT # because the library name is explicitly given
+    capabilities = 'method=opt' # because the library name is explicitly given
     prereq = 'dynamic_object_restrict_bad'
     library_mode = 'DYNAMIC'
     group = 'dynamic_loading'
@@ -70,7 +70,7 @@
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'
     cli_args = 'Problem/library_name=libphase_field-opt.la'
-    method = OPT # because the library name is explicitly given
+    capabilities = 'method=opt' # because the library name is explicitly given
     prereq = 'dynamic_object_loading_syntax'
     library_mode = 'DYNAMIC'
     group = 'dynamic_loading'

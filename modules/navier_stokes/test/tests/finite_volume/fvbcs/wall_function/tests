@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = Re_t395.i
     exodiff = Re_t395_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to impose a wall shear stress at the wall according to the algebraic wall function.'
     issues = '#18273'
     design = 'rans_theory.md INSFVWallFunctionBC.md'

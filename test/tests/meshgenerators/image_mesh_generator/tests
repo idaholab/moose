@@ -22,7 +22,7 @@
       input = image_2d.i
       exodiff = image_2d_out.e
       capabilities = 'vtk'
-      method = '!DBG' # This test is slow in debug b/c of calls to libMesh::MeshTools::libmesh_assert_valid_dof_ids
+      capabilities = 'method!=dbg' # This test is slow in debug b/c of calls to libMesh::MeshTools::libmesh_assert_valid_dof_ids
       detail = "2D and"
     []
     [3d]

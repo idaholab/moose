@@ -119,7 +119,7 @@
     input = 'grain_growth.i'
     issues = '#13539'
     design = 'actions/GrainGrowthAction.md'
-    method = 'OPT' # this is too slow for anything but opt
+    capabilities = 'method=opt' # this is too slow for anything but opt
     ratio_tol = 5e-8
     difference_tol = 5e-5
     run_sim = True

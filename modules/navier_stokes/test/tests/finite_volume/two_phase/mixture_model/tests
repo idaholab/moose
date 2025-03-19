@@ -25,7 +25,7 @@
     input = 'rayleigh-bernard-two-phase.i'
     requirement = 'The system shall be able solve two phase Rayleigh Bernard convection with the mixture model. The problem has multiple solutions so RunApp is used for testing.'
     recover = false
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = none
     allow_warnings = true
   []

@@ -201,7 +201,7 @@
     requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
                   'mechanical contact problem in which the secondary side of the contact interface '
                   'is split between processes when run in parallel.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
   [split_secondary_action]
@@ -214,7 +214,7 @@
                   'is split between processes when run in parallel while using the contact action to '
                   'build the set of constraints, user objects, and application of generalized '
                   'forces.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
   [mixed_inactive_nodes]

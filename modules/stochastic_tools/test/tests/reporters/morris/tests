@@ -27,7 +27,7 @@
       input = morris_main.i
       jsondiff = morris_main_out.json
       allow_test_objects = true
-      method = 'opt'
+      capabilities = 'method=opt'
       detail = 'distributed;'
     []
     [root]
@@ -36,7 +36,7 @@
       cli_args = 'Reporters/storage/parallel_type=ROOT'
       jsondiff = morris_main_out.json
       allow_test_objects = true
-      method = 'opt'
+      capabilities = 'method=opt'
       detail = 'on root processor;'
     []
   []

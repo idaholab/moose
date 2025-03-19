@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 2d-transient.i
     exodiff = 2d-transient_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#16756 #18806'
     requirement = 'The system shall be able to solve transient relaxations within the weakly compressible approximation, with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
@@ -27,7 +27,7 @@
     type = 'Exodiff'
     input = 2d-transient-action.i
     exodiff = 2d-transient-action_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#19472'
     requirement = 'The system shall be able to solve weakly compressible transient problems with the NSFV action syntax.'
@@ -38,7 +38,7 @@
     type = 'Exodiff'
     input = 2d-transient-physics.i
     exodiff = 2d-transient-physics_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#25642'
     requirement = 'The system shall be able to solve weakly compressible transient problems with flow physics syntax.'
