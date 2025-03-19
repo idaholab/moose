@@ -1,0 +1,89 @@
+<!DOCTYPE html><head><meta charset="UTF-8"><link href="../css/devel_moose.css" type="text/css" rel="stylesheet"></link><link href="../css/alert_moose.css" type="text/css" rel="stylesheet"></link><link href="../css/content_moose.css" type="text/css" rel="stylesheet"></link><link href="../css/civet_moose.css" type="text/css" rel="stylesheet"></link><link href="../css/sqa_moose.css" type="text/css" rel="stylesheet"></link></head><body><h1 id="listing-extension">Listing Extension</h1><h2 id="test-numbering">Test Numbering</h2><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-heading">Listing 1: </span><span class="moose-caption-text" id="one"></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-None">One</code></pre></div><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-heading">Listing 2: </span><span class="moose-caption-text" id="two"></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-None">Two</code></pre></div><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-heading">Listing 3: </span><span class="moose-caption-text" id="three"></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-None">Three</code></pre></div><p>You can reference listings: <a href="#three">Listing 3</a>.</p><h2 id="test-captions">Test Captions</h2><pre class="moose-pre" style="max-height:350px;"><code class="language-None">no caption</code></pre><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-text">the <strong>caption</strong></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-None">caption with inline content</code></pre></div><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-heading">File 1: </span><span class="moose-caption-text" id="file1">the <u>caption</u></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-None">caption with prefix and number</code></pre></div><p>Reference to special prefix: <a href="#file1">File 1</a>.</p><h2 id="listing-with-space">Listing with space</h2><pre class="moose-pre" style="max-height:350px;"><code class="language-None">void function();
+
+void anotherFunction();
+</code></pre><h3 id="test-limited-height">Test Limited Height</h3><p>The container for this listing is limited to 92 pixels, vertically:</p><pre class="moose-pre" style="max-height:92px;"><code class="language-None">#include &lt;stdio.h&gt;
+
+void
+greeting(void)
+{
+  printf(&quot;Hello, World!\n&quot;);
+}
+
+int
+main(int argc, char **argv)
+{
+  greeting();
+}
+</code></pre><h2 id="language">Language</h2><pre class="moose-pre" style="max-height:350px;"><code class="language-c++">void function();</code></pre><h2 id="file-listings">File Listings</h2><p>Display a C++ source file (excluding the MOOSE header) and hide the modal link:</p><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-heading">Listing 4: </span><span class="moose-caption-text" id="diffusion-c"></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-cpp">
+#include &quot;Diffusion.h&quot;
+
+registerMooseObject(&quot;MooseApp&quot;, Diffusion);
+
+InputParameters
+Diffusion::validParams()
+{
+  InputParameters params = Kernel::validParams();
+  params.addClassDescription(&quot;The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak &quot;
+                             &quot;form of $(\\nabla \\phi_i, \\nabla u_h)$.&quot;);
+  return params;
+}
+
+Diffusion::Diffusion(const InputParameters &amp; parameters) : Kernel(parameters) {}
+
+Real
+Diffusion::computeQpResidual()
+{
+  return _grad_u[_qp] * _grad_test[_i][_qp];
+}
+
+Real
+Diffusion::computeQpJacobian()
+{
+  return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+}
+</code></pre></div><p>Display only the <code>validParams()</code> definition and limit height to 92 pixels, vertically:</p><pre class="moose-pre" style="max-height:92px;"><code class="language-cpp">InputParameters
+Diffusion::validParams()
+{
+  InputParameters params = Kernel::validParams();
+  params.addClassDescription(&quot;The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak &quot;
+                             &quot;form of $(\\nabla \\phi_i, \\nabla u_h)$.&quot;);
+  return params;
+}
+</code></pre><span class="moose-source-filename">(framework/src/kernels/Diffusion.C)</span><h3 id="hit-files">HIT Files</h3><p>Extract the <code>[Mesh]</code> and <code>[Kernels]</code> blocks and use a special prefix:</p><div class="moose-float-div"><p class="moose-caption"><span class="moose-caption-heading">xxxxx 1: </span><span class="moose-caption-text" id="prfx"></span></p><pre class="moose-pre" style="max-height:350px;"><code class="language-moose">[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+[]
+
+[Kernels]
+  [diff]
+    type = Diffusion&lt;&lt;&lt;{&quot;description&quot;: &quot;The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak form of $(\\nabla \\phi_i, \\nabla u_h)$.&quot;}&gt;&gt;&gt;
+    variable&lt;&lt;&lt;{&quot;description&quot;: &quot;The name of the variable that this residual object operates on&quot;}&gt;&gt;&gt; = u
+  []
+[]</code></pre><span class="moose-source-filename">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</span></div><p>Extract the <code>[diff]</code> block, indent 2 spaces, and add <code>[AuxKernels]</code> and <code>[]</code> as header and footer:</p><pre class="moose-pre" style="max-height:350px;"><code class="language-moose">[Kernels]
+  [diff]
+    type = Diffusion&lt;&lt;&lt;{&quot;description&quot;: &quot;The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak form of $(\\nabla \\phi_i, \\nabla u_h)$.&quot;}&gt;&gt;&gt;
+    variable&lt;&lt;&lt;{&quot;description&quot;: &quot;The name of the variable that this residual object operates on&quot;}&gt;&gt;&gt; = u
+  []
+[]</code></pre><span class="moose-source-filename">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</span><p>Remove the <code>[test]</code> block and hide the modal link:</p><pre class="moose-pre" style="max-height:350px;"><code class="language-text">[Tests]
+[]
+</code></pre><p>Remove the <code>issues</code> and <code>design</code> parameters:</p><pre class="moose-pre" style="max-height:350px;"><code class="language-text">[Tests]
+  [test]
+    type = &#x27;Exodiff&#x27;
+    input = &#x27;simple_diffusion.i&#x27;
+    exodiff = &#x27;simple_diffusion_out.e&#x27;
+
+    requirement = &#x27;The system shall run a simple 2D linear diffusion problem with Dirichlet boundary conditions on a regular mesh.&#x27;
+
+    # Enables running the limited HPC tests on CIVET on all events
+    group = &#x27;hpc&#x27;
+  []
+[]
+</code></pre><span class="moose-source-filename">(test/tests/kernels/simple_diffusion/tests)</span><p>Extract the <code>[BCs]</code> block then remove the <code>[left]</code> block and the <code>value</code> parameter:</p><pre class="moose-pre" style="max-height:350px;"><code class="language-moose">[BCs]
+  [right]
+    type = DirichletBC&lt;&lt;&lt;{&quot;description&quot;: &quot;Imposes the essential boundary condition $u=g$, where $g$ is a constant, controllable value.&quot;}&gt;&gt;&gt;
+    variable&lt;&lt;&lt;{&quot;description&quot;: &quot;The name of the variable that this residual object operates on&quot;}&gt;&gt;&gt; = u
+    boundary&lt;&lt;&lt;{&quot;description&quot;: &quot;The list of boundary IDs from the mesh where this object applies&quot;}&gt;&gt;&gt; = right
+  []
+[]</code></pre><span class="moose-source-filename">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</span></body><script type="text/javascript" src="../js/sqa_moose.js"></script><script type="text/javascript" src="../js/moose_input_parser.js"></script>

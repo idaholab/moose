@@ -86,9 +86,6 @@ Extract the `[diff]` block, indent 2 spaces, and add `[AuxKernels]` and `[]` as 
 
 !listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
          block=Kernels/diff
-         indent=2
-         header=[AuxKernels]
-         footer=[]
 
 Remove the `[test]` block and hide the modal link:
 
