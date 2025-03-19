@@ -2,11 +2,11 @@
 
 Familiarize yourself with [inl/hpc_ondemand.md], and return here with an interactive shell for the
 machine you wish to run your application on. NCRC Application binaries are only available on
-Sawtooth and Lemhi.
+Sawtooth, Bitterroot, and WindRiver.
 
 ## Load {{ApplicationName}} Environment
 
-Logged into either Sawtooth or Lemhi, load the {{ApplicationName}} environment:
+Logged into either Sawtooth, Bitterroot, or WindRiver, load the {{ApplicationName}} environment:
 
 ```bash
 module load use.moose {{ApplicationLower}}-openmpi
