@@ -89,6 +89,7 @@ public:
   override_property(p, v, e);
   override_property(T, v, e);
   override_property(v, p, T);
+  override_property(rho, p, T);
   override_property(e, p, T);
   override_property(s, p, T);
   override_property(c, p, T);
@@ -96,6 +97,7 @@ public:
   override_property(cv, p, T);
   override_property(mu, p, T);
   override_property(k, p, T);
+  override_property(e, p, rho);
 
 #undef override_property
 
