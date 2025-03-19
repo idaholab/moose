@@ -5,7 +5,6 @@
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'right left;
                                right left'
-    parallel_type = 'replicated'
   []
 []
 

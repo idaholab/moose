@@ -10,10 +10,6 @@
 [TriSubChannelMesh]
   [subchannel]
     type = SCMDetailedTriSubChannelMeshGenerator
-    dwire = 0.002
-    hwire = 0.0833
-    spacer_z = '0'
-    spacer_k = '5.0'
   []
   [pins]
     type = SCMDetailedTriPinMeshGenerator
