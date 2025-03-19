@@ -4,7 +4,7 @@
     input = moving_level_set.i
     exodiff = 'moving_level_set_out.e moving_level_set_out.e-s002 moving_level_set_out.e-s003'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to specify whether an XFEM cut surface '
                   'should be healed independently for individual interfaces'
     design = 'LineSegmentCutSetUserObject.md LevelSetCutUserObject.md'
@@ -15,7 +15,7 @@
     type = RunApp
     input = moving_level_set.i
     cli_args = 'XFEM/debug_output_level=0'
-    unique_id = true
+    capabilities = 'unique_id'
     absent_out = 'XFEM mesh cutting with element fragment algorithm complete'
     requirement = 'The XFEM module shall not output summary information on mesh changes when '
                   'debug_output_level=0'
@@ -27,7 +27,7 @@
     type = RunApp
     input = moving_level_set.i
     cli_args = 'XFEM/debug_output_level=1'
-    unique_id = true
+    capabilities = 'unique_id'
     expect_out = 'XFEM mesh cutting with element fragment algorithm complete'
     requirement = 'The XFEM module shall output summary information on mesh changes when '
                   'debug_output_level=1'
@@ -39,7 +39,7 @@
     type = RunApp
     input = moving_level_set.i
     cli_args = 'XFEM/debug_output_level=2'
-    unique_id = true
+    capabilities = 'unique_id'
     expect_out = 'XFEM added new node:'
     requirement = 'The XFEM module shall output detailed information on mesh changes when '
                   'debug_output_level=2'
@@ -51,7 +51,7 @@
     type = RunApp
     input = moving_level_set.i
     cli_args = 'XFEM/debug_output_level=3'
-    unique_id = true
+    capabilities = 'unique_id'
     expect_out = 'XFEM Element fragment algorithm mesh prior to cutting:'
     requirement = 'The XFEM module shall output detailed information on mesh changes when '
                   'debug_output_level=3'
@@ -63,7 +63,7 @@
     input = moving_bimaterial.i
     exodiff = 'moving_bimaterial_out.e moving_bimaterial_out.e-s002'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
                   'where a moving material interface is defined by an XFEM surface, which is defined '
                   'by a prescribed level set field.'
@@ -76,7 +76,7 @@
     input = moving_ad_bimaterial.i
     exodiff = 'moving_bimaterial_out.e moving_bimaterial_out.e-s002'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     prereq = moving_bimaterials
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
                   'where a moving material interface is defined by an XFEM surface, which is defined '
@@ -92,7 +92,7 @@
               'moving_bimaterial_finite_strain_out.e-s003 moving_bimaterial_finite_strain_out.e-s004 '
               'moving_bimaterial_finite_strain_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
                   'at finite strain where a moving material interface is defined by an XFEM surface, '
                   'which is defined by a prescribed level set field.'
@@ -109,7 +109,7 @@
               'moving_bimaterial_finite_strain_esm_out.e-s004 '
               'moving_bimaterial_finite_strain_esm_out.e-s005'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to modify subdomain IDs based on an XFEM '
                   'interface.'
     design = 'CutElementSubdomainModifier.md'
@@ -120,7 +120,7 @@
     input = moving_diffusion.i
     exodiff = 'moving_diffusion_out.e moving_diffusion_out.e-s002'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     installation_type = in_tree
     requirement = 'The XFEM module shall provide an ability to solve bi-material diffusion problems '
                   'where a moving material interface is defined by an XFEM surface, which is defined '
@@ -133,7 +133,7 @@
     input = moving_ad_diffusion.i
     exodiff = 'moving_diffusion_out.e moving_diffusion_out.e-s002'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     prereq = moving_diffusion
     requirement = 'The XFEM module shall provide an ability to solve bi-material diffusion problems '
                   'where a moving material interface is defined by an XFEM surface, which is defined '
@@ -147,7 +147,7 @@
     exodiff = 'phase_transition_2d_out.e  phase_transition_2d_out.e-s002  phase_transition_2d_out.e-s003  '
               'phase_transition_2d_out.e-s004'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     abs_zero = 1e-8
     requirement = 'The XFEM module shall provide an ability to solve a simple 2d phase transition '
                   'problem in which the phase boundary is defined by and XFEM surface and the '
@@ -164,7 +164,7 @@
     exodiff = 'phase_transition_3d_out.e  phase_transition_3d_out.e-s002  phase_transition_3d_out.e-s003  '
               'phase_transition_3d_out.e-s004'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     abs_zero = 1e-8
     requirement = 'The XFEM module shall provide an ability to solve a simple 3d phase transition '
                   'problem in which the phase boundary is defined by and XFEM surface and the '
@@ -181,7 +181,7 @@
     exodiff = 'phase_transition_2d_out.e  phase_transition_2d_out.e-s002  phase_transition_2d_out.e-s003  '
               'phase_transition_2d_out.e-s004'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     abs_zero = 1e-8
     prereq = phase_transition_2d
     requirement = 'The XFEM module shall provide an ability to solve a 2d simple phase transition '
@@ -196,7 +196,7 @@
     input = cut_mesh_2d.i
     exodiff = 'cut_mesh_2d_out.e  cut_mesh_2d_out.e-s002 cut_mesh_2d_out_cut_mesh.e'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     abs_zero = 1e-5
     requirement = 'The XFEM module shall provide an ability to cut one block with a moving circle surface mesh in 2D.'
     design = 'InterfaceMeshCut2DUserObject.md'
@@ -207,7 +207,7 @@
     input = cut_mesh_3d.i
     exodiff = 'cut_mesh_3d_out.e  cut_mesh_3d_out.e-s002 cut_mesh_3d_out_cut_mesh.e'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     abs_zero = 1e-5
     installation_type = in_tree
     requirement = 'The XFEM module shall provide an ability to cut one block with a moving cylinder surface mesh in 3D.'
