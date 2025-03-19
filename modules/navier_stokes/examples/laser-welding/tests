@@ -38,9 +38,8 @@
       allow_test_objects = true
       cli_args = "Mesh/uniform_refine=0 Executioner/num_steps=4 Postprocessors/active='' Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
       valgrind = 'heavy'
-      capabilities = 'strumpack'
+      capabilities = 'strumpack & method!=dbg'
       detail = 'in three dimensions, using a finite element discretization for all variables, and'
-      capabilities = 'method!=dbg'
     []
     [2d-fv]
       input = 2d-fv.i
