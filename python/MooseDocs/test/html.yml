@@ -94,7 +94,7 @@ Extensions:
             MTU: Michigan Technological University
     MooseDocs.extensions.common:
         shortcuts:
-            MOOSE: https:://mooseframework.org
+            MOOSE: https:://https://mooseframework.inl.gov
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/test
