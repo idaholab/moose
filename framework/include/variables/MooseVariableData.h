@@ -116,8 +116,7 @@ public:
    */
   void computeValuesFace(const FaceInfo & fi);
   void computeGhostValuesFace(const FaceInfo & fi, MooseVariableData<OutputType> & other_face);
-  void computeADFaceAveraging();
-  void computeADElementAveraging();
+  void computeADAveraging();
 
   /**
    * compute the variable values
@@ -558,7 +557,6 @@ private:
 
   /// Averaging flags
   mutable bool _need_averaging;
-  mutable bool _face_averaging;
 
   bool _has_dof_indices;
 
@@ -652,6 +650,7 @@ private:
   const FieldVariablePhiCurl * _current_curl_phi;
   const FieldVariablePhiDivergence * _current_div_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _current_ad_grad_phi;
+  MooseArray<ADReal> _current_ad_JxW;
 
   // dual mortar
   const bool _use_dual;
@@ -717,6 +716,9 @@ private:
 
   /// The current element side
   const unsigned int & _current_side;
+
+  const MooseArray<ADReal> & _ad_JxW;
+  const MooseArray<ADReal> & _ad_JxWFace;
 
   /// A dummy ADReal variable
   ADReal _ad_real_dummy = 0;

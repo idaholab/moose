@@ -59,7 +59,6 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _need_ad_second_u(false),
     _need_ad_curl_u(false),
     _need_averaging(false),
-    _face_averaging(false),
     _has_dof_indices(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
@@ -76,7 +75,9 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _node(node),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
-    _current_side(_assembly.side())
+    _current_side(_assembly.side()),
+    _ad_JxW(_assembly.adJxW()),
+    _ad_JxWFace(_assembly.adJxWFace())
 {
   _continuity = FEInterface::get_continuity(_fe_type);
 
@@ -171,7 +172,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi;
       _current_div_phi = _div_phi;
       _current_ad_grad_phi = _ad_grad_phi;
-      _face_averaging = false;
+      _current_ad_JxW = _ad_JxW;
       break;
     }
     case Moose::Face:
@@ -183,7 +184,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi_face;
       _current_div_phi = _div_phi_face;
       _current_ad_grad_phi = _ad_grad_phi_face;
-      _face_averaging = true;
+      _current_ad_JxW = _ad_JxWFace;
       break;
     }
   }
@@ -434,13 +435,18 @@ MooseVariableData<OutputType>::computeValuesFace(const FaceInfo & /*fi*/)
   computeValues();
 }
 
-// NOTES: GhostValues for FE variable with equal the Face average value
-// of the neighbor side.
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeGhostValuesFace(const FaceInfo & /*fi*/,
                                                       MooseVariableData<OutputType> & other_face)
 {
+  /*
+   *  NOTES: For cases where a neighoring cell is needed but does not exist
+   *         (such as a cell on the mesh boundary), a ghost cell is needed.
+   *         This function takes the simplified approach where it is assumed
+   *         that the average FE values on the face of the ghost cell is
+   *         equal to the neighoring side.
+   */
   if (_need_ad_u)
   {
     const auto nqp = other_face.adSlnAvg().size();
@@ -459,83 +465,32 @@ MooseVariableData<OutputType>::computeGhostValuesFace(const FaceInfo & /*fi*/,
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::computeADFaceAveraging()
+MooseVariableData<OutputType>::computeADAveraging()
 {
   unsigned int nqp = _current_qrule->n_points();
-  const MooseArray<ADReal> & _ad_JxW = _assembly.adJxWFace();
   const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
-  ADReal _current_elem_volume = 0.0;
+  ADReal _current_volume = 0.0;
   for (unsigned int qp = 0; qp < nqp; qp++)
-    _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
+    _current_volume += _current_ad_JxW[qp] * _ad_coord[qp];
   if (_need_ad_u)
   {
-    _ad_u_average.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      _ad_u_average[qp] = _ad_zero;
-    }
-    auto value_temp = _ad_u[0];
-    value_temp = 0.0;
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
-    value_temp /= _current_elem_volume;
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      _ad_u_average[qp] = value_temp;
-  }
-  if (_need_ad_grad_u)
-  {
-    _ad_grad_u_average.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      _ad_grad_u_average[qp] = _ad_zero;
-    }
-    auto value_temp = _ad_grad_u[0];
-    value_temp = 0.0;
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
-    value_temp /= _current_elem_volume;
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      _ad_grad_u_average[qp] = value_temp;
-  }
-}
+    auto value_temp = _current_ad_JxW[0] * _ad_coord[0] * _ad_u[0];
+    for (unsigned int qp = 1; qp < nqp; qp++)
+      value_temp += _current_ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
+    value_temp /= _current_volume;
 
-template <typename OutputType>
-void
-MooseVariableData<OutputType>::computeADElementAveraging()
-{
-  unsigned int nqp = _current_qrule->n_points();
-  const MooseArray<ADReal> & _ad_JxW = _assembly.adJxW();
-  const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
-  ADReal _current_elem_volume = 0.0;
-  for (unsigned int qp = 0; qp < nqp; qp++)
-    _current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
-  if (_need_ad_u)
-  {
     _ad_u_average.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      _ad_u_average[qp] = _ad_zero;
-    }
-    auto value_temp = _ad_u[0];
-    value_temp = 0.0;
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
-    value_temp /= _current_elem_volume;
     for (unsigned int qp = 0; qp < nqp; qp++)
       _ad_u_average[qp] = value_temp;
   }
   if (_need_ad_grad_u)
   {
+    auto value_temp = _current_ad_JxW[0] * _ad_coord[0] * _ad_grad_u[0];
+    for (unsigned int qp = 1; qp < nqp; qp++)
+      value_temp += _current_ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+    value_temp /= _current_volume;
+
     _ad_grad_u_average.resize(nqp);
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      _ad_grad_u_average[qp] = _ad_zero;
-    }
-    auto value_temp = _ad_grad_u[0];
-    value_temp = 0.0;
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
-    value_temp /= _current_elem_volume;
     for (unsigned int qp = 0; qp < nqp; qp++)
       _ad_grad_u_average[qp] = value_temp;
   }
@@ -543,13 +498,7 @@ MooseVariableData<OutputType>::computeADElementAveraging()
 
 template <>
 void
-MooseVariableData<RealEigenVector>::computeADFaceAveraging()
-{
-  mooseError("AD for array variable has not been implemented");
-}
-template <>
-void
-MooseVariableData<RealEigenVector>::computeADElementAveraging()
+MooseVariableData<RealEigenVector>::computeADAveraging()
 {
   mooseError("AD for array variable has not been implemented");
 }
@@ -960,12 +909,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
   // Averaging FE values for FE -> FV coupling
   if (_need_averaging)
-  {
-    if (_face_averaging)
-      computeADFaceAveraging();
-    else
-      computeADElementAveraging();
-  }
+    computeADAveraging();
 }
 
 template <>

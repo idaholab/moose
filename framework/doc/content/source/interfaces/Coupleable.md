@@ -14,6 +14,7 @@ The following tables summarize the methods it provides.
 `coupledDotDotDu` | Derivative with regards to the variable of the second time derivative of a coupled variable at q-points
 `coupledGradientDot`§ | Time derivative of the gradient of a coupled variable at q-points
 `coupledGradientDotDot` | Second time derivative of the gradient of a coupled variable at q-points
+`adCoupledGradientFace` | Average gradient value of a coupled variable at a cell face while provided with automatic differentiation info
 
 ---
 
@@ -218,3 +219,8 @@ if so, will insert those variables into the aux solution vector. This obviates t
 
 !alert warning
 `Coupleable::writableVariable` can let users write to both FE / FV from AuxKernels and UserObjects but one must exercise caution about whether Nodal or Elemental type AuxKernels / UOs are used as the quadrature would depend on this choice and might lead to segfault if a FV variable values are set using `setDofValue` function for non-zero values of `_qp` .
+
+## Coupling FE variables into FV objects
+
+Scalar field FE variable types can be directly coupled into FV objects using the automatic differentiation coupling format, such as `adCoupledValue` and `adCoupledGradient`. When a scalar field FE variable is declared in a FV object, the element or face average value is provided depending on the FV object base type, such as `FVElementalKernel` or `FVFluxKernel`.
+
