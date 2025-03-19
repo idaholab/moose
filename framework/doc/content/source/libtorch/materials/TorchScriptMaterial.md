@@ -10,7 +10,7 @@ instructions on how to load the torch script material, we recommend visiting
 
 ## Example Input Syntax
 
-!listing test/tests/materials/torchscript_material.i block=Materials
+!listing test/tests/materials/torchscript_material/test.i block=Materials
 
 !syntax parameters /Materials/TorchScriptMaterial
 
