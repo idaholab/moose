@@ -2370,7 +2370,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     const auto & face_phys_points = fe_face->get_xyz();
     fe_face->attach_quadrature_rule(qrule_face);
 
-    qrule->init(elem->type(), elem->p_level());
+    qrule->init(*elem);
     volume_ref_points_coarse = qrule->get_points();
     fe_face->reinit(elem, (unsigned int)0);
     libMesh::FEMap::inverse_map(dim, elem, face_phys_points, face_ref_points_coarse);
@@ -2382,7 +2382,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     for (const auto p_level : p_levels)
     {
       mesh_refinement.uniformly_p_refine(1);
-      qrule->init(elem->type(), elem->p_level());
+      qrule->init(*elem);
       volume_ref_points_fine = qrule->get_points();
       fe_face->reinit(elem, (unsigned int)0);
       libMesh::FEMap::inverse_map(dim, elem, face_phys_points, face_ref_points_fine);
