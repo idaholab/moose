@@ -52,7 +52,7 @@ protected:
   const Elem * _my_elem;
 };
 
-const IPHDGAssemblyHelper &
+inline const IPHDGAssemblyHelper &
 IPHDGKernel::iphdgHelper() const
 {
   return const_cast<IPHDGKernel *>(this)->iphdgHelper();
