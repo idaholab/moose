@@ -4,8 +4,7 @@
     input = edge_crack_2d.i
     exodiff = 'edge_crack_2d_out.e'
     map = false
-    unique_id = true
-    superlu = true
+    capabilities = 'unique_id & superlu'
     requirement = 'The XFEM module shall have the capability to include '
                   'near-tip enrichment functions in 2D mechanics simulations.'
     design = 'LineSegmentCutUserObject.md '
@@ -17,16 +16,13 @@
     input = penny_crack_3d.i
     exodiff = 'penny_crack_3d_out.e'
     map = false
-    unique_id = true
+    capabilities = 'unique_id & superlu & method!=dbg'
     heavy = true
-    superlu = true
     max_time = 400 # Slow test
     requirement = 'The XFEM module shall have the capability to include '
                   'near-tip enrichment functions in 3D mechanics simulations.'
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
-
-    method = '!dbg' #Slow test
   [../]
 []

@@ -3,7 +3,7 @@
     type = CSVDiff
     input = subchannel.i
     csvdiff = subchannel_out.csv
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 1e-5
@@ -14,7 +14,7 @@
     type = CSVDiff
     input = THM_SCM_coupling_pump.i
     csvdiff = 'THM_SCM_coupling_pump_out.csv THM_SCM_coupling_pump_out_subchannel0.csv'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 1e-5
@@ -25,7 +25,7 @@
     type = CSVDiff
     input = THM_SCM_coupling.i
     csvdiff = 'THM_SCM_coupling_out.csv THM_SCM_coupling_out_subchannel0.csv'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 1e-5

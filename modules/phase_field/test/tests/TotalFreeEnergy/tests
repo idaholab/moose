@@ -12,7 +12,7 @@
     type = 'Exodiff'
     input = 'TotalFreeEnergy_2var_test.i'
     exodiff = 'TotalFreeEnergy_2var_test_out.e-s004'
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     rel_err = 1e-5
     requirement = 'We shall be able to calculate the free energy (with two variables) using an AuxKernel'
   [../]

@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 2d-rc-epsjump.i
     exodiff = rc-smooth-epsjump.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to model a smooth porosity gradient in a 2D channel.'
     cli_args = "Outputs/file_base='rc-smooth-epsjump' ICs/inactive='porosity_1 porosity_2' FunctorMaterials/inactive='jump smooth'"
   []
@@ -42,7 +42,7 @@
     type = 'Exodiff'
     input = 2d-rc-epsjump.i
     exodiff = rc-discontinuous-epsjump.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 2D channel.'
     recover = false
     max_parallel = 1

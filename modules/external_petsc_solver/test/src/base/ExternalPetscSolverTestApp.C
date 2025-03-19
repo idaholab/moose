@@ -45,7 +45,7 @@ ExternalPetscSolverTestApp::registerAll(Factory & f,
 void
 ExternalPetscSolverTestApp::registerApps()
 {
-  registerApp(ExternalPetscSolverApp);
+  ExternalPetscSolverApp::registerApps();
   registerApp(ExternalPetscSolverTestApp);
 }
 

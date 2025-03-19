@@ -206,6 +206,6 @@
     issues = '#28030'
     design = 'actions/PorousFlowFullySaturated.md actions/PorousFlowBasicTHM.md actions/PorousFlowUnsaturated.md'
     valgrind = 'heavy'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
   []
 []
