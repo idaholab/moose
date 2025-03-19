@@ -6,7 +6,7 @@
     input = 'XX09_SS_SHRT17.i'
     exodiff  = 'XX09_SS_SHRT17_out.e'
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
     recover = false

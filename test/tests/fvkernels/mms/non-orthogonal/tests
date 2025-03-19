@@ -6,10 +6,10 @@
     input = 'test.py'
     test_case = TestCompactADR
     requirement = 'The system shall display second order convergence, when using face side neighbors to compute face midpoint values during gradient reconstruction.'
-    method = '!dbg'
     min_parallel = 2
     required_python_packages = 'pandas matplotlib'
     heavy = true
+    capabilities = 'method!=dbg'
   []
   [extended]
     type = PythonUnitTest
@@ -17,10 +17,10 @@
     test_case = TestExtendedADR
     # I don't understand why we lose a half order of convergence when using this extended stencil, but if it changes in the future (for better or worse), I want to know why
     requirement = 'The system shall display 1.5 order convergence, when using face vertex neighbors to compute face midpoint values during gradient reconstruction.'
-    method = '!dbg'
     min_parallel = 2
     required_python_packages = 'pandas matplotlib'
     heavy = true
     skip = '#20953'
+    capabilities = 'method!=dbg'
   []
 []

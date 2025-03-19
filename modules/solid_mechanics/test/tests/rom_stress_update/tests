@@ -200,7 +200,7 @@
       input = 'AD3d.i'
       prereq = 'ADrom/3d'
       ratio_tol = 5e-7
-      method = 'opt'
+      capabilities = 'method=opt'
       cli_args = 'Executioner/num_steps=2'
       difference_tol = 1
       run_sim = True
@@ -219,7 +219,7 @@
     [2drz-jac]
       type = 'PetscJacobianTester'
       input = 'AD2drz.i'
-      method = 'opt'
+      capabilities = 'method=opt'
       prereq = 'ADrom/2drz'
       ratio_tol = 5e-7
       difference_tol = 1

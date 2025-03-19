@@ -17,7 +17,7 @@
     heavy = True
     recover = false
     valgrind = none
-    method = opt
+    capabilities = 'method=opt'
     required_python_packages = 'sympy os'
   []
 
@@ -39,7 +39,7 @@
     heavy = True
     recover = false
     valgrind = none
-    method = opt
+    capabilities = 'method=opt'
     required_python_packages = 'sympy os'
   []
 []

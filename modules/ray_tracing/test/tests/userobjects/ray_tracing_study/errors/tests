@@ -247,7 +247,7 @@
       expect_err = 'Element does not contain vertices in ElemExtrema'
       allow_test_objects = true
       # will hit assertions before the error outside of opt
-      method = opt
+      capabilities = 'method=opt'
       detail = 'building an element extrema edge for invalid vertices'
     []
     [get_elem_normals_unimplemented]

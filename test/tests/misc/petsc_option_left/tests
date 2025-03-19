@@ -37,6 +37,6 @@
     expect_out = "Option left:\s+name:-SNES_TYPE\s+value:\s+ksponly"
     requirement = "The system shall warn the user of unused petsc options that are not set programatically."
     issues = '#28053'
-    petsc_version = '>=3.19.2'
+    capabilities = 'petsc>=3.19.2'
   []
 []

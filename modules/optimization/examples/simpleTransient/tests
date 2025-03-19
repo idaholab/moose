@@ -10,7 +10,7 @@
       csvdiff = grad.csv
       rel_err = 1e-4
       heavy = true
-      method = OPT
+      capabilities = 'method=opt'
       detail = 'an adjoint solve,'
     []
     [auto_adjoint]
@@ -20,7 +20,7 @@
       csvdiff = grad.csv
       rel_err = 1e-4
       heavy = true
-      method = OPT
+      capabilities = 'method=opt'
       detail = 'an automatically computed adjoint solve, and '
     []
     [nonlinear]
@@ -30,7 +30,7 @@
       csvdiff = nonlinear_auto_adjoint_forward0.csv
       rel_err = 1e-4
       heavy = true
-      method = OPT
+      capabilities = 'method=opt'
       detail = 'nonlinear material properties.'
     []
   []
@@ -45,7 +45,7 @@
       cli_args = '--mesh-only'
       check_files = 'source_mesh_in.e'
       heavy = true
-      method = OPT
+      capabilities = 'method=opt'
       detail = 'creating a source mesh and '
     []
     [optimization]
@@ -55,7 +55,7 @@
       prereq = transient_mesh/source_mesh
       rel_err = 1e-4
       heavy = true
-      method = OPT
+      capabilities = 'method=opt'
       detail = 'performing the optimization.'
     []
   []

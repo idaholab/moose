@@ -6,7 +6,7 @@
     input = psbt.i
     exodiff = psbt_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 1e-5

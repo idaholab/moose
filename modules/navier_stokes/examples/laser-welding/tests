@@ -40,7 +40,7 @@
       valgrind = 'heavy'
       capabilities = 'strumpack'
       detail = 'in three dimensions, using a finite element discretization for all variables, and'
-      method = '!dbg'
+      capabilities = 'method!=dbg'
     []
     [2d-fv]
       input = 2d-fv.i
