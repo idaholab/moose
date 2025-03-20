@@ -54,13 +54,18 @@ private:
   /// Limiting maximum value for the rate of change of output of the PID controller
   const Real _maximum_change_rate;
   /// Integral of the error
-  Real _integral;
+  Real & _integral;
   /// Saved value of the integral at the beginning of a timestep, to recover from a failed solve
-  Real _integral_old;
+  Real & _integral_old;
+  /// Saved value of the controlled parameter at the end of a timestep. This is recomputed every time, but need to be restarted
+  /// for recover simulations
+  Real & _value;
   /// Saved value of the controlled parameter at the beginning of a timestep, to recover from a failed solve
-  Real _value_old;
+  Real & _value_old;
   /// the previous time step
-  int _t_step_old;
-  /// the previous value of the difference with the target, to detect changes of sign
-  Real _old_delta;
+  int & _t_step_old;
+  /// the previous value of the difference with the target, to detect changes of sign, and to compute the derivative term
+  Real & _old_delta;
+  /// whether the app has recovered once, because the logic for setting the value is different after having just recovered
+  bool _has_recovered;
 };

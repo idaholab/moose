@@ -78,11 +78,13 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
     _maximum_output_value(getParam<Real>("maximum_output_value")),
     _minimum_output_value(getParam<Real>("minimum_output_value")),
     _maximum_change_rate(getParam<Real>("maximum_change_rate")),
-    _integral(0),
-    _integral_old(0),
-    _value_old(0),
-    _t_step_old(-1),
-    _old_delta(0)
+    _integral(declareRestartableData<Real>("pid_integral", 0)),
+    _integral_old(declareRestartableData<Real>("pid_integral_old", 0)),
+    _value(declareRestartableData<Real>("pid_value", 0)),
+    _value_old(declareRestartableData<Real>("pid_value_old", 0)),
+    _t_step_old(declareRestartableData<int>("pid_tstep_old", -1)),
+    _old_delta(declareRestartableData<Real>("pid_delta_old", 0)),
+    _has_recovered(false)
 {
   if (!_fe_problem.isTransient())
     mooseError("PIDTransientControl is only meant to be used when the problem is transient, for "
@@ -109,14 +111,30 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
 void
 PIDTransientControl::execute()
 {
+  // Dont execute on INITIAL again on a recover.
+  // Executing on INITIAL in a regular simulation is fine, but on a recover we will get the integral
+  // term wrong and set the wrong attributes for the time derivative too. Best to skip
+  if (_app.isRecovering() && _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
+  {
+    mooseInfo("Skipping execution on recover + INITIAL.");
+    return;
+  }
+
   if (_t >= _start_time && _t < _stop_time)
   {
     // Get the current value of the controllable parameter
-    Real value;
     if (isParamValid("parameter"))
-      value = getControllableValue<Real>("parameter");
+    {
+      // If just recovering, we must use the restartable value as the parameter value is
+      // not restarted
+      if (_app.isRecovering() && !_has_recovered)
+        _has_recovered = true;
+      // else get the current value of the parameter
+      else
+        _value = getControllableValue<Real>("parameter");
+    }
     else
-      value = getPostprocessorValueByName(getParam<std::string>("parameter_pp"));
+      _value = getPostprocessorValueByName(getParam<std::string>("parameter_pp"));
 
     // Save integral and controlled value at each time step
     // if the solver fails, a smaller time step will be used but _t_step is unchanged
@@ -127,9 +145,8 @@ PIDTransientControl::execute()
         _integral = 0;
 
       _integral_old = _integral;
-      _value_old = value;
+      _value_old = _value;
       _t_step_old = _t_step;
-      _old_delta = 0;
     }
 
     // If there were coupling/Picard iterations during the transient and they failed,
@@ -138,7 +155,11 @@ PIDTransientControl::execute()
     if (_app.getExecutioner()->fixedPointSolve().numFixedPointIts() == 1)
     {
       _integral = _integral_old;
-      value = _value_old;
+      _value = _value_old;
+
+      // Note we do not restore _old_delta because we dont have a way to keep track of it at the
+      // moment. And we really need to, it comes in the time derivative term. In the future, we will
+      // reset restartableData on new fixed point iterations.
     }
 
     // Compute the delta between the current value of the postprocessor and the desired value
@@ -150,26 +171,26 @@ PIDTransientControl::execute()
 
     // Compute the three error terms and add them to the controlled value
     _integral += delta * _dt;
-    value += _Kint * _integral + _Kpro * delta;
+    _value += _Kint * _integral + _Kpro * delta;
     if (_dt > 0)
-      value += _Kder * delta / _dt;
+      _value += _Kder * (delta - _old_delta) / _dt;
 
-    // If the maxmimum rate of change by the pid is fixed
+    // If the maximum rate of change by the pid is fixed
     if (_maximum_change_rate != std::numeric_limits<Real>::max())
-    {
-      value = std::min(std::max(_value_old - _dt * _maximum_change_rate, value),
-                       _value_old + _dt * _maximum_change_rate);
-    }
-    else
-      value = std::min(std::max(_minimum_output_value, value), _maximum_output_value);
+      _value = std::min(std::max(_value_old - _dt * _maximum_change_rate, _value),
+                        _value_old + _dt * _maximum_change_rate);
+
+    // Compute the value, within the bounds
+    _value = std::min(std::max(_minimum_output_value, _value), _maximum_output_value);
 
     // Set the new value of the postprocessor
     if (isParamValid("parameter"))
-      setControllableValue<Real>("parameter", value);
+      setControllableValue<Real>("parameter", _value);
     else
-      _fe_problem.setPostprocessorValueByName(getParam<std::string>("parameter_pp"), value);
+      _fe_problem.setPostprocessorValueByName(getParam<std::string>("parameter_pp"), _value);
 
     // Keep track of the previous delta for integral windup control
+    // and for time derivative calculation
     _old_delta = delta;
   }
 }
