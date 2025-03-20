@@ -223,8 +223,6 @@
     youngs_modulus = 30e6
     poissons_ratio = 0.3
     block = 1
-    outputs = exodus
-    output_properties = 'material_stiffness material_flexure'
   [../]
   [./strain_pipe]
     type = ComputeIncrementalBeamStrain
@@ -241,7 +239,7 @@
   [./stress_pipe]
     type = ComputeBeamResultants
     block = 1
-    outputs = exodus
+    outputs = csv
     output_properties = 'forces moments'
   [../]
   [./elasticity_cons]
@@ -250,8 +248,6 @@
     youngs_modulus = 10e2
     poissons_ratio = 0.3
     block = 2
-    outputs = exodus
-    output_properties = 'material_stiffness material_flexure'
   [../]
   [./strain_cons]
     type = ComputeIncrementalBeamStrain
@@ -268,7 +264,7 @@
   [./stress_cons]
     type = ComputeBeamResultants
     block = 2
-    outputs = exodus
+    outputs = csv
     output_properties = 'forces moments'
   [../]
 []
@@ -293,5 +289,4 @@
 
 [Outputs]
   csv = true
-  exodus = true
 []
