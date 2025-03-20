@@ -18,15 +18,14 @@ with MOOSE many of the modes will work, the best two are METHOD=dbg or
 METHOD=devel. Make sure your job is running.
 
 GENERATE TRACES STAGE
-This script will run first run qstat -n <job number> to figure out which
-nodes your job is running on. If you need to modify that command for your
-cluster, you'll find it in "generate traces". Note: This script is currently
-only designed to work with PBS, but could be easily adapted to other queuing
-systems.
+This script will run first run qstat -n <job number> or squeue -j <job number>
+to figure out which nodes your job is running on. If you need to modify that
+command for your cluster, you'll find it in "generate traces". Note: This
+script is currently only designed to work with PBS or Slurm, but could be easily
+adapted to other queuing systems.
 
-Next, we use a RegEx to parse through the output of qstat to find the nodes
-where your job is running. Check the patterns below and make sure they work
-for your cluster (i.e. node_name_pattern).
+Next, we use a RegEx to parse through the output of qstat or squeue to find
+the nodes where your job is running.
 
 Once the script has all the node names down, it'll assemble a bunch of
 complex ssh commands to login and pull back the traces based on PID. It
@@ -34,7 +33,8 @@ figures out the PIDs by grepping `ps -ef` for your application name so
 make sure you know how your application appears on one of the running
 nodes.
 
-Finally, double check the stack binary "PSTACK_BINARY" for your cluster.
+Finally, double check the job scheduler "SCHEDULER" stack binary "PSTACK_BINARY"
+for your cluster.
 
 If all of this works, the script will use several threads to get stack
 traces from all of your ranks and dump them to a local cache file. It's
@@ -79,14 +79,7 @@ import threading # for thread locking and thread timers
 
 ##################################################################
 # Modify the following variable(s) for your cluster or use one of the versions below
-### FISSION
-# node_name_pattern = re.compile('(fission-\d{4})')
-# pstack_binary = 'pstack'
-### BECHLER
-# node_name_pattern = re.compile('(b\d{2})')
-# pstack_binary = 'pstack'
-### FALCON
-node_name_pattern = re.compile(r'(r\di\dn\d{1,2})')
+SCHEDULER = 'PBS' # PBS or Slurm
 PSTACK_BINARY = 'gstack'
 ##################################################################
 
@@ -248,13 +241,13 @@ def get_sshpids(application_name, host):
     """
     ps_grep = f'ps -e | grep {application_name}'
     awk_print = r"awk '{print \$1}'"
-    return f'ssh {host} "echo {host}; {ps_grep} | {awk_print}"'
+    return f'ssh -o StrictHostKeyChecking=no {host} "echo {host}; {ps_grep} | {awk_print}"'
 
 def get_sshstack(host, pid):
     """
     Generate and return a valid SSH remote stacktrace command
     """
-    return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
+    return f'ssh -o StrictHostKeyChecking=no {host} "echo Host: {host} PID: {pid}; ' \
            f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
 
 def generate_traces(job_num, application_name, num_hosts, num_threads):
@@ -263,14 +256,19 @@ def generate_traces(job_num, application_name, num_hosts, num_threads):
     formated results
     """
     hosts = set([])
-    a_job = Job(f'qstat -n {job_num}')
+    if SCHEDULER == "PBS":
+        a_job = Job(f'qstat -n {job_num} | grep -oP \'[^+\s]+(?=/)\'')
+    elif SCHEDULER == "Slurm":
+        a_job = Job(f'scontrol show hostname $(squeue -j {job_num} -h -o %R)')
+    else:
+        raise Exception(f"Unknown scheduler type: {SCHEDULER}")
     a_job.run()
-    results = a_job.get_stdout()
-    for i in node_name_pattern.findall(results):
-        hosts.add(i)
+    hosts = a_job.get_stdout().splitlines()
     if num_hosts:
         # convert back into set
         hosts = set(list(hosts)[:num_hosts])
+
+    print("Searching hosts: " + ", ".join(hosts))
 
     # Use a Scheduler to get hosts and PIDs
     hosts_pids = __get_pids(application_name, hosts, num_threads)
@@ -489,11 +487,11 @@ def main():
     """
     Parse arguments, gather hosts and launch SSH commands
     """
-    parser = argparse.ArgumentParser(description="Normally you will run this script with your PBS job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
+    parser = argparse.ArgumentParser(description="Normally you will run this script with your PBS or Slurm job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
                                      "\nHowever, you can also pass in the name of the cache file containing traces from a previous run to process (e.g. find_hung_processes.py -f my_app-opt.1234.cache).")
 
     if '-f' not in sys.argv and '--file' not in sys.argv:
-        parser.add_argument('pbs_job_num', type=int)
+        parser.add_argument('job_num', type=int)
         parser.add_argument('application', type=str)
 
     parser.add_argument('-n', '--hosts', metavar='int', action='store', type=int, default=0,
@@ -515,9 +513,9 @@ def main():
     cache_filename = None
     if args.file == None:
         # Autogenerate a filename based on application name and job number
-        cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
+        cache_filename = f'{args.application}.{args.job_num}.cache'
 
-        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads)
+        traces = generate_traces(args.job_num, args.application, args.hosts, args.threads)
 
         # Cache the restuls to a file
         with open(cache_filename, 'w', encoding='utf-8') as cache_file:
