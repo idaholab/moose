@@ -282,9 +282,10 @@ CSV::getVectorPostprocessorFilePrefix(const std::string & vpp_name)
 }
 
 bool
-CSV::supportsMaterialPropertyOutput() const
+CSV::supportsMaterialPropertyOutput(bool suppress_warnings) const
 {
-  mooseInfo("By default, outputting material property to CSV output objects does not write any "
-            "data to the output file");
+  if (!suppress_warnings)
+    mooseInfo("By default, outputting material property to CSV output objects does not write any "
+              "data to the output file");
   return true;
 }

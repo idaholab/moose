@@ -25,7 +25,7 @@ public:
    */
   Tecplot(const InputParameters & parameters);
 
-  bool supportsMaterialPropertyOutput() const override { return true; }
+  bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const override { return true; }
 
 protected:
   /**
