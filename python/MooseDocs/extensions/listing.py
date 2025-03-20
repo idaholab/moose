@@ -9,8 +9,9 @@
 import pyhit
 import moosetree
 import difflib
-import moosesyntax
+from moosesyntax import SyntaxNode, ObjectNodeBase
 import json
+from typing import Union
 
 from .. import common
 from ..common import exceptions
@@ -155,7 +156,9 @@ class LocalListingCommand(command.CommandComponent):
         for node in moosetree.iterate(root):
             # Add reference to moose syntax
             fullpath = '/'.join([n.name for n in node.path])
-            moose_node = syntax_ext.find(fullpath, node_type=moosesyntax.SyntaxNode, throw_on_missing=False)
+            moose_node = syntax_ext.find(
+                fullpath, node_type=SyntaxNode, throw_on_missing=False
+            )
             if moose_node:
                 l = node.line() - 1
                 line = content_lines[l]
@@ -169,21 +172,25 @@ class LocalListingCommand(command.CommandComponent):
                 val = node.get('type', None)
                 if val:
                     fullpath = f'{parent_path}/{val}'
-                    moose_node = syntax_ext.find(fullpath, node_type=moosesyntax.ObjectNodeBase, throw_on_missing=False)
+                    moose_node = syntax_ext.find(
+                        fullpath, node_type=ObjectNodeBase, throw_on_missing=False
+                    )
                     if moose_node:
                         pl = node.line(name='type') - 1
                         content_lines[pl] += self._stringifySyntaxData(moose_node, page)
                 # If it isn't a object, let's try to find the action
                 else:
                     fullpath = parent_path
-                    moose_node = syntax_ext.find(fullpath, node_type=moosesyntax.SyntaxNode, throw_on_missing=False)
+                    moose_node = syntax_ext.find(
+                        fullpath, node_type=SyntaxNode, throw_on_missing=False
+                    )
 
             # Can't do anything more if there is no moose node
             if moose_node is None:
                 continue
 
             # Get all parameters associated with the syntax
-            if isinstance(moose_node, moosesyntax.SyntaxNode):
+            if isinstance(moose_node, SyntaxNode):
                 parameters = [param for action in moose_node.actions() for param in action.parameters.values()]
             elif moose_node.parameters:
                 parameters = list(moose_node.parameters.values())
@@ -210,7 +217,11 @@ class LocalListingCommand(command.CommandComponent):
 
         return '\n'.join(content_lines)
 
-    def _stringifySyntaxData(self, node: moosesyntax.SyntaxNode | moosesyntax.ObjectNodeBase, page: pages.Page) -> str:
+    def _stringifySyntaxData(
+        self,
+        node: Union[SyntaxNode, ObjectNodeBase],
+        page: pages.Page,
+    ) -> str:
         # Just in case
         if node is None:
             return ''
