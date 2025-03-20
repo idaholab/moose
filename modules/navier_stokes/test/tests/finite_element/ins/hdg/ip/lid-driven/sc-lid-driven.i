@@ -14,7 +14,7 @@ n = 8
     ymax = ${l}
     nx = ${n}
     ny = ${n}
-    elem_type = QUAD9
+    elem_type = TRI6
   []
 []
 
@@ -223,6 +223,10 @@ n = 8
 [Outputs]
   [out]
     type = Exodus
+    hide = 'lambda pressure_integral symmetric'
+  []
+  [csv]
+    type = CSV
     hide = 'lambda pressure_integral'
   []
 []

@@ -5,19 +5,24 @@
       type = Exodiff
       input = lid-driven.i
       exodiff = lid-driven_out.e
-      installation_type = 'in_tree' # uses JIT
       detail = 'the system is uncondensed, and when'
     []
     [condensed]
       type = Exodiff
       input = sc-lid-driven.i
-      cli_args = 'Outputs/file_base=lid-driven_out'
+      cli_args = "Outputs/file_base=lid-driven_out"
       exodiff = lid-driven_out.e
       prereq = 'lid-driven/uncondensed'
-      installation_type = 'in_tree' # uses JIT
       detail = 'the system is condensed.'
       max_threads = 1
     []
+  []
+  [condensed_symmetric]
+    requirement = "The condensed matrix shall be symmetric, although I don't understand why. Where did the advection go?"
+    type = CSVDiff
+    input = 'sc-lid-driven.i'
+    csvdiff = 'sc-lid-driven_csv.csv'
+    max_threads = 1
   []
   [lid-mms]
     type = PythonUnitTest
@@ -27,7 +32,7 @@
     min_parallel = 4
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    installation_type = 'in_tree'
     method = '!dbg'
     valgrind = 'none'
   []
@@ -39,16 +44,15 @@
     min_parallel = 4
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
     method = '!dbg'
     valgrind = 'none'
+    installation_type = 'in_tree'
   []
   [stokes_symmetric]
     type = CSVDiff
     input = stokes-lid-driven.i
     csvdiff = stokes-lid-driven_out.csv
     requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization of Stokes flow shall be symmetric.'
-    installation_type = 'in_tree' # uses JIT
   []
   [matrix_testing]
     requirement = 'The system shall show that for an interior penalty based hybridizable discontinuous Galerkin method, 1) a grad-div finite element weak form is equivalent to the matrix product B_up M_p^-1 B_pu, where u denotes volumetric velocity degrees of freedom and p denotes volumetric pressure degrees of freedom, 2) a jump finite element weak form is equivalent to the matrix product B_upb M_pb^-1 B_pbu where pb denotes pressure degrees of freedom on the facets, 3) the matrix product B_pu M_u^-1 B_up is nonsingular, and 4) the matrix product B_pbu M_u^-1 B_upb is nonsingular for'
@@ -56,7 +60,6 @@
       type = CSVDiff
       input = matrix-testing.i
       csvdiff = matrix-testing_out.csv
-      installation_type = 'in_tree' # uses JIT
       max_parallel = 1 # No MatLUFactor support for mpidense
       method = "!dbg"
       valgrind = 'none'
@@ -67,7 +70,6 @@
       input = matrix-testing.i
       cli_args = 'Outputs/file_base=second-order-matrix-testing Variables/vel_x/order=SECOND Variables/vel_y/order=SECOND Variables/pressure/order=FIRST Variables/vel_bar_x/order=SECOND Variables/vel_bar_y/order=SECOND Variables/pressure_bar/order=SECOND'
       csvdiff = second-order-matrix-testing.csv
-      installation_type = 'in_tree' # uses JIT
       max_parallel = 1 # No MatLUFactor support for mpidense
       method = "!dbg"
       valgrind = 'none'
@@ -83,5 +85,6 @@
     expect_out = 'iterations 2'
     abs_zero = 1e-8
     cli_args = "n=16 Outputs/active='out'"
+    valgrind = 'none'
   []
 []
