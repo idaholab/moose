@@ -219,12 +219,18 @@ TransientBase::TransientBase(const InputParameters & parameters)
   {
     if (_problem.shouldSolve())
     {
-      // num_steps set; set to the midpoint of all timesteps
-      if (_num_steps != std::numeric_limits<unsigned int>::max())
-        _test_restep_step = _t_step + (_num_steps + 1) / 2;
-      // num_steps not set; use the first timestep
-      else
-        _test_restep_step = _t_step + 1;
+      // Try to infer the number of steps from end_time, start_time, and dt
+      unsigned int num_steps_guess =
+          !parameters.isParamSetByAddParam("dt")
+              ? std::ceil((_end_time - _start_time) / getParam<Real>("dt"))
+              : std::numeric_limits<unsigned int>::max();
+      // Now get the smaller of this one versus the one that might be explicitly set
+      num_steps_guess = std::min(_num_steps, num_steps_guess);
+      // If the number of steps still doesn't make any sense, set it to 1
+      if (num_steps_guess == 0 || num_steps_guess == std::numeric_limits<unsigned int>::max())
+        num_steps_guess = 1;
+      // Set this to the midpoint
+      _test_restep_step = _t_step + (num_steps_guess + 1) / 2;
       mooseInfo(
           "Timestep ", *_test_restep_step, " will be forcefully retried due to --test-restep");
     }
