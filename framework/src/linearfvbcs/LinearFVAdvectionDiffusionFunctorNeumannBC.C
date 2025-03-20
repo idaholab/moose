@@ -1,0 +1,72 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "LinearFVAdvectionDiffusionFunctorNeumannBC.h"
+
+registerMooseObject("MooseApp", LinearFVAdvectionDiffusionFunctorNeumannBC);
+
+InputParameters
+LinearFVAdvectionDiffusionFunctorNeumannBC::validParams()
+{
+  InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
+  params.addClassDescription(
+      "Adds a fixed gradient BC which can be used for the assembly of linear "
+      "finite volume system and whose normal face gradient values are determined "
+      "using a functor. This kernel is only designed to work with advection-diffusion problems.");
+  params.addRequiredParam<MooseFunctorName>("functor", "The gradient value functor for this boundary condition.");
+  return params;
+}
+
+LinearFVAdvectionDiffusionFunctorNeumannBC::LinearFVAdvectionDiffusionFunctorNeumannBC(
+    const InputParameters & parameters)
+  : LinearFVAdvectionDiffusionBC(parameters), _functor(getFunctor<Real>("functor"))
+{
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
+{
+  const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                        ? _current_face_info->elemPtr()
+                                        : _current_face_info->neighborPtr());
+  const Real distance = computeCellToFaceDistance();
+  return raw_value(_var(elem_arg, determineState())) +
+        _functor(singleSidedFaceArg(_current_face_info), determineState()) * distance;
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() const
+{
+  return _functor(singleSidedFaceArg(_current_face_info), determineState());
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueMatrixContribution() const
+{
+  return 1.0;
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueRHSContribution() const
+{
+  // Fetch the boundary value from the provided functor.
+  return -_functor(singleSidedFaceArg(_current_face_info), determineState()) * computeCellToFaceDistance();
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryGradientMatrixContribution() const
+{
+  return 0.0;
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryGradientRHSContribution() const
+{
+  return _functor(singleSidedFaceArg(_current_face_info), determineState());
+}
