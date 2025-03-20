@@ -19,4 +19,12 @@
     requirement = "The system shall support the ability to compute Sobol sensitivity indices for vector-type data."
     method = 'opt'
   []
+  [sobol_no_resample]
+    type = JSONDiff
+    input = sobol_no_resample.i
+    jsondiff = sobol_no_resample_out.json
+    allow_test_objects = true
+
+    requirement = "The system shall support the ability to compute only first and total-effect Sobol sensitivity indices when resampling is not requested."
+  []
 []

@@ -1,0 +1,39 @@
+[Tests]
+  [workshop]
+    [diffusion]
+      type = RunApp
+      input = diffusion.i
+    []
+    [step1]
+      type = RunApp
+      input = step01.i
+      cli_args = 'Samplers/hypercube/num_rows=10'
+    []
+    [step2]
+      type = RunApp
+      input = step02.i
+      cli_args = 'Samplers/hypercube/num_rows=10'
+    []
+    [step3]
+      type = RunApp
+      input = step03.i
+      cli_args = 'Samplers/hypercube/num_rows=10'
+    []
+    [step4]
+      type = RunApp
+      input = step04.i
+      cli_args = 'Samplers/hypercube/num_rows=10 Samplers/resample/num_rows=10'
+    []
+    [step5]
+      type = RunApp
+      input = step05.i
+      cli_args = 'ParameterStudy/num_samples=10'
+    []
+    [step6]
+      type = RunApp
+      input = step06.i
+      cli_args = 'Trainers/poly_reg_T_avg/max_degree=1'
+      prereq = workshop/step2
+    []
+  []
+[]
