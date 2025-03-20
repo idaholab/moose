@@ -7,19 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LayeredSideAverageFunctor.h"
+#include "LayeredAverageFunctor.h"
 
-registerMooseObject("MooseApp", LayeredSideAverageFunctor);
+registerMooseObject("MooseApp", LayeredAverageFunctor);
 
 InputParameters
-LayeredSideAverageFunctor::validParams()
+LayeredAverageFunctor::validParams()
 {
-  InputParameters params = LayeredSideAverageBase<SideIntegralFunctorUserObject>::validParams();
+  InputParameters params =
+      LayeredVolumeAverageBase<ElementIntegralFunctorUserObject>::validParams();
   params.addClassDescription("Computes layered side averages of a functor.");
   return params;
 }
 
-LayeredSideAverageFunctor::LayeredSideAverageFunctor(const InputParameters & parameters)
-  : LayeredSideAverageBase<SideIntegralFunctorUserObject>(parameters)
+LayeredAverageFunctor::LayeredAverageFunctor(const InputParameters & parameters)
+  : LayeredVolumeAverageBase<ElementIntegralFunctorUserObject>(parameters)
 {
 }

@@ -267,6 +267,7 @@ share/
 # Ignore vscode stuff
 .vscode/*
 *.code-workspace
+.cache
 
 # clangd
 .cache

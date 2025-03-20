@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "LayeredSideIntegralBase.h"
+#include "LayeredIntegralBase.h"
 #include "SideIntegralFunctorUserObject.h"
 
 /**
  * Computes layered side integrals of a functor.
  */
-class LayeredSideIntegralFunctor : public LayeredSideIntegralBase<SideIntegralFunctorUserObject>
+class LayeredSideIntegralFunctor : public LayeredIntegralBase<SideIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();

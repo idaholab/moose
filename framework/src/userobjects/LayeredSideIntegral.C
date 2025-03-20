@@ -14,13 +14,13 @@ registerMooseObject("MooseApp", LayeredSideIntegral);
 InputParameters
 LayeredSideIntegral::validParams()
 {
-  InputParameters params = LayeredSideIntegralBase<SideIntegralVariableUserObject>::validParams();
+  InputParameters params = LayeredIntegralBase<SideIntegralVariableUserObject>::validParams();
   params.addClassDescription("Computes surface integral of a variable storing partial sums for the "
                              "specified number of intervals in a direction (x,y,z).");
   return params;
 }
 
 LayeredSideIntegral::LayeredSideIntegral(const InputParameters & parameters)
-  : LayeredSideIntegralBase<SideIntegralVariableUserObject>(parameters)
+  : LayeredIntegralBase<SideIntegralVariableUserObject>(parameters)
 {
 }
