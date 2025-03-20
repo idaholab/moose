@@ -13,49 +13,52 @@
     type = SamplerFullSolveMultiApp
     sampler = dummy
     input_files = 'libtorch_drl_control_sub.i'
+    # mode = batch-reset
   []
 []
 
 [Transfers]
   [nn_transfer]
-    type = LibtorchNeuralNetControlTransfer
+    type = SamplerNeuralNetControlTransfer
     to_multi_app = runner
     trainer_name = nn_trainer
     control_name = src_control
+    sampler = dummy
   []
   [r_transfer]
-    type = MultiAppReporterTransfer
+    type = SamplerReporterTransfer
     from_multi_app = runner
-    to_reporters = 'results/center_temp results/env_temp results/reward results/top_flux results/log_prob_top_flux'
-    from_reporters = 'T_reporter/center_temp_tend:value T_reporter/env_temp:value T_reporter/reward:value T_reporter/top_flux:value T_reporter/log_prob_top_flux:value'
+    sampler = dummy
+    stochastic_reporter = storage
+    from_reporter = 'T_reporter/center_temp_tend:value T_reporter/reward:value T_reporter/top_flux:value T_reporter/log_prob_top_flux:value'
   []
 []
 
 [Trainers]
   [nn_trainer]
     type = LibtorchDRLControlTrainer
-    response = 'results/center_temp results/env_temp'
-    control = 'results/top_flux'
-    log_probability = 'results/log_prob_top_flux'
-    reward = 'results/reward'
+    response = 'storage/r_transfer:T_reporter:center_temp_tend:value'
+    control = 'storage/r_transfer:T_reporter:top_flux:value'
+    log_probability = 'storage/r_transfer:T_reporter:log_prob_top_flux:value'
+    reward = 'storage/r_transfer:T_reporter:reward:value'
 
-    num_epochs = 1000
-    update_frequency = 10
-    decay_factor = 0.0
+    num_epochs = 120
+    update_frequency = 2
+    decay_factor = 0.8
 
     loss_print_frequency = 10
 
-    critic_learning_rate = 0.0001
-    num_critic_neurons_per_layer = '64 27'
+    critic_learning_rate = 0.005
+    num_critic_neurons_per_layer = '32 16'
 
-    control_learning_rate = 0.0005
-    num_control_neurons_per_layer = '16 6'
+    control_learning_rate = 0.005
+    num_control_neurons_per_layer = '32 16'
 
     # keep consistent with LibtorchNeuralNetControl
-    input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '290 290'
-    action_standard_deviations = '0.02'
+    input_timesteps = 1
+    response_scaling_factors = '0.03'
+    response_shift_factors = '290'
+    action_standard_deviations = '3e-2'
 
     standardize_advantage = true
 
@@ -64,12 +67,9 @@
 []
 
 [Reporters]
-  [results]
-    type = ConstantReporter
-    real_vector_names = 'center_temp env_temp reward top_flux log_prob_top_flux'
-    real_vector_values = '0; 0; 0; 0; 0'
-    outputs = csv
-    execute_on = timestep_begin
+  [storage]
+    type = StochasticReporter
+    parallel_type = ROOT
   []
   [reward]
     type = DRLRewardReporter
@@ -79,11 +79,13 @@
 
 [Executioner]
   type = Transient
-  num_steps = 440
+  num_steps = 4
 []
 
 [Outputs]
   file_base = output/train_out
+  # json = true
   csv = true
-  time_step_interval = 10
+  time_step_interval = 1
+  execute_on = TIMESTEP_END
 []

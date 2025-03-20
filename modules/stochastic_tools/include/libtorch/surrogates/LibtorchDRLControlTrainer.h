@@ -12,7 +12,7 @@
 #pragma once
 
 #include <torch/torch.h>
-#include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchActorNeuralNet.h"
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
@@ -40,6 +40,10 @@ public:
    * at the end of every episode.
    */
   Real averageEpisodeReward() { return _average_episode_reward; }
+  Real stdEpisodeReward() { return _std_episode_reward; }
+
+  std::vector<Real> sampleAverageEpsiodeRewards() { return _sample_average_episode_reward; }
+  std::vector<Real> sampleStdEpsiodeRewards() { return _sample_std_episode_reward; }
 
   /// The condensed training function
   void trainController();
@@ -48,7 +52,17 @@ public:
 
 protected:
   /// Compute the average eposiodic reward
-  void computeAverageEpisodeReward();
+  void computeEpisodeRewardStatistics();
+
+  /**
+   * Function to convert input/output data from std::vector<std::vector> to torch::tensor
+   * @param vector_data The input data in vector-vectors format
+   * @param tensor_data The tensor where we would like to save the results
+   * @param detach If the gradient info needs to be detached from the tensor
+   */
+  void convertDataToTensor(std::vector<std::vector<std::vector<Real>>> & vector_data,
+                           torch::Tensor & tensor_data,
+                           const bool detach = false);
 
   /**
    * Function to convert input/output data from std::vector<std::vector> to torch::tensor
@@ -57,8 +71,8 @@ protected:
    * @param detach If the gradient info needs to be detached from the tensor
    */
   void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
-                           torch::Tensor & tensor_data,
-                           const bool detach = false);
+    torch::Tensor & tensor_data,
+    const bool detach = false);
 
   /**
    * Function which evaluates the critic to get the value (discounter reward)
@@ -77,40 +91,46 @@ protected:
   torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);
 
   /// Compute the return value by discounting the rewards and summing them
-  void computeRewardToGo();
+  void computeReturn(std::vector<std::vector<Real>> & data,
+                         const std::vector<std::vector<Real>> & reward,
+                        const Real decay_factor);
 
   /// Reset data after updating the neural network
   void resetData();
 
   /// Response reporter names
-  const std::vector<ReporterName> _response_names;
+  const std::vector<ReporterName> _state_names;
 
   /// Pointers to the current values of the responses
-  std::vector<const std::vector<Real> *> _response_value_pointers;
+  /// We can have multiple responses, multiple samples, multiple timesteps
+  std::vector<const std::vector<std::vector<Real>> *> _state_value_pointers;
 
   /// Shifting constants for the responses
-  const std::vector<Real> _response_shift_factors;
+  const std::vector<Real> _state_shift_factors;
 
   /// Scaling constants for the responses
-  const std::vector<Real> _response_scaling_factors;
+  const std::vector<Real> _state_scaling_factors;
 
   /// Control reporter names
-  const std::vector<ReporterName> _control_names;
+  const std::vector<ReporterName> _action_names;
 
   /// Pointers to the current values of the control signals
-  std::vector<const std::vector<Real> *> _control_value_pointers;
+  /// We can have multiple control signals, multiple samples, multiple timesteps
+  std::vector<const std::vector<std::vector<Real>> *> _action_value_pointers;
 
   /// Log probability reporter names
   const std::vector<ReporterName> _log_probability_names;
 
   /// Pointers to the current values of the control log probabilities
-  std::vector<const std::vector<Real> *> _log_probability_value_pointers;
+  /// We can have multiple control signals, multiple samples, multiple timesteps
+  std::vector<const std::vector<std::vector<Real>> *> _log_probability_value_pointers;
 
   /// Reward reporter name
   const ReporterName _reward_name;
 
   /// Pointer to the current values of the reward
-  const std::vector<Real> * _reward_value_pointer;
+  /// We can have multiple samples, multiple timesteps
+  const std::vector<std::vector<Real>> * _reward_value_pointer;
 
   /// Number of timesteps to fetch from the reporters to be the input of then eural nets
   const unsigned int _input_timesteps;
@@ -121,16 +141,18 @@ protected:
   unsigned int _num_outputs;
 
   ///@{
-  /// The gathered data from the reporters, each row represents one QoI, each column represents one time step
-  std::vector<std::vector<Real>> _input_data;
-  std::vector<std::vector<Real>> _output_data;
-  std::vector<std::vector<Real>> _log_probability_data;
+  std::vector<std::vector<std::vector<Real>>> _state_data;
+  std::vector<std::vector<std::vector<Real>>> _next_state_data;
+  std::vector<std::vector<std::vector<Real>>> _action_data;
+  std::vector<std::vector<std::vector<Real>>> _log_probability_data;
   ///@}
 
   ///@{
   /// The reward and return data. The return is calculated using the _reward_data
-  std::vector<Real> _reward_data;
-  std::vector<Real> _return_data;
+  std::vector<std::vector<Real>> _reward_data;
+  std::vector<std::vector<Real>> _return_data;
+  std::vector<std::vector<Real>> _delta_data;
+  std::vector<std::vector<Real>> _gae_data;
   ///@}
 
   /// Number of epochs for the training of the emulator
@@ -156,6 +178,7 @@ protected:
 
   /// Decaying factor that is used when calculating the return from the reward
   const Real _decay_factor;
+  const Real _lambda_factor;
 
   /// Standard deviation for the actions
   const std::vector<Real> _action_std;
@@ -176,6 +199,11 @@ protected:
 
   /// Storage for the current average episode reward
   Real _average_episode_reward;
+  Real _std_episode_reward;
+
+  std::vector<Real> _sample_average_episode_reward;
+  std::vector<Real> _sample_std_episode_reward;
+  std::vector<unsigned int> _sample_lengths;
 
   /// Switch to enable the standardization of the advantages
   const bool _standardize_advantage;
@@ -183,19 +211,29 @@ protected:
   /// The frequency the loss should be printed
   const unsigned int _loss_print_frequency;
 
+  /// min
+  std::vector<Real> _min_values;
+  /// max
+  std::vector<Real> _max_values;
+
   /// Pointer to the control (or actor) neural net object
-  std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _control_nn;
+  std::shared_ptr<Moose::LibtorchActorNeuralNet> _control_nn;
   /// Pointer to the critic neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _critic_nn;
 
-  /// standard deviation in a tensor format for sampling the actual control value
-  torch::Tensor _std;
-
   /// Torch::tensor version of the input and action data
-  torch::Tensor _input_tensor;
-  torch::Tensor _output_tensor;
+  torch::Tensor _state_tensor;
+  torch::Tensor _next_state_tensor;
+  torch::Tensor _action_tensor;
+  torch::Tensor _gae_tensor;
   torch::Tensor _return_tensor;
+  torch::Tensor _delta_tensor;
   torch::Tensor _log_probability_tensor;
+
+  Real _highest_reward;
+
+  std::unique_ptr<torch::optim::Adam> _actor_optimizer;
+  std::unique_ptr<torch::optim::Adam> _critic_optimizer;
 
 private:
   /**
@@ -205,17 +243,26 @@ private:
    * @param reporter_names The names of the reporters which need to be extracted
    * @param num_timesteps The number of timesteps we want to use for training
    */
-  void getInputDataFromReporter(std::vector<std::vector<Real>> & data,
-                                const std::vector<const std::vector<Real> *> & reporter_links,
-                                const unsigned int num_timesteps);
+  void getResponseDataFromReporter(std::vector<std::vector<std::vector<Real>>> & data,
+                                  std::vector<std::vector<std::vector<Real>>> & next_data,
+                                  const std::vector<const std::vector<std::vector<Real>> *> & reporter_links,
+                                  const unsigned int num_timesteps);
   /**
-   * Extract the output (actions, logarithmic probabilities) values from the postprocessors
+   * Extract the signal (actions, logarithmic probabilities) values from the postprocessors
    * of the controlled system. This assumes that they are stored in an AccumulateReporter
    * @param data The data where we would like to store the output values
    * @param reporter_names The names of the reporters which need to be extracted
    */
-  void getOutputDataFromReporter(std::vector<std::vector<Real>> & data,
-                                 const std::vector<const std::vector<Real> *> & reporter_links);
+  void getSignalDataFromReporter(std::vector<std::vector<std::vector<Real>>> & data,
+                                 const std::vector<const std::vector<std::vector<Real>> *> & reporter_links);
+
+  void computeCumulativeRewardEstimate(std::vector<std::vector<Real>> & data,
+                                  std::vector<std::vector<std::vector<Real>>> & state,
+                                  std::vector<std::vector<std::vector<Real>>> & next_state,
+                                  std::vector<std::vector<Real>> & reward);
+
+  void normalizeResponseData(std::vector<std::vector<std::vector<Real>>> & data,
+          const unsigned int num_timesteps);
 
   /**
    * Extract the reward values from the postprocessors of the controlled system
@@ -223,15 +270,17 @@ private:
    * @param data The data where we would like to store the reward values
    * @param reporter_names The name of the reporter which need to be extracted
    */
-  void getRewardDataFromReporter(std::vector<Real> & data,
-                                 const std::vector<Real> * const reporter_link);
+  void getRewardDataFromReporter(std::vector<std::vector<Real>> & data,
+                                 const std::vector<std::vector<Real>> * const reporter_link);
 
   /// Getting reporter pointers with given names
   void getReporterPointers(const std::vector<ReporterName> & reporter_names,
-                           std::vector<const std::vector<Real> *> & pointer_storage);
+                           std::vector<const std::vector<std::vector<Real>> *> & pointer_storage);
 
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
+
+  unsigned int _timestep_window;
 };
 
 #endif

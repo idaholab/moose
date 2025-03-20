@@ -145,7 +145,10 @@ void
 MooseParsedFunctionWrapper::update()
 {
   for (unsigned int i = 0; i < _pp_index.size(); ++i)
+  {
     (*_addr[_pp_index[i]]) = (*_pp_vals[i]);
+    // std::cout << (*_pp_vals[i]) << std::endl;
+  }
 
   for (unsigned int i = 0; i < _scalar_index.size(); ++i)
     (*_addr[_scalar_index[i]]) = (*_scalar_vals[i]);
