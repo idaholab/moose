@@ -48,4 +48,7 @@ public:
 protected:
   /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;
+
+  /// The functor for the diffusion coefficient
+  const Moose::Functor<Real> & _diffusion_coeff;
 };

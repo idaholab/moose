@@ -167,8 +167,7 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   // This should only be used for BCs where the gradient of the value is computed and
   // not prescribed.
 
-  if (diff_bc->use_boundary_gradient_extrapolation())
-    if (_use_nonorthogonal_correction)
+    if (_use_nonorthogonal_correction && diff_bc->use_boundary_gradient_extrapolation())
     {
       const auto correction_vector =
           _current_face_info->normal() -
