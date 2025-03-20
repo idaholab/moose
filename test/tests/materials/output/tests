@@ -165,7 +165,7 @@
   [invalid_material_output_unsupported]
     type = RunException
     input = output.i
-    expect_err = "The output object 'console' is not a defined output object, or it does not support material output"
+    expect_err = "The output object 'console' does not support material output."
     cli_args = 'Materials/test_material/outputs=console Outputs/console=true'
 
     requirement = "The system shall report an error if the output option for material data output "

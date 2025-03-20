@@ -98,9 +98,6 @@ public:
   /// Reset Exodus output
   void clear();
 
-  /**
-   * Indicate to OutputWarehouse that this output type supports material output.
-   */
   bool supportsMaterialPropertyOutput() const override { return true; }
 
 protected:
