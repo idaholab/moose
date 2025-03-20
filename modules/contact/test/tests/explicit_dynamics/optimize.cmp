@@ -1,0 +1,29 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:          0.0025 @ t26
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 1.0e-4
+	accel_x      # min:               0 @ t1,n1	max:   1.4235028e-08 @ t15,n13
+	accel_y      # min:               0 @ t1,n1	max:   1.4359195e-08 @ t15,n13
+	accel_z      # min:               0 @ t1,n1	max:             981 @ t5,n61
+	disp_x       # min:               0 @ t1,n1	max:   3.5949903e-15 @ t26,n1
+	disp_y       # min:               0 @ t1,n1	max:   3.0943334e-15 @ t26,n4
+	disp_z       # min:               0 @ t1,n1	max:    0.0029959956 @ t26,n81
+	gap_rate     # min:               0 @ t1,n1	max:   6.9388939e-18 @ t13,n7
+	vel_x        # min:               0 @ t1,n1	max:   2.8494473e-12 @ t26,n17
+	vel_y        # min:               0 @ t1,n1	max:   2.8494473e-12 @ t26,n17
+	vel_z        # min:               0 @ t1,n1	max:        2.342896 @ t26,n79
+
+ELEMENT VARIABLES relative 1.e-6 floor 1.0e-4
+	wave_speed   # min:             100 @ t1,b2,e28	max:       316.22777 @ t1,b1,e20
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
+# No EDGE BLOCK VARIABLES
+
+# No FACE BLOCK VARIABLES
+

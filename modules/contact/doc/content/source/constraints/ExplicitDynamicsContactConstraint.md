@@ -4,8 +4,7 @@
 
 This object implements node-face constraints for the enforcement of normal
 mechanical contact in explicit dynamics. Surrogate balance-momentum equations are
-solved at each node on the secondary surface using density and wave speed
-material properties and the velocities of the two surfaces in contact.
+solved at each node on the secondary surface.
 
 This method MUST be used with the [DirectCentralDifference](source/timeintegrators/DirectCentralDifference.md) time integrator found in the Solid Mechanics module.
 

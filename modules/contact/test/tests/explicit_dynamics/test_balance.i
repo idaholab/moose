@@ -243,6 +243,7 @@
     vel_x = 'vel_x'
     vel_y = 'vel_y'
     vel_z = 'vel_z'
+    verbose = true
   []
 []
 
@@ -311,7 +312,6 @@
   interval = 10
   exodus = true
   csv = true
-  checkpoint = true # for regression testing purposes
 []
 
 [Postprocessors]

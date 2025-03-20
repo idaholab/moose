@@ -1,15 +1,20 @@
-# One element test to test the central difference time integrator in 3D.
+# This test demonstrates explicit contact with MOOSE and includes optimizations
+# to enhance performance.
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[Problem]
+  extra_tag_matrices = 'mass'
 []
 
 [Mesh]
   [block_one]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 2
-    nz = 2
+    nx = 4
+    ny = 4
+    nz = 4
     xmin = 4.5
     xmax = 5.5
     ymin = 4.5
@@ -21,13 +26,13 @@
   [block_two]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 2
-    nz = 2
-    xmin = 0.0
-    xmax = 10
-    ymin = 0.0
-    ymax = 10
+    nx = 9
+    ny = 9
+    nz = 4
+    xmin = 3
+    xmax = 7
+    ymin = 3
+    ymax = 7
     zmin = -2
     zmax = 0
     boundary_name_prefix = 'base'
@@ -48,6 +53,7 @@
     inputs = ' block_one_id block_two_id'
   []
   allow_renumbering = false
+  # patch_update_strategy = always
 []
 
 [Variables]
@@ -60,6 +66,8 @@
 []
 
 [AuxVariables]
+  [gap_rate]
+  []
   [vel_x]
   []
   [accel_x]
@@ -80,184 +88,179 @@
     variable = accel_x
     displacement = disp_x
     first = false
+    execute_on = 'TIMESTEP_END'
   []
   [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
+    execute_on = 'TIMESTEP_END'
   []
   [accel_y]
     type = TestNewmarkTI
     variable = accel_y
     displacement = disp_y
     first = false
+    execute_on = 'TIMESTEP_END'
   []
   [vel_y]
     type = TestNewmarkTI
     variable = vel_y
     displacement = disp_x
+    execute_on = 'TIMESTEP_END'
   []
   [accel_z]
     type = TestNewmarkTI
     variable = accel_z
     displacement = disp_z
     first = false
+    execute_on = 'TIMESTEP_END'
   []
   [vel_z]
     type = TestNewmarkTI
     variable = vel_z
     displacement = disp_z
+    execute_on = 'TIMESTEP_END'
   []
 []
 
 [Kernels]
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    volumetric_locking_correction = true
-    stiffness_damping_coefficient = 0.04
-    #generate_output = 'stress_zz strain_zz'
   []
-  [inertia_x]
-    type = InertialForce
+
+  [Mass_x]
+    type = MassMatrix
     variable = disp_x
+    density = density
+    matrix_tags = 'mass'
   []
-  [inertia_y]
-    type = InertialForce
+  [Mass_y]
+    type = MassMatrix
     variable = disp_y
+    density = density
+    matrix_tags = 'mass'
   []
-  [inertia_z]
-    type = InertialForce
+  [Mass_z]
+    type = MassMatrix
     variable = disp_z
+    density = density
+    matrix_tags = 'mass'
   []
 []
 
-[Functions]
-  [dispz]
-    type = ParsedFunction
-    expression = if(t<1.0e3,-0.01*t,0)
-  []
-  [push]
-    type = ParsedFunction
-    expression = if(t<10.0,0.01*t,0.1)
+[Kernels]
+  [gravity]
+    type = Gravity
+    variable = disp_z
+    value = -981.0
+    block = 1
   []
 []
 
 [BCs]
-  [z_front]
-    type = FunctionDirichletBC
-    variable = disp_z
-    boundary = 'ball_front'
-    function = dispz
-    preset = false
-  []
   [x_front]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_x
     boundary = 'ball_front'
-    preset = false
     value = 0.0
   []
   [y_front]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_y
     boundary = 'ball_front'
-    preset = false
     value = 0.0
   []
   [x_fixed]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_x
     boundary = 'base_back'
-    preset = false
     value = 0.0
   []
   [y_fixed]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_y
     boundary = 'base_back'
-    preset = false
     value = 0.0
   []
   [z_fixed]
-    type = DirichletBC
+    type = DirectDirichletBC
     variable = disp_z
     boundary = 'base_back'
-    preset = false
     value = 0.0
   []
+
 []
 
 [ExplicitDynamicsContact]
   [my_contact]
-    model = frictionless
-    primary = base_front
-    secondary = ball_back
-    penalty = 1.0e3
-    verbose = true
+    model = frictionless_balance
+    primary = 'base_front ball_back'
+    secondary = 'ball_back base_front'
+    vel_x = 'vel_x'
+    vel_y = 'vel_y'
+    vel_z = 'vel_z'
   []
 []
 
 [Materials]
   [elasticity_tensor_block_one]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e3
-    poissons_ratio = 0.0
+    youngs_modulus = 1e1
+    poissons_ratio = 0.3
     block = 1
+    constant_on = SUBDOMAIN
   []
   [elasticity_tensor_block_two]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+    youngs_modulus = 1e7
+    poissons_ratio = 0.3
     block = 2
+    constant_on = SUBDOMAIN
   []
   [strain_block]
-    type = ComputeIncrementalStrain
+    type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
   []
-  [density]
+  [density_one]
     type = GenericConstantMaterial
     prop_names = density
-    prop_values = 1e4
+    prop_values = 1e7
+    output_properties = 'density'
+    block = '1'
+  []
+  [density_two]
+    type = GenericConstantMaterial
+    prop_names = density
+    prop_values = 1e3
+    output_properties = 'density'
+    block = '2'
   []
   [wave_speed]
     type = WaveSpeed
+    outputs = 'exodus'
+    output_properties = 'wave_speed'
   []
 []
 
 [Executioner]
   type = Transient
-  start_time = -0.01
-  end_time = 0.25
-  dt = 0.005
+  start_time = 0
+  end_time = 0.04
+  dt = 0.0001
   timestep_tolerance = 1e-6
-
   [TimeIntegrator]
-    type = CentralDifference
+    type = DirectCentralDifference
+    mass_matrix_tag = 'mass'
+    use_constant_mass = true
   []
+  skip_exception_check = true
 []
-
-[Postprocessors]
-  [disp_58z]
-    type = NodalVariableValue
-    nodeid = 1
-    variable = disp_z
-  []
-  [critical_time_step]
-    type = CriticalTimeStep
-  []
-  [contact_pressure_max]
-    type = NodalExtremeValue
-    variable = contact_pressure
-    block = '1 2'
-    value_type = max
-  []
-[]
-
 [Outputs]
+  interval = 100
   exodus = true
-  csv = true
 []
