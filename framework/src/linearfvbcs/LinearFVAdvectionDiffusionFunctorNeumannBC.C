@@ -40,9 +40,13 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
+  const auto d_cf = computeCellToFaceVector();
+  // For non-orthogonal meshes we compute an extra correction vector to increase order accuracy
+  // correction_vector is a vector orthogonal to the boundary normal
+  const auto correction_vector = (d_cf - (d_cf * _current_face_info->normal())* _current_face_info->normal());
   return raw_value(_var(elem_arg, determineState())) +
         _functor(singleSidedFaceArg(_current_face_info), determineState())/_diffusion_coeff(face_arg, determineState()) *
-        distance;
+        distance + _var.gradSln(*_current_face_info->elemInfo()) * correction_vector;
 }
 
 Real
@@ -61,8 +65,15 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueMatrixContributi
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueRHSContribution() const
 {
+  const auto face_arg = makeCDFace(*_current_face_info);
   // Fetch the boundary value from the provided functor.
-  return -_functor(singleSidedFaceArg(_current_face_info), determineState()) * computeCellToFaceDistance();
+  const Real distance = computeCellToFaceDistance();
+  const auto d_cf = computeCellToFaceVector();
+  // For non-orthogonal meshes we compute an extra correction vector to increase order accuracy
+  // correction_vector is a vector orthogonal to the boundary normal
+  const auto correction_vector = (d_cf - (d_cf * _current_face_info->normal())* _current_face_info->normal());
+  return +_functor(singleSidedFaceArg(_current_face_info), determineState())/_diffusion_coeff(face_arg, determineState()) *
+        distance + _var.gradSln(*_current_face_info->elemInfo()) * correction_vector;
 }
 
 Real
