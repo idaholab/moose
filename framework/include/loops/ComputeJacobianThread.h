@@ -56,7 +56,4 @@ protected:
   virtual void computeOnInternalFace() override;
 
   std::string objectType() const override { return "Jacobian"; }
-
-private:
-  static Threads::spin_mutex _add_mutex;
 };
