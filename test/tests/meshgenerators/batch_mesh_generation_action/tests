@@ -43,13 +43,21 @@
       recover = false
       requirement = 'The system should batch generate meshes of the same type with variation in one single vector parameter'
   []
-  [double_vector]
+  [double_vector_corr]
     type = 'Exodiff'
       input = 'double_vector_corr.i'
       exodiff = 'double_vector_corr_in.e'
       cli_args = '--mesh-only'
       recover = false
       requirement = 'The system should batch generate meshes of the same type with variation in two vector parameters'
+  []
+  [double_vector_cp]
+    type = 'Exodiff'
+      input = 'double_vector_cp.i'
+      exodiff = 'double_vector_cp_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generate meshes of the same type with variation in two vector parameters using a Cartesian product for the combination of parameters.'
   []
   [scalar_vector_corr]
     type = 'Exodiff'
