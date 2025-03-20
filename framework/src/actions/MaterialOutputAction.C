@@ -160,7 +160,7 @@ MaterialOutputAction::act()
         // Get all available output names from OutputWarehouse that support material output
         const auto & all_output_names = _output_warehouse.getAllMaterialPropertyOutputNames();
 
-        // For reserved name "all", set outputs to match all avialable output names
+        // For reserved name "all", set outputs to match all available output names
         if (outputs.find("all") != outputs.end())
           outputs = all_output_names;
 
