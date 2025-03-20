@@ -11,6 +11,7 @@
     type = TorchScriptUserObject
     filename = "my_net.pt"
     load_during_construction = true
+    execute_on = INITIAL
   []
 []
 
