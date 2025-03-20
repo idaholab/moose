@@ -31,7 +31,7 @@ public:
   Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
 
   virtual void init() override {}
-  virtual void step() override;
+  virtual void acceptStep() override;
 
 protected:
   virtual Real computeInitialDT() override;
