@@ -48,6 +48,7 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() const
 {
+  const auto face_arg = makeCDFace(*_current_face_info);
   return _functor(singleSidedFaceArg(_current_face_info), determineState())/_diffusion_coeff(face_arg, determineState());
 }
 
