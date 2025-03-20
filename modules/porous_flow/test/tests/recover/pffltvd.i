@@ -16,6 +16,9 @@
   nx = 10
   xmin = 0
   xmax = 1
+
+  # To get consistent ordering of results with distributed meshes
+  allow_renumbering = false
 []
 
 [Adaptivity]

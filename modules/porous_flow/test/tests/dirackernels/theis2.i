@@ -11,6 +11,9 @@
   bias_y = 1.1
   ymax = 100
   xmax = 100
+
+  # To get consistent ordering of results with distributed meshes
+  allow_renumbering = false
 []
 
 [GlobalParams]
