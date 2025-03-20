@@ -1,5 +1,6 @@
 # TorchScriptUserObject
 
+!if function=hasLibtorch()
 !syntax description /UserObjects/TorchScriptUserObject
 
 ## Description
@@ -16,8 +17,15 @@ torch script format, visit the [official documentation](https://pytorch.org/docs
 
 !listing test/tests/materials/torchscript_material/test.i block=UserObjects
 
+!if! function=hasLibtorch()
+
 !syntax parameters /UserObjects/TorchScriptUserObject
 
 !syntax inputs /UserObjects/TorchScriptUserObject
 
 !syntax children /UserObjects/TorchScriptUserObject
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md
