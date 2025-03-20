@@ -99,7 +99,7 @@ class TestDiffusion2DNonorthogonal_neumann(unittest.TestCase):
                  label='l2error',
                  marker='o',
                  markersize=8,
-                 num_fitted_points=3,
+                 num_fitted_points=2,
                  slope_precision=1)
         fig.save('2d-linear-fv-diffusion-nonorthogonal_neumann.png')
 
