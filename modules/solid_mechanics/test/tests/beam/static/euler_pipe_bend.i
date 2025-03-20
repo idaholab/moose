@@ -173,8 +173,6 @@
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = 0
-    outputs = exodus
-    output_properties = 'material_stiffness material_flexure'
   [../]
   [./strain]
     type = ComputeIncrementalBeamStrain
@@ -191,7 +189,7 @@
   [./stress]
     type = ComputeBeamResultants
     block = 0
-    outputs = exodus
+    outputs = csv
     output_properties = 'forces moments'
   [../]
 []
@@ -216,5 +214,4 @@
 
 [Outputs]
   csv = true
-  exodus = true
 []
