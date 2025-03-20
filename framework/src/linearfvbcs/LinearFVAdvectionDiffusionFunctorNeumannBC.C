@@ -20,30 +20,35 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::validParams()
       "finite volume system and whose normal face gradient values are determined "
       "using a functor. This kernel is only designed to work with advection-diffusion problems.");
   params.addRequiredParam<MooseFunctorName>("functor", "The gradient value functor for this boundary condition.");
+  params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The diffusion coefficient.");
   return params;
 }
 
 LinearFVAdvectionDiffusionFunctorNeumannBC::LinearFVAdvectionDiffusionFunctorNeumannBC(
     const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionBC(parameters), _functor(getFunctor<Real>("functor"))
+  : LinearFVAdvectionDiffusionBC(parameters),
+  _functor(getFunctor<Real>("functor")),
+  _diffusion_coeff(getFunctor<Real>("diffusion_coeff"))
 {
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
 {
+  const auto face_arg = makeCDFace(*_current_face_info);
   const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
   return raw_value(_var(elem_arg, determineState())) +
-        _functor(singleSidedFaceArg(_current_face_info), determineState()) * distance;
+        _functor(singleSidedFaceArg(_current_face_info), determineState())/_diffusion_coeff(face_arg, determineState()) *
+        distance;
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() const
 {
-  return _functor(singleSidedFaceArg(_current_face_info), determineState());
+  return _functor(singleSidedFaceArg(_current_face_info), determineState())/_diffusion_coeff(face_arg, determineState());
 }
 
 Real
