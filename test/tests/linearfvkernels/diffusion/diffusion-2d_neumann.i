@@ -1,8 +1,10 @@
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
-    dim = 1
+    dim = 2
     nx = 2
+    ny = 1
+    ymax = 0.5
   []
 []
 
@@ -23,6 +25,7 @@
     type = LinearFVDiffusion
     variable = u
     diffusion_coeff = coeff_func
+    use_nonorthogonal_correction = false
   []
   [source]
     type = LinearFVSource
@@ -35,33 +38,45 @@
   [dir]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
-    boundary = "right"
+    boundary = "left top"
     functor = analytic_solution
   []
-  [neu]
+  [neu_bottom]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = u
-    boundary = "left"
-    functor = analytic_solution_neumann
+    boundary = "bottom"
+    functor = analytic_solution_neumann_bottom
+    diffusion_coeff = coeff_func
+  []
+  [neu_right]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = u
+    boundary = "right"
+    functor = analytic_solution_neumann_right
+    diffusion_coeff = coeff_func
   []
 []
 
 [Functions]
   [coeff_func]
     type = ParsedFunction
-    expression = '0.5*x'
+    expression = '1+0.5*x*y'
   []
   [source_func]
     type = ParsedFunction
-    expression = '2*x'
+    expression = '2*(1.5-y*y)+2*x*y*(1.5-y*y)+2*(1.5-x*x)+2*x*y*(1.5-x*x)'
   []
   [analytic_solution]
     type = ParsedFunction
-    expression = '1-x*x'
+    expression = '(1.5-x*x)*(1.5-y*y)'
   []
-  [analytic_solution_neumann]
+  [analytic_solution_neumann_bottom]
     type = ParsedFunction
-    expression = '-(0.5*x)*(-2*x)'
+    expression = '-(1+0.5*x*y)*(1.5-x*x)*(-2*y)'
+  []
+  [analytic_solution_neumann_right]
+    type = ParsedFunction
+    expression = '(1+0.5*x*y)*(-2*x)*(1.5-y*y)'
   []
 []
 
@@ -78,10 +93,20 @@
   []
 []
 
+[Convergence]
+  [linear]
+    type = IterationCountConvergence
+    max_iterations = 1
+    converge_at_max_iterations = true
+  []
+[]
+
 [Executioner]
   type = Steady
   system_names = u_sys
   l_abs_tol = 1e-10
+  multi_system_fixed_point=true
+  multi_system_fixed_point_convergence=linear
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
