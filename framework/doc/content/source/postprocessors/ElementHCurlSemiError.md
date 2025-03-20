@@ -22,7 +22,7 @@ the `vectorValue` and `curl` methods, e.g. [MooseParsedVectorFunction.md].
 
 ## Example Input File Syntax
 
-!listing vector_kernel.i block=Postprocessors/HCurlSemiError
+!listing /vector_kernel.i block=Postprocessors/HCurlSemiError
 
 !syntax parameters /Postprocessors/ElementHCurlSemiError
 
