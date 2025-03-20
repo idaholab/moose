@@ -116,6 +116,11 @@ public:
                             int line = -1);
 
   /**
+   * De-registers all actions associated with a given syntax
+   */
+  void removeAllActionsForSyntax(const std::string & syntax);
+
+  /**
    *  Registration function that replaces existing Moose Actions with a completely new action
    *  Note: This function will remove all actions associated with this piece of syntax _NOT_ just
    *        a single match of some kind
