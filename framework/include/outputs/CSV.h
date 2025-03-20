@@ -32,6 +32,8 @@ public:
    */
   CSV(const InputParameters & parameters);
 
+  bool supportsMaterialPropertyOutput() const override;
+
 protected:
   using Output::output;
 

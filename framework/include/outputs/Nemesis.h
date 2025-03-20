@@ -51,6 +51,8 @@ public:
    */
   virtual void outputSetup();
 
+  bool supportsMaterialPropertyOutput() const override { return true; }
+
 protected:
   /**
    * Overload the Output::output method, this is required for Nemesis

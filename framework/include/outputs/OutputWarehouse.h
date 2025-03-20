@@ -61,8 +61,6 @@ public:
   /**
    * Returns true if the output object exists
    * @param name The name of the output object for which to test for existence within the warehouse
-   * @param supports_material_output Optional parameter to check if the output object associated
-   * with name must support material output
    */
   bool hasOutput(const std::string & name) const;
 
