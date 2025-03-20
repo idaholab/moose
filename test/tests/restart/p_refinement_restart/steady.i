@@ -74,8 +74,11 @@
 
 [Executioner]
   type = Steady
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
-  csv = true
+  checkpoint = true
+  exodus = true
+  print_mesh_changed_info = true
 []

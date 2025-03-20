@@ -127,7 +127,7 @@
     [spatially_const_p]
       type = 'Exodiff'
       input = 'stateful_prop_adaptivity_test.i'
-      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_p_refinement_for_families="lagrange" Outputs/file_base=stateful_prop_adaptivity_test_p'
+      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Variables/u/disable_p_refinement=true Outputs/file_base=stateful_prop_adaptivity_test_p'
       exodiff = 'stateful_prop_adaptivity_test_p.e-s004'
       detail = 'when properties are spatially constant and we are performing p-refinement, and'
     []
@@ -136,7 +136,7 @@
       type = 'Exodiff'
       input = 'spatial_adaptivity_test.i'
       exodiff = 'spatial_adaptivity_test_p.e-s004'
-      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_p_refinement_for_families="lagrange" Outputs/file_base=spatial_adaptivity_test_p'
+      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Variables/u/disable_p_refinement=true Outputs/file_base=spatial_adaptivity_test_p'
       detail = 'when properties vary spatially and we are performing p-refinement.'
     []
 
