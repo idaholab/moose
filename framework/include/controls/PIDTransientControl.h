@@ -68,4 +68,8 @@ private:
   Real & _old_delta;
   /// whether the app has recovered once, because the logic for setting the value is different after having just recovered
   bool _has_recovered;
+  /// the difference with the target from the previous time step, used if a time step fails
+  Real _delta_prev_tstep = 0.0;
+  /// the difference with the target from the from the second-to-last iteration of previous time step, used if a time step fails
+  Real _old_delta_prev_tstep = 0.0;
 };
