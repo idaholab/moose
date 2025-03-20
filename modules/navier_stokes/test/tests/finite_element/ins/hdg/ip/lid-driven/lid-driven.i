@@ -14,7 +14,7 @@ n = 8
     ymax = ${l}
     nx = ${n}
     ny = ${n}
-    elem_type = QUAD9
+    elem_type = TRI6
   []
 []
 
@@ -227,9 +227,6 @@ n = 8
     type = ParsedPostprocessor
     pp_names = ''
     expression = '${rho} * ${U} * ${l} / ${mu}'
-  []
-  [symmetric]
-    type = IsMatrixSymmetric
   []
   [pressure_integral]
     type = ElementIntegralVariablePostprocessor
