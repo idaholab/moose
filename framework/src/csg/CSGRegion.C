@@ -12,7 +12,8 @@
 namespace CSG
 {
 
-CSGRegion::CSGRegion(){
+CSGRegion::CSGRegion()
+{
   _region_str = "";
   _region_type = CSGRegion::RegionType::EMPTY;
 };
@@ -35,8 +36,9 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
       _region_type != CSGRegion::RegionType::UNION)
     mooseError("Region type " + getRegionTypeString() + " is not supported for two regions.");
   else if (region_a.getRegionType() == CSGRegion::RegionType::EMPTY ||
-      region_b.getRegionType() == CSGRegion::RegionType::EMPTY)
-      mooseError("Region operation " + getRegionTypeString() + " cannot be performed on an empty region.");
+           region_b.getRegionType() == CSGRegion::RegionType::EMPTY)
+    mooseError("Region operation " + getRegionTypeString() +
+               " cannot be performed on an empty region.");
   else
   {
     std::string op = (_region_type == CSGRegion::RegionType::UNION) ? " | " : " & ";
