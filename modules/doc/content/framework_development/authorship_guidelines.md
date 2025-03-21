@@ -49,6 +49,7 @@ The current guidelines for transient authorship are listed below:
 MOOSE-related activities are developments in the MOOSE modules and MOOSE applications.
 Modules are deliberately excluded from the list of contributions, as developers of a module should
 publish a module paper and report on new developments outside of the MOOSE framework paper.
+The organization of a significant community event can be counted towards the minor contributions.
 
 A list of major, minor and fixup example contributions has been developed as guidelines for
 classification and can be shared upon request. The classification of contributions is decided when
