@@ -12,8 +12,8 @@
 #include "Material.h"
 
 /**
- * A material that optinally computes two properties, one corresponding to the value of the coupled
- * variable and the other corresponding to the gradient of the coupled variable
+ * A material that creates a gradient material equal to the gradient of the coupled variable
+ * times a scalar material property
  */
 template <bool is_ad>
 class CoupledGradientMaterialTempl : public Material
