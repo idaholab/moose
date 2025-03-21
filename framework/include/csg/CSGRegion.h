@@ -23,8 +23,9 @@ class CSGRegion
 {
 public:
   /// An enum for type of type of operation that defines region
-  enum class Operation
+  enum class RegionType
   {
+    EMPTY,
     HALFSPACE,
     COMPLEMENT,
     INTERSECTION,
@@ -32,24 +33,85 @@ public:
   };
 
   /**
-   * Constructor for halfspace
+   * Default Constructor
    */
-  CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Direction direction, const CSGRegion::Operation region_op);
+  CSGRegion();
 
   /**
-   * Constructor for complement, union, and intersection
+   * Constructor for halfspace
    */
-  CSGRegion(std::vector<const CSGRegion> & regions, const CSGRegion::Operation region_op);
+  CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Direction direction);
+
+  /**
+   * Constructor for union and intersection
+   */
+  CSGRegion(const CSGRegion & region_a,
+            const CSGRegion & region_b,
+            const CSGRegion::RegionType region_type);
+
+  /**
+   * Constructor for complement
+   */
+  CSGRegion(const CSGRegion & region);
 
   /**
    * Destructor
    */
   virtual ~CSGRegion() = default;
 
-  std::string toString() const;
+  /**
+   * @brief gets the string representation of the region
+   *
+   * @return std::string
+   */
+  std::string toString() const { return _region_str; }
+
+  /**
+   * @brief Get the Region Type as a string
+   *
+   * @return const std::string
+   */
+  const std::string getRegionTypeString();
+
+  /**
+   * @brief Get the list of surfaces associated with the region
+   *
+   * @return std::vector<std::shared_ptr<CSGSurface>>
+   */
+  std::vector<std::shared_ptr<CSGSurface>> getSurfaces() const { return _surfaces; };
 
 protected:
-  /// String representation of region
-  std::string _region_str;
+  /// String representation of region - default empty string
+  std::string _region_str = "";
+
+  /// type of region - default empty
+  RegionType _region_type = CSGRegion::RegionType::EMPTY;
+
+  /// Surface list associated with the region
+  std::vector<std::shared_ptr<CSGSurface>> _surfaces;
 };
+
+/// Operation overloads for operation based region construction
+
+// positve halfspace
+const CSGRegion operator+(std::shared_ptr<CSGSurface> surf);
+
+// negative halfspace
+const CSGRegion operator-(std::shared_ptr<CSGSurface> surf);
+
+// intersection
+const CSGRegion operator&(const CSGRegion & region_a, const CSGRegion & region_b);
+
+// union
+const CSGRegion operator|(const CSGRegion & region_a, const CSGRegion & region_b);
+
+// complement
+const CSGRegion operator~(const CSGRegion & region);
+
+// add to with intersection
+const CSGRegion operator&=(const CSGRegion & region_a, const CSGRegion & region_b);
+
+// add to with union
+const CSGRegion operator|=(const CSGRegion & region_a, const CSGRegion & region_b);
+
 } // namespace CSG
