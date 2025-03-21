@@ -7,61 +7,52 @@
 # @Requirement F3.30
 ###########################################################
 
+AD = ''
+
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
-  active = 'u'
-
-  [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  active = 'diff'
-
-  [./diff]
-    type = Diffusion
+  [diff]
+    type = ${AD}Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   # BCs cannot be preset due to Jacobian test
-  active = 'left right'
-
-  [./left]
-    type = DirichletBC
+  [left]
+    type = ${AD}DirichletBC
     variable = u
     preset = false
-    boundary = 3
+    boundary = left
     value = 0
-  [../]
-
-  [./right]
-    type = DirichletBC
+  []
+  [right]
+    type = ${AD}DirichletBC
     variable = u
     preset = false
-    boundary = 1
+    boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-
   solve_type = 'NEWTON'
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []
