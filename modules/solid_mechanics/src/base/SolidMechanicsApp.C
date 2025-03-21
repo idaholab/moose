@@ -39,11 +39,15 @@ SolidMechanicsApp::setupOptions()
 {
   MooseApp::setupOptions();
 
-  if (getParam<bool>("parse_neml2_only"))
+  if (getInputFileNames().size())
   {
-    // Let parse_neml2 run before anything else, and stop after that.
-    syntax().addDependency("determine_system_type", "parse_neml2");
-    actionWarehouse().setFinalTask("parse_neml2");
+    if (getParam<bool>("parse_neml2_only"))
+    {
+      // Let parse_neml2 run before anything else, and stop after that.
+      syntax().registerTaskName("parse_neml2");
+      syntax().addDependency("determine_system_type", "parse_neml2");
+      actionWarehouse().setFinalTask("parse_neml2");
+    }
   }
 }
 

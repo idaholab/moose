@@ -16,7 +16,6 @@ register_NEML2_object(NEML2TestModel);
 OptionSet
 NEML2TestModel::expected_options()
 {
-  using vecstr = std::vector<std::string>;
   auto options = Model::expected_options();
   options.set<VariableName>("A") = VariableName("forces", "A");
   options.set<VariableName>("B") = VariableName("forces", "B");
@@ -47,7 +46,7 @@ NEML2TestModel::request_AD()
 }
 
 void
-NEML2TestModel::set_value(bool out, bool dout_din, bool d2out_din2)
+NEML2TestModel::set_value(bool out, bool /*dout_din*/, bool /*d2out_din2*/)
 {
   if (!out)
     return;
