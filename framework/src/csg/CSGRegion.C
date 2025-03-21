@@ -60,8 +60,11 @@ CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType regio
         "Region type " + getRegionTypeString() + " is not supported for a single region");
 
   if (_region_type == CSGRegion::RegionType::COMPLEMENT)
+  {
     // no change to surfaces, but update string
     _region_str = "~(" + region.toString() + ")";
+    _surfaces = region.getSurfaces();
+  }
   else if (_region_type == CSGRegion::RegionType::EMPTY)
   {
     // reset the region and make it empty
