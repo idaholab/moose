@@ -331,6 +331,8 @@ def parse(content, root=None, filename=''):
     for the tree to populate; if it is given this same node is returned. The *filename*, if provided,
     will be used for error reporting when manipulating the tree.
     """
+    if not content.strip():
+        raise ValueError("pyhit cannot parse null content.")
     hit_node = hit.parse(filename, content)
     hit.explode(hit_node)
     root = Node(root, hit_node) if root is not None else Node(None, hit_node)
