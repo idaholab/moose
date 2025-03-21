@@ -56,6 +56,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   };
   std::vector<std::string> surf_names {"plus_x", "minus_x", "plus_y", "minus_y"};
 
+  // initialize cell region to be updated
   CSG::CSGRegion region;
   for (unsigned int i = 0; i < points_on_planes.size(); ++i)
   {
@@ -63,8 +64,12 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
     auto plane_ptr = csg_mesh->createPlaneFromPoints(surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
     const auto region_direction = plane_ptr->directionFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
-    region &= halfspace;
+      ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
+    // check if first halfspace to be added to the region
+    if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+      region = halfspace;
+    else
+      region &= halfspace;
   }
 
   const auto cell_name = "square_cell";
