@@ -50,7 +50,6 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
   auto cell_ptr = root_univ->getCell(cell_name);
   const auto cell_region = cell_ptr->getRegion();
   const auto centroid = Point(0, 0, 0);
-  std::vector<const CSG::CSGRegion> region_halfspaces = {cell_region};
 
   // Add surfaces and halfspaces corresponding to top and bottom axial planes
   std::vector<std::string> surf_names {"plus_z", "minus_z"};
@@ -61,11 +60,12 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
     auto plane_ptr = input_mesh->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     const auto region_direction = plane_ptr->directionFromPoint(centroid);
-    const auto region_halfspace = CSG::CSGRegion(plane_ptr, region_direction, CSG::CSGRegion::Operation::HALFSPACE);
-    region_halfspaces.push_back(region_halfspace);
+    auto halfspace =
+        ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
+    cell_region &= halfspace;
   }
-  const auto updated_region = CSG::CSGRegion(region_halfspaces, CSG::CSGRegion::Operation::INTERSECTION);
-  cell_ptr->updateRegion(updated_region);
+
+  cell_ptr->updateRegion(cell_region);
 
   return input_mesh;
 }

@@ -12,37 +12,112 @@
 namespace CSG
 {
 
-CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Direction direction, const CSGRegion::Operation region_op)
+// halfspace constructor
+CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Direction direction)
+  : _region_type(CSGRegion::RegionType::HALFSPACE)
 {
-  if (region_op != CSGRegion::Operation::HALFSPACE)
-    mooseError("This region constructor requires the region operator to be of type halfspace");
   _region_str = ((direction == CSGSurface::Direction::positive) ? "+" : "-") + surf->getName();
+  _surfaces.push_back(surf);
 }
 
-CSGRegion::CSGRegion(std::vector<const CSGRegion> & regions, const CSGRegion::Operation region_op)
+// intersection and union constructor
+CSGRegion::CSGRegion(const CSGRegion & region_a,
+                     const CSGRegion & region_b,
+                     const CSGRegion::RegionType region_type)
+  : _region_type(region_type)
 {
-  if (region_op == CSGRegion::Operation::COMPLEMENT)
+  if (_region_type != CSGRegion::RegionType::INTERSECTION &&
+      _region_type != CSGRegion::RegionType::UNION)
   {
-    if (regions.size() != 1)
-      mooseError("Only a single region should be passed when constructing a region defined as a complement.");
-    _region_str = "~(" + regions[0].toString() + ")";
+    mooseError("Region type " + getRegionTypeString() + " is not supported for two regions.");
   }
   else
   {
-    if (regions.size() < 2)
-      mooseError("Regions defined as unions or intersections must be comprised of at least 2 sub-regions");
-
-    std::string op = (region_op == CSGRegion::Operation::UNION) ? " | " : " & ";
-    _region_str = "(";
-    for (const auto i : index_range(regions))
-      _region_str += ((i != 0) ? op : "") + regions[i].toString();
-    _region_str += ")";
+    std::string op = (_region_type == CSGRegion::RegionType::UNION) ? " | " : " & ";
+    _region_str = "(" + region_a.toString() + op + region_b.toString() + ")";
+    auto a_surfs = region_a.getSurfaces();
+    auto b_surfs = region_b.getSurfaces();
+    _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
+    _surfaces.insert(_surfaces.end(), b_surfs.begin(), b_surfs.end());
   }
 }
 
-std::string
-CSGRegion::toString() const
+// complement constructor
+CSGRegion::CSGRegion(const CSGRegion & region) : _region_type(CSGRegion::RegionType::COMPLEMENT)
 {
-  return _region_str;
+  // no change to surfaces, but update string
+  _region_str = "~(" + region.toString() + ")";
 }
+
+const std::string
+CSGRegion::getRegionTypeString()
+{
+  switch (_region_type)
+  {
+    case RegionType::EMPTY:
+      return "EMPTY";
+    case RegionType::HALFSPACE:
+      return "HALFSPACE";
+    case RegionType::COMPLEMENT:
+      return "COMPLEMENT";
+    case RegionType::INTERSECTION:
+      return "INTERSECTION";
+    case RegionType::UNION:
+      return "UNION";
+    default:
+      return "INVALID";
+  }
+}
+
+// Operators for region construction
+
+// positve halfspace
+const CSGRegion
+operator+(std::shared_ptr<CSGSurface> surf)
+{
+  return CSGRegion(surf, CSGSurface::Direction::positive);
+}
+
+// negative halfspace
+const CSGRegion
+operator-(std::shared_ptr<CSGSurface> surf)
+{
+  return CSGRegion(surf, CSGSurface::Direction::negative);
+}
+
+// intersection
+const CSGRegion
+operator&(const CSGRegion & region_a, const CSGRegion & region_b)
+{
+  return CSGRegion(region_a, region_b, CSGRegion::RegionType::INTERSECTION);
+}
+
+// union
+const CSGRegion
+operator|(const CSGRegion & region_a, const CSGRegion & region_b)
+{
+  return CSGRegion(region_a, region_b, CSGRegion::RegionType::UNION);
+}
+
+// complement
+const CSGRegion
+operator~(const CSGRegion & region)
+{
+  return CSGRegion(region);
+}
+
+// add to with intersection
+const CSGRegion
+operator&=(const CSGRegion & region_a, const CSGRegion & region_b)
+{
+  return CSGRegion(region_a, region_b, CSGRegion::RegionType::INTERSECTION);
+}
+
+// add to with union
+const CSGRegion
+operator|=(const CSGRegion & region_a, const CSGRegion & region_b)
+{
+  return CSGRegion(region_a, region_b, CSGRegion::RegionType::UNION);
+}
+
 } // namespace CSG
