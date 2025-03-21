@@ -63,6 +63,8 @@ public:
   bool isActive() const { return true; }
 
 protected:
+  /// Whether to use the displaced mesh
+  const bool _use_displaced_mesh;
   SubProblem & _subproblem;
   FEProblemBase & _fe_problem;
   SystemBase & _sys;

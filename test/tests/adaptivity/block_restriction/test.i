@@ -71,6 +71,8 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
+  line_search = 'none'
+  nl_abs_tol = 1e-12
 
   end_time = 200
   dt = 100
