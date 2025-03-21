@@ -10,7 +10,7 @@
 #ifdef LIBTORCH_ENABLED
 
 #include "LibtorchNeuralNetControl.h"
-#include "LibtorchTorchScriptNeuralNet.h"
+#include "TorchScriptModule.h"
 #include "LibtorchUtils.h"
 
 #include "Transient.h"
@@ -108,7 +108,7 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
   {
     std::string filename = getParam<std::string>("filename");
     if (getParam<bool>("torch_script_format"))
-      _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
+      _nn = std::make_shared<Moose::TorchScriptModule>(filename);
     else
     {
       unsigned int num_inputs = _response_names.size() * _input_timesteps;

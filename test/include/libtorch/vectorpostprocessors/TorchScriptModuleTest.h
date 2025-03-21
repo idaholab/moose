@@ -14,14 +14,14 @@
 #include "GeneralVectorPostprocessor.h"
 
 /**
- * A UserObject that tests the LibtorchTorchScriptNeuralNet.
+ * A UserObject that tests the TorchScriptModule.
  */
-class LibtorchTorchScriptNeuralNetTest : public GeneralVectorPostprocessor
+class TorchScriptModuleTest : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  LibtorchTorchScriptNeuralNetTest(const InputParameters & params);
+  TorchScriptModuleTest(const InputParameters & params);
 
   virtual void initialize(){};
   virtual void execute(){};
