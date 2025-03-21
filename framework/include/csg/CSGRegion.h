@@ -115,10 +115,4 @@ const CSGRegion operator|(const CSGRegion & region_a, const CSGRegion & region_b
 // complement
 const CSGRegion operator~(const CSGRegion & region);
 
-// add to with intersection
-const CSGRegion operator&=(const CSGRegion & region_a, const CSGRegion & region_b);
-
-// add to with union
-const CSGRegion operator|=(const CSGRegion & region_a, const CSGRegion & region_b);
-
 } // namespace CSG
