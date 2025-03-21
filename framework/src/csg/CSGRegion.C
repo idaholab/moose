@@ -16,6 +16,7 @@ CSGRegion::CSGRegion()
 {
   _region_str = "";
   _region_type = CSGRegion::RegionType::EMPTY;
+  std::cout << "default: REGION TYPE: " + getRegionTypeString() + _region_str << std::endl;
 };
 
 // halfspace constructor
@@ -24,6 +25,7 @@ CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Directi
 {
   _region_str = ((direction == CSGSurface::Direction::positive) ? "+" : "-") + surf->getName();
   _surfaces.push_back(surf);
+  std::cout << "halfspace: REGION TYPE: " + getRegionTypeString() + _region_str << std::endl;
 }
 
 // intersection and union constructor
@@ -48,6 +50,7 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
     _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
     _surfaces.insert(_surfaces.end(), b_surfs.begin(), b_surfs.end());
   }
+  std::cout << "int/un REGION TYPE: " + getRegionTypeString() + _region_str  << std::endl;
 }
 
 // complement constructor
@@ -55,6 +58,7 @@ CSGRegion::CSGRegion(const CSGRegion & region) : _region_type(CSGRegion::RegionT
 {
   // no change to surfaces, but update string
   _region_str = "~(" + region.toString() + ")";
+  std::cout << "complement: REGION TYPE: " + getRegionTypeString() + _region_str << std::endl;
 }
 
 const std::string
@@ -112,20 +116,6 @@ const CSGRegion
 operator~(const CSGRegion & region)
 {
   return CSGRegion(region);
-}
-
-// add to with intersection
-const CSGRegion
-operator&=(const CSGRegion & region_a, const CSGRegion & region_b)
-{
-  return CSGRegion(region_a, region_b, CSGRegion::RegionType::INTERSECTION);
-}
-
-// add to with union
-const CSGRegion
-operator|=(const CSGRegion & region_a, const CSGRegion & region_b)
-{
-  return CSGRegion(region_a, region_b, CSGRegion::RegionType::UNION);
 }
 
 } // namespace CSG
