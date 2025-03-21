@@ -142,44 +142,59 @@
     [csv]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=csv Outputs/csv=true"
+      cli_args = "Materials/test_material/outputs=csv
+                  Outputs/csv=true
+                  Outputs/file_base=output_csv"
       allow_warnings = true
       detail = "CSV."
     []
     [vtk]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=vtk Outputs/vtk=true"
+      cli_args = "Materials/test_material/outputs=vtk
+                  Outputs/vtk=true
+                  Outputs/file_base=output_vtk"
       detail = "VTK."
     []
     [nemesis]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=nemesis Outputs/nemesis=true Outputs/exodus=false"
+      cli_args = "Materials/test_material/outputs=nemesis
+                  Outputs/nemesis=true
+                  Outputs/exodus=false
+                  Outputs/file_base=output_nemesis"
       detail = "Nemesis."
     []
     [tecplot]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=tecplot Outputs/tecplot=true"
+      cli_args = "Materials/test_material/outputs=tecplot
+                  Outputs/tecplot=true
+                  Outputs/file_base=output_tecplot"
       detail = "Tecplot."
     []
     [xda]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=xda Outputs/xda=true"
+      cli_args = "Materials/test_material/outputs=xda
+                  Outputs/xda=true
+                  Outputs/file_base=output_xda"
       detail = "XDA."
     []
     [xdr]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=xdr Outputs/xdr=true"
+      cli_args = "Materials/test_material/outputs=xdr
+                  Outputs/xdr=true
+                  Outputs/file_base=output_xdr"
       detail = "XDR."
     []
     [checkpoint]
       type = RunApp
       input = output.i
-      cli_args = "Materials/test_material/outputs=checkpoint Outputs/checkpoint=true"
+      cli_args = "Materials/test_material/outputs=checkpoint
+                  Outputs/checkpoint=true
+                  Outputs/file_base=output_checkpoint"
       detail = "Checkpoint."
     []
   []
