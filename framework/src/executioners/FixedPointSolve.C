@@ -272,10 +272,8 @@ FixedPointSolve::solve()
       else
       {
         // For every iteration other than the first, we need to restore the state of the MultiApps
-        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_END);
-        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
@@ -318,21 +316,21 @@ FixedPointSolve::solve()
       break;
     }
 
-    if (converged)
-    {
-      // Fixed point iteration loop ends right above
-      _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-      _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
-      if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
-      {
-        _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-        return false;
-      }
-      _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
-    }
-
     _problem.dt() =
         current_dt; // _dt might be smaller than this at this point for multistep methods
+  }
+
+  if (converged)
+  {
+    // Fixed point iteration loop ends right above
+    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+    if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
+    {
+      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+      return false;
+    }
+    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
   }
 
   // Save postprocessors after the solve and their potential timestep_end execution
