@@ -12,7 +12,8 @@
 #include <set>
 
 #ifdef NEML2_ENABLED
-#include "neml2/misc/math.h"
+#include "neml2/tensors/functions/jacrev.h"
+#include "neml2/dispatchers/ValueMapLoader.h"
 #endif
 
 registerMooseObject("SolidMechanicsApp", NEML2ModelExecutor);
@@ -20,7 +21,7 @@ registerMooseObject("SolidMechanicsApp", NEML2ModelExecutor);
 InputParameters
 NEML2ModelExecutor::actionParams()
 {
-  auto params = NEML2ModelInterface<GeneralUserObject>::validParams();
+  auto params = emptyInputParameters();
   // allow user to explicit skip required input variables
   params.addParam<std::vector<std::string>>(
       "skip_inputs",
@@ -35,7 +36,8 @@ NEML2ModelExecutor::actionParams()
 InputParameters
 NEML2ModelExecutor::validParams()
 {
-  auto params = NEML2ModelExecutor::actionParams();
+  auto params = NEML2ModelInterface<GeneralUserObject>::validParams();
+  params += NEML2ModelExecutor::actionParams();
   params.addClassDescription(NEML2Utils::docstring("Execute the specified NEML2 model"));
 
   params.addRequiredParam<UserObjectName>(
@@ -124,7 +126,7 @@ NEML2ModelExecutor::initialSetup()
 
     // introspect the NEML2 model to figure out if the gatherer UO is gathering for a NEML2 input
     // variable or for a NEML2 model parameter
-    if (!model().named_parameters().has_key(uo.NEML2Name()))
+    if (model().named_parameters().count(uo.NEML2Name()) != 1)
       mooseError("The MOOSEToNEML2 gatherer named '",
                  gatherer_name,
                  "' is gathering MOOSE data for a non-existent NEML2 model parameter named '",
@@ -283,11 +285,43 @@ NEML2ModelExecutor::applyPredictor()
 }
 
 void
+NEML2ModelExecutor::expandInputs()
+{
+  // Figure out what our batch size is
+  std::vector<neml2::Tensor> defined;
+  for (const auto & [key, value] : _in)
+    defined.push_back(value);
+  const auto batch_shape = neml2::utils::broadcast_batch_sizes(defined);
+
+  // Make all inputs conformal
+  for (auto & [key, value] : _in)
+    if (value.batch_sizes() != batch_shape)
+      _in[key] = value.batch_unsqueeze(0).batch_expand(batch_shape);
+}
+
+void
 NEML2ModelExecutor::solve()
 {
   // Evaluate the NEML2 material model
-  std::tie(_out, _dout_din) = model().value_and_dvalue(_in);
+  TIME_SECTION("NEML2 solve", 3, "Solving NEML2 material model");
+
+  // NEML2 requires double precision
+  auto prev_dtype = neml2::get_default_dtype();
+  neml2::set_default_dtype(neml2::kFloat64);
+
+  if (scheduler())
+  {
+    // We only need consisent batch sizes if we are using the dispatcher
+    expandInputs();
+    neml2::ValueMapLoader loader(_in, 0);
+    std::tie(_out, _dout_din) = dispatcher()->run(loader);
+  }
+  else
+    std::tie(_out, _dout_din) = model().value_and_dvalue(_in);
   _in.clear();
+
+  // Restore the default dtype
+  neml2::set_default_dtype(prev_dtype);
 }
 
 void
@@ -302,11 +336,11 @@ NEML2ModelExecutor::extractOutputs()
   // retrieve parameter derivatives
   for (auto & [y, dy] : _retrieved_parameter_derivatives)
     for (auto & [p, target] : dy)
-      target = neml2::math::jacrev(_out[y],
-                                   model().get_parameter(p),
-                                   /*retain_graph=*/true,
-                                   /*create_graph=*/false,
-                                   /*allow_unused=*/false)
+      target = neml2::jacrev(_out[y],
+                             model().get_parameter(p),
+                             /*retain_graph=*/true,
+                             /*create_graph=*/false,
+                             /*allow_unused=*/false)
                    .to(torch::kCPU);
 
   // clear output
@@ -380,7 +414,7 @@ NEML2ModelExecutor::getOutputParameterDerivative(const neml2::VariableName & out
                parameter_name,
                "', but the NEML2 output variable does not exist.");
 
-  if (!model().named_parameters().has_key(parameter_name))
+  if (model().named_parameters().count(parameter_name) != 1)
     mooseError("Trying to retrieve the derivative of NEML2 output variable '",
                output_name,
                "' with respect to NEML2 model parameter '",
