@@ -74,6 +74,13 @@ public:
   const std::string getRegionTypeString();
 
   /**
+   * @brief Get the RegionType
+   *
+   * @return RegionType
+   */
+  RegionType getRegionType() const { return _region_type; }
+
+  /**
    * @brief Get the list of surfaces associated with the region
    *
    * @return std::vector<std::shared_ptr<CSGSurface>>
@@ -82,10 +89,10 @@ public:
 
 protected:
   /// String representation of region - default empty string
-  std::string _region_str = "";
+  std::string _region_str;
 
   /// type of region - default empty
-  RegionType _region_type = CSGRegion::RegionType::EMPTY;
+  RegionType _region_type;
 
   /// Surface list associated with the region
   std::vector<std::shared_ptr<CSGSurface>> _surfaces;
