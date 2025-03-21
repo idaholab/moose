@@ -58,7 +58,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
 
   // initialize cell region to be updated
   CSG::CSGRegion region;
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < points_on_planes.size(); ++i)
   {
     const auto surf_name = "surf_" + surf_names[i];
     auto plane_ptr = csg_mesh->createPlaneFromPoints(surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
@@ -67,11 +67,10 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
         ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
     // check if first halfspace to be added to the region
     if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
-      {region = halfspace;}
+      region = halfspace;
     else
-      {region = region & halfspace;}
+      region = region & halfspace;
   }
-  mooseInfo(region.toString());
 
   const auto cell_name = "square_cell";
   const auto material_name = "square_material";
