@@ -52,7 +52,7 @@ public:
   /**
    * Constructor for complement
    */
-  CSGRegion(const CSGRegion & region);
+  CSGRegion(const CSGRegion & region, const CSGRegion::RegionType region_type);
 
   /**
    * Destructor
