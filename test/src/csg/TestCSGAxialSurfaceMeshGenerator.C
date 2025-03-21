@@ -62,7 +62,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
     const auto region_direction = plane_ptr->directionFromPoint(centroid);
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
-    cell_region &= halfspace;
+    cell_region = cell_region & halfspace;
   }
 
   cell_ptr->updateRegion(cell_region);
