@@ -98,6 +98,8 @@ public:
   /// Reset Exodus output
   void clear();
 
+  bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const override { return true; }
+
 protected:
   /**
    * Outputs nodal, nonlinear variables

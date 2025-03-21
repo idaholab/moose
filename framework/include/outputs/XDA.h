@@ -25,6 +25,8 @@ public:
    */
   XDA(const InputParameters & parameters);
 
+  bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const override { return true; }
+
 protected:
   /**
    * Overload the Output::output method, this is required for XDA

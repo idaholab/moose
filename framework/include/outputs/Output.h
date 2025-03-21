@@ -143,6 +143,14 @@ public:
 
   const std::set<Real> & getSyncTimes() { return _sync_times; }
 
+  /**
+   * A virtual function that stores whether output type supports material output. Defaults to false,
+   * if a particular output type supports material output it can be overridden in the child class.
+   * @param suppress_warnings Parameter to control whether warnings should be suppressed. This
+   *        parameter is intentionally unused and may be used by the child class
+   */
+  virtual bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const { return false; }
+
 protected:
   /**
    * Overload this function with the desired output activities

@@ -103,8 +103,8 @@ CheckOutputAction::checkMaterialOutput()
     // Extract the names of the output objects to which the material properties will be exported
     std::set<OutputName> outputs = mat->getOutputs();
 
-    // Check that the outputs exist
-    _app.getOutputWarehouse().checkOutputs(outputs);
+    // Check that the outputs exist, and that the output types support material output
+    _app.getOutputWarehouse().checkOutputs(outputs, /* supports_material_output = */ true);
   }
 }
 

@@ -65,6 +65,12 @@ public:
   bool hasOutput(const std::string & name) const;
 
   /**
+   * Returns true if the output object exists, and it supports material property output
+   * @param name The name of the output object for which to test for existence within the warehouse
+   */
+  bool hasMaterialPropertyOutput(const std::string & name) const;
+
+  /**
    * Calls the meshChanged method for every output object
    */
   void meshChanged();
@@ -117,10 +123,20 @@ public:
   /**
    * Test that the output names exist
    * @param names A vector of names to check
-   * This method will produce an error if any of the supplied
-   * names do not exist in the warehouse. Reserved names are not considered.
+   * @param supports_material_output Optional parameter to check if all output objects associated
+   *       with 'names' must support material property output
+   *
+   * This method will produce an error if any of the supplied names do not exist in
+   * the warehouse. Reserved names are not considered.
    */
-  void checkOutputs(const std::set<OutputName> & names);
+  void checkOutputs(const std::set<OutputName> & names,
+                    const bool supports_material_output = false);
+
+  /**
+   * Returns all output names that support material output
+   * @return A set of all output names that support material output
+   */
+  std::set<OutputName> getAllMaterialPropertyOutputNames() const;
 
   /**
    * Return an Output object by name

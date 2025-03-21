@@ -98,6 +98,8 @@ public:
    */
   std::stringstream checkpointInfo() const;
 
+  bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const override { return true; }
+
 protected:
   /**
    * Outputs a checkpoint file.

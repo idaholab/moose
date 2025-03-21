@@ -208,13 +208,13 @@ TC3 = 1.0
                  "if(mat_den<${rho1},TC1,if(mat_den<${rho2},TC2,TC3))"
     coupled_variables = 'mat_den'
     property_name = thermal_cond
-    outputs = 'exodus'
+    outputs = 'out'
   []
   [thermal_compliance]
     type = ThermalCompliance
     temperature = temp
     thermal_conductivity = thermal_cond
-    outputs = 'exodus'
+    outputs = 'out'
   []
   [elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
@@ -271,14 +271,14 @@ TC3 = 1.0
     type = CostSensitivity
     design_density = mat_den
     cost = Cost_mat
-    outputs = 'exodus'
+    outputs = 'out'
   []
   [tc]
     type = ThermalSensitivity
     design_density = mat_den
     thermal_conductivity = thermal_cond
     temperature = temp
-    outputs = 'exodus'
+    outputs = 'out'
   []
 []
 
@@ -376,7 +376,6 @@ TC3 = 1.0
 []
 
 [Outputs]
-  exodus = true
   [out]
     type = CSV
     execute_on = 'TIMESTEP_END'
