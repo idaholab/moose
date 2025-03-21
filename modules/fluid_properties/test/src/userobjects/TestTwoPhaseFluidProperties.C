@@ -58,6 +58,12 @@ TestTwoPhaseFluidProperties::sigma_from_T(Real T) const
   return 5 * T;
 }
 
+Real
+TestTwoPhaseFluidProperties::T_triple() const
+{
+  return 0.1;
+}
+
 Real TestTwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const { return 5; }
 
 bool

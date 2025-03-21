@@ -30,18 +30,12 @@ public:
   FlowModel(const InputParameters & params);
 
   /**
-   * Gets a vector of the solution variables
-   */
-  std::vector<VariableName> getSolutionVariables() const { return _solution_vars; }
-
-  /**
    * Initialize the model
    */
-  virtual void init() = 0;
+  virtual void init() {}
 
   /**
    * Add variables the model uses
-   *
    */
   virtual void addVariables() = 0;
 
