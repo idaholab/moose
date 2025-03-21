@@ -38,6 +38,7 @@ using libMesh::DofMap;
 using libMesh::QBase;
 using libMesh::VectorValue;
 
+class FaceInfo;
 class TimeIntegrator;
 class Assembly;
 class SubProblem;
@@ -109,6 +110,13 @@ public:
   void setGeometry(Moose::GeometryType gm_type);
 
   //////////////// Heavy lifting computational routines //////////////////////////////
+
+  /**
+   * compute the face values and averaging
+   */
+  void computeValuesFace(const FaceInfo & fi);
+  void computeGhostValuesFace(const FaceInfo & fi, MooseVariableData<OutputType> & other_face);
+  void computeADAveraging();
 
   /**
    * compute the variable values
@@ -298,10 +306,24 @@ public:
     return _ad_u;
   }
 
+  const ADTemplateVariableValue<OutputType> & adSlnAvg() const
+  {
+    _need_averaging = true;
+    _need_ad = _need_ad_u = true;
+    return _ad_u_average;
+  }
+
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
+  }
+
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const
+  {
+    _need_averaging = true;
+    _need_ad = _need_ad_grad_u = true;
+    return _ad_grad_u_average;
   }
 
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
@@ -524,6 +546,9 @@ private:
   mutable bool _need_ad_grad_u_dot;
   mutable bool _need_ad_second_u;
 
+  /// Averaging flags
+  mutable bool _need_averaging;
+
   bool _has_dof_indices;
 
   /// grad_u dots
@@ -548,6 +573,8 @@ private:
 
   /// AD u
   ADTemplateVariableValue<OutputType> _ad_u;
+  ADTemplateVariableValue<OutputType> _ad_u_average;
+  ADTemplateVariableGradient<OutputType> _ad_grad_u_average;
   ADTemplateVariableGradient<OutputType> _ad_grad_u;
   ADTemplateVariableSecond<OutputType> _ad_second_u;
   MooseArray<ADReal> _ad_dof_values;
@@ -613,6 +640,7 @@ private:
   const FieldVariablePhiCurl * _current_curl_phi;
   const FieldVariablePhiDivergence * _current_div_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _current_ad_grad_phi;
+  MooseArray<ADReal> _current_ad_JxW;
 
   // dual mortar
   const bool _use_dual;
@@ -678,6 +706,9 @@ private:
 
   /// The current element side
   const unsigned int & _current_side;
+
+  const MooseArray<ADReal> & _ad_JxW;
+  const MooseArray<ADReal> & _ad_JxWFace;
 
   /// A dummy ADReal variable
   ADReal _ad_real_dummy = 0;

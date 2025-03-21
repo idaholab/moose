@@ -631,6 +631,17 @@ protected:
                                                             unsigned int comp = 0) const;
 
   /**
+   * Returns gradient of a coupled variable at an element face
+   * @param var_name Name of coupled array variable
+   * @param fi The face for which to retrieve the gradient
+   * @param state State argument which describes at what time / solution iteration  state we want to
+   * evaluate the variable
+   */
+  virtual ADRealVectorValue adCoupledGradientFace(const std::string & var_name,
+                                                  const FaceInfo & fi,
+                                                  const Moose::StateArg & state);
+
+  /**
    * Returns gradient of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -1362,6 +1373,9 @@ protected:
   const GenericVariableSecond<is_ad> & genericZeroSecond();
 
 protected:
+  /// Whether the MooseObject is a finite volume object
+  const bool _is_fv;
+
   // Reference to the interface's input parameters
   const InputParameters & _c_parameters;
 
@@ -1759,9 +1773,6 @@ private:
   std::set<TagID> _fe_coupleable_vector_tags;
 
   std::set<TagID> _fe_coupleable_matrix_tags;
-
-  /// Whether the MooseObject is a finite volume object
-  const bool _is_fv;
 
   const MooseObject * const _obj;
 
