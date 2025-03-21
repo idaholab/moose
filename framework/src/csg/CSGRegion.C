@@ -58,8 +58,16 @@ CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType regio
       _region_type != CSGRegion::RegionType::EMPTY)
     mooseError(
         "Region type " + getRegionTypeString() + " is not supported for a single region");
-  // no change to surfaces, but update string
-  _region_str = "~(" + region.toString() + ")";
+
+  if (_region_type == CSGRegion::RegionType::COMPLEMENT)
+    // no change to surfaces, but update string
+    _region_str = "~(" + region.toString() + ")";
+  else if (_region_type == CSGRegion::RegionType::EMPTY)
+  {
+    // reset the region and make it empty
+    _region_str = "";
+    _surfaces.clear();
+  }
 }
 
 const std::string
