@@ -318,6 +318,7 @@ BatchMeshGeneratorAction::addMeshGenerators()
     {
       // For the first element, just copy the parameters
       if (processed_batch_vector_input_param_values.empty())
+      {
         if (processed_batch_scalar_input_param_values.empty())
         {
           // if no batch scalar input parameters are used
@@ -380,6 +381,7 @@ BatchMeshGeneratorAction::addMeshGenerators()
             }
           }
         }
+      }
       else
       {
         const unsigned int num_new_batch_params = _batch_vector_input_param_values[i].size();

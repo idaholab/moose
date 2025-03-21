@@ -825,12 +825,13 @@ Assembly::reinitFE(const Elem * elem)
         computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
     }
     else
+    {
       for (unsigned qp = 0; qp < n_qp; ++qp)
-      {
         _ad_JxW[qp] = _current_JxW[qp];
-        if (_calculate_xyz)
+      if (_calculate_xyz)
+        for (unsigned qp = 0; qp < n_qp; ++qp)
           _ad_q_points[qp] = _current_q_points[qp];
-      }
+    }
 
     for (const auto & it : _fe[dim])
     {
@@ -848,8 +849,8 @@ Assembly::reinitFE(const Elem * elem)
       else
       {
         const auto & regular_grad_phi = _fe_shape_data[fe_type]->_grad_phi;
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+          for (unsigned qp = 0; qp < n_qp; ++qp)
             grad_phi[i][qp] = regular_grad_phi[i][qp];
       }
     }
@@ -869,8 +870,8 @@ Assembly::reinitFE(const Elem * elem)
       else
       {
         const auto & regular_grad_phi = _vector_fe_shape_data[fe_type]->_grad_phi;
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+          for (unsigned qp = 0; qp < n_qp; ++qp)
             grad_phi[i][qp] = regular_grad_phi[i][qp];
       }
     }
@@ -1136,15 +1137,15 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
           _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), dx_deta = _ad_dxyzdeta_map[p](0),
-                 dy_dxi = _ad_dxyzdxi_map[p](1), dy_deta = _ad_dxyzdeta_map[p](1),
-                 dz_dxi = _ad_dxyzdxi_map[p](2), dz_deta = _ad_dxyzdeta_map[p](2);
+      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), &dx_deta = _ad_dxyzdeta_map[p](0),
+                 &dy_dxi = _ad_dxyzdxi_map[p](1), &dy_deta = _ad_dxyzdeta_map[p](1),
+                 &dz_dxi = _ad_dxyzdxi_map[p](2), &dz_deta = _ad_dxyzdeta_map[p](2);
 
       const auto g11 = (dx_dxi * dx_dxi + dy_dxi * dy_dxi + dz_dxi * dz_dxi);
 
       const auto g12 = (dx_dxi * dx_deta + dy_dxi * dy_deta + dz_dxi * dz_deta);
 
-      const auto g21 = g12;
+      const auto & g21 = g12;
 
       const auto g22 = (dx_deta * dx_deta + dy_deta * dy_deta + dz_deta * dz_deta);
 
@@ -1214,11 +1215,11 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
           _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      const auto dx_dxi = _ad_dxyzdxi_map[p](0), dy_dxi = _ad_dxyzdxi_map[p](1),
-                 dz_dxi = _ad_dxyzdxi_map[p](2), dx_deta = _ad_dxyzdeta_map[p](0),
-                 dy_deta = _ad_dxyzdeta_map[p](1), dz_deta = _ad_dxyzdeta_map[p](2),
-                 dx_dzeta = _ad_dxyzdzeta_map[p](0), dy_dzeta = _ad_dxyzdzeta_map[p](1),
-                 dz_dzeta = _ad_dxyzdzeta_map[p](2);
+      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), &dy_dxi = _ad_dxyzdxi_map[p](1),
+                 &dz_dxi = _ad_dxyzdxi_map[p](2), &dx_deta = _ad_dxyzdeta_map[p](0),
+                 &dy_deta = _ad_dxyzdeta_map[p](1), &dz_deta = _ad_dxyzdeta_map[p](2),
+                 &dx_dzeta = _ad_dxyzdzeta_map[p](0), &dy_dzeta = _ad_dxyzdzeta_map[p](1),
+                 &dz_dzeta = _ad_dxyzdzeta_map[p](2);
 
       _ad_jac[p] = (dx_dxi * (dy_deta * dz_dzeta - dz_deta * dy_dzeta) +
                     dy_dxi * (dz_deta * dx_dzeta - dx_deta * dz_dzeta) +
@@ -1394,7 +1395,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
                 side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
       }
 
-      for (unsigned int p = 0; p < n_qp; p++)
+      for (const auto p : make_range(n_qp))
       {
         if (_calculate_face_xyz)
         {
@@ -1415,14 +1416,14 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       if (_calculate_curvatures)
         _ad_d2xyzdxi2_map.resize(n_qp);
 
-      for (unsigned int p = 0; p < n_qp; p++)
-      {
+      for (const auto p : make_range(n_qp))
         _ad_dxyzdxi_map[p].zero();
-        if (_calculate_face_xyz)
+      if (_calculate_face_xyz)
+        for (const auto p : make_range(n_qp))
           _ad_q_points_face[p].zero();
-        if (_calculate_curvatures)
+      if (_calculate_curvatures)
+        for (const auto p : make_range(n_qp))
           _ad_d2xyzdxi2_map[p].zero();
-      }
 
       const auto n_mapping_shape_functions =
           FE<2, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
@@ -1437,17 +1438,17 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
             Moose::derivInsert(
                 side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
-        for (unsigned int p = 0; p < n_qp; p++)
-        {
+        for (const auto p : make_range(n_qp))
           _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
-          if (_calculate_face_xyz)
+        if (_calculate_face_xyz)
+          for (const auto p : make_range(n_qp))
             _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
-          if (_calculate_curvatures)
+        if (_calculate_curvatures)
+          for (const auto p : make_range(n_qp))
             _ad_d2xyzdxi2_map[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
-        }
       }
 
-      for (unsigned int p = 0; p < n_qp; p++)
+      for (const auto p : make_range(n_qp))
       {
         _ad_normals[p] =
             (VectorValue<ADReal>(_ad_dxyzdxi_map[p](1), -_ad_dxyzdxi_map[p](0), 0.)).unit();
@@ -1476,19 +1477,21 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         _ad_d2xyzdeta2_map.resize(n_qp);
       }
 
-      for (unsigned int p = 0; p < n_qp; p++)
+      for (const auto p : make_range(n_qp))
       {
         _ad_dxyzdxi_map[p].zero();
         _ad_dxyzdeta_map[p].zero();
-        if (_calculate_face_xyz)
+      }
+      if (_calculate_face_xyz)
+        for (const auto p : make_range(n_qp))
           _ad_q_points_face[p].zero();
-        if (_calculate_curvatures)
+      if (_calculate_curvatures)
+        for (const auto p : make_range(n_qp))
         {
           _ad_d2xyzdxi2_map[p].zero();
           _ad_d2xyzdxideta_map[p].zero();
           _ad_d2xyzdeta2_map[p].zero();
         }
-      }
 
       const unsigned int n_mapping_shape_functions =
           FE<3, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
@@ -1503,34 +1506,36 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
             Moose::derivInsert(
                 side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
-        for (unsigned int p = 0; p < n_qp; p++)
+        for (const auto p : make_range(n_qp))
         {
           _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
           _ad_dxyzdeta_map[p].add_scaled(side_point, dpsideta_map[i][p]);
-          if (_calculate_face_xyz)
+        }
+        if (_calculate_face_xyz)
+          for (const auto p : make_range(n_qp))
             _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
-          if (_calculate_curvatures)
+        if (_calculate_curvatures)
+          for (const auto p : make_range(n_qp))
           {
             _ad_d2xyzdxi2_map[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
             _ad_d2xyzdxideta_map[p].add_scaled(side_point, (*d2psidxideta_map)[i][p]);
             _ad_d2xyzdeta2_map[p].add_scaled(side_point, (*d2psideta2_map)[i][p]);
           }
-        }
       }
 
-      for (unsigned int p = 0; p < n_qp; p++)
+      for (const auto p : make_range(n_qp))
       {
         _ad_normals[p] = _ad_dxyzdxi_map[p].cross(_ad_dxyzdeta_map[p]).unit();
 
-        const auto &dxdxi = _ad_dxyzdxi_map[p](0), dxdeta = _ad_dxyzdeta_map[p](0),
-                   dydxi = _ad_dxyzdxi_map[p](1), dydeta = _ad_dxyzdeta_map[p](1),
-                   dzdxi = _ad_dxyzdxi_map[p](2), dzdeta = _ad_dxyzdeta_map[p](2);
+        const auto &dxdxi = _ad_dxyzdxi_map[p](0), &dxdeta = _ad_dxyzdeta_map[p](0),
+                   &dydxi = _ad_dxyzdxi_map[p](1), &dydeta = _ad_dxyzdeta_map[p](1),
+                   &dzdxi = _ad_dxyzdxi_map[p](2), &dzdeta = _ad_dxyzdeta_map[p](2);
 
         const auto g11 = (dxdxi * dxdxi + dydxi * dydxi + dzdxi * dzdxi);
 
         const auto g12 = (dxdxi * dxdeta + dydxi * dydeta + dzdxi * dzdeta);
 
-        const auto g21 = g12;
+        const auto & g21 = g12;
 
         const auto g22 = (dxdeta * dxdeta + dydeta * dydeta + dzdeta * dzdeta);
 
@@ -2134,15 +2139,19 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
         computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
     }
     else
+    {
       for (unsigned qp = 0; qp < n_qp; ++qp)
       {
         _ad_JxW_face[qp] = _current_JxW_face[qp];
-        if (_calculate_face_xyz)
-          _ad_q_points_face[qp] = _current_q_points_face[qp];
         _ad_normals[qp] = _current_normals[qp];
-        if (_calculate_curvatures)
-          _ad_curvatures[qp] = _curvatures[qp];
       }
+      if (_calculate_face_xyz)
+        for (unsigned qp = 0; qp < n_qp; ++qp)
+          _ad_q_points_face[qp] = _current_q_points_face[qp];
+      if (_calculate_curvatures)
+        for (unsigned qp = 0; qp < n_qp; ++qp)
+          _ad_curvatures[qp] = _curvatures[qp];
+    }
 
     for (const auto & it : _fe_face[dim])
     {
@@ -2160,8 +2169,8 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       if (_displaced)
         computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
       else
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+          for (unsigned qp = 0; qp < n_qp; ++qp)
             grad_phi[i][qp] = regular_grad_phi[i][qp];
     }
     for (const auto & it : _vector_fe_face[dim])
@@ -2180,8 +2189,8 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       if (_displaced)
         computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
       else
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+          for (unsigned qp = 0; qp < n_qp; ++qp)
             grad_phi[i][qp] = regular_grad_phi[i][qp];
     }
   }

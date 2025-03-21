@@ -23,6 +23,7 @@
 #include "ContactLineSearchBase.h"
 #include "ExplicitDynamicsContactAction.h"
 
+#include "libmesh/id_types.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
@@ -49,9 +50,6 @@ ExplicitDynamicsContactConstraint::validParams()
   params.addCoupledVar("secondary_gap_offset", "offset to the gap distance from secondary side");
   params.addCoupledVar("mapped_primary_gap_offset",
                        "offset to the gap distance mapped from primary side");
-  params.addRequiredCoupledVar("nodal_area", "The nodal area.");
-  params.addRequiredCoupledVar("nodal_density", "The nodal density.");
-  params.addRequiredCoupledVar("nodal_wave_speed", "The nodal wave speed.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("penalty",
                         1e8,
@@ -62,10 +60,7 @@ ExplicitDynamicsContactConstraint::validParams()
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
-  params.addParam<bool>("overwrite_current_solution",
-                        false,
-                        "Whether to overwrite the position of contact boundaries with the velocity "
-                        "computed with the contact algorithm.");
+
   params.addClassDescription(
       "Apply non-penetration constraints on the mechanical deformation in explicit dynamics "
       "using a node on face formulation by solving uncoupled momentum-balance equations.");
@@ -89,16 +84,9 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _has_mapped_primary_gap_offset(isCoupled("mapped_primary_gap_offset")),
     _mapped_primary_gap_offset_var(
         _has_mapped_primary_gap_offset ? getVar("mapped_primary_gap_offset", 0) : nullptr),
-    _nodal_area_var(getVar("nodal_area", 0)),
-    _nodal_density_var(getVar("nodal_density", 0)),
-    _nodal_wave_speed_var(getVar("nodal_wave_speed", 0)),
-    _aux_system(_nodal_area_var->sys()),
-    _aux_solution(_aux_system.currentSolution()),
     _penalty(getParam<Real>("penalty")),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _residual_copy(_sys.residualGhosted()),
-    _neighbor_density(getNeighborMaterialPropertyByName<Real>("density")),
-    _neighbor_wave_speed(getNeighborMaterialPropertyByName<Real>("wave_speed")),
     _gap_rate(&writableVariable("gap_rate")),
     _neighbor_vel_x(isCoupled("vel_x") ? coupledNeighborValue("vel_x") : _zero),
     _neighbor_vel_y(isCoupled("vel_y") ? coupledNeighborValue("vel_y") : _zero),
@@ -236,7 +224,7 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
   distance_vec += udotvec;
 
   if (distance_vec.norm() != 0)
-    distance_vec += gapOffset(node) * pinfo->_normal * distance_vec.unit() * distance_vec.unit();
+    distance_vec += gapOffset(node) * pinfo->_normal;
 
   const Real gap_size = -1.0 * pinfo->_normal * distance_vec;
 
@@ -255,15 +243,15 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
   if (!pinfo->isCaptured())
     return;
 
-  const Real penalty = getPenalty(node);
-
-  RealVectorValue pen_force(penalty * distance_vec);
-
   switch (_model)
   {
     case ExplicitDynamicsContactModel::FRICTIONLESS:
+    {
+      const Real penalty = getPenalty(node);
+      RealVectorValue pen_force(penalty * distance_vec);
       pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
       break;
+    }
     case ExplicitDynamicsContactModel::FRICTIONLESS_BALANCE:
       solveImpactEquations(node, pinfo, distance_vec);
       break;
@@ -274,7 +262,7 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
 
   if (update_contact_set && pinfo->isCaptured() && !newly_captured)
   {
-    const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(node);
+    const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force);
     if (-contact_pressure >= 0.0)
     {
       pinfo->release();
@@ -291,25 +279,6 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
   // Momentum balance, uncoupled normal pressure
   // See Heinstein et al, 2000, Contact-impact modeling in explicit transient dynamics.
 
-  const auto nodal_area = nodalArea(node);
-
-  dof_id_type dof_wave_speed =
-      node.dof_number(_aux_system.number(), _nodal_wave_speed_var->number(), 0);
-  const Real wave_speed_secondary = (*_aux_solution)(dof_wave_speed);
-
-  dof_id_type dof_density = node.dof_number(_aux_system.number(), _nodal_density_var->number(), 0);
-  const Real density_secondary = (*_aux_solution)(dof_density);
-
-  Real mass_contact_pressure(0.0);
-
-  Real gap_rate(0.0);
-
-  mass_contact_pressure =
-      density_secondary * _neighbor_density[0] * wave_speed_secondary * _neighbor_wave_speed[0];
-  mass_contact_pressure /=
-      (density_secondary * wave_speed_secondary + _neighbor_density[0] * _neighbor_wave_speed[0]);
-  mass_contact_pressure *= nodal_area;
-
   dof_id_type dof_x = node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
   dof_id_type dof_y = node.dof_number(_sys.number(), _var_objects[1]->number(), 0);
   dof_id_type dof_z =
@@ -318,14 +287,18 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
   auto & u_dot = *_sys.solutionUDot();
 
   // Get lumped mass value
-  auto & diag = _sys.getVector("mass_matrix_diag");
-  Real mass_q = diag(dof_x);
+  const auto & diag = _sys.getVector("mass_matrix_diag_inverted");
+
+  Real mass_node = 1.0 / diag(dof_x);
+  Real mass_face = computeFaceMass(diag);
+
+  Real mass_eff = (mass_face * mass_node) / (mass_face + mass_node);
 
   // Include effects of other forces:
   // Initial guess: v_{n-1/2} + dt * M^{-1} * (F^{ext} - F^{int})
-  Real velocity_x = u_dot(dof_x) + _dt / mass_q * -1 * _residual_copy(dof_x);
-  Real velocity_y = u_dot(dof_y) + _dt / mass_q * -1 * _residual_copy(dof_y);
-  Real velocity_z = u_dot(dof_z) + _dt / mass_q * -1 * _residual_copy(dof_z);
+  Real velocity_x = u_dot(dof_x) + _dt / mass_node * -1 * _residual_copy(dof_x);
+  Real velocity_y = u_dot(dof_y) + _dt / mass_node * -1 * _residual_copy(dof_y);
+  Real velocity_z = u_dot(dof_z) + _dt / mass_node * -1 * _residual_copy(dof_z);
 
   Real n_velocity_x = _neighbor_vel_x[0];
   Real n_velocity_y = _neighbor_vel_y[0];
@@ -335,58 +308,23 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
       velocity_x, velocity_y, _mesh.dimension() == 3 ? velocity_z : 0.0);
   RealVectorValue closest_point_velocity(
       n_velocity_x, n_velocity_y, _mesh.dimension() == 3 ? n_velocity_z : 0.0);
+  // Compute initial gap rate
+  Real gap_rate = pinfo->_normal * (secondary_velocity - closest_point_velocity);
+
+  // Compute the force increment needed to set gap rate to 0
+  RealVectorValue impulse_force = pinfo->_normal * (gap_rate * mass_eff) / _dt;
+  pinfo->_contact_force = impulse_force;
+
+  // recalculate velocity to determine gap rate
+  velocity_x -= _dt / mass_eff * impulse_force(0);
+  velocity_y -= _dt / mass_eff * impulse_force(1);
+  velocity_z -= _dt / mass_eff * impulse_force(2);
+
+  // Recalculate gap rate for backwards compatibility
+  secondary_velocity = {velocity_x, velocity_y, _mesh.dimension() == 3 ? velocity_z : 0.0};
   gap_rate = pinfo->_normal * (secondary_velocity - closest_point_velocity);
-
-  // Prepare equilibrium loop
-  bool is_converged(false);
-  unsigned int iteration_no(0);
-  const unsigned int max_no_iterations(20000);
-
-  // Initialize augmented iteration variable
-  Real gap_rate_old(0.0);
-  Real force_increment(0.0);
-  Real force_increment_old(0.0);
-  Real lambda_iteration(0);
-
-  while (!is_converged && iteration_no < max_no_iterations)
-  {
-    // Start a loop until we converge on normal contact forces
-    gap_rate_old = gap_rate;
-    gap_rate = pinfo->_normal * (secondary_velocity - closest_point_velocity);
-    force_increment_old = force_increment;
-
-    force_increment = mass_contact_pressure * gap_rate;
-
-    velocity_x -= _dt / mass_q * (pinfo->_normal(0) * (force_increment));
-    velocity_y -= _dt / mass_q * (pinfo->_normal(1) * (force_increment));
-    velocity_z -= _dt / mass_q * (pinfo->_normal(2) * (force_increment));
-
-    // Let's not modify the neighbor velocity, but apply the corresponding force.
-    // TODO: Update for multi-body impacts
-    // n_velocity_x = n_velocity_x;
-    // n_velocity_y = n_velocity_y;
-    // n_velocity_z = n_velocity_z;
-
-    secondary_velocity = {velocity_x, velocity_y, _mesh.dimension() == 3 ? velocity_z : 0.0};
-    closest_point_velocity = {
-        n_velocity_x, n_velocity_y, _mesh.dimension() == 3 ? n_velocity_z : 0.0};
-
-    // Convergence check
-    lambda_iteration += force_increment;
-
-    const Real relative_error = (force_increment - force_increment_old) / force_increment;
-    const Real absolute_error = std::abs(force_increment);
-
-    if (std::abs(relative_error) < TOLERANCE * TOLERANCE || absolute_error < TOLERANCE ||
-        (gap_rate_old) * (gap_rate) < 0.0)
-      is_converged = true;
-    else
-      iteration_no++;
-  }
-
+  // gap rate is now always near "0"
   _gap_rate->setNodalValue(gap_rate);
-
-  pinfo->_contact_force = pinfo->_normal * lambda_iteration;
 }
 
 Real
@@ -430,25 +368,30 @@ ExplicitDynamicsContactConstraint::gapOffset(const Node & node)
 }
 
 Real
-ExplicitDynamicsContactConstraint::nodalArea(const Node & node)
-{
-  dof_id_type dof = node.dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
-
-  Real area = (*_aux_solution)(dof);
-  if (area == 0.0)
-  {
-    if (_t_step > 1)
-      mooseError("Zero nodal area found");
-    else
-      area = 1.0; // Avoid divide by zero during initialization
-  }
-
-  return area;
-}
-
-Real
 ExplicitDynamicsContactConstraint::getPenalty(const Node & /*node*/)
 {
   // TODO: Include normalized penalty values.
   return _penalty;
+}
+
+Real
+ExplicitDynamicsContactConstraint::computeFaceMass(const NumericVector<Real> & lumped_mass)
+{
+  // Initialize face mass to zero
+  Real mass_face(0.0);
+
+  // Get the primary side of the current contact
+  const auto primary_side = _current_primary->side_ptr(_assembly.neighborSide());
+
+  // Get the dofs on the primary (face) side of the contact
+  std::vector<dof_id_type> face_dofs;
+  _primary_var.getDofIndices(primary_side.get(), face_dofs);
+
+  // Get average mass of face
+  for (const auto dof : face_dofs)
+    mass_face += 1.0 / lumped_mass(dof);
+
+  mass_face /= face_dofs.size();
+
+  return mass_face;
 }
