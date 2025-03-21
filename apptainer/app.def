@@ -119,11 +119,24 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Remove the libmesh methods from moose-dev that we do not need
     for method in opt oprof devel dbg; do
-        if [ "$method" != "$METHOD" ]; then
-            find ${LIBMESH_DIR}/lib -name "*_$method.so*" -delete -print
-            find ${LIBMESH_DIR}/lib -name "*_$method.la" -delete -print
-            find ${LIBMESH_DIR}/bin -name "*-$method" -delete -print
-            find ${LIBMESH_DIR} -name "*-$method.pc" -delete -print
+        if [ "$method" == "$METHOD" ]; then
+            continue
+        fi
+        # libmesh
+        find ${LIBMESH_DIR}/lib -name "*_$method.so*" -delete -print
+        find ${LIBMESH_DIR}/lib -name "*_$method.la" -delete -print
+        find ${LIBMESH_DIR}/bin -name "*-$method" -delete -print
+        find ${LIBMESH_DIR} -name "*-$method.pc" -delete -print
+        # neml2
+        if [ -n "$NEML2_DIR" ]; then
+            if [ "$method" == "devel" ]; then
+                suffix="RelWithDebInfo"
+            elif [ "$method" == "dbg" ]; then
+                suffix="Debug"
+            else
+                continue
+            fi
+            find ${NEML2_DIR}/lib64 -name "*_${suffix}.so" -delete -print
         fi
     done
 

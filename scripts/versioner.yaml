@@ -116,10 +116,20 @@ packages:
     apptainer:
       from: libmesh
     influential:
+      # container build definitions
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
+      # files that are included within moose-dev.def
       - apptainer/files/moose-dev
+      # wasp
+      - scripts/configure_wasp.sh
+      - scripts/update_and_rebuild_wasp.sh
+      # libtorch
       - scripts/setup_libtorch.sh
+      # neml2
+      - scripts/configure_neml2.sh
+      - scripts/update_and_rebuild_neml2.sh
+      - modules/solid_mechanics/contrib/neml2
   # dependers: none
   pprof:
     version: 2025.04.17

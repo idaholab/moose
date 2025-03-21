@@ -98,6 +98,11 @@ libmesh_CXXFLAGS  += $(wasp_CXXFLAGS)
 libmesh_LDFLAGS   += $(wasp_LDFLAGS)
 
 #
+# neml2
+#
+include $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2.mk
+
+#
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
 ifeq ($(ENABLE_LIBTORCH),true)

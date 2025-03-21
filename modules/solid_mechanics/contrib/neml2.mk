@@ -1,104 +1,89 @@
-# There are 2 influential conf vars.
-# They are controlled by the MOOSE configure script.
+# Influential environment variables:
 #
-# ENABLE_LIBTORCH: True if we should compile with libTorch AND an installation
-#                  of libTorch is available. False otherwise.
-# LIBTORCH_DIR:    The path to the libTorch installation. NEML2 will use this
-#                  libTorch as the backend.
+# NEML2_SRC_DIR: The path to the NEML2 source directory.
+# NEML2_DIR:     The path to the installed NEML2.
 #
-# There are 2 influential env vars.
+# If NEML2_DIR is set, no lookup is done for the installed NEML2, and the
+# specified directory is used.
 #
-# ENABLE_NEML2:  If true, MOOSE will attempt to compile with NEML2 at
-#                the NEML2_DIR. If false, MOOSE will not be compiled with
-#                NEML2 (even if the NEML2 submodule is init'ed or a valid
-#                NEML2_DIR is supplied). This variable defaults to true.
-# NEML2_DIR:     The path to a valid NEML2 checkout. This variable defaults to
-#                the NEML2 submodule. The user is responsible for setting this
-#                variable if a custom NEML2 should be used. The compilation
-#                will terminate with an error message if ENABLE_NEML2 is true
-#                AND a NEML2 checkout cannot be found.
+# If NEML2_DIR is not set, by default we look for an installed NEML2 in
+# the NEML2 submodule directory. If NEML2_SRC_DIR is set, we instead look for
+# the installed NEML2 in NEML2_SRC_DIR/installed.
 
-NEML2_DIR ?= $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2
-ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
-_ENABLE_NEML2_DEFAULT = false
+# Try out best to find the installed NEML2
+ifeq ($(NEML2_DIR),)
+ifneq ($(NEML2_SRC_DIR),)
+NEML2_DIR := $(NEML2_SRC_DIR)/installed
 else
-ifneq ($(ENABLE_LIBTORCH),true)
-_ENABLE_NEML2_DEFAULT = false
-else
-_ENABLE_NEML2_DEFAULT = true
+NEML2_DIR := $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2/installed
 endif
 endif
 
-ifdef ENABLE_NEML2
-_ENABLE_NEML2_SET_BY_USER = true
-else
-ENABLE_NEML2 = $(_ENABLE_NEML2_DEFAULT)
-_ENABLE_NEML2_SET_BY_USER = false
-endif
-
-ifeq ($(ENABLE_NEML2),true)
-
-ifneq ($(ENABLE_LIBTORCH),true)
-$(error Attempting to compile MOOSE with NEML2, but libTorch is not enabled. \
-  To enable libTorch, configure MOOSE with the --with-libtorch option. \
-  To disable NEML2, set ENABLE_NEML2 to false)
-endif
-
-ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
+# If the NEML2 directory does not exist, disable NEML2
+ifeq ($(wildcard $(NEML2_DIR)/.),)
 ENABLE_NEML2 = false
-ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
-$(error Not compiling MOOSE with NEML2 because a valid NEML2 checkout cannot be found.  \
-  To use the default NEML2 that comes with MOOSE, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
-	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
-	To disable NEML2, set ENABLE_NEML2 to false.)
 else
-$(info Not compiling MOOSE with NEML2 because a valid NEML2 checkout cannot be found.  \
-  To use the default NEML2 that comes with MOOSE, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
-	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
-	To suppress this warning, set ENABLE_NEML2 to false.)
+ENABLE_NEML2 = true
+endif
+
+# If MOOSE is not configured with libtorch, warn the user that NEML2 is disabled
+ifeq ($(ENABLE_NEML2),true)
+ifneq ($(ENABLE_LIBTORCH),true)
+$(warning ******************************************************************************************)
+$(warning Found a NEML2 installation at $(NEML2_DIR), but libtorch is not enabled. )
+$(warning Disabling NEML2. To enable NEML2, please configure MOOSE following the instructions at )
+$(warning https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html)
+$(warning ******************************************************************************************)
+ENABLE_NEML2 = false
 endif
 endif
 
-endif
-
-
-###############################################################################
-# At this point, we have everything needed to compile MOOSE with NEML2
-###############################################################################
+################################################################################
+# ENABLE_NEML2 = true
+################################################################################
 ifeq ($(ENABLE_NEML2),true)
 
-$(info Compiling MOOSE with NEML2.)
-
-app_non_unity_dirs += $(shell find $(APPLICATION_DIR)/src/neml2 -type d -not -path '*/.libs*' 2> /dev/null)
-app_non_unity_dirs += $(shell find $(APPLICATION_DIR)/test/src/neml2 -type d -not -path '*/.libs*' 2> /dev/null)
-
-NEML2_INCLUDE        := $(NEML2_DIR)/include $(addsuffix /include,$(ADDITIONAL_NEML2_DIRS))
-NEML2_SRC_DIRS       := $(NEML2_DIR)/src $(addsuffix /src,$(ADDITIONAL_NEML2_DIRS))
-NEML2_SRC            := $(shell find $(NEML2_SRC_DIRS) -name "*.cxx")
-NEML2_OBJ            := $(patsubst %.cxx,%.$(obj-suffix),$(NEML2_SRC))
-NEML2_LIB            := $(NEML2_DIR)/libNEML2-$(METHOD).la
-
-ifeq ($(MOOSE_HEADER_SYMLINKS),true)
-$(NEML2_OBJ): $(moose_config_symlink) | moose_header_symlinks
-else
-$(NEML2_OBJ): $(moose_config)
+# Dynamic library suffix
+DYLIB_SUFFIX := so
+ifeq ($(shell uname -s),Darwin)
+DYLIB_SUFFIX := dylib
 endif
 
-$(NEML2_LIB): $(NEML2_OBJ)
-	@echo "Linking Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(NEML2_OBJ) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(NEML2_DIR)
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(NEML2_LIB) $(NEML2_DIR)
+# NEML2 libraries are suffixed with the CMake build type
+ifeq ($(METHOD),devel)
+NEML2_SUFFIX := _RelWithDebInfo
+else ifeq ($(METHOD),dbg)
+NEML2_SUFFIX := _Debug
+endif
 
-$(NEML2_OBJ) : %.$(obj-suffix) : %.cxx
-	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+# NEML2 directories and libraries
+NEML2_INCLUDE    := $(NEML2_DIR)/include
+# If we can ever consistently get NEML2 to install its libs in
+# the same directory, we can get rid of this
+ifneq ($(wildcard $(NEML2_DIR)/lib/.),)
+NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib
+else ifneq ($(wildcard $(NEML2_DIR)/lib64/.),)
+NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib64
+else
+$(error Failed to find NEML2 libraries in $(NEML2_DIR)/lib or $(NEML2_DIR)/lib64)
+endif
+NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
+									  neml2_dispatcher$(NEML2_SUFFIX) \
+										neml2_driver$(NEML2_SUFFIX) \
+										neml2_jit$(NEML2_SUFFIX) \
+										neml2_misc$(NEML2_SUFFIX) \
+										neml2_model$(NEML2_SUFFIX) \
+										neml2_solver$(NEML2_SUFFIX) \
+										neml2_tensor$(NEML2_SUFFIX) \
+										neml2_user_tensor$(NEML2_SUFFIX)
+NEML2_LINK_FLAGS := $(addprefix -l,$(NEML2_LIBS))
+NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 
-
-ADDITIONAL_INCLUDES  += $(addprefix -iquote,$(NEML2_INCLUDE))
-ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED
-ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD)
-ADDITIONAL_DEPEND_LIBS += $(NEML2_LIB)
+# Compile flags for NEML2
+neml2_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
+neml2_CPPFLAGS    += -DNEML2_ENABLED
+neml2_LDFLAGS     += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
+libmesh_CXXFLAGS += $(neml2_CPPFLAGS) $(neml2_INCLUDES)
+libmesh_LIBS     += $(neml2_LDFLAGS)
 
 endif

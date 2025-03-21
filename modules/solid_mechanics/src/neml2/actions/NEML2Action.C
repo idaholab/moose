@@ -15,9 +15,10 @@
 #include "InputParameterWarehouse.h"
 
 #ifdef NEML2_ENABLED
-#include "neml2/misc/parser_utils.h"
+#include "neml2/base/Parser.h"
 #endif
 
+registerMooseAction("SolidMechanicsApp", NEML2Action, "parse_neml2");
 registerMooseAction("SolidMechanicsApp", NEML2Action, "add_material");
 registerMooseAction("SolidMechanicsApp", NEML2Action, "add_user_object");
 
@@ -84,9 +85,6 @@ NEML2Action::NEML2Action(const InputParameters & params)
   const auto & common_action = getCommonAction();
   sub_block_params.applyParameters(common_action.parameters());
 
-  // verbosity
-  _verbose = getParam<bool>("verbose");
-
   // Set up optional output variable initialization
   auto init_vars = getParam<std::vector<MaterialPropertyName>>("initialize_outputs");
   auto init_vals = getParam<std::vector<MaterialPropertyName>>("initialize_output_values");
@@ -126,11 +124,19 @@ NEML2Action::act()
 void
 NEML2Action::act()
 {
+  if (_current_task == "parse_neml2")
+  {
+    if (_app.parameters().have_parameter<bool>("parse_neml2_only"))
+      if (!_app.parameters().get<bool>("parse_neml2_only"))
+        return;
+    auto & model = NEML2Utils::getModel(getParam<std::string>("model"));
+    printSummary(model);
+  }
+
   if (_current_task == "add_user_object")
   {
     // Get the NEML2 model so that we can introspect variable tensor types
-    auto & model = neml2::get_model(getParam<std::string>("model"));
-    model.to(getParam<std::string>("device"));
+    auto & model = NEML2Utils::getModel(getParam<std::string>("model"));
 
     setupInputMappings(model);
     setupParameterMappings(model);
@@ -138,8 +144,7 @@ NEML2Action::act()
     setupDerivativeMappings(model);
     setupParameterDerivativeMappings(model);
 
-    if (_verbose)
-      printSummary(model);
+    printSummary(model);
 
     // MOOSEToNEML2 input gatherers
     std::vector<UserObjectName> gatherers;
@@ -467,6 +472,9 @@ NEML2Action::setupParameterDerivativeMappings(const neml2::Model & model)
 void
 NEML2Action::printSummary(const neml2::Model & model) const
 {
+  if (!_app.parameters().have_parameter<bool>("parse_neml2_only"))
+    return;
+
   // Save formatting of the output stream so that we can restore it later
   const auto flags = _console.flags();
 
@@ -488,43 +496,46 @@ NEML2Action::printSummary(const neml2::Model & model) const
   _console << model;
 
   // List transfer between MOOSE and NEML2
-  _console << COLOR_CYAN << std::setw(width) << std::setfill('-') << std::left
-           << "Transfer between MOOSE and NEML2 " << std::setfill(' ') << COLOR_DEFAULT
-           << std::endl;
-
-  // Figure out the longest name length so that we could align the arrows
-  const auto max_moose_name_length = getLongestMOOSEName();
-
-  // List input transfer, MOOSE -> NEML2
-  for (const auto & input : _inputs)
+  if (!_app.parameters().get<bool>("parse_neml2_only"))
   {
-    _console << std::setw(max_moose_name_length) << std::right
-             << (input.neml2.name.is_old_force() || input.neml2.name.is_old_state()
-                     ? ("(old) " + input.moose.name)
-                     : input.moose.name)
-             << " --> " << input.neml2.name << std::endl;
-  }
-
-  // List parameter transfer, MOOSE -> NEML2
-  for (const auto & param : _params)
-    _console << std::setw(max_moose_name_length) << std::right << param.moose.name << " --> "
-             << param.neml2.name << std::endl;
-
-  // List output transfer, NEML2 -> MOOSE
-  for (const auto & output : _outputs)
-    _console << std::setw(max_moose_name_length) << std::right << output.moose.name << " <-- "
-             << output.neml2.name << std::endl;
-
-  // List derivative transfer, NEML2 -> MOOSE
-  for (const auto & deriv : _derivs)
-    _console << std::setw(max_moose_name_length) << std::right << deriv.moose.name << " <-- d("
-             << deriv.neml2.y.name << ")/d(" << deriv.neml2.x.name << ")" << std::endl;
-
-  // List parameter derivative transfer, NEML2 -> MOOSE
-  for (const auto & param_deriv : _param_derivs)
-    _console << std::setw(max_moose_name_length) << std::right << param_deriv.moose.name
-             << " <-- d(" << param_deriv.neml2.y.name << ")/d(" << param_deriv.neml2.x.name << ")"
+    _console << COLOR_CYAN << std::setw(width) << std::setfill('-') << std::left
+             << "Transfer between MOOSE and NEML2 " << std::setfill(' ') << COLOR_DEFAULT
              << std::endl;
+
+    // Figure out the longest name length so that we could align the arrows
+    const auto max_moose_name_length = getLongestMOOSEName();
+
+    // List input transfer, MOOSE -> NEML2
+    for (const auto & input : _inputs)
+    {
+      _console << std::setw(max_moose_name_length) << std::right
+               << (input.neml2.name.is_old_force() || input.neml2.name.is_old_state()
+                       ? ("(old) " + input.moose.name)
+                       : input.moose.name)
+               << " --> " << input.neml2.name << std::endl;
+    }
+
+    // List parameter transfer, MOOSE -> NEML2
+    for (const auto & param : _params)
+      _console << std::setw(max_moose_name_length) << std::right << param.moose.name << " --> "
+               << param.neml2.name << std::endl;
+
+    // List output transfer, NEML2 -> MOOSE
+    for (const auto & output : _outputs)
+      _console << std::setw(max_moose_name_length) << std::right << output.moose.name << " <-- "
+               << output.neml2.name << std::endl;
+
+    // List derivative transfer, NEML2 -> MOOSE
+    for (const auto & deriv : _derivs)
+      _console << std::setw(max_moose_name_length) << std::right << deriv.moose.name << " <-- d("
+               << deriv.neml2.y.name << ")/d(" << deriv.neml2.x.name << ")" << std::endl;
+
+    // List parameter derivative transfer, NEML2 -> MOOSE
+    for (const auto & param_deriv : _param_derivs)
+      _console << std::setw(max_moose_name_length) << std::right << param_deriv.moose.name
+               << " <-- d(" << param_deriv.neml2.y.name << ")/d(" << param_deriv.neml2.x.name << ")"
+               << std::endl;
+  }
 
   _console << COLOR_CYAN << std::setw(width) << std::setfill('*') << std::left
            << "NEML2 MATERIAL MODEL SUMMARY END " << std::setfill(' ') << COLOR_DEFAULT << std::endl
