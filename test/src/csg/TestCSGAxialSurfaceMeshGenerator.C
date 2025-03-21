@@ -48,7 +48,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
   auto root_univ = input_mesh->getRootUniverse();
   const auto cell_name = "square_cell";
   auto cell_ptr = root_univ->getCell(cell_name);
-  const auto cell_region = cell_ptr->getRegion();
+  auto cell_region = cell_ptr->getRegion();
   const auto centroid = Point(0, 0, 0);
 
   // Add surfaces and halfspaces corresponding to top and bottom axial planes
