@@ -15,14 +15,14 @@
  * Class implementing a Dirichlet boundary condition for linear finite
  * volume variables. This is only applicable for advection-diffusion problems.
  */
-class LinearFVAdvectionDiffusionFunctorDirichletBC : public LinearFVAdvectionDiffusionBC
+class LinearFVAdvectionDiffusionFunctorNeumannBC : public LinearFVAdvectionDiffusionBC
 {
 public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVAdvectionDiffusionFunctorDirichletBC(const InputParameters & parameters);
+  LinearFVAdvectionDiffusionFunctorNeumannBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -38,11 +38,17 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  virtual bool use_boundary_value_extrapolation() const override { return false; }
+  virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
-  virtual bool use_boundary_gradient_extrapolation() const override { return true; }
+  virtual bool use_boundary_value_extrapolation() const override { return true; }
+
+  virtual bool use_boundary_gradient_extrapolation() const override { return false; }
+
 
 protected:
   /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;
+
+  /// The functor for the diffusion coefficient
+  const Moose::Functor<Real> & _diffusion_coeff;
 };
