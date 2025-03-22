@@ -905,6 +905,18 @@ unsigned long long int convert<unsigned long long int>(const std::string & str,
                                                        bool throw_on_failure);
 
 /**
+ * This lets us use templated code using convert for both strings and other types, provided the
+ * other types don't really need a conversion
+ */
+template <typename T>
+T
+convert(const T & input, bool /*throw_on_failure*/)
+{
+  T val = input;
+  return val;
+}
+
+/**
  * Create a symbolic link, if the link already exists it is replaced.
  */
 void createSymlink(const std::string & target, const std::string & link);
@@ -1096,12 +1108,11 @@ template <typename C, typename It, typename M1, typename M2>
 auto
 findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(start_iterator,
-                      container.end(),
-                      [&](auto & item) {
-                        return wildcardEqual(first, item.first) &&
-                               wildcardEqual(second, item.second);
-                      });
+  return std::find_if(
+      start_iterator,
+      container.end(),
+      [&](auto & item)
+      { return wildcardEqual(first, item.first) && wildcardEqual(second, item.second); });
 }
 
 /**
