@@ -25,6 +25,7 @@ class KernelBase;
 class Kernel;
 class ResidualObject;
 class FVElementalKernel;
+class HDGKernel;
 
 class NonlinearThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -48,7 +49,9 @@ public:
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
   virtual void postElement(const Elem * /*elem*/) override;
   virtual void post() override;
+  bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const override;
 
+protected:
   /**
    * Reinitialize variables and materials on a face
    * @param fe_problem The finite element problem to call reinit methods on
@@ -59,20 +62,18 @@ public:
    * @param lower_d_elem If provided, lower dimensional variables coincident with the element face
    * will be reinit'd
    */
-  static void prepareFace(FEProblemBase & fe_problem,
-                          THREAD_ID tid,
-                          const Elem * elem,
-                          unsigned int side,
-                          BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
-                          const Elem * lower_d_elem = nullptr);
+  void prepareFace(const Elem * elem,
+                   unsigned int side,
+                   BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
+                   const Elem * lower_d_elem = nullptr);
 
-protected:
   ///@{
   /// Base class version just calls compute on each object for the element
   virtual void computeOnElement();
   virtual void computeOnBoundary(BoundaryID bnd_id, const Elem * lower_d_elem);
   virtual void computeOnInterface(BoundaryID bnd_id);
   virtual void computeOnInternalFace(const Elem * neighbor);
+  virtual void computeOnInternalFace() = 0;
   ///@}
 
   /**
@@ -152,9 +153,22 @@ protected:
   MooseObjectWarehouse<KernelBase> * _tag_kernels;
   ///@}
 
+  ///@{
+  /// Reference to HDGKernel storage structures
+  MooseObjectTagWarehouse<HDGKernel> & _hdg_kernels;
+
+  MooseObjectWarehouse<HDGKernel> * _hdg_warehouse;
+  ///@}
+
   /// Current subdomain FVElementalKernels
   std::vector<FVElementalKernel *> _fv_kernels;
 
   /// Whether there are any active residual objects; otherwise we will do an early return
   const bool _has_active_objects;
+
+private:
+  /// Whether DG kernels should be executed for a given internal side. This can be false if HDG
+  /// kernels are present because in that case we visit the internal side from both sides and we
+  /// don't want to double execute DG kernels
+  mutable bool _should_execute_dg;
 };
