@@ -66,7 +66,7 @@ AdjointSolve::AdjointSolve(Executioner & ex)
   // Set the solver options for the adjoint system
   mooseAssert(_problem.numSolverSystems() > 1,
               "We should have forward and adjoint systems as evidenced by our initialization list");
-  const std::string prefix = "-" + _nl_adjoint.name() + "_";
+  const auto prefix = _nl_adjoint.prefix();
   Moose::PetscSupport::storePetscOptions(_problem, prefix, ex);
   Moose::PetscSupport::setConvergedReasonFlags(_problem, prefix);
   // Set solver parameter prefix
