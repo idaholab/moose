@@ -51,7 +51,7 @@ public:
    */
   virtual void outputSetup();
 
-  bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const override { return true; }
+  bool supportsMaterialPropertyOutput() const override { return true; }
 
 protected:
   /**
