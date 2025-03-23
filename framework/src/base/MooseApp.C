@@ -72,6 +72,10 @@
 #include <sys/utsname.h> // utsname
 #endif
 
+#ifdef LIBTORCH_ENABLED
+#include <torch/version.h>
+#endif
+
 // C++ includes
 #include <numeric> // std::accumulate
 #include <fstream>
@@ -735,7 +739,7 @@ MooseApp::registerCapabilities()
   {
     const auto doc = "LibTorch machine learning and parallel tensor algebra library";
 #ifdef LIBTORCH_ENABLED
-    haveCapability("libtorch", doc);
+    addCapability("libtorch", TORCH_VERSION, doc);
 #else
     missingCapability("libtorch",
                       doc,
