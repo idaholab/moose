@@ -798,12 +798,6 @@ MooseApp::registerCapabilities()
     addCapability("petsc", version, "Using PETSc version " + version + ".");
   }
 
-#ifdef LIBMESH_DETECTED_PETSC_VERSION_RELEASE
-  addCapability("petsc_release", true, "Using a release version of PETSc.");
-#else
-  addCapability("petsc_release", false, "Not using a release version of PETSc.");
-#endif
-
 #ifdef LIBMESH_PETSC_USE_DEBUG
   addCapability("petsc_debug", true, "PETSc was built with debugging options.");
 #else
@@ -924,6 +918,15 @@ MooseApp::registerCapabilities()
 #endif
   }
 
+  {
+    const auto doc = "Boost C++ library";
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+    haveCapability("boost", doc);
+#else
+    libmeshMissingCapability("boost", doc, "--with-boost");
+#endif
+  }
+
   // libmesh stuff
   {
     const auto doc = "Adaptive mesh refinement";
@@ -997,6 +1000,15 @@ MooseApp::registerCapabilities()
     haveCapability("unique_id", doc);
 #else
     libmeshMissingCapability("unique_id", doc, "--enable-unique-id");
+#endif
+  }
+
+  {
+    const auto doc = "libMesh default mesh mode";
+#ifdef LIBMESH_ENABLE_PARMESH
+    addCapability("mesh_mode", "distributed", doc);
+#else
+    addCapability("mesh_mode", "replicated", doc);
 #endif
   }
 

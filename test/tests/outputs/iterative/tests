@@ -76,7 +76,6 @@
     max_threads = 1
     # no. of iterations is not recoverable
     recover = false
-    petsc_version_release = true
     # MPI dependent
     hpc = false
 

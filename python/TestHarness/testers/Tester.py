@@ -51,7 +51,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('machine',       ['ALL'], "A list of micro architectures for which this test will run on. ('ALL', 'X86_64', 'ARM64')")
         params.addParam('compiler',      ['ALL'], "A list of compilers for which this test is valid on. ('ALL', 'GCC', 'INTEL', 'CLANG')")
         params.addParam('petsc_version', ['ALL'], "A list of petsc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('petsc_version_release', ['ALL'], "A test that runs against PETSc master if FALSE ('ALL', 'TRUE', 'FALSE')")
         params.addParam('slepc_version', [], "A list of slepc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('exodus_version', ['ALL'], "A list of Exodus versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('vtk_version', ['ALL'], "A list of VTK versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
@@ -60,7 +59,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('max_ad_size',   None, "A maximum AD size for which this test will run")
         params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
         params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
-        params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('unique_ids',    ['ALL'], "Deprecated. Use unique_id instead.")
         params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
         params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
@@ -78,8 +76,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('ptscotch',      ['ALL'], "A test that runs only if PTScotch (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
         params.addParam('slepc',         ['ALL'], "A test that runs only if SLEPc is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('unique_id',     ['ALL'], "A test that runs only if libmesh is configured with --enable-unique-id ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('cxx11',         ['ALL'], "A test that runs only if CXX11 is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('fparser_jit',   ['ALL'], "A test that runs only if FParser JIT is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
@@ -615,14 +611,19 @@ class Tester(MooseObject, OutputInterface):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # Check for supported capabilities
-        capabilities_present = util.checkCapabilities(capabilities, self.specs, certain=self.specs['dynamic_capabilities'])[0]
-        if not capabilities_present:
-            reasons['missing_capabilities'] = 'Needs: ' + self.specs['capabilities']
+        if self.specs['capabilities']:
+            if capabilities is None:
+                raise Exception('Capabilities are not available')
+            capabilities_present = util.checkCapabilities(capabilities,
+                                                          self.specs['capabilities'],
+                                                          certain=self.specs['dynamic_capabilities'])[0]
+            if not capabilities_present:
+                reasons['missing_capabilities'] = 'Needs: ' + self.specs['capabilities']
 
         # PETSc and SLEPc is being explicitly checked above
-        local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
+        local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode',
                         'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
-                        'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release',
+                        'strumpack', 'unique_id', 'slepc',
                         'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
                         'threading', 'libpng', 'libtorch']
 
@@ -670,13 +671,11 @@ class Tester(MooseObject, OutputInterface):
             if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
                 reasons['depend_files'] = 'DEPEND FILES'
 
-        # We calculate the exe_objects only if we need them
-        if self.specs["required_objects"] and checks["exe_objects"] is None:
-            checks["exe_objects"] = util.getExeObjects(self.specs["executable"])
-
         # Check to see if we have the required object names
+        if self.specs['required_objects'] and options._app_objects is None:
+            raise Exception('Cannot used required_objects; app objects not available')
         for var in self.specs['required_objects']:
-            if var not in checks["exe_objects"]:
+            if var not in options._app_objects:
                 reasons['required_objects'] = '%s not found in executable' % var
                 break
 
