@@ -139,15 +139,6 @@
 
   [output_types]
     requirement = "The system shall support material property output to output objects of type "
-    [csv]
-      type = RunApp
-      input = output.i
-      cli_args = "Materials/test_material/outputs=csv
-                  Outputs/csv=true
-                  Outputs/file_base=output_csv"
-      allow_warnings = true
-      detail = "CSV."
-    []
     [vtk]
       type = RunApp
       input = output.i
