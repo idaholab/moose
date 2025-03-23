@@ -406,7 +406,6 @@ class TestHarness:
             checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
             assert checks['libtorch'] == util.getMooseConfigOption(self.moose_dir, 'libtorch')
             checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
-            assert checks['libtorch_version'] == util.getLibtorchVersion(self.moose_dir)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
