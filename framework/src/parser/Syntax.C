@@ -172,6 +172,12 @@ Syntax::replaceActionSyntax(const std::string & action,
 }
 
 void
+Syntax::removeAllActionsForSyntax(const std::string & syntax)
+{
+  _syntax_to_actions.erase(syntax);
+}
+
+void
 Syntax::deprecateActionSyntax(const std::string & syntax)
 {
   const std::string message = "\"[" + syntax + "]\" is deprecated.";

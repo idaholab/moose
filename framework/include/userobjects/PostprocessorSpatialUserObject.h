@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "SpatialUserObjectFunctor.h"
 #include "GeneralUserObject.h"
 
 /**
@@ -17,7 +18,7 @@
  * This object can be used to associate a postprocessor value with a geometrical
  * location in a mutli app setup
  */
-class PostprocessorSpatialUserObject : public GeneralUserObject
+class PostprocessorSpatialUserObject : public SpatialUserObjectFunctor<GeneralUserObject>
 {
 public:
   PostprocessorSpatialUserObject(const InputParameters & parameters);
