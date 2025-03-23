@@ -25,7 +25,7 @@ public:
    */
   XDA(const InputParameters & parameters);
 
-  bool supportsMaterialPropertyOutput(bool /* suppress_warnings */) const override { return true; }
+  bool supportsMaterialPropertyOutput() const override { return true; }
 
 protected:
   /**

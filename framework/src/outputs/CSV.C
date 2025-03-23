@@ -280,12 +280,3 @@ CSV::getVectorPostprocessorFilePrefix(const std::string & vpp_name)
 {
   return _file_base + "_" + MooseUtils::shortName(vpp_name);
 }
-
-bool
-CSV::supportsMaterialPropertyOutput(bool suppress_warnings) const
-{
-  if (!suppress_warnings)
-    mooseInfo("By default, outputting material property to CSV output objects does not write any "
-              "data to the output file");
-  return true;
-}
