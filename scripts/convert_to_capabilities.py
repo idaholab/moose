@@ -97,7 +97,7 @@ class SpecModifier:
       fix_param(param, do_string_param)
     # boolean params
     bool_params = ['unique_id', 'tecplot', 'vtk', 'petsc_debug', 'superlu',
-                   'mumps', 'strumpack', 'slepc', 'petsc_version_release',
+                   'mumps', 'strumpack', 'slepc',
                    'parmetis', 'chaco', 'party', 'ptscotch', 'libpng',
                    'libtorch']
     for param in bool_params:

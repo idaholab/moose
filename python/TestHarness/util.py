@@ -612,24 +612,53 @@ def getCapabilities(exe):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
-    if exe is None:
-        return {}
+    assert exe
     output = runCommand("%s --show-capabilities" % exe)
-    try:
-        output = output.split('**START JSON DATA**\n')[1]
-        output = output.split('**END JSON DATA**\n')[0]
-        results = json.loads(output)
-    except json.decoder.JSONDecodeError as e:
-        raise Exception(f'{exe} --show-capabilities, produced invalid JSON output') from e
-    return results
+    return parseMOOSEJSON(output, '--show-capabilities')
 
-def checkCapabilities(supported: dict, test, certain):
+def getCapabilityOption(supported: dict,
+                        name: str,
+                        from_version: bool = False,
+                        from_type: type = None,
+                        to_set: bool = False,
+                        no_all: bool = False,
+                        to_bool: bool = False,
+                        to_none: bool = False):
+    """
+    Helper for getting the deprecated Tester option given a capability
+    """
+    entry = supported.get(name)
+    if entry is None:
+        raise ValueError(f'Missing capability {name}')
+    else:
+        value = entry[0]
+
+    if from_version and isinstance(value, str):
+        assert re.fullmatch(r'[0-9.]+', value)
+    if from_type is not None:
+        assert isinstance(value, from_type)
+
+    if value and to_bool:
+        value = True
+
+    if to_set:
+        values = [str(value).upper()]
+        if not no_all:
+            values.append('ALL')
+        return set(sorted(values))
+    else:
+        assert not no_all
+    if to_none and not value:
+        return None
+    return value
+
+def checkCapabilities(supported: dict, requested: str, certain):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
-    [status, message, doc] = pycapabilities.check(test['capabilities'], supported)
+    [status, message, doc] = pycapabilities.check(requested, supported)
     if status == pycapabilities.PARSE_FAIL:
-        raise ValueError(f"Failed to parse capabilities='{test['capabilities']}'")
+        raise ValueError(f"Failed to parse capabilities='{requested}'")
     success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
     return success, message
 
@@ -784,30 +813,28 @@ def addObjectNames(objs, node):
     if star:
         addObjectNames(objs, star)
 
-def getExeJSON(exe):
-    """
-    Extracts the JSON from the dump
-    """
-    output = runCommand("%s --json" % exe)
+def parseMOOSEJSON(output: str, context: str) -> dict:
     try:
         output = output.split('**START JSON DATA**\n')[1]
         output = output.split('**END JSON DATA**\n')[0]
-        results = json.loads(output)
+        return json.loads(output)
     except IndexError:
-        print(f'{exe} --json, produced an error during execution')
-        sys.exit(1)
+        raise Exception(f'Failed to find JSON header and footer from {context}')
     except json.decoder.JSONDecodeError:
-        print(f'{exe} --json, produced invalid JSON output')
-        sys.exit(1)
-    return results
+        raise Exception(f'Failed to parse JSON from {context}')
 
-def getExeObjects(exe):
+def getExeJSON(exe: str) -> str:
+    """
+    Calls --json on the given executable
+    """
+    return runCommand("%s --json" % exe)
+
+def getExeObjects(json: dict) -> set[str]:
     """
     Gets a set of object names that are in the executable JSON dump.
     """
-    data = getExeJSON(exe)
     obj_names = set()
-    addObjectsFromBlock(obj_names, data, "blocks")
+    addObjectsFromBlock(obj_names, json, "blocks")
     return obj_names
 
 def readResourceFile(exe, app_name):
@@ -821,14 +848,6 @@ def readResourceFile(exe, app_name):
             print(f'resource file parse failure: {resource_path}')
             sys.exit(1)
     return {}
-
-# TODO: Deprecate when we can remove getExeObjects
-def getExeRegisteredApps(exe):
-    """
-    Gets a list of registered applications
-    """
-    data = getExeJSON(exe)
-    return data.get('global', {}).get('registered_apps', [])
 
 def getRegisteredApps(exe, app_name):
     """

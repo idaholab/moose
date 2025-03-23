@@ -27,8 +27,8 @@ class TestHarnessTester(TestHarnessTestCase):
 
         # All the caveats we will verify that should exist in the
         # output
-        caveats = ['ASIO', 'DTK', 'UNIQUE_IDS', 'CXX11', 'SUPERLU',
-                   'DOF_ID_BYTES', 'TECPLOT', 'PETSC_VERSION_RELEASE',
+        caveats = ['UNIQUE_IDS', 'SUPERLU',
+                   'DOF_ID_BYTES', 'TECPLOT',
                    'SLEPC_VERSION', 'MESH_MODE', 'METHOD', 'BOOST',
                    'PETSC_DEBUG', 'LIBRARY_MODE', 'PETSC_VERSION',
                    'CURL', 'THREADING', 'SLEPC', 'VTK', 'UNIQUE_ID',

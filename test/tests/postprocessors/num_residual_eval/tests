@@ -15,6 +15,5 @@
     requirement = 'The system shall be capable of outputting the number of Residual evaluations'
     issues = '#2089'
     design = 'NumResidualEvaluations.md'
-    capabilities = 'petsc_version_release'
   [../]
 []
