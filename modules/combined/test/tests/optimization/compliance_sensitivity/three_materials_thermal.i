@@ -98,6 +98,10 @@ TC3 = 1.0
     order = CONSTANT
     initial_condition = ${vol_frac}
   []
+  [thermal_compliance]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 # [ICs]
@@ -115,6 +119,12 @@ TC3 = 1.0
     type = MaterialRealAux
     variable = Cost
     property = Cost_mat
+  []
+  [thermal_compliance]
+    type = MaterialRealAux
+    property = thermal_compliance
+    variable = thermal_compliance
+    execute_on = timestep_end
   []
 []
 
@@ -208,13 +218,11 @@ TC3 = 1.0
                  "if(mat_den<${rho1},TC1,if(mat_den<${rho2},TC2,TC3))"
     coupled_variables = 'mat_den'
     property_name = thermal_cond
-    outputs = 'out'
   []
   [thermal_compliance]
     type = ThermalCompliance
     temperature = temp
     thermal_conductivity = thermal_cond
-    outputs = 'out'
   []
   [elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
@@ -271,14 +279,12 @@ TC3 = 1.0
     type = CostSensitivity
     design_density = mat_den
     cost = Cost_mat
-    outputs = 'out'
   []
   [tc]
     type = ThermalSensitivity
     design_density = mat_den
     thermal_conductivity = thermal_cond
     temperature = temp
-    outputs = 'out'
   []
 []
 

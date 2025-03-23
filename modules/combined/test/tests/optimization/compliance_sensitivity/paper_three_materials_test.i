@@ -188,7 +188,6 @@ C3 = 1.0
     type = CostSensitivity
     design_density = mat_den
     cost = Cost_mat
-    outputs = 'out'
   []
 []
 
