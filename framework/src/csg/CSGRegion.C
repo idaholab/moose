@@ -110,24 +110,19 @@ stripRegionString(std::string region_str, std::string op)
   // if not, then remove parentheses:
   bool remove_par = true; // assume parentheses can be removed unless otherwise
   for (auto opi : ops_list)
-  {
     if (opi != op)
-    {
       // only look for strings that are not of the current op type
       if (region_str.find(opi) != std::string::npos)
       {
         remove_par = false;
         break;
       }
-    }
-  }
+
   if (remove_par)
-  {
     region_str.erase(std::remove_if(region_str.begin(),
                                     region_str.end(),
                                     [](char c) { return c == '(' || c == ')'; }),
                      region_str.end());
-  }
   return region_str;
 }
 

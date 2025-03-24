@@ -1,4 +1,11 @@
 {
+  "CELLS": {
+    "square_cell": {
+      "FILL": "square_material",
+      "FILLTYPE": "MATERIAL",
+      "REGION": "(-surf_plus_x & -surf_minus_x & -surf_plus_y & -surf_minus_y & -surf_plus_z & +surf_minus_z)"
+    }
+  },
   "SURFACES": {
     "surf_minus_x": {
       "BOUNDARY": "transmission",
@@ -61,14 +68,5 @@
       "TYPE": "plane"
     }
   },
-  "UNIVERSES": {
-    "root_universe": {
-      "CELLS": {
-        "square_cell": {
-          "REGION": "((-surf_plus_x & -surf_minus_x & -surf_plus_y & -surf_minus_y) & -surf_plus_z & +surf_minus_z)",
-          "TYPE": "material"
-        }
-      }
-    }
-  }
+  "UNIVERSES": null
 }
