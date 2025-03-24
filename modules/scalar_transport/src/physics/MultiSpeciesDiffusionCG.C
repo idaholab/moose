@@ -39,6 +39,7 @@ MultiSpeciesDiffusionCG::addFEKernels()
   {
     const auto & var_name = _species_names[s];
     // Diffusion term
+    if (isParamValid("diffusivity_matprops") || isParamValid("diffusivity_functors"))
     {
       // Select the kernel type based on the user parameters
       std::string kernel_type;
@@ -53,8 +54,7 @@ MultiSpeciesDiffusionCG::addFEKernels()
           paramError(
               "diffusivity_functors", "No diffusion kernel implemented for the source type of", d);
       }
-      else
-        kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
+
       InputParameters params = getFactory().getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = var_name;
       assignBlocks(params, _blocks);
