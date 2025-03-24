@@ -3,7 +3,7 @@
     "square_cell": {
       "FILL": "square_material",
       "FILLTYPE": "MATERIAL",
-      "REGION": "(-surf_plus_x & -surf_minus_x & -surf_plus_y & -surf_minus_y)"
+      "REGION": "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y)"
     }
   },
   "SURFACES": {
@@ -21,19 +21,19 @@
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
-        "b": -1.0,
+        "b": 1.0,
         "c": 0.0,
-        "d": 2.5
+        "d": -2.5
       },
       "TYPE": "plane"
     },
     "surf_plus_x": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "a": 1.0,
+        "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": 2.5
+        "d": -2.5
       },
       "TYPE": "plane"
     },

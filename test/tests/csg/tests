@@ -21,6 +21,15 @@
     mesh_mode = REPLICATED
     detail = 'passing a single CSGBase object between MeshGenerators to be updated'
   []
+  [all_region_types]
+    type = 'JSONDiff'
+    input = 'csg_only_region_types.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_only_region_types_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'correctly defining regions as a combination of halfspaces, intersections, unions, and complements'
+  []
   [csg_only_sphere_origin]
     type = 'JSONDiff'
     input = 'csg_only_sphere_origin.i'

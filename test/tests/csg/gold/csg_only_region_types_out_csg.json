@@ -3,67 +3,61 @@
     "square_cell": {
       "FILL": "square_material",
       "FILLTYPE": "MATERIAL",
-      "REGION": "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y & -surf_plus_z & +surf_minus_z)"
+      "REGION": "((+surf_minus_x & -surf_plus_y & -surf_minus_y & -surf_zero_y) | (-surf_plus_x & -surf_plus_y & -surf_minus_y & +surf_zero_y))"
+    },
+    "void_cell": {
+      "FILLTYPE": "EMPTY",
+      "REGION": "~((+surf_minus_x & -surf_plus_y & -surf_minus_y & -surf_zero_y) | (-surf_plus_x & -surf_plus_y & -surf_minus_y & +surf_zero_y))"
     }
   },
   "SURFACES": {
     "surf_minus_x": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "a": -1.0,
-        "b": 0.0,
+        "a": 0.0,
+        "b": -1.0,
         "c": 0.0,
-        "d": 2.5
+        "d": 5.0
       },
       "TYPE": "plane"
     },
     "surf_minus_y": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "a": 0.0,
-        "b": 1.0,
-        "c": 0.0,
-        "d": -2.5
-      },
-      "TYPE": "plane"
-    },
-    "surf_minus_z": {
-      "BOUNDARY": "transmission",
-      "COEFFICIENTS": {
-        "a": 0.0,
+        "a": -1.0,
         "b": 0.0,
-        "c": 1.0,
-        "d": -2.5
+        "c": 0.0,
+        "d": 5.0
       },
       "TYPE": "plane"
     },
     "surf_plus_x": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "a": -1.0,
-        "b": 0.0,
+        "a": 0.0,
+        "b": 1.0,
         "c": 0.0,
-        "d": -2.5
+        "d": 5.0
       },
       "TYPE": "plane"
     },
     "surf_plus_y": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "a": 0.0,
-        "b": 1.0,
+        "a": 1.0,
+        "b": 0.0,
         "c": 0.0,
-        "d": 2.5
+        "d": 5.0
       },
       "TYPE": "plane"
     },
-    "surf_plus_z": {
+    "surf_zero_y": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "a": 0.0,
+        "a": 1.0,
         "b": 0.0,
-        "c": 1.0,
-        "d": 2.5
+        "c": 0.0,
+        "d": 0.0
       },
       "TYPE": "plane"
     }
