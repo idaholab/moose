@@ -53,7 +53,7 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
   }
 }
 
-// complement constructor
+// complement or explicitly empty constructor
 CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType region_type)
   : _region_type(region_type)
 {
@@ -65,7 +65,7 @@ CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType regio
   if (_region_type == CSGRegion::RegionType::COMPLEMENT)
   {
     // no change to surfaces, but update string
-    _region_str = "~(" + region.toString() + ")";
+    _region_str = "~" + region.toString();
     _surfaces = region.getSurfaces();
   }
   else if (_region_type == CSGRegion::RegionType::EMPTY)
