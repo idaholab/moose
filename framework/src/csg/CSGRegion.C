@@ -42,7 +42,10 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
   else
   {
     std::string op = (_region_type == CSGRegion::RegionType::UNION) ? " | " : " & ";
-    _region_str = "(" + region_a.toString() + op + region_b.toString() + ")";
+    auto a_string = stripRegionString(region_a.toString(), op);
+    auto b_string = stripRegionString(region_b.toString(), op);
+
+    _region_str = "(" + a_string + op + b_string + ")";
     auto a_surfs = region_a.getSurfaces();
     auto b_surfs = region_b.getSurfaces();
     _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
@@ -91,6 +94,41 @@ CSGRegion::getRegionTypeString()
     default:
       return "INVALID";
   }
+}
+
+std::string
+stripRegionString(std::string region_str, std::string op)
+{
+  std::vector<std::string> ops_list = {" | ", " & ", "~"};
+  if (op.compare(" | ") && op.compare(" & "))
+  { // compare() returns non zero if strings are not equal
+    mooseError(
+        "Region string can only be simplified based on intersection (&) and union (|) operations.");
+  }
+
+  // find if there are any operators in string already that are not the op of interest
+  // if not, then remove parentheses:
+  bool remove_par = true; // assume parentheses can be removed unless otherwise
+  for (auto opi : ops_list)
+  {
+    if (opi != op)
+    {
+      // only look for strings that are not of the current op type
+      if (region_str.find(opi) != std::string::npos)
+      {
+        remove_par = false;
+        break;
+      }
+    }
+  }
+  if (remove_par)
+  {
+    region_str.erase(std::remove_if(region_str.begin(),
+                                    region_str.end(),
+                                    [](char c) { return c == '(' || c == ')'; }),
+                     region_str.end());
+  }
+  return region_str;
 }
 
 // Operators for region construction
