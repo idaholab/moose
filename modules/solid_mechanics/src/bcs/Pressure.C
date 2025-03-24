@@ -17,12 +17,23 @@
 registerMooseObject("SolidMechanicsApp", Pressure);
 registerMooseObject("SolidMechanicsApp", ADPressure);
 
+registerMoosePressureAction("SolidMechanicsApp", Pressure, PressureAction);
+
 template <bool is_ad>
 InputParameters
 PressureTempl<is_ad>::validParams()
 {
   InputParameters params = PressureParent<is_ad>::validParams();
   params.addClassDescription("Applies a pressure on a given boundary in a given direction");
+  params += actionParams();
+  return params;
+}
+
+template <bool is_ad>
+InputParameters
+PressureTempl<is_ad>::actionParams()
+{
+  InputParameters params = PressureParent<is_ad>::actionParams();
   params.addDeprecatedParam<Real>("constant",
                                   "The magnitude to use in computing the pressure",
                                   "Use 'factor' in place of 'constant'");
@@ -30,7 +41,11 @@ PressureTempl<is_ad>::validParams()
   params.addParam<FunctionName>("function", "The function that describes the pressure");
   params.addParam<PostprocessorName>("postprocessor",
                                      "Postprocessor that will supply the pressure value");
-  params.addParam<Real>("alpha", 0.0, "alpha parameter required for HHT time integration scheme");
+
+  params.addParam<Real>("hht_alpha",
+                        0,
+                        "alpha parameter for mass dependent numerical damping induced "
+                        "by HHT time integration scheme");
   return params;
 }
 
@@ -43,7 +58,7 @@ PressureTempl<is_ad>::PressureTempl(const InputParameters & parameters)
     _function(this->isParamValid("function") ? &this->getFunction("function") : NULL),
     _postprocessor(
         this->isParamValid("postprocessor") ? &this->getPostprocessorValue("postprocessor") : NULL),
-    _alpha(this->template getParam<Real>("alpha"))
+    _alpha(this->template getParam<Real>("hht_alpha"))
 {
   if (parameters.isParamSetByUser("factor") && parameters.isParamSetByUser("constant"))
     mooseError("Cannot set 'factor' and 'constant'.");

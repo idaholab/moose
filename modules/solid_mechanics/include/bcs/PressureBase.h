@@ -30,6 +30,7 @@ class PressureBaseTempl : public PressureBaseParent<is_ad>
 {
 public:
   static InputParameters validParams();
+  static InputParameters actionParams();
 
   PressureBaseTempl(const InputParameters & parameters);
 

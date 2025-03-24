@@ -10,6 +10,7 @@
 #pragma once
 
 #include "PressureBase.h"
+#include "PressureAction.h"
 #include "MooseTypes.h"
 
 #include "MooseTypes.h"
@@ -26,6 +27,7 @@ class PressureTempl : public PressureParent<is_ad>
 {
 public:
   static InputParameters validParams();
+  static InputParameters actionParams();
 
   PressureTempl(const InputParameters & parameters);
 
@@ -48,3 +50,5 @@ protected:
 
 typedef PressureTempl<false> Pressure;
 typedef PressureTempl<true> ADPressure;
+
+declareMoosePressureAction(Pressure, PressureAction);
