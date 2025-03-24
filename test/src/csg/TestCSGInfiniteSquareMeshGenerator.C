@@ -69,7 +69,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
     if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
       region = halfspace;
     else
-      region = region & halfspace;
+      region &= halfspace;
   }
 
   const auto cell_name = "square_cell";

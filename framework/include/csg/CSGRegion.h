@@ -87,6 +87,12 @@ public:
    */
   std::vector<std::shared_ptr<CSGSurface>> getSurfaces() const { return _surfaces; };
 
+  /// Operator overload for &=
+  CSGRegion & operator&=(const CSGRegion & other_region);
+
+  /// Operator overload for |=
+  CSGRegion & operator|=(const CSGRegion & other_region);
+
 protected:
   /// String representation of region - defaults to empty string
   std::string _region_str;
