@@ -1661,8 +1661,10 @@ DMSetUp_Moose(DM dm)
   }
   PetscFunctionReturn(PETSC_SUCCESS);
 }
-
-#if !PETSC_VERSION_LESS_THAN(3, 18, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 23, 0)
+PetscErrorCode
+DMSetFromOptions_Moose(DM dm, PetscOptionItems /*options*/)
+#elif !PETSC_VERSION_LESS_THAN(3, 18, 0)
 PetscErrorCode
 DMSetFromOptions_Moose(DM dm, PetscOptionItems * /*options*/) // >= 3.18.0
 #elif !PETSC_VERSION_LESS_THAN(3, 7, 0)
