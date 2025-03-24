@@ -88,10 +88,10 @@ public:
   std::vector<std::shared_ptr<CSGSurface>> getSurfaces() const { return _surfaces; };
 
 protected:
-  /// String representation of region - default empty string
+  /// String representation of region - defaults to empty string
   std::string _region_str;
 
-  /// type of region - default empty
+  /// type of region - defaults to EMPTY
   RegionType _region_type;
 
   /// Surface list associated with the region
