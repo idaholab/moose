@@ -476,6 +476,8 @@ class Tester(MooseObject, OutputInterface):
         return exit_code == 0
 
     def getCapability(self, options, name):
+        if options._capabilities is None:
+            raise Exception('Capabilities are not available')
         value = options._capabilities.get(name)
         return None if value is None else value[0]
 
@@ -572,14 +574,15 @@ class Tester(MooseObject, OutputInterface):
             reasons['recover'] = 'NO RECOVER'
 
         # AD size check
-        ad_size = self.getCapability(options, 'ad_size')
-        assert isinstance(ad_size, int)
         min_ad_size = self.specs['min_ad_size']
-        if min_ad_size is not None and int(min_ad_size) > ad_size:
-            reasons['min_ad_size'] = "Minimum AD size %d needed, but MOOSE is configured with %d" % (int(min_ad_size), ad_size)
         max_ad_size = self.specs['max_ad_size']
-        if max_ad_size is not None and int(max_ad_size) < ad_size:
-            reasons['max_ad_size'] = "Maximum AD size %d needed, but MOOSE is configured with %d" % (int(max_ad_size), ad_size)
+        if min_ad_size is not None or min_ad_size is not None:
+            ad_size = self.getCapability(options, 'ad_size')
+            assert isinstance(ad_size, int)
+            if min_ad_size is not None and int(min_ad_size) > ad_size:
+                reasons['min_ad_size'] = "Minimum AD size %d needed, but MOOSE is configured with %d" % (int(min_ad_size), ad_size)
+            if max_ad_size is not None and int(max_ad_size) < ad_size:
+                reasons['max_ad_size'] = "Maximum AD size %d needed, but MOOSE is configured with %d" % (int(max_ad_size), ad_size)
 
         # Check for PETSc versions
         (petsc_status, petsc_version) = util.checkPetscVersion(checks, self.specs)
