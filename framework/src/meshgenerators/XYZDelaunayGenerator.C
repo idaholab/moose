@@ -48,7 +48,9 @@ XYZDelaunayGenerator::validParams()
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
 
   params.addRequiredParam<MeshGeneratorName>(
-      "boundary", "The input MeshGenerator defining the output outer boundary");
+      "boundary",
+      "The input MeshGenerator defining the output outer boundary. The input mesh can either "
+      "include 3D volume elements or 2D surface elements.");
 
   params.addParam<SubdomainName>("output_subdomain_name",
                                  "Subdomain name to set on new triangles.");
@@ -66,9 +68,16 @@ XYZDelaunayGenerator::validParams()
                         false,
                         "Whether to do Laplacian mesh smoothing on the generated triangles.");
   params.addParam<std::vector<MeshGeneratorName>>(
-      "holes", std::vector<MeshGeneratorName>(), "The MeshGenerators that define mesh holes.");
+      "holes",
+      std::vector<MeshGeneratorName>(),
+      "The MeshGenerators that define mesh holes. A hole mesh must contain 3D volume elements and "
+      "its external surface works as the closed manifold that defines the hole.");
   params.addParam<std::vector<bool>>(
       "stitch_holes", std::vector<bool>(), "Whether to stitch to the mesh defining each hole.");
+  params.addParam<bool>("convert_holes_for_stitching",
+                        false,
+                        "Whether to convert the 3D hole meshes with non-TRI3 surface sides into "
+                        "all-TET4 meshes to allow stitching.");
 
   params.addRangeCheckedParam<Real>(
       "desired_volume",
@@ -97,6 +106,7 @@ XYZDelaunayGenerator::XYZDelaunayGenerator(const InputParameters & parameters)
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
+    _convert_holes_for_stitching(getParam<bool>("convert_holes_for_stitching")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
@@ -130,6 +140,64 @@ XYZDelaunayGenerator::generate()
   ngint.smooth_after_generating() = _smooth_tri;
 
   ngint.desired_volume() = _desired_volume;
+
+  // The hole meshes will be used for hole boundary identification and optionally for stitching.
+  // if a hole mesh contains 3D volume elements but has non-TRI3 surface side elements, it cannot be
+  // used directly for stitching. But it can be converted into a all-TET4 mesh to support hole
+  // boundary identification
+  for (auto hole_i : index_range(_hole_ptrs))
+  {
+    UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(**_hole_ptrs[hole_i]);
+    libMesh::MeshSerializer serial_hole(hole_mesh);
+    // Check the dimension of the hole mesh
+    // We do not need to worry about element order here as libMesh checks it
+    std::set<ElemType> hole_elem_types;
+    std::set<unsigned short> hole_elem_dims;
+    for (auto elem : hole_mesh.element_ptr_range())
+    {
+      hole_elem_dims.emplace(elem->dim());
+
+      // For a 3D element, we need to check the surface side element type instead of the element
+      // type
+      if (elem->dim() == 3)
+        for (auto s : make_range(elem->n_sides()))
+        {
+          if (!elem->neighbor_ptr(s))
+            hole_elem_types.emplace(elem->side_ptr(s)->type());
+        }
+      // For a non-3D element, we just need to record the element type
+      // but an error will be thrown later
+      else
+        hole_elem_types.emplace(elem->type());
+    }
+    if (hole_elem_dims.size() != 1)
+      paramError("holes", "All elements in a hole mesh must have the same dimension (3D).");
+    else if (*hole_elem_dims.begin() == 3)
+    {
+      // For 3D meshes, if there are non-TRI3 surface side elements
+      // (1) if no stitching is needed, we can just convert the whole mesh into TET to facilitate
+      // boundary identification (2) if stitching is needed, we can still convert and stitch, but
+      // that would modify the input hole mesh
+      if (*hole_elem_types.begin() != ElemType::TRI3)
+      {
+        if (_stitch_holes.size() && _stitch_holes[hole_i] && !_convert_holes_for_stitching)
+          paramError("holes",
+                     "3D hole meshes with non-TRI3 surface elements cannot be stitched without "
+                     "converting them to TET4. Consider setting convert_holes_for_stitching=true.");
+        else
+          MeshTools::Modification::all_tri(**_hole_ptrs[hole_i]);
+      }
+    }
+    else if (*hole_elem_dims.begin() == 2)
+    {
+      // 2D hole meshes are currently not supported
+      paramError("holes",
+                 "2D hole meshes are currently not supported. Consider using separate "
+                 "XYZDelaunayGenerators to create 3D hole meshes.");
+    }
+    else
+      paramError("holes", "All elements in a hole mesh must 3D.");
+  }
 
   std::unique_ptr<std::vector<std::unique_ptr<UnstructuredMesh>>> ngholes =
       std::make_unique<std::vector<std::unique_ptr<UnstructuredMesh>>>();
