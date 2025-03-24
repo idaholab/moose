@@ -15,6 +15,7 @@
 // Forward Declarations
 class InputParameters;
 class VectorPostprocessor;
+class TransientBase;
 
 namespace libMesh
 {
@@ -108,6 +109,9 @@ protected:
   /// The communicator of the child
   const libMesh::Parallel::Communicator & _comm;
 
+  /// Transient executioner used to determine if the last solve converged
+  const TransientBase * const _sampler_transient;
+
   /// The variable names
   std::vector<std::string> _variable_names;
 
@@ -125,4 +129,10 @@ protected:
   VectorPostprocessorValue & _id;
 
   std::vector<VectorPostprocessorValue *> _values;
+
+private:
+  /// The number of samples added in the last execution
+  std::size_t _curr_num_samples = 0;
+  /// The indices of the samples in the last execution
+  std::set<std::size_t, std::greater<std::size_t>> _curr_indices;
 };

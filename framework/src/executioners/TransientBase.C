@@ -221,7 +221,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
     {
       // Try to infer the number of steps from end_time, start_time, and dt
       unsigned int num_steps_guess =
-          !parameters.isParamSetByAddParam("dt")
+          !parameters.isParamSetByAddParam("dt") && !parameters.isParamSetByAddParam("end_time")
               ? std::ceil((_end_time - _start_time) / getParam<Real>("dt"))
               : std::numeric_limits<unsigned int>::max();
       // Now get the smaller of this one versus the one that might be explicitly set
@@ -483,7 +483,7 @@ TransientBase::takeStep(Real input_dt)
   // the timestep we are to repeat for the first time
   if (_test_restep_step && *_test_restep_step == _t_step)
   {
-    mooseAssert(!_test_restep_dt, "Should not be set");
+    mooseAssert(!_testing_restep, "Should not be set");
 
     // We shouldn't try to test resolving if the last solve was
     // a failure. This might actually not be needed, but I'm
