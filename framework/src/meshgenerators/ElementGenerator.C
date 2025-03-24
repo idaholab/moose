@@ -101,6 +101,8 @@ ElementGenerator::generate()
     }
   }
 
+  mesh->set_isnt_prepared();
+
   if (getParam<bool>("create_sidesets"))
     for (const auto i_side : make_range(elem->n_sides()))
       mesh->get_boundary_info().add_side(elem, i_side, i_side);

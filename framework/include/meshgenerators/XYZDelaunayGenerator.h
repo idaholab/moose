@@ -44,6 +44,9 @@ protected:
   /// Whether to stitch to the mesh defining each hole
   const std::vector<bool> _stitch_holes;
 
+  /// Whether to convert 3D hole meshes with non-TRI3 surface elements into all-TET4 meshes
+  const bool _convert_holes_for_stitching;
+
   /// Type of algorithm used to find matching nodes (binary or exhaustive)
   const MooseEnum _algorithm;
 
