@@ -34,23 +34,18 @@ source "${SRC_DIR:?}/retry_build.sh"
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
 
-cd "${PREFIX:?}/bin"
-ln -s ${INSTALL_DIR:?}/bin/<EXECUTABLE>-opt .
-ln -s ${INSTALL_DIR:?}/bin/moose_test_runner .
-cd "${PREFIX:?}/share"
-if ! [[ -d "<APPLICATION>" ]]; then
-    ln -s "${INSTALL_DIR:?}/share/<APPLICATION>" .
-fi
 mkdir -p "${PREFIX:?}/etc/conda/activate.d" "${PREFIX:?}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX:?}/etc/conda/activate.d/activate_${PKG_NAME:?}.sh"
 export MOOSE_ADFPARSER_JIT_INCLUDE=${INSTALL_DIR}/include/moose/ADRealMonolithic.h
 export <FORMATTED_APPLICATION>_DOCS=${INSTALL_DIR}/share/<APPLICATION>/doc/index.html
 export NCRC_APP=<FORMATTED_APPLICATION>
+export PATH=\$PATH:\${CONDA_PREFIX}/${APPLICATION}/bin
 EOF
 cat <<EOF > "${PREFIX:?}/etc/conda/deactivate.d/deactivate_${PKG_NAME:?}.sh"
 unset MOOSE_ADFPARSER_JIT_INCLUDE
 unset <FORMATTED_APPLICATION>_DOCS
 unset NCRC_APP
+export PATH=\${PATH%":\${CONDA_PREFIX}/${APPLICATION}/bin"}
 EOF
 if [[ "${APPLICATION:?}" == "moose" ]]; then
     cat <<EOF >> "${PREFIX:?}/etc/conda/activate.d/activate_${PKG_NAME:?}.sh"
