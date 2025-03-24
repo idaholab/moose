@@ -98,6 +98,16 @@ protected:
   std::vector<std::shared_ptr<CSGSurface>> _surfaces;
 };
 
+/**
+ * @brief strip the leading and trailing parentheses fromt the string
+ * if only the specified operator is present in the string
+ *
+ * @param region_str
+ * @param op
+ * @return std::string region string with () removed if applicable
+ */
+std::string stripRegionString(std::string region_str, std::string op);
+
 /// Operation overloads for operation based region construction
 
 // positve halfspace
