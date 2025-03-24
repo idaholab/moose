@@ -1,1 +1,0 @@
-../../2d_diffusion/gold/neumannbc_out.e
