@@ -50,20 +50,20 @@ MaxQpsThread::operator()(const libMesh::ConstElemRange & range)
     assem.setVolumeQRule(elem);
 
     auto & qrule = assem.writeableQRule();
-    qrule->init(elem->type(), elem->p_level());
+    qrule->init(*elem);
     if (qrule->n_points() > _max)
       _max = qrule->n_points();
 
-    if (elem->dim())
-    {
-      // We are assuming here that side 0 ends up with at least as many quadrature points as any
-      // other side
-      assem.setFaceQRule(elem, /*side=*/0);
-      auto & qrule_face = assem.writeableQRuleFace();
-      qrule_face->init(elem->side_type(0), elem->p_level());
-      if (qrule_face->n_points() > _max)
-        _max = qrule->n_points();
-    }
+    // We used to check side quadrature rules too - badly (assuming
+    // side 0 doesn't have a smaller rule than the others, which is
+    // often untrue on prisms) and generally unnecessarily (a side
+    // rule will always use fewer points than a corresponding interior
+    // rule).
+    //
+    // We should handle the possibility of users manually specifying a
+    // higher order for side than for interior integration.  Doing
+    // this efficiently will need to wait for a new libMesh API,
+    // though.
 
     // In initial conditions nodes are enumerated as pretend quadrature points
     // using the _qp index to access coupled variables. In order to be able to
