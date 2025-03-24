@@ -11,28 +11,30 @@
 
 registerMooseObject("SolidMechanicsApp", CoupledPressureBC);
 
+template <bool is_ad>
 InputParameters
-CoupledPressureBC::validParams()
+CoupledPressureBCTempl<is_ad>::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Applies a pressure from a variable on a given boundary in a given direction");
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "component", "component<3", "The component for the pressure");
   params.addRequiredCoupledVar("pressure", "Coupled variable containing the pressure");
-  params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
   return params;
 }
 
-CoupledPressureBC::CoupledPressureBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
-    _component(getParam<unsigned int>("component")),
-    _pressure(coupledValue("pressure"))
+template <bool is_ad>
+CoupledPressureBCTempl<is_ad>::CoupledPressureBCTempl(const InputParameters & parameters)
+  : PressureParent<is_ad>(parameters),
+    _pressure(this->template coupledGenericValue<is_ad>("pressure"))
 {
 }
 
-Real
-CoupledPressureBC::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+CoupledPressureBCTempl<is_ad>::computePressure() const
 {
-  return _pressure[_qp] * _normals[_qp](_component) * _test[_i][_qp];
+  return _pressure[_qp];
 }
+
+template class CoupledPressureBCTempl<true>;
+template class CoupledPressureBCTempl<false>;
