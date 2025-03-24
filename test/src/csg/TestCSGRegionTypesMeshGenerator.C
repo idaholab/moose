@@ -66,13 +66,13 @@ TestCSGRegionTypesMeshGenerator::generateCSG()
       region_left = pos_halfspace;
     else if ((surf_names[i] == "plus_y") || (surf_names[i] == "minus_y"))
     {
-      region_right = region_right & neg_halfspace;
-      region_left = region_left & neg_halfspace;
+      region_right &= neg_halfspace;
+      region_left &= neg_halfspace;
     }
     else
     {
-      region_right = region_right & pos_halfspace;
-      region_left = region_left & neg_halfspace;
+      region_right &= pos_halfspace;
+      region_left &= neg_halfspace;
     }
   }
 

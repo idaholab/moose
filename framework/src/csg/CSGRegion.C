@@ -96,6 +96,22 @@ CSGRegion::getRegionTypeString()
   }
 }
 
+CSGRegion &
+CSGRegion::operator&=(const CSGRegion & other_region)
+{
+  if (this != &other_region)
+    *this = CSGRegion(*this, other_region, CSGRegion::RegionType::INTERSECTION);
+  return *this;
+}
+
+CSGRegion &
+CSGRegion::operator|=(const CSGRegion & other_region)
+{
+  if (this != &other_region)
+    *this = CSGRegion(*this, other_region, CSGRegion::RegionType::UNION);
+  return *this;
+}
+
 std::string
 stripRegionString(std::string region_str, std::string op)
 {
