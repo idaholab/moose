@@ -57,6 +57,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _need_ad_grad_u(false),
     _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
+    _need_averaging(false),
     _has_dof_indices(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
@@ -73,7 +74,9 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _node(node),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
-    _current_side(_assembly.side())
+    _current_side(_assembly.side()),
+    _ad_JxW(_assembly.adJxW()),
+    _ad_JxWFace(_assembly.adJxWFace())
 {
   _continuity = FEInterface::get_continuity(_fe_type);
 
@@ -168,6 +171,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi;
       _current_div_phi = _div_phi;
       _current_ad_grad_phi = _ad_grad_phi;
+      _current_ad_JxW = _ad_JxW;
       break;
     }
     case Moose::Face:
@@ -179,6 +183,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi_face;
       _current_div_phi = _div_phi_face;
       _current_ad_grad_phi = _ad_grad_phi_face;
+      _current_ad_JxW = _ad_JxWFace;
       break;
     }
   }
@@ -419,6 +424,82 @@ MooseVariableData<OutputType>::divPhiFace() const
 {
   _div_phi_face = &_div_phi_face_assembly_method(_assembly, _fe_type);
   return *_div_phi_face;
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeValuesFace(const FaceInfo & /*fi*/)
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  computeValues();
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeGhostValuesFace(const FaceInfo & /*fi*/,
+                                                      MooseVariableData<OutputType> & other_face)
+{
+  /*
+   *  NOTES: For cases where a neighoring cell is needed but does not exist
+   *         (such as a cell on the mesh boundary), a ghost cell is needed.
+   *         This function takes the simplified approach where it is assumed
+   *         that the average FE values on the face of the ghost cell is
+   *         equal to the neighoring side.
+   */
+  if (_need_ad_u)
+  {
+    const auto nqp = other_face.adSlnAvg().size();
+    _ad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_u_average[qp] = other_face.adSlnAvg()[qp];
+  }
+  if (_need_ad_grad_u)
+  {
+    const auto nqp = other_face.adGradSlnAvg().size();
+    _ad_grad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_grad_u_average[qp] = other_face.adGradSlnAvg()[qp];
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::computeADAveraging()
+{
+  unsigned int nqp = _current_qrule->n_points();
+  const MooseArray<ADReal> & _ad_coord = _assembly.adCoordTransformation();
+  ADReal _current_volume = 0.0;
+  for (unsigned int qp = 0; qp < nqp; qp++)
+    _current_volume += _current_ad_JxW[qp] * _ad_coord[qp];
+  if (_need_ad_u)
+  {
+    auto value_temp = _current_ad_JxW[0] * _ad_coord[0] * _ad_u[0];
+    for (unsigned int qp = 1; qp < nqp; qp++)
+      value_temp += _current_ad_JxW[qp] * _ad_coord[qp] * _ad_u[qp];
+    value_temp /= _current_volume;
+
+    _ad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_u_average[qp] = value_temp;
+  }
+  if (_need_ad_grad_u)
+  {
+    auto value_temp = _current_ad_JxW[0] * _ad_coord[0] * _ad_grad_u[0];
+    for (unsigned int qp = 1; qp < nqp; qp++)
+      value_temp += _current_ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+    value_temp /= _current_volume;
+
+    _ad_grad_u_average.resize(nqp);
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _ad_grad_u_average[qp] = value_temp;
+  }
+}
+
+template <>
+void
+MooseVariableData<RealEigenVector>::computeADAveraging()
+{
+  mooseError("AD for array variable has not been implemented");
 }
 
 template <typename OutputType>
@@ -807,6 +888,10 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
           _ad_grad_u_dot[qp] = _grad_u_dot[qp];
     }
   }
+
+  // Averaging FE values for FE -> FV coupling
+  if (_need_averaging)
+    computeADAveraging();
 }
 
 template <>
