@@ -67,6 +67,7 @@
     input = 'ad_coupled_curl_product.i'
     cli_args = 'Outputs/exodus=false'
     difference_tol = 1e10
+    heavy = true
     issues = '#29868'
     requirement = "The system shall be able to solve a problem that supplies the product "
                   "of the curl of a variable vector and a supplied field into a "
