@@ -141,7 +141,7 @@ offset = 1e-2
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
-  nl_max_its = 6
+  nl_max_its = 30
   line_search = 'none'
   snesmf_reuse_base = true
   nl_rel_tol = 1e-8
@@ -164,13 +164,19 @@ offset = 1e-2
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
   [num_nl]
     type = NumNonlinearIterations
   []
   [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
+  []
+  [linear]
+    type = NumLinearIterations
+  []
+  [cumulative_linear]
+    type = CumulativeValuePostprocessor
+    postprocessor = linear
   []
   [contact]
     type = ContactDOFSetSize
