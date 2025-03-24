@@ -344,40 +344,19 @@ class TestHarness:
                 return util.getCapabilityOption(self.options._capabilities, *args, **kwargs)
 
             checks['compiler'] = get_option('compiler', to_set=True)
-            assert checks['compiler'] == util.getCompilers(self.libmesh_dir)
-
             checks['petsc_version'] = get_option('petsc', from_version=True)
-            assert checks['petsc_version'] == util.getPetscVersion(self.libmesh_dir)
             checks['petsc_debug'] = get_option('petsc_debug', from_type=bool, to_set=True)
-            assert checks['petsc_debug'] == util.getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
-
             checks['slepc_version'] = get_option('slepc', from_version=True)
-            assert checks['slepc_version'] == util.getSlepcVersion(self.libmesh_dir)
             checks['slepc'] = get_option('slepc', from_version=True, to_set=True, to_bool=True)
-            assert checks['slepc'] == util.getLibMeshConfigOption(self.libmesh_dir, 'slepc')
-
             checks['exodus_version'] = get_option('exodus', from_version=True)
-            assert checks['exodus_version'] == util.getExodusVersion(self.libmesh_dir)
-
             checks['vtk_version'] = get_option('vtk', from_version=True)
-            assert checks['vtk_version'] == util.getVTKVersion(self.libmesh_dir)
             checks['vtk'] = get_option('vtk', from_version=True, to_set=True, to_bool=True)
-            assert checks['vtk'] == util.getLibMeshConfigOption(self.libmesh_dir, 'vtk')
-
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
-
             checks['mesh_mode'] = get_option('mesh_mode', from_type=str, to_set=True)
-            assert checks['mesh_mode'] == util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
-
             checks['unique_ids'] = get_option('unique_id', from_type=bool, to_set=True)
             checks['unique_id'] = checks['unique_ids']
-            assert checks['unique_ids'] == util.getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
-
             checks['tecplot'] = get_option('tecplot', from_type=bool, to_set=True)
-            assert checks['tecplot'] == util.getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
-
             checks['dof_id_bytes'] = get_option('dof_id_bytes', from_type=int, to_set=True, no_all=True)
-            assert checks['dof_id_bytes'] == util.getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
 
             threading = None
             threads = get_option('threads', from_type=bool)
@@ -389,22 +368,17 @@ class TestHarness:
                 if not threading:
                     threading = 'pthreads'
             checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
-            assert checks['threading'] == util.getLibMeshThreadingModel(self.libmesh_dir)
 
             for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',
                          'ptscotch', 'boost', 'curl']:
                 checks[name] = get_option(name, from_type=bool, to_set=True)
-                assert checks[name] == util.getLibMeshConfigOption(self.libmesh_dir, name)
 
             checks['libpng'] = get_option('libpng', from_type=bool, to_set=True)
-            assert checks['libpng'] == util.getMooseConfigOption(self.moose_dir, 'libpng')
 
             fparser = get_option('fparser')
             checks['fparser_jit'] = set(sorted(['ALL', 'TRUE' if fparser == 'jit' else 'FALSE']))
-            assert checks['fparser_jit'] == util.getLibMeshConfigOption(self.libmesh_dir, 'fparser_jit')
 
             checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
-            assert checks['libtorch'] == util.getMooseConfigOption(self.moose_dir, 'libtorch')
             checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'

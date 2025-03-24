@@ -407,99 +407,6 @@ def runExecutable(libmesh_dir, location, bin, args):
 
     return runCommand(libmesh_exe + " " + args).rstrip()
 
-
-def getCompilers(libmesh_dir):
-    # Supported compilers are GCC, INTEL or ALL
-    compilers = set(['ALL'])
-
-    mpicxx_cmd = str(runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx"))
-
-    # Account for usage of distcc or ccache
-    if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
-        mpicxx_cmd = mpicxx_cmd.split()[-1]
-
-    # If mpi is in the command, run -show to get the compiler
-    if "mpi" in mpicxx_cmd:
-        raw_compiler = runCommand(mpicxx_cmd + " -show")
-    else:
-        raw_compiler = mpicxx_cmd
-
-    if re.match(r'\S*icpc\s', raw_compiler) != None:
-        compilers.add("INTEL")
-    elif re.match(r'\S*clang\+\+\s', raw_compiler) != None:
-        compilers.add("CLANG")
-    elif re.match(r'\S*[cg]\+\+\s', raw_compiler) != None:
-        compilers.add("GCC")
-
-    return compilers
-
-def getLibMeshThreadingModel(libmesh_dir):
-    threading_models = set(['ALL'])
-    have_threads = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'threads');
-    if have_threads:
-        have_tbb = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'tbb')
-        have_openmp = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'openmp')
-        if have_openmp:
-            threading_models.add("OPENMP")
-        elif have_tbb:
-            threading_models.add("TBB")
-        else:
-            threading_models.add("PTHREADS")
-    else:
-        threading_models.add("NONE")
-    return threading_models
-
-def getPetscVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
-    subminor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1:
-        print("Error determining PETSC version")
-        exit(1)
-
-    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
-
-def getSlepcVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'slepc_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_minor')
-    subminor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
-
-def getExodusVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'exodus_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'exodus_minor')
-    if len(major_version) != 1 or len(minor_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop()
-
-def getVTKVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'vtk_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_minor')
-    subminor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
-
-def getLibtorchVersion(moose_dir):
-    libtorch_dir = getMooseConfigOption(moose_dir, 'libtorch_dir')
-
-    if len(libtorch_dir) != 1:
-      return None
-
-    filenames = [libtorch_dir.pop()+'/include/torch/csrc/api/include/torch/version.h']
-    major_version = getConfigOption(filenames, 'libtorch_major', LIBTORCH_OPTIONS)
-    minor_version = getConfigOption(filenames, 'libtorch_minor', LIBTORCH_OPTIONS)
-
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop()
-
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
@@ -616,6 +523,13 @@ def getCapabilities(exe):
     output = runCommand("%s --show-capabilities" % exe)
     return parseMOOSEJSON(output, '--show-capabilities')
 
+def getCapability(exe, name):
+    """
+    Get the value of a capability from a MOOSE application
+    """
+    value = getCapabilities(exe).get(name)
+    return None if value is None else value[0]
+
 def getCapabilityOption(supported: dict,
                         name: str,
                         from_version: bool = False,
@@ -662,14 +576,6 @@ def checkCapabilities(supported: dict, requested: str, certain):
     success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
     return success, message
 
-def getIfAsioExists(moose_dir):
-    option_set = set(['ALL'])
-    if os.path.exists(moose_dir+"/framework/contrib/asio/include/asio.hpp"):
-        option_set.add('TRUE')
-    else:
-        option_set.add('FALSE')
-    return option_set
-
 def getConfigOption(config_files, option, options):
     # Some tests work differently with parallel mesh enabled
     # We need to detect this condition
@@ -708,23 +614,6 @@ def getConfigOption(config_files, option, options):
         exit(1)
 
     return option_set
-
-def getMooseConfigOption(moose_dir, option):
-    filenames = [
-        moose_dir + '/framework/include/base/MooseConfig.h',
-        moose_dir + '/include/moose/MooseConfig.h',
-        ];
-
-    return getConfigOption(filenames, option, MOOSE_OPTIONS)
-
-
-def getLibMeshConfigOption(libmesh_dir, option):
-    filenames = [
-      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
-      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
-      ];
-
-    return getConfigOption(filenames, option, LIBMESH_OPTIONS)
 
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
