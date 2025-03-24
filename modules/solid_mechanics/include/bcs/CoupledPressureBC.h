@@ -10,6 +10,7 @@
 #pragma once
 
 #include "PressureBase.h"
+#include "PressureAction.h"
 
 /**
  * Pressure boundary condition using coupled variable to apply pressure in a given direction
@@ -19,6 +20,7 @@ class CoupledPressureBCTempl : public PressureParent<is_ad>
 {
 public:
   static InputParameters validParams();
+  static InputParameters actionParams();
 
   CoupledPressureBCTempl(const InputParameters & parameters);
 
@@ -33,3 +35,5 @@ protected:
 
 typedef CoupledPressureBCTempl<false> CoupledPressureBC;
 typedef CoupledPressureBCTempl<true> ADCoupledPressureBC;
+
+declareMoosePressureAction(CoupledPressureBC, CoupledPressureAction);

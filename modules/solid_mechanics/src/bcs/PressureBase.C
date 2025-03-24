@@ -21,9 +21,17 @@ PressureBaseTempl<is_ad>::validParams()
   InputParameters params = PressureBaseParent<is_ad>::validParams();
   params.addDeprecatedParam<unsigned int>(
       "component", "The component for the pressure", "This parameter is no longer necessary");
+  params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
+  return params;
+}
+
+template <bool is_ad>
+InputParameters
+PressureBaseTempl<is_ad>::actionParams()
+{
+  auto params = emptyInputParameters();
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
-  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

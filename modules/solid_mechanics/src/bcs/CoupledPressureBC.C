@@ -8,16 +8,28 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CoupledPressureBC.h"
+#include "PressureAction.h"
 
 registerMooseObject("SolidMechanicsApp", CoupledPressureBC);
+
+registerMoosePressureAction("SolidMechanicsApp", CoupledPressureBC, CoupledPressureAction);
 
 template <bool is_ad>
 InputParameters
 CoupledPressureBCTempl<is_ad>::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = PressureParent<is_ad>::validParams();
   params.addClassDescription(
       "Applies a pressure from a variable on a given boundary in a given direction");
+  params += actionParams();
+  return params;
+}
+
+template <bool is_ad>
+InputParameters
+CoupledPressureBCTempl<is_ad>::actionParams()
+{
+  InputParameters params = PressureParent<is_ad>::actionParams();
   params.addRequiredCoupledVar("pressure", "Coupled variable containing the pressure");
   return params;
 }
