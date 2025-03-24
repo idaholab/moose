@@ -34,15 +34,19 @@ def make_extension(**kwargs):
 
 def hasMooseApp(ext, app):
     """Module function for searching for the existence of a registered application name."""
-    return ext.hasRegistredApp(app)
+    return ext.hasCapability(app)
 
 def hasSubmodule(ext, name, recursive=True):
     """Module function for testing if an application has a submodule ending with the given name."""
     return ext.hasSubmodule(name, recursive)
 
+def hasCapability(ext, name):
+    """Module function for testing if an application has a capability"""
+    return ext.hasCapability(name)
+
 def hasLibtorch(ext):
     """Module function for testing if an application was compiled with libtorch."""
-    return ext.hasConfigOption('libtorch', 'true')
+    return hasCapability(ext, 'libtorch')
 
 def hasPage(ext, filename):
     """Module function for the existence of markdown page."""
@@ -61,9 +65,8 @@ class IfElseExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
-        # List of registered apps, see preExecute
-        self._registerd_apps = set()
-        self._current_app = None
+        # Application capabilities
+        self._capabilities = None
 
         # Build list of modules for function searching and include this file by default
         self._modules = list()
@@ -85,17 +88,8 @@ class IfElseExtension(command.CommandExtension):
                 break
 
         if syntax is not None:
-            for node in moosetree.iterate(syntax):
-                self._registerd_apps.update(node.groups())
-
-    def hasRegistredApp(self, name):
-        """Helper for the 'hasMooseApp' function."""
-        if not self._registerd_apps:
-            msg = "The 'hasMooseApp' function requires the 'appsyntax' extension to have complete syntax, the 'ifelse' extension is being disabled."
-            self.setActive(False)
-            LOG.warning(msg)
-
-        return name in self._registerd_apps
+            LOG.info('Reading MOOSE application capabilities')
+            self._capabilities = util.getCapabilities(syntax.get('executable'))
 
     def hasSubmodule(self, name, recursive):
         """Helper for the 'hasSubmodule' function."""
@@ -105,16 +99,15 @@ class IfElseExtension(command.CommandExtension):
             status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR)
         return any([repo.endswith(name) for repo in status.keys()])
 
-    def hasConfigOption(self, option, value):
-        moose_dir = os.getenv('MOOSE_DIR',
-                              os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..')))
-
-        # getMooseconfig returns a set of ('ALL', value ), so we have to iterate through it
-        for it in util.getMooseConfigOption(moose_dir, option):
-            if it.lower() == value.lower():
-                return True
-
-        return False
+    def hasCapability(self, name):
+        """Helper for whether or not the app has the given capability"""
+        if self._capabilities is None:
+            msg = "The 'hasCapability' function requires the 'appsyntax' extension. The 'ifelse' extension is being disabled."
+            self.setActive(False)
+            LOG.warning(msg)
+            return False
+        entry = self._capabilities.get(name.lower())
+        return entry is not None and entry[0]
 
     def extend(self, reader, renderer):
         self.requires(command)
