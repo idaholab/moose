@@ -23,11 +23,11 @@ CSGCell::getFillTypeString()
   switch (_fill_type)
   {
     case FillType::MATERIAL:
-      return "material";
+      return "MATERIAL";
     case FillType::EMPTY:
-      return "empty";
+      return "EMPTY";
     default:
-      return "invalid";
+      return "INVALID";
   }
 }
 } // namespace CSG
