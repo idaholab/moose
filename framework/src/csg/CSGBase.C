@@ -39,6 +39,7 @@ CSGBase::generateOutput() const
   nlohmann::json csg_json;
 
   csg_json["SURFACES"] = {};
+  csg_json["CELLS"] = {};
   csg_json["UNIVERSES"] = {};
 
   // get all surfaces information
@@ -54,23 +55,27 @@ CSGBase::generateOutput() const
         csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
   }
 
-  // Print out universe information. For now we are assuming there is a single
+  // Print out cell information. For now we are assuming there is a single
   // root universe in the CSGBase object
   auto root_univ = getRootUniverse();
   auto root_univ_name = root_univ->getName();;
-  csg_json["UNIVERSES"][root_univ_name] = {{"CELLS", {}}};
   auto all_cells = root_univ->getAllCells();
   for (const auto & c : all_cells)
   {
     const auto cell_ptr = c.second;
     const auto cell_name = cell_ptr->getName();
     const auto cell_region = cell_ptr->getRegionAsString();
-    const auto cell_type = cell_ptr->getFillTypeString();
-    csg_json["UNIVERSES"][root_univ_name]["CELLS"][cell_name]["TYPE"] = cell_type;
-    csg_json["UNIVERSES"][root_univ_name]["CELLS"][cell_name]["REGION"] = cell_region;
+    const auto cell_filltype = cell_ptr->getFillTypeString();
+    csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
+    csg_json["CELLS"][cell_name]["REGION"] = cell_region;
+    if (cell_filltype == "MATERIAL")
+    {
+      const auto matcell_ptr = std::static_pointer_cast<CSGMaterialCell>(cell_ptr);
+      const auto cell_fill = matcell_ptr->getFill();
+      csg_json["CELLS"][cell_name]["FILL"] = cell_fill;
+    }
   }
 
   return csg_json;
-
 }
 } // namespace CSG
