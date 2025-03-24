@@ -738,8 +738,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 process_elem_dof_indices(
                     evindices, indices_to_insert_to, &nonlocal_indices_to_insert_to);
               } // if pinfo
-            }   // for penetration
-          }     // for contact name
+            } // for penetration
+          } // for contact name
         };
 
         // Include all nodes on the contact surfaces
@@ -1661,8 +1661,10 @@ DMSetUp_Moose(DM dm)
   }
   PetscFunctionReturn(PETSC_SUCCESS);
 }
-
-#if !PETSC_VERSION_LESS_THAN(3, 18, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 23, 0)
+PetscErrorCode
+DMSetFromOptions_Moose(DM dm, PetscOptionItems /*options*/)
+#elif !PETSC_VERSION_LESS_THAN(3, 18, 0)
 PetscErrorCode
 DMSetFromOptions_Moose(DM dm, PetscOptionItems * /*options*/) // >= 3.18.0
 #elif !PETSC_VERSION_LESS_THAN(3, 7, 0)
