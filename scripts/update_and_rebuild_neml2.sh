@@ -50,7 +50,7 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo
   echo "Command-line arguments:"
   echo "  --help                   Display this message and exit"
-  echo "  --summary                Display a summary of the configuration and exit"
+  echo "  --summary                Display a summary of the configuration"
   echo "  --fast                   Skip the update, clean, and configure steps (steps 1-3)"
   echo "  --skip-submodule-update  Skip the update step (step 1)"
   echo "  ADDITIONAL_CONFIGURE_ARG Additional argument(s) to pass to the NEML2 cmake configure command"

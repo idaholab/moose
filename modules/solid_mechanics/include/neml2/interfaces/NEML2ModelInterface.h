@@ -57,7 +57,7 @@ protected:
       neml2::WorkDispatcher<neml2::ValueMap, RJType, RJType, neml2::ValueMap, RJType>;
 
   /// Get the work scheduler
-  const std::shared_ptr<neml2::WorkScheduler> & scheduler() const { return _scheduler; }
+  const neml2::WorkScheduler * scheduler() const { return _scheduler; }
   /// Get the work dispatcher
   const std::unique_ptr<DispatcherType> & dispatcher() const { return _dispatcher; }
 
@@ -124,7 +124,7 @@ NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&
     _device(params.get<std::string>("device")),
     _model(NEML2Utils::getModel(params.get<std::string>("model"), _device)),
     _scheduler(params.isParamValid("scheduler")
-                   ? neml2::Factory::get_object_ptr<neml2::WorkScheduler>(
+                   ? &neml2::Factory::get_object<neml2::WorkScheduler>(
                          "Schedulers", params.get<std::string>("scheduler"))
                    : nullptr),
     _async_dispatch(params.get<bool>("async_dispatch"))
