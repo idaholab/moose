@@ -117,7 +117,6 @@ class AppSyntaxExtension(command.CommandExtension):
 
         self._app_type = None
         self._app_syntax = None
-        self._app_exe = None
         self._database = None
         self._cache = dict()
         self._object_cache = dict()
@@ -145,10 +144,8 @@ class AppSyntaxExtension(command.CommandExtension):
 
         start = time.time()
         LOG.info("Reading MOOSE application syntax...")
-        exe = mooseutils.eval_path(self['executable'])
-        exe = mooseutils.find_moose_executable(exe, name=self['app_name'], show_error=False)
-        self._app_exe = exe
 
+        exe = self.executable
         if exe is None:
             LOG.error("Failed to locate a valid executable in %s.", self['executable'])
         else:
@@ -231,7 +228,11 @@ class AppSyntaxExtension(command.CommandExtension):
 
     @property
     def executable(self):
-        return self._app_exe
+        exe = mooseutils.eval_path(self['executable'])
+        exe = mooseutils.find_moose_executable(exe,
+                                               name=self['app_name'],
+                                               show_error=False)
+        return exe
 
     def find(self, name, page, node_type=None):
 

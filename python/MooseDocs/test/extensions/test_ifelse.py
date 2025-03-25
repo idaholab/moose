@@ -31,7 +31,7 @@ class TestHasMooseApp(MooseDocsTestCase):
             return dict(executable=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
 
     def testIf(self):
-        ast = self.tokenize("!if function=hasMooseApp('MooseApp')\ncontent")
+        ast = self.tokenize("!if function=hasMooseApp('MooseTestApp')\ncontent")
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=1)
         self.assertToken(ast(0,0), 'Condition', size=1, command='if')
@@ -43,6 +43,29 @@ class TestHasMooseApp(MooseDocsTestCase):
         self.assertToken(ast(0), 'Statement', size=1)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
 
+class TestCapabilities(MooseDocsTestCase):
+    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal, alert]
+
+    def setupExtension(self, ext):
+        sys.path.append(os.path.dirname(__file__))
+        if ext == ifelse:
+            return dict(active=True,
+                        modules=['test_ifelse'])
+        if ext is appsyntax:
+            return dict(executable=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
+
+    def testHasCapability(self):
+        ast = self.tokenize("!if function=hasCapability('petsc')\ncontent")
+        self.assertEqual(len(ast), 1)
+        self.assertToken(ast(0), 'Statement', size=1)
+        self.assertToken(ast(0,0), 'Condition', size=1, command='if')
+        self.assertToken(ast(0,0,0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0,0,0), 'Word', size=0, content='content')
+
+        ast = self.tokenize("!if function=hasCapability('missing')\ncontent")
+        self.assertEqual(len(ast), 1)
+        self.assertToken(ast(0), 'Statement', size=1)
+        self.assertToken(ast(0,0), 'Condition', size=0, command='if')
 
 class TestStatements(MooseDocsTestCase):
     EXTENSIONS = [core, ifelse, command]
