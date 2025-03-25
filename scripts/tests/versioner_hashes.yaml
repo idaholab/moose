@@ -894,3 +894,34 @@ fd5f7bc651f0d6a8e2d23e5d4c2c2dadca58aa0b: #29978
   wasp:
     full_version: 2025.02.25_0
     hash: 46ea1c0
+148afcd2fd82fd65a0e114f3313ffdd248132217: #29882
+  libmesh:
+    full_version: 2025.03.06_1
+    hash: bc5c687
+  libmesh-vtk:
+    full_version: 9.3.0_6
+    hash: 83f29bc
+  moose-dev:
+    full_version: 2025.03.24
+    hash: 00b281f
+  mpi:
+    full_version: 2025.03.24
+    hash: d5b4334
+  peacock:
+    full_version: 2025.03.24
+    hash: f8f84d6
+  petsc:
+    full_version: 3.22.1.193.g72c1e49ee3d_2
+    hash: caeec6b
+  pprof:
+    full_version: 2024.12.23_0
+    hash: fe051bc
+  seacas:
+    full_version: 2024.08.15_2
+    hash: 2dd352c
+  tools:
+    full_version: 2025.03.24
+    hash: 8af34cd
+  wasp:
+    full_version: 2025.02.25_1
+    hash: a8340b3

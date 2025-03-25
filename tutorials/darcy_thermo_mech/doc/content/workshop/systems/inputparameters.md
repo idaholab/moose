@@ -152,7 +152,7 @@ Each application is capable of generating documentation from the `validParams` f
 
 +Option 2+: Command line `--show-input` generates a tree based on your input file\\
 
-+Option 3+: [mooseframework.org/syntax](syntax/index.md alternative=https://mooseframework.org/syntax)
++Option 3+: [https://mooseframework.inl.gov/syntax](syntax/index.md alternative=https://mooseframework.inl.gov/syntax)
 
 !---
 

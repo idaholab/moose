@@ -18,7 +18,7 @@ the [!ac](SLL) for {{app}} is dependent upon the following documents.
 !if! function=hasSubmodule('moose', False)
 ## MOOSE
 
-{{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework), which is
+{{app}} is a MOOSE-based application, [https://mooseframework.inl.gov](https://mooseframework), which is
 summarized in the following abstract [!citep](permann2020moose).
 
 > Harnessing modern parallel computing resources to achieve complex multiphysics simulations is a

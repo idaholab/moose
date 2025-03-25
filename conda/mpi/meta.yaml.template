@@ -144,7 +144,7 @@ outputs:
         - yaml
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: Provides MPI wrapper and toolchain for MOOSE based development.
   description: {{ mpi_friendly_name }} is a high performance and widely portable implementation of the Message Passing Interface (MPI) standard.

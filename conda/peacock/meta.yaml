@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2024.12.23" %}
+{% set version = "2025.03.24" %}
 
 package:
   name: moose-peacock
@@ -39,7 +39,7 @@ test:
     - vtk
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: >
     This superficial module (moose-peacock) acts as a top-level module designed to provide all

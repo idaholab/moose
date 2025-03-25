@@ -2,7 +2,7 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   moose/conda_build_config.yaml
 # As well as any directions pertaining to modifying those files.
-{% set version = "2025.03.06" %}
+{% set version = "2025.03.24" %}
 
 package:
   name: moose-dev
@@ -27,7 +27,7 @@ requirements:
     - {{ moose_peacock }}
 
 about:
-  home: https://mooseframework.org/
+  home: https://mooseframework.inl.gov/
   license: LGPL 2.1
   summary: >
     A simple package which installs all necessary Conda packages for MOOSE based development.
