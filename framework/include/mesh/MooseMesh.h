@@ -1337,6 +1337,16 @@ public:
   [[nodiscard]] bool doingPRefinement() const { return _doing_p_refinement; }
 
   /**
+   * Returns the maximum p-refinement level of all elements
+   */
+  unsigned int maxPLevel() const { return _max_p_level; }
+
+  /**
+   * Returns the maximum h-refinement level of all elements
+   */
+  unsigned int maxHLevel() const { return _max_h_level; }
+
+  /**
    * Get the map describing for each volumetric quadrature point (qp) on the refined level which qp
    * on the previous coarser level the fine qp is closest to
    */
@@ -1848,6 +1858,10 @@ private:
 
   /// Whether we have p-refinement (as opposed to h-refinement)
   bool _doing_p_refinement;
+  /// Maximum p-refinement level of all elements
+  unsigned int _max_p_level;
+  /// Maximum h-refinement level of all elements
+  unsigned int _max_h_level;
 
   template <typename T>
   struct MeshType;

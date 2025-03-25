@@ -155,6 +155,12 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
   }
   else
     oss << std::setw(console_field_width) << "  Elems:" << mesh.n_active_elem() << '\n';
+  if (moose_mesh.maxPLevel() > 0)
+    oss << std::setw(console_field_width)
+        << "  Max p-Refinement Level: " << static_cast<std::size_t>(moose_mesh.maxPLevel()) << '\n';
+  if (moose_mesh.maxHLevel() > 0)
+    oss << std::setw(console_field_width)
+        << "  Max h-Refinement Level: " << static_cast<std::size_t>(moose_mesh.maxHLevel()) << '\n';
 
   if (verbose)
   {
