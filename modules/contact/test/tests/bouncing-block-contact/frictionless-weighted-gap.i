@@ -8,11 +8,7 @@ offset = 1e-2
 []
 
 [Mesh]
-  file = long-bottom-block-1elem-blocks-coarse.e
-[]
-
-[Problem]
-  prefer_hash_table_matrix_assembly = false
+  file = long-bottom-block-1elem-blocks.e
 []
 
 [Variables]
@@ -135,17 +131,16 @@ offset = 1e-2
   type = Transient
   end_time = 200
   dt = 5
-  dtmin = 5
-  solve_type = 'NEWTON'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor -ksp_view'
+  dtmin = .1
+  solve_type = 'PJFNK'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
-  nl_max_its = 30
+  nl_max_its = 20
   line_search = 'none'
   snesmf_reuse_base = true
-  nl_rel_tol = 1e-8
-  num_steps = 3
+  nl_rel_tol = 1e-12
 []
 
 [Debug]
@@ -164,19 +159,13 @@ offset = 1e-2
 []
 
 [Postprocessors]
+  active = 'num_nl cumulative contact'
   [num_nl]
     type = NumNonlinearIterations
   []
   [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  []
-  [linear]
-    type = NumLinearIterations
-  []
-  [cumulative_linear]
-    type = CumulativeValuePostprocessor
-    postprocessor = linear
   []
   [contact]
     type = ContactDOFSetSize
