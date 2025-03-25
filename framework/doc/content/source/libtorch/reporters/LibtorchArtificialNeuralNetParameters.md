@@ -1,6 +1,6 @@
 # LibtorchArtificialNeuralNetParameters
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Reporters/LibtorchArtificialNeuralNetParameters
 
 ## Overview
@@ -14,7 +14,7 @@ simulation.
 
 !listing test/tests/controls/libtorch_nn_control/read_control.i block=Reporters
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Reporters/LibtorchArtificialNeuralNetParameters
 

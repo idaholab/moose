@@ -1,6 +1,6 @@
 # DRLControlNeuralNetParameters
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Reporters/DRLControlNeuralNetParameters
 
 ## Overview
@@ -13,7 +13,7 @@ training process.
 
 !listing modules/stochastic_tools/test/tests/transfers/libtorch_nn_transfer/libtorch_drl_control_trainer.i block=Reporters
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Reporters/DRLControlNeuralNetParameters
 

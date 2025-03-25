@@ -1,6 +1,6 @@
 # LibtorchNeuralNetControlTransfer
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Transfers/LibtorchNeuralNetControlTransfer
 
 ## Overview
@@ -8,7 +8,7 @@
 Transfer which copies a [LibtorchArtificialNeuralNet.md] from a neural net control trainer object
 (say [LibtorchDRLControlTrainer.md]) on the main app to a [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md) object on the sub app.
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Transfers/LibtorchNeuralNetControlTransfer
 
