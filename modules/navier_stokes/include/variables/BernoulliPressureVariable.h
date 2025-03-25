@@ -64,15 +64,14 @@ protected:
   /// The density
   const Moose::Functor<ADReal> * _rho;
 
+  /// The names of the sidesets which will have associated form loss coefficients
   std::vector<BoundaryName> _pressure_drop_sidesets;
 
-  std::vector<Real> pressure_drop_form_factors;
-
+  /// The boundary IDs corresponding to the form loss sidesets
   const std::vector<BoundaryID> _pressure_drop_sideset_ids;
 
+  /// The form loss coefficients corresponding to the sidesets
   std::vector<Real> _pressure_drop_form_factors;
-
-  const std::set<BoundaryID> _theBoundaries;
 
 private:
   /// Switch to enable the two-term extrapolation on porosity jump faces.

@@ -47,7 +47,6 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _pressure_drop_sidesets(getParam<std::vector<BoundaryName>>("pressure_drop_sidesets")),
     _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs( _pressure_drop_sidesets)),
     _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
-    _theBoundaries(this->_mesh.getBoundaryIDs()),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
 {
@@ -56,13 +55,11 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     paramError(
         "allow_two_term_expansion_on_bernoulli_faces",
         "Skewness correction with two term extrapolation on Bernoulli faces is not supported!");
-  size_t num_pressure_drop_sidesets = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
-  size_t num_pressure_drop_form_factors = sizeof(_pressure_drop_sidesets) / sizeof(_pressure_drop_sidesets[0]);
 
-  if (num_pressure_drop_form_factors != num_pressure_drop_sidesets)
+  if (_pressure_drop_sidesets.size() != _pressure_drop_form_factors.size())
     paramError(
         "pressure_drop_sidesets",
-        "The number of sidesets and form losses is not equal");
+        "The number of sidesets and the number of supplied form losses are not equal!");
 }
 
 void
@@ -165,14 +162,14 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   const auto & eps_downwind = fi_elem_is_upwind ? eps_neighbor : eps_elem;
 
   /*
-     If a weakly compressible material is used where the density slightly
-     depends on pressure. Given that the two-term expansion on Bernoulli faces is
-     enabled, we take use the downwind face assuming the continuity (minimal jump) of the
-     density. This protects against an infinite recursion between pressure and
-     density.
+    If a weakly compressible material is used where the density slightly
+    depends on pressure. Given that the two-term expansion on Bernoulli faces is
+    enabled, we take use the downwind face assuming the continuity (minimal jump) of the
+    density. This protects against an infinite recursion between pressure and
+    density.
   */
- const auto & rho_upwind = (*_rho)(upwind_elem, time);
- const auto & rho_downwind = (*_rho)(downwind_elem, time);
+  const auto & rho_upwind = (*_rho)(upwind_elem, time);
+  const auto & rho_downwind = (*_rho)(downwind_elem, time);
 
   const VectorValue<ADReal> interstitial_vel_upwind = vel_upwind * (1 / eps_upwind);
   const VectorValue<ADReal> interstitial_vel_downwind = vel_downwind * (1 / eps_downwind);
@@ -180,18 +177,19 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   const auto v_dot_n_upwind = interstitial_vel_upwind * fi.normal();
   const auto v_dot_n_downwind = interstitial_vel_downwind * fi.normal();
 
+  // Iterate through sidesets to see if we have associated irreversible pressure losses
+  // or not.
   ADReal factor = 0.0;
-  // Iterate through sidesets to see if they are boundary faces or not
-//How do I access the variable I defined above titled num_pressure_drop_sidesets?
   for (const auto & bd_id : fi.boundaryIDs())
     for(const auto i : index_range(_pressure_drop_sideset_ids))
      if (_pressure_drop_sideset_ids[i] == bd_id)
       factor += _pressure_drop_form_factors[i];
 
-  auto upwind_bernoulli_vel_chunk = 0.5 * rho_upwind * v_dot_n_upwind * v_dot_n_upwind ;
-  auto downwind_bernoulli_vel_chunk = 0.5 * rho_downwind * v_dot_n_downwind * v_dot_n_downwind ;
+  auto upwind_bernoulli_vel_chunk = 0.5 * rho_upwind * v_dot_n_upwind * v_dot_n_upwind;
+  auto downwind_bernoulli_vel_chunk = 0.5 * rho_downwind * v_dot_n_downwind * v_dot_n_downwind;
 
-  // If it is a contraction we have to use the downwind values, otherwise hte upwind values
+  // We add the additional, irreversible pressure loss here.
+  // If it is a contraction we have to use the downwind values, otherwise the upwind values.
   if (eps_downwind < eps_upwind)
     downwind_bernoulli_vel_chunk += 0.5*factor * rho_downwind * v_dot_n_downwind * v_dot_n_downwind;
   else
