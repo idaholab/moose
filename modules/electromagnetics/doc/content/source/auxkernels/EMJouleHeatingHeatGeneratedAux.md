@@ -26,7 +26,7 @@ where
 
 ## Example Input File Syntax
 
-!listing aux_microwave_heating.i block=AuxKernels/aux_microwave_heating
+!listing /auxkernels/heating/aux_microwave_heating.i block=AuxKernels/aux_microwave_heating
 
 !syntax parameters /AuxKernels/EMJouleHeatingHeatGeneratedAux
 
