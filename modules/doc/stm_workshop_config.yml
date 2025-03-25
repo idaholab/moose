@@ -1,1 +1,38 @@
-../stochastic_tools/doc/stm_workshop_config.yml
+Content: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Content
+
+Executioner: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Executioner
+
+Renderer: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Renderer
+
+Extensions:
+    disable_defaults: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions disable_defaults
+    MooseDocs.extensions.comment: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.comment
+    MooseDocs.extensions.common: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.common
+    MooseDocs.extensions.command: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.command
+    MooseDocs.extensions.core: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.core
+    MooseDocs.extensions.config: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.config
+    MooseDocs.extensions.media: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.media
+    MooseDocs.extensions.floats: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.floats
+    MooseDocs.extensions.include: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.include
+    MooseDocs.extensions.bibtex: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.bibtex
+    MooseDocs.extensions.katex: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.katex
+    MooseDocs.extensions.style: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.style
+    MooseDocs.extensions.autolink: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.autolink
+    MooseDocs.extensions.materialicon: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.materialicon
+    MooseDocs.extensions.heading: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.heading
+    MooseDocs.extensions.shortcut: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.shortcut
+    MooseDocs.extensions.table: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.table
+    MooseDocs.extensions.layout: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.layout
+    MooseDocs.extensions.alert: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.alert
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/combined
+        remove: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.appsyntax remove
+        unregister: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.appsyntax unregister
+        includes: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.appsyntax includes
+    MooseDocs.extensions.content: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.content
+    MooseDocs.extensions.modal: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.modal
+    MooseDocs.extensions.acronym: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.acronym
+    MooseDocs.extensions.listing: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.listing
+    MooseDocs.extensions.reveal: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.reveal
+    MooseDocs.extensions.datetime: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.datetime
+    MooseDocs.extensions.graph: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/stm_workshop_config.yml Extensions MooseDocs.extensions.graph
