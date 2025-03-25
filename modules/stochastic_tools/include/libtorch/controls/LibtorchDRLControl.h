@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchActorNeuralNet.h"
 #include "LibtorchNeuralNetControl.h"
 
 /**
@@ -39,6 +39,10 @@ public:
    */
   Real getSignalLogProbability(const unsigned int signal_index) const;
 
+  virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn) override;
+
+  virtual void loadControlNeuralNetFromFile(const InputParameters & parameters) override;
+
 protected:
   /**
    * Function which computes the logarithmic probability of given actions.
@@ -53,11 +57,16 @@ protected:
   /// The log probability of control signals from the last evaluation of the controller
   std::vector<Real> _current_control_signal_log_probabilities;
 
-  /// Standard deviation for the actions, supplied by the user
-  const std::vector<Real> _action_std;
+  std::vector<Real> _previous_control_signal;
+  std::vector<Real> _current_smoothed_signal;
 
-  /// Standard deviations converted to a 2D diagonal tensor that can be used by Libtorch routines.
-  torch::Tensor _std;
+  std::shared_ptr<Moose::LibtorchActorNeuralNet> _actor_nn;
+
+  unsigned int _call_counter;
+  const unsigned int _num_steps_in_period;
+  const Real _smoother;
+  const bool _stochastic;
+
 };
 
 #endif

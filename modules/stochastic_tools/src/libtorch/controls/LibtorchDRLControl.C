@@ -11,8 +11,8 @@
 
 #include "LibtorchDRLControl.h"
 #include "LibtorchTorchScriptNeuralNet.h"
-#include "LibtorchArtificialNeuralNet.h"
 #include "Transient.h"
+#include "LibtorchUtils.h"
 
 registerMooseObject("StochasticToolsApp", LibtorchDRLControl);
 
@@ -23,9 +23,19 @@ LibtorchDRLControl::validParams()
   params.addClassDescription(
       "Sets the value of multiple 'Real' input parameters and postprocessors based on a Deep "
       "Reinforcement Learning (DRL) neural network trained using a PPO algorithm.");
-  params.addRequiredParam<std::vector<Real>>(
-      "action_standard_deviations", "Standard deviation value used while sampling the actions.");
+
   params.addParam<unsigned int>("seed", "Seed for the random number generator.");
+
+  params.addParam<unsigned int>("num_stems_in_period", 1, "Blabla");
+  params.addParam<Real>("smoother", 1.0, "Blabla");
+
+  params.addParam<bool>("stochastic", true, "Blabla");
+
+  params.addParam<std::vector<Real>>(
+    "action_standard_deviations", {}, "Standard deviation value used while sampling the actions.");
+
+  params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
+  params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
 
   return params;
 }
@@ -33,28 +43,66 @@ LibtorchDRLControl::validParams()
 LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   : LibtorchNeuralNetControl(parameters),
     _current_control_signal_log_probabilities(std::vector<Real>(_control_names.size(), 0.0)),
-    _action_std(getParam<std::vector<Real>>("action_standard_deviations"))
+    _previous_control_signal(std::vector<Real>(_control_names.size(), 0.0)),
+    _current_smoothed_signal(std::vector<Real>(_control_names.size(), 0.0)),
+    _call_counter(0),
+    _num_steps_in_period(getParam<unsigned int>("num_stems_in_period")),
+    _smoother(getParam<Real>("smoother")),
+    _stochastic(getParam<bool>("stochastic"))
 {
-  if (_control_names.size() != _action_std.size())
-    paramError("action_standard_deviations",
-               "Number of action_standard_deviations does not match the number of controlled "
-               "parameters.");
-
   // Fixing the RNG seed to make sure every experiment is the same.
   if (isParamValid("seed"))
     torch::manual_seed(getParam<unsigned int>("seed"));
 
-  // We convert and store the user-supplied standard deviations into a tensor which can be easily
-  // used by routines in libtorch
-  _std = torch::eye(_control_names.size());
-  for (unsigned int i = 0; i < _control_names.size(); ++i)
-    _std[i][i] = _action_std[i];
+  if (isParamValid("filename"))
+    loadControlNeuralNetFromFile(parameters);
+}
+
+void
+LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & parameters)
+{
+  const auto & filename = getParam<std::string>("filename");
+  if (getParam<bool>("torch_script_format"))
+    _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
+  else
+  {
+    unsigned int num_inputs = _response_names.size() * _input_timesteps;
+    unsigned int num_outputs = _control_names.size();
+    std::vector<unsigned int> num_neurons_per_layer =
+        getParam<std::vector<unsigned int>>("num_neurons_per_layer");
+    std::vector<std::string> activation_functions =
+        parameters.isParamSetByUser("activation_function")
+            ? getParam<std::vector<std::string>>("activation_function")
+            : std::vector<std::string>({"relu"});
+
+    const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
+    const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
+    const std::vector<Real> & action_std = getParam<std::vector<Real>>("action_standard_deviations");
+
+    auto nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
+        filename, num_inputs, num_outputs, num_neurons_per_layer, action_std, activation_functions, minimum_values, maximum_values);
+
+    try
+    {
+      torch::load(nn, filename);
+      _actor_nn =std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
+    }
+    catch (const c10::Error & e)
+    {
+      mooseError(
+          "The requested pytorch parameter file could not be loaded. This can either be the"
+          "result of the file not existing or a misalignment in the generated container and"
+          "the data in the file. Make sure the dimensions of the generated neural net are the"
+          "same as the dimensions of the parameters in the input file!\n",
+          e.msg());
+    }
+  }
 }
 
 void
 LibtorchDRLControl::execute()
 {
-  if (_nn)
+  if (_actor_nn)
   {
     unsigned int n_controls = _control_names.size();
     unsigned int num_old_timesteps = _input_timesteps - 1;
@@ -62,59 +110,94 @@ LibtorchDRLControl::execute()
     // Fill a vector with the current values of the responses
     updateCurrentResponse();
 
-    // If this is the first time this control is called and we need to use older values, fill up the
-    // needed old values using the initial values
-    if (!_initialized)
+    if (_current_execute_flag == EXEC_TIMESTEP_BEGIN)
     {
-      _old_responses.clear();
-      for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-        _old_responses.push_back(_current_response);
-      _initialized = true;
+      // If this is the first time this control is called and we need to use older values, fill up the
+      // needed old values using the initial values
+      if (!_initialized)
+      {
+        _old_responses.clear();
+        for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
+          _old_responses.push_back(_current_response);
+        _initialized = true;
+      }
+
+      if (_call_counter % _num_steps_in_period == 0)
+      {
+        // Organize the old an current solution into a tensor so we can evaluate the neural net
+        torch::Tensor input_tensor = prepareInputTensor();
+
+        // std::cout << "Std" << _actor_nn->stdTensor() << std::endl;
+        // std::cout << "Input" << input_tensor << std::endl;
+        // Evaluate the neural network to get the expected control value
+        torch::Tensor action = _actor_nn->evaluate(input_tensor, _stochastic);
+
+        // std::cout << "in za control " << action << std::endl;
+        // Compute log probability
+
+        _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
+
+        if (_call_counter == 0)
+          _current_smoothed_signal = _current_control_signals;
+
+        // std::cout << "Computing control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
+
+
+        // for (const auto i : index_range(_current_control_signals))
+        //   _current_control_signals[i] = std::min(std::max(_current_control_signals[i], _minimum_actions[i]), _maximum_actions[i]);
+
+        if (!_stochastic)
+        {
+          torch::Tensor log_probability = _actor_nn->logProbability(action);
+
+          _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
+                                                    log_probability.data_ptr<Real>() +
+                                                      log_probability.size(1)};
+          // std::cout << "Logprob: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
+        }
+      }
+
+
+      // Convert data
+      _previous_control_signal = _current_smoothed_signal;
+
+
+      for (const auto i : index_range(_current_smoothed_signal))
+        _current_smoothed_signal[i] = _previous_control_signal[i] + _smoother*(_current_control_signals[i] - _previous_control_signal[i]);
+
+
+      // std::cout << "Setting control signal to: " << Moose::stringify(_current_smoothed_signal) << std::endl;
+
+
+      for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
+      {
+
+        // We scale the controllable value for physically meaningful control action
+        setControllableValueByName<Real>(_control_names[control_i],
+                                        _current_smoothed_signal[control_i] *
+                                            _action_scaling_factors[control_i]);
+      }
+
+      // We add the curent solution to the old solutions and move everything in there one step
+      // backward
+      if (_old_responses.size())
+      {
+        std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
+        _old_responses[0] = _current_response;
+      }
+      _call_counter++;
     }
-
-    // Organize the old an current solution into a tensor so we can evaluate the neural net
-    torch::Tensor input_tensor = prepareInputTensor();
-
-    // Evaluate the neural network to get the expected control value
-    torch::Tensor output_tensor = _nn->forward(input_tensor);
-
-    // Sample control value (action) from Gaussian distribution
-    torch::Tensor action = at::normal(output_tensor, _std);
-
-    // Compute log probability
-    torch::Tensor log_probability = computeLogProbability(action, output_tensor);
-
-    // Convert data
-    _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
-
-    _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
-                                                 log_probability.data_ptr<Real>() +
-                                                     log_probability.size(1)};
-
-    for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
-    {
-      // We scale the controllable value for physically meaningful control action
-      setControllableValueByName<Real>(_control_names[control_i],
-                                       _current_control_signals[control_i] *
-                                           _action_scaling_factors[control_i]);
-    }
-
-    // We add the curent solution to the old solutions and move everything in there one step
-    // backward
-    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-    _old_responses[0] = _current_response;
   }
 }
 
-torch::Tensor
-LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
-                                          const torch::Tensor & output_tensor)
+void
+LibtorchDRLControl::loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn)
 {
-  // Logarithmic probability of taken action, given the current distribution.
-  torch::Tensor var = torch::matmul(_std, _std);
-
-  return -((action - output_tensor) * (action - output_tensor)) / (2.0 * var) - torch::log(_std) -
-         std::log(std::sqrt(2.0 * M_PI));
+  const auto * check = dynamic_cast<const Moose::LibtorchActorNeuralNet *>(&input_nn);
+  if (!check)
+    mooseError("This needs to be a LibtorchActorNeuralNet!");
+  _nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*check);
+  _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*check);
 }
 
 Real
