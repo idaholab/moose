@@ -1,6 +1,6 @@
 # LibtorchDRLLogProbabilityPostprocessor
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Postprocessors/LibtorchDRLLogProbabilityPostprocessor
 
 ## Overview
@@ -10,7 +10,7 @@ a controller. It is used in a Deep Reinforcement Learning (DRL) context where we
 actions using a normal distribution around the computed mean value. This helps with the random
 exploration of the action space together with reducing the overfitting of the neural networks.
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Postprocessors/LibtorchDRLLogProbabilityPostprocessor
 
