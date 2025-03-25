@@ -80,16 +80,27 @@ class IfElseExtension(command.CommandExtension):
 
     def preExecute(self):
         """Populate a list of registered applications."""
-
         syntax = None
         for ext in self.translator.extensions:
             if isinstance(ext, appsyntax.AppSyntaxExtension):
-                syntax = ext.syntax
+                syntax = ext
                 break
 
-        if syntax is not None:
-            LOG.info('Reading MOOSE application capabilities')
-            self._capabilities = util.getCapabilities(syntax.get('executable'))
+        if syntax is None:
+            msg = "The 'ifelse' extension requires the 'appsyntax' extension for parsing capabilities."
+            LOG.warning(msg)
+            return
+
+        exe = syntax.executable
+        if exe is None:
+            LOG.error(f"Failed to locate a valid executable in {syntax['executable']}.")
+            return
+
+        try:
+            LOG.info("Reading MOOSE application capabilities...")
+            self._capabilities = util.getCapabilities(exe)
+        except:
+            LOG.error(f'Failed to load capabilities from application {exe}.')
 
     def hasSubmodule(self, name, recursive):
         """Helper for the 'hasSubmodule' function."""
@@ -102,12 +113,11 @@ class IfElseExtension(command.CommandExtension):
     def hasCapability(self, name):
         """Helper for whether or not the app has the given capability"""
         if self._capabilities is None:
-            msg = "The 'hasCapability' function requires the 'appsyntax' extension. The 'ifelse' extension is being disabled."
-            self.setActive(False)
-            LOG.warning(msg)
+            msg = "Capabilities are not available"
+            LOG.error(msg)
             return False
         entry = self._capabilities.get(name.lower())
-        return entry is not None and entry[0]
+        return entry is not None and entry[0] != False
 
     def extend(self, reader, renderer):
         self.requires(command)
