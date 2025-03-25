@@ -355,6 +355,13 @@ FEProblemBase::validParams()
       false,
       "Whether to preallocate matrix memory. If this is false, then no sparsity pattern will be "
       "precomputed and instead a hash table will be used for matrix assembly");
+  params.addParam<bool>(
+      "reset_memory",
+      true,
+      "Whether we should reset matrix memory for every Jacobian evaluation. This option is useful "
+      "if the sparsity pattern is constantly changing and you are using hash table assembly or if "
+      "you wish to continually restore the matrix to the originally preallocated sparsity pattern "
+      "computed by relationship managers.");
 
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
@@ -363,10 +370,10 @@ FEProblemBase::validParams()
       "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
-  params.addParamNamesToGroup(
-      "use_nonlinear previous_nl_solution_required nl_sys_names "
-      "ignore_zeros_in_jacobian identify_variable_groups_in_nl prefer_hash_table_matrix_assembly",
-      "Nonlinear system(s)");
+  params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
+                              "ignore_zeros_in_jacobian identify_variable_groups_in_nl "
+                              "prefer_hash_table_matrix_assembly reset_memory",
+                              "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
   params.addParamNamesToGroup("verbose_setup verbose_multiapps parallel_barrier_messaging",
@@ -483,6 +490,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         isParamValid("error_on_jacobian_nonzero_reallocation")
             ? getParam<bool>("error_on_jacobian_nonzero_reallocation")
             : _app.errorOnJacobianNonzeroReallocation()),
+    _reset_memory(getParam<bool>("reset_memory")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _preserve_matrix_sparsity_pattern(true),
     _force_restart(getParam<bool>("force_restart")),
@@ -7227,7 +7235,15 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           if (_current_nl_sys->hasMatrix(tag))
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
-            matrix.reset_memory();
+            bool memory_changed = false;
+            if (_reset_memory)
+            {
+              memory_changed = matrix.reset_memory();
+              mooseAssert(_communicator.verify(memory_changed),
+                          "Verification that all our 'memory_changed' values are the same failed");
+            }
+            if (!memory_changed)
+              matrix.zero();
             if (haveADObjects())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero

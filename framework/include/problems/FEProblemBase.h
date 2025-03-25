@@ -1873,6 +1873,11 @@ public:
   MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0);
 
   /**
+   * @returns Whether matrix memory is reset to original preallocation before each Jacobian assembly
+   */
+  bool resetMatrixMemory() const { return _reset_memory; }
+
+  /**
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc
    */
@@ -2883,6 +2888,11 @@ private:
   // Parameters handling Jacobian sparsity pattern behavior
   /// Whether to error when the Jacobian is re-allocated, usually because the sparsity pattern changed
   bool _error_on_jacobian_nonzero_reallocation;
+  /// Whether we should reset matrix memory for every Jacobian evaluation. This option is useful if
+  /// the sparsity pattern is constantly changing and you are using hash table assembly or if you
+  /// wish to continually restore the matrix to the originally preallocated sparsity pattern
+  /// computed by relationship managers.
+  const bool _reset_memory;
   /// Whether to ignore zeros in the Jacobian, thereby leading to a reduced sparsity pattern
   bool _ignore_zeros_in_jacobian;
   /// Whether to preserve the system matrix / Jacobian sparsity pattern, using 0-valued entries usually
