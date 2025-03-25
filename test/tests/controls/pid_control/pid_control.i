@@ -40,7 +40,9 @@ c = 0
 [Executioner]
   type = Transient
 
-  solve_type = 'PJFNK'
+  solve_type = 'Newton'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   start_time = 0.0
   end_time = 20
   dt = 1

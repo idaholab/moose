@@ -25,7 +25,8 @@ MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
     _app(app),
-    _has_bmbb(false)
+    _has_bmbb(false),
+    _verbose(false)
 {
 }
 
@@ -401,6 +402,10 @@ MeshGeneratorSystem::executeMeshGenerators()
     for (const auto & generator : generator_set)
     {
       const auto & name = generator->name();
+      if (_verbose)
+        _app._console << " [DBG] Executing mesh generator (" << COLOR_GREEN << std::setw(20) << name
+                      << COLOR_DEFAULT << ") in type (" << COLOR_GREEN << generator->type()
+                      << COLOR_DEFAULT << ")" << std::endl;
       auto current_mesh = generator->generateInternal();
 
       // Only generating data for this generator

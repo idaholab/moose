@@ -837,7 +837,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       FEBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
       auto & grad_phi = _ad_grad_phi_data[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -858,7 +858,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
       auto & grad_phi = _ad_vector_grad_phi_data[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -1042,7 +1042,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
-  auto num_shapes = fe->n_shape_functions();
+  auto num_shapes = FEInterface::n_shape_functions(fe->get_fe_type(), elem);
   const auto & phi_map = fe->get_fe_map().get_phi_map();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
@@ -1426,7 +1426,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
           _ad_d2xyzdxi2_map[p].zero();
 
       const auto n_mapping_shape_functions =
-          FE<2, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
+          FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -1494,7 +1494,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         }
 
       const unsigned int n_mapping_shape_functions =
-          FE<3, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
+          FE<3, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -1795,11 +1795,7 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
-  FEInterface::inverse_map(elem->dim(),
-                           _holder_fe_helper[elem->dim()]->get_fe_type(),
-                           elem,
-                           physical_points,
-                           _temp_reference_points);
+  FEMap::inverse_map(elem->dim(), elem, physical_points, _temp_reference_points);
 
   reinit(elem, _temp_reference_points);
 
@@ -1880,9 +1876,9 @@ Assembly::reinitFVFace(const FaceInfo & fi)
     // The order of the element that is used for initing here doesn't matter since this will just
     // be used for constant monomials (which only need a single integration point)
     if (dim == 3)
-      _current_qrule_face->init(QUAD4);
+      _current_qrule_face->init(QUAD4, /* p_level = */ 0, /* simple_type_only = */ true);
     else
-      _current_qrule_face->init(EDGE2);
+      _current_qrule_face->init(EDGE2, /* p_level = */ 0, /* simple_type_only = */ true);
   }
 
   _current_side_elem = &_current_side_elem_builder(*_current_elem, _current_side);
@@ -2009,11 +2005,8 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
   if (neighbor_reference_points)
     _current_neighbor_ref_points = *neighbor_reference_points;
   else
-    FEInterface::inverse_map(neighbor_dim,
-                             FEType(),
-                             neighbor,
-                             _current_q_points_face.stdVector(),
-                             _current_neighbor_ref_points);
+    FEMap::inverse_map(
+        neighbor_dim, neighbor, _current_q_points_face.stdVector(), _current_neighbor_ref_points);
 
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
@@ -2157,7 +2150,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     {
       FEBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
       auto & grad_phi = _ad_grad_phi_data_face[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -2177,7 +2170,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     {
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
-      auto num_shapes = fe.n_shape_functions();
+      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
       auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
 
       grad_phi.resize(num_shapes);
@@ -2426,8 +2419,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(
-      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
+  FEMap::inverse_map(neighbor_dim, neighbor, physical_points, _current_neighbor_ref_points);
 
   if (_need_JxW_neighbor)
   {
@@ -2462,8 +2454,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(
-      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
+  FEMap::inverse_map(neighbor_dim, neighbor, physical_points, _current_neighbor_ref_points);
 
   reinitFENeighbor(neighbor, _current_neighbor_ref_points);
   reinitNeighbor(neighbor, _current_neighbor_ref_points);

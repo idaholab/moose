@@ -890,8 +890,8 @@ DisplacedProblem::reinitElemNeighborAndLowerD(const Elem * elem,
     {
       auto qps = _assembly[tid][currentNlSysNum()]->qPointsFaceNeighbor().stdVector();
       std::vector<Point> reference_points;
-      FEInterface::inverse_map(
-          lower_d_elem_neighbor->dim(), FEType(), lower_d_elem_neighbor, qps, reference_points);
+      FEMap::inverse_map(
+          lower_d_elem_neighbor->dim(), lower_d_elem_neighbor, qps, reference_points);
       reinitLowerDElem(lower_d_elem_neighbor, tid, &qps);
     }
   }

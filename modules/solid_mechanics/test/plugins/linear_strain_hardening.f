@@ -69,6 +69,13 @@ C
 C
 C     ELASTIC STIFFNESS
 C
+C     Fully initialize DDSDDE to zero
+      DO I = 1, NTENS
+         DO J = 1, NTENS
+            DDSDDE(I,J) = 0.0
+         END DO
+      END DO
+
       DO K1=1, NDI
          DO K2=1, NDI
             DDSDDE(K2, K1)=ELAM
@@ -155,6 +162,10 @@ C      PRINT *, PJ
          END DO
          DO K=NDI+1,NTENS
             DIR(K) = ((THREE/TWO)*STRESS(K))/PJ
+         END DO
+      ELSE
+         DO K=1,NTENS
+            DIR(K) = 0.0
          END DO
       END IF
 C      PRINT *, DIR
