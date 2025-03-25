@@ -19,20 +19,18 @@ typically contains gravitational terms; however, we have omitted them under the
 assumption that $\rho_1 = \rho_2$ which should be true when density does not
 depend on pressure (the incompressible or "weakly" compressible case).
 
-The decision to use downstream information to compute the upstream pressure value
-is based on eigenvalue reasoning for the subsonic Euler equations. For the
-subsonic Euler equations, mesh dimension + 1 upstream explicit/physical (as
-opposed to implicit) boundary conditions are required while one downstream
-explicit/physical boundary condition is required
-[!citep](novak2018pronghorn). In practice this often corresponds to mesh
-dimension explicit inlet boundary conditions related to velocity, one explicit
-inlet boundary condition related to temperature, and one explicit outlet
-boundary condition related to pressure. Thus physics-based discretizations of
-Euler flows typically (at least partially) upwinds information being advected by
-the flow field. However, given the propagation of pressure information upstream
-from the explicit outlet pressure boundary condition, we believe it reasonable
-to do the same for computing the Bernoulli pressure jump at porosity
-discontinuities.
+Furthermore, the user can select sidesets in the domain to assign additional
+irreversible pressure drops. For this, the selected sidesets should be defined
+using parameters [!param](/Variables/BernoulliPressureVariable/pressure_drop_sidesets)
+and [!param](/Variables/BernoulliPressureVariable/pressure_drop_form_factors).
+The irreversible pressure drop can be expressed as:
+
+\begin{equation}
+\frac{1}{2}\kappa\rho\vec{v}^2,
+\end{equation}
+
+where $\kappa$ is the form loss coefficient. For contractions, the velocity and the density
+on the upwind side are taken whereas for expansions the downwind side values are used.
 
 !alert! note title=Behavior with parallel execution
 
@@ -50,7 +48,6 @@ additional layers of ghosted elements (which can potentially increase local comp
 using the following `FVKernel` parameter [!param](/FVKernels/FVDiffusion/ghost_layers).
 
 !alert-end!
-
 
 !syntax parameters /Variables/BernoulliPressureVariable
 

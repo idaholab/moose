@@ -23,9 +23,14 @@ BernoulliPressureVariable::validParams()
   params.addParam<MooseFunctorName>("w", 0, "The z-component of velocity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
-  // params.addParam<std::vector<std::string>>("pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
-  params.addParam<std::vector<BoundaryName>>("pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
-  params.addParam<std::vector<Real>>("pressure_drop_form_factors", {}, "User-suppled form loss coefficients to be applied over the sidesets listed above");
+  // params.addParam<std::vector<std::string>>("pressure_drop_sidesets", {}, "Sidesets over which
+  // form loss coefficients are to be applied");
+  params.addParam<std::vector<BoundaryName>>(
+      "pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
+  params.addParam<std::vector<Real>>(
+      "pressure_drop_form_factors",
+      {},
+      "User-suppled form loss coefficients to be applied over the sidesets listed above");
   params.addParam<bool>(
       "allow_two_term_expansion_on_bernoulli_faces",
       false,
@@ -45,7 +50,7 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _eps(nullptr),
     _rho(nullptr),
     _pressure_drop_sidesets(getParam<std::vector<BoundaryName>>("pressure_drop_sidesets")),
-    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs( _pressure_drop_sidesets)),
+    _pressure_drop_sideset_ids(this->_mesh.getBoundaryIDs(_pressure_drop_sidesets)),
     _pressure_drop_form_factors(getParam<std::vector<Real>>("pressure_drop_form_factors")),
     _allow_two_term_expansion_on_bernoulli_faces(
         getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
@@ -57,9 +62,8 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
         "Skewness correction with two term extrapolation on Bernoulli faces is not supported!");
 
   if (_pressure_drop_sidesets.size() != _pressure_drop_form_factors.size())
-    paramError(
-        "pressure_drop_sidesets",
-        "The number of sidesets and the number of supplied form losses are not equal!");
+    paramError("pressure_drop_sidesets",
+               "The number of sidesets and the number of supplied form losses are not equal!");
 }
 
 void
@@ -181,9 +185,9 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   // or not.
   ADReal factor = 0.0;
   for (const auto & bd_id : fi.boundaryIDs())
-    for(const auto i : index_range(_pressure_drop_sideset_ids))
-     if (_pressure_drop_sideset_ids[i] == bd_id)
-      factor += _pressure_drop_form_factors[i];
+    for (const auto i : index_range(_pressure_drop_sideset_ids))
+      if (_pressure_drop_sideset_ids[i] == bd_id)
+        factor += _pressure_drop_form_factors[i];
 
   auto upwind_bernoulli_vel_chunk = 0.5 * rho_upwind * v_dot_n_upwind * v_dot_n_upwind;
   auto downwind_bernoulli_vel_chunk = 0.5 * rho_downwind * v_dot_n_downwind * v_dot_n_downwind;
@@ -191,7 +195,8 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   // We add the additional, irreversible pressure loss here.
   // If it is a contraction we have to use the downwind values, otherwise the upwind values.
   if (eps_downwind < eps_upwind)
-    downwind_bernoulli_vel_chunk += 0.5*factor * rho_downwind * v_dot_n_downwind * v_dot_n_downwind;
+    downwind_bernoulli_vel_chunk +=
+        0.5 * factor * rho_downwind * v_dot_n_downwind * v_dot_n_downwind;
   else
     upwind_bernoulli_vel_chunk += -0.5 * factor * rho_upwind * v_dot_n_upwind * v_dot_n_upwind;
 
@@ -203,4 +208,3 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
 
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }
-
