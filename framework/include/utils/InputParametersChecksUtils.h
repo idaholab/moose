@@ -371,10 +371,12 @@ InputParametersChecksUtils<C>::checkVectorParamsNoOverlap(
       {
         auto copy_params = param_vec;
         copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
+        // Overlap between multiple vectors of parameters
         if (copy_params.size())
           forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
                             "' is also present in one or more of the parameters '" +
                             Moose::stringify(copy_params) + "', which is not allowed.");
+        // Overlap within a single vector parameter caused by a repeated item
         else
           forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
                             "' is repeated, which is not allowed.");
