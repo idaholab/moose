@@ -1,3 +1,10 @@
+!alert warning
+This kernel will be deprecated in the near future
+(10/01/2025) in favor of exclusively using the [ADJouleHeatingSource](ADJouleHeatingSource.md)
+within the Heat Transfer module, because ADJouleHeatingSource can calculate both electrostatic
+and electromagnetic Joule heating. For more information, please see
+[ADJouleHeatingSource](ADJouleHeatingSource.md).
+
 # EMJouleHeatingSource
 
 !syntax description /Kernels/EMJouleHeatingSource
@@ -13,7 +20,7 @@ The EMJouleHeatingSource object implements a heating term imparted to the medium
 
 where
 
-- $\sigma$ is the conductivity of the medium, 
+- $\sigma$ is the conductivity of the medium,
 - $\vec{E}$ is the electric field
 - $\vec{E}^{*}$ is the complex conjugate of the electric field,
 - and $\text{Scaling}$ is a scaling factor (usually used to convert the units of the heating term).

@@ -12,6 +12,12 @@
 #include "ADKernel.h"
 
 /**
+ *  NOTE: This kernel will be deprecated in the near future (10/01/2025)
+ *        in favor of exclusively using the Heat Transfer module's
+ *        'ADJouleHeatingSource' for coupling electromagnetics to heat transfer problems.
+ */
+
+/**
  *  Supplies the heating due to the electic field (E) in the form of
  *  0.5 Re( conductivity * E * E^* )
  *  where E^* is the complex conjugate of the electric field.

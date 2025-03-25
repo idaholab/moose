@@ -36,6 +36,21 @@
   []
 []
 
+[AuxVariables]
+  [joule_heating]
+    family = MONOMIAL
+    order = FIRST
+  []
+[]
+
+[AuxKernels]
+  [joule_heating_calculation]
+    type = JouleHeatingHeatGeneratedAux
+    variable = joule_heating
+    heating_term = 'field_heating'
+  []
+[]
+
 [BCs]
   [lefttemp]
     type = ADDirichletBC

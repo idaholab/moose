@@ -1,3 +1,10 @@
+!alert warning
+This kernel will be deprecated in the near future
+(10/01/2025) in favor of exclusively using the [JouleHeatingHeatGeneratedAux](JouleHeatingHeatGeneratedAux.md)
+within the Heat Transfer module, because JouleHeatingHeatGeneratedAux can calculate both electrostatic
+and electromagnetic Joule heating. For more information, please see
+[JouleHeatingHeatGeneratedAux](JouleHeatingHeatGeneratedAux.md).
+
 # EMJouleHeatingHeatGeneratedAux
 
 !syntax description /AuxKernels/EMJouleHeatingHeatGeneratedAux
@@ -13,7 +20,7 @@ The EMJouleHeatingHeatGeneratedAux object calculates the heating term imparted t
 
 where
 
-- $\sigma$ is the conductivity of the medium, 
+- $\sigma$ is the conductivity of the medium,
 - $\vec{E}$ is the electric field, and
 - $\vec{E}^{*}$ is the complex conjugate of the electric field.
 
