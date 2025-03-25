@@ -197,14 +197,14 @@ for METHOD in $(echo $METHODS | tr ',' ' '); do
   fi
 
   # Step 2: Clean and recreate the build directory
-  if [[ -z "${FAST}"  ]] ; then
+  if [[ "${FAST}" != true  ]] ; then
     rm -rf ${NEML2_BUILD_DIR}
     mkdir -p ${NEML2_BUILD_DIR}
   fi
 
   # Step 3: Configure NEML2
   source $SCRIPT_DIR/configure_neml2.sh
-  if [[ -z "${FAST}"  ]] ; then
+  if [[ "${FAST}" != true  ]] ; then
     configure_neml2 ${NEML2_SRC_DIR} \
                     ${NEML2_BUILD_DIR} \
                     ${LIBTORCH_DIR} \
