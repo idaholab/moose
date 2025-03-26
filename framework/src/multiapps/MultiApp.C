@@ -662,6 +662,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     timestep_tol =
         dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
 
+  // Determination on whether we need to backup the app due to changes below
+  bool backup_apps = false;
+
   // First, see if any Apps need to be reset
   for (unsigned int i = 0; i < _reset_times.size(); i++)
   {
@@ -696,6 +699,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         if (target_time + timestep_tol >= _reset_times[j])
           _reset_happened[j] = true;
 
+      // Backup in case the next solve fails
+      backup_apps = true;
+
       break;
     }
   }
@@ -706,7 +712,13 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)
       moveApp(_move_apps[i], _move_positions[i]);
+
+    // Backup in case the next solve fails
+    backup_apps = true;
   }
+
+  if (backup_apps)
+    backup();
 }
 
 Executioner *
