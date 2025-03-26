@@ -17,8 +17,8 @@ AdvectionIPHDGPrescribedFluxBC::validParams()
 {
   auto params = IPHDGPrescribedFluxBC::validParams();
   params += AdvectionIPHDGAssemblyHelper::validParams();
-  params.addClassDescription("Implements an outflow boundary condition for use with a hybridized "
-                             "discretization of the Advection equation");
+  params.addClassDescription("Implements a prescribed flux condition for use with a hybridized "
+                             "discretization of the advection equation");
   return params;
 }
 
