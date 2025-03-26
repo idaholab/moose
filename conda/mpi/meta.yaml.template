@@ -92,12 +92,12 @@ outputs:
         - zfp
         - autoconf
         - libtool
-        - cmake
+        - {{ moose_cmake }}
         - make
         - zlib
         - m4
       run_constrained:
-        - python >=3.9,<3.12
+        - python >=3.9,<3.13
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -110,7 +110,7 @@ outputs:
   - name: moose-python
     requirements:
       run:
-        - python >=3.9,<3.12
+        - python >=3.9,<3.13
         - packaging
         - paramiko
         - requests
