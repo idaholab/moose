@@ -7,8 +7,8 @@ moose_petsc:
   - moose-petsc 3.23.0.6.gd9d7fd11dca openmpi_0
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.3.0 mpich_6
-  - moose-libmesh-vtk 9.3.0 openmpi_6
+  - moose-libmesh-vtk 9.3.0 mpich_7
+  - moose-libmesh-vtk 9.3.0 openmpi_7
 
 zip_keys:
   - mpi

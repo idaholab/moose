@@ -27,7 +27,7 @@ requirements:
     - {{ moose_ccompiler }}
     - {{ moose_cxxcompiler }}
     - xorg-libx11 1.8.9
-    - cmake
+    - {{ moose_cmake }}
     - make
     - automake
     - wget

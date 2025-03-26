@@ -26,6 +26,9 @@ zip_keys:
   - mpi_dev_website
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
+moose_cmake:
+  - cmake 3
+
 moose_cc:
   - gcc 12.3.0 h915e2ae_7                                   # [linux]
   - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
