@@ -2,6 +2,7 @@
   [cmg]
     type = FileMeshGenerator
     file = steady_out_cp/LATEST
+    skip_partitioning = true
   []
 []
 
