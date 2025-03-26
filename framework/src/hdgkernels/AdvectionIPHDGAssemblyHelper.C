@@ -104,20 +104,12 @@ AdvectionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & diric
     const Moose::ElemSideQpArg r = {
         _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]};
     const auto vdotn = _velocity(r, _ti.determineState()) * _ip_normals[qp];
-    ADReal adv_quant = _coeff;
-    if (_self_advection)
-    {
-      if (MetaPhysicL::raw_value(vdotn) >= 0)
-        adv_quant *= _u_sol[qp];
-      else
-      {
-        const auto dirichlet_value = dirichlet_functor(
-            Moose::ElemSideQpArg{
-                _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
-            _ti.determineState());
-        adv_quant *= dirichlet_value;
-      }
-    }
+    mooseAssert(_self_advection, "This shouldn't be called if we are not self-advecting");
+    const auto dirichlet_value = dirichlet_functor(
+        Moose::ElemSideQpArg{
+            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+        _ti.determineState());
+    const auto adv_quant = dirichlet_value * _coeff;
     for (const auto i : index_range(_scalar_re))
       _scalar_re(i) += _ip_JxW_face[qp] * _scalar_phi_face[i][qp] * vdotn * adv_quant;
   }
