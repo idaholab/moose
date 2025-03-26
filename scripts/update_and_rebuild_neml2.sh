@@ -39,6 +39,7 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  WASP_SRC_DIR    The path to the WASP source directory. Default to <MOOSE_DIR>/framework/contrib/wasp."
   echo "  WASP_DIR        The path to the WASP directory. Default to <WASP_SRC_DIR>/install."
   echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/libtorch."
+  echo "  NEML2_DIR       The path where to install NEML2. Default to <NEML2_SRC_DIR>/install."
   echo "  NEML2_SRC_DIR   The path to the NEML2 source directory if a custom NEML2 should be used. If set, "
   echo "                  --skip-submodule-update will be assumed."
   echo "  NEML2_JOBS      The number of jobs to use when building NEML2. Default to <MOOSE_JOBS>. "
@@ -90,6 +91,7 @@ if [[ -n "$NEML2_SRC_DIR" ]]; then
 else
   NEML2_SRC_DIR=${MOOSE_DIR}/modules/solid_mechanics/contrib/neml2
 fi
+NEML2_DIR=${NEML2_DIR:-${NEML2_SRC_DIR}/installed}
 
 if [[ -z "$NEML2_JOBS" ]]; then
   if [[ -n "$MOOSE_JOBS" ]]; then
@@ -128,6 +130,7 @@ if [[ "${SUMMARY}" == true ]]; then
   echo "  TIMPI_DIR:                 ${TIMPI_DIR}"
   echo "  WASP_DIR:                  ${WASP_DIR}"
   echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
+  echo "  NEML2_DIR:                 ${NEML2_DIR}"
   echo "  NEML2_SRC_DIR:             ${NEML2_SRC_DIR}"
   echo "  NEML2_JOBS:                ${NEML2_JOBS}"
   echo "  METHODS:                   ${METHODS}"
@@ -176,7 +179,6 @@ for METHOD in $(echo $METHODS | tr ',' ' '); do
 
   # Build and install directories
   NEML2_BUILD_DIR=${NEML2_SRC_DIR}/build/${METHOD}
-  NEML2_INSTALL_DIR=${NEML2_SRC_DIR}/install/${METHOD}
 
   # If we are going fast, the build directory must already exist
   if [[ "${FAST}" == true ]] && [[ ! -d "${NEML2_BUILD_DIR}" ]] ; then
@@ -225,7 +227,7 @@ for METHOD in $(echo $METHODS | tr ',' ' '); do
   fi
 
   # Step 5: Install NEML2
-  install_neml2 ${NEML2_BUILD_DIR} ${NEML2_INSTALL_DIR}
+  install_neml2 ${NEML2_BUILD_DIR} ${NEML2_DIR}
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to install NEML2"
     exit 1
