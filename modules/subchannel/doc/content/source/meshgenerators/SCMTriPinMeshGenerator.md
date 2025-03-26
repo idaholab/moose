@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This mesh generator creates the mesh were the `SCM` solution variables associated with the pins live.
 The user needs to provide the [!param](/Mesh/SCMTriPinMeshGenerator/nrings) parameter which defines the number of fuel pin rings. For triangular sub-assemblies, one nring means that there is one central pin in the (0 0 0)

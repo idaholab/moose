@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This is a postprocessor that calculates a mass-flow-rate-averaged mean value of a user specified [!param](/Postprocessors/SCMPlanarMean/variable) over all subchannels
 at a user specified [!param](/Postprocessors/SCMPlanarMean/height).

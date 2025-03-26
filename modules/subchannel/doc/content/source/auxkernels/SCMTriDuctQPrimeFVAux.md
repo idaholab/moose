@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 The `SCMTriDuctQPrimeFVAux` AuxKernel is used to compute the axial heat rate on a hexagonal duct surface (Finite Volume formulation).
 

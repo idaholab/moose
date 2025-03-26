@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 The inter-wrapper is the flow area around subchannel subassemblies.
 This kernel solves for the flow variables in that area, for the case of sub-assembies that have subchannels/pins in a triangular lattice.
