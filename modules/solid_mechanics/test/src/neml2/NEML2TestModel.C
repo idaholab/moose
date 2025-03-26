@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef NEML2_ENABLED
+
 #include "NEML2TestModel.h"
 
 namespace neml2
@@ -57,3 +59,5 @@ NEML2TestModel::set_value(bool out, bool /*dout_din*/, bool /*d2out_din2*/)
 }
 
 } // namespace neml2
+
+#endif // NEML2_ENABLED
