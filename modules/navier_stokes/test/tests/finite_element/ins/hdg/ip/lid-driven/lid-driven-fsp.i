@@ -188,20 +188,34 @@ gamma = 1e5
     component = 1
   []
 
-  [mass_convection_walls]
-    type = AdvectionIPHDGDirichletBC
+  [mass_convection_all]
+    type = ADHDGAdvectionDirichletBC
     variable = pressure
-    face_variable = pressure_bar
-    velocity = wall_vel_func
+    velocity = 'velocity'
+    coeff = '${fparse -rho}'
+    self_advection = false
+    boundary = 'left bottom top right'
+  []
+  [mass_convection_bar_all]
+    type = ADHDGAdvectionDirichletBC
+    variable = pressure_bar
+    velocity = 'velocity'
+    coeff = ${rho}
+    self_advection = false
+    boundary = 'left bottom top right'
+  []
+  [mass_convection_bar_diri_walls]
+    type = ADHDGAdvectionDirichletBC
+    variable = pressure_bar
+    velocity_function = wall_vel_func
     coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom right'
   []
-  [mass_convection_top]
-    type = AdvectionIPHDGDirichletBC
-    variable = pressure
-    face_variable = pressure_bar
-    velocity = top_vel_func
+  [mass_convection_bar_diri_top]
+    type = ADHDGAdvectionDirichletBC
+    variable = pressure_bar
+    velocity_function = top_vel_func
     coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'top'
@@ -235,21 +249,13 @@ gamma = 1e5
   []
 []
 
-[FunctorMaterials]
-  [var_vel]
-    type = ADGenericVectorFunctorMaterial
-    prop_names = 'velocity'
-    prop_values = 'vel_x vel_y 0'
+[Functions]
+  [top_vel_func]
+    type = ParsedVectorFunction
+    expression_x = ${U}
   []
-  [lid_velocity]
-    type = GenericVectorFunctorMaterial
-    prop_names = 'top_vel_func'
-    prop_values = '${U} 0 0'
-  []
-  [wall_velocity]
-    type = GenericVectorFunctorMaterial
-    prop_names = 'wall_vel_func'
-    prop_values = '0 0 0'
+  [wall_vel_func]
+    type = ParsedVectorFunction
   []
 []
 
@@ -258,6 +264,12 @@ gamma = 1e5
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
+  []
+  [vel]
+    type = ADVectorFromComponentVariablesMaterial
+    vector_prop_name = 'velocity'
+    u = vel_x
+    v = vel_y
   []
 []
 
