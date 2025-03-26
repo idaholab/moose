@@ -1,5 +1,5 @@
-diff = 2
-a = 2
+diff=2
+a=2
 
 [GlobalParams]
   variable = u
@@ -58,9 +58,9 @@ a = 2
   []
 []
 
-[FunctorMaterials]
+[Materials]
   [vel]
-    type = ADGenericVectorFunctorMaterial
+    type = ADGenericConstantVectorMaterial
     prop_names = 'vel'
     prop_values = '${a} ${fparse 2*a} 0'
   []
