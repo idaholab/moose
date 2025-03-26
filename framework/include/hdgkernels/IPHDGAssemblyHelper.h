@@ -18,6 +18,7 @@
 #include "MooseVariableDependencyInterface.h"
 #include "TaggingInterface.h"
 #include "ThreeMaterialPropertyInterface.h"
+#include "ADFunctorInterface.h"
 
 #include "libmesh/vector_value.h"
 #include <vector>
@@ -38,7 +39,7 @@ class TransientInterface;
  * (IPDG-H), which is a type of HDG method, discretization of the diffusion equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
-class IPHDGAssemblyHelper : public ThreeMaterialPropertyInterface
+class IPHDGAssemblyHelper : public ThreeMaterialPropertyInterface, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

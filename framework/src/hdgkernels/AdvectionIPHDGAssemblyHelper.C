@@ -22,7 +22,7 @@ InputParameters
 AdvectionIPHDGAssemblyHelper::validParams()
 {
   auto params = IPHDGAssemblyHelper::validParams();
-  params.addRequiredParam<MaterialPropertyName>("velocity", "Velocity vector");
+  params.addRequiredParam<MooseFunctorName>("velocity", "Velocity vector");
   params.addParam<Real>(
       "coeff", 1, "A constant coefficient. This could be something like a density");
   params.addParam<bool>("self_advection",
@@ -43,8 +43,7 @@ AdvectionIPHDGAssemblyHelper::AdvectionIPHDGAssemblyHelper(
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
   : IPHDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
-    _velocity(getADMaterialProperty<RealVectorValue>("velocity")),
-    _face_velocity(getFaceADMaterialProperty<RealVectorValue>("velocity")),
+    _velocity(getFunctor<ADRealVectorValue>("velocity")),
     _coeff(moose_obj->getParam<Real>("coeff")),
     _self_advection(moose_obj->getParam<bool>("self_advection"))
 {
@@ -55,11 +54,13 @@ AdvectionIPHDGAssemblyHelper::scalarVolume()
 {
   for (const auto qp : make_range(_ip_qrule->n_points()))
   {
+    const Moose::ElemQpArg r = {_ip_current_elem, qp, _ip_qrule, _ip_q_point[qp]};
+    const auto velocity = _velocity(r, _ti.determineState());
     ADReal adv_quant = _coeff;
     if (_self_advection)
       adv_quant *= _u_sol[qp];
     for (const auto i : index_range(_scalar_re))
-      _scalar_re(i) -= _ip_JxW[qp] * _grad_scalar_phi[i][qp] * _velocity[qp] * adv_quant;
+      _scalar_re(i) -= _ip_JxW[qp] * _grad_scalar_phi[i][qp] * velocity * adv_quant;
   }
 }
 
@@ -68,7 +69,9 @@ AdvectionIPHDGAssemblyHelper::scalarFace()
 {
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
+    const Moose::ElemSideQpArg r = {
+        _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]};
+    const auto vdotn = _velocity(r, _ti.determineState()) * _ip_normals[qp];
     ADReal adv_quant = _coeff;
     if (_self_advection)
       adv_quant *= (MetaPhysicL::raw_value(vdotn) >= 0 ? _u_sol[qp] : _lm_u_sol[qp]);
@@ -82,7 +85,9 @@ AdvectionIPHDGAssemblyHelper::lmFace()
 {
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
+    const Moose::ElemSideQpArg r = {
+        _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]};
+    const auto vdotn = _velocity(r, _ti.determineState()) * _ip_normals[qp];
     ADReal adv_quant = _coeff;
     if (_self_advection)
       adv_quant *= (MetaPhysicL::raw_value(vdotn) >= 0 ? _u_sol[qp] : _lm_u_sol[qp]);
@@ -96,7 +101,9 @@ AdvectionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & diric
 {
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
+    const Moose::ElemSideQpArg r = {
+        _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]};
+    const auto vdotn = _velocity(r, _ti.determineState()) * _ip_normals[qp];
     mooseAssert(_self_advection, "This shouldn't be called if we are not self-advecting");
     const auto dirichlet_value = dirichlet_functor(
         Moose::ElemSideQpArg{
@@ -114,7 +121,9 @@ AdvectionIPHDGAssemblyHelper::lmOutflow()
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
 #ifndef NDEBUG
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
+    const Moose::ElemSideQpArg r = {
+        _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]};
+    const auto vdotn = _velocity(r, _ti.determineState()) * _ip_normals[qp];
     mooseAssert(MetaPhysicL::raw_value(vdotn) >= 0, "The velocity must create outflow conditions");
     mooseAssert(_self_advection, "This shouldn't be called if we are not self-advecting");
 #endif
