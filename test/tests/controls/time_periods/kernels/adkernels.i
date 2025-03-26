@@ -63,6 +63,7 @@
     enable_objects = 'Kernel::diff0'
     disable_objects = '*::diff1'
     start_time = '0'
-    end_time = '0.49'
+    end_time = '0.51'
+    execute_on = 'timestep_begin'
   []
 []
