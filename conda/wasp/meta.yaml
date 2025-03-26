@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2025.02.25" %}
+{% set version = "2025.05.13" %}
 
 package:
   name: moose-wasp
@@ -33,14 +33,14 @@ source:
       - message.patch
 
 build:
-  number: 2
-  string: build_2
+  number: 0
+  string: build_0
 
 outputs:
   - name: moose-wasp-base
     build:
-      number: 2
-      string: build_2
+      number: 0
+      string: build_0
       script: ${RECIPE_DIR}/build_wasp.sh
       script_env:
         - MOOSE_JOBS
@@ -60,7 +60,7 @@ outputs:
 
   - name: moose-pyhit
     build:
-      number: 2
+      number: 0
       script: ${RECIPE_DIR}/build_pyhit.sh
       script_env:
         - MOOSE_JOBS
