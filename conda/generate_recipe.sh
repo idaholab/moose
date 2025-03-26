@@ -72,12 +72,12 @@ IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH MOOSE_OPTIONS)
         cp "${cfile}" "${TMP_DIR}/${RECIPES}"
         for THIS in "${REPLACE[@]}"; do
             if [ "$(uname)" == 'Darwin' ]; then
-                ARG='-i ""'
+                sed -i '' -e "s|<${THIS}>|${!THIS}|g" \
+                    "${TMP_DIR}/${RECIPES}/$(basename "${cfile}")"
             else
-                ARG='-i""'
+                sed -i'' -e "s|<${THIS}>|${!THIS}|g" \
+                    "${TMP_DIR}/${RECIPES}/$(basename "${cfile}")"
             fi
-            sed "${ARG}" -e "s|<${THIS}>|${!THIS}|g" \
-              "${TMP_DIR}/${RECIPES}/$(basename "${cfile}")"
         done
     done
 }
@@ -145,7 +145,7 @@ if [ "$(basename "${REPO}" .git)" == 'moose' ]; then
 else
     export IS_MOOSE=''
     export MOOSE='/moose'
-    export PREFIX_PACKAGE_WITH="${PREFIX_PACKAGE_WITH:-'ncrc-'}"
+    export PREFIX_PACKAGE_WITH="${PREFIX_PACKAGE_WITH:-ncrc-}"
 fi
 SKIP_DOCS='False'
 if [ -n "${MOOSE_SKIP_DOCS}" ]; then
