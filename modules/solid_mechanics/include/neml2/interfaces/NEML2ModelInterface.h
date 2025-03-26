@@ -68,7 +68,7 @@ private:
   neml2::Model & _model;
 
   /// The work scheduler to use
-  std::shared_ptr<neml2::WorkScheduler> _scheduler;
+  const neml2::WorkScheduler * _scheduler;
   /// Work dispatcher
   std::unique_ptr<DispatcherType> _dispatcher;
   /// Whether to dispatch work asynchronously
