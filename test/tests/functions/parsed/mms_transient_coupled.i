@@ -141,7 +141,7 @@
     type = PointValue
     variable = u
     point = '0.5 0.5 0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial timestep_begin timestep_end'
   [../]
   [./u_midpoint_exact]
     type = FunctionValuePostprocessor
