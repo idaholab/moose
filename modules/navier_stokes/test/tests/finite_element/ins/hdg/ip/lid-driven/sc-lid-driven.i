@@ -149,19 +149,12 @@ n = 8
     component = 1
   []
 
-  [mass_convection_all]
-    type = ADHDGAdvectionDirichletBC
+  [mass_convection]
+    type = AdvectionIPHDGPrescribedFluxBC
+    face_variable = pressure_bar
     variable = pressure
     velocity = 'velocity'
     coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-  []
-  [mass_convection_bar_all]
-    type = ADHDGAdvectionDirichletBC
-    variable = pressure_bar
-    velocity = 'velocity'
-    coeff = ${rho}
     self_advection = false
     boundary = 'left bottom top right'
   []
