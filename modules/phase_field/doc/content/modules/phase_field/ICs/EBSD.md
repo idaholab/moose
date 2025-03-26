@@ -118,9 +118,9 @@ blue (RGB) values are outputted as auxvariables that are automatically read by
 Paraview as a vector.
 
 Two `Auxkernels` can be used to output the RGB values. The first,
-[EulerAngleProvider2RGBAux](http://mooseframework.org/docs/doxygen/modules/classEulerAngleProvider2RGBAux.html)
+[EulerAngleProvider2RGBAux](https://mooseframework.inl.gov/docs/doxygen/modules/classEulerAngleProvider2RGBAux.html)
 is the simplest but requires the entire domain to have the same crystal structure. The second,
-[EulerAngleVariables2RGBAux](http://mooseframework.org/docs/doxygen/modules/classEulerAngleVariables2RGBAux.html)
+[EulerAngleVariables2RGBAux](https://mooseframework.inl.gov/docs/doxygen/modules/classEulerAngleVariables2RGBAux.html)
 requires various other auxvariables that contain the Euler angles, the crystal structure,
 and the phase number.
 

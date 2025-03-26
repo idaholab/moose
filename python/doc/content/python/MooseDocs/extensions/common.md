@@ -11,7 +11,7 @@ globals:
     type: MooseDocs.extensions.common
     shortcuts:
         libMesh: http://libmesh.github.io/
-        MOOSE: http://www.mooseframework.org
+        MOOSE: https://mooseframework.inl.gov
 ```
 
 !devel example id=common-example caption=Example use of globally defined shortcut.

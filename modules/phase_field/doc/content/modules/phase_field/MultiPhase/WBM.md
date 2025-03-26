@@ -1,7 +1,7 @@
 # Multiphase models
 
 Material objects that internally derive from `DerivativeFunctionMaterialBase`
-([Doxygen](http://mooseframework.org/docs/doxygen/modules/classDerivativeFunctionMaterialBase.html)),
+([Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classDerivativeFunctionMaterialBase.html)),
 like the materials for the [Parsed Function Kernels](FunctionMaterialKernels.md) are used to provide
 the free energy expressions for each phase.
 
@@ -48,12 +48,12 @@ holds for every test function $v$ and $q$.
 
 The $L_1$ Lagrange residuals are provided by 
 [`SwitchingFunctionConstraintEta`](/SwitchingFunctionConstraintEta.md) 
-([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintEta.html)) 
+([Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classSwitchingFunctionConstraintEta.html)) 
 kernels - one for each phase order parameter.
 
 The $L_2$ Lagrange residual is provided by a 
 [`SwitchingFunctionConstraintLagrange`](/SwitchingFunctionConstraintLagrange.md)
-([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintLagrange.html))
+([Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classSwitchingFunctionConstraintLagrange.html))
 kernel.
 
 The *Jacobian fill* term introduces a small $\lambda$ dependence in the constraint
@@ -68,7 +68,7 @@ violation can be made as small as the convergence limits.
 
 As an alternative (softer) constraint enforcement we provide the
 [`SwitchingFunctionPenalty`](/SwitchingFunctionPenalty.md)
-([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionPenalty.html))
+([Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classSwitchingFunctionPenalty.html))
 kernel, which effectively adds a free energy penalty of $\gamma k(\vec \eta)^2$
 (with $\epsilon=0$), where $\gamma$ is the penalty prefactor (`penalty`). The
 constraint is enforced approximately to a tolerance of $\frac1\gamma$ (depending

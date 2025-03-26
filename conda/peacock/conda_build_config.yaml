@@ -3,4 +3,4 @@ mpi:
   - openmpi
 
 moose_mpi:
-  - moose-mpi 2024.12.23
+  - moose-mpi 2025.03.24

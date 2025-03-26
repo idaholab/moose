@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,7 +49,7 @@
 
 /* Define to the home page for this package. */
 #ifndef MOOSE_PACKAGE_URL
-#define MOOSE_PACKAGE_URL "https://mooseframework.org"
+#define MOOSE_PACKAGE_URL "https://mooseframework.inl.gov"
 #endif
 
 /* Define to the version of this package. */

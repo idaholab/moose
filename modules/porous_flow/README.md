@@ -4,7 +4,7 @@ The PorousFlow module of MOOSE enables the simulation of flow and transport thro
 
 ## Use
 
-PorousFlow documentation can be found at https://mooseframework.org/modules/porous_flow/index.html, which describes:
+PorousFlow documentation can be found at https://mooseframework.inl.gov/modules/porous_flow/index.html, which describes:
 
 - the physics
 - examples and a tutorial
@@ -12,9 +12,9 @@ PorousFlow documentation can be found at https://mooseframework.org/modules/poro
 - implementation details
 
 New PorousFlow users who have never used MOOSE before are encouraged to check-out its
-[workshop](https://mooseframework.org/workshop/) and [examples](https://mooseframework.org/getting_started/examples_and_tutorials/index.html#examples).
+[workshop](https://mooseframework.inl.gov/workshop/) and [examples](https://mooseframework.inl.gov/getting_started/examples_and_tutorials/index.html#examples).
 
-Doxygen pages for PorousFlow are at https://mooseframework.org/docs/doxygen/modules/classes.html.  In particular, navigate to the letter "P" and explore the `PorousFlow*` classes.
+Doxygen pages for PorousFlow are at https://mooseframework.inl.gov/docs/doxygen/modules/classes.html.  In particular, navigate to the letter "P" and explore the `PorousFlow*` classes.
 
 ## License
 
@@ -22,7 +22,7 @@ PorousFlow is distributed with MOOSE under the [Gnu Lesser General Public Licens
 
 ## Install
 
-PorousFlow comes packaged with the MOOSE framework.  To install MOOSE and PorousFlow, please follow the instructions at https://mooseframework.org/modules/porous_flow/getting_started_with_pf.html.  After building and testing MOOSE you will need to build PorousFlow, which is an easy step:
+PorousFlow comes packaged with the MOOSE framework.  To install MOOSE and PorousFlow, please follow the instructions at https://mooseframework.inl.gov/modules/porous_flow/getting_started_with_pf.html.  After building and testing MOOSE you will need to build PorousFlow, which is an easy step:
 
 ``
 cd <path_to_moose>/modules/porous_flow ;

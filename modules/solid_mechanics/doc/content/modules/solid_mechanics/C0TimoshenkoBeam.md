@@ -203,6 +203,6 @@ R_j = \sum_{i=1}^3 I_{ji} \; \ddot{\theta}_i
 
 ### Time-integration and damping
 
-Rayleigh damping and Newmark and HHT time integration are calculated as in [Damping](http://mooseframework.org/wiki/PhysicsPhysics/SolidMechanics/Dynamics/) but with [StressDivergenceBeam](/StressDivergenceBeam.md) and [InertialForceBeam](/InertialForceBeam.md) while using consistent mass/inertia matrix, and [StressDivergenceBeam](/StressDivergenceBeam.md), [NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) while using point mass/inertia matrix.
+Rayleigh damping and Newmark and HHT time integration are calculated as in [Damping](https://mooseframework.inl.gov/wiki/PhysicsPhysics/SolidMechanics/Dynamics/) but with [StressDivergenceBeam](/StressDivergenceBeam.md) and [InertialForceBeam](/InertialForceBeam.md) while using consistent mass/inertia matrix, and [StressDivergenceBeam](/StressDivergenceBeam.md), [NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) while using point mass/inertia matrix.
 
 !bibtex bibliography
