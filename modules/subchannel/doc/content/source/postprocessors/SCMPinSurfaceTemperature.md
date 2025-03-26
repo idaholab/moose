@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This is a postprocessor that calculates and prints the pin surface temperature `Tpin`.
 To be more exact, `Tpin` is calculated inside the `SCM` solver:

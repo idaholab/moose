@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 In the case were the user wants to define a uniform mass flow rate at the inlet, the `SCMFlatMassFlowRateAux`
 kernel can be used. In this kernel the user must define a total [!param](/AuxKernels/SCMFlatMassFlowRateAux/mass_flow) rate  which will be divided equally among the subchannels.
