@@ -356,7 +356,7 @@ FEProblemBase::validParams()
       "Whether to preallocate matrix memory. If this is false, then no sparsity pattern will be "
       "precomputed and instead a hash table will be used for matrix assembly");
   params.addParam<bool>(
-      "reset_memory",
+      "restore_original_nonzero_pattern",
       true,
       "Whether we should reset matrix memory for every Jacobian evaluation. This option is useful "
       "if the sparsity pattern is constantly changing and you are using hash table assembly or if "
@@ -372,7 +372,7 @@ FEProblemBase::validParams()
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
                               "ignore_zeros_in_jacobian identify_variable_groups_in_nl "
-                              "prefer_hash_table_matrix_assembly reset_memory",
+                              "prefer_hash_table_matrix_assembly restore_original_nonzero_pattern",
                               "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
@@ -490,7 +490,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         isParamValid("error_on_jacobian_nonzero_reallocation")
             ? getParam<bool>("error_on_jacobian_nonzero_reallocation")
             : _app.errorOnJacobianNonzeroReallocation()),
-    _reset_memory(getParam<bool>("reset_memory")),
+    _restore_original_nonzero_pattern(getParam<bool>("restore_original_nonzero_pattern")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _preserve_matrix_sparsity_pattern(true),
     _force_restart(getParam<bool>("force_restart")),
@@ -7235,14 +7235,9 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           if (_current_nl_sys->hasMatrix(tag))
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
-            bool memory_changed = false;
-            if (_reset_memory)
-            {
-              memory_changed = matrix.reset_memory();
-              mooseAssert(_communicator.verify(memory_changed),
-                          "Verification that all our 'memory_changed' values are the same failed");
-            }
-            if (!memory_changed)
+            if (_restore_original_nonzero_pattern)
+              matrix.restore_original_nonzero_pattern();
+            else
               matrix.zero();
             if (haveADObjects())
               // PETSc algorithms require diagonal allocations regardless of whether there is
