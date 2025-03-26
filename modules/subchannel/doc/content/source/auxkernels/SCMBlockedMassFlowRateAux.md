@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 In the case were there is a partial blockage in the inlet of the subchannel sub-assembly, the user can use the `SCMBlockedMassFlowRateAux` kernel to define an appropiate mass-flow distribution at the inlet.
 The user must define the [!param](/AuxKernels/SCMBlockedMassFlowRateAux/variable) (must be `mdot`), a low mass-flux and a normal mass-flux, as well as the indexes of the blocked subchannels. The low mass-flux [!param](/AuxKernels/SCMBlockedMassFlowRateAux/blocked_mass_flux) will be

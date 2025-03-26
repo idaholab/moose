@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This mesh generator creates the mesh were the `SCM` solution variables associated with the subchannels live.
 The user needs to provide the number of subchannels [!param](/Mesh/SCMQuadSubChannelMeshGenerator/nx) in the -x direction and [!param](/Mesh/SCMQuadSubChannelMeshGenerator/ny) in the -y direction.

@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This kernel is used to save the solution variables in a file, for the square subchannel problem.
 Imagine a plane perpendicular to the flow direction at a specific [!param](/Outputs/QuadSubChannelNormalSliceValues/height) defined by the user.

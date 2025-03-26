@@ -4,7 +4,7 @@
 
 ## Description
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 The `DiffusionFluxFVAux` AuxKernel is used to compute the components of the flux vector for FV diffusion problems. The flux is computed as $J=-D\frac{\partial C}{\partial X}$, where $J$ is the diffusion flux vector, $D$ is the diffusivity or diffusion coefficient, $C$ is the concentration variable, and $X$ is the coordinate.
 
