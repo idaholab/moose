@@ -576,7 +576,7 @@ class Tester(MooseObject, OutputInterface):
         # AD size check
         min_ad_size = self.specs['min_ad_size']
         max_ad_size = self.specs['max_ad_size']
-        if min_ad_size is not None or min_ad_size is not None:
+        if not None in [min_ad_size, max_ad_size]:
             ad_size = self.getCapability(options, 'ad_size')
             assert isinstance(ad_size, int)
             if min_ad_size is not None and int(min_ad_size) > ad_size:

@@ -38,9 +38,7 @@ def readTestRoot(fname):
     # TODO: add check to see if the binary exists before returning. This can be used to
     # allow users to control fallthrough for e.g. individual module binaries vs. the
     # combined binary.
-    app_name = root.get('app_name')
-    if not app_name:
-        app_name = None
+    app_name = root.get('app_name') or None
     return app_name, args, root
 
 # Struct that represents all of the information pertaining to a testroot file
@@ -361,12 +359,7 @@ class TestHarness:
             threading = None
             threads = get_option('threads', from_type=bool)
             if threads:
-                for name in ['tbb', 'openmp']:
-                    if get_option(name, from_type=bool):
-                        threading = name
-                        break
-                if not threading:
-                    threading = 'pthreads'
+                threading = next((name for name in ['tbb', 'openmp'] if get_option(name, from_type=bool)), 'pthreads')
             checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
 
             for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',

@@ -3371,7 +3371,7 @@ MooseApp::outputMachineReadableData(const std::string & param,
                                     const std::string & end_marker,
                                     const std::string & data) const
 {
-  // Bool parameter, just to streen
+  // Bool parameter, just to screen
   if (_pars.have_parameter<bool>(param))
   {
     Moose::out << start_marker << data << end_marker << std::endl;

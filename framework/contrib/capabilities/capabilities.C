@@ -87,8 +87,6 @@ capabilities_check(PyObject *self, PyObject *args)
       capabilities[key] = {bool(PyObject_IsTrue(value)), doc};
     else if (PyLong_Check(value))
       capabilities[key] = {static_cast<int>(PyLong_AsLong(value)), doc};
-    // else if (PyFloat_Check(value))
-    //   capabilities[key] = {PyFloat_AsDouble(value), doc};
     else if (PyUnicode_Check(value))
       capabilities[key] = {std::string(PyUnicode_AsUTF8(value)), doc};
     else
