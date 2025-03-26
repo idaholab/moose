@@ -222,6 +222,21 @@ class LocalListingCommand(command.CommandComponent):
         node: Union[SyntaxNode, ObjectNodeBase],
         page: pages.Page,
     ) -> str:
+        """
+        Create string containing meta-data of the MOOSE syntax or object.
+
+        The resulting string a json dump of the data surrounded by triple
+        carrots, i.e. `<<<{"key", value, ...}>>>`
+
+        Currently, this data includes:
+        - Object description (if available) --- usually not included for a SyntaxNode
+        - Object documentation page (if available and found)
+
+        Examples::
+
+            <<<{"href": "syntax/Functions/index.html"}>>>
+            <<<{"description": "Function created by parsing a string", "href": "MooseParsedFunction.html"}>>>
+        """
         # Just in case
         if node is None:
             return ''
