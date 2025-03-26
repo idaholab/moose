@@ -38,7 +38,9 @@ UseOldVectorPostprocessor::UseOldVectorPostprocessor(const InputParameters & par
     _vec(getVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"))),
     _vec_old(getVectorPostprocessorValueOld("vpp", getParam<std::string>("vector_name"))),
     _value(declareRestartableData<Real>("last_value", 0)),
-    _old_value(0)
+    _old_value(declareRestartableData<Real>("last_old_value", 0)),
+    _t_step(_fe_problem.timeStep()),
+    _last_t_step(declareRestartableData<int>("last_t_step", 0))
 {
 }
 
@@ -51,6 +53,10 @@ UseOldVectorPostprocessor::execute()
    */
   if (processor_id() == 0)
   {
+    // If we are repeating a timestep, for whatever reason, then we want to revert to the old value
+    if (_t_step == _last_t_step)
+      _value = _old_value;
+
     if (!_vec_old.empty())
     {
       // See if the old value matches the last current value we received.
@@ -62,6 +68,8 @@ UseOldVectorPostprocessor::execute()
 
     if (!_vec.empty())
       _value = _vec.back();
+
+    _last_t_step = _t_step;
   }
 }
 
