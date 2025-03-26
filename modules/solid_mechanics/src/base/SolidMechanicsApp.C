@@ -185,7 +185,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
   addTaskDependency("setup_postprocessor_data", "validate_coordinate_systems");
 
-  registerTask("parse_neml2", /*required=*/true);
+  registerTask("parse_neml2", /*required=*/false);
   syntax.addDependency("add_material", "parse_neml2");
   syntax.addDependency("add_user_object", "parse_neml2");
   registerSyntax("NEML2ActionCommon", "NEML2");

@@ -39,7 +39,7 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  WASP_SRC_DIR    The path to the WASP source directory. Default to <MOOSE_DIR>/framework/contrib/wasp."
   echo "  WASP_DIR        The path to the WASP directory. Default to <WASP_SRC_DIR>/install."
   echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/libtorch."
-  echo "  NEML2_DIR       The path where to install NEML2. Default to <NEML2_SRC_DIR>/install."
+  echo "  NEML2_DIR       The path where to install NEML2. Default to <NEML2_SRC_DIR>/installed."
   echo "  NEML2_SRC_DIR   The path to the NEML2 source directory if a custom NEML2 should be used. If set, "
   echo "                  --skip-submodule-update will be assumed."
   echo "  NEML2_JOBS      The number of jobs to use when building NEML2. Default to <MOOSE_JOBS>. "
@@ -212,6 +212,7 @@ for METHOD in $(echo $METHODS | tr ',' ' '); do
                     ${LIBTORCH_DIR} \
                     ${WASP_DIR} \
                     ${TIMPI_DIR} \
+                    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
                     ${EXTRA_ARGS[@]}
     if [[ $? -ne 0 ]] ; then
       echo "Error: Failed to configure NEML2"

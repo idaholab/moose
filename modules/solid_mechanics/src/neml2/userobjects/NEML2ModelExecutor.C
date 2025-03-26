@@ -21,7 +21,7 @@ registerMooseObject("SolidMechanicsApp", NEML2ModelExecutor);
 InputParameters
 NEML2ModelExecutor::actionParams()
 {
-  auto params = NEML2ModelInterface<GeneralUserObject>::validParams();
+  auto params = emptyInputParameters();
   // allow user to explicit skip required input variables
   params.addParam<std::vector<std::string>>(
       "skip_inputs",
@@ -36,7 +36,8 @@ NEML2ModelExecutor::actionParams()
 InputParameters
 NEML2ModelExecutor::validParams()
 {
-  auto params = NEML2ModelExecutor::actionParams();
+  auto params = NEML2ModelInterface<GeneralUserObject>::validParams();
+  params += NEML2ModelExecutor::actionParams();
   params.addClassDescription(NEML2Utils::docstring("Execute the specified NEML2 model"));
 
   params.addRequiredParam<UserObjectName>(

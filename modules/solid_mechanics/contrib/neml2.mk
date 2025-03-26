@@ -8,14 +8,14 @@
 #
 # If NEML2_DIR is not set, by default we look for an installed NEML2 in
 # the NEML2 submodule directory. If NEML2_SRC_DIR is set, we instead look for
-# the installed NEML2 in NEML2_SRC_DIR/install/$(METHOD).
+# the installed NEML2 in NEML2_SRC_DIR/installed.
 
 # Try out best to find the installed NEML2
 ifeq ($(NEML2_DIR),)
 ifneq ($(NEML2_SRC_DIR),)
-NEML2_DIR := $(NEML2_SRC_DIR)/install/$(METHOD)
+NEML2_DIR := $(NEML2_SRC_DIR)/installed
 else
-NEML2_DIR := $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2/install/$(METHOD)
+NEML2_DIR := $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2/installed
 endif
 endif
 
@@ -45,18 +45,25 @@ ifeq ($(shell uname -s),Darwin)
 DYLIB_SUFFIX := dylib
 endif
 
+# NEML2 libraries are suffixed with the CMake build type
+ifeq ($(METHOD),devel)
+NEML2_SUFFIX := _RelWithDebInfo
+else ifeq ($(METHOD),dbg)
+NEML2_SUFFIX := _Debug
+endif
+
 # NEML2 directories and libraries
 NEML2_INCLUDE    := $(NEML2_DIR)/include
-NEML2_LINK_DIR 	 := $(NEML2_DIR)/lib64
-NEML2_LIBS       := neml2_base \
-									  neml2_dispatcher \
-										neml2_driver \
-										neml2_jit \
-										neml2_misc \
-										neml2_model \
-										neml2_solver \
-										neml2_tensor \
-										neml2_user_tensor
+NEML2_LINK_DIR 	 := $(NEML2_DIR)/lib
+NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
+									  neml2_dispatcher$(NEML2_SUFFIX) \
+										neml2_driver$(NEML2_SUFFIX) \
+										neml2_jit$(NEML2_SUFFIX) \
+										neml2_misc$(NEML2_SUFFIX) \
+										neml2_model$(NEML2_SUFFIX) \
+										neml2_solver$(NEML2_SUFFIX) \
+										neml2_tensor$(NEML2_SUFFIX) \
+										neml2_user_tensor$(NEML2_SUFFIX)
 NEML2_LINK_FLAGS := $(addprefix -l,$(NEML2_LIBS))
 NEML2_LIB_FILES  := $(addprefix $(NEML2_LINK_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 

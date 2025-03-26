@@ -22,7 +22,8 @@ registerMooseAction("SolidMechanicsApp", NEML2ActionCommon, "parse_neml2");
 InputParameters
 NEML2ActionCommon::commonParams()
 {
-  auto params = NEML2ModelExecutor::actionParams();
+  auto params = NEML2ModelInterface<Action>::validParams();
+  params += NEML2ModelExecutor::actionParams();
 
   MultiMooseEnum moose_types("MATERIAL VARIABLE POSTPROCESSOR");
 
