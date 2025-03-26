@@ -57,7 +57,7 @@ protected:
       neml2::WorkDispatcher<neml2::ValueMap, RJType, RJType, neml2::ValueMap, RJType>;
 
   /// Get the work scheduler
-  const neml2::WorkScheduler * scheduler() const { return _scheduler; }
+  neml2::WorkScheduler * scheduler() { return _scheduler; }
   /// Get the work dispatcher
   const std::unique_ptr<DispatcherType> & dispatcher() const { return _dispatcher; }
 
@@ -68,7 +68,7 @@ private:
   neml2::Model & _model;
 
   /// The work scheduler to use
-  const neml2::WorkScheduler * _scheduler;
+  neml2::WorkScheduler * const _scheduler;
   /// Work dispatcher
   std::unique_ptr<DispatcherType> _dispatcher;
   /// Whether to dispatch work asynchronously
