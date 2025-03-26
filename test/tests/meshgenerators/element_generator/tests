@@ -1,20 +1,30 @@
 [Tests]
-  issues = '#11640'
+  issues = '#11640 #30158'
   design = 'meshgenerators/ElementGenerator.md'
 
   [generate]
     requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
                   'points, element types, and connectivity,'
 
-    [single_element]
+    [single_element_no_ss]
       type = 'Exodiff'
       input = 'element_generator.i'
       cli_args = '--mesh-only'
       exodiff = 'element_generator_in.e'
       recover = false
 
-      detail = 'resulting in a single element mesh, or'
+      detail = 'resulting in a single element mesh without sidesets assigned, or'
+    []
+    [single_element_ss]
+      type = 'Exodiff'
+      input = 'element_generator.i'
+      cli_args = '--mesh-only element_generator_ss_in.e
+                  Mesh/eg/create_sidesets=true'
+      exodiff = 'element_generator_ss_in.e'
+      exodiff_opts = '-pedantic'
+      recover = false
 
+      detail = 'resulting in a single element mesh with separate sidesets assigned to each side, or'
     []
 
     [multi_elem_multi_gen]
