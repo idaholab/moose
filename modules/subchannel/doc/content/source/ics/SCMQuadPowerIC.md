@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This IC assigns the axial heat rate ([!param](/ICs/SCMQuadPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a
 square lattice arrangement. The user must provide the  total power of the subassembly [!param](/ICs/SCMQuadPowerIC/power), the axial shape of the power profile and the radial
@@ -23,7 +23,7 @@ The axial heat rate at a specific height is the product of the total power of th
 
 ## Caveat
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 If the user has created a mesh for the pins, the axial heat rate will be assigned to the nodes of the pin mesh. If the user hasn't created a pin mesh the appropriate heat rate will be assigned to
 the nodes of the subchannel mesh.
