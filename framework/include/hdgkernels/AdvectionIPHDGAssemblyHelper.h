@@ -60,8 +60,11 @@ public:
    */
   void lmOutflow();
 
-  /// The velocity
-  const Moose::Functor<ADRealVectorValue> & _velocity;
+  /// The velocity in the element interior
+  const ADMaterialProperty<RealVectorValue> & _velocity;
+
+  /// The velocity on the element faces
+  const ADMaterialProperty<RealVectorValue> & _face_velocity;
 
   const Real _coeff;
   const bool _self_advection;

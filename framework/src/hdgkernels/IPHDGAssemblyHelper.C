@@ -40,7 +40,6 @@ IPHDGAssemblyHelper::IPHDGAssemblyHelper(const MooseObject * const moose_obj,
                                          const std::set<SubdomainID> & block_ids,
                                          const std::set<BoundaryID> & boundary_ids)
   : ThreeMaterialPropertyInterface(moose_obj, block_ids, boundary_ids),
-    ADFunctorInterface(moose_obj),
     _ti(*ti),
     _u_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("variable"))),
     _u_face_var(sys.getFieldVariable<Real>(

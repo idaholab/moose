@@ -39,9 +39,9 @@
   []
 []
 
-[FunctorMaterials]
+[Materials]
   [vel]
-    type = ADGenericVectorFunctorMaterial
+    type = ADGenericConstantVectorMaterial
     prop_names = 'vel'
     prop_values = '2 0 0'
   []
