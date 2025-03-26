@@ -16,6 +16,36 @@ The capabilities system API consists of the following static functions in `Moose
 
 Capabilities that are known _not_ to be supported should be explicitly registered as `false`.
 
+## Adding capabilities
+
+When adding additional capabilities within your derived applications, you should utilize the
+`addCapability()` methods on `MooseApp` within `registerApps()` in your application.
+
+For example:
+
+```c++
+void
+YourApp::registerApps()
+{
+  // Add a capability for cool_feature based on a compile-time option
+  const std::string doc = "Cool feature ";
+#ifdef COOL_FEATURE_ENABLED
+  addCapability("cool_feature", true, doc + "is available.");
+#else
+  addCapability("cool_feature", false, doc + "is not available.");
+#endif
+
+  // Add a versioned capability
+  addCapability("cool_library", "1.2.3", "Cool library is available");
+
+  registerApp(YourApp);
+}
+```
+
+With the above registered capabilities, you could create capability requirement strings such as
+`!cool_feature` to require that cool feature is not available and `cool_library>=1.2` to require
+that cool library must have a version of `1.2` or higher.
+
 ## Command line arguments
 
 `--show-capabilities` produces a JSON dump of the registered capabilities for the current application. If an input file is specified, capabilities from any dynamically registered modules or apps are included in the dump.
