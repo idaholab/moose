@@ -77,7 +77,7 @@ n = 4
     variable = pressure
     face_variable = pressure_bar
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
   []
 []
@@ -141,7 +141,7 @@ n = 4
     type = ADHDGAdvectionDirichletBC
     variable = pressure
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom top right'
   []
@@ -152,32 +152,6 @@ n = 4
     coeff = ${rho}
     self_advection = false
     boundary = 'left bottom top right'
-  []
-  [mass_convection_bar_diri_walls]
-    type = ADHDGAdvectionDirichletBC
-    variable = pressure_bar
-    velocity_function = wall_vel_func
-    coeff = ${fparse -rho}
-    self_advection = false
-    boundary = 'left bottom right'
-  []
-  [mass_convection_bar_diri_top]
-    type = ADHDGAdvectionDirichletBC
-    variable = pressure_bar
-    velocity_function = top_vel_func
-    coeff = ${fparse -rho}
-    self_advection = false
-    boundary = 'top'
-  []
-[]
-
-[Functions]
-  [top_vel_func]
-    type = ParsedVectorFunction
-    expression_x = ${U}
-  []
-  [wall_vel_func]
-    type = ParsedVectorFunction
   []
 []
 
