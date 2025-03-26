@@ -86,7 +86,7 @@ rho = 2
     variable = pressure
     face_variable = pressure_bar
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
   []
 []
@@ -153,7 +153,7 @@ rho = 2
     type = ADHDGAdvectionDirichletBC
     variable = pressure
     velocity = 'velocity'
-    coeff = ${fparse -rho}
+    coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom top right'
   []
@@ -164,14 +164,6 @@ rho = 2
     coeff = ${rho}
     self_advection = false
     boundary = 'left bottom top right'
-  []
-  [mass_convection_bar_diri_all]
-    type = ADHDGAdvectionDirichletBC
-    variable = pressure_bar
-    velocity_function = vector_vel_func
-    coeff = ${fparse -rho}
-    self_advection = false
-    boundary = 'left bottom right top'
   []
 []
 
@@ -206,11 +198,6 @@ rho = 2
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
-  [vector_vel_func]
-    type = ParsedVectorFunction
-    expression_x = 'sin(y)*cos((1/2)*x*pi)'
-    expression_y = 'sin(x)*cos((1/2)*y*pi)'
-  []
 []
 
 [Materials]
@@ -228,9 +215,12 @@ rho = 2
 []
 
 [AuxVariables]
-  [vel_exact_x][]
-  [vel_exact_y][]
-  [pressure_exact][]
+  [vel_exact_x]
+  []
+  [vel_exact_y]
+  []
+  [pressure_exact]
+  []
 []
 
 [AuxKernels]
