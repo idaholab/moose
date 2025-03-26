@@ -70,8 +70,8 @@ LinearInterpolation::sample(const T & x) const
   }
 
   auto upper = std::upper_bound(_x.begin(), _x.end(), x);
-  const unsigned int i = std::distance(_x.begin(), upper) - 1;
-  if (i == _x.size() - 1)
+  const auto i = cast_int<std::size_t>(std::distance(_x.begin(), upper) - 1);
+  if (i == cast_int<std::size_t>(_x.size() - 1))
     // std::upper_bound returns the end() iterator if there are no elements that are
     // an upper bound to the value. Since x >= _x.back() has already returned above,
     // this means x is a NaN, so we return a NaN here.
@@ -105,8 +105,8 @@ LinearInterpolation::sampleDerivative(const T & x) const
   }
 
   auto upper = std::upper_bound(_x.begin(), _x.end(), x);
-  const unsigned int i = std::distance(_x.begin(), upper) - 1;
-  if (i == _x.size() - 1)
+  const auto i = cast_int<std::size_t>(std::distance(_x.begin(), upper) - 1);
+  if (i == cast_int<std::size_t>(_x.size() - 1))
     // std::upper_bound returns the end() iterator if there are no elements that are
     // an upper bound to the value. Since x >= _x.back() has already returned above,
     // this means x is a NaN, so we return a NaN here.
