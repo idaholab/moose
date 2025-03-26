@@ -47,7 +47,7 @@ endif
 
 # NEML2 directories and libraries
 NEML2_INCLUDE    := $(NEML2_DIR)/include
-NEML2_LINK_DIR 	 := $(NEML2_DIR)/lib
+NEML2_LINK_DIR 	 := $(NEML2_DIR)/lib64
 NEML2_LIBS       := neml2_base \
 									  neml2_dispatcher \
 										neml2_driver \
