@@ -204,22 +204,6 @@ gamma = 1e5
     self_advection = false
     boundary = 'left bottom top right'
   []
-  [mass_convection_bar_diri_walls]
-    type = ADHDGAdvectionDirichletBC
-    variable = pressure_bar
-    velocity_function = wall_vel_func
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom right'
-  []
-  [mass_convection_bar_diri_top]
-    type = ADHDGAdvectionDirichletBC
-    variable = pressure_bar
-    velocity_function = top_vel_func
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'top'
-  []
 
   [pb_mass]
     type = MassMatrixIntegratedBC
@@ -246,16 +230,6 @@ gamma = 1e5
     component = 1
     boundary = 'left right bottom top'
     gamma = ${gamma}
-  []
-[]
-
-[Functions]
-  [top_vel_func]
-    type = ParsedVectorFunction
-    expression_x = ${U}
-  []
-  [wall_vel_func]
-    type = ParsedVectorFunction
   []
 []
 
