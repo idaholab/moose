@@ -1,25 +1,13 @@
 [Mesh]
   [cmg]
-    type = CartesianMeshGenerator
-    dim = 2
-    dx = '1 1'
-    dy = '1 1'
-    ix = '2 2'
-    iy = '2 2'
-    subdomain_id = '0 0
-                    0 1'
+    type = FileMeshGenerator
+    file = steady_out_cp/LATEST
+    skip_partitioning = true
   []
 []
 
-[Adaptivity]
-  switch_h_to_p_refinement = true
-  initial_marker = uniform
-  initial_steps = 1
-  [Markers/uniform]
-    type = UniformMarker
-    mark = REFINE
-    block = 1
-  []
+[Problem]
+  restart_file_base = steady_out_cp/LATEST
 []
 
 [Variables]
@@ -74,8 +62,9 @@
 
 [Executioner]
   type = Steady
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
-  csv = true
+  exodus = true
 []
