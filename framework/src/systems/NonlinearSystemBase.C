@@ -2931,7 +2931,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     static bool first = true;
 
     // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
-    if ((_fe_problem.resetMatrixMemory() || first) &&
+    if ((_fe_problem.restoreOriginalNonzeroPattern() || first) &&
         _add_implicit_geometric_coupling_entries_to_jacobian)
     {
       first = false;
