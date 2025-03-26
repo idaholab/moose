@@ -297,7 +297,11 @@ class TestHarness:
         self.parseCLArgs(argv)
 
         # Determine the executable if we have an application
-        self.executable = self.getExecutable() if self.app_name else None
+        try:
+            self.executable = self.getExecutable() if self.app_name else None
+        except FileNotFoundError as e:
+            print(f'ERROR: {e}')
+            sys.exit(1)
 
         # Load capabilities if they're needed
         if self.options.no_capabilities:
@@ -1012,8 +1016,7 @@ class TestHarness:
         if exe_path:
             return exe_path
 
-        print(f'ERROR: Failed to find the executable {name}')
-        sys.exit(1)
+        raise FileNotFoundError(f'Failed to find MOOSE executable {name}')
 
     def initialize(self):
         # Load the scheduler plugins
