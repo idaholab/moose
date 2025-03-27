@@ -166,7 +166,7 @@ capabilities_LIB          := $(CAPABILITIES_DIR)/$(capabilities_LIBNAME)
 capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS)
 capabilities_LDFLAGS      := -Wl,-rpath,$(HIT_DIR) -L$(HIT_DIR) -lhit-$(METHOD) -Wl,-rpath,$(FRAMEWORK_DIR) -L$(FRAMEWORK_DIR) -lmoose-$(METHOD) $(DYNAMIC_LOOKUP)
 
-capabilities $(capabilities_LIB) : $(capabilities_srcfiles) $(moose_LIB)| prebuild
+capabilities $(capabilities_LIB) : $(capabilities_srcfiles) $(moose_LIB) $(app_HEADER) | prebuild
 	@echo "Building and linking "$@"..."
 	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB))'
 
