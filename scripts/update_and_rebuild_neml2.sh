@@ -145,7 +145,7 @@ if [[ ! -d "${LIBTORCH_DIR}" ]]; then
   echo "Error: The libtorch directory (${LIBTORCH_DIR}) does not exist. Please see --help for more information."
   exit 1
 fi
-if [[ ! -d "${LIBTORCH_DIR}" ]]; then
+if [[ ! -d "${TIMPI_DIR}" ]]; then
   echo "Error: The TIMPI directory (${TIMPI_DIR}) does not exist. Please see --help for more information."
   exit 1
 fi
@@ -173,7 +173,7 @@ fi
 for METHOD in $(echo $METHODS | tr ',' ' '); do
   # Check that timpi is available
   if [[ ! -f "${TIMPI_DIR}"/lib/libtimpi_${METHOD}.${DYLIB_SUFFIX} ]]; then
-    echo "Error: The TIMPI directory (${TIMPI_DIR}) does not exist. Please build libMesh first."
+    echo "Error: The TIMPI library (${TIMPI_DIR}/lib/libtimpi_${METHOD}.${DYLIB_SUFFIX}) does not exist. Please build libMesh first."
     exit 1
   fi
 
