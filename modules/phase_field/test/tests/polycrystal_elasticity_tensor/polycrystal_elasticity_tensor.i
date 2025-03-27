@@ -129,39 +129,9 @@
 []
 
 [AuxVariables]
-  [bnds]
-  []
-  [unique_grains]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [var_indices]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [ebsd_grains]
-    family = MONOMIAL
-    order = CONSTANT
-  []
   [phi1]
     family = MONOMIAL
     order = CONSTANT
-  []
-  [halo0]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [halo1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [halo2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [halo3]
-    order = CONSTANT
-    family = MONOMIAL
   []
 []
 
@@ -171,66 +141,12 @@
 []
 
 [AuxKernels]
-  [BndsCalc]
-    type = BndsCalcAux
-    variable = bnds
-    execute_on = timestep_end
-  []
-  [unique_grains]
-    type = FeatureFloodCountAux
-    variable = unique_grains
-    execute_on = 'initial timestep_end'
-    flood_counter = grain_tracker
-    field_display = UNIQUE_REGION
-  []
-  [var_indices]
-    type = FeatureFloodCountAux
-    variable = var_indices
-    execute_on = 'initial timestep_end'
-    flood_counter = grain_tracker
-    field_display = VARIABLE_COLORING
-  []
-  [grain_aux]
-    type = EBSDReaderPointDataAux
-    variable = ebsd_grains
-    ebsd_reader = ebsd_reader
-    data_name = 'feature_id'
-    execute_on = 'initial timestep_end'
-  []
   [phi1]
     type = OutputEulerAngles
     euler_angle_provider = ebsd_reader
     output_euler_angle = phi1
     grain_tracker = grain_tracker
     variable = phi1
-  []
-  [halo0]
-    type = FeatureFloodCountAux
-    variable = halo0
-    map_index = 0
-    field_display = HALOS
-    flood_counter = grain_tracker
-  []
-  [halo1]
-    type = FeatureFloodCountAux
-    variable = halo1
-    map_index = 1
-    field_display = HALOS
-    flood_counter = grain_tracker
-  []
-  [halo2]
-    type = FeatureFloodCountAux
-    variable = halo2
-    map_index = 2
-    field_display = HALOS
-    flood_counter = grain_tracker
-  []
-  [halo3]
-    type = FeatureFloodCountAux
-    variable = halo3
-    map_index = 3
-    field_display = HALOS
-    flood_counter = grain_tracker
   []
 []
 
@@ -250,13 +166,9 @@
 []
 
 [Postprocessors]
-  [n_nodes]
-    type = NumNodes
-    execute_on = timestep_end
-  []
-
-  [DOFs]
-    type = NumDOFs
+  [check_euler_angle_1]
+    type = ElementAverageValue
+    variable = phi1
   []
 []
 
@@ -278,5 +190,5 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

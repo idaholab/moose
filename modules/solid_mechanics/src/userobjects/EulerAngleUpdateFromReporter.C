@@ -20,19 +20,19 @@ EulerAngleUpdateFromReporter::validParams()
   params.addClassDescription("Update Euler angle from reporter value.");
   params.addRequiredParam<ReporterName>(
       "euler_angle_0_name",
-      "reporter name for the first component of the Euler angles.  This "
-      "uses the reporter syntax <reporter>/<name>.");
+      "reporter name for the first component of the Euler angles in degrees.  This "
+      "parameter uses the reporter syntax <reporter>/<name>.");
   params.addRequiredParam<ReporterName>(
       "euler_angle_1_name",
-      "reporter name for the second component of the Euler angles.  This "
-      "uses the reporter syntax <reporter>/<name>.");
+      "reporter name for the second component of the Euler angles in degrees.  This "
+      "parameter uses the reporter syntax <reporter>/<name>.");
   params.addRequiredParam<ReporterName>(
       "euler_angle_2_name",
-      "reporter name for the third component of the Euler angles.  This "
-      "uses the reporter syntax <reporter>/<name>.");
+      "reporter name for the third component of the Euler angles in degrees.  This "
+      "parameter uses the reporter syntax <reporter>/<name>.");
   params.addRequiredParam<ReporterName>("grain_id_name",
                                         "reporter name for the grain IDs.  This "
-                                        "uses the reporter syntax <reporter>/<name>.");
+                                        "parameter uses the reporter syntax <reporter>/<name>.");
   return params;
 }
 
