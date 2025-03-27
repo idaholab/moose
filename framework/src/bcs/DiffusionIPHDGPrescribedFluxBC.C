@@ -8,12 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DiffusionIPHDGAssemblyHelper.h"
-#include "DiffusionIPHDGPrescribedGradientBC.h"
+#include "DiffusionIPHDGPrescribedFluxBC.h"
 
-registerMooseObject("MooseApp", DiffusionIPHDGPrescribedGradientBC);
+registerMooseObject("MooseApp", DiffusionIPHDGPrescribedFluxBC);
 
 InputParameters
-DiffusionIPHDGPrescribedGradientBC::validParams()
+DiffusionIPHDGPrescribedFluxBC::validParams()
 {
   auto params = IPHDGPrescribedFluxBC::validParams();
   params += DiffusionIPHDGAssemblyHelper::validParams();
@@ -22,8 +22,7 @@ DiffusionIPHDGPrescribedGradientBC::validParams()
   return params;
 }
 
-DiffusionIPHDGPrescribedGradientBC::DiffusionIPHDGPrescribedGradientBC(
-    const InputParameters & parameters)
+DiffusionIPHDGPrescribedFluxBC::DiffusionIPHDGPrescribedFluxBC(const InputParameters & parameters)
   : IPHDGPrescribedFluxBC(parameters),
     _iphdg_helper(std::make_unique<DiffusionIPHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs()))

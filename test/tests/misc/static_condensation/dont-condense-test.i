@@ -57,7 +57,7 @@
     alpha = 6
   []
   [zero_flux]
-    type = DiffusionIPHDGPrescribedGradientBC
+    type = DiffusionIPHDGPrescribedFluxBC
     boundary = 'top bottom'
     variable = u
     face_variable = side_u

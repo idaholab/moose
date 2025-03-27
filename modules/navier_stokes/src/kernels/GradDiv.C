@@ -20,6 +20,8 @@ GradDiv::validParams()
   params.addRequiredParam<unsigned short>("component",
                                           "The velocity component this object is being applied to");
   params.addParam<Real>("gamma", 1, "The penalty parameter");
+  params.addClassDescription("Adds grad-div stabilization for scalar field velocity component "
+                             "Navier-Stokes implementations.");
   return params;
 }
 

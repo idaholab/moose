@@ -9,7 +9,7 @@
 
 #include "MassMatrixDGKernel.h"
 
-registerMooseObject("MooseApp", MassMatrixDGKernel);
+registerMooseObject("NavierStokesApp", MassMatrixDGKernel);
 
 InputParameters
 MassMatrixDGKernel::validParams()

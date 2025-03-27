@@ -170,7 +170,6 @@ Extensions:
             fviks: syntax/FVInterfaceKernels/index.md
             fvics: syntax/FVICs/index.md
             fvkernels: syntax/FVKernels/index.md
-            hdgbcs: syntax/HDGBCs/index.md
             hdgkernels: syntax/HDGKernels/index.md
             linearfvkernels: syntax/LinearFVKernels/index.md
             linearfvbcs: syntax/LinearFVBCs/index.md

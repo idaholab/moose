@@ -20,7 +20,7 @@
 #include <petscmat.h>
 #include <slepceps.h>
 
-registerMooseObject("NavierStokesApp", PrintMatricesNSProblem);
+registerMooseObject("NavierStokesTestApp", PrintMatricesNSProblem);
 
 InputParameters
 PrintMatricesNSProblem::validParams()

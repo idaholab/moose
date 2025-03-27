@@ -17,6 +17,9 @@ DiffusionIPHDGKernel::validParams()
 {
   auto params = IPHDGKernel::validParams();
   params += DiffusionIPHDGAssemblyHelper::validParams();
+  params.addClassDescription(
+      "Adds the element and interior face weak forms for a hybridized interior penalty "
+      "discontinuous Galerkin discretization of a diffusion term.");
   return params;
 }
 

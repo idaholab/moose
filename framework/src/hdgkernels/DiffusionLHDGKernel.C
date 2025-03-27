@@ -29,6 +29,8 @@ DiffusionLHDGKernel::validParams()
   params += DiffusionLHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   params.addParam<MooseFunctorName>("source", 0, "Source for the diffusing species");
+  params.addClassDescription("Adds the element and interior face weak forms for a hybridized local "
+                             "discontinuous Galerkin discretization of a diffusion term.");
   return params;
 }
 

@@ -10,7 +10,7 @@
 #include "NavierStokesStressIPHDGDirichletBC.h"
 #include "NavierStokesStressIPHDGAssemblyHelper.h"
 
-registerMooseObject("MooseApp", NavierStokesStressIPHDGDirichletBC);
+registerMooseObject("NavierStokesApp", NavierStokesStressIPHDGDirichletBC);
 
 InputParameters
 NavierStokesStressIPHDGDirichletBC::validParams()
