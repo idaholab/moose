@@ -6,6 +6,8 @@ In a crystal plasticity simulation, the `ComputeBlockOrientationByRotation`  use
 2. Computing the distribution of quaternion values.
 3. Choosing the most prevalent orientation direction as the grain orientation.
 
+For interested readers, the algorithm used to calculate the Eugler angles in Steps 2-3 can be found in [!cite](markley2007averaging).
+
 A alternative way of calculating the block orientation can be found in [ComputeBlockOrientationByMisorientation](ComputeBlockOrientationByMisorientation.md).
 
 ## Example Input File Syntax
