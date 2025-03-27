@@ -10,13 +10,15 @@
 #include "NavierStokesStressIPHDGAssemblyHelper.h"
 #include "NavierStokesStressIPHDGKernel.h"
 
-registerMooseObject("MooseApp", NavierStokesStressIPHDGKernel);
+registerMooseObject("NavierStokesApp", NavierStokesStressIPHDGKernel);
 
 InputParameters
 NavierStokesStressIPHDGKernel::validParams()
 {
   auto params = IPHDGKernel::validParams();
   params += NavierStokesStressIPHDGAssemblyHelper::validParams();
+  params.addClassDescription(
+      "Adds viscous and pressure stress terms for element interiors and interior faces");
   return params;
 }
 
