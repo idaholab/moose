@@ -1,15 +1,17 @@
-# Fluid properties
-mu = 1
-rho = 1
-cp = 1
-k = 1
-D_h = 2
+# Waterish Fluid properties
+mu = 1.79e-3
+rho = 1e3
+cp = 4.186e3
+k = .561
+D_h = .05
 num_axial_elements = 50
+num_radial_elements = 10
+h = '${fparse D_h/2/num_radial_elements}'
 
 # Operating conditions
 u_inlet = 1
 T_inlet = 300
-T_wall = 400
+T_wall = 350
 p_outlet = 0
 
 [Mesh]
@@ -17,11 +19,11 @@ p_outlet = 0
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 5
+    xmax = '${fparse h * num_axial_elements}'
     ymin = 0
-    ymax = '${fparse D_h/2}'
+    ymax = '${fparse h * num_radial_elements}'
     nx = ${num_axial_elements}
-    ny = 20
+    ny = ${num_radial_elements}
   []
 []
 
@@ -41,7 +43,7 @@ p_outlet = 0
         momentum_inlet_types = 'fixed-velocity'
         momentum_inlet_functors = '${u_inlet} 0'
         wall_boundaries = 'bottom top'
-        momentum_wall_types = 'symmetry noslip'
+        momentum_wall_types = 'symmetry slip'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure-zero-gradient'
@@ -58,8 +60,8 @@ p_outlet = 0
 
         fluid_temperature_variable = 'T_fluid'
         initial_temperature = '${T_inlet}'
-        energy_inlet_types = 'heatflux'
-        energy_inlet_functors = '${fparse u_inlet * rho * cp * T_inlet}'
+        energy_inlet_types = 'FIXED-TEMPERATURE'
+        energy_inlet_functors = '${T_inlet}'
 
         energy_wall_types = 'heatflux heatflux'
         energy_wall_functors = '0 q'
