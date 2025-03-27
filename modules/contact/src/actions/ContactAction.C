@@ -296,7 +296,8 @@ ContactAction::ContactAction(const InputParameters & params)
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh")),
-    _mortar_dynamics(getParam<bool>("mortar_dynamics"))
+    _mortar_dynamics(getParam<bool>("mortar_dynamics")),
+    _add_aux_vars(getParam<bool>("add_aux_vars"))
 {
   // Check for automatic selection of contact pairs.
   if (getParam<std::vector<BoundaryName>>("automatic_pairing_boundaries").size() > 1)
@@ -365,11 +366,6 @@ ContactAction::ContactAction(const InputParameters & params)
       _use_dual = getParam<bool>("use_dual");
     else
       _use_dual = true;
-
-    if (isParamValid("add_aux_vars"))
-      _add_aux_vars = getParam<bool>("add_aux_vars");
-    else
-      _add_aux_vars = true;
     
     if (!getParam<bool>("mortar_dynamics"))
     {
