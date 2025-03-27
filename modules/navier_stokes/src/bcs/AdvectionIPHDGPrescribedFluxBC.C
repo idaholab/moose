@@ -10,7 +10,7 @@
 #include "AdvectionIPHDGAssemblyHelper.h"
 #include "AdvectionIPHDGPrescribedFluxBC.h"
 
-registerMooseObject("MooseApp", AdvectionIPHDGPrescribedFluxBC);
+registerMooseObject("NavierStokesApp", AdvectionIPHDGPrescribedFluxBC);
 
 InputParameters
 AdvectionIPHDGPrescribedFluxBC::validParams()

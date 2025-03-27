@@ -15,11 +15,11 @@
  * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
  * the diffusion equation
  */
-class DiffusionIPHDGPrescribedGradientBC : public IPHDGPrescribedFluxBC
+class DiffusionIPHDGPrescribedFluxBC : public IPHDGPrescribedFluxBC
 {
 public:
   static InputParameters validParams();
-  DiffusionIPHDGPrescribedGradientBC(const InputParameters & parameters);
+  DiffusionIPHDGPrescribedFluxBC(const InputParameters & parameters);
 
 protected:
   virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }

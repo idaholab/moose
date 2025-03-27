@@ -42,7 +42,7 @@
     boundary = 'right'
   []
   [zero_flux]
-    type = DiffusionIPHDGPrescribedGradientBC
+    type = DiffusionIPHDGPrescribedFluxBC
     boundary = 'top bottom'
   []
 []

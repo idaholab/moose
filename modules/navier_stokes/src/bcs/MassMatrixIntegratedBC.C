@@ -9,7 +9,7 @@
 
 #include "MassMatrixIntegratedBC.h"
 
-registerMooseObject("MooseApp", MassMatrixIntegratedBC);
+registerMooseObject("NavierStokesApp", MassMatrixIntegratedBC);
 
 InputParameters
 MassMatrixIntegratedBC::validParams()
