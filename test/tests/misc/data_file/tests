@@ -51,7 +51,7 @@
     type = RunException
     input = test.i
     cli_args = 'UserObjects/data_file/data_file_by_path=surely/no/exist'
-    expect_err = "The following error occurred in the UserObject 'data_file' of type DataFileNameTest.\s+Unable to find the data file 'surely/no/exist\' anywhere"
+    expect_err = "The following occurred in the UserObject 'data_file' of type DataFileNameTest.\s+Unable to find the data file 'surely/no/exist\' anywhere"
     requirement = 'The system shall throw an exception if finding a data file via a path in designated directories fails'
   []
   [by_path_absolute]
