@@ -9,6 +9,9 @@
 import re
 from ..base import components, Extension
 from ..tree import tokens
+import logging
+
+LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return CommentExtension(**kwargs)
@@ -29,6 +32,15 @@ class CommentExtension(Extension):
         reader.addInline(CommentInline(), location='_begin')
         reader.addBlock(CommentBlock(), location='_begin')
 
+class CommentInline(components.ReaderComponent):
+    """
+    Inline comments begin with !! and continue to the end of a line.
+    """
+    RE = re.compile(r'(?<!!)!{2}(?!!)(?P<content>.*?)$', flags=re.UNICODE|re.MULTILINE)
+    def createToken(self, parent, info, page, settings):
+        Comment(parent, content=info['content'])
+        return parent
+
 class HTMLCommentBlock(components.ReaderComponent):
     """
     HTML style comments (deprecated)
@@ -37,15 +49,7 @@ class HTMLCommentBlock(components.ReaderComponent):
     RE = re.compile(r'<!--(?P<content>.*?)-->', flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
     def createToken(self, parent, info, page, settings):
-        Comment(parent, content=info['content'])
-        return parent
-
-class CommentInline(components.ReaderComponent):
-    """
-    Inline comments begin with !! and continue to the end of a line.
-    """
-    RE = re.compile(r'(?<!!)!{2}(?!!)(?P<content>.*?)$', flags=re.UNICODE|re.MULTILINE)
-    def createToken(self, parent, info, page, settings):
+        LOG.error("Use of HTML style comments detected on page %s!", page)
         Comment(parent, content=info['content'])
         return parent
 

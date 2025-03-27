@@ -14,6 +14,11 @@ log in.
 
 The following represents some of the more useful features, and is not an exhaustive list:
 
+!!!
+NOTE that the line spacing here is very intentional, in order to give vertical space between the
+top-level bullet points.
+!!!
+
 - Files, Home Directory
 
   - This will launch a "File Explorer" web browser tab.
@@ -22,20 +27,17 @@ The following represents some of the more useful features, and is not an exhaust
     a native file explorer. File Explorer will also allow you to download and upload files to and
     from your machine.
 
-<!-- intentional double space -->
 
 - Jobs, Active Jobs
 
   - Launches a new browser tab listing all scheduled jobs you own.
 
-<!-- intentional double space -->
 
 - Jobs, Job Composer
 
   - Launches a new browser tab allowing you to schedule a new job to be run on one of [!ac](INL)'s
    [!ac](HPC) machines.
 
-<!-- intentional double space -->
 
 - Clusters, * Shell Access
 
@@ -43,7 +45,6 @@ The following represents some of the more useful features, and is not an exhaust
    selected. The interactive shell will be one of the more useful tools when needing direct access
    to things like: launching PBS/Slurm jobs manually, building MOOSE, running tests, and more.
 
-<!-- intentional double space -->
 
 - Interactive Apps, Linux Desktop / Linux Deskop with Visualization
 
