@@ -897,6 +897,22 @@ class Versioner:
             raise
 
     @staticmethod
+    def git_is_commit(commit: str, repo_dir: os.PathLike = MOOSE_DIR) -> bool:
+        """
+        Checks whether or not the given commit is a valid commit
+        """
+        command = ['git', 'rev-parse', '-q', '--verify', f'{commit}^{{commit}}']
+        try:
+            subprocess.check_output(command, cwd=repo_dir)
+        except subprocess.CalledProcessError as cpe:
+            if cpe.returncode == 1: # code 1 means no
+                return False
+            raise cpe
+        except Exception as ex:
+            raise ex
+        return True
+
+    @staticmethod
     def versioner_yaml_path(commit: str) -> str:
         """
         Get the path to the Versioner configuration file at
@@ -906,7 +922,8 @@ class Versioner:
         module_hash.yaml -> versioner.yaml
         """
         changed_commit = '2bd844dc5d4de47238eab94a3a718e9714592de1'
-        use_module_hash = not Versioner.after_commit(changed_commit, commit)
+        use_module_hash = Versioner.git_is_commit(changed_commit) and \
+            not Versioner.after_commit(changed_commit, commit)
         path = 'module_hash.yaml' if use_module_hash else 'versioner.yaml'
         return os.path.abspath(os.path.join(MOOSE_DIR, 'scripts', path))
 
@@ -918,6 +935,9 @@ class Versioner:
         are aggregatedas worked through the configuration file
         """
         changed_commit = '0e0785ee8a25742715b49bc26871117b788e7190'
+        # If commit not found, likely a shallow clone so assume no deprecated features
+        if not Versioner.git_is_commit(changed_commit):
+            return False
         return not Versioner.after_commit(changed_commit, commit)
 
     @staticmethod
@@ -926,6 +946,9 @@ class Versioner:
         Whether or not
         """
         changed_commit = '9da58ad93351b19cb23d850361f00ab98db3330b'
+        # If commit not found, likely a shallow clone so assume no deprecated features
+        if not Versioner.git_is_commit(changed_commit):
+            return True
         return Versioner.git_ancestor(changed_commit, commit)
 
     @staticmethod
