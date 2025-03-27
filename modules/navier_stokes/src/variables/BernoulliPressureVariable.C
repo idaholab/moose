@@ -23,14 +23,12 @@ BernoulliPressureVariable::validParams()
   params.addParam<MooseFunctorName>("w", 0, "The z-component of velocity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
-  // params.addParam<std::vector<std::string>>("pressure_drop_sidesets", {}, "Sidesets over which
-  // form loss coefficients are to be applied");
   params.addParam<std::vector<BoundaryName>>(
       "pressure_drop_sidesets", {}, "Sidesets over which form loss coefficients are to be applied");
   params.addParam<std::vector<Real>>(
       "pressure_drop_form_factors",
       {},
-      "User-suppled form loss coefficients to be applied over the sidesets listed above");
+      "User-supplied form loss coefficients to be applied over the sidesets listed above");
   params.addParam<bool>(
       "allow_two_term_expansion_on_bernoulli_faces",
       false,

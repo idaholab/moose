@@ -5,20 +5,20 @@
   [single-expansion]
     type = CSVDiff
     input = 'formloss_single.i'
-    csvdiff = 'formloss_single_out.csv'
+    csvdiff = 'formloss_single_out.csv' # This csv contains values that have been compared with textbook solution
     requirement = 'The system shall be able to handle irreversible pressure drops from expansions at interfaces.'
   []
   [single-contraction]
     type = CSVDiff
     input = 'formloss_single.i'
-    csvdiff = 'contraction.csv'
+    csvdiff = 'contraction.csv' # This csv contains values that have been compared with textbook solution
     requirement = 'The system shall be able to handle irreversible pressure drops from contractions at interfaces.'
-    cli_args = "Outputs/file_base='contraction' Materials/porosity/subdomain_to_prop_value='1 1.0 2 0.5' Variables/pressure/pressure_drop_form_factors=0.2983 Modules/NavierStokesFV/momentum_inlet_functors='1.2 0.0'"
+    cli_args = "Outputs/file_base='contraction' Materials/porosity/subdomain_to_prop_value='1 1.0 2 0.5' Physics/NavierStokes/Flow/flow/pressure_drop_form_factors=0.2983 Physics/NavierStokes/Flow/flow/momentum_inlet_functors='1.2 0.0'"
   []
   [multiple]
     type = CSVDiff
     input = 'formloss_multiple.i'
-    csvdiff = 'formloss_multiple_out.csv'
+    csvdiff = 'formloss_multiple_out.csv' # This csv contains values that have been compared with textbook solution
     requirement = 'The system shall be able to handle multiple subsequent irreversible pressure drops from contractions and expansions.'
   []
 []

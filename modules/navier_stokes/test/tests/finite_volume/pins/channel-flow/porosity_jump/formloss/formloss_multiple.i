@@ -1,3 +1,4 @@
+# The expected pressure drop from textbook correlations for this example is: 1081.468315
 [Mesh]
   [gen]
       type = CartesianMeshGenerator

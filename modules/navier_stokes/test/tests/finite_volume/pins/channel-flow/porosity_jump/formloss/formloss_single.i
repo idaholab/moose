@@ -1,3 +1,25 @@
+# The expected pressure increase from textbook correlations for an expansion is: -355.68 Pa
+# The form loss coefficient is computed with the following expression:
+#
+# K = (1-\beta)^2 = 0.25,
+#
+# where $\beta$ is the area ratio (0.5 in our case). With this, the total pressure drop
+# can be computed using:
+#
+# \Delta p = 0.5 * K * \rho * v_upstream^2 + 0.5 * \rho * (v_downstream^2 - v_upstream^2)
+#
+# The expected pressure drop from textbook correlations for a contraction is: 2980.03437 Pa
+# The form loss coefficient is computed with the following expression:
+#
+# K = 0.5*(1-/beta)^0.75 = 0.29730,
+#
+# where $\beta$ is the area ratio (0.5 in our case). With this, the total pressure drop
+# can be computed using:
+#
+# \Delta p = 0.5 * K * rho * v_downstream^2 + 0.5 * \rho * (v_downstream^2 - v_upstream^2)
+#
+# Every velocity in these expressions is interstitial normal velocity to the surface.
+
 [Mesh]
   [gen]
     type = CartesianMeshGenerator
@@ -15,20 +37,6 @@
   []
 []
 
-[Variables]
-  [pressure]
-    type = BernoulliPressureVariable
-    pressure_drop_sidesets = 'area_change'
-    pressure_drop_form_factors = '0.25'
-    porosity = porosity
-    u = superficial_vel_x
-    v = superficial_vel_y
-    rho = 988.0
-    initial_condition = 1.01e5
-    block = '1 2'
-  []
-[]
-
 [Materials]
   [all_constant_props]
     type = ADGenericConstantFunctorMaterial
@@ -43,29 +51,33 @@
   []
 []
 
-[Modules]
-  [NavierStokesFV]
-    block = '1 2'
-    compressibility = 'weakly-compressible'
-    porous_medium_treatment = true
-    add_energy_equation = false
+[Physics]
+  [NavierStokes]
+    [Flow]
+      [flow]
+        block = '1 2'
+        compressibility = 'weakly-compressible'
+        porous_medium_treatment = true
 
-    # Material property parameters
-    density = rho
-    dynamic_viscosity = mu
-    pressure_variable = pressure
+        # Material property parameters
+        density = rho
+        dynamic_viscosity = mu
 
-    # Porous medium parameters
-    porosity = porosity
-    porosity_interface_pressure_treatment = 'bernoulli'
+        # Porous medium parameters
+        porosity = porosity
+        porosity_interface_pressure_treatment = 'bernoulli'
+        pressure_drop_sidesets = 'area_change'
+        pressure_drop_form_factors = '0.25'
 
-    # Boundary conditions
-    inlet_boundaries = 'left'
-    outlet_boundaries = 'right'
-    momentum_inlet_types = fixed-velocity
-    momentum_inlet_functors = '0.6 0.0'
-    momentum_outlet_types = fixed-pressure
-    pressure_functors = '1.01e5'
+        # Boundary conditions
+        inlet_boundaries = 'left'
+        outlet_boundaries = 'right'
+        momentum_inlet_types = fixed-velocity
+        momentum_inlet_functors = '0.6 0.0'
+        momentum_outlet_types = fixed-pressure
+        pressure_functors = '1.01e5'
+      []
+    []
   []
 []
 
