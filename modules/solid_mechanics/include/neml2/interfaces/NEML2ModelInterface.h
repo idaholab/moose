@@ -12,6 +12,7 @@
 #include "NEML2Utils.h"
 
 #ifdef NEML2_ENABLED
+#include <ATen/Parallel.h>
 #include "neml2/models/Model.h"
 #include "neml2/base/Parser.h"
 #include "neml2/dispatchers/WorkScheduler.h"
@@ -152,7 +153,11 @@ NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&
     };
 
     auto thread_init = [this](neml2::Device device) -> void
-    { NEML2Utils::getModel(_model.name(), device); };
+    {
+      at::set_num_threads(libMesh::n_threads());
+      at::set_num_interop_threads(libMesh::n_threads());
+      NEML2Utils::getModel(_model.name(), device);
+    };
 
     _dispatcher = std::make_unique<DispatcherType>(
         *_scheduler,
