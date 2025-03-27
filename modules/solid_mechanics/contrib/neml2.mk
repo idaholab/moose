@@ -54,7 +54,15 @@ endif
 
 # NEML2 directories and libraries
 NEML2_INCLUDE    := $(NEML2_DIR)/include
-NEML2_LINK_DIR 	 := $(NEML2_DIR)/lib
+# If we can ever consistently get NEML2 to install its libs in
+# the same directory, we can get rid of this
+ifneq ($(wildcard $(NEML2_DIR)/lib/.),)
+NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib
+else ifneq ($(wildcard $(NEML2_DIR)/lib64/.),)
+NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib64
+else
+$(error Failed to find NEML2 libraries in $(NEML2_DIR)/lib or $(NEML2_DIR)/lib64)
+endif
 NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
 									  neml2_dispatcher$(NEML2_SUFFIX) \
 										neml2_driver$(NEML2_SUFFIX) \
@@ -65,12 +73,12 @@ NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
 										neml2_tensor$(NEML2_SUFFIX) \
 										neml2_user_tensor$(NEML2_SUFFIX)
 NEML2_LINK_FLAGS := $(addprefix -l,$(NEML2_LIBS))
-NEML2_LIB_FILES  := $(addprefix $(NEML2_LINK_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
+NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 
 # Compile flags for NEML2
 ADDITIONAL_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
 ADDITIONAL_CPPFLAGS    += -DNEML2_ENABLED
-ADDITIONAL_LIBS        += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LINK_DIR) -L$(NEML2_LINK_DIR) $(NEML2_LINK_FLAGS)
+ADDITIONAL_LIBS        += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
 ADDITIONAL_DEPEND_LIBS += $(NEML2_LIB_FILES)
 
 endif
