@@ -11,12 +11,13 @@
 # that recovery was successful.
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 10
-  xmin = 0
-  xmax = 1
-
+  [mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 10
+    xmin = 0
+    xmax = 1
+  []
   # To get consistent ordering of results with distributed meshes
   allow_renumbering = false
 []

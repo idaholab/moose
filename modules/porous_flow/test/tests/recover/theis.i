@@ -11,14 +11,15 @@
 # that recovery was successful.
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 20
-  xmax = 100
-  bias_x = 1.05
+  [mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 20
+    xmax = 100
+    bias_x = 1.05
+  []
   coord_type = RZ
   rz_coord_axis = Y
-
   # To get consistent ordering of results with distributed meshes
   allow_renumbering = false
 []

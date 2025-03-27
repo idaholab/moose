@@ -4,6 +4,7 @@
     input = 'constant_poroperm.i'
     exodiff = 'constant_poroperm_out.e'
     threading = '!pthreads'
+    mesh_mode = replicated
     requirement = "The system shall allow the assignment of porosity and permeability from an "
                   "AuxVariable field."
     issues = "#8062"
@@ -14,6 +15,7 @@
     input = 'constant_poroperm_fv.i'
     exodiff = 'constant_poroperm_fv_out.e'
     threading = '!pthreads'
+    mesh_mode = replicated
     requirement = "The system shall allow the assignment of porosity and permeability from an "
                   "AuxVariable field using FV variables."
     issues = "#8062 #21275"
@@ -24,6 +26,7 @@
     input = 'constant_poroperm2.i'
     exodiff = 'constant_poroperm2_out.e'
     threading = '!pthreads'
+    mesh_mode = replicated
     requirement = "The system shall allow the assignment of porosity and permeability from an "
                   "AuxVariable field with binlinear relationships."
     issues = "#8062"
@@ -45,6 +48,7 @@
     input = vol_expansion_poroperm.i
     exodiff = vol_expansion_poroperm_out.e
     threading = '!pthreads'
+    mesh_mode = replicated
     requirement = "The system shall calculate permeability from a changing porosity."
     issues = "#8062"
     design = "PorousFlowPorosity.md"
