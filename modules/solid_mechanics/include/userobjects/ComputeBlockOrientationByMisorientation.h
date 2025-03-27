@@ -42,7 +42,7 @@ public:
   virtual void threadJoin(const UserObject & /*y*/) override{};
 
   /**
-   * Called _once_ after execute has been called all all "objects".
+   * Called _once_ after execute has been called on all "objects".
    */
   virtual void finalize() override;
 

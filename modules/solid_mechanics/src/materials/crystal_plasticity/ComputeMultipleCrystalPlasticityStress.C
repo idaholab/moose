@@ -321,7 +321,9 @@ ComputeMultipleCrystalPlasticityStress::postSolveQp(RankTwoTensor & cauchy_stres
   // Calculate the misorientation
   auto _misorientation_mat = _updated_rotation[_qp] * _updated_rotation_old[_qp].inverse();
   auto cos_val = (_misorientation_mat.trace() - 1.0) / 2.0;
-  // Make sure the value is in feasible range
+  // Mathematically, the values should lie in the range of [-1, 1]. However, there maybe numerical
+  // errors during calculation. Let's guard small numerical errors here and throw an error when the
+  // numerical error is too big, which indicates other issues.
   if (cos_val > 1.0 || cos_val < -1.0)
   {
     if (MooseUtils::absoluteFuzzyEqual(cos_val, -1.0))

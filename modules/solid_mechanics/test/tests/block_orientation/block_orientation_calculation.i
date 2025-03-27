@@ -124,7 +124,6 @@
     type = ComputeBlockOrientationByRotation
     # type = ComputeBlockOrientationByMisorientation <- can use this UO as well
     execute_on = 'TIMESTEP_END'
-    execution_order_group = -1
   []
 []
 

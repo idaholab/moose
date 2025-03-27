@@ -12,8 +12,6 @@
 #include "EulerAngleFileReader.h"
 #include "ReporterInterface.h"
 
-// Forward declaration
-
 /**
  * Update Euler angle from reporter value
  */
