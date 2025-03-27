@@ -22,10 +22,9 @@ public:
   static InputParameters validParams();
 
 protected:
-  /// Density
   /// Hydraulic diameter
   const Moose::Functor<GenericReal<is_ad>> & _D_h;
-  /// Heat conduction
+  /// Thermal conductivity
   const Moose::Functor<GenericReal<is_ad>> & _k;
   /// Fluid temperature
   const Moose::Functor<GenericReal<is_ad>> & _T;

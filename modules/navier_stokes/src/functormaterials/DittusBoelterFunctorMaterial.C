@@ -48,7 +48,7 @@ DittusBoelterFunctorMaterialTempl<is_ad>::DittusBoelterFunctorMaterialTempl(
       {
         const Real n =
             (MetaPhysicL::raw_value(_T(r, t)) < MetaPhysicL::raw_value(_T_wall(r, t))) ? 0.4 : 0.3;
-        const auto Nu = 0.023 * std::pow(_reynolds(r, t), 4. / 5.) * std::pow(_prandtl(r, t), n);
+        const auto Nu = 0.023 * std::pow(_reynolds(r, t), 0.8) * std::pow(_prandtl(r, t), n);
         return NS::wallHeatTransferCoefficient(Nu, _k(r, t), _D_h(r, t));
       });
 }
