@@ -125,10 +125,8 @@ p_outlet = 0
   [q]
     type = ParsedFunctorMaterial
     expression = 'Hw * (T_wall - T_fluid)'
-    functor_symbols = 'Hw T_fluid'
-    functor_names = 'Hw layered_T_fluid'
-    constant_names = 'T_wall'
-    constant_expressions = '${T_wall}'
+    functor_symbols = 'Hw T_fluid T_wall'
+    functor_names = 'Hw layered_T_fluid ${T_wall}'
     property_name = 'q'
   []
 []
