@@ -14,6 +14,7 @@ import unittest
 import yaml
 import subprocess # for assertRaises
 import mooseutils
+from mock import patch
 
 MOOSE_DIR = mooseutils.git_root_dir()
 sys.path.insert(0, os.path.join(MOOSE_DIR, 'scripts'))
@@ -21,6 +22,8 @@ from versioner import Versioner
 
 with open(os.path.join(MOOSE_DIR, 'scripts', 'tests', 'versioner_hashes.yaml'), 'r') as stream:
     OLD_HASHES = yaml.safe_load(stream)
+
+HEAD = Versioner.git_rev_parse('HEAD')
 
 class Test(unittest.TestCase):
     def testOldHashes(self):
@@ -78,6 +81,10 @@ class Test(unittest.TestCase):
             Versioner.git_hash('foobar', 'HEAD')
         self.assertIn('Failed to obtain git hash', str(e.exception))
 
+    def testGitIsCommit(self):
+        self.assertTrue(Versioner.git_is_commit(HEAD))
+        self.assertFalse(Versioner.git_is_commit('foo'))
+
     def testGitAncestor(self):
         ancestor = '4c082c170ff5295bcc94721c3da4131ceacae727'
         dependent = 'dd8042e2116537945caf305320eeeb526c15ff88'
@@ -86,6 +93,37 @@ class Test(unittest.TestCase):
 
         with self.assertRaises(subprocess.CalledProcessError):
             Versioner.git_ancestor('foo', 'bar')
+
+    @patch.object(Versioner, 'git_is_commit')
+    def testVersionerYamlPathMissingCommit(self, p):
+        """
+        Tests that versioner_yaml_path will return the new
+        versioner.yaml path if the changed commit does not exist
+        (like with a shallow clone)
+        """
+        p.return_value = False
+        self.assertIn('versioner.yaml', Versioner.versioner_yaml_path(HEAD))
+        p.assert_called_once()
+
+    @patch.object(Versioner, 'git_is_commit')
+    def testUsingOldInfluentialMissingCommit(self, p):
+        """
+        Tests that using_old_influential will return False if the
+        changed commit does not exist (like with a shallow clone)
+        """
+        p.return_value = False
+        self.assertFalse(Versioner.using_old_influential(HEAD))
+        p.assert_called_once()
+
+    @patch.object(Versioner, 'git_is_commit')
+    def testUsingManagedVersionsMissingCommit(self, p):
+        """
+        Tests that using_managed_versions will return True if the
+        changed commit does not exist (like with a shallow clone)
+        """
+        p.return_value = False
+        self.assertTrue(Versioner.using_managed_versions(HEAD))
+        p.assert_called_once()
 
     def testGitFile(self):
         self.assertNotIn('thm', Versioner.git_file('.coverage', 'bc75e4a07af609e3cfbc5c789aa69a8b3fc2c099'))
