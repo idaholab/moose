@@ -27,7 +27,9 @@ BlockOrientationFromUserObject::validParams()
       "Name of ComputeBlockOrientation user object for updated block orientation.");
 
   params.addParam<bool>(
-      "degree_to_radian", false, "Whether to convert euler angles from degree to radian.");
+      "degree_to_radian",
+      false,
+      "Whether to convert euler angles from degree to radian. The default is to use degrees.");
 
   params.addClassDescription(
       "Output the Euler angle for each block computed from average of quaternions.");

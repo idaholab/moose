@@ -37,10 +37,10 @@ protected:
   const UserObjectName & _uo_name;
   const ComputeBlockOrientationBase * _uo;
 
-  /// Number of columns
+  /// Number of columns, representing the number of features in the VectorPostprocessor
   int _num_cols;
 
-  /// Number of rows
+  /// Number of rows, representing the number of data entries in the VectorPostprocessor
   int _num_rows;
 
   /// Vector of outputs, where each entry is the vector of average values for single variable in each block
