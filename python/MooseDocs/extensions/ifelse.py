@@ -44,6 +44,10 @@ def hasCapability(ext, name):
     """Module function for testing if an application has a capability"""
     return ext.hasCapability(name)
 
+def hasLibtorch(ext):
+    """Module function for testing if an application has a capability"""
+    return hasCapability(ext, 'libtorch')
+
 def hasPage(ext, filename):
     """Module function for the existence of markdown page."""
     return ext.translator.findPage(filename, throw_on_zero=False) is not None
