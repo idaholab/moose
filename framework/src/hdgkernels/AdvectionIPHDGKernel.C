@@ -17,6 +17,8 @@ AdvectionIPHDGKernel::validParams()
 {
   auto params = IPHDGKernel::validParams();
   params += AdvectionIPHDGAssemblyHelper::validParams();
+  params.addClassDescription("Adds element and interior face integrals for a hybridized interior "
+                             "penalty discontinuous Galerkin discretization of an advection term.");
   return params;
 }
 

@@ -10,8 +10,8 @@ hybridized kernel [NavierStokesLHDGKernel.md]. The condition imposed is
 where $\vec{n}$ is the outward-facing normal on the boundary, $p$ is the
 pressure, $\nu$ is the kinematic viscosity, and $\vec{u}$ is the velocity.
 
-!syntax parameters /HDGBCs/NavierStokesLHDGOutflowBC
+!syntax parameters /BCs/NavierStokesLHDGOutflowBC
 
-!syntax inputs /HDGBCs/NavierStokesLHDGOutflowBC
+!syntax inputs /BCs/NavierStokesLHDGOutflowBC
 
-!syntax children /HDGBCs/NavierStokesLHDGOutflowBC
+!syntax children /BCs/NavierStokesLHDGOutflowBC

@@ -5,8 +5,8 @@ hybridized discretization of the Navier-Stokes equations. This class should be
 used with the [NavierStokesLHDGKernel.md]. Any `FunctionName` parameters
 that are not provided are defaulted to 0.
 
-!syntax parameters /HDGBCs/NavierStokesLHDGVelocityDirichletBC
+!syntax parameters /BCs/NavierStokesLHDGVelocityDirichletBC
 
-!syntax inputs /HDGBCs/NavierStokesLHDGVelocityDirichletBC
+!syntax inputs /BCs/NavierStokesLHDGVelocityDirichletBC
 
-!syntax children /HDGBCs/NavierStokesLHDGVelocityDirichletBC
+!syntax children /BCs/NavierStokesLHDGVelocityDirichletBC
