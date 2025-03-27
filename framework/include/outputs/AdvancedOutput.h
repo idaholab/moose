@@ -354,7 +354,7 @@ private:
   OutputDataWarehouse _execute_data;
 
   /// Storage for the last output time for the various output types, this is used to avoid duplicate output when using OUTPUT_FINAL flag
-  std::map<std::string, Real> _last_execute_time;
+  std::map<std::string, Real> & _last_execute_time;
 
   /// Flags for outputting PP/VPP data as a reporter
   const bool _postprocessors_as_reporters, _vectorpostprocessors_as_reporters;
