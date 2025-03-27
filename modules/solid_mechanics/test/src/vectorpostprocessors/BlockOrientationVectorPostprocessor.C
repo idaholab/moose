@@ -19,8 +19,8 @@ BlockOrientationVectorPostprocessor::validParams()
   InputParameters params = ElementVectorPostprocessor::validParams();
   params += SamplerBase::validParams();
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
-                                          "The EulerAngleProvider User object");
-  params.addClassDescription("This object outputs the coordinates, block id, and Euler Angles associated with each element from a EulerAngleProvider.");
+                                          "The EulerAngleProvider user object that provides Euler angle values in degrees.");
+  params.addClassDescription("This object outputs the coordinates, block id, and Euler Angles (degrees) associated with each element from a EulerAngleProvider.");
   return params;
 }
 

@@ -1,6 +1,6 @@
 # BlockOrientationFromUserObject
 
-The `BlockOrientationFromUserObject` vector postprocessor collects Euler angle information for each material block from a user object, such as [ComputeBlockOrientationByRotation](ComputeBlockOrientationByRotation.md) or [ComputeBlockOrientationByMisorientation](ComputeBlockOrientationByMisorientation.md), and structures the data into four columns:i.e., `subdomain_id`, `euler_angle_0`, `euler_angle_1` and `euler_angle_2`.
+The `BlockOrientationFromUserObject` vector postprocessor collects Euler angle (degrees) information for each material block from a user object, such as [ComputeBlockOrientationByRotation](ComputeBlockOrientationByRotation.md) or [ComputeBlockOrientationByMisorientation](ComputeBlockOrientationByMisorientation.md), and structures the data into four columns:i.e., `subdomain_id`, `euler_angle_0`, `euler_angle_1` and `euler_angle_2`.
 
 ## Example Input File Syntax
 
