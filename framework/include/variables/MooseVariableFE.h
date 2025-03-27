@@ -359,6 +359,10 @@ public:
   {
     return _element_data->adGradSlnDot();
   }
+  const ADTemplateVariableCurl<OutputType> & adCurlSln() const override
+  {
+    return _element_data->adCurlSln();
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
@@ -384,6 +388,10 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const override
   {
     return _neighbor_data->adGradSlnDot();
+  }
+  const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const override
+  {
+    return _neighbor_data->adCurlSln();
   }
 
   /// element dots
