@@ -30,7 +30,7 @@ public:
   // Evaluation function of the libtorch modules. Since there are considerable
   // differences between self-built modules and modules read using a torch-script
   // format, this serves as a common denominator between the two.
-  virtual torch::Tensor forward(torch::Tensor & x) = 0;
+  virtual torch::Tensor forward(const torch::Tensor & x) = 0;
 };
 
 }

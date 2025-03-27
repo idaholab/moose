@@ -85,7 +85,7 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
-LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
+LibtorchArtificialNeuralNet::forward(const torch::Tensor & x)
 {
   torch::Tensor output(x);
   if (_data_type != output.scalar_type())
