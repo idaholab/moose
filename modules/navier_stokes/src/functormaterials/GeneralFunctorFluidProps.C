@@ -162,8 +162,8 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         [this](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           Real dcp_dp, dcp_dT, dummy;
-          auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-          auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+          const auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+          const auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
           _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
 
           return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
@@ -359,10 +359,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     addFunctorProperty<GenericReal<is_ad>>(
         NS::Reynolds_interstitial,
         [this, &Re](const auto & r, const auto & t) -> GenericReal<is_ad>
-        {
-          return Re(r, t) / _eps(r, t);
-          ;
-        });
+        { return Re(r, t) / _eps(r, t); });
   }
   else
   {
@@ -687,10 +684,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     addFunctorProperty<GenericReal<is_ad>>(
         NS::Reynolds_interstitial,
         [this, &Re](const auto & r, const auto & t) -> GenericReal<is_ad>
-        {
-          return Re(r, t) / _eps(r, t);
-          ;
-        });
+        { return Re(r, t) / _eps(r, t); });
   }
 }
 
