@@ -46,7 +46,6 @@ class FEProblemBase;
 class InputParameters;
 class MooseEnum;
 class MooseObject;
-class MooseBase;
 class MultiMooseEnum;
 class Problem;
 namespace hit
@@ -986,10 +985,8 @@ public:
    * when returning most scalar and vector types.
    */
   template <typename T>
-  static const T & getParamHelper(const std::string & name,
-                                  const InputParameters & pars,
-                                  const T * the_type,
-                                  const MooseBase * moose_base = nullptr);
+  static const T &
+  getParamHelper(const std::string & name, const InputParameters & pars, const T * the_type);
   ///@}
 
   using Parameters::get;
@@ -1067,8 +1064,39 @@ public:
    */
   std::string paramFullpath(const std::string & param) const;
 
-  /// generate error message prefix with parameter name and location (if available)
-  std::string errorPrefix(const std::string & param) const;
+  /**
+   * Returns a prefix containing the parameter name and location (if available)
+   */
+  std::string paramLocationPrefix(const std::string & param) const;
+
+  /**
+   * @return A message used as a prefix for output relating to a parameter.
+   *
+   * Will first prefix with a path to the parameter, or the parameter that
+   * resulted in the creation of these parameters, if available. The message
+   * will then be prefixed with the block path to the parameter, if available.
+   */
+  template <typename... Args>
+  std::string paramMessage(const std::string & param, Args... args) const;
+
+  /**
+   * Emits an error prefixed with the object information, if available.
+   */
+  template <typename... Args>
+  [[noreturn]] void mooseError(Args &&... args) const;
+
+  /*
+   * Emits an error.
+   */
+  template <typename... Args>
+  [[noreturn]] void mooseErrorNonPrefixed(Args &&... args) const;
+
+  /**
+   * Emits a parameter error prefixed with the parameter location and
+   * object information if available.
+   */
+  template <typename... Args>
+  [[noreturn]] void paramError(const std::string & param, Args... args) const;
 
   /**
    * @return A string representing the raw, unmodified token text for the given param.
@@ -1245,7 +1273,17 @@ private:
                                 const std::string & docstring,
                                 const std::string & removal_date);
 
-  static void callMooseErrorHelper(const MooseBase & moose_base, const std::string & error);
+  /**
+   * Internal helper getting a parameer error context
+   */
+  std::string paramMessageHelper(const std::string & param, const std::string & msg) const;
+
+  /**
+   * Internal helper for calling back to mooseError(), ideally from the underlying
+   * MooseBase object if it is available (for more context)
+   */
+  [[noreturn]] void callMooseErrorHelper(const std::string & msg,
+                                         const bool with_prefix = true) const;
 
   struct Metadata
   {
@@ -1344,12 +1382,6 @@ private:
                                  const std::string & syntax,
                                  const bool required,
                                  const bool value_required);
-
-  /// original location of input block (i.e. filename,linenum) - used for nice error messages.
-  std::string _block_location;
-
-  /// full HIT path of the block from the input file - used for nice error messages.
-  std::string _block_fullpath;
 
   /// The actual parameter data. Each Metadata object contains attributes for the corresponding
   /// parameter.
@@ -2127,13 +2159,11 @@ void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & 
                                                             MooseFunctorName & l_value,
                                                             const int & r_value);
 
-// TODO: pass MooseBase here instead and use it in objects
 template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name_in,
                                 const InputParameters & pars,
-                                const T *,
-                                const MooseBase * moose_base /* = nullptr */)
+                                const T *)
 {
   const auto name = pars.checkForRename(name_in);
 
@@ -2141,10 +2171,7 @@ InputParameters::getParamHelper(const std::string & name_in,
   {
     std::stringstream err;
     err << "The parameter \"" << name << "\" is being retrieved before being set.";
-    if (moose_base)
-      callMooseErrorHelper(*moose_base, err.str());
-    else
-      mooseError(err.str());
+    pars.callMooseErrorHelper(err.str(), true);
   }
 
   return pars.get<T>(name);
@@ -2154,18 +2181,14 @@ InputParameters::getParamHelper(const std::string & name_in,
 // implementation, but the definition will be in InputParameters.C so
 // we won't need to bring in *MooseEnum header files here.
 template <>
-const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                           const InputParameters & pars,
-                                           const MooseEnum *,
-                                           const MooseBase * moose_base /* = nullptr */);
+const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name,
+                                                             const InputParameters & pars,
+                                                             const MooseEnum *);
 
 template <>
-const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *,
-                                                const MooseBase * moose_base /* = nullptr */);
+const MultiMooseEnum & InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                                       const InputParameters & pars,
+                                                                       const MultiMooseEnum *);
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
@@ -2179,18 +2202,19 @@ InputParameters::get(const std::string & param1_in, const std::string & param2_i
 
   auto controllable = getControllableParameters();
   if (controllable.count(param1) || controllable.count(param2))
-    mooseError(errorPrefix(param1),
+    mooseError("Parameters ",
+               param1,
                " and/or ",
-               errorPrefix(param2) +
-                   " are controllable parameters and cannot be retireved using "
-                   "the MooseObject::getParam/InputParameters::get methods for pairs");
+               param2 + " are controllable parameters and cannot be retireved using "
+                        "the MooseObject::getParam/InputParameters::get methods for pairs");
 
   if (v1.size() != v2.size())
-    mooseError("Vector parameters ",
-               errorPrefix(param1),
+    paramError(param1,
+               "Vector parameters ",
+               param1,
                "(size: ",
                v1.size(),
-               ") and " + errorPrefix(param2),
+               ") and " + param2,
                "(size: ",
                v2.size(),
                ") are of different lengths \n");
@@ -2313,6 +2337,42 @@ InputParameters::transferParam(const InputParameters & source_params,
     _params[p_name]._is_private = true;
   if (source_params.isControllable(name))
     _params[p_name]._controllable = true;
+}
+
+template <typename... Args>
+[[noreturn]] void
+InputParameters::mooseError(Args &&... args) const
+{
+  std::ostringstream oss;
+  moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+  callMooseErrorHelper(oss.str(), /* with_prefix = */ true);
+}
+
+template <typename... Args>
+[[noreturn]] void
+InputParameters::mooseErrorNonPrefixed(Args &&... args) const
+{
+  std::ostringstream oss;
+  moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+  callMooseErrorHelper(oss.str(), /* with_prefix = */ false);
+}
+
+template <typename... Args>
+std::string
+InputParameters::paramMessage(const std::string & param, Args... args) const
+{
+  std::ostringstream oss;
+  moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+  return paramMessageHelper(param, oss.str());
+}
+
+template <typename... Args>
+[[noreturn]] void
+InputParameters::paramError(const std::string & param, Args... args) const
+{
+  Moose::show_trace = false;
+  mooseErrorNonPrefixed(paramMessage(param, std::forward<Args>(args)...));
+  Moose::show_trace = true;
 }
 
 namespace Moose
