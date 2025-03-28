@@ -29,14 +29,6 @@
   using MooseBaseParameterInterface::_action_factory
 
 /**
- * Get canonical paramError prefix for param-related error/warning/info messages.
- *
- * Use this for building custom messages when the default paramError isn't
- * quite what you need.
- */
-std::string paramErrorPrefix(const InputParameters & params, const std::string & param);
-
-/**
  * Every object that can be built by the factory should be derived from this class.
  */
 class MooseBaseParameterInterface
@@ -181,40 +173,13 @@ protected:
 private:
   /// The MooseBase object that inherits this class
   const MooseBase & _moose_base;
-
-  template <typename... Args>
-  std::string paramErrorMsg(const std::string & param, Args... args) const
-  {
-    auto param_prefix = paramErrorPrefix(_pars, param);
-
-    // With no input location information, append object info (name + type)
-    const std::string object_prefix =
-        _pars.inputLocation(param).empty() ? _moose_base.messagePrefix() : "";
-
-    std::ostringstream oss;
-    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-    std::string msg = oss.str();
-
-    // Wrap error message to a separate line from param_prefix if it is about to
-    // blow past 100 chars.  But only wrap if the param_prefix is long enough (12
-    // chars) for the wrap to buy us much extra length. We don't check object_prefix
-    // here because it will go before the parameter error
-    if ((param_prefix.size() > 12 && msg.size() + param_prefix.size() > 99) ||
-        msg.find("\n") != std::string::npos)
-    {
-      if (param_prefix.size() > 0 && param_prefix[param_prefix.size() - 1] != ':')
-        param_prefix += ":";
-      return object_prefix + param_prefix + "\n    " + MooseUtils::replaceAll(msg, "\n", "\n    ");
-    }
-    return object_prefix + param_prefix + " " + msg;
-  }
 };
 
 template <typename T>
 const T &
 MooseBaseParameterInterface::getParam(const std::string & name) const
 {
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), &_moose_base);
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
 
 template <typename T>
@@ -232,13 +197,13 @@ MooseBaseParameterInterface::getRenamedParam(const std::string & old_name,
   // this enables having a default on the new parameter but bypassing it with the old one
   // Most important: accept new parameter
   if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), &_moose_base);
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
   // Second most: accept old parameter
   else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0), &_moose_base);
+    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0));
   // Third most: accept default for new parameter
   else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), &_moose_base);
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
   // Refuse: no default, no value passed
   else if (!isParamValid(old_name) && !isParamValid(new_name))
     mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
@@ -254,24 +219,21 @@ template <typename... Args>
 [[noreturn]] void
 MooseBaseParameterInterface::paramError(const std::string & param, Args... args) const
 {
-  Moose::show_trace = false;
-  _moose_base.callMooseError(paramErrorMsg(param, std::forward<Args>(args)...),
-                             /* with_prefix = */ false);
-  Moose::show_trace = true;
+  _pars.paramError(param, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void
 MooseBaseParameterInterface::paramWarning(const std::string & param, Args... args) const
 {
-  mooseWarning(paramErrorMsg(param, std::forward<Args>(args)...));
+  mooseWarning(_pars.paramMessage(param, std::forward<Args>(args)...));
 }
 
 template <typename... Args>
 void
 MooseBaseParameterInterface::paramInfo(const std::string & param, Args... args) const
 {
-  mooseInfo(paramErrorMsg(param, std::forward<Args>(args)...));
+  mooseInfo(_pars.paramMessage(param, std::forward<Args>(args)...));
 }
 
 template <typename T1, typename T2>
