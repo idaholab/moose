@@ -40,10 +40,7 @@ public:
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
-  virtual bool use_boundary_value_extrapolation() const override { return true; }
-
   virtual bool use_boundary_gradient_extrapolation() const override { return false; }
-
 
 protected:
   /// The functor for this BC (can be variable, function, etc)
