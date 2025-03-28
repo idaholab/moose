@@ -20,9 +20,6 @@ class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, appCopyConstructParams);
 #endif
 
-// Forward declarations
-class InputParameters;
-
 /**
  * Macros
  */

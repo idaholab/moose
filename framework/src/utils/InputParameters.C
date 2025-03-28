@@ -16,6 +16,7 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "MooseObject.h"
+#include "MooseApp.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/simple_range.h"
@@ -70,8 +71,6 @@ InputParameters::clear()
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
   _allow_copy = true;
-  _block_fullpath = "";
-  _block_location = "";
   _old_to_new_name_and_dep.clear();
   _new_to_old_names.clear();
   _hit_node = nullptr;
@@ -118,8 +117,13 @@ InputParameters::attemptPrintDeprecated(const std::string & name_in)
       // This is user-facing, no need for a backtrace
       const auto current_show_trace = Moose::show_trace;
       Moose::show_trace = false;
-      moose::internal::mooseDeprecatedStream(
-          Moose::out, false, true, errorPrefix(deprecated_name), ":\n", deprecation_message, "\n");
+      moose::internal::mooseDeprecatedStream(Moose::out,
+                                             false,
+                                             true,
+                                             paramLocationPrefix(deprecated_name),
+                                             ":\n",
+                                             deprecation_message,
+                                             "\n");
       Moose::show_trace = current_show_trace;
       return true;
     };
@@ -170,8 +174,6 @@ InputParameters::operator=(const InputParameters & rhs)
   _coupled_vars = rhs._coupled_vars;
   _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _allow_copy = rhs._allow_copy;
-  _block_fullpath = rhs._block_fullpath;
-  _block_location = rhs._block_location;
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
@@ -702,12 +704,12 @@ InputParameters::finalize(const std::string & parsing_syntax)
       }
       catch (std::exception & e)
       {
-        error = errorPrefix(param_name) + " " + e.what();
+        error = e.what();
       }
       Moose::_throw_on_error = throw_on_error_before;
 
       if (error)
-        mooseError(*error);
+        paramError(param_name, *error);
 
       // Set the value to the absolute searched path
       data_file_name->set() = found_path.path;
@@ -744,13 +746,12 @@ InputParameters::getFileBase(const std::optional<std::string> & param_name) cons
   // Failed to find a node up the tree that isn't a command line argument
   if (!hit_node)
   {
-    std::string prefix = "";
+    const std::string error = "Input context was set via a command-line argument and does not have "
+                              "sufficient context for determining a file path.";
     if (param_name)
-      prefix = errorPrefix(*param_name) + " ";
-    mooseError(prefix,
-               "Input context was set via a command-line argument and does not have sufficient "
-               "context for "
-               "determining a file path.");
+      paramError(*param_name, error);
+    else
+      mooseError(error);
   }
 
   return std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
@@ -1061,7 +1062,6 @@ InputParameters::applySpecificParameters(const InputParameters & common,
   // Loop through the common parameters
   for (const auto & it : common)
   {
-
     // Common parameter name
     const std::string & common_name = it.first;
 
@@ -1460,8 +1460,7 @@ template <>
 const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
                                            const InputParameters & pars,
-                                           const MooseEnum *,
-                                           const MooseBase * /* = nullptr */)
+                                           const MooseEnum *)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MooseEnum>(name);
@@ -1471,8 +1470,7 @@ template <>
 const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
                                                 const InputParameters & pars,
-                                                const MultiMooseEnum *,
-                                                const MooseBase * /* = nullptr */)
+                                                const MultiMooseEnum *)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MultiMooseEnum>(name);
@@ -1591,7 +1589,7 @@ InputParameters::getControllableParameters() const
 }
 
 std::string
-InputParameters::errorPrefix(const std::string & param) const
+InputParameters::paramLocationPrefix(const std::string & param) const
 {
   auto prefix = param + ":";
   if (!inputLocation(param).empty())
@@ -1750,8 +1748,34 @@ InputParameters::queryDataFileNamePath(const std::string & name) const
   return at(checkForRename(name))._data_file_name_path;
 }
 
-void
-InputParameters::callMooseErrorHelper(const MooseBase & moose_base, const std::string & error)
+std::string
+InputParameters::paramMessageHelper(const std::string & param, const std::string & msg) const
 {
-  moose_base.callMooseError(error, true);
+  // Search for a prefix (path to something in input)
+  std::string prefix = "";
+  // Try first for the parameter directly
+  if (_values.count(param))
+    if (const auto node = getHitNode(param))
+      prefix = node->fileLocation() + ":\n(" + node->fullpath() + "): ";
+  // Couldn't find a parameter, search for the next level up
+  if (prefix.empty())
+    if (const auto node = getHitNode())
+      if (!node->isRoot())
+        prefix = node->fileLocation() + ":\n(" + node->fullpath() + "/" + param + "): ";
+  // Couldn't find anything, at least use the parameter
+  if (prefix.empty())
+    prefix = "(" + param + ")" + ": ";
+
+  return prefix + msg;
+}
+
+[[noreturn]] void
+InputParameters::callMooseErrorHelper(const std::string & msg,
+                                      const bool with_prefix /* = true */) const
+{
+  if (have_parameter<const MooseBase *>("_moose_base_ptr"))
+    if (const auto moose_base = get<const MooseBase *>("_moose_base_ptr"))
+      moose_base->callMooseError(msg, with_prefix);
+
+  ::mooseError(msg);
 }

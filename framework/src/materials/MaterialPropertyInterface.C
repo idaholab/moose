@@ -157,12 +157,13 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
     std::ostringstream oss;
     oss << "Incompatible material and object blocks:";
 
-    oss << "\n    " << paramErrorPrefix(discrete->parameters(), "block")
+    oss << "\n    " << discrete->parameters().paramLocationPrefix("block")
         << " material defined on blocks ";
     for (const auto & sbd_id : discrete->blockIDs())
       oss << sbd_id << ", ";
 
-    oss << "\n    " << paramErrorPrefix(_mi_params, "block") << " object needs material on blocks ";
+    oss << "\n    " << _mi_params.paramLocationPrefix("block")
+        << " object needs material on blocks ";
     for (const auto & block_id : _mi_block_ids)
       oss << block_id << ", ";
 
@@ -175,12 +176,12 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
     std::ostringstream oss;
     oss << "Incompatible material and object boundaries:";
 
-    oss << "\n    " << paramErrorPrefix(discrete->parameters(), "boundary")
+    oss << "\n    " << discrete->parameters().paramLocationPrefix("boundary")
         << " material defined on boundaries ";
     for (const auto & bnd_id : discrete->boundaryIDs())
       oss << bnd_id << ", ";
 
-    oss << "\n    " << paramErrorPrefix(_mi_params, "boundary")
+    oss << "\n    " << _mi_params.paramLocationPrefix("boundary")
         << " object needs material on boundaries ";
     for (const auto & bnd_id : _mi_boundary_ids)
       oss << bnd_id << ", ";

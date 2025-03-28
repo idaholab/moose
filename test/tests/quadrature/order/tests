@@ -24,7 +24,7 @@
     type = RunException
     input = 'block-order.i'
     cli_args = 'Executioner/Quadrature/custom_orders=""'
-    expect_err = '\(Executioner/Quadrature/custom_orders\)\(size: 0\) are of different lengths'
+    expect_err = '\(Executioner/Quadrature/custom_blocks\): Vector parameters custom_blocks\(size: 2\) and custom_orders\(size: 0\) are of different lengths'
     requirement = "The system shall ensure that for per-block specified quadrature orders exactly "
                   "one order is given per specified block."
     issues = '#24820'

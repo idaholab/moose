@@ -74,7 +74,7 @@
       type = RunException
       input = 'ppi_errors.i'
       cli_args = 'UserObjects/error_test/missing=true UserObjects/error_test/pp=missing_pp'
-      expect_err = 'pp\) A Postprocessor with the name \"missing_pp\" was not found.'
+      expect_err = 'UserObjects/error_test/pp\): A Postprocessor with the name \"missing_pp\" was not found.'
 
       detail = 'by parameter and the Postprocessor does not exist and'
     []
