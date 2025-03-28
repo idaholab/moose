@@ -19,7 +19,6 @@ cd ~/projects/moose
 
 !alert tip
 The setup script uses sensible defaults that work out-of-the-box. The script is also extensively customizable. Use the `--help` argument to print out a detailed help message.
-The `--summary` can be used to print out a configuration summary for debugging purposes.
 
 After that, you can follow the [getting started](getting_started/installation/index_content.md optional=True) instructions to build MOOSE as usual.
 
