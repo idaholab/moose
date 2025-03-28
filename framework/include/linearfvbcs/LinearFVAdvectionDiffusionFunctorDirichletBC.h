@@ -38,8 +38,6 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  virtual bool use_boundary_value_extrapolation() const override { return false; }
-
   virtual bool use_boundary_gradient_extrapolation() const override { return true; }
 
 protected:

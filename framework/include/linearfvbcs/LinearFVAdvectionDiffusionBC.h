@@ -60,13 +60,6 @@ public:
   virtual bool includesMaterialPropertyMultiplier() const { return false; }
 
   /**
-   * Define if the value of the field to compute fluxes at boundaries is prescribed by the BC
-   * or if it is extrapolated/derived from the BC. For Neumann BC this is false as the flux is
-   * prescribed, whereas for Dirichlet BC this is true.
-   */
-  virtual bool use_boundary_value_extrapolation() const { return false; }
-
-  /**
    * Define if the value of the gradient of the field to compute fluxes at boundaries is
    * prescribed by the BC or if it is extrapolated/derived from the BC. For Neumann BC this
    # is false as the flux is prescribed, whereas for Dirichlet BC this is true.
