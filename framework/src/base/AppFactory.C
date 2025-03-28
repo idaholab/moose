@@ -135,9 +135,13 @@ AppFactory::createShared(const std::string & app_type,
 
   command_line->populateCommandLineParams(parameters);
 
+  // Copy the parameters into a set of parameters that we own
+  auto & params =
+      *_input_parameters.emplace_back(std::make_unique<const InputParameters>(parameters)).get();
+
   build_info->_app_creation_count++;
 
-  return build_info->build(parameters);
+  return build_info->build(params);
 }
 
 std::size_t

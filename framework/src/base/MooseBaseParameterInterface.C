@@ -12,12 +12,6 @@
 #include "MooseApp.h"
 #include "InputParameterWarehouse.h"
 
-std::string
-paramErrorPrefix(const InputParameters & params, const std::string & param)
-{
-  return params.errorPrefix(param);
-}
-
 MooseBaseParameterInterface::MooseBaseParameterInterface(const MooseBase & base,
                                                          const InputParameters & parameters)
   : _pars(parameters),

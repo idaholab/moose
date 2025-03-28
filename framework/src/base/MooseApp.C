@@ -423,7 +423,7 @@ MooseApp::validParams()
   return params;
 }
 
-MooseApp::MooseApp(InputParameters parameters)
+MooseApp::MooseApp(const InputParameters & parameters)
   : ConsoleStreamInterface(*this),
     PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
@@ -431,7 +431,7 @@ MooseApp::MooseApp(InputParameters parameters)
     MooseBase(parameters.get<std::string>("_type"),
               parameters.get<std::string>("_app_name"),
               *this,
-              _pars),
+              parameters),
     _pars(parameters),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
@@ -1155,10 +1155,6 @@ MooseApp::setupOptions()
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
   _test_checkpoint_half_transient = getParam<bool>("test_checkpoint_half_transient");
-
-  // The no_timing flag takes precedence over the timing flag.
-  if (getParam<bool>("no_timing"))
-    _pars.set<bool>("timing") = false;
 
   if (getParam<bool>("trap_fpe"))
   {
