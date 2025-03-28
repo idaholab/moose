@@ -70,6 +70,11 @@ public:
   std::string messagePrefix() const;
 
   /**
+   * Deprecated message prefix; the error type is no longer used
+   */
+  std::string errorPrefix(const std::string &) const { return messagePrefix(); }
+
+  /**
    * Calls moose error with the message \p msg.
    *
    * Will prefix the message with the subapp name if one exists.
