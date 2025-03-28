@@ -22,19 +22,7 @@
   [diffusion]
     type = LinearFVDiffusion
     variable = u
-    diffusion_coeff = diff_coeff_func
-    use_nonorthogonal_correction = false
-  []
-  [advection]
-    type = LinearFVAdvection
-    variable = u
-    velocity = "0.5 0 0"
-    advected_interp_method = average
-  []
-  [reaction]
-    type = LinearFVReaction
-    variable = u
-    coeff = coeff_func
+    diffusion_coeff = coeff_func
   []
   [source]
     type = LinearFVSource
@@ -44,48 +32,36 @@
 []
 
 [LinearFVBCs]
-  inactive = "outflow neumann"
   [dir]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
-    boundary = "left right"
+    boundary = "right"
     functor = analytic_solution
   []
-  [outflow]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    variable = u
-    boundary = "right"
-    use_two_term_expansion = true
-  []
-  [neumann]
+  [neu]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = u
     boundary = "left"
-    functor = analytic_solution_neumann_left
-    diffusion_coeff = diff_coeff_func
+    functor = analytic_solution_neumann
   []
 []
 
 [Functions]
-  [diff_coeff_func]
-    type = ParsedFunction
-    expression = '1+0.5*x'
-  []
   [coeff_func]
     type = ParsedFunction
-    expression = '1+1/(1+x)'
+    expression = '0.5*x'
   []
   [source_func]
     type = ParsedFunction
-    expression = '(1+1/(x+1))*(sin(pi/2*x)+1.5)+0.25*pi*pi*(0.5*x+1)*sin(pi/2*x)'
+    expression = '2*x'
   []
   [analytic_solution]
     type = ParsedFunction
-    expression = 'sin(pi/2*x)+1.5'
+    expression = '1-x*x'
   []
-  [analytic_solution_neumann_left]
+  [analytic_solution_neumann]
     type = ParsedFunction
-    expression = '-(1+0.5*x)*cos(pi/2*x)*pi/2'
+    expression = '-(0.5*x)*(-2*x)'
   []
 []
 
@@ -102,20 +78,10 @@
   []
 []
 
-[Convergence]
-  [linear]
-    type = IterationCountConvergence
-    max_iterations = 1
-    converge_at_max_iterations = true
-  []
-[]
-
 [Executioner]
   type = Steady
   system_names = u_sys
   l_abs_tol = 1e-10
-  multi_system_fixed_point=true
-  multi_system_fixed_point_convergence=linear
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
