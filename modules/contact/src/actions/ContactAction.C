@@ -495,39 +495,39 @@ ContactAction::act()
     if (_current_task == "add_aux_kernel")
     { // Add ContactPenetrationAuxAction.
       if (!_problem->getDisplacedProblem())
-	mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
-		   "Mesh block.");
+        mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
+                   "Mesh block.");
       // Create auxiliary kernels for each contact pairs
       for (const auto & contact_pair : _boundary_pairs)
       {
-	{
-	  InputParameters params = _factory.getValidParams("PenetrationAux");
-	  params.applyParameters(parameters(),
-				 {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
+        {
+          InputParameters params = _factory.getValidParams("PenetrationAux");
+          params.applyParameters(parameters(),
+                                 {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
 
-	  std::vector<VariableName> displacements =
-	      getParam<std::vector<VariableName>>("displacements");
-	  const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
-				 .system()
-				 .variable_type(displacements[0])
-				 .order.get_order();
+          std::vector<VariableName> displacements =
+              getParam<std::vector<VariableName>>("displacements");
+          const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                                 .system()
+                                 .variable_type(displacements[0])
+                                 .order.get_order();
 
-	  params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-	  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
-	  params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
-	  params.set<BoundaryName>("paired_boundary") = contact_pair.first;
-	  params.set<AuxVariableName>("variable") = "penetration";
-	  if (isParamValid("secondary_gap_offset"))
-	    params.set<std::vector<VariableName>>("secondary_gap_offset") = {
-		getParam<VariableName>("secondary_gap_offset")};
-	  if (isParamValid("mapped_primary_gap_offset"))
-	    params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
-		getParam<VariableName>("mapped_primary_gap_offset")};
-	  params.set<bool>("use_displaced_mesh") = true;
-	  std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter++);
+          params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+          params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+          params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+          params.set<BoundaryName>("paired_boundary") = contact_pair.first;
+          params.set<AuxVariableName>("variable") = "penetration";
+          if (isParamValid("secondary_gap_offset"))
+            params.set<std::vector<VariableName>>("secondary_gap_offset") = {
+                getParam<VariableName>("secondary_gap_offset")};
+          if (isParamValid("mapped_primary_gap_offset"))
+            params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
+                getParam<VariableName>("mapped_primary_gap_offset")};
+          params.set<bool>("use_displaced_mesh") = true;
+          std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter++);
 
-	  _problem->addAuxKernel("PenetrationAux", name, params);
-	}
+          _problem->addAuxKernel("PenetrationAux", name, params);
+        }
       }
 
       addContactPressureAuxKernel();
@@ -537,40 +537,40 @@ ContactAction::act()
       // Add MortarFrictionalPressureVectorAux
       if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB && ndisp > 2)
       {
-	{
-	  InputParameters params = _factory.getValidParams("MortarFrictionalPressureVectorAux");
+        {
+          InputParameters params = _factory.getValidParams("MortarFrictionalPressureVectorAux");
 
-	  params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
-	  params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
-	  params.set<std::vector<BoundaryName>>("boundary") = {_boundary_pairs[0].second};
-	  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_NONLINEAR};
+          params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+          params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+          params.set<std::vector<BoundaryName>>("boundary") = {_boundary_pairs[0].second};
+          params.set<ExecFlagEnum>("execute_on", true) = {EXEC_NONLINEAR};
 
-	  std::string action_name = MooseUtils::shortName(name());
-	  const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
-	  const std::string tangential_lagrange_multiplier_3d_name =
-	      action_name + "_tangential_3d_lm";
+          std::string action_name = MooseUtils::shortName(name());
+          const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
+          const std::string tangential_lagrange_multiplier_3d_name =
+              action_name + "_tangential_3d_lm";
 
-	  params.set<std::vector<VariableName>>("tangent_one") = {
-	      tangential_lagrange_multiplier_name};
-	  params.set<std::vector<VariableName>>("tangent_two") = {
-	      tangential_lagrange_multiplier_3d_name};
+          params.set<std::vector<VariableName>>("tangent_one") = {
+              tangential_lagrange_multiplier_name};
+          params.set<std::vector<VariableName>>("tangent_two") = {
+              tangential_lagrange_multiplier_3d_name};
 
-	  std::vector<std::string> disp_components({"x", "y", "z"});
-	  unsigned component_index = 0;
+          std::vector<std::string> disp_components({"x", "y", "z"});
+          unsigned component_index = 0;
 
-	  // Loop over three displacements
-	  for (const auto & disp_component : disp_components)
-	  {
-	    params.set<AuxVariableName>("variable") = _name + "_tangent_" + disp_component;
-	    params.set<unsigned int>("component") = component_index;
+          // Loop over three displacements
+          for (const auto & disp_component : disp_components)
+          {
+            params.set<AuxVariableName>("variable") = _name + "_tangent_" + disp_component;
+            params.set<unsigned int>("component") = component_index;
 
-	    std::string name = _name + "_mortar_frictional_pressure_" + disp_component + "_" +
-			       Moose::stringify(contact_mortar_auxkernel_counter++);
+            std::string name = _name + "_mortar_frictional_pressure_" + disp_component + "_" +
+                               Moose::stringify(contact_mortar_auxkernel_counter++);
 
-	    _problem->addAuxKernel("MortarFrictionalPressureVectorAux", name, params);
-	    component_index++;
-	  }
-	}
+            _problem->addAuxKernel("MortarFrictionalPressureVectorAux", name, params);
+            component_index++;
+          }
+        }
       }
     }
 
@@ -578,32 +578,32 @@ ContactAction::act()
     {
       std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
       const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
-			     .system()
-			     .variable_type(displacements[0])
-			     .order.get_order();
+                             .system()
+                             .variable_type(displacements[0])
+                             .order.get_order();
       // Add ContactPenetrationVarAction
       {
-	auto var_params = _factory.getValidParams("MooseVariable");
-	var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-	var_params.set<MooseEnum>("family") = "LAGRANGE";
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-	_problem->addAuxVariable("MooseVariable", "penetration", var_params);
+        _problem->addAuxVariable("MooseVariable", "penetration", var_params);
       }
       // Add ContactPressureVarAction
       {
-	auto var_params = _factory.getValidParams("MooseVariable");
-	var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-	var_params.set<MooseEnum>("family") = "LAGRANGE";
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-	_problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
+        _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
       }
       // Add nodal area contact variable
       {
-	auto var_params = _factory.getValidParams("MooseVariable");
-	var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-	var_params.set<MooseEnum>("family") = "LAGRANGE";
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-	_problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
+        _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
       }
 
       const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
@@ -611,19 +611,19 @@ ContactAction::act()
       // Add MortarFrictionalPressureVectorAux variables
       if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB && ndisp > 2)
       {
-	{
-	  std::vector<std::string> disp_components({"x", "y", "z"});
-	  // Loop over three displacements
-	  for (const auto & disp_component : disp_components)
-	  {
-	    auto var_params = _factory.getValidParams("MooseVariable");
-	    var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-	    var_params.set<MooseEnum>("family") = "LAGRANGE";
+        {
+          std::vector<std::string> disp_components({"x", "y", "z"});
+          // Loop over three displacements
+          for (const auto & disp_component : disp_components)
+          {
+            auto var_params = _factory.getValidParams("MooseVariable");
+            var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+            var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-	    _problem->addAuxVariable(
-		"MooseVariable", _name + "_tangent_" + disp_component, var_params);
-	  }
-	}
+            _problem->addAuxVariable(
+                "MooseVariable", _name + "_tangent_" + disp_component, var_params);
+          }
+        }
       }
     }
 
@@ -637,8 +637,8 @@ ContactAction::act()
 
       std::vector<BoundaryName> secondary_boundary_vector;
       for (const auto * const action : actions)
-	for (const auto j : index_range(action->_boundary_pairs))
-	  secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
+        for (const auto j : index_range(action->_boundary_pairs))
+          secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
 
       var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
       var_params.set<std::vector<VariableName>>("variable") = {"nodal_area"};
@@ -648,8 +648,8 @@ ContactAction::act()
       var_params.set<bool>("use_displaced_mesh") = true;
 
       _problem->addUserObject("NodalArea",
-			      "nodal_area_object_" + Moose::stringify(contact_userobject_counter++),
-			      var_params);
+                              "nodal_area_object_" + Moose::stringify(contact_userobject_counter++),
+                              var_params);
     }
   }
 }
