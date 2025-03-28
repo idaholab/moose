@@ -98,6 +98,8 @@ public:
     std::map<std::string, RestartableEquationSystems::VectorHeader> vectors;
     /// Special name for a vector that is the system solution vector
     static const std::string system_solution_name;
+    /// Special name for a vector that is the old system solution vector
+    static const std::string system_old_solution_name;
   };
 
   /**
