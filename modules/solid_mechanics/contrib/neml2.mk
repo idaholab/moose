@@ -73,7 +73,7 @@ NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
 										neml2_tensor$(NEML2_SUFFIX) \
 										neml2_user_tensor$(NEML2_SUFFIX)
 NEML2_LINK_FLAGS := $(addprefix -l,$(NEML2_LIBS))
-NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
+NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 
 # Compile flags for NEML2
 ADDITIONAL_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
