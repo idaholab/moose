@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVPressureVariable.h"
+#include "INSFVPressureHydraulicSeparatorBC.h"
 
 registerMooseObject("NavierStokesApp", INSFVPressureVariable);
 
@@ -17,6 +18,7 @@ INSFVPressureVariable::validParams()
   return INSFVVariable::validParams();
 }
 
-INSFVPressureVariable::INSFVPressureVariable(const InputParameters & params) : INSFVVariable(params)
+INSFVPressureVariable::INSFVPressureVariable(const InputParameters & params) :
+INSFVVariable(params)
 {
 }

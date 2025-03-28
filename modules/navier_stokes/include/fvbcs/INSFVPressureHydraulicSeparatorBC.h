@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxBC.h"
+#include "INSFVHydraulicSeparatorInterface.h"
 
 class InputParameters;
 
@@ -18,7 +19,7 @@ class InputParameters;
  * Navier Stokes equations. There is no cross flow and this should also
  * ensure that the cell gradients are decoupled on the two sides of the boundary.
  */
-class INSFVPressureHydraulicSeparatorBC : public FVFluxBC
+class INSFVPressureHydraulicSeparatorBC : public FVFluxBC, public INSFVHydraulicSeparatorInterface
 {
 public:
   static InputParameters validParams();

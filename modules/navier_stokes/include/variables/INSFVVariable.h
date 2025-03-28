@@ -27,12 +27,24 @@ public:
   void computeNeighborValuesFace() override;
   void computeNeighborValues() override;
   void requireQpComputations() const override { _qp_calculations = true; }
+  virtual void initialSetup() override;
+
+  // If the given boundary is a hydraulic separator bouundary for this variable
+  bool isSeparatorBoundary(const FaceInfo & fi) const;
+
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+    const Elem * elem,
+    const Moose::StateArg & time) const override;
 
 protected:
   /**
    * Returns whether the passed-in \p FaceInfo corresponds to a fully-developed flow face
    */
   bool isFullyDevelopedFlowFace(const FaceInfo & fi) const;
+
+  /// A container for quick access of hydraulic separator BCs associated with this
+  /// variable.
+  std::unordered_map<BoundaryID, const FVFluxBC *> _boundary_id_to_separator;
 
 private:
   /// Whether to pre-initialize variable data for use in traditional MOOSE quadrature point based

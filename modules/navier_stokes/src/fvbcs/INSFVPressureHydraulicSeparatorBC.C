@@ -10,10 +10,14 @@
 #include "INSFVPressureHydraulicSeparatorBC.h"
 #include "InputParameters.h"
 
+registerMooseObject("NavierStokesApp", INSFVPressureHydraulicSeparatorBC);
+
 InputParameters
 INSFVPressureHydraulicSeparatorBC::validParams()
 {
   return FVFluxBC::validParams();
 }
 
-INSFVPressureHydraulicSeparatorBC::INSFVPressureHydraulicSeparatorBC(const InputParameters & params) : FVFluxBC(params) {}
+INSFVPressureHydraulicSeparatorBC::INSFVPressureHydraulicSeparatorBC(const InputParameters & params) :
+FVFluxBC(params),
+INSFVHydraulicSeparatorInterface() {}
