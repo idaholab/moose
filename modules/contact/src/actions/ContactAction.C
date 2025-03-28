@@ -279,14 +279,16 @@ ContactAction::validParams()
       MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
       "Quadrature rule to use on mortar segments. For 2D mortar DEFAULT is recommended."
       "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
-      "While DEFAULT quadrature order is typically sufficiently accurate, " 
-      "exact integration of QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order quadrature for SECOND order variables.");
+      "While DEFAULT quadrature order is typically sufficiently accurate, "
+      "exact integration of QUAD mortar faces requires SECOND order quadrature for FIRST variables "
+      "and FOURTH order quadrature for SECOND order variables.");
 
-  params.addParam<bool>(
-      "add_aux_vars",
-      true,
-      "For Mortar contact formulation problems, does the user still wish to generate aux-variables necessary for penalty and kinematic formulations."
-      "Turning this to false can be useful if the user is running out of memory on mortar contact solves using a large mesh");  
+  params.addParam<bool>("add_aux_vars",
+                        true,
+                        "For Mortar contact formulation problems, does the user still wish to "
+                        "generate aux-variables necessary for penalty and kinematic formulations."
+                        "Turning this to false can be useful if the user is running out of memory "
+                        "on mortar contact solves using a large mesh");
   return params;
 }
 
@@ -366,7 +368,7 @@ ContactAction::ContactAction(const InputParameters & params)
       _use_dual = getParam<bool>("use_dual");
     else
       _use_dual = true;
-    
+
     if (!getParam<bool>("mortar_dynamics"))
     {
       if (params.isParamSetByUser("newmark_beta"))
@@ -403,7 +405,9 @@ ContactAction::ContactAction(const InputParameters & params)
                  "The 'quadrature' option can only be used with the 'mortar' formulation.");
     else if (params.isParamSetByUser("add_aux_vars"))
       paramError("add_aux_vars",
-                 "The 'add_aux_vars' option can only be used with the 'mortar' formulation. nodal_area, penetration and contact_pressure variables are not optional with kinematic and penalty formulations.x");    
+                 "The 'add_aux_vars' option can only be used with the 'mortar' formulation. "
+                 "nodal_area, penetration and contact_pressure variables are not optional with "
+                 "kinematic and penalty formulations.x");
   }
 
   if (_formulation == ContactFormulation::RANFS)
@@ -490,13 +494,14 @@ ContactAction::act()
     addMortarContact();
   else
     addNodeFaceContact();
-  if(!(_formulation == ContactFormulation::MORTAR && !_add_aux_vars))
+  if (!(_formulation == ContactFormulation::MORTAR && !_add_aux_vars))
   {
     if (_current_task == "add_aux_kernel")
     { // Add ContactPenetrationAuxAction.
       if (!_problem->getDisplacedProblem())
-        mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
-                   "Mesh block.");
+        mooseError(
+            "Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
+            "Mesh block.");
       // Create auxiliary kernels for each contact pairs
       for (const auto & contact_pair : _boundary_pairs)
       {
@@ -535,7 +540,8 @@ ContactAction::act()
       const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
 
       // Add MortarFrictionalPressureVectorAux
-      if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB && ndisp > 2)
+      if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB &&
+          ndisp > 2)
       {
         {
           InputParameters params = _factory.getValidParams("MortarFrictionalPressureVectorAux");
@@ -576,7 +582,8 @@ ContactAction::act()
 
     if (_current_task == "add_contact_aux_variable")
     {
-      std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
+      std::vector<VariableName> displacements =
+          getParam<std::vector<VariableName>>("displacements");
       const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
                              .system()
                              .variable_type(displacements[0])
@@ -609,7 +616,8 @@ ContactAction::act()
       const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
 
       // Add MortarFrictionalPressureVectorAux variables
-      if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB && ndisp > 2)
+      if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB &&
+          ndisp > 2)
       {
         {
           std::vector<std::string> disp_components({"x", "y", "z"});
@@ -617,7 +625,8 @@ ContactAction::act()
           for (const auto & disp_component : disp_components)
           {
             auto var_params = _factory.getValidParams("MooseVariable");
-            var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+            var_params.set<MooseEnum>("order") =
+                Utility::enum_to_string<Order>(OrderWrapper{order});
             var_params.set<MooseEnum>("family") = "LAGRANGE";
 
             _problem->addAuxVariable(
@@ -1066,7 +1075,7 @@ ContactAction::addMortarContact()
       params.set<bool>("compute_primal_residuals") = false;
 
       params.set<MooseEnum>("quadrature") = getParam<MooseEnum>("quadrature");
-      
+
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
 
       if (ndisp > 1)
