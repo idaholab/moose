@@ -15,6 +15,28 @@
     design = 'VectorCurrentSource.md'
     issues = '#21080'
   []
+  [ad_vector_kernels]
+    type = Exodiff
+    input = 'ad_vector_kernels.i'
+    exodiff = 'vector_kernels_out.e'
+    cli_args = 'Outputs/file_base=vector_kernels_out'
+    abs_zero = 1e-8
+    design = 'ADCurlCurlField.md'
+    issues = '#29868'
+    requirement = "The system shall be capable of modeling the vector Helmholtz equation for vector fields "
+                  "using Nedelec elements of the first kind with automatic differentiation."
+  []
+  [ad_vector_kernels_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_vector_kernels.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    difference_tol = 1e10
+    design = 'ADCurlCurlField.md'
+    issues = '#29868'
+    requirement = "The system shall be capable of modeling the vector Helmholtz equation for vector fields "
+                  "using Nedelec elements of the first kind with automatic differentiation and have a perfect Jacobian."
+  []
 
   [vector_ADmaterial_wave_reaction]
     type = 'Exodiff'

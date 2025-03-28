@@ -57,6 +57,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _need_ad_grad_u(false),
     _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
+    _need_ad_curl_u(false),
     _has_dof_indices(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
@@ -730,6 +731,23 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
         // Note that this will not carry any derivatives with respect to displacements because
         // those calculations have not yet been implemented in Assembly
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
+  }
+
+  if (_need_ad_curl_u)
+  {
+    _ad_curl_u.resize(nqp);
+    for (const auto qp : make_range(nqp))
+      _ad_curl_u[qp] = _ad_zero;
+
+    for (const auto i : make_range(num_dofs))
+      for (const auto qp : make_range(nqp))
+      {
+        mooseAssert(_current_curl_phi,
+                    "We're requiring a curl calculation but have not set a curl shape function!");
+
+        // Note that the current version of _ad_curl_u is not yet implemented for mesh displacement
+        _ad_curl_u[qp] += _ad_dof_values[i] * (*_current_curl_phi)[i][qp];
+      }
   }
 
   bool is_transient = _subproblem.isTransient();

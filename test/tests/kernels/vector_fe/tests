@@ -20,6 +20,59 @@
     requirement = 'The system shall be able to estimate the L2 and H(curl) errors for a curl-curl '
                   'problem solved using Nedelec elements of the first kind.'
   []
+  [ad_vector_fe]
+    type = Exodiff
+    input = 'ad_vector_kernel.i'
+    exodiff = 'vector_kernel_out.e'
+    cli_args = 'Outputs/file_base=vector_kernel_out'
+    abs_zero = 1e-8
+    issues = '#29868'
+    requirement = "The system shall be able to solve a curl-curl problem "
+                  "using Nedelec elements of the first kind with automatic differentiation."
+  []
+  [ad_vector_fe_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_vector_kernel.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    difference_tol = 1e10
+    issues = '#29868'
+    requirement = "The system shall be able to solve a curl-curl problem "
+                  "using Nedelec elements of the first kind with automatic differentiation and have a perfect Jacobian."
+  []
+  [ad_coupled_curl_product]
+    type = Exodiff
+    input = 'ad_coupled_curl_product.i'
+    exodiff = 'ad_coupled_curl_product_out.e'
+    custom_cmp = 'ad_coupled_curl_product.cmp'
+    abs_zero = 1e-8
+    issues = '#29868'
+    requirement = "The system shall be able to solve a problem that supplies the product "
+                  "of the curl of a variable vector and a supplied field into a "
+                  "diffusion problem using automatic differentiation."
+  []
+  [ad_coupled_curl_product_errors]
+    type = CSVDiff
+    input = ad_coupled_curl_product.i
+    csvdiff = ad_coupled_curl_product_out.csv
+    prereq = 'ad_coupled_curl_product'
+    should_execute = false
+    issues = '#29868'
+    requirement = 'The system shall be able to estimate the L2 and H(curl) errors for a '
+                  'problem that supplies the product of the curl of a variable vector '
+                  'and a supplied field into a diffusion problem using automatic differentiation.'
+  []
+  [ad_coupled_curl_product_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_coupled_curl_product.i'
+    cli_args = 'Outputs/exodus=false'
+    difference_tol = 1e10
+    heavy = true
+    issues = '#29868'
+    requirement = "The system shall be able to solve a problem that supplies the product "
+                  "of the curl of a variable vector and a supplied field into a "
+                  "diffusion problem using automatic differentiation and have a perfect Jacobian."
+  []
   [coupled_scalar_vector]
     type = Exodiff
     input = 'coupled_scalar_vector.i'

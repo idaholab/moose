@@ -9,30 +9,29 @@
 
 #pragma once
 
-#include "VectorKernel.h"
-#include "MaterialProperty.h"
+#include "GenericKernelCurl.h"
 
-class VectorFEWave : public VectorKernel
+template <bool is_ad>
+class VectorFEWaveTempl : public GenericKernelCurl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  VectorFEWave(const InputParameters & parameters);
+  VectorFEWaveTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  /// curl of the test function
-  const VectorVariableTestCurl & _curl_test;
-
-  /// curl of the shape function
-  const VectorVariablePhiCurl & _curl_phi;
-
-  /// Holds the solution curl at the current quadrature points
-  const VectorVariableCurl & _curl_u;
-
+  /// x component forcing function
   const Function & _x_ffn;
+  /// y component forcing function
   const Function & _y_ffn;
+  /// z component forcing function
   const Function & _z_ffn;
+
+  usingGenericKernelCurlMembers;
 };
+
+typedef VectorFEWaveTempl<false> VectorFEWave;
+typedef VectorFEWaveTempl<true> ADVectorFEWave;
