@@ -3,7 +3,7 @@
     type = Exodiff
     input = 'inclined_bc_2d.i'
     exodiff = 'inclined_bc_2d_out.e'
-    superlu = true
+    capabilities = 'superlu'
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions on a 2D model using a penalty method.'
@@ -12,7 +12,7 @@
     type = Exodiff
     input = 'inclined_bc_3d.i'
     exodiff = 'inclined_bc_3d_out.e'
-    superlu = true
+    capabilities = 'superlu'
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions on a 3D model using a penalty method.'
@@ -21,7 +21,7 @@
     type = Exodiff
     input = 'ad_inclined_bc_3d.i'
     exodiff = 'ad_inclined_bc_3d_out.e'
-    superlu = true
+    capabilities = 'superlu'
     issues = '#24910'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions while using automatic differentiation.'

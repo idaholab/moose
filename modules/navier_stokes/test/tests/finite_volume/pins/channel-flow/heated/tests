@@ -7,7 +7,7 @@
       type = 'Exodiff'
       input = 2d-rc-heated.i
       exodiff = rc-heated.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       detail = 'with a Cartesian geometry, only modeling the fluid phase,'
       valgrind = HEAVY
@@ -17,7 +17,7 @@
       type = 'Exodiff'
       input = 2d-rc-heated-disp-system.i
       exodiff = 2d-rc-heated-disp-system_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       detail = 'with a Cartesian geometry, only modeling the fluid phase, with objects running on the displaced mesh,'
       valgrind = HEAVY
@@ -26,7 +26,7 @@
       type = 'Exodiff'
       input = 2d-rc-heated.i
       exodiff = rc-heated-rz.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 2e-9
       detail = 'in rz geometry,'
       valgrind = HEAVY
@@ -36,7 +36,7 @@
       type = 'Exodiff'
       input = 2d-rc-heated-effective.i
       exodiff = rc-heated-effective.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient,'
       valgrind = HEAVY
@@ -46,7 +46,7 @@
       type = 'Exodiff'
       input = 2d-rc-heated-effective-action.i
       exodiff = rc-heated-effective-action.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient and NSFVAction syntax,'
       valgrind = HEAVY
@@ -56,7 +56,7 @@
       type = 'Exodiff'
       input = 2d-rc-heated-effective.i
       exodiff = rc-heated-effective-dirichlet.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient and dirichlet inlet boundary condition for fluid temperature,'
       valgrind = HEAVY
@@ -68,7 +68,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated.i
     exodiff = rc-heated-solid-fluid.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
@@ -81,7 +81,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated-action.i
     exodiff = rc-heated-solid-fluid-action.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#19472'
     design = 'NSFVAction.md'
@@ -93,7 +93,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated-physics.i
     exodiff = rc-heated-solid-fluid-physics.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#19472'
     design = 'WCNSFVFlowPhysics.md WCNSFVFluidHeatTransferPhysics.md'
@@ -105,7 +105,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated.i
     exodiff = rc-heated-solid-fluid-block.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and block-restricted convection.'
@@ -120,7 +120,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated-action.i
     exodiff = rc-heated-solid-fluid-block-action.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#19472'
     design = 'NSFVAction.md'
@@ -135,7 +135,7 @@
     type = 'Exodiff'
     input = 2d-transient.i
     exodiff = 2d-transient_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#16756'
     requirement = 'The system shall be able to solve transient relaxations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
@@ -146,7 +146,7 @@
     type = 'Exodiff'
     input = 2d-transient-action.i
     exodiff = 2d-transient-action_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     abs_zero = 1e-9
     issues = '#19472'
     design = 'NSFVAction.md'
@@ -157,7 +157,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated-boussinesq.i
     exodiff = rc-heated-boussinesq.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation for the influence of temperature on density.'
     valgrind = HEAVY
@@ -168,7 +168,7 @@
     type = 'Exodiff'
     input = 2d-rc-heated-boussinesq-action.i
     exodiff = rc-heated-boussinesq-action.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     issues = '#19472'
     design = 'NSFVAction.md'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation using the NSFV action syntax.'

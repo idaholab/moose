@@ -3,33 +3,33 @@
     type = RunApp
     input = 'grain_growth_2D_graintracker.i'
     # Only run in opt mode to avoid timeouts in dbg.
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
   [./grain_growth_2D_random]
     type = RunApp
     input = 'grain_growth_2D_random.i'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
   [./grain_growth_2D_voronoi]
     type = RunApp
     input = 'grain_growth_2D_voronoi.i'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
   [./grain_growth_2D_voronoi_newadapt]
     type = RunApp
     input = 'grain_growth_2D_voronoi_newadapt.i'
     cli_args = 'Adaptivity/max_h_level=0'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
   [./grain_growth_3D]
     type = RunApp
     input = 'grain_growth_3D.i'
     # Only run in opt mode to avoid timeouts in dbg.
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
 
     cli_args = 'Mesh/uniform_refine=0'
@@ -38,7 +38,7 @@
     type = RunApp
     input = '3D_6000_gr.i'
     # Only run in opt mode to avoid timeouts in dbg.
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
 
     cli_args = 'Mesh/nx=10 Mesh/ny=10 Mesh/ny=10 UserObjects/voronoi/grain_num=10 GlobalParams/op_num=10'

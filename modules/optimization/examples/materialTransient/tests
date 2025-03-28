@@ -9,7 +9,7 @@
       cli_args = 'Outputs/execute_on=FINAL Reporters/data/outputs=csv'
       csvdiff = forward_out_data_0011.csv
       recover = False
-      method = '!dbg'
+      capabilities = 'method!=dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'generating synthetic measurement data,'
@@ -20,7 +20,7 @@
       exodiff = optimize_nograd_out_forward0.e
       rel_err = 1e-2
       prereq = material_transient/forward
-      method = '!dbg'
+      capabilities = 'method!=dbg'
       valgrind = none
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing gradient-free optimization,'
@@ -30,7 +30,7 @@
       input = optimize_grad.i
       exodiff = optimize_grad_out_forward0.e
       prereq = material_transient/forward
-      method = '!dbg'
+      capabilities = 'method!=dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing gradient-based optimization, or'
@@ -41,7 +41,7 @@
       cli_args = 'Outputs/file_base=optimize_grad_out'
       exodiff = optimize_grad_out_forward0.e
       prereq = material_transient/forward
-      method = '!dbg'
+      capabilities = 'method!=dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing gradient-based optimization with an automatically computed adjoint.'
@@ -57,7 +57,7 @@
                   forward:Problem/nl_sys_names=\'forward adjoint\''
       exodiff = optimize_grad_out_forward0.e
       prereq = material_transient/forward
-      method = '!dbg'
+      capabilities = 'method!=dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
       requirement = 'The system shall be able to perform inverse material optimization on a transient model by performing gradient-based optimization with an automatically computed adjoint using non-default system names.'

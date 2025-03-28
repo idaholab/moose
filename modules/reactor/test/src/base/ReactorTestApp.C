@@ -45,7 +45,7 @@ ReactorTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool us
 void
 ReactorTestApp::registerApps()
 {
-  registerApp(ReactorApp);
+  ReactorApp::registerApps();
   registerApp(ReactorTestApp);
 }
 

@@ -8,7 +8,7 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm.'
     recover = false # we don't support recovery for SIMPLE yet
     valgrind = heavy
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [with-energy]
     type = 'Exodiff'

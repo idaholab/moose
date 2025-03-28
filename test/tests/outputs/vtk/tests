@@ -11,7 +11,7 @@
        input = 'vtk_serial.i'
        check_files = 'vtk_serial_out_000.pvtu vtk_serial_out_000_0.vtu vtk_serial_out_001.pvtu vtk_serial_out_001_0.vtu vtk_serial_out_002.pvtu vtk_serial_out_002_0.vtu vtk_serial_out_003.pvtu vtk_serial_out_003_0.vtu vtk_serial_out_004.pvtu vtk_serial_out_004_0.vtu vtk_serial_out_005.pvtu vtk_serial_out_005_0.vtu'
        max_parallel = 1
-       vtk = true
+       capabilities = 'vtk'
 
        detail = 'in serial and'
      []
@@ -22,7 +22,7 @@
        check_files = 'vtk_parallel_out_000.pvtu vtk_parallel_out_000_0.vtu vtk_parallel_out_000_1.vtu vtk_parallel_out_001.pvtu vtk_parallel_out_001_0.vtu vtk_parallel_out_001_1.vtu vtk_parallel_out_002.pvtu vtk_parallel_out_002_0.vtu vtk_parallel_out_002_1.vtu vtk_parallel_out_003.pvtu vtk_parallel_out_003_0.vtu vtk_parallel_out_003_1.vtu vtk_parallel_out_004.pvtu vtk_parallel_out_004_0.vtu vtk_parallel_out_004_1.vtu vtk_parallel_out_005.pvtu vtk_parallel_out_005_0.vtu vtk_parallel_out_005_1.vtu'
        max_parallel = 2
        min_parallel = 2
-       vtk = true
+       capabilities = 'vtk'
 
        detail = 'in parallel.'
      []
@@ -36,7 +36,7 @@
        xmldiff = 'vtk_diff_out_005.pvtu vtk_diff_out_005_0.vtu'
        input = vtk_diff.i
        max_parallel = 1
-       vtk = true
+       capabilities = 'vtk'
        mesh_mode = REPLICATED
 
        detail = 'in serial with a replicated mesh,'
@@ -48,7 +48,7 @@
        input = vtk_diff_serial_mesh_parallel.i
        max_parallel = 2
        min_parallel = 2
-       vtk = true
+       capabilities = 'vtk'
        mesh_mode = REPLICATED
 
        detail = 'in parallel with a replicated mesh, and'
@@ -60,7 +60,7 @@
        input = vtk_diff.i
        max_parallel = 2
        min_parallel = 2
-       vtk = true
+       capabilities = 'vtk'
        cli_args = Outputs/file_base=vtk_diff_parallel_mesh_out
        mesh_mode = DISTRIBUTED
        skip = "#6149"

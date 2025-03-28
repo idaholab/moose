@@ -1,6 +1,6 @@
 # LibtorchDRLControl
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Controls/LibtorchDRLControl
 
 ## Overview
@@ -10,7 +10,7 @@ with an additional functionality of randomizing the action values to avoid overf
 This control object is supposed to be used in conjunction with [LibtorchDRLControlTrainer.md]. In other
 cases when the neural network needs to be simply evaluated, the user is encouraged to use [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md).
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Controls/LibtorchDRLControl
 

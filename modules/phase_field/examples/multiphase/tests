@@ -22,7 +22,7 @@
     requirement = "The multi-phase grand potential phase-field model shall have an example with 3 phases that enforces strict mass conservation"
     design = 'kernels/ACSwitching.md'
     issues = '#22159'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
   [../]
   [./GrandPotential3Phase_AD]
     type = RunApp

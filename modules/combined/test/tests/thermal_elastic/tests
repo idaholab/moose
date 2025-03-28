@@ -20,9 +20,8 @@
   [./ad-test-jac]
     type = 'PetscJacobianTester'
     input = 'ad-thermal_elastic.i'
-    petsc_version = '>=3.9.4 || <3.9.0'
     ratio_tol = 6e-7
-    method = 'OPT'
+    capabilities = 'method=opt'
     difference_tol = 1e1 # Higher tolerance due to non-AD linear interpolation material
     run_sim = True
     requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a good jacobian'
@@ -31,7 +30,6 @@
   [../]
   [./derivatives]
     type = 'AnalyzeJacobian'
-    petsc_version = '>=3.9.4 || <3.9.0'
     requirement = 'The system shall compute accurate Jacobians for elastic mechanics.'
     design = "jacobian_definition.md"
     issues = '#8265'

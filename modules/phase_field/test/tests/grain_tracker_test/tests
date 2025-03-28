@@ -18,7 +18,7 @@
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
     max_time = 500
 
@@ -70,7 +70,7 @@
     type = 'Exodiff'
     input = 'grain_halo_over_bc.i'
     exodiff = 'grain_halo_over_bc_out.e'
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
     max_parallel = 1
 
@@ -86,7 +86,7 @@
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'NONE' # Exact same test used elsewhere
 
     requirement = "The GrainTracker object shall support remapping order parameter values."
@@ -99,7 +99,7 @@
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
 
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
     prereq = 'test_remapping_serial'
 
@@ -115,7 +115,7 @@
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_linearized_interface_test.i'
     csvdiff = 'grain_tracker_remapping_linearized_interface_test_out.csv'
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
 
     requirement = "The GrainTracker object shall support remapping order parameter values with "
                   "nonlinear preconditioning."
@@ -129,7 +129,7 @@
     input = 'grain_tracker_remapping_test.i'
     cli_args = 'Outputs/file_base=gt_recover_serial_out Outputs/checkpoint=true --test-checkpoint-half-transient'
 
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = 'NONE'
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
@@ -146,7 +146,7 @@
     prereq = 'test_recovery_serial_part1'
     delete_output_before_running = false
 
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = 'NONE'
 
     requirement = "The GrainTracker object shall properly recover unique grain information in "
@@ -162,7 +162,7 @@
 
     min_parallel = 8 # Test distributed merge work with grain tracker
 
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = 'NONE'
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
@@ -181,7 +181,7 @@
 
     min_parallel = 8 # Test distributed merge work with grain tracker
 
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = 'NONE'
 
     requirement = "The GrainTracker object shall properly recover unique grain information in "
@@ -197,7 +197,7 @@
 
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=1 Executioner/Adaptivity/refine_fraction=0.7 Executioner/Adaptivity/max_h_level=2 Executioner/num_steps=1 Outputs/file_base=test_poly_ic_handoff_out'
 
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'NONE' # Exact same test used elsewhere
 
     requirement = "The GrainTracker shall support reusing the data structures from the "
@@ -211,7 +211,7 @@
     input = 'grain_tracker_reserve.i'
     exodiff = 'grain_tracker_reserve_out.e'
     abs_zero = 1e-6 # Remapping can cause more significant diffs
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
     requirement = "The GrainTracker shall support maintaining reserve order parameters for "
@@ -227,7 +227,7 @@
     abs_zero = 1e-6
     cli_args = 'ICs/inactive=gr0 Outputs/file_base=start_with_zero_grains_out'
 
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
     requirement = "The GrainTracker shall support beginning a simulation with no active grain "
@@ -288,7 +288,7 @@
     input = 'split_grain.i'
     csvdiff = 'split_grain_out.csv'
     max_time = 500
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
     requirement = "The GrainTracker shall support handling the splitting of a grain during a "
@@ -303,7 +303,7 @@
     input = 'grain_tracker_volume_changing.i'
     csvdiff = 'grain_tracker_volume_changing_out.csv'
     rel_err = 1e-4
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
     requirement = "The AverageFeatureVolume Postprocessor shall calculate the average volume of each "
@@ -319,7 +319,7 @@
     expect_out = "Unable to find any suitable order parameters for remapping"
     allow_warnings = true
     valgrind = 'NONE'
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     min_parallel = 2
 
     requirement = "The GrainTracker shall support a mode where it can continue even when it fails to "
@@ -375,7 +375,7 @@
     cli_args = 'Outputs/file_base=gt_faux_elemental_out UserObjects/grain_tracker/type=FauxGrainTracker'
 
     exodiff = 'gt_faux_elemental_out.e-s002'
-    method = '!DBG' # slow test
+    capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
     max_time = 500
 

@@ -31,7 +31,7 @@
       input = '2d_advection_error_testing.i'
       allow_test_objects = true
       # This problem uses SuperLU.
-      superlu = true
+      capabilities = 'superlu'
       detail = 'and in 2D.'
     [../]
   []

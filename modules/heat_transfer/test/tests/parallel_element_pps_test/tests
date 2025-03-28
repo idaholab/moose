@@ -6,7 +6,7 @@
     input = 'parallel_element_pps_test.i'
     exodiff = 'out.e'
     min_parallel = 2
-    platform = 'DARWIN'
+    capabilities = 'platform=darwin'
     requirement = 'The system shall computed an integrated value on elements in parallel'
   [../]
 []

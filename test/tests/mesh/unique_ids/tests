@@ -5,18 +5,18 @@
   [./replicated_mesh]
     type = 'RunApp'
     input = 'unique_ids.i'
-    unique_id = True
     min_parallel = 2
     requirement = 'The system shall support having a truly unique_id (never recycled) for all mesh elements and nodes when using replicated mesh.'
+    capabilities = 'unique_id'
   [../]
 
   [./distributed_mesh]
     type = 'RunApp'
     input = 'unique_ids.i'
-    unique_id = True
     cli_args = '--distributed-mesh'
     min_parallel = 2
     prereq = 'replicated_mesh'
     requirement = 'The system shall support having a truly unique_id (never recycled) for all mesh elements and nodes when using distributed mes.'
+    capabilities = 'unique_id'
   [../]
 []

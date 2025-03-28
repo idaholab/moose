@@ -45,7 +45,7 @@ LevelSetTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
 void
 LevelSetTestApp::registerApps()
 {
-  registerApp(LevelSetApp);
+  LevelSetApp::registerApps();
   registerApp(LevelSetTestApp);
 }
 

@@ -17,7 +17,7 @@
     allow_test_objects = true
 
     requirement = "The system shall support the ability to compute Sobol sensitivity indices for vector-type data."
-    method = 'opt'
+    capabilities = 'method=opt'
   []
   [sobol_no_resample]
     type = JSONDiff

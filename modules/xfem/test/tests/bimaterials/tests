@@ -6,7 +6,7 @@
     abs_zero = 1e-8
     use_old_floor = true
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall have the capability to calculate '
                   'mechanical response in two glued, layered materials with '
                   'the interface location and material properties applied to '
@@ -22,7 +22,7 @@
     abs_zero = 1e-8
     use_old_floor = true
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall have the capability to calculate '
                   'mechanical response in a composite material matrix with an '
                   'inclusion with the location of the inclusion boundary '
@@ -38,7 +38,7 @@
     abs_zero = 1e-8
     use_old_floor = true
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     prereq = glued_bimaterial
     requirement = 'The system shall have the capability to calculate the '
                   'mechanical response in two glued, layered materials with '
@@ -55,7 +55,7 @@
     abs_zero = 1e-8
     use_old_floor = true
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     prereq = inclusion_bimaterial
     requirement = 'The XFEM module shall have the capability to calculate '
                   'mechanical response in a composite material matrix with an '

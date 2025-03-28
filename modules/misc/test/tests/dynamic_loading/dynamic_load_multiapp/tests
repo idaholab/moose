@@ -23,7 +23,7 @@
     library_mode = 'DYNAMIC'
     group = 'dynamic_loading'
     cli_args = 'MultiApps/sub_app/library_name=libphase_field-opt.la'
-    method = OPT # because the library name is explicitly given
+    capabilities = 'method=opt' # because the library name is explicitly given
     prereq = 'dynamic_load'
     recover = false # See #5207
     requirement = 'The system shall be able to dynamically load a multiapp using the library name, to select a compiling optimization level for example.'

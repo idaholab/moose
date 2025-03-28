@@ -27,7 +27,7 @@ Bayesian UQ:
 
 - [modules/stochastic_tools/examples/bayesian_uq_1d_diff.md]
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 Deep Reinforcement Learning Models:
 

@@ -7,7 +7,7 @@
     input = 'test.i'
     csvdiff = 'test_out_test_0001.csv'
     requirement = 'The system shall be able to evaluate a neural net with the same values as the python code which created the neural net.'
-    libtorch = true
+    capabilities = 'libtorch'
     allow_test_objects = True
   []
 []

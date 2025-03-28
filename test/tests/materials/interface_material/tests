@@ -16,7 +16,7 @@
     requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface when the mesh is split'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    capabilities = 'method!=dbg' # issue 12033
   []
   [jump_split_stateful]
     type = Exodiff
@@ -27,7 +27,7 @@
     requirement = 'The system shall be able to calculate stateful material properties in an interface material object'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
+    capabilities = 'method!=dbg' # issue 12033
   []
   [boundary_elem_aux]
     type = Exodiff

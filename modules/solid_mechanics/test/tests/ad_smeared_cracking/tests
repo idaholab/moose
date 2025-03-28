@@ -39,7 +39,7 @@
     exodiff_opts = '-steps 0:1200:1'
     valgrind = HEAVY
     requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress relase while using the rz coordinate system using AD and match non-AD methods.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
   []
   [power]
     type = Exodiff
