@@ -63,7 +63,7 @@ public:
   std::string typeAndName() const;
 
   /**
-   * @returns A prefix to be used in messages that contains the input
+   * @returns A prefix to be used in messages that contain the input
    * file location associated with this object (if any) and the
    * name and type of the object.
    */
