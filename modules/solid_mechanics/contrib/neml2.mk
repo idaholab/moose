@@ -26,15 +26,22 @@ else
 ENABLE_NEML2 = true
 endif
 
+# If MOOSE is not configured with libtorch, warn the user that NEML2 is disabled
+ifeq ($(ENABLE_NEML2),true)
+ifneq ($(ENABLE_LIBTORCH),true)
+$(warning ******************************************************************************************)
+$(warning Found a NEML2 installation at $(NEML2_DIR), but libtorch is not enabled. )
+$(warning Disabling NEML2. To enable NEML2, please configure MOOSE following the instructions at )
+$(warning https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html)
+$(warning ******************************************************************************************)
+ENABLE_NEML2 = false
+endif
+endif
+
 ################################################################################
 # ENABLE_NEML2 = true
 ################################################################################
 ifeq ($(ENABLE_NEML2),true)
-
-# If MOOSE is not configured with libtorch, error out
-ifneq ($(ENABLE_LIBTORCH),true)
-$(error NEML2 requires libtorch to be enabled. Please configure MOOSE following the instructions at https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html)
-endif
 
 # Tell the user that NEML2 is enabled
 $(info NEML2 is enabled.)
