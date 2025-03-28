@@ -9,15 +9,9 @@
 
 #pragma once
 
-#include "INSFVVariable.h"
-
-class InputParameters;
-class INSFVPressureHydraulicSeparatorBC;
-
-class INSFVPressureVariable : public INSFVVariable
+/**
+ * An empty base class which serves as a tag for hydraulic separators.
+ */
+class INSFVHydraulicSeparatorInterface
 {
-public:
-  INSFVPressureVariable(const InputParameters & params);
-
-  static InputParameters validParams();
 };
