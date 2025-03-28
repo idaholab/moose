@@ -2,14 +2,16 @@
 # a heterogeneous model
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 3
-  ny = 3
-  nz = 3
-  xmax = 3
-  ymax = 3
-  zmax = 3
+  [mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 3
+    ny = 3
+    nz = 3
+    xmax = 3
+    ymax = 3
+    zmax = 3
+  []
 []
 
 [GlobalParams]

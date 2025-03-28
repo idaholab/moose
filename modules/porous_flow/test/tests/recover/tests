@@ -1,64 +1,70 @@
 [Tests]
-  [./theis_full]
+  [theis_full]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0004.csv'
+    ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./theis_part1]
+  []
+  [theis_part1]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0002.csv'
+    ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'theis_full'
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./theis_recover]
+  []
+  [theis_recover]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0004.csv'
+    ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     cli_args = '--recover'
     prereq = 'theis_part1'
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./pffltvd_full]
+  []
+  [pffltvd_full]
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0004.csv'
+    ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./pffltvd_part1]
+  []
+  [pffltvd_part1]
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0002.csv'
+    ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'pffltvd_full'
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./pffltvd_recover]
+  []
+  [pffltvd_recover]
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0004.csv'
+    ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     cli_args = '--recover'
     prereq = 'pffltvd_part1'
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
+  []
 []
