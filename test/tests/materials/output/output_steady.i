@@ -6,49 +6,49 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./bc_func]
+  [bc_func]
     type = ParsedFunction
     expression = 0.5*y
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     block = 0
     coef = 0.1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = u
     boundary = left
     function = bc_func
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = OutputTestMaterial
     block = 0
     outputs = all
     variable = u
     output_properties = 'real_property vector_property tensor_property'
-  [../]
+  []
 []
 
 [Executioner]
