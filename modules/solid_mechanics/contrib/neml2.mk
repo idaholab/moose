@@ -43,9 +43,6 @@ endif
 ################################################################################
 ifeq ($(ENABLE_NEML2),true)
 
-# Tell the user that NEML2 is enabled
-$(info NEML2 is enabled.)
-
 # Dynamic library suffix
 DYLIB_SUFFIX := so
 ifeq ($(shell uname -s),Darwin)
@@ -83,9 +80,10 @@ NEML2_LINK_FLAGS := $(addprefix -l,$(NEML2_LIBS))
 NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 
 # Compile flags for NEML2
-ADDITIONAL_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
-ADDITIONAL_CPPFLAGS    += -DNEML2_ENABLED
-ADDITIONAL_LIBS        += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
-ADDITIONAL_DEPEND_LIBS += $(NEML2_LIB_FILES)
+neml2_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
+neml2_CPPFLAGS    += -DNEML2_ENABLED
+neml2_LDFLAGS     += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
+libmesh_CXXFLAGS += $(neml2_CPPFLAGS) $(neml2_INCLUDES)
+libmesh_LIBS     += $(neml2_LDFLAGS)
 
 endif

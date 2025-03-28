@@ -13,9 +13,9 @@ MOOSE_DIR="$( cd "$( dirname "${SCRIPT_DIR}" )" && pwd )"
 
 # Display the help message if requested
 if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
-  SCRIPT_NAME=$(basename $0)
+  SCRIPT_NAME=$(basename "$0")
   echo "Usage: ${SCRIPT_NAME} --help"
-  echo "Usage: ${SCRIPT_NAME} [--summary] [--fast|--skip-submodule-update] [ADDITIONAL_CONFIGURE_ARG ...]"
+  echo "Usage: ${SCRIPT_NAME} [--fast|--skip-submodule-update] [ADDITIONAL_CONFIGURE_ARG ...]"
   echo
   echo "This script makes NEML2 available to the MOOSE framework. The script "
   echo "performs the following steps:"
@@ -51,7 +51,6 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo
   echo "Command-line arguments:"
   echo "  --help                   Display this message and exit"
-  echo "  --summary                Display a summary of the configuration"
   echo "  --fast                   Skip the update, clean, and configure steps (steps 1-3)"
   echo "  --skip-submodule-update  Skip the update step (step 1)"
   echo "  ADDITIONAL_CONFIGURE_ARG Additional argument(s) to pass to the NEML2 cmake configure command"
@@ -62,9 +61,7 @@ fi
 FAST=false
 SKIP_SUBMODULE_UPDATE=false
 for ARG in "$@" ; do
-  if [[ "${ARG}" == "--summary" ]]; then
-    SUMMARY=true
-  elif [[ "${ARG}" == "--fast" ]]; then
+  if [[ "${ARG}" == "--fast" ]]; then
     FAST=true
   elif [[ "${ARG}" == "--skip-submodule-update" ]]; then
     SKIP_SUBMODULE_UPDATE=true
@@ -123,22 +120,20 @@ if [[ -n "$METHOD" ]]; then
 fi
 
 # Print out the configuration summary if requested
-if [[ "${SUMMARY}" == true ]]; then
-  SCRIPT_NAME=$(basename $0)
-  echo "****************************************************************************************************"
-  echo "${SCRIPT_NAME} summary:"
-  echo "  TIMPI_DIR:                 ${TIMPI_DIR}"
-  echo "  WASP_DIR:                  ${WASP_DIR}"
-  echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
-  echo "  NEML2_DIR:                 ${NEML2_DIR}"
-  echo "  NEML2_SRC_DIR:             ${NEML2_SRC_DIR}"
-  echo "  NEML2_JOBS:                ${NEML2_JOBS}"
-  echo "  METHODS:                   ${METHODS}"
-  echo "  FAST:                      ${FAST}"
-  echo "  SKIP_SUBMODULE_UPDATE:     ${SKIP_SUBMODULE_UPDATE}"
-  echo "  ADDITIONAL_CONFIGURE_ARGS: ${EXTRA_ARGS[@]}"
-  echo "****************************************************************************************************"
-fi
+SCRIPT_NAME=$(basename "$0")
+echo "****************************************************************************************************"
+echo "${SCRIPT_NAME} summary:"
+echo "  TIMPI_DIR:                 ${TIMPI_DIR}"
+echo "  WASP_DIR:                  ${WASP_DIR}"
+echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
+echo "  NEML2_DIR:                 ${NEML2_DIR}"
+echo "  NEML2_SRC_DIR:             ${NEML2_SRC_DIR}"
+echo "  NEML2_JOBS:                ${NEML2_JOBS}"
+echo "  METHODS:                   ${METHODS}"
+echo "  FAST:                      ${FAST}"
+echo "  SKIP_SUBMODULE_UPDATE:     ${SKIP_SUBMODULE_UPDATE}"
+echo "  ADDITIONAL_CONFIGURE_ARGS: ${EXTRA_ARGS[*]}"
+echo "****************************************************************************************************"
 
 # Check that dependencies are available
 if [[ ! -d "${LIBTORCH_DIR}" ]]; then
@@ -160,8 +155,8 @@ fi
 
 # Step 1: Update the NEML2 submodule
 if [[ "$SKIP_SUBMODULE_UPDATE" != true ]] && [[ "$FAST" != true ]]; then
-  cd $MOOSE_DIR
-  git submodule update --init --checkout ${NEML2_SRC_DIR}
+  cd "$MOOSE_DIR" || exit
+  git submodule update --init --checkout "${NEML2_SRC_DIR}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to update the NEML2 submodule with command"
     echo "  git submodule update --init --checkout ${NEML2_SRC_DIR}"
@@ -170,7 +165,7 @@ if [[ "$SKIP_SUBMODULE_UPDATE" != true ]] && [[ "$FAST" != true ]]; then
 fi
 
 # Loop over the methods to configure, build, and install NEML2
-for METHOD in $(echo $METHODS | tr ',' ' '); do
+for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   # Check that timpi is available
   if [[ ! -f "${TIMPI_DIR}"/lib/libtimpi_${METHOD}.${DYLIB_SUFFIX} ]]; then
     echo "Error: The TIMPI library (${TIMPI_DIR}/lib/libtimpi_${METHOD}.${DYLIB_SUFFIX}) does not exist. Please build libMesh first."
@@ -200,20 +195,20 @@ for METHOD in $(echo $METHODS | tr ',' ' '); do
 
   # Step 2: Clean and recreate the build directory
   if [[ "${FAST}" != true  ]] ; then
-    rm -rf ${NEML2_BUILD_DIR}
-    mkdir -p ${NEML2_BUILD_DIR}
+    rm -rf "${NEML2_BUILD_DIR}"
+    mkdir -p "${NEML2_BUILD_DIR}"
   fi
 
   # Step 3: Configure NEML2
   source $SCRIPT_DIR/configure_neml2.sh
   if [[ "${FAST}" != true  ]] ; then
-    configure_neml2 ${NEML2_SRC_DIR} \
-                    ${NEML2_BUILD_DIR} \
-                    ${LIBTORCH_DIR} \
-                    ${WASP_DIR} \
-                    ${TIMPI_DIR} \
+    configure_neml2 "${NEML2_SRC_DIR}" \
+                    "${NEML2_BUILD_DIR}" \
+                    "${LIBTORCH_DIR}" \
+                    "${WASP_DIR}" \
+                    "${TIMPI_DIR}" \
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-                    ${EXTRA_ARGS[@]}
+                    "${EXTRA_ARGS[*]}"
     if [[ $? -ne 0 ]] ; then
       echo "Error: Failed to configure NEML2"
       exit 1
@@ -221,14 +216,14 @@ for METHOD in $(echo $METHODS | tr ',' ' '); do
   fi
 
   # Step 4: Build NEML2
-  build_neml2 ${NEML2_BUILD_DIR} ${NEML2_JOBS}
+  build_neml2 "${NEML2_BUILD_DIR}" "${NEML2_JOBS}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to build NEML2"
     exit 1
   fi
 
   # Step 5: Install NEML2
-  install_neml2 ${NEML2_BUILD_DIR} ${NEML2_DIR}
+  install_neml2 "${NEML2_BUILD_DIR}" "${NEML2_DIR}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to install NEML2"
     exit 1
