@@ -17,7 +17,7 @@
       input = 'mesh_generator_test.i'
       detail = 'requesting an input mesh generator parameter and the parameter is of the wrong type'
       cli_args = 'Mesh/test/get_mesh_wrong_type=true'
-      expect_err = 'dummy: Parameter of type "bool" is not an expected type for getting a MeshGenerator'
+      expect_err = '\(Mesh/test/dummy\): Parameter of type "bool" is not an expected type for getting a MeshGenerator'
     []
     [get_meshes_by_name_invalid]
       type = RunException
@@ -31,7 +31,7 @@
       input = 'mesh_generator_test.i'
       detail = 'requesting input mesh generators by parameter and the parameter is of the wrong type'
       cli_args = 'Mesh/test/get_meshes_by_name_wrong_type=true'
-      expect_err = 'dummy: Parameter of type "bool" is not an expected type for getting MeshGenerators'
+      expect_err = '\(Mesh/test/dummy\): Parameter of type "bool" is not an expected type for getting MeshGenerators'
     []
     [get_mesh_outside_construct]
       type = RunException
