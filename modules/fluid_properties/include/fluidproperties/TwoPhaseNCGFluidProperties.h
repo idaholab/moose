@@ -26,6 +26,10 @@ public:
 
   TwoPhaseNCGFluidProperties(const InputParameters & parameters);
 
+  using TwoPhaseFluidProperties::h_lat;
+  using TwoPhaseFluidProperties::p_sat;
+  using TwoPhaseFluidProperties::T_sat;
+
   const UserObjectName & getLiquidName() const override { return _fp_2phase->getLiquidName(); }
   const UserObjectName & getVaporName() const override { return _fp_2phase->getVaporName(); }
 

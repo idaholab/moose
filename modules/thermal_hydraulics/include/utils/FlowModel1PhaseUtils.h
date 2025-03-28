@@ -80,6 +80,35 @@ computeConservativeSolutionVector(const std::vector<GenericReal<is_ad>> & W,
 }
 
 /**
+ * Computes the numerical flux vector from the primitive solution vector
+ *
+ * @param[in] W   Primitive solution vector
+ * @param[in] A   Cross-sectional area
+ * @param[in] fp  Fluid properties object
+ */
+template <bool is_ad>
+std::vector<GenericReal<is_ad>>
+computeFluxFromPrimitive(const std::vector<GenericReal<is_ad>> & W,
+                         const GenericReal<is_ad> & A,
+                         const SinglePhaseFluidProperties & fp)
+{
+  const auto & p = W[THMVACE1D::PRESSURE];
+  const auto & T = W[THMVACE1D::TEMPERATURE];
+  const auto & vel = W[THMVACE1D::VELOCITY];
+
+  const auto rho = fp.rho_from_p_T(p, T);
+  const auto e = fp.e_from_p_rho(p, rho);
+  const auto E = e + 0.5 * vel * vel;
+
+  std::vector<ADReal> F(THMVACE1D::N_FLUX_OUTPUTS, 0.0);
+  F[THMVACE1D::MASS] = rho * vel * A;
+  F[THMVACE1D::MOMENTUM] = (rho * vel * vel + p) * A;
+  F[THMVACE1D::ENERGY] = vel * (rho * E + p) * A;
+
+  return F;
+}
+
+/**
  * Gets the elemental conservative solution vector
  *
  * @param[in] elem         Element
