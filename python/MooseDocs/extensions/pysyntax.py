@@ -6,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import re
 import pydoc
 import logging
@@ -59,7 +58,11 @@ class PySyntax(object):
             return out
 
     def __init__(self, cls):
-        cls = pydoc.locate(cls) if isinstance(cls, str) else cls
+        cls = self._locate(cls) if isinstance(cls, str) else cls
+        if inspect.ismodule(cls):
+            raise ValueError(
+                f"{cls.__name__} appears to be a module, not a class or function."
+            )
         self.documentation = inspect.getdoc(cls)
         self.filename = inspect.getfile(cls)
         self.signature = str(inspect.signature(cls))
@@ -89,6 +92,25 @@ class PySyntax(object):
                     (public and info.public)]) and \
                     ((function is None) or (info.function == function)):
                 yield name, info
+
+    @staticmethod
+    def _locate(cls_in: str) -> object:
+        """Get the module, class, or function that a string is representing."""
+        # See what pydoc gets
+        cls = pydoc.locate(cls_in)
+        if not inspect.ismodule(cls):
+            return cls
+
+        # Sometimes a class signature can be the same as the modules,
+        # so check if it can be a class and will prefer that.
+        parts = [part for part in cls_in.split('.') if part]
+        mod = pydoc.safeimport('.'.join(parts[:-1]))
+        if mod:
+            object = getattr(mod, parts[-1])
+            return (
+                object if inspect.isclass(object) or inspect.isfunction(object) else cls
+            )
+
 
 class PySyntaxExtension(command.CommandExtension):
     def extend(self, reader, renderer):
