@@ -703,12 +703,13 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
       // case of non-conformality
       bool node_on_elem = false;
 
-      // non-vertex nodes are not cause for the kind of non-conformality we are looking for
-      if (!elem->is_vertex(elem->get_node_index(node)))
-        continue;
-
       if (elem->get_node_index(node) != libMesh::invalid_uint)
+      {
         node_on_elem = true;
+        // non-vertex nodes are not cause for the kind of non-conformality we are looking for
+        if (!elem->is_vertex(elem->get_node_index(node)))
+          continue;
+      }
 
       // Keep track of all the elements this node is a part of. They are potentially the
       // 'fine' (refined) elements next to a coarser element
@@ -745,7 +746,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
              fine_elements.size() != 3)
       continue;
     else if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
-             (fine_elements.size() % 4 != 0))
+             (fine_elements.size() % 2 != 0))
       continue;
 
     // only one coarse element in front of refined elements except for tets. Whatever we're
