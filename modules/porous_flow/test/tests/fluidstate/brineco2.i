@@ -212,14 +212,12 @@
 
 [Kernels]
   [mass0]
-    type = PorousFlowMassTimeDerivative
+    type = NullKernel
     variable = pgas
-    fluid_component = 0
   []
   [mass1]
-    type = PorousFlowMassTimeDerivative
+    type = NullKernel
     variable = z
-    fluid_component = 1
   []
 []
 
@@ -263,20 +261,6 @@
     xnacl = xnacl
     capillary_pressure = pc
     fluid_state = fs
-  []
-  [permeability]
-    type = PorousFlowPermeabilityConst
-    permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  []
-  [relperm0]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 2
-    phase = 0
-  []
-  [relperm1]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 3
-    phase = 1
   []
   [porosity]
     type = PorousFlowPorosityConst
