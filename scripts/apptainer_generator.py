@@ -615,11 +615,14 @@ class ApptainerGenerator:
                 jinja_data[jinja_var] = source[var]
 
         # Set petsc and libmesh versions
-        need_versions = {'petsc': {'package': 'petsc', 'submodule': 'petsc'},
-                         'libmesh': {'package': 'libmesh', 'submodule': 'libmesh'},
-                         'moose-dev': {'package': 'wasp', 'submodule': 'framework/contrib/wasp'}}
-        for library, package_info in need_versions.items():
-            if library == self.args.library:
+        need_versions = {'petsc': [{'package': 'petsc', 'submodule': 'petsc'}],
+                         'libmesh': [{'package': 'libmesh', 'submodule': 'libmesh'}],
+                         'moose-dev': [{'package': 'conduit', 'submodule': 'framework/contrib/conduit'},
+                                       {'package': 'mfem', 'submodule': 'framework/contrib/mfem'},
+                                       {'package': 'wasp', 'submodule': 'framework/contrib/wasp'}]}
+        needed = need_versions.get(self.args.library)
+        if needed is not None:
+            for package_info in needed:
                 package = package_info['package']
                 submodule = package_info['submodule']
 
