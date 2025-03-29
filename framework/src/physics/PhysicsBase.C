@@ -469,16 +469,11 @@ PhysicsBase::addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options)
 {
   Moose::PetscSupport::PetscOptions & po = _problem->getPetscOptions();
-  if (_problem->numSolverSystems() > 1) // we must prefix
-    for (const auto & sys_name : _system_names)
-      Moose::PetscSupport::addPetscPairsToPetscOptions(
-          petsc_pair_options, _problem->mesh().dimension(), "-" + sys_name + "_", *this, po);
-  else
-  {
-    mooseAssert(
-        _system_names.size() == 1,
-        "The problem has only one solver system, so there should be no more than 1 systen name");
+  for (const auto solver_sys_num : _system_numbers)
     Moose::PetscSupport::addPetscPairsToPetscOptions(
-        petsc_pair_options, _problem->mesh().dimension(), "-", *this, po);
-  }
+        petsc_pair_options,
+        _problem->mesh().dimension(),
+        _problem->getSolverSystem(solver_sys_num).prefix(),
+        *this,
+        po);
 }

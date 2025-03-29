@@ -224,8 +224,9 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
       _moose_line_searches.end())
     _problem.addLineSearch(_pars);
 
-  auto set_solver_params = [this, &ex](const SolverSystem & sys, const std::string & prefix)
+  auto set_solver_params = [this, &ex](const SolverSystem & sys)
   {
+    const auto prefix = sys.prefix();
     Moose::PetscSupport::storePetscOptions(_problem, prefix, ex);
     Moose::PetscSupport::setConvergedReasonFlags(_problem, prefix);
 
@@ -236,16 +237,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   };
 
   // Extract and store PETSc related settings on FEProblemBase
-  if (_problem.numSolverSystems() > 1) // we must prefix
-    for (const auto * const sys : _systems)
-      set_solver_params(*sys, "-" + sys->name() + "_");
-  else
-  {
-    mooseAssert(
-        _systems.size() == 1,
-        "If there is only one system on the problem, then we should only have a single system");
-    set_solver_params(*_systems.front(), "-");
-  }
+  for (const auto * const sys : _systems)
+    set_solver_params(*sys);
 
   // Set linear solve parameters in the equation system
   // Nonlinear solve parameters are added in the DefaultNonlinearConvergence

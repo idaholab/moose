@@ -200,9 +200,9 @@ petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
       dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   const char * snes_prefix = nullptr;
   std::string snes_prefix_str;
-  if (nl.feProblem().numSolverSystems() > 1)
+  if (nl.system().prefix_with_name())
   {
-    snes_prefix_str = nl.name() + "_";
+    snes_prefix_str = nl.system().prefix();
     snes_prefix = snes_prefix_str.c_str();
   }
   SNES snes = petsc_solver->snes(snes_prefix);
@@ -443,8 +443,7 @@ petscSetDefaults(FEProblemBase & problem)
 {
   // We care about both nonlinear and linear systems when setting the SNES prefix because
   // SNESSetOptionsPrefix will also set its KSP prefix which could compete with linear system KSPs
-  const auto num_solver_sys = problem.numSolverSystems();
-  for (auto nl_index : make_range(problem.numNonlinearSystems()))
+  for (const auto nl_index : make_range(problem.numNonlinearSystems()))
   {
     NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
 
@@ -478,9 +477,9 @@ petscSetDefaults(FEProblemBase & problem)
     auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
     const char * snes_prefix = nullptr;
     std::string snes_prefix_str;
-    if (num_solver_sys > 1)
+    if (nl.system().prefix_with_name())
     {
-      snes_prefix_str = nl.name() + "_";
+      snes_prefix_str = nl.system().prefix();
       snes_prefix = snes_prefix_str.c_str();
     }
     SNES snes = petsc_solver->snes(snes_prefix);
