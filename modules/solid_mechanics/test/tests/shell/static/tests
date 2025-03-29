@@ -1,6 +1,6 @@
 [Tests]
   design = "ShellElements.md"
-  issues = "#14280 #21384 #28471"
+  issues = "#14280 #21384 #28471 #30174"
   [beam_bending]
     type = 'Exodiff'
     input = 'beam_bending_moment_AD.i'
@@ -136,5 +136,29 @@
     input = plate_cantilever.i
     exodiff = 'plate_cantilever_out.e'
     requirement = "Local stress and bending moment are calculated correctly on the shell element"
+  []
+  [tank_shell]
+    type = 'Exodiff'
+    input = tank_shell.i
+    exodiff = 'tank_shell_out.e'
+    requirement = "pressure loads are applied correctly on the shell element with curved geometry"
+  []
+  [tank_shell_rotated]
+    type = 'Exodiff'
+    input = tank_shell_rotated.i
+    exodiff = 'tank_shell_rotated_out.e'
+    requirement = "pressure loads are applied correctly on the shell element with curved geometry"
+  []
+  [scordelis_lo_roof_shell]
+    type = 'Exodiff'
+    input = scordelis_lo_roof_shell.i
+    exodiff = 'scordelis_lo_roof_shell_out.e'
+    requirement = "benchmark test for distributed load on shell"
+  []
+  [clamped_plate_flat]
+    type = 'Exodiff'
+    input = clamped_plate_flat.i
+    exodiff = 'clamped_plate_flat_out.e'
+    requirement = "benchmark test for distributed load on shell"
   []
 []
