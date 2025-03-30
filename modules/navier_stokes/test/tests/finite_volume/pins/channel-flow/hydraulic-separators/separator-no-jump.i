@@ -1,5 +1,5 @@
 rho=1.1
-advected_interp_method='upwind'
+advected_interp_method='average'
 velocity_interp_method='rc'
 
 [Mesh]
@@ -8,7 +8,7 @@ velocity_interp_method='rc'
     dim = 2
     dx = '1'
     dy = '0.25 0.25'
-    ix = '3'
+    ix = '2'
     iy = '1 1'
     subdomain_id = '1 2'
   []
@@ -52,12 +52,12 @@ velocity_interp_method='rc'
 [Variables]
   [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 1
+    initial_condition = 0.1
     two_term_boundary_expansion = false
   []
   [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 1e-6
+    initial_condition = 0.0
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -130,13 +130,13 @@ velocity_interp_method='rc'
     type = INSFVInletVelocityBC
     boundary = 'inlet-1'
     variable = superficial_vel_x
-    function = '1.0'
+    function = '0.1'
   []
   [inlet-u-2]
     type = INSFVInletVelocityBC
     boundary = 'inlet-2'
     variable = superficial_vel_x
-    function = '2.0'
+    function = '0.2'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
@@ -215,10 +215,11 @@ velocity_interp_method='rc'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' lu       NONZERO               1e-10'
   line_search = 'none'
   nl_rel_tol = 1e-10
+  nl_max_its = 10
 []
 
 [Postprocessors]
