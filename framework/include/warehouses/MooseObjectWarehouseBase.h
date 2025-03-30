@@ -291,9 +291,10 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object,
   std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(object);
 
   // Boundary Restricted
-  if (bnd && bnd->boundaryRestricted())
+  if (bnd)
   {
-    const std::set<BoundaryID> & ids = bnd->boundaryIDs();
+    const std::set<BoundaryID> & ids =
+        bnd->boundaryRestricted() ? bnd->boundaryIDs() : bnd->meshBoundaryIDs();
     for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_boundary_objects[tid][*it].push_back(object);
