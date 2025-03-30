@@ -14,9 +14,11 @@
 #include "SinglePhaseFluidProperties.h"
 
 registerMooseObject("NavierStokesApp", GeneralFunctorFluidProps);
+registerMooseObject("NavierStokesApp", NonADGeneralFunctorFluidProps);
 
+template <bool is_ad>
 InputParameters
-GeneralFunctorFluidProps::validParams()
+GeneralFunctorFluidPropsTempl<is_ad>::validParams()
 {
   auto params = FunctorMaterial::validParams();
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties functor userobject");
@@ -58,10 +60,12 @@ GeneralFunctorFluidProps::validParams()
   return params;
 }
 
-GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & parameters)
+template <bool is_ad>
+GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
+    const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
-    _eps(getFunctor<ADReal>(NS::porosity)),
+    _eps(getFunctor<GenericReal<is_ad>>(NS::porosity)),
     _d(getFunctor<Real>("characteristic_length")),
 
     _pressure_is_dynamic(getParam<bool>("solving_for_dynamic_pressure")),
@@ -69,11 +73,11 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _reference_pressure_value(getParam<Real>("reference_pressure")),
     _gravity_vec(getParam<Point>("gravity")),
 
-    _pressure(getFunctor<ADReal>(NS::pressure)),
-    _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
-    _speed(getFunctor<ADReal>(NS::speed)),
+    _pressure(getFunctor<GenericReal<is_ad>>(NS::pressure)),
+    _T_fluid(getFunctor<GenericReal<is_ad>>(NS::T_fluid)),
+    _speed(getFunctor<GenericReal<is_ad>>(NS::speed)),
     _force_define_density(getParam<bool>("force_define_density")),
-    _rho(getFunctor<ADReal>(NS::density)),
+    _rho(getFunctor<GenericReal<is_ad>>(NS::density)),
     _mu_rampdown(getFunction("mu_rampdown")),
     _neglect_derivatives_of_density_time_derivative(
         getParam<bool>("neglect_derivatives_of_density_time_derivative"))
@@ -98,67 +102,72 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   if (!_pressure_is_dynamic)
   {
     if (!isParamValid(NS::density) || _force_define_density)
-      addFunctorProperty<ADReal>(NS::density,
-                                 [this](const auto & r, const auto & t) -> ADReal
-                                 { return _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
+      addFunctorProperty<GenericReal<is_ad>>(
+          NS::density,
+          [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+          { return _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
-    addFunctorProperty<ADReal>(NS::cv,
-                               [this](const auto & r, const auto & t) -> ADReal
-                               { return _fluid.cv_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::cv,
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _fluid.cv_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
-    const auto & cp =
-        addFunctorProperty<ADReal>(NS::cp,
-                                   [this](const auto & r, const auto & t) -> ADReal
-                                   { return _fluid.cp_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
+    const auto & cp = addFunctorProperty<GenericReal<is_ad>>(
+        NS::cp,
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _fluid.cp_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
-    const auto & mu = addFunctorProperty<ADReal>(
+    const auto & mu = addFunctorProperty<GenericReal<is_ad>>(
         NS::mu,
-        [this](const auto & r, const auto & t) -> ADReal
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
         { return _mu_rampdown(r, t) * _fluid.mu_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
-    const auto & k =
-        addFunctorProperty<ADReal>(NS::k,
-                                   [this](const auto & r, const auto & t) -> ADReal
-                                   { return _fluid.k_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
+    const auto & k = addFunctorProperty<GenericReal<is_ad>>(
+        NS::k,
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _fluid.k_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
     //
     // Time derivatives of fluid properties
     //
     if (_neglect_derivatives_of_density_time_derivative)
     {
-      addFunctorProperty<ADReal>(
+      addFunctorProperty<GenericReal<is_ad>>(
           NS::time_deriv(NS::density),
-          [this](const auto & r, const auto & t) -> ADReal
+          [this](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             Real rho, drho_dp, drho_dT;
-            _fluid.rho_from_p_T(
-                _pressure(r, t).value(), _T_fluid(r, t).value(), rho, drho_dp, drho_dT);
+            _fluid.rho_from_p_T(MetaPhysicL::raw_value(_pressure(r, t)),
+                                MetaPhysicL::raw_value(_T_fluid(r, t)),
+                                rho,
+                                drho_dp,
+                                drho_dT);
             return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
           });
     }
     else
     {
-      addFunctorProperty<ADReal>(
+      addFunctorProperty<GenericReal<is_ad>>(
           NS::time_deriv(NS::density),
-          [this](const auto & r, const auto & t) -> ADReal
+          [this](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
-            ADReal rho, drho_dp, drho_dT;
+            GenericReal<is_ad> rho, drho_dp, drho_dT;
             _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t), rho, drho_dp, drho_dT);
             return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
           });
     }
 
-    addFunctorProperty<ADReal>(NS::time_deriv(NS::cp),
-                               [this](const auto & r, const auto & t) -> ADReal
-                               {
-                                 Real dcp_dp, dcp_dT, dummy;
-                                 auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-                                 auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-                                 _fluid.cp_from_p_T(
-                                     raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::time_deriv(NS::cp),
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          Real dcp_dp, dcp_dT, dummy;
+          const auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+          const auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+          _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
 
-                                 return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
-                               });
+          return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
+        });
 
     //
     // Temperature and pressure derivatives, to help with computing time derivatives
@@ -264,14 +273,14 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     // Fluid adimensional quantities, used in numerous correlations
     //
 
-    addFunctorProperty<ADReal>(NS::Prandtl,
-                               [&cp, &mu, &k](const auto & r, const auto & t) -> ADReal
-                               {
-                                 static constexpr Real small_number = 1e-8;
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::Prandtl,
+        [&cp, &mu, &k](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          static constexpr Real small_number = 1e-8;
 
-                                 return fp::prandtl(
-                                     cp(r, t), mu(r, t), std::max(k(r, t), small_number));
-                               });
+          return fp::prandtl(cp(r, t), mu(r, t), std::max(k(r, t), small_number));
+        });
 
     addFunctorProperty<Real>(
         derivativePropertyNameFirst(NS::Prandtl, NS::pressure),
@@ -303,17 +312,17 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     // we don't redundantly check that viscosity is not too close to zero.
     //
 
-    const auto & Re =
-        addFunctorProperty<ADReal>(NS::Reynolds,
-                                   [this, &mu](const auto & r, const auto & t) -> ADReal
-                                   {
-                                     static constexpr Real small_number = 1e-8;
-                                     return std::max(fp::reynolds(_rho(r, t),
-                                                                  _eps(r, t) * _speed(r, t),
-                                                                  _d(r, t),
-                                                                  std::max(mu(r, t), small_number)),
-                                                     small_number);
-                                   });
+    const auto & Re = addFunctorProperty<GenericReal<is_ad>>(
+        NS::Reynolds,
+        [this, &mu](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          static constexpr Real small_number = 1e-8;
+          return std::max(fp::reynolds(_rho(r, t),
+                                       _eps(r, t) * _speed(r, t),
+                                       _d(r, t),
+                                       std::max(mu(r, t), small_number)),
+                          small_number);
+        });
 
     addFunctorProperty<Real>(
         derivativePropertyNameFirst(NS::Reynolds, NS::pressure),
@@ -338,29 +347,28 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
         });
 
     // (hydraulic) Reynolds number
-    addFunctorProperty<ADReal>(NS::Reynolds_hydraulic,
-                               [this, &Re](const auto & r, const auto & t) -> ADReal
-                               {
-                                 static constexpr Real small_number = 1e-8;
-                                 return Re(r, t) / std::max(1 - _eps(r, t), small_number);
-                               });
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::Reynolds_hydraulic,
+        [this, &Re](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          static constexpr Real small_number = 1e-8;
+          return Re(r, t) / std::max(1 - _eps(r, t), small_number);
+        });
 
     // (interstitial) Reynolds number
-    addFunctorProperty<ADReal>(NS::Reynolds_interstitial,
-                               [this, &Re](const auto & r, const auto & t) -> ADReal
-                               {
-                                 return Re(r, t) / _eps(r, t);
-                                 ;
-                               });
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::Reynolds_interstitial,
+        [this, &Re](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return Re(r, t) / _eps(r, t); });
   }
   else
   {
 
     const auto & rho =
         (!isParamValid(NS::density) || _force_define_density)
-            ? addFunctorProperty<ADReal>(
+            ? addFunctorProperty<GenericReal<is_ad>>(
                   NS::density,
-                  [this](const auto & r, const auto & t) -> ADReal
+                  [this](const auto & r, const auto & t) -> GenericReal<is_ad>
                   {
                     auto total_pressure = _pressure(r, t) + _reference_pressure_value;
                     // TODO: we should be integrating this term
@@ -369,21 +377,21 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
                         rho_approx * _gravity_vec * (r.getPoint() - _reference_pressure_point);
                     return _fluid.rho_from_p_T(total_pressure, _T_fluid(r, t));
                   })
-            : getFunctor<ADReal>(NS::density);
+            : getFunctor<GenericReal<is_ad>>(NS::density);
 
-    addFunctorProperty<ADReal>(NS::cv,
-                               [this, &rho](const auto & r, const auto & t) -> ADReal
-                               {
-                                 const auto total_pressure =
-                                     _pressure(r, t) + _reference_pressure_value +
-                                     rho(r, t) * _gravity_vec *
-                                         (r.getPoint() - _reference_pressure_point);
-                                 return _fluid.cv_from_p_T(total_pressure, _T_fluid(r, t));
-                               });
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::cv,
+        [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          const auto total_pressure =
+              _pressure(r, t) + _reference_pressure_value +
+              rho(r, t) * _gravity_vec * (r.getPoint() - _reference_pressure_point);
+          return _fluid.cv_from_p_T(total_pressure, _T_fluid(r, t));
+        });
 
-    const auto & cp = addFunctorProperty<ADReal>(
+    const auto & cp = addFunctorProperty<GenericReal<is_ad>>(
         NS::cp,
-        [this, &rho](const auto & r, const auto & t) -> ADReal
+        [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
               _pressure(r, t) + _reference_pressure_value +
@@ -391,9 +399,9 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
           return _fluid.cp_from_p_T(total_pressure, _T_fluid(r, t));
         });
 
-    const auto & mu = addFunctorProperty<ADReal>(
+    const auto & mu = addFunctorProperty<GenericReal<is_ad>>(
         NS::mu,
-        [this, &rho](const auto & r, const auto & t) -> ADReal
+        [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
               _pressure(r, t) + _reference_pressure_value +
@@ -401,9 +409,9 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
           return _mu_rampdown(r, t) * _fluid.mu_from_p_T(total_pressure, _T_fluid(r, t));
         });
 
-    const auto & k = addFunctorProperty<ADReal>(
+    const auto & k = addFunctorProperty<GenericReal<is_ad>>(
         NS::k,
-        [this, &rho](const auto & r, const auto & t) -> ADReal
+        [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
               _pressure(r, t) + _reference_pressure_value +
@@ -416,37 +424,40 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     //
     if (_neglect_derivatives_of_density_time_derivative)
     {
-      addFunctorProperty<ADReal>(
+      addFunctorProperty<GenericReal<is_ad>>(
           NS::time_deriv(NS::density),
-          [this, &rho](const auto & r, const auto & t) -> ADReal
+          [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             const auto total_pressure =
                 _pressure(r, t) + _reference_pressure_value +
                 rho(r, t) * _gravity_vec * (r.getPoint() - _reference_pressure_point);
             Real rho, drho_dp, drho_dT;
-            _fluid.rho_from_p_T(
-                total_pressure.value(), _T_fluid(r, t).value(), rho, drho_dp, drho_dT);
+            _fluid.rho_from_p_T(MetaPhysicL::raw_value(total_pressure),
+                                MetaPhysicL::raw_value(_T_fluid(r, t)),
+                                rho,
+                                drho_dp,
+                                drho_dT);
             return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
           });
     }
     else
     {
-      addFunctorProperty<ADReal>(
+      addFunctorProperty<GenericReal<is_ad>>(
           NS::time_deriv(NS::density),
-          [this, &rho](const auto & r, const auto & t) -> ADReal
+          [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             const auto total_pressure =
                 _pressure(r, t) + _reference_pressure_value +
                 rho(r, t) * _gravity_vec * (r.getPoint() - _reference_pressure_point);
-            ADReal rho, drho_dp, drho_dT;
+            GenericReal<is_ad> rho, drho_dp, drho_dT;
             _fluid.rho_from_p_T(total_pressure, _T_fluid(r, t), rho, drho_dp, drho_dT);
             return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
           });
     }
 
-    addFunctorProperty<ADReal>(
+    addFunctorProperty<GenericReal<is_ad>>(
         NS::time_deriv(NS::cp),
-        [this, &rho](const auto & r, const auto & t) -> ADReal
+        [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
               _pressure(r, t) + _reference_pressure_value +
@@ -587,14 +598,14 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     // Fluid adimensional quantities, used in numerous correlations
     //
 
-    addFunctorProperty<ADReal>(NS::Prandtl,
-                               [&cp, &mu, &k](const auto & r, const auto & t) -> ADReal
-                               {
-                                 static constexpr Real small_number = 1e-8;
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::Prandtl,
+        [&cp, &mu, &k](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          static constexpr Real small_number = 1e-8;
 
-                                 return fp::prandtl(
-                                     cp(r, t), mu(r, t), std::max(k(r, t), small_number));
-                               });
+          return fp::prandtl(cp(r, t), mu(r, t), std::max(k(r, t), small_number));
+        });
 
     addFunctorProperty<Real>(
         derivativePropertyNameFirst(NS::Prandtl, NS::pressure),
@@ -626,17 +637,17 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     // we don't redundantly check that viscosity is not too close to zero.
     //
 
-    const auto & Re =
-        addFunctorProperty<ADReal>(NS::Reynolds,
-                                   [this, &mu](const auto & r, const auto & t) -> ADReal
-                                   {
-                                     static constexpr Real small_number = 1e-8;
-                                     return std::max(fp::reynolds(_rho(r, t),
-                                                                  _eps(r, t) * _speed(r, t),
-                                                                  _d(r, t),
-                                                                  std::max(mu(r, t), small_number)),
-                                                     small_number);
-                                   });
+    const auto & Re = addFunctorProperty<GenericReal<is_ad>>(
+        NS::Reynolds,
+        [this, &mu](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          static constexpr Real small_number = 1e-8;
+          return std::max(fp::reynolds(_rho(r, t),
+                                       _eps(r, t) * _speed(r, t),
+                                       _d(r, t),
+                                       std::max(mu(r, t), small_number)),
+                          small_number);
+        });
 
     addFunctorProperty<Real>(
         derivativePropertyNameFirst(NS::Reynolds, NS::pressure),
@@ -661,19 +672,21 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
         });
 
     // (hydraulic) Reynolds number
-    addFunctorProperty<ADReal>(NS::Reynolds_hydraulic,
-                               [this, &Re](const auto & r, const auto & t) -> ADReal
-                               {
-                                 static constexpr Real small_number = 1e-8;
-                                 return Re(r, t) / std::max(1 - _eps(r, t), small_number);
-                               });
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::Reynolds_hydraulic,
+        [this, &Re](const auto & r, const auto & t) -> GenericReal<is_ad>
+        {
+          static constexpr Real small_number = 1e-8;
+          return Re(r, t) / std::max(1 - _eps(r, t), small_number);
+        });
 
     // (interstitial) Reynolds number
-    addFunctorProperty<ADReal>(NS::Reynolds_interstitial,
-                               [this, &Re](const auto & r, const auto & t) -> ADReal
-                               {
-                                 return Re(r, t) / _eps(r, t);
-                                 ;
-                               });
+    addFunctorProperty<GenericReal<is_ad>>(
+        NS::Reynolds_interstitial,
+        [this, &Re](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return Re(r, t) / _eps(r, t); });
   }
 }
+
+template class GeneralFunctorFluidPropsTempl<false>;
+template class GeneralFunctorFluidPropsTempl<true>;

@@ -43,6 +43,13 @@ TEST(LinearInterpolationTest, sample)
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(1.1), 5.);
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.), 1.);
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.1), 1.);
+
+  // For NaN input, output should also be NaN; use property NaN != NaN to test
+  const Real x_nan = std::sqrt(-1.0);
+  const Real y_nan = interp.sample(x_nan);
+  const Real dydx_nan = interp.sampleDerivative(x_nan);
+  EXPECT_TRUE(y_nan != y_nan);
+  EXPECT_TRUE(dydx_nan != dydx_nan);
 }
 
 TEST(LinearInterpolationTest, automatic_differentiation_sample)

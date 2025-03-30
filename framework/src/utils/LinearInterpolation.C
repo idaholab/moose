@@ -70,11 +70,14 @@ LinearInterpolation::sample(const T & x) const
   }
 
   auto upper = std::upper_bound(_x.begin(), _x.end(), x);
-  int i = std::distance(_x.begin(), upper) - 1;
-  return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
-
-  // If this point is reached, x must be a NaN.
-  mooseException("Sample point in LinearInterpolation is a NaN.");
+  const auto i = cast_int<std::size_t>(std::distance(_x.begin(), upper) - 1);
+  if (i == cast_int<std::size_t>(_x.size() - 1))
+    // std::upper_bound returns the end() iterator if there are no elements that are
+    // an upper bound to the value. Since x >= _x.back() has already returned above,
+    // this means x is a NaN, so we return a NaN here.
+    return std::nan("");
+  else
+    return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
 }
 
 template Real LinearInterpolation::sample<Real>(const Real &) const;
@@ -102,11 +105,14 @@ LinearInterpolation::sampleDerivative(const T & x) const
   }
 
   auto upper = std::upper_bound(_x.begin(), _x.end(), x);
-  int i = std::distance(_x.begin(), upper) - 1;
-  return (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]);
-
-  // If this point is reached, x must be a NaN.
-  mooseException("Sample point in LinearInterpolation is a NaN.");
+  const auto i = cast_int<std::size_t>(std::distance(_x.begin(), upper) - 1);
+  if (i == cast_int<std::size_t>(_x.size() - 1))
+    // std::upper_bound returns the end() iterator if there are no elements that are
+    // an upper bound to the value. Since x >= _x.back() has already returned above,
+    // this means x is a NaN, so we return a NaN here.
+    return std::nan("");
+  else
+    return (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]);
 }
 
 template Real LinearInterpolation::sampleDerivative<Real>(const Real &) const;

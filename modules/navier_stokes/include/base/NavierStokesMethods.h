@@ -169,4 +169,19 @@ divergence(const TensorValue<T> & gradient,
     div += value(rz_radial_coord) / point(rz_radial_coord);
   return div;
 }
+
+/**
+ * Compute wall heat transfer coefficient
+ * @param Nu Nusselt number
+ * @param k Thermal conductivity
+ * @param D_h Hydraulic diameter
+ *
+ * @return the wall heat transfer coefficient
+ */
+template <typename T1, typename T2, typename T3>
+auto
+wallHeatTransferCoefficient(const T1 & Nu, const T2 & k, const T3 & D_h)
+{
+  return Nu * k / D_h;
+}
 }

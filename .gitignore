@@ -269,9 +269,6 @@ share/
 *.code-workspace
 .cache
 
-# clangd
-.cache
-
 # App Resource file (including modules/)
 /test/moose_test.yaml
 /modules/functional_expansion_tools/functional_expansion_tools.yaml
