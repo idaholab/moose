@@ -414,24 +414,14 @@ template <typename OutputType>
 std::pair<bool, std::vector<const FVFluxBC *>>
 MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 {
-  std::vector<const FVFluxBC *> bcs;
+  if (!_flux_map_setup)
+    const_cast<MooseVariableFV<OutputType> *>(this)->determineBoundaryToFluxBCMap();
 
-  this->_subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVFluxBC")
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribBoundaries>(fi.boundaryIDs())
-      .template condition<AttribVar>(_var_num)
-      .template condition<AttribSysNum>(this->_sys.number())
-      .queryInto(bcs);
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto it = _boundary_id_to_flux_bc.find(bnd_id); it != _boundary_id_to_flux_bc.end())
+      return {true, it->second};
 
-  bool has_flux_bc = bcs.size() > 0;
-
-  if (has_flux_bc)
-    return std::make_pair(true, bcs);
-  else
-    return std::make_pair(false, std::vector<const FVFluxBC *>());
+  return std::make_pair(false, std::vector<const FVFluxBC *>());
 }
 
 template <typename OutputType>
@@ -886,6 +876,37 @@ MooseVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
   }
 
   _dirichlet_map_setup = true;
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::determineBoundaryToFluxBCMap()
+{
+  _boundary_id_to_flux_bc.clear();
+  std::vector<const FVFluxBC *> bcs;
+
+  // I believe because query() returns by value but condition returns by reference that binding to a
+  // const lvalue reference results in the query() getting destructed and us holding onto a dangling
+  // reference. I think that condition returned by value we would be able to bind to a const lvalue
+  // reference here. But as it is we'll bind to a regular lvalue
+  const auto base_query = this->_subproblem.getMooseApp()
+                              .theWarehouse()
+                              .query()
+                              .template condition<AttribSystem>("FVFluxBC")
+                              .template condition<AttribThread>(_tid)
+                              .template condition<AttribVar>(_var_num)
+                              .template condition<AttribSysNum>(this->_sys.number());
+
+  for (const auto bnd_id : this->_mesh.getBoundaryIDs())
+  {
+    auto base_query_copy = base_query;
+    base_query_copy.template condition<AttribBoundaries>(std::set<BoundaryID>({bnd_id}))
+        .queryInto(bcs);
+    if (!bcs.empty())
+      _boundary_id_to_flux_bc.emplace(bnd_id, bcs);
+  }
+
+  _flux_map_setup = true;
 }
 
 template class MooseVariableFV<Real>;
