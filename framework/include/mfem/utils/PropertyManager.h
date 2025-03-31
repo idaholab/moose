@@ -46,67 +46,68 @@ public:
   };
 
   void declareScalar(const std::string & name, std::shared_ptr<mfem::Coefficient> coef);
-  void declareScalar(const std::string & name, global_t, std::shared_ptr<mfem::Coefficient> coef);
-  void declareScalar(const std::string & name,
-                     const std::vector<std::string> & blocks,
-                     std::shared_ptr<mfem::Coefficient> coef);
   template <class P, class... Args>
-  void
-  declareScalar(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
+  void declareScalar(const std::string & name, Args &&... args)
   {
-    this->declareScalar(name, blocks, _scalar_manager.make<P>(args...));
+    this->declareScalarProperty<P>(name, std::vector<std::string>(), args...);
   }
+
+  void declareScalarProperty(const std::string & name,
+                             const std::vector<std::string> & blocks,
+                             std::shared_ptr<mfem::Coefficient> coef);
   template <class P, class... Args>
-  void declareScalar(const std::string & name, global_t, Args &&... args)
+  void declareScalarProperty(const std::string & name,
+                             const std::vector<std::string> & blocks,
+                             Args &&... args)
   {
-    this->declareScalar<P>(name, std::vector<std::string>(), args...);
+    this->declareScalarProperty(name, blocks, _scalar_manager.make<P>(args...));
   }
 
   void declareVector(const std::string & name, std::shared_ptr<mfem::VectorCoefficient> coef);
-  void
-  declareVector(const std::string & name, global_t, std::shared_ptr<mfem::VectorCoefficient> coef);
-  void declareVector(const std::string & name,
-                     const std::vector<std::string> & blocks,
-                     std::shared_ptr<mfem::VectorCoefficient> coef);
   template <class P, class... Args>
-  void
-  declareVector(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
+  void declareVector(const std::string & name, Args &&... args)
   {
-    this->declareVector(name, blocks, _vector_manager.make<P>(args...));
+    this->declareVectorProperty<P>(name, std::vector<std::string>(), args...);
   }
+
+  void declareVectorProperty(const std::string & name,
+                             const std::vector<std::string> & blocks,
+                             std::shared_ptr<mfem::VectorCoefficient> coef);
   template <class P, class... Args>
-  void declareVector(const std::string & name, global_t, Args &&... args)
+  void declareVectorProperty(const std::string & name,
+                             const std::vector<std::string> & blocks,
+                             Args &&... args)
   {
-    this->declareVector<P>(name, std::vector<std::string>(), args...);
+    this->declareVectorProperty(name, blocks, _vector_manager.make<P>(args...));
   }
 
   void declareMatrix(const std::string & name, std::shared_ptr<mfem::MatrixCoefficient> coef);
-  void
-  declareMatrix(const std::string & name, global_t, std::shared_ptr<mfem::MatrixCoefficient> coef);
-  void declareMatrix(const std::string & name,
-                     const std::vector<std::string> & blocks,
-                     std::shared_ptr<mfem::MatrixCoefficient> coef);
   template <class P, class... Args>
-  void
-  declareMatrix(const std::string & name, const std::vector<std::string> & blocks, Args &&... args)
+  void declareMatrix(const std::string & name, Args &&... args)
   {
-    this->declareMatrix(name, blocks, _matrix_manager.make<P>(args...));
-  }
-  template <class P, class... Args>
-  void declareMatrix(const std::string & name, global_t, Args &&... args)
-  {
-    this->declareMatrix<P>(name, std::vector<std::string>(), args...);
+    this->declareMatrixProperty<P>(name, std::vector<std::string>(), args...);
   }
 
-  mfem::Coefficient & getScalarProperty(const std::string name);
-  mfem::VectorCoefficient & getVectorProperty(const std::string name);
-  mfem::MatrixCoefficient & getMatrixProperty(const std::string name);
-  std::shared_ptr<mfem::Coefficient> getScalarPropertyPtr(const std::string name);
-  std::shared_ptr<mfem::VectorCoefficient> getVectorPropertyPtr(const std::string name);
-  std::shared_ptr<mfem::MatrixCoefficient> getMatrixPropertyPtr(const std::string name);
-  bool scalarIsDefined(const std::string & name, const std::string & block) const;
-  bool vectorIsDefined(const std::string & name, const std::string & block) const;
-  bool matrixIsDefined(const std::string & name, const std::string & block) const;
+  void declareMatrixProperty(const std::string & name,
+                             const std::vector<std::string> & blocks,
+                             std::shared_ptr<mfem::MatrixCoefficient> coef);
+  template <class P, class... Args>
+  void declareMatrixProperty(const std::string & name,
+                             const std::vector<std::string> & blocks,
+                             Args &&... args)
+  {
+    this->declareMatrixProperty(name, blocks, _matrix_manager.make<P>(args...));
+  }
+
+  mfem::Coefficient & getScalarCoefficient(const std::string name);
+  mfem::VectorCoefficient & getVectorCoefficient(const std::string name);
+  mfem::MatrixCoefficient & getMatrixCoefficient(const std::string name);
+  std::shared_ptr<mfem::Coefficient> getScalarCoefficientPtr(const std::string name);
+  std::shared_ptr<mfem::VectorCoefficient> getVectorCoefficientPtr(const std::string name);
+  std::shared_ptr<mfem::MatrixCoefficient> getMatrixCoefficientPtr(const std::string name);
+  bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
+  bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
+  bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
 
   const static global_t global;
 

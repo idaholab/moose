@@ -25,7 +25,7 @@ public:
 private:
   const VariableName _var_name;
   const FunctionName _coeff_name;
-  const std::shared_ptr<mfem::Coefficient> _coeff;
+  mfem::Coefficient & _coeff;
   mfem::GridFunction & _var;
 };
 

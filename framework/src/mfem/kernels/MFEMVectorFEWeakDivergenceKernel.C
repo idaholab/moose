@@ -22,7 +22,7 @@ MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
     const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
-    _coef(getScalarProperty(_coef_name))
+    _coef(getScalarCoefficient(_coef_name))
 {
 }
 

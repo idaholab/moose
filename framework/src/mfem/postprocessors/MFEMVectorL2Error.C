@@ -22,8 +22,8 @@ MFEMVectorL2Error::MFEMVectorL2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     _var_name(getParam<VariableName>("variable")),
     _coeff_name(getParam<FunctionName>("function")),
-    _vec_coeff(getMFEMProblem().getVectorFunctionCoefficient(_coeff_name)),
-    _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(_var_name))
+    _vec_coeff(getVectorCoefficient(_coeff_name)),
+    _var(getMFEMProblem().getProblemData()._gridfunctions.GetRef(_var_name))
 {
 }
 
@@ -40,7 +40,7 @@ MFEMVectorL2Error::execute()
 PostprocessorValue
 MFEMVectorL2Error::getValue() const
 {
-  return _var.ComputeL2Error(*_vec_coeff);
+  return _var.ComputeL2Error(_vec_coeff);
 }
 
 #endif

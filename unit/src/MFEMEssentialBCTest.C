@@ -141,7 +141,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctorDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::GridFunctionCoefficient scalar_variable(&_scalar_gridfunc);
-  mfem::Coefficient & expected(_mfem_problem->getProperties().getScalarProperty("func1"));
+  mfem::Coefficient & expected(_mfem_problem->getProperties().getScalarCoefficient("func1"));
   check_boundary(
       1,
       _scalar_fes,
@@ -207,7 +207,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::VectorGridFunctionCoefficient variable(&_vector_h1_gridfunc);
-  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorProperty("func2"));
+  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorCoefficient("func2"));
   check_boundary(
       1,
       _vector_h1_fes,
@@ -282,7 +282,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorNormalDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::VectorGridFunctionCoefficient variable(&_vector_hdiv_gridfunc);
-  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorProperty("func2"));
+  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorCoefficient("func2"));
   check_boundary(
       1,
       _vector_hdiv_fes,
@@ -359,7 +359,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorTangentialDirichletBC)
 
   // Check the correct boundary values have been applied
   mfem::VectorGridFunctionCoefficient variable(&_vector_hcurl_gridfunc);
-  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorProperty("func2"));
+  mfem::VectorCoefficient & function(_mfem_problem->getProperties().getVectorCoefficient("func2"));
   check_boundary(
       1,
       _vector_hcurl_fes,
