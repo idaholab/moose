@@ -1,0 +1,3 @@
+time,check_euler_angle_1,check_euler_angle_2,check_euler_angle_3,check_rotation_00,check_rotation_01,check_rotation_02,check_rotation_11,check_rotation_12,check_rotation_22
+0,0,0,0,0,0,0,0,0,0
+0.05,166.1992525252,37.395864183612,206.69485638278,0.80884227539048,0.1432933371891,-0.18917407582563,0.82339909167649,-0.25480364973238,0.77052440970826
