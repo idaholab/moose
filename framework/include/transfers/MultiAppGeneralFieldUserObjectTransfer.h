@@ -25,6 +25,8 @@ public:
   MultiAppGeneralFieldUserObjectTransfer(const InputParameters & parameters);
 
 protected:
+  virtual void execute() override;
+
   virtual void prepareEvaluationOfInterpValues(const unsigned int /* var_index */) override;
 
   virtual void

@@ -67,6 +67,31 @@ MultiAppGeneralFieldUserObjectTransfer::MultiAppGeneralFieldUserObjectTransfer(
 }
 
 void
+MultiAppGeneralFieldUserObjectTransfer::execute()
+{
+  // Execute the user object if it was specified to execute on TRANSFER
+  switch (_current_direction)
+  {
+    case TO_MULTIAPP:
+    {
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _user_object_name);
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _user_object_name);
+      break;
+    }
+    case FROM_MULTIAPP:
+    {
+      getFromMultiApp()->problemBase().computeUserObjectByName(
+          EXEC_TRANSFER, Moose::PRE_AUX, _user_object_name);
+      getFromMultiApp()->problemBase().computeUserObjectByName(
+          EXEC_TRANSFER, Moose::POST_AUX, _user_object_name);
+    }
+  }
+
+  // Perfom the actual transfer
+  MultiAppGeneralFieldTransfer::execute();
+}
+
+void
 MultiAppGeneralFieldUserObjectTransfer::prepareEvaluationOfInterpValues(
     const unsigned int /* var_index */)
 {

@@ -65,6 +65,25 @@ MultiAppPostprocessorTransfer::execute()
 {
   TIME_SECTION("MultiAppPostprocessorTransfer::execute()", 5, "Transferring a postprocessor");
 
+  // Execute the postprocessor if it was specified to execute on TRANSFER
+  switch (_current_direction)
+  {
+    case TO_MULTIAPP:
+    {
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _from_pp_name);
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _from_pp_name);
+      break;
+    }
+    case FROM_MULTIAPP:
+    case BETWEEN_MULTIAPP:
+    {
+      getFromMultiApp()->problemBase().computeUserObjectByName(
+          EXEC_TRANSFER, Moose::PRE_AUX, _from_pp_name);
+      getFromMultiApp()->problemBase().computeUserObjectByName(
+          EXEC_TRANSFER, Moose::POST_AUX, _from_pp_name);
+    }
+  }
+
   switch (_current_direction)
   {
     case BETWEEN_MULTIAPP:
