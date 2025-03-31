@@ -1,5 +1,5 @@
 [Tests]
-  design = 'FCTFdisplacementIC.md'
+  design = 'FCTFdisplacementIC.md v&v/areva_fctf.md'
   issues = '#30069 #29501'
   [PNNL-12_ss]
       type = CSVDiff
@@ -12,6 +12,6 @@
       abs_zero = 1e-5
       max_threads = 1
       max_parallel = 1
-      requirement = 'The system will examine the subchannel solver for the AREVA_fctf deformed duct simulation'
+      requirement = 'The system should be able to model the deformed duct displacement in the AREVA_fctf simulation and produce consistent results'
   []
 []
