@@ -1,6 +1,6 @@
 # SCM model for the Oak Ridge National Laboratory (ORNL) 19-pin benchmark
 
-*Contact: Mauricio Tano, mauricio.tanoretamales@inl.gov*
+*Contact: Mauricio Tano, mauricio.tanoretamales.at.inl.gov*
 
 ## Benchmark description
 
