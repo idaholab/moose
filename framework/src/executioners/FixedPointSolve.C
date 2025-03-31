@@ -241,7 +241,8 @@ FixedPointSolve::solve()
     }
 
     // To detect a new time step
-    if (_old_entering_time == _problem.time())
+    if (_old_entering_time == _problem.time() &&
+        _fixed_point_status != MooseFixedPointConvergenceReason::UNSOLVED)
     {
       // Keep track of the iteration number of the main app
       _main_fixed_point_it++;
