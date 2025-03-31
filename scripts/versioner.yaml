@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.03.31
+    version: 2025.04.08
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: libmesh-vtk, peacock, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.03.31
+    version: 2025.04.08
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -37,7 +37,7 @@ packages:
       - conda/libmesh-vtk/build.sh
   # dependers: peacock
   peacock:
-    version: 2025.03.31
+    version: 2025.04.08
     conda: conda/peacock
     templates:
       conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml

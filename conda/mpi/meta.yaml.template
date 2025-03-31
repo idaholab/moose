@@ -8,9 +8,6 @@
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set version = "__VERSIONER_MPI_VERSION__" %}
 
-# HDF5 Version
-{% set hdf5_version = "1.14.2" %}
-
 package:
   name: moose-mpi
   version: {{ version }}
@@ -60,7 +57,7 @@ outputs:
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
-        - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+        - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
       run:
         - {{ mpi }} {{ mpi_version }}
         - {{ mpi }}-mpicc
@@ -85,9 +82,9 @@ outputs:
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
-        - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
+        - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
+        - {{ moose_libexpat }}
         - automake 1.16.5
-        - libexpat 2.5.0
         - bison 3.4
         - zfp
         - autoconf
