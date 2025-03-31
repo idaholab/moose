@@ -10,7 +10,29 @@
   var_name_base = gr
 []
 
+[Variables]
+  [PolycrystalVariables]
+  []
+[]
+
+[Kernels]
+  [PolycrystalKernel]
+  []
+[]
+
 [AuxVariables]
+[phi1]
+family = MONOMIAL
+order = CONSTANT
+[]
+[Phi]
+family = MONOMIAL
+order = CONSTANT
+[]
+[phi2]
+family = MONOMIAL
+order = CONSTANT
+[]
   [crystrot_00]
     family = MONOMIAL
     order = CONSTANT
@@ -38,6 +60,27 @@
 []
 
 [AuxKernels]
+[phi1]
+    type = OutputEulerAngles
+    euler_angle_provider = ebsd_reader
+    output_euler_angle = phi1
+    grain_tracker = grain_tracker
+    variable = phi1
+  []
+  [Phi]
+    type = OutputEulerAngles
+    euler_angle_provider = ebsd_reader
+    output_euler_angle = Phi
+    grain_tracker = grain_tracker
+    variable = Phi
+  []
+  [phi2]
+    type = OutputEulerAngles
+    euler_angle_provider = ebsd_reader
+    output_euler_angle = phi2
+    grain_tracker = grain_tracker
+    variable = phi2
+  []
   [aux_crystrot_00]
     type = MaterialRankTwoTensorAux
     i = 0
@@ -123,33 +166,6 @@
   []
 []
 
-[Variables]
-  [PolycrystalVariables]
-  []
-[]
-
-[AuxVariables]
-  [phi1]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[Kernels]
-  [PolycrystalKernel]
-  []
-[]
-
-[AuxKernels]
-  [phi1]
-    type = OutputEulerAngles
-    euler_angle_provider = ebsd_reader
-    output_euler_angle = phi1
-    grain_tracker = grain_tracker
-    variable = phi1
-  []
-[]
-
 [Materials]
   [CuGrGr]
     type = GBEvolution
@@ -169,6 +185,38 @@
   [check_euler_angle_1]
     type = ElementAverageValue
     variable = phi1
+  []
+  [check_euler_angle_2]
+    type = ElementAverageValue
+    variable = Phi
+  []
+  [check_euler_angle_3]
+    type = ElementAverageValue
+    variable = phi2
+  []
+  [check_rotation_00]
+    type = ElementAverageValue
+    variable = crystrot_00
+  []
+  [check_rotation_01]
+    type = ElementAverageValue
+    variable = crystrot_01
+  []
+  [check_rotation_02]
+    type = ElementAverageValue
+    variable = crystrot_02
+  []
+  [check_rotation_11]
+    type = ElementAverageValue
+    variable = crystrot_11
+  []
+  [check_rotation_12]
+    type = ElementAverageValue
+    variable = crystrot_12
+  []
+  [check_rotation_22]
+    type = ElementAverageValue
+    variable = crystrot_22
   []
 []
 
