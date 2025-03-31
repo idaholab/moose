@@ -1,6 +1,6 @@
-# Deformed duct validation
+# AREVA FCTF deformed duct Validation case
 
-*Contact: Vasileios Kyriakopoulos, vasileios.kyriakopoulos@inl.gov*
+*Contact: Vasileios Kyriakopoulos, vasileios.kyriakopoulos.at.inl.gov*
 
 ## Validation overview
 
@@ -14,12 +14,12 @@ The FCTF in Richland, Washington, at the AREVA fuel fabrication facility was mod
 
 The deformed duct was a hexagonal duct where the inner duct walls had an axial and lateral (between duct corners for each duct face) profile shape, where the hexagonal flow area expanded from the nominal size and then contracted to return to the nominal hexagonal shape along the axial length. This bundle represents a later-in-life duct geometry. The deformed duct did not deform in the experiments, but instead was machined to represent the expected shape of a deformed duct due to conditions in the reactor. A picture of the deformed and the non-deformed duct is shown in [duct]. An illustration of the deformation, its functional form, and other geometric details of the deformed heated bundle are shown in [bundle].
 
-!media subchannel/v&v/duct.png
+!media subchannel/v&v/areva_fctf/duct.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=duct
        caption=Cross-sections of experimental fuel pin bundle [!citep](mays2017thermal).
 
-!media subchannel/v&v/bundle.png
+!media subchannel/v&v/areva_fctf/bundle.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=bundle
        caption=Illustration (not to scale) of the deformed heated bundle [!citep](mays2017thermal).
@@ -43,15 +43,15 @@ TerraPower was responsible for the RANS CFD computations. The CD-Adapco commerci
 
 SCM models the effect of the deformation of the duct by adapting the geometric parameters of the perimetric subchannels according to a representative per subchannel deformation variable, which is called Displacement (D). This variable is calculated based on the centroid coordinates of each subchannel. Particularly, the relative lateral location of the subchannel centroid in relation to the center of each deformed duct side ($x_i$) and the height ($z$). These values are plugged into the equation that describes the deformation, which is presented in [bundle]. The result is the value of Displacement D for each subchannel at a specific axial height.
 
-The geometric parameters affected by Displacement D are the wetted perimeter, the gap and the surface area. This consequently leads to a change in the hydraulic diameter, friction factor, and friction force, among others, which, in turn, have an effect on the resolved flow field via the conservation of momentum equations. The effect of the displacement value on the geometric parameters is graphically presented in [displacement].
+The geometric parameters affected by displacement D are the wetted perimeter, the gap and the surface area. This consequently leads to a change in the hydraulic diameter, friction factor, and friction force, among others, which, in turn, have an effect on the resolved flow field via the conservation of momentum equations. The effect of the displacement value on the geometric parameters is graphically presented in [displacement].
 
-!media subchannel/v&v/displacement.png
+!media subchannel/v&v/areva_fctf/displacement.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=displacement
        caption=SCM duct deformation modeling.
 
 
-The green line at the top of [displacement] represents an exaggerated version of the deformation. Based on the centroid location (black circles), the value of the Displacement variable $D$ is calculated. This calculation is performed per subchannel and the result of this calculation is used to perturb the other geometric parameters. A different treatment is used for the side and corner subchannels.
+The green line at the top of [displacement] represents an exaggerated version of the deformation. Based on the centroid location (black circles), the value of the displacement variable $D$ is calculated. This calculation is performed per subchannel and the result of this calculation is used to perturb the other geometric parameters. A different treatment is used for the side and corner subchannels.
 
 For the side subchannels, located in the perimeter of the hexagonal assembly, only the surface area and the gap between the pins and the duct are affected by the duct deformation. The wetted perimeter remains the same. The deformation is assumed constant along the side of the subchannel and a rectangular (blue-shaded) shaped area is added to the original surface area of the subchannel. This is an approximation since the actual deformation has the shape depicted in [bundle] and the green line in [displacement].
 
@@ -59,19 +59,21 @@ For the corner subchannel the surface area, gap, and wetted perimeter are affect
 
 ## Input files
 
-The SCM deformation model is implemented by an IC: [FCTFdisplacementIC](/ics/FCTFdisplacementIC.md)
+The SCM deformation model is implemented by a custom IC: [FCTFdisplacementIC](/ics/FCTFdisplacementIC.md)
 
 The deformed duct simulation is run by the following input files:
 
+main file:
 !listing /examples/areva_FCTF/FCTF_deformed.i language=cpp
 
+file that groups all the postprocessors:
 !listing /examples/areva_FCTF/deformed_duct_pp.i language=cpp
 
 ## Results
 
 Pressure measurements were taken from a pressure tap in the middle of Face B (see [DP-FaceB]) at various axial heights from the start of the heated section of the bundle.
 
-!media subchannel/v&v/DP-FaceB.png
+!media subchannel/v&v/areva_fctf/DP-FaceB.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=DP-FaceB
        caption=Deformed duct pressure measurements.
@@ -81,7 +83,7 @@ In all cases SCM over-predicts pressure drop in comparison to CFD and the experi
 
 Experimental temperature measurements are extracted from locations on the outer surface of specific unheated tubes, and on duct Face E, at two different axial heights. The first plane, known as Plane B, is at an axial height 4.4167P above the start of the heated section. At plane B the wire-wrapping is at 5 o'clock and the thermocouples are at 4 and 6 o'clock ([planeB]).
 
-!media subchannel/v&v/planeB.png
+!media subchannel/v&v/areva_fctf/planeB.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=planeB
        caption=Measurement plane B.
@@ -90,7 +92,7 @@ Pink dots show locations where temperatures were sampled from. Unheated tubes wh
 
 A plot of the temperature difference between the local temperature and the planar mean temperature for Planes B, where the planar mean is determined from an average of the local temperatures at the specified measurement points, is shown in [TEMP-PlaneB]. It should be noted that the experimental measurements and the CFD calculations, refer to point-wise surface measurements at the selected unheated pin surfaces. On the other hand, the SCM calculations refer to subchannel surface averages. For a more accurate representation of the locality of the pin surface temperature measure by the thermocouples, the selected subchannels that correspond to the pin temperature values, are those that are closer to both the thermocouple locations. More specifically, the two thermocouple values per pin and the two CFD calculations per pin, are averaged to give one value per pin which is associated with the value of the nearest subchannel.
 
-!media subchannel/v&v/TEMP-PlaneB.png
+!media subchannel/v&v/areva_fctf/TEMP-PlaneB.png
        style=width:60%;margin-bottom:2%;margin:auto;
        id=TEMP-PlaneB
        caption=Deformed duct temperature measurements on plane B.
