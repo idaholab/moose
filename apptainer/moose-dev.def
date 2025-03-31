@@ -163,7 +163,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${NEML2_SRC_DIR}
     git checkout ${NEML2_GIT_SHA}
     git submodule update --init --recursive
-    NEML2_SRC_DIR=${NEML2_SRC_DIR} NEML2_DIR=${NEML2_DIR} ${NEML2_BUILD_SCRIPT} --skip-submodule-update
+    # no oprof; oprof for neml2 is opt (release)
+    METHODS="opt devel dbg" NEML2_SRC_DIR=${NEML2_SRC_DIR} NEML2_DIR=${NEML2_DIR} ${NEML2_BUILD_SCRIPT} --skip-submodule-update
     rm -rf ${NEML2_SRC_DIR}
 {%- endif %}
 

@@ -182,7 +182,7 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   fi
 
   # CMake build type
-  if [[ ${METHOD} == "opt" ]]; then
+  if [[ ${METHOD} == "opt" ]] || [[ ${METHOD} == "oprof" ]]; then
     CMAKE_BUILD_TYPE="Release"
   elif [[ ${METHOD} == "devel" ]]; then
     CMAKE_BUILD_TYPE="RelWithDebInfo"
