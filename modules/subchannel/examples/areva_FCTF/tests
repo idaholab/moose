@@ -1,0 +1,17 @@
+[Tests]
+  design = 'FCTFdisplacementIC.md'
+  issues = '#30069 #29501'
+  [PNNL-12_ss]
+      type = CSVDiff
+      input = FCTF_deformed.i
+      csvdiff = FCTF_deformed_out.csv
+      # custom_cmp = 'test.exodiff'
+      method = '!DBG'
+      valgrind = NONE
+      recover = false
+      abs_zero = 1e-5
+      max_threads = 1
+      max_parallel = 1
+      requirement = 'The system will examine the subchannel solver for the AREVA_fctf deformed duct simulation'
+  []
+[]
