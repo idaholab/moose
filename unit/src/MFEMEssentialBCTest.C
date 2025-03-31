@@ -5,13 +5,13 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarDirichletBC.h"
-#include "MFEMScalarFunctionDirichletBC.h"
+#include "MFEMScalarFunctorDirichletBC.h"
 #include "MFEMVectorDirichletBC.h"
-#include "MFEMVectorFunctionDirichletBC.h"
+#include "MFEMVectorFunctorDirichletBC.h"
 #include "MFEMVectorNormalDirichletBC.h"
-#include "MFEMVectorFunctionNormalDirichletBC.h"
+#include "MFEMVectorFunctorNormalDirichletBC.h"
 #include "MFEMVectorTangentialDirichletBC.h"
-#include "MFEMVectorFunctionTangentialDirichletBC.h"
+#include "MFEMVectorFunctorTangentialDirichletBC.h"
 
 class MFEMEssentialBCTest : public MFEMObjectUnitTest
 {
@@ -121,17 +121,17 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
 }
 
 /**
- * Test MFEMScalarFunctionDirichletBC can be constructed and applied successfully
+ * Test MFEMScalarFunctorDirichletBC can be constructed and applied successfully
  */
-TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
+TEST_F(MFEMEssentialBCTest, MFEMScalarFunctorDirichletBC)
 {
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctionDirichletBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctorDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::string>("coefficient") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
-      addObject<MFEMScalarFunctionDirichletBC>("MFEMScalarFunctionDirichletBC", "bc1", bc_params);
+      addObject<MFEMScalarFunctorDirichletBC>("MFEMScalarFunctorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -187,17 +187,17 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
 }
 
 /**
- * Test MFEMVectorFunctionDirichletBC can be constructed and applied successfully
+ * Test MFEMVectorFunctorDirichletBC can be constructed and applied successfully
  */
-TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
+TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorDirichletBC)
 {
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionDirichletBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::string>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
-      addObject<MFEMVectorFunctionDirichletBC>("MFEMVectorFunctionDirichletBC", "bc1", bc_params);
+      addObject<MFEMVectorFunctorDirichletBC>("MFEMVectorFunctorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -262,17 +262,17 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
 }
 
 /**
- * Test MFEMVectorFunctionNormalDirichletBC can be constructed and applied successfully
+ * Test MFEMVectorFunctorNormalDirichletBC can be constructed and applied successfully
  */
-TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
+TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorNormalDirichletBC)
 {
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionNormalDirichletBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorNormalDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::string>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorFunctionNormalDirichletBC>(
-      "MFEMVectorFunctionNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMVectorFunctorNormalDirichletBC>(
+      "MFEMVectorFunctorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -339,17 +339,17 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
 }
 
 /**
- * Test MFEMVectorFunctionTangentialDirichletBC can be constructed and applied successfully
+ * Test MFEMVectorFunctorTangentialDirichletBC can be constructed and applied successfully
  */
-TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
+TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorTangentialDirichletBC)
 {
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionTangentialDirichletBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorTangentialDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::string>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorFunctionTangentialDirichletBC>(
-      "MFEMVectorFunctionTangentialDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMVectorFunctorTangentialDirichletBC>(
+      "MFEMVectorFunctorTangentialDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");

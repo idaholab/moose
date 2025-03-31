@@ -1,10 +1,10 @@
-# MFEMVectorFunctionNormalDirichletBC
+# MFEMVectorFunctorNormalDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctionNormalDirichletBC
+!syntax description /BCs/MFEMVectorFunctorNormalDirichletBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ a function of space and/or time.
 
 !listing test/tests/mfem/kernels/graddiv.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctionNormalDirichletBC
+!syntax parameters /BCs/MFEMVectorFunctorNormalDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctionNormalDirichletBC
+!syntax inputs /BCs/MFEMVectorFunctorNormalDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctionNormalDirichletBC
+!syntax children /BCs/MFEMVectorFunctorNormalDirichletBC
 
 !if-end!
 

@@ -3,12 +3,12 @@
 #pragma once
 #include "MFEMEssentialBC.h"
 
-class MFEMScalarFunctionDirichletBC : public MFEMEssentialBC
+class MFEMScalarFunctorDirichletBC : public MFEMEssentialBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarFunctionDirichletBC(const InputParameters & parameters);
+  MFEMScalarFunctorDirichletBC(const InputParameters & parameters);
 
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
 

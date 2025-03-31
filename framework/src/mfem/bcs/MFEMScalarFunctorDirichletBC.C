@@ -1,12 +1,11 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMScalarFunctionDirichletBC.h"
-#include "MFEMProblem.h"
+#include "MFEMScalarFunctorDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMScalarFunctionDirichletBC);
+registerMooseObject("MooseApp", MFEMScalarFunctorDirichletBC);
 
 InputParameters
-MFEMScalarFunctionDirichletBC::validParams()
+MFEMScalarFunctorDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
   params.addRequiredParam<std::string>(
@@ -14,7 +13,7 @@ MFEMScalarFunctionDirichletBC::validParams()
   return params;
 }
 
-MFEMScalarFunctionDirichletBC::MFEMScalarFunctionDirichletBC(const InputParameters & parameters)
+MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
     _coef_name(getParam<std::string>("coefficient")),
     _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
@@ -22,7 +21,7 @@ MFEMScalarFunctionDirichletBC::MFEMScalarFunctionDirichletBC(const InputParamete
 }
 
 void
-MFEMScalarFunctionDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
+MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
 {
   mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
   ess_bdrs = getBoundaries();

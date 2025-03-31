@@ -3,12 +3,12 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
 
-class MFEMVectorFunctionBoundaryIntegratedBC : public MFEMIntegratedBC
+class MFEMVectorFunctorNormalIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFunctionBoundaryIntegratedBC(const InputParameters & parameters);
+  MFEMVectorFunctorNormalIntegratedBC(const InputParameters & parameters);
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.

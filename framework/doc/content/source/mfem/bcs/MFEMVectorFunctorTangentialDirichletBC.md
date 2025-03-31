@@ -1,10 +1,10 @@
-# MFEMVectorFunctionTangentialDirichletBC
+# MFEMVectorFunctorTangentialDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax description /BCs/MFEMVectorFunctorTangentialDirichletBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ a function of space and/or time.
 
 !listing test/tests/mfem/kernels/curlcurl.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax parameters /BCs/MFEMVectorFunctorTangentialDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax inputs /BCs/MFEMVectorFunctorTangentialDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctionTangentialDirichletBC
+!syntax children /BCs/MFEMVectorFunctorTangentialDirichletBC
 
 !if-end!
 

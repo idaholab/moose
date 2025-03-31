@@ -1,10 +1,10 @@
-# MFEMVectorFunctionDirichletBC
+# MFEMVectorFunctorDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctionDirichletBC
+!syntax description /BCs/MFEMVectorFunctorDirichletBC
 
 ## Overview
 
@@ -15,11 +15,11 @@ vector $H^1$ conforming variable on the boundary. The boundary value is a functi
 
 !listing test/tests/mfem/kernels/linearelasticity.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctionDirichletBC
+!syntax parameters /BCs/MFEMVectorFunctorDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctionDirichletBC
+!syntax inputs /BCs/MFEMVectorFunctorDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctionDirichletBC
+!syntax children /BCs/MFEMVectorFunctorDirichletBC
 
 !if-end!
 
