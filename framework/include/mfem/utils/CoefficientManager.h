@@ -14,42 +14,38 @@
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
-#include "PropertyMap.h"
-#include "ObjectManager.h"
+#include "coefficient_map.h"
+#include "TrackedObjectFactory.h"
 
 namespace Moose::MFEM
 {
 
 /**
- * Class to manage material properties and associate them with MFEM
- * coefficients. In particular, it will handle the complexity of
- * piecewise coefficients being built up from multiple materials.
+ * Front-end class for creating and storing MFEM coefficients. They
+ * can be created so they are global (defined across the entire
+ * domain) or as piecewise material properties.
  */
-class PropertyManager
+class CoefficientManager
 {
 
 public:
-  PropertyManager(ScalarCoefficientManager & scalar_manager,
-                  VectorCoefficientManager & vector_manager,
-                  MatrixCoefficientManager & matrix_manager)
-    : _scalar_manager(scalar_manager),
-      _vector_manager(vector_manager),
-      _matrix_manager(matrix_manager),
-      _scalar_coeffs(scalar_manager),
-      _vector_coeffs(vector_manager),
-      _matrix_coeffs(matrix_manager)
+  CoefficientManager(TrackedScalarCoefficientFactory & scalar_factory,
+                     TrackedVectorCoefficientFactory & vector_factory,
+                     TrackedMatrixCoefficientFactory & matrix_factory)
+    : _scalar_factory(scalar_factory),
+      _vector_factory(vector_factory),
+      _matrix_factory(matrix_factory),
+      _scalar_coeffs(scalar_factory),
+      _vector_coeffs(vector_factory),
+      _matrix_coeffs(matrix_factory)
   {
   }
-
-  struct global_t
-  {
-  };
 
   void declareScalar(const std::string & name, std::shared_ptr<mfem::Coefficient> coef);
   template <class P, class... Args>
   void declareScalar(const std::string & name, Args &&... args)
   {
-    this->declareScalarProperty<P>(name, std::vector<std::string>(), args...);
+    this->declareScalar(name, _scalar_factory.make<P>(args...));
   }
 
   void declareScalarProperty(const std::string & name,
@@ -60,14 +56,14 @@ public:
                              const std::vector<std::string> & blocks,
                              Args &&... args)
   {
-    this->declareScalarProperty(name, blocks, _scalar_manager.make<P>(args...));
+    this->declareScalarProperty(name, blocks, _scalar_factory.make<P>(args...));
   }
 
   void declareVector(const std::string & name, std::shared_ptr<mfem::VectorCoefficient> coef);
   template <class P, class... Args>
   void declareVector(const std::string & name, Args &&... args)
   {
-    this->declareVectorProperty<P>(name, std::vector<std::string>(), args...);
+    this->declareVector(name, _vector_factory.make<P>(args...));
   }
 
   void declareVectorProperty(const std::string & name,
@@ -78,14 +74,14 @@ public:
                              const std::vector<std::string> & blocks,
                              Args &&... args)
   {
-    this->declareVectorProperty(name, blocks, _vector_manager.make<P>(args...));
+    this->declareVectorProperty(name, blocks, _vector_factory.make<P>(args...));
   }
 
   void declareMatrix(const std::string & name, std::shared_ptr<mfem::MatrixCoefficient> coef);
   template <class P, class... Args>
   void declareMatrix(const std::string & name, Args &&... args)
   {
-    this->declareMatrixProperty<P>(name, std::vector<std::string>(), args...);
+    this->declareMatrix(name, _matrix_factory.make<P>(args...));
   }
 
   void declareMatrixProperty(const std::string & name,
@@ -96,7 +92,7 @@ public:
                              const std::vector<std::string> & blocks,
                              Args &&... args)
   {
-    this->declareMatrixProperty(name, blocks, _matrix_manager.make<P>(args...));
+    this->declareMatrixProperty(name, blocks, _matrix_factory.make<P>(args...));
   }
 
   mfem::Coefficient & getScalarCoefficient(const std::string name);
@@ -109,12 +105,10 @@ public:
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
 
-  const static global_t global;
-
 private:
-  ScalarCoefficientManager & _scalar_manager;
-  VectorCoefficientManager & _vector_manager;
-  MatrixCoefficientManager & _matrix_manager;
+  TrackedScalarCoefficientFactory & _scalar_factory;
+  TrackedVectorCoefficientFactory & _vector_factory;
+  TrackedMatrixCoefficientFactory & _matrix_factory;
   ScalarMap _scalar_coeffs;
   VectorMap _vector_coeffs;
   MatrixMap _matrix_coeffs;

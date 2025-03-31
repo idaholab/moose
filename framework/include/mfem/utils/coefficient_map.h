@@ -10,34 +10,39 @@
 #include <vector>
 
 #include "MooseException.h"
+#include "MooseError.h"
 
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 
-#include "ObjectManager.h"
+#include "TrackedObjectFactory.h"
 
 namespace Moose::MFEM
 {
 
 /**
  * Class to manage MFEM coefficient objects representing material
- * properties. In particular, it will handle the complexity of
- * piecewise coefficients being built up from multiple materials.
+ * properties. It can build up piecewise coefficients representing
+ * properties defined across multiple materials.
  */
 template <class T, class Tpw>
-class PropertyMap
+class CoefficientMap
 {
 public:
-  PropertyMap(ObjectManager<T> & manager) : _manager(manager) {}
+  CoefficientMap(TrackedObjectFactory<T> & factory) : _manager(factory) {}
 
-  void addProperty(const std::string & name, std::shared_ptr<T> coeff)
+  void addCoefficient(const std::string & name, std::shared_ptr<T> coeff)
   {
+    mooseAssert(std::find(this->_manager.cbegin(), this->_manager.cend(), coeff) !=
+                    this->_manager.cend(),
+                "Coefficient object was not created by the appropriate coefficient manager.");
+
     const auto [_, inserted] = this->_properties.emplace(name, std::move(coeff));
     if (!inserted)
     {
-      throw MooseException("Property with name '" + name +
-                           "' already present in PropertyMap object");
+      throw MooseException("Coefficient with name '" + name +
+                           "' already present in CoefficientMap object");
     }
   }
 
@@ -47,6 +52,13 @@ public:
                           std::shared_ptr<T> coeff,
                           const std::vector<std::string> & blocks)
   {
+    // If list of blocks is empty then treat as a global coefficient
+    if (blocks.size() == 0)
+    {
+      this->addCoefficient(name, coeff);
+      return;
+    }
+
     // Initialise property with empty coefficients, if it does not already exist
     if (!this->hasCoefficient(name))
     {
@@ -56,9 +68,12 @@ public:
     // Throw an exception if the data is not piecewise
     if (!data)
     {
-      throw MooseException("Property with name '" + name +
-                           "' already present for all blocks in PropertyMap");
+      throw MooseException("Global coefficient with name '" + name +
+                           "' already present in CoefficientMap");
     }
+    mooseAssert(std::find(this->_manager.cbegin(), this->_manager.cend(), coeff) !=
+                    this->_manager.cend(),
+                "Coefficient object was not created by the appropriate coefficient manager.");
     auto & [pw_coeff, coeff_map] = *data;
     this->checkPWData(coeff, pw_coeff, name);
 
@@ -67,7 +82,7 @@ public:
       if (coeff_map.count(block) > 0)
       {
         throw MooseException("Property with name '" + name + "' already assigned to block " +
-                             block + " in PropertyMap object");
+                             block + " in CoefficientMap object");
       }
       coeff_map[block] = coeff;
       pw_coeff->UpdateCoefficient(std::stoi(block), *coeff);
@@ -90,7 +105,7 @@ public:
     }
     catch (std::out_of_range &)
     {
-      throw MooseException("Property with name '" + name + "' has not been declared.");
+      throw MooseException("Coefficient with name '" + name + "' has not been declared.");
     }
   }
 
@@ -116,7 +131,7 @@ public:
 
   bool hasCoefficient(const std::string & name) const { return this->_properties.count(name) > 0; }
 
-  bool coefficientDefinedOnBlock(const std::string & name, const std::string & block) const
+  bool propertyDefinedOnBlock(const std::string & name, const std::string & block) const
   {
     if (!this->hasCoefficient(name))
       return false;
@@ -130,7 +145,7 @@ public:
 private:
   using PWData = std::tuple<std::shared_ptr<Tpw>, std::map<const std::string, std::shared_ptr<T>>>;
   std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _properties;
-  ObjectManager<T> & _manager;
+  TrackedObjectFactory<T> & _manager;
 
   PWData emptyPWData(std::shared_ptr<T> /*coeff*/)
   {
@@ -144,9 +159,9 @@ private:
   }
 };
 
-using ScalarMap = PropertyMap<mfem::Coefficient, mfem::PWCoefficient>;
-using VectorMap = PropertyMap<mfem::VectorCoefficient, mfem::PWVectorCoefficient>;
-using MatrixMap = PropertyMap<mfem::MatrixCoefficient, mfem::PWMatrixCoefficient>;
+using ScalarMap = CoefficientMap<mfem::Coefficient, mfem::PWCoefficient>;
+using VectorMap = CoefficientMap<mfem::VectorCoefficient, mfem::PWVectorCoefficient>;
+using MatrixMap = CoefficientMap<mfem::MatrixCoefficient, mfem::PWMatrixCoefficient>;
 
 template <>
 VectorMap::PWData VectorMap::emptyPWData(std::shared_ptr<mfem::VectorCoefficient> coeff);

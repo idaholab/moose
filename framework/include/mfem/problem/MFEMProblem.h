@@ -160,7 +160,7 @@ public:
    * properties and converting them to MFEM coefficients. This is used
    * by Material and Kernel classes (among others).
    */
-  Moose::MFEM::PropertyManager & getProperties() { return _problem_data.properties; }
+  Moose::MFEM::CoefficientManager & getProperties() { return _problem_data.properties; }
 
   /**
    * Method to get the current MFEMProblemData object storing the

@@ -6,7 +6,7 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 #include "MFEMGeneralUserObject.h"
-#include "PropertyManager.h"
+#include "CoefficientManager.h"
 
 class MFEMMaterial : public MFEMGeneralUserObject
 {
@@ -21,8 +21,8 @@ public:
   const std::vector<SubdomainName> & getBlocks() const { return _block_ids; }
 
 protected:
-  const std::vector<SubdomainName> _block_ids;
-  Moose::MFEM::PropertyManager & _properties;
+  const std::vector<SubdomainName> & _block_ids;
+  Moose::MFEM::CoefficientManager & _properties;
 };
 
 #endif
