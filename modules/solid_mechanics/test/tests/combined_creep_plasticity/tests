@@ -7,7 +7,7 @@
     input = 'combined_creep_plasticity.i'
     exodiff = 'combined_creep_plasticity_out.e'
     abs_zero = 1e-09
-    method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    capabilities = 'method=opt | method=oprof' # Test is too big for debug, but kept as is to match the published journal soln
     valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 1-d bar problem."
@@ -17,7 +17,7 @@
     input = 'combined_creep_plasticity_start_time.i'
     exodiff = 'combined_creep_plasticity_start_time_out.e'
     abs_zero = 1e-09
-    method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    capabilities = 'method=opt | method=oprof' # Test is too big for debug, but kept as is to match the published journal soln
     custom_cmp = start_time.cmp
     valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
@@ -29,7 +29,7 @@
     exodiff = 'combined_stress_prescribed_out.e'
     rel_err = 1e-5
     abs_zero = 1e-09
-    superlu = true
+    capabilities = 'superlu'
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 3D cube problem with a time-varying pressure
                    BC."
@@ -48,7 +48,7 @@
     input = 'creepWithPlasticity.i'
     exodiff = 'creepWithPlasticity_out.e'
     abs_zero = 1e-09
-    method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    capabilities = 'method=opt | method=oprof' # Test is too big for debug, but kept as is to match the published journal soln
     valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 1-d bar problem with the creep and plasticity models tightly coupled."

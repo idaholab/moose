@@ -4,7 +4,7 @@
     input = one_cut_stationary.i
     exodiff = 'one_cut_stationary_out.e'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to switch materials for one stationary '
                   'cut.'
     design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md'
@@ -15,7 +15,7 @@
     input = one_cut_moving.i
     exodiff = 'one_cut_moving_out.e one_cut_moving_out.e-s002 one_cut_moving_out.e-s003'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to switch materials for one moving cut.'
     design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md'
     issues = '#17041'
@@ -25,7 +25,7 @@
     input = one_cut_moving_using_mesh_cut.i
     exodiff = 'one_cut_moving_using_mesh_cut_out.e one_cut_moving_using_mesh_cut_out.e-s002 one_cut_moving_using_mesh_cut_out.e-s003 one_cut_moving_using_mesh_cut_out_cut.e'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall allow switching materials based on the side of an interface for a single moving cut defined using a mesh as the cutting object.'
     design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md '
     issues = '#17041 #17797'
@@ -35,7 +35,7 @@
     input = two_cuts_stationary.i
     exodiff = 'two_cuts_stationary_out.e'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to switch materials for two stationary '
                   'cuts.'
     design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md ComboCutUserObject.md'
@@ -46,7 +46,7 @@
     input = two_cuts_moving.i
     exodiff = 'two_cuts_moving_out.e two_cuts_moving_out.e-s002 two_cuts_moving_out.e-s003'
     map = false
-    unique_id = true
+    capabilities = 'unique_id'
     requirement = 'The XFEM module shall provide an ability to switch materials for two moving cuts.'
     design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md ComboCutUserObject.md'
     issues = '#17041'

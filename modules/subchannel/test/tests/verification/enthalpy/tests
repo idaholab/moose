@@ -6,7 +6,7 @@
     input = two_channel.i
     exodiff = two_channel_out.e
     custom_cmp = 'test.exodiff'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     max_parallel = 1

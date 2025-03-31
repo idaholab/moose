@@ -43,7 +43,7 @@ ScalarTransportTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 ScalarTransportTestApp::registerApps()
 {
-  registerApp(ScalarTransportApp);
+  ScalarTransportApp::registerApps();
   registerApp(ScalarTransportTestApp);
 }
 

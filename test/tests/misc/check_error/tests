@@ -136,7 +136,7 @@
     type = 'RunException'
     input = 'bad_second_order_test.i'
     expect_err = 'ERROR: Finite element LAGRANGE on geometric element QUAD4\nonly supports FEInterface::max_order = 1, not fe_type.order = 2'
-    method = 'DBG'
+    capabilities = 'dbg'
 
     requirement = 'The system shall report an error when a first order element is used with a second order discretization.'
     issues = '#1405'
@@ -731,7 +731,7 @@
     type = 'RunException'
     input = 'wrong_moose_object_test.i'
     expect_err = "Task \w+ is not registered to build \w+ derived objects"
-    method = '!dbg'
+    capabilities = 'method!=dbg'
 
     requirement = 'The system shall report an error when an input file block associated with a pluggable system is asked to build an object from a different system.'
     issues = '#1405'
@@ -816,7 +816,7 @@
     type = 'RunException'
     input = 'nodal_value_off_block.i'
     expect_err = 'Node 0 does not contain any dofs for the v variable'
-    method = 'dbg'
+    capabilities = 'dbg'
 
     requirement = 'The system shall report an error when a coupled variable is not defined in the same region as the variable performing the coupling.'
     issues = '#2849'

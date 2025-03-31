@@ -43,12 +43,12 @@ done
 
 mkdir -p "${PREFIX:?}/etc/conda/activate.d" "${PREFIX:?}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export PATH=\${PATH}:${PREFIX}/moose/bin
-export MOOSE_BIN=${PREFIX}/moose/bin/moose
-export MOOSE_ADFPARSER_JIT_INCLUDE=${PREFIX}/moose/include/moose/ADRealMonolithic.h
+export PATH=\${PATH}:\${CONDA_PREFIX}/moose/bin
+export MOOSE_BIN=\${CONDA_PREFIX}/moose/bin/moose
+export MOOSE_ADFPARSER_JIT_INCLUDE=\${CONDA_PREFIX}/moose/include/moose/ADRealMonolithic.h
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
-export PATH=\${PATH%":${PREFIX}/moose/bin"}
+export PATH=\${PATH%":\${CONDA_PREFIX}/moose/bin"}
 unset MOOSE_BIN
 unset MOOSE_ADFPARSER_JIT_INCLUDE
 EOF

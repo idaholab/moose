@@ -43,7 +43,7 @@ RdgTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
 void
 RdgTestApp::registerApps()
 {
-  registerApp(RdgApp);
+  RdgApp::registerApps();
   registerApp(RdgTestApp);
 }
 

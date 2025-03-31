@@ -5,7 +5,7 @@
     type = CSVDiff
     input = two_channel.i
     csvdiff = two_channel_out.csv
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
     abs_zero = 1e-5

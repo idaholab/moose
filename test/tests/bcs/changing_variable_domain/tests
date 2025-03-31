@@ -10,9 +10,9 @@
   [error]
     type = RunException
     input = 'var_block_id.i'
-    cli_args= 'BCs/neum/skip_execution_outside_variable_domain=false'
+    cli_args = 'BCs/neum/skip_execution_outside_variable_domain=false'
     requirement = 'The system shall error in debug mode if an integrated boundary condition is being executed outside the domain of definition of variable, without explicitly allowing this.'
     expect_err = "This boundary condition is being executed outside the domain of definition of its variable"
-    method = 'dbg'
+    capabilities = 'method=dbg'
   []
 []

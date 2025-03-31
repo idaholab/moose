@@ -44,7 +44,7 @@ StochasticToolsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 StochasticToolsTestApp::registerApps()
 {
-  registerApp(StochasticToolsApp);
+  StochasticToolsApp::registerApps();
   registerApp(StochasticToolsTestApp);
 }
 

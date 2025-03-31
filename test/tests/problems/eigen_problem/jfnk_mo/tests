@@ -6,8 +6,7 @@
     type = 'CSVDiff'
     input = 'ne_array_mo.i'
     csvdiff = 'ne_array_mo_out_eigenvalues_0001.csv'
-    slepc = true
-    slepc_version = '>=3.11.0'
+    capabilities = 'slepc>=3.11.0'
     expect_out = 'PJFNK\s+with\s+Matrix\s+Only'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations"
   []
@@ -17,7 +16,7 @@
     input = 'ne_array_mo.i'
     cli_args = "Mesh/refine/refinement='1 0' Outputs/file_base=pjfnkmo_hanging_nodes"
     csvdiff = 'pjfnkmo_hanging_nodes_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations when hanging nodes (constraints) are present."
   []
 
@@ -25,8 +24,7 @@
     type = 'CSVDiff'
     input = 'ne_mo_with_linear_aux.i'
     csvdiff = 'ne_mo_with_linear_aux_out.csv'
-    slepc = true
-    slepc_version = '>=3.14.0'
+    capabilities = 'slepc>=3.14.0'
     requirement = "The system shall support evaluation of auxiliary variables on linear with the matrix-only eigenvalue solve type"
   []
 
@@ -35,8 +33,7 @@
     input = 'ne_array_mo.i'
     csvdiff = 'ne_array_mo_out_eigenvalues_0001.csv'
     prereq = 'ne_array_mo'
-    slepc = true
-    slepc_version = '>=3.11.0'
+    capabilities = 'slepc>=3.11.0'
     expect_out = 'PJFNK\s+with\s+Matrix\s+Only'
     cli_args = 'Executioner/constant_matrices=true'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations with constant matrices"
@@ -46,8 +43,7 @@
     type = RunException
     input = 'ne_array_mo.i'
     prereq = 'const_mats'
-    slepc = true
-    slepc_version = '>=3.11.0'
+    capabilities = 'slepc>=3.11.0'
     expect_err = 'constant_matrices flag is only valid for solve type: PJFNKMO'
     cli_args = 'Executioner/constant_matrices=true Executioner/solve_type=PJFNK'
     requirement = "The system shall support compatibility of solve type and constant-matrices flag"
@@ -60,8 +56,7 @@
       type = 'CSVDiff'
       input = 'ne_coupled_mo.i'
       csvdiff = 'ne_coupled_eigenvalues_0001.csv'
-      slepc = true
-      slepc_version = '>=3.11.0'
+      capabilities = 'slepc>=3.11.0'
       detail = 'computed as the L2 norm of the bx vector, or'
     []
     [custom_bx]
@@ -69,8 +64,7 @@
       input = 'ne_coupled_mo.i'
       csvdiff = 'ne_coupled_eigenvalues_0001.csv'
       cli_args = 'Problem/bx_norm=uint'
-      slepc = true
-      slepc_version = '>=3.11.0'
+      capabilities = 'slepc>=3.11.0'
       detail = 'computed by a user provided postprocessor.'
       prereq = 'ne_coupled_mo/l2_bx'
     []
@@ -90,8 +84,7 @@
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
     prereq = 'ne_coupled_mo/custom_bx'
     cli_args = 'Preconditioning/active='''
-    slepc = true
-    slepc_version = '>=3.11.0'
+    capabilities = 'slepc>=3.11.0'
     requirement = "The system shall support use of matrix-vector multiplication with full-coupled matrices (by default) as residual evaluation for coupled eigenvalue problems"
   []
 
@@ -100,8 +93,7 @@
     input = 'ne_coupled_mo.i'
     csvdiff = 'non-homogeneous_eigenvalues_0001.csv'
     cli_args = 'Outputs/file_base="non-homogeneous" Kernels/b/type="BodyForce" Kernels/b/variable=u Preconditioning/active='''
-    slepc = true
-    slepc_version = '>=3.11.0'
+    capabilities = 'slepc>=3.11.0'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for non-homogeneous problems"
   []
 []

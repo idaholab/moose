@@ -33,19 +33,14 @@ else:
     pathname = os.path.abspath(pathname)
 
 class REStruct(object):
-    def __init__(self, new_petsc):
+    def __init__(self):
         self.MfdRE = "Finite[ -]difference Jacobian"
         self.MhcRE = "Hand-coded Jacobian"
         self.MdiffRE = "Hand-coded minus finite[ -]difference Jacobian"
         self.rowRE = re.compile("row (\d+):")
         self.valRE = re.compile(" \((\d+), ([+.e\d-]+)\)")
-        if not new_petsc:
-            additional_string = " \(user-defined state\)"
-        else:
-            additional_string = ""
-        self.MfdRE, self.MhcRE, self.MdiffRE = (re.compile(item + additional_string) for item in
+        self.MfdRE, self.MhcRE, self.MdiffRE = (re.compile(item) for item in
                                                 (self.MfdRE, self.MhcRE, self.MdiffRE))
-        self.new_petsc = new_petsc
 
 # Borrowed from Peacock
 def recursiveFindFile(current_path, p, executable):
@@ -216,12 +211,8 @@ def saveMatrixToFile(M, dofs, filename) :
 def parseOutput(output, dofdata, re_struct) :
     global options
 
-    if re_struct.new_petsc:
-        first_re = re_struct.MhcRE
-        second_re = re_struct.MfdRE
-    else:
-        first_re = re_struct.MfdRE
-        second_re = re_struct.MhcRE
+    first_re = re_struct.MhcRE
+    second_re = re_struct.MfdRE
 
     write_matrices = options.write_matrices
     dofs = dofdata['ndof']
@@ -238,12 +229,8 @@ def parseOutput(output, dofdata, re_struct) :
         if state == 0 :
             Mfd = np.zeros((dofs, dofs))
             Mhc = np.zeros((dofs, dofs))
-            if re_struct.new_petsc:
-                first_matrix = Mhc
-                second_matrix = Mfd
-            else:
-                first_matrix = Mfd
-                second_matrix = Mhc
+            first_matrix = Mhc
+            second_matrix = Mfd
             Mdiff = np.zeros((dofs, dofs))
             state = 1
 
@@ -407,24 +394,12 @@ if __name__ == '__main__':
     #for kernels in combination_dofs :
     #   print kernels
 
-    moose_dir = os.environ.get('MOOSE_DIR',
-                               os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                            '../..')))
-    if os.environ.get("LIBMESH_DIR"):
-        libmesh_dir = os.environ['LIBMESH_DIR']
-    else:
-        libmesh_dir = os.path.join(moose_dir, 'libmesh', 'installed')
-    new_petsc = list(map(int, util.getPetscVersion(libmesh_dir).split("."))) >= [3, 9]
-
     # build the parameter list for the jacobian debug run
     mooseparams = moosebaseparams[:]
     if not options.noauto :
-        if new_petsc:
-            petsc_test_options = ['-snes_test_jacobian', '-snes_test_jacobian_view', '-snes_type', 'ksponly',
-                                  '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip',
-                                  '-snes_test_jacobian_display_threshold', '1e-10']
-        else:
-            petsc_test_options = ['-snes_type', 'test', '-snes_test_display']
+        petsc_test_options = ['-snes_test_jacobian', '-snes_test_jacobian_view', '-snes_type', 'ksponly',
+                                '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip',
+                                '-snes_test_jacobian_display_threshold', '1e-10']
 
         mooseparams.extend(petsc_test_options + ['-mat_fd_type', 'ds',
                                                  'BCs/active=', 'Outputs/exodus=false', 'Outputs/csv=false',
@@ -445,7 +420,7 @@ if __name__ == '__main__':
         if child.returncode == -11 :
             print("The moose application crashed with a segmentation fault (try recompiling)")
             sys.exit(1)
-        elif (not new_petsc and child.returncode != 1) or (new_petsc and child.returncode != 0):
+        elif child.returncode:
             print(data)
             print("Application quit with an unexpected return code")
             sys.exit(1)
@@ -453,7 +428,7 @@ if __name__ == '__main__':
         print('Error executing moose based application\n')
         sys.exit(1)
 
-    re_struct = REStruct(new_petsc)
+    re_struct = REStruct()
     # parse the raw output, which contains the PETSc debug information
     if parseOutput(data, dofdata, re_struct) == 0:
         print(data)

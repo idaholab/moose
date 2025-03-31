@@ -1,8 +1,8 @@
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 # Deep Reinforcement Learning Control Using Libtorch
 
-The following example demonstrates how to set up a Proximal Policy Optimization (PPO) based 
-Deep Reinforcement Learning (DRL) training sequence for neural-net-based controllers of MOOSE simulations. 
+The following example demonstrates how to set up a Proximal Policy Optimization (PPO) based
+Deep Reinforcement Learning (DRL) training sequence for neural-net-based controllers of MOOSE simulations.
 See [!cite](schulman2017proximal) for a more theoretical background on the PPO algorithm.
 
 ## Problem Statement
@@ -21,7 +21,7 @@ of the environment temperature. Furthermore, we assume the following:
 - The density of the air is: $\rho = 1.184~\frac{kg}{m^3}$
 - The specific heat of the air is: $c_p = 1000 \frac{J}{kg~K}$
 - The effective thermal conductivity (increased to account for mixing effects) is: $k = 0.5 \frac{W}{m~K}$
-- The environment temperature is handled as a Dirichlet boundary condition applied 
+- The environment temperature is handled as a Dirichlet boundary condition applied
   to the right and left walls with a value of:
   $T_\mathrm{env}(t)~[K]=273+15*\sin{\left(\frac{\pi t}{86400}\right)}$
 - The air conditioner is modeled as a Neumann boundary condition on the top with given heat flux
@@ -116,8 +116,8 @@ When these are set, we define the architecture of the critic and control neural 
 (see [!cite](schulman2017proximal) for more information on these) using
 [!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and
 [!param](/Trainers/LibtorchDRLControlTrainer/num_control_neurons_per_layer).
-The corresponding learning rates can be defined by 
-[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate) and 
+The corresponding learning rates can be defined by
+[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate) and
 [!param](/Trainers/LibtorchDRLControlTrainer/control_learning_rate).
 Then, we copy-paste the input/output standardization options from the `Control` in the sub-app.
 Additionally, we can choose to standardize the advantage function which makes
@@ -135,15 +135,15 @@ Which means that we run a total of 440 simulations.
 
 First, we take a look at how the average episodic reward evolves throughout the
 training process. We see that the average reward increases to a point where it is
-comparable with the theoretical maximum.  
+comparable with the theoretical maximum.
 
 !alert note
 In this example we used [ScaledAbsDifferenceDRLRewardFunction.md] as follows:
-$R = 10 - |T_\mathrm{target} - T_\mathrm{sensor}|$ which means that the maximum achievable 
-reward was 10. 
+$R = 10 - |T_\mathrm{target} - T_\mathrm{sensor}|$ which means that the maximum achievable
+reward was 10.
 
 However, it is important to note
-that the higher the standard deviation is for the controllers signal to the system 
+that the higher the standard deviation is for the controllers signal to the system
 (also referred to as action), the more flexible the controller
 will be (due to less overfitting). On the other hand, by increasing the random
 variation in the action, we also decrease its accuracy. Therefore, the user needs
