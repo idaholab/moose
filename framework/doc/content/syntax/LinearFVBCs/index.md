@@ -40,7 +40,7 @@ advection term on the cell adjacent to the boundary:
 
 \begin{equation}
   \int\limits_{V_b} \nabla \cdot (\vec{v} u) dV \approx \left(\sum\limits_i \vec{n}_i
-  \cdot \vec{v}_i u_{f,i}|S_i|\right) + \vec{n}_b \cdot \vec{v}_b u_b |S_b|~,
+  \cdot \vec{v}_i u_i|S_i|\right) + \vec{n}_b \cdot \vec{v}_b u_b |S_b|~,
 \end{equation}
 
 where the $i$ index denotes internal faces of the cell, while $b$ denotes the only face on the boundary.
