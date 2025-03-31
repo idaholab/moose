@@ -202,10 +202,16 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   # Step 3: Configure NEML2
   source $SCRIPT_DIR/configure_neml2.sh
   if [[ "${FAST}" != true  ]] ; then
+    echo
+    echo "****************************************************************************************************"
+    echo "Configuring NEML2 for METHOD=${METHOD}"
+    echo "****************************************************************************************************"
+    echo
     configure_neml2 "${NEML2_SRC_DIR}" \
                     "${NEML2_BUILD_DIR}" \
                     "${LIBTORCH_DIR}" \
                     "${WASP_DIR}" \
+                    "${MOOSE_DIR}"/framework/contrib/hit \
                     "${TIMPI_DIR}" \
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
                     "${EXTRA_ARGS[*]}"
@@ -216,6 +222,11 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   fi
 
   # Step 4: Build NEML2
+  echo
+  echo "****************************************************************************************************"
+  echo "Compiling NEML2 for METHOD=${METHOD}"
+  echo "****************************************************************************************************"
+  echo
   build_neml2 "${NEML2_BUILD_DIR}" "${NEML2_JOBS}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to build NEML2"
@@ -223,6 +234,11 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   fi
 
   # Step 5: Install NEML2
+  echo
+  echo "****************************************************************************************************"
+  echo "Installing NEML2 for METHOD=${METHOD}"
+  echo "****************************************************************************************************"
+  echo
   install_neml2 "${NEML2_BUILD_DIR}" "${NEML2_DIR}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to install NEML2"

@@ -18,12 +18,13 @@
 #   2. Path to the NEML2 build directory
 #   3. Path to the libtorch directory
 #   4. Path to the WASP directory
-#   5. Path to the TIMPI directory
+#   5. Path to the HIT source directory
+#   6. Path to the TIMPI directory
 #
 # Remaining arguments will be appended to the cmake command verbatim
 function configure_neml2()
 {
-    ARGS=( "${@:6}" )
+    ARGS=( "${@:7}" )
     cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DNEML2_TESTS=OFF \
@@ -34,10 +35,11 @@ function configure_neml2()
       -DNEML2_WORK_DISPATCHER=ON \
       -DTorch_ROOT="$3" \
       -DWASP_ROOT="$4" \
-      -DTIMPI_ROOT="$5" \
+      -DHIT_SOURCE_DIR="$5" \
+      -DTIMPI_ROOT="$6" \
       -G "Unix Makefiles" \
-      -B $2 \
-      -S $1 \
+      -B "$2" \
+      -S "$1" \
       "${ARGS[@]}"
 }
 
@@ -48,7 +50,7 @@ function configure_neml2()
 #   2. Number of jobs to use when building NEML2
 function build_neml2()
 {
-  cmake --build $1 --parallel $2 --target all
+  cmake --build "$1" --parallel "$2" --target all
 }
 
 # Install NEML2
@@ -58,5 +60,5 @@ function build_neml2()
 #   2. Install prefix
 function install_neml2()
 {
-  cmake --install $1 --prefix $2
+  cmake --install "$1" --prefix "$2"
 }
