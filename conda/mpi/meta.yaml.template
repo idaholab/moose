@@ -9,7 +9,7 @@
 {% set version = "__VERSIONER_MPI_VERSION__" %}
 
 # HDF5 Version
-{% set hdf5_version = "1.14.2" %}
+{% set hdf5_version = "1.14.4" %}
 
 package:
   name: moose-mpi
@@ -87,7 +87,7 @@ outputs:
         - {{ moose_icu }}
         - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
         - automake 1.16.5
-        - libexpat 2.5.0
+        - libexpat 2.7.0
         - bison 3.4
         - zfp
         - autoconf

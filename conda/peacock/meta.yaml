@@ -26,7 +26,7 @@ requirements:
     - pyqt
     - matplotlib !=3.9.0
     - libgl                           # [linux]
-    - vtk
+    - vtk 9.2.6
   run_constrained:
     # Python max constraints
     - python <{{3.13}}
