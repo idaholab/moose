@@ -385,9 +385,9 @@ NonlinearSystem::getSNES()
   {
     const char * snes_prefix = nullptr;
     std::string snes_prefix_str;
-    if (feProblem().numSolverSystems() > 1)
+    if (system().prefix_with_name())
     {
-      snes_prefix_str = name() + "_";
+      snes_prefix_str = system().prefix();
       snes_prefix = snes_prefix_str.c_str();
     }
     return petsc_solver->snes(snes_prefix);

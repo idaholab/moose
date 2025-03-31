@@ -8,7 +8,7 @@
       input = test.i
       exodiff = test_out.e
       detail = 'segregating the solves; first the independent variable is solved for, and second the dependent variable is solved for using the solution of the first'
-      absent_out = 'unused database options'
+      absent_out = 'unused database option'
     []
     [segregated-fv]
       type = Exodiff
