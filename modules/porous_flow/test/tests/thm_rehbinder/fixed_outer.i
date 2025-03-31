@@ -17,6 +17,8 @@
     extrusion_vector = '0 0 1'
     num_layers = 1
   []
+  # To get consistent ordering of results with distributed meshes
+  allow_renumbering = false
 []
 
 [GlobalParams]
@@ -237,11 +239,11 @@
 []
 
 [Preconditioning]
-  [andy]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_rtol'
-    petsc_options_value = 'gmres      asm      lu           1E-8'
+    petsc_options_value = 'gmres      asm      lu           1E-10'
   []
 []
 

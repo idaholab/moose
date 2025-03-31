@@ -226,6 +226,8 @@
   end_time = 1e4
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-5
+  # Avoids failing first time step in parallel
+  line_search = 'none'
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1

@@ -6,5 +6,7 @@
     requirement = 'The system shall be able to model a natural convection problem in porous media.'
     issues = '#26238'
     design = 'porous_flow/natural_convection.md'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   []
 []
