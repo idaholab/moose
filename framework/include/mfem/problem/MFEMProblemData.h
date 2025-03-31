@@ -17,10 +17,10 @@ public:
   virtual ~MFEMProblemData() { ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
-  Moose::MFEM::TrackedScalarCoefficientFactory scalar_manager;
-  Moose::MFEM::TrackedVectorCoefficientFactory vector_manager;
-  Moose::MFEM::TrackedMatrixCoefficientFactory matrix_manager;
-  Moose::MFEM::CoefficientManager properties{scalar_manager, vector_manager, matrix_manager};
+  Moose::MFEM::TrackedScalarCoefficientFactory scalar_factory;
+  Moose::MFEM::TrackedVectorCoefficientFactory vector_factory;
+  Moose::MFEM::TrackedMatrixCoefficientFactory matrix_factory;
+  platypus::CoefficientManager properties{scalar_factory, vector_factory, matrix_factory};
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
   mfem::BlockVector f;

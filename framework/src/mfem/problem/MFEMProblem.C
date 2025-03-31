@@ -322,7 +322,7 @@ MFEMProblem::addFunction(const std::string & type,
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
   {
     getProperties().declareScalar(name,
-                                  std::make_shared<mfem::FunctionCoefficient>(
+                                  makeScalarCoefficient<mfem::FunctionCoefficient>(
                                       [&func](const mfem::Vector & p, double t) -> mfem::real_t
                                       { return func.value(t, pointFromMFEMVector(p)); }));
   }
@@ -331,7 +331,7 @@ MFEMProblem::addFunction(const std::string & type,
     int dim = vectorFunctionDim(type, parameters);
     getProperties().declareVector(
         name,
-        std::make_shared<mfem::VectorFunctionCoefficient>(
+        makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
             dim,
             [&func, dim](const mfem::Vector & p, double t, mfem::Vector & u)
             {

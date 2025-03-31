@@ -36,15 +36,15 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
         _trial_variables.at(ind)->ParFESpace(), dX_dt, _block_true_offsets[ind]);
   }
   const double time = GetTime();
-  for (auto & coef : _problem.scalar_manager)
+  for (auto & coef : _problem.scalar_factory)
   {
     coef->SetTime(time);
   }
-  for (auto & coef : _problem.vector_manager)
+  for (auto & coef : _problem.vector_factory)
   {
     coef->SetTime(time);
   }
-  for (auto & coef : _problem.matrix_manager)
+  for (auto & coef : _problem.matrix_factory)
   {
     coef->SetTime(time);
   }
