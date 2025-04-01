@@ -8,5 +8,7 @@
     requirement = 'PorousFlow shall be able to simulate flow and heat transport along a fracture embedded in a porous matrix, using a MultiApp approach'
     issues = '#17928'
     design = 'porous_flow/multiapp_fracture_flow_PorousFlow_2D.md'
+    # Uses a MultiAppGeometricInterpolationTransfer
+    mesh_mode = 'replicated'
   []
 []
