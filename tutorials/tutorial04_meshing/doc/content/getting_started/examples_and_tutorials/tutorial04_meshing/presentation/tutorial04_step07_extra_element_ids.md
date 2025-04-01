@@ -45,6 +45,7 @@
 - Reporting IDs can be used to assign material properties
 - Reporting IDs can be used to create additional unique zones (e.g. depletion zones)
 - Reporting IDs can be leveraged to post-process solution data into tables by using the [ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
+- Reporting IDs can be generated from the block ID (subdomain ID) mapping using [SubdomainExtraElementIDGenerator.md] or copied over from an existing reporting ID name using [ExtraElementIDCopyGenerator.md]. Otherwise the mesh generators describes in the next slides explain how they can be defined from scratch for typical mesh generation workflows.
 
 !---
 
@@ -62,6 +63,8 @@
 - When assembly duct regions are present, these regions are numbered sequentially starting from the inner-most region to the outer-most region.
 
 - Pin and Assembly IDs are applied during creations of assemblies and core, respectively.
+
+- [FlexiblePatternGenerator.md] also supports creation of reporting IDs for each unique pin structure (See ["Advanced Meshing Tools"](tutorial04_meshing/presentation/index.md#/15) section)
 
 !---
 
