@@ -59,19 +59,16 @@ SolutionTimeAdaptiveDT::step()
 
   TimeStepper::step();
 
-  if (converged())
-  {
-    auto solve_end = std::chrono::system_clock::now();
-    auto elapsed_time =
-        std::chrono::duration_cast<std::chrono::milliseconds>(solve_end - solve_start).count();
+  auto solve_end = std::chrono::system_clock::now();
+  auto elapsed_time =
+      std::chrono::duration_cast<std::chrono::milliseconds>(solve_end - solve_start).count();
 
-    // Take the maximum time over all processors so all processors compute and use the same dt
-    TimeStepper::_communicator.max(elapsed_time);
+  // Take the maximum time over all processors so all processors compute and use the same dt
+  TimeStepper::_communicator.max(elapsed_time);
 
-    _older_sol_time_vs_dt = _old_sol_time_vs_dt;
-    _old_sol_time_vs_dt = _sol_time_vs_dt;
-    _sol_time_vs_dt = elapsed_time / _dt;
-  }
+  _older_sol_time_vs_dt = _old_sol_time_vs_dt;
+  _old_sol_time_vs_dt = _sol_time_vs_dt;
+  _sol_time_vs_dt = elapsed_time / _dt;
 }
 
 Real
@@ -116,6 +113,10 @@ SolutionTimeAdaptiveDT::rejectStep()
   _console << "Solve failed... cutting timestep" << std::endl;
   if (_adapt_log)
     _adaptive_log << "Solve failed... cutting timestep" << std::endl;
+
+  // Reverse progression of quantities
+  _sol_time_vs_dt = _old_sol_time_vs_dt;
+  _old_sol_time_vs_dt = _older_sol_time_vs_dt;
 
   TimeStepper::rejectStep();
 }
