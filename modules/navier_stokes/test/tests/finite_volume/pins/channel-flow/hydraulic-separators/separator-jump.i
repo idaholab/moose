@@ -1,43 +1,63 @@
 # This test describes a test where three parallel channels are
 # separated using flow separators that act as slip boundary conditions.
-# The different channels have different friction factors
-# meaning that we expect different pressure drops.
-# Channel 1 expected drop (analytic, Forchheimer only): 5.50E-03 Pa
-# Channel 2 expected drop (analytic, Forchheimer only): 4.40E-02 Pa
-# Channel 3 expected drop (analytic, Forchheimer only): 1.49E-01 Pa
+# The different channels have different pressure discontinuities
+# due to Bernoulli pressure jump combined with irreversible form losses.
+# Channel 1 expected drop (analytic, Bernolli plus contraction form loss): 2.079E-01 Pa
+# Channel 2 expected drop (analytic, Bernolli plus contraction form loss): 8.360E-02 Pa
+# Channel 3 expected drop (analytic, Bernolli plus contraction form loss): 1.870E-02 Pa
 
 rho=1.1
-mu=1.1
-advected_interp_method='average'
+advected_interp_method='upwind'
 velocity_interp_method='rc'
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '1'
+    dx = '0.2 0.2 0.2 0.2'
     dy = '0.25 0.25 0.25'
-    ix = '5'
+    ix = '2 2 2 2'
     iy = '2 2 2'
-    subdomain_id = '1 2 3'
+    subdomain_id = '1 2 2 2 3 3 4 4 5 5 5 6'
   []
   [separator-1]
     type = SideSetsBetweenSubdomainsGenerator
-    new_boundary = 'separator-1'
-    primary_block = 1
-    paired_block = 2
     input = mesh
+    primary_block = '1 2'
+    paired_block = '3 4'
+    new_boundary = 'separator-1'
   []
   [separator-2]
     type = SideSetsBetweenSubdomainsGenerator
-    new_boundary = 'separator-2'
-    primary_block = 2
-    paired_block = 3
     input = separator-1
+    primary_block = '3 4'
+    paired_block = '5 6'
+    new_boundary = 'separator-2'
+  []
+  [jump-1]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = separator-2
+    primary_block = '1'
+    paired_block = '2'
+    new_boundary = 'jump-1'
+  []
+  [jump-2]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = jump-1
+    primary_block = '3'
+    paired_block = '4'
+    new_boundary = 'jump-2'
+  []
+  [jump-3]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = jump-2
+    primary_block = '5'
+    paired_block = '6'
+    new_boundary = 'jump-3'
   []
   [inlet-1]
     type = ParsedGenerateSideset
-    input = separator-2
+    input = jump-3
     combinatorial_geometry = 'y < 0.25 & x < 0.00001'
     replace = true
     new_sideset_name = inlet-1
@@ -82,9 +102,11 @@ velocity_interp_method='rc'
   []
   [pressure]
     type = BernoulliPressureVariable
-    u = u
-    v = v
+    u = superficial_vel_x
+    v = superficial_vel_y
     rho = ${rho}
+    pressure_drop_sidesets = 'jump-1 jump-2 jump-3'
+    pressure_drop_form_factors = '0.1 0.2 0.3 '
   []
 []
 
@@ -105,25 +127,11 @@ velocity_interp_method='rc'
     rho = ${rho}
     momentum_component = 'x'
   []
-  [u_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = superficial_vel_x
-    momentum_component = 'x'
-    mu = ${mu}
-  []
   [u_pressure]
     type = PINSFVMomentumPressure
     variable = superficial_vel_x
     pressure = pressure
     momentum_component = 'x'
-  []
-  [u_friction]
-    type = PINSFVMomentumFriction
-    variable = superficial_vel_x
-    momentum_component = 'x'
-    Forchheimer_name = 'Forchheimer_coefficient'
-    rho = ${rho}
-    speed = speed
   []
 
   [v_advection]
@@ -134,25 +142,11 @@ velocity_interp_method='rc'
     rho = ${rho}
     momentum_component = 'y'
   []
-  [v_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = superficial_vel_y
-    momentum_component = 'y'
-    mu = ${mu}
-  []
   [v_pressure]
     type = PINSFVMomentumPressure
     variable = superficial_vel_y
     pressure = pressure
     momentum_component = 'y'
-  []
-  [v_friction]
-    type = PINSFVMomentumFriction
-    variable = superficial_vel_y
-    momentum_component = 'y'
-    Forchheimer_name = 'Forchheimer_coefficient'
-    rho = ${rho}
-    speed = speed
   []
 []
 
@@ -224,28 +218,17 @@ velocity_interp_method='rc'
 []
 
 [FunctorMaterials]
-  [const]
+  [porosity-1]
     type = ADGenericFunctorMaterial
     prop_names = 'porosity'
     prop_values = '1.0'
+    block = '1 3 5'
   []
-  [darcy-1]
-    type = ADGenericVectorFunctorMaterial
-    prop_names = 'Forchheimer_coefficient'
-    prop_values = '1.0 1.0 1.0'
-    block = 1
-  []
-  [darcy-2]
-    type = ADGenericVectorFunctorMaterial
-    prop_names = 'Forchheimer_coefficient'
-    prop_values = '2.0 2.0 2.0'
-    block = 2
-  []
-  [darcy-3]
-    type = ADGenericVectorFunctorMaterial
-    prop_names = 'Forchheimer_coefficient'
-    prop_values = '3.0 3.0 3.0'
-    block = 3
+  [porosity-2]
+    type = ADGenericFunctorMaterial
+    prop_names = 'porosity'
+    prop_values = '0.5'
+    block = '2 4 6'
   []
   [speed]
     type = PINSFVSpeedFunctorMaterial
@@ -262,7 +245,6 @@ velocity_interp_method='rc'
   petsc_options_value = ' lu       NONZERO               1e-10'
   line_search = 'none'
   nl_rel_tol = 1e-10
-  nl_max_its = 10
 []
 
 [Postprocessors]
@@ -305,6 +287,5 @@ velocity_interp_method='rc'
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
