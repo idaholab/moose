@@ -1,4 +1,4 @@
-# AREVA FCTF deformed duct Validation casen
+# AREVA FCTF deformed duct Validation case
 
 *Contact: Vasileios Kyriakopoulos, vasileios.kyriakopoulos.at.inl.gov*
 
@@ -63,9 +63,9 @@ The SCM deformation model is implemented by an IC: [FCTFdisplacementIC](/ics/FCT
 
 The deformed duct simulation is run by the following input files:
 
-!listing /examples/areva_FCTF/FCTF_deformed.i language=cpp
+!listing /v&v/areva_FCTF/FCTF_deformed.i language=cpp
 
-!listing /examples/areva_FCTF/deformed_duct_pp.i language=cpp
+!listing /v&v/areva_FCTF/deformed_duct_pp.i language=cpp
 
 ## Results
 
