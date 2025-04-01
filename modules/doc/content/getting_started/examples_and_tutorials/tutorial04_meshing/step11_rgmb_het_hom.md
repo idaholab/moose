@@ -1,6 +1,6 @@
 # Reactor Geometry Mesh Builder Example: Conversion of Heterogeneous to Homogeneous Sodium-Cooled Fast Reactor Core Mesh (ABTR)
 
-This example illustrates the use of RGMB mesh generators to define a pin-resolved heterogeneous 3D hexagonal geometry core (ABTR ([!cite](shemon2015abtr)), and using Griffin to convert this mesh to an equivalent homogenized core mesh with automatic geometry construction and region ID assignment. The final mesh constructed will be similar to the one presented earlier in this tutorial using base mesh generators.
+This example illustrates the use of RGMB mesh generators to define a pin-resolved heterogeneous 3D hexagonal geometry core for the Advanced Burner Test Reactor (ABTR) [!cite](shemon2015abtr), and using Griffin to convert this mesh to an equivalent homogenized core mesh with automatic geometry construction and region ID assignment. The final mesh constructed will be similar to the one presented earlier in this tutorial using base mesh generators.
 
 !media tutorial04_meshing/rgmb_abtr_hethom_stepbystep.png
        id=tutorial04-rgmb_abtr_stepbystep
@@ -27,11 +27,13 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
          caption=ABTR RGMB pin example.
          block=Mesh/fuel_pin_1
 
-Tips
+!alert! note title=Tips
 
 - Use a unique [PinMeshGenerator.md] block for each pin with a unique geometrical configuration and/or region ID composition
 - region_ids is a 2-dimensional array containing region IDs (essentially materials). The first row of the array represents the 2D radial regions (from center of the pin to outermost region) for the bottom layer of the pin. Each subsequent row assigns IDs on another axial level, from bottom to top. In this case, each pin has 3 radial regions (fuel, clad, background), this array is a column pertaining to each axial level of the pin assembly.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
+
+!alert-end!
 
 ## Assembly structures using AssemblyMeshGenerator
 
@@ -44,35 +46,39 @@ Tips
          caption=ABTR RGMB heterogeneous assembly example.
          block=Mesh/fuel_assembly_1
 
-Tips
+!alert! note title=Tips
 
 - Use a unique [AssemblyMeshGenerator.md] block for each assembly with a unique geometrical configuration, region ID composition, and/or inventory of pin structures
-- background_region_ids is a 1-dimensional array containing region IDs for each axial layer of the background region. duct_region_ids is a 2-dimensional array containing regions IDs for the duct region. The first row of the array represents the 2D duct regions (from innermost to outermost duct region) for the bottom layer of the assembly. Each subsequent row assigns IDs on another axial level, from bottom to top.
+- [!param](/Mesh/AssemblyMeshGenerator/background_region_ids) is a 1-dimensional array containing region IDs for each axial layer of the background region. [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) is a 2-dimensional array containing regions IDs for the duct region. The first row of the array represents the 2D duct regions (from innermost to outermost duct region) for the bottom layer of the assembly. Each subsequent row assigns IDs on another axial level, from bottom to top.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
+
+!alert-end!
 
 ## Homogeneous assembly structures using PinMeshGenerator
 
 In order to define homogeneous assembly structures to stitch into the core, we use [PinMeshGenerator.md] once again ([AssemblyMeshGenerator.md] is only used for structures that consist of lattices of pins).
 
 - +To define single assemblies directly with PinMeshGenerators for stitching with [CoreMeshGenerator.md]+, [PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`.
-- In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized and [SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [PolygonConcentricCircleMeshGenerator.md].
+- In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
          id=tutorial04-rgmb_abtr-hom-assembly
          caption=ABTR RGMB homogeneous assembly example.
          block=Mesh/reflector_assembly
 
-Tips
+!alert! note title=Tips
 
 - For homogenized assemblies, each assembly has only 1 radial region, so each column in `region_ids` pertains to the region ID of each axial level of the homogenized assembly.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
 
+!alert-end!
+
 ## Heterogeneous core using CoreMeshGenerator
 
-Now that all heterogeneous and homogeneous assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference `dummy` (this object has not been actually created) and tell [CoreMeshGenerator.md] through the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
+At this point, we have defined a 3D heterogeneous ABTR Now that all heterogeneous and homogeneous assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference `dummy` (this object has not been actually created) and tell [CoreMeshGenerator.md] through the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
 
-- Since we want to extrude the 2D core, we use the [!param](/Mesh/CoreMeshGenerator/extrude)=`true` parameter within [CoreMeshGenerator.md]. The step simultaneously extrudes the geometry and applies the regions IDs to all axial layers as defined in the [PinMeshGenerator.md] objects.
-- Behind the scenes, extra element IDs `assembly_id` and `plane_id` are automatically applied.
+- Since we want to extrude the 2D core, we use the [!param](/Mesh/CoreMeshGenerator/extrude)=`true` parameter within [CoreMeshGenerator.md]. The step simultaneously extrudes the geometry and applies the regions IDs to all axial layers as defined in the [PinMeshGenerator.md] and [AssemblyMeshGenerator.md] objects.
+- Behind the scenes, extra element IDs `assembly_id` and `plane_id` are automatically added to the relevant elements.
 - Since [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) = `true` in [ReactorMeshParams.md], the different assembly types are stitched together without hanging nodes.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
@@ -90,7 +96,13 @@ Now that all heterogeneous and homogeneous assemblies have been defined, they ar
 
 ## Equivalent homogeneous core using Griffin's EquivalentCoreMeshGenerator
 
-`EquivalentCoreMeshGenerator` is a mesh generator defined in Griffin that converts an input heterogeneous RGMB mesh into equivalent "duct heterogeneous", "ring heterogeneous", or "fully homogeneous" representations. Each unique subassembly region (radial + axial location) will have its own region ID in the equivalent core mesh.
+!alert! note title=Griffin executable required
+
+This section assumes the user has access to the Griffin executable, as it invokes `EquivalentCoreMeshGenerator` that is defined within Griffin.
+
+!alert-end!
+
+So far, a 3-D heterogeneous pin-resolved hexagonal ABTR core geometry has been created exlusively using the Reactor Geometry Mesh Builder defined in the MOOSE Reactor module. This section requires the use of `EquivalentCoreMeshGenerator` defined in the Griffin code. This mesh generator defined in Griffin converts an input heterogeneous RGMB mesh into equivalent "duct heterogeneous", "ring heterogeneous", or "fully homogeneous" representations. Each unique subassembly region (radial + axial location) will have its own region ID in the equivalent core mesh.
 
 - In this case, `EquivalentCoreMeshGenerator` will determine uniqueness based on both the geometry AND region ID mapping of each subassembly region in the heterogeneous core.
 

@@ -64,7 +64,7 @@
 
 - Pin and Assembly IDs are applied during creations of assemblies and core, respectively.
 
-- [FlexiblePatternGenerator.md] also supports creation of reporting IDs for each unique pin structure (See "Advanced Meshing Tools" section)
+- [FlexiblePatternGenerator.md] also supports creation of reporting IDs for each unique pin structure (See ["Advanced Meshing Tools"](tutorial04_meshing/presentation/index.md#/15) section)
 
 !---
 
