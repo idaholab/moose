@@ -20,7 +20,7 @@ public:
   Moose::MFEM::TrackedScalarCoefficientFactory scalar_factory;
   Moose::MFEM::TrackedVectorCoefficientFactory vector_factory;
   Moose::MFEM::TrackedMatrixCoefficientFactory matrix_factory;
-  platypus::CoefficientManager properties{scalar_factory, vector_factory, matrix_factory};
+  Moose::MFEM::CoefficientManager properties{scalar_factory, vector_factory, matrix_factory};
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
   mfem::BlockVector f;

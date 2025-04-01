@@ -62,7 +62,7 @@ TEST_F(CheckCoefficientMap, GetPWCoefficient)
 
 TEST_F(CheckCoefficientMap, HasVecCoefficient)
 {
-  platypus::VectorMap coeff_map(_vector_factory);
+  Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addCoefficient(
       "test", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
   EXPECT_TRUE(coeff_map.hasCoefficient("test"));
@@ -71,7 +71,7 @@ TEST_F(CheckCoefficientMap, HasVecCoefficient)
 
 TEST_F(CheckCoefficientMap, GetVecCoefficient)
 {
-  platypus::VectorMap coeff_map(_vector_factory);
+  Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addCoefficient(
       "resistivity", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
   mfem::VectorConstantCoefficient * c =
@@ -86,7 +86,7 @@ TEST_F(CheckCoefficientMap, GetVecCoefficient)
 
 TEST_F(CheckCoefficientMap, GetPWVecCoefficient)
 {
-  platypus::VectorMap coeff_map(_vector_factory);
+  Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
@@ -240,7 +240,7 @@ TEST_F(CheckCoefficientMap, OverwriteBlocks)
 
 TEST_F(CheckCoefficientMap, DifferentVecSize)
 {
-  platypus::VectorMap coeff_map(_vector_factory);
+  Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
