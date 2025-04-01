@@ -121,7 +121,7 @@ TEST_F(CheckCoefficientMap, GetPWVecCoefficient)
 
 TEST_F(CheckCoefficientMap, HasMatCoefficient)
 {
-  platypus::MatrixMap coeff_map(_matrix_factory);
+  Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
   coeff_map.addCoefficient(
       "test",
       std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
@@ -131,7 +131,7 @@ TEST_F(CheckCoefficientMap, HasMatCoefficient)
 
 TEST_F(CheckCoefficientMap, GetMatCoefficient)
 {
-  platypus::MatrixMap coeff_map(_matrix_factory);
+  Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
   coeff_map.addCoefficient(
       "resistivity",
       std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
@@ -148,7 +148,7 @@ TEST_F(CheckCoefficientMap, GetMatCoefficient)
 
 TEST_F(CheckCoefficientMap, GetPWMatCoefficient)
 {
-  platypus::MatrixMap coeff_map(_matrix_factory);
+  Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
   coeff_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
@@ -253,7 +253,7 @@ TEST_F(CheckCoefficientMap, DifferentVecSize)
 
 TEST_F(CheckCoefficientMap, DifferentMatSize)
 {
-  platypus::MatrixMap coeff_map(_matrix_factory);
+  Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
   coeff_map.addPiecewiseBlocks(
       "test",
       std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),

@@ -9,7 +9,9 @@ MFEMVectorFunctorBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addRequiredParam<MFEMVectorCoefficientName>(
-      "vector_coefficient", "Vector coefficient used in the boundary integrator.");
+      "vector_functor",
+      "Vector functor used in the boundary integrator. A functor is any of the following: a "
+      "variable, an MFEM material property, a function, or a post-processor.");
   return params;
 }
 
@@ -17,7 +19,7 @@ MFEMVectorFunctorBoundaryIntegratedBC::validParams()
 MFEMVectorFunctorBoundaryIntegratedBC::MFEMVectorFunctorBoundaryIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_functor")))
 {
 }
 

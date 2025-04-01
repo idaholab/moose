@@ -3,8 +3,8 @@
 #include "MFEMObjectUnitTest.h"
 #include "MFEMGenericConstantMaterial.h"
 #include "MFEMGenericConstantVectorMaterial.h"
-#include "MFEMGenericFunctionMaterial.h"
-#include "MFEMGenericFunctionVectorMaterial.h"
+#include "MFEMGenericFunctorMaterial.h"
+#include "MFEMGenericFunctorVectorMaterial.h"
 
 class MFEMMaterialTest : public MFEMObjectUnitTest
 {
@@ -21,10 +21,10 @@ public:
   }
 };
 
-class MFEMFunctionMaterialTest : public MFEMMaterialTest
+class MFEMFunctorMaterialTest : public MFEMMaterialTest
 {
 public:
-  MFEMFunctionMaterialTest() : MFEMMaterialTest()
+  MFEMFunctorMaterialTest() : MFEMMaterialTest()
   {
     InputParameters func_params1 = _factory.getValidParams("ParsedFunction");
     func_params1.set<std::string>("expression") = "x + y";
@@ -37,10 +37,10 @@ public:
   }
 };
 
-class MFEMFunctionVectorMaterialTest : public MFEMMaterialTest
+class MFEMFunctorVectorMaterialTest : public MFEMMaterialTest
 {
 public:
-  MFEMFunctionVectorMaterialTest() : MFEMMaterialTest()
+  MFEMFunctorVectorMaterialTest() : MFEMMaterialTest()
   {
     InputParameters func_params1 = _factory.getValidParams("ParsedVectorFunction");
     func_params1.set<std::string>("expression_x") = "x + y";
@@ -254,14 +254,14 @@ TEST_F(MFEMMaterialTest, MFEMGenericConstantVectorMaterial_Exception)
 }
 
 /**
- * Test whether an MFEMGenericFunctionMaterial creates FunctionCoefficients.
+ * Test whether an MFEMGenericFunctorMaterial creates FunctionCoefficients.
  */
-TEST_F(MFEMFunctionMaterialTest, MFEMGenericFunctionMaterial)
+TEST_F(MFEMFunctorMaterialTest, MFEMGenericFunctorMaterial)
 {
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctionMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func1", "func2"};
-  _mfem_problem->addMaterial("MFEMGenericFunctionMaterial", "material1", coef_params);
+  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func1", "func2"};
+  _mfem_problem->addMaterial("MFEMGenericFunctorMaterial", "material1", coef_params);
 
   mfem::Coefficient & coef1 = _mfem_problem->getProperties().getScalarCoefficient("coef1");
   auto c1 = dynamic_cast<mfem::FunctionCoefficient *>(&coef1);
@@ -285,18 +285,18 @@ TEST_F(MFEMFunctionMaterialTest, MFEMGenericFunctionMaterial)
 /**
  * Test whether an MFEMFunctionMaterial can create piecewise coefficients.
  */
-TEST_F(MFEMFunctionMaterialTest, MFEMGenericFunctionMaterial_PW)
+TEST_F(MFEMFunctorMaterialTest, MFEMGenericFunctorMaterial_PW)
 {
-  InputParameters coef_params1 = _factory.getValidParams("MFEMGenericFunctionMaterial");
+  InputParameters coef_params1 = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params1.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params1.set<std::vector<FunctionName>>("prop_values") = {"func1", "func2"};
+  coef_params1.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func1", "func2"};
   coef_params1.set<std::vector<SubdomainName>>("block") = {"1", "2"};
-  _mfem_problem->addMaterial("MFEMGenericFunctionMaterial", "material1", coef_params1);
-  InputParameters coef_params2 = _factory.getValidParams("MFEMGenericFunctionMaterial");
+  _mfem_problem->addMaterial("MFEMGenericFunctorMaterial", "material1", coef_params1);
+  InputParameters coef_params2 = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params2.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params2.set<std::vector<FunctionName>>("prop_values") = {"func2"};
+  coef_params2.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func2"};
   coef_params2.set<std::vector<SubdomainName>>("block") = {"3"};
-  _mfem_problem->addMaterial("MFEMGenericFunctionMaterial", "material2", coef_params2);
+  _mfem_problem->addMaterial("MFEMGenericFunctorMaterial", "material2", coef_params2);
 
   mfem::Coefficient & coef1 = _mfem_problem->getProperties().getScalarCoefficient("coef1");
   auto c1 = dynamic_cast<mfem::PWCoefficient *>(&coef1);
@@ -332,35 +332,35 @@ TEST_F(MFEMFunctionMaterialTest, MFEMGenericFunctionMaterial_PW)
 }
 
 /**
- * Test how MFEMGenericFunctionMaterial behaves when the wrong number
+ * Test how MFEMGenericFunctorMaterial behaves when the wrong number
  * of property names/values are passed.
  */
-TEST_F(MFEMFunctionMaterialTest, MFEMGenericFunctionMaterial_Exception)
+TEST_F(MFEMFunctorMaterialTest, MFEMGenericFunctorMaterial_Exception)
 {
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctionMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func1"};
-  EXPECT_THROW(_mfem_problem->addMaterial("MFEMGenericFunctionMaterial", "material1", coef_params),
+  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func1"};
+  EXPECT_THROW(_mfem_problem->addMaterial("MFEMGenericFunctorMaterial", "material1", coef_params),
                std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func1", "func2"};
-  EXPECT_THROW(_mfem_problem->addMaterial("MFEMGenericFunctionMaterial", "material1", coef_params),
+  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func1", "func2"};
+  EXPECT_THROW(_mfem_problem->addMaterial("MFEMGenericFunctorMaterial", "material1", coef_params),
                std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func3"};
-  EXPECT_THROW(_mfem_problem->addMaterial("MFEMGenericFunctionMaterial", "material1", coef_params),
+  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func3"};
+  EXPECT_THROW(_mfem_problem->addMaterial("MFEMGenericFunctorMaterial", "material1", coef_params),
                std::runtime_error);
 }
 
 /**
- * Test whether an MFEMGenericFunctionVectorMaterial creates FunctionCoefficients.
+ * Test whether an MFEMGenericFunctorVectorMaterial creates FunctionCoefficients.
  */
-TEST_F(MFEMFunctionVectorMaterialTest, MFEMGenericFunctionVectorMaterial)
+TEST_F(MFEMFunctorVectorMaterialTest, MFEMGenericFunctorVectorMaterial)
 {
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctionVectorMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func1", "func2"};
-  _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material1", coef_params);
+  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func1", "func2"};
+  _mfem_problem->addMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params);
   mfem::Vector a({0., 1., 2.}), b({1.5, 2.5, 3.5}), c({0., 0., 0.}), d({0.5, 1., 1.5});
 
   mfem::VectorCoefficient & coef1 = _mfem_problem->getProperties().getVectorCoefficient("coef1");
@@ -385,18 +385,18 @@ TEST_F(MFEMFunctionVectorMaterialTest, MFEMGenericFunctionVectorMaterial)
 /**
  * Test whether an MFEMFunctionVectorMaterial can create piecewise coefficients.
  */
-TEST_F(MFEMFunctionVectorMaterialTest, MFEMGenericFunctionVectorMaterial_PW)
+TEST_F(MFEMFunctorVectorMaterialTest, MFEMGenericFunctorVectorMaterial_PW)
 {
-  InputParameters coef_params1 = _factory.getValidParams("MFEMGenericFunctionVectorMaterial");
+  InputParameters coef_params1 = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params1.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params1.set<std::vector<FunctionName>>("prop_values") = {"func1", "func2"};
+  coef_params1.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func1", "func2"};
   coef_params1.set<std::vector<SubdomainName>>("block") = {"1", "2"};
-  _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material1", coef_params1);
-  InputParameters coef_params2 = _factory.getValidParams("MFEMGenericFunctionVectorMaterial");
+  _mfem_problem->addMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params1);
+  InputParameters coef_params2 = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params2.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params2.set<std::vector<FunctionName>>("prop_values") = {"func2"};
+  coef_params2.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func2"};
   coef_params2.set<std::vector<SubdomainName>>("block") = {"3"};
-  _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material2", coef_params2);
+  _mfem_problem->addMaterial("MFEMGenericFunctorVectorMaterial", "material2", coef_params2);
   mfem::Vector a({0., 1., 2.}), b({1.5, 2.5, 3.5}), c({0., 0., 0.}), d({0.5, 1., 1.5}),
       zero({0., 0., 0.});
 
@@ -434,26 +434,26 @@ TEST_F(MFEMFunctionVectorMaterialTest, MFEMGenericFunctionVectorMaterial_PW)
 }
 
 /**
- * Test how MFEMGenericFunctionVectorMaterial behaves when the wrong number
+ * Test how MFEMGenericFunctorVectorMaterial behaves when the wrong number
  * of property names/values are passed.
  */
-TEST_F(MFEMFunctionVectorMaterialTest, MFEMGenericFunctionVectorMaterial_Exception)
+TEST_F(MFEMFunctorVectorMaterialTest, MFEMGenericFunctorVectorMaterial_Exception)
 {
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctionVectorMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func1"};
+  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func1"};
   EXPECT_THROW(
-      _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material1", coef_params),
+      _mfem_problem->addMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params),
       std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func1", "func2"};
+  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func1", "func2"};
   EXPECT_THROW(
-      _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material1", coef_params),
+      _mfem_problem->addMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params),
       std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<FunctionName>>("prop_values") = {"func3"};
+  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func3"};
   EXPECT_THROW(
-      _mfem_problem->addMaterial("MFEMGenericFunctionVectorMaterial", "material1", coef_params),
+      _mfem_problem->addMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params),
       std::runtime_error);
 }
 

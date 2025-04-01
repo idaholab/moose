@@ -13,14 +13,14 @@ MFEMMixedScalarCurlKernel::validParams()
                              "$(k\\vec\\nabla \\times \\vec u, v)_\\Omega$ "
                              "arising from the weak form of the scalar curl operator "
                              "$k\\vec\\nabla \\times u$. The vector must be 2D.");
-  params.addParam<std::string>("coefficient",
-                               "Name of scalar property k to multiply the integrator by.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "Name of scalar property k to multiply the integrator by.");
   return params;
 }
 
 MFEMMixedScalarCurlKernel::MFEMMixedScalarCurlKernel(const InputParameters & parameters)
   : MFEMMixedBilinearFormKernel(parameters),
-    _coef_name(getParam<std::string>("coefficient")),
+    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     _coef(getScalarCoefficient(_coef_name))
 {
 }

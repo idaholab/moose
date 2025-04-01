@@ -9,6 +9,7 @@
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
+#include "MooseTypes.h"
 
 namespace Moose::MFEM
 {
@@ -191,9 +192,11 @@ using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
 } // namespace Moose::MFEM
 
-// TODO: Convert coefficient names to MOOSE derived string types
-using MFEMScalarCoefficientName = std::string;
-using MFEMVectorCoefficientName = std::string;
-using MFEMMatrixCoefficientName = std::string;
+/// This type is used for objects that expect mfem::Coefficient objects
+DerivativeStringClass(MFEMScalarCoefficientName);
+/// This type is used for objects that expect mfem::VectorCoefficient objects
+DerivativeStringClass(MFEMVectorCoefficientName);
+/// This type is used for objects that expect mfem::MatrixCoefficient objects
+DerivativeStringClass(MFEMMatrixCoefficientName);
 
 #endif
