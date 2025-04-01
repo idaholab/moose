@@ -169,7 +169,7 @@ The drum angle starts in the positive y-direction and increases in a clockwise d
 
 ## CoreMeshGenerator with ControlDrumMeshGenerator
 
-Use of [ControlDrumMeshGenerator.md] allows for drum structures to be stitched directly into the lattice defined in [CoreMeshGenerator.md]. Setting [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) in [ReactorMeshParams.md] needs to true ensures that all assembly structures get stitched together without any hanging nodes.
+Use of [ControlDrumMeshGenerator.md] allows for drum structures to be stitched directly into the lattice defined in [CoreMeshGenerator.md]. Setting [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) in [ReactorMeshParams.md] to true ensures that all assembly structures get stitched together without any hanging nodes.
 
 !listing rgmb_mesh_generators/rgmb_core_cd.i
          id=tutorial04-rgmb_core_cd
@@ -202,7 +202,7 @@ An RGMB case can terminate at the pin, assembly, or core "level". Pins and assem
 - The default block names in the final mesh are `RGMB_(level)(type)` and `RGMB_(level)(type)_TRI` (if triangular elements are present). For example, `RGMB_PIN1` and `RMGB_PIN1_TRI`, or `RGMB_ASSEMBLY1` and `RGMB_ASSEMBLY1_TRI`, or `RGMB_CORE` and `RGMB_CORE_TRI`, for workflows ending at the pin, assembly or core level, respectively.
 - The default outer boundary names in the radial dimension are `outer_(level)_(type)`. For example, for workflows ending at the pin, assembly or core level respectively, the outer boundary names are `outer_pin_1`, `outer_assembly_1` and `outer_core`.
 - If the problem is extruded in the axial dimension, the `top` and `bottom` boundaries also exist.
-- For users that require a block name that is linked to the region ID of the element, "ReactorMeshParams/region_id_as_block_name" can be set to true to accomplish this. In this case, the block name will be set as `RGMB_(level)(type)_REG(region_id)`, where "region_id" refers to the region ID extra element integer the element. For triangular elements, the suffix "_TRI" will also be added.
+- For users that require a block name that is linked to the region ID of the element, "[ReactorMeshParams.md]/[!param](/Mesh/ReactorMeshParams/region_id_as_block_name)" can be set to true to accomplish this. In this case, the block name will be set as `RGMB_(level)(type)_REG(region_id)`, where "region_id" refers to the region ID extra element integer the element. For triangular elements, the suffix "_TRI" will also be added.
 
 !content pagination previous=tutorial04_meshing/step09_hpmr.md
                     next=tutorial04_meshing/step11_rgmb_het_hom.md
