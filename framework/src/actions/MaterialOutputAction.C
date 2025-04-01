@@ -176,6 +176,9 @@ MaterialOutputAction::act()
         }
       }
     }
+    else if (output_properties.size())
+      mooseWarning("Material properties output specified is not created because 'outputs' is not "
+                   "set in the Material, and neither is Outputs/output_material_properties");
   }
   if (unsupported_names.size() > 0 && get_names_only &&
       getParam<bool>("print_unsupported_prop_names"))

@@ -96,6 +96,8 @@
                   Outputs/file_base=output_exodus1_mat_block1_with_var
                   Outputs/exodus2/file_base=output_exodus2_varonly
                   Outputs/exodus2/hide=''"
+      # output_properties set then outputs=none
+      allow_warnings = true
       detail = 'outputting certain properties within the material definition to a single file using the "exodus" keyword in the presence of multiple output files;'
     []
     [multiple_files_output_all]
@@ -105,6 +107,8 @@
       cli_args = "Materials/block_2/outputs=none
                   Outputs/exodus1/file_base=output_exodus1_mat_block1
                   Outputs/exodus2/file_base=output_exodus2_mat_block1"
+      # output_properties set then outputs=none
+      allow_warnings = true
       detail = 'outputting certain properties within the material definition to a single file using the "all" keyword in the presence of multiple output files;'
     []
     [multiple_files_output_explicit]
@@ -115,6 +119,8 @@
                   Materials/block_2/outputs=none
                   Outputs/exodus1/file_base=output_exodus1_mat_block1
                   Outputs/exodus2/file_base=output_exodus2_mat_block1"
+      # output_properties set then outputs=none
+      allow_warnings = true
       detail = 'outputting certain properties within the material definition to multiple files by explicitly specifying multiple output names; and'
     []
     [steady]
@@ -205,6 +211,17 @@
 
     requirement = "The system shall report an error if the supplied output options for material data output "
                   "are not consistent with the list of available outputs."
+  []
+  [missing_outputs]
+    type = RunException
+    input = output.i
+    expect_err = "Material properties output specified is not created because 'outputs' is not set in the Material, and neither is Outputs/output_material_properties"
+    cli_args = "Materials/active='out'
+                Materials/out/type=OutputTestMaterial
+                Materials/out/variable=u
+                Materials/out/output_properties='vector_property'"
+    requirement = "The system shall report a warning if the supplied output options for material properties do "
+                  "not generate an output."
   []
   [invalid_material_output_exodus]
     type = RunException
