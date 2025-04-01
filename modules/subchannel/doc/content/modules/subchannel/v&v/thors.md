@@ -89,11 +89,11 @@ It should be noted that the effect of the simulated blockage, depends on the axi
 
 The input file to run the central blockage case is presented below:
 
-!listing /examples/Blockage/THORS/FFM-3A.i language=cpp
+!listing /v&v/Blockage/THORS/FFM-3A.i language=cpp
 
 The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
 
-!listing /examples/Blockage/THORS/FFM-3A_viz.i language=cpp
+!listing /v&v/Blockage/THORS/FFM-3Adetailed.i language=cpp
 
 ## Edge blockage of 14 channels in 19-pin sodium-cooled bundles
 
@@ -143,9 +143,9 @@ The second case presented here is the low flow case (FFM Series 6, Test 12, Run 
 
 The input files to run the edge blockage case is presented below:
 
-!listing /examples/Blockage/THORS/FFM-5B_high.i language=cpp
+!listing /v&v/Blockage/THORS/FFM-5B_high.i language=cpp
 
-!listing /examples/Blockage/THORS/FFM-5B_low.i language=cpp
+!listing /v&v/Blockage/THORS/FFM-5B_low.i language=cpp
 
 ## Caveat
 

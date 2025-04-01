@@ -53,8 +53,8 @@ It should be noted that the CFD simulation took about 3 hours to converge, while
 
 The input file to run the 70% blockage case with the `improved` parameters is presented below:
 
-!listing /examples/Blockage/PNNL_7x7/7X7blockage70.i language=cpp
+!listing /v&v/Blockage/PNNL_7x7/7X7blockage70.i language=cpp
 
 The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
 
-!listing /examples/Blockage/PNNL_7x7/detailedMesh.i language=cpp
+!listing /v&v/Blockage/PNNL_7x7/detailedMesh.i language=cpp
