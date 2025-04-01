@@ -6,7 +6,7 @@ The PNNL 2$\times$6 benchmark [!cite](BATES1980) was performed at Pacific Northw
 
 Local fluid velocity and temperature measurements in the mixed (combined free and forced) convection regime were obtained. This benchmark aims to validate the SCM code in natural convection conditions. For each of the  test conditions of this study, fluid axial velocity and temperature (both local and bulk average inlet and outlet) were measured within the heated length of the pin bundle.  For the steady state cases studied, velocity measurements were made along the X axis at Y = 0.0 which is along the centerline of the central subchannels (subchannels 1-7). The cross section of the pin bundle is presented in Figure [2x6].
 
-!media subchannel/v&v/2x6.png
+!media subchannel/v&v/pnnl/2x6.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=2x6
     caption=  Bundle Cross-Section with Subchannel Numbering Scheme and Bundle Dimensions (in.)
@@ -27,11 +27,11 @@ Velocity data were recorded at selected points along the central subchannel axia
 
 The input file for the steady case 9 is:
 
-!listing /examples/PNNL_12_pin/steady_state/2X6_ss.i language=cpp
+!listing /v&v/PNNL_12_pin/steady_state/2X6_ss.i language=cpp
 
 The input file decribing the radial pin power profile is:
 
-!listing /examples/PNNL_12_pin/steady_state/power_profile.txt language=cpp
+!listing /v&v/PNNL_12_pin/steady_state/power_profile.txt language=cpp
 
 For case 13 the input file and power profile file, need to be adapted according to the respective operational parameters.
 
@@ -39,23 +39,23 @@ For case 13 the input file and power profile file, need to be adapted according 
 
 The input file for the steady case 5 is:
 
-!listing /examples/PNNL_12_pin/transient/2X6_transient.i language=cpp
+!listing /v&v/PNNL_12_pin/transient/2X6_transient.i language=cpp
 
 ## Results
 
 The SCM results vs the experimental measurements are shown in Figures [buoyancy9], [buoyancy13] and [coast_down].
 
-!media subchannel/v&v/buoyancy9.png
+!media subchannel/v&v/pnnl/buoyancy9.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=buoyancy9
     caption=  Velocity profile across centerline
 
-!media subchannel/v&v/buoyancy13.png
+!media subchannel/v&v/pnnl/buoyancy13.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=buoyancy13
     caption=  Velocity profile across centerline
 
-!media subchannel/v&v/coast_down.png
+!media subchannel/v&v/pnnl/coast_down.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=coast_down
     caption=  Linear flow coast down
