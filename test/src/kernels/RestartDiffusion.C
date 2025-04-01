@@ -22,14 +22,20 @@ RestartDiffusion::validParams()
 RestartDiffusion::RestartDiffusion(const InputParameters & parameters)
   : Kernel(parameters),
     _coef(getParam<Real>("coef")),
-    _current_coef(declareRestartableData<Real>("current_coef", 1))
+    _current_coef(declareRestartableData<Real>("current_coef", 1)),
+    _last_t_step(declareRecoverableData<int>("last_t_step", -1))
 {
 }
 
 void
 RestartDiffusion::timestepSetup()
 {
+  if (_last_t_step == _t_step)
+    return;
+
   _current_coef += 1;
+
+  _last_t_step = _t_step;
 }
 
 Real
