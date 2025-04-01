@@ -288,4 +288,5 @@ velocity_interp_method='rc'
 
 [Outputs]
   csv = true
+  execute_on = final
 []
