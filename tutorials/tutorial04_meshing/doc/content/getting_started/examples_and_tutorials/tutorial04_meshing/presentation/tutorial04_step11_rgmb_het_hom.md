@@ -54,7 +54,7 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
 In order to define homogeneous assembly structures to stitch into the core, we use [PinMeshGenerator.md] once again ([AssemblyMeshGenerator.md] is only used for structures that consist of lattices of pins).
 
 - +To define single assemblies directly with PinMeshGenerators for stitching with [CoreMeshGenerator.md]+, [PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`.
-- In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized and [SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [PolygonConcentricCircleMeshGenerator.md].
+- In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
          block=Mesh/reflector_assembly
@@ -69,6 +69,7 @@ In order to define homogeneous assembly structures to stitch into the core, we u
 
 - Since [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) = `true` in [ReactorMeshParams.md], the different assembly types are stitched together without hanging nodes.
 - Dummy assemblies do not need to be defined explicitly and instead can be referenced in the core lattice input by specifying a name in [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name).
+- This is the last step you can run if you do not have Griffin exectuable access.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
          block=Mesh/het_core
@@ -81,7 +82,7 @@ In order to define homogeneous assembly structures to stitch into the core, we u
 
 ## Equivalent homogeneous core using Griffin's EquivalentCoreMeshGenerator
 
-`EquivalentCoreMeshGenerator` is a mesh generator defined in Griffin that converts an input heterogeneous RGMB mesh into equivalent "duct heterogeneous", "ring heterogeneous", or "fully homogeneous" representations. Each unique subassembly region (radial + axial location) will have its own region ID in the equivalent core mesh.
+`EquivalentCoreMeshGenerator` is a mesh generator defined in Griffin that converts an input heterogeneous RGMB mesh into equivalent "duct heterogeneous", "ring heterogeneous", or "fully homogeneous" representations. Each unique subassembly region (radial + axial location) will have its own region ID in the equivalent core mesh. This step requires Griffin executable access.
 
 !row!
 !col small=12 medium=6 large=8
