@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#30185'
+  design = 'navier_stokes/pinsfv.md INSFVVelocityHydraulicSeparatorBC.md INSFVPressureHydraulicSeparatorBC.md INSFVEnergyHydraulicSeparatorBC.md'
+  [separated-nojump]
+    type = 'CSVDiff'
+    input = separator-no-jump.i
+    csvdiff =  separator-no-jump_out.csv
+    requirement = 'The system shall be able to simulate hydraulicly separated channels without pressure jumps.'
+  []
+  [separated-jump]
+    type = 'CSVDiff'
+    input = separator-jump.i
+    csvdiff =  separator-jump_out.csv
+    requirement = 'The system shall be able to simulate hydraulicly separated channels with pressure jumps.'
+  []
+[]
