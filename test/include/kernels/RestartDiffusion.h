@@ -26,4 +26,5 @@ protected:
 
   Real _coef;
   Real & _current_coef;
+  int & _last_t_step;
 };
