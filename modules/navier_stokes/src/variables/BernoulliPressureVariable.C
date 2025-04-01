@@ -121,11 +121,6 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
   if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem, time))
     return true;
 
-<<<<<<< HEAD
-  if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
-    // We choose to apply the Dirichlet condition for the upwind
-    return std::get<0>(elemIsUpwind(*elem, fi, time));
-=======
   if (isInternalFace(fi))
   {
     if (isSeparatorBoundary(fi))
@@ -135,7 +130,6 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
       // We choose to apply the Dirichlet condition for the upwind element
       return std::get<0>(elemIsUpwind(*elem, fi, time));
   }
->>>>>>> 1e00b9fdf7 (Add first approach for separator implemntation. (#30185))
 
   return false;
 }
