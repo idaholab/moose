@@ -12,7 +12,7 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Class implementing a Dirichlet boundary condition for linear finite
+ * Class implementing a Neumann boundary condition for linear finite
  * volume variables. This is only applicable for advection-diffusion problems.
  */
 class LinearFVAdvectionDiffusionFunctorNeumannBC : public LinearFVAdvectionDiffusionBC
@@ -39,8 +39,6 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
-
-  virtual bool use_boundary_gradient_extrapolation() const override { return false; }
 
 protected:
   /// The functor for this BC (can be variable, function, etc)

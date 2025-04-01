@@ -48,13 +48,6 @@
     functor = analytic_solution_neumann_bottom
     diffusion_coeff = coeff_func
   []
-  # [neu_right]
-  #   type = LinearFVAdvectionDiffusionFunctorNeumannBC
-  #   variable = u
-  #   boundary = "right"
-  #   functor = analytic_solution_neumann_right
-  #   diffusion_coeff = coeff_func
-  # []
   [neu_top]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = u
@@ -81,10 +74,6 @@
     type = ParsedFunction
     expression = '-(1+0.5*x*y)*(1.5-x*x)*(-2*y)'
   []
-  # [analytic_solution_neumann_right]
-  #   type = ParsedFunction
-  #   expression = '(1+0.5*x*y)*(-2*x)*(1.5-y*y)'
-  # []
   [analytic_solution_neumann_top]
     type = ParsedFunction
     expression = '(1+0.5*x*y)*(1.5-x*x)*(-2*y)'

@@ -22,7 +22,7 @@ class TestDiffusion1D(unittest.TestCase):
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
-class TestDiffusion1D_neumann(unittest.TestCase):
+class TestDiffusion1DNeumann(unittest.TestCase):
     def test(self):
         df1 = run_spatial('diffusion-1d_neumann.i', 6, file_base="diffusion-1d_neumann_csv")
 
@@ -33,7 +33,7 @@ class TestDiffusion1D_neumann(unittest.TestCase):
                  markersize=8,
                  num_fitted_points=3,
                  slope_precision=1)
-        fig.save('1d-linear-fv-diffusion_neumann.png')
+        fig.save('1d-linear-fv-diffusion-neumann.png')
 
         for _,value in fig.label_to_slope.items():
             print("The current slope: ", value)
@@ -73,7 +73,7 @@ class TestDiffusion2DNonorthogonal(unittest.TestCase):
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
-class TestDiffusion2DOrthogonal_neumann(unittest.TestCase):
+class TestDiffusion2DOrthogonalNeumann(unittest.TestCase):
     def test(self):
         df1 = run_spatial('diffusion-2d_neumann.i', 5, file_base="diffusion-2d_neumann_csv")
 
@@ -84,13 +84,13 @@ class TestDiffusion2DOrthogonal_neumann(unittest.TestCase):
                  markersize=8,
                  num_fitted_points=3,
                  slope_precision=1)
-        fig.save('2d-linear-fv-diffusion-orthogonal_neumann.png')
+        fig.save('2d-linear-fv-diffusion-orthogonal-neumann.png')
 
         for _,value in fig.label_to_slope.items():
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
-class TestDiffusion2DNonorthogonal_neumann(unittest.TestCase):
+class TestDiffusion2DNonorthogonalNeumann(unittest.TestCase):
     def test(self):
         df1 = run_spatial('diffusion-2d_neumann.i', 5, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/diffusion/use_nonorthogonal_correction=true Convergence/linear/max_iterations=10", file_base="diffusion-2d_neumann_csv")
 

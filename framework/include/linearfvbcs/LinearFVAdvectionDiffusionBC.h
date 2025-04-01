@@ -64,5 +64,5 @@ public:
    * prescribed by the BC or if it is extrapolated/derived from the BC. For Neumann BC this
    # is false as the flux is prescribed, whereas for Dirichlet BC this is true.
    */
-  virtual bool use_boundary_gradient_extrapolation() const { return false; }
+  virtual bool useBoundaryGradientExtrapolation() const { return false; }
 };

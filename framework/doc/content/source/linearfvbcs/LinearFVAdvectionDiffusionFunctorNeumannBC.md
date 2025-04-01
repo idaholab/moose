@@ -2,7 +2,7 @@
 
 ## Description
 
-`LinearFVAdvectionDiffusionFunctorNeumannBC` will specify the boundary value of the diffusive flux at the boundary.
+`LinearFVAdvectionDiffusionFunctorNeumannBC` specifies the diffusive flux at the boundary.
 The value will be determined by a `Functor`
 (through the [!param](/LinearFVBCs/LinearFVAdvectionDiffusionFunctorNeumannBC/functor) parameter).
 

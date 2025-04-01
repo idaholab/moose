@@ -38,7 +38,7 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  virtual bool use_boundary_gradient_extrapolation() const override { return true; }
+  virtual bool useBoundaryGradientExtrapolation() const override { return true; }
 
 protected:
   /// The functor for this BC (can be variable, function, etc)
