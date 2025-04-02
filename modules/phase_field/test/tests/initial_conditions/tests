@@ -27,6 +27,8 @@
       input = 'BimodalInverseSuperellipsoidsIC.i'
       exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
       scale_refine = 1
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'bimodal inverse superellipsoidal structures,'
     []
@@ -36,6 +38,8 @@
       input = 'BimodalSuperellipsoidsIC.i'
       exodiff = 'BimodalSuperellipsoidsIC_out.e'
       scale_refine = 1
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'bimodal superellipsoidal structures,'
     []
@@ -46,6 +50,8 @@
       exodiff = 'SmoothSuperellipsoidIC_out.e'
       scale_refine = 1
       valgrind = 'HEAVY'
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'smooth superellipsoidal structures,'
     []
@@ -56,6 +62,8 @@
       exodiff = 'SpecifiedSmoothSuperellipsoidIC_out.e'
       scale_refine = 1
       valgrind = 'HEAVY'
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'smooth superellipsoidal structures specified from a file,'
     []
@@ -227,6 +235,8 @@
       exodiff = 'SmoothCircleIC_out.e'
       scale_refine = 1
       valgrind = 'HEAVY'
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'smooth interface circles,'
     []
