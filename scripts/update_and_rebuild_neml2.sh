@@ -82,6 +82,9 @@ TIMPI_DIR=${TIMPI_DIR:-${LIBMESH_DIR}}
 WASP_SRC_DIR=${WASP_SRC_DIR:-${MOOSE_DIR}/framework/contrib/wasp}
 WASP_DIR=${WASP_DIR:-${WASP_SRC_DIR}/install}
 
+# Dependency: hit
+HIT_SRC_DIR=${HIT_SRC_DIR:-${MOOSE_DIR}/framework/contrib/hit}
+
 # Handle environment variables
 if [[ -n "$NEML2_SRC_DIR" ]]; then
   SKIP_SUBMODULE_UPDATE=true
@@ -123,6 +126,7 @@ fi
 SCRIPT_NAME=$(basename "$0")
 echo "****************************************************************************************************"
 echo "${SCRIPT_NAME} summary:"
+echo "  HIT_SRC_DIR:               ${HIT_SRC_DIR}"
 echo "  TIMPI_DIR:                 ${TIMPI_DIR}"
 echo "  WASP_DIR:                  ${WASP_DIR}"
 echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
@@ -211,7 +215,7 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
                     "${NEML2_BUILD_DIR}" \
                     "${LIBTORCH_DIR}" \
                     "${WASP_DIR}" \
-                    "${MOOSE_DIR}"/framework/contrib/hit \
+                    "${HIT_SRC_DIR}" \
                     "${TIMPI_DIR}" \
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
                     "${EXTRA_ARGS[*]}"
