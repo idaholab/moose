@@ -53,6 +53,10 @@ private:
   virtual void addInletBC() override;
   virtual void addOutletBC() override;
   virtual void addWallsBC() override;
+  virtual void addSeparatorBC() override
+  {
+    mooseError("Flow separators are not supported for linear FV yet!");
+  }
 
   virtual bool hasForchheimerFriction() const override { return false; };
 
@@ -61,7 +65,8 @@ private:
   virtual MooseFunctorName getLinearFrictionCoefName() const override
   {
     mooseError("Not implemented");
-  };
+  }
+
   UserObjectName rhieChowUOName() const override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;

@@ -66,6 +66,8 @@ public:
   const std::vector<BoundaryName> & getOutletBoundaries() const { return _outlet_boundaries; }
   /// Get the wall boundaries
   const std::vector<BoundaryName> & getWallBoundaries() const { return _wall_boundaries; }
+  /// Get the hydraulic separator boundaries
+  const std::vector<BoundaryName> & getHydraulicSeparators() const { return _hydraulic_separators; }
   /// Get the inlet direction if using a flux inlet
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
   /// Get the inlet flux postprocessor if using a flux inlet
@@ -103,6 +105,7 @@ protected:
   virtual void addInletBC() = 0;
   virtual void addOutletBC() = 0;
   virtual void addWallsBC() = 0;
+  virtual void addSeparatorBC() = 0;
 
   /// Return whether a Forchheimer friction model is in use
   virtual bool hasForchheimerFriction() const = 0;
@@ -176,6 +179,8 @@ protected:
   const std::vector<BoundaryName> _outlet_boundaries;
   /// Boundaries which define a wall (slip/noslip/etc.)
   const std::vector<BoundaryName> _wall_boundaries;
+  /// Hydraulic separator boundaries
+  std::vector<BoundaryName> _hydraulic_separators;
 
   /// Momentum inlet boundary types
   std::map<BoundaryName, MooseEnum> _momentum_inlet_types;
