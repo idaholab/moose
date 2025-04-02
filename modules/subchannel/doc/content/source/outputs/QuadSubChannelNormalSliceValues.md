@@ -13,7 +13,7 @@ and the subchannel mesh and printed on that [!param](/Outputs/QuadSubChannelNorm
 
 ## Example Input File Syntax
 
-!listing /examples/PNNL_12_pin/steady_state/2X6_ss.i block=Outputs language=cpp
+!listing /v&v/PNNL_12_pin/steady_state/2X6_ss.i block=Outputs language=cpp
 
 !syntax parameters /Outputs/QuadSubChannelNormalSliceValues
 
