@@ -14,5 +14,7 @@
     issues = '#21704'
     design = 'SolutionAuxMisorientationBoundary.md'
     requirement = 'The system shall assign local diffusivity.'
+    # Steady solve
+    recover = false
   [../]
 []

@@ -151,5 +151,7 @@
     requirement = "The system shall support grain evolution when beginning from EBSD ICs and compute "
                   "average orientation
                    of non-uniformly oriented grains."
+    # 0-step transient does not recover
+    recover = false
   []
 []

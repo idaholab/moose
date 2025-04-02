@@ -8,15 +8,15 @@
 []
 
 [Variables]
-  [./rho]
-  [../]
+  [rho]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = rho
-  [../]
+  []
 []
 
 [Problem]
@@ -34,7 +34,7 @@
 []
 
 [ICs]
-  [./rho_IC]
+  [rho_IC]
     y2 = 8.75
     lc = 5
     y1 = 1.25
@@ -45,6 +45,6 @@
     type = PFCFreezingIC
     min = .3
     max = .7
-  [../]
+  []
 []
 

@@ -16,6 +16,8 @@
     issues = '#4835'
     design = 'KKSCHBulk.md'
     requirement = 'A non-split version of the Kim-Kim-Suzuki shall be provided'
+    # uses exodus oversampling see #2295
+    recover = false
   []
 
   [kks_example_split]
