@@ -241,6 +241,7 @@
       input = checkpoint_block.i
       cli_args = '--test-checkpoint-half-transient'
       recover = false
+      restep = false
       detail = "at every timestep while maintaining the most recent two files and"
 
       check_files = "checkpoint_block_out_cp/0004-restart-0.rd/data "
