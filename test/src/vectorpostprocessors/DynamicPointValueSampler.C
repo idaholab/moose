@@ -37,7 +37,7 @@ DynamicPointValueSampler::DynamicPointValueSampler(const InputParameters & param
 void
 DynamicPointValueSampler::initialize()
 {
-  _num_points = _num_points + _adder;
+  _num_points = getParam<unsigned int>("num_points") + _adder * (_t_step + 1);
 
   std::vector<Point> points;
   generatePointsAndIDs(_start_point, _end_point, _num_points, points, _ids);
