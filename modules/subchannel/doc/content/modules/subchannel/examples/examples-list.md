@@ -1,8 +1,7 @@
 # Examples
 
-The authors have compiled a selection of examples that would be useful as demostration cases for the user.
-These are examples that do not fall under the category of verification or validation but are deemed to offer an
-insight to SCM's capabilities, thus are useful to be documented. This list is a work in progress so check often for updates.
+The authors have compiled a collection of examples that serve as useful demonstration cases for the user.
+These examples do not fit into the verification or validation categories, but are considered to provide valuable insights into SCM's capabilities, making them worthwhile to document. This list is a work in progress, so please check back frequently for updates.
 
 ## List of examples
 

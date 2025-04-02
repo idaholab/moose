@@ -1,11 +1,11 @@
 # Thermo-mechanical coupling of an one pin problem
 
-This is an example case of coupling a subchannel calculation with a thermo_mechanical model of a fuel pin.
+This is an example case of coupling a subchannel calculation (SCM) with a 2D-RZ thermo_mechanical model of a fuel pin.
 
 
 ## Example Description
 
-The example models 4 subchannels around one fuel pin. SCM sends pin surface temperature to the pin model. The pin model returns linear heat flux at the surface of the pin and pin diameter.
+The example models 4 subchannels around one fuel pin (quad geometry). SCM sends pin surface temperature to the pin model. The pin model returns linear heat flux at the surface of the pin and pin diameter. The pin diameter is affected by thermal dillation.
 
 ## Input files
 

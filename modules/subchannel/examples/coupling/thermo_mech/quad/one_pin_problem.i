@@ -4,9 +4,8 @@ T_in = 359.15
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 4.923e6 # Pa
 heated_length = 1.0
-
+######## Geometry #
 [GlobalParams]
-    ######## Geometry #
     nx = 2
     ny = 2
     n_cells = 25
@@ -229,11 +228,10 @@ heated_length = 1.0
 ################################################################################
 [MultiApps]
     ################################################################################
-    # Couple to BISON
+    # Couple to Thermo-Mechanical Pin model (uses kernels available in MOOSE)
     ################################################################################
     [sub]
         type = FullSolveMultiApp
-        # app_type = BisonApp
         input_files = one_pin_problem_sub.i
         execute_on = 'timestep_end'
         positions = '0   0   0 '
@@ -242,7 +240,7 @@ heated_length = 1.0
     []
 
     ################################################################################
-    # A multiapp that projects data to a detailed mesh
+    # A multiapp that projects the solution to a detailed mesh for visualization purposes
     ################################################################################
     [viz]
         type = FullSolveMultiApp
@@ -252,7 +250,7 @@ heated_length = 1.0
 []
 
 [Transfers]
-    [Tpin] # send pin surface temperature to bison,
+    [Tpin] # send pin surface temperature to pin model,
         type = MultiAppGeneralFieldNearestLocationTransfer
         to_multi_app = sub
         variable = Pin_surface_temperature
@@ -261,7 +259,7 @@ heated_length = 1.0
         greedy_search = true
     []
 
-    [diameter] # send diameter information from /BISON/heatConduction to subchannel
+    [diameter] # send diameter information from pin model to subchannel
         type = MultiAppGeneralFieldNearestLocationTransfer
         from_multi_app = sub
         variable = Dpin
@@ -271,7 +269,7 @@ heated_length = 1.0
         greedy_search = true
     []
 
-    [q_prime] # send heat flux from /BISON/heatConduction to subchannel
+    [q_prime] # send heat flux from pin model to subchannel
         type = MultiAppGeneralFieldNearestLocationTransfer
         from_multi_app = sub
         variable = q_prime
