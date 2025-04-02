@@ -428,6 +428,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   }
   else
   {
+    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
     return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
            fT * std::pow(psi, 1.0 / 3.0);
   }

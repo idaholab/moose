@@ -1,4 +1,6 @@
 # %%
+# This script plots the validation results based on the SCM simulation
+# and experimental measurements.
 ##### LOAD MODULES ###############
 import numpy as np
 import matplotlib.pyplot as plt
