@@ -122,6 +122,9 @@
       input = solution_invalid_recover.i
       jsondiff = 'solution_invalid_checkpoint.json'
       hpc = false # iteration counts can be MPI dependent
+      # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
+      # The object is meant to keep its state across failed timesteps, though.
+      restep = false
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
       detail = 'outputting of checkpoint files'
     []
@@ -135,6 +138,9 @@
       cli_args = "--recover solution_invalid_checkpoint_cp/0003 Outputs/file_base='solution_invalid_recover' Executioner/num_steps=4 Outputs/json=true"
       jsondiff = 'solution_invalid_recover.json'
       prereq = 'test/solution_valid_checkpoint'
+      # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
+      # The object is meant to keep its state across failed timesteps, though.
+      restep = false
       detail = 'restarting from the output data'
     []
   []
