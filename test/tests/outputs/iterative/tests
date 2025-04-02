@@ -79,6 +79,8 @@
     max_threads = 1
     # no. of iterations is not recoverable
     recover = false
+    # Number of iterations will accumulate after a failed timestep
+    restep = false
     # MPI dependent
     hpc = false
 
