@@ -39,6 +39,14 @@
                    match non-AD methods'
   []
 
+  [ad_eigen_sol]
+    type = Exodiff
+    input = 'eigen_sol.i'
+    exodiff = 'eigen_sol_out.e'
+    issues = '#30233'
+    requirement = 'Finite strain methods with AD should be able to use the EigenSolution decomposition.'
+  []
+
   [bending-jac]
     type = PetscJacobianTester
     input = 'bending_jacobian.i'
