@@ -8,7 +8,7 @@
 
 Boundary condition for enforcing an essential (Dirichlet) condition on
 a scalar variable on the boundary, fixing its values to the input
-scalar function on the boundary.
+scalar functor on the boundary.
 
 ## Example Input File Syntax
 
