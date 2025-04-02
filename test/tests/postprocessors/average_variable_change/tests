@@ -16,6 +16,8 @@
       input = 'transient.i'
       csvdiff = 'transient_out.csv'
       abs_zero = 1e-5
+      # Output on nonlinear duplicates re-done timestep in CSV
+      restep = false
       detail = 'for a transient executioner.'
     []
   []
