@@ -31,9 +31,11 @@
     type = HexagonalGridPositions
     center = '0 0 0'
     nr = 2
-    positions_pattern =           'hex_grid hex_grid;
-    hex_grid_2rings_exclusions  hex_grid_2rings_exclusions hex_grid;
-                    -1 hex_grid'
+    positions_pattern_indexing = 'hex_grid 1
+                                  hex_grid_2rings_exclusions 2'
+    positions_pattern = '1 1;
+                        2 2 1;
+                        -1 1'
     lattice_flat_to_flat = 12
     pin_pitch = 4
     outputs = 'out'
