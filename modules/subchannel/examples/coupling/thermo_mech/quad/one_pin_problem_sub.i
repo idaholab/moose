@@ -7,7 +7,7 @@ T_in = 359.15
 
 [Mesh]
     second_order = true
-    [bisonMesh]
+    [PinMesh]
         type = GeneratedMeshGenerator
         dim = 2
         xmax = '${fparse pin_diameter / 2.0}'
@@ -22,7 +22,7 @@ T_in = 359.15
 []
 
 [Functions]
-    [volumetric_heat_rate]
+    [volumetric_heat_rate] # Defined such as to be consistent with the IC in SCM
         type = ParsedFunction
         expression = '(4.0 * 100000.0 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
         symbol_names = 'L D'
@@ -51,9 +51,7 @@ T_in = 359.15
 []
 
 [Modules]
-
     [TensorMechanics]
-
         [Master]
             add_variables = true
             strain = SMALL
@@ -71,7 +69,7 @@ T_in = 359.15
 
 [AuxKernels]
     [QPrime]
-        type = SCMRZPinQPrimeAux
+        type = SCMRZPinQPrimeAux # This kernel calculates linear heat rate for the 2D-RZ pin model
         diffusivity = 'thermal_conductivity'
         variable = q_prime
         diffusion_variable = temperature
@@ -122,13 +120,11 @@ T_in = 359.15
         type = ComputeStrainIncrementBasedStress
         block = 0
     []
-
     [heat_conductor]
         type = HeatConductionMaterial
         thermal_conductivity = 1.0
         block = 0
     []
-
     [density]
         type = Density
         block = 0
@@ -215,17 +211,14 @@ T_in = 359.15
         functor = volumetric_heat_rate
         use_displaced_mesh = false
     []
-
     [total_power_disp]
         type = ElementIntegralFunctorPostprocessor
         functor = volumetric_heat_rate
         use_displaced_mesh = true
     []
-
     [volume]
         type = VolumePostprocessor
     []
-
     [volume_disp]
         type = VolumePostprocessor
         use_displaced_mesh = true
