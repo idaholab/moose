@@ -1155,6 +1155,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(SolverSystemName, string);
 
         // map types
+        setmap(string, unsigned int);
         setmap(string, Real);
         setmap(string, string);
         setmap(unsigned int, unsigned int);
@@ -1192,7 +1193,6 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(FunctionName);
         setvectorvector(ConvergenceName);
         setvectorvector(UserObjectName);
-        setvectorvector(PositionsName);
         setvectorvector(IndicatorName);
         setvectorvector(MarkerName);
         setvectorvector(MultiAppName);

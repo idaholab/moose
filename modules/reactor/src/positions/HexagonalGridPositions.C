@@ -37,12 +37,17 @@ HexagonalGridPositions::validParams()
       "selected as positions.");
   params.addParam<std::vector<unsigned int>>(
       "include_in_pattern", {}, "A vector of the numbers in the pattern to include");
-  params.addParam<std::vector<std::vector<PositionsName>>>(
+  params.addParam<std::vector<std::vector<int>>>(
       "positions_pattern",
       {},
-      "A double-indexed hexagonal-shaped array of the name of other Positions objects starting "
+      "A double-indexed hexagonal-shaped array with the index of other Positions objects starting "
       "with the upper-left corner. These positions objects will be distributed within the "
-      "hexagonal grid. Use '-1' to discard a position in the lattice.");
+      "hexagonal grid. The indexing is given in 'positions_pattern_indexing'. Use '-1' to discard "
+      "a position in the lattice.");
+  params.addParam<std::map<std::string, unsigned int>>(
+      "positions_pattern_indexing",
+      {},
+      "A map from the name of positions objects to their index in the 'positions_pattern'");
 
   // Use user-provided ordering
   params.set<bool>("auto_sort") = false;
@@ -63,8 +68,11 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
     _include_in_pattern(
         std::set<unsigned int>(getParam<std::vector<unsigned int>>("include_in_pattern").begin(),
                                getParam<std::vector<unsigned int>>("include_in_pattern").end())),
-    _positions_pattern(getParam<std::vector<std::vector<PositionsName>>>("positions_pattern"))
+    _positions_pattern(getParam<std::vector<std::vector<int>>>("positions_pattern")),
+    _positions_pattern_indexing(
+        getParam<std::map<std::string, unsigned int>>("positions_pattern_indexing"))
 {
+  // Check dimensions
   if (_nr == 1)
   {
     if (MooseUtils::absoluteFuzzyGreaterThan(_pin_pitch, _lattice_flat_to_flat))
@@ -79,11 +87,13 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
                  "Lattice flat to flat distance is less than the minimum (3 * nr - 1) * pin_pitch "
                  "/ sqrt(3) given nr rings with a pitch of pin_pitch");
   }
+
+  // Check pattern and include_in_pattern
   if ((_include_in_pattern.empty() && _pattern.size()) ||
       (_include_in_pattern.size() && _pattern.empty()))
     paramError(
         "include_in_pattern",
-        "The 'pattern' parameter and the include_in_pattern must be both specified or both not "
+        "The 'pattern' parameter and the 'include_in_pattern' must be both specified or both not "
         "specified by the user.");
   for (const auto include : _include_in_pattern)
   {
@@ -93,16 +103,37 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
         found = true;
     if (!found)
       paramError("include_in_pattern",
-                 "Pattern item " + std::to_string(include) +
-                     " to include is not present in the pattern");
+                 "Pattern item '" + std::to_string(include) +
+                     "' to include is not present in the pattern");
   }
-  if (_positions_pattern.size() && _positions_pattern[0].size() &&
+
+  // Check positions_pattern and positions_pattern_indexing
+  if ((_positions_pattern.empty() && _positions_pattern_indexing.size()) ||
+      (_positions_pattern.size() && _positions_pattern_indexing.empty()))
+    paramError("positions_pattern_indexing",
+               "The 'positions_pattern' parameter and the 'positions_pattern_indexing' must be "
+               "both specified or both not specified by the user.");
+  for (const auto & [pos_name, index] : _positions_pattern_indexing)
+  {
+    bool found = false;
+    for (const auto & row : _positions_pattern)
+      if (std::find(row.begin(), row.end(), index) != row.end())
+        found = true;
+    if (!found)
+      paramError("include_in_pattern",
+                 "Pattern item '" + pos_name + "' with index '" + std::to_string(index) +
+                     "' to include is not present in the pattern");
+  }
+
+  // Check incompatible parameters
+  if (((_positions_pattern.size() && _positions_pattern[0].size()) ||
+       _positions_pattern_indexing.size()) &&
       ((_pattern.size() && _pattern[0].size()) || _include_in_pattern.size()))
     paramError("positions_pattern",
                "'pattern'/'include_in_pattern' are not supported in combination with "
-               "'positions_pattern'. Only one pattern is supporteds");
+               "'positions_pattern/positions_pattern_indexing'. Only one pattern is supported");
 
-  // Obtain the positions by evaluating the functors
+  // Obtain the positions by unrolling the patterns
   initialize();
   // Sort if needed (user-specified)
   finalize();
@@ -197,16 +228,15 @@ HexagonalGridPositions::initialize()
 
     // Check that all the positions names are valid
     unsigned num_pos = 0;
-    for (const auto & row : _positions_pattern)
-      for (const auto & pos_name : row)
-        if (_fe_problem.hasUserObject(pos_name))
-          num_pos += _fe_problem.getPositionsObject(pos_name).getNumPositions(initial);
-        else if (pos_name != "-1")
-          mooseError("Positions ",
-                     pos_name,
-                     " has not been created yet. If it exists, re-order Positions in the input "
-                     "file or implement automated construction ordering");
+    for (const auto & [pos_name, index] : _positions_pattern_indexing)
+      if (_fe_problem.hasUserObject(pos_name))
+        num_pos += _fe_problem.getPositionsObject(pos_name).getNumPositions(initial);
     _positions.reserve(num_pos);
+
+    // Invert map from positions to indices
+    std::map<unsigned int, PositionsName> index_to_pos;
+    for (const auto & [pos_name, index] : _positions_pattern_indexing)
+      index_to_pos[index] = pos_name;
 
     // Unroll pattern : the positions vector is 1D and should be
     std::vector<PositionsName> pattern_unrolled;
@@ -218,7 +248,15 @@ HexagonalGridPositions::initialize()
         libmesh_ignore(a_i);
         unsigned int row_i, within_row_i;
         _hex_latt->get2DInputPatternIndex(i, row_i, within_row_i);
-        pattern_unrolled[i++] = _positions_pattern[row_i][within_row_i];
+        const auto & pos_index = _positions_pattern[row_i][within_row_i];
+        if (index_to_pos.count((unsigned int)(pos_index)))
+          pattern_unrolled[i++] = index_to_pos[pos_index];
+        else if (pos_index != -1)
+          paramError("positions_pattern",
+                     "Index '" + std::to_string(pos_index) +
+                         "' in pattern is not found in 'positions_pattern_indexing'");
+        else
+          pattern_unrolled[i++] = "-1";
       }
 
     // Now place the positions in the _positions array with the offset from the parent lattice index
