@@ -1192,6 +1192,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(FunctionName);
         setvectorvector(ConvergenceName);
         setvectorvector(UserObjectName);
+        setvectorvector(PositionsName);
         setvectorvector(IndicatorName);
         setvectorvector(MarkerName);
         setvectorvector(MultiAppName);
