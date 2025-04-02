@@ -1,5 +1,5 @@
 [Tests]
-  design = 'FCTFdisplacementIC.md v&v/areva_fctf.md'
+  design = 'FCTFdisplacementIC.md areva_fctf.md'
   issues = '#30069 #29501'
   [PNNL-12_ss]
       type = CSVDiff
