@@ -60,7 +60,8 @@ LeastSquaresFitHistory::LeastSquaresFitHistory(const InputParameters & parameter
     _x_scale(parameters.get<Real>("x_scale")),
     _x_shift(parameters.get<Real>("x_shift")),
     _y_scale(parameters.get<Real>("y_scale")),
-    _y_shift(parameters.get<Real>("y_shift"))
+    _y_shift(parameters.get<Real>("y_shift")),
+    _last_t_step(declareRecoverableData<int>("ls_last_t_step", -1))
 {
   _coeffs.resize(_order + 1);
   for (unsigned int i = 0; i < _coeffs.size(); ++i)
@@ -81,6 +82,15 @@ LeastSquaresFitHistory::execute()
     mooseError("In LeastSquresFitTimeHistory size of data in x_values and y_values must be equal");
   if (_x_values.size() == 0)
     mooseError("In LeastSquresFitTimeHistory size of data in x_values and y_values must be > 0");
+
+  // If we are repeating a timestep, make sure to clear the last entry
+  if (_last_t_step == _t_step)
+  {
+    std::for_each(_coeffs.begin(), _coeffs.end(), [](auto coeff) { coeff->pop_back(); });
+    _times->pop_back();
+  }
+  else
+    _last_t_step = _t_step;
 
   // Create a copy of _x_values that we can modify.
   std::vector<Real> x_values(_x_values.begin(), _x_values.end());
