@@ -164,7 +164,10 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction)
+  // This should only be used for BCs where the gradient of the value is computed and
+  // not prescribed.
+
+  if (_use_nonorthogonal_correction && diff_bc->useBoundaryGradientExtrapolation())
   {
     const auto correction_vector =
         _current_face_info->normal() -
