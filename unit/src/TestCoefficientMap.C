@@ -26,7 +26,7 @@ protected:
 TEST_F(CheckCoefficientMap, HasCoefficient)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
-  coeff_map.addCoefficient("test", std::make_unique<mfem::ConstantCoefficient>(1.));
+  coeff_map.addCoefficient("test", _scalar_factory.make<mfem::ConstantCoefficient>(1.));
   EXPECT_TRUE(coeff_map.hasCoefficient("test"));
   EXPECT_FALSE(coeff_map.hasCoefficient("missing"));
 }
@@ -34,7 +34,7 @@ TEST_F(CheckCoefficientMap, HasCoefficient)
 TEST_F(CheckCoefficientMap, GetCoefficient)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
-  coeff_map.addCoefficient("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
+  coeff_map.addCoefficient("resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(2.));
   mfem::ConstantCoefficient * c =
       dynamic_cast<mfem::ConstantCoefficient *>(&coeff_map.getCoefficient("resistivity"));
   EXPECT_NE(c, nullptr);
@@ -45,8 +45,9 @@ TEST_F(CheckCoefficientMap, GetCoefficient)
 TEST_F(CheckCoefficientMap, GetPWCoefficient)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
-  coeff_map.addPiecewiseBlocks("test", std::make_shared<mfem::ConstantCoefficient>(2.), {"1", "2"});
-  coeff_map.addPiecewiseBlocks("test", std::make_shared<mfem::ConstantCoefficient>(1.), {"3"});
+  coeff_map.addPiecewiseBlocks(
+      "test", _scalar_factory.make<mfem::ConstantCoefficient>(2.), {"1", "2"});
+  coeff_map.addPiecewiseBlocks("test", _scalar_factory.make<mfem::ConstantCoefficient>(1.), {"3"});
   mfem::PWCoefficient * c = dynamic_cast<mfem::PWCoefficient *>(&coeff_map.getCoefficient("test"));
   EXPECT_NE(c, nullptr);
   fe_transform.Attribute = 1;
@@ -64,7 +65,7 @@ TEST_F(CheckCoefficientMap, HasVecCoefficient)
 {
   Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addCoefficient(
-      "test", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
+      "test", _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
   EXPECT_TRUE(coeff_map.hasCoefficient("test"));
   EXPECT_FALSE(coeff_map.hasCoefficient("missing"));
 }
@@ -73,7 +74,8 @@ TEST_F(CheckCoefficientMap, GetVecCoefficient)
 {
   Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addCoefficient(
-      "resistivity", std::make_unique<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
+      "resistivity",
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})));
   mfem::VectorConstantCoefficient * c =
       dynamic_cast<mfem::VectorConstantCoefficient *>(&coeff_map.getCoefficient("resistivity"));
   EXPECT_NE(c, nullptr);
@@ -89,10 +91,12 @@ TEST_F(CheckCoefficientMap, GetPWVecCoefficient)
   Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addPiecewiseBlocks(
       "test",
-      std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
       {"1", "2"});
   coeff_map.addPiecewiseBlocks(
-      "test", std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({1., 0., 0.})), {"3"});
+      "test",
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({1., 0., 0.})),
+      {"3"});
   mfem::PWVectorCoefficient * c =
       dynamic_cast<mfem::PWVectorCoefficient *>(&coeff_map.getCoefficient("test"));
   EXPECT_NE(c, nullptr);
@@ -122,9 +126,9 @@ TEST_F(CheckCoefficientMap, GetPWVecCoefficient)
 TEST_F(CheckCoefficientMap, HasMatCoefficient)
 {
   Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
-  coeff_map.addCoefficient(
-      "test",
-      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
+  coeff_map.addCoefficient("test",
+                           _matrix_factory.make<mfem::MatrixConstantCoefficient>(
+                               mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
   EXPECT_TRUE(coeff_map.hasCoefficient("test"));
   EXPECT_FALSE(coeff_map.hasCoefficient("missing"));
 }
@@ -132,9 +136,9 @@ TEST_F(CheckCoefficientMap, HasMatCoefficient)
 TEST_F(CheckCoefficientMap, GetMatCoefficient)
 {
   Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
-  coeff_map.addCoefficient(
-      "resistivity",
-      std::make_unique<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
+  coeff_map.addCoefficient("resistivity",
+                           _matrix_factory.make<mfem::MatrixConstantCoefficient>(
+                               mfem::DenseMatrix({{0., 1.}, {1., 0.}})));
   mfem::MatrixConstantCoefficient * c =
       dynamic_cast<mfem::MatrixConstantCoefficient *>(&coeff_map.getCoefficient("resistivity"));
   EXPECT_NE(c, nullptr);
@@ -149,14 +153,14 @@ TEST_F(CheckCoefficientMap, GetMatCoefficient)
 TEST_F(CheckCoefficientMap, GetPWMatCoefficient)
 {
   Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
-  coeff_map.addPiecewiseBlocks(
-      "test",
-      std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
-      {"1", "2"});
-  coeff_map.addPiecewiseBlocks(
-      "test",
-      std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{11., 0.}, {0., -1.}})),
-      {"3"});
+  coeff_map.addPiecewiseBlocks("test",
+                               _matrix_factory.make<mfem::MatrixConstantCoefficient>(
+                                   mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
+                               {"1", "2"});
+  coeff_map.addPiecewiseBlocks("test",
+                               _matrix_factory.make<mfem::MatrixConstantCoefficient>(
+                                   mfem::DenseMatrix({{11., 0.}, {0., -1.}})),
+                               {"3"});
   mfem::PWMatrixCoefficient * c =
       dynamic_cast<mfem::PWMatrixCoefficient *>(&coeff_map.getCoefficient("test"));
   EXPECT_NE(c, nullptr);
@@ -190,8 +194,9 @@ TEST_F(CheckCoefficientMap, GetPWMatCoefficient)
 TEST_F(CheckCoefficientMap, CoefficientDefinedOnBlock)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
-  coeff_map.addPiecewiseBlocks("a", std::make_shared<mfem::ConstantCoefficient>(2.), {"1", "2"});
-  coeff_map.addCoefficient("b", std::make_unique<mfem::ConstantCoefficient>(5.));
+  coeff_map.addPiecewiseBlocks(
+      "a", _scalar_factory.make<mfem::ConstantCoefficient>(2.), {"1", "2"});
+  coeff_map.addCoefficient("b", _scalar_factory.make<mfem::ConstantCoefficient>(5.));
   EXPECT_TRUE(coeff_map.propertyDefinedOnBlock("a", "1"));
   EXPECT_TRUE(coeff_map.propertyDefinedOnBlock("a", "2"));
   EXPECT_FALSE(coeff_map.propertyDefinedOnBlock("a", "3"));
@@ -207,9 +212,9 @@ TEST_F(CheckCoefficientMap, CoefficientDefinedOnBlock)
 TEST_F(CheckCoefficientMap, OverwriteCoefficient)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
-  coeff_map.addCoefficient("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
+  coeff_map.addCoefficient("resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(2.));
   EXPECT_THROW(
-      coeff_map.addCoefficient("resistivity", std::make_unique<mfem::ConstantCoefficient>(4.)),
+      coeff_map.addCoefficient("resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(4.)),
       MooseException);
 }
 
@@ -222,9 +227,9 @@ TEST_F(CheckCoefficientMap, CoefficientNotDeclared)
 TEST_F(CheckCoefficientMap, AddBlocksForGlobalCoefficient)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
-  coeff_map.addCoefficient("resistivity", std::make_unique<mfem::ConstantCoefficient>(2.));
+  coeff_map.addCoefficient("resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(2.));
   EXPECT_THROW(coeff_map.addPiecewiseBlocks(
-                   "resistivity", std::make_shared<mfem::ConstantCoefficient>(1.), {"1", "2"}),
+                   "resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(1.), {"1", "2"}),
                MooseException);
 }
 
@@ -232,9 +237,9 @@ TEST_F(CheckCoefficientMap, OverwriteBlocks)
 {
   Moose::MFEM::ScalarMap coeff_map(_scalar_factory);
   coeff_map.addPiecewiseBlocks(
-      "resistivity", std::make_shared<mfem::ConstantCoefficient>(2.), {"2", "3"});
+      "resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(2.), {"2", "3"});
   EXPECT_THROW(coeff_map.addPiecewiseBlocks(
-                   "resistivity", std::make_shared<mfem::ConstantCoefficient>(1.), {"1", "2"}),
+                   "resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(1.), {"1", "2"}),
                MooseException);
 }
 
@@ -243,24 +248,25 @@ TEST_F(CheckCoefficientMap, DifferentVecSize)
   Moose::MFEM::VectorMap coeff_map(_vector_factory);
   coeff_map.addPiecewiseBlocks(
       "test",
-      std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({0., 1., 0.})),
       {"1", "2"});
-  EXPECT_THROW(
-      coeff_map.addPiecewiseBlocks(
-          "test", std::make_shared<mfem::VectorConstantCoefficient>(mfem::Vector({1., 0.})), {"3"}),
-      MooseException);
+  EXPECT_THROW(coeff_map.addPiecewiseBlocks(
+                   "test",
+                   _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({1., 0.})),
+                   {"3"}),
+               MooseException);
 }
 
 TEST_F(CheckCoefficientMap, DifferentMatSize)
 {
   Moose::MFEM::MatrixMap coeff_map(_matrix_factory);
-  coeff_map.addPiecewiseBlocks(
-      "test",
-      std::make_shared<mfem::MatrixConstantCoefficient>(mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
-      {"1", "2"});
+  coeff_map.addPiecewiseBlocks("test",
+                               _matrix_factory.make<mfem::MatrixConstantCoefficient>(
+                                   mfem::DenseMatrix({{0., 1.}, {1., 0.}})),
+                               {"1", "2"});
   EXPECT_THROW(
       coeff_map.addPiecewiseBlocks("test",
-                                   std::make_shared<mfem::MatrixConstantCoefficient>(
+                                   _matrix_factory.make<mfem::MatrixConstantCoefficient>(
                                        mfem::DenseMatrix({{11., 0., 42.}, {0., -1., 10.}})),
                                    {"3"}),
       MooseException);
