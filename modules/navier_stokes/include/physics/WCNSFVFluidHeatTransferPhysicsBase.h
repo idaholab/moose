@@ -79,6 +79,7 @@ protected:
   virtual void addEnergyInletBC() = 0;
   virtual void addEnergyWallBC() = 0;
   virtual void addEnergyOutletBC() = 0;
+  virtual void addEnergySeparatorBC() = 0;
 
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar

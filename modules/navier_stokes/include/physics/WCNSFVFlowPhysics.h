@@ -61,6 +61,7 @@ private:
   void addInletBC() override;
   void addOutletBC() override;
   void addWallsBC() override;
+  void addSeparatorBC() override;
 
   /// Return whether a Forchheimer friction model is in use
   bool hasForchheimerFriction() const override;
