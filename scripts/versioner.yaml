@@ -46,8 +46,8 @@ packages:
       - mpi
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.22.1.193.g72c1e49ee3d
-    build_number: 2
+    version: 3.23.0.6.gd9d7fd11dca
+    build_number: 0
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -65,8 +65,8 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2025.03.06
-    build_number: 1
+    version: 2025.04.02
+    build_number: 0
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -102,7 +102,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.03.24
+    version: 2025.04.02
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
