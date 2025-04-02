@@ -4,17 +4,20 @@
 Upcoming MOOSE related training in chronological order:
 !style-end!
 
-- [MOOSE Framework Fundamentals (2024 October 15-17, University of Illinois Urbana-Champaign)](more_detail/MOOSE_2024_10_15-17_UIUC.md)
+- [Griffin Workshop during M&C 2025](https://www.ans.org/meetings/mc2025/calendar/event-1560/) (2025 April 27, Denver)
 
-# Conferences
+- MOOSE Framework Fundamentals (2025 June 3-5, Idaho Falls)
 
-!style! halign=left
-Upcoming MOOSE related Conferences:
-!style-end!
+- [BISON](https://mooseframework.inl.gov/bison) Fuels Performance (2025 June 17-20, Idaho Falls)
 
-- [MOOSE International Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)
 
 #### Past Training:
+
+- [BISON](https://mooseframework.inl.gov/bison) Fuels Performance (2025 January 17, University of Massachusetts - Lowell)
+
+- MOOSE Framework Fundamentals (2025 January 15-16, University of Massachusetts - Lowell)
+
+- MOOSE Framework Fundamentals (2024 October 15-17, University of Illinois Urbana-Champaign)
 
 - MOOSE Framework Fundamentals (2024 June 4-6, Idaho Falls)
 
@@ -47,3 +50,5 @@ Upcoming MOOSE related Conferences:
 - MOOSE Framework (2022 June)
 
 #### Past Conferences
+
+- [MOOSE International Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)
