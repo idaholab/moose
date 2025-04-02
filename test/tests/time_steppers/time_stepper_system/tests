@@ -25,6 +25,7 @@
       input = 'AB2PredictorCorrector.i'
       exodiff = 'aee_out.e'
       rel_err = 0.003
+      restep = false # Explicitly needs to abort on solve failed
       detail = 'AB2PredictorCorrector as one of the input time steppers,'
     []
 
