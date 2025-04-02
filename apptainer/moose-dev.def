@@ -232,12 +232,16 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
+    # code-server helpers
     {{ FILES_DIR }}/opt/code-server/bin/code-server-setup-extensions /opt/code-server/bin/code-server-setup-extensions
     {{ FILES_DIR }}/opt/code-server/bin/code-server-start /opt/code-server/bin/code-server-start
+    # wasp
     {{ MOOSE_DIR }}/scripts/{{ WASP_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ WASP_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_wasp.sh {{ ROOT_BUILD_DIR }}/configure_wasp.sh
 {%- if WITH_LIBTORCH %}
+    # libtorch
     {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
+    # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
 {%- endif %}
