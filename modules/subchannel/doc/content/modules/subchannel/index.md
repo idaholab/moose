@@ -29,10 +29,10 @@ SCM specific Kernel syntax.
 
 !col! small=12 medium=3 large=3 icon=assessment
 
-## [Verification & Validation](modules/subchannel/v&v/v&v-list.md) class=center style=font-weight:200;font-size:150%
+## [Verification & Validation](modules/subchannel/v_and_v/v_and_v-list.md) class=center style=font-weight:200;font-size:150%
 
 !style halign=center
-Several problems that are ideal for thermal-hydraulic subchannel analysis have been used for the validation and verification of SCM. These problems can be found [here](modules/subchannel/v&v/v&v-list.md).
+Several problems that are ideal for thermal-hydraulic subchannel analysis have been used for the validation and verification of SCM. These problems can be found [here](modules/subchannel/v_and_v/v_and_v-list.md).
 !col-end!
 
 !col! small=12 medium=3 large=3 icon=toys
