@@ -30,6 +30,7 @@
       input = 'transient_main.i'
       csvdiff = 'transient_main_out.csv transient_main_out_sub0_csv.csv'
       cli_args = 'Executioner/fixed_point_max_its=5 Executioner/fixed_point_abs_tol=1e-10'
+      restep = false # Test will be repeating it's own time steps
       detail = 'with a failed timestep,'
     []
     [iteration_adaptive]
