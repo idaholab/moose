@@ -40,9 +40,7 @@ public:
   virtual void execute() override {}
   virtual void finalize() override {}
 
-  virtual const EulerAngles & getEulerAngles(unsigned int) const override;
   virtual const EulerAngles & getEulerAnglesOld(unsigned int) const;
-  virtual unsigned int getGrainNum() const override;
 
 protected:
   const GrainTrackerInterface & _grain_tracker;
@@ -53,6 +51,5 @@ protected:
   const Real _mr;
   bool _first_time;
 
-  std::vector<EulerAngles> _angles;
   std::vector<EulerAngles> _angles_old;
 };
