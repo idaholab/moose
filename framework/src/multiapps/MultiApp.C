@@ -858,6 +858,11 @@ MultiApp::restore(bool force)
       _end_aux_solutions.clear();
     }
 
+    // Make sure the displaced mesh on the multiapp is up-to-date with displacement variables
+    for (const auto & app_ptr : _apps)
+      if (app_ptr->feProblem().getDisplacedProblem())
+        app_ptr->feProblem().getDisplacedProblem()->updateMesh();
+
     // If we are restoring due to a failed solve, make sure reset the solved state in the sub-apps
     if (!getMooseApp().getExecutioner()->lastSolveConverged())
       for (auto & app_ptr : _apps)
