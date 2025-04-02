@@ -31,4 +31,10 @@
     csvdiff =  separator-mixing_out.csv
     requirement = 'The system shall be able to simulate hydraulicly and thermally separated channels with interim mixing zones.'
   []
+  [mixing-physics]
+    type = 'CSVDiff'
+    input = separator-mixing-physics.i
+    csvdiff =  separator-mixing-physics_out.csv
+    requirement = 'The system shall be able to simulate hydraulicly and thermally separated channels with interim mixing zones using the physics syntax.'
+  []
 []

@@ -34,46 +34,46 @@ velocity_interp_method='rc'
     new_boundary = 'separator-2'
   []
   [jump-1]
-    type = ParsedGenerateSideset
+    type = SideSetsBetweenSubdomainsGenerator
     input = separator-2
-    combinatorial_geometry = 'y < 0.25 & x > 0.2499999 & x < 0.2500001'
-    replace = true
-    new_sideset_name = jump-1
+    primary_block = '1'
+    paired_block = '2'
+    new_boundary = jump-1
   []
   [jump-2]
-    type = ParsedGenerateSideset
+    type = SideSetsBetweenSubdomainsGenerator
     input = jump-1
-    combinatorial_geometry = 'y > 0.25 & y < 0.5 & x > 0.2499999 & x < 0.2500001'
-    replace = true
-    new_sideset_name = jump-2
+    primary_block = '1'
+    paired_block = '3'
+    new_boundary = jump-2
   []
   [jump-3]
-    type = ParsedGenerateSideset
+    type = SideSetsBetweenSubdomainsGenerator
     input = jump-2
-    combinatorial_geometry = 'y > 0.5 & x > 0.2499999 & x < 0.2500001'
-    replace = true
-    new_sideset_name = jump-3
+    primary_block = '1'
+    paired_block = '4'
+    new_boundary = jump-3
   []
   [outlet-1]
-    type = ParsedGenerateSideset
+    type = SideSetsBetweenSubdomainsGenerator
     input = jump-3
-    combinatorial_geometry = 'y < 0.25 & x > 1.24999999 & x < 1.2500001'
-    replace = true
-    new_sideset_name = outlet-1
+    primary_block = '2'
+    paired_block = '5'
+    new_boundary = outlet-1
   []
   [outlet-2]
-    type = ParsedGenerateSideset
+    type = SideSetsBetweenSubdomainsGenerator
     input = outlet-1
-    combinatorial_geometry = 'y > 0.25 & y < 0.5 & x > 1.24999999 & x < 1.2500001'
-    replace = true
-    new_sideset_name = outlet-2
+    primary_block = '3'
+    paired_block = '5'
+    new_boundary = outlet-2
   []
   [outlet-3]
-    type = ParsedGenerateSideset
+    type = SideSetsBetweenSubdomainsGenerator
     input = outlet-2
-    combinatorial_geometry = 'y > 0.5 & x > 1.24999999 & x < 1.2500001'
-    replace = true
-    new_sideset_name = outlet-3
+    primary_block = '4'
+    paired_block = '5'
+    new_boundary = outlet-3
   []
 []
 
@@ -273,29 +273,14 @@ velocity_interp_method='rc'
 []
 
 [FunctorMaterials]
-  [porosity-1]
-    type = ADGenericFunctorMaterial
-    prop_names = 'porosity'
-    prop_values = '0.8'
-    block = '1 5'
-  []
-  [porosity-2]
-    type = ADGenericFunctorMaterial
-    prop_names = 'porosity'
-    prop_values = '0.7'
-    block = '2'
-  []
-  [porosity-3]
-    type = ADGenericFunctorMaterial
-    prop_names = 'porosity'
-    prop_values = '0.6'
-    block = '3'
-  []
-  [porosity-4]
-    type = ADGenericFunctorMaterial
-    prop_names = 'porosity'
-    prop_values = '0.5'
-    block = '4'
+  [porosity]
+    type = ADPiecewiseByBlockFunctorMaterial
+    prop_name = porosity
+    subdomain_to_prop_value = '1 0.8
+                               2 0.7
+                               3 0.6
+                               4 0.5
+                               5 0.8'
   []
   [darcy-1]
     type = ADGenericVectorFunctorMaterial
