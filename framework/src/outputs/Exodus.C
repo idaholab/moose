@@ -246,7 +246,9 @@ Exodus::outputSetup()
   //   (2) The mesh has NOT changed
   //   (3) An existing Exodus file exists for appending (_exodus_num > 0)
   //   (4) Sequential output is NOT desired
-  if (_recovering && !_exodus_mesh_changed && _exodus_num > 0 && !_sequence)
+  //   (5) Exodus is NOT being output only on FINAL
+  if (_recovering && !_exodus_mesh_changed && _exodus_num > 0 && !_sequence &&
+      getExecuteOnEnum() != {EXEC_FINAL})
   {
     // Set the recovering flag to false so that this special case is not triggered again
     _recovering = false;

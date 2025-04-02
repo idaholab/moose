@@ -18,45 +18,45 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
-  [./bnds]
+    []
+  []
+  [bnds]
     type = BndsCalcIC
     variable = bnds
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 10
     use_kdtree = true
     point_patch_size = 1
     grain_patch_size = 10
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Problem]

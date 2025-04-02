@@ -30,6 +30,8 @@
       input = 'MathFreeEnergy.i'
       exodiff = 'MathFreeEnergy_oversample.e'
       detail = "hardcoded in C++ and applied to a non-split Cahn-Hilliard system"
+      # uses exodus oversampling see #2295
+      recover = false
     []
     [split]
       type = 'Exodiff'
@@ -44,6 +46,8 @@
       exodiff = 'MathEBFreeEnergy_oversample.e'
       detail = "implemented using the ExpressionBuilder system and applied to a non-split "
                "Cahn-Hilliard system"
+      # uses exodus oversampling see #2295
+      recover = false
     []
     [eb-split]
       type = 'Exodiff'
