@@ -2,11 +2,10 @@
 # MATERIAL PROPERTIES
 ################################################################################
 rho = 3279.
-T_0 = 875.0
 mu = 1.
 k_cond = 38.0
 cp = 640.
-alpha = 3.26e-4
+alpha_b = 3.26e-4
 
 walls = 'right left top bottom'
 
@@ -34,8 +33,8 @@ walls = 'right left top bottom'
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 600
-    ny = 600
+    nx = 30
+    ny = 30
   []
 []
 
@@ -49,7 +48,7 @@ walls = 'right left top bottom'
     u = superficial_vel_x
     v = superficial_vel_y
     pressure = pressure
-    rho = ${rho}
+    rho = 'rho' # 'rho'
     p_diffusion_kernel = p_diffusion
   []
 []
@@ -89,16 +88,24 @@ walls = 'right left top bottom'
     pressure = pressure
     momentum_component = 'x'
   []
+  # [u_buoyancy]
+  #   type = LinearFVMomentumBoussinesq
+  #   variable = superficial_vel_x
+  #   T_fluid = T_fluid
+  #   gravity = '0 -9.81 0'
+  #   rho = ${rho}
+  #   ref_temperature = ${T_0}
+  #   alpha_name = ${alpha}
+  #   momentum_component = 'x'
+  # []
   [u_buoyancy]
-    type = LinearFVMomentumBoussinesq
+    type = LinearFVMomentumBuoyancy
     variable = superficial_vel_x
-    T_fluid = T_fluid
+    rho = 'rho'
     gravity = '0 -9.81 0'
-    rho = ${rho}
-    ref_temperature = ${T_0}
-    alpha_name = ${alpha}
     momentum_component = 'x'
   []
+
 
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -113,14 +120,21 @@ walls = 'right left top bottom'
     pressure = pressure
     momentum_component = 'y'
   []
+  # [v_buoyancy]
+  #   type = LinearFVMomentumBoussinesq
+  #   variable = superficial_vel_y
+  #   T_fluid = T_fluid
+  #   gravity = '0 -9.81 0'
+  #   rho = ${rho}
+  #   ref_temperature = ${T_0}
+  #   alpha_name = ${alpha}
+  #   momentum_component = 'y'
+  # []
   [v_buoyancy]
-    type = LinearFVMomentumBoussinesq
+    type = LinearFVMomentumBuoyancy
     variable = superficial_vel_y
-    T_fluid = T_fluid
+    rho = 'rho'
     gravity = '0 -9.81 0'
-    rho = ${rho}
-    ref_temperature = ${T_0}
-    alpha_name = ${alpha}
     momentum_component = 'y'
   []
 
@@ -148,7 +162,7 @@ walls = 'right left top bottom'
   [conduction]
     type = LinearFVDiffusion
     variable = T_fluid
-    diffusion_coeff = ${fparse k_cond}
+    diffusion_coeff = ${k_cond}
   []
 []
 
@@ -192,11 +206,31 @@ walls = 'right left top bottom'
   []
 []
 
+# [FunctorMaterials]
+#   [constant_functors]
+#     type = GenericFunctorMaterial
+#     prop_names = 'cp alpha_b'
+#     prop_values = '${cp} ${alpha}'
+#   []
+# []
+
+# [FluidProperties]
+#   [fluid_properties_obj]
+#     type                             = SimpleFluidProperties
+#     density0                         = ${rho}   # kg/m^3
+#     thermal_expansion                = ${alpha_b} # K^{-1}
+#     cp                               = ${cp}      # J/kg·K
+#     viscosity                        = ${mu}    # Pa-s11
+#     thermal_conductivity             = ${k_cond}         # W/m·K
+#   []
+# []
+
 [FunctorMaterials]
-  [constant_functors]
-    type = GenericFunctorMaterial
-    prop_names = 'cp alpha_b'
-    prop_values = '${cp} ${alpha}'
+  [rho_function]
+    type = ParsedFunctorMaterial
+    property_name = 'rho'
+    functor_names = 'T_fluid'
+    expression = '${rho} - ${alpha_b}*T_fluid '
   []
 []
 
