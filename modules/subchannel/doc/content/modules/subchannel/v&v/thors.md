@@ -93,11 +93,11 @@ The input file to run the central blockage case is presented below:
 
 The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
 
-!listing /examples/Blockage/THORS/FFM-3Adetailed.i language=cpp
+!listing /examples/Blockage/THORS/FFM-3A_viz.i language=cpp
 
 ## Edge blockage of 14 channels in 19-pin sodium-cooled bundles
 
-THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711-cm-diam wire-wrap spacers are used to separate the peripheral pins from the duct wall. The half-size spacers are used to reduce the flow in the peripheral flow channels and to cause a flatter radial temperature profile across the bundle. It also means that the flat-to-flat distance is reduced appropiately. The pins have a heated length of $45.7 cm$. A 3175-cm-thick stainless steel blockage plate is located $10.2 cm$  above the start of the heated zone to block $14$ edge and internal channels along the duct wall. The test section layout is shown in Fig [fig:thors2]. The experimental parameters for the chosen case are presented in [parameters2]. SCM modeled the THORS bundle 5B blockage with a $83.4$% area reduction on the affected subchannels and a local form loss coefficient of $1$. $C_T$ was set to $10$ as in the previous case. The SCM model's geometry and subchannel/pin index notation is shown in [fig:hex_index].
+THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711-cm-diam wire-wrap spacers are used to separate the peripheral pins from the duct wall. The half-size spacers are used to reduce the flow in the peripheral flow channels and to cause a flatter radial temperature profile across the bundle. It also means that the flat-to-flat distance is reduced appropiately. The pins have a heated length of $45.7 cm$. A 3175-cm-thick stainless steel blockage plate is located $10.2 cm$  above the start of the heated zone to block $14$ edge and internal channels along the duct wall. The test section layout is shown in Fig [fig:thors2]. The experimental parameters for the chosen case are presented in [parameters2]. SCM modeled the THORS bundle 5B blockage with a $80$% area reduction on the affected subchannels and a local form loss coefficient of $1.2$. $C_T$ was set to $10$ as in the previous case. The SCM model's geometry and subchannel/pin index notation is shown in [fig:hex_index].
 
 !media subchannel/v&v/thors2.png
     style=width:60%;margin-bottom:2%;margin:auto;
@@ -146,3 +146,7 @@ The input files to run the edge blockage case is presented below:
 !listing /examples/Blockage/THORS/FFM-5B_high.i language=cpp
 
 !listing /examples/Blockage/THORS/FFM-5B_low.i language=cpp
+
+## Caveat
+
+There is still no formal way to model the effect of the blockage by adapting the relevant parameters (area, reduction, form loss coefficient, axial discretization). It is up to the user to develop the correct combination appropriate for the specific geometry.
