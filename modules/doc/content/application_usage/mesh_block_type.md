@@ -19,10 +19,10 @@
 | .dat        | [Tecplot ASCII file](https://people.sc.fsu.edu/~jburkardt/data/tec/tec.html)                       |
 | .e, .exd    | [Sandia's ExodusII format](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodus-library)                 |
 | .fro        | [ACDL's surface triangulation file](https://www.reviversoft.com/file-extensions/fro)        |
-| .gmv        | [LANL's GMV (General Mesh Viewer) format](www.generalmeshviewer.com/)  |
+| .gmv        | [LANL's GMV (General Mesh Viewer) format](https://github.com/CPFDSoftware/gmv)  |
 | .mat        | [Matlab triangular ASCII file](https://www.reviversoft.com/file-extensions/mat) (read only) |
 | .msh        | [GMSH ASCII file](http://www.manpagez.com/info/gmsh/gmsh-2.2.6/gmsh_63.php)                          |
-| .n, .nem    | [Sandia's Nemesis format](https://sandialabs.github.io/seacas-docs/sphinx/html/)                  |
+| .n, .nem    | [Sandia's Nemesis format](https://sandialabs.github.io/seacas-docs/sphinx/html/#nemesis-library)                  |
 | .plt        | [Tecplot binary file](https://tecplot.azureedge.net/products/360/current/360-data-format.pdf) (write only)         |
 | .node, .ele; .poly | [TetGen ASCII file](http://wias-berlin.de/software/tetgen/1.5/doc/manual/manual006.html) (read; write)   |
 | .inp        | [Abaqus .inp format](https://www.sharcnet.ca/Software/Abaqus610/Documentation/docs/v6.10/books/usb/default.htm?startat=pt01ch03s06aus34.html) (read only)           |
