@@ -49,6 +49,7 @@
     requirement = "The system shall support reading EBSD data to initalized Polycrystal grain "
                   "structures while supporting reduced order parameter IC assignment on a "
                   "distributed mesh."
+    prereq = '1phase_reconstruction_40x40'
   []
   [1phase_reconstruction_40x40_distributed_pre_refine]
     type = 'Exodiff'
@@ -62,6 +63,7 @@
     requirement = "The system shall support reading EBSD data to initalized Polycrystal grain "
                   "structures while supporting reduced order parameter IC assignment on a "
                   "distributed mesh with pre-refinement to allow for adaptive coarsening."
+    prereq = '1phase_reconstruction_40x40_distributed'
   []
 
   [1phase_evolution]
