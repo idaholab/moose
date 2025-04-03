@@ -6,8 +6,8 @@
   nx = 1
   ny = 1
   nz = 1
-  xmin = 1
-  xmax = 3
+  xmin = -1
+  xmax = 1
   ymin = -1
   ymax = 1
   zmin = -1
@@ -132,7 +132,7 @@
   [p0]
     type = PointValue
     variable = pp
-    point = '2 0 0'
+    point = '0 0 0'
     execute_on = timestep_end
   []
 []
@@ -146,7 +146,7 @@
   []
   [insitu_pp]
     type = ParsedFunction
-    expression = '0.5e7*x'  #bh is located at x=2
+    expression = '-2e7*z' #bh_bottom is located at z=-0.5
   []
 []
 
