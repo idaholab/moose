@@ -210,7 +210,8 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
     case DecompMethod::EigenSolution:
     {
       // AD stabilization error
-      if (_Fhat[_qp] == ADRankTwoTensor::Identity())
+      if (this->_fe_problem.currentlyComputingJacobian() &&
+          _Fhat[_qp] == ADRankTwoTensor::Identity())
         _Fhat[_qp] += ADRankTwoTensor(
             1.0e-12, 1.0e-12, 1.0e-12, 1.0e-12, 1.1e-12, 1.0e-12, 1.0e-12, 1.0e-12, 0.9e-12);
 
