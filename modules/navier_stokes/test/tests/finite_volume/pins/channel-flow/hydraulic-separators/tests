@@ -25,6 +25,12 @@
     csvdiff =  separator-energy-nonorthogonal_out.csv
     requirement = 'The system shall be able to simulate hydraulicly and thermally separated channels described with nonorthogonal meshes.'
   []
+  [scalar]
+    type = 'CSVDiff'
+    input = separator-scalar.i
+    csvdiff =  separator-scalar_out.csv
+    requirement = 'The system shall be able to simulate hydraulicly and scalar-flux separated channels.'
+  []
   [mixing]
     type = 'CSVDiff'
     input = separator-mixing.i
