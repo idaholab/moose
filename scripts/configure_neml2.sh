@@ -8,6 +8,14 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+function get_variable()
+{
+  if [ -z "${!1}" ]; then
+    >&2 echo "ERROR: Missing required variable $1"
+  fi
+  echo "${!1}"
+}
+
 # Configure NEML2 with the default MOOSE configuration options
 #
 # Separated so that it can be used across all NEML2 build scripts:
@@ -24,23 +32,25 @@
 # Remaining arguments will be appended to the cmake command verbatim
 function configure_neml2()
 {
-    ARGS=( "${@:7}" )
-    cmake \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DNEML2_TESTS=OFF \
-      -DNEML2_RUNNER=OFF \
-      -DNEML2_PYBIND=OFF \
-      -DNEML2_DOC=OFF \
-      -DNEML2_CPU_PROFILER=OFF \
-      -DNEML2_WORK_DISPATCHER=ON \
-      -DTorch_ROOT="$3" \
-      -DWASP_ROOT="$4" \
-      -DHIT_SOURCE_DIR="$5" \
-      -DTIMPI_ROOT="$6" \
-      -G "Unix Makefiles" \
-      -B "$2" \
-      -S "$1" \
-      "${ARGS[@]}"
+  ARGS=( "${@:3}" )
+  if [ -n "$HIT_SRC_DIR" ]; then
+    ARGS+=("-DHIT_SOURCE_DIR=$HIT_SRC_DIR")
+  fi
+  cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DNEML2_TESTS=OFF \
+    -DNEML2_RUNNER=OFF \
+    -DNEML2_PYBIND=OFF \
+    -DNEML2_DOC=OFF \
+    -DNEML2_CPU_PROFILER=OFF \
+    -DNEML2_WORK_DISPATCHER=ON \
+    -DTorch_ROOT="$(get_variable LIBTORCH_DIR)" \
+    -DWASP_ROOT="$(get_variable WASP_DIR)" \
+    -DTIMPI_ROOT="$(get_variable TIMPI_DIR)" \
+    -G "Unix Makefiles" \
+    -B "$2" \
+    -S "$1" \
+    "${ARGS[@]}"
 }
 
 # Build NEML2 assuming that the project has already been configured

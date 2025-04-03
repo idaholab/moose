@@ -71,19 +71,22 @@ for ARG in "$@" ; do
 done
 
 # Dependency: libtorch
-LIBTORCH_DIR=${LIBTORCH_DIR:-${MOOSE_DIR}/framework/contrib/libtorch}
+export LIBTORCH_DIR=${LIBTORCH_DIR:-${MOOSE_DIR}/framework/contrib/libtorch}
 
 # Dependency: timpi
 LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR:-${MOOSE_DIR}/libmesh}
 LIBMESH_DIR=${LIBMESH_DIR:-${LIBMESH_SRC_DIR}/installed}
-TIMPI_DIR=${TIMPI_DIR:-${LIBMESH_DIR}}
+export TIMPI_DIR=${TIMPI_DIR:-${LIBMESH_DIR}}
 
 # Dependency: wasp
 WASP_SRC_DIR=${WASP_SRC_DIR:-${MOOSE_DIR}/framework/contrib/wasp}
-WASP_DIR=${WASP_DIR:-${WASP_SRC_DIR}/install}
+export WASP_DIR=${WASP_DIR:-${WASP_SRC_DIR}/install}
 
-# Dependency: hit
-HIT_SRC_DIR=${HIT_SRC_DIR:-${MOOSE_DIR}/framework/contrib/hit}
+# Dependency: hit in place if it exists
+if [ -z "$HIT_SRC_DIR" ] && [ -d "${MOOSE_DIR}/framework/contrib/hit" ]; then
+  HIT_SRC_DIR=${MOOSE_DIR}/framework/contrib/hit
+fi
+export HIT_SRC_DIR
 
 # Handle environment variables
 if [[ -n "$NEML2_SRC_DIR" ]]; then
@@ -213,12 +216,8 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
     echo
     configure_neml2 "${NEML2_SRC_DIR}" \
                     "${NEML2_BUILD_DIR}" \
-                    "${LIBTORCH_DIR}" \
-                    "${WASP_DIR}" \
-                    "${HIT_SRC_DIR}" \
-                    "${TIMPI_DIR}" \
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-                    "${EXTRA_ARGS[*]}"
+                    "${EXTRA_ARGS[@]}"
     if [[ $? -ne 0 ]] ; then
       echo "Error: Failed to configure NEML2"
       exit 1
