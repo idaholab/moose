@@ -30,7 +30,7 @@ To make use of user-specified `computeQpOffDiagJacobian` methods, one should spe
 []
 ```
 
-The user may also choose to omit certain off-diagonal entries from their `SMP` matrix; this is outlined in the detailed [Preconditioning article](https://mooseframework.inl.gov/wiki/MooseSystems/Preconditioners/).
+The user may also choose to omit certain off-diagonal entries from their `SMP` matrix; this is outlined in the detailed [Preconditioning article](https://mooseframework.inl.gov/syntax/Preconditioning/index.html).
 
 To build a preconditioning matrix through finite differencing of the residuals, the user can specify in his/her input file:
 
