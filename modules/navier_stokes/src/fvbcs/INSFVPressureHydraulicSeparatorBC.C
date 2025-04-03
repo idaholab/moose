@@ -18,6 +18,7 @@ INSFVPressureHydraulicSeparatorBC::validParams()
   return FVFluxBC::validParams();
 }
 
-INSFVPressureHydraulicSeparatorBC::INSFVPressureHydraulicSeparatorBC(const InputParameters & params) :
-FVFluxBC(params),
-INSFVHydraulicSeparatorInterface() {}
+INSFVPressureHydraulicSeparatorBC::INSFVPressureHydraulicSeparatorBC(const InputParameters & params)
+  : FVFluxBC(params), INSFVHydraulicSeparatorInterface()
+{
+}

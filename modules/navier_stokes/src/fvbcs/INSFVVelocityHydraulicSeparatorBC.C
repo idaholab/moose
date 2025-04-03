@@ -19,6 +19,6 @@ INSFVVelocityHydraulicSeparatorBC::validParams()
 }
 
 INSFVVelocityHydraulicSeparatorBC::INSFVVelocityHydraulicSeparatorBC(const InputParameters & params)
-:
-INSFVFluxBC(params),
-INSFVHydraulicSeparatorInterface() {}
+  : INSFVFluxBC(params), INSFVHydraulicSeparatorInterface()
+{
+}

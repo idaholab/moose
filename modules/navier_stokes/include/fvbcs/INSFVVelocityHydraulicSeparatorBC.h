@@ -15,11 +15,12 @@
 class InputParameters;
 
 /**
- * Class describing ah ydraulic separator for the velocity in the
+ * Class describing a hydraulic separator for the velocity in the
  * Navier Stokes equations. There is no cross flow and this should also
  * ensure that the cell gradients are decoupled on the two sides of the boundary.
  */
-class INSFVVelocityHydraulicSeparatorBC : public INSFVFluxBC, public INSFVHydraulicSeparatorInterface
+class INSFVVelocityHydraulicSeparatorBC : public INSFVFluxBC,
+                                          public INSFVHydraulicSeparatorInterface
 {
 public:
   static InputParameters validParams();
