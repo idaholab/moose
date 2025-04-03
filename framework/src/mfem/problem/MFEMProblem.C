@@ -188,6 +188,12 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   // Register gridfunction.
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
   getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  if (mfem_variable.getFESpace().isScalar())
+    getProperties().declareScalar<mfem::GridFunctionCoefficient>(
+        var_name, mfem_variable.getGridFunction().get());
+  else
+    getProperties().declareVector<mfem::VectorGridFunctionCoefficient>(
+        var_name, mfem_variable.getGridFunction().get());
 }
 
 void
@@ -321,26 +327,26 @@ MFEMProblem::addFunction(const std::string & type,
   // are only of space or only of time.
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
   {
-    getProperties().declareScalar(name,
-                                  makeScalarCoefficient<mfem::FunctionCoefficient>(
-                                      [&func](const mfem::Vector & p, double t) -> mfem::real_t
-                                      { return func.value(t, pointFromMFEMVector(p)); }));
+    getProperties().declareScalar<mfem::FunctionCoefficient>(
+        name,
+
+        [&func](const mfem::Vector & p, double t) -> mfem::real_t
+        { return func.value(t, pointFromMFEMVector(p)); });
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
     int dim = vectorFunctionDim(type, parameters);
-    getProperties().declareVector(
+    getProperties().declareVector<mfem::VectorFunctionCoefficient>(
         name,
-        makeVectorCoefficient<mfem::VectorFunctionCoefficient>(
-            dim,
-            [&func, dim](const mfem::Vector & p, double t, mfem::Vector & u)
-            {
-              libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-              for (int i = 0; i < dim; i++)
-              {
-                u[i] = vector_value(i);
-              }
-            }));
+        dim,
+        [&func, dim](const mfem::Vector & p, double t, mfem::Vector & u)
+        {
+          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          for (int i = 0; i < dim; i++)
+          {
+            u[i] = vector_value(i);
+          }
+        });
   }
   else
   {
@@ -348,6 +354,18 @@ MFEMProblem::addFunction(const std::string & type,
                  type,
                  " is scalar or vector; no MFEM coefficient object created.");
   }
+}
+
+void
+MFEMProblem::addPostprocessor(const std::string & type,
+                              const std::string & name,
+                              InputParameters & parameters)
+{
+  // For some reason this isn't getting called
+  ExternalProblem::addPostprocessor(type, name, parameters);
+  const PostprocessorValue & val = getPostprocessorValueByName(name);
+  getProperties().declareScalar<mfem::FunctionCoefficient>(
+      name, [&val](const mfem::Vector & p, double t) -> mfem::real_t { return val; });
 }
 
 InputParameters

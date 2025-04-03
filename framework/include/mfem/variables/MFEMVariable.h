@@ -18,6 +18,9 @@ public:
   /// Returns a shared pointer to the constructed gridfunction.
   inline std::shared_ptr<mfem::ParGridFunction> getGridFunction() const { return _gridfunction; }
 
+  /// Returns a reference to the fespace used by the gridfunction.
+  inline const MFEMFESpace & getFESpace() const { return _fespace; }
+
 protected:
   const MFEMFESpace & _fespace;
 

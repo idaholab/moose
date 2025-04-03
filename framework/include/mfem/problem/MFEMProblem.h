@@ -129,6 +129,15 @@ public:
                    InputParameters & parameters) override;
 
   /**
+   * Override of ExternalProblem::addPostprocessor. In addition to
+   * creating the postprocessor object, it will create a coefficient
+   * that will hold its value.
+   */
+  void addPostprocessor(const std::string & type,
+                        const std::string & name,
+                        InputParameters & parameters) override;
+
+  /**
    * Method called in AddMFEMPreconditionerAction which will create the solver.
    */
   void addMFEMPreconditioner(const std::string & user_object_name,
