@@ -101,6 +101,7 @@
     required_python_packages = requests
     recover = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
+    valgrind = 'none' # http library is not completely valgrind clean
   []
 
   [connect_port]
