@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MultiMooseEnum.h"
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -75,12 +76,14 @@ void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
 /**
  * Set SLEPc/PETSc options to trigger free power iteration
  */
-void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+void setFreeNonlinearPowerIterations(unsigned int free_power_iterations,
+                                     const MultiMooseEnum & dont_add_these_options);
 
 /*
  * Set SLEPc/PETSc options to turn the eigen-solver back to a regular Newton solver
  */
-void clearFreeNonlinearPowerIterations(const InputParameters & params);
+void clearFreeNonlinearPowerIterations(const InputParameters & params,
+                                       const MultiMooseEnum & dont_add_these_options);
 
 /**
  * Form matrix according to tag
