@@ -8,7 +8,7 @@ application developers.
 In particular, testing of both MOOSE and MOOSE-based applications is of primary importance; changes
 are only merged into the framework once manual code review and the automated tests have ensured the
 changes are compatible with the applications. Since MOOSE is an open-source project, the testing
-process is publicly available at [www.moosebuild.org](http://www.moosebuild.org).
+process is publicly available at [https://civet.inl.gov](https://civet.inl.gov).
 
 MOOSE is developed by the Idaho National Laboratory (INL) by a team of computer scientists and
 engineers and is supported by various funding agencies including the
