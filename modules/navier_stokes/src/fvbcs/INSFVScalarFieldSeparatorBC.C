@@ -15,7 +15,9 @@ registerMooseObject("NavierStokesApp", INSFVScalarFieldSeparatorBC);
 InputParameters
 INSFVScalarFieldSeparatorBC::validParams()
 {
-  return FVFluxBC::validParams();
+  auto params = FVFluxBC::validParams();
+  params.addClassDescription("A separator boundary condition that prevents any type of scalar flux and can be used within the domain.");
+  return params;
 }
 
 INSFVScalarFieldSeparatorBC::INSFVScalarFieldSeparatorBC(const InputParameters & params)
