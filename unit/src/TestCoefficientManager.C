@@ -192,6 +192,52 @@ TEST_F(CheckCoefficientManager, DeclareCoefficientScalar)
   EXPECT_EQ(c->Eval(fe_transform, point1), 3.0);
 }
 
+TEST_F(CheckCoefficientManager, DeclareCoefficientAliasScalar)
+{
+  manager.declareScalar("resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(2.));
+  manager.declareScalar("resistivity2", "resistivity");
+  mfem::Coefficient &c1 = manager.getScalarCoefficient("resistivity"),
+                    &c2 = manager.getScalarCoefficient("resistivity2");
+  EXPECT_EQ(&c1, &c2);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyAliasScalar)
+{
+  manager.declareScalarProperty(
+      "resistivity", {"1", "2"}, _scalar_factory.make<mfem::ConstantCoefficient>(2.));
+  manager.declareScalar("resistivity2", "resistivity");
+  mfem::Coefficient &c1 = manager.getScalarCoefficient("resistivity"),
+                    &c2 = manager.getScalarCoefficient("resistivity2");
+  EXPECT_EQ(&c1, &c2);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromCoefficientNameScalar)
+{
+  manager.declareScalar("resistivity", _scalar_factory.make<mfem::ConstantCoefficient>(2.));
+  manager.declareScalarProperty("resistivity2", {"1", "2"}, "resistivity");
+  mfem::Coefficient & c = manager.getScalarCoefficient("resistivity2");
+  fe_transform.Attribute = 1;
+  EXPECT_EQ(c.Eval(fe_transform, point1), 2.0);
+  fe_transform.Attribute = 10;
+  EXPECT_EQ(c.Eval(fe_transform, point1), 0.0);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameScalar)
+{
+  manager.declareScalarProperty(
+      "test", {"1", "2"}, _scalar_factory.make<mfem::ConstantCoefficient>(2.));
+  manager.declareScalarProperty(
+      "test2", {"1", "2"}, _scalar_factory.make<mfem::ConstantCoefficient>(3.));
+  EXPECT_THROW(manager.declareScalarProperty("test2", {"3"}, "test"), MooseException);
+}
+
+TEST_F(CheckCoefficientManager, NonexistentAliasScalar)
+{
+  EXPECT_THROW(manager.declareScalar("thingy", "undeclared name"), MooseException);
+  EXPECT_THROW(manager.declareScalarProperty("test2", {"1", "2", "3"}, "another undeclared name"),
+               MooseException);
+}
+
 TEST_F(CheckCoefficientManager, DeclareCoefficientPWScalar)
 {
   manager.declareScalarProperty(
@@ -477,6 +523,65 @@ TEST_F(CheckCoefficientManager, DeclareCoefficientVector)
   EXPECT_EQ(vec[1], 4.0);
 }
 
+TEST_F(CheckCoefficientManager, DeclareCoefficientAliasVector)
+{
+  manager.declareVector(
+      "resistivity", _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})));
+  manager.declareVector("resistivity2", "resistivity");
+  mfem::VectorCoefficient &c1 = manager.getVectorCoefficient("resistivity"),
+                          &c2 = manager.getVectorCoefficient("resistivity2");
+  EXPECT_EQ(&c1, &c2);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyAliasVector)
+{
+  manager.declareVectorProperty(
+      "resistivity",
+      {"1", "2"},
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})));
+  manager.declareVector("resistivity2", "resistivity");
+  mfem::VectorCoefficient &c1 = manager.getVectorCoefficient("resistivity"),
+                          &c2 = manager.getVectorCoefficient("resistivity2");
+  EXPECT_EQ(&c1, &c2);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromCoefficientNameVector)
+{
+  manager.declareVector(
+      "resistivity", _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})));
+  manager.declareVectorProperty("resistivity2", {"1", "2"}, "resistivity");
+  mfem::VectorCoefficient & c = manager.getVectorCoefficient("resistivity2");
+  mfem::Vector vec;
+  fe_transform.Attribute = 1;
+  c.Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 1.0);
+  fe_transform.Attribute = 10;
+  c.Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 0.0);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameVector)
+{
+  manager.declareVectorProperty(
+      "test",
+      {"1", "2"},
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})));
+  manager.declareVectorProperty(
+      "test2",
+      {"1", "2"},
+      _vector_factory.make<mfem::VectorConstantCoefficient>(mfem::Vector({2., 1.})));
+  EXPECT_THROW(manager.declareVectorProperty("test2", {"3"}, "test"), MooseException);
+}
+
+TEST_F(CheckCoefficientManager, NonexistentAliasVector)
+{
+  EXPECT_THROW(manager.declareVector("thingy", "undeclared name"), MooseException);
+  EXPECT_THROW(manager.declareVectorProperty("test2", {"1", "2", "3"}, "another undeclared name"),
+               MooseException);
+}
+
 TEST_F(CheckCoefficientManager, DeclareCoefficientPWVector)
 {
   manager.declareVectorProperty(
@@ -678,6 +783,63 @@ TEST_F(CheckCoefficientManager, DeclareFunctionTMatrix)
   EXPECT_EQ(mat.Elem(0, 1), 2.0);
   EXPECT_EQ(mat.Elem(1, 0), 5.0);
   EXPECT_EQ(mat.Elem(1, 1), 1.5);
+}
+
+TEST_F(CheckCoefficientManager, DeclareCoefficientAliasMatrix)
+{
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>("resistivity",
+                                                         mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
+  manager.declareMatrix("resistivity2", "resistivity");
+  mfem::MatrixCoefficient &c1 = manager.getMatrixCoefficient("resistivity"),
+                          &c2 = manager.getMatrixCoefficient("resistivity2");
+  EXPECT_EQ(&c1, &c2);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyAliasMatrix)
+{
+  manager.declareMatrixProperty<mfem::MatrixConstantCoefficient>(
+      "resistivity", {"1", "2"}, mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
+  manager.declareMatrix("resistivity2", "resistivity");
+  mfem::MatrixCoefficient &c1 = manager.getMatrixCoefficient("resistivity"),
+                          &c2 = manager.getMatrixCoefficient("resistivity2");
+  EXPECT_EQ(&c1, &c2);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromCoefficientNameMatrix)
+{
+  manager.declareMatrix<mfem::MatrixConstantCoefficient>("resistivity",
+                                                         mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
+  manager.declareMatrixProperty("resistivity2", {"1", "2"}, "resistivity");
+  mfem::MatrixCoefficient & c = manager.getMatrixCoefficient("resistivity2");
+  mfem::DenseMatrix mat;
+  fe_transform.Attribute = 1;
+  c.Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 1.);
+  EXPECT_EQ(mat.Elem(0, 1), 2.);
+  EXPECT_EQ(mat.Elem(1, 0), 3.);
+  EXPECT_EQ(mat.Elem(1, 1), 4.);
+  fe_transform.Attribute = 10;
+  c.Eval(mat, fe_transform, point1);
+  EXPECT_EQ(mat.Elem(0, 0), 0.);
+  EXPECT_EQ(mat.Elem(0, 1), 0.);
+  EXPECT_EQ(mat.Elem(1, 0), 0.);
+  EXPECT_EQ(mat.Elem(1, 1), 0.);
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameMatrix)
+{
+  manager.declareMatrixProperty<mfem::MatrixConstantCoefficient>(
+      "test", {"1", "2"}, mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
+  manager.declareMatrixProperty<mfem::MatrixConstantCoefficient>(
+      "test2", {"1", "2"}, mfem::DenseMatrix({{2., 2.}, {3., 3.}}));
+  EXPECT_THROW(manager.declareMatrixProperty("test2", {"3"}, "test"), MooseException);
+}
+
+TEST_F(CheckCoefficientManager, NonexistentAliasMatrix)
+{
+  EXPECT_THROW(manager.declareMatrix("thingy", "undeclared name"), MooseException);
+  EXPECT_THROW(manager.declareMatrixProperty("test2", {"1", "2", "3"}, "another undeclared name"),
+               MooseException);
 }
 
 TEST_F(CheckCoefficientManager, DeclareFunctionPWMatrix)

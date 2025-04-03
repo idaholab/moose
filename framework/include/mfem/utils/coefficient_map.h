@@ -89,25 +89,7 @@ public:
     }
   }
 
-  T & getCoefficient(const std::string & name)
-  {
-    try
-    {
-      auto & coeff = this->_properties.at(name);
-      try
-      {
-        return *std::get<std::shared_ptr<T>>(coeff);
-      }
-      catch (std::bad_variant_access &)
-      {
-        return *std::get<0>(std::get<PWData>(coeff));
-      }
-    }
-    catch (std::out_of_range &)
-    {
-      throw MooseException("Coefficient with name '" + name + "' has not been declared.");
-    }
-  }
+  T & getCoefficient(const std::string & name) { return *this->getCoefficientPtr(name); }
 
   std::shared_ptr<T> getCoefficientPtr(const std::string & name)
   {
@@ -120,7 +102,7 @@ public:
       }
       catch (std::bad_variant_access)
       {
-        throw MooseException("Property with name '" + name + "' is piecewise.");
+        return std::get<0>(std::get<PWData>(coeff));
       }
     }
     catch (std::out_of_range)
