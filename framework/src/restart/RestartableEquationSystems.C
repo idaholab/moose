@@ -19,9 +19,6 @@
 const std::string RestartableEquationSystems::SystemHeader::system_solution_name =
     "SYSTEM_SOLUTION";
 
-const std::string RestartableEquationSystems::SystemHeader::system_old_solution_name =
-    "SOLUTION_STATE_1";
-
 RestartableEquationSystems::RestartableEquationSystems(libMesh::MeshBase & mesh)
   : _es(mesh), _load_all_vectors(true)
 {
@@ -267,9 +264,6 @@ RestartableEquationSystems::load(std::istream & stream)
 
     bool modified_sys = false;
 
-    bool init_old_solution = !sys_header.vectors.count(SystemHeader::system_old_solution_name) &&
-                             sys.have_vector(SystemHeader::system_old_solution_name);
-
     for (const auto & vec_name_header_pair : sys_header.vectors)
     {
       bool modified_vec = false;
@@ -286,9 +280,6 @@ RestartableEquationSystems::load(std::istream & stream)
       }
 
       auto & vec = is_solution ? *sys.solution : sys.get_vector(vec_header.name);
-      auto * old_vec = is_solution && init_old_solution
-                           ? &sys.get_vector(SystemHeader::system_old_solution_name)
-                           : nullptr;
 
       for (const auto & var_name_header_pair : sys_header.variables)
       {
@@ -300,20 +291,12 @@ RestartableEquationSystems::load(std::istream & stream)
           continue;
 
         restore(sys_header, vec_header, var_header, sys, vec, var, stream);
-
-        if (old_vec)
-          restore(sys_header, vec_header, var_header, sys, *old_vec, var, stream);
-
         modified_vec = true;
       }
 
       if (modified_vec)
       {
         vec.close();
-
-        if (old_vec)
-          old_vec->close();
-
         modified_sys = true;
       }
     }
