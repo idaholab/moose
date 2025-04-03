@@ -19,5 +19,6 @@ INSFVEnergyHydraulicSeparatorBC::validParams()
 }
 
 INSFVEnergyHydraulicSeparatorBC::INSFVEnergyHydraulicSeparatorBC(const InputParameters & params)
-: FVFluxBC(params),
-INSFVHydraulicSeparatorInterface(){}
+  : FVFluxBC(params), INSFVHydraulicSeparatorInterface()
+{
+}

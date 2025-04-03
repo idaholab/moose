@@ -2,9 +2,9 @@
 # separated using flow separators that act as slip boundary conditions.
 # The different channels have different pressure discontinuities
 # due to Bernoulli pressure jump combined with irreversible form losses.
-# Channel 1 expected drop (analytic, Bernolli plus contraction form loss): 2.079E-01 Pa
-# Channel 2 expected drop (analytic, Bernolli plus contraction form loss): 8.360E-02 Pa
-# Channel 3 expected drop (analytic, Bernolli plus contraction form loss): 1.870E-02 Pa
+# Channel 1 expected drop (analytic, Bernoulli plus contraction form loss): 2.079E-01 Pa
+# Channel 2 expected drop (analytic, Bernoulli plus contraction form loss): 8.360E-02 Pa
+# Channel 3 expected drop (analytic, Bernoulli plus contraction form loss): 1.870E-02 Pa
 
 rho=1.1
 advected_interp_method='upwind'

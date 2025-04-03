@@ -94,8 +94,11 @@ FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
   if (avoidBoundary(fi))
     return true;
 
+  // We get this to check if we are on a kernel boundary or not
+  const bool on_boundary = onBoundary(fi);
+
   // Blanket forcing on boundary
-  if (_force_boundary_execution)
+  if (_force_boundary_execution && on_boundary)
     return false;
 
   // Selected boundaries to force
@@ -114,7 +117,7 @@ FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
 
   // The last question is: are we on the inside or on the outside? If we are on an internal
   // face we dont skip, otherwise we assume a natural BC and skip
-  return onBoundary(fi);
+  return on_boundary;
 }
 
 void

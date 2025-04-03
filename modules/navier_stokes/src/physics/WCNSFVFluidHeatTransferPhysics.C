@@ -407,5 +407,5 @@ WCNSFVFluidHeatTransferPhysics::addEnergySeparatorBC()
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<std::vector<BoundaryName>>("boundary") =
       _flow_equations_physics->getHydraulicSeparators();
-  getProblem().addFVBC(bc_type, _fluid_temperature_name + "_separators", params);
+  getProblem().addFVBC(bc_type, prefix() + _fluid_temperature_name + "_separators", params);
 }

@@ -33,8 +33,8 @@ public:
   bool isSeparatorBoundary(const FaceInfo & fi) const;
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
-    const Elem * elem,
-    const Moose::StateArg & time) const override;
+                                  const Elem * elem,
+                                  const Moose::StateArg & time) const override;
 
 protected:
   /**

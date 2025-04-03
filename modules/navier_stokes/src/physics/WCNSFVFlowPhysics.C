@@ -1005,14 +1005,14 @@ WCNSFVFlowPhysics::addSeparatorBC()
   {
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];
     params.set<MooseEnum>("momentum_component") = NS::directions[d];
-    getProblem().addFVBC(bc_type, _velocity_names[d] + "_separators", params);
+    getProblem().addFVBC(bc_type, prefix() + _velocity_names[d] + "_separators", params);
   }
 
   bc_type = "INSFVPressureHydraulicSeparatorBC";
   params = getFactory().getValidParams(bc_type);
   params.set<std::vector<BoundaryName>>("boundary") = _hydraulic_separators;
   params.set<NonlinearVariableName>("variable") = _pressure_name;
-  getProblem().addFVBC(bc_type, _pressure_name + "_separators", params);
+  getProblem().addFVBC(bc_type, prefix() + _pressure_name + "_separators", params);
 }
 
 void

@@ -18,7 +18,6 @@ INSFVPressureVariable::validParams()
   return INSFVVariable::validParams();
 }
 
-INSFVPressureVariable::INSFVPressureVariable(const InputParameters & params) :
-INSFVVariable(params)
+INSFVPressureVariable::INSFVPressureVariable(const InputParameters & params) : INSFVVariable(params)
 {
 }

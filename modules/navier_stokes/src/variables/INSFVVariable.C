@@ -30,7 +30,8 @@ INSFVVariable::INSFVVariable(const InputParameters & params)
 {
 }
 
-void INSFVVariable::initialSetup()
+void
+INSFVVariable::initialSetup()
 {
   MooseVariableFVReal::initialSetup();
 
@@ -57,7 +58,8 @@ void INSFVVariable::initialSetup()
   }
 }
 
-bool INSFVVariable::isSeparatorBoundary(const FaceInfo & fi) const
+bool
+INSFVVariable::isSeparatorBoundary(const FaceInfo & fi) const
 {
   for (const auto bid : fi.boundaryIDs())
     if (_boundary_id_to_separator.find(bid) != _boundary_id_to_separator.end())
@@ -68,8 +70,8 @@ bool INSFVVariable::isSeparatorBoundary(const FaceInfo & fi) const
 
 bool
 INSFVVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                      const Elem * const elem,
-                                                      const Moose::StateArg & time) const
+                                          const Elem * const elem,
+                                          const Moose::StateArg & time) const
 {
   if (isDirichletBoundaryFace(fi, elem, time))
     return false;
