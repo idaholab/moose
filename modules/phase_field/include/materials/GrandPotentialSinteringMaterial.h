@@ -113,11 +113,21 @@ protected:
 
   /// Body Force coefficient for mass conservation in conc and chempot coupling
   MaterialProperty<Real> & _hv_c_min;
+  MaterialProperty<Real> & _dhv_c_mindphi;
+  MaterialProperty<Real> & _d2hv_c_mindphi2;
   MaterialProperty<Real> & _hs_c_min;
+  MaterialProperty<Real> & _dhs_c_mindphi;
+  MaterialProperty<Real> & _d2hs_c_mindphi2;
+  std::vector<MaterialProperty<Real> *> _dhs_c_min;
+  std::vector<std::vector<MaterialProperty<Real> *>> _d2hs_c_min;
 
   /// MatReaction Force coefficient for mass conservation in conc and chempot coupling
   MaterialProperty<Real> & _hv_over_kVa;
+  MaterialProperty<Real> & _dhv_over_kVadphi;
+  MaterialProperty<Real> & _d2hv_over_kVadphi2;
   MaterialProperty<Real> & _hs_over_kVa;
+  MaterialProperty<Real> & _dhs_over_kVadphi;
+  MaterialProperty<Real> & _d2hs_over_kVadphi2;
 
   /// surface energy
   const Real _sigma_s;
