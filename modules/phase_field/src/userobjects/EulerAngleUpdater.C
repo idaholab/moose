@@ -40,7 +40,10 @@ EulerAngleUpdater::EulerAngleUpdater(const InputParameters & params)
     _grain_torque(getUserObject<GrainForceAndTorqueInterface>("grain_torques_object")),
     _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes")),
     _mr(getParam<Real>("rotation_constant")),
-    _first_time(true)
+    _first_time(declareRestartableData<bool>("first_time_euler_update", true)),
+    _first_time_recovered(_app.isRecovering()),
+    _angles(declareRestartableData<std::vector<EulerAngles>>("euler_angles")),
+    _angles_old(declareRestartableData<std::vector<EulerAngles>>("euler_angles_old"))
 {
 }
 
@@ -63,8 +66,10 @@ EulerAngleUpdater::initialize()
 
   for (unsigned int i = 0; i < grain_num; ++i)
   {
-    if (!_first_time && !_fe_problem.converged(_sys.number()))
+    // We dont want to use old angles on recovery
+    if (!_first_time && !_first_time_recovered && !_fe_problem.converged(_sys.number()))
       _angles[i] = _angles_old[i];
+    _first_time_recovered = false;
 
     RealGradient torque = _grain_torque.getTorqueValues()[i];
 

@@ -25,6 +25,7 @@
  * 1. SIMPLE INTERFACE:
  *    There are three static functions that are suitable as a drop in replacement for the
  *    random number capabilities available in the standard C++ library.
+ *    This interface DOES NOT SUPPORT restart/recover
  *
  * 2. ADVANCED INTERFACE:
  *    When creating an instance of this class, one can maintain an arbitrary number of

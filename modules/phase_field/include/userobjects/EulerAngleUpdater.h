@@ -51,8 +51,11 @@ protected:
   const VectorPostprocessorValue & _grain_volumes;
 
   const Real _mr;
-  bool _first_time;
+  /// Whether this is the first time updating angles, in which case the initial euler angle provider should be used
+  bool & _first_time;
+  /// Whether the simulation has recovered once
+  bool _first_time_recovered;
 
-  std::vector<EulerAngles> _angles;
-  std::vector<EulerAngles> _angles_old;
+  std::vector<EulerAngles> & _angles;
+  std::vector<EulerAngles> & _angles_old;
 };
