@@ -41,6 +41,10 @@ public:
     return _fec;
   }
 
+  virtual bool isScalar() const = 0;
+
+  virtual bool isVector() const = 0;
+
 protected:
   /// Type of ordering of the vector dofs when _vdim > 1.
   const int _ordering;
