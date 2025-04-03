@@ -15,7 +15,9 @@ registerMooseObject("NavierStokesApp", INSFVVelocityHydraulicSeparatorBC);
 InputParameters
 INSFVVelocityHydraulicSeparatorBC::validParams()
 {
-  return INSFVFluxBC::validParams();
+  auto params = INSFVFluxBC::validParams();
+  params.addClassDescription("A separator boundary condition that prevents any type of momentum flux and can be used within the domain.");
+  return params;
 }
 
 INSFVVelocityHydraulicSeparatorBC::INSFVVelocityHydraulicSeparatorBC(const InputParameters & params)
