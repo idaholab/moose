@@ -40,6 +40,13 @@ public:
   virtual unsigned int getNumberOfRegions() const override { return 4; }
 
 protected:
+  /// Type for how to compute left and right wave speeds
+  enum class WaveSpeedFormulation
+  {
+    EINFELDT,
+    DAVIS
+  };
+
   /**
    * Computes the flow area that is used in the numerical flux
    */
@@ -48,6 +55,9 @@ protected:
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
+
+  /// How to compute left and right wave speeds
+  const WaveSpeedFormulation _wave_speed_formulation;
 
 public:
   static InputParameters validParams();
