@@ -12,7 +12,7 @@
 #include "ADKernelValue.h"
 
 /**
- *  This kernel supplies the heat source term corresponding to joule heating (Q).
+ *  This kernel supplies the heat source term corresponding to Joule heating (Q).
  *  The residual is provided by the 'ElectromagneticHeatingMaterial' object and
  *  can be structured in the following formulations:
  *

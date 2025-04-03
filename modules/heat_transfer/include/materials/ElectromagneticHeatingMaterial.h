@@ -29,15 +29,15 @@ public:
   virtual void computeJouleHeating();
 
 protected:
-  /// The variable data of the supplied variable for the field
+  /// The variable data of the supplied variable for the electric field
   const MooseVariableFieldBase & _field_var;
-  /// True is the supplied variable is a vector
+  /// True if the supplied variable is a vector
   const bool _is_vector;
-  /// The field defined from a vector variable
+  /// The electric field defined from a vector variable
   const ADVectorVariableValue & _efield;
   /// The complex component of the electric field, needed for harmonic formulation
   const ADVectorVariableValue & _efield_complex;
-  /// The field defined from the gradient of a scalar variable
+  /// The electric field defined from the gradient of a scalar variable
   const ADVariableGradient & _grad_potential;
   /// Electric field material property
   ADMaterialProperty<RealVectorValue> & _field;
