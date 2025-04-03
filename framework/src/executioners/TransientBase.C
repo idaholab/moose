@@ -344,10 +344,10 @@ TransientBase::incrementStepOrReject()
         _problem.adaptMesh();
 #endif
 
+      _problem.advanceState();
+
       _time_old = _time;
       _t_step++;
-
-      _problem.advanceState();
 
       if (_t_step == 1)
         return;
