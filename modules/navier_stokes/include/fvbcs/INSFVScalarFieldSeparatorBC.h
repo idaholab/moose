@@ -15,15 +15,15 @@
 class InputParameters;
 
 /**
- * Class describing a hydraulic separator for the energy in the
- * Navier Stokes equations. There is no cross flow and this should also
- * ensure that the cell gradients are decoupled on the two sides of the boundary.
+ * Class describing a separator (no diffusive or advective flux) for a scalar field
+ * (pressure, energy, passive scalar) associated with the
+ * Navier Stokes equations.
  */
-class INSFVEnergyHydraulicSeparatorBC : public FVFluxBC, public INSFVHydraulicSeparatorInterface
+class INSFVScalarFieldSeparatorBC : public FVFluxBC, public INSFVHydraulicSeparatorInterface
 {
 public:
   static InputParameters validParams();
-  INSFVEnergyHydraulicSeparatorBC(const InputParameters & params);
+  INSFVScalarFieldSeparatorBC(const InputParameters & params);
 
   void computeResidual(const FaceInfo & /*fi*/) override {}
   void computeJacobian(const FaceInfo & /*fi*/) override {}
@@ -31,6 +31,6 @@ public:
 
   ADReal computeQpResidual() override final
   {
-    mooseError("Energy hydraulic separators are not supposed to contribute to anything!");
+    mooseError("Scalar field separators are not supposed to contribute to anything!");
   }
 };

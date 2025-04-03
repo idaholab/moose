@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVPressureVariable.h"
-#include "INSFVPressureHydraulicSeparatorBC.h"
+#include "INSFVScalarFieldSeparatorBC.h"
 
 registerMooseObject("NavierStokesApp", INSFVPressureVariable);
 

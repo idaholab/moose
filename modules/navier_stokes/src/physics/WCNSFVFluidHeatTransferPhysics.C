@@ -402,7 +402,7 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
 void
 WCNSFVFluidHeatTransferPhysics::addEnergySeparatorBC()
 {
-  const std::string bc_type = "INSFVEnergyHydraulicSeparatorBC";
+  const std::string bc_type = "INSFVScalarFieldSeparatorBC";
   InputParameters params = getFactory().getValidParams(bc_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<std::vector<BoundaryName>>("boundary") =
