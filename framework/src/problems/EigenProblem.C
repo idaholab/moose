@@ -520,7 +520,8 @@ EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 
   doFreePowerIteration(true);
   // Set free power iterations
-  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
+  Moose::SlepcSupport::setFreeNonlinearPowerIterations(
+      free_power_iterations, this->getPetscOptions().dont_add_these_options);
 
   // Call solver
   _current_nl_sys->solve();
@@ -529,7 +530,8 @@ EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
   // Clear free power iterations
   auto executioner = getMooseApp().getExecutioner();
   if (executioner)
-    Moose::SlepcSupport::clearFreeNonlinearPowerIterations(executioner->parameters());
+    Moose::SlepcSupport::clearFreeNonlinearPowerIterations(
+        executioner->parameters(), this->getPetscOptions().dont_add_these_options);
   else
     mooseError("There is no executioner for this moose app");
 
