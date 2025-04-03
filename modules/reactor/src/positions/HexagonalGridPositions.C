@@ -108,8 +108,8 @@ HexagonalGridPositions::HexagonalGridPositions(const InputParameters & parameter
   }
 
   // Check positions_pattern and positions_pattern_indexing
-  if ((_positions_pattern.empty() && _positions_pattern_indexing.size()) ||
-      (_positions_pattern.size() && _positions_pattern_indexing.empty()))
+  if ((_positions_pattern.empty() && !_positions_pattern_indexing.empty()) ||
+      (!_positions_pattern.empty() && _positions_pattern_indexing.empty()))
     paramError("positions_pattern_indexing",
                "The 'positions_pattern' parameter and the 'positions_pattern_indexing' must be "
                "both specified or both not specified by the user.");
@@ -156,10 +156,10 @@ HexagonalGridPositions::initialize()
     if (_pattern.size())
     {
       // Check number of pins in pattern
-      unsigned pattern_size = 0;
+      std::size_t pattern_size = 0;
       for (const auto & row : _pattern)
         pattern_size += row.size();
-      if (_pattern.size() != 2 * _nr - 1)
+      if (_pattern.size() != cast_int<std::size_t>(2 * _nr - 1))
         mooseError("Number of rows in pattern (",
                    _pattern.size(),
                    ") should be equal to twice the number of hexagonal rings minus one");
@@ -194,7 +194,7 @@ HexagonalGridPositions::initialize()
           n_exclusions++;
 
     // Size array, remove the '-1' / not included positions
-    const auto n_positions = _hex_latt->totalPins(_nr) - n_exclusions;
+    const auto n_positions = cast_int<std::size_t>(_hex_latt->totalPins(_nr) - n_exclusions);
     _positions.resize(n_positions);
 
     // Fill the positions by retrieving the pin centers at indices included in the pattern (if
@@ -214,7 +214,7 @@ HexagonalGridPositions::initialize()
     unsigned pattern_size = 0;
     for (const auto & row : _positions_pattern)
       pattern_size += row.size();
-    if (_positions_pattern.size() != 2 * _nr - 1)
+    if (_positions_pattern.size() != cast_int<std::size_t>(2 * _nr - 1))
       mooseError("Number of rows in 'positions_pattern' (",
                  _pattern.size(),
                  ") should be equal to twice the number of hexagonal rings minus one");
@@ -248,9 +248,10 @@ HexagonalGridPositions::initialize()
         libmesh_ignore(a_i);
         unsigned int row_i, within_row_i;
         _hex_latt->get2DInputPatternIndex(i, row_i, within_row_i);
-        const auto & pos_index = _positions_pattern[row_i][within_row_i];
-        if (index_to_pos.count((unsigned int)(pos_index)))
-          pattern_unrolled[i++] = index_to_pos[pos_index];
+        const auto pos_index = _positions_pattern[row_i][within_row_i];
+        if (auto it = index_to_pos.find(cast_int<unsigned int>(pos_index));
+            it != index_to_pos.end())
+          pattern_unrolled[i++] = it->second;
         else if (pos_index != -1)
           paramError("positions_pattern",
                      "Index '" + std::to_string(pos_index) +
