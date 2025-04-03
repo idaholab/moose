@@ -248,7 +248,7 @@ Exodus::outputSetup()
   //   (4) Sequential output is NOT desired
   //   (5) Exodus is NOT being output only on FINAL
   if (_recovering && !_exodus_mesh_changed && _exodus_num > 0 && !_sequence &&
-      getExecuteOnEnum() != {EXEC_FINAL})
+      (getExecuteOnEnum().size() != 1 || !getExecuteOnEnum().contains(EXEC_FINAL)))
   {
     // Set the recovering flag to false so that this special case is not triggered again
     _recovering = false;
