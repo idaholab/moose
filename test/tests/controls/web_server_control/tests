@@ -18,6 +18,7 @@
       required_python_packages = requests
       recover = false
       detail = 'boolean'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [real]
       type = JSONDiff
@@ -30,6 +31,7 @@
       required_python_packages = requests
       recover = false
       detail = 'double precision number'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [int]
       type = JSONDiff
@@ -42,6 +44,7 @@
       required_python_packages = requests
       recover = false
       detail = 'integer'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [string]
       type = JSONDiff
@@ -54,6 +57,7 @@
       required_python_packages = requests
       recover = false
       detail = 'string'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [vec_real]
       type = JSONDiff
@@ -66,6 +70,7 @@
       required_python_packages = requests
       recover = false
       detail = 'vector of double precision numbers'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [vec_int]
       type = JSONDiff
@@ -78,6 +83,7 @@
       required_python_packages = requests
       recover = false
       detail = 'vector of integers'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [vec_string]
       type = JSONDiff
@@ -90,6 +96,7 @@
       required_python_packages = requests
       recover = false
       detail = 'vector of strings'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
   []
 
@@ -101,6 +108,7 @@
     required_python_packages = requests
     recover = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
+    valgrind = 'none' # http library is not completely valgrind clean
   []
 
   [connect_port]
@@ -110,6 +118,7 @@
     required_python_packages = requests
     recover = False
     requirement = 'The system shall support connecting to a REST API via a port'
+    valgrind = 'none' # http library is not completely valgrind clean
   []
 
   [parallel_consistent]
@@ -124,6 +133,7 @@
     requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
     min_parallel = 2
     max_parallel = 2
+    valgrind = 'none' # http library is not completely valgrind clean
   []
 
   # We cannot run these tests with valgrind because they come from the python script, which will terminate
@@ -187,6 +197,7 @@
       input = 'wait_initial.i'
       expect_err = "You must provide either the parameter 'port' or 'file_socket'"
       detail = 'a parameter was not provided that specifies where the server should listen'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
     [port_and_socket]
       type = RunException
@@ -194,6 +205,7 @@
       cli_args = 'Controls/web_server/port=1234 Controls/web_server/file_socket=foo'
       expect_err = "Cannot provide both 'port' and 'file_socket'"
       detail = 'both a port and a file were specified to listen on'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
   []
 []
