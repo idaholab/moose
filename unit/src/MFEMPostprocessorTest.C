@@ -52,7 +52,7 @@ TEST_F(MFEMPostprocessorTest, MFEML2Error)
   EXPECT_GT(l2_pp.getValue(), 1.);
 
   _scalar_var->ProjectCoefficient(
-      _mfem_problem->getProperties().getScalarCoefficient("scalar_ones"));
+      _mfem_problem->getCoefficients().getScalarCoefficient("scalar_ones"));
   EXPECT_LT(l2_pp.getValue(), 1e-12);
 }
 
@@ -66,7 +66,7 @@ TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
   pp_params.set<VariableName>("variable") = "scalar_var";
   _mfem_problem->addPostprocessor("MFEML2Error", "ppl2", pp_params);
   auto & l2_pp = _mfem_problem->getUserObject<MFEML2Error>("ppl2");
-  auto & l2_coef = _mfem_problem->getProperties().getScalarCoefficient("ppl2");
+  auto & l2_coef = _mfem_problem->getCoefficients().getScalarCoefficient("ppl2");
 
   mfem::ConstantCoefficient twos(2.);
   _scalar_var->ProjectCoefficient(twos);
@@ -96,7 +96,7 @@ TEST_F(MFEMPostprocessorTest, MFEMVectorL2Error)
   EXPECT_GT(l2_pp.getValue(), 1.);
 
   _vector_var->ProjectCoefficient(
-      _mfem_problem->getProperties().getVectorCoefficient("vector_ones"));
+      _mfem_problem->getCoefficients().getVectorCoefficient("vector_ones"));
   EXPECT_LT(l2_pp.getValue(), 1e-12);
 }
 

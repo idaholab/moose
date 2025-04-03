@@ -38,7 +38,7 @@ public:
                     this->_manager.cend(),
                 "Coefficient object was not created by the appropriate coefficient manager.");
 
-    const auto [_, inserted] = this->_properties.emplace(name, std::move(coeff));
+    const auto [_, inserted] = this->_coefficients.emplace(name, std::move(coeff));
     if (!inserted)
     {
       throw MooseException("Coefficient with name '" + name +
@@ -62,9 +62,9 @@ public:
     // Initialise property with empty coefficients, if it does not already exist
     if (!this->hasCoefficient(name))
     {
-      this->_properties.insert({name, this->emptyPWData(coeff)});
+      this->_coefficients.insert({name, this->emptyPWData(coeff)});
     }
-    PWData * data = std::get_if<PWData>(&this->_properties[name]);
+    PWData * data = std::get_if<PWData>(&this->_coefficients[name]);
     // Throw an exception if the data is not piecewise
     if (!data)
     {
@@ -95,7 +95,7 @@ public:
   {
     try
     {
-      auto & coeff = this->_properties.at(name);
+      auto & coeff = this->_coefficients.at(name);
       try
       {
         return std::get<std::shared_ptr<T>>(coeff);
@@ -111,13 +111,16 @@ public:
     }
   }
 
-  bool hasCoefficient(const std::string & name) const { return this->_properties.count(name) > 0; }
+  bool hasCoefficient(const std::string & name) const
+  {
+    return this->_coefficients.count(name) > 0;
+  }
 
   bool propertyDefinedOnBlock(const std::string & name, const std::string & block) const
   {
     if (!this->hasCoefficient(name))
       return false;
-    auto & coeff = this->_properties.at(name);
+    auto & coeff = this->_coefficients.at(name);
     if (std::holds_alternative<std::shared_ptr<T>>(coeff))
       return true;
     auto block_map = std::get<1>(std::get<PWData>(coeff));
@@ -126,7 +129,7 @@ public:
 
 private:
   using PWData = std::tuple<std::shared_ptr<Tpw>, std::map<const std::string, std::shared_ptr<T>>>;
-  std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _properties;
+  std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _coefficients;
   TrackedObjectFactory<T> & _manager;
 
   PWData emptyPWData(std::shared_ptr<T> /*coeff*/)
