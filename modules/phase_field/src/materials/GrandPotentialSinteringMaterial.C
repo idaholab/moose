@@ -105,9 +105,19 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _d2kappa(declarePropertyDerivative<Real>("kappa", _phi_name, _phi_name)),
     _gamma(declareProperty<Real>("gamma")),
     _hv_c_min(declareProperty<Real>("hv_c_min")),
+    _dhv_c_mindphi(declarePropertyDerivative<Real>("hv_c_min", _phi_name)),
+    _d2hv_c_mindphi2(declarePropertyDerivative<Real>("hv_c_min", _phi_name, _phi_name)),
     _hs_c_min(declareProperty<Real>("hs_c_min")),
+    _dhs_c_mindphi(declarePropertyDerivative<Real>("hs_c_min", _phi_name)),
+    _d2hs_c_mindphi2(declarePropertyDerivative<Real>("hs_c_min", _phi_name, _phi_name)),
+    _dhs_c_min(_neta),
+    _d2hs_c_min(_neta),
     _hv_over_kVa(declareProperty<Real>("hv_over_kVa")),
+    _dhv_over_kVadphi(declarePropertyDerivative<Real>("hv_over_kVa", _phi_name)),
+    _d2hv_over_kVadphi2(declarePropertyDerivative<Real>("hv_over_kVa", _phi_name, _phi_name)),
     _hs_over_kVa(declareProperty<Real>("hs_over_kVa")),
+    _dhs_over_kVadphi(declarePropertyDerivative<Real>("hs_over_kVa", _phi_name)),
+    _d2hs_over_kVadphi2(declarePropertyDerivative<Real>("hs_over_kVa", _phi_name, _phi_name)),
 
     _sigma_s(getParam<Real>("surface_energy")),
     _sigma_gb(getParam<Real>("grainboundary_energy")),
@@ -141,6 +151,8 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _domegasdeta[i] = &declarePropertyDerivative<Real>("omegas", _eta_name[i]);
     _d2omegasdwdeta[i] = &declarePropertyDerivative<Real>("omegas", _w_name, _eta_name[i]);
     _d2omegasdetadeta[i].resize(_neta);
+    _dhs_c_min[i] = &declarePropertyDerivative<Real>("hs_c_min", _eta_name[i]);
+    _d2hs_c_min[i].resize(_neta);
 
     for (unsigned int j = 0; j <= i; ++j)
     {
@@ -149,6 +161,7 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
       _d2rhos[j][i] = &declarePropertyDerivative<Real>("rhos", _eta_name[j], _eta_name[i]);
       _d2omegasdetadeta[j][i] =
           &declarePropertyDerivative<Real>("omegas", _eta_name[j], _eta_name[i]);
+      _d2hs_c_min[j][i] = &declarePropertyDerivative<Real>("hs_c_min", _eta_name[j], _eta_name[i]);
     }
   }
 }
@@ -217,9 +230,17 @@ GrandPotentialSinteringMaterial::computeQpProperties()
 
       // bodyforce and matreact coefficients for strict mass conservation case
       _hv_c_min[_qp] = _hv[_qp] * 1.0;
+      _dhv_c_mindphi[_qp] = _dhv[_qp] * 1.0;
+      _d2hv_c_mindphi2[_qp] = _d2hv[_qp] * 1.0;
       _hs_c_min[_qp] = _hs[_qp] * _cs_eq[_qp];
+      _dhs_c_mindphi[_qp] = _dhs[_qp] * _cs_eq[_qp];
+      _d2hs_c_mindphi2[_qp] = _d2hs[_qp] * _cs_eq[_qp];
       _hv_over_kVa[_qp] = _hv[_qp] / (_Va * _kv[_qp]);
+      _dhv_over_kVadphi[_qp] = _dhv[_qp] / (_Va * _kv[_qp]);
+      _d2hv_over_kVadphi2[_qp] = _d2hv[_qp] / (_Va * _kv[_qp]);
       _hs_over_kVa[_qp] = _hs[_qp] / (_Va * _ks[_qp]);
+      _dhs_over_kVadphi[_qp] = _dhs[_qp] / (_Va * _ks[_qp]);
+      _d2hs_over_kVadphi2[_qp] = _d2hs[_qp] / (_Va * _ks[_qp]);
 
       for (unsigned int i = 0; i < _neta; ++i)
       {
@@ -227,10 +248,12 @@ GrandPotentialSinteringMaterial::computeQpProperties()
         (*_d2rhosdwdeta[i])[_qp] = 0.0;
         (*_domegasdeta[i])[_qp] = -_w[_qp] * (*_dcs_eq[i])[_qp] / _Va;
         (*_d2omegasdwdeta[i])[_qp] = -(*_dcs_eq[i])[_qp] / _Va;
+        (*_dhs_c_min[i])[_qp] = _hs[_qp] * (*_dcs_eq[i])[_qp];
         for (unsigned int j = i; j < _neta; ++j)
         {
           (*_d2rhos[i][j])[_qp] = (*_d2cs_eq[i][j])[_qp] / _Va;
           (*_d2omegasdetadeta[i][j])[_qp] = -_w[_qp] * (*_d2cs_eq[i][j])[_qp] / _Va;
+          (*_d2hs_c_min[i][j])[_qp] = _hs[_qp] * (*_d2cs_eq[i][j])[_qp];
         }
       }
       break;
