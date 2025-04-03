@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVPressureHydraulicSeparatorBC.h"
+#include "INSFVScalarFieldSeparatorBC.h"
 #include "InputParameters.h"
 
-registerMooseObject("NavierStokesApp", INSFVPressureHydraulicSeparatorBC);
+registerMooseObject("NavierStokesApp", INSFVScalarFieldSeparatorBC);
 
 InputParameters
-INSFVPressureHydraulicSeparatorBC::validParams()
+INSFVScalarFieldSeparatorBC::validParams()
 {
   return FVFluxBC::validParams();
 }
 
-INSFVPressureHydraulicSeparatorBC::INSFVPressureHydraulicSeparatorBC(const InputParameters & params)
+INSFVScalarFieldSeparatorBC::INSFVScalarFieldSeparatorBC(const InputParameters & params)
   : FVFluxBC(params), INSFVHydraulicSeparatorInterface()
 {
 }

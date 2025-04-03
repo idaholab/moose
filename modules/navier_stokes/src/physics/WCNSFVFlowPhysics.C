@@ -1008,7 +1008,7 @@ WCNSFVFlowPhysics::addSeparatorBC()
     getProblem().addFVBC(bc_type, prefix() + _velocity_names[d] + "_separators", params);
   }
 
-  bc_type = "INSFVPressureHydraulicSeparatorBC";
+  bc_type = "INSFVScalarFieldSeparatorBC";
   params = getFactory().getValidParams(bc_type);
   params.set<std::vector<BoundaryName>>("boundary") = _hydraulic_separators;
   params.set<NonlinearVariableName>("variable") = _pressure_name;

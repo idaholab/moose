@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30185'
-  design = 'navier_stokes/pinsfv.md INSFVVelocityHydraulicSeparatorBC.md INSFVPressureHydraulicSeparatorBC.md INSFVEnergyHydraulicSeparatorBC.md'
+  design = 'navier_stokes/pinsfv.md INSFVVelocityHydraulicSeparatorBC.md INSFVScalarFieldSeparatorBC.md INSFVScalarFieldSeparatorBC.md'
   [nojump]
     type = 'CSVDiff'
     input = separator-no-jump.i

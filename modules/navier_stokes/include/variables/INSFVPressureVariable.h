@@ -12,7 +12,7 @@
 #include "INSFVVariable.h"
 
 class InputParameters;
-class INSFVPressureHydraulicSeparatorBC;
+class INSFVScalarFieldSeparatorBC;
 
 class INSFVPressureVariable : public INSFVVariable
 {

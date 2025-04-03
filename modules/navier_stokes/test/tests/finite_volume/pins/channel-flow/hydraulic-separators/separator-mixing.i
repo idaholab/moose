@@ -253,13 +253,13 @@ velocity_interp_method='rc'
   []
 
   [separator-p]
-    type = INSFVPressureHydraulicSeparatorBC
+    type = INSFVScalarFieldSeparatorBC
     boundary = 'separator-1 separator-2'
     variable = pressure
   []
 
   [separator-T]
-    type = INSFVEnergyHydraulicSeparatorBC
+    type = INSFVScalarFieldSeparatorBC
     boundary = 'separator-1 separator-2'
     variable = T_fluid
   []
