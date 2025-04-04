@@ -16,11 +16,12 @@ InputParameters
 INSFVVelocityHydraulicSeparatorBC::validParams()
 {
   auto params = INSFVFluxBC::validParams();
-  params.addClassDescription("A separator boundary condition that prevents any type of momentum flux and can be used within the domain.");
+  params.addClassDescription("A separator boundary condition that prevents any type of momentum "
+                             "flux and can be used within the domain.");
   return params;
 }
 
 INSFVVelocityHydraulicSeparatorBC::INSFVVelocityHydraulicSeparatorBC(const InputParameters & params)
-  : INSFVFluxBC(params), INSFVHydraulicSeparatorInterface()
+  : INSFVFluxBC(params), INSFVHydraulicSeparatorInterface(this)
 {
 }

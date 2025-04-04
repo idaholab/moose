@@ -16,11 +16,12 @@ InputParameters
 INSFVScalarFieldSeparatorBC::validParams()
 {
   auto params = FVFluxBC::validParams();
-  params.addClassDescription("A separator boundary condition that prevents any type of scalar flux and can be used within the domain.");
+  params.addClassDescription("A separator boundary condition that prevents any type of scalar flux "
+                             "and can be used within the domain.");
   return params;
 }
 
 INSFVScalarFieldSeparatorBC::INSFVScalarFieldSeparatorBC(const InputParameters & params)
-  : FVFluxBC(params), INSFVHydraulicSeparatorInterface()
+  : FVFluxBC(params), INSFVHydraulicSeparatorInterface(this)
 {
 }
