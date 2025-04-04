@@ -33,12 +33,12 @@ CSGUniverse::getCell(const std::string name)
 {
   if (!hasCell(name))
     mooseError("Cell with name " + name + " does not exist in universe " + _name + ".");
-
   for (auto cell : _cells)
   {
     if (cell->getName() == name)
       return cell;
   }
+  return nullptr;
 }
 
 bool
@@ -62,7 +62,7 @@ CSGUniverse::removeCell(const std::string name)
   {
     if (cell->getName() == name)
     {
-      _cells.remove(cell);
+      _cells.erase(std::remove(_cells.begin(), _cells.end(), cell), _cells.end());
       break;
     }
   }
@@ -75,7 +75,7 @@ CSGUniverse::removeCell(const std::shared_ptr<CSGCell> cell)
   if (!hasCell(name))
     mooseError("Cannot remove cell. Cell with name " + name + " does not exist in universe " +
                _name + ".");
-  _cells.remove(cell);
+  _cells.erase(std::remove(_cells.begin(), _cells.end(), cell), _cells.end());
 }
 
 } // namespace CSG
