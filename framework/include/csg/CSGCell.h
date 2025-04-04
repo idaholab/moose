@@ -25,9 +25,9 @@ public:
   // TODO add support for universe and lattice fill
   enum class FillType
   {
+    VOID,
     MATERIAL,
-    EMPTY,
-    INVALID
+    UNIVERSE,
   };
 
   /**
@@ -36,11 +36,25 @@ public:
   CSGCell(const std::string name, const FillType fill_type, const CSGRegion & region);
 
   /**
+   * Constructor for void cell
+   */
+  CSGCell(const std::string name, const CSGRegion & region);
+
+  /**
+   * Constructor for Material Cell; TODO: mat_name will be replaced with material object when
+   * available
+   */
+  CSGCell(const std::string name, const std::string mat_name, const CSGRegion & region);
+
+  /**
    * Destructor
    */
   virtual ~CSGCell() = default;
 
   FillType getFillType() const { return _fill_type; }
+
+  template <typename T>
+  T getFill();
 
   const std::string getName() const { return _name; }
 
@@ -58,6 +72,10 @@ protected:
 
   /// Fill type of cell
   FillType _fill_type;
+
+  /// Fill
+  const std::string _fill_material; // TODO: make this a material object
+  const std::string _fill_universe; // TODO: make this a universe object
 
   /// Cell region, represented as a CSGRegion object
   CSGRegion _region;

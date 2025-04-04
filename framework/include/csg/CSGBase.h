@@ -15,10 +15,9 @@
 #include "CSGXCylinder.h"
 #include "CSGYCylinder.h"
 #include "CSGZCylinder.h"
-#include "CSGUniverse.h"
-#include "CSGMaterialCell.h"
-#include "CSGVoidCell.h"
 #include "CSGRegion.h"
+#include "CSGCellList.h"
+#include "CSGUniverse.h"
 #include "nlohmann/json.h"
 
 namespace CSG
@@ -139,6 +138,54 @@ public:
     return _surface_list.getSurface(name);
   }
 
+  // getSurfaceName(surf)
+
+  std::shared_ptr<CSGCell>
+  createCell(const std::string name, const std::string mat_name, const CSGRegion & region)
+  {
+    return _cell_list.addMaterialCell(name, mat_name, region);
+  }
+
+  std::shared_ptr<CSGCell> createCell(const std::string name, const CSGRegion & region)
+  {
+    return _cell_list.addVoidCell(name, region);
+  }
+
+  // TODO: createUniverseCell
+
+  /**
+   * @brief Get all cell objects
+   *
+   * @return map of names to CSGCell objects
+   */
+  const std::map<std::string, std::shared_ptr<CSGCell>> & getAllCells() const
+  {
+    return _cell_list.getAllCells();
+  }
+
+  /**
+   * @brief Get a Cell object by name
+   *
+   * @param name cell name
+   * @return shared pointer to CSGCell object
+   */
+  const std::shared_ptr<CSGCell> & getCellByName(const std::string name)
+  {
+    return _cell_list.getCell(name);
+  }
+
+  // getCellName(cell)
+
+  // getCellRegion(cell)
+
+  // setCellRegion(cell, region)
+
+  // setCellFill(cell, new_fill_type or obj)
+
+  // removeCell(cell); // removes from root universe altogether
+
+  // removeCellFromUniverse() // removes just from that universe
+
   /**
    * @brief Create a Root Universe object
    *
@@ -161,8 +208,11 @@ public:
   nlohmann::json generateOutput() const;
 
 private:
-  /// List of surfaces associated with CSG mesh
+  /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;
+
+  /// List of surfaces associated with CSG object
+  CSGCellList _cell_list;
 
   /// Pointer to root universe
   std::shared_ptr<CSGUniverse> _root_universe;
