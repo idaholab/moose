@@ -50,4 +50,14 @@ CSGCellList::addMaterialCell(const std::string name,
   return _cells[name];
 }
 
+std::shared_ptr<CSGCell>
+CSGCellList::addUniverseCell(const std::string name,
+                             const CSGUniverse & univ,
+                             const CSGRegion & region)
+{
+  checkCellName(name);
+  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, univ, region)));
+  return _cells[name];
+}
+
 } // namespace CSG

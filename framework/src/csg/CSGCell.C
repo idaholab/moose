@@ -23,8 +23,17 @@ CSGCell::CSGCell(const std::string name, const CSGRegion & region)
 }
 
 CSGCell::CSGCell(const std::string name, const std::string mat_name, const CSGRegion & region)
-  : _name(name), _fill_type(FillType::MATERIAL), _fill_material(mat_name), _region(region)
+  : _name(name),
+    _fill_type(FillType::MATERIAL),
+    _fill_name(mat_name),
+    _region(region)
 {
+}
+
+CSGCell::CSGCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region)
+  : _name(name), _fill_type(FillType::UNIVERSE), _fill_name(univ.getName()), _region(region)
+{
+  _fill_universe = &univ;
 }
 
 template <typename T>
@@ -32,11 +41,11 @@ T
 CSGCell::getFill()
 {
   if (getFillType() == FillType::VOID)
-    return NULL;
+    return nullptr;
   if (getFillType() == FillType::MATERIAL)
-    return _fill_material;
+    return static_cast<std::string>(_fill_name); // TODO: return material object when available
   if (getFillType() == FillType::UNIVERSE)
-    return _fill_universe;
+    return static_cast<const CSGUniverse *>(_fill_universe);
 }
 
 const std::string
