@@ -60,21 +60,20 @@ CSGBase::generateOutput() const
   auto root_univ = getRootUniverse();
   auto root_univ_name = root_univ->getName();;
   auto all_cells = root_univ->getAllCells();
-  // for (const auto & c : all_cells)
-  // {
-  //   const auto cell_ptr = c.second;
-  //   const auto cell_name = cell_ptr->getName();
-  //   const auto cell_region = cell_ptr->getRegionAsString();
-  //   const auto cell_filltype = cell_ptr->getFillTypeString();
-  //   csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
-  //   csg_json["CELLS"][cell_name]["REGION"] = cell_region;
-  //   if (cell_filltype == "MATERIAL")
-  //   {
-  //     const auto matcell_ptr = std::static_pointer_cast<CSGMaterialCell>(cell_ptr);
-  //     const auto cell_fill = matcell_ptr->getFill();
-  //     csg_json["CELLS"][cell_name]["FILL"] = cell_fill;
-  //   }
-  // }
+  for (const auto & cell_ptr : all_cells)
+  {
+    const auto cell_name = cell_ptr->getName();
+    const auto cell_region = cell_ptr->getRegionAsString();
+    const auto cell_filltype = cell_ptr->getFillTypeString();
+    csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
+    csg_json["CELLS"][cell_name]["REGION"] = cell_region;
+
+    //const auto cell_fill = cell_ptr->getFill();
+    //if (!cell_fill){
+    //  // TODO: const auto fill_name = cell_fill->getName();
+    //  csg_json["CELLS"][cell_name]["FILL"] = cell_fill;
+    //}
+  }
 
   return csg_json;
 }

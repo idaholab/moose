@@ -174,18 +174,6 @@ public:
     return _cell_list.getCell(name);
   }
 
-  // getCellName(cell)
-
-  // getCellRegion(cell)
-
-  // setCellRegion(cell, region)
-
-  // setCellFill(cell, new_fill_type or obj)
-
-  // removeCell(cell); // removes from root universe altogether
-
-  // removeCellFromUniverse() // removes just from that universe
-
   /**
    * @brief Create a Root Universe object
    *
