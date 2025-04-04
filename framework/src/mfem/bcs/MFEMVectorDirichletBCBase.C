@@ -16,7 +16,8 @@ MFEMVectorDirichletBCBase::validParams()
 MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
     _vec_value(getParam<std::vector<Real>>("values")),
-    _vec_coef(getMFEMProblem().makeVectorCoefficient<mfem::VectorConstantCoefficient>(
+    _vec_coef(getMFEMProblem().getCoefficients().declareVector<mfem::VectorConstantCoefficient>(
+        "__VectorDirichletBC" + std::to_string(reinterpret_cast<intptr_t>(this)),
         mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }

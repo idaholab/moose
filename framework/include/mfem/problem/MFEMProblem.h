@@ -178,36 +178,6 @@ public:
   MFEMProblemData & getProblemData() { return _problem_data; }
 
   /**
-   * Method to build scalar mfem::Coefficient objects. These will be
-   * tracked so that the simulation time can be updated on them later.
-   */
-  template <class T, class... Args>
-  std::shared_ptr<T> makeScalarCoefficient(Args &&... args)
-  {
-    return this->_problem_data.scalar_factory.make<T>(args...);
-  }
-
-  /**
-   * Method to build scalar mfem::VectorCoefficient objects. These will be
-   * tracked so that the simulation time can be updated on them later.
-   */
-  template <class T, class... Args>
-  std::shared_ptr<T> makeVectorCoefficient(Args &&... args)
-  {
-    return this->_problem_data.vector_factory.make<T>(args...);
-  }
-
-  /**
-   * Method to build scalar mfem::MatrixCoefficient objects. These will be
-   * tracked so that the simulation time can be updated on them later.
-   */
-  template <class T, class... Args>
-  std::shared_ptr<T> makeMatrixCoefficient(Args &&... args)
-  {
-    return this->_problem_data.matrix_factory.make<T>(args...);
-  }
-
-  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();

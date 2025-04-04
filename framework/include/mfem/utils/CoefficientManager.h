@@ -41,77 +41,73 @@ public:
   {
   }
 
-  void declareScalar(const std::string & name, std::shared_ptr<mfem::Coefficient> coef);
   /// Declare an alias to an existing coefficient
-  void declareScalar(const std::string & name, const std::string & existing_coef);
+  mfem::Coefficient & declareScalar(const std::string & name, const std::string & existing_coef);
   template <class P, class... Args>
-  void declareScalar(const std::string & name, Args &&... args)
+  P & declareScalar(const std::string & name, Args &&... args)
   {
-    this->declareScalar(name, _scalar_factory.make<P>(args...));
+    auto coef = _scalar_factory.make<P>(args...);
+    this->declareScalar(name, coef);
+    return *coef;
   }
 
-  void declareScalarProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             std::shared_ptr<mfem::Coefficient> coef);
   /// Use an existing coefficient for a property on some blocks of the mesh
-  void declareScalarProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             const std::string & existing_coef);
+  mfem::Coefficient & declareScalarProperty(const std::string & name,
+                                            const std::vector<std::string> & blocks,
+                                            const std::string & existing_coef);
   template <class P, class... Args>
-  void declareScalarProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             Args &&... args)
+  mfem::Coefficient & declareScalarProperty(const std::string & name,
+                                            const std::vector<std::string> & blocks,
+                                            Args &&... args)
   {
-    this->declareScalarProperty(name, blocks, _scalar_factory.make<P>(args...));
+    return this->declareScalarProperty(name, blocks, _scalar_factory.make<P>(args...));
   }
 
-  void declareVector(const std::string & name, std::shared_ptr<mfem::VectorCoefficient> coef);
   /// Declare an alias to an existing coefficient
-  void declareVector(const std::string & name, const std::string & existing_coef);
+  mfem::VectorCoefficient & declareVector(const std::string & name,
+                                          const std::string & existing_coef);
   template <class P, class... Args>
-  void declareVector(const std::string & name, Args &&... args)
+  P & declareVector(const std::string & name, Args &&... args)
   {
-    this->declareVector(name, _vector_factory.make<P>(args...));
+    auto coef = _vector_factory.make<P>(args...);
+    this->declareVector(name, coef);
+    return *coef;
   }
 
-  void declareVectorProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             std::shared_ptr<mfem::VectorCoefficient> coef);
   /// Use an existing coefficient for a property on some blocks of the mesh
-  void declareVectorProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             const std::string & existing_coef);
+  mfem::VectorCoefficient & declareVectorProperty(const std::string & name,
+                                                  const std::vector<std::string> & blocks,
+                                                  const std::string & existing_coef);
   template <class P, class... Args>
-  void declareVectorProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             Args &&... args)
+  mfem::VectorCoefficient & declareVectorProperty(const std::string & name,
+                                                  const std::vector<std::string> & blocks,
+                                                  Args &&... args)
   {
-    this->declareVectorProperty(name, blocks, _vector_factory.make<P>(args...));
+    return this->declareVectorProperty(name, blocks, _vector_factory.make<P>(args...));
   }
 
-  void declareMatrix(const std::string & name, std::shared_ptr<mfem::MatrixCoefficient> coef);
   /// Declare an alias to an existing coefficient
-  void declareMatrix(const std::string & name, const std::string & existing_coef);
+  mfem::MatrixCoefficient & declareMatrix(const std::string & name,
+                                          const std::string & existing_coef);
 
   template <class P, class... Args>
-  void declareMatrix(const std::string & name, Args &&... args)
+  P & declareMatrix(const std::string & name, Args &&... args)
   {
-    this->declareMatrix(name, _matrix_factory.make<P>(args...));
+    auto coef = _matrix_factory.make<P>(args...);
+    this->declareMatrix(name, coef);
+    return *coef;
   }
 
-  void declareMatrixProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             std::shared_ptr<mfem::MatrixCoefficient> coef);
   /// Use an existing coefficient for a property on some blocks of the mesh
-  void declareMatrixProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             const std::string & existing_coef);
+  mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
+                                                  const std::vector<std::string> & blocks,
+                                                  const std::string & existing_coef);
   template <class P, class... Args>
-  void declareMatrixProperty(const std::string & name,
-                             const std::vector<std::string> & blocks,
-                             Args &&... args)
+  mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
+                                                  const std::vector<std::string> & blocks,
+                                                  Args &&... args)
   {
-    this->declareMatrixProperty(name, blocks, _matrix_factory.make<P>(args...));
+    return this->declareMatrixProperty(name, blocks, _matrix_factory.make<P>(args...));
   }
 
   mfem::Coefficient & getScalarCoefficient(const std::string name);
@@ -128,6 +124,22 @@ private:
   ScalarMap _scalar_coeffs;
   VectorMap _vector_coeffs;
   MatrixMap _matrix_coeffs;
+
+  mfem::Coefficient & declareScalar(const std::string & name,
+                                    std::shared_ptr<mfem::Coefficient> coef);
+  mfem::Coefficient & declareScalarProperty(const std::string & name,
+                                            const std::vector<std::string> & blocks,
+                                            std::shared_ptr<mfem::Coefficient> coef);
+  mfem::VectorCoefficient & declareVector(const std::string & name,
+                                          std::shared_ptr<mfem::VectorCoefficient> coef);
+  mfem::VectorCoefficient & declareVectorProperty(const std::string & name,
+                                                  const std::vector<std::string> & blocks,
+                                                  std::shared_ptr<mfem::VectorCoefficient> coef);
+  mfem::MatrixCoefficient & declareMatrix(const std::string & name,
+                                          std::shared_ptr<mfem::MatrixCoefficient> coef);
+  mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
+                                                  const std::vector<std::string> & blocks,
+                                                  std::shared_ptr<mfem::MatrixCoefficient> coef);
 };
 }
 

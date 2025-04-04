@@ -31,8 +31,11 @@ MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & param
     _heat_transfer_coef(
         getScalarCoefficient(getParam<MFEMScalarCoefficientName>("heat_transfer_coefficient"))),
     _T_inf_coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("T_infinity"))),
-    _external_heat_flux_coef(getMFEMProblem().makeScalarCoefficient<mfem::ProductCoefficient>(
-        _heat_transfer_coef, _T_inf_coef))
+    _external_heat_flux_coef(
+        getMFEMProblem().getCoefficients().declareScalar<mfem::ProductCoefficient>(
+            "__ExternalHeatFlux" + std::to_string(reinterpret_cast<intptr_t>(this)),
+            _heat_transfer_coef,
+            _T_inf_coef))
 {
 }
 
@@ -41,7 +44,7 @@ MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & param
 mfem::LinearFormIntegrator *
 MFEMConvectiveHeatFluxBC::createLFIntegrator()
 {
-  return new mfem::BoundaryLFIntegrator(*_external_heat_flux_coef);
+  return new mfem::BoundaryLFIntegrator(_external_heat_flux_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.

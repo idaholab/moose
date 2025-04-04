@@ -23,7 +23,7 @@ public:
 protected:
   mfem::Coefficient & _heat_transfer_coef;
   mfem::Coefficient & _T_inf_coef;
-  const std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
+  mfem::ProductCoefficient & _external_heat_flux_coef;
 };
 
 #endif

@@ -4,27 +4,29 @@
 namespace platypus
 {
 
-void
+mfem::Coefficient &
 CoefficientManager::declareScalar(const std::string & name, std::shared_ptr<mfem::Coefficient> coef)
 {
   this->_scalar_coeffs.addCoefficient(name, coef);
+  return *coef;
 }
 
-void
+mfem::Coefficient &
 CoefficientManager::declareScalar(const std::string & name, const std::string & existing_coef)
 {
-  this->declareScalar(name, this->_scalar_coeffs.getCoefficientPtr(existing_coef));
+  return this->declareScalar(name, this->_scalar_coeffs.getCoefficientPtr(existing_coef));
 }
 
-void
+mfem::Coefficient &
 CoefficientManager::declareScalarProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           std::shared_ptr<mfem::Coefficient> coef)
 {
   this->_scalar_coeffs.addPiecewiseBlocks(name, coef, blocks);
+  return getScalarCoefficient(name);
 }
 
-void
+mfem::Coefficient &
 CoefficientManager::declareScalarProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           const std::string & existing_coef)
@@ -35,31 +37,33 @@ CoefficientManager::declareScalarProperty(const std::string & name,
     throw MooseException(
         "Properties must not be defined out of other properties or piecewise coefficients.");
   }
-  this->declareScalarProperty(name, blocks, coef);
+  return this->declareScalarProperty(name, blocks, coef);
 }
 
-void
+mfem::VectorCoefficient &
 CoefficientManager::declareVector(const std::string & name,
                                   std::shared_ptr<mfem::VectorCoefficient> coef)
 {
   this->_vector_coeffs.addCoefficient(name, coef);
+  return *coef;
 }
 
-void
+mfem::VectorCoefficient &
 CoefficientManager::declareVector(const std::string & name, const std::string & existing_coef)
 {
-  this->declareVector(name, this->_vector_coeffs.getCoefficientPtr(existing_coef));
+  return this->declareVector(name, this->_vector_coeffs.getCoefficientPtr(existing_coef));
 }
 
-void
+mfem::VectorCoefficient &
 CoefficientManager::declareVectorProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           std::shared_ptr<mfem::VectorCoefficient> coef)
 {
   this->_vector_coeffs.addPiecewiseBlocks(name, coef, blocks);
+  return getVectorCoefficient(name);
 }
 
-void
+mfem::VectorCoefficient &
 CoefficientManager::declareVectorProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           const std::string & existing_coef)
@@ -71,31 +75,33 @@ CoefficientManager::declareVectorProperty(const std::string & name,
     throw MooseException(
         "Properties must not be defined out of other properties or piecewise coefficients.");
   }
-  this->declareVectorProperty(name, blocks, coef);
+  return this->declareVectorProperty(name, blocks, coef);
 }
 
-void
+mfem::MatrixCoefficient &
 CoefficientManager::declareMatrix(const std::string & name,
                                   std::shared_ptr<mfem::MatrixCoefficient> coef)
 {
   this->_matrix_coeffs.addCoefficient(name, coef);
+  return *coef;
 }
 
-void
+mfem::MatrixCoefficient &
 CoefficientManager::declareMatrix(const std::string & name, const std::string & existing_coef)
 {
-  this->declareMatrix(name, this->_matrix_coeffs.getCoefficientPtr(existing_coef));
+  return this->declareMatrix(name, this->_matrix_coeffs.getCoefficientPtr(existing_coef));
 }
 
-void
+mfem::MatrixCoefficient &
 CoefficientManager::declareMatrixProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           std::shared_ptr<mfem::MatrixCoefficient> coef)
 {
   this->_matrix_coeffs.addPiecewiseBlocks(name, coef, blocks);
+  return getMatrixCoefficient(name);
 }
 
-void
+mfem::MatrixCoefficient &
 CoefficientManager::declareMatrixProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           const std::string & existing_coef)
@@ -107,7 +113,7 @@ CoefficientManager::declareMatrixProperty(const std::string & name,
     throw MooseException(
         "Properties must not be defined out of other properties or piecewise coefficients.");
   }
-  this->declareMatrixProperty(name, blocks, coef);
+  return this->declareMatrixProperty(name, blocks, coef);
 }
 
 mfem::Coefficient &
