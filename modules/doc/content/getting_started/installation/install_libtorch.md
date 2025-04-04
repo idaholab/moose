@@ -67,7 +67,7 @@ to the Metal Performance Shader (MPS) capabilities (GPU acceleration).
    ```bash
    cd test
    make -j 8
-   ./run_test --re=libtorch
+   ./run_tests --re=libtorch
    ```
 
    If you see tests passing with green colors, the installation was successful.
@@ -110,7 +110,7 @@ to the Metal Performance Shader (MPS) capabilities (GPU acceleration).
    ```bash
    cd test
    make -j 8
-   ./run_test --re=libtorch
+   ./run_tests --re=libtorch
    ```
 
    If you see tests passing with green colors, the installation was successful.
@@ -163,7 +163,7 @@ This can be a problem when using the moose conda environment with new versions o
    ```bash
    cd test
    make -j 8
-   ./run_test --re=libtorch
+   ./run_tests --re=libtorch
    ```
 
    If you see tests passing with green colors, the installation was successful.
