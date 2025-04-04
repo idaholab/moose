@@ -6,10 +6,10 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2025.03.24" %}
+{% set version = "2025.03.31" %}
 
 # HDF5 Version
-{% set hdf5_version = "1.14.2" %}
+{% set hdf5_version = "1.14.4" %}
 
 package:
   name: moose-mpi
@@ -87,17 +87,17 @@ outputs:
         - {{ moose_icu }}
         - hdf5={{ hdf5_version }}=mpi_{{ mpi }}_*
         - automake 1.16.5
-        - libexpat 2.5.0
+        - libexpat 2.7.0
         - bison 3.4
         - zfp
         - autoconf
         - libtool
-        - cmake
+        - {{ moose_cmake }}
         - make
         - zlib
         - m4
       run_constrained:
-        - python >=3.9,<3.12
+        - python >=3.9,<3.13
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -110,7 +110,7 @@ outputs:
   - name: moose-python
     requirements:
       run:
-        - python >=3.9,<3.12
+        - python >=3.9,<3.13
         - packaging
         - paramiko
         - requests
