@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include "CSGCell.h"
-#include "CSGVoidCell.h"
+#include "CSGCellList.h"
 
 namespace CSG
 {
@@ -28,20 +27,24 @@ public:
    */
   CSGUniverse(const std::string name);
 
+  CSGUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells);
+
   /**
    * Destructor
    */
   virtual ~CSGUniverse() = default;
 
-  std::shared_ptr<CSGCell> addMaterialCell(const std::string name, const std::string fill_name, const CSGRegion & region);
-
-  std::shared_ptr<CSGCell> addVoidCell(const std::string name, const CSGRegion & region);
+  void addCell(const std::shared_ptr<CSGCell> cell);
 
   std::shared_ptr<CSGCell> getCell(const std::string name);
 
   bool hasCell(const std::string name) const;
 
-  const std::map<unsigned int, std::shared_ptr<CSGCell>> getAllCells() const { return _cells; }
+  void removeCell(const std::string name);
+
+  void removeCell(const std::shared_ptr<CSGCell> cell);
+
+  std::vector<std::shared_ptr<CSGCell>> getAllCells() const { return _cells; }
 
   const std::string getName() const { return _name; }
 
@@ -49,13 +52,7 @@ protected:
   /// Name of surface
   std::string _name;
 
-  /// Mapping of cell ids to pointers of cell objects that belong to universe
-  std::map<unsigned int, std::shared_ptr<CSGCell>> _cells;
-
-  /// Mapping of cell name to cell id
-  std::map<std::string, unsigned int> _cell_name_id_mapping;
-
-  /// Next available cell id
-  unsigned int _next_cell_id;
+  /// list of cells in universe
+  std::vector<std::shared_ptr<CSGCell>> _cells;
 };
 } // namespace CSG

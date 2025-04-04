@@ -12,42 +12,70 @@
 namespace CSG
 {
 
-CSGUniverse::CSGUniverse(const std::string name) : _name(name) { _next_cell_id = 0; }
+CSGUniverse::CSGUniverse(const std::string name) : _name(name) {}
 
-std::shared_ptr<CSGCell>
-CSGUniverse::addMaterialCell(const std::string name, const std::string fill_name, const CSGRegion & region)
+CSGUniverse::CSGUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells)
+  : _name(name)
 {
-  if (_cell_name_id_mapping.find(name) != _cell_name_id_mapping.end())
-    mooseError("Cell with name " + name + " already exists in universe");
-  const auto cell_id = _next_cell_id++;
-  _cells.insert(std::make_pair(cell_id, std::make_shared<CSGMaterialCell>(name, fill_name, region)));
-  _cell_name_id_mapping.insert({name, cell_id});
-  return _cells[cell_id];
+  _cells.insert(_cells.end(), cells.begin(), cells.end());
 }
 
-std::shared_ptr<CSGCell>
-CSGUniverse::addVoidCell(const std::string name, const CSGRegion & region)
+void
+CSGUniverse::addCell(const std::shared_ptr<CSGCell> cell)
 {
-  if (_cell_name_id_mapping.find(name) != _cell_name_id_mapping.end())
-    mooseError("Cell with name " + name + " already exists in universe");
-  const auto cell_id = _next_cell_id++;
-  _cells.insert(std::make_pair(cell_id, std::make_shared<CSGVoidCell>(name, region)));
-  _cell_name_id_mapping.insert({name, cell_id});
-  return _cells[cell_id];
+  auto cell_name = cell->getName();
+  if (!hasCell(cell_name))
+    _cells.push_back(cell);
 }
 
 std::shared_ptr<CSGCell>
 CSGUniverse::getCell(const std::string name)
 {
-  if (_cell_name_id_mapping.find(name) == _cell_name_id_mapping.end())
-    mooseError("Cell with name " + name + " does not exist in universe");
-  const auto cell_id = _cell_name_id_mapping[name];
-  return _cells.at(cell_id);
+  if (!hasCell(name))
+    mooseError("Cell with name " + name + " does not exist in universe " + _name + ".");
+
+  for (auto cell : _cells)
+  {
+    if (cell->getName() == name)
+      return cell;
+  }
 }
 
 bool
 CSGUniverse::hasCell(const std::string name) const
 {
-  return (_cell_name_id_mapping.find(name) != _cell_name_id_mapping.end());
+  for (auto cell : _cells)
+  {
+    if (cell->getName() == name)
+      return true;
+  }
+  return false;
 }
+
+void
+CSGUniverse::removeCell(const std::string name)
+{
+  if (!hasCell(name))
+    mooseError("Cannot remove cell. Cell with name " + name + " does not exist in universe " +
+               _name + ".");
+  for (auto cell : _cells)
+  {
+    if (cell->getName() == name)
+    {
+      _cells.remove(cell);
+      break;
+    }
+  }
+}
+
+void
+CSGUniverse::removeCell(const std::shared_ptr<CSGCell> cell)
+{
+  auto name = cell->getName();
+  if (!hasCell(name))
+    mooseError("Cannot remove cell. Cell with name " + name + " does not exist in universe " +
+               _name + ".");
+  _cells.remove(cell);
+}
+
 } // namespace CSG
