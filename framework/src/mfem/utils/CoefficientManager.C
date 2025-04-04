@@ -154,4 +154,12 @@ CoefficientManager::matrixPropertyIsDefined(const std::string & name,
 {
   return this->_matrix_coeffs.propertyDefinedOnBlock(name, block);
 }
+
+void
+CoefficientManager::setTime(const double time)
+{
+  this->_scalar_coeffs.setTime(time);
+  this->_vector_coeffs.setTime(time);
+  this->_matrix_coeffs.setTime(time);
+}
 }

@@ -15,7 +15,6 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 #include "coefficient_map.h"
-#include "TrackedObjectFactory.h"
 
 namespace Moose::MFEM
 {
@@ -29,24 +28,14 @@ class CoefficientManager
 {
 
 public:
-  CoefficientManager(TrackedScalarCoefficientFactory & scalar_factory,
-                     TrackedVectorCoefficientFactory & vector_factory,
-                     TrackedMatrixCoefficientFactory & matrix_factory)
-    : _scalar_factory(scalar_factory),
-      _vector_factory(vector_factory),
-      _matrix_factory(matrix_factory),
-      _scalar_coeffs(scalar_factory),
-      _vector_coeffs(vector_factory),
-      _matrix_coeffs(matrix_factory)
-  {
-  }
+  CoefficientManager() = default;
 
   /// Declare an alias to an existing coefficient
   mfem::Coefficient & declareScalar(const std::string & name, const std::string & existing_coef);
   template <class P, class... Args>
   P & declareScalar(const std::string & name, Args &&... args)
   {
-    auto coef = _scalar_factory.make<P>(args...);
+    auto coef = _scalar_coeffs.make<P>(args...);
     this->declareScalar(name, coef);
     return *coef;
   }
@@ -60,7 +49,7 @@ public:
                                             const std::vector<std::string> & blocks,
                                             Args &&... args)
   {
-    return this->declareScalarProperty(name, blocks, _scalar_factory.make<P>(args...));
+    return this->declareScalarProperty(name, blocks, _scalar_coeffs.make<P>(args...));
   }
 
   /// Declare an alias to an existing coefficient
@@ -69,7 +58,7 @@ public:
   template <class P, class... Args>
   P & declareVector(const std::string & name, Args &&... args)
   {
-    auto coef = _vector_factory.make<P>(args...);
+    auto coef = _vector_coeffs.make<P>(args...);
     this->declareVector(name, coef);
     return *coef;
   }
@@ -83,7 +72,7 @@ public:
                                                   const std::vector<std::string> & blocks,
                                                   Args &&... args)
   {
-    return this->declareVectorProperty(name, blocks, _vector_factory.make<P>(args...));
+    return this->declareVectorProperty(name, blocks, _vector_coeffs.make<P>(args...));
   }
 
   /// Declare an alias to an existing coefficient
@@ -93,7 +82,7 @@ public:
   template <class P, class... Args>
   P & declareMatrix(const std::string & name, Args &&... args)
   {
-    auto coef = _matrix_factory.make<P>(args...);
+    auto coef = _matrix_coeffs.make<P>(args...);
     this->declareMatrix(name, coef);
     return *coef;
   }
@@ -107,7 +96,7 @@ public:
                                                   const std::vector<std::string> & blocks,
                                                   Args &&... args)
   {
-    return this->declareMatrixProperty(name, blocks, _matrix_factory.make<P>(args...));
+    return this->declareMatrixProperty(name, blocks, _matrix_coeffs.make<P>(args...));
   }
 
   mfem::Coefficient & getScalarCoefficient(const std::string name);
@@ -116,11 +105,9 @@ public:
   bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
+  void setTime(const double time);
 
 private:
-  TrackedScalarCoefficientFactory & _scalar_factory;
-  TrackedVectorCoefficientFactory & _vector_factory;
-  TrackedMatrixCoefficientFactory & _matrix_factory;
   ScalarMap _scalar_coeffs;
   VectorMap _vector_coeffs;
   MatrixMap _matrix_coeffs;

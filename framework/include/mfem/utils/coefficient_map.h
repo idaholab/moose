@@ -16,8 +16,6 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 
-#include "TrackedObjectFactory.h"
-
 namespace Moose::MFEM
 {
 
@@ -30,13 +28,25 @@ template <class T, class Tpw>
 class CoefficientMap
 {
 public:
-  CoefficientMap(TrackedObjectFactory<T> & factory) : _manager(factory) {}
+  CoefficientMap() = default;
 
+  /// Make arbitrary coefficients which will be tracked by this object
+  template <class P, class... Args>
+  std::shared_ptr<P> make(Args &&... args)
+  {
+    auto result = std::make_shared<P>(args...);
+    this->_iterable_coefficients.push_back(result);
+    return result;
+  }
+
+  /// Add a named global coefficient. It must have been created with
+  /// the `make` method on this object.
   void addCoefficient(const std::string & name, std::shared_ptr<T> coeff)
   {
-    mooseAssert(std::find(this->_manager.cbegin(), this->_manager.cend(), coeff) !=
-                    this->_manager.cend(),
-                "Coefficient object was not created by the appropriate coefficient manager.");
+    mooseAssert(std::find(this->_iterable_coefficients.cbegin(),
+                          this->_iterable_coefficients.cend(),
+                          coeff) != this->_iterable_coefficients.cend(),
+                "Coefficient object was not created by this CoefficientMap.");
 
     const auto [_, inserted] = this->_coefficients.emplace(name, std::move(coeff));
     if (!inserted)
@@ -46,8 +56,10 @@ public:
     }
   }
 
-  // Note: If you attempt to overwrite an existing block then an exception will be thrown and data
-  // for that property will be left in an undefined state.
+  /// Add piecewise material property. The coefficient must have been created with the `make` method on this object.
+  ///
+  /// Note: If you attempt to overwrite an existing block then an exception will be thrown and data
+  /// for that property will be left in an undefined state.
   void addPiecewiseBlocks(const std::string & name,
                           std::shared_ptr<T> coeff,
                           const std::vector<std::string> & blocks)
@@ -71,8 +83,9 @@ public:
       throw MooseException("Global coefficient with name '" + name +
                            "' already present in CoefficientMap");
     }
-    mooseAssert(std::find(this->_manager.cbegin(), this->_manager.cend(), coeff) !=
-                    this->_manager.cend(),
+    mooseAssert(std::find(this->_iterable_coefficients.cbegin(),
+                          this->_iterable_coefficients.cend(),
+                          coeff) != this->_iterable_coefficients.cend(),
                 "Coefficient object was not created by the appropriate coefficient manager.");
     auto & [pw_coeff, coeff_map] = *data;
     this->checkPWData(coeff, pw_coeff, name);
@@ -127,14 +140,22 @@ public:
     return block_map.count(block) > 0;
   }
 
+  void setTime(const double time)
+  {
+    for (auto & coef : this->_iterable_coefficients)
+    {
+      coef->SetTime(time);
+    }
+  }
+
 private:
   using PWData = std::tuple<std::shared_ptr<Tpw>, std::map<const std::string, std::shared_ptr<T>>>;
   std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _coefficients;
-  TrackedObjectFactory<T> & _manager;
+  std::vector<std::shared_ptr<T>> _iterable_coefficients;
 
   PWData emptyPWData(std::shared_ptr<T> /*coeff*/)
   {
-    return std::make_tuple(this->_manager.template make<Tpw>(),
+    return std::make_tuple(this->template make<Tpw>(),
                            std::map<const std::string, std::shared_ptr<T>>());
   }
   void checkPWData(std::shared_ptr<T> /*coeff*/,

@@ -3,7 +3,6 @@
 #pragma once
 #include "EquationSystem.h"
 #include "MFEMContainers.h"
-#include "TrackedObjectFactory.h"
 #include "CoefficientManager.h"
 #include <fstream>
 #include <iostream>
@@ -17,10 +16,7 @@ public:
   virtual ~MFEMProblemData() { ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> _pmesh{nullptr};
-  Moose::MFEM::TrackedScalarCoefficientFactory scalar_factory;
-  Moose::MFEM::TrackedVectorCoefficientFactory vector_factory;
-  Moose::MFEM::TrackedMatrixCoefficientFactory matrix_factory;
-  Moose::MFEM::CoefficientManager coefficients{scalar_factory, vector_factory, matrix_factory};
+  Moose::MFEM::CoefficientManager coefficients;
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
   mfem::BlockVector f;

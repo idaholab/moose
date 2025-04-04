@@ -7,7 +7,7 @@ template <>
 VectorMap::PWData
 VectorMap::emptyPWData(std::shared_ptr<mfem::VectorCoefficient> coeff)
 {
-  return std::make_tuple(this->_manager.make<mfem::PWVectorCoefficient>(coeff->GetVDim()),
+  return std::make_tuple(this->make<mfem::PWVectorCoefficient>(coeff->GetVDim()),
                          std::map<const std::string, std::shared_ptr<mfem::VectorCoefficient>>());
 }
 
@@ -16,7 +16,7 @@ MatrixMap::PWData
 MatrixMap::emptyPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff)
 {
   return std::make_tuple(
-      this->_manager.make<mfem::PWMatrixCoefficient>(coeff->GetHeight(), coeff->GetWidth()),
+      this->make<mfem::PWMatrixCoefficient>(coeff->GetHeight(), coeff->GetWidth()),
       std::map<const std::string, std::shared_ptr<mfem::MatrixCoefficient>>());
 }
 

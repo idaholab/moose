@@ -14,11 +14,8 @@ class CheckCoefficientManager : public testing::Test
 protected:
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point1, point2;
-  Moose::MFEM::TrackedScalarCoefficientFactory scalar_factory;
-  Moose::MFEM::TrackedVectorCoefficientFactory vector_factory;
-  Moose::MFEM::TrackedMatrixCoefficientFactory matrix_factory;
   Moose::MFEM::CoefficientManager manager;
-  CheckCoefficientManager() : manager(scalar_factory, vector_factory, matrix_factory)
+  CheckCoefficientManager()
   {
     point1.Init(2);
     point1.Set2(0., 0.);

@@ -35,19 +35,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
     _trial_variables.at(ind)->MakeTRef(
         _trial_variables.at(ind)->ParFESpace(), dX_dt, _block_true_offsets[ind]);
   }
-  const double time = GetTime();
-  for (auto & coef : _problem.scalar_factory)
-  {
-    coef->SetTime(time);
-  }
-  for (auto & coef : _problem.vector_factory)
-  {
-    coef->SetTime(time);
-  }
-  for (auto & coef : _problem.matrix_factory)
-  {
-    coef->SetTime(time);
-  }
+  _problem.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
   _problem.nonlinear_solver->SetSolver(*_problem.jacobian_solver);
