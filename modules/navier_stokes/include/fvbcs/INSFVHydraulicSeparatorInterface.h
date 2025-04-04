@@ -9,9 +9,22 @@
 
 #pragma once
 
+#include "FVBoundaryCondition.h"
+#include "INSFVVariable.h"
+
 /**
- * An empty base class which serves as a tag for hydraulic separators.
+ * A base class which serves as a tag for hydraulic separators.
  */
 class INSFVHydraulicSeparatorInterface
 {
+public:
+  /// Constructor
+  INSFVHydraulicSeparatorInterface(const FVBoundaryCondition * bc);
+
+protected:
+  /// Pointer to the boundary condition that inherits from this interface
+  const FVBoundaryCondition * _bc;
+
+  /// Pointer to the INSFV variable
+  const INSFVVariable * _insfv_variable;
 };
