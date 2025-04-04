@@ -93,6 +93,7 @@ template <typename T>
 void
 MOOSEToNEML2Batched<T>::execute()
 {
+  TIME_SECTION("NEML2 collect", 3, "Collecting NEML2 input data");
   const auto & elem_data = this->elemMOOSEData();
   for (auto i : index_range(elem_data))
     _buffer.push_back(elem_data[i]);

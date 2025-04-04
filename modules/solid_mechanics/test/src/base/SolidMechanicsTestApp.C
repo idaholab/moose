@@ -22,7 +22,8 @@ SolidMechanicsTestApp::validParams()
 
 registerKnownLabel("SolidMechanicsTestApp");
 
-SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
+SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters)
+  : SolidMechanicsApp(parameters)
 {
   SolidMechanicsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
