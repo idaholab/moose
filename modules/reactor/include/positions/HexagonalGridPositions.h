@@ -47,6 +47,12 @@ protected:
   /// List of the pattern locations to include. Include all if empty
   std::set<unsigned int> _include_in_pattern;
 
+  /// List of positions objects, the positions of which are translated in the parent hexagonal pattern
+  std::vector<std::vector<int>> _positions_pattern;
+
+  /// Indexing of the positions objects in the pattern
+  std::map<std::string, unsigned int> _positions_pattern_indexing;
+
   /// Hexagonal lattice utility object
   std::unique_ptr<HexagonalLatticeUtils> _hex_latt;
 };
