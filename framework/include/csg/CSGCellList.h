@@ -35,8 +35,8 @@ public:
 
   std::shared_ptr<CSGCell> addVoidCell(const std::string name, const CSGRegion & region);
 
-  // std::shared_ptr<CSGCell>
-  // addUniverseCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
+  std::shared_ptr<CSGCell>
+  addUniverseCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
 
   const std::map<std::string, std::shared_ptr<CSGCell>> & getAllCells() const { return _cells; }
 

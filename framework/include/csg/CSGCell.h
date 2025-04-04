@@ -14,6 +14,8 @@
 namespace CSG
 {
 
+class CSGUniverse;
+
 /**
  * CSGCell creates an internal representation of a Constructive Solid Geometry (CSG)
  * cell, which represents a region of space filled by a material or void
@@ -47,6 +49,11 @@ public:
   CSGCell(const std::string name, const std::string mat_name, const CSGRegion & region);
 
   /**
+   * Constructor for Universe Cell
+   */
+  CSGCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
+
+  /**
    * Destructor
    */
   virtual ~CSGCell() = default;
@@ -55,6 +62,8 @@ public:
 
   template <typename T>
   T getFill();
+
+  std::string getFillName() const { return _fill_name; }
 
   const std::string getName() const { return _name; }
 
@@ -73,11 +82,11 @@ protected:
   /// Fill type of cell
   FillType _fill_type;
 
-  /// Fill
-  const std::string _fill_material; // TODO: make this a material object
-  const std::string _fill_universe; // TODO: make this a universe object
+  std::string _fill_name;
 
   /// Cell region, represented as a CSGRegion object
   CSGRegion _region;
+
+  const CSGUniverse *_fill_universe;
 };
 } // namespace CSG

@@ -146,12 +146,17 @@ public:
     return _cell_list.addMaterialCell(name, mat_name, region);
   }
 
-  std::shared_ptr<CSGCell> createCell(const std::string name, const CSGRegion & region)
+  std::shared_ptr<CSGCell>
+  createCell(const std::string name, const CSGRegion & region)
   {
     return _cell_list.addVoidCell(name, region);
   }
 
-  // TODO: createUniverseCell
+  std::shared_ptr<CSGCell>
+  createCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region)
+  {
+    return _cell_list.addUniverseCell(name, univ, region);
+  }
 
   /**
    * @brief Get all cell objects

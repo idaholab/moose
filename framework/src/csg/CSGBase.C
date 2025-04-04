@@ -65,14 +65,10 @@ CSGBase::generateOutput() const
     const auto cell_name = cell_ptr->getName();
     const auto cell_region = cell_ptr->getRegionAsString();
     const auto cell_filltype = cell_ptr->getFillTypeString();
+    const auto fill_name = cell_ptr ->getFillName();
     csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
     csg_json["CELLS"][cell_name]["REGION"] = cell_region;
-
-    //const auto cell_fill = cell_ptr->getFill();
-    //if (!cell_fill){
-    //  // TODO: const auto fill_name = cell_fill->getName();
-    //  csg_json["CELLS"][cell_name]["FILL"] = cell_fill;
-    //}
+    csg_json["CELLS"][cell_name]["FILL"] = fill_name;
   }
 
   return csg_json;
