@@ -42,4 +42,5 @@ private:
   void addEnergyInletBC() override;
   void addEnergyWallBC() override;
   void addEnergyOutletBC() override {}
+  void addEnergySeparatorBC() override;
 };

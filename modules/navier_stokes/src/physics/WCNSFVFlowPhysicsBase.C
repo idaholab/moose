@@ -124,6 +124,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
+    _hydraulic_separators(getParam<std::vector<BoundaryName>>("hydraulic_separator_sidesets")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions"))
 {
@@ -249,6 +250,7 @@ WCNSFVFlowPhysicsBase::addFVBCs()
   addInletBC();
   addOutletBC();
   addWallsBC();
+  addSeparatorBC();
 }
 
 void

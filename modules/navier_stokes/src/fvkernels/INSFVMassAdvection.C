@@ -34,5 +34,6 @@ INSFVMassAdvection::computeQpResidual()
                                       limiterType(_advected_interp_method),
                                       MetaPhysicL::raw_value(v) * _normal > 0),
                              determineState());
+
   return _normal * v * rho_face;
 }

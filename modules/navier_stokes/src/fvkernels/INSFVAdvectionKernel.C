@@ -94,10 +94,6 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
   if (avoidBoundary(fi))
     return true;
 
-  // We're not on a boundary, so technically we're not skipping a boundary
-  if (!onBoundary(fi))
-    return false;
-
   // Selected boundaries to force
   for (const auto bnd_to_force : _boundaries_to_force)
     if (fi.boundaryIDs().count(bnd_to_force))
@@ -120,6 +116,7 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
       return false;
 
   // If not a flow boundary, then there should be no advection/flow in the normal direction, e.g. we
-  // should not contribute any advective flux
-  return true;
+  // should not contribute any advective flux. If we are on an internal face though, we still
+  // execute.
+  return onBoundary(fi);
 }

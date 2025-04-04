@@ -45,6 +45,9 @@ NSFVBase::commonNavierStokesFlowParams()
       "outlet_boundaries", std::vector<BoundaryName>(), "Names of outlet boundaries");
   params.addParam<std::vector<BoundaryName>>(
       "wall_boundaries", std::vector<BoundaryName>(), "Names of wall boundaries");
+  params.addParam<std::vector<BoundaryName>>("hydraulic_separator_sidesets",
+                                             std::vector<BoundaryName>(),
+                                             "Sidesets which serve as hydraulic separators.");
   return params;
 }
 

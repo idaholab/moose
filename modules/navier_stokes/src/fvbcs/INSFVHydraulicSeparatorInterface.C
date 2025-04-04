@@ -7,17 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "INSFVHydraulicSeparatorInterface.h"
 
-#include "INSFVVariable.h"
-
-class InputParameters;
-class INSFVScalarFieldSeparatorBC;
-
-class INSFVPressureVariable : public INSFVVariable
+INSFVHydraulicSeparatorInterface::INSFVHydraulicSeparatorInterface(const FVBoundaryCondition * bc)
+  : _bc(bc)
 {
-public:
-  INSFVPressureVariable(const InputParameters & params);
-
-  static InputParameters validParams();
-};
+  if (!dynamic_cast<const INSFVVariable *>(&_bc->variable()))
+    _bc->paramError("variable", "The variable should be an INSFV variable!");
+}
