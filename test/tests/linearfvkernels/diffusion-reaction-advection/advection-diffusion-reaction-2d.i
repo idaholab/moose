@@ -46,7 +46,7 @@
 []
 
 [LinearFVBCs]
-  inactive = "outflow"
+  inactive = "outflow neumann"
   [dir]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
@@ -58,6 +58,13 @@
     variable = u
     boundary = "right"
     use_two_term_expansion = true
+  []
+  [neumann]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = u
+    boundary = "top"
+    functor = analytic_solution_neumann_top
+    diffusion_coeff = diff_coeff_func
   []
 []
 
@@ -77,6 +84,10 @@
   [analytic_solution]
     type = ParsedFunction
     expression = 'sin((1/2)*x*pi)*sin(2*y*pi) + 1.5'
+  []
+  [analytic_solution_neumann_top]
+    type = ParsedFunction
+    expression = '(1.0+0.5*x*y)*sin((1/2)*x*pi)*cos(2*y*pi)*2*pi'
   []
 []
 

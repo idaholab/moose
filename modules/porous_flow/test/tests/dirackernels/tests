@@ -419,7 +419,7 @@
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in a fully-saturated system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
-    issues = '#7992 #8139 #20452'
+    issues = '#7992 #8139 #20452 #30237'
   []
   [bh04]
     type = 'CSVDiff'
