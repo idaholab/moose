@@ -110,6 +110,7 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu       superlu_dist'
   nl_rel_tol = 5e-8
+  line_search = NONE
 []
 
 [Postprocessors]
