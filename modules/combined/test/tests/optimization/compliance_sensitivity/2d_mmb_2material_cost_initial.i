@@ -162,7 +162,6 @@ C2 = 1.0
     type = CostSensitivity
     design_density = mat_den
     cost = Cost_mat
-    outputs = 'exodus'
   []
 []
 
@@ -238,7 +237,6 @@ C2 = 1.0
 []
 
 [Outputs]
-  exodus = true
   [out]
     type = CSV
     execute_on = 'TIMESTEP_END'

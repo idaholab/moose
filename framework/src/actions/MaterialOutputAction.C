@@ -153,13 +153,32 @@ MaterialOutputAction::act()
           material_names.insert(curr_material_names.begin(), curr_material_names.end());
         }
       }
-      // If the material object has limited outputs, store the variables associated with the
-      // output objects
-      if (!outputs.empty())
-        for (const auto & output_name : outputs)
-          _material_variable_names_map[output_name].insert(_material_variable_names.begin(),
-                                                           _material_variable_names.end());
+      // If the material object has explicitly defined outputs, store the variables associated with
+      // the output objects
+      if (outputs.find("none") == outputs.end())
+      {
+        // Get all available output names from OutputWarehouse that support material output
+        const auto & all_output_names = _output_warehouse.getAllMaterialPropertyOutputNames();
+
+        // For reserved name "all", set outputs to match all available output names
+        if (outputs.find("all") != outputs.end())
+          outputs = all_output_names;
+
+        // Iterate through all available output names and update _material_variable_names_map
+        // based on which of these output names are found in 'outputs' parameter
+        for (const auto & output_name : all_output_names)
+        {
+          if (outputs.find(output_name) != outputs.end())
+            _material_variable_names_map[output_name].insert(_material_variable_names.begin(),
+                                                             _material_variable_names.end());
+          else
+            _material_variable_names_map[output_name].insert({});
+        }
+      }
     }
+    else if (output_properties.size())
+      mooseWarning("Material properties output specified is not created because 'outputs' is not "
+                   "set in the Material, and neither is Outputs/output_material_properties");
   }
   if (unsupported_names.size() > 0 && get_names_only &&
       getParam<bool>("print_unsupported_prop_names"))

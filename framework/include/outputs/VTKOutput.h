@@ -26,6 +26,8 @@ public:
    */
   VTKOutput(const InputParameters & parameters);
 
+  bool supportsMaterialPropertyOutput() const override { return true; }
+
 protected:
   /**
    * Perform the output of VTKOutput
