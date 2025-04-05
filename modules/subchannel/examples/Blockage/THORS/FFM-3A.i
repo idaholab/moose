@@ -1,5 +1,10 @@
-# M. H. Fontana et al 1973, 1976
-# This input file models a partial block at the center of the assembly
+################################################################################
+## THORS bundle 3A central blockage benchmark                                 ##
+## SCM simulation                                                             ##
+## POC : Vasileios Kyriakopoulos, vasileios.kyriakopoulos@inl.gov             ##
+################################################################################
+# Details on the experimental facility modeled can be found at:
+# Han, J. T. "Blockages in LMFBR fuel assemblies: A review of experimental and theoretical studies." (1977).
 # The affected subchannels get an area reduction and a form loss coefficient
 T_in = 714.261
 A12 = 1.00423e3

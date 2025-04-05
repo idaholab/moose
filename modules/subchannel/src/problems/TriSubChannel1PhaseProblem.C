@@ -272,10 +272,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   auto w_over_d = (pin_diameter + gap) / pin_diameter;
   auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  auto ReL_outer = std::pow(10, (w_over_d - 1)) * 320.0;
-  auto ReT_outer = std::pow(10, 0.7 * (w_over_d - 1)) * 1.0E+4;
   auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
-  auto psi_outer = std::log(Re / ReL_outer) / std::log(ReT_outer / ReL_outer);
   const Real lambda = 7.0;
   auto theta = std::acos(wire_lead_length /
                          std::sqrt(std::pow(wire_lead_length, 2) +
@@ -431,17 +428,9 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   }
   else
   {
-    // transition flow
-    if (subch_type == EChannelType::CENTER)
-    {
-      return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-             fT * std::pow(psi, 1.0 / 3.0);
-    }
-    else
-    {
-      return fL * std::pow((1 - psi_outer), 1.0 / 3.0) * (1 - std::pow(psi_outer, lambda)) +
-             fT * std::pow(psi_outer, 1.0 / 3.0);
-    }
+    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+           fT * std::pow(psi, 1.0 / 3.0);
   }
 }
 
