@@ -57,4 +57,5 @@ protected:
   std::vector<std::vector<std::vector<Real>> *> _vector_real_values_parallel_storage;
   std::vector<std::vector<Real> *> _vector_real_values;
   ///@}
+  const bool _build_all_mappings_only;
 };
