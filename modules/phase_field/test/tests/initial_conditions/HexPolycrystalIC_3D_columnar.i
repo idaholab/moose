@@ -17,43 +17,43 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = hex_ic
-    [../]
-  [../]
-  [./bnds]
+    []
+  []
+  [bnds]
     type = BndsCalcIC
     variable = bnds
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
-  [./hex_ic]
+  [hex_ic]
     type = PolycrystalHex
     coloring_algorithm = bt
     columnar_3D = true
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Problem]
