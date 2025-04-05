@@ -13,7 +13,7 @@ The purpose of these lists is two fold:
 - [HOGNOSE](https://github.com/shortlab/hognose) - CASL's mesoscale corrosion/oxidation code
 - [MAMBA](https://github.com/shortlab/mamba) - CASL's code for boiling, heat transfer, and chemistry in porous media
 - [Hyrax](https://github.com/UMThorntonGroup/Hyrax) - Zirconium hydride precipitation and growth in LWR nuclear fuel cladding
-- [Ferret](https://bitbucket.org/mesoscience/ferret.git) - Kernels to implement the time-dependent Landau-Ginzburg theory of phase transitions for simulating ferroelectric materials
+- [Ferret](https://mangerij.github.io/ferret/) - Kernels to implement the time-dependent Landau-Ginzburg theory of phase transitions for simulating ferroelectric materials
 - [GRIME](https://github.com/shortlab/grime) - The Grand Radiation Informed Microstructural Evolver: Coupled, spatially dependent radiation damage and microstructural evolution
 - [Gardensnake](https://github.com/friedmud/gardensnake) - Nodal neutron diffusion code developed at MIT
 - [Zapdos](https://github.com/shannon-lab/zapdos) - Low temperature plasma simulation
