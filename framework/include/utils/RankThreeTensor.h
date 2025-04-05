@@ -118,6 +118,12 @@ public:
   /// Print the rank three tensor
   void print(std::ostream & stm = Moose::out) const;
 
+  friend std::ostream & operator<<(std::ostream & os, const RankThreeTensorTempl<T> & t)
+  {
+    t.print(os);
+    return os;
+  }
+
   /// copies values from "a" into this tensor
   RankThreeTensorTempl<T> & operator=(const RankThreeTensorTempl<T> & a);
 

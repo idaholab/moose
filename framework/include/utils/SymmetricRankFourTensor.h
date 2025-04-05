@@ -188,6 +188,12 @@ public:
   /// Print the values of the rank four tensor
   void printReal(std::ostream & stm = Moose::out) const;
 
+  friend std::ostream & operator<<(std::ostream & os, const SymmetricRankFourTensorTempl<T> & t)
+  {
+    t.print(os);
+    return os;
+  }
+
   /// copies values from a into this tensor
   SymmetricRankFourTensorTempl<T> & operator=(const SymmetricRankFourTensorTempl<T> & a) = default;
 

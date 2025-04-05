@@ -419,6 +419,12 @@ public:
   /// Print the Real part of the ADReal rank two tensor along with its first nDual dual numbers
   void printADReal(unsigned int nDual, std::ostream & stm = Moose::out) const;
 
+  friend std::ostream & operator<<(std::ostream & os, const SymmetricRankTwoTensorTempl<T> & t)
+  {
+    t.print(os);
+    return os;
+  }
+
   /// Add identity times a to _vals
   void addIa(const T & a);
 
