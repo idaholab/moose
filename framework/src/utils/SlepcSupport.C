@@ -193,7 +193,6 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
   else
   { // linear eigenvalue problem
     // linear solver
-    const auto & dont_add_these_options = eigen_problem.getPetscOptions().dont_add_these_options;
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
         solver_params._prefix + "st_ksp_max_it",
