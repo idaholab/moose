@@ -10,7 +10,6 @@ public:
   static InputParameters validParams();
 
   explicit MFEMTransient(const InputParameters & params);
-  ~MFEMTransient() override = default;
 
   void constructProblemOperator() override;
   void step(double dt, int it) const;

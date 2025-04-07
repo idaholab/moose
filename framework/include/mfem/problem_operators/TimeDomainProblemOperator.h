@@ -15,7 +15,6 @@ class TimeDomainProblemOperator : public mfem::TimeDependentOperator,
 {
 public:
   TimeDomainProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
-  ~TimeDomainProblemOperator() override = default;
 
   void SetGridFunctions() override;
 

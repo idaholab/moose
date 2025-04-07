@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMTimeDerivativeMassKernel(const InputParameters & parameters);
-  ~MFEMTimeDerivativeMassKernel() override {}
 
   // Get name of the trial variable (gridfunction) the kernel acts on.
   // Defaults to the name of the test variable labelling the weak form.

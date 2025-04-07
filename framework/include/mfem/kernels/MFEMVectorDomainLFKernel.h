@@ -12,7 +12,6 @@ public:
   static InputParameters validParams();
 
   MFEMVectorDomainLFKernel(const InputParameters & parameters);
-  ~MFEMVectorDomainLFKernel() override {}
 
   virtual mfem::LinearFormIntegrator * createIntegrator() override;
 

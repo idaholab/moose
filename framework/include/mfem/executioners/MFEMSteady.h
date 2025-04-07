@@ -10,7 +10,6 @@ public:
   static InputParameters validParams();
 
   explicit MFEMSteady(const InputParameters & params);
-  ~MFEMSteady() override = default;
 
   void constructProblemOperator() override;
   virtual void init() override;

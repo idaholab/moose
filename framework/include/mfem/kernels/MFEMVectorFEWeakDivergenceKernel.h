@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMVectorFEWeakDivergenceKernel(const InputParameters & parameters);
-  ~MFEMVectorFEWeakDivergenceKernel() override = default;
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 

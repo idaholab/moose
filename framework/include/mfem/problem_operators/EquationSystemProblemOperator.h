@@ -19,8 +19,6 @@ public:
   void Init(mfem::BlockVector & X) override;
   virtual void Solve(mfem::Vector & X) override;
 
-  ~EquationSystemProblemOperator() override = default;
-
   [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)

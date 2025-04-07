@@ -137,11 +137,13 @@ protected:
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
-  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>
+      _blf_kernels_map;
 
   Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
 
-  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>> _nlf_kernels_map;
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>>
+      _nlf_kernels_map;
 
   Moose::MFEM::NamedFieldsMap<
       Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>
@@ -159,7 +161,6 @@ class TimeDependentEquationSystem : public EquationSystem
 {
 public:
   TimeDependentEquationSystem();
-  ~TimeDependentEquationSystem() override = default;
 
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 

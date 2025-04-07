@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMMassKernel(const InputParameters & parameters);
-  ~MFEMMassKernel() override {}
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 

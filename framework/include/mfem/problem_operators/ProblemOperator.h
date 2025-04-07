@@ -11,7 +11,6 @@ class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
 {
 public:
   ProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
-  ~ProblemOperator() override = default;
 
   void SetGridFunctions() override;
 

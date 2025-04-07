@@ -12,7 +12,6 @@ public:
   static InputParameters validParams();
 
   MFEMExecutioner(const InputParameters & params);
-  virtual ~MFEMExecutioner() override = default;
 
   virtual bool lastSolveConverged() const override { return true; };
 

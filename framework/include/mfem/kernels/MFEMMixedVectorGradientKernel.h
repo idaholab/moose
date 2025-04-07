@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMMixedVectorGradientKernel(const InputParameters & parameters);
-  ~MFEMMixedVectorGradientKernel() override = default;
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 

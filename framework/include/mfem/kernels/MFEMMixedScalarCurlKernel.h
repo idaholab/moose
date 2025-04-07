@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMMixedScalarCurlKernel(const InputParameters & parameters);
-  ~MFEMMixedScalarCurlKernel() override {}
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 

@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMCurlCurlKernel(const InputParameters & parameters);
-  ~MFEMCurlCurlKernel() override {}
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 

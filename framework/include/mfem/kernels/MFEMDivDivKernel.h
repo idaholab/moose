@@ -14,7 +14,6 @@ public:
   static InputParameters validParams();
 
   MFEMDivDivKernel(const InputParameters & parameters);
-  ~MFEMDivDivKernel() override {}
 
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 
