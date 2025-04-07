@@ -61,6 +61,10 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
     paramError("porous_medium_treatment", "Porous media unsupported");
   if (!_has_flow_equations)
     mooseError("Not supported");
+
+  if (_hydraulic_separators.size())
+    paramError("hydraulic_separator_sidesets",
+               "Flow separators are not supported yet for linearFV!");
 }
 
 void

@@ -97,23 +97,28 @@ FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
   // We get this to check if we are on a kernel boundary or not
   const bool on_boundary = onBoundary(fi);
 
-  // Blanket forcing on boundary
-  if (_force_boundary_execution && on_boundary)
-    return false;
-
-  // Selected boundaries to force
-  for (const auto bnd_to_force : _boundaries_to_force)
-    if (fi.boundaryIDs().count(bnd_to_force))
+  // We are either on a kernel boundary or on an internal sideset
+  // which is handled as a boundary
+  if (on_boundary || !fi.boundaryIDs().empty())
+  {
+    // Blanket forcing on boundary
+    if (_force_boundary_execution)
       return false;
 
-  // If we have a flux boundary on this face, we skip. This
-  // should be relatively easy to check with the cached maps.
-  if (_var.getFluxBCs(fi).first)
-    return true;
+    // Selected boundaries to force
+    for (const auto bnd_to_force : _boundaries_to_force)
+      if (fi.boundaryIDs().count(bnd_to_force))
+        return false;
 
-  // If we have a dirichlet BC, we are not skipping
-  if (_var.getDirichletBC(fi).first)
-    return false;
+    // If we have a flux boundary on this face, we skip. This
+    // should be relatively easy to check with the cached maps.
+    if (_var.getFluxBCs(fi).first)
+      return true;
+
+    // If we have a dirichlet BC, we are not skipping
+    if (_var.getDirichletBC(fi).first)
+      return false;
+  }
 
   // The last question is: are we on the inside or on the outside? If we are on an internal
   // face we dont skip, otherwise we assume a natural BC and skip

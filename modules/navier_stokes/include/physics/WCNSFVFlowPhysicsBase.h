@@ -180,7 +180,7 @@ protected:
   /// Boundaries which define a wall (slip/noslip/etc.)
   const std::vector<BoundaryName> _wall_boundaries;
   /// Hydraulic separator boundaries
-  std::vector<BoundaryName> _hydraulic_separators;
+  const std::vector<BoundaryName> _hydraulic_separators;
 
   /// Momentum inlet boundary types
   std::map<BoundaryName, MooseEnum> _momentum_inlet_types;

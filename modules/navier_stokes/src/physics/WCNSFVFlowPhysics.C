@@ -996,23 +996,26 @@ WCNSFVFlowPhysics::addWallsBC()
 void
 WCNSFVFlowPhysics::addSeparatorBC()
 {
-  std::string bc_type = "INSFVVelocityHydraulicSeparatorBC";
-  InputParameters params = getFactory().getValidParams(bc_type);
-  params.set<std::vector<BoundaryName>>("boundary") = _hydraulic_separators;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-
-  for (const auto d : make_range(dimension()))
+  if (_hydraulic_separators.size())
   {
-    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-    params.set<MooseEnum>("momentum_component") = NS::directions[d];
-    getProblem().addFVBC(bc_type, prefix() + _velocity_names[d] + "_separators", params);
-  }
+    std::string bc_type = "INSFVVelocityHydraulicSeparatorBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<std::vector<BoundaryName>>("boundary") = _hydraulic_separators;
+    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
-  bc_type = "INSFVScalarFieldSeparatorBC";
-  params = getFactory().getValidParams(bc_type);
-  params.set<std::vector<BoundaryName>>("boundary") = _hydraulic_separators;
-  params.set<NonlinearVariableName>("variable") = _pressure_name;
-  getProblem().addFVBC(bc_type, prefix() + _pressure_name + "_separators", params);
+    for (const auto d : make_range(dimension()))
+    {
+      params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      getProblem().addFVBC(bc_type, prefix() + _velocity_names[d] + "_separators", params);
+    }
+
+    bc_type = "INSFVScalarFieldSeparatorBC";
+    params = getFactory().getValidParams(bc_type);
+    params.set<std::vector<BoundaryName>>("boundary") = _hydraulic_separators;
+    params.set<NonlinearVariableName>("variable") = _pressure_name;
+    getProblem().addFVBC(bc_type, prefix() + _pressure_name + "_separators", params);
+  }
 }
 
 void

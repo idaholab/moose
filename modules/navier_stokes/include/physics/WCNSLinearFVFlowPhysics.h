@@ -53,10 +53,7 @@ private:
   virtual void addInletBC() override;
   virtual void addOutletBC() override;
   virtual void addWallsBC() override;
-  virtual void addSeparatorBC() override
-  {
-    mooseError("Flow separators are not supported for linear FV yet!");
-  }
+  virtual void addSeparatorBC() override {}
 
   virtual bool hasForchheimerFriction() const override { return false; };
 
