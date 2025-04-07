@@ -12,8 +12,9 @@
 #include "LinearFVDiffusion.h"
 
 /**
- * Kernel that adds contributions from a diffusion term discretized using the finite volume method
- * to a linear system.
+ * Kernel that adds contributions from a diffusion term of the turbulent variables,
+ * limited in the near-wall regions,
+ * discretized using the finite volume method to a linear system.
  */
 class LinearFVTurbulentLimitedDiffusion : public LinearFVDiffusion
 {

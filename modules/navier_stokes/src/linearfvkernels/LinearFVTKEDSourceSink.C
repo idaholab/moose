@@ -23,8 +23,7 @@ LinearFVTKEDSourceSink::validParams()
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("k", "Coupled turbulent kinetic energy.");
-  params.deprecateParam("k", NS::TKE, "01/01/2025");
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
