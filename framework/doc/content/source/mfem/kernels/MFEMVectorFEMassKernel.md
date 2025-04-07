@@ -20,7 +20,7 @@ k \vec u
 
 ## Example Input File Syntax
 
-!listing kernels/curlcurl.i
+!listing mfem/kernels/curlcurl.i
 
 !syntax parameters /Kernels/MFEMVectorFEMassKernel
 

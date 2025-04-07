@@ -20,7 +20,7 @@ This term arises from the weak form of the curl curl operator
 
 ## Example Input File Syntax
 
-!listing curlcurl.i
+!listing mfem/kernels/curlcurl.i
 
 !syntax parameters /Kernels/MFEMCurlCurlKernel
 

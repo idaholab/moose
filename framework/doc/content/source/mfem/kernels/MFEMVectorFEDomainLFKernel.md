@@ -19,7 +19,7 @@ This term arises from the weak form of the forcing term
 
 ## Example Input File Syntax
 
-!listing kernels/curlcurl.i
+!listing mfem/kernels/curlcurl.i
 
 !syntax parameters /Kernels/MFEMVectorFEDomainLFKernel
 

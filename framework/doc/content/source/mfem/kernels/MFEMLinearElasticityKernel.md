@@ -36,7 +36,7 @@ material Young's modulus $E$ and the Poisson ratio $\nu$ using
 
 ## Example Input File Syntax
 
-!listing kernels/linearelasticity.i
+!listing mfem/kernels/linearelasticity.i
 
 !syntax parameters /Kernels/MFEMLinearElasticityKernel
 

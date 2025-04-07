@@ -18,7 +18,7 @@ H(\mathrm{div})$ and $\vec{u}_{ex}$ is a vector function.
 
 ## Example Input File Syntax
 
-!listing kernels/irrotational.i
+!listing mfem/kernels/irrotational.i
 
 !syntax parameters /Postprocessors/MFEMVectorL2Error
 
