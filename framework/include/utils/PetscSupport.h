@@ -26,9 +26,9 @@ class NonlinearSystemBase;
 class CommandLine;
 class InputParameters;
 class ParallelParamObject;
-class MultiMooseEnum
+class MultiMooseEnum;
 
-    namespace Moose
+namespace Moose
 {
 namespace PetscSupport
 {
