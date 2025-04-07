@@ -15,15 +15,15 @@ public:
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
-  virtual mfem::LinearFormIntegrator * createLinearFormIntegrator();
+  virtual mfem::LinearFormIntegrator * createLinearFormIntegrator() override;
 
   // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
+  virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator() override;
 
 protected:
-  std::shared_ptr<mfem::FunctionCoefficient> _heat_transfer_coef;
-  std::shared_ptr<mfem::Coefficient> _T_inf_coef;
-  std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
+  const std::shared_ptr<mfem::FunctionCoefficient> _heat_transfer_coef;
+  const std::shared_ptr<mfem::Coefficient> _T_inf_coef;
+  const std::shared_ptr<mfem::ProductCoefficient> _external_heat_flux_coef;
 };
 
 #endif

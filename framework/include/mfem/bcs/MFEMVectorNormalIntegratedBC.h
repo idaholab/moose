@@ -12,14 +12,14 @@ public:
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
-  virtual mfem::LinearFormIntegrator * createLinearFormIntegrator();
+  virtual mfem::LinearFormIntegrator * createLinearFormIntegrator() override;
 
   // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator();
+  virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator() override;
 
 protected:
   std::vector<Real> _vec_value;
-  std::shared_ptr<mfem::VectorConstantCoefficient> _vec_coef{nullptr};
+  const std::shared_ptr<mfem::VectorConstantCoefficient> _vec_coef;
 };
 
 #endif

@@ -20,8 +20,8 @@ public:
   virtual void update(){};
 
 protected:
-  // Name of auxvariable to store the result of the auxkernel in.
-  AuxVariableName _result_var_name;
+  /// Name of auxvariable to store the result of the auxkernel in.
+  const AuxVariableName _result_var_name;
 
   /// Reference to result gridfunction.
   mfem::ParGridFunction & _result_var;

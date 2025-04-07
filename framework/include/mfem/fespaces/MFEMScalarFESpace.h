@@ -12,11 +12,11 @@ public:
 
 protected:
   /// Get the name of the desired FECollection.
-  virtual std::string getFECName() const;
+  virtual std::string getFECName() const override;
 
   /// Get the number of degrees of freedom per basis function needed
   /// in this finite element space.
-  virtual int getVDim() const;
+  virtual int getVDim() const override;
 
 private:
   /// Name of the family of finite element collections to use

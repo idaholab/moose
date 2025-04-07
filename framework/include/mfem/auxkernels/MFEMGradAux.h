@@ -23,11 +23,11 @@ public:
 
 protected:
   // Name of source MFEMVariable to take the gradient of.
-  VariableName _source_var_name;
+  const VariableName _source_var_name;
   // Reference to source gridfunction.
-  mfem::ParGridFunction & _source_var;
+  const mfem::ParGridFunction & _source_var;
   // Scalar factor to multiply the result by.
-  mfem::real_t _scale_factor;
+  const mfem::real_t _scale_factor;
   // Grad operator
   mfem::common::ParDiscreteGradOperator _grad;
 };

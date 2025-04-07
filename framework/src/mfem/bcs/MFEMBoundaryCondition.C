@@ -15,13 +15,13 @@ MFEMBoundaryCondition::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
       "The list of boundaries (ids or names) from the mesh where this boundary condition applies");
-  params.addParam<std::string>("variable", "Variable on which to apply the boundary condition");
+  params.addParam<VariableName>("variable", "Variable on which to apply the boundary condition");
   return params;
 }
 
 MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    _test_var_name(getParam<std::string>("variable")),
+    _test_var_name(getParam<VariableName>("variable")),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
     _bdr_attributes(_boundary_names.size())
 {
