@@ -30,6 +30,7 @@
 class EigenProblem;
 class InputParameters;
 class SolverParams;
+class MultiMooseEnum;
 
 namespace Moose
 {
@@ -75,13 +76,11 @@ void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
 
 /**
  * Set SLEPc/PETSc options to trigger free power iteration
- * @param dont_add_these_options a list of options that won't be set.
  */
 void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
 
 /*
  * Set SLEPc/PETSc options to turn the eigen-solver back to a regular Newton solver
- * @param dont_add_these_options a list of options that won't be set.
  */
 void clearFreeNonlinearPowerIterations(const InputParameters & params);
 
