@@ -13,13 +13,19 @@
     csvdiff = 'solution_scalar_ic_out.csv'
     requirement = "The system shall be able to initialize a scalar variable from an ExodusII file."
   []
+  [exodus_certain_blocks]
+    type = 'Exodiff'
+    input = 'solution_ic_block_restricted.i'
+    exodiff = 'solution_ic_block_restricted_out.e'
+    requirement = "The system shall be able to initialize a variable from an ExodusII file."
+  []
 
   [errors]
     requirement = "The system shall report an error if"
     [missing_block]
       type = RunException
       input = 'solution_ic.i'
-      cli_args = "Mesh/gmg/subdomain_ids='0 0 0 2' ICs/initial_cond_nl/block=2"
+      cli_args = "Mesh/gmg/subdomain_ids='0 0 0 2' ICs/initial_cond_nl/from_subdomains=2"
       expect_err = "Block '2' does not exist in the file"
       detail = "a solution is to be loaded at a block that does not exist in the source file."
     []
