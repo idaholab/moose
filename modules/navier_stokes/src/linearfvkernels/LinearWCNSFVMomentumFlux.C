@@ -318,8 +318,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     trace_elem += u_grad_elem(0);
     frace_grad_approx(0) = u_grad_elem(_index);
-
-    const auto face_arg = makeCDFace(*_current_face_info);
+    
     const auto state_arg = determineState();
 
     if (_dim > 1)

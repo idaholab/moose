@@ -12,8 +12,9 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds contributions from a reaction term discretized using the finite volume method to
- * a linear system.
+ * Kernel that adds contributions to the source and the sink of the
+ * turbulent kinetic energy dissipation
+ * discretized using the finite volume method to a linear system.
  */
 class LinearFVTKEDSourceSink : public LinearFVElementalKernel
 {

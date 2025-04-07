@@ -550,11 +550,11 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     if (_turbulence_system_names.size() != _turbulence_equation_relaxation.size())
       paramError("turbulence_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
-                 "passive scalar equations!");
+                 "turbulence equations!");
     if (_turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
       paramError("turbulence_absolute_tolerance",
                  "The number of absolute tolerances does not match the number of "
-                 "passive scalar equations!");
+                 "turbulence equations!");
     if (_turbulence_field_min_limit.empty())
       // If no minimum bounds are given, initialize to default value 1e-8
       _turbulence_field_min_limit.resize(_turbulence_system_names.size(), 1e-8);
