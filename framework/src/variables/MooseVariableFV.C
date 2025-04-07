@@ -399,9 +399,6 @@ template <typename OutputType>
 std::pair<bool, const FVDirichletBCBase *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
-  if (!_dirichlet_map_setup)
-    const_cast<MooseVariableFV<OutputType> *>(this)->determineBoundaryToDirichletBCMap();
-
   for (const auto bnd_id : fi.boundaryIDs())
     if (auto it = _boundary_id_to_dirichlet_bc.find(bnd_id);
         it != _boundary_id_to_dirichlet_bc.end())
@@ -414,9 +411,6 @@ template <typename OutputType>
 std::pair<bool, std::vector<const FVFluxBC *>>
 MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 {
-  if (!_flux_map_setup)
-    const_cast<MooseVariableFV<OutputType> *>(this)->determineBoundaryToFluxBCMap();
-
   for (const auto bnd_id : fi.boundaryIDs())
     if (auto it = _boundary_id_to_flux_bc.find(bnd_id); it != _boundary_id_to_flux_bc.end())
       return {true, it->second};
@@ -680,6 +674,11 @@ template <typename OutputType>
 void
 MooseVariableFV<OutputType>::residualSetup()
 {
+  if (!_dirichlet_map_setup)
+    determineBoundaryToDirichletBCMap();
+  if (!_flux_map_setup)
+    determineBoundaryToFluxBCMap();
+
   clearCaches();
 }
 
@@ -850,6 +849,10 @@ template <typename OutputType>
 void
 MooseVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
 {
+  mooseAssert(!Threads::in_threads,
+              "This routine has not been implemented for threads. Please query this routine before "
+              "a threaded region or contact a MOOSE developer to discuss.");
+
   _boundary_id_to_dirichlet_bc.clear();
   std::vector<FVDirichletBCBase *> bcs;
 
@@ -882,6 +885,10 @@ template <typename OutputType>
 void
 MooseVariableFV<OutputType>::determineBoundaryToFluxBCMap()
 {
+  mooseAssert(!Threads::in_threads,
+              "This routine has not been implemented for threads. Please query this routine before "
+              "a threaded region or contact a MOOSE developer to discuss.");
+
   _boundary_id_to_flux_bc.clear();
   std::vector<const FVFluxBC *> bcs;
 

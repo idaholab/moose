@@ -462,6 +462,7 @@ public:
   std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
 
   virtual void residualSetup() override;
+  virtual void initialSetup() override;
   virtual void jacobianSetup() override;
   virtual void timestepSetup() override;
   virtual void meshChanged() override;
@@ -839,6 +840,15 @@ MooseVariableFV<OutputType>::dofIndicesLower() const
 {
   static const std::vector<dof_id_type> empty;
   return empty;
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::initialSetup()
+{
+  determineBoundaryToDirichletBCMap();
+  determineBoundaryToFluxBCMap();
+  MooseVariableField<OutputType>::initialSetup();
 }
 
 template <typename OutputType>

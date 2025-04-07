@@ -18,6 +18,7 @@
 #include "INSFVAttributes.h"
 #include "SystemBase.h"
 #include "INSFVHydraulicSeparatorInterface.h"
+#include "FVFluxBC.h"
 
 InputParameters
 INSFVVariable::validParams()
