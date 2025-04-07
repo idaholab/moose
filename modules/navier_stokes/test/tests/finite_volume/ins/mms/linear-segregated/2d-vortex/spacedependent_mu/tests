@@ -27,7 +27,7 @@
     test_case = TestVortexSNL
     method = '!dbg'
     min_parallel = 4
-    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLENA solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
+    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLENL solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
   []
@@ -37,7 +37,7 @@
     test_case = TestVortexSNLDeviatoric
     method = '!dbg'
     min_parallel = 4
-    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLENA solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
+    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLENL solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
   []
