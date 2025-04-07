@@ -402,96 +402,69 @@ setWhichEigenPairsOptions(SolverParams & solver_params,
 }
 
 void
-setFreeNonlinearPowerIterations(unsigned int free_power_iterations,
-                                const MultiMooseEnum & dont_add_these_options)
+setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_power_update", "0");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-snes_max_it", "2");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "2");
   // During each power iteration, we want solver converged unless linear solver does not
   // work. We here use a really loose tolerance for this purpose.
   // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-snes_rtol", "0.99999999999");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_max_it", stringify(free_power_iterations));
+  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", stringify(free_power_iterations));
   // We always want the number of free power iterations respected so we don't want to stop early if
   // we've satisfied a convergence criterion. Consequently we make this tolerance very tight
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_tol", "1e-50");
+  Moose::PetscSupport::setSinglePetscOption("-eps_tol", "1e-50");
 }
 
 void
-clearFreeNonlinearPowerIterations(const InputParameters & params,
-                                  const MultiMooseEnum & dont_add_these_options)
+clearFreeNonlinearPowerIterations(const InputParameters & params)
 {
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_power_update", "1");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_max_it", "1");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-snes_max_it", stringify(params.get<unsigned int>("nl_max_its")));
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-snes_rtol", stringify(params.get<Real>("nl_rel_tol")));
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_tol", stringify(params.get<Real>("eigen_tol")));
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it",
+                                            stringify(params.get<unsigned int>("nl_max_its")));
+  Moose::PetscSupport::setSinglePetscOption("-snes_rtol",
+                                            stringify(params.get<Real>("nl_rel_tol")));
+  Moose::PetscSupport::setSinglePetscOption("-eps_tol", stringify(params.get<Real>("eigen_tol")));
 }
 
 void
-setNewtonPetscOptions(SolverParams & solver_params,
-                      const InputParameters & params,
-                      const MultiMooseEnum & dont_add_these_options)
+setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & params)
 {
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
   // Whether or not we need to involve an initial inverse power
   bool initial_power = params.get<bool>("_newton_inverse_power");
 
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_type", "power");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_power_nonlinear", "1");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_power_update", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
   // Only one outer iteration in EPS is allowed when Newton/PJFNK/JFNK
   // is used as the eigen solver
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_max_it", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
   if (initial_power)
   {
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-init_eps_power_snes_max_it", "1");
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-init_eps_power_ksp_rtol", "1e-2");
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options,
-        "-init_eps_max_it",
-        stringify(params.get<unsigned int>("free_power_iterations")));
+    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
+    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
+    Moose::PetscSupport::setSinglePetscOption(
+        "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
   }
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_target_magnitude", "");
+  Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
   if (solver_params._eigen_matrix_free)
   {
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-snes_mf_operator", "1");
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "1");
     if (initial_power)
-      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, "-init_eps_power_snes_mf_operator", "1");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
   }
   else
   {
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-snes_mf_operator", "0");
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "0");
     if (initial_power)
-      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, "-init_eps_power_snes_mf_operator", "0");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "0");
   }
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-st_type", "sinvert");
+  Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
   if (initial_power)
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-init_st_type", "sinvert");
+    Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
 #endif
 #else
   mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
@@ -499,26 +472,19 @@ setNewtonPetscOptions(SolverParams & solver_params,
 }
 
 void
-setNonlinearPowerOptions(SolverParams & solver_params, EigenProblem & eigen_problem)
+setNonlinearPowerOptions(SolverParams & solver_params)
 {
-  const auto & dont_add_these_options = eigen_problem.getPetscOptions().dont_add_these_options;
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_type", "power");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_power_nonlinear", "1");
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-eps_target_magnitude", "");
+  Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
   if (solver_params._eigen_matrix_free)
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-snes_mf_operator", "1");
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "1");
   else
-    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, "-snes_mf_operator", "0");
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "0");
 
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-      dont_add_these_options, "-st_type", "sinvert");
+  Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #endif
 #else
   mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
@@ -526,61 +492,54 @@ setNonlinearPowerOptions(SolverParams & solver_params, EigenProblem & eigen_prob
 }
 
 void
-setEigenSolverOptions(SolverParams & solver_params,
-                      const InputParameters & params,
-                      EigenProblem & eigen_problem)
+setEigenSolverOptions(SolverParams & solver_params, const InputParameters & params)
 {
-  const auto & dont_add_these_options = eigen_problem.getPetscOptions().dont_add_these_options;
   // Avoid unused variable warnings when you have SLEPc but not PETSc-dev.
   libmesh_ignore(params);
 
   switch (solver_params._eigen_solve_type)
   {
     case Moose::EST_POWER:
-      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, "-eps_type", "power");
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       break;
 
     case Moose::EST_ARNOLDI:
-      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, "-eps_type", "arnoldi");
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "arnoldi");
       break;
 
     case Moose::EST_KRYLOVSCHUR:
-      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, "-eps_type", "krylovschur");
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "krylovschur");
       break;
 
     case Moose::EST_JACOBI_DAVIDSON:
-      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, "-eps_type", "jd");
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "jd");
       break;
 
     case Moose::EST_NONLINEAR_POWER:
-      setNonlinearPowerOptions(solver_params, eigen_problem);
+      setNonlinearPowerOptions(solver_params);
       break;
 
     case Moose::EST_NEWTON:
-      setNewtonPetscOptions(solver_params, params, dont_add_these_options);
+      setNewtonPetscOptions(solver_params, params);
       break;
 
     case Moose::EST_PJFNK:
       solver_params._eigen_matrix_free = true;
       solver_params._customized_pc_for_eigen = false;
-      setNewtonPetscOptions(solver_params, params, dont_add_these_options);
+      setNewtonPetscOptions(solver_params, params);
       break;
 
     case Moose::EST_JFNK:
       solver_params._eigen_matrix_free = true;
       solver_params._customized_pc_for_eigen = true;
-      setNewtonPetscOptions(solver_params, params, dont_add_these_options);
+      setNewtonPetscOptions(solver_params, params);
       break;
 
     case Moose::EST_PJFNKMO:
       solver_params._eigen_matrix_free = true;
       solver_params._customized_pc_for_eigen = false;
       solver_params._eigen_matrix_vector_mult = true;
-      setNewtonPetscOptions(solver_params, params, dont_add_these_options);
+      setNewtonPetscOptions(solver_params, params);
       break;
 
     default:
@@ -600,7 +559,7 @@ slepcSetOptions(EigenProblem & eigen_problem,
   // Call "SolverTolerances" first, so some solver specific tolerance such as "eps_max_it"
   // can be overriden
   setSlepcEigenSolverTolerances(eigen_problem, solver_params, params);
-  setEigenSolverOptions(solver_params, params, eigen_problem);
+  setEigenSolverOptions(solver_params, params);
   // when Bx norm postprocessor is provided, we switch off the sign normalization
   if (eigen_problem.bxNormProvided())
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
