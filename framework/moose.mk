@@ -13,6 +13,14 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 endif
 
 #
+# Dynamic library suffix
+#
+lib_suffix := so
+ifeq ($(shell uname -s),Darwin)
+	lib_suffix := dylib
+endif
+
+#
 # MOOSE
 #
 APPLICATION_DIR := $(FRAMEWORK_DIR)
@@ -46,6 +54,7 @@ hit_srcdir    := $(HIT_DIR)/src/hit
 hit_srcfiles  := $(hit_srcdir)/parse.cc $(hit_srcdir)/lex.cc $(hit_srcdir)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
+hit_DYLIB     := $(HIT_DIR)/libhit-$(METHOD).$(lib_suffix)
 # dependency files
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit command line tool
@@ -64,17 +73,9 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/capabilities
 capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C
 
-#
-# Dynamic library suffix
-#
-lib_suffix := so
-ifeq ($(shell uname -s),Darwin)
-	lib_suffix := dylib
-endif
-
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
-
+moose_DYLIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).$(lib_suffix)
 #
 # wasp
 #
@@ -168,6 +169,8 @@ capabilities_LDFLAGS      := -Wl,-rpath,$(HIT_DIR) -L$(HIT_DIR) -lhit-$(METHOD) 
 
 capabilities $(capabilities_LIB) : $(capabilities_srcfiles) $(moose_LIB) $(app_HEADER) | prebuild
 	@echo "Building and linking "$@"..."
+# @$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
+# $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB)
 	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB))'
 
 #
@@ -513,15 +516,6 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 libname_hit = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/hit/libhit-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
 libpath_hit = $(MOOSE_DIR)/framework/contrib/hit/$(libname_hit)
 
-ifneq (,$(findstring darwin,$(libmesh_HOST)))
-  patch_relink = install_name_tool -change $(2) @rpath/$(3) $(1)
-  patch_rpath = install_name_tool -add_rpath @executable_path/$(2) $(1)
-else
-  patch_relink = :
-  patch_rpath = patchelf --set-rpath '$$ORIGIN'/$(2):$$(patchelf --print-rpath $(1)) $(1)
-endif
-patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
-
 install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_testers
 
 install_data::
@@ -546,8 +540,14 @@ install_python: $(pyhit_LIB) $(capabilities_LIB)
 	@mkdir -p $(python_install_dir)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
 	@cp -f $(pyhit_LIB) $(python_install_dir)/
+	@echo "Installing python library $(pyhit_LIB)"
 	@cp -f $(capabilities_LIB) $(python_install_dir)/
-	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(lib_install_dir)/)
+	@echo "Installing python library $(capabilities_LIB)"
+	@$(call remove_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(FRAMEWORK_DIR))
+	@$(call remove_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(HIT_DIR))
+	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(lib_install_dir))
+	@$(call patch_relink,$(python_install_dir)/$(capabilities_LIBNAME),$(shell realpath $(moose_DYLIB)),$(shell readlink $(moose_DYLIB)))
+	@$(call patch_relink,$(python_install_dir)/$(capabilities_LIBNAME),$(shell realpath $(hit_DYLIB)),$(shell readlink $(hit_DYLIB)))
 
 install_harness: install_python
 	@echo "Installing TestHarness"
@@ -570,11 +570,11 @@ lib_install_dir = $(PREFIX)/$(lib_install_suffix)
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
   patch_relink = install_name_tool -change $(2) @rpath/$(3) $(1)
 	patch_rpath = install_name_tool -add_rpath $(2) $(1)
-	patch_remove = :
+	remove_rpath = install_name_tool -delete_rpath $(2) $(1)
 else
   patch_relink = :
 	patch_rpath = patchelf --set-rpath $(2):$$(patchelf --print-rpath $(1)) $(1)
-	patch_remove = patchelf --remove-needed $(2) $(1)
+	remove_rpath = :
 endif
 patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
 # Gets the associated library from a library archive (first argument)
