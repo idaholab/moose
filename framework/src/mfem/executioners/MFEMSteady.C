@@ -27,8 +27,9 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 void
 MFEMSteady::constructProblemOperator()
 {
-  _problem_data.eqn_system = std::make_shared<MooseMFEM::EquationSystem>();
-  auto problem_operator = std::make_unique<MooseMFEM::EquationSystemProblemOperator>(_problem_data);
+  _problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+  auto problem_operator =
+      std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(_problem_data);
 
   _problem_operator.reset();
   _problem_operator = std::move(problem_operator);

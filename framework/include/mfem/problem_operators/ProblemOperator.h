@@ -4,7 +4,7 @@
 #include "MFEMProblemData.h"
 #include "ProblemOperatorInterface.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 /// Steady-state problem operator with no equation system.
 class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
@@ -19,6 +19,6 @@ public:
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}
 };
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

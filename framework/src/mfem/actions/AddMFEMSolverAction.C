@@ -9,7 +9,7 @@ InputParameters
 AddMFEMSolverAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Set the MooseMFEM solver and the solver options.");
+  params.addClassDescription("Set the Moose::MFEM solver and the solver options.");
   return params;
 }
 

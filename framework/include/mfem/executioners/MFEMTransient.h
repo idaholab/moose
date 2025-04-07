@@ -26,7 +26,7 @@ private:
   mutable int _it;         // Time index
   int _vis_steps;          // Number of cycles between each output update
   mutable bool _last_step; // Flag to check if current step is final
-  std::unique_ptr<MooseMFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
+  std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 
 #endif

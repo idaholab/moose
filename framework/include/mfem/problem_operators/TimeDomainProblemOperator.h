@@ -4,7 +4,7 @@
 #include "MFEMProblemData.h"
 #include "ProblemOperatorInterface.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 std::vector<std::string> GetTimeDerivativeNames(std::vector<std::string> gridfunction_names);
 
@@ -22,6 +22,6 @@ public:
   void ImplicitSolve(const double, const mfem::Vector &, mfem::Vector &) override {}
 };
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

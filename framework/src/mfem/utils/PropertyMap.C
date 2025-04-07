@@ -2,7 +2,7 @@
 
 #include "PropertyMap.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 template <>
 VectorMap::PWData

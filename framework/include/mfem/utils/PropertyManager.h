@@ -17,7 +17,7 @@
 #include "PropertyMap.h"
 #include "ObjectManager.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 /**

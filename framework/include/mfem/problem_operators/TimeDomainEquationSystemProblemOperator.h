@@ -4,7 +4,7 @@
 #include "TimeDomainProblemOperator.h"
 #include "EquationSystemInterface.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 /// Problem operator for time-dependent problems with an equation system.
@@ -15,7 +15,7 @@ public:
   TimeDomainEquationSystemProblemOperator(MFEMProblemData & problem)
     : TimeDomainProblemOperator(problem),
       _equation_system(
-          std::dynamic_pointer_cast<MooseMFEM::TimeDependentEquationSystem>(problem.eqn_system))
+          std::dynamic_pointer_cast<Moose::MFEM::TimeDependentEquationSystem>(problem.eqn_system))
   {
   }
 
@@ -24,7 +24,7 @@ public:
 
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
 
-  [[nodiscard]] MooseMFEM::TimeDependentEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] Moose::MFEM::TimeDependentEquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -39,9 +39,9 @@ protected:
 
 private:
   std::vector<mfem::ParGridFunction *> _trial_variable_time_derivatives;
-  std::shared_ptr<MooseMFEM::TimeDependentEquationSystem> _equation_system{nullptr};
+  std::shared_ptr<Moose::MFEM::TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

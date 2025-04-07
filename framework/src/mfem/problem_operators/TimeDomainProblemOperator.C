@@ -2,7 +2,7 @@
 
 #include "TimeDomainProblemOperator.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 std::vector<std::string>
 GetTimeDerivativeNames(std::vector<std::string> gridfunction_names)
@@ -22,6 +22,6 @@ TimeDomainProblemOperator::SetGridFunctions()
   width = height = _block_true_offsets[_trial_variables.size()];
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

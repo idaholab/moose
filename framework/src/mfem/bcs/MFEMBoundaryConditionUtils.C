@@ -2,7 +2,7 @@
 
 #include "MFEMBoundaryConditionUtils.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 mfem::Array<int>
@@ -92,6 +92,6 @@ BCMap::ApplyIntegratedBCs(const std::string & test_var_name,
   }
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

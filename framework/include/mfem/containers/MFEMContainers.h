@@ -10,7 +10,7 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 /// Lightweight adaptor over an std::map from strings to pointer to T
@@ -186,9 +186,9 @@ GetTimeDerivativeName(std::string name)
   return std::string("d") + name + std::string("_dt");
 }
 
-using FECollections = MooseMFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
-using FESpaces = MooseMFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
-using GridFunctions = MooseMFEM::NamedFieldsMap<mfem::ParGridFunction>;
-} // namespace MooseMFEM
+using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
+using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
+using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
+} // namespace Moose::MFEM
 
 #endif

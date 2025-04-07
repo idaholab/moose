@@ -2,7 +2,7 @@
 
 #include "ProblemOperator.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 void
@@ -12,6 +12,6 @@ ProblemOperator::SetGridFunctions()
   width = height = _block_true_offsets[_trial_variables.size()];
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

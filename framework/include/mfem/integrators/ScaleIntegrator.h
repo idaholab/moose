@@ -6,7 +6,7 @@
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 /// Integrator which scales its results by a constant value
@@ -85,6 +85,6 @@ public:
 
   virtual ~ScaleIntegrator();
 };
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

@@ -13,7 +13,7 @@
 class CheckObjectManager : public testing::Test
 {
 protected:
-  MooseMFEM::ObjectManager<mfem::Coefficient> manager;
+  Moose::MFEM::ObjectManager<mfem::Coefficient> manager;
   std::shared_ptr<mfem::ConstantCoefficient> c1, c2, c3;
 
   CheckObjectManager()

@@ -17,7 +17,7 @@
 
 #include "ObjectManager.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 /**
@@ -143,6 +143,6 @@ template <>
 void MatrixMap::checkPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff,
                             std::shared_ptr<mfem::PWMatrixCoefficient> existing_pw,
                             const std::string & name);
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

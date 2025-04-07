@@ -4,7 +4,7 @@
 #include "MooseError.h"
 #include <algorithm>
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 template <class T, class Tpw>
 inline void

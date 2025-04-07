@@ -10,7 +10,7 @@
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 /*
@@ -45,17 +45,17 @@ public:
                  const std::string & test_var_name,
                  std::shared_ptr<MFEMMixedBilinearFormKernel> mblf_kernel);
 
-  virtual void ApplyBoundaryConditions(MooseMFEM::BCMap & bc_map);
+  virtual void ApplyBoundaryConditions(Moose::MFEM::BCMap & bc_map);
 
   // Build forms
-  virtual void Init(MooseMFEM::GridFunctions & gridfunctions,
-                    const MooseMFEM::FESpaces & fespaces,
-                    MooseMFEM::BCMap & bc_map,
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+                    const Moose::MFEM::FESpaces & fespaces,
+                    Moose::MFEM::BCMap & bc_map,
                     mfem::AssemblyLevel assembly_level);
-  virtual void BuildLinearForms(MooseMFEM::BCMap & bc_map);
-  virtual void BuildBilinearForms(MooseMFEM::BCMap & bc_map);
+  virtual void BuildLinearForms(Moose::MFEM::BCMap & bc_map);
+  virtual void BuildBilinearForms(Moose::MFEM::BCMap & bc_map);
   virtual void BuildMixedBilinearForms();
-  virtual void BuildEquationSystem(MooseMFEM::BCMap & bc_map);
+  virtual void BuildEquationSystem(Moose::MFEM::BCMap & bc_map);
 
   // Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -80,7 +80,7 @@ public:
   // Update variable from solution vector after solve
   using mfem::Operator::RecoverFEMSolution;
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  MooseMFEM::GridFunctions & gridfunctions);
+                                  Moose::MFEM::GridFunctions & gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
@@ -89,7 +89,7 @@ public:
    */
   template <class T>
   void addKernelToMap(std::shared_ptr<T> kernel,
-                      MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & kernels_map)
+                      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & kernels_map)
   {
     auto test_var_name = kernel->getTestVariableName();
     if (!kernels_map.Has(test_var_name))
@@ -116,17 +116,17 @@ protected:
   // from test_var_names when time derivatives are present.
   std::vector<std::string> _trial_var_names;
   // Pointers to trial variables.
-  MooseMFEM::GridFunctions _trial_variables;
+  Moose::MFEM::GridFunctions _trial_variables;
   // Names of all test variables corresponding to linear forms in this equation
   // system
   std::vector<std::string> _test_var_names;
   std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
 
   // Components of weak form. // Named according to test variable
-  MooseMFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
-  MooseMFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  MooseMFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  MooseMFEM::NamedFieldsMap<MooseMFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
+  Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
+  Moose::MFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
 
   // gridfunctions for setting Dirichlet BCs
@@ -137,14 +137,14 @@ protected:
 
   // Arrays to store kernels to act on each component of weak form. Named
   // according to test variable
-  MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>> _blf_kernels_map;
 
-  MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMLinearFormKernel>>> _lf_kernels_map;
 
-  MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>> _nlf_kernels_map;
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMNonlinearFormKernel>>> _nlf_kernels_map;
 
-  MooseMFEM::NamedFieldsMap<
-      MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>
+  Moose::MFEM::NamedFieldsMap<
+      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>
       _mblf_kernels_map_map;
 
   mutable mfem::OperatorHandle _jacobian;
@@ -164,11 +164,11 @@ public:
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
-  virtual void UpdateEquationSystem(MooseMFEM::BCMap & bc_map);
+  virtual void UpdateEquationSystem(Moose::MFEM::BCMap & bc_map);
 
   virtual void AddKernel(const std::string & test_var_name,
                          std::shared_ptr<MFEMBilinearFormKernel> blf_kernel) override;
-  virtual void BuildBilinearForms(MooseMFEM::BCMap & bc_map) override;
+  virtual void BuildBilinearForms(Moose::MFEM::BCMap & bc_map) override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
@@ -182,10 +182,10 @@ protected:
   mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
   std::vector<std::string> _trial_var_time_derivative_names;
 
-  MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMBilinearFormKernel>>>
       _td_blf_kernels_map;
   // Container to store contributions to weak form of the form (F du/dt, v)
-  MooseMFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 };
 
 inline const std::vector<std::string> &
@@ -194,6 +194,6 @@ TimeDependentEquationSystem::TrialVarTimeDerivativeNames() const
   return _trial_var_time_derivative_names;
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

@@ -2,7 +2,7 @@
 
 #include "ScaleIntegrator.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 void
@@ -118,6 +118,6 @@ ScaleIntegrator::~ScaleIntegrator()
     delete _integrator;
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

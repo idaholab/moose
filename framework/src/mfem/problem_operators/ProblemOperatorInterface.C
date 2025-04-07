@@ -2,7 +2,7 @@
 
 #include "ProblemOperatorInterface.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 void
 ProblemOperatorInterface::SetGridFunctions()

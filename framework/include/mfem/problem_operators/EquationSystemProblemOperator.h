@@ -4,7 +4,7 @@
 #include "ProblemOperator.h"
 #include "EquationSystemInterface.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 /// Steady-state problem operator with an equation system.
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
@@ -21,7 +21,7 @@ public:
 
   ~EquationSystemProblemOperator() override = default;
 
-  [[nodiscard]] MooseMFEM::EquationSystem * GetEquationSystem() const override
+  [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -32,9 +32,9 @@ public:
   }
 
 private:
-  std::shared_ptr<MooseMFEM::EquationSystem> _equation_system{nullptr};
+  std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
 };
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

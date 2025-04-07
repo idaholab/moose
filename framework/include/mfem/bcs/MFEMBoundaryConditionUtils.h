@@ -5,10 +5,10 @@
 #include "MFEMEssentialBC.h"
 #include "MFEMContainers.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
-class BCMap : public MooseMFEM::NamedFieldsMap<MFEMBoundaryCondition>
+class BCMap : public Moose::MFEM::NamedFieldsMap<MFEMBoundaryCondition>
 {
 public:
   void ApplyEssentialBCs(const std::string & test_var_name,
@@ -27,6 +27,6 @@ private:
   mfem::Array<int> GetEssentialBdrMarkers(const std::string & test_var_name, mfem::Mesh & mesh);
 };
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

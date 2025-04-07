@@ -16,7 +16,7 @@ TEST(CheckData, ScaleIntegratorTestLegacy)
   integ_sum.AddIntegrator(new mfem::MassIntegrator);
   integ_sum.AddIntegrator(new mfem::MassIntegrator);
 
-  MooseMFEM::ScaleIntegrator integ_scale(new mfem::MassIntegrator, 2);
+  Moose::MFEM::ScaleIntegrator integ_scale(new mfem::MassIntegrator, 2);
 
   const mfem::FiniteElement & el1 = *fes.GetFE(0);
   const mfem::FiniteElement & el2 = *fes.GetFE(0);
@@ -57,7 +57,7 @@ TEST(CheckData, ScaleIntegratorTestFaceAssembly)
   integ_sum.AddIntegrator(&integ);
   integ_sum.AddIntegrator(&integ);
 
-  MooseMFEM::ScaleIntegrator integ_scale(&integ, 2, false);
+  Moose::MFEM::ScaleIntegrator integ_scale(&integ, 2, false);
 
   mfem::DenseMatrix m1, m2;
 
@@ -91,7 +91,7 @@ TEST(CheckData, ScaleIntegratorTestPartial)
   integ_sum.AddIntegrator(new mfem::MassIntegrator);
   integ_sum.AddIntegrator(new mfem::MassIntegrator);
 
-  MooseMFEM::ScaleIntegrator integ_scale(new mfem::MassIntegrator, 2);
+  Moose::MFEM::ScaleIntegrator integ_scale(new mfem::MassIntegrator, 2);
 
   mfem::DenseMatrix m1, m2;
 

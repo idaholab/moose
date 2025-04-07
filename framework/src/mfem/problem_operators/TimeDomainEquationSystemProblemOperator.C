@@ -2,7 +2,7 @@
 
 #include "TimeDomainEquationSystemProblemOperator.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 void
@@ -64,6 +64,6 @@ TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(double dt)
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

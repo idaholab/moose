@@ -27,7 +27,7 @@ protected:
   unsigned int _output_iteration_number;
 
 private:
-  std::unique_ptr<MooseMFEM::ProblemOperator> _problem_operator{nullptr};
+  std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};
 };
 
 #endif

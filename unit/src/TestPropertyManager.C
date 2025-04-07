@@ -14,10 +14,10 @@ class CheckPropertyManager : public testing::Test
 protected:
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point1, point2;
-  MooseMFEM::ScalarCoefficientManager _scalar_manager;
-  MooseMFEM::VectorCoefficientManager _vector_manager;
-  MooseMFEM::MatrixCoefficientManager _matrix_manager;
-  MooseMFEM::PropertyManager manager;
+  Moose::MFEM::ScalarCoefficientManager _scalar_manager;
+  Moose::MFEM::VectorCoefficientManager _vector_manager;
+  Moose::MFEM::MatrixCoefficientManager _matrix_manager;
+  Moose::MFEM::PropertyManager manager;
   CheckPropertyManager() : manager(_scalar_manager, _vector_manager, _matrix_manager)
   {
     point1.Init(2);

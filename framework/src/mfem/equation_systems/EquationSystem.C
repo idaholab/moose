@@ -3,7 +3,7 @@
 #include "EquationSystem.h"
 #include "libmesh/int_range.h"
 
-namespace MooseMFEM
+namespace Moose::MFEM
 {
 
 EquationSystem::~EquationSystem() { _h_blocks.DeleteAll(); }
@@ -73,7 +73,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
   if (!_mblf_kernels_map_map.Has(test_var_name))
   {
     auto kernel_field_map = std::make_shared<
-        MooseMFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>();
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMMixedBilinearFormKernel>>>>();
 
     _mblf_kernels_map_map.Register(test_var_name, std::move(kernel_field_map));
   }
@@ -93,7 +93,7 @@ EquationSystem::AddKernel(const std::string & trial_var_name,
 }
 
 void
-EquationSystem::ApplyBoundaryConditions(MooseMFEM::BCMap & bc_map)
+EquationSystem::ApplyBoundaryConditions(Moose::MFEM::BCMap & bc_map)
 {
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
@@ -237,7 +237,7 @@ EquationSystem::GetGradient(const mfem::Vector &) const
 
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                   MooseMFEM::GridFunctions & gridfunctions)
+                                   Moose::MFEM::GridFunctions & gridfunctions)
 {
   for (const auto i : index_range(_trial_var_names))
   {
@@ -248,9 +248,9 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 }
 
 void
-EquationSystem::Init(MooseMFEM::GridFunctions & gridfunctions,
-                     const MooseMFEM::FESpaces &,
-                     MooseMFEM::BCMap &,
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                     const Moose::MFEM::FESpaces &,
+                     Moose::MFEM::BCMap &,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -275,7 +275,7 @@ EquationSystem::Init(MooseMFEM::GridFunctions & gridfunctions,
 }
 
 void
-EquationSystem::BuildLinearForms(MooseMFEM::BCMap & bc_map)
+EquationSystem::BuildLinearForms(Moose::MFEM::BCMap & bc_map)
 {
   // Register linear forms
   for (const auto i : index_range(_test_var_names))
@@ -308,7 +308,7 @@ EquationSystem::BuildLinearForms(MooseMFEM::BCMap & bc_map)
 }
 
 void
-EquationSystem::BuildBilinearForms(MooseMFEM::BCMap & bc_map)
+EquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
 {
   // Register bilinear forms
   for (const auto i : index_range(_test_var_names))
@@ -346,7 +346,7 @@ EquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    auto test_mblfs = std::make_shared<MooseMFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_test_var_names))
     {
       auto trial_var_name = _test_var_names.at(j);
@@ -378,7 +378,7 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
-EquationSystem::BuildEquationSystem(MooseMFEM::BCMap & bc_map)
+EquationSystem::BuildEquationSystem(Moose::MFEM::BCMap & bc_map)
 {
   BuildBilinearForms(bc_map);
   BuildMixedBilinearForms();
@@ -433,7 +433,7 @@ TimeDependentEquationSystem::AddKernel(const std::string & test_var_name,
 }
 
 void
-TimeDependentEquationSystem::BuildBilinearForms(MooseMFEM::BCMap & bc_map)
+TimeDependentEquationSystem::BuildBilinearForms(Moose::MFEM::BCMap & bc_map)
 {
   EquationSystem::BuildBilinearForms(bc_map);
 
@@ -570,13 +570,13 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem(MooseMFEM::BCMap & bc_map)
+TimeDependentEquationSystem::UpdateEquationSystem(Moose::MFEM::BCMap & bc_map)
 {
   BuildBilinearForms(bc_map);
   BuildMixedBilinearForms();
   BuildLinearForms(bc_map);
 }
 
-} // namespace MooseMFEM
+} // namespace Moose::MFEM
 
 #endif

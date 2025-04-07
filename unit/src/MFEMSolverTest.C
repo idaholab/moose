@@ -248,7 +248,7 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
 }
 
 /**
- * Test MFEMSuperLU creates an MooseMFEM::SuperLUSolver successfully.
+ * Test MFEMSuperLU creates an Moose::MFEM::SuperLUSolver successfully.
  */
 TEST_F(MFEMSolverTest, MFEMSuperLU)
 {
@@ -259,7 +259,7 @@ TEST_F(MFEMSolverTest, MFEMSuperLU)
   MFEMSuperLU & solver = addObject<MFEMSuperLU>("MFEMSuperLU", "solver1", solver_params);
 
   // Test MFEMKernel returns an integrator of the expected type
-  auto solver_downcast = std::dynamic_pointer_cast<MooseMFEM::SuperLUSolver>(solver.getSolver());
+  auto solver_downcast = std::dynamic_pointer_cast<Moose::MFEM::SuperLUSolver>(solver.getSolver());
   ASSERT_NE(solver_downcast.get(), nullptr);
   testDiffusionSolve(*solver_downcast.get(), 1e-12);
 }
