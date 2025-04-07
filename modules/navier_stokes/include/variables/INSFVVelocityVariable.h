@@ -13,7 +13,6 @@
 
 class INSFVNoSlipWallBC;
 class InputParameters;
-class INSFVVelocityHydraulicSeparatorBC;
 
 class INSFVVelocityVariable : public INSFVVariable
 {

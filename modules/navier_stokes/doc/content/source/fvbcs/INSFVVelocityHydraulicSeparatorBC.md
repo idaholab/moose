@@ -11,7 +11,7 @@ This object serves three purposes:
   while $\rho$ is the density on the face. While the normal component of
   the stress term is also zero.
 - It disables this face's contribution to the Rhie-Chow interpolation.
-- If forces a two-sided evaluation on this face during gradient computation
+- It forces a two-sided evaluation on this face during gradient computation
   using the Green-Gauss approach. This means that this face is a discontinuity,
   the velocity has different values from the element and the neighbor side on the face.
 

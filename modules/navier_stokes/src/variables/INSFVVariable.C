@@ -53,7 +53,7 @@ INSFVVariable::initialSetup()
     {
       const auto separator = dynamic_cast<const INSFVHydraulicSeparatorInterface *>(bc);
       if (separator)
-        _boundary_id_to_separator.emplace(bnd_id, bc);
+        _boundary_id_to_separator.emplace(bnd_id, separator);
     }
   }
 }
@@ -62,7 +62,7 @@ bool
 INSFVVariable::isSeparatorBoundary(const FaceInfo & fi) const
 {
   for (const auto bid : fi.boundaryIDs())
-    if (_boundary_id_to_separator.find(bid) != _boundary_id_to_separator.end())
+    if (_boundary_id_to_separator.count(bid))
       return true;
 
   return false;

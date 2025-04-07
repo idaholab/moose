@@ -11,7 +11,6 @@
 
 #include "FVFluxKernel.h"
 #include "INSFVBCInterface.h"
-#include "INSFVVariable.h"
 
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow

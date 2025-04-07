@@ -96,7 +96,6 @@ BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                                       const Elem * const elem,
                                                       const Moose::StateArg & time) const
 {
-
   if (isDirichletBoundaryFace(fi, elem, time))
     return false;
   if (!isInternalFace(fi))

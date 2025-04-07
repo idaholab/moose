@@ -12,6 +12,7 @@
 #include "MooseVariableFV.h"
 
 class InputParameters;
+class INSFVHydraulicSeparatorInterface;
 
 class INSFVVariable : public MooseVariableFVReal
 {
@@ -44,7 +45,8 @@ protected:
 
   /// A container for quick access of hydraulic separator BCs associated with this
   /// variable.
-  std::unordered_map<BoundaryID, const FVFluxBC *> _boundary_id_to_separator;
+  std::unordered_map<BoundaryID, const INSFVHydraulicSeparatorInterface *>
+      _boundary_id_to_separator;
 
 private:
   /// Whether to pre-initialize variable data for use in traditional MOOSE quadrature point based

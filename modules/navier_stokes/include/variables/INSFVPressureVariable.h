@@ -12,7 +12,6 @@
 #include "INSFVVariable.h"
 
 class InputParameters;
-class INSFVScalarFieldSeparatorBC;
 
 class INSFVPressureVariable : public INSFVVariable
 {

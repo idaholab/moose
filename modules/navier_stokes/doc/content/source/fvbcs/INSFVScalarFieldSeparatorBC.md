@@ -9,7 +9,7 @@ This object serves two purposes:
 
   where $\Phi$ is the scalar variable, $\vec{u}$ denotes the velocity vector on the face.
   Furthermore, this separator BC also ensures that the diffusive flux is zero on this boundary.
-- If forces a two-sided evaluation on this face during gradient computation
+- It forces a two-sided evaluation on this face during gradient computation
   using the Green-Gauss approach. This means that this face is a discontinuity,
   the scalar field has different values from the element and the neighbor side on the face.
 
