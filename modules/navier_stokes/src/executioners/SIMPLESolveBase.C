@@ -297,8 +297,7 @@ SIMPLESolveBase::validParams()
   params.addParam<std::vector<Real>>("turbulence_field_relaxation",
                                      std::vector<Real>(),
                                      "The relaxation which should be used for the turbulence "
-                                     "equations. (=1 for no relaxation, "
-                                     "diagonal dominance will still be enforced)");
+                                     "fields.");
 
   params.addParam<std::vector<Real>>(
       "turbulence_field_min_limit",
@@ -344,7 +343,7 @@ SIMPLESolveBase::validParams()
                               "turbulence_petsc_options_value turbulence_petsc_options_value "
                               "turbulence_absolute_tolerance "
                               "turbulence_l_tol turbulence_l_abs_tol turbulence_l_max_its",
-                              "turbulence Equation");
+                              "Turbulence Equations");
 
   /*
    * SIMPLE iteration control
