@@ -14,7 +14,7 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * An advection kernel that implements the advection term for the turbulent variabkes
+ * An advection kernel that implements the advection term for the turbulent variables
  * limited for the first cells near the wall.
  */
 class LinearFVTurbulentAdvection : public LinearFVScalarAdvection

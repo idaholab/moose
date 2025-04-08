@@ -4,7 +4,7 @@ This object extends [`LinearFVDiffusion`](LinearFVDiffusion.md) to allow diffusi
 at certain boundaries.
 
 The particularity of this kernel is that it allows us to skip computing diffusion
-for near-wall elements. The key for this skip are the boundaries identified in
+for near-wall elements. The keys for this skip are the boundaries identified in
 the [!param](/LinearFVKernels/LinearFVTurbulentDiffusion/walls) list.
 For any element that is in contact with a boundary identified
 in the [!param](/LinearFVKernels/LinearFVTurbulentDiffusion/walls) list,
