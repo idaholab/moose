@@ -7,45 +7,126 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVTurbulentLimitedAdvection.h"
-#include "MooseLinearVariableFV.h"
-#include "NSFVUtils.h"
+#include "LinearFVTurbulentDiffusion.h"
+#include "Assembly.h"
+#include "SubProblem.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 #include "NavierStokesMethods.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", LinearFVTurbulentLimitedAdvection);
+registerMooseObject("MooseApp", LinearFVTurbulentDiffusion);
 
 InputParameters
-LinearFVTurbulentLimitedAdvection::validParams()
+LinearFVTurbulentDiffusion::validParams()
 {
-  InputParameters params = LinearFVScalarAdvection::validParams();
-  params.addClassDescription("Represents the matrix and right hand side contributions of an "
-                             "advection term for a turbulent variable.");
+  InputParameters params = LinearFVDiffusion::validParams();
+  params.addClassDescription(
+      "Represents the matrix and right hand side contributions of a "
+      "diffusion term for a turbulent variable in a partial differential equation.");
+
+  params.addParam<MooseFunctorName>(
+      "scaling_coeff", 1.0, "The scaling coefficient for the diffusion term.");
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
-
   return params;
 }
 
-LinearFVTurbulentLimitedAdvection::LinearFVTurbulentLimitedAdvection(const InputParameters & params)
-  : LinearFVScalarAdvection(params),
-    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+LinearFVTurbulentDiffusion::LinearFVTurbulentDiffusion(const InputParameters & params)
+  : LinearFVDiffusion(params),
+    _scaling_coeff(getFunctor<Real>("scaling_coeff")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+  if (_use_nonorthogonal_correction)
+    _var.computeCellGradients();
 }
 
 void
-LinearFVTurbulentLimitedAdvection::initialSetup()
+LinearFVTurbulentDiffusion::initialSetup()
 {
-  LinearFVScalarAdvection::initialSetup();
+  LinearFVDiffusion::initialSetup();
   NS::getWallBoundedElements(
       _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
 }
 
+Real
+LinearFVTurbulentDiffusion::computeElemMatrixContribution()
+{
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return computeFluxMatrixContribution() / _scaling_coeff(face_arg, determineState());
+}
+
+Real
+LinearFVTurbulentDiffusion::computeNeighborMatrixContribution()
+{
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return -computeFluxMatrixContribution() / _scaling_coeff(face_arg, determineState());
+}
+
+Real
+LinearFVTurbulentDiffusion::computeElemRightHandSideContribution()
+{
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return computeFluxRHSContribution() / _scaling_coeff(face_arg, determineState());
+}
+
+Real
+LinearFVTurbulentDiffusion::computeNeighborRightHandSideContribution()
+{
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return -computeFluxRHSContribution() / _scaling_coeff(face_arg, determineState());
+}
+
+Real
+LinearFVTurbulentDiffusion::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
+{
+  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(diff_bc, "This should be a valid BC!");
+
+  auto grad_contrib = diff_bc->computeBoundaryGradientMatrixContribution() * _current_face_area;
+  // If the boundary condition does not include the diffusivity contribution then
+  // add it here.
+  if (!diff_bc->includesMaterialPropertyMultiplier())
+  {
+    const auto face_arg = singleSidedFaceArg(_current_face_info);
+    grad_contrib *= _diffusion_coeff(face_arg, determineState());
+  }
+
+  return grad_contrib;
+}
+
+Real
+LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
+{
+  const auto * const diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  mooseAssert(diff_bc, "This should be a valid BC!");
+
+  const auto face_arg = singleSidedFaceArg(_current_face_info);
+  auto grad_contrib = diff_bc->computeBoundaryGradientRHSContribution() * _current_face_area;
+
+  // If the boundary condition does not include the diffusivity contribution then
+  // add it here.
+  if (!diff_bc->includesMaterialPropertyMultiplier())
+    grad_contrib *= _diffusion_coeff(face_arg, determineState());
+
+  // We add the nonorthogonal corrector for the face here. Potential idea: we could do
+  // this in the boundary condition too. For now, however, we keep it like this.
+  if (_use_nonorthogonal_correction)
+  {
+    const auto correction_vector =
+        _current_face_info->normal() -
+        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
+
+    grad_contrib += _diffusion_coeff(face_arg, determineState()) *
+                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
+                    _current_face_area;
+  }
+
+  return grad_contrib;
+}
+
 void
-LinearFVTurbulentLimitedAdvection::addMatrixContribution()
+LinearFVTurbulentDiffusion::addMatrixContribution()
 {
   // Coumputing bounding map
   const Elem * elem = _current_face_info->elemPtr();
@@ -115,7 +196,7 @@ LinearFVTurbulentLimitedAdvection::addMatrixContribution()
 }
 
 void
-LinearFVTurbulentLimitedAdvection::addRightHandSideContribution()
+LinearFVTurbulentDiffusion::addRightHandSideContribution()
 {
   // Coumputing bounding map
   const Elem * elem = _current_face_info->elemPtr();
@@ -136,9 +217,9 @@ LinearFVTurbulentLimitedAdvection::addRightHandSideContribution()
     const auto neighbor_rhs_contribution = computeNeighborRightHandSideContribution();
 
     // Populate right hand side
-    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()) && !(bounded_elem))
+    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
       _rhs_contribution(0) = elem_rhs_contribution;
-    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()) && !(bounded_neigh))
+    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
       _rhs_contribution(1) = neighbor_rhs_contribution;
 
     (*_linear_system.rhs)
