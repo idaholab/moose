@@ -1,6 +1,6 @@
 [Tests]
-  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
-  issues = '#9007'
+  design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+  issues = '#29846'
   [BFS_ERCOFTAC_linear_transient]
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a backward facing step, '
     [result]
@@ -11,6 +11,8 @@
       abs_zero = 5e-6
       rel_err = 5e-6
       heavy = true
+      recover = false # we don't support recovery for PIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
     []
     [run]
       type = 'Exodiff'
@@ -20,6 +22,8 @@
       abs_zero = 5e-6
       rel_err = 5e-6
       cli_args = 'Executioner/dt=1.0 Executioner/num_steps=1 Outputs/exodus/file_base=BFS_ERCOFTAC_short'
+      recover = false # we don't support recovery for PIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
     []
   []
 []
