@@ -6,7 +6,7 @@
         input = test_LBE-19pin.i
         exodiff = test_LBE-19pin_out.e
         custom_cmp = 'test.exodiff'
-        method = '!DBG'
+        capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
         max_parallel = 1
@@ -17,7 +17,7 @@
         input = test_LEAD-19pin.i
         exodiff = test_LEAD-19pin_out.e
         custom_cmp = 'test.exodiff'
-        method = '!DBG'
+        capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
         max_parallel = 1

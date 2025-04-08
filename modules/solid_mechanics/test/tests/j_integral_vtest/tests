@@ -30,7 +30,7 @@
               'j_int_surfbreak_ellip_crack_sym_mm_cm_ad_out_J_3_0001.csv'
     max_parallel = 1
     valgrind = 'none'
-    method = 'opt'
+    capabilities = 'method=opt'
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks using the crack '
                   'mouth specification computing the system Jacobian via automatic differentiation.'

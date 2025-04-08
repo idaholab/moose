@@ -70,7 +70,6 @@
       group = 'geometric'
       custom_cmp = exclude_elem_id.cmp
       allow_warnings = true
-      compiler = '!INTEL'
 
       # Note: This test only works with replicated mesh
       mesh_mode = REPLICATED
@@ -148,7 +147,6 @@
       group = 'geometric'
       custom_cmp = exclude_elem_id.cmp
       allow_warnings = true
-      compiler = '!INTEL'
 
       # Note: This test only works with replicated mesh
       mesh_mode = REPLICATED

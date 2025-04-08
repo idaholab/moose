@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "Capabilities.h"
 
 InputParameters
 ChemicalReactionsApp::validParams()
@@ -58,6 +59,13 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 ChemicalReactionsApp::registerApps()
 {
+  const std::string doc = "Thermochimica Gibbs energy minimization library support ";
+#ifdef THERMOCHIMICA_ENABLED
+  addCapability("thermochimica", true, doc + "is available.");
+#else
+  addCapability("thermochimica", false, doc + "is not available.");
+#endif
+
   registerApp(ChemicalReactionsApp);
 }
 

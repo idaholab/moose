@@ -46,7 +46,7 @@ PhaseFieldTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool
 void
 PhaseFieldTestApp::registerApps()
 {
-  registerApp(PhaseFieldApp);
+  PhaseFieldApp::registerApps();
   registerApp(PhaseFieldTestApp);
 }
 

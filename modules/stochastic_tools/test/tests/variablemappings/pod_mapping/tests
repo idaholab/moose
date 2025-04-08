@@ -10,7 +10,7 @@
     cli_args = "Outputs/file_base=serial"
     skip_keys = "left_singular_vectors right_singular_vectors" # We do this because the negative of the eigenvectors are still eigenvectors and depending on the system it finds alternating signs
     max_parallel = 1
-    petsc_version = ">=3.14"
+    capabilities = 'petsc>=3.14'
   []
   [svd_2_proc_per_app]
     type = JSONDiff
@@ -21,7 +21,7 @@
     cli_args = "Outputs/file_base=two_procs_per_app Transfers/solution_transfer/serialize_on_root=false"
     min_parallel = 2
     max_parallel = 2
-    petsc_version = ">=3.14"
+    capabilities = 'petsc>=3.14'
   []
   [svd_2_proc_per_app_root]
     type = JSONDiff
@@ -32,6 +32,6 @@
     skip_keys = "left_singular_vectors right_singular_vectors" # We do this because the negative of the eigenvectors are still eigenvectors and depending on the system it finds alternating signs
     min_parallel = 2
     max_parallel = 2
-    petsc_version = ">=3.14"
+    capabilities = 'petsc>=3.14'
   []
 []

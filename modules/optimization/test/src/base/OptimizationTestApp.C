@@ -44,7 +44,7 @@ OptimizationTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 OptimizationTestApp::registerApps()
 {
-  registerApp(OptimizationApp);
+  OptimizationApp::registerApps();
   registerApp(OptimizationTestApp);
 }
 

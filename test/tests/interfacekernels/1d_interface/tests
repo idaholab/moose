@@ -53,7 +53,6 @@
     input = coupled_value_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Outputs/exodus=false'
     issues = '#13232'
     requirement = "The system shall produce correct Jacobians for coupled flux on an interface."
@@ -64,7 +63,6 @@
     input = mixed_shapes.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Outputs/exodus=false'
     issues = '#13232'
     requirement = "The system shall support produce correct Jacobians when "
@@ -77,7 +75,6 @@
     input = single_variable_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     issues = '#13232'
     requirement = "The system shall produce correct Jacobians for single variable coupled flux on an interface."
     design = 'InterfaceKernels/index.md'

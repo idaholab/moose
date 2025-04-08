@@ -10,7 +10,7 @@
     requirement = 'The system shall be able to run a two-dimensional frictional model using the '
                   'contact action for mortar applications'
     valgrind = 'heavy'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [frictional_bouncing_block_action_restart_2]
     type = 'Exodiff'
@@ -24,7 +24,7 @@
                   'be unused'
     prereq = 'frictional_bouncing_block_action_restart_1'
     valgrind = 'heavy'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []

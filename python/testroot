@@ -1,4 +1,5 @@
-app_name = moose_python
+# Explicitly do not use an application
+app_name = ''
 allow_warnings = false
 allow_unused = false
 allow_override = false

@@ -19,7 +19,6 @@
     type = 'Exodiff'
     input = 'large_strain_m_40_AD.i'
     exodiff = 'large_strain_m_40_AD_out.e'
-    petsc_version = '>=3.9.0'
     requirement = "The mechanics system shall accurately compute the deflection of a cantilever beam when it is modeled using shell elements under large strain and rotations are included."
   []
   [beam_bending_jacobian]
@@ -32,7 +31,6 @@
     type = 'PetscJacobianTester'
     input = 'large_strain_m_40_AD.i'
     cli_args = 'Executioner/num_steps=1'
-    petsc_version = '>=3.9.0'
     requirement = "The mechanics system shall accurately compute the Jacobian for a large strain quasi-static shell element."
   []
   [plate_bending]

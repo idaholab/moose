@@ -38,9 +38,8 @@
       allow_test_objects = true
       cli_args = "Mesh/uniform_refine=0 Executioner/num_steps=4 Postprocessors/active='' Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
       valgrind = 'heavy'
-      strumpack = true
+      capabilities = 'strumpack & method!=dbg'
       detail = 'in three dimensions, using a finite element discretization for all variables, and'
-      method = '!dbg'
     []
     [2d-fv]
       input = 2d-fv.i
@@ -50,7 +49,7 @@
       allow_test_objects = true
       cli_args = 'Executioner/num_steps=3 Mesh/nx=15 Mesh/ny=4 Outputs/hide="advection mesh_advection conduction laser_flux radiation total_sum volume_rho_cp_dT e_advection e_mesh_advection e_conduction e_laser e_radiation e_time"'
       valgrind = 'heavy'
-      strumpack = true
+      capabilities = 'strumpack'
     []
   []
 []

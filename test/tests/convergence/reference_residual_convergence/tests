@@ -25,7 +25,6 @@
     exodiff = 'scaled.e'
     requirement = 'The system shall have the ability to automatically scale a originally poorly '
                   'scaled problem and achieve convergence based on individual reference quantities, using a convergence object.'
-    petsc_version = '>=3.9.0'
     max_parallel = 2
   []
   [converge_on]

@@ -5,6 +5,6 @@
     exodiff = 'heat_out.e'
     map = false
     # XFEM requires --enable-unique-ids in libmesh
-    unique_id = true
+    capabilities = 'unique_id'
   [../]
 []

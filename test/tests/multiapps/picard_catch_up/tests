@@ -10,10 +10,7 @@
       max_parallel = 1 # This is here because we're counting residual evaluations
       max_threads = 1 # NanAtCountKernel changes behavior with threads
       recover = false
-      petsc_version = '>=3.6.1'
       allow_warnings = true
-      petsc_version_release = true
-      compiler = '!INTEL'
       detail = 'resetting the initial condition for every coupling'
     []
     [keep_solution]

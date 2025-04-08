@@ -23,8 +23,7 @@
     ratio_tol = 3e-7
     difference_tol = 1e1
     run_sim = True
-    method = 'OPT'
-    petsc_version = '>=3.9.4 || <3.9.0'
+    capabilities = 'method=opt'
     requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a perfect jacobian'
     design = "jacobian_definition.md"
     issues = "#12633"
@@ -56,8 +55,7 @@
     ratio_tol = 1e-8
     difference_tol = 1e-5
     run_sim = True
-    method = 'OPT'
-    petsc_version = '>=3.9.4 || <3.9.0'
+    capabilities = 'method=opt'
     requirement = 'Coupled thermo-mechanics simulations with AD shall calculate a perfect jacobian'
     design = "jacobian_definition.md"
     issues = "#12633"

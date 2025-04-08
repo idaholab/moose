@@ -23,9 +23,8 @@
     input = rotated-2d-bkt-function-porosity.i
     exodiff = rotated-2d-bkt-function-porosity_out.e
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
-    mumps = true
+    capabilities = 'mumps & method!=dbg'
     recover = false # See https://github.com/idaholab/moose/issues/17906
-    method = "!dbg"
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md PCNSFVMomentumFriction.md'
   []
@@ -34,9 +33,8 @@
     input = rotated-2d-bkt-function-porosity-mixed.i
     exodiff = rotated-2d-bkt-function-porosity-mixed_out.e
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem using a mixed variable set with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
-    mumps = true
+    capabilities = 'mumps & method!=dbg'
     recover = false # See https://github.com/idaholab/moose/issues/17906
-    method = "!dbg"
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousMixedVarMaterial.md PCNSFVMomentumFriction.md'
   []

@@ -3,7 +3,7 @@
     type = 'RunApp'
     input = '1ph.p_T.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     input = '1ph.p_T.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"static":{"T":300.0,"beta":0.[0-9]+,"c":347.[0-9]+,'
                  '"cp":1003.45,"cv":716.[0-9]+,"e":215025.[0-9]+,"h":301035.0,'
@@ -50,7 +50,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     type = 'RunApp'
     input = '1ph.rho_e.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     input = '1ph.rho_e.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"static":{"T":299.[0-9]+,"beta":0.[0-9]+,"c":347.[0-9]+,'
                  '"cp":1003.45,"cv":716.[0-9]+,"e":215025.0,"h":301034.[0-9]+,"k":0.[0-9]+,'
@@ -96,7 +96,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     type = 'RunApp'
     input = '1ph.rho_p.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ Volumetric expansion coefficient:              0.002867  1/K'
     input = '1ph.rho_p.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"static":{"T":348.[0-9]+,"beta":0.[0-9]+,"c":374.[0-9]+,"cp":1003.45,'
                  '"cv":716.[0-9]+,"e":250000.[0-9]+,"h":350000.[0-9]+,"k":0.[0-9]+,'
@@ -142,7 +142,7 @@ Volumetric expansion coefficient:              0.002867  1/K'
     type = 'RunApp'
     input = '1ph.rho_rhou_rhoE.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
     input = '1ph.rho_rhou_rhoE.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"stagnation":{"T0":2.[0-9]+,"beta0":0.[0-9]+,"c0":1.[0-9]+,"cp0":2.[0-9]+,'
                  '"cv0":1.[0-9]+,"e0":5.[0-9]+,"h0":7.[0-9]+,"k0":0.[0-9]+,"mu0":1.823e-05,'
@@ -212,7 +212,7 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
     input = '2ph.p_T.i'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"2-phase":{"h_lat":688964.[0-9]+,"p_critical":25.0},"liquid":'
                  '{"static":{"T":300.0,"beta":0.[0-9]+,"c":347.[0-9]+,"cp":1003.45,'
@@ -292,7 +292,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     cli_args = 'FluidPropertiesInterrogator/x_ncg=0.1'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
@@ -347,7 +347,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     type = RunApp
     input = '2ph_ncg_partial_pressure_p_T.i'
     allow_test_objects = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'Mass fraction 0:\s+0.9930237384'
     requirement = "The fluid properties interrogator shall output two-phase and static-state, "
@@ -362,7 +362,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     cli_args = 'FluidPropertiesInterrogator/x_ncg=0.1 FluidPropertiesInterrogator/json=true'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"2-phase":{"h_lat":877840.[0-9]+,"p_critical":25.0},'
                  '"liquid":{"static":{"T":372.[0-9]+,"beta":0.[0-9]+,"c":375.[0-9]+,'
@@ -384,7 +384,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     input = 'vapor_mixture_rho_e.i'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = 'Vapor mixture STATIC properties:
 --------------------------------------------------------------------------------
@@ -415,7 +415,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"static":{"T":2547.[0-9]+,"c":997.[0-9]+,"cp":1271.[0-9]+,'
                  '"cv":972.[0-9]+,"e":2477165.[0-9]+,"h":3238782.[0-9]+,"k":0.[0-9]+,'
@@ -433,7 +433,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
   input = '2ph.p.i'
   allow_test_objects = true
   allow_warnings = true
-  method = 'OPT'
+  capabilities = 'method=opt'
   threading = '!pthreads'
   expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
@@ -453,7 +453,7 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"2-phase":{"T_sat":200000.0,"h_lat":459309999.[0-9]+,"p_critical":25.0}}'
 
@@ -469,7 +469,7 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
   input = '2ph.T.i'
   allow_test_objects = true
   allow_warnings = true
-  method = 'OPT'
+  capabilities = 'method=opt'
   threading = '!pthreads'
   expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
@@ -490,7 +490,7 @@ Surface tension:                                   1500  N/m'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_test_objects = true
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_out = '{"2-phase":{"h_lat":688964.[0-9]+,"p_critical":25.0,"p_sat":900.0,'
                  '"sigma":1500.0}}'
@@ -506,7 +506,7 @@ Surface tension:                                   1500  N/m'
     type = RunException
     input = 'err.wrong_fp_type.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_err = "The type of the parameter 'fp' must be derived from type 'SinglePhaseFluidProperties', 'VaporMixtureFluidProperties', or 'TwoPhaseFluidProperties'"
 
@@ -520,7 +520,7 @@ Surface tension:                                   1500  N/m'
     type = RunException
     input = '1ph.rho_e.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_err = "\(rho\,e\) has been specified\; T cannot be specified\."
     cli_args = "FluidPropertiesInterrogator/T=300"
@@ -535,7 +535,7 @@ Surface tension:                                   1500  N/m'
     type = RunException
     input = 'err.no_params.i'
     allow_warnings = true
-    method = 'OPT'
+    capabilities = 'method=opt'
     threading = '!pthreads'
     expect_err = "For one-phase fluid properties\, you must provide one of the following
 combinations of thermodynamic properties:"

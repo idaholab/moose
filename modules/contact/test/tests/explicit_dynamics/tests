@@ -17,7 +17,7 @@
     exodiff = 'test_balance_out.e'
     abs_zero = 1.0e-4
     allow_warnings = true
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve a simple few-element normal contact problem '
                   'using explicit dynamics solving uncoupled, local equations of momentum balance.'
   []
@@ -79,7 +79,7 @@
     exodiff = 'deep_impact_out.e'
     abs_zero = 1.0e-5
     allow_warnings = true
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     heavy = true
     requirement = 'The system shall be able to solve for a large displacemnt explicit contact problem.'
   []

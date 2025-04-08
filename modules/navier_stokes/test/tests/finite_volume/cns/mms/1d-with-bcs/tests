@@ -6,7 +6,7 @@
     test_case = Test1DFreeFlowHLLC
     requirement = 'The system shall exhibit first order convergence for all variables for the free-flow Euler equations with added artificial diffusion using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     design = 'CNSFVHLLCBase.md'
@@ -19,7 +19,7 @@
       input = test.py
       test_case = Test1DPorousHLLC
       required_python_packages = 'pandas matplotlib'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
       detail = 'constant porosity'
@@ -29,7 +29,7 @@
       input = test.py
       test_case = Test1DVaryingEpsPorousHLLC
       required_python_packages = 'pandas matplotlib'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
       detail = 'varying porosity'
@@ -44,7 +44,7 @@
       test_case = TestBasic1DPorousKTPrimitiveCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -54,7 +54,7 @@
       test_case = TestBasic1DPorousKTPrimitiveUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -64,7 +64,7 @@
       test_case = TestBasic1DPorousKTPrimitiveVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -78,7 +78,7 @@
       test_case = TestBasic1DPorousKTConservedCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -88,7 +88,7 @@
       test_case = TestBasic1DPorousKTConservedUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -98,7 +98,7 @@
       test_case = TestBasic1DPorousKTConservedVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -112,7 +112,7 @@
       test_case = TestBasic1DVaryingPorousKTPrimitiveCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -122,7 +122,7 @@
       test_case = TestBasic1DVaryingPorousKTPrimitiveUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -132,7 +132,7 @@
       test_case = TestBasic1DVaryingPorousKTPrimitiveVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -146,7 +146,7 @@
       test_case = TestBasic1DVaryingPorousKNPPrimitiveCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -156,7 +156,7 @@
       test_case = TestBasic1DVaryingPorousKNPPrimitiveUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     []
@@ -166,7 +166,7 @@
       test_case = TestBasic1DVaryingPorousKNPPrimitiveVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -180,7 +180,7 @@
       test_case = TestBasic1DVaryingPorousKTMixedCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -190,7 +190,7 @@
       test_case = TestBasic1DVaryingPorousKTMixedUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -203,7 +203,7 @@
       input = 'straight-channel-hllc.i'
       exodiff = straight-channel-hllc_out.e
       detail = 'when the source has a cell-centered volumetric discretization'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
     []
   []
   [sources_give_hllc_problems_regular]
@@ -215,7 +215,7 @@
       exodiff = 'regular-straight-channel_out.e'
       detail = 'conservation of mass when no sources are present'
       cli_args = "FVKernels/inactive='drag'"
-      method = "!dbg"
+      capabilities = 'method!=dbg'
     []
     [non_conserved]
       input = 'regular-straight-channel.i'
@@ -223,7 +223,7 @@
       detail = 'violation of conservation of mass when sources are present'
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources_out'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
     []
     [non_conserved_finer]
       input = 'regular-straight-channel.i'
@@ -231,7 +231,7 @@
       detail = 'lesser violation of conservation of mass when sources are present and the mesh is refined'
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources-nx-150_out Mesh/gen_mesh/nx=150'
-      method = "!dbg"
+      capabilities = 'method!=dbg'
     []
   []
   [pwcnsfv]
@@ -239,7 +239,7 @@
     input = test.py
     test_case = PWCNSFV
     required_python_packages = 'pandas matplotlib'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     requirement = 'The system shall demonstrate first order convergence rates for pressure and superficial velocity when using an upwind interpolation for advected quantities in a weakly compressible formulation of the mass and momentum Euler equations.'

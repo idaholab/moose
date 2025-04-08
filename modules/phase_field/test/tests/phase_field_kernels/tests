@@ -32,7 +32,6 @@
     cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
     ratio_tol = 1e-8
     difference_tol = 1e-4
-    petsc_version = '<3.9.0 || >=3.9.4'
     issues = '#13138'
     design = '/ADSplitCHParsed.md'
     requirement = 'The system shall provide a perfect Jacobian for the AD split Cahn-Hilliard problem.'
@@ -62,7 +61,6 @@
     expect_out = '\nNo errors detected. :-\)\n'
     resize_mesh = true
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     issues = '#3816'
     design = '/AllenCahn.md'
     requirement = 'The system shall provide perfect Jacobian contributions for the Allen-Cahn phase field formulation.'

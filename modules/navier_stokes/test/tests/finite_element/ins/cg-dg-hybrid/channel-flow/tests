@@ -6,7 +6,7 @@
     input = channel-hybrid.i
     exodiff = channel-hybrid_out.e
     requirement = 'The system shall be able to solve a channel flow problem using a hybrid CG-DG discretization with first Lagrange pressure and first monomial velocity.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     installation_type = 'in_tree' # uses JIT
     # Raised for the lagrange multiplier diffing right above the default tolerance

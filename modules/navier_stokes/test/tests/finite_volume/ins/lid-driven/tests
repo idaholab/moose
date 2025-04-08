@@ -92,7 +92,7 @@
     input = 'lid-driven-with-energy.i'
     exodiff = 'lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the incompressible Navier Stokes equations.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
@@ -101,7 +101,7 @@
     input = 'lid-driven-with-energy-action.i'
     exodiff = 'lid-driven-with-energy-action_out.e'
     requirement = 'The system shall be able to get the same result as the enthalpy transport example using the NSFVAction to set up the run.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
@@ -110,7 +110,7 @@
     input = 'lid-driven-with-energy-physics.i'
     exodiff = 'lid-driven-with-energy-physics_out.e'
     requirement = 'The system shall be able to get the same result as the enthalpy transport example using the Physics syntax to set up the run.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
@@ -119,7 +119,7 @@
     input = 'transient-lid-driven-with-energy.i'
     exodiff = 'transient-lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the transient incompressible Navier Stokes equations.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []

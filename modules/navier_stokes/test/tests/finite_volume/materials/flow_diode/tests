@@ -22,7 +22,7 @@
       # see #21185
       allow_warnings = true
       valgrind = 'none' # too slow
-      method = 'opt'
+      capabilities = 'method=opt'
     []
     [pdrop]
       type = CSVDiff
@@ -33,7 +33,7 @@
       # see #21185
       allow_warnings = true
       valgrind = 'none' # too slow
-      method = 'opt'
+      capabilities = 'method=opt'
     []
     [flow]
       type = CSVDiff
@@ -44,7 +44,7 @@
       # see #21185
       allow_warnings = true
       valgrind = 'none' # too slow
-      method = 'opt'
+      capabilities = 'method=opt'
     []
   []
 []

@@ -5,7 +5,7 @@
     type = RunApp
     input = 'single_main.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check a multi-load SIMP topology optimization "
                   "of a bridge problem."
   []
@@ -13,7 +13,7 @@
     type = RunApp
     input = 'square_main.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check a multi-load SIMP topology optimization "
                   "of a square problem with opposing loads which would not have a meaningful "
                   "optimization result if the loads are considered to be acting simultaneously."

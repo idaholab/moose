@@ -261,10 +261,10 @@
     valgrind = NONE
     # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
     cli_args = '--disable-perflog Outputs/perf_graph=true --no-timing'
-    method = '!dbg' # debug prints some extra stuff at the end that messes up the regex
 
     requirement = 'The system shall override Performance Log output when conflicting values appear on the command line and input file.'
     issues = '#4497'
+    capabilities = 'method!=dbg'
   [../]
   [./additional_output_on]
     # Test use of 'additional_output_on' parameter
@@ -301,7 +301,7 @@
     requirement = "The system shall support disabling all console output to the screen."
     issues = "#5178 #16030"
     design = "syntax/Outputs/index.md Console.md"
-    method = "opt" # dbg has libMesh stuff show up
+    capabilities = 'method!=dbg' # dbg has libMesh stuff show up
     deleted = "#5178" # tempararily disable this test for console refactoring
   [../]
 []

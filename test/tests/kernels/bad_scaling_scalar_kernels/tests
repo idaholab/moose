@@ -17,7 +17,6 @@
     cli_args = 'Executioner/automatic_scaling=true'
     max_parallel = 1 # no parallel svd
     requirement = 'We shall be able to show that with automatic scaling, this system is non-singular'
-    petsc_version = '>=3.9.0'
   []
   [auto-scaled-field-scalar-system-parallel]
     type = Exodiff
@@ -27,6 +26,5 @@
     prereq = auto-scaled-field-scalar-system
     requirement = 'We shall be able to show that with automatic scaling we can run this problem successfully in parallel'
     max_parallel = 2 # Can't reset preallocation in PETSc when there are no dofs on a process
-    petsc_version = '>=3.9.0'
   []
 []

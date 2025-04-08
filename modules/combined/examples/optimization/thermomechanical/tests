@@ -6,7 +6,7 @@
     input = 'thermomechanical_main.i'
     exodiff = 'thermomechanical_main_out.e'
     valgrind = 'none'
-    method = 'opt'
+    capabilities = 'method=opt'
     heavy = true
     requirement = 'The system shall be able to optimize a combined heat conduction and structural '
                   'problem using multiapp capabilities.'

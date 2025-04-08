@@ -67,7 +67,7 @@
       expect_err = 'Linear solve did not converge due to DIVERGED_ITS'
       cli_args = "Outputs/exodus=false Outputs/active='' -pc_type hypre -pc_hypre_type boomeramg -ksp_converged_reason"
       detail = 'be incompataible with algebraic multigrid'
-      petsc_version = '>=3.10.0'
+      capabilities = 'petsc>=3.10.0'
     []
   []
   [vi]

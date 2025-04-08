@@ -12,7 +12,7 @@
                                                     9100  200   3
                                                     0.012 0.004 3
                                                     291   2     3'"
-      method = opt
+      capabilities = 'method=opt'
       detail = "nearest point surrogate, "
     []
     [poly_chaos_uniform_mc]
@@ -20,7 +20,7 @@
       input = poly_chaos_uniform_mc.i
       cli_args = 'Outputs/file_base=uniform_mc Samplers/sample/num_rows=10'
       check_files = 'uniform_mc_poly_chaos_avg.rd/data uniform_mc_poly_chaos_max.rd/data'
-      method = opt
+      capabilities = 'method=opt'
       detail = "polynomial chaos with uniform parameter distribution and Monte Carlo sampling, "
     []
     [poly_chaos_uniform_quad]
@@ -28,7 +28,7 @@
       input = poly_chaos_uniform_quad.i
       cli_args = 'Outputs/file_base=uniform_quad Samplers/sample/order=2'
       check_files = 'uniform_quad_poly_chaos_avg.rd/data uniform_quad_poly_chaos_max.rd/data'
-      method = opt
+      capabilities = 'method=opt'
       detail = "polynomial chaos with uniform parameter distribution and quadrature sampling, "
     []
     [poly_chaos_normal_mc]
@@ -36,7 +36,7 @@
       input = poly_chaos_normal_mc.i
       cli_args = 'Outputs/file_base=normal_mc Samplers/sample/num_rows=10'
       check_files = 'normal_mc_poly_chaos_avg.rd/data normal_mc_poly_chaos_max.rd/data'
-      method = opt
+      capabilities = 'method=opt'
       detail = "polynomial chaos with normal parameter distribution and Monte Carlo sampling, "
     []
     [poly_chaos_normal_quad]
@@ -44,7 +44,7 @@
       input = poly_chaos_normal_quad.i
       cli_args = 'Outputs/file_base=normal_quad Samplers/sample/order=2'
       check_files = 'normal_quad_poly_chaos_avg.rd/data normal_quad_poly_chaos_max.rd/data'
-      method = opt
+      capabilities = 'method=opt'
       detail = "and polynomial chaos with normal parameter distribution and quadrature sampling."
     []
   []
@@ -56,7 +56,7 @@
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=10"
       prereq = train/nearest_point
-      method = opt
+      capabilities = 'method=opt'
       detail = "nearest point surrogate and "
     []
     [poly_chaos]
@@ -66,7 +66,7 @@
                   Surrogates/poly_chaos_avg/filename=uniform_quad_poly_chaos_avg.rd
                   Surrogates/poly_chaos_max/filename=uniform_quad_poly_chaos_max.rd"
       prereq = train/poly_chaos_uniform_quad
-      method = opt
+      capabilities = 'method=opt'
       detail = "polynomial chaos."
     []
   []
@@ -78,7 +78,7 @@
       cli_args = "Samplers/sample/num_rows=10"
       allow_test_objects = true
       prereq = evaluate_uniform/nearest_point
-      method = opt
+      capabilities = 'method=opt'
       detail = "nearest point surrogate and "
     []
     [poly_chaos]
@@ -88,7 +88,7 @@
                   Surrogates/poly_chaos_avg/filename=normal_quad_poly_chaos_avg.rd
                   Surrogates/poly_chaos_max/filename=normal_quad_poly_chaos_max.rd"
       prereq = train/poly_chaos_normal_quad
-      method = opt
+      capabilities = 'method=opt'
       detail = "polynomial chaos."
     []
   []

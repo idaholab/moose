@@ -7,7 +7,7 @@
     type = CSVDiff
     input = libtorch_drl_control_trainer.i
     csvdiff = 'train_out.csv'
-    libtorch = true
+    capabilities = 'libtorch'
     cli_args = "Executioner/num_steps=1
                 Trainers/nn_trainer/update_frequency=1
                 Trainers/nn_trainer/num_epochs=100

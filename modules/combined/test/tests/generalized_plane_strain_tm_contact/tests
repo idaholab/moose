@@ -5,7 +5,7 @@
    exodiff = 'generalized_plane_strain_tm_contact_out.e'
    min_parallel = 2
    custom_cmp = 'generalized.exodiff'
-   superlu = true
+   capabilities = 'superlu'
 #   deleted = '#6924'
  [../]
  [./out_of_plane_pressure]

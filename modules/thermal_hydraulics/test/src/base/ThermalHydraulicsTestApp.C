@@ -54,7 +54,7 @@ ThermalHydraulicsTestApp::registerAll(Factory & f,
 void
 ThermalHydraulicsTestApp::registerApps()
 {
-  registerApp(ThermalHydraulicsApp);
+  ThermalHydraulicsApp::registerApps();
   registerApp(ThermalHydraulicsTestApp);
 }
 

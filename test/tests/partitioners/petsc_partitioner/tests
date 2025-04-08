@@ -13,8 +13,7 @@
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Outputs/file_base=petsc_partitioner_ptscotch_out Outputs/exodus=false'
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    ptscotch = true
-    petsc_version = '>=3.10.0'
+    capabilities = 'petsc>=3.10.0 & ptscotch'
     min_parallel = 4
     max_parallel = 4
     # PTScotch is not valgrind clean
@@ -29,10 +28,9 @@
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_weight_element_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch  Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_element_out Outputs/exodus=false'
-    ptscotch = true
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    petsc_version = '>=3.10.0'
+    capabilities = 'petsc>=3.10.0 & ptscotch'
     min_parallel = 4
     max_parallel = 4
    # PTScotch is not valgrind clean
@@ -47,10 +45,9 @@
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_weight_side_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_side_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_side_out Outputs/exodus=false'
-    ptscotch = true
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    petsc_version = '>=3.10.0'
+    capabilities = 'petsc>=3.10.0 & ptscotch'
     min_parallel = 4
     max_parallel = 4
    # PTScotch is not valgrind clean
@@ -65,10 +62,9 @@
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_weight_both_out.csv'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_both_out Outputs/exodus=false'
-    ptscotch = true
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    petsc_version = '>=3.10.0'
+    capabilities = 'petsc>=3.10.0 & ptscotch'
     min_parallel = 4
     max_parallel = 4
   # PTScotch is not valgrind clean
@@ -89,7 +85,7 @@
                 Outputs/exodus=false"
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    parmetis = true
+    capabilities = 'parmetis'
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
@@ -101,16 +97,10 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_element_out.csv'
-    cli_args = "Mesh/nx=20
-                Mesh/Partitioner/part_package=parmetis
-                Mesh/Partitioner/type=PartitionerWeightTest
-                Mesh/Partitioner/apply_element_weight=true
-                Outputs/file_base=petsc_partitioner_parmetis_weight_element_out
-                Outputs/exodus=false"
-    parmetis = true
+    cli_args = 'Mesh/nx=20 Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_element_out Mesh/Partitioner/apply_element_weight=true Outputs/exodus=false'
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    petsc_version = '>=3.9.3'
+    capabilities = 'petsc>=3.9.3 & parmetis'
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
@@ -122,16 +112,10 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_side_out.csv'
-    cli_args = "Mesh/nx=20
-                Mesh/Partitioner/part_package=parmetis
-                Mesh/Partitioner/type=PartitionerWeightTest
-                Mesh/Partitioner/apply_side_weight=true
-                Outputs/file_base=petsc_partitioner_parmetis_weight_side_out
-                Outputs/exodus=false"
-    parmetis = true
+    cli_args = 'Mesh/nx=20 Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_side_out Mesh/Partitioner/apply_side_weight=true Outputs/exodus=false'
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    petsc_version = '>=3.9.3'
+    capabilities = 'petsc>=3.9.3 & parmetis'
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
@@ -143,17 +127,10 @@
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_both_out.csv'
-    cli_args = "Mesh/nx=20
-                Mesh/Partitioner/part_package=parmetis
-                Mesh/Partitioner/type=PartitionerWeightTest
-                Mesh/Partitioner/apply_element_weight=true
-                Mesh/Partitioner/apply_side_weight=true
-                Outputs/file_base=petsc_partitioner_parmetis_weight_both_out
-                Outputs/exodus=false"
-    parmetis = true
+    cli_args = 'Mesh/nx=20 Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_both_out Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/exodus=false'
     # Want to insure the partitioned mesh can be used by solver
     expect_out = 'Solve Converged!'
-    petsc_version = '>=3.9.3'
+    capabilities = 'petsc>=3.9.3 & parmetis'
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
@@ -167,9 +144,7 @@
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Mesh/parallel_type=replicated --split-file petsc_partitioner_parmetis_presplit --split-mesh 4,8'
     check_files = 'petsc_partitioner_parmetis_presplit.cpa.gz/4/header.gz petsc_partitioner_parmetis_presplit.cpa.gz/4/split-4-0.gz petsc_partitioner_parmetis_presplit.cpa.gz/4/split-4-3.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/header.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/split-8-0.gz petsc_partitioner_parmetis_presplit.cpa.gz/8/split-8-7.gz'
     recover = false
-
-    parmetis = true
-    petsc_version = '>=3.9.3'
+    capabilities = 'petsc>=3.9.3 & parmetis'
     min_parallel = 2
     max_parallel = 2
   [../]
@@ -180,12 +155,8 @@
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_chaco_out.e'
     cli_args = 'Mesh/Partitioner/part_package=chaco Mesh/uniform_refine=0 Outputs/file_base=petsc_partitioner_chaco_out'
-    chaco = true
-    petsc_version = '>=3.9.0'
-    # chaco uses rand so that it is platform dependent
-    platform = DARWIN
     # work with 32-bit integers only
-    dof_id_bytes = 4
+    capabilities = 'petsc>=3.9.0 & chaco & dof_id_bytes=4 & platform=darwin'
     min_parallel = 4
     max_parallel = 4
   [../]
@@ -196,8 +167,7 @@
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_party_out.e'
     cli_args = 'Mesh/Partitioner/part_package=party Mesh/uniform_refine=0 Outputs/file_base=petsc_partitioner_party_out'
-    party = true
-    petsc_version = '>=3.9.3'
+    capabilities = 'petsc>=3.9.3 & party'
     min_parallel = 4
     max_parallel = 4
   [../]

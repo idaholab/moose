@@ -5,10 +5,10 @@
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
-    method = 'opt'
     recover = false
     max_threads = 1
     max_parallel = 1
+    capabilities = 'method=opt'
   []
   [test_signal_recover]
     type = RunApp
@@ -22,12 +22,12 @@
     #the checkpoint should write somewhere after the first step, and before the last step
     #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
     expect_out = 'Time Step 49,'
-    method = 'opt'
     max_threads = 1
     max_parallel = 1
     prereq = 'test_signal'
     delete_output_before_running = true
     requirement = 'The app should be able to recover from the autosaved checkpoint created by a signal.'
+    capabilities = 'method=opt'
   []
   [test_signal_recover_exodiff]
     type = 'Exodiff'
@@ -37,7 +37,7 @@
     should_execute = 'false'
     requirement = 'The app, recovered from a signal-created checkpoint, should produce an accurate solution.'
     issues = '#25755'
-    method = 'opt'
+    capabilities = 'method=opt'
   []
   [test_signal_parallel]
     type = SignalTester
@@ -46,9 +46,9 @@
     min_parallel = 3
     max_parallel = 3
     cli_args = 'Executioner/num_steps=70'
-    method = 'opt'
     max_threads = 1
     recover = false
+    capabilities = 'method=opt'
   []
   [test_signal_parallel_recover]
     type = RunApp
@@ -62,7 +62,6 @@
     #the checkpoint should write somewhere after the first step, and before the last step
     #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
     expect_out = 'Time Step 69,'
-    method = 'opt'
 
     min_parallel = 3
     max_parallel = 3
@@ -70,6 +69,7 @@
     delete_output_before_running = true
     requirement = 'The app should be able to recover from a parallel autosaved checkpoint created by a signal.'
     max_threads = 1
+    capabilities = 'method=opt'
   []
   [test_signal_parallel_recover_exodiff]
     type = 'Exodiff'
@@ -79,21 +79,20 @@
     should_execute = 'false'
     requirement = 'The app, recovered from a parallel signal-created checkpoint, should produce an accurate solution.'
     issues = '#25755'
-    method = 'opt'
+    capabilities = 'method=opt'
   []
   [test_signal_debug]
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it, in a debug build.'
-    method = 'dbg'
     cli_args = 'Mesh/uniform_refine=0 Outputs/file_base="simple_transient_diffusion_scaled_dbg"'
     recover = false
+    capabilities = 'method=dbg'
   []
   [test_signal_recover_debug]
     type = RunApp
     input = 'simple_transient_diffusion_scaled.i'
     cli_args = 'Mesh/uniform_refine=0 Outputs/file_base="simple_transient_diffusion_scaled_dbg" --recover'
-    method = 'dbg'
 
     #verify that the recovery is actually recovering and not starting from the beginning
     absent_out = 'Time Step 0,'
@@ -106,6 +105,7 @@
     prereq = 'test_signal_debug'
     delete_output_before_running = true
     requirement = 'The app should be able to recover from the autosaved checkpoint created by a signal, in a debug build.'
+    capabilities = 'method=dbg'
   []
   [test_signal_recover_exodiff_debug]
     type = 'Exodiff'
@@ -116,8 +116,7 @@
     should_execute = false
     requirement = 'The app, recovered from a signal-created checkpoint, should produce an accurate solution in a debug build.'
     issues = '#25755'
-    method = 'dbg'
     rel_err = 2.0e-4
+    capabilities = 'method=dbg'
   []
 []
-

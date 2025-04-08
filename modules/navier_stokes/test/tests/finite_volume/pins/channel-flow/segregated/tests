@@ -20,7 +20,7 @@
                   "algorithm."
     abs_zero = 2e-8
     recover = false # we don't support recovery for SIMPLE yet
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [2d-momentum-friction]
     type = 'Exodiff'
@@ -32,7 +32,7 @@
                   "in a 2D channel with friction caused by porous media using the SIMPLE algorithm."
     abs_zero = 2e-8
     recover = false # we don't support recovery for SIMPLE yet
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [2d-heated]
     type = 'Exodiff'

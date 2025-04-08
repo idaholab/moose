@@ -46,7 +46,6 @@
     exodiff = '2D-RZ_finiteStrain_resid_out.e'
     use_old_floor = true
     abs_zero = 1e-8
-    compiler = 'GCC CLANG'
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md'
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
   [../]
@@ -56,7 +55,6 @@
     exodiff = '2D-RZ_finiteStrain_resid_bbar_out.e'
     use_old_floor = true
     abs_zero = 1.1e-8
-    compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=2D-RZ_finiteStrain_resid_bbar_out'
     prereq = 'axisym_resid'
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
@@ -124,7 +122,6 @@
   [./axisym_resid-jac]
     type = PetscJacobianTester
     input = '2D-RZ_finiteStrain_resid.i'
-    compiler = 'GCC CLANG'
     run_sim = 'True'
     ratio_tol = 9e-8
     difference_tol = 1e1
@@ -135,7 +132,6 @@
   [./axisym_resid_Bbar-jac]
     type = PetscJacobianTester
     input = '2D-RZ_finiteStrain_resid.i'
-    compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     run_sim = 'True'
     ratio_tol = 5e-7

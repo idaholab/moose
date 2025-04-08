@@ -36,8 +36,8 @@ test:
   script: run_test.sh
   commands:
     - $PREFIX/moose/bin/combined-opt -h
-    - $PREFIX/bin/moose-opt -h
-    - $PREFIX/bin/moose -h
+    - $PREFIX/moose/bin/moose-opt -h
+    - $PREFIX/moose/bin/moose -h
 
 about:
   home: https://mooseframework.inl.gov/

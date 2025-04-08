@@ -4,7 +4,7 @@
     type = 'Exodiff'
     input = 'nl_divergence_tolerance.i'
     exodiff = 'nl_divergence_tolerance_out.e'
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     max_parallel = 1
     max_threads = 1
     mesh_mode = REPLICATED

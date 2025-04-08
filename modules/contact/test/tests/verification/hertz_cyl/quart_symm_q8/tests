@@ -11,7 +11,7 @@
     abs_zero = 1e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -25,7 +25,7 @@
     abs_zero = 1e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -39,7 +39,7 @@
     abs_zero = 1e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -53,7 +53,7 @@
     abs_zero = 5e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -68,7 +68,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]

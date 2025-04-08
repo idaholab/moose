@@ -147,7 +147,7 @@
 
     issues = "#13869"
     design = "EBSDReader.md"
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = "The system shall support grain evolution when beginning from EBSD ICs and compute "
                   "average orientation
                    of non-uniformly oriented grains."

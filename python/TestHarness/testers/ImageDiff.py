@@ -19,8 +19,8 @@ class ImageDiff(FileTester):
         params = FileTester.validParams()
         params.addRequiredParam('imagediff', [], 'A list of files to compare against the gold.')
         params.addParam('allowed', 0.98, "Absolute zero cutoff used in exodiff comparisons.")
-        params.addParam('allowed_linux', "Absolute zero cuttoff used for linux machines, if not provided 'allowed' is used.")
-        params.addParam('allowed_darwin', "Absolute zero cuttoff used for Mac OS (Darwin) machines, if not provided 'allowed' is used.")
+        params.addParam('allowed_linux', "Absolute zero cutoff used for linux machines, if not provided 'allowed' is used.")
+        params.addParam('allowed_darwin', "Absolute zero cutoff used for Mac OS (Darwin) machines, if not provided 'allowed' is used.")
         # We don't want to check for any errors on the screen with this. If there are any real errors then the image test will fail.
         params['errors'] = []
         params['display_required'] = False

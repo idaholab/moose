@@ -17,7 +17,7 @@
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together "
                   "with the energy equation in a 3D channel using the SIMPLE algorithm."
     valgrind = heavy
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [3d-segregated-scalar]
     type = 'Exodiff'

@@ -76,7 +76,7 @@
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.2 0.25 0.25 0.25 ; 0.25 0.25 0.25 0.25; 0.25 0.25 0.25 0.25"'
     expect_err = 'view_factors row 1 sums to 0.95.'
-    compiler = '!GCC'
+    capabilities = 'compiler!=gcc'
     requirement = 'The system shall check consistency of the view_factors entry norm.'
     design = 'ConstantViewFactorSurfaceRadiation.md'
   [../]

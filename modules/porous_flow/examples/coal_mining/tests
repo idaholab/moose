@@ -6,7 +6,7 @@
     input = 'coarse_with_fluid.i'
     csvdiff = 'coarse_with_fluid_out.csv'
     cli_args = 'Executioner/end_time=0.014706'
-    superlu = true
+    capabilities = 'superlu'
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to simulate caving coupled with fluid flow associated with underground coal mining'
     design = 'porous_flow/coal_mining.md'

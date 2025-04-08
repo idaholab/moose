@@ -104,8 +104,7 @@
     check_files = 'geometric_neighbors.cpa.gz/2/header.gz geometric_neighbors.cpa.gz/2/split-2-0.gz '
                   'geometric_neighbors.cpa.gz/2/split-2-1.gz'
     recover = false
-    compiler = '!INTEL'
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
 
     issues = '#11434 #27240'
     design = 'Mesh/splitting.md'
@@ -119,8 +118,7 @@
                'Outputs/file_base=geometric_edge_two_2D_out'
     exodiff = 'geometric_edge_two_2D_out.e'
     recover = false
-    compiler = '!INTEL'
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
 
     min_parallel = 2
     max_parallel = 2

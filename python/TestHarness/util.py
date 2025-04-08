@@ -14,6 +14,7 @@ from collections import OrderedDict
 import json
 import yaml
 import sys
+import pycapabilities
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -406,99 +407,6 @@ def runExecutable(libmesh_dir, location, bin, args):
 
     return runCommand(libmesh_exe + " " + args).rstrip()
 
-
-def getCompilers(libmesh_dir):
-    # Supported compilers are GCC, INTEL or ALL
-    compilers = set(['ALL'])
-
-    mpicxx_cmd = str(runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx"))
-
-    # Account for usage of distcc or ccache
-    if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
-        mpicxx_cmd = mpicxx_cmd.split()[-1]
-
-    # If mpi is in the command, run -show to get the compiler
-    if "mpi" in mpicxx_cmd:
-        raw_compiler = runCommand(mpicxx_cmd + " -show")
-    else:
-        raw_compiler = mpicxx_cmd
-
-    if re.match(r'\S*icpc\s', raw_compiler) != None:
-        compilers.add("INTEL")
-    elif re.match(r'\S*clang\+\+\s', raw_compiler) != None:
-        compilers.add("CLANG")
-    elif re.match(r'\S*[cg]\+\+\s', raw_compiler) != None:
-        compilers.add("GCC")
-
-    return compilers
-
-def getLibMeshThreadingModel(libmesh_dir):
-    threading_models = set(['ALL'])
-    have_threads = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'threads');
-    if have_threads:
-        have_tbb = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'tbb')
-        have_openmp = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'openmp')
-        if have_openmp:
-            threading_models.add("OPENMP")
-        elif have_tbb:
-            threading_models.add("TBB")
-        else:
-            threading_models.add("PTHREADS")
-    else:
-        threading_models.add("NONE")
-    return threading_models
-
-def getPetscVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
-    subminor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1:
-        print("Error determining PETSC version")
-        exit(1)
-
-    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
-
-def getSlepcVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'slepc_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_minor')
-    subminor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
-
-def getExodusVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'exodus_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'exodus_minor')
-    if len(major_version) != 1 or len(minor_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop()
-
-def getVTKVersion(libmesh_dir):
-    major_version = getLibMeshConfigOption(libmesh_dir, 'vtk_major')
-    minor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_minor')
-    subminor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_subminor')
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
-
-def getLibtorchVersion(moose_dir):
-    libtorch_dir = getMooseConfigOption(moose_dir, 'libtorch_dir')
-
-    if len(libtorch_dir) != 1:
-      return None
-
-    filenames = [libtorch_dir.pop()+'/include/torch/csrc/api/include/torch/version.h']
-    major_version = getConfigOption(filenames, 'libtorch_major', LIBTORCH_OPTIONS)
-    minor_version = getConfigOption(filenames, 'libtorch_minor', LIBTORCH_OPTIONS)
-
-    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
-      return None
-
-    return major_version.pop() + '.' + minor_version.pop()
-
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
@@ -607,14 +515,66 @@ def checkLibtorchVersion(checks, test):
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
+def getCapabilities(exe):
+    """
+    Get capabilities JSON and compare it to the required capabilities
+    """
+    assert exe
+    output = runCommand("%s --show-capabilities" % exe)
+    return parseMOOSEJSON(output, '--show-capabilities')
 
-def getIfAsioExists(moose_dir):
-    option_set = set(['ALL'])
-    if os.path.exists(moose_dir+"/framework/contrib/asio/include/asio.hpp"):
-        option_set.add('TRUE')
+def getCapability(exe, name):
+    """
+    Get the value of a capability from a MOOSE application
+    """
+    value = getCapabilities(exe).get(name)
+    return None if value is None else value[0]
+
+def getCapabilityOption(supported: dict,
+                        name: str,
+                        from_version: bool = False,
+                        from_type: type = None,
+                        to_set: bool = False,
+                        no_all: bool = False,
+                        to_bool: bool = False,
+                        to_none: bool = False):
+    """
+    Helper for getting the deprecated Tester option given a capability
+    """
+    entry = supported.get(name)
+    if entry is None:
+        raise ValueError(f'Missing capability {name}')
     else:
-        option_set.add('FALSE')
-    return option_set
+        value = entry[0]
+
+    if from_version and isinstance(value, str):
+        assert re.fullmatch(r'[0-9.]+', value)
+    if from_type is not None:
+        assert isinstance(value, from_type)
+
+    if value and to_bool:
+        value = True
+
+    if to_set:
+        values = [str(value).upper()]
+        if not no_all:
+            values.append('ALL')
+        return set(sorted(values))
+    else:
+        assert not no_all
+    if to_none and not value:
+        return None
+    return value
+
+def checkCapabilities(supported: dict, requested: str, certain):
+    """
+    Get capabilities JSON and compare it to the required capabilities
+    """
+    [status, message, doc] = pycapabilities.check(requested, supported)
+    if status == pycapabilities.PARSE_FAIL:
+        raise ValueError(f"Failed to parse capabilities='{requested}'")
+    success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
+    return success, message
 
 def getConfigOption(config_files, option, options):
     # Some tests work differently with parallel mesh enabled
@@ -654,23 +614,6 @@ def getConfigOption(config_files, option, options):
         exit(1)
 
     return option_set
-
-def getMooseConfigOption(moose_dir, option):
-    filenames = [
-        moose_dir + '/framework/include/base/MooseConfig.h',
-        moose_dir + '/include/moose/MooseConfig.h',
-        ];
-
-    return getConfigOption(filenames, option, MOOSE_OPTIONS)
-
-
-def getLibMeshConfigOption(libmesh_dir, option):
-    filenames = [
-      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
-      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
-      ];
-
-    return getConfigOption(filenames, option, LIBMESH_OPTIONS)
 
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
@@ -759,30 +702,28 @@ def addObjectNames(objs, node):
     if star:
         addObjectNames(objs, star)
 
-def getExeJSON(exe):
-    """
-    Extracts the JSON from the dump
-    """
-    output = runCommand("%s --json" % exe)
+def parseMOOSEJSON(output: str, context: str) -> dict:
     try:
         output = output.split('**START JSON DATA**\n')[1]
         output = output.split('**END JSON DATA**\n')[0]
-        results = json.loads(output)
+        return json.loads(output)
     except IndexError:
-        print(f'{exe} --json, produced an error during execution')
-        sys.exit(1)
+        raise Exception(f'Failed to find JSON header and footer from {context}')
     except json.decoder.JSONDecodeError:
-        print(f'{exe} --json, produced invalid JSON output')
-        sys.exit(1)
-    return results
+        raise Exception(f'Failed to parse JSON from {context}')
 
-def getExeObjects(exe):
+def getExeJSON(exe: str) -> str:
+    """
+    Calls --json on the given executable
+    """
+    return runCommand("%s --json" % exe)
+
+def getExeObjects(json: dict) -> set[str]:
     """
     Gets a set of object names that are in the executable JSON dump.
     """
-    data = getExeJSON(exe)
     obj_names = set()
-    addObjectsFromBlock(obj_names, data, "blocks")
+    addObjectsFromBlock(obj_names, json, "blocks")
     return obj_names
 
 def readResourceFile(exe, app_name):
@@ -796,14 +737,6 @@ def readResourceFile(exe, app_name):
             print(f'resource file parse failure: {resource_path}')
             sys.exit(1)
     return {}
-
-# TODO: Deprecate when we can remove getExeObjects
-def getExeRegisteredApps(exe):
-    """
-    Gets a list of registered applications
-    """
-    data = getExeJSON(exe)
-    return data.get('global', {}).get('registered_apps', [])
 
 def getRegisteredApps(exe, app_name):
     """

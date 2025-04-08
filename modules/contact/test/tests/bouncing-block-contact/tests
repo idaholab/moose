@@ -112,7 +112,7 @@
                'lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
@@ -201,7 +201,7 @@
     requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
                   'mechanical contact problem in which the secondary side of the contact interface '
                   'is split between processes when run in parallel.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
   [split_secondary_action]
@@ -214,7 +214,7 @@
                   'is split between processes when run in parallel while using the contact action to '
                   'build the set of constraints, user objects, and application of generalized '
                   'forces.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
   [mixed_inactive_nodes]
@@ -223,8 +223,7 @@
     exodiff = 'mixed-weighted-gap-swapped_out.e'
     requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on '
                   'inactive nodes.'
-    method = "!dbg"
     valgrind = 'heavy'
-    min_ad_size = '100'
+    capabilities = 'ad_size>=100 & method!=dbg'
   []
 []

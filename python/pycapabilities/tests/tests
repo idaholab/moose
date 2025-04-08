@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#26470'
+  design = 'python/index.md'
+  [capabilities]
+    type = PythonUnitTest
+    input = test_capabilities.py
+    requirement = "The system shall contain a python utility parsing and evaluating application capability requirements."
+  []
+[]

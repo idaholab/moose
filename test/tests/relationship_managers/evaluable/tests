@@ -5,7 +5,6 @@
     type = 'Exodiff'
     input = 'evaluable.i'
     exodiff = 'evaluable_out.e'
-    petsc_version = '>3.8'
     cli_args = 'Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     min_parallel = 3
     max_parallel = 3
@@ -19,7 +18,6 @@
     input = 'edge_neighbors.i'
     exodiff = 'edge_neighbors_out.e'
     cli_args = 'Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
-    petsc_version = '>3.8'
 
     min_parallel = 3
     max_parallel = 3
@@ -34,7 +32,6 @@
     cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=edge_neighbors_3D_out '
                'Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
     exodiff = 'edge_neighbors_3D_out.e'
-    petsc_version = '>3.8'
 
     min_parallel = 3
     max_parallel = 3

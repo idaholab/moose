@@ -6,7 +6,6 @@
     input = interface_coupled.i
     exodiff = interface_coupled_out.e
     min_threads = 2
-    petsc_version = '>=3.7.6' #This test times out on Falcon on PETSc 3.6.3 with 2 threads
     group = functional_expansion_tools
     requirement = 'The functional_expansion_tools module shall be capable of coupling interface data between a parent and sub app in 2D.'
   [../]

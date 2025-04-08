@@ -12,7 +12,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
@@ -29,7 +29,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
@@ -45,10 +45,7 @@
     abs_zero = 1e-4
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
-    # This test is fails reliably on INTEL compilers with PETSc 3.7.4 and 3.7.5, so restrict the test to not INTEL
-    compiler = 'GCC CLANG'
-    petsc_version = '>=3.7.6'
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
@@ -64,7 +61,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
@@ -79,7 +76,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
@@ -93,7 +90,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     skip = 'bad contact pressure'
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact
@@ -107,7 +104,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."

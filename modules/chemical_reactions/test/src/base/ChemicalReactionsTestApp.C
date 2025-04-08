@@ -23,7 +23,7 @@ ChemicalReactionsTestApp::validParams()
 registerKnownLabel("ChemicalReactionsTestApp");
 
 ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters)
-  : MooseApp(parameters)
+  : ChemicalReactionsApp(parameters)
 {
   ChemicalReactionsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -34,10 +34,9 @@ ChemicalReactionsTestApp::~ChemicalReactionsTestApp() {}
 void
 ChemicalReactionsTestApp::registerAll(Factory & f,
                                       ActionFactory & af,
-                                      Syntax & s,
+                                      Syntax & /*s*/,
                                       bool use_test_objects)
 {
-  ChemicalReactionsApp::registerAll(f, af, s);
   if (use_test_objects)
   {
     Registry::registerObjectsTo(f, {"ChemicalReactionsTestApp"});
@@ -48,7 +47,7 @@ ChemicalReactionsTestApp::registerAll(Factory & f,
 void
 ChemicalReactionsTestApp::registerApps()
 {
-  registerApp(ChemicalReactionsApp);
+  ChemicalReactionsApp::registerApps();
   registerApp(ChemicalReactionsTestApp);
 }
 

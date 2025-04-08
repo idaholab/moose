@@ -3,7 +3,7 @@
     type = RunApp
     input = 'IN100-111grn.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
 []

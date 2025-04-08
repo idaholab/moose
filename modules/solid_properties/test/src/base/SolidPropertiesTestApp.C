@@ -41,7 +41,7 @@ SolidPropertiesTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 SolidPropertiesTestApp::registerApps()
 {
-  registerApp(SolidPropertiesApp);
+  SolidPropertiesApp::registerApps();
   registerApp(SolidPropertiesTestApp);
 }
 

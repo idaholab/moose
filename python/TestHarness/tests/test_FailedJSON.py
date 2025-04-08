@@ -14,7 +14,7 @@ import TestHarness
 from contextlib import redirect_stdout
 
 class TestHarnessTester(unittest.TestCase):
-    @mock.patch.object(TestHarness.util, 'runCommand')
+    @mock.patch.object(TestHarness.util, 'getExeJSON')
     def mocked_output(self, mocked, expect_fail, mocked_return):
         MOOSE_DIR = os.getenv('MOOSE_DIR')
         os.chdir(f'{MOOSE_DIR}/test')
@@ -22,7 +22,8 @@ class TestHarnessTester(unittest.TestCase):
         with redirect_stdout(out):
             mocked_return.return_value=f'{mocked}'
             with self.assertRaises(SystemExit) as e:
-                TestHarness.TestHarness.buildAndRun(['', '-i', 'required_objects'], None, MOOSE_DIR)
+                args = ['', '-i', 'required_objects']
+                TestHarness.TestHarness.buildAndRun(args, None, MOOSE_DIR)
             if expect_fail:
                 self.assertNotEqual(e.exception.code, 0)
             else:
@@ -34,18 +35,20 @@ class TestHarnessTester(unittest.TestCase):
         Test for good json output
         """
         out = self.mocked_output('**START JSON DATA**\n{}**END JSON DATA**\n', False)
-        self.assertRegex(out, r'.*?AnalyticalIndicator not found in executable')
+        self.assertIn('AnalyticalIndicator not found in executable', out)
 
     def testBadJSONOutput(self):
         """
         Test for bad json output
         """
-        out = self.mocked_output('**START JSON DATA**\n{badjson}**END JSON DATA**\n', True)
-        self.assertRegex(out, r'.*?produced invalid JSON output')
+        with self.assertRaises(Exception) as e:
+            self.mocked_output('**START JSON DATA**\n{badjson}**END JSON DATA**\n', True)
+        self.assertEqual(str(e.exception), 'Failed to parse JSON from --json')
 
     def testBadIndex(self):
         """
         Test for general bad output (unable to split)
         """
-        out = self.mocked_output('bad output\n', True)
-        self.assertRegex(out, r'.*?produced an error during execution')
+        with self.assertRaises(Exception) as e:
+            self.mocked_output('bad output\n', True)
+        self.assertEqual(str(e.exception), 'Failed to find JSON header and footer from --json')

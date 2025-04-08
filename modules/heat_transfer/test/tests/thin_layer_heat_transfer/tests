@@ -47,7 +47,6 @@
     type = 'PetscJacobianTester'
     input = 'transient_2d.i'
     run_sim = 'True'
-    petsc_version = '>=3.9'
     ratio_tol = 2e-7
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'

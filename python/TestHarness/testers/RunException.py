@@ -19,6 +19,7 @@ class RunException(RunApp):
         params.addParam('expect_err', "A regular expression or literal string that must occur in the output (see match_literal). (Test may terminate unexpectedly and be considered passing)")
         params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the output. (Test may terminate unexpectedly and be considered passing)")
         params.addParam('should_crash', True, "Indicates that the test is expected to crash or otherwise terminate early")
+        params.addParam('expect_exit_code', "An integer exit code to expect")
 
         # RunException tests executed in parallel need to have their output redirected to a file, and examined individually
         params['redirect_output'] = True
@@ -52,3 +53,14 @@ class RunException(RunApp):
         if self.hasRedirectedOutput(options):
             return self.getRedirectedOutputFiles(options)
         return []
+
+    def testExitCodes(self, options, exit_code, runner_output):
+        reason = super().testExitCodes(options, exit_code, runner_output)
+
+        if not reason:
+            specs = self.specs
+            if specs.isValid('expect_exit_code') and exit_code != specs['expect_exit_code']:
+                self.setStatus(self.fail, 'WRONG EXIT CODE')
+                reason = f'\nExit code {exit_code} != {specs["expect_exit_code"]}'
+
+        return reason
