@@ -6,6 +6,7 @@
       input = FCTF_deformed.i
       csvdiff = FCTF_deformed_out.csv
       # custom_cmp = 'test.exodiff'
+      heavy = true
       method = '!DBG'
       valgrind = NONE
       recover = false
