@@ -13,6 +13,7 @@
 
 // MOOSE includes
 #include "SolverParams.h"
+#include "MultiMooseEnum.h"
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/linear_solver.h"
@@ -26,7 +27,6 @@ class NonlinearSystemBase;
 class CommandLine;
 class InputParameters;
 class ParallelParamObject;
-class MultiMooseEnum;
 
 namespace Moose
 {
