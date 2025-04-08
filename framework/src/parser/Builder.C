@@ -1155,6 +1155,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(SolverSystemName, string);
 
         // map types
+        setmap(string, unsigned int);
         setmap(string, Real);
         setmap(string, string);
         setmap(unsigned int, unsigned int);

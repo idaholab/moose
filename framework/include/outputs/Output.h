@@ -143,6 +143,12 @@ public:
 
   const std::set<Real> & getSyncTimes() { return _sync_times; }
 
+  /**
+   * A virtual function that stores whether output type supports material output. Defaults to false,
+   * if a particular output type supports material output it can be overridden in the child class.
+   */
+  virtual bool supportsMaterialPropertyOutput() const { return false; }
+
 protected:
   /**
    * Overload this function with the desired output activities

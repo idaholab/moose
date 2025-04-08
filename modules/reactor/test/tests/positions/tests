@@ -24,6 +24,12 @@
       cli_args = 'Positions/active=hex_grid_3rings_exclusions Outputs/file_base=hexagonal_grid_positions_3r_out'
       detail = 'a three-ring hexagonal grid with some positions excluded,'
     []
+    [nested_hex_pattern]
+      type = 'JSONDiff'
+      input = 'nested_hexagonal_grid_positions.i'
+      jsondiff = 'nested_hexagonal_grid_positions_out.json'
+      detail = 'a two-level nested hexagonal grid, with some positions excluded from the parent grid,'
+    []
     [cartesian_centroids]
       type = 'JSONDiff'
       input = 'cartesian_grid_positions.i'

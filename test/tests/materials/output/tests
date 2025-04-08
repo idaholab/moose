@@ -68,9 +68,60 @@
     [multiple_files]
       type = Exodiff
       input = output_multiple_files.i
-      exodiff = 'output_multiple_files_exodus1.e output_multiple_files_exodus2.e'
-
-      detail = 'outputting certain properties within the material definition to different files; and'
+      exodiff = 'output_exodus1_mat_block1.e output_exodus2_mat_block2.e'
+      cli_args = "Materials/block_1/outputs=exodus1
+                  Outputs/exodus1/file_base='output_exodus1_mat_block1'
+                  Outputs/exodus2/file_base='output_exodus2_mat_block2'"
+      detail = 'outputting certain properties within the material definition to different files;'
+    []
+    [multiple_materials_single_file]
+      type = Exodiff
+      input = output_multiple_files.i
+      exodiff = 'output_exodus1_mat_both.e output_exodus2_varonly.e'
+      cli_args = "Materials/block_1/outputs=exodus1
+                  Materials/block_2/outputs=exodus1
+                  Outputs/exodus1/file_base='output_exodus1_mat_both'
+                  Outputs/exodus2/file_base='output_exodus2_varonly'
+                  Outputs/exodus2/hide=''"
+      detail = 'outputting certain properties within the material definition to a single file in the presence of multiple output files;'
+    []
+    [multiple_files_output_exodus]
+      type = Exodiff
+      input = output_multiple_files.i
+      exodiff = 'output_exodus1_mat_block1_with_var.e output_exodus2_varonly.e'
+      cli_args = "Materials/block_1/outputs=exodus
+                  Materials/block_2/outputs=none
+                  Outputs/inactive=exodus1
+                  Outputs/exodus=true
+                  Outputs/file_base=output_exodus1_mat_block1_with_var
+                  Outputs/exodus2/file_base=output_exodus2_varonly
+                  Outputs/exodus2/hide=''"
+      # output_properties set then outputs=none
+      allow_warnings = true
+      detail = 'outputting certain properties within the material definition to a single file using the "exodus" keyword in the presence of multiple output files;'
+    []
+    [multiple_files_output_all]
+      type = Exodiff
+      input = output_multiple_files.i
+      exodiff = 'output_exodus1_mat_block1.e output_exodus2_mat_block1.e'
+      cli_args = "Materials/block_2/outputs=none
+                  Outputs/exodus1/file_base=output_exodus1_mat_block1
+                  Outputs/exodus2/file_base=output_exodus2_mat_block1"
+      # output_properties set then outputs=none
+      allow_warnings = true
+      detail = 'outputting certain properties within the material definition to a single file using the "all" keyword in the presence of multiple output files;'
+    []
+    [multiple_files_output_explicit]
+      type = Exodiff
+      input = output_multiple_files.i
+      exodiff = 'output_exodus1_mat_block1.e output_exodus2_mat_block1.e'
+      cli_args = "Materials/block_1/outputs='exodus1 exodus2'
+                  Materials/block_2/outputs=none
+                  Outputs/exodus1/file_base=output_exodus1_mat_block1
+                  Outputs/exodus2/file_base=output_exodus2_mat_block1"
+      # output_properties set then outputs=none
+      allow_warnings = true
+      detail = 'outputting certain properties within the material definition to multiple files by explicitly specifying multiple output names; and'
     []
     [steady]
       type = Exodiff
@@ -92,6 +143,60 @@
     []
   []
 
+  [output_types]
+    requirement = "The system shall support material property output to output objects of type "
+    [vtk]
+      type = RunApp
+      input = output.i
+      cli_args = "Materials/test_material/outputs=vtk
+                  Outputs/vtk=true
+                  Outputs/file_base=output_vtk"
+      detail = "VTK."
+      vtk = true
+    []
+    [nemesis]
+      type = RunApp
+      input = output.i
+      cli_args = "Materials/test_material/outputs=nemesis
+                  Outputs/nemesis=true
+                  Outputs/exodus=false
+                  Outputs/file_base=output_nemesis"
+      detail = "Nemesis."
+    []
+    [tecplot]
+      type = RunApp
+      input = output.i
+      cli_args = "Materials/test_material/outputs=tecplot
+                  Outputs/tecplot=true
+                  Outputs/file_base=output_tecplot"
+      detail = "Tecplot."
+    []
+    [xda]
+      type = RunApp
+      input = output.i
+      cli_args = "Materials/test_material/outputs=xda
+                  Outputs/xda=true
+                  Outputs/file_base=output_xda"
+      detail = "XDA."
+    []
+    [xdr]
+      type = RunApp
+      input = output.i
+      cli_args = "Materials/test_material/outputs=xdr
+                  Outputs/xdr=true
+                  Outputs/file_base=output_xdr"
+      detail = "XDR."
+    []
+    [checkpoint]
+      type = RunApp
+      input = output.i
+      cli_args = "Materials/test_material/outputs=checkpoint
+                  Outputs/checkpoint=true
+                  Outputs/file_base=output_checkpoint"
+      detail = "Checkpoint."
+    []
+  []
+
   [duplicate_variable_name]
     type = RunException
     input = output_steady.i
@@ -99,14 +204,51 @@
     cli_args = "AuxVariables/real_property/order=CONSTANT AuxVariables/real_property/family=MONOMIAL"
     requirement = "The system shall report an error if an existing variable shares the same name as an auxiliary variable used for material output"
   []
-  [invalid_outputs]
+  [invalid_material_outputs]
     type = RunException
     input = output.i
     expect_err = "The output object 'garbage' is not a defined output object"
-    cli_args = 'Outputs/exodus=false Materials/test_material/outputs=garbage'
+    cli_args = 'Materials/test_material/outputs=garbage'
 
     requirement = "The system shall report an error if the supplied output options for material data output "
                   "are not consistent with the list of available outputs."
+  []
+  [missing_outputs]
+    type = RunException
+    input = output.i
+    expect_err = "Material properties output specified is not created because 'outputs' is not set in the Material, and neither is Outputs/output_material_properties"
+    cli_args = "Materials/active='out'
+                Materials/out/type=OutputTestMaterial
+                Materials/out/variable=u
+                Materials/out/output_properties='vector_property'"
+    requirement = "The system shall report a warning if the supplied output options for material properties do "
+                  "not generate an output."
+  []
+  [invalid_material_output_exodus]
+    type = RunException
+    input = output.i
+    expect_err = "The output object 'exodus' is not a defined output object"
+    cli_args = 'Materials/test_material/outputs=exodus Outputs/exodus=false'
+
+    requirement = "The system shall report an error if the 'exodus' output option for material data output "
+                  "is invoked when Outputs/exodus=false"
+  []
+  [invalid_material_output_unsupported]
+    type = RunException
+    input = output.i
+    expect_err = "The output object 'console' does not support material output."
+    cli_args = 'Materials/test_material/outputs=console Outputs/console=true'
+
+    requirement = "The system shall report an error if the output option for material data output "
+                  "is not one that supports material output"
+  []
+  [invalid_output_multiple_reserved_names]
+    type = RunException
+    input = output.i
+    expect_err = "When setting output name to reserved name 'none', only one entry is allowed in outputs parameter"
+    cli_args = "Materials/test_material/outputs='none exodus'"
+
+    requirement = "The system shall report an error if multiple output values are provided and one of those values is a reserved name"
   []
   [warn_unsupported_types]
     type = RunApp

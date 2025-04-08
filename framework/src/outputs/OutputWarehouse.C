@@ -125,6 +125,20 @@ OutputWarehouse::hasOutput(const std::string & name) const
   return _object_map.find(name) != _object_map.end();
 }
 
+bool
+OutputWarehouse::hasMaterialPropertyOutput(const std::string & name) const
+{
+  const auto found_object = hasOutput(name);
+  if (!found_object)
+    return false;
+  else
+  {
+    // Check if output object supports material property output
+    const auto * output_object = static_cast<const Output *>(_object_map.at(name));
+    return output_object->supportsMaterialPropertyOutput();
+  }
+}
+
 const std::set<OutputName> &
 OutputWarehouse::getOutputNames()
 {
@@ -314,11 +328,39 @@ OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name,
 }
 
 void
-OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
+OutputWarehouse::checkOutputs(const std::set<OutputName> & names,
+                              const bool supports_material_output)
 {
+  std::string reserved_name = "";
   for (const auto & name : names)
-    if (!isReservedName(name) && !hasOutput(name))
-      mooseError("The output object '", name, "' is not a defined output object");
+  {
+    const bool is_reserved_name = isReservedName(name);
+    if (is_reserved_name)
+      reserved_name = name;
+    if (!is_reserved_name)
+    {
+      if (!hasOutput(name))
+        mooseError("The output object '", name, "' is not a defined output object.");
+      if (supports_material_output && !hasMaterialPropertyOutput(name))
+        mooseError("The output object '", name, "' does not support material output.");
+    }
+  }
+  if (!reserved_name.empty() && names.size() > 1)
+    mooseError("When setting output name to reserved name '" + reserved_name +
+               "', only one entry is allowed in outputs parameter.");
+}
+
+std::set<OutputName>
+OutputWarehouse::getAllMaterialPropertyOutputNames() const
+{
+  std::set<OutputName> output_names;
+  for (const auto & pair : _object_map)
+  {
+    const auto * output = static_cast<const Output *>(pair.second);
+    if (output->supportsMaterialPropertyOutput())
+      output_names.insert(pair.first);
+  }
+  return output_names;
 }
 
 const std::set<std::string> &
