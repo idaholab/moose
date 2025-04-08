@@ -34,7 +34,6 @@
     assign_type = 'cell'
     id_name = 'pin_id'
     pattern_boundary = 'none'
-    square_size = 5.04
     generate_core_metadata = false
   []
   [core]
