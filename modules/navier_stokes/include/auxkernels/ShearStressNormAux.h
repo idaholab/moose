@@ -15,8 +15,7 @@
 #include "NS.h"
 
 /**
- * Computes the turbuent viscosity for the k-Epsilon model.
- * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
+ * Computes the norm of the sheer stress in the momentum equation.
  */
 class ShearStressNormAux : public AuxKernel
 {
