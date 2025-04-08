@@ -16,7 +16,7 @@
  * limited in the near-wall regions,
  * discretized using the finite volume method to a linear system.
  */
-class LinearFVTurbulentLimitedDiffusion : public LinearFVDiffusion
+class LinearFVTurbulentDiffusion : public LinearFVDiffusion
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,7 @@ public:
    * Class constructor.
    * @param params The InputParameters for the kernel.
    */
-  LinearFVTurbulentLimitedDiffusion(const InputParameters & params);
+  LinearFVTurbulentDiffusion(const InputParameters & params);
 
   virtual void initialSetup() override;
 
