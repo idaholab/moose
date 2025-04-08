@@ -20,12 +20,14 @@ ElectromagneticHeatingMaterial::validParams()
       "Material class used to provide the electric field as a material property and computes the "
       "residuals for electromagnetic/electrostatic heating based objects.");
   params.addCoupledVar(
-      "electric_field", "The electic field vector or electrostatic potential scalar to produce the field.");
+      "electric_field",
+      "The electic field vector or electrostatic potential scalar to produce the field.");
   params.addCoupledVar(
       "complex_electric_field",
       "The complex component of the electic field vector for the harmonic formulation.");
-  params.addParam<std::string>(
-      "electric_field_material_name", "electric_field", "User-specified material property name for the field.");
+  params.addParam<std::string>("electric_field_material_name",
+                               "electric_field",
+                               "User-specified material property name for the field.");
   params.addParam<std::string>("electric_field_heating_name",
                                "electric_field_heating",
                                "User-specified material property name for the Joule Heating.");
@@ -52,16 +54,19 @@ ElectromagneticHeatingMaterial::ElectromagneticHeatingMaterial(const InputParame
     _efield(_is_vector ? adCoupledVectorValue("electric_field") : _ad_grad_zero),
     _efield_complex(_is_vector ? adCoupledVectorValue("complex_electric_field") : _ad_grad_zero),
     _grad_potential(_is_vector ? _ad_grad_zero : adCoupledGradient("electric_field")),
-    _electric_field(declareADProperty<RealVectorValue>(getParam<std::string>("electric_field_material_name"))),
-    _electric_field_complex(declareADProperty<RealVectorValue>(getParam<std::string>("electric_field_material_name") +
-                                                      "_complex")),
-    _electric_field_heating(declareADProperty<Real>(getParam<std::string>("electric_field_heating_name"))),
+    _electric_field(
+        declareADProperty<RealVectorValue>(getParam<std::string>("electric_field_material_name"))),
+    _electric_field_complex(declareADProperty<RealVectorValue>(
+        getParam<std::string>("electric_field_material_name") + "_complex")),
+    _electric_field_heating(
+        declareADProperty<Real>(getParam<std::string>("electric_field_heating_name"))),
     _heating_scaling(getParam<Real>("heating_scaling")),
     _elec_cond(getADMaterialProperty<Real>("electrical_conductivity")),
     _formulation(getParam<MooseEnum>("formulation")),
     _solver(getParam<MooseEnum>("solver"))
 {
-  if ((_formulation == ElectromagneticFormulation::FREQUENCY) && (_solver == ElectromagneticFormulation::ELECTROSTATIC))
+  if ((_formulation == ElectromagneticFormulation::FREQUENCY) &&
+      (_solver == ElectromagneticFormulation::ELECTROSTATIC))
   {
     mooseError("The frequency domain is selected, but the solver type is electrostatic! Please "
                "check input file.");
@@ -104,7 +109,9 @@ ElectromagneticHeatingMaterial::computeJouleHeating()
 {
   if (_formulation == ElectromagneticFormulation::FREQUENCY)
     _electric_field_heating[_qp] = _heating_scaling * 0.5 * _elec_cond[_qp] *
-                          (_electric_field[_qp] * _electric_field[_qp] + _electric_field_complex[_qp] * _electric_field_complex[_qp]);
+                                   (_electric_field[_qp] * _electric_field[_qp] +
+                                    _electric_field_complex[_qp] * _electric_field_complex[_qp]);
   else
-    _electric_field_heating[_qp] = _heating_scaling * _elec_cond[_qp] * _electric_field[_qp] * _electric_field[_qp];
+    _electric_field_heating[_qp] =
+        _heating_scaling * _elec_cond[_qp] * _electric_field[_qp] * _electric_field[_qp];
 }
