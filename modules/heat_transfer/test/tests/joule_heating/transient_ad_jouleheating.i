@@ -27,7 +27,7 @@
   [HeatSrc]
     type = ADJouleHeatingSource
     variable = T
-    heating_term = 'field_heating'
+    heating_term = 'electric_field_heating'
   []
   [electric]
     type = ADHeatConduction
@@ -60,9 +60,9 @@
 [Materials]
   [ElectromagneticMaterial]
     type = ElectromagneticHeatingMaterial
-    field = elec
-    field_heating_name = field_heating
-    conductivity = electrical_conductivity
+    electric_field = elec
+    electric_field_heating_name = electric_field_heating
+    electrical_conductivity = electrical_conductivity
     formulation = 'time'
     solver = 'electrostatic'
   []

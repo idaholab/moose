@@ -30,7 +30,7 @@ public:
 
 protected:
   /// The variable data of the supplied variable for the electric field
-  const MooseVariableFieldBase & _field_var;
+  const MooseVariableFieldBase & _electric_field_var;
   /// True if the supplied variable is a vector
   const bool _is_vector;
   /// The electric field defined from a vector variable
@@ -40,11 +40,11 @@ protected:
   /// The electric field defined from the gradient of a scalar variable
   const ADVariableGradient & _grad_potential;
   /// Electric field material property
-  ADMaterialProperty<RealVectorValue> & _field;
+  ADMaterialProperty<RealVectorValue> & _electric_field;
   /// Complex electric field material property
-  ADMaterialProperty<RealVectorValue> & _field_complex;
+  ADMaterialProperty<RealVectorValue> & _electric_field_complex;
   /// Joule Heating residual material property
-  ADMaterialProperty<Real> & _field_heating;
+  ADMaterialProperty<Real> & _electric_field_heating;
   /// Coefficient to multiply by heating term
   const Real & _heating_scaling;
   /// Real component of the material conductivity (in S/m)

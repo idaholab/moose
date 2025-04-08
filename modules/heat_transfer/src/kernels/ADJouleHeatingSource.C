@@ -17,7 +17,7 @@ ADJouleHeatingSource::validParams()
   InputParameters params = ADKernelValue::validParams();
   params.addCoupledVar("elec", "Electrostatic potential for joule heating.");
   params.addParam<MaterialPropertyName>(
-      "heating_term", "field_heating", "Material property providing the Joule Heating.");
+      "heating_term", "electric_field_heating", "Material property providing the Joule Heating.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",
       "electrical_conductivity",

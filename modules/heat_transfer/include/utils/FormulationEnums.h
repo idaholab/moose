@@ -15,7 +15,7 @@
  *  and used to determine between solving for an electrostatic or
  *  electromagnetic electric field
  */
-namespace FM
+namespace ElectromagneticFormulation
 {
 /// Enum used when determining the domain of the formulation
 enum FormEnum

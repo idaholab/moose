@@ -18,6 +18,8 @@ For the formulation of the residuals, user can declare:
 - TIME DOMAIN: where the electric field is assumed to be derived from the time dependent Maxwell's equations
 - FREQUENCY DOMAIN: where the electric field is assumed to be derived from the frequency dependent Maxwell's equations. When using the frequency domain, the electric field is assumed to have a real and complex component.
 
+The equations for the residual formulations can be found in [ADJouleHeatingSource](ADJouleHeatingSource.md).
+
 ## Example Input File Syntax
 
 An electrostatic example of how to use `ElectromagneticHeatingMaterial` can be found in the

@@ -42,4 +42,13 @@
     method = opt
     required_python_packages = 'sympy os'
   []
+
+  [copper_wire_heating]
+    type = Exodiff
+    input = fusing_current_through_copper_wire.i
+    exodiff = fusing_current_through_copper_wire_out.e
+    requirement = 'The system shall calculate the heating of a copper wire when supplied with a current.'
+    design = 'ADJouleHeatingSource.md'
+    issues = '#30000'
+  []
 []

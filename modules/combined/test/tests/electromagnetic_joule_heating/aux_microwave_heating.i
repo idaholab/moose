@@ -134,10 +134,10 @@
   []
   [ElectromagneticMaterial]
     type = ElectromagneticHeatingMaterial
-    field = E_real
-    complex_field = E_imag
-    field_heating_name = field_heating
-    conductivity = cond_real
+    electric_field = E_real
+    complex_electric_field = E_imag
+    electric_field_heating_name = electric_field_heating
+    electrical_conductivity = cond_real
     formulation = FREQUENCY
     solver = ELECTROMAGNETIC
   []
@@ -231,7 +231,7 @@
   [microwave_heating]
     type = ADJouleHeatingSource
     variable = n
-    heating_term = 'field_heating'
+    heating_term = 'electric_field_heating'
   []
   [body_force_n]
     type = BodyForce
@@ -251,7 +251,7 @@
   [aux_microwave_heating]
     type = JouleHeatingHeatGeneratedAux
     variable = heating_term
-    heating_term = 'field_heating'
+    heating_term = 'electric_field_heating'
   []
 []
 

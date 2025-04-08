@@ -12,7 +12,7 @@
     input = 'transient_ad_jouleheating.i'
     exodiff = 'transient_ad_jouleheating_out.e'
     requirement = 'The system shall compute Joule heating using automatic differentiation'
-    # issues = '#15536'
+    issues = '#15536'
     design = 'ADJouleHeatingSource.md'
   [../]
   [./ad_joule_heating_jacobian]

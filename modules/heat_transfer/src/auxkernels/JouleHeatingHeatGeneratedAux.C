@@ -17,7 +17,7 @@ JouleHeatingHeatGeneratedAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute heat generated from Joule heating.");
   params.addParam<MaterialPropertyName>(
-      "heating_term", "field_heating", "Material property providing the Joule Heating.");
+      "heating_term", "electric_field_heating", "Material property providing the Joule Heating.");
   params.addCoupledVar("elec", "Electric potential for joule heating.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",
