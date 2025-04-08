@@ -16,7 +16,6 @@
     type = CSVDiff
     input = 'FFM-5B_high.i'
     csvdiff  = 'FFM-5B_high_out.csv'
-    heavy = true
     method = '!DBG'
     abs_zero = 1e-5
     valgrind = NONE
