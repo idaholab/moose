@@ -87,9 +87,6 @@ protected:
   /// Holds the current solution gradient at the current quadrature point
   const VariableGradient & _grad_u_neighbor;
 
-  /// Whether to use nodal or elemental values
-  const bool _use_nodal_values;
-
   /**
    * The virtual function you will want to override to compute error contributions.
    * This is called once per quadrature point on each interior side of every element.

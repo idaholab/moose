@@ -21,7 +21,7 @@
                 AuxVariables/disp_x/family=LAGRANGE AuxVariables/disp_y/family=LAGRANGE
                 Adaptivity/Indicators/indicator/use_displaced_mesh=false
                 Adaptivity/Markers/marker/refine=0.2"
-    requirement = "The system shall allow for using internal side indicators on the displaced mesh that depend on a monomial variable."
+    requirement = "The system shall allow for using internal side indicators on the displaced mesh, and acting on a monomial variable."
     # uses same output file names
     prereq = 'linear_lagrange_source'
   []

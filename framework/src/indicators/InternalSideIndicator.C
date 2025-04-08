@@ -74,8 +74,7 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     _normals(_assembly.normals()),
 
     _u_neighbor(_var.slnNeighbor()),
-    _grad_u_neighbor(_var.gradSlnNeighbor()),
-    _use_nodal_values(_var.isNodalDefined())
+    _grad_u_neighbor(_var.gradSlnNeighbor())
 {
   const std::vector<MooseVariableFieldBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
@@ -88,6 +87,9 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     paramError("use_displaced_mesh",
                "Internal side indicators do not support using the displaced mesh at this time. "
                "They can be used on the undisplaced mesh in a Problem with displaced mesh");
+  // Access into the solution vector assumes constant monomial
+  if (_field_var.feType() != libMesh::FEType(CONSTANT, MONOMIAL))
+    mooseError("Only constant monomial variables for the internal side indicator are supported");
 }
 
 void
@@ -100,8 +102,6 @@ InternalSideIndicator::computeIndicator()
 
   // Contribution is added to the two elements
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
     const auto sys_num = _field_var.sys().number();
     const auto var_num = _field_var.number();
     _solution.add(_current_elem->dof_number(sys_num, var_num, 0), sum * _current_elem->hmax());
@@ -136,7 +136,6 @@ InternalSideIndicator::finalize()
     const auto sys_num = _field_var.sys().number();
     const auto var_num = _field_var.number();
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _solution.set(_current_elem->dof_number(sys_num, var_num, 0),
                   std::sqrt(value) / static_cast<Real>(n_flux_faces));
   }
