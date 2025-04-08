@@ -6,30 +6,35 @@
     input = separator-no-jump.i
     csvdiff =  separator-no-jump_out.csv
     requirement = 'The system shall be able to simulate hydraulically separated channels without pressure jumps.'
+    mesh_mode = REPLICATED # ParsedGenerateSideset doen't allow distributed
   []
   [jump]
     type = 'CSVDiff'
     input = separator-jump.i
     csvdiff =  separator-jump_out.csv
     requirement = 'The system shall be able to simulate hydraulically separated channels with pressure jumps.'
+    mesh_mode = REPLICATED # ParsedGenerateSideset doen't allow distributed
   []
   [energy]
     type = 'CSVDiff'
     input = separator-energy.i
     csvdiff =  separator-energy_out.csv
     requirement = 'The system shall be able to simulate hydraulically and thermally separated channels.'
+    mesh_mode = REPLICATED # ParsedGenerateSideset doen't allow distributed
   []
   [energy-nonorthogonal]
     type = 'CSVDiff'
     input = separator-energy-nonorthogonal.i
     csvdiff =  separator-energy-nonorthogonal_out.csv
     requirement = 'The system shall be able to simulate hydraulically and thermally separated channels described with nonorthogonal meshes.'
+    mesh_mode = REPLICATED # ParsedGenerateSideset doen't allow distributed
   []
   [scalar]
     type = 'CSVDiff'
     input = separator-scalar.i
     csvdiff =  separator-scalar_out.csv
     requirement = 'The system shall be able to simulate hydraulically and scalar-flux separated channels.'
+    mesh_mode = REPLICATED # ParsedGenerateSideset doen't allow distributed
   []
   [mixing]
     type = 'CSVDiff'
