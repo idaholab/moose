@@ -1,5 +1,5 @@
 clang_format:
-  - clang-format 16
+  - clang-format 18
 
 moose_python:
   - python 3.12

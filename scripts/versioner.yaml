@@ -25,8 +25,8 @@ packages:
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.3.0
-    build_number: 7
+    version: 9.4.2
+    build_number: 0
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -121,7 +121,7 @@ packages:
       - scripts/setup_libtorch.sh
   # dependers: none
   pprof:
-    version: 2024.12.23
+    version: 2025.04.08
     build_number: 0
     conda: conda/pprof
     templates:

@@ -3,8 +3,12 @@ mpi:
   - openmpi
 
 mpi_version:
-  - 4.2.1
-  - 4.1.6
+  # MPICH versions
+  - 4.2.1    # [linux]
+  - 4.3.0    # [osx]
+  # OpenMPI versions
+  - 4.1.6    # [linux]
+  - 5.0.7    # [osx]
 
 mpi_friendly_name:
   - MPICH
@@ -26,10 +30,12 @@ zip_keys:
   - mpi_dev_website
 
 moose_hdf5:
-  - hdf5 1.14.2
+  - hdf5 1.14.2         # [linux]
+  - hdf5 1.14.4         # [osx]
 
 moose_libexpat:
-  - libexpat 2.5.0
+  - libexpat 2.5.0      # [linux]
+  - libexpat 2.7.0      # [osx]
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cmake:
@@ -38,20 +44,20 @@ moose_cmake:
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
   - gcc 12.3.0 h915e2ae_13                                  # [linux]
-  - clang 16.0.6 default_h420b035_14                        # [not arm64 and osx]
-  - clang 16.0.6 default_h87a6e52_14                        # [arm64]
+  - clang 18.1.8 default_h576c50e_9                         # [not arm64 and osx]
+  - clang 18.1.8 default_h474c9e2_9                         # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
   - gxx 12.3.0 h915e2ae_13                                  # [linux]
-  - clangxx 16.0.6 default_h2725d3a_14                      # [not arm64 and osx]
-  - clangxx 16.0.6 default_h75e0ad0_14                      # [arm64]
+  - clangxx 18.1.8 default_heb2e8d1_9                       # [not arm64 and osx]
+  - clangxx 18.1.8 default_h1ffe849_9                       # [arm64]
 
 ### If you change these versions, change also conda/seacas/*
 moose_gfortran:
   - gfortran 12.3.0 h915e2ae_13                             # [linux]
-  - gfortran 12.4.0 hcc3c99d_1                              # [not arm64 and osx]
-  - gfortran 12.4.0 h3ef1dbf_1                              # [arm64]
+  - gfortran 13.3.0 hcc3c99d_1                              # [not arm64 and osx]
+  - gfortran 13.3.0 h3ef1dbf_1                              # [arm64]
 
 ### Cmake requires these be installed in order to "find" compilers
 moose_ccompiler:
@@ -70,10 +76,10 @@ moose_libgfortran5:
   - libgfortran5 14.2.0 h2c44a93_105                        # [arm64]
 
 moose_gcc_impl:                                             # [linux]
-  - gcc_impl_linux-64 12.3.0 h58ffeeb_13                     # [linux]
+  - gcc_impl_linux-64 12.3.0 h58ffeeb_13                    # [linux]
 
 moose_gfortran_impl:                                        # [linux]
-  - gfortran_impl_linux-64 12.3.0 h8f2110c_13                # [linux]
+  - gfortran_impl_linux-64 12.3.0 h8f2110c_13               # [linux]
 
 ### Below are pinings created at the time of render
 ### based on above content. If any of the above
@@ -96,44 +102,44 @@ moose_libzlib:
 
 moose_icu:
   - icu 73.2 h59595ed_0                                     # [linux]
-  - icu 73.2 hf5e326d_0                                     # [not arm64 and osx]
-  - icu 73.2 hc8870d7_0                                     # [arm64]
+  - icu 75.1 h120a0e1_0                                     # [not arm64 and osx]
+  - icu 75.1 hfee45f7_0                                     # [arm64]
 
 moose_cctools:                                              # [osx]
-  - cctools_osx-64 1010.6 heaa7f0c_1                        # [not arm64 and osx]
-  - cctools_osx-arm64 1010.6 h4f2c9d0_1                     # [arm64]
+  - cctools_osx-64 1010.6 hd19c6af_6                        # [not arm64 and osx]
+  - cctools_osx-arm64 1010.6 h3b4f5d3_6                     # [arm64]
 
 moose_compiler_rt:                                          # [osx]
-  - compiler-rt 16.0.6 ha38d28d_2                           # [not arm64 and osx]
-  - compiler-rt 16.0.6 h3808999_2                           # [arm64]
+  - compiler-rt 18.1.8 h1020d70_1                           # [not arm64 and osx]
+  - compiler-rt 18.1.8 h856b3c1_1                           # [arm64]
 
 moose_clang_osx:                                            # [osx]
-  - clangxx_osx-64 16.0.6 hb91bd55_19                       # [not arm64 and osx]
-  - clang_osx-arm64 16.0.6 h54d7cd3_19                      # [arm64]
+  - clangxx_osx-64 18.1.8 h7e5c614_24                       # [not arm64 and osx]
+  - clang_osx-arm64 18.1.8 h07b0088_24                      # [arm64]
 
 moose_llvm_openmp:                                          # [osx]
   - llvm-openmp 20.1.2 ha54dae1_0                           # [not arm64 and osx]
   - llvm-openmp 20.1.2 hdb05f8b_0                           # [arm64]
 
 moose_llvm_tools:                                           # [osx]
-  - llvm-tools 16.0.6 hbedff68_3                            # [not arm64 and osx]
-  - llvm-tools 16.0.6 haab561b_3                            # [arm64]
+  - llvm-tools 18.1.8 hc29ff6c_3                            # [not arm64 and osx]
+  - llvm-tools 18.1.8 hc4b4ae8_3                            # [arm64]
 
 moose_libclang:
   - libclang13 15.0.7 default_h5d6823c_5                    # [linux]
-  - libclang-cpp16 16.0.6 default_he1224e2_14               # [not arm64 and osx]
-  - libclang-cpp16 16.0.6 default_hc2ef00a_14               # [arm64]
+  - libclang-cpp18.1 18.1.8 default_h3571c67_9              # [not arm64 and osx]
+  - libclang-cpp18.1 18.1.8 default_hf90f093_9              # [arm64]
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX11.3.sdk                                     # [osx]
+  - /opt/MacOSX13.3.sdk                                     # [osx]
 
 macos_min_version:                                          # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]
 
 macos_machine:                                              # [osx]
   - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
-  - arm64-apple-darwin20.0.0                                # [arm64]
+  - arm64-apple-darwin22.6.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]
