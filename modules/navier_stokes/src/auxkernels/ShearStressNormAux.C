@@ -18,8 +18,7 @@ InputParameters
 ShearStressNormAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription(
-      "Calculates the turbulent viscosity according to the k-epsilon model.");
+  params.addClassDescription("Calculates the norm of the sheer stress.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
