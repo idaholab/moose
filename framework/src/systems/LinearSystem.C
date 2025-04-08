@@ -97,10 +97,6 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   _rhs_tag = _fe_problem.addVectorTag("RHS");
   associateVectorToTag(*_linear_implicit_system.rhs, _rhs_tag);
 
-  // We add other wector tags so that objects acting on the aux system inheriting
-  // from the tagging interface can still be used without any nonlinear systems
-  _rhs_non_time_tag = _fe_problem.addVectorTag("NONTIME");
-
   _linear_implicit_system.attach_assemble_function(Moose::compute_linear_system);
 }
 
