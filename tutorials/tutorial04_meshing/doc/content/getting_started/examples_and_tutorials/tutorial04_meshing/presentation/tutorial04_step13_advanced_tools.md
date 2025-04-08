@@ -8,7 +8,7 @@
  
  The quadratic element options can be selected by setting `tri_element_type` as TRI6 or TRI7, and `quad_element_type` as QUAD8 or QUAD9 in the 2D mesh generators.
  
- The 2D-to-3D mesh generators such as [AdvancedExtruderGenerator.md] detects 2D quadratic elements and create 3D quadratic elements accordingly.
+ The 2D-to-3D mesh generators such as [AdvancedExtruderGenerator.md] detect 2D quadratic elements and create 3D quadratic elements accordingly.
 
 !media reactor/meshgenerators/pccmg_quad.png
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
@@ -114,6 +114,8 @@ This [FillBetweenPointVectorsGenerator.md] object generates a transition layer b
 !---
 
 ## RevolveGenerator
+
+[RevolveGenerator.md] provides an alternative tool for increasing the dimensionality of a lower dimension mesh (1D or 2D) in addition to [MeshExtruderGenerator.md]/[AdvancedExtruderGenerator.md]. Each element is converted to one or more copies of its corresponding higher dimensional element along an open or closed specific circular curve.
 
 !row!
 !col small=12 medium=6 large=8

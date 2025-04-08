@@ -49,7 +49,7 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
 !alert! note title=Tips
 
 - Use a unique [AssemblyMeshGenerator.md] block for each assembly with a unique geometrical configuration, region ID composition, and/or inventory of pin structures
-- [!param](/Mesh/AssemblyMeshGenerator/background_region_ids) is a 1-dimensional array containing region IDs for each axial layer of the background region. [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) is a 2-dimensional array containing regions IDs for the duct region. The first row of the array represents the 2D duct regions (from innermost to outermost duct region) for the bottom layer of the assembly. Each subsequent row assigns IDs on another axial level, from bottom to top.
+- [!param](/Mesh/AssemblyMeshGenerator/background_region_id) is a 1-dimensional array containing region IDs for each axial layer of the background region. [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) is a 2-dimensional array containing regions IDs for the duct region. The first row of the array represents the 2D duct regions (from innermost to outermost duct region) for the bottom layer of the assembly. Each subsequent row assigns IDs on another axial level, from bottom to top.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
 
 !alert-end!
