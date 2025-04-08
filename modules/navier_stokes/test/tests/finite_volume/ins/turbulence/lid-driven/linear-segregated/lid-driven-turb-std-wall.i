@@ -148,17 +148,17 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 
   [TKE_advection]
-    type = LinearFVTurbulentLimitedAdvection
+    type = LinearFVTurbulentAdvection
     variable = TKE
   []
   [TKE_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = ${mu}
     use_nonorthogonal_correction = true
   []
   [TKE_turb_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_k}
@@ -179,19 +179,19 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 
   [TKED_advection]
-    type = LinearFVTurbulentLimitedAdvection
+    type = LinearFVTurbulentAdvection
     variable = TKED
     walls = ${walls}
   []
   [TKED_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
     use_nonorthogonal_correction = true
     walls = ${walls}
   []
   [TKED_turb_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
@@ -203,7 +203,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
@@ -252,7 +252,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
-    k = TKE
+    tke = TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -279,7 +279,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = kEpsilonViscosityAux
     variable = mu_t
     C_mu = ${C_mu}
-    k = TKE
+    tke = TKE
     epsilon = TKED
     mu = ${mu}
     rho = ${rho}
@@ -294,7 +294,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [compute_y_plus]
     type = RANSYPlusAux
     variable = yplus
-    k = TKE
+    tke = TKE
     mu = ${mu}
     rho = ${rho}
     u = vel_x

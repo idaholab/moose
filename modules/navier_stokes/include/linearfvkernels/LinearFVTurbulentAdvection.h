@@ -14,14 +14,14 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * An advection kernel that implements the advection term for the enthalpy in the
- * energy equation.
+ * An advection kernel that implements the advection term for the turbulent variabkes
+ * limited for the first cells near the wall.
  */
-class LinearFVTurbulentLimitedAdvection : public LinearFVScalarAdvection
+class LinearFVTurbulentAdvection : public LinearFVScalarAdvection
 {
 public:
   static InputParameters validParams();
-  LinearFVTurbulentLimitedAdvection(const InputParameters & params);
+  LinearFVTurbulentAdvection(const InputParameters & params);
 
   virtual void addMatrixContribution() override;
 
