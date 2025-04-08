@@ -423,7 +423,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   // Relax the field update for the next momentum predictor
   if (relax_fields)
   {
-    auto & old_local_solution = *(system.solutionPreviousNewton());
+    const auto & old_local_solution = *(system.solutionPreviousNewton());
     NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
   }
 
@@ -528,7 +528,7 @@ LinearAssemblySegregatedSolve::solve()
           solveSolidEnergy();
     }
 
-    // If we have an turbulence equations, solve it here.
+    // If we have turbulence equations, solve them here.
     // The turbulent viscosity depends on the value of the turbulence surrogate variables
     if (_has_turbulence_systems)
     {
