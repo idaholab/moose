@@ -18,13 +18,13 @@ public:
   {
     InputParameters params = MFEMGeneralUserObject::validParams();
     params.registerBase("Kernel");
-    params.addParam<std::string>("variable",
-                                 "Variable labelling the weak form this kernel is added to");
+    params.addParam<VariableName>("variable",
+                                  "Variable labelling the weak form this kernel is added to");
     return params;
   }
 
   MFEMKernel(const InputParameters & parameters)
-    : MFEMGeneralUserObject(parameters), _test_var_name(getParam<std::string>("variable"))
+    : MFEMGeneralUserObject(parameters), _test_var_name(getParam<VariableName>("variable"))
   {
   }
   virtual ~MFEMKernel() = default;

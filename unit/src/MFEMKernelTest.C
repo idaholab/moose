@@ -31,7 +31,7 @@ TEST_F(MFEMKernelTest, MFEMCurlCurlKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMCurlCurlKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMCurlCurlKernel & kernel =
       addObject<MFEMCurlCurlKernel>("MFEMCurlCurlKernel", "kernel1", kernel_params);
@@ -55,7 +55,7 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMDiffusionKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMDiffusionKernel & kernel =
       addObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "kernel1", kernel_params);
@@ -79,7 +79,7 @@ TEST_F(MFEMKernelTest, MFEMDivDivKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMDivDivKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   auto & kernel = addObject<MFEMDivDivKernel>("MFEMDivDivKernel", "kernel1", kernel_params);
 
@@ -102,7 +102,7 @@ TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMLinearElasticityKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("lambda") = "lambda";
   kernel_params.set<std::string>("mu") = "mu";
   MFEMLinearElasticityKernel & kernel =
@@ -127,7 +127,7 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorGradientKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMMixedVectorGradientKernel & kernel = addObject<MFEMMixedVectorGradientKernel>(
       "MFEMMixedVectorGradientKernel", "kernel1", kernel_params);
@@ -151,7 +151,7 @@ TEST_F(MFEMKernelTest, MFEMVectorDomainLFKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorDomainLFKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("vector_coefficient") = "coef1";
   MFEMVectorDomainLFKernel & kernel =
       addObject<MFEMVectorDomainLFKernel>("MFEMVectorDomainLFKernel", "kernel1", kernel_params);
@@ -177,7 +177,7 @@ TEST_F(MFEMKernelTest, MFEMVectorFEDomainLFKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEDomainLFKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<FunctionName>("function") = "vec_coef1";
   MFEMVectorFEDomainLFKernel & kernel =
       addObject<MFEMVectorFEDomainLFKernel>("MFEMVectorFEDomainLFKernel", "kernel1", kernel_params);
@@ -201,7 +201,7 @@ TEST_F(MFEMKernelTest, MFEMVectorFEMassKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEMassKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMVectorFEMassKernel & kernel =
       addObject<MFEMVectorFEMassKernel>("MFEMVectorFEMassKernel", "kernel1", kernel_params);
@@ -226,7 +226,7 @@ TEST_F(MFEMKernelTest, MFEMVectorFEWeakDivergenceKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEWeakDivergenceKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMVectorFEWeakDivergenceKernel & kernel = addObject<MFEMVectorFEWeakDivergenceKernel>(
       "MFEMVectorFEWeakDivergenceKernel", "kernel1", kernel_params);
@@ -251,7 +251,7 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarCurlKernel");
-  kernel_params.set<std::string>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<std::string>("trial_variable") = "trial_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMMixedScalarCurlKernel & kernel =

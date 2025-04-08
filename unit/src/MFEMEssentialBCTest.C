@@ -98,7 +98,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMScalarDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<Real>("value") = 1.;
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
@@ -127,7 +127,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctionDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctionDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<FunctionName>("function") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
@@ -159,7 +159,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<Real>>("values") = {1., 2., 3.};
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
@@ -194,7 +194,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<FunctionName>("function") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
@@ -232,7 +232,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorNormalDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<Real>>("values") = {1., 2., 3.};
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
@@ -270,7 +270,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionNormalDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionNormalDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<FunctionName>("function") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMVectorFunctionNormalDirichletBC>(
@@ -309,7 +309,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorTangentialDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<Real>>("values") = {1., 2., 3.};
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMVectorTangentialDirichletBC>(
@@ -348,7 +348,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctionTangentialDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionTangentialDirichletBC");
-  bc_params.set<std::string>("variable") = "test_variable_name";
+  bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<FunctionName>("function") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMVectorFunctionTangentialDirichletBC>(
