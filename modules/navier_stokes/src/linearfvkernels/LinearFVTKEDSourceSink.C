@@ -130,7 +130,7 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     if (_w_var)
       velocity(2) = (*_w_var)(elem_arg, state);
 
-    // Get near wall faceInof and distances from cell center to every wall
+    // Get near wall faceInfo and distances from cell center to every wall
     const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem_info->elem());
     const auto & distance_vec = libmesh_map_find(_dist, _current_elem_info->elem());
     mooseAssert(distance_vec.size(), "Should have found a distance vector");
