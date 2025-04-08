@@ -29,12 +29,12 @@ projectQPoints3d(const Elem * const msm_elem,
                  const QBase & qrule_msm,
                  std::vector<Point> & q_pts)
 {
-  auto && msm_order = msm_elem->default_order();
-  auto && msm_type = msm_elem->type();
+  const auto msm_elem_order = msm_elem->default_order();
+  const auto msm_elem_type = msm_elem->type();
 
   // Get normal to linearized element, could store and query but computation is easy
-  Point e1 = msm_elem->point(0) - msm_elem->point(1);
-  Point e2 = msm_elem->point(2) - msm_elem->point(1);
+  const Point e1 = msm_elem->point(0) - msm_elem->point(1);
+  const Point e2 = msm_elem->point(2) - msm_elem->point(1);
   const Point normal = e2.cross(e1).unit();
 
   // Get sub-elem (for second order meshes, otherwise trivial)
@@ -203,8 +203,10 @@ projectQPoints3d(const Elem * const msm_elem,
     // Get physical point on msm_elem to project
     Point x0;
     for (auto n : make_range(msm_elem->n_nodes()))
-      x0 += Moose::fe_lagrange_2D_shape(
-                msm_type, msm_order, n, static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp))) *
+      x0 += Moose::fe_lagrange_2D_shape(msm_elem_type,
+                                        msm_elem_order,
+                                        n,
+                                        static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp))) *
             msm_elem->point(n);
 
     // Use msm_elem quadrature point as initial guess
