@@ -21,7 +21,7 @@ advected_interp_method = 'upwind'
 pressure_tag = "pressure_grad"
 
 ### k-epsilon Closure Parameters ###
-sigma_k = 1.0
+sigma_k =1.0
 sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
@@ -53,14 +53,14 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
   [corner_walls]
     type = SideSetsBetweenSubdomainsGenerator
     input = gen
-    primary_block = '1'
-    paired_block = '2'
+    primary_block ='1'
+    paired_block ='2'
     new_boundary = 'wall-side'
   []
   [delete_bottom]
     type = BlockDeletionGenerator
     input = corner_walls
-    block = '2'
+    block ='2'
   []
 []
 
@@ -240,7 +240,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
@@ -276,7 +276,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     type = INSFVMixingLengthTKEDBC
     boundary = 'left'
     variable = TKED
-    k = TKE
+    tke = TKE
     characteristic_length = '${fparse 2*H}'
   []
   [outlet_p]
@@ -306,7 +306,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
-    k = TKE
+    tke = TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -324,7 +324,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     type = kEpsilonViscosityAux
     variable = mu_t
     C_mu = ${C_mu}
-    k = TKE
+    tke = TKE
     epsilon = TKED
     mu = ${mu}
     rho = ${rho}
