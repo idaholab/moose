@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LinearFVElementalKernel.h"
+#include "NS.h"
 
 /**
  * Kernel that adds contributions to the source and the sink of the turbulent kinetic energy

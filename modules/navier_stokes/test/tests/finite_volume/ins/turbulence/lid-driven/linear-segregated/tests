@@ -3,8 +3,8 @@
   # Input                        Wall function           Solver         Energy   Energy wall function
   # lid-driven-turb-std-wall.i      std                  segregated     no
   # lid-driven-turb-non-eq-wall.i   non-eq               segregated     no
-  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
-  issues = '#9007'
+  design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+  issues = '#29846'
   [lid_driven_turb_std_wall_linear]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions and the linear finite volume discretization, '
     [result]
@@ -14,6 +14,7 @@
       detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
     []
     [run]
       type = 'Exodiff'
@@ -22,6 +23,7 @@
       detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-std-wall_short'
       abs_zero = 1e-6
+      recover = false # we don't support recovery for SIMPLE yet
     []
   []
   [lid_driven_turb_non_eq_wall_linear]
@@ -33,6 +35,8 @@
       detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
     []
     [run]
       type = 'Exodiff'
@@ -41,6 +45,8 @@
       detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-non-eq-wall_short'
       abs_zero = 1e-6
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
     []
   []
 []
