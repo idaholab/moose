@@ -350,8 +350,8 @@ MeshGeneratorPD::generate()
         else if (_merge_pd_interfacial_blks) // assign block ID (max_fe_blk_id + 1 +
                                              // _pd_blk_offset_number) to all PD inter-block bonds
           new_elem->subdomain_id() = max_fe_blk_id + 1 + _pd_blk_offset_number;
-        else // assign a new block ID (node i blk ID + node j blk ID) to this PD inter-block bonds
-          new_elem->subdomain_id() = bid_i + bid_j;
+        else // assign a new block ID (node i blk ID) to this PD inter-block bonds
+          new_elem->subdomain_id() = bid_i;
 
         new_elem = new_mesh->add_elem(new_elem);
         new_elem->set_node(0) = new_mesh->node_ptr(i);

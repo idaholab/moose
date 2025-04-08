@@ -150,4 +150,15 @@
     design = 'MeshGeneratorPD.md'
     issues = '#17723'
   [../]
+
+  [./2D_pd_block_ids]
+    type = 'Exodiff'
+    input = '2D_pd_block_ids.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_pd_block_ids_in.e'
+    recover = false
+    map = false
+    issues = '#28903'
+    requirement = 'The system shall assign to interfacial elements the ID of one of the connected blocks.'
+  [../]
 []
