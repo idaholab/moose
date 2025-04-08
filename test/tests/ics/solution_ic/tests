@@ -17,7 +17,7 @@
     type = 'Exodiff'
     input = 'solution_ic_block_restricted.i'
     exodiff = 'solution_ic_block_restricted_out.e'
-    requirement = "The system shall be able to initialize a variable from an ExodusII file."
+    requirement = "The system shall be able to initialize a variable from an ExodusII file and specify the block restriction of the source blocks in that file independently of the block restriction of the initial condition."
   []
 
   [errors]
