@@ -117,14 +117,14 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     use_deviatoric_terms = yes
   []
   [u_diffusion]
     type = LinearFVDiffusion
     variable = vel_x
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -141,14 +141,14 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     use_deviatoric_terms = yes
   []
   [v_diffusion]
     type = LinearFVDiffusion
     variable = vel_y
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -161,7 +161,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -171,21 +171,21 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   []
 
   [TKE_advection]
-    type = LinearFVTurbulentLimitedAdvection
+    type = LinearFVTurbulentAdvection
     variable = TKE
   []
   [TKE_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [TKE_turb_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_k}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [TKE_source_sink]
     type = LinearFVTKESourceSink
@@ -202,23 +202,23 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   []
 
   [TKED_advection]
-    type = LinearFVTurbulentLimitedAdvection
+    type = LinearFVTurbulentAdvection
     variable = TKED
     walls = ${walls}
   []
   [TKED_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     walls = ${walls}
   []
   [TKED_turb_diffusion]
-    type = LinearFVTurbulentLimitedDiffusion
+    type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     walls = ${walls}
   []
   [TKED_source_sink]
@@ -226,7 +226,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
@@ -318,7 +318,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
-    k = TKE
+    tke = TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -345,7 +345,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     type = kEpsilonViscosityAux
     variable = mu_t
     C_mu = ${C_mu}
-    k = TKE
+    tke = TKE
     epsilon = TKED
     mu = ${mu}
     rho = ${rho}
@@ -360,7 +360,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   [compute_y_plus]
     type = RANSYPlusAux
     variable = yplus
-    k = TKE
+    tke = TKE
     mu = ${mu}
     rho = ${rho}
     u = vel_x

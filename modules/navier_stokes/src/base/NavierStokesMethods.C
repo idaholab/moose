@@ -217,7 +217,7 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
       grad_zy = grad_w(1);
       grad_zz = grad_w(2);
 
-      trace += Sij_zz / 3.0;
+      trace += 2.0 * Sij_zz / 3.0;
     }
   }
 
