@@ -58,22 +58,63 @@ public:
    */
   virtual ~CSGCell() = default;
 
+  /**
+   * @brief Get the type of fill for the cell
+   *
+   * @return FillType
+   */
   FillType getFillType() const { return _fill_type; }
 
+  /**
+   * @brief Get the string representation of the fill type
+   *
+   * @return const std::string
+   */
+  const std::string getFillTypeString();
+
+  /**
+   * @brief Get the cell fill
+   *
+   * @return nullptr for void cell, material name (string) for material cell,
+   * or CSGUniverse for universe cell
+   */
   template <typename T>
   T getFill();
 
+  /**
+   * @brief Get the name of the fill
+   *
+   * @return std::string
+   */
   std::string getFillName() const { return _fill_name; }
 
+  /**
+   * @brief Get the cell name
+   *
+   * @return const std::string
+   */
   const std::string getName() const { return _name; }
 
+  /**
+   * @brief upate the region of the cell
+   *
+   * @param region
+   */
   void updateRegion(const CSGRegion & region) { _region = region; }
 
+  /**
+   * @brief Get the cell region
+   *
+   * @return const CSGRegion&
+   */
   const CSGRegion & getRegion() const { return _region; }
 
+  /**
+   * @brief Get the string representation of the cell region
+   *
+   * @return std::string
+   */
   std::string getRegionAsString() const { return _region.toString(); }
-
-  const std::string getFillTypeString();
 
 protected:
   /// Name of surface
@@ -82,6 +123,7 @@ protected:
   /// Fill type of cell
   FillType _fill_type;
 
+  /// name of the fill object
   std::string _fill_name;
 
   /// Cell region, represented as a CSGRegion object

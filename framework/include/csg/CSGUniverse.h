@@ -27,6 +27,12 @@ public:
    */
   CSGUniverse(const std::string name);
 
+  /**
+   * @brief Construct a new CSGUniverse object from list of cells
+   *
+   * @param name unique name of universe
+   * @param cells list of cells to add to universe
+   */
   CSGUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells);
 
   /**
@@ -34,22 +40,59 @@ public:
    */
   virtual ~CSGUniverse() = default;
 
+  /**
+   * @brief add cell to universe
+   *
+   * @param cell
+   */
   void addCell(const std::shared_ptr<CSGCell> cell);
 
+  /**
+   * @brief Get the Cell object by name
+   *
+   * @param name name of cell
+   * @return std::shared_ptr<CSGCell>
+   */
   std::shared_ptr<CSGCell> getCell(const std::string name);
 
+  /**
+   * @brief check if cell of provided name is present in universe
+   *
+   * @param name name of cell
+   * @return true / false
+   */
   bool hasCell(const std::string name) const;
 
+  /**
+   * @brief remove a cell from the universe by its name
+   *
+   * @param name name of cell to remove
+   */
   void removeCell(const std::string name);
 
+  /**
+   * @brief remove a cell from the universe
+   *
+   * @param cell cell to remove
+   */
   void removeCell(const std::shared_ptr<CSGCell> cell);
 
+  /**
+   * @brief Get list of the all cells in the universe
+   *
+   * @return std::vector<std::shared_ptr<CSGCell>>
+   */
   std::vector<std::shared_ptr<CSGCell>> getAllCells() const { return _cells; }
 
+  /**
+   * @brief Get the name of the universe
+   *
+   * @return const std::string
+   */
   const std::string getName() const { return _name; }
 
 protected:
-  /// Name of surface
+  /// Name of universe
   std::string _name;
 
   /// list of cells in universe

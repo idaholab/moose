@@ -17,7 +17,7 @@
 #include "CSGZCylinder.h"
 #include "CSGRegion.h"
 #include "CSGCellList.h"
-#include "CSGUniverse.h"
+#include "CSGUniverseList.h"
 #include "nlohmann/json.h"
 
 namespace CSG
@@ -138,20 +138,41 @@ public:
     return _surface_list.getSurface(name);
   }
 
-  // getSurfaceName(surf)
-
+  /**
+   * @brief Create a Material Cell object
+   *
+   * @param name unique cell name
+   * @param mat_name material name (TODO: this will eventually be a material object and not just a name)
+   * @param region cell region
+   * @return std::shared_ptr<CSGCell>
+   */
   std::shared_ptr<CSGCell>
   createCell(const std::string name, const std::string mat_name, const CSGRegion & region)
   {
     return _cell_list.addMaterialCell(name, mat_name, region);
   }
 
+  /**
+   * @brief Create a Void Cell object
+   *
+   * @param name unique cell name
+   * @param region cell region
+   * @return std::shared_ptr<CSGCell>
+   */
   std::shared_ptr<CSGCell>
   createCell(const std::string name, const CSGRegion & region)
   {
     return _cell_list.addVoidCell(name, region);
   }
 
+  /**
+   * @brief Create a Universe Cell object
+   *
+   * @param name unique cell name
+   * @param univ universe
+   * @param region cell region
+   * @return std::shared_ptr<CSGCell>
+   */
   std::shared_ptr<CSGCell>
   createCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region)
   {
@@ -180,19 +201,11 @@ public:
   }
 
   /**
-   * @brief Create a Root Universe object
-   *
-   * @param name root universe name
-   * @return shared pointer to CSGUniverse
-   */
-  std::shared_ptr<CSGUniverse> createRootUniverse(const std::string name);
-
-  /**
    * @brief Get the Root Universe object
    *
    * @return  shared pointer to CSGUniverse
    */
-  std::shared_ptr<CSGUniverse> getRootUniverse() const;
+  std::shared_ptr<CSGUniverse> getRootUniverse() const { return _universe_list.getRoot(); }
 
   /**
    * @brief generate the JSON representation output for the CSG object
@@ -207,7 +220,8 @@ private:
   /// List of surfaces associated with CSG object
   CSGCellList _cell_list;
 
-  /// Pointer to root universe
-  std::shared_ptr<CSGUniverse> _root_universe;
+  /// List of universes associated with CSG object
+  CSGUniverseList _universe_list;
+
 };
 } // namespace CSG
