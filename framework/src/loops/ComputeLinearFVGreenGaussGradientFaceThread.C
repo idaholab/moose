@@ -116,6 +116,10 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
             const auto * const elem_info = current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                                ? face_info->elemInfo()
                                                : face_info->neighborInfo();
+
+            // We have to account for cases when this face is an internal boundary and the normal
+            // points in the wrong direction
+            const auto multiplier = current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0;
             auto & dof_id_container = current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                           ? dof_indices_elem
                                           : dof_indices_neighbor;
@@ -128,7 +132,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
 
             // If we don't have a boundary condition, then it's a natural condition. We'll use a
             // one-term expansion approximation in that case
-            const auto contribution = face_info->normal() * face_info->faceArea() *
+            const auto contribution = multiplier * face_info->normal() * face_info->faceArea() *
                                       face_info->faceCoord() *
                                       (bc_pointer ? bc_pointer->computeBoundaryValue()
                                                   : solution_reader(dof_id_container[face_i]));
