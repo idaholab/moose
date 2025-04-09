@@ -59,8 +59,7 @@ CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType regio
 {
   if (_region_type != CSGRegion::RegionType::COMPLEMENT &&
       _region_type != CSGRegion::RegionType::EMPTY)
-    mooseError(
-        "Region type " + getRegionTypeString() + " is not supported for a single region");
+    mooseError("Region type " + getRegionTypeString() + " is not supported for a single region");
 
   if (_region_type == CSGRegion::RegionType::COMPLEMENT)
   {

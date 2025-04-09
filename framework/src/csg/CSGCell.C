@@ -23,10 +23,7 @@ CSGCell::CSGCell(const std::string name, const CSGRegion & region)
 }
 
 CSGCell::CSGCell(const std::string name, const std::string mat_name, const CSGRegion & region)
-  : _name(name),
-    _fill_type(FillType::MATERIAL),
-    _fill_name(mat_name),
-    _region(region)
+  : _name(name), _fill_type(FillType::MATERIAL), _fill_name(mat_name), _region(region)
 {
 }
 

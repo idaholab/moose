@@ -12,7 +12,10 @@
 namespace CSG
 {
 
-CSGBase::CSGBase() : _surface_list(CSGSurfaceList()), _cell_list(CSGCellList()), _universe_list(CSGUniverseList()) {}
+CSGBase::CSGBase()
+  : _surface_list(CSGSurfaceList()), _cell_list(CSGCellList()), _universe_list(CSGUniverseList())
+{
+}
 
 CSGBase::~CSGBase() {}
 
@@ -40,7 +43,8 @@ CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGR
   return cell;
 }
 
-nlohmann::json CSGBase::generateOutput() const
+nlohmann::json
+CSGBase::generateOutput() const
 {
   nlohmann::json csg_json;
 
@@ -58,17 +62,18 @@ nlohmann::json CSGBase::generateOutput() const
                                      {"BOUNDARY", surf_obj->getBoundaryTypeString()},
                                      {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
-        csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
+      csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
   }
 
   // Print out cell information
   auto all_cells = getAllCells();
   for (const auto & c_pair : all_cells)
-  { const auto cell_ptr = c_pair.second;
+  {
+    const auto cell_ptr = c_pair.second;
     const auto cell_name = cell_ptr->getName();
     const auto cell_region = cell_ptr->getRegionAsString();
     const auto cell_filltype = cell_ptr->getFillTypeString();
-    const auto fill_name = cell_ptr ->getFillName();
+    const auto fill_name = cell_ptr->getFillName();
     csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
     csg_json["CELLS"][cell_name]["REGION"] = cell_region;
     csg_json["CELLS"][cell_name]["FILL"] = fill_name;
@@ -82,11 +87,12 @@ nlohmann::json CSGBase::generateOutput() const
     const auto univ_ptr = u_pair.second;
     const auto univ_name = univ_ptr->getName();
     // only print root universe if root is the only universe that exists
-    if ( num_univs > 1 && univ_name == "ROOT_UNIVERSE" )
+    if (num_univs > 1 && univ_name == "ROOT_UNIVERSE")
       continue;
     const auto univ_cells = univ_ptr->getAllCells();
     csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
-    for (const auto & c : univ_cells){
+    for (const auto & c : univ_cells)
+    {
       csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c->getName());
     }
   }

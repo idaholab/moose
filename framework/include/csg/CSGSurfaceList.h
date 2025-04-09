@@ -33,14 +33,13 @@ public:
   std::shared_ptr<CSGSurface>
   addPlaneFromPoints(const std::string name, const Point p1, const Point p2, const Point p3);
 
-  std::shared_ptr<CSGSurface>
-  addPlaneFromCoefficients(const std::string name, const Real a, const Real b, const Real c, const Real d);
+  std::shared_ptr<CSGSurface> addPlaneFromCoefficients(
+      const std::string name, const Real a, const Real b, const Real c, const Real d);
 
-  std::shared_ptr<CSGSurface>
-  addSphere(const std::string name, const Point center, const Real r);
+  std::shared_ptr<CSGSurface> addSphere(const std::string name, const Point center, const Real r);
 
-  std::shared_ptr<CSGSurface>
-  addCylinder(const std::string name, const Real x0, const Real x1, const Real r, const std::string axis);
+  std::shared_ptr<CSGSurface> addCylinder(
+      const std::string name, const Real x0, const Real x1, const Real r, const std::string axis);
 
   const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
   {
@@ -55,6 +54,5 @@ protected:
 
   /// Checks whether surface name already exists within CSGSurfaceList object
   void checkSurfaceName(const std::string name);
-
 };
 } // namespace CSG
