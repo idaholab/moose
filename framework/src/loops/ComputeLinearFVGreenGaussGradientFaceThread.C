@@ -119,7 +119,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
 
             // We have to account for cases when this face is an internal boundary and the normal
             // points in the wrong direction
-            const auto multiplier = current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0;
+            const auto multiplier =
+                current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0;
             auto & dof_id_container = current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                           ? dof_indices_elem
                                           : dof_indices_neighbor;

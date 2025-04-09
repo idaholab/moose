@@ -26,7 +26,7 @@ SIMPLESolveBase::validParams()
                                             "The solver system for the pressure equation.");
   params.addParam<SolverSystemName>("energy_system", "The solver system for the energy equation.");
   params.addParam<SolverSystemName>("solid_energy_system",
-    "The solver system for the solid energy equation.");
+                                    "The solver system for the solid energy equation.");
   params.addParam<std::vector<SolverSystemName>>(
       "passive_scalar_systems", {}, "The solver system for each scalar advection equation.");
 
@@ -198,44 +198,43 @@ SIMPLESolveBase::validParams()
    */
 
   params.addParam<MultiMooseEnum>("solid_energy_petsc_options",
-    Moose::PetscSupport::getCommonPetscFlags(),
-    "Singleton PETSc options for the solid energy equation");
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the solid energy equation");
   params.addParam<MultiMooseEnum>("solid_energy_petsc_options_iname",
-        Moose::PetscSupport::getCommonPetscKeys(),
-        "Names of PETSc name/value pairs for the solid energy equation");
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the solid energy equation");
   params.addParam<std::vector<std::string>>(
-    "solid_energy_petsc_options_value",
-    "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
-    "solid energy equation");
+      "solid_energy_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "solid energy equation");
 
   params.addRangeCheckedParam<Real>(
-        "solid_energy_absolute_tolerance",
-        1e-5,
-        "0.0<solid_energy_absolute_tolerance",
-        "The absolute tolerance on the normalized residual of the solid energy equation.");
+      "solid_energy_absolute_tolerance",
+      1e-5,
+      "0.0<solid_energy_absolute_tolerance",
+      "The absolute tolerance on the normalized residual of the solid energy equation.");
 
   params.addRangeCheckedParam<Real>("solid_energy_l_tol",
-    1e-5,
-    "0.0<=solid_energy_l_tol & solid_energy_l_tol<1.0",
-    "The relative tolerance on the normalized residual in the "
-    "linear solver of the solid energy equation.");
+                                    1e-5,
+                                    "0.0<=solid_energy_l_tol & solid_energy_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the solid energy equation.");
 
   params.addRangeCheckedParam<Real>("solid_energy_l_abs_tol",
-        1e-10,
-        "0.0<solid_energy_l_abs_tol",
-        "The absolute tolerance on the normalized residual in the "
-        "linear solver of the solid energy equation.");
+                                    1e-10,
+                                    "0.0<solid_energy_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the solid energy equation.");
   params.addRangeCheckedParam<unsigned int>(
-            "solid_energy_l_max_its",
-            10000,
-            "0<solid_energy_l_max_its",
-            "The maximum allowed iterations in the linear solver of the solid energy equation.");
+      "solid_energy_l_max_its",
+      10000,
+      "0<solid_energy_l_max_its",
+      "The maximum allowed iterations in the linear solver of the solid energy equation.");
 
-  params.addParamNamesToGroup(
-                "solid_energy_petsc_options solid_energy_petsc_options_iname "
-                "solid_energy_petsc_options_value solid_energy_absolute_tolerance "
-                "solid_energy_l_tol solid_energy_l_abs_tol solid_energy_l_max_its",
-                "Solid Energy Equation");
+  params.addParamNamesToGroup("solid_energy_petsc_options solid_energy_petsc_options_iname "
+                              "solid_energy_petsc_options_value solid_energy_absolute_tolerance "
+                              "solid_energy_l_tol solid_energy_l_abs_tol solid_energy_l_max_its",
+                              "Solid Energy Equation");
 
   /*
    * Parameters to control the solution of each scalar advection system
@@ -397,17 +396,23 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
 
   if (_has_solid_energy_system)
   {
-    const auto & solid_energy_petsc_options = getParam<MultiMooseEnum>("solid_energy_petsc_options");
+    const auto & solid_energy_petsc_options =
+        getParam<MultiMooseEnum>("solid_energy_petsc_options");
     const auto & solid_energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
         "solid_energy_petsc_options_iname", "solid_energy_petsc_options_value");
     Moose::PetscSupport::addPetscFlagsToPetscOptions(
         solid_energy_petsc_options, "-", *this, _solid_energy_petsc_options);
-    Moose::PetscSupport::addPetscPairsToPetscOptions(
-        solid_energy_petsc_pair_options, _problem.mesh().dimension(), "-", *this, _solid_energy_petsc_options);
+    Moose::PetscSupport::addPetscPairsToPetscOptions(solid_energy_petsc_pair_options,
+                                                     _problem.mesh().dimension(),
+                                                     "-",
+                                                     *this,
+                                                     _solid_energy_petsc_options);
 
     _solid_energy_linear_control.real_valued_data["rel_tol"] = getParam<Real>("solid_energy_l_tol");
-    _solid_energy_linear_control.real_valued_data["abs_tol"] = getParam<Real>("solid_energy_l_abs_tol");
-    _solid_energy_linear_control.int_valued_data["max_its"] = getParam<unsigned int>("solid_energy_l_max_its");
+    _solid_energy_linear_control.real_valued_data["abs_tol"] =
+        getParam<Real>("solid_energy_l_abs_tol");
+    _solid_energy_linear_control.int_valued_data["max_its"] =
+        getParam<unsigned int>("solid_energy_l_max_its");
   }
   else
     checkDependentParameterError("solid_energy_system",

@@ -300,11 +300,10 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     // We might be on a face which is an internal boundary so we want to make sure we
     // get the gradient from the right side.
     const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-        ? _current_face_info->elemInfo()
-        : _current_face_info->neighborInfo();
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
 
-    grad_contrib += _mu(face_arg, determineState()) *
-                    _var.gradSln(*elem_info) * correction_vector;
+    grad_contrib += _mu(face_arg, determineState()) * _var.gradSln(*elem_info) * correction_vector;
   }
 
   return grad_contrib;

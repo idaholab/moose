@@ -29,10 +29,12 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
     _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr),
-    _solid_energy_sys_number(_has_solid_energy_system
-      ? _problem.linearSysNum(getParam<SolverSystemName>("solid_energy_system"))
-      : libMesh::invalid_uint),
-    _solid_energy_system(_has_solid_energy_system ? &_problem.getLinearSystem(_solid_energy_sys_number) : nullptr)
+    _solid_energy_sys_number(
+        _has_solid_energy_system
+            ? _problem.linearSysNum(getParam<SolverSystemName>("solid_energy_system"))
+            : libMesh::invalid_uint),
+    _solid_energy_system(
+        _has_solid_energy_system ? &_problem.getLinearSystem(_solid_energy_sys_number) : nullptr)
 
 {
   // We fetch the systems and their numbers for the momentum equations.
@@ -434,7 +436,8 @@ LinearAssemblySegregatedSolve::solve()
   unsigned int simple_iteration_counter = 0;
 
   // Assign residuals to general residual vector
-  const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
+  const unsigned int no_systems =
+      _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
   std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
   std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
