@@ -62,6 +62,10 @@
 
 !---
 
+!include getting_started/examples_and_tutorials/tutorial04_meshing/presentation/tutorial04_step12_rgmb_empire.md
+
+!---
+
 !include getting_started/examples_and_tutorials/tutorial04_meshing/presentation/tutorial04_step13_advanced_tools.md
 
 !---

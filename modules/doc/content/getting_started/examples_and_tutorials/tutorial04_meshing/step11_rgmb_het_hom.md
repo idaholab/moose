@@ -137,4 +137,4 @@ Material definition in the Griffin input file is then greatly simplified since `
 !bibtex bibliography !!include to make sure next/previous are last on page
 
 !content pagination previous=tutorial04_meshing/step10_rgmb.md
-                    next=tutorial04_meshing/step13_advanced_tools.md
+                    next=tutorial04_meshing/step12_rgmb_empire.md
