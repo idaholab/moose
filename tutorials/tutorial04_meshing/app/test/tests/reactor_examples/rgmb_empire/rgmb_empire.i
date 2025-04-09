@@ -21,14 +21,15 @@ mid_drum_pad = 11   # Drum pad region of control drum assembly
 [Mesh]
 
   #################################      # This parameter allows us to execute the file but stop at this block so we can see intermediate output.
-  final_generator = core                 # User: Change this to 'fuel_pin_1', 'fuel_assembly_1', or 'airhole_assembly', 'cd_ne', or 'core'
+  final_generator = empire_mesh          # User: Change this to 'fuel_pin_1', 'fuel_assembly_1', or 'airhole_assembly', 'cd_ne', 'core', or 'empire_mesh'
   #################################
 
   # step 1: fuel_pin_1 (pin mesh structure to stitch into fuel assemblies)
   # step 2: fuel_assembly_1 (assembly mesh structure to define fuel assemblies)
   # step 3: airhole_assembly (homogenized assembly mesh structure to stitch into core)
   # step 4: cd_ne (control drum structure to stitch into core)
-  # step 5: core (final Empire core mesh structure)
+  # step 5: core (core mesh structure)
+  # step 6: empire_mesh (final Empire mesh with "material_id" reporting ID for use in Griffin)
 
   ### Step 0. Define global parameters for Reactor Geometry Mesh Builder workflow
               # Note: This step does not produce any mesh
@@ -282,7 +283,7 @@ mid_drum_pad = 11   # Drum pad region of control drum assembly
     region_ids = '${mid_reflector} ${mid_drum_pad} ${mid_reflector} ${mid_reflector}'
   []
 
-  ### Step 5. Define final Empire core mesh structure
+  ### Step 5. Define Empire core mesh structure
   [core]
     type = CoreMeshGenerator
     inputs = 'fuel_assembly_1 fuel_assembly_2
@@ -302,5 +303,13 @@ mid_drum_pad = 11   # Drum pad region of control drum assembly
     # Define depletion IDs for each unique (pin, region_id) pair
     generate_depletion_id = true
     depletion_id_type = pin
+  []
+
+  ### Step 6. Copy "region_id" reporting IDs with name "material_id", for use with Griffin reactor physics code
+  [empire_mesh]
+    type = ExtraElementIDCopyGenerator
+    input = core
+    source_extra_element_id = region_id
+    target_extra_element_ids = 'material_id'
   []
 []
