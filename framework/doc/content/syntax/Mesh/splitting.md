@@ -23,13 +23,13 @@ Splitting 42 ways...
 
 This will create three split configurations for your mesh that include 13, 42, and 1000 chunks
 each.  If your input file uses the mesh file `foo.e`, this process will generate a directory
-named `foo.cpr`.  In general, you should neither rename this directory nor modify its
+named `foo.cpa.gz`.  In general, you should neither rename this directory nor modify its
 contents.  All split configurations for the mesh will be stored in this directory (even across
 independent splitting operations).
 
-For non-file-based mesh cases (e.g. GeneratedMesh), you will need to tell MOOSE what name to use
-for the split mesh files it will generate using the `--split-file <file_name>` flag; in general,
-you should use the `.cpr` file extension here. For example:
+For non-file-based mesh cases (e.g. [GeneratedMesh.md]), you will need to tell MOOSE what name to
+use for the split mesh files it will generate using the `--split-file <file_name>` flag; you must
+use the `.cpa.gz` (gzipped ASCII) or `.cpr` (binary) extensions here. For example:
 
 ```
 $ moose-app-opt -i your_input.i --split-mesh 42 --split-file foo.cpr
@@ -56,11 +56,11 @@ The mesh splitter commands do not work with a [distributed mesh](syntax/Mesh/ind
 
 ## Using Split Meshes
 
-There are two ways of referring to distributed meshes in MOOSE, as split or as distributed. A split mesh is a distributed mesh. A split mesh is read from a pre-split mesh file (from a [Checkpoint.md] or using the instructions above). A distributed mesh can be generated in parallel or loaded entirely replicated then distributed.
+There are two types of distributed meshes in MOOSE: split or non-split. A split mesh is always a distributed mesh. A split mesh is read from a pre-split mesh file (from a [Checkpoint.md] or using the instructions above).
 
 ### Loading a split mesh using [FileMeshGenerator.md]
 
-A split mesh, i.e. a `.cpr` file, may be loaded using a [FileMeshGenerator.md] if access to the mesh is needed before the full simulation case is set-up, notably for additional mesh generation with [mesh generators](syntax/Mesh/index.md#mesh-generators). In fact this approach is recommended; it leads to correct element ghosting whereas the approach we introduce in the following section may not.
+A split mesh, i.e. a `.cpa.gz` or `.cpr` file, may be loaded using a [FileMeshGenerator.md] if access to the mesh is needed before the full simulation case is set-up, notably for additional mesh generation with [mesh generators](syntax/Mesh/index.md#mesh-generators). In fact this approach is recommended; it leads to correct element ghosting whereas the approach we introduce in the following section may not.
 
 ### Loading a split mesh using `--use-split`
 
@@ -84,4 +84,4 @@ $ mpiexec -n 42 moose-app-opt -i your_input.i --use-split --split-file foo.cpr
 ```
 
 !alert warning
-The `--use-split` option skips entirely the `[Mesh]` block of the input file, and as such some data structure initializations required if further mesh operations are necessary at the simulation start-up stage. 
+The `--use-split` option skips entirely the `[Mesh]` block of the input file, and as such some data structure initialization required if further mesh operations are necessary at the simulation start-up stage.
