@@ -30,7 +30,7 @@ The following map is useful for understanding the template:
 The three rows correspond to standard, vector and array variables.
 OutputType is the data type used for templating.
 RealEigenVector is a typedef in [MooseTypes.h] as *Eigen::Matrix<Real, Eigen::Dynamic, 1>*.
-OutputShape is for the type of shape functions and OutputData is the type of basis function expansion coefficients that are stored in the moose array variable grabbed from the solution vector.
+OutputShape is for the type of shape functions and OutputData is the type of basis function expansion coefficients that are stored in the MOOSE array variable grabbed from the solution vector.
 
 ## Kernels for Array Variables
 

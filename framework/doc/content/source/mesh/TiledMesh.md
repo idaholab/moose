@@ -27,7 +27,7 @@ The example utilizes a cube (cube.e) mesh as input as shown in Figure 1, which i
 0 to 10 in the x, y, and z-directions.
 
 As specified in the input file for this test (see below), this mesh is then used to create two tiles in the x, y,
-and z directions. To execute the example and create a new mesh, the moose test application is executed with the special "--mesh-only" flag, which indicates that only the mesh operations should be performed. Running this command will create
+and z directions. To execute the example and create a new mesh, the MOOSE test application is executed with the special "--mesh-only" flag, which indicates that only the mesh operations should be performed. Running this command will create
 the resulting mesh file (tiled_mesh_test_in.e), which is intended to be used by a separate input file to run a
 complete simulation.
 

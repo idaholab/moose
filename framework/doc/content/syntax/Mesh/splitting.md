@@ -3,7 +3,7 @@
 MOOSE provides the ability to pre-split a mesh into several chunks for use with
 [distributed mesh](/Mesh/index.md#replicated-and-distributed-mesh).
 This can be useful if the whole mesh is too big to fit into memory. A split-mesh
-workflow involves generating the mesh split configuration(s) and then telling moose
+workflow involves generating the mesh split configuration(s) and then telling MOOSE
 to use them when you run simulations.  This is described in the sections below.
 
 ## Generating Split Configurations
