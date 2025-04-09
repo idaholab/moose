@@ -7,16 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TestCSGSphereAtOriginMeshGenerator.h"
+#include "TestCSGInputNotMovedMeshGenerator.h"
+#include "MeshGenerator.h"
 
-registerMooseObject("MooseTestApp", TestCSGSphereAtOriginMeshGenerator);
+registerMooseObject("MooseTestApp", TestCSGInputNotMovedMeshGenerator);
 
 InputParameters
-TestCSGSphereAtOriginMeshGenerator::validParams()
+TestCSGInputNotMovedMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addRequiredParam<Real>("radius", "radius of sphere.");
+  params.addRequiredParam<MeshGeneratorName>("input", "The input MeshGenerator.");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -24,26 +25,27 @@ TestCSGSphereAtOriginMeshGenerator::validParams()
   return params;
 }
 
-TestCSGSphereAtOriginMeshGenerator::TestCSGSphereAtOriginMeshGenerator(const InputParameters & params)
+TestCSGInputNotMovedMeshGenerator::TestCSGInputNotMovedMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
-    _radius(getParam<Real>("radius"))
+    _mesh_ptr(getMesh("input"))
 {
 }
 
 std::unique_ptr<MeshBase>
-TestCSGSphereAtOriginMeshGenerator::generate()
+TestCSGInputNotMovedMeshGenerator::generate()
 {
   auto null_mesh = nullptr;
   return null_mesh;
 }
 
 std::unique_ptr<CSG::CSGBase>
-TestCSGSphereAtOriginMeshGenerator::generateCSG()
+TestCSGInputNotMovedMeshGenerator::generateCSG()
 {
-  auto csg_mesh = std::make_unique<CSG::CSGBase>();
+  static_cast<void>(getCSGMesh("input"));
 
-  csg_mesh->createSphereAtOrigin("sphere_surf", _radius);
-  // TODO: make cells: auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
+  // Create temporary CSG object to return
+  auto csg_mesh = std::make_unique<CSG::CSGBase>();
+  csg_mesh->createSphereAtOrigin("sphere_surf", 5.0);
 
   return csg_mesh;
 }

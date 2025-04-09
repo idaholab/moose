@@ -42,9 +42,6 @@ std::unique_ptr<CSG::CSGBase>
 TestCSGInfiniteSquareMeshGenerator::generateCSG()
 {
   auto csg_mesh = std::make_unique<CSG::CSGBase>();
-
-  std::string root_univ_name = "root_universe";
-  auto root_univ = csg_mesh->createRootUniverse(root_univ_name);
   const auto centroid = Point(0, 0, 0);
 
   // Add surfaces and halfspaces corresponding to 4 planes of infinite square
@@ -75,7 +72,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   const auto cell_name = "square_cell";
   const auto material_name = "square_material";
 
-  root_univ->addMaterialCell(cell_name, material_name, region);
+  csg_mesh->createCell(cell_name, material_name, region);
 
   return csg_mesh;
 }
