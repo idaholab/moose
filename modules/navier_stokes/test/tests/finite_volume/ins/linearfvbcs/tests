@@ -1,0 +1,20 @@
+[Tests]
+  [convection_correlation]
+    issues = '#17638'
+    design = 'FVConvectionCorrelationInterface.md'
+    requirement = 'The system shall be able to solve for wall-convection with a user-specified heat transfer coefficient'
+    [cavity]
+      type = Exodiff
+      input = convection_cavity.i
+      exodiff = 'convection_cavity_out.e'
+      detail = 'for a cavity problem'
+      max_parallel = 1
+    []
+    [channel]
+      type = Exodiff
+      input = convection_channel.i
+      exodiff = 'convection_channel_out.e'
+      detail = 'and for a channel problem.'
+    []
+  []
+[]
