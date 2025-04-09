@@ -18,7 +18,7 @@
  * where h is the heat transfer coefficient, while T_solid and T_liquid
  * denot the solid and liquid temperatures, respecitvely.
  */
-class LinearFVExtrapolatedPressureBC : public LinearFVAdvectionDiffusionExtrapolatedBC
+class LinearFVConvectiveHeatTransferBC : public LinearFVAdvectionDiffusionBC
 {
 public:
   static InputParameters validParams();
@@ -27,7 +27,7 @@ public:
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVExtrapolatedPressureBC(const InputParameters & parameters);
+  LinearFVConvectiveHeatTransferBC(const InputParameters & parameters);
 
   virtual Real computeBoundaryValue() const override;
 
@@ -44,17 +44,20 @@ public:
 protected:
 
   /// The fluid temperature variable
-  const Moose::Functor<Real> & _temp_fluid;
+  const MooseLinearVariableFV<Real> * _temp_fluid;
 
   /// The solid/wall temperature variable
-  const Moose::Functor<Real> & _temp_solid;
+  const MooseLinearVariableFV<Real> * _temp_solid;
 
   /// The convective heat transfer coefficient in the local element
   const Moose::Functor<Real> & _htc;
+
+  /// Helper boolean to see if the variable we have is the fluid variable
+  bool _var_is_fluid;
 
   /// The temperature which will contribute to the right hand side.
   /// When this is the fluid domain, the solid temperature will go to the
   /// right hand side. When it is the solid domain, the fluid temperature
   /// will contribute to the right hand side.
-  const Moose::Functor<Real> * _rhs_temperature;
+  const MooseLinearVariableFV<Real> * _rhs_temperature;
 };

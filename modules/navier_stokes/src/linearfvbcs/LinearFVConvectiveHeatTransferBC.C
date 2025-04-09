@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVConvectiveHeatTransferBC.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", LinearFVConvectiveHeatTransferBC);
 
@@ -15,8 +16,8 @@ InputParameters
 LinearFVConvectiveHeatTransferBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
-  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "The fluid temperature variable");
-  params.addRequiredParam<MooseFunctorName>(NS::T_solid, "The solid/wall temperature variable");
+  params.addRequiredParam<SolverVariableName>(NS::T_fluid, "The fluid temperature variable");
+  params.addRequiredParam<SolverVariableName>(NS::T_solid, "The solid/wall temperature variable");
   params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient");
   params.addClassDescription(
       "Class describing a convective heat transfer between two domains.");
@@ -25,22 +26,29 @@ LinearFVConvectiveHeatTransferBC::validParams()
 
 LinearFVConvectiveHeatTransferBC::LinearFVConvectiveHeatTransferBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
-    _temp_fluid(getFunctor<ADReal>(NS::T_fluid)),
-    _temp_solid(getFunctor<ADReal>(NS::T_solid)),
-    _htc(getFunctor<ADReal>("h"))
+    _htc(getFunctor<Real>("h"))
 {
+  _temp_fluid = dynamic_cast<const MooseLinearVariableFV<Real> *>(&_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_fluid)));
+  if (!_temp_fluid)
+    mooseError("Not a linearFVvariable!");
+
+  _temp_solid = dynamic_cast<const MooseLinearVariableFV<Real> *>(&_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_solid)));
+  if (!_temp_solid)
+    mooseError("Not a linearFVvariable!");
+
+  _var_is_fluid = _temp_fluid == &_var;
+
   // We determine which one of our variable is
-  if ("wraps_" + _var.name() == _temp_fluid.functorName())
-    _rhs_temperature = &_temp_fluid;
+  if (_var_is_fluid)
+    _rhs_temperature = _temp_solid;
   else
-    _rhs_temperature = &_temp_solid;
+    _rhs_temperature = _temp_fluid;
 }
 
 Real
 LinearFVConvectiveHeatTransferBC::computeBoundaryValue() const
 {
-  // We allow internal boundaries too so we need to check which side we are on
-  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
@@ -48,8 +56,8 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryValue() const
   auto boundary_value = _var.getElemValue(*elem_info, determineState());
 
   // If we request linear extrapolation, we add the gradient term as well
-  if (_two_term_expansion)
-    boundary_value += _var.gradSln(*elem_info) * computeCellToFaceVector();
+  // if (_two_term_expansion)
+  //   boundary_value += _var.gradSln(*elem_info) * computeCellToFaceVector();
 
   return boundary_value;
 }
@@ -58,11 +66,22 @@ Real
 LinearFVConvectiveHeatTransferBC::computeBoundaryNormalGradient() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
+  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+
+  const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->neighborInfo()
+                             : _current_face_info->elemInfo();
+
+  const auto fluid_side_elem_info = _var_is_fluid ? elem_info : neighbor_info;
+  const auto solid_side_elem_info = _var_is_fluid ? neighbor_info : elem_info;
+
   const auto state = determineState();
 
-  const bool multiplier = (_rhs_temperature == &_temp_fluid(face, state)) ? 1.0 : -1.0;
+  const bool multiplier = _var_is_fluid ? 1.0 : -1.0;
 
-  return multiplier * _htc(face, state) * (_temp_fluid(face, state) - _temp_solid(face, state));
+  return multiplier * _htc(face, state) * (_temp_fluid->getElemValue(*fluid_side_elem_info, state) - _temp_fluid->getElemValue(*solid_side_elem_info, state));
 }
 
 Real
@@ -86,13 +105,13 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryValueRHSContribution() const
 
   // If we have linear extrapolation, we chose to add the linear term to
   // the right hand side instead of the system matrix.
-  if (_two_term_expansion)
-  {
-    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
-    contribution = _var.gradSln(*elem_info) * computeCellToFaceVector();
-  }
+  // if (_two_term_expansion)
+  // {
+  //   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+  //                              ? _current_face_info->elemInfo()
+  //                              : _current_face_info->neighborInfo();
+  //   contribution = _var.gradSln(*elem_info) * computeCellToFaceVector();
+  // }
 
   return contribution;
 }
@@ -111,5 +130,9 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientRHSContribution() const
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
-  return _htc(face, state) * (*_rhs_temperature)(face, state);
+  const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->neighborInfo()
+                             : _current_face_info->elemInfo();
+
+  return _htc(face, state) * _rhs_temperature->getElemValue(*neighbor_info, state);
 }
