@@ -41,6 +41,8 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
+  virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+
 protected:
 
   /// The fluid temperature variable

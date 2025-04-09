@@ -30,15 +30,15 @@ LinearFVConvectiveHeatTransferBC::LinearFVConvectiveHeatTransferBC(const InputPa
 {
   _temp_fluid = dynamic_cast<const MooseLinearVariableFV<Real> *>(&_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_fluid)));
   if (!_temp_fluid)
-    mooseError("Not a linearFVvariable!");
+    paramError(NS::T_fluid, "The fluid temperature must be of MooseLinearVariableFV type!");
 
   _temp_solid = dynamic_cast<const MooseLinearVariableFV<Real> *>(&_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_solid)));
   if (!_temp_solid)
-    mooseError("Not a linearFVvariable!");
+    paramError(NS::T_solid, "The solid temperature must be of MooseLinearVariableFV type!");
 
-  _var_is_fluid = _temp_fluid == &_var;
+  _var_is_fluid = (_temp_fluid == &_var);
 
-  // We determine which one of our variable is
+  // We determine which one is the source variable
   if (_var_is_fluid)
     _rhs_temperature = _temp_solid;
   else
@@ -52,20 +52,15 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryValue() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  // By default we approximate the boundary value with the neighboring cell value
-  auto boundary_value = _var.getElemValue(*elem_info, determineState());
-
-  // If we request linear extrapolation, we add the gradient term as well
-  // if (_two_term_expansion)
-  //   boundary_value += _var.gradSln(*elem_info) * computeCellToFaceVector();
-
-  return boundary_value;
+  return _var.getElemValue(*elem_info, determineState());
 }
 
 Real
 LinearFVConvectiveHeatTransferBC::computeBoundaryNormalGradient() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+
   const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
@@ -77,11 +72,11 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryNormalGradient() const
   const auto fluid_side_elem_info = _var_is_fluid ? elem_info : neighbor_info;
   const auto solid_side_elem_info = _var_is_fluid ? neighbor_info : elem_info;
 
-  const auto state = determineState();
-
+  // All this fuss is just for cases when we have an internal boundary, then the flux will change signs
+  // depending on which side of the face we are at.
   const auto multiplier = _current_face_info->normal() * (_current_face_info->faceCentroid() - fluid_side_elem_info->centroid()) > 0 ? 1 : -1;
 
-  return multiplier * _htc(face, state) * (_temp_fluid->getElemValue(*fluid_side_elem_info, state) - _temp_fluid->getElemValue(*solid_side_elem_info, state));
+  return multiplier * _htc(face, state) * (_temp_fluid->getElemValue(*fluid_side_elem_info, state) - _temp_solid->getElemValue(*solid_side_elem_info, state));
 }
 
 Real
@@ -97,23 +92,9 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryValueRHSContribution() const
 {
   // First approach: normally, we should not expect any cross flow through
   // these boundaries. Just in case someone comes up with something here,
-  // we will do an expansion.
-
-  // If we approximate the face value with the cell value, we
-  // don't need to add anything to the right hand side
-  Real contribution = 0.0;
-
-  // If we have linear extrapolation, we chose to add the linear term to
-  // the right hand side instead of the system matrix.
-  // if (_two_term_expansion)
-  // {
-  //   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-  //                              ? _current_face_info->elemInfo()
-  //                              : _current_face_info->neighborInfo();
-  //   contribution = _var.gradSln(*elem_info) * computeCellToFaceVector();
-  // }
-
-  return contribution;
+  // we approximate the face value with the cell value, we
+  // don't need to add anything to the right hand side.
+  return 0.0;
 }
 
 Real
@@ -121,13 +102,10 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientMatrixContribution() co
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                             ? _current_face_info->neighborInfo()
-                             : _current_face_info->elemInfo();
 
-  const auto multiplier = _var_is_fluid ? 1.0 : -1.0;
-
-  return multiplier * _htc(face, state);
+  // We just put the heat transfer coefficient on the diagonal (multiplication with the
+  // surface area is take care of in the kernel).
+  return _htc(face, state);
 }
 
 Real
@@ -136,10 +114,10 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientRHSContribution() const
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
+  // We make sure that we always fetch the temperature on the other side (on the neighbor)
   const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                              ? _current_face_info->neighborInfo()
                              : _current_face_info->elemInfo();
 
-  const auto multiplier = _var_is_fluid ? 1.0 : -1.0;
-  return multiplier * _htc(face, state) * _rhs_temperature->getElemValue(*neighbor_info, state);
+  return _htc(face, state) * _rhs_temperature->getElemValue(*neighbor_info, state);
 }
