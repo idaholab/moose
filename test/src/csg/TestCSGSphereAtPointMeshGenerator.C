@@ -46,9 +46,6 @@ TestCSGSphereAtPointMeshGenerator::generateCSG()
 {
   auto csg_mesh = std::make_unique<CSG::CSGBase>();
 
-  std::string root_univ_name = "root_sphere_point";
-  auto root_univ = csg_mesh->createRootUniverse(root_univ_name);
-
   csg_mesh->createSphereAtPoint("sphere_surf", _center, _radius);
   // TODO: make cells: auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
 
