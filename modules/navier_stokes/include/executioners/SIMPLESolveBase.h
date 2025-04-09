@@ -139,6 +139,22 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _energy_l_abs_tol;
 
+  // ************************ Solid Energy Eq Variables *********************** //
+
+  /// Boolean for easy check if a solid energy system shall be solved or not
+  const bool _has_solid_energy_system;
+
+  /// Options which hold the petsc settings for the fluid energy equation
+  Moose::PetscSupport::PetscOptions _solid_energy_petsc_options;
+
+  /// Options for the linear solver of the energy equation
+  SIMPLESolverConfiguration _solid_energy_linear_control;
+
+  /// Absolute linear tolerance for the energy equations. We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _solid_energy_l_abs_tol;
+
+
   // ************************ Passive Scalar Variables ************************ //
 
   /// The names of the passive scalar systems
@@ -173,6 +189,9 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in energy
   const Real _energy_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in solid energy
+  const Real _solid_energy_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in passive scalars
   const std::vector<Real> _passive_scalar_absolute_tolerance;
