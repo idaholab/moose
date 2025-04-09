@@ -268,7 +268,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 
   if (_print_fields)
   {
-    _console << "Pressure matrix" << std::endl;
+    _console << "Solid energy matrix" << std::endl;
     mmat.print();
   }
 
@@ -434,12 +434,14 @@ LinearAssemblySegregatedSolve::solve()
   unsigned int simple_iteration_counter = 0;
 
   // Assign residuals to general residual vector
-  const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system;
+  const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
   std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
   std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
   if (_has_energy_system)
     ns_abs_tols.push_back(_energy_absolute_tolerance);
+  if (_has_solid_energy_system)
+    ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
 
   bool converged = false;
   // Loop until converged or hit the maximum allowed iteration number
@@ -481,6 +483,13 @@ LinearAssemblySegregatedSolve::solve()
                                                                        _energy_equation_relaxation,
                                                                        _energy_linear_control,
                                                                        _energy_l_abs_tol);
+    }
+    if (_has_solid_energy_system)
+    {
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
+      ns_residuals[momentum_residual.size() + 2] = solveSolidEnergy();
     }
     _problem.execute(EXEC_NONLINEAR);
 

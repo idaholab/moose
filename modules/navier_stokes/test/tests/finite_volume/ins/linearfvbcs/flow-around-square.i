@@ -1,18 +1,20 @@
 # Water properties
-mu = 1.0E-3
-rho = 1000.0
+mu = 1.0E-2
+rho = 1.0
 k = 0.598
-cp = 4186
+cp = 100
 
 # Solid properties
-cp_s = 830
-rho_s = 1680
+# cp_s = 830
+# rho_s = 1680
 k_s = 3.5
 
 # Other parameters
-p_outlet = 0
-u_inlet = -1e-4
+# p_outlet = 0
+# u_inlet = -1e-4
 h_conv = 50
+
+advected_interp_method = 'upwind'
 
 [Mesh]
   [generated_mesh]
@@ -55,6 +57,7 @@ h_conv = 50
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    block = 0
   []
 []
 
@@ -63,26 +66,31 @@ h_conv = 50
     type = MooseLinearVariableFVReal
     initial_condition = 0.5
     solver_sys = u_system
+    block = 0
   []
   [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
     initial_condition = 0.0
+    block = 0
   []
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    block = 0
   []
   [T_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
     initial_condition = 300
+    block = 0
   []
   [T_solid]
     type = MooseLinearVariableFVReal
     solver_sys = solid_energy_system
     initial_condition = 500
+    block = 1
   []
 []
 
@@ -149,23 +157,15 @@ h_conv = 50
     diffusion_coeff = ${k}
     use_nonorthogonal_correction = false
   []
-  [conduction]
-    type = FVDiffusion
+  [solid-conduction]
+    type = LinearFVDiffusion
     variable = T_solid
-    coeff = ${3.5}
+    diffusion_coeff = ${k_s}
   []
-  [source]
-    type = FVBodyForce
+  [solid-source]
+    type = LinearFVSource
     variable = T_solid
-    function = 25000
-  []
-[]
-
-[FunctorMaterials]
-  [constant_functors]
-    type = GenericFunctorMaterial
-    prop_names = 'cp cp_s'
-    prop_values = '${cp} ${cp_s}'
+    source_density = 50000
   []
 []
 
@@ -174,7 +174,7 @@ h_conv = 50
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'left'
     variable = vel_x
-    functor = '1.1'
+    functor = '0.1'
   []
   [inlet-v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -184,13 +184,13 @@ h_conv = 50
   []
   [walls-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
+    boundary = 'top bottom interface'
     variable = vel_x
     functor = 0.0
   []
   [walls-v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
+    boundary = 'top bottom interface'
     variable = vel_y
     functor = 0.0
   []
@@ -231,52 +231,16 @@ h_conv = 50
     T_solid = T_solid
     T_fluid = T_fluid
     boundary = interface
+    h = ${h_conv}
   []
 
   [solid_fluid]
     type = LinearFVConvectiveHeatTransferBC
-    variable = T_fluid
+    variable = T_solid
     T_solid = T_solid
     T_fluid = T_fluid
     boundary = interface
-  []
-[]
-
-[AuxVariables]
-  [T_solid]
-    type = MooseLinearVariableFVReal
-    initial_condition = 300
-    block = 1
-  []
-[]
-
-[MultiApps]
-  inactive = 'solid'
-  [solid]
-    type = FullSolveMultiApp
-    input_files = solid.i
-    execute_on = timestep_begin
-    no_restore = true
-  []
-[]
-
-[Transfers]
-  inactive = 'from_solid to_solid'
-  [from_solid]
-    type = MultiAppGeneralFieldShapeEvaluationTransfer
-    from_multi_app = solid
-    source_variable = 'T_solid'
-    variable = 'T_solid'
-    execute_on = timestep_begin
-    from_blocks = 1
-  []
-  [to_solid]
-    type = MultiAppGeneralFieldShapeEvaluationTransfer
-    to_multi_app = solid
-    source_variable = 'T_fluid'
-    variable = 'T_fluid'
-    execute_on = timestep_begin
-    to_blocks = 1
+    h = ${h_conv}
   []
 []
 
@@ -285,26 +249,32 @@ h_conv = 50
   momentum_l_abs_tol = 1e-13
   pressure_l_abs_tol = 1e-13
   energy_l_abs_tol = 1e-13
+  solid_energy_l_abs_tol = 1e-13
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
+  solid_energy_l_tol = 0
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
+  solid_energy_system = 'solid_energy_system'
   momentum_equation_relaxation = 0.8
   energy_equation_relaxation = 0.9
   pressure_variable_relaxation = 0.3
-  num_iterations = 20
+  num_iterations = 100
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10
+  solid_energy_absolute_tolerance = 1e-10
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
+  solid_energy_petsc_options_iname = '-pc_type -pc_hypre_type'
+  solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
 []
