@@ -28,7 +28,12 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
-    _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr)
+    _energy_system(_has_energy_system ? &_problem.getLinearSystem(_energy_sys_number) : nullptr),
+    _solid_energy_sys_number(_has_solid_energy_system
+      ? _problem.linearSysNum(getParam<SolverSystemName>("solid_energy_system"))
+      : libMesh::invalid_uint),
+    _solid_energy_system(_has_solid_energy_system ? &_problem.getLinearSystem(_solid_energy_sys_number) : nullptr)
+
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -42,6 +47,9 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 
   if (_has_energy_system)
     _systems_to_solve.push_back(_energy_system);
+
+  if (_has_solid_energy_system)
+    _systems_to_solve.push_back(_solid_energy_system);
 
   // and for the passive scalar equations
   if (_has_passive_scalar_systems)
@@ -232,6 +240,66 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
       std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
 
   _console << " Pressure equation: " << COLOR_GREEN << residuals.second << COLOR_DEFAULT
+           << " Linear its: " << residuals.first << std::endl;
+
+  return residuals;
+}
+
+std::pair<unsigned int, Real>
+LinearAssemblySegregatedSolve::solveSolidEnergy()
+{
+  _problem.setCurrentLinearSystem(_solid_energy_sys_number);
+
+  // We will need some members from the linear system
+  LinearImplicitSystem & system =
+      libMesh::cast_ref<LinearImplicitSystem &>(_solid_energy_system->system());
+
+  // We will need the solution, the right hand side and the matrix
+  NumericVector<Number> & current_local_solution = *(system.current_local_solution);
+  NumericVector<Number> & solution = *(system.solution);
+  SparseMatrix<Number> & mmat = *(system.matrix);
+  NumericVector<Number> & rhs = *(system.rhs);
+
+  // Fetch the linear solver from the system
+  PetscLinearSolver<Real> & solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*system.get_linear_solver());
+
+  _problem.computeLinearSystemSys(system, mmat, rhs, false);
+
+  if (_print_fields)
+  {
+    _console << "Pressure matrix" << std::endl;
+    mmat.print();
+  }
+
+  // We compute the normalization factors based on the fluxes
+  Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
+
+  // We need the non-preconditioned norm to be consistent with the norm factor
+  LibmeshPetscCall(KSPSetNormType(solver.ksp(), KSP_NORM_UNPRECONDITIONED));
+
+  // Setting the linear tolerances and maximum iteration counts
+  _solid_energy_linear_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
+  solver.set_solver_configuration(_solid_energy_linear_control);
+
+  auto its_res_pair = solver.solve(mmat, mmat, solution, rhs);
+  system.update();
+
+  if (_print_fields)
+  {
+    _console << " rhs when we solve solid energy " << std::endl;
+    rhs.print();
+    _console << " Solid energy " << std::endl;
+    solution.print();
+    _console << "Norm factor " << norm_factor << std::endl;
+  }
+
+  _solid_energy_system->setSolution(current_local_solution);
+
+  const auto residuals =
+      std::make_pair(its_res_pair.first, solver.get_initial_residual() / norm_factor);
+
+  _console << " Solid energy equation: " << COLOR_GREEN << residuals.second << COLOR_DEFAULT
            << " Linear its: " << residuals.first << std::endl;
 
   return residuals;
