@@ -35,7 +35,10 @@ public:
   std::shared_ptr<CSGUniverse> addUniverse(const std::string name,
                                            std::vector<std::shared_ptr<CSGCell>> cells);
 
-  const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const { return _universes; }
+  const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
+  {
+    return _universes;
+  }
 
   const std::shared_ptr<CSGUniverse> & getUniverse(const std::string name);
 

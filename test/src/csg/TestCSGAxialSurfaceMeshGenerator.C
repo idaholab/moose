@@ -52,7 +52,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
   const auto centroid = Point(0, 0, 0);
 
   // Add surfaces and halfspaces corresponding to top and bottom axial planes
-  std::vector<std::string> surf_names {"plus_z", "minus_z"};
+  std::vector<std::string> surf_names{"plus_z", "minus_z"};
   std::vector<Real> coeffs{0.5 * _axial_height, -0.5 * _axial_height};
   for (unsigned int i = 0; i < coeffs.size(); ++i)
   {

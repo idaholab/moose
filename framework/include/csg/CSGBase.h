@@ -65,8 +65,8 @@ public:
    * @param d coefficient d
    * @return shared pointer to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
-  createPlaneFromCoefficients(const std::string name, const Real a, const Real b, const Real c, const Real d)
+  std::shared_ptr<CSGSurface> createPlaneFromCoefficients(
+      const std::string name, const Real a, const Real b, const Real c, const Real d)
   {
     return _surface_list.addPlaneFromCoefficients(name, a, b, c, d);
   }
@@ -78,8 +78,7 @@ public:
    * @param r radius
    * @return shared pointer to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
-  createSphereAtOrigin(const std::string name, const Real r)
+  std::shared_ptr<CSGSurface> createSphereAtOrigin(const std::string name, const Real r)
   {
     return _surface_list.addSphere(name, Point(0.0, 0.0, 0.0), r);
   }
@@ -111,8 +110,8 @@ public:
    * @param r radius
    * @return shared pointer to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
-  createCylinder(const std::string name, const Real x0, const Real x1, const Real r, const std::string axis)
+  std::shared_ptr<CSGSurface> createCylinder(
+      const std::string name, const Real x0, const Real x1, const Real r, const std::string axis)
   {
     return _surface_list.addCylinder(name, x0, x1, r, axis);
   }
@@ -142,7 +141,8 @@ public:
    * @brief Create a Material Cell object
    *
    * @param name unique cell name
-   * @param mat_name material name (TODO: this will eventually be a material object and not just a name)
+   * @param mat_name material name (TODO: this will eventually be a material object and not just a
+   * name)
    * @param region cell region
    * @return std::shared_ptr<CSGCell>
    */
@@ -156,8 +156,7 @@ public:
    * @param region cell region
    * @return std::shared_ptr<CSGCell>
    */
-  std::shared_ptr<CSGCell>
-  createCell(const std::string name, const CSGRegion & region);
+  std::shared_ptr<CSGCell> createCell(const std::string name, const CSGRegion & region);
 
   /**
    * @brief Create a Universe Cell object
@@ -217,7 +216,7 @@ public:
    * @return std::shared_ptr<CSGUniverse>
    */
   std::shared_ptr<CSGUniverse> createUniverse(const std::string name,
-                                               std::vector<std::shared_ptr<CSGCell>> cells)
+                                              std::vector<std::shared_ptr<CSGCell>> cells)
   {
     return _universe_list.addUniverse(name, cells);
   }
@@ -258,6 +257,5 @@ private:
 
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
-
 };
 } // namespace CSG
