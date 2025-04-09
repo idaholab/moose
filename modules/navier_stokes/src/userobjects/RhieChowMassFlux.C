@@ -195,7 +195,8 @@ RhieChowMassFlux::initFaceMassFlux()
   // initial conditions for velocity
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) || (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
       RealVectorValue density_times_velocity;
 
@@ -286,7 +287,8 @@ RhieChowMassFlux::computeFaceMassFlux()
   // and the momentum matrix/right hand side
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) || (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
       // Making sure the kernel knows which face we are on
       _p_diffusion_kernel->setupFaceData(fi);
@@ -318,12 +320,13 @@ RhieChowMassFlux::computeFaceMassFlux()
 
         // Compute the face flux from the matrix and right hand side contributions
         p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
-                      p_elem_value * elem_matrix_contribution) -
+                       p_elem_value * elem_matrix_contribution) -
                       elem_rhs_contribution;
       }
       else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
       {
-        mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
+        mooseAssert(fi->boundaryIDs().size() == 1,
+                    "We should only have one boundary on every face.");
 
         const ElemInfo & elem_info =
             hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
@@ -397,7 +400,8 @@ RhieChowMassFlux::populateCouplingFunctors(
   // We loop through the faces and populate the coupling fields (face H/A and 1/H)
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) || (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
       Real face_rho = 0;
       RealVectorValue face_hbya;
@@ -447,8 +451,12 @@ RhieChowMassFlux::populateCouplingFunctors(
         // is consistent
         if (_vel[0]->isDirichletBoundaryFace(*fi))
         {
-          const Moose::FaceArg boundary_face{
-              fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
+          const Moose::FaceArg boundary_face{fi,
+                                             Moose::FV::LimiterType::CentralDifference,
+                                             true,
+                                             false,
+                                             elem_info.elem(),
+                                             nullptr};
           face_rho = _rho(boundary_face, Moose::currentState());
 
           for (const auto dim_i : make_range(_dim))

@@ -44,7 +44,6 @@ public:
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
 protected:
-
   /// The fluid temperature variable
   const MooseLinearVariableFV<Real> * _temp_fluid;
 

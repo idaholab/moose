@@ -48,8 +48,7 @@ SIMPLESolveNonlinearAssembly::validParams()
       "The lower limit imposed on turbulent quantities. The recommended value for robustness "
       "is 1e-8.");
 
-  params.addParamNamesToGroup("turbulence_equation_relaxation",
-                              "Relaxation");
+  params.addParamNamesToGroup("turbulence_equation_relaxation", "Relaxation");
 
   /*
    * Petsc options for every equations in the system
@@ -98,10 +97,9 @@ SIMPLESolveNonlinearAssembly::validParams()
       10000,
       "The maximum allowed iterations in the linear solver of the turbulence equation(s).");
 
-  params.addParamNamesToGroup(
-      "turbulence_l_tol "
-      "turbulence_l_abs_tol turbulence_l_max_its",
-      "Linear Iteration Control");
+  params.addParamNamesToGroup("turbulence_l_tol "
+                              "turbulence_l_abs_tol turbulence_l_max_its",
+                              "Linear Iteration Control");
 
   return params;
 }

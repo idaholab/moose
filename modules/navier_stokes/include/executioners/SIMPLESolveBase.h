@@ -154,7 +154,6 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _solid_energy_l_abs_tol;
 
-
   // ************************ Passive Scalar Variables ************************ //
 
   /// The names of the passive scalar systems

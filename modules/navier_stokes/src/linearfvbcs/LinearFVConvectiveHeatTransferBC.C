@@ -19,20 +19,21 @@ LinearFVConvectiveHeatTransferBC::validParams()
   params.addRequiredParam<SolverVariableName>(NS::T_fluid, "The fluid temperature variable");
   params.addRequiredParam<SolverVariableName>(NS::T_solid, "The solid/wall temperature variable");
   params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient");
-  params.addClassDescription(
-      "Class describing a convective heat transfer between two domains.");
+  params.addClassDescription("Class describing a convective heat transfer between two domains.");
   return params;
 }
 
-LinearFVConvectiveHeatTransferBC::LinearFVConvectiveHeatTransferBC(const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionBC(parameters),
-    _htc(getFunctor<Real>("h"))
+LinearFVConvectiveHeatTransferBC::LinearFVConvectiveHeatTransferBC(
+    const InputParameters & parameters)
+  : LinearFVAdvectionDiffusionBC(parameters), _htc(getFunctor<Real>("h"))
 {
-  _temp_fluid = dynamic_cast<const MooseLinearVariableFV<Real> *>(&_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_fluid)));
+  _temp_fluid = dynamic_cast<const MooseLinearVariableFV<Real> *>(
+      &_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_fluid)));
   if (!_temp_fluid)
     paramError(NS::T_fluid, "The fluid temperature must be of MooseLinearVariableFV type!");
 
-  _temp_solid = dynamic_cast<const MooseLinearVariableFV<Real> *>(&_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_solid)));
+  _temp_solid = dynamic_cast<const MooseLinearVariableFV<Real> *>(
+      &_subproblem.getVariable(_tid, getParam<SolverVariableName>(NS::T_solid)));
   if (!_temp_solid)
     paramError(NS::T_solid, "The solid temperature must be of MooseLinearVariableFV type!");
 
@@ -66,17 +67,23 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryNormalGradient() const
                              : _current_face_info->neighborInfo();
 
   const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                             ? _current_face_info->neighborInfo()
-                             : _current_face_info->elemInfo();
+                                 ? _current_face_info->neighborInfo()
+                                 : _current_face_info->elemInfo();
 
   const auto fluid_side_elem_info = _var_is_fluid ? elem_info : neighbor_info;
   const auto solid_side_elem_info = _var_is_fluid ? neighbor_info : elem_info;
 
-  // All this fuss is just for cases when we have an internal boundary, then the flux will change signs
-  // depending on which side of the face we are at.
-  const auto multiplier = _current_face_info->normal() * (_current_face_info->faceCentroid() - fluid_side_elem_info->centroid()) > 0 ? 1 : -1;
+  // All this fuss is just for cases when we have an internal boundary, then the flux will change
+  // signs depending on which side of the face we are at.
+  const auto multiplier = _current_face_info->normal() * (_current_face_info->faceCentroid() -
+                                                          fluid_side_elem_info->centroid()) >
+                                  0
+                              ? 1
+                              : -1;
 
-  return multiplier * _htc(face, state) * (_temp_fluid->getElemValue(*fluid_side_elem_info, state) - _temp_solid->getElemValue(*solid_side_elem_info, state));
+  return multiplier * _htc(face, state) *
+         (_temp_fluid->getElemValue(*fluid_side_elem_info, state) -
+          _temp_solid->getElemValue(*solid_side_elem_info, state));
 }
 
 Real
@@ -116,8 +123,8 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientRHSContribution() const
 
   // We make sure that we always fetch the temperature on the other side (on the neighbor)
   const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                             ? _current_face_info->neighborInfo()
-                             : _current_face_info->elemInfo();
+                                 ? _current_face_info->neighborInfo()
+                                 : _current_face_info->elemInfo();
 
   return _htc(face, state) * _rhs_temperature->getElemValue(*neighbor_info, state);
 }
