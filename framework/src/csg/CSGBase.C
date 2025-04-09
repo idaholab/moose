@@ -16,8 +16,31 @@ CSGBase::CSGBase() : _surface_list(CSGSurfaceList()), _cell_list(CSGCellList()),
 
 CSGBase::~CSGBase() {}
 
-nlohmann::json
-CSGBase::generateOutput() const
+std::shared_ptr<CSGCell>
+CSGBase::createCell(const std::string name, const std::string mat_name, const CSGRegion & region)
+{
+  auto cell = _cell_list.addMaterialCell(name, mat_name, region);
+  getRootUniverse()->addCell(cell);
+  return cell;
+}
+
+std::shared_ptr<CSGCell>
+CSGBase::createCell(const std::string name, const CSGRegion & region)
+{
+  auto cell = _cell_list.addVoidCell(name, region);
+  getRootUniverse()->addCell(cell);
+  return cell;
+}
+
+std::shared_ptr<CSGCell>
+CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region)
+{
+  auto cell = _cell_list.addUniverseCell(name, univ, region);
+  getRootUniverse()->addCell(cell);
+  return cell;
+}
+
+nlohmann::json CSGBase::generateOutput() const
 {
   nlohmann::json csg_json;
 
@@ -38,13 +61,10 @@ CSGBase::generateOutput() const
         csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
   }
 
-  // Print out cell information. For now we are assuming there is a single
-  // root universe in the CSGBase object
-  auto root_univ = getRootUniverse();
-  auto root_univ_name = root_univ->getName();;
-  auto all_cells = root_univ->getAllCells();
-  for (const auto & cell_ptr : all_cells)
-  {
+  // Print out cell information
+  auto all_cells = getAllCells();
+  for (const auto & c_pair : all_cells)
+  { const auto cell_ptr = c_pair.second;
     const auto cell_name = cell_ptr->getName();
     const auto cell_region = cell_ptr->getRegionAsString();
     const auto cell_filltype = cell_ptr->getFillTypeString();
@@ -52,6 +72,23 @@ CSGBase::generateOutput() const
     csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
     csg_json["CELLS"][cell_name]["REGION"] = cell_region;
     csg_json["CELLS"][cell_name]["FILL"] = fill_name;
+  }
+
+  // Print out universe information
+  auto all_univs = getAllUniverses();
+  int num_univs = all_univs.size();
+  for (const auto & u_pair : all_univs)
+  {
+    const auto univ_ptr = u_pair.second;
+    const auto univ_name = univ_ptr->getName();
+    // only print root universe if root is the only universe that exists
+    if ( num_univs > 1 && univ_name == "ROOT_UNIVERSE" )
+      continue;
+    const auto univ_cells = univ_ptr->getAllCells();
+    csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
+    for (const auto & c : univ_cells){
+      csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c->getName());
+    }
   }
 
   return csg_json;
