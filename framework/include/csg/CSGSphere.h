@@ -35,7 +35,6 @@ public:
   virtual CSGSurface::Direction directionFromPoint(const Point p) override;
 
 protected:
-
   /// Value of x0 in equation of sphere
   Real _x0;
 
