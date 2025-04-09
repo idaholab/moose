@@ -12,24 +12,7 @@
 namespace CSG
 {
 
-std::shared_ptr<CSGUniverse>
-CSGBase::createRootUniverse(const std::string name)
-{
-  if (_root_universe)
-    mooseError("Root universe for this mesh has already been created.");
-  _root_universe = std::make_shared<CSGUniverse>(name);
-  return _root_universe;
-}
-
-std::shared_ptr<CSGUniverse>
-CSGBase::getRootUniverse() const
-{
-  if (!_root_universe)
-    mooseError("Cannot retrieve root universe before it is initialized.");
-  return _root_universe;
-}
-
-CSGBase::CSGBase() : _surface_list(CSGSurfaceList()) {}
+CSGBase::CSGBase() : _surface_list(CSGSurfaceList()), _cell_list(CSGCellList()), _universe_list(CSGUniverseList()) {}
 
 CSGBase::~CSGBase() {}
 
