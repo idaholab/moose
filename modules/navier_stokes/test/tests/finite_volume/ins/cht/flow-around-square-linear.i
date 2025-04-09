@@ -1,17 +1,8 @@
-# Water properties
-mu = 1.0E-2
-rho = 1.0
-k = 0.598
-cp = 100
-
-# Solid properties
-# cp_s = 830
-# rho_s = 1680
-k_s = 3.5
-
-# Other parameters
-# p_outlet = 0
-# u_inlet = -1e-4
+mu = 0.01
+rho = 1.1
+k = 0.2
+cp = 10
+k_s = 2.0
 h_conv = 50
 
 advected_interp_method = 'upwind'
@@ -64,14 +55,14 @@ advected_interp_method = 'upwind'
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.5
+    initial_condition = 0.1
     solver_sys = u_system
     block = 0
   []
   [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
-    initial_condition = 0.0
+    initial_condition = 0.01
     block = 0
   []
   [pressure]
@@ -157,6 +148,7 @@ advected_interp_method = 'upwind'
     diffusion_coeff = ${k}
     use_nonorthogonal_correction = false
   []
+
   [solid-conduction]
     type = LinearFVDiffusion
     variable = T_solid
@@ -212,6 +204,7 @@ advected_interp_method = 'upwind'
     use_two_term_expansion = false
     boundary = right
   []
+
   [inlet_wall_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T_fluid
@@ -233,7 +226,6 @@ advected_interp_method = 'upwind'
     boundary = interface
     h = ${h_conv}
   []
-
   [solid_fluid]
     type = LinearFVConvectiveHeatTransferBC
     variable = T_solid
@@ -260,9 +252,9 @@ advected_interp_method = 'upwind'
   energy_system = 'energy_system'
   solid_energy_system = 'solid_energy_system'
   momentum_equation_relaxation = 0.8
-  energy_equation_relaxation = 0.9
+  energy_equation_relaxation = 1.0
   pressure_variable_relaxation = 0.3
-  num_iterations = 100
+  num_iterations = 200
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10
