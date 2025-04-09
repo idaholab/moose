@@ -5,7 +5,7 @@
     type = CSVDiff
     input = 'FFM-5B_low.i'
     csvdiff  = 'FFM-5B_low_out.csv'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -16,7 +16,7 @@
     type = CSVDiff
     input = 'FFM-5B_high.i'
     csvdiff  = 'FFM-5B_high_out.csv'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -27,7 +27,7 @@
     type = CSVDiff
     input = 'FFM-3A.i'
     csvdiff  = 'FFM-3A_out.csv'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     rel_err = 1e-5
     valgrind = NONE

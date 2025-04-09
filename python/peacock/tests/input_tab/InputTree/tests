@@ -97,6 +97,6 @@
 
       detail = "handles incompatible parameter changes without failure."
     []
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
+    capabilities = 'platform=linux' # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

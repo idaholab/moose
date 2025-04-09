@@ -5,13 +5,11 @@
     compiler = 'GCC'
     method = 'OPT OPROF'
     petsc_version = '3.7.5'
-    petsc_version_release = true
     petsc_debug = true
     slepc_version = '>=3.7.4'
     exodus_version = '>=8.0'
     library_mode = 'DYNAMIC'
     mesh_mode = 'distributed'
-    dtk = true
     unique_ids = true
     vtk = true
     tecplot = true
@@ -21,8 +19,6 @@
     superlu = true
     slepc = true
     unique_id = true
-    cxx11 = true
-    asio = true
     boost = true
     fparser_jit = true
     chaco = true

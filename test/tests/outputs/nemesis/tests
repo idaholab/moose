@@ -23,7 +23,7 @@
     min_parallel = 4
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     requirement = "The Nemesis Output object shall support writing elemental variables."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
@@ -37,7 +37,7 @@
     min_parallel = 4
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     requirement = "The Nemesis Output object shall support writing elemental variables with the same numbering on DistributedMesh."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
@@ -55,7 +55,7 @@
     min_parallel = 4
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     requirement = "The Nemesis Ouput object shall support writing scalar variables."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
@@ -70,7 +70,7 @@
     min_parallel = 4
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     requirement = "The Nemesis Ouput object shall support writing scalar variables when using DistributedMesh."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'

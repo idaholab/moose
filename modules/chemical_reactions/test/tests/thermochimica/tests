@@ -8,7 +8,7 @@
     requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [MoRu_reinit]
@@ -20,7 +20,7 @@
     requirement = 'The system shall be able to use reinitialization to speed up a nodal thermochimica solve'
     cli_args = 'ChemicalComposition/thermo/reinitialization_type=time'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [MoRu_FV]
@@ -32,7 +32,7 @@
     requirement = 'The system shall be able to set up an elemental thermochemistry solve using an action'
     cli_args = 'ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [MoRu_FV_reinit]
@@ -44,7 +44,7 @@
     requirement = 'The system shall be able to use reinitialization to speed up an elemental thermochimica solve'
     cli_args = 'ChemicalComposition/thermo/reinitialization_type=time ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [MoRu_subblock]
@@ -55,7 +55,7 @@
     issues = '#26376'
     requirement = 'The system shall be able to run different instances of Thermochimica on different sub-blocks'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [MoRuPd]
@@ -66,7 +66,7 @@
     issues = '#25661'
     requirement = 'The system shall be able to use graciously handle a missing element in Thermochimica'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [csv_ic]
@@ -78,7 +78,7 @@
     requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
     cli_args = 'ChemicalComposition/tunit=K ChemicalComposition/punit=atm ChemicalComposition/munit=moles ChemicalComposition/output_species_unit=moles'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [FeTiVO]
@@ -91,7 +91,7 @@
     cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/exodus=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [FeTiVO_csv]
@@ -105,7 +105,7 @@
     cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/csv=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [tunit_error]
@@ -118,7 +118,7 @@
     requirement = 'The system shall throw an error if the temperature unit is not specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [punit_error]
     type = RunException
@@ -130,7 +130,7 @@
     requirement = 'The system shall throw an error if the pressure unit is not specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [munit_error]
     type = RunException
@@ -142,7 +142,7 @@
     requirement = 'The system shall throw an error if the mass unit is not specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [op_munit_error]
     type = RunException
@@ -154,7 +154,7 @@
     requirement = 'The system shall throw an error if the output mass unit is not specified when species amount or amount of element in phase is requested'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [separator_error1]
@@ -166,7 +166,7 @@
     requirement = 'The system shall throw an error if an invalid output species format is detected'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [separator_error2]
     type = RunException
@@ -177,7 +177,7 @@
     requirement = 'The system shall throw an error if an invalid element potential format is detected'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [invalid_element]
@@ -189,7 +189,7 @@
     requirement = 'The system shall throw an error if an invalid element is specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_species1]
@@ -201,7 +201,7 @@
     requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
   [wrong_species2]
     type = RunException
@@ -212,7 +212,7 @@
     requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_element1]
@@ -224,7 +224,7 @@
     requirement = 'The system shall throw an error if an element absent from the simulation is specified for chemical potential output'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_phase]
@@ -237,7 +237,7 @@
     requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_vapor_pressure1]
@@ -249,7 +249,7 @@
     requirement = 'The system shall throw an error if a gas phase species name is not in correct format'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_vapor_pressure2]
@@ -262,7 +262,7 @@
     requirement = 'The system shall throw an error if a species in a phase other than the gas phase is specified for vapor pressure output'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_vapor_pressure3]
@@ -274,7 +274,7 @@
     requirement = 'The system shall throw an error if a species not present in gas phase is specified for vapor pressure output'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_datafile]
@@ -286,7 +286,7 @@
     requirement = 'The system shall throw an error if the wrong datafile is specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [option_all]
@@ -298,7 +298,7 @@
     requirement = 'The system shall be able to handle ALL option for elements by using all database elements'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_element_phase1]
@@ -310,7 +310,7 @@
     requirement = 'The system shall throw an error if a wrong phase name is specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_element_phase2]
@@ -322,7 +322,7 @@
     requirement = 'The system shall throw an error if a wrong element name is specified'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 
   [wrong_element_phase3]
@@ -334,6 +334,6 @@
     requirement = 'The system shall throw an error if the output elements in phase do not have enough tokens'
     design = ChemicalCompositionAction.md
 
-    required_submodule = 'contrib/thermochimica'
+    capabilities = 'thermochimica'
   []
 []

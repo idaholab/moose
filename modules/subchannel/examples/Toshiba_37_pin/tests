@@ -6,7 +6,7 @@
         input = toshiba_37_pin.i
         csvdiff = toshiba_37_pin_out.csv
         # custom_cmp = 'test.exodiff'
-        method = '!DBG'
+        capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
         abs_zero = 1e-5

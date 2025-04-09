@@ -11,7 +11,7 @@
       abs_zero = 1e-8
       map = false
       # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
+      capabilities = 'unique_id'
       detail = ' and crack growth and direction is computed by a fracture integral with constant fracture toughness.'
     []
     [kvpp_growth]
@@ -21,7 +21,7 @@
       abs_zero = 1e-8
       map = false
       # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
+      capabilities = 'unique_id'
       detail = ' and crack growth and direction is computed by a fracture integral with fracture toughness sampled from a material at the crack tip.'
     []
     [stress_growth]
@@ -31,7 +31,7 @@
       abs_zero = 1e-8
       map = false
       # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
+      capabilities = 'unique_id'
       detail = ' and crack growth is a maximum stress criterion and the growth direction is in the original crack direction.'
     []
     [k_stress_growth]
@@ -41,7 +41,7 @@
       abs_zero = 1e-8
       map = false
       # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
+      capabilities = 'unique_id'
       detail = ' and crack growth and direction is computed by a fracture integral with constant fracture toughness or maximum stress criterion.'
     []
     [k_error]
@@ -59,7 +59,7 @@
                 'stress_check_CrackFrontNonlocalStress_0003.csv '
                 'stress_check_CrackFrontNonlocalStress_0004.csv'
       # XFEM requires --enable-unique-ids in libmesh
-      unique_id = true
+      capabilities = 'unique_id'
       detail = ' and crack growth is defined by a function.  The average crack tip stress changes with crack orientation '
                'and properly accounts volume averaging near surfaces.'
     []

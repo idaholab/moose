@@ -52,7 +52,32 @@ FluidPropertiesApp::~FluidPropertiesApp() {}
 void
 FluidPropertiesApp::registerApps()
 {
+  const std::string doc = "Saline thermophysical fluid properties ";
+#ifdef SALINE_ENABLED
+  addCapability("saline", true, doc + "are available.");
+#else
+  addCapability("saline", false, doc + "are not available.");
+#endif
+
   registerApp(FluidPropertiesApp);
+#ifdef AIR_FP_ENABLED
+  registerApp(AirApp);
+#endif
+#ifdef CARBON_DIOXIDE_FP_ENABLED
+  registerApp(CarbonDioxideApp);
+#endif
+#ifdef HELIUM_FP_ENABLED
+  registerApp(HeliumApp);
+#endif
+#ifdef NITROGEN_FP_ENABLED
+  registerApp(NitrogenApp);
+#endif
+#ifdef POTASSIUM_FP_ENABLED
+  registerApp(PotassiumApp);
+#endif
+#ifdef SODIUM_FP_ENABLED
+  registerApp(SodiumApp);
+#endif
 }
 
 static void

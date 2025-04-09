@@ -26,7 +26,6 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9'
     turn_off_exodus_output = False
     requirement = 'AD shall work with stateful material properties and the Jacobian shall be beautiful'
     issues = "#5658"

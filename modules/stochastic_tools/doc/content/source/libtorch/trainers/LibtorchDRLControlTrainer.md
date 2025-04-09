@@ -1,6 +1,6 @@
 # LibtorchDRLControlTrainer
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Trainers/LibtorchDRLControlTrainer
 
 ## Overview
@@ -10,7 +10,7 @@ using the Proximal Policy Optimization (PPO) algorithm [!cite](schulman2017proxi
 
 ## Example Input File Syntax
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Trainers/LibtorchDRLControlTrainer
 

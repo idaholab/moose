@@ -45,7 +45,7 @@ PeridynamicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 PeridynamicsTestApp::registerApps()
 {
-  registerApp(PeridynamicsApp);
+  PeridynamicsApp::registerApps();
   registerApp(PeridynamicsTestApp);
 }
 

@@ -10,7 +10,6 @@
 
 import os
 import unittest
-import pyhit
 
 class TestExamples(unittest.TestCase):
     def test(self):

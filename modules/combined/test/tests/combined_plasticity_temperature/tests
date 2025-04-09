@@ -14,7 +14,7 @@
     exodiff = ad_plasticity_temperature_dep_yield_out.e
     abs_zero = 1e-9
     issues = '#13544'
-    method = OPT # this test seems to have an bifurcation instability and goes the wrong way in dbg
+    capabilities = 'method=opt' # this test seems to have an bifurcation instability and goes the wrong way in dbg
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The MOOSE tensor mechanics module shall provide an isotropic plasticity model with a temperature dependent yield criterion and support for automatic differentiation'
   [../]

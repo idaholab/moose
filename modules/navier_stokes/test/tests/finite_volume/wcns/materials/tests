@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 2d-transient.i
     exodiff = 2d-transient_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation, while approximating enthalpy as the product of specific heat and temperature'
     rel_err = 7e-5
     # The non-linear tolerance is actually fairly tight, but the variable values
@@ -18,7 +18,7 @@
     input = 2d-transient.i
     cli_args = 'FunctorMaterials/ins_fv/assumed_constant_cp=false FunctorMaterials/ins_fv/fp=fp FunctorMaterials/ins_fv/pressure=pressure'
     exodiff = 2d-transient_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation'
     rel_err = 7e-5
     # The non-linear tolerance is actually fairly tight, but the variable values

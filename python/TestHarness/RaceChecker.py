@@ -44,7 +44,7 @@ class RaceChecker(object):
     def printRaceConditionsByPrereq(self):
         """ Print jobs with race conditions that share a prereq """
 
-        colissions = dict()
+        collisions = dict()
         for job in self.all_jobs:
             if len(job.racePartners) > 0:
                 prereq = str([x.getTestName() for x in job.getUpstreams()])
@@ -53,13 +53,13 @@ class RaceChecker(object):
                 for partner in job.racePartners:
                     if job.getUpstreams() == partner.getUpstreams():
                         shared.append(partner.getTestName())
-                    colissions[prereq] = shared
-        for prereq in colissions:
+                    collisions[prereq] = shared
+        for prereq in collisions:
             if prereq != "[]":
                 print(("The following share " + prereq + " for their prereq(s)"))
             else:
                 print("The following don't share any prereqs")
-            for job in colissions[prereq]:
+            for job in collisions[prereq]:
                 print(job)
         return
 

@@ -11,8 +11,7 @@
     max_threads = 1
     # steady solve
     recover = false
-    libtorch = true
-    required_submodule = '../solid_mechanics/contrib/neml2'
+    capabilities = 'neml2'
     issues = '#26920'
   []
 []

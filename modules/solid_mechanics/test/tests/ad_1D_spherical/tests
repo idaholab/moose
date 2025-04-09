@@ -4,7 +4,6 @@
     type = Exodiff
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
-    compiler = 'CLANG GCC'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false
                 Materials/stress/type=ADComputeLinearElasticStress'
     issues = '#6256 #7555 #18876'
@@ -14,7 +13,6 @@
     type = Exodiff
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
-    compiler = 'CLANG GCC'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true
                 Materials/stress/type=ADComputeFiniteStrainElasticStress'
     prereq = 'smallStrain_1DSphere'
@@ -25,7 +23,6 @@
     type = Exodiff
     input = 'finiteStrain_1DSphere_hollow.i'
     exodiff = 'finiteStrain_1DSphere_hollow_out.e'
-    compiler = 'CLANG GCC'
     issues = '#6256 #7555 #18876'
     requirement = 'The ADComputeRSphericalFiniteStrain class, called through the QuasiStatic SolidMechanics Physics action, shall find the finite incremental strain displacement of a thick walled hollow isotropic elastic sphere under an applied load using a 1D spherical symmetric fomulation with incremental finite strain assumptions. The RankTwoSphericalComponent class, called through the QuasiStatic SolidMechanics Physics, shall output the spherical radial stress.'
   []

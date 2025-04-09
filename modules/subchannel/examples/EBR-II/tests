@@ -6,7 +6,7 @@
     input = 'XX09_SCM_SS17.i'
     csvdiff  = 'XX09_SCM_SS17_out.csv'
     heavy = true
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -18,7 +18,7 @@
     input = 'XX09_SCM_SS45R.i'
     csvdiff  = 'XX09_SCM_SS45R_out.csv'
     heavy = true
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -30,7 +30,7 @@
     input = 'XX09_SCM_TR17.i'
     csvdiff  = 'XX09_SCM_TR17_out.csv'
     heavy = true
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     rel_err = 1e-4
     valgrind = NONE
@@ -43,7 +43,7 @@
     input = 'XX09_SCM_TR45R.i'
     csvdiff  = 'XX09_SCM_TR45R_out.csv'
     heavy = true
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     abs_zero = 1e-5
     rel_err = 1e-4
     valgrind = NONE

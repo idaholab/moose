@@ -27,7 +27,7 @@
     rel_err = 1e-4
     requirement = "The system shall support mesh adaptivity with periodic boundary conditions on a "
                   "distributed generated displaced mesh."
-    method = '!dbg' # periodic timeout
+    capabilities = 'method!=dbg' # periodic timeout
     valgrind = 'NONE'
   []
 
@@ -71,7 +71,7 @@
       prereq = 'pbc_adaptivity'
       abs_zero = 1e-7
       rel_err = 1e-4
-      method = '!dbg' # periodic timeout
+      capabilities = 'method!=dbg' # periodic timeout
 
       detail = "automatic scaling."
     []

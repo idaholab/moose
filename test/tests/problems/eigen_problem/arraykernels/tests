@@ -7,8 +7,7 @@
       type = 'CSVDiff'
       input = 'ne_array_kernels.i'
       csvdiff = 'ne_array_kernels_out_eigenvalues_0001.csv'
-      slepc = true
-      slepc_version = '>=3.11.0'
+      capabilities = 'slepc>=3.11.0'
 
       detail = "an array of residual contributions;"
     []
@@ -17,8 +16,7 @@
       type = 'CSVDiff'
       input = 'ne_two_variables.i'
       csvdiff = 'ne_two_variables_out_eigenvalues_0001.csv'
-      slepc = true
-      slepc_version = '>=3.11.0'
+      capabilities = 'slepc>=3.11.0'
 
       detail = "multiple variables; and"
     []
@@ -30,13 +28,12 @@
       cli_args = 'Executioner/precond_matrix_includes_eigen=true -pc_type  lu  lu '
                  '-pc_factor_mat_solver_type superlu_dist'
       expect_out = '6 Linear \|R\|'
-      slepc = true
       # Include B into the preconditioning matrix in general is a bad idea
       # If there is no good guess, free power iteration may converge a different mode
       # For SLEPc 3.13.0 or newer, we can set initial guess from moose side with right
       # boundary conditions etc. So it still converge to the fundamental mode.
       # SLEPc older than 3.13 can not take initial guess from moose
-      slepc_version = '>=3.13.0'
+      capabilities = 'slepc>=3.13.0'
 
       detail = "multiple variables with Eigen values include in preconditioning matrix."
     []

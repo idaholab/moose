@@ -16,7 +16,7 @@
       csvdiff = '3d_mbb_out.csv'
       detail = '3D topology optimization problem.'
       valgrind = 'none'
-      method = opt
+      capabilities = 'method=opt'
     []
     [2d_mbb_pde]
       type = 'CSVDiff'
@@ -49,7 +49,7 @@
                   'mechanical complianceproblem and reproduce approximate results from the '
                   'literature.'
     heavy = true
-    method = 'opt'
+    capabilities = 'method=opt'
     valgrind = 'none'
   []
   [three_materials_thermal]
@@ -60,7 +60,7 @@
                   'thermal complianceproblem and qualitatively reproduce results from the '
                   'literature.'
     heavy = true
-    method = 'opt'
+    capabilities = 'method=opt'
     valgrind = 'none'
   []
   [thermal_test]

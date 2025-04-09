@@ -135,7 +135,7 @@
       type = 'Exodiff'
       input = 'PolycrystalVoronoiVoidIC_periodic_fromfile.i'
       exodiff = 'PolycrystalVoronoiVoidIC_periodic_fromfile_out.e'
-      method = '!DBG'
+      capabilities = 'method!=dbg'
 
       detail = 'polycrystal structure with voids with centroids specified from a file,'
     []
@@ -177,7 +177,7 @@
       input = HexPolycrystalIC.i
       exodiff = HexPolycrystalIC_out.e
       # Testing optimal hex coloring with a backtracking algorithm
-      method = '!DBG'
+      capabilities = 'method!=dbg'
 
       detail = 'hexagonal structure in 2D,'
     []
@@ -187,7 +187,7 @@
       input = HexPolycrystalIC_3D_columnar.i
       exodiff = HexPolycrystalIC_3D_columnar_out.e
       # Testing optimal hex coloring with a backtracking algorithm
-      method = '!DBG'
+      capabilities = 'method!=dbg'
 
       detail = 'hexagonal structure in 3D, and'
     []
@@ -281,7 +281,7 @@
       type = Exodiff
       input = ClosePackIC_3D.i
       exodiff = ClosePackIC_3D_out.e
-      method = '!dbg' # This test is too slow in debug
+      capabilities = 'method!=dbg' # This test is too slow in debug
       valgrind = HEAVY
 
       detail = 'in 3D.'

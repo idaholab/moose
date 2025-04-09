@@ -57,15 +57,10 @@ class PetscJacobianTester(RunApp):
         if self.specs['turn_off_exodus_output']:
             self.specs['cli_args'][:0] = ['Outputs/exodus=false']
 
-        if list(map(int, util.getPetscVersion(self.libmesh_dir).split("."))) < [3, 9]:
-            self.old_petsc = True
-            self.specs['cli_args'].extend(['-snes_type test', '-snes_mf_operator 0'])
-        else:
-            self.old_petsc = False
-            self.specs['cli_args'].extend(['-snes_test_jacobian', '-snes_force_iteration'])
-            if not self.specs['run_sim']:
-                self.specs['cli_args'].extend(['-snes_type', 'ksponly',
-                                  '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip'])
+        self.specs['cli_args'].extend(['-snes_test_jacobian', '-snes_force_iteration'])
+        if not self.specs['run_sim']:
+            self.specs['cli_args'].extend(['-snes_type', 'ksponly',
+                                '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip'])
 
     def __strToFloat(self, str):
         """ Convert string to float """
@@ -98,43 +93,18 @@ class PetscJacobianTester(RunApp):
     def processResults(self, moose_dir, options, exit_code, runner_output):
         output = ''
 
-        if self.old_petsc:
-            if self.specs['state'].lower() == 'user':
-                m = re.search(r"Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)",
-                              runner_output, re.MULTILINE | re.DOTALL)
-            elif self.specs['state'].lower() == 'const_positive':
-                m = re.search(r"Norm of matrix ratio (\S+?),? difference (\S+) \(constant state 1\.0\)",
-                              runner_output, re.MULTILINE | re.DOTALL)
-            elif self.specs['state'].lower() == 'const_negative':
-                m = re.search(r"Norm of matrix ratio (\S+?),? difference (\S+) \(constant state -1\.0\)",
-                              runner_output, re.MULTILINE | re.DOTALL)
+        matches = re.finditer(r"\|\|J - Jfd\|\|_F/\|\|J\|\|_F\s?=?\s?(\S+), \|\|J - Jfd\|\|_F\s?=?\s?(\S+)",
+                runner_output, re.MULTILINE | re.DOTALL)
+
+        reason = 'EXPECTED OUTPUT NOT FOUND'
+        for match in matches:
+            if self.__compare(self.__strToFloat(match.group(1)), self.specs['ratio_tol']) and \
+                self.__compare(self.__strToFloat(match.group(2)), self.specs['difference_tol']):
+                reason = ''
             else:
-                self.setStatus("state must be either 'user', const_positive', or 'const_negative'",
-                               self.bucket_fail)
-                return output
-
-            if m:
-                if self.__compare(self.__strToFloat(m.group(1)), self.specs['ratio_tol']) and \
-                   self.__compare(self.__strToFloat(m.group(2)), self.specs['difference_tol']):
-                    reason = ''
-                else:
-                    reason = 'INCORRECT JACOBIAN'
-            else:
-                reason = 'EXPECTED OUTPUT NOT FOUND'
-
-        else:
-            matches = re.finditer(r"\|\|J - Jfd\|\|_F/\|\|J\|\|_F\s?=?\s?(\S+), \|\|J - Jfd\|\|_F\s?=?\s?(\S+)",
-                  runner_output, re.MULTILINE | re.DOTALL)
-
-            reason = 'EXPECTED OUTPUT NOT FOUND'
-            for match in matches:
-                if self.__compare(self.__strToFloat(match.group(1)), self.specs['ratio_tol']) and \
-                   self.__compare(self.__strToFloat(match.group(2)), self.specs['difference_tol']):
-                    reason = ''
-                else:
-                    reason = 'INCORRECT JACOBIAN'
-                    if str(self.specs['only_final_jacobian']).lower()=="false":
-                        break
+                reason = 'INCORRECT JACOBIAN'
+                if str(self.specs['only_final_jacobian']).lower()=="false":
+                    break
 
         if reason != '':
             self.setStatus(self.fail, reason)

@@ -5,7 +5,6 @@
     csvdiff = 'gh01.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
   [./gh02]
     type = 'CSVDiff'
@@ -13,7 +12,6 @@
     csvdiff = 'gh02.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
   [./gh03]
     type = 'CSVDiff'
@@ -21,7 +19,6 @@
     csvdiff = 'gh03.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
   [./gh04]
     type = 'CSVDiff'
@@ -29,7 +26,6 @@
     csvdiff = 'gh04.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
   [./gh05]
     type = 'CSVDiff'
@@ -38,7 +34,6 @@
     rel_err = 1e-5
     abs_zero = 1e-4
     max_parallel = 1
-    compiler = 'GCC CLANG'
   [../]
   [./gh06]
     type = 'CSVDiff'
@@ -46,7 +41,6 @@
     csvdiff = 'gh06.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
   [./gh08]
     type = 'CSVDiff'
@@ -54,7 +48,6 @@
     csvdiff = 'gh08.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
 
   [./gh17]
@@ -63,7 +56,6 @@
     csvdiff = 'gh17.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    compiler = 'GCC CLANG'
   [../]
 
   [./gh18]
@@ -73,7 +65,6 @@
     exodiff_opts = '-steps last'
     rel_err = 1e-5
     use_old_floor = True
-    compiler = 'GCC CLANG'
   [../]
 
   [./gh_lumped_07]

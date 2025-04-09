@@ -44,7 +44,7 @@ MiscTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_t
 void
 MiscTestApp::registerApps()
 {
-  registerApp(MiscApp);
+  MiscApp::registerApps();
   registerApp(MiscTestApp);
 }
 

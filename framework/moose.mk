@@ -13,6 +13,14 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 endif
 
 #
+# Dynamic library suffix
+#
+lib_suffix := so
+ifeq ($(shell uname -s),Darwin)
+	lib_suffix := dylib
+endif
+
+#
 # MOOSE
 #
 APPLICATION_DIR := $(FRAMEWORK_DIR)
@@ -46,6 +54,7 @@ hit_srcdir    := $(HIT_DIR)/src/hit
 hit_srcfiles  := $(hit_srcdir)/parse.cc $(hit_srcdir)/lex.cc $(hit_srcdir)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
+hit_DYLIB     := $(HIT_DIR)/libhit-$(METHOD).$(lib_suffix)
 # dependency files
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit command line tool
@@ -59,13 +68,14 @@ $(hit_objects): | prebuild
 pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/parse.cc $(hit_srcdir)/braceexpr.cc
 
 #
-# Dynamic library suffix
+# capabilities python bindings
 #
-lib_suffix := so
-ifeq ($(shell uname -s),Darwin)
-	lib_suffix := dylib
-endif
+CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/capabilities
+capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C
 
+# Making a .la object instead.  This is what you make out of .lo objects...
+moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
+moose_DYLIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).$(lib_suffix)
 #
 # wasp
 #
@@ -135,19 +145,33 @@ endif
 UNAME10 := $(shell uname | cut -c-10)
 ifeq ($(UNAME10), MINGW64_NT)
 	libmesh_LDFLAGS    += -no-undefined
-	pyhit_LIB          := $(HIT_DIR)/hit.pyd
-	pyhit_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
+	PYMOD_EXTENSION    := pyd
+	PYMOD_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
 else
-	pyhit_LIB          := $(HIT_DIR)/hit.so
-	pyhit_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
+	PYMOD_EXTENSION    := so
+	PYMOD_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
 endif
-pyhit_COMPILEFLAGS += $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
 $(pyhit_srcfiles) $(hit_CLI_srcfiles): | prebuild
+
+pyhit_LIB          := $(HIT_DIR)/hit.$(PYMOD_EXTENSION)
+pyhit_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
+
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
+
+capabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)
+capabilities_LIB          := $(CAPABILITIES_DIR)/$(capabilities_LIBNAME)
+capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS)
+capabilities_LDFLAGS      := -Wl,-rpath,$(HIT_DIR) -L$(HIT_DIR) -lhit-$(METHOD) -Wl,-rpath,$(FRAMEWORK_DIR) -L$(FRAMEWORK_DIR) -lmoose-$(METHOD) $(DYNAMIC_LOOKUP)
+
+capabilities $(capabilities_LIB) : $(capabilities_srcfiles) $(moose_LIB) $(app_HEADER) | prebuild
+	@echo "Building and linking "$@"..."
+# @$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
+# $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB)
+	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB))'
 
 #
 # gtest
@@ -233,9 +257,6 @@ moose_INC_DIRS += $(HIT_DIR)/include
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
-
-# Making a .la object instead.  This is what you make out of .lo objects...
-moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
@@ -399,7 +420,7 @@ prebuild::
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
-moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(capabilities_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
@@ -421,7 +442,7 @@ $(hit_LIB): $(hit_objects)
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
@@ -431,6 +452,7 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
+$(capabilities_LIB) : | moose_header_symlinks
 
 else
 
@@ -448,6 +470,7 @@ sa: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/hit/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/capabilities/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pugixml/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/tinyhttp/src/tinyhttp/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/minijson/src/minijson/*.d)
@@ -483,6 +506,15 @@ share_dir = $(PREFIX)/share
 moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
+lib_install_suffix = lib/$(APPLICATION_NAME)
+lib_install_dir = $(PREFIX)/$(lib_install_suffix)
+
+libname_framework = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/libmoose-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)
+libname_pcre = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/pcre/libpcre-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
+libname_hit = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/hit/libhit-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_hit = $(MOOSE_DIR)/framework/contrib/hit/$(libname_hit)
 
 install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_testers
 
@@ -502,12 +534,20 @@ install_exodiff: all
 	@mkdir -p $(bin_install_dir)
 	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
-install_python:
+install_python: $(pyhit_LIB) $(capabilities_LIB)
 	@echo "Installing python utilities"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
-	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/
+	@cp -f $(pyhit_LIB) $(python_install_dir)/
+	@echo "Installing python library $(pyhit_LIB)"
+	@cp -f $(capabilities_LIB) $(python_install_dir)/
+	@echo "Installing python library $(capabilities_LIB)"
+	@$(call remove_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(FRAMEWORK_DIR))
+	@$(call remove_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(HIT_DIR))
+	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(lib_install_dir))
+	@$(call patch_relink,$(python_install_dir)/$(capabilities_LIBNAME),$(shell realpath $(moose_DYLIB)),$(shell readlink $(moose_DYLIB)))
+	@$(call patch_relink,$(python_install_dir)/$(capabilities_LIBNAME),$(shell realpath $(hit_DYLIB)),$(shell readlink $(hit_DYLIB)))
 
 install_harness: install_python
 	@echo "Installing TestHarness"
@@ -530,11 +570,11 @@ lib_install_dir = $(PREFIX)/$(lib_install_suffix)
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
   patch_relink = install_name_tool -change $(2) @rpath/$(3) $(1)
 	patch_rpath = install_name_tool -add_rpath $(2) $(1)
-	patch_remove = :
+	remove_rpath = install_name_tool -delete_rpath $(2) $(1)
 else
   patch_relink = :
 	patch_rpath = patchelf --set-rpath $(2):$$(patchelf --print-rpath $(1)) $(1)
-	patch_remove = patchelf --remove-needed $(2) $(1)
+	remove_rpath = :
 endif
 patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
 # Gets the associated library from a library archive (first argument)
@@ -548,11 +588,11 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 #
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit
+.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit capabilities
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+app_LIB  := $(moose_LIBS) $(gtest_LIB) $(pyhit_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 

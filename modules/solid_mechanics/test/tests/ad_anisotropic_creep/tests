@@ -114,7 +114,6 @@
                "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
                "Materials/inactive='trial_creep_aniso_iso' "
                "Materials/elasticity_tensor/poissons_ratio=0.25"
-    petsc_version = '>=3.9'
     ratio_tol = 1e-2
     difference_tol = 0.1
     only_final_jacobian = 'True'
@@ -129,7 +128,6 @@
                "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
                "Materials/inactive='trial_creep_aniso_iso' "
                "Materials/elasticity_tensor/poissons_ratio=0.25"
-    petsc_version = '>=3.9'
     ratio_tol = 0.035
     difference_tol = 0.35
     only_final_jacobian = 'True'

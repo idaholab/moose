@@ -11,7 +11,7 @@
                   "preconditioning results."
     valgrind = HEAVY
     # For CI timing requirements
-    method = '!dbg'
+    capabilities = 'method!=dbg'
   []
   [L-small]
     type = CSVDiff

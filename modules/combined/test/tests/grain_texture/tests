@@ -11,7 +11,6 @@
     input = 'grain_texture_test_2.i'
     csvdiff = 'grain_texture_test_2_out_textureInfo_0001.csv'
     recover = false
-    compiler = 'GCC CLANG' # this may not be related to superlu_dist, but we need to move forward #10084
   [../]
 
   [./EulerAngleProvider2RGBAux]

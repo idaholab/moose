@@ -38,7 +38,8 @@ def readTestRoot(fname):
     # TODO: add check to see if the binary exists before returning. This can be used to
     # allow users to control fallthrough for e.g. individual module binaries vs. the
     # combined binary.
-    return root.get('app_name'), args, root
+    app_name = root.get('app_name') or None
+    return app_name, args, root
 
 # Struct that represents all of the information pertaining to a testroot file
 TestRoot = namedtuple('TestRoot', ['root_dir', 'app_name', 'args', 'hit_node'])
@@ -224,7 +225,7 @@ class TestHarness:
             if app_name:
                 test_root = test_root._replace(app_name=app_name)
             # Missing an app_name
-            else:
+            elif app_name is not None:
                 raise RuntimeError(f'{test_root.root_dir}/testroot missing app_name')
 
         harness = TestHarness(argv, moose_dir, moose_python_dir, test_root)
@@ -252,7 +253,10 @@ class TestHarness:
         # Get dependent applications and load dynamic tester plugins
         # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
         # Use the find_dep_apps script to get the dependent applications for an app
-        app_dirs = findDepApps(self.app_name, use_current_only=True).split('\n')
+        if self.app_name:
+            app_dirs = findDepApps(self.app_name, use_current_only=True).split('\n')
+        else:
+            app_dirs = []
         # For installed binaries, the apps will exist in RELEASE_PATH/scripts, where in
         # this case RELEASE_PATH is moose_dir
         share_dir = os.path.join(moose_dir, 'share')
@@ -292,6 +296,29 @@ class TestHarness:
         # Parse arguments
         self.parseCLArgs(argv)
 
+        # Determine the executable if we have an application
+        try:
+            self.executable = self.getExecutable() if self.app_name else None
+        except FileNotFoundError as e:
+            print(f'ERROR: {e}')
+            sys.exit(1)
+
+        # Load capabilities if they're needed
+        if self.options.no_capabilities:
+            self.options._capabilities = None
+        else:
+            assert self.executable
+            self.options._capabilities = util.getCapabilities(self.executable)
+
+        # Load app json output if we can
+        if self.executable:
+            self.options._app_json = util.parseMOOSEJSON(util.getExeJSON(self.executable),
+                                                         '--json')
+            self.options._app_objects = util.getExeObjects(self.options._app_json)
+        else:
+            self.options._app_json = None
+            self.options._app_objects = None
+
         checks = {}
         checks['platform'] = util.getPlatforms()
         checks['machine'] = util.getMachine()
@@ -299,74 +326,57 @@ class TestHarness:
         checks['exe_objects'] = None # This gets calculated on demand
         checks['registered_apps'] = None # This gets extracted on demand
 
-        # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
-        # to select whether they want to probe for libMesh configuration options.
-        if self.options.skip_config_checks:
+        # The TestHarness doesn't strictly require the existence of an app
+        # in order to run. Here we allow the user to select whether they
+        # want to probe for configuration options
+        if self.options.no_capabilities:
             checks['compiler'] = set(['ALL'])
-            checks['petsc_version'] = 'N/A'
-            checks['petsc_version_release'] = 'N/A'
-            checks['slepc_version'] = 'N/A'
-            checks['exodus_version'] = 'N/A'
-            checks['vtk_version'] = 'N/A'
-            checks['library_mode'] = set(['ALL'])
-            checks['mesh_mode'] = set(['ALL'])
-            checks['dtk'] = set(['ALL'])
-            checks['unique_ids'] = set(['ALL'])
-            checks['vtk'] = set(['ALL'])
-            checks['tecplot'] = set(['ALL'])
-            checks['dof_id_bytes'] = set(['ALL'])
-            checks['petsc_debug'] = set(['ALL'])
-            checks['curl'] = set(['ALL'])
-            checks['threading'] = set(['ALL'])
-            checks['superlu'] = set(['ALL'])
-            checks['mumps'] = set(['ALL'])
-            checks['strumpack'] = set(['ALL'])
-            checks['parmetis'] = set(['ALL'])
-            checks['chaco'] = set(['ALL'])
-            checks['party'] = set(['ALL'])
-            checks['ptscotch'] = set(['ALL'])
-            checks['slepc'] = set(['ALL'])
-            checks['unique_id'] = set(['ALL'])
-            checks['cxx11'] = set(['ALL'])
-            checks['asio'] =  set(['ALL'])
-            checks['boost'] = set(['ALL'])
-            checks['fparser_jit'] = set(['ALL'])
-            checks['libpng'] = set(['ALL'])
-            checks['libtorch'] = set(['ALL'])
-            checks['libtorch_version'] = 'N/A'
+            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch']:
+                checks[f'{prefix}_version'] = 'N/A'
+            for var in ['library_mode', 'mesh_mode', 'unique_ids', 'vtk',
+                        'tecplot', 'dof_id_bytes', 'petsc_debug', 'curl',
+                        'threading', 'superlu', 'mumps', 'strumpack',
+                        'parmetis', 'chaco', 'party', 'ptscotch',
+                        'slepc', 'unique_id', 'boost', 'fparser_jit',
+                        'libpng', 'libtorch', 'libtorch_version',
+                        'installation_type']:
+                checks[var] = set(['ALL'])
         else:
-            checks['compiler'] = util.getCompilers(self.libmesh_dir)
-            checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
-            checks['petsc_version_release'] = util.getLibMeshConfigOption(self.libmesh_dir, 'petsc_version_release')
-            checks['slepc_version'] = util.getSlepcVersion(self.libmesh_dir)
-            checks['exodus_version'] = util.getExodusVersion(self.libmesh_dir)
-            checks['vtk_version'] = util.getVTKVersion(self.libmesh_dir)
+            def get_option(*args, **kwargs):
+                return util.getCapabilityOption(self.options._capabilities, *args, **kwargs)
+
+            checks['compiler'] = get_option('compiler', to_set=True)
+            checks['petsc_version'] = get_option('petsc', from_version=True)
+            checks['petsc_debug'] = get_option('petsc_debug', from_type=bool, to_set=True)
+            checks['slepc_version'] = get_option('slepc', from_version=True)
+            checks['slepc'] = get_option('slepc', from_version=True, to_set=True, to_bool=True)
+            checks['exodus_version'] = get_option('exodus', from_version=True)
+            checks['vtk_version'] = get_option('vtk', from_version=True)
+            checks['vtk'] = get_option('vtk', from_version=True, to_set=True, to_bool=True)
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
-            checks['mesh_mode'] = util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
-            checks['dtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'dtk')
-            checks['unique_ids'] = util.getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
-            checks['vtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'vtk')
-            checks['tecplot'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
-            checks['dof_id_bytes'] = util.getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
-            checks['petsc_debug'] = util.getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
-            checks['curl'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'curl')
-            checks['threading'] =  util.getLibMeshThreadingModel(self.libmesh_dir)
-            checks['superlu'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'superlu')
-            checks['mumps'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'mumps')
-            checks['strumpack'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'strumpack')
-            checks['parmetis'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'parmetis')
-            checks['chaco'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'chaco')
-            checks['party'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'party')
-            checks['ptscotch'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'ptscotch')
-            checks['slepc'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'slepc')
-            checks['unique_id'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
-            checks['cxx11'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
-            checks['asio'] =  util.getIfAsioExists(self.moose_dir)
-            checks['boost'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'boost')
-            checks['fparser_jit'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'fparser_jit')
-            checks['libpng'] = util.getMooseConfigOption(self.moose_dir, 'libpng')
-            checks['libtorch'] = util.getMooseConfigOption(self.moose_dir, 'libtorch')
-            checks['libtorch_version'] = util.getLibtorchVersion(self.moose_dir)
+            checks['mesh_mode'] = get_option('mesh_mode', from_type=str, to_set=True)
+            checks['unique_ids'] = get_option('unique_id', from_type=bool, to_set=True)
+            checks['unique_id'] = checks['unique_ids']
+            checks['tecplot'] = get_option('tecplot', from_type=bool, to_set=True)
+            checks['dof_id_bytes'] = get_option('dof_id_bytes', from_type=int, to_set=True, no_all=True)
+
+            threading = None
+            threads = get_option('threads', from_type=bool)
+            if threads:
+                threading = next((name for name in ['tbb', 'openmp'] if get_option(name, from_type=bool)), 'pthreads')
+            checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
+
+            for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',
+                         'ptscotch', 'boost', 'curl']:
+                checks[name] = get_option(name, from_type=bool, to_set=True)
+
+            checks['libpng'] = get_option('libpng', from_type=bool, to_set=True)
+
+            fparser = get_option('fparser')
+            checks['fparser_jit'] = set(sorted(['ALL', 'TRUE' if fparser == 'jit' else 'FALSE']))
+
+            checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
+            checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
@@ -383,10 +393,12 @@ class TestHarness:
         # This is so we can easily pass checks around to any scheduler plugin
         self.options._checks = checks
 
-        self.initialize(argv, self.app_name)
+        # Initialize the scheduler
+        self.initialize()
 
-        # executable is available after initalize
-        checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
+        # executable is available after initialize
+        if not self.options.no_capabilities:
+            checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
 
         os.chdir(self._orig_cwd)
 
@@ -504,7 +516,7 @@ class TestHarness:
             print('\nExiting due to keyboard interrupt...')
 
     # Create and return list of tester objects. A tester is created by providing
-    # abspath to basename (dirpath), and the test file in queustion (file)
+    # abspath to basename (dirpath), and the test file in question (file)
     def createTesters(self, dirpath, file, find_only, testroot_params={}):
         # Build a Parser to parse the objects
         parser = Parser(self.factory, self.warehouse)
@@ -840,8 +852,8 @@ class TestHarness:
                             if job.isSilent():
                                 continue
 
-                            formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                            f.write(formated_results + '\n')
+                            formatted_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
+                            f.write(formatted_results + '\n')
 
         except IOError:
             print('Permission error while writing results to disc')
@@ -985,7 +997,28 @@ class TestHarness:
             print(f'\nERROR: Failed to move in progress results {file_in_progress} to {file}')
             raise
 
-    def initialize(self, argv, app_name):
+    def getExecutable(self) -> str:
+        """
+        Finds the MOOSE executable based on the app name
+        """
+        exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
+        name = f'{self.app_name}-{self.options.method}{exec_suffix}'
+
+        # Directories to search in
+        dirs = [self._orig_cwd, os.getcwd(), self._rootdir,
+                os.path.join(testharness_dir, '../../../../bin')]
+        dirs = list(dict.fromkeys(dirs)) # remove duplicates
+        for dir in dirs:
+            path = os.path.join(dir, name)
+            if os.path.exists(path):
+                return path
+        exe_path = shutil.which(name)
+        if exe_path:
+            return exe_path
+
+        raise FileNotFoundError(f'Failed to find MOOSE executable {name}')
+
+    def initialize(self):
         # Load the scheduler plugins
         plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
         self.factory.loadPlugins(plugin_paths, 'schedulers', "IS_SCHEDULER")
@@ -1001,32 +1034,6 @@ class TestHarness:
 
         # Create the scheduler
         self.scheduler = self.factory.create(scheduler_plugin, self, plugin_params)
-
-        # Now that the scheduler is setup, initialize the results storage
-        # Save executable-under-test name to self.executable
-        exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
-        executable = f'{app_name}-{self.options.method}{exec_suffix}'
-        self.app_name = app_name
-
-        # Find the app executable
-        self.executable = None
-        if os.path.isabs(executable):
-            self.executable = executable
-        else:
-            # Directories to search in
-            dirs = [self._orig_cwd, os.getcwd(), self._rootdir,
-                    os.path.join(testharness_dir, '../../../../bin')]
-            dirs = list(dict.fromkeys(dirs)) # remove duplicates
-            for dir in dirs:
-                path = os.path.join(dir, executable)
-                if os.path.exists(path):
-                    self.executable = path
-                    break
-            if self.executable is None and shutil.which(executable):
-                self.executable = shutil.which(executable)
-
-        if self.executable is not None:
-            self.executable = os.path.normpath(self.executable)
 
         # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
         if self.options.output_dir:
@@ -1068,7 +1075,7 @@ class TestHarness:
         parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
         parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', help='The test specification file to look for (default: tests)')
         parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
-        parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
+        parser.add_argument('--no-capabilities', action='store_true', dest='no_capabilities', help='Do not allow capability checks')
         parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
@@ -1233,6 +1240,10 @@ class TestHarness:
         # Set default
         if not self.options.input_file_name:
             self.options.input_file_name = 'tests'
+
+        if self.app_name is None:
+            print('INFO: Setting --no-capabilities because there is not an application')
+            self.options.no_capabilities = True
 
     def postRun(self, specs, timing):
         return

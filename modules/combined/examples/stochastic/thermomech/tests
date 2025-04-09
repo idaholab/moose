@@ -9,7 +9,7 @@
       cli_args = 'Samplers/sample/num_rows=10'
       jsondiff = 'lhs_uniform_out.json'
       detail = "sample and compute statistics, "
-      method = opt # a bit too slow for debug
+      capabilities = 'method=opt' # a bit too slow for debug
     []
     [poly_chaos_train_uniform]
       type = CheckFiles

@@ -44,7 +44,7 @@ HeatTransferTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 HeatTransferTestApp::registerApps()
 {
-  registerApp(HeatTransferApp);
+  HeatTransferApp::registerApps();
   registerApp(HeatTransferTestApp);
 }
 

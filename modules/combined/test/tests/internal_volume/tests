@@ -45,7 +45,6 @@
     type = 'CSVDiff'
     input = 'hex20.i'
     csvdiff = 'hex20_out.csv'
-    compiler = 'GCC CLANG' # this may not be related to superlu_dist, but we need to move forward #10084
     requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates and hex20 elements'
   [../]
 

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "SolidMechanicsApp.h"
 
-class SolidMechanicsTestApp : public MooseApp
+class SolidMechanicsTestApp : public SolidMechanicsApp
 {
 public:
   static InputParameters validParams();

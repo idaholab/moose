@@ -39,7 +39,7 @@ public:
 protected:
   virtual RT computeValue() override;
 
-  /// Perform a sanity check on teh retrieved value (e.g. to check dynamic sizes)
+  /// Perform a sanity check on the retrieved value (e.g. to check dynamic sizes)
   virtual void checkFullValue() {}
 
   /// Returns material property values at quadrature points
