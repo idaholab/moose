@@ -147,10 +147,7 @@ public:
    * @return std::shared_ptr<CSGCell>
    */
   std::shared_ptr<CSGCell>
-  createCell(const std::string name, const std::string mat_name, const CSGRegion & region)
-  {
-    return _cell_list.addMaterialCell(name, mat_name, region);
-  }
+  createCell(const std::string name, const std::string mat_name, const CSGRegion & region);
 
   /**
    * @brief Create a Void Cell object
@@ -160,10 +157,7 @@ public:
    * @return std::shared_ptr<CSGCell>
    */
   std::shared_ptr<CSGCell>
-  createCell(const std::string name, const CSGRegion & region)
-  {
-    return _cell_list.addVoidCell(name, region);
-  }
+  createCell(const std::string name, const CSGRegion & region);
 
   /**
    * @brief Create a Universe Cell object
@@ -174,10 +168,7 @@ public:
    * @return std::shared_ptr<CSGCell>
    */
   std::shared_ptr<CSGCell>
-  createCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region)
-  {
-    return _cell_list.addUniverseCell(name, univ, region);
-  }
+  createCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
 
   /**
    * @brief Get all cell objects
@@ -206,6 +197,51 @@ public:
    * @return  shared pointer to CSGUniverse
    */
   std::shared_ptr<CSGUniverse> getRootUniverse() const { return _universe_list.getRoot(); }
+
+  /**
+   * @brief Create an empty Universe object
+   *
+   * @param name unique universe name
+   * @return std::shared_ptr<CSGUniverse>
+   */
+  std::shared_ptr<CSGUniverse> createUniverse(const std::string name)
+  {
+    return _universe_list.addUniverse(name);
+  }
+
+  /**
+   * @brief Create a Universe object from list of cells
+   *
+   * @param name unique universe name
+   * @param cells list of cells to add to universe
+   * @return std::shared_ptr<CSGUniverse>
+   */
+  std::shared_ptr<CSGUniverse> createUniverse(const std::string name,
+                                               std::vector<std::shared_ptr<CSGCell>> cells)
+  {
+    return _universe_list.addUniverse(name, cells);
+  }
+
+  /**
+   * @brief Get all universe objects
+   *
+   * @return map of names to CSGUniverse objects
+   */
+  const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
+  {
+    return _universe_list.getAllUniverses();
+  }
+
+  /**
+   * @brief Get a universe object by name
+   *
+   * @param name universe name
+   * @return shared pointer to CSGUniverse object
+   */
+  const std::shared_ptr<CSGUniverse> & getUniverseByName(const std::string name)
+  {
+    return _universe_list.getUniverse(name);
+  }
 
   /**
    * @brief generate the JSON representation output for the CSG object
