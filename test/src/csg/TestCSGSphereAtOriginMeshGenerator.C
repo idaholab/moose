@@ -24,9 +24,9 @@ TestCSGSphereAtOriginMeshGenerator::validParams()
   return params;
 }
 
-TestCSGSphereAtOriginMeshGenerator::TestCSGSphereAtOriginMeshGenerator(const InputParameters & params)
-  : MeshGenerator(params),
-    _radius(getParam<Real>("radius"))
+TestCSGSphereAtOriginMeshGenerator::TestCSGSphereAtOriginMeshGenerator(
+    const InputParameters & params)
+  : MeshGenerator(params), _radius(getParam<Real>("radius"))
 {
 }
 
