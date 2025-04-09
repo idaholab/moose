@@ -168,7 +168,8 @@ RhieChowMassFlux::setupCellVolumes()
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
   {
     const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
-    _cell_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
+    if (elem_dof != libMesh::DofObject::invalid_id)
+      _cell_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
   }
   _cell_volumes->close();
 }
@@ -194,41 +195,44 @@ RhieChowMassFlux::initFaceMassFlux()
   // initial conditions for velocity
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    RealVectorValue density_times_velocity;
-
-    // On internal face we do a regular interpolation with geometric weights
-    if (_vel[0]->isInternalFace(*fi))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) || (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
+      RealVectorValue density_times_velocity;
 
-      Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-      Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+      // On internal face we do a regular interpolation with geometric weights
+      if (_vel[0]->isInternalFace(*fi))
+      {
+        const auto & elem_info = *fi->elemInfo();
+        const auto & neighbor_info = *fi->neighborInfo();
 
-      for (const auto dim_i : index_range(_vel))
-        interpolate(InterpMethod::Average,
-                    density_times_velocity(dim_i),
-                    _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
-                    _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
-                    *fi,
-                    true);
+        Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+        Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+
+        for (const auto dim_i : index_range(_vel))
+          interpolate(InterpMethod::Average,
+                      density_times_velocity(dim_i),
+                      _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
+                      _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
+                      *fi,
+                      true);
+      }
+      // On the boundary, we just take the boundary values
+      else
+      {
+        const Elem * const boundary_elem =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+
+        const Real face_rho = _rho(boundary_face, time_arg);
+        for (const auto dim_i : index_range(_vel))
+          density_times_velocity(dim_i) =
+              face_rho * raw_value((*_vel[dim_i])(boundary_face, time_arg));
+      }
+
+      _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
     }
-    // On the boundary, we just take the boundary values
-    else
-    {
-      const Elem * const boundary_elem =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
-
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
-
-      const Real face_rho = _rho(boundary_face, time_arg);
-      for (const auto dim_i : index_range(_vel))
-        density_times_velocity(dim_i) =
-            face_rho * raw_value((*_vel[dim_i])(boundary_face, time_arg));
-    }
-
-    _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
   }
 }
 
@@ -282,56 +286,59 @@ RhieChowMassFlux::computeFaceMassFlux()
   // and the momentum matrix/right hand side
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    // Making sure the kernel knows which face we are on
-    _p_diffusion_kernel->setupFaceData(fi);
-
-    // We are setting this to 1.0 because we don't want to multiply the kernel contributions
-    // with the surface area yet. The surface area will be factored in in the advection kernels.
-    _p_diffusion_kernel->setCurrentFaceArea(1.0);
-
-    Real p_grad_flux = 0.0;
-    if (_p->isInternalFace(*fi))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) || (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
+      // Making sure the kernel knows which face we are on
+      _p_diffusion_kernel->setupFaceData(fi);
 
-      // Fetching the dof indices for the pressure variable
-      const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
-      const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
+      // We are setting this to 1.0 because we don't want to multiply the kernel contributions
+      // with the surface area yet. The surface area will be factored in in the advection kernels.
+      _p_diffusion_kernel->setCurrentFaceArea(1.0);
 
-      // Fetching the values of the pressure for the element and the neighbor
-      const auto p_elem_value = p_reader(elem_dof);
-      const auto p_neighbor_value = p_reader(neighbor_dof);
+      Real p_grad_flux = 0.0;
+      if (_p->isInternalFace(*fi))
+      {
+        const auto & elem_info = *fi->elemInfo();
+        const auto & neighbor_info = *fi->neighborInfo();
 
-      // Compute the elem matrix contributions for the face
-      const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
-      const auto neighbor_matrix_contribution =
-          _p_diffusion_kernel->computeNeighborMatrixContribution();
-      const auto elem_rhs_contribution =
-          _p_diffusion_kernel->computeElemRightHandSideContribution();
+        // Fetching the dof indices for the pressure variable
+        const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
+        const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
 
-      // Compute the face flux from the matrix and right hand side contributions
-      p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
-                     p_elem_value * elem_matrix_contribution) -
-                    elem_rhs_contribution;
+        // Fetching the values of the pressure for the element and the neighbor
+        const auto p_elem_value = p_reader(elem_dof);
+        const auto p_neighbor_value = p_reader(neighbor_dof);
+
+        // Compute the elem matrix contributions for the face
+        const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
+        const auto neighbor_matrix_contribution =
+            _p_diffusion_kernel->computeNeighborMatrixContribution();
+        const auto elem_rhs_contribution =
+            _p_diffusion_kernel->computeElemRightHandSideContribution();
+
+        // Compute the face flux from the matrix and right hand side contributions
+        p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
+                      p_elem_value * elem_matrix_contribution) -
+                      elem_rhs_contribution;
+      }
+      else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
+      {
+        mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
+
+        const ElemInfo & elem_info =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+        const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
+        const auto matrix_contribution =
+            _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
+        const auto rhs_contribution =
+            _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
+
+        // On the boundary, only the element side has a contribution
+        p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
+      }
+      // Compute the new face flux
+      _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
     }
-    else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
-    {
-      mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
-
-      const ElemInfo & elem_info =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-      const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
-      const auto matrix_contribution =
-          _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
-      const auto rhs_contribution =
-          _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
-
-      // On the boundary, only the element side has a contribution
-      p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
-    }
-    // Compute the new face flux
-    _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
   }
 }
 
@@ -390,79 +397,82 @@ RhieChowMassFlux::populateCouplingFunctors(
   // We loop through the faces and populate the coupling fields (face H/A and 1/H)
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    Real face_rho = 0;
-    RealVectorValue face_hbya;
-
-    // We do the lookup in advance
-    auto & Ainv = _Ainv[fi->id()];
-
-    // If it is internal, we just interpolate (using geometric weights) to the face
-    if (_vel[0]->isInternalFace(*fi))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) || (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      // Get the dof indices for the element and the neighbor
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
-      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
-      const auto neighbor_dof = neighbor_info.dofIndices()[_global_momentum_system_numbers[0]][0];
+      Real face_rho = 0;
+      RealVectorValue face_hbya;
 
-      // Get the density values for the element and neighbor. We need this multiplication to make
-      // the coupling fields mass fluxes.
-      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+      // We do the lookup in advance
+      auto & Ainv = _Ainv[fi->id()];
 
-      // Now we do the interpolation to the face
-      interpolate(Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
-      for (const auto dim_i : index_range(raw_hbya))
+      // If it is internal, we just interpolate (using geometric weights) to the face
+      if (_vel[0]->isInternalFace(*fi))
       {
-        interpolate(Moose::FV::InterpMethod::Average,
-                    face_hbya(dim_i),
-                    hbya_reader[dim_i](elem_dof),
-                    hbya_reader[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-        interpolate(InterpMethod::Average,
-                    Ainv(dim_i),
-                    elem_rho * ainv_reader[dim_i](elem_dof),
-                    neighbor_rho * ainv_reader[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-      }
-    }
-    else
-    {
-      const ElemInfo & elem_info =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
+        // Get the dof indices for the element and the neighbor
+        const auto & elem_info = *fi->elemInfo();
+        const auto & neighbor_info = *fi->neighborInfo();
+        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
+        const auto neighbor_dof = neighbor_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-      // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
-      // is consistent
-      if (_vel[0]->isDirichletBoundaryFace(*fi))
-      {
-        const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
-        face_rho = _rho(boundary_face, Moose::currentState());
+        // Get the density values for the element and neighbor. We need this multiplication to make
+        // the coupling fields mass fluxes.
+        const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+        const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
 
-        for (const auto dim_i : make_range(_dim))
-          face_hbya(dim_i) =
-              -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+        // Now we do the interpolation to the face
+        interpolate(Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
+        for (const auto dim_i : index_range(raw_hbya))
+        {
+          interpolate(Moose::FV::InterpMethod::Average,
+                      face_hbya(dim_i),
+                      hbya_reader[dim_i](elem_dof),
+                      hbya_reader[dim_i](neighbor_dof),
+                      *fi,
+                      true);
+          interpolate(InterpMethod::Average,
+                      Ainv(dim_i),
+                      elem_rho * ainv_reader[dim_i](elem_dof),
+                      neighbor_rho * ainv_reader[dim_i](neighbor_dof),
+                      *fi,
+                      true);
+        }
       }
-      // Otherwise we just do a one-term expansion (so we just use the element value)
       else
       {
+        const ElemInfo & elem_info =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
         const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-        face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-        for (const auto dim_i : make_range(_dim))
-          face_hbya(dim_i) = hbya_reader[dim_i](elem_dof);
-      }
+        // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
+        // is consistent
+        if (_vel[0]->isDirichletBoundaryFace(*fi))
+        {
+          const Moose::FaceArg boundary_face{
+              fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
+          face_rho = _rho(boundary_face, Moose::currentState());
 
-      // We just do a one-term expansion for 1/A no matter what
-      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-      for (const auto dim_i : index_range(raw_Ainv))
-        Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
+          for (const auto dim_i : make_range(_dim))
+            face_hbya(dim_i) =
+                -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+        }
+        // Otherwise we just do a one-term expansion (so we just use the element value)
+        else
+        {
+          const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
+
+          face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+          for (const auto dim_i : make_range(_dim))
+            face_hbya(dim_i) = hbya_reader[dim_i](elem_dof);
+        }
+
+        // We just do a one-term expansion for 1/A no matter what
+        const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+        for (const auto dim_i : index_range(raw_Ainv))
+          Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
+      }
+      // Lastly, we populate the face flux resulted by H/A
+      _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
     }
-    // Lastly, we populate the face flux resulted by H/A
-    _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
   }
 }
 

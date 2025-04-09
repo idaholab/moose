@@ -79,7 +79,7 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryNormalGradient() const
 
   const auto state = determineState();
 
-  const bool multiplier = _var_is_fluid ? 1.0 : -1.0;
+  const auto multiplier = _current_face_info->normal() * (_current_face_info->faceCentroid() - fluid_side_elem_info->centroid()) > 0 ? 1 : -1;
 
   return multiplier * _htc(face, state) * (_temp_fluid->getElemValue(*fluid_side_elem_info, state) - _temp_fluid->getElemValue(*solid_side_elem_info, state));
 }
@@ -121,7 +121,13 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientMatrixContribution() co
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  return _htc(face, state);
+  const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->neighborInfo()
+                             : _current_face_info->elemInfo();
+
+  const auto multiplier = _var_is_fluid ? 1.0 : -1.0;
+
+  return multiplier * _htc(face, state);
 }
 
 Real
@@ -134,5 +140,6 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientRHSContribution() const
                              ? _current_face_info->neighborInfo()
                              : _current_face_info->elemInfo();
 
-  return _htc(face, state) * _rhs_temperature->getElemValue(*neighbor_info, state);
+  const auto multiplier = _var_is_fluid ? 1.0 : -1.0;
+  return multiplier * _htc(face, state) * _rhs_temperature->getElemValue(*neighbor_info, state);
 }
