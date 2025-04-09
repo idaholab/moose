@@ -48,9 +48,6 @@ TestCSGCylindersMeshGenerator::generateCSG()
 {
   auto csg_mesh = std::make_unique<CSG::CSGBase>();
 
-  std::string root_univ_name = "root_cylinder";
-  auto root_univ = csg_mesh->createRootUniverse(root_univ_name);
-
   csg_mesh->createCylinder("cylinder_surf_" + _axis, _x0, _x1, _radius, _axis);
   // TODO: make cells: auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
 
