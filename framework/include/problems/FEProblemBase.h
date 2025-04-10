@@ -2399,6 +2399,11 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
+  /**
+   * @returns the active blocks
+   */
+  const std::vector<SubdomainName> getActiveBlockLists() const { return _active_blocks; };
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2735,6 +2740,9 @@ protected:
   std::vector<unsigned char> _has_active_material_properties;
 
   std::vector<SolverParams> _solver_params;
+
+  /// blocks that help user to set easier for both kernel and material coverage check
+  std::vector<SubdomainName> _active_blocks;
 
   /// Determines whether and which subdomains are to be checked to ensure that they have an active kernel
   CoverageCheckMode _kernel_coverage_check;

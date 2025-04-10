@@ -719,7 +719,10 @@ SystemBase::addVariable(const std::string & var_type,
   // Convert the std::vector parameter provided by the user into a std::set for use by libMesh's
   // System::add_variable method
   std::set<SubdomainID> blocks;
-  const auto & block_param = parameters.get<std::vector<SubdomainName>>("block");
+  std::vector<SubdomainName> block_param = parameters.get<std::vector<SubdomainName>>("block");
+  if (block_param.empty() and _fe_problem.isParamValid("default_block"))
+    block_param = _fe_problem.getActiveBlockLists();
+
   for (const auto & subdomain_name : block_param)
   {
     SubdomainID blk_id = _mesh.getSubdomainID(subdomain_name);
