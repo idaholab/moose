@@ -1,5 +1,5 @@
 [Problem]
-  default_block = '0 1 3'
+  block = '0 1 3'
 []
 
 [Mesh]
@@ -51,7 +51,6 @@
 [Variables]
   [diff]
     order = FIRST
-    block = ''
   []
 []
 
@@ -60,17 +59,6 @@
     type = MatDiffusion
     variable = diff
     diffusivity = 'k'
-<<<<<<<< HEAD:test/tests/default_block_check/diffusion_with_null_material_empty_blocks_check.i
-    block = ''
-========
-    block = '0 1'
-  []
-  [time]
-    type = CoefTimeDerivative
-    variable = diff
-    Coefficient = 1E-2
-    block = '3'
->>>>>>>> ef87d1c376 ((a) Add some lines into `sanity_checking.md` and `BlockRestrictable.md` to explain the `default_block` effect in coverage checking and block restrictions. (b) move the tests into `/test/tests/default_block_check`. (c) Fix according to Gary's comments.):test/tests/default_block_check/diffusion_with_null_material_different_kernel_differnt_blocks.i
   []
 []
 

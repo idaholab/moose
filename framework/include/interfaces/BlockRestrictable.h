@@ -224,6 +224,8 @@ protected:
    */
   Moose::CoordinateSystemType getBlockCoordSystem();
 
+  void isTheBlocksWithinDefaultBlocks() const;
+
 private:
   /// Set of block ids supplied by the user via the input file (for error checking)
   std::set<SubdomainID> _blk_ids;
