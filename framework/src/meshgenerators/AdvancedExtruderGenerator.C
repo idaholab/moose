@@ -496,7 +496,6 @@ AdvancedExtruderGenerator::generate()
                                    _boundary_swap_pairs[e].count(id_to_copy)
                                        ? _boundary_swap_pairs[e][id_to_copy]
                                        : id_to_copy);
-            boundary_info.add_equivalent_sideset(_boundary_swap_pairs[e][id_to_copy]);
           }
 
         old_distance = current_distance;

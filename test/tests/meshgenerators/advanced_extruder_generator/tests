@@ -120,6 +120,7 @@
     requirement = 'The system shall be able to retain and swap boundary ids during extrusion.'
     design = 'AdvancedExtruderGenerator.md'
     issues = '#21852'
+    skip = 'Pending libmesh PR #4121 being merged'
   []
   [helicoidal]
     type = Exodiff
