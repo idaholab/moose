@@ -4,6 +4,7 @@
   nx = 20
   ny = 20
   elem_type = TRI3
+  coord_type = RZ
 []
 
 [Variables]
@@ -42,7 +43,6 @@
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
 []
 
 [Executioner]

@@ -55,7 +55,7 @@
     type = Exodiff
     input = 'gap_heat_transfer_mortar_displaced.i'
     exodiff = 'gap_heat_transfer_mortar_displaced_rz_out.e'
-    cli_args = 'Outputs/file_base=gap_heat_transfer_mortar_displaced_rz_out Problem/coord_type=RZ'
+    cli_args = 'Outputs/file_base=gap_heat_transfer_mortar_displaced_rz_out Mesh/coord_type=RZ'
     requirement = "The system shall accurately calculate axisymmetric coordinates on mortar finite "
                   "element segments"
   []

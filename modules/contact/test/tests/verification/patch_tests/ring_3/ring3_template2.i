@@ -5,12 +5,12 @@
 
 [Mesh]
   file = ring3_mesh.e
+  coord_type = RZ
 []
 
 [Problem]
   type = AugmentedLagrangianContactProblem
   maximum_lagrangian_update_iterations = 200
-  coord_type = RZ
 []
 
 [Variables]

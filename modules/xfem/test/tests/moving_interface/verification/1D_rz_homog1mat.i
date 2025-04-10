@@ -30,10 +30,6 @@
   family = LAGRANGE
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -44,6 +40,7 @@
   ymin = 0.0
   ymax = 0.5
   elem_type = QUAD4
+  coord_type = RZ
 []
 
 [XFEM]

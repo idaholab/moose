@@ -2,10 +2,6 @@
   displacements = 'disp_r disp_z'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -13,6 +9,7 @@
   xmax = 2
   nx = 50
   ny = 50
+  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

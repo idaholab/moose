@@ -38,11 +38,6 @@
 # For comparison, see results from the flux post processors.
 #
 
-[Problem]
-  coord_type = RZ
-  rz_coord_axis = Y # this is modified through CLI args to test Z-R as opposed to R-Z
-[]
-
 [Mesh]
   active = 'file'
   [file]
@@ -55,6 +50,8 @@
     vector_value = '90 0 0'
     input = file
   []
+  rz_coord_axis = Y # this is modified through CLI args to test Z-R as opposed to R-Z
+  coord_type = RZ
 []
 [Functions]
 

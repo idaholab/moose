@@ -2,14 +2,11 @@
 
 [Mesh]
   file = necking_quad4.e
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Variables]

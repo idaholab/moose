@@ -14,9 +14,6 @@ velocity_interp_method='rc'
     nx = 2
     ny = 2
   []
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 

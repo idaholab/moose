@@ -22,14 +22,11 @@
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

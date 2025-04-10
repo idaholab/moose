@@ -11,12 +11,9 @@
   displacements = disp_x
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = line.e
+  coord_type = RZ
 []
 
 [Variables]
