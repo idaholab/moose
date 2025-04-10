@@ -91,8 +91,7 @@ public:
    * @param r radius
    * @return shared pointer to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
-  createSphere(const std::string name, const Point center, const Real r)
+  std::shared_ptr<CSGSurface> createSphere(const std::string name, const Point center, const Real r)
   {
     return _surface_list.addSphere(name, center, r);
   }
@@ -249,14 +248,14 @@ public:
    *
    * @return CSGSurfaceList
    */
-  CSGSurfaceList getSurfaceList(){ return _surface_list; }
+  CSGSurfaceList getSurfaceList() { return _surface_list; }
 
   /**
    * @brief Get the CSGCellList object
    *
    * @return CSGCellList
    */
-  CSGCellList getCellList(){ return _cell_list; }
+  CSGCellList getCellList() { return _cell_list; }
 
   /**
    * @brief Get the CSGUniverseList object
