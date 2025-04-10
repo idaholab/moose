@@ -6,7 +6,8 @@
       "REGION": "((+surf_minus_x & -surf_plus_y & -surf_minus_y & -surf_zero_y) | (-surf_plus_x & -surf_plus_y & -surf_minus_y & +surf_zero_y))"
     },
     "void_cell": {
-      "FILLTYPE": "EMPTY",
+      "FILL": "",
+      "FILLTYPE": "VOID",
       "REGION": "~((+surf_minus_x & -surf_plus_y & -surf_minus_y & -surf_zero_y) | (-surf_plus_x & -surf_plus_y & -surf_minus_y & +surf_zero_y))"
     }
   },
@@ -62,5 +63,12 @@
       "TYPE": "plane"
     }
   },
-  "UNIVERSES": null
+  "UNIVERSES": {
+    "ROOT_UNIVERSE": {
+      "CELLS": [
+        "square_cell",
+        "void_cell"
+      ]
+    }
+  }
 }

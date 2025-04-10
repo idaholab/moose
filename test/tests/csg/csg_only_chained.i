@@ -1,11 +1,11 @@
 [Mesh]
-  [csg_inf_square]
+  [inf_square]
     type = TestCSGInfiniteSquareMeshGenerator
     side_length = 5
   []
-  [csg_cube]
+  [cube]
     type = TestCSGAxialSurfaceMeshGenerator
-    input = csg_inf_square
+    input = inf_square
     axial_height = 5
   []
 []
