@@ -60,4 +60,11 @@ CSGCellList::addUniverseCell(const std::string name,
   return _cells[name];
 }
 
+void
+CSGCellList::addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell)
+{
+  checkCellName(cell.first);
+  _cells.insert(cell);
+}
+
 } // namespace CSG

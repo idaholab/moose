@@ -44,6 +44,8 @@ public:
 
   const std::shared_ptr<CSGUniverse> & getRoot() const { return _root_universe; };
 
+  void addUniverse(const std::pair<std::string, std::shared_ptr<CSGUniverse>> universe);
+
 protected:
   /// Mapping of universe names to pointers of stored universe objects
   std::map<std::string, std::shared_ptr<CSGUniverse>> _universes;

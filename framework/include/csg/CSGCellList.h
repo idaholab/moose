@@ -62,9 +62,27 @@ public:
   std::shared_ptr<CSGCell>
   addUniverseCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
 
+  /**
+   * @brief Get the all cells in CSGBase instance
+   *
+   * @return const std::map<std::string, std::shared_ptr<CSGCell>>&
+   */
   const std::map<std::string, std::shared_ptr<CSGCell>> & getAllCells() const { return _cells; }
 
+  /**
+   * @brief Get the CSGCell by name
+   *
+   * @param name
+   * @return const std::shared_ptr<CSGCell>&
+   */
   const std::shared_ptr<CSGCell> & getCell(const std::string name);
+
+  /**
+   * @brief add a cell to the CellList
+   *
+   * @param cell
+   */
+  void addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell);
 
 protected:
   /// Mapping of cell names to pointers of stored cell objects

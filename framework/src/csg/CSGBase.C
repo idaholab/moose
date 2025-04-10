@@ -43,6 +43,43 @@ CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGR
   return cell;
 }
 
+void
+CSGBase::_joinSurfaceLists(CSGSurfaceList surf_list)
+{
+  auto all_surfs = surf_list.getAllSurfaces();
+  for (auto s : all_surfs)
+    _surface_list.addSurface(s);
+}
+
+void
+CSGBase::_joinCellList(CSGCellList cell_list)
+{
+  auto all_cells = cell_list.getAllCells();
+  for (auto c : all_cells)
+    _cell_list.addCell(c);
+}
+
+void
+CSGBase::_joinUniverseList(CSGUniverseList univ_list)
+{
+  auto all_univs = univ_list.getAllUniverses();
+  for (auto u : all_univs)
+  {
+    if (u.first == "ROOT_UNIVERSE")
+    {
+      // add existing cells to current root instead of creating new universe
+      auto root = getRootUniverse();
+      auto all_cells = u.second->getAllCells();
+      for (auto cell : all_cells)
+      {
+        root->addCell(cell);
+      }
+    }
+    else
+      _universe_list.addUniverse(u);
+  }
+}
+
 nlohmann::json
 CSGBase::generateOutput() const
 {

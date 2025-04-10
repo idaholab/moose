@@ -198,6 +198,18 @@ public:
   std::shared_ptr<CSGUniverse> getRootUniverse() const { return _universe_list.getRoot(); }
 
   /**
+   * @brief create a copy of an existing universe with a new name
+   *
+   * @param universe existing universe to copy
+   * @param name new name of universe
+   * @return std::shared_ptr<CSGUniverse>
+   */
+  std::shared_ptr<CSGUniverse> copyUniverse(std::shared_ptr<CSGUniverse> universe, std::string name)
+  {
+    return createUniverse(name, universe->getAllCells());
+  }
+
+  /**
    * @brief Create an empty Universe object
    *
    * @param name unique universe name
@@ -243,6 +255,39 @@ public:
   }
 
   /**
+   * @brief Get the CSGSurfaceList object
+   *
+   * @return CSGSurfaceList
+   */
+  CSGSurfaceList getSurfaceList(){ return _surface_list; }
+
+  /**
+   * @brief Get the CSGCellList object
+   *
+   * @return CSGCellList
+   */
+  CSGCellList getCellList(){ return _cell_list; }
+
+  /**
+   * @brief Get the CSGUniverseList object
+   *
+   * @return CSGUniverseList
+   */
+  CSGUniverseList getUniverseList() { return _universe_list; }
+
+  /**
+   * @brief join another CSGBase object to this one
+   *
+   * @param base pointer to a different CSGBase object
+   */
+  void joinOtherBase(std::unique_ptr<CSGBase> & base)
+  {
+    _joinSurfaceLists(base->getSurfaceList());
+    _joinCellList(base->getCellList());
+    _joinUniverseList(base->getUniverseList());
+  }
+
+  /**
    * @brief generate the JSON representation output for the CSG object
    *
    */
@@ -257,5 +302,26 @@ private:
 
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
+
+  /**
+   * @brief join a separate CSGSurfaceList object to this one
+   *
+   * @param surf_list
+   */
+  void _joinSurfaceLists(CSGSurfaceList surf_list);
+
+  /**
+   * @brief join a separate CSGCellList object to this one
+   *
+   * @param cell_list
+   */
+  void _joinCellList(CSGCellList cell_list);
+
+  /**
+   * @brief join a separate CSGUniverseList object to this one
+   *
+   * @param univ_list
+   */
+  void _joinUniverseList(CSGUniverseList univ_list);
 };
 } // namespace CSG
