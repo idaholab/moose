@@ -79,4 +79,11 @@ CSGSurfaceList::addCylinder(
   return _surfaces[name];
 }
 
+void
+CSGSurfaceList::addSurface(const std::pair<std::string, std::shared_ptr<CSGSurface>> surf)
+{
+  checkSurfaceName(surf.first);
+  _surfaces.insert(surf);
+}
+
 } // namespace CSG

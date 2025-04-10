@@ -48,6 +48,8 @@ public:
 
   const std::shared_ptr<CSGSurface> & getSurface(const std::string name);
 
+  void addSurface(const std::pair<std::string, std::shared_ptr<CSGSurface>> surf);
+
 protected:
   /// Mapping of surface names to pointers of stored surface objects
   std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;
