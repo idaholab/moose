@@ -41,9 +41,11 @@ std::unique_ptr<CSG::CSGBase>
 TestCSGSphereAtOriginMeshGenerator::generateCSG()
 {
   auto csg_mesh = std::make_unique<CSG::CSGBase>();
+  auto mg_name = this->name();
 
-  csg_mesh->createSphereAtOrigin("sphere_surf", _radius);
-  // TODO: make cells: auto elem_cell_ptr = root_univ->addMaterialCell(cell_name, material_name);
+  auto sphere_surf = csg_mesh->createSphere(mg_name + "_sphere_surf", _radius);
+  auto sphere_cell = csg_mesh->createCell(mg_name + "_sphere_cell", -sphere_surf);
+  auto sphere_univ = csg_mesh->createUniverse(mg_name + "_sphere_univ", {sphere_cell});
 
   return csg_mesh;
 }

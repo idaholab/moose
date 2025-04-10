@@ -48,5 +48,11 @@
       "TYPE": "plane"
     }
   },
-  "UNIVERSES": null
+  "UNIVERSES": {
+    "ROOT_UNIVERSE": {
+      "CELLS": [
+        "square_cell"
+      ]
+    }
+  }
 }

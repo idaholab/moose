@@ -11,28 +11,22 @@
 
 #include "MeshGenerator.h"
 
-class TestCSGCylindersMeshGenerator : public MeshGenerator
+class TestCSGUniverseMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestCSGCylindersMeshGenerator(const InputParameters & parameters);
+  TestCSGUniverseMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override{};
+  void generateData() override {};
 
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 
 protected:
-  /// radii of cylinders
-  const std::vector<Real> _radii;
-  /// height of cylinder
-  const Real _h;
-  /// First coordinate of center of cylinder
-  const Real _x0;
-  /// Second coordinate of center of cylinder
-  const Real _x1;
-  /// axis: x, y, or z
-  const std::string _axis;
+  /// Pointer to the input mesh
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
+  /// list of MGs to add to the universe
+  const std::vector<MeshGeneratorName> _input_mgs;
 };

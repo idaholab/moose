@@ -1,17 +1,8 @@
 [Tests]
   design = 'MeshGenerator.md'
   issues = '#29095'
-  requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file by '
+  requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file by correctly constructing a CSG model and '
 
-  [csg_only]
-    type = 'JSONDiff'
-    input = 'csg_only_inf_planes.i'
-    cli_args = '--csg-only'
-    jsondiff = 'csg_only_inf_planes_out_csg.json'
-    recover = false
-    mesh_mode = REPLICATED
-    detail = 'correctly constructing planes from 3 points'
-  []
   [csg_only_chained]
     type = 'JSONDiff'
     input = 'csg_only_chained.i'
@@ -21,6 +12,24 @@
     mesh_mode = REPLICATED
     detail = 'passing a single CSGBase object between MeshGenerators to be updated'
   []
+  [csg_only_multi_universes]
+    type = 'JSONDiff'
+    input = 'csg_full_geom.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_full_geom_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'joining multiple CSGBase objects to create one object with multiple universes'
+  []
+  [csg_only_final_generator]
+    type = 'JSONDiff'
+    input = 'csg_only_chained.i'
+    cli_args = 'Mesh/final_generator=inf_square --csg-only csg_only_inf_planes_out_csg.json'
+    jsondiff = 'csg_only_inf_planes_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'specifying a final generator to create a CSGBase object for an intermediate generator'
+  []
   [all_region_types]
     type = 'JSONDiff'
     input = 'csg_only_region_types.i'
@@ -29,51 +38,6 @@
     recover = false
     mesh_mode = REPLICATED
     detail = 'correctly defining regions as a combination of halfspaces, intersections, unions, and complements'
-  []
-  [csg_only_sphere_origin]
-    type = 'JSONDiff'
-    input = 'csg_only_sphere_origin.i'
-    cli_args = '--csg-only'
-    jsondiff = 'csg_only_sphere_origin_out_csg.json'
-    recover = false
-    mesh_mode = REPLICATED
-    detail = 'correctly constructing a sphere at the origin when no center is provided'
-  []
-  [csg_only_sphere_point]
-    type = 'JSONDiff'
-    input = 'csg_only_sphere_point.i'
-    cli_args = '--csg-only'
-    jsondiff = 'csg_only_sphere_point_out_csg.json'
-    recover = false
-    mesh_mode = REPLICATED
-    detail = 'correctly constructing a sphere at a specified point'
-  []
-  [csg_only_cylinder_x]
-    type = 'JSONDiff'
-    input = 'csg_only_cylinder_x.i'
-    cli_args = '--csg-only'
-    jsondiff = 'csg_only_cylinder_x_out_csg.json'
-    recover = false
-    mesh_mode = REPLICATED
-    detail = 'correctly constructing cylinders that are aligned with the x-axis'
-  []
-  [csg_only_cylinder_y]
-    type = 'JSONDiff'
-    input = 'csg_only_cylinder_y.i'
-    cli_args = '--csg-only'
-    jsondiff = 'csg_only_cylinder_y_out_csg.json'
-    recover = false
-    mesh_mode = REPLICATED
-    detail = 'correctly constructing cylinders that are aligned with the y-axis'
-  []
-  [csg_only_cylinder_z]
-    type = 'JSONDiff'
-    input = 'csg_only_cylinder_z.i'
-    cli_args = '--csg-only'
-    jsondiff = 'csg_only_cylinder_z_out_csg.json'
-    recover = false
-    mesh_mode = REPLICATED
-    detail = 'correctly constructing cylinders that are aligned with the z-axis'
   []
 
   [errors]
