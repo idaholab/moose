@@ -1,0 +1,11 @@
+[Tests]
+    design = 'MarvelTriFlowAreaIC.md MarvelTriWettedPerimIC.md'
+    issues = '#30295'
+    [test]
+        type = Exodiff
+        input = 'test.i'
+        exodiff = 'test_out.e'
+        recover = False
+        requirement = 'The system shall calculate the flow area and wetted perimeter for a Marvel-type microreactor core modeled in SCM'
+    []
+[]
