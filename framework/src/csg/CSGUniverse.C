@@ -26,6 +26,8 @@ CSGUniverse::addCell(const std::shared_ptr<CSGCell> cell)
   auto cell_name = cell->getName();
   if (!hasCell(cell_name))
     _cells.push_back(cell);
+  else
+    mooseError("Universe " + getName() + " already contains a cell by name " + cell_name + ".");
 }
 
 std::shared_ptr<CSGCell>
