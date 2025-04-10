@@ -91,6 +91,8 @@ public:
    */
   const std::string getName() const { return _name; }
 
+  void setName(const std::string name) { _name = name; }
+
 protected:
   /// Name of universe
   std::string _name;
