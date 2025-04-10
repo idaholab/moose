@@ -20,7 +20,7 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override {};
+  void generateData() override{};
 
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 

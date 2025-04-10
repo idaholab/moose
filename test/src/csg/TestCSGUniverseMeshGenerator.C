@@ -16,7 +16,8 @@ InputParameters
 TestCSGUniverseMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addRequiredParam<std::vector<MeshGeneratorName>>("input_meshes", "list of MGs to add to universe");
+  params.addRequiredParam<std::vector<MeshGeneratorName>>("input_meshes",
+                                                          "list of MGs to add to universe");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -44,9 +45,9 @@ TestCSGUniverseMeshGenerator::generateCSG()
   auto csg_mesh = std::make_unique<CSG::CSGBase>();
   for (auto img : _input_mgs)
   {
-   std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(img));
-   csg_mesh->joinOtherBase(inp_csg_mesh);
-   csg_mesh->renameRootUniverse(this->name() + "_root");
+    std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(img));
+    csg_mesh->joinOtherBase(inp_csg_mesh);
+    csg_mesh->renameRootUniverse(this->name() + "_root");
   }
 
   return csg_mesh;

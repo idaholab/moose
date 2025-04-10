@@ -64,7 +64,8 @@ TestCSGCylindersMeshGenerator::generateCSG()
   else if (_axis == "z")
     c = 1;
   auto pos_plane = csg_mesh->createPlaneFromCoefficients(mg_name + "_pos_plane", a, b, c, _h / 2);
-  auto neg_plane = csg_mesh->createPlaneFromCoefficients(mg_name + "_neg_plane", a, b, c, -1 * _h / 2);
+  auto neg_plane =
+      csg_mesh->createPlaneFromCoefficients(mg_name + "_neg_plane", a, b, c, -1 * _h / 2);
   auto tmp_surf2 = csg_mesh->getSurfaceByName(mg_name + "_neg_plane");
 
   int i = 0;
