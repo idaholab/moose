@@ -17,7 +17,7 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used. Here we also invoke the option to enable flexible assembly stitching, so that dissimilar assembly structutes can be stitched into the reactor core without any hanging nodes
+[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used. Here we also invoke the option to enable flexible assembly stitching, so that dissimilar assembly structures can be stitched into the reactor core without any hanging nodes
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
          block=Mesh/rmp
@@ -69,7 +69,7 @@ In order to define homogeneous assembly structures to stitch into the core, we u
 
 - Since [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) = `true` in [ReactorMeshParams.md], the different assembly types are stitched together without hanging nodes.
 - Dummy assemblies do not need to be defined explicitly and instead can be referenced in the core lattice input by specifying a name in [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name).
-- This is the last step you can run if you do not have Griffin exectuable access.
+- This is the last step you can run if you do not have Griffin executable access.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
          block=Mesh/het_core

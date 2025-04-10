@@ -9,7 +9,7 @@ This example illustrates the use of RGMB mesh generators to define a heterogeneo
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used. Here we also invoke the option to enable flexible assembly stitching with [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching), so that dissimilar assembly structutes can be stitched into the reactor core without any hanging nodes. This parameter needs to be set to true in order to use [ControlDrumMeshGenerator.md].
+[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used. Here we also invoke the option to enable flexible assembly stitching with [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching), so that dissimilar assembly structures can be stitched into the reactor core without any hanging nodes. This parameter needs to be set to true in order to use [ControlDrumMeshGenerator.md].
 
 !listing reactor_examples/rgmb_empire/rgmb_empire.i
          id=tutorial04-rgmb_empire-rmp
@@ -31,7 +31,7 @@ The EMPIRE core features heterogeneous fuel assemblies, homogeneous air and refl
 
 !alert! note title=Tips
 
-- region_ids is a 2-dimensional array containing region IDs (essentially materials). Since this problem is 2-D and does not have any axial layers, we only need to define a single row of values corresponding to the 2D radial regions (from center of the pin to outermost region) of the pin. In this case, the fuel pin has 3 radial regions (fuel inner ring, gap outer ring, statinless steel background).
+- [!param](/Mesh/PinMeshGenerator/region_ids) is a 2-dimensional array containing region IDs (essentially materials). Since this problem is 2-D and does not have any axial layers, we only need to define a single row of values corresponding to the 2D radial regions (from center of the pin to outermost region) of the pin. In this case, the fuel pin has 3 radial regions (fuel inner ring, gap outer ring, statinless steel background).
 
 !alert-end!
 
@@ -69,7 +69,7 @@ This process is repeated for each homogeneous assembly type (1 airhole assembly 
 
 !alert! note title=Tips
 
-- For homogenized assemblies, each assembly has only 1 radial region, so a single value is passed to `region_ids` representing the region ID of the 2-D homogenized region.
+- For homogenized assemblies, each assembly has only 1 radial region, so a single value is passed to [!param](/Mesh/PinMeshGenerator/region_ids) representing the region ID of the 2-D homogenized region.
 
 !alert-end!
 

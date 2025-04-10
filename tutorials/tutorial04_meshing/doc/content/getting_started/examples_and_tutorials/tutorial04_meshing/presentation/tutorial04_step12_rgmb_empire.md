@@ -15,7 +15,7 @@ This example illustrates the use of RGMB mesh generators to define a heterogeneo
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. Here we also invoke the option to enable flexible assembly stitching with [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching), so that dissimilar assembly structutes can be stitched into the reactor core without any hanging nodes. This parameter needs to be set to true in order to use [ControlDrumMeshGenerator.md].
+[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. Here we also invoke the option to enable flexible assembly stitching with [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching), so that dissimilar assembly structures can be stitched into the reactor core without any hanging nodes. This parameter needs to be set to true in order to use [ControlDrumMeshGenerator.md].
 
 !listing reactor_examples/rgmb_empire/rgmb_empire.i
          block=Mesh/rmp
