@@ -42,6 +42,10 @@ public:
     INT,
     UINT,
     STRING,
+    SDNAME,
+    BDRYNAME,
+    MGNAME,
+    MFNAME,
     ENUM
   };
 
@@ -109,12 +113,24 @@ protected:
    * @param params InputParameters object to set the parameter
    * @param param_name Name of the parameter to set
    * @param param_value Value of the parameter to set in string format
-   * @param is_integer Flag to indicate if the parameter is an integer
    */
   template <typename T>
   void convertAndSetNumericVector(InputParameters & params,
                                   const std::string & param_name,
                                   const std::vector<std::string> & param_value);
+
+  /**
+   * Convert a vector of strings to a string-derived type vector and set it in the InputParameters
+   * object
+   * @param params InputParameters object to set the parameter
+   * @param param_name Name of the parameter to set
+   * @param param_value Value of the parameter to set in string format
+   */
+  template <typename T>
+  void convertAndSetStringLikeVector(InputParameters & params,
+                                     const std::string & param_name,
+                                     const std::vector<std::string> & param_value);
+
   /**
    * Check the types of the input parameters are valid, otherwise throw an error
    * @param params InputParameters object to check the parameters
@@ -128,6 +144,7 @@ protected:
                                  const std::vector<std::string> & param_names,
                                  const std::vector<ParameterType> & param_types,
                                  const bool & is_vector = false);
+
   /**
    * Check the type of the input parameter is valid, otherwise throw an error
    * @param params InputParameters object to check the parameter

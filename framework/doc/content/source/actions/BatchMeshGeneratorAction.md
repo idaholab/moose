@@ -35,6 +35,10 @@ The supported input parameter types are summarized in [supported_types] for both
 | `vector<int>` | `int` | `INT` |
 | `vector<unsigned int>` | `unsigned int` | `UINT` |
 | `vector<string>` | `string` | `STRING` |
+| `vector<SubdomainName>` | `SubdomainName` | `SDNAME` |
+| `vector<BoundaryName>` | `BoundaryName` | `BDNAME` |
+| `vector<MeshGeneratorName>` | `MeshGeneratorName` | `MGNAME` |
+| `vector<MeshFileName>` | `MeshFileName` | `MFNAME` |
 | `MultiMooseEnum` | `MooseEnum` | `ENUM` |
 | `vector<bool>` | `bool` | `BOOL` |
 
