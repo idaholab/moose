@@ -101,8 +101,27 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
       _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
       _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
     }
-  }
 
+    if (_blk_feproblem->isParamValid("default_block"))
+    {
+      // Get the default block list from the FEProblem
+      std::vector<SubdomainName> default_blocks = _blk_feproblem->getActiveBlockLists();
+      // Check that the supplied blocks are a subset of the default blocks
+      if (!std::includes(
+              default_blocks.begin(), default_blocks.end(), _blocks.begin(), _blocks.end()))
+        moose_object->paramError(
+            "block", "The supplied block list is not a subset of the default block list");
+    }
+  }
+  // when 'default_block' is set at the [Problem] -> 'block' input should come first before this
+  else if (_blk_feproblem->isParamValid("default_block"))
+  {
+    _blocks = _blk_feproblem->getActiveBlockLists();
+    // Get the IDs from the supplied names
+    _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
+
+    _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
+  }
   // When 'blocks' is not set and there is a "variable", use the blocks from the variable
   else if (moose_object->isParamValid("variable"))
   {
