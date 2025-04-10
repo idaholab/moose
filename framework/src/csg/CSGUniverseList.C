@@ -60,4 +60,13 @@ CSGUniverseList::addUniverse(const std::pair<std::string, std::shared_ptr<CSGUni
   _universes.insert(universe);
 }
 
+void
+CSGUniverseList::renameRoot(const std::string name)
+{
+  auto prev_root_name = _root_universe->getName();
+  _root_universe->setName(name);
+  _universes.erase(prev_root_name);
+  _universes.insert(std::make_pair(name, _root_universe));
+}
+
 } // namespace CSG

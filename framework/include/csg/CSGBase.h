@@ -78,7 +78,7 @@ public:
    * @param r radius
    * @return shared pointer to CSGSurface object
    */
-  std::shared_ptr<CSGSurface> createSphereAtOrigin(const std::string name, const Real r)
+  std::shared_ptr<CSGSurface> createSphere(const std::string name, const Real r)
   {
     return _surface_list.addSphere(name, Point(0.0, 0.0, 0.0), r);
   }
@@ -92,7 +92,7 @@ public:
    * @return shared pointer to CSGSurface object
    */
   std::shared_ptr<CSGSurface>
-  createSphereAtPoint(const std::string name, const Point center, const Real r)
+  createSphere(const std::string name, const Point center, const Real r)
   {
     return _surface_list.addSphere(name, center, r);
   }
@@ -197,17 +197,7 @@ public:
    */
   std::shared_ptr<CSGUniverse> getRootUniverse() const { return _universe_list.getRoot(); }
 
-  /**
-   * @brief create a copy of an existing universe with a new name
-   *
-   * @param universe existing universe to copy
-   * @param name new name of universe
-   * @return std::shared_ptr<CSGUniverse>
-   */
-  std::shared_ptr<CSGUniverse> copyUniverse(std::shared_ptr<CSGUniverse> universe, std::string name)
-  {
-    return createUniverse(name, universe->getAllCells());
-  }
+  void renameRootUniverse(const std::string name) { _universe_list.renameRoot(name); };
 
   /**
    * @brief Create an empty Universe object
