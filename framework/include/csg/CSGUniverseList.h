@@ -30,20 +30,54 @@ public:
    */
   virtual ~CSGUniverseList() = default;
 
+  /**
+   * @brief create an empty universe
+   *
+   * @param name
+   * @return std::shared_ptr<CSGUniverse>
+   */
   std::shared_ptr<CSGUniverse> addUniverse(const std::string name);
 
+  /**
+   * @brief create a universe from list of cells
+   *
+   * @param name
+   * @param cells
+   * @return std::shared_ptr<CSGUniverse>
+   */
   std::shared_ptr<CSGUniverse> addUniverse(const std::string name,
                                            std::vector<std::shared_ptr<CSGCell>> cells);
 
+  /**
+   * @brief Get the all universes
+   *
+   * @return const std::map<std::string, std::shared_ptr<CSGUniverse>>&
+   */
   const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
   {
     return _universes;
   }
 
+  /**
+   * @brief Get the Universe by name
+   *
+   * @param name
+   * @return const std::shared_ptr<CSGUniverse>&
+   */
   const std::shared_ptr<CSGUniverse> & getUniverse(const std::string name);
 
+  /**
+   * @brief Get the root universe
+   *
+   * @return const std::shared_ptr<CSGUniverse>&
+   */
   const std::shared_ptr<CSGUniverse> & getRoot() const { return _root_universe; };
 
+  /**
+   * @brief add an existing universe to list
+   *
+   * @param universe
+   */
   void addUniverse(const std::pair<std::string, std::shared_ptr<CSGUniverse>> universe);
 
 protected:
