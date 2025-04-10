@@ -9,7 +9,7 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used. Here we also invoke the option to enable flexible assembly stitching, so that dissimilar assembly structutes can be stitched into the reactor core without any hanging nodes.
+[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used. Here we also invoke the option to enable flexible assembly stitching, so that dissimilar assembly structures can be stitched into the reactor core without any hanging nodes.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i
          id=tutorial04-rgmb_abtr-rmp
@@ -30,7 +30,7 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
 !alert! note title=Tips
 
 - Use a unique [PinMeshGenerator.md] block for each pin with a unique geometrical configuration and/or region ID composition
-- region_ids is a 2-dimensional array containing region IDs (essentially materials). The first row of the array represents the 2D radial regions (from center of the pin to outermost region) for the bottom layer of the pin. Each subsequent row assigns IDs on another axial level, from bottom to top. In this case, each pin has 3 radial regions (fuel, clad, background), this array is a column pertaining to each axial level of the pin assembly.
+- [!param](/Mesh/PinMeshGenerator/region_ids) is a 2-dimensional array containing region IDs (essentially materials). The first row of the array represents the 2D radial regions (from center of the pin to outermost region) for the bottom layer of the pin. Each subsequent row assigns IDs on another axial level, from bottom to top. In this case, each pin has 3 radial regions (fuel, clad, background), this array is a column pertaining to each axial level of the pin assembly.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
 
 !alert-end!
@@ -68,14 +68,14 @@ In order to define homogeneous assembly structures to stitch into the core, we u
 
 !alert! note title=Tips
 
-- For homogenized assemblies, each assembly has only 1 radial region, so each column in `region_ids` pertains to the region ID of each axial level of the homogenized assembly.
+- For homogenized assemblies, each assembly has only 1 radial region, so each column in [!param](/Mesh/PinMeshGenerator/region_ids) pertains to the region ID of each axial level of the homogenized assembly.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
 
 !alert-end!
 
 ## Heterogeneous core using CoreMeshGenerator
 
-At this point, we have defined a 3D heterogeneous ABTR Now that all heterogeneous and homogeneous assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference `dummy` (this object has not been actually created) and tell [CoreMeshGenerator.md] through the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
+Now that all heterogeneous and homogeneous assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference `dummy` (this object has not been actually created) and tell [CoreMeshGenerator.md] through the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
 
 - Since we want to extrude the 2D core, we use the [!param](/Mesh/CoreMeshGenerator/extrude)=`true` parameter within [CoreMeshGenerator.md]. The step simultaneously extrudes the geometry and applies the regions IDs to all axial layers as defined in the [PinMeshGenerator.md] and [AssemblyMeshGenerator.md] objects.
 - Behind the scenes, extra element IDs `assembly_id` and `plane_id` are automatically added to the relevant elements.
