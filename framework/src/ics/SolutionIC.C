@@ -23,6 +23,10 @@ SolutionIC::validParams()
                                           "The SolutionUserObject to extract data from.");
   params.addRequiredParam<VariableName>(
       "from_variable", "The name of the variable in the file that is to be extracted");
+  params.addParam<std::vector<SubdomainName>>(
+      "from_subdomains",
+      "The name(s) of the subdomain(s) in the solution file providing the data. If not specified, "
+      "will default to the block restriction specified by the 'block' parameter.");
   params.addClassDescription(
       "Sets the initial condition from a field variable stored in an Exodus file, "
       "retrieved by a SolutionUserObject");
@@ -47,7 +51,9 @@ SolutionIC::initialSetup()
 
     const std::vector<SubdomainID> all_block_ids(meshBlockIDs().begin(), meshBlockIDs().end());
     const auto blocks_to_check =
-        blockRestricted() ? blocks() : _sys.mesh().getSubdomainNames(all_block_ids);
+        isParamValid("from_subdomains")
+            ? getParam<std::vector<SubdomainName>>("from_subdomains")
+            : (blockRestricted() ? blocks() : _sys.mesh().getSubdomainNames(all_block_ids));
 
     for (auto & blk_name : blocks_to_check)
     {
@@ -72,6 +78,12 @@ SolutionIC::initialSetup()
       }
     }
   }
+
+  if (_solution_object.getSolutionFileType() != "exodusII" && isParamValid("from_subdomains"))
+    paramError("from_subdomains",
+               "Source subdomain block restriction is not supported if the solution file type is "
+               "not Exodus. Current file type: " +
+                   std::string(_solution_object.getSolutionFileType()));
 }
 
 Real
