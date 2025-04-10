@@ -30,8 +30,19 @@ public:
    */
   virtual ~CSGSphere() = default;
 
+  /**
+   * @brief Get the coefficients (x0, y0, z0, r) for the equation of a sphere
+   *
+   * @return std::map<std::string, Real>
+   */
   virtual std::map<std::string, Real> getCoeffs() override;
 
+  /**
+   * @brief get direction from point to sphere surface
+   *
+   * @param p
+   * @return CSGSurface::Direction
+   */
   virtual CSGSurface::Direction directionFromPoint(const Point p) override;
 
 protected:

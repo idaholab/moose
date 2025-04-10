@@ -32,11 +32,23 @@ public:
    */
   virtual ~CSGPlane() = default;
 
+  /**
+   * @brief get coefficients (a, b, c, d) of the Plane aX + bY + cZ = d
+   *
+   * @return std::map<std::string, Real>
+   */
   virtual std::map<std::string, Real> getCoeffs() override;
 
+  /**
+   * @brief get direction from point p to plane
+   *
+   * @param p
+   * @return CSGSurface::Direction
+   */
   virtual CSGSurface::Direction directionFromPoint(const Point p) override;
 
 protected:
+  // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane
   void coeffsFromPoints(const Point p1, const Point p2, const Point p3);
 
   /// Value of a in equation of plane
