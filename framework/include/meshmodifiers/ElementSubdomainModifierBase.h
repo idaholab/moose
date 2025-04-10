@@ -12,6 +12,31 @@
 #include "ElementUserObject.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
+#include "NodalPatchRecoveryBase.h"
+#include "KDTree.h"
+
+/**
+ * @note Throughout this file, the term "active" refer to elements that are part of the
+ * computational domain where PDEs are being solved. This term shall not be confused with "active"
+ * in the context of adaptive mesh refinement.
+ */
+
+/**
+ * Strategies for (re)initializing the solution:
+ *
+ * - IC: Use the initial condition for the variable
+ * - POLYNOMIAL_NEIGHBOR: Fit a polynomial using the neighbor active elements
+ * - POLYNOMIAL_WHOLE: Fit a polynomial using all active elements
+ * - POLYNOMIAL_NEARBY: Fit a polynomial using nearby active elements whose distance is below a
+ *                      specified threshold.
+ */
+enum class ReinitStrategy
+{
+  IC,
+  POLYNOMIAL_NEIGHBOR,
+  POLYNOMIAL_WHOLE,
+  POLYNOMIAL_NEARBY
+};
 
 /**
  * Base class for mesh modifiers modifying element subdomains
@@ -59,6 +84,12 @@ protected:
   /// Boundary names associated with each moving boundary ID
   std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
 
+  /// Nonlinear system
+  NonlinearSystemBase & _nl_sys;
+
+  /// Auxiliary system
+  AuxiliarySystem & _aux_sys;
+
 private:
   /// Create moving boundaries
   void createMovingBoundaries(MooseMesh & mesh);
@@ -80,6 +111,9 @@ private:
 
   void applyMovingBoundaryChanges(MooseMesh & mesh);
 
+  void prepareVariableForReinitialization(const VariableName & var_name,
+                                          ReinitStrategy reinit_strategy);
+
   /// Update boundaries for adaptive mesh from the parent to children elements
   void updateAMRMovingBoundary(MooseMesh & mesh);
 
@@ -95,16 +129,19 @@ private:
   bool nodeIsNewlyReinitialized(dof_id_type node_id) const;
 
   /// Reinitialize variables on range of elements and nodes to be reinitialized
-  void applyIC(bool displaced);
+  void applyIC();
 
   /// Reinitialize stateful material properties on range of elements and nodes to be reinitialized
-  void initElementStatefulProps(bool displaced);
+  void initElementStatefulProps();
 
   /// Range of reinitialized elements
-  ConstElemRange & reinitializedElemRange(bool displaced = false);
+  ConstElemRange & reinitializedElemRange();
+
+  /// Range of reinitialized nodes
+  ConstNodeRange & reinitializedNodeRange();
 
   /// Range of reinitialized boundary nodes
-  ConstBndNodeRange & reinitializedBndNodeRange(bool displaced = false);
+  ConstBndNodeRange & reinitializedBndNodeRange();
 
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
@@ -136,13 +173,71 @@ private:
   std::unordered_set<dof_id_type> _reinitialized_elems;
   /// Range of reinitialized elements
   std::unique_ptr<ConstElemRange> _reinitialized_elem_range;
-  /// Range of reinitialized elements on the displaced mesh
-  std::unique_ptr<ConstElemRange> _reinitialized_displaced_elem_range;
 
   /// Reinitialized nodes
   std::unordered_set<dof_id_type> _reinitialized_nodes;
+  /// Range of reinitialized nodes
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range;
   /// Range of reinitialized boundary nodes
   std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
-  /// Range of reinitialized boundary nodes on the displaced mesh
-  std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
+
+  /// A map from variable name to a pair of:
+  /// (1) a vector of DOF IDs associated with non-reinitialized nodes on reinitialized elements, and
+  /// (2) the corresponding solution values at those DOFs.
+  /// This map is used to preserve solution data for variables that should not be reinitialized
+  /// even though they reside on reinitialized elements.
+  std::map<VariableName, std::pair<std::vector<dof_id_type>, std::vector<Number>>>
+      _overridden_values_on_reinit_elems;
+
+  /// The strategy used to apply IC on newly activated nodes
+  std::vector<ReinitStrategy> _reinit_strategy;
+
+  /// @brief Names of the NodalPatchRecoveryBase user objects
+  const std::vector<UserObjectName> _pr_names;
+
+  /// @brief Apply initial conditions using polynomial extrapolation
+  std::vector<const NodalPatchRecoveryBase *> _pr;
+
+  /// @brief List of variable names to be initialized for IC
+  std::vector<VariableName> _reinit_vars;
+
+  /// @brief map from variable name to the index of the nodal patch recovery user object in `_pr`
+  std::map<VariableName, unsigned int> _var_name_to_pr_idx;
+
+  /// @brief A map to map reinitialization strategies to their corresponding patch element IDs
+  std::map<VariableName, std::vector<dof_id_type>> _patch_elem_ids;
+
+  /// @brief Maximum number of elements allowed in a leaf node of the k-d tree.
+  int _leaf_max_size = 10;
+
+  /// @brief k-d tree used for neighbor solved element search in polynomial extrapolation.
+  std::unique_ptr<KDTree> _kd_tree = nullptr;
+
+  /// @brief Centroids of all solved elements used for k-d tree construction.
+  std::vector<Point> _kd_tree_points;
+
+  /// @brief Radius threshold for the k-d tree neighbor search.
+  double _nearby_distance_threshold;
+
+  /// @brief List of variable names for which overridden DOF values should be restored.
+  std::vector<VariableName> _vars_to_restore_overridden_dofs;
+
+  /// @brief Set of processor IDs that have reinitialized elements and nodes.
+  std::set<processor_id_type> _global_proc_ids_for_reinit;
+
+  /// @brief Gather patch elements for reinitialized elements based onthe reinitialization strategy.
+  void gatherPatchElements(const VariableName & var_name, ReinitStrategy reinit_strategy);
+
+  /// @brief Extrapolate polynomial for the given variable onto the reinitialized elements.
+  void extrapolatePolynomial(const VariableName & var_name);
+
+  /// @brief Store values from non-reinitialized nodes on reinitialized elements
+  void storeOverriddenDofValues(const std::vector<VariableName> & vars_names);
+
+  /// @brief Restore values to non-reinitialized nodes on reinitialized elements
+  void restoreOverriddenDofValues(const std::vector<VariableName> & vars_names);
+
+private:
+  /// Construct a KD-tree from the given elements
+  std::unique_ptr<KDTree> constructKDTreeFromElements(const std::vector<dof_id_type> & elems);
 };

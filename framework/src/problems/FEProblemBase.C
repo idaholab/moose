@@ -128,6 +128,7 @@
 #include "libmesh/petsc_solver_exception.h"
 
 #include "metaphysicl/dualnumber.h"
+#include <vector>
 
 using namespace libMesh;
 
@@ -3662,10 +3663,10 @@ FEProblemBase::projectSolution()
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3683,10 +3684,12 @@ FEProblemBase::projectSolution()
 }
 
 void
-FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
-                                                    ConstBndNodeRange & bnd_nodes)
+FEProblemBase::projectInitialConditionOnCustomRange(
+    ConstElemRange & elem_range,
+    ConstBndNodeRange & bnd_nodes,
+    const std::optional<std::set<VariableName>> & target_vars)
 {
-  ComputeInitialConditionThread cic(*this);
+  ComputeInitialConditionThread cic(*this, target_vars);
   Threads::parallel_reduce(elem_range, cic);
 
   // Need to close the solution vector here so that boundary ICs take precendence
@@ -3694,7 +3697,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     nl->solution().close();
   _aux->solution().close();
 
-  ComputeBoundaryInitialConditionThread cbic(*this);
+  ComputeBoundaryInitialConditionThread cbic(*this, target_vars);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
   for (auto & nl : _nl)
@@ -3710,15 +3713,19 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     for (const auto & ic : ics)
     {
       MooseVariableScalar & var = ic->variable();
+
+      if (target_vars && !target_vars->count(var.name()))
+        continue;
+
       var.reinit();
 
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3733,6 +3740,84 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+}
+
+void
+FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
+                                            Number (*poly_func)(const Point &,
+                                                                const libMesh::Parameters &,
+                                                                const std::string &,
+                                                                const std::string &),
+                                            Gradient (*poly_func_grad)(const Point &,
+                                                                       const libMesh::Parameters &,
+                                                                       const std::string &,
+                                                                       const std::string &),
+                                            const libMesh::Parameters & function_parameters,
+                                            const VariableName & target_var)
+{
+  const auto & var = getStandardVariable(0, target_var);
+  const auto var_num = var.number();
+
+  SystemBase & sys =
+      _aux->hasVariable(target_var)
+          ? static_cast<SystemBase &>(getAuxiliarySystem())
+          : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(target_var)));
+
+  // Let libmesh handle the projection
+  System & libmesh_sys = getSystem(target_var);
+  std::string temp_vec_name = "__temp_projection_" + target_var + "__";
+  NumericVector<Number> & temp_vec = libmesh_sys.add_vector(temp_vec_name, /*projected=*/false);
+  libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
+  temp_vec.close();
+
+  // Get the dofs to copy
+  DofMap & dof_map = sys.dofMap();
+  std::set<dof_id_type> owned_dof_indices;
+  std::vector<dof_id_type> dof_indices;
+
+  for (const auto & elem : elem_range)
+  {
+    dof_map.dof_indices(elem, dof_indices, var_num);
+    for (auto dof : dof_indices)
+    {
+      if (dof_map.dof_owner(dof) == processor_id())
+        owned_dof_indices.insert(dof);
+    }
+  }
+
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> push_data;
+
+  for (const auto & elem : elem_range)
+  {
+    dof_map.dof_indices(elem, dof_indices, var_num);
+    for (auto dof : dof_indices)
+    {
+      if (dof_map.dof_owner(dof) == processor_id())
+        owned_dof_indices.insert(dof);
+      else // push the dof to the processor that owns it
+        push_data[dof_map.dof_owner(dof)].push_back(dof);
+    }
+  }
+
+  auto push_receiver = [&](const processor_id_type, const std::vector<dof_id_type> & received_data)
+  {
+    for (const auto & id : received_data)
+      owned_dof_indices.insert(id);
+  };
+
+  Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
+
+  std::vector<dof_id_type> owned_dof_indices_vec(owned_dof_indices.begin(),
+                                                 owned_dof_indices.end());
+  // Copy the projected values into the solution vector
+  std::vector<Real> dof_vals;
+  temp_vec.get(owned_dof_indices_vec, dof_vals);
+  sys.solution().insert(dof_vals, owned_dof_indices_vec);
+  sys.solution().close();
+  sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
+
+  // Remove the temporary vector
+  libmesh_sys.remove_vector(temp_vec_name);
 }
 
 std::shared_ptr<MaterialBase>
@@ -4338,8 +4423,8 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   }
 
   // Add as a Functor if it is one. We usually need to add the user object from thread 0 as the
-  // registered functor for all threads because when user objects are thread joined, generally only
-  // the primary thread copy ends up with all the data
+  // registered functor for all threads because when user objects are thread joined, generally
+  // only the primary thread copy ends up with all the data
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     const decltype(uos)::size_type uo_index = uos.front()->needThreadedCopy() ? tid : 0;
@@ -4481,8 +4566,8 @@ FEProblemBase::computeIndicators()
   {
     TIME_SECTION("computeIndicators", 1, "Computing Indicators");
 
-    // Internal side indicators may lead to creating a much larger sparsity pattern than dictated by
-    // the actual finite element scheme (e.g. CFEM)
+    // Internal side indicators may lead to creating a much larger sparsity pattern than dictated
+    // by the actual finite element scheme (e.g. CFEM)
     const auto old_do_derivatives = ADReal::do_derivatives;
     ADReal::do_derivatives = false;
 
@@ -4634,8 +4719,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // With the auxiliary system solution computed, sync the displaced problem auxiliary solution
   // before computation of post-aux user objects. The undisplaced auxiliary system current local
   // solution is updated (via System::update) within the AuxiliarySystem class's variable
-  // computation methods (e.g. computeElementalVarsHelper, computeNodalVarsHelper), so it is safe to
-  // use it here
+  // computation methods (e.g. computeElementalVarsHelper, computeNodalVarsHelper), so it is safe
+  // to use it here
   if (_displaced_problem)
     _displaced_problem->syncAuxSolution(*getAuxiliarySystem().currentSolution());
 
@@ -6448,10 +6533,10 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       {
         _console << "\n" << _exception_message << "\n";
         if (isTransient())
-          _console
-              << "To recover, the solution will fail and then be re-attempted with a reduced time "
-                 "step.\n"
-              << std::endl;
+          _console << "To recover, the solution will fail and then be re-attempted with a "
+                      "reduced time "
+                      "step.\n"
+                   << std::endl;
       }
 
       // Stop the solve -- this entails setting
@@ -6929,8 +7014,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
           auto & matrix = _current_nl_sys->getMatrix(tag);
           matrix.zero();
           if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
-            // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
-            // diagonal dependence. With global AD indexing we only add non-zero
+            // PETSc algorithms require diagonal allocations regardless of whether there is
+            // non-zero diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
             for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
               matrix.add(index, index, 0);
@@ -7144,11 +7229,12 @@ FEProblemBase::handleException(const std::string & calling_method)
     // - Both processes throw because of a new nonzero during MOOSE's computeJacobianTags
     // - We potentially handle the exceptions nicely here
     // - When the matrix is closed in libMesh's libmesh_petsc_snes_solver, there is a new nonzero
-    //   throw which we do not catch here in MOOSE and the simulation terminates. This only appears
-    //   in parallel (and not all the time; a test I was examining threw with distributed mesh, but
-    //   not with replicated). In serial there are no new throws from libmesh_petsc_snes_solver.
-    // So for uniformity of behavior across serial/parallel, we will choose to abort here and always
-    // produce a non-zero exit code
+    //   throw which we do not catch here in MOOSE and the simulation terminates. This only
+    //   appears in parallel (and not all the time; a test I was examining threw with distributed
+    //   mesh, but not with replicated). In serial there are no new throws from
+    //   libmesh_petsc_snes_solver.
+    // So for uniformity of behavior across serial/parallel, we will choose to abort here and
+    // always produce a non-zero exit code
     mooseError(create_exception_message("libMesh::PetscSolverException", e));
   }
   catch (const std::exception & e)
@@ -7926,7 +8012,9 @@ FEProblemBase::initialAdaptMesh()
       if (_adaptivity.initialAdaptMesh())
       {
         meshChanged(
-            /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
+            /*intermediate_change=*/false,
+            /*contract_mesh=*/true,
+            /*clean_refinement_flags=*/true);
 
         // reproject the initial condition
         projectSolution();
@@ -8045,13 +8133,17 @@ FEProblemBase::updateMeshXFEM()
       // having coincident elements. While conceptually speaking we do not need to contract the
       // mesh, we need its call to renumber_nodes_and_elements in order to preserve these tests
       meshChanged(
-          /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
+          /*intermediate_change=*/false,
+          /*contract_mesh=*/true,
+          /*clean_refinement_flags=*/false);
 
     updated = _xfem->update(_time, _nl, *_aux);
     if (updated)
     {
       meshChanged(
-          /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
+          /*intermediate_change=*/false,
+          /*contract_mesh=*/true,
+          /*clean_refinement_flags=*/false);
       _xfem->initSolution(_nl, *_aux);
       restoreSolutions();
     }
@@ -8170,9 +8262,9 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 
       // Concurrent erasure from the shared hash map is not safe while we are reading from it in
       // ProjectMaterialProperties, so we handle erasure here. Moreover, erasure based on key is
-      // not thread safe in and of itself because it is a read-write operation. Note that we do not
-      // do the erasure for p-refinement because the coarse level element is the same as our active
-      // refined level element
+      // not thread safe in and of itself because it is a read-write operation. Note that we do
+      // not do the erasure for p-refinement because the coarse level element is the same as our
+      // active refined level element
       if (!doingPRefinement())
         for (const auto & elem : range)
         {
@@ -8188,8 +8280,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
           /* refine = */ false, *this, _material_props, _bnd_material_props, _assembly);
       const auto & range = *_mesh.coarsenedElementRange();
       Threads::parallel_reduce(range, pmp);
-      // Note that we do not do the erasure for p-refinement because the coarse level element is the
-      // same as our active refined level element
+      // Note that we do not do the erasure for p-refinement because the coarse level element is
+      // the same as our active refined level element
       if (!doingPRefinement())
         for (const auto & elem : range)
         {
@@ -8209,8 +8301,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
 
-  // Now for backwards compatibility with user code that overrode the old no-arg meshChanged we must
-  // call it here
+  // Now for backwards compatibility with user code that overrode the old no-arg meshChanged we
+  // must call it here
   meshChanged();
 }
 
@@ -9047,8 +9139,8 @@ FEProblemBase::getFVMatsAndDependencies(
         for (auto * var : var_deps)
         {
           if (!var->isFV())
-            mooseError(
-                "Ghostable materials should only have finite volume variables coupled into them.");
+            mooseError("Ghostable materials should only have finite volume variables coupled "
+                       "into them.");
           else if (face_mat->hasStatefulProperties())
             mooseError("Finite volume materials do not currently support stateful properties.");
           variables.insert(var);
@@ -9069,8 +9161,8 @@ FEProblemBase::getFVMatsAndDependencies(
         for (auto * var : var_deps)
         {
           if (!var->isFV())
-            mooseError(
-                "Ghostable materials should only have finite volume variables coupled into them.");
+            mooseError("Ghostable materials should only have finite volume variables coupled "
+                       "into them.");
           else if (neighbor_mat->hasStatefulProperties())
             mooseError("Finite volume materials do not currently support stateful properties.");
           auto pr = variables.insert(var);
@@ -9325,7 +9417,8 @@ FEProblemBase::computeSystems(const ExecFlagType & type)
   // When performing an adjoint solve in the optimization module, the current solver system is the
   // adjoint. However, the adjoint solve requires having accurate time derivative calculations for
   // the forward system. The cleanest way to handle such uses is just to compute the time
-  // derivatives for all solver systems instead of trying to guess which ones we need and don't need
+  // derivatives for all solver systems instead of trying to guess which ones we need and don't
+  // need
   for (auto & solver_sys : _solver_systems)
     solver_sys->compute(type);
 

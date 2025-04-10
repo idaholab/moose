@@ -1,0 +1,164 @@
+[Tests]
+  issues = '#30627'
+  design = 'ElementSubdomainModifier.md'
+
+  [group]
+    requirement = 'The framework shall include the ability to set initial conditions on newly activated nodes during simulation '
+
+    [IC_for_newlyactivated_nodes]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr.i'
+      exodiff = 'external_moving_boundary_npr_out.e-s004'
+      detail = 'using a strategy that estimates values from nearby solved regions.'
+    []
+
+    [IC_for_newlyactivated_nodes_two_variables_different_IC]
+      type = 'Exodiff'
+      input = 'setIC_UO_followVar.i'
+      exodiff = 'setIC_UO_followVar_out.e-s004'
+      detail = 'using different strategies for each field, one based on nearby regions and the other using a fixed value.'
+    []
+
+    [IC_for_newlyactivated_nodes_two_variables_same_IC]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_two_variables_npr_for_both.i'
+      exodiff = 'external_moving_boundary_npr_two_variables_npr_for_both_out.e-s004'
+      detail = 'using a shared strategy to assign the same type of initial condition to multiple fields.'
+    []
+
+    [IC_for_newlyactivated_nodes_two_variables_normal_setting]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      exodiff = 'external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s004'
+      detail = 'using a configuration where multiple lists are aligned to assign initial conditions to each field.'
+    []
+
+    [npr_element_not_specified_by_user]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_elem_not_provide.i'
+      exodiff = 'external_moving_boundary_npr_elem_not_provide_out.e-s002'
+      detail = 'using all elements in a designated region to estimate initial values by default.'
+    []
+
+    [DEFAULT]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_default.i'
+      exodiff = 'external_moving_boundary_no_unsolved_blocks_all_default_out.e-s004'
+      detail = 'using a default method that does not require advanced configuration.'
+    []
+
+    [IC_for_newlyactivated_nodes_quad9]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_Quad9.i'
+      exodiff = 'external_moving_boundary_npr_Quad9_out.e-s004'
+      detail = 'using an extrapolation strategy that supports higher-order elements.'
+    []
+
+    [IC_for_auxiliary_monomial_variables]
+      type = 'Exodiff'
+      input = 'npr_IC_aux.i'
+      exodiff = 'npr_IC_aux_out.e-s004'
+      detail = 'using an approach that supports auxiliary variables defined over entire elements.'
+    []
+
+    [IC_for_auxiliary_lagrange_variables]
+      type = 'Exodiff'
+      input = 'npr_IC_nodal_based_aux.i'
+      exodiff = 'npr_IC_nodal_based_aux_out.e-s004'
+      detail = 'using an approach that supports auxiliary variables defined at nodal locations.'
+    []
+
+    [IC_for_default]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_three_vars.i'
+      exodiff = 'external_moving_boundary_npr_three_vars_out.e-s004'
+      detail = 'using a fallback method to assign values when no specific configuration is provided.'
+    []
+
+    [IC_three_variables_three_IC_strategies]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_out.e-s004'
+      detail = 'using three distinct methods to assign initial values to different fields.'
+    []
+
+    [IC_three_variables_three_IC_strategies_default]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies_default.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_default_out.e-s004'
+      detail = 'using a combination of default and custom methods to initialize each field.'
+    []
+
+    [IC_strategies_npr_with_IC_in_var]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies_ic_in_var.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s004'
+      detail = 'using either directly specified values or extrapolation methods, with extrapolated values taking precedence when both are provided.'
+    []
+
+    [IC_for_newlyactivated_nodes_old_test]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_output_old_older.i'
+      exodiff = 'external_moving_boundary_npr_output_old_older_out.e-s004'
+      detail = 'using the current solution to also update values from previous time steps.'
+    []
+
+    [IC_threeD_second_order]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_3D_second_order.i'
+      exodiff = 'external_moving_boundary_3D_second_order_out.e-s002'
+      detail = 'using a 3D configuration to initialize from second-order nodal patch recovery.'
+    []
+
+    [restore_not_restore_test]
+      type = 'Exodiff'
+      input = 'restore_not_restore_test.i'
+      exodiff = 'restore_not_restore_test_out.e-s004'
+      detail = 'using a configuration that tests both restoring and not restoring DOF values after reinitialization.'
+    []
+  []
+
+  [error_test]
+    requirement = 'The system shall throw an error '
+
+    [error_reinitialization_strategy_not_valid]
+      type = RunException
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL"'
+      expect_err = 'Invalid option "POLYNOMIAL" in MooseEnum.'
+      detail = 'if an invalid initial condition strategy name is provided when modifying element subdomains.'
+    []
+
+    [error_reinitialization_strategy_more_than_ic_variables]
+      type = RunException
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE"'
+      expect_err = "The 'reinitialization_strategy' parameter must have either a single value or a number of values equal to the number of 'reinitialize_variables'."
+      detail = 'if the number of specified strategies does not match the number of associated fields.'
+    []
+
+    [mismatch_ic_variables_and_restore_overridden_dofs]
+      type = RunException
+      input = 'restore_not_restore_test.i'
+      cli_args = 'MeshModifiers/moving_circle/restore_overridden_dofs="true false"'
+      expect_err = "The 'restore_overridden_dofs' parameter must have either a single value or a number"
+      detail = 'if the number of initialized variables and restore_overridden_dofs do not match.'
+    []
+
+    [npr_no_UO_in_esm]
+      type = RunException
+      input = 'external_moving_boundary_no_unsolved_blocks_all_default.i'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR" MeshModifiers/moving_circle/reinitialize_variables="diff"'
+      expect_err = "The number of polynomial fitters"
+      detail = 'if a strategy that requires extrapolation is used without providing the necessary supporting method.'
+    []
+
+    [mismatch_IC_poly_npr_UO]
+      type = RunException
+      input = 'external_moving_boundary_npr.i'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="IC"'
+      expect_err = "Mismatch between number of reinitialization strategies using polynomial extrapolation and polynomial fitters"
+      detail = 'if the number of extrapolation-based strategies does not match the number of corresponding extrapolation sources.'
+    []
+  []
+[]

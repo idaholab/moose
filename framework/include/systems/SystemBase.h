@@ -433,6 +433,11 @@ public:
    */
   virtual NumericVector<Number> & serializedSolution();
 
+  /**
+   * Create a fresh serial solution vector
+   */
+  virtual void cleanSerializedSolution();
+
   virtual NumericVector<Number> & residualCopy()
   {
     mooseError("This system does not support getting a copy of the residual");
