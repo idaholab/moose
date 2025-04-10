@@ -305,7 +305,7 @@ AddVariableAction::getSubdomainIDs()
   std::vector<SubdomainName> block_param =
       _moose_object_pars.get<std::vector<SubdomainName>>("block");
   if (block_param.empty() && _problem->isParamValid("default_block"))
-    block_param = _problem->getActiveBlockLists();
+    block_param = _problem->getDefaultBlockLists();
 
   for (const auto & subdomain_name : block_param)
   {

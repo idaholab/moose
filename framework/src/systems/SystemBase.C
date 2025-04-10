@@ -720,7 +720,7 @@ SystemBase::addVariable(const std::string & var_type,
   std::set<SubdomainID> blocks;
   std::vector<SubdomainName> block_param = parameters.get<std::vector<SubdomainName>>("block");
   if (block_param.empty() and _fe_problem.isParamValid("default_block"))
-    block_param = _fe_problem.getActiveBlockLists();
+    block_param = _fe_problem.getDefaultBlockLists();
 
   for (const auto & subdomain_name : block_param)
   {
