@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30300'
-  design = 'sanity_checking.md BlockRestrictable.md'
+  design = '../../../../modules/doc/content/framework_development/sanity_checking.md ../source/interfaces/BlockRestrictable.md'
   [block_test]
     requirement = 'The system shall be capable of using default_block in [Problem] to (1) enforce that only blocks listed in default_block are considered during kernel and material coverage checks, and (2) automatically apply default_block as the block restriction for kernels and variables unless explicitly overridden.'
     [default_block]
@@ -20,7 +20,6 @@
       input = 'diffusion_with_null_material_kernel_coverage_override.i'
       exodiff = 'diffusion_with_null_material_kernel_coverage_override_out.e'
       detail = 'Check whether kernel coverage override is allowed even when default_block is specified.'
-      requirement = NONE
     []
   []
   [error_test]

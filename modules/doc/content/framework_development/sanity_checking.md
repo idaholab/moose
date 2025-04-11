@@ -78,6 +78,7 @@ In such cases, the common approach is to either:
 ```
 
 In addition, when certain material properties are block restricted to the computational domain, users must also manually set:
+
 ```
 [Problem]
   material_coverage_check = ONLY_LIST
@@ -88,7 +89,7 @@ to skip the material coverage check outside the computational domain.
 
 This manual setup is not only repetitive but also error-prone, especially when the same block list needs to be specified in multiple places.
 
-To simplify this process, MOOSE provides a convenient parameter called `default_block` under the `[Problem]` block. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
+To simplify this process, MOOSE provides a convenient parameter called `default_block` under the \[`Problem`\] block. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
 
 Setting `default_block` will automatically:
 
@@ -99,6 +100,7 @@ Setting `default_block` will automatically:
 This provides a more user-friendly and centralized way to handle simulations with a preferred, non-default computational domain.
 
 Example Usage for  `default_block`:
+
 ```
 # Perform kernel and material coverage checks only for block 0, 1, and 3,
 # while excluding block 2 as an inactive region.
