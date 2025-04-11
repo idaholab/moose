@@ -7,8 +7,6 @@ every object may be restricted to one or more subdomains simultaneously. Subdoma
 either as numeric IDs or strings (when supported by the Mesh format or named entities are used).
 When the user sets `default_block` in the `[Problem]` block, the specified block restriction will be
 automatically applied to all objects inheriting the BlockRestrictable interface. Users can still override
-this behavior by explicitly specifying the `block` parameter within each object. If an explicitly
-specified `block` is not a subset of the `default_block`, MOOSE will throw a warning
-to notify the user about the inconsistency.
+this behavior by explicitly specifying the `block` parameter within each object.
 Finally, this interface handles queries about the set of subdomains that an object is restricted
 to when no restrictions are supplied.
