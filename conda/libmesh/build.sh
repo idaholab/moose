@@ -6,7 +6,7 @@ export PKG_CONFIG_PATH=${BUILD_PREFIX:?}/lib/pkgconfig:${PKG_CONFIG_PATH}
 function set_libmesh_env(){
     unset LIBMESH_DIR CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS \
           LDFLAGS DEBUG_CPPFLAGS DEBUG_CFLAGS DEBUG_CXXFLAGS \
-          FORTRANFLAGS DEBUG_FFLAGS DEBUG_FORTRANFLAGS ADDED_ARGS
+          FORTRANFLAGS DEBUG_FFLAGS DEBUG_FORTRANFLAGS
 
     if [[ "$(uname)" == Darwin ]]; then
         if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then

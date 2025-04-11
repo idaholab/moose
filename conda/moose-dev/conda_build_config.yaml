@@ -10,10 +10,10 @@ moose_wasp:
   - moose-wasp 2025.02.25
 
 moose_tools:
-  - moose-tools 2025.04.08
+  - moose-tools 2025.04.11
 
 moose_peacock:
-  - moose-peacock 2025.04.08
+  - moose-peacock 2025.04.11
 
 zip_keys:
   - mpi
