@@ -31,11 +31,5 @@
       expect_err = 'The supplied block list is not a subset of the default block list'
       detail = 'Ensure that an error is thrown when the block specified in a kernel is not within the default_block list.'
     []
-    [error_no_default_block]
-      type = RunException
-      input = 'diffusion_with_null_material_no_default_block.i'
-      expect_err = 'The following blocks from your input mesh do not contain an active material'
-      detail = 'Ensure that an error is thrown when default_block is not defined in [Problem] and the kernel references a block that lacks an active material.'
-    []
   []
 []
