@@ -68,5 +68,5 @@ This [FillBetweenPointVectorsGenerator.md] object generates a transition layer b
 
 [XYDelaunayGenerator.md] is extremely powerful when combined with [ParsedCurveGenerator.md] and other Reactor module objects already described, as it can mesh very irregularly shaped regions.
 
-!content pagination previous=tutorial04_meshing/step12_rgmb_hetero.md
+!content pagination previous=tutorial04_meshing/step12_rgmb_empire.md
                     next=tutorial04_meshing/step14_advanced_examples.md

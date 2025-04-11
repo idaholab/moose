@@ -58,11 +58,11 @@
 
 !---
 
-!include getting_started/examples_and_tutorials/tutorial04_meshing/presentation/tutorial04_step11_rgmb_homo.md
+!include getting_started/examples_and_tutorials/tutorial04_meshing/presentation/tutorial04_step11_rgmb_het_hom.md
 
 !---
 
-!include getting_started/examples_and_tutorials/tutorial04_meshing/presentation/tutorial04_step12_rgmb_hetero.md
+!include getting_started/examples_and_tutorials/tutorial04_meshing/presentation/tutorial04_step12_rgmb_empire.md
 
 !---
 
