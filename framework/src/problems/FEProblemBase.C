@@ -224,7 +224,9 @@ FEProblemBase::validParams()
   };
 
   params.addParam<std::vector<SubdomainName>>(
-      "default_block", {}, "List of subdomains for kernel coverage and material check.");
+      "default_block",
+      {},
+      "Default list of subdomains for block-restrictable objects such as kernels and materials.");
 
   MooseEnum kernel_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
   params.addParam<MooseEnum>("kernel_coverage_check",
@@ -377,7 +379,7 @@ FEProblemBase::validParams()
       "boundary_restricted_elem_integrity_check material_coverage_check "
       "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
-      "Simulation checks default_blocks");
+      "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
                               "ignore_zeros_in_jacobian identify_variable_groups_in_nl "
                               "use_hash_table_matrix_assembly restore_original_nonzero_pattern",

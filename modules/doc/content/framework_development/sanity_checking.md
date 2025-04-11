@@ -55,3 +55,56 @@ pair of parameters used in testing can be used to disable the kernel coverage ch
   solve = false
 []
 ```
+
+Regarding simulations like additive manufacturing or immersed boundary simulations, users often work with a complete mesh where certain regions (referred to as *inactive domains*) should not be solved.
+
+In such cases, the common approach is to either:
+
+- Disable kernel coverage checks entirely by setting:
+
+```
+[Problem]
+  kernel_coverage_check = false
+[]
+```
+
+- Restrict the kernel coverage check to specific active blocks by setting:
+
+```
+[Problem]
+  kernel_coverage_check = ONLY_LIST
+  kernel_coverage_block_list = 'active block IDs'
+[]
+```
+
+However, when different kernels are associated with different material properties, users must also manually set:
+
+```
+[Problem]
+  material_coverage_check = ONLY_LIST
+  material_coverage_block_list = 'active block IDs'
+[]
+```
+to ensure material properties are correctly assigned only to the active regions.
+
+This manual setup is not only repetitive but also error-prone, especially when the same block list needs to be specified in multiple places.
+
+To simplify this process, MOOSE provides a convenient parameter called `default_block` under the `[Problem]` block. This allows users to specify the active blocks only once.
+
+Setting `default_block` will automatically:
+
+- Enable kernel coverage check with `ONLY_LIST` mode and assign the specified blocks to `kernel_coverage_block_list`
+
+- Enable material coverage check with `ONLY_LIST` mode and assign the specified blocks to `material_coverage_block_list`
+
+This provides a more user-friendly and centralized way to handle simulations with inactive regions.
+
+Example Usage for  `default_block`:
+```
+# Perform kernel and material coverage checks only for block 0, 1, and 3,
+# while excluding block 2 as an inactive region.
+
+[Problem]
+  default_block = '0 1 3'
+[]
+```

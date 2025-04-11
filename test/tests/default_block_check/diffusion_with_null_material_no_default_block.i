@@ -48,68 +48,51 @@
 []
 
 [Variables]
-  [cond]
+  [diff]
     order = FIRST
   []
 []
 
 [Kernels]
-  [diff]
-    type = HeatConduction
-    variable = cond
+  [diffusion]
+    type = MatDiffusion
+    variable = diff
+    diffusivity = 'k'
   []
 []
 
 [Materials]
   [material_left_cond]
-    type = HeatConductionMaterial
     block = 0
-    specific_heat = 30
-    thermal_conductivity = 20
+    type = GenericConstantMaterial
+    prop_names = 'k'
+    prop_values = 26.0
   []
   [material_right_cond]
-    type = HeatConductionMaterial
     block = 1
-    specific_heat = 75
-    thermal_conductivity = 50
+    type = GenericConstantMaterial
+    prop_names = 'k'
+    prop_values = 35.0
   []
   [material_middle_cond]
-    type = HeatConductionMaterial
     block = 3
-    specific_heat = 150
-    thermal_conductivity = 100
-  []
-  [density_left]
     type = GenericConstantMaterial
-    prop_names = 'density'
-    block = 0
-    prop_values = 10
-  []
-  [density_right]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    block = 1
-    prop_values = 20
-  []
-  [density_middle]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    block = 3
-    prop_values = 50
+    prop_names = 'k'
+    prop_values = 10.0
   []
 []
 
 [BCs]
   [left]
     type = DirichletBC
-    variable = cond
+    variable = diff
     boundary = left
     value = 10
   []
 
   [right]
     type = DirichletBC
-    variable = cond
+    variable = diff
     boundary = right
     value = 0
   []
@@ -127,7 +110,7 @@
 [Postprocessors]
   [T3]
     type = ElementAverageValue
-    variable = cond
+    variable = diff
     block = '3'
     execute_on = 'INITIAL TIMESTEP_END'
   []

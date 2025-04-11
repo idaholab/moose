@@ -2460,9 +2460,9 @@ public:
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
   /**
-   * @returns the active blocks
+   * @returns the default blocks (for block restriction)
    */
-  const std::vector<SubdomainName> getDefaultBlockLists() const { return _default_blocks; };
+  const std::vector<SubdomainName> getDefaultBlocks() const { return _default_blocks; };
 
   virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
 
@@ -2814,7 +2814,7 @@ protected:
 
   std::vector<SolverParams> _solver_params;
 
-  /// blocks that help user to set easier for both kernel and material coverage check
+  /// Default blocks for block restriction
   std::vector<SubdomainName> _default_blocks;
 
   /// Determines whether and which subdomains are to be checked to ensure that they have an active kernel
