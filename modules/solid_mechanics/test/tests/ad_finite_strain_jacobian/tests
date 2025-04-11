@@ -44,7 +44,7 @@
     input = 'eigen_sol.i'
     exodiff = 'eigen_sol_out.e'
     issues = '#30233'
-    requirement = 'Finite strain methods with AD should be able to use the EigenSolution decomposition.'
+    requirement = 'Finite strain methods with AD shall work with the EigenSolution option for polar decomposition.'
   []
 
   [bending-jac]

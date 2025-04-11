@@ -20,7 +20,7 @@
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
-    decomposition_method = EigenSolution # Using TaylorExpansion Works
+    decomposition_method = EigenSolution
     add_variables = true
     use_automatic_differentiation = true
   []
