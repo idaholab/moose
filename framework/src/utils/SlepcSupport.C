@@ -13,7 +13,6 @@
 
 #include "SlepcSupport.h"
 // MOOSE includes
-#include "MultiMooseEnum.h"
 #include "InputParameters.h"
 #include "Conversion.h"
 #include "EigenProblem.h"
