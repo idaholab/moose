@@ -102,7 +102,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
       _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
     }
 
-    isTheBlocksWithinDefaultBlocks();
+    checkDefaultBlockConsistency();
   }
 
   // When 'blocks' is not set and there is a "variable", use the blocks from the variable
@@ -116,7 +116,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
                                    Moose::VarKindType::VAR_ANY,
                                    Moose::VarFieldType::VAR_FIELD_ANY)
                      .activeSubdomains();
-    isTheBlocksWithinDefaultBlocks();
+    checkDefaultBlockConsistency();
   }
 
   // when 'default_block' is set at the [Problem] -> 'block and variable' input should come first
@@ -383,7 +383,7 @@ BlockRestrictable::blocksMaxDimension() const
 }
 
 void
-BlockRestrictable::isTheBlocksWithinDefaultBlocks() const
+BlockRestrictable::checkDefaultBlockConsistency() const
 {
   if (_blk_feproblem->isParamSetByUser("default_block"))
   {
