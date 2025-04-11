@@ -35,13 +35,10 @@ OversampleOutput::validParams()
                          "Set a positional offset, this vector will get added to the "
                          "nodal coordinates to move the domain.");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", "The list of blocks to restrict the mesh sampling to");
 
-  // **** DEPRECATED AND REMOVED PARAMETERS ****
-  params.addDeprecatedParam<bool>("oversample",
-                                  false,
-                                  "Set to true to enable oversampling",
-                                  "This parameter is no longer active, simply set 'refinements' to "
-                                  "a value greater than zero to evoke oversampling");
+  // **** DEPRECATED PARAMETERS ****
   params.addDeprecatedParam<bool>("append_oversample",
                                   false,
                                   "Append '_oversample' to the output file base",
@@ -49,7 +46,7 @@ OversampleOutput::validParams()
                                   "'_oversample' utilize the output block name or 'file_base'");
 
   // 'Oversampling' Group
-  params.addParamNamesToGroup("refinements position file", "Oversampling");
+  params.addParamNamesToGroup("refinements position file block", "Modified Mesh Sampling");
 
   return params;
 }
@@ -57,7 +54,7 @@ OversampleOutput::validParams()
 OversampleOutput::OversampleOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _refinements(getParam<unsigned int>("refinements")),
-    _oversample(_refinements > 0 || isParamValid("file")),
+    _oversample(_refinements > 0 || isParamValid("file") || isParamValid("block")),
     _change_position(isParamValid("position")),
     _position(_change_position ? getParam<Point>("position") : Point()),
     _oversample_mesh_changed(true)
@@ -218,7 +215,7 @@ OversampleOutput::updateOversample()
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
 
-  // Loop throuch each system
+  // Loop through each system
   for (unsigned int sys_num = 0; sys_num < source_es.n_systems(); ++sys_num)
   {
     if (!_mesh_functions[sys_num].empty())
@@ -236,7 +233,7 @@ OversampleOutput::updateOversample()
       for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
 
-        // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it
+        // If the mesh has changed, the MeshFunctions need to be re-built, otherwise simply clear it
         // for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
           _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
@@ -290,6 +287,22 @@ OversampleOutput::cloneMesh()
                    "adapted meshes)!!  Refs #2295");
 
     _cloned_mesh_ptr = _mesh_ptr->safeClone();
+  }
+
+  // Remove unspecified blocks
+  if (isParamValid("block"))
+  {
+    // Remove all elements not in the blocks
+    const auto & blocks_to_keep_names = getParam<std::vector<SubdomainName>>("block");
+    const auto & blocks_to_keep = _cloned_mesh_ptr->getSubdomainIDs(blocks_to_keep_names);
+    for (const auto & elem_ptr : _cloned_mesh_ptr->getMesh().element_ptr_range())
+      if (std::find(blocks_to_keep.begin(), blocks_to_keep.end(), elem_ptr->subdomain_id()) ==
+          blocks_to_keep.end())
+        _cloned_mesh_ptr->getMesh().delete_elem(elem_ptr);
+
+    // Remove isolated nodes
+    _cloned_mesh_ptr->getMesh().allow_renumbering(false);
+    _cloned_mesh_ptr->getMesh().prepare_for_use(/*skip_renumber*/ true);
   }
 
   // Make sure that the mesh pointer points to the newly cloned mesh
