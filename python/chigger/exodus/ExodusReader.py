@@ -181,7 +181,7 @@ class ExodusReader(base.ChiggerObject):
                 self.__vtkreader.ApplyDisplacementsOff()
 
             # Set the geometric objects to load (i.e., subdomains, nodesets, sidesets)
-            active_blockinfo = self.__getDefaultBlocks()
+            active_blockinfo = self.__getActiveBlocks()
             blockinfo = self.getBlockInformation()
             for object_type in ExodusReader.BLOCK_TYPES:
                 for data in blockinfo[object_type].values():
