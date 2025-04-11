@@ -123,10 +123,8 @@ LAROMANCE6DInterpolation::request_AD()
 }
 
 void
-LAROMANCE6DInterpolation::set_value(bool out, bool dout_din, bool d2out_din2)
+LAROMANCE6DInterpolation::set_value(bool out, bool /*dout_din*/, bool /*d2out_din2*/)
 {
-  neml_assert_dbg(!dout_din || !d2out_din2,
-                  "Only AD derivatives are currently supported for this model");
   if (out)
     _output_rate = interpolate_and_transform();
 }
