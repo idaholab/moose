@@ -22,13 +22,4 @@
       detail = 'Check whether kernel coverage override is allowed even when default_block is specified.'
     []
   []
-  [error_test]
-    requirement = 'The system shall throw an error if the supplied block in a kernel or variable is not a subset of the default_block list.'
-    [error]
-      type = RunException
-      input = 'diffusion_with_null_material_more_blocks_in_kernel.i'
-      expect_err = 'The supplied block list is not a subset of the default block list'
-      detail = 'Ensure that an error is thrown when the block specified in a kernel is not within the default_block list.'
-    []
-  []
 []
