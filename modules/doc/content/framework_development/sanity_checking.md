@@ -56,7 +56,7 @@ pair of parameters used in testing can be used to disable the kernel coverage ch
 []
 ```
 
-Regarding simulations like additive manufacturing or immersed boundary simulations, users often work with a complete mesh where certain regions (referred to as *inactive domains*) should not be solved.
+By default, MOOSE assumes the computational domain to be the entire mesh. However, some simulations set up using subdomain modifiers or lower-dimensional blocks (such as mortar contact) describe the computational domain of the underlying problem on a subset of the mesh.
 
 In such cases, the common approach is to either:
 
@@ -68,28 +68,27 @@ In such cases, the common approach is to either:
 []
 ```
 
-- Restrict the kernel coverage check to specific active blocks by setting:
+- Restrict the kernel coverage check to specific blocks by setting:
 
 ```
 [Problem]
   kernel_coverage_check = ONLY_LIST
-  kernel_coverage_block_list = 'active block IDs'
+  kernel_coverage_block_list = 'block1 block2 block4'
 []
 ```
 
-However, when different kernels are associated with different material properties, users must also manually set:
-
+In addition, when certain material properties are block restricted to the computational domain, users must also manually set:
 ```
 [Problem]
   material_coverage_check = ONLY_LIST
-  material_coverage_block_list = 'active block IDs'
+  material_coverage_block_list = 'block1 block2 block4'
 []
 ```
-to ensure material properties are correctly assigned only to the active regions.
+to skip the material coverage check outside the computational domain.
 
 This manual setup is not only repetitive but also error-prone, especially when the same block list needs to be specified in multiple places.
 
-To simplify this process, MOOSE provides a convenient parameter called `default_block` under the `[Problem]` block. This allows users to specify the active blocks only once.
+To simplify this process, MOOSE provides a convenient parameter called `default_block` under the `[Problem]` block. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
 
 Setting `default_block` will automatically:
 
@@ -97,7 +96,7 @@ Setting `default_block` will automatically:
 
 - Enable material coverage check with `ONLY_LIST` mode and assign the specified blocks to `material_coverage_block_list`
 
-This provides a more user-friendly and centralized way to handle simulations with inactive regions.
+This provides a more user-friendly and centralized way to handle simulations with a preferred, non-default computational domain.
 
 Example Usage for  `default_block`:
 ```

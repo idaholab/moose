@@ -231,7 +231,7 @@ protected:
    */
   Moose::CoordinateSystemType getBlockCoordSystem();
 
-  void isTheBlocksWithinDefaultBlocks() const;
+  void checkDefaultBlockConsistency() const;
 
 private:
   /// Set of block ids supplied by the user via the input file (for error checking)
