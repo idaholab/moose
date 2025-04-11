@@ -29,7 +29,6 @@ requirements:
   build:
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
-    - libtirpc                                          # [linux]
     - pkg-config
     - libpng
     - zlib
@@ -37,7 +36,6 @@ requirements:
     - {{ mpi }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
-    - libtirpc                                          # [linux]
     - pkg-config
     - packaging
 

@@ -8,7 +8,6 @@ function set_libmesh_env(){
           LDFLAGS DEBUG_CPPFLAGS DEBUG_CFLAGS DEBUG_CXXFLAGS \
           FORTRANFLAGS DEBUG_FFLAGS DEBUG_FORTRANFLAGS ADDED_ARGS
 
-    ADDED_ARGS=''
     if [[ "$(uname)" == Darwin ]]; then
         if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
             CTUNING="-march=armv8.3-a -I${PREFIX:?}/include"
@@ -17,8 +16,6 @@ function set_libmesh_env(){
             CTUNING="-march=core2 -mtune=haswell"
         fi
     else
-        # Linux libcxx>=20.x requirement (to install libtirpc separately)
-        ADDED_ARGS+=" --with-xdr-include=${PREFIX:?}/include/tirpc"
         CTUNING="-march=nocona -mtune=haswell"
     fi
 
@@ -47,8 +44,7 @@ function do_build(){
     rm -rf "${LIBMESH_DIR:?}"
     mkdir -p "${SRC_DIR:?}/build"; cd "${SRC_DIR:?}/build"
     configure_libmesh --with-vtk-lib="${BUILD_PREFIX}"/libmesh-vtk/lib \
-                      --with-vtk-include="${BUILD_PREFIX}"/libmesh-vtk/include/vtk-"${VTK_VERSION}" \
-                      ${ADDED_ARGS}
+                      --with-vtk-include="${BUILD_PREFIX}"/libmesh-vtk/include/vtk-"${VTK_VERSION}"
     CORES=${MOOSE_JOBS:-6}
     make -j "$CORES"
     make install -j "$CORES"

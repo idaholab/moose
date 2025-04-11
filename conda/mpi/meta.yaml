@@ -84,6 +84,7 @@ outputs:
         - {{ moose_icu }}
         - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
         - {{ moose_libexpat }}
+        - libtirpc                                # [linux]
         - automake 1.16.5
         - bison 3.4
         - zfp
