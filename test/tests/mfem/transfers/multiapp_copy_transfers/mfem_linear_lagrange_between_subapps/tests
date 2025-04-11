@@ -1,0 +1,17 @@
+[Tests]
+  [test]
+    [run]
+      type = RunApp
+      input = parent.i
+    []
+    [verify]
+      type = RunCommand
+      command = '../check.sh
+                recv
+                OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
+                send
+                OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
+	  prereq = test/run
+    []
+  []
+[]

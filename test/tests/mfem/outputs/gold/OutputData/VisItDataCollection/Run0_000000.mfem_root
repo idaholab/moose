@@ -1,0 +1,29 @@
+{
+  "dsets": {
+    "main": {
+      "cycle": 0,
+      "domains": 1,
+      "fields": {
+        "diffused": {
+          "path": "Run0_000000/diffused.%06d",
+          "tags": {
+            "assoc": "nodes",
+            "comps": "1",
+            "lod": "1"
+          }
+        }
+      },
+      "mesh": {
+        "format": "0",
+        "path": "Run0_000000/mesh.%06d",
+        "tags": {
+          "max_lods": "32",
+          "spatial_dim": "3",
+          "topo_dim": "3"
+        }
+      },
+      "time": 0,
+      "time_step": 0
+    }
+  }
+}
