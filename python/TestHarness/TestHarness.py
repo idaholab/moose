@@ -1004,19 +1004,41 @@ class TestHarness:
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
         name = f'{self.app_name}-{self.options.method}{exec_suffix}'
 
+        # Build list of names for other methods in case an executable exists for
+        # a method other than self.options.method
+        all_methods = ['opt', 'oprof', 'dbg', 'devel']
+        all_names = [f'{self.app_name}-{method}{exec_suffix}' for method in all_methods]
+
         # Directories to search in
         dirs = [self._orig_cwd, os.getcwd(), self._rootdir,
                 os.path.join(testharness_dir, '../../../../bin')]
         dirs = list(dict.fromkeys(dirs)) # remove duplicates
-        for dir in dirs:
-            path = os.path.join(dir, name)
-            if os.path.exists(path):
-                return path
-        exe_path = shutil.which(name)
-        if exe_path:
-            return exe_path
+        matches = []
+        for other_name in all_names:
+            for dir in dirs:
+                path = os.path.join(dir, other_name)
+                if os.path.exists(path):
+                    matches.append(path)
+            exe_path = shutil.which(other_name)
+            if exe_path:
+                matches.append(exe_path)
 
-        raise FileNotFoundError(f'Failed to find MOOSE executable {name}')
+        matched_names = [os.path.split(match)[1] for match in matches]
+        if name in matched_names:
+            return matches[matched_names.index(name)]
+        elif len(matched_names):
+            # Eliminate any duplicates
+            matched_names = set(matched_names)
+            available_methods = [matched_name.split('-')[-1] for matched_name in matched_names]
+            err_message = (f'\nThe following executable(s) were found, but METHOD '
+                           f'is set to {self.options.method}: {", ".join(matched_names)}'
+                           f'\nTo use one of these executables, set the "METHOD" environmental '
+                           f'variable to one of the following values: {", ".join(available_methods)}'
+                           )
+        else:
+            err_message = ""
+
+        raise FileNotFoundError(f'Failed to find MOOSE executable {name}{err_message}')
 
     def initialize(self):
         # Load the scheduler plugins
