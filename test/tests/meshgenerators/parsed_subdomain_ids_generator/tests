@@ -1,0 +1,28 @@
+[Tests]
+  design = 'meshgenerators/ParsedSubdomainIDsGenerator.md'
+  issues = '#30304'
+  [parsed_eeid]
+    type = 'Exodiff'
+    input = 'parsed_eeid.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_eeid_in.e'
+    recover = false
+    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of an extra element id.'
+  []
+  [parsed_xy]
+    type = 'Exodiff'
+    input = 'parsed_xy.i'
+    cli_args = '--mesh-only parsed_eeid_in.e'
+    exodiff = 'parsed_eeid_in.e'
+    recover = false
+    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of element centroid coordination.'
+  []
+  [parsed_xy_rounded]
+    type = 'Exodiff'
+    input = 'parsed_xy_rounded.i'
+    cli_args = '--mesh-only parsed_eeid_in.e'
+    exodiff = 'parsed_eeid_in.e'
+    recover = false
+    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of element centroid coordination after rounding up and taking absolute value.'
+  []
+[]

@@ -12,14 +12,14 @@
 #include "ParsedSubdomainGeneratorBase.h"
 
 /**
- * MeshGenerator for defining a Subdomain inside or outside of combinatorial geometry
+ * MeshGenerator to use a parsed expression to determine the subdomain ids of included elements.
  */
-class ParsedSubdomainMeshGenerator : public ParsedSubdomainGeneratorBase
+class ParsedSubdomainIDsGenerator : public ParsedSubdomainGeneratorBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedSubdomainMeshGenerator(const InputParameters & parameters);
+  ParsedSubdomainIDsGenerator(const InputParameters & parameters);
 
 protected:
   /// function expression
