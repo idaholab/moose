@@ -121,10 +121,16 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   else if (_blk_feproblem->isParamSetByUser("default_block"))
   {
     _blocks = _blk_feproblem->getDefaultBlocks();
-    // Get the IDs from the supplied names
-    _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
 
-    _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
+    // Store the IDs in a set, handling ANY_BLOCK_ID if supplied
+    if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end())
+      _blk_ids.insert(Moose::ANY_BLOCK_ID);
+    else
+    {
+      // Get the IDs from the supplied names
+      _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
+      _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
+    }
   }
 
   // Produce error if the object is not allowed to be both block and boundary restricted

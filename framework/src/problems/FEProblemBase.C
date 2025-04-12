@@ -538,6 +538,17 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors")),
     _requires_nonlocal_coupling(false)
 {
+
+  auto checkConflict = [this](const std::string & coverage_check)
+  {
+    if (isParamSetByUser(coverage_check) && isParamSetByUser("default_block"))
+      mooseError("Cannot set both '" + coverage_check +
+                 "' and 'default_block'. Please set only one.");
+  };
+
+  checkConflict("kernel_coverage_check");
+  checkConflict("material_coverage_check");
+
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
   //  We will toggle this to false when doing residual evaluations
