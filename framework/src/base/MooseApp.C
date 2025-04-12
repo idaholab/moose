@@ -751,6 +751,19 @@ MooseApp::registerCapabilities()
   }
 
   {
+    const auto doc = "MFEM finite element library";
+#ifdef MFEM_ENABLED
+    haveCapability("mfem", doc);
+#else
+    missingCapability("mfem",
+                      doc,
+                      "Install mfem using the scripts/update_and_rebuild_mfem.sh script after "
+                      "first running scripts/update_and_rebuild_conduit.sh. Finally, configure "
+                      "moose with ./configure --with-mfem");
+#endif
+  }
+
+  {
     const auto doc = "gperftools code performance analysis and profiling library";
 #ifdef HAVE_GPERFTOOLS
     haveCapability("gperftools", doc);
