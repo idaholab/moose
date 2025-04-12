@@ -81,7 +81,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('mfem', ['ALL'], "A test that runs only if mfem is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('mfem_version', ['ALL'], "A list of mfem versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
@@ -619,11 +618,6 @@ class Tester(MooseObject, OutputInterface):
         (libtorch_status, libtorch_version) = util.checkLibtorchVersion(checks, self.specs)
         if not libtorch_status:
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
-
-        # Check for mfem version
-        (mfem_status, mfem_version) = util.checkMfemVersion(checks, self.specs)
-        if not mfem_status:
-            reasons['mfem_version'] = 'using mfem ' + str(checks['mfem_version']) + ' REQ: ' + mfem_version
 
         # Check for supported capabilities
         if self.specs['capabilities']:

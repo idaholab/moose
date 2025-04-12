@@ -367,7 +367,7 @@ class TestHarness:
             checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
 
             for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',
-                         'ptscotch', 'boost', 'curl']:
+                         'ptscotch', 'boost', 'curl', 'mfem']:
                 checks[name] = get_option(name, from_type=bool, to_set=True)
 
             checks['libpng'] = get_option('libpng', from_type=bool, to_set=True)
@@ -377,8 +377,6 @@ class TestHarness:
 
             checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
             checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
-            checks['mfem'] = get_option('mfem', from_version=True, to_set=True, to_bool=True)
-            checks['mfem_version'] = get_option('mfem', from_version=True, to_none=True)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.

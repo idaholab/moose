@@ -217,12 +217,6 @@ LIBTORCH_OPTIONS = {
                  }
 }
 
-MFEM_OPTIONS = {
-      'mfem_version' :  { 're_option' : r'#define\s+MFEM_VERSION\s+(\d+)',
-                   'default'   : '40701'
-                 }
-}
-
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
@@ -422,24 +416,6 @@ def runExecutable(libmesh_dir, location, bin, args):
 
     return runCommand(libmesh_exe + " " + args).rstrip()
 
-def getMfemVersion(moose_dir):
-    mfem_dir = getMooseConfigOption(moose_dir, 'mfem_dir')
-
-    if len(mfem_dir) != 1:
-      return None
-
-    filenames = [mfem_dir.pop()+'/include/mfem/config/_config.hpp']
-    mfem_version_list = getConfigOption(filenames, 'mfem_version', MFEM_OPTIONS)
-    if len(mfem_version_list) != 1:
-        return None
-
-    mfem_version = int(mfem_version_list.pop())
-    major = mfem_version // 10000
-    minor = (mfem_version // 100) % 100
-    patch = mfem_version % 100
-
-    return str(major) + '.' + str(minor) + '.' + str(patch)
-
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
@@ -547,20 +523,6 @@ def checkLibtorchVersion(checks, test):
        return (False, version_string)
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
-
-# Break down mfem version logic in a new define
-def checkMfemVersion(checks, test):
-    version_string = ' '.join(test['mfem_version'])
-
-    # If any version of mfem works, return true immediately
-    if 'ALL' in set(test['mfem_version']):
-        return (True, version_string)
-
-    # mfem not installed or version could not be detected
-    if checks['mfem_version'] == None:
-       return (False, version_string)
-
-    return (checkVersion(checks, version_string, 'mfem_version'), version_string)
 
 def getCapabilities(exe):
     """
