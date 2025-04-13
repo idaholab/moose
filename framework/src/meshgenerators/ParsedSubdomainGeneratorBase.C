@@ -22,6 +22,8 @@ ParsedSubdomainGeneratorBase::validParams()
   params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addRequiredParam<std::string>(
+      "expression", "Parsed expression to determine the subdomain id of each involved element");
   params.addParam<std::vector<SubdomainName>>(
       "excluded_subdomains",
       "A set of subdomain names that will not changed even if "
@@ -49,13 +51,13 @@ ParsedSubdomainGeneratorBase::ParsedSubdomainGeneratorBase(const InputParameters
   : MeshGenerator(parameters),
     FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
-    _block_id(isParamValid("block_id") ? parameters.get<subdomain_id_type>("block_id")
-                                       : Elem::invalid_subdomain_id),
+    _function(parameters.get<std::string>("expression")),
     _excluded_ids(isParamValid("excluded_subdomain_ids")
                       ? parameters.get<std::vector<subdomain_id_type>>("excluded_subdomain_ids")
                       : std::vector<subdomain_id_type>()),
     _eeid_names(getParam<std::vector<ExtraElementIDName>>("extra_element_id_names"))
 {
+  functionInitialize(_function);
 }
 
 std::unique_ptr<MeshBase>
@@ -83,9 +85,8 @@ ParsedSubdomainGeneratorBase::generate()
   for (const auto & elem : mesh->active_element_ptr_range())
     assignElemSubdomainID(elem);
 
-  // Assign block name, if provided
-  if (isParamValid("block_name"))
-    mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
+  // Assign block name, if applicable
+  setBlockName(mesh);
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

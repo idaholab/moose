@@ -22,12 +22,18 @@ public:
   ParsedSubdomainMeshGenerator(const InputParameters & parameters);
 
 protected:
-  /// function expression
-  const std::string _function;
+  /// Block ID to assign to the region
+  const subdomain_id_type _block_id;
 
   /**
    * Assign the subdomain id to the element based on the parsed expression
    * @param elem The element to assign the subdomain id to
    */
   void assignElemSubdomainID(Elem * elem) override;
+
+  /**
+   * Set block name for the block with new id if applicable
+   * @param mesh The mesh to set the block name on
+   */
+  void setBlockName(std::unique_ptr<MeshBase> & mesh) override;
 };

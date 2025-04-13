@@ -15,7 +15,7 @@
     cli_args = '--mesh-only parsed_eeid_in.e'
     exodiff = 'parsed_eeid_in.e'
     recover = false
-    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of element centroid coordination.'
+    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of element vertex average coordination.'
   []
   [parsed_xy_rounded]
     type = 'Exodiff'
@@ -23,6 +23,13 @@
     cli_args = '--mesh-only parsed_eeid_in.e'
     exodiff = 'parsed_eeid_in.e'
     recover = false
-    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of element centroid coordination after rounding up and taking absolute value.'
+    requirement = 'The system shall have the ability to assign subdomain ids based on a parsed function of element vertex average coordination after rounding up and taking absolute value.'
+  []
+  [parsed_xy_negative]
+    type = RunException
+    input = 'parsed_xy_negative.i'
+    cli_args = '--mesh-only err.e'
+    expect_err = 'the value of the function is negative'
+    requirement = 'The system shall throw an error if the parsed function gives a negative value for an element.'
   []
 []

@@ -18,6 +18,6 @@
   [psidg]
     type = ParsedSubdomainIDsGenerator
     input = add_eeid
-    expression = 'if(x>0,if(y>0,1.2,3.8),if(y>0,2.3,2.9))'
+    expression = 'if(x>0,if(y>0,1,-4),if(y>0,2,3))'
   []
 []

@@ -22,9 +22,6 @@ public:
   ParsedSubdomainIDsGenerator(const InputParameters & parameters);
 
 protected:
-  /// function expression
-  const std::string _function;
-
   /**
    * Assign the subdomain id to the element based on the parsed expression
    * @param elem The element to assign the subdomain id to

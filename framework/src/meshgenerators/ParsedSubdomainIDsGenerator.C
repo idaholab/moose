@@ -16,8 +16,6 @@ ParsedSubdomainIDsGenerator::validParams()
 {
   InputParameters params = ParsedSubdomainGeneratorBase::validParams();
 
-  params.addRequiredParam<std::string>(
-      "expression", "Parsed expression to determine the subdomain id of each involved element");
   params.addClassDescription(
       "Uses a parsed expression to determine the subdomain ids of included elements.");
 
@@ -25,9 +23,8 @@ ParsedSubdomainIDsGenerator::validParams()
 }
 
 ParsedSubdomainIDsGenerator::ParsedSubdomainIDsGenerator(const InputParameters & parameters)
-  : ParsedSubdomainGeneratorBase(parameters), _function(parameters.get<std::string>("expression"))
+  : ParsedSubdomainGeneratorBase(parameters)
 {
-  functionInitialize(_function);
 }
 
 void
@@ -41,5 +38,14 @@ ParsedSubdomainIDsGenerator::assignElemSubdomainID(Elem * elem)
 
   if (std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
       _excluded_ids.end())
-    elem->subdomain_id() = std::abs(std::round(evaluate(_func_F)));
+  {
+    const Real func_val = evaluate(_func_F);
+    if (func_val < 0.0)
+      paramError("expression",
+                 "the value of the function is negative at the element with ID " +
+                     std::to_string(elem->id()) +
+                     ". The function must be non-negative. Consider using the absolute value of "
+                     "the function.");
+    elem->subdomain_id() = std::round(func_val);
+  }
 }

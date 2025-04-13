@@ -16,8 +16,9 @@ ParsedSubdomainMeshGenerator::validParams()
 {
   InputParameters params = ParsedSubdomainGeneratorBase::validParams();
 
-  params.addRequiredParam<std::string>("combinatorial_geometry",
-                                       "Function expression encoding a combinatorial geometry");
+  params.renameParam("expression",
+                     "combinatorial_geometry",
+                     "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<subdomain_id_type>("block_id",
                                              "Subdomain id to set for inside of the combinatorial");
   params.addParam<SubdomainName>("block_name",
@@ -32,9 +33,8 @@ ParsedSubdomainMeshGenerator::validParams()
 
 ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters & parameters)
   : ParsedSubdomainGeneratorBase(parameters),
-    _function(parameters.get<std::string>("combinatorial_geometry"))
+    _block_id(parameters.get<subdomain_id_type>("block_id"))
 {
-  functionInitialize(_function);
 }
 
 void
@@ -50,4 +50,12 @@ ParsedSubdomainMeshGenerator::assignElemSubdomainID(Elem * elem)
   if (contains && std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
                       _excluded_ids.end())
     elem->subdomain_id() = _block_id;
+}
+
+void
+ParsedSubdomainMeshGenerator::setBlockName(std::unique_ptr<MeshBase> & mesh)
+{
+  if (isParamValid("block_name"))
+    mesh->subdomain_name(getParam<subdomain_id_type>("block_id")) =
+        getParam<SubdomainName>("block_name");
 }

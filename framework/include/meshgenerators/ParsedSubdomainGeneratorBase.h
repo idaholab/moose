@@ -25,11 +25,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// mesh to add the subdomain to
+  /// mesh to set the subdomains on
   std::unique_ptr<MeshBase> & _input;
 
-  /// Block ID to assign to the region
-  const subdomain_id_type _block_id;
+  /// function expression
+  const std::string _function;
 
   /// A list of excluded subdomain ids that will not be changed even if they are in the combinatorial geometry
   std::vector<subdomain_id_type> _excluded_ids;
@@ -52,4 +52,6 @@ protected:
   void functionInitialize(const std::string & function_expression);
 
   virtual void assignElemSubdomainID(Elem * elem) = 0;
+
+  virtual void setBlockName(std::unique_ptr<MeshBase> &){};
 };
