@@ -302,7 +302,7 @@ OversampleOutput::cloneMesh()
 
     // Remove isolated nodes
     _cloned_mesh_ptr->getMesh().allow_renumbering(false);
-    _cloned_mesh_ptr->getMesh().prepare_for_use(/*skip_renumber*/ true);
+    _cloned_mesh_ptr->getMesh().prepare_for_use();
   }
 
   // Make sure that the mesh pointer points to the newly cloned mesh
