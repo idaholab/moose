@@ -47,7 +47,7 @@ NEML2TestModel::request_AD()
 }
 
 void
-NEML2TestModel::set_value(bool out, bool dout_din, bool d2out_din2)
+NEML2TestModel::set_value(bool out, bool /*dout_din*/, bool /*d2out_din2*/)
 {
   if (!out)
     return;

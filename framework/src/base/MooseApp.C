@@ -889,7 +889,16 @@ MooseApp::registerCapabilities()
         LIBMESH_DETECTED_EXODUS_VERSION_MINOR);
     haveCapabilityVersion("exodus", doc, version);
 #else
-    libmeshMissingCapability("exodus", doc, "--disable-exodus");
+    libmeshMissingCapability("exodus", doc, "--enable-exodus");
+#endif
+  }
+
+  {
+    const auto doc = "Netgen meshing library";
+#ifdef LIBMESH_HAVE_NETGEN
+    haveCapability("netgen", doc);
+#else
+    libmeshMissingCapability("netgen", doc, "--enable-netgen");
 #endif
   }
 

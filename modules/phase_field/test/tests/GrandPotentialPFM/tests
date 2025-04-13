@@ -37,6 +37,7 @@
     requirement = 'The system shall provide classes to implement a Grand Potential phase field '
                   'formulation with strict mass conservation'
     capabilities = 'method!=dbg'
+    valgrind = 'heavy'
   []
   [GrandPotentialInterface]
     type = 'CSVDiff'

@@ -9,7 +9,7 @@ With {{ApplicationName}} built, we can now run tests to verify a working binary 
   conda activate moose
   ```
 
-- If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+- If +[!ac](INL) [!ac](HPC) Sawtooth, Bitterroot, or WindRiver+ (required each time you log in):
 
   ```bash
   module load use.moose moose-dev

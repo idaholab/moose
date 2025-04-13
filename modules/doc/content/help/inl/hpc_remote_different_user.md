@@ -22,7 +22,7 @@ Host hpclogin
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 lemhi1 lemhi2 rod hoodoo1 viz1
+Host sawtooth1 sawtooth2 bitterroot1 bitterroot2 windriver1 windriver2 rod hoodoo1 viz1
   User doejohn
   ProxyJump hpclogin
 ```

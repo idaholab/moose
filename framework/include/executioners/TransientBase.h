@@ -75,6 +75,8 @@ public:
    */
   virtual void incrementStepOrReject();
 
+  virtual void advanceState();
+
   virtual void endStep(Real input_time = -1.0);
 
   /**
