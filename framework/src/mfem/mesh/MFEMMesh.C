@@ -17,15 +17,15 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
-  params.addParam<int>(
+  params.addParam<unsigned int>(
       "serial_refine",
       0,
       "Number of serial refinements to perform on the mesh. Equivalent to uniform_refine.");
-  params.addParam<int>(
+  params.addParam<unsigned int>(
       "uniform_refine",
       0,
       "Number of serial refinements to perform on the mesh. Equivalent to serial_refine");
-  params.addParam<int>(
+  params.addParam<unsigned int>(
       "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
 
@@ -55,15 +55,15 @@ MFEMMesh::buildMesh()
         "are the same variable). Please choose one.\n");
 
   uniformRefinement(mfem_ser_mesh,
-                    isParamSetByUser("serial_refine") ? getParam<int>("serial_refine")
-                                                      : getParam<int>("uniform_refine"));
+                    isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
+                                                      : getParam<unsigned int>("uniform_refine"));
 
   // multi app should take the mpi comm from moose so is split correctly??
   auto comm = _app.comm().get();
   _mfem_par_mesh = std::make_shared<mfem::ParMesh>(comm, mfem_ser_mesh);
 
   // Perform parallel refinements
-  uniformRefinement(*_mfem_par_mesh, getParam<int>("parallel_refine"));
+  uniformRefinement(*_mfem_par_mesh, getParam<unsigned int>("parallel_refine"));
 
   if (isParamSetByUser("displacement"))
   {
@@ -103,10 +103,9 @@ MFEMMesh::buildDummyMooseMesh()
 }
 
 void
-MFEMMesh::uniformRefinement(mfem::Mesh & mesh, int nref)
+MFEMMesh::uniformRefinement(mfem::Mesh & mesh, const unsigned int nref) const
 {
-
-  for (int i = 0; i < nref; ++i)
+  for (unsigned int i = 0; i < nref; ++i)
     mesh.UniformRefinement();
 }
 

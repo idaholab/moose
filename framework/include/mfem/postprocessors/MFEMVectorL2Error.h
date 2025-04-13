@@ -23,9 +23,9 @@ public:
   virtual PostprocessorValue getValue() const override final;
 
 private:
-  VariableName _var_name;
-  FunctionName _coeff_name;
-  std::shared_ptr<mfem::VectorCoefficient> _vec_coeff;
+  const VariableName _var_name;
+  const FunctionName _coeff_name;
+  const std::shared_ptr<mfem::VectorCoefficient> _vec_coeff;
   mfem::GridFunction & _var;
 };
 

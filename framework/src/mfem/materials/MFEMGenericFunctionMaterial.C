@@ -24,20 +24,13 @@ MFEMGenericFunctionMaterial::MFEMGenericFunctionMaterial(const InputParameters &
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<FunctionName>>("prop_values"))
 {
-  unsigned int num_names = _prop_names.size();
-  unsigned int num_values = _prop_values.size();
+  if (_prop_names.size() != _prop_values.size())
+    paramError("prop_names", "Must match the size of prop_values");
 
-  if (num_names != num_values)
-    mooseError(
-        "Number of prop_names must match the number of prop_values for a GenericConstantMaterial!");
-
-  _num_props = num_names;
-  for (unsigned int i = 0; i < _num_props; i++)
-  {
+  for (const auto i : index_range(_prop_names))
     _properties.declareScalar(_prop_names[i],
                               subdomainsToStrings(_block_ids),
                               getMFEMProblem().getScalarFunctionCoefficient(_prop_values[i]));
-  }
 }
 
 MFEMGenericFunctionMaterial::~MFEMGenericFunctionMaterial() {}

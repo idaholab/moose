@@ -17,7 +17,7 @@ public:
 
 protected:
   mfem::VisItDataCollection _visit_dc;
-  unsigned int _refinements;
+  const unsigned int _refinements;
 };
 
 #endif

@@ -81,7 +81,7 @@ private:
   /**
    * Performs a uniform refinement on the chosen mesh nref times.
    */
-  void uniformRefinement(mfem::Mesh & mesh, int nref);
+  void uniformRefinement(mfem::Mesh & mesh, const unsigned int nref) const;
 
   /**
    * Holds name of variable used for mesh displacement, if set.

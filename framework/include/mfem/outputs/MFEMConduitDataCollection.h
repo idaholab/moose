@@ -17,7 +17,7 @@ public:
 
 protected:
   mfem::ConduitDataCollection _conduit_dc;
-  MooseEnum _protocol;
+  const MooseEnum _protocol;
 };
 
 #endif

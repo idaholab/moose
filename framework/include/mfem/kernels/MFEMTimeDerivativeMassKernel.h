@@ -17,11 +17,11 @@ public:
 
   // Get name of the trial variable (gridfunction) the kernel acts on.
   // Defaults to the name of the test variable labelling the weak form.
-  virtual const std::string & getTrialVariableName() const override { return _var_dot_name; };
+  virtual const VariableName & getTrialVariableName() const override { return _var_dot_name; };
 
 protected:
   // Name of variable (gridfunction) representing time derivative of variable.
-  std::string _var_dot_name;
+  const VariableName _var_dot_name;
 };
 
 #endif

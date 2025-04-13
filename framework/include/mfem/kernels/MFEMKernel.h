@@ -33,15 +33,15 @@ public:
   virtual T * createIntegrator() = 0;
 
   // Get name of the test variable labelling the weak form this kernel is added to
-  const std::string & getTestVariableName() const { return _test_var_name; }
+  const VariableName & getTestVariableName() const { return _test_var_name; }
 
   // Get name of the trial variable (gridfunction) the kernel acts on.
   // Defaults to the name of the test variable labelling the weak form.
-  virtual const std::string & getTrialVariableName() const { return _test_var_name; }
+  virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
 
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
-  std::string _test_var_name;
+  const VariableName _test_var_name;
 };
 
 #endif

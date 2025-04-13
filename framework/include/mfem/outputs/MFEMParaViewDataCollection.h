@@ -17,8 +17,8 @@ public:
 
 protected:
   mfem::ParaViewDataCollection _pv_dc;
-  bool _high_order_output;
-  unsigned int _refinements;
+  const bool _high_order_output;
+  const unsigned int _refinements;
   const mfem::VTKFormat _vtk_format;
 };
 

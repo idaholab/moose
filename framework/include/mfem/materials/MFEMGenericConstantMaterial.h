@@ -19,7 +19,6 @@ public:
 protected:
   const std::vector<std::string> & _prop_names;
   const std::vector<Real> & _prop_values;
-  unsigned int _num_props;
 };
 
 #endif

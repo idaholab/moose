@@ -27,21 +27,14 @@ MFEMGenericConstantVectorMaterial::MFEMGenericConstantVectorMaterial(
     _prop_values(getParam<std::vector<Real>>("prop_values")),
     _prop_dims(getParam<int>("dim"))
 {
-  unsigned int num_names = _prop_names.size();
-  unsigned int num_values = _prop_values.size();
+  if (_prop_names.size() * _prop_dims != _prop_values.size())
+    paramError("prop_values", "Number of values must be equal to dim * number of properties");
 
-  if (num_names * _prop_dims != num_values)
-    mooseError("Number of prop_values must be equal to dim * number of properties for a "
-               "GenericConstantMaterial!");
-
-  _num_props = num_names;
-  for (unsigned int i = 0; i < _num_props; i++)
+  for (const auto i : index_range(_prop_names))
   {
     mfem::Vector vec(_prop_dims);
     for (int j = 0; j < _prop_dims; j++)
-    {
       vec[j] = _prop_values[i * _prop_dims + j];
-    }
     _properties.declareVector<mfem::VectorConstantCoefficient>(
         _prop_names[i], subdomainsToStrings(_block_ids), vec);
   }

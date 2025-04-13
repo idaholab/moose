@@ -25,8 +25,8 @@ public:
   virtual mfem::BilinearFormIntegrator * createIntegrator() override;
 
 protected:
-  std::string _lambda_name;
-  std::string _mu_name;
+  const std::string _lambda_name;
+  const std::string _mu_name;
   mfem::Coefficient & _lambda;
   mfem::Coefficient & _mu;
 };

@@ -24,7 +24,7 @@ MFEMMaterial::validParams()
 }
 
 std::vector<std::string>
-MFEMMaterial::subdomainsToStrings(std::vector<SubdomainName> blocks)
+MFEMMaterial::subdomainsToStrings(const std::vector<SubdomainName> & blocks)
 {
   std::vector<std::string> result(blocks.size());
   // FIXME: Is there really no better way to do this conversion? It doesn't seem like it should be
