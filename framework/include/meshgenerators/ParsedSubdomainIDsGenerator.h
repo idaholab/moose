@@ -12,28 +12,19 @@
 #include "ParsedSubdomainGeneratorBase.h"
 
 /**
- * MeshGenerator for defining a Subdomain inside or outside of combinatorial geometry
+ * MeshGenerator to use a parsed expression to determine the subdomain ids of included elements.
  */
-class ParsedSubdomainMeshGenerator : public ParsedSubdomainGeneratorBase
+class ParsedSubdomainIDsGenerator : public ParsedSubdomainGeneratorBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedSubdomainMeshGenerator(const InputParameters & parameters);
+  ParsedSubdomainIDsGenerator(const InputParameters & parameters);
 
 protected:
-  /// Block ID to assign to the region
-  const subdomain_id_type _block_id;
-
   /**
    * Assign the subdomain id to the element based on the parsed expression
    * @param elem The element to assign the subdomain id to
    */
   void assignElemSubdomainID(Elem * elem) override;
-
-  /**
-   * Set block name for the block with new id if applicable
-   * @param mesh The mesh to set the block name on
-   */
-  void setBlockName(std::unique_ptr<MeshBase> & mesh) override;
 };
