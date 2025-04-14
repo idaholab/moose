@@ -29,7 +29,7 @@ requirements:
     #       etc combos, to continue to do so with only needing the moose-mpi package.
     - beautifulsoup4
     - {{ clang_format }}
-    - clang-tools
+    - {{ clang_tools }}
     - deepdiff
     - git-lfs <3.5.1
     - gitpython
