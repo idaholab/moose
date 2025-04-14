@@ -1,5 +1,7 @@
 # MFEMVectorNormalDirichletBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMVectorNormalDirichletBC
@@ -17,3 +19,6 @@ constant in space and time.
 !syntax inputs /BCs/MFEMVectorNormalDirichletBC
 
 !syntax children /BCs/MFEMVectorNormalDirichletBC
+
+!else
+!include mfem/mfem_warning.md

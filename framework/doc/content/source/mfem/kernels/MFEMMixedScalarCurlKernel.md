@@ -1,5 +1,7 @@
 # MFEMMixedScalarCurlKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMMixedScalarCurlKernel
@@ -26,3 +28,6 @@ k \vec\nabla \times \vec u
 !syntax inputs /Kernels/MFEMMixedScalarCurlKernel
 
 !syntax children /Kernels/MFEMMixedScalarCurlKernel
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # MFEMVectorL2Error
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Postprocessors/MFEMVectorL2Error
@@ -25,3 +27,6 @@ H(\mathrm{div})$ and $\vec{u}_{ex}$ is a vector function.
 !syntax inputs /Postprocessors/MFEMVectorL2Error
 
 !syntax children /Postprocessors/MFEMVectorL2Error
+
+!else
+!include mfem/mfem_warning.md

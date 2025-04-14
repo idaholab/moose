@@ -1,5 +1,7 @@
 # EquationSystem
 
+!if! function=hasCapability('mfem')
+
 The EquationSystem is responsible for defining and assembling the weak form of the PDE into an
 [`mfem::Operator`](https://docs.mfem.org/html/classmfem_1_1Operator.html) used to solve an iteration
 of the FE problem. This operator is passed to an
@@ -50,3 +52,6 @@ $u(t+\delta t) \approx u(t) + \delta t \dot{u}(t+\delta t)$, we have
 !equation
 \left([\mathcal{T}+\delta t\mathcal{L}](\dot{u}_n), v\right)_{\Omega}
 =\left([f-\mathcal{L}(u_{n-1})],v\right)_{\Omega}\,\,\,\forall v \in V
+
+!else
+!include mfem/mfem_warning.md

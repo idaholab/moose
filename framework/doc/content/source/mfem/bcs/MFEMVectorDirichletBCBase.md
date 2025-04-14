@@ -1,5 +1,7 @@
 # MFEMVectorDirichletBCBase
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 Base class for objects applying essential boundary conditions on vector variables in an MFEM FE problem.
@@ -10,3 +12,6 @@ Classes deriving from `MFEMVectorDirichletBCBase` are used for the application o
 remove degrees of freedom from vector variables in the problem on the specified boundary. These are commonly used when
 strongly constraining the values a solution may take on boundaries. The imposed values are uniform in space and constant
 in time.
+
+!else
+!include mfem/mfem_warning.md

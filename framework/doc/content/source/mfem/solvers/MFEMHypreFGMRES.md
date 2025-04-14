@@ -1,5 +1,7 @@
 # MFEMHypreFGMRES
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMHypreFGMRES
@@ -15,3 +17,6 @@ Not compatible with use on partially assembled equation systems.
 !syntax inputs /Solver/MFEMHypreFGMRES
 
 !syntax children /Solver/MFEMHypreFGMRES
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # MFEMSolverBase
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 Base class for `mfem::Solver` objects to use in MFEM problems.
@@ -13,3 +15,6 @@ derived object, and the `getSolver` method should return the `shared_ptr` for us
 Problem-specific information - such as finite element spaces used in the set-up of some
 preconditioners - can be passed to the `mfem::Solver` at construction time.
 
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # MFEMCurlAux
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /AuxKernels/MFEMCurlAux
@@ -25,3 +27,6 @@ where $\vec u \in H(\mathrm{curl})$, $\vec v \in H(\mathrm{div})$ and $\lambda$ 
 !syntax inputs /AuxKernels/MFEMCurlAux
 
 !syntax children /AuxKernels/MFEMCurlAux
+
+!else
+!include mfem/mfem_warning.md

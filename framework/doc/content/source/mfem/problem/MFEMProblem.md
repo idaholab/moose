@@ -1,5 +1,7 @@
 # MFEMProblem
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Problem/MFEMProblem
@@ -27,3 +29,6 @@ In order to build the FE problem using the MFEM library on the backend, the `MFE
 !syntax inputs /Problem/MFEMProblem
 
 !syntax children /Problem/MFEMProblem
+
+!else
+!include mfem/mfem_warning.md

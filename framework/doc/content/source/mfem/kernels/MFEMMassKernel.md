@@ -1,5 +1,7 @@
 # MFEMMassKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMMassKernel
@@ -23,3 +25,6 @@ k u
 !syntax inputs /Kernels/MFEMMassKernel
 
 !syntax children /Kernels/MFEMMassKernel
+
+!else
+!include mfem/mfem_warning.md

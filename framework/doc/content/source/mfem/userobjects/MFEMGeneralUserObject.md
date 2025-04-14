@@ -1,5 +1,7 @@
 # MFEMGeneralUserObject
 
+!if! function=hasCapability('mfem')
+
 !syntax description /UserObjects/MFEMGeneralUserObject
 
 ## Overview
@@ -14,3 +16,6 @@ required.
 !syntax inputs /UserObjects/MFEMGeneralUserObject
 
 !syntax children /UserObjects/MFEMGeneralUserObject
+
+!else
+!include mfem/mfem_warning.md

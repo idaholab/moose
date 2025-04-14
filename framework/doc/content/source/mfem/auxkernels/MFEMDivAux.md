@@ -1,5 +1,7 @@
 # MFEMDivAux
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /AuxKernels/MFEMDivAux
@@ -26,3 +28,6 @@ where $\vec u \in H(\mathrm{div})$, $v \in L^2$ and $\lambda$ is a scalar consta
 !syntax inputs /AuxKernels/MFEMDivAux
 
 !syntax children /AuxKernels/MFEMDivAux
+
+!else
+!include mfem/mfem_warning.md

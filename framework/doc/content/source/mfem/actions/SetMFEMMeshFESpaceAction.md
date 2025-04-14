@@ -1,5 +1,7 @@
 # SetMFEMMeshFESpaceAction
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 Sets the nodal mesh FESpace to use the same FESpace as the
@@ -16,3 +18,6 @@ and the `displacement` field is set.
 ## Example Input File Syntax
 
 !listing test/tests/mfem/kernels/linearelasticity.i block=Mesh
+
+!else
+!include mfem/mfem_warning.md

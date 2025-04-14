@@ -1,5 +1,7 @@
 # MFEMMaterial
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Materials/MFEMMaterial
@@ -23,3 +25,6 @@ manner consistent with the standard MOOSE Materials system.
 !syntax inputs /Materials/MFEMMaterial
 
 !syntax children /Materials/MFEMMaterial
+
+!else
+!include mfem/mfem_warning.md

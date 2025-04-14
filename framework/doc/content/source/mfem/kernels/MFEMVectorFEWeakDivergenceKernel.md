@@ -1,5 +1,7 @@
 # MFEMVectorFEWeakDivergenceKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMVectorFEWeakDivergenceKernel
@@ -24,3 +26,6 @@ This term arises from the weak form of the divergence operator
 !syntax inputs /Kernels/MFEMVectorFEWeakDivergenceKernel
 
 !syntax children /Kernels/MFEMVectorFEWeakDivergenceKernel
+
+!else
+!include mfem/mfem_warning.md

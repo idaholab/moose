@@ -1,5 +1,7 @@
 # PropertyMap
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 `PropertyMap` stores MFEM coefficient objects, handling the set-up of piecewise coefficients defined
@@ -15,3 +17,6 @@ piecewise coefficients required by domain and boundary integrators that span mul
 Addition of new material properties and coefficients to the `PropertyMap` should usually be managed
 by calling the appropriate methods of the `PropertyManager`.
 
+
+!else
+!include mfem/mfem_warning.md

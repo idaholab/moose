@@ -1,5 +1,7 @@
 # MFEMGenericFESpace
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /FESpaces/MFEMGenericFESpace
@@ -30,3 +32,6 @@ element collections are supported by those classes.
 !syntax inputs /FESpaces/MFEMGenericFESpace
 
 !syntax children /FESpaces/MFEMGenericFESpace
+
+!else
+!include mfem/mfem_warning.md

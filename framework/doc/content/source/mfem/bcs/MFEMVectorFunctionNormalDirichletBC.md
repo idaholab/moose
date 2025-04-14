@@ -1,5 +1,7 @@
 # MFEMVectorFunctionNormalDirichletBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMVectorFunctionNormalDirichletBC
@@ -19,3 +21,6 @@ a function of space and/or time.
 !syntax inputs /BCs/MFEMVectorFunctionNormalDirichletBC
 
 !syntax children /BCs/MFEMVectorFunctionNormalDirichletBC
+
+!else
+!include mfem/mfem_warning.md

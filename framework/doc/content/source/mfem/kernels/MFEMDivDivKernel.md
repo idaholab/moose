@@ -1,5 +1,7 @@
 # MFEMDivDivKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMDivDivKernel
@@ -27,3 +29,6 @@ This term arises from the weak form of the grad div operator
 !syntax inputs /Kernels/MFEMDivDivKernel
 
 !syntax children /Kernels/MFEMDivDivKernel
+
+!else
+!include mfem/mfem_warning.md

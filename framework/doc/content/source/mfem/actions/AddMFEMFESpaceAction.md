@@ -1,5 +1,7 @@
 # AddMFEMFESpaceAction
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /FESpaces/AddMFEMFESpaceAction
@@ -15,3 +17,6 @@ Action called to add an MFEM finite element space to the problem, parsing conten
 !listing test/tests/mfem/kernels/heatconduction.i block=Problem FESpaces
 
 !syntax parameters /FESpaces/AddMFEMFESpaceAction
+
+!else
+!include mfem/mfem_warning.md

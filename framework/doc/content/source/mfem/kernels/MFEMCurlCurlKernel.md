@@ -1,5 +1,7 @@
 # MFEMCurlCurlKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMCurlCurlKernel
@@ -27,3 +29,6 @@ This term arises from the weak form of the curl curl operator
 !syntax inputs /Kernels/MFEMCurlCurlKernel
 
 !syntax children /Kernels/MFEMCurlCurlKernel
+
+!else
+!include mfem/mfem_warning.md

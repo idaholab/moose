@@ -1,5 +1,7 @@
 # MFEMHypreBoomerAMG
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMHypreBoomerAMG
@@ -17,3 +19,6 @@ Defines and builds an `mfem::HypreBoomerAMG` solver to use as a preconditioner o
 !syntax inputs /Solver/MFEMHypreBoomerAMG
 
 !syntax children /Solver/MFEMHypreBoomerAMG
+
+!else
+!include mfem/mfem_warning.md

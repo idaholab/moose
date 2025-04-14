@@ -1,5 +1,7 @@
 # MFEMScalarFESpace
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /FESpaces/MFEMScalarFESpace
@@ -24,3 +26,6 @@ options available in this class, you can use
 !syntax inputs /FESpaces/MFEMScalarFESpace
 
 !syntax children /FESpaces/MFEMScalarFESpace
+
+!else
+!include mfem/mfem_warning.md

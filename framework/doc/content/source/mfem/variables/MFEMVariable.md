@@ -1,5 +1,7 @@
 # MFEMVariable
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Variables/MFEMVariable
@@ -26,3 +28,6 @@ create the corresponding `MFEMFESpace` and `MFEMVariable` for that type:
 !syntax inputs /Variables/MFEMVariable
 
 !syntax children /Variables/MFEMVariable
+
+!else
+!include mfem/mfem_warning.md

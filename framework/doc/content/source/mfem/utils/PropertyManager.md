@@ -1,5 +1,7 @@
 # PropertyManager
 
+!if! function=hasCapability('mfem')
+
 `PropertyManager` owns and manages MFEM coefficient objects, handling the set-up of piecewise
 coefficients defined across multiple materials.
 
@@ -16,3 +18,6 @@ defining `Materials` for all subdomains of their mesh which will add properties 
 do so using the `PropertyManager::declareXXX` methods, and use `getScalarProperty`,
 `getVectorProperty`, and/or `getMatrixProperty` to fetch global coefficients for properties in the
 system by name.
+
+!else
+!include mfem/mfem_warning.md

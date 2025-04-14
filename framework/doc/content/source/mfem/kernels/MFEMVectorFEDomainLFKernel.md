@@ -1,5 +1,7 @@
 # MFEMVectorFEDomainLFKernel
 
+!if! function=hasCapability('mfem')
+
 !syntax description /Kernels/MFEMVectorFEDomainLFKernel
 
 ## Overview
@@ -26,3 +28,6 @@ This term arises from the weak form of the forcing term
 !syntax inputs /Kernels/MFEMVectorFEDomainLFKernel
 
 !syntax children /Kernels/MFEMVectorFEDomainLFKernel
+
+!else
+!include mfem/mfem_warning.md

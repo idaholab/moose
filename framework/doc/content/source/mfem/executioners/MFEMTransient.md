@@ -1,5 +1,7 @@
 # MFEMTransient
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Executioner/MFEMTransient
@@ -24,3 +26,6 @@ are supported.
 !syntax inputs /Executioner/MFEMTransient
 
 !syntax children /Executioner/MFEMTransient
+
+!else
+!include mfem/mfem_warning.md

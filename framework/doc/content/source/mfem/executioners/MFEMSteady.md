@@ -1,5 +1,7 @@
 # MFEMSteady
 
+!if! function=hasCapability('mfem')
+
 !syntax description /Executioner/MFEMSteady
 
 ## Overview
@@ -19,3 +21,6 @@ level to use during problem set-up and solution can be selected.
 !syntax inputs /Executioner/MFEMSteady
 
 !syntax children /Executioner/MFEMSteady
+
+!else
+!include mfem/mfem_warning.md

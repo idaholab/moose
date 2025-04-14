@@ -1,5 +1,7 @@
 # MFEMCGSolver
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMCGSolver
@@ -14,3 +16,6 @@ equation system. Compatible with use on partially assembled equation systems.
 !syntax inputs /Solver/MFEMCGSolver
 
 !syntax children /Solver/MFEMCGSolver
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # MFEMHypreADS
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMHypreADS
@@ -20,3 +22,6 @@ Raviart-Thomas elements, in which case the $H(\mathrm{div})$ FE space should be 
 !syntax inputs /Solver/MFEMHypreADS
 
 !syntax children /Solver/MFEMHypreADS
+
+!else
+!include mfem/mfem_warning.md

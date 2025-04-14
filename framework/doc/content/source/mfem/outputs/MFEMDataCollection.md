@@ -1,5 +1,7 @@
 # MFEMDataCollection
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 Base class for MFEM DataCollection outputs.
@@ -17,3 +19,6 @@ Child classes should override the `getDataCollection()` method to return a refer
 ## Example Input File Syntax
 
 !listing test/tests/mfem/outputs/datacollections.i block=Outputs
+
+!else
+!include mfem/mfem_warning.md

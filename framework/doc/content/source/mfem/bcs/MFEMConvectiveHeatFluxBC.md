@@ -1,5 +1,7 @@
 # MFEMConvectiveHeatFluxBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMConvectiveHeatFluxBC
@@ -31,3 +33,6 @@ for the temperature, $v=T'$ as the test variable, and $u_0=T_{inf}$ as the equil
 !syntax inputs /BCs/MFEMConvectiveHeatFluxBC
 
 !syntax children /BCs/MFEMConvectiveHeatFluxBC
+
+!else
+!include mfem/mfem_warning.md

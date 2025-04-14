@@ -1,5 +1,7 @@
 # MFEMVectorFunctionDirichletBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMVectorFunctionDirichletBC
@@ -18,3 +20,6 @@ vector $H^1$ conforming variable on the boundary. The boundary value is a functi
 !syntax inputs /BCs/MFEMVectorFunctionDirichletBC
 
 !syntax children /BCs/MFEMVectorFunctionDirichletBC
+
+!else
+!include mfem/mfem_warning.md

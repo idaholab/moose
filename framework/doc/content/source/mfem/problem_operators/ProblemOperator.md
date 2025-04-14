@@ -1,5 +1,7 @@
 # ProblemOperator
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 `ProblemOperator` objects are
@@ -9,3 +11,6 @@
 degrees of freedom of all variables.
 
 For more information on usage, see [`MFEMExecutioner`](MFEMExecutioner.md) and its derived classes.
+
+!else
+!include mfem/mfem_warning.md

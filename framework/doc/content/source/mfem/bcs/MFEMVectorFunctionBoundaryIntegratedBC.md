@@ -1,5 +1,7 @@
 # MFEMVectorFunctionBoundaryIntegratedBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMVectorFunctionBoundaryIntegratedBC
@@ -20,3 +22,6 @@ where $v \in \vec H^1$ and $\vec f$ is a vector function of the same dimension.
 !syntax inputs /BCs/MFEMVectorFunctionBoundaryIntegratedBC
 
 !syntax children /BCs/MFEMVectorFunctionBoundaryIntegratedBC
+
+!else
+!include mfem/mfem_warning.md

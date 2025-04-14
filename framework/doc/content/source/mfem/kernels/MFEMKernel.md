@@ -1,5 +1,7 @@
 # MFEMKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 Base class for MFEM kernels applied to the weak form being solved.
@@ -20,3 +22,6 @@ variable names is the same as the set of trial variable names for a square syste
 
 `MFEMKernel` is a purely virtual base class. Derived classes should override the `createIntegrator`
  method to return an integrator to add to the `EquationSystem`.
+
+!else
+!include mfem/mfem_warning.md

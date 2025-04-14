@@ -1,5 +1,7 @@
 # MFEMVectorFESpace
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /FESpaces/MFEMVectorFESpace
@@ -41,3 +43,6 @@ options available in this class, you can use
 !syntax inputs /FESpaces/MFEMVectorFESpace
 
 !syntax children /FESpaces/MFEMVectorFESpace
+
+!else
+!include mfem/mfem_warning.md

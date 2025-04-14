@@ -1,5 +1,7 @@
 # MFEMSuperLU
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMSuperLU
@@ -13,3 +15,6 @@ Defines and builds an `mfem::SuperLUSolver` to use as a direct solver to solve t
 !syntax inputs /Solver/MFEMSuperLU
 
 !syntax children /Solver/MFEMSuperLU
+
+!else
+!include mfem/mfem_warning.md

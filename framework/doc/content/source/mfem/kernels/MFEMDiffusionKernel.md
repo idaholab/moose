@@ -1,5 +1,7 @@
 # MFEMDiffusionKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMDiffusionKernel
@@ -27,3 +29,6 @@ This term arises from the weak form of the Laplacian operator
 !syntax inputs /Kernels/MFEMDiffusionKernel
 
 !syntax children /Kernels/MFEMDiffusionKernel
+
+!else
+!include mfem/mfem_warning.md

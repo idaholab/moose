@@ -1,5 +1,7 @@
 # MFEMScalarFunctionDirichletBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMScalarFunctionDirichletBC
@@ -17,3 +19,6 @@ scalar function on the boundary.
 !syntax inputs /BCs/MFEMScalarFunctionDirichletBC
 
 !syntax children /BCs/MFEMScalarFunctionDirichletBC
+
+!else
+!include mfem/mfem_warning.md

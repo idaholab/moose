@@ -1,5 +1,7 @@
 # MFEMTimeDerivativeMassKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMTimeDerivativeMassKernel
@@ -27,3 +29,6 @@ k \dot{u}
 !syntax inputs /Kernels/MFEMTimeDerivativeMassKernel
 
 !syntax children /Kernels/MFEMTimeDerivativeMassKernel
+
+!else
+!include mfem/mfem_warning.md

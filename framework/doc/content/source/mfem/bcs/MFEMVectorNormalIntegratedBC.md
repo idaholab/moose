@@ -1,5 +1,7 @@
 # MFEMVectorNormalIntegratedBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMVectorNormalIntegratedBC
@@ -19,3 +21,6 @@ vector on the boundary.
 !syntax inputs /BCs/MFEMVectorNormalIntegratedBC
 
 !syntax children /BCs/MFEMVectorNormalIntegratedBC
+
+!else
+!include mfem/mfem_warning.md

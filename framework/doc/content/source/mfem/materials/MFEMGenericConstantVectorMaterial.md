@@ -1,5 +1,7 @@
 # MFEMGenericConstantVectorMaterial
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Materials/MFEMGenericConstantVectorMaterial
@@ -18,3 +20,6 @@ components, assumed to be the mesh dimension.
 !syntax inputs /Materials/MFEMGenericConstantVectorMaterial
 
 !syntax children /Materials/MFEMGenericConstantVectorMaterial
+
+!else
+!include mfem/mfem_warning.md

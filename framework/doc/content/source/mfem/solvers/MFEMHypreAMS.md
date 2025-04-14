@@ -1,5 +1,7 @@
 # MFEMHypreAMS
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMHypreAMS
@@ -24,3 +26,6 @@ magnetic vector potential in magnetostatic systems in the steady state - users s
 !syntax inputs /Solver/MFEMHypreAMS
 
 !syntax children /Solver/MFEMHypreAMS
+
+!else
+!include mfem/mfem_warning.md

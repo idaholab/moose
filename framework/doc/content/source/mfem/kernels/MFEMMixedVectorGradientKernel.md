@@ -1,5 +1,7 @@
 # MFEMMixedVectorGradientKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMMixedVectorGradientKernel
@@ -24,3 +26,6 @@ k \vec\nabla u
 !syntax inputs /Kernels/MFEMMixedVectorGradientKernel
 
 !syntax children /Kernels/MFEMMixedVectorGradientKernel
+
+!else
+!include mfem/mfem_warning.md

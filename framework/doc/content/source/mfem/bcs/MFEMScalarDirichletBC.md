@@ -1,5 +1,7 @@
 # MFEMScalarDirichletBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMScalarDirichletBC
@@ -18,3 +20,6 @@ boundary, fixing its values to the input on the boundary.
 !syntax inputs /BCs/MFEMScalarDirichletBC
 
 !syntax children /BCs/MFEMScalarDirichletBC
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # MFEMGradAux
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /AuxKernels/MFEMGradAux
@@ -27,3 +29,6 @@ where $u \in H^1$, $\vec v \in H(\mathrm{curl})$ and $\lambda$ is a scalar const
 !syntax inputs /AuxKernels/MFEMGradAux
 
 !syntax children /AuxKernels/MFEMGradAux
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # AddMFEMSolverAction
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/AddMFEMSolverAction
@@ -15,3 +17,6 @@ Action called to add a linear solver to an MFEM problem, parsing content inside 
 !listing test/tests/mfem/kernels/curlcurl.i block=Problem FESpaces Preconditioner Solver
 
 !syntax parameters /Solver/AddMFEMSolverAction
+
+!else
+!include mfem/mfem_warning.md

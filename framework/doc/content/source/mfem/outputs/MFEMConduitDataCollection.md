@@ -1,5 +1,7 @@
 # MFEMConduitDataCollection
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Outputs/MFEMConduitDataCollection
@@ -21,3 +23,6 @@ The user may choose the output protocol out of the following options: `hdf5`, `j
 !syntax inputs /Outputs/MFEMConduitDataCollection
 
 !syntax children /Outputs/MFEMConduitDataCollection
+
+!else
+!include mfem/mfem_warning.md

@@ -1,5 +1,7 @@
 # MFEMParaViewDataCollection
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Outputs/MFEMParaViewDataCollection
@@ -23,3 +25,6 @@ BINARY VTK format.
 !syntax inputs /Outputs/MFEMParaViewDataCollection
 
 !syntax children /Outputs/MFEMParaViewDataCollection
+
+!else
+!include mfem/mfem_warning.md

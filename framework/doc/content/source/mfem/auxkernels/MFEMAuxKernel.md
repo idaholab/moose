@@ -1,5 +1,7 @@
 # MFEMAuxKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 Base class for MFEM auxkernels used to evaluate auxiliary variables to the main solve.
@@ -15,3 +17,6 @@ parameter.
 
 `MFEMAuxKernel` is a purely virtual base class. Derived classes should override the `execute`
  method to update the `_result_var` during execution.  
+
+!else
+!include mfem/mfem_warning.md

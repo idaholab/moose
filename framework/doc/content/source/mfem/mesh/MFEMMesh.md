@@ -1,5 +1,7 @@
 # MFEMMesh
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Mesh/MFEMMesh
@@ -24,3 +26,6 @@ the `getMFEMParMesh()` accessor as needed.
 !syntax inputs /Mesh/MFEMMesh
 
 !syntax children /Mesh/MFEMMesh
+
+!else
+!include mfem/mfem_warning.md

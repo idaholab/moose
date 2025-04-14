@@ -1,5 +1,7 @@
 # MFEMGenericFunctionMaterial
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Materials/MFEMGenericFunctionMaterial
@@ -16,3 +18,6 @@ entire mesh if missing. The scalar material properties are named according to me
 !syntax inputs /Materials/MFEMGenericFunctionMaterial
 
 !syntax children /Materials/MFEMGenericFunctionMaterial
+
+!else
+!include mfem/mfem_warning.md

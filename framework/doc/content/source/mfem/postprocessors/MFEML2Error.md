@@ -1,5 +1,7 @@
 # MFEML2Error
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Postprocessors/MFEML2Error
@@ -23,3 +25,6 @@ where $u_{h} \in H^1 \lor L^2$ and $u_{ex}$ is a scalar function.
 !syntax inputs /Postprocessors/MFEML2Error
 
 !syntax children /Postprocessors/MFEML2Error
+
+!else
+!include mfem/mfem_warning.md

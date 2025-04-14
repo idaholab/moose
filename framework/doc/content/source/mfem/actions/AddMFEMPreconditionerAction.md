@@ -1,5 +1,7 @@
 # AddMFEMPreconditionerAction
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Preconditioner/AddMFEMPreconditionerAction
@@ -15,3 +17,6 @@ the `Problem` type is set to [`MFEMProblem`](source/mfem/problem/MFEMProblem.md)
 !listing test/tests/mfem/kernels/curlcurl.i block=Problem FESpaces Preconditioner
 
 !syntax parameters /Preconditioner/AddMFEMPreconditionerAction
+
+!else
+!include mfem/mfem_warning.md

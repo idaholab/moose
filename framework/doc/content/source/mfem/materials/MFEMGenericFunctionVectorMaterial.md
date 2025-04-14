@@ -1,5 +1,7 @@
 # MFEMGenericFunctionVectorMaterial
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Materials/MFEMGenericFunctionVectorMaterial
@@ -18,3 +20,6 @@ functions.
 !syntax inputs /Materials/MFEMGenericFunctionVectorMaterial
 
 !syntax children /Materials/MFEMGenericFunctionVectorMaterial
+
+!else
+!include mfem/mfem_warning.md

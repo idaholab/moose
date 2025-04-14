@@ -1,5 +1,7 @@
 # MFEMScalarBoundaryIntegratedBC
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /BCs/MFEMScalarBoundaryIntegratedBC
@@ -19,3 +21,6 @@ Neumann-type boundary conditions.
 !syntax inputs /BCs/MFEMScalarBoundaryIntegratedBC
 
 !syntax children /BCs/MFEMScalarBoundaryIntegratedBC
+
+!else
+!include mfem/mfem_warning.md

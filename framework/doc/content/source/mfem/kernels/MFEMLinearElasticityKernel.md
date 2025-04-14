@@ -1,5 +1,7 @@
 # MFEMLinearElasticityKernel
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Kernels/MFEMLinearElasticityKernel
@@ -43,3 +45,6 @@ material Young's modulus $E$ and the Poisson ratio $\nu$ using
 !syntax inputs /Kernels/MFEMLinearElasticityKernel
 
 !syntax children /Kernels/MFEMLinearElasticityKernel
+
+!else
+!include mfem/mfem_warning.md

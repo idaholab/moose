@@ -1,5 +1,7 @@
 # MFEMOperatorJacobiSmoother
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Solver/MFEMOperatorJacobiSmoother
@@ -14,3 +16,6 @@ the MFEM equation system. Most often used as a preconditioner, compatible with p
 !syntax inputs /Solver/MFEMOperatorJacobiSmoother
 
 !syntax children /Solver/MFEMOperatorJacobiSmoother
+
+!else
+!include mfem/mfem_warning.md

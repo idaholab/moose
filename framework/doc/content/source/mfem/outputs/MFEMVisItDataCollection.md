@@ -1,5 +1,7 @@
 # MFEMVisItDataCollection
 
+!if! function=hasCapability('mfem')
+
 ## Summary
 
 !syntax description /Outputs/MFEMVisItDataCollection
@@ -19,3 +21,6 @@ output fields is desired.
 !syntax inputs /Outputs/MFEMVisItDataCollection
 
 !syntax children /Outputs/MFEMVisItDataCollection
+
+!else
+!include mfem/mfem_warning.md
