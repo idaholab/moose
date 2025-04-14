@@ -49,11 +49,13 @@ Indicator::Indicator(const InputParameters & parameters)
     Restartable(this, "Indicators"),
     OutputInterface(parameters),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _solution(_sys.solution()),
     _tid(parameters.get<THREAD_ID>("_tid")),
+    // Assembly for system 0
     _assembly(_subproblem.assembly(_tid, 0)),
     _mesh(_subproblem.mesh())
 {

@@ -81,22 +81,32 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     addMooseVariableDependency(var);
 
   addMooseVariableDependency(&mooseVariableField());
+
+  // Not supported with the base linear lagrange case
+  if (_use_displaced_mesh)
+    paramError("use_displaced_mesh",
+               "Internal side indicators do not support using the displaced mesh at this time. "
+               "They can be used on the undisplaced mesh in a Problem with displaced mesh");
+  // Access into the solution vector assumes constant monomial
+  if (_field_var.feType() != libMesh::FEType(CONSTANT, MONOMIAL))
+    mooseError("Only constant monomial variables for the internal side indicator are supported");
 }
 
 void
 InternalSideIndicator::computeIndicator()
 {
+  // Derived class decides the contribution at each qp to the indicator value
   Real sum = 0;
-
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
 
+  // Contribution is added to the two elements
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-    // We use the nodal dof index but these are constant monomial variables
-    _solution.add(_field_var.nodalDofIndex(), sum * _current_elem->hmax());
-    _solution.add(_field_var.nodalDofIndexNeighbor(), sum * _neighbor_elem->hmax());
+    const auto sys_num = _field_var.sys().number();
+    const auto var_num = _field_var.number();
+    _solution.add(_current_elem->dof_number(sys_num, var_num, 0), sum * _current_elem->hmax());
+    if (_field_var.hasBlocks(_neighbor_elem->subdomain_id()))
+      _solution.add(_neighbor_elem->dof_number(sys_num, var_num, 0), sum * _neighbor_elem->hmax());
   }
 }
 
@@ -123,8 +133,10 @@ InternalSideIndicator::finalize()
   Real value = _field_var.dofValues()[0];
 
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    // We use the nodal dof index but these are constant monomial variables
-    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value) / static_cast<Real>(n_flux_faces));
+    const auto sys_num = _field_var.sys().number();
+    const auto var_num = _field_var.number();
+
+    _solution.set(_current_elem->dof_number(sys_num, var_num, 0),
+                  std::sqrt(value) / static_cast<Real>(n_flux_faces));
   }
 }
