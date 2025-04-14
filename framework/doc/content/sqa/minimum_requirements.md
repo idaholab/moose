@@ -14,7 +14,7 @@ MacOS releases.
 | Memory | 8 GB (16 GBs for debug compilation) |
 | Disk Space | 30GB |
 
-<!-- comment to force MooseDocs to separate the tables -->
+!! comment to force MooseDocs to separate the tables
 
 | Libraries | Version / Information |
 | :- | :- |

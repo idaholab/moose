@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This is a mesh generator used for visualization purposes only. It is part of an input file that creates
 a 3D realistic mesh of the subchannels in a square lattice arrangement. This input file has a Problem block
