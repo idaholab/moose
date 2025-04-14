@@ -15,13 +15,19 @@
       exodiff = 'diffusion_with_null_material_different_kernel_differnt_blocks_out.e'
       detail = 'Check whether different kernels can be assigned to different blocks, as long as the block IDs belong to the default_block list.'
     []
+    [default_block_with_kernel_coverage_check_false]
+      type = 'Exodiff'
+      input = 'diffusion_with_null_material_kernel_coverage_check_false.i'
+      exodiff = 'diffusion_with_null_material_kernel_coverage_check_false_out.e'
+      detail = 'Check whether user can set default_block and kernel_coverage_check = false.'
+    []
   []
   [error_test]
     requirement = 'The system shall throw an error if the user sets either kernel_coverage_check or material_coverage_check together with default_block'
     [error]
       type = RunException
       input = 'diffusion_with_null_material_kernel_coverage_override.i'
-      expect_err = "Cannot set both 'kernel_coverage_check' and 'default_block'. Please set only one."
+      expect_err = "Cannot set both 'kernel_coverage_check' as 'ONLY_LIST' or 'SKIP_LIST' and 'default_block'. Please set only one."
       detail = 'Ensure that an error is thrown when user set both kernel_coverage_check and default_block in the [Problem].'
     []
   []
