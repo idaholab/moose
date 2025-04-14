@@ -29,5 +29,7 @@ This term arises from the weak form of the forcing term
 
 !syntax children /Kernels/MFEMVectorDomainLFKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

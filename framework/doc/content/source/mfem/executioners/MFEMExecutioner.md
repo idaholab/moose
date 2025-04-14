@@ -27,5 +27,7 @@ By default, legacy assembly of the FE problem on CPUs will be selected for robus
 
 !listing test/tests/mfem/kernels/diffusion_partial.i block=Executioner
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

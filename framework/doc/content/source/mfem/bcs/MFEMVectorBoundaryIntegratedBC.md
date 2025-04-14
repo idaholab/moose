@@ -25,5 +25,7 @@ where $\vec v \in \vec H^1$ and $\vec f$ is a constant vector of the same dimens
 
 !syntax children /BCs/MFEMVectorBoundaryIntegratedBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

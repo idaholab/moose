@@ -23,5 +23,7 @@ entire mesh if missing. The scalar material properties are named according to me
 
 !syntax children /Materials/MFEMGenericConstantMaterial
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

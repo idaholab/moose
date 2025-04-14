@@ -29,5 +29,7 @@ k \vec\nabla \times \vec u
 
 !syntax children /Kernels/MFEMMixedScalarCurlKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

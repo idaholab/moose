@@ -12,5 +12,7 @@ Classes deriving from `MFEMEssentialBC` are used for the application of Dirichle
 remove degrees of freedom from the problem on the specified boundary. These are commonly used when
 strongly constraining the values a solution may take on boundaries.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

@@ -17,5 +17,7 @@ the MFEM equation system. Most often used as a preconditioner, compatible with p
 
 !syntax children /Solver/MFEMOperatorJacobiSmoother
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

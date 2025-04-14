@@ -12,5 +12,7 @@ Classes deriving from `MFEMVectorFunctionDirichletBCBase` are used for the appli
 remove degrees of freedom from vector variables in the problem on the specified boundary. These are commonly used when
 strongly constraining the values a solution may take on boundaries. The imposed values may vary in space and/or time.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

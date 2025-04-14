@@ -20,5 +20,7 @@ constant in space and time.
 
 !syntax children /BCs/MFEMVectorNormalDirichletBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

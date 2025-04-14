@@ -19,5 +19,7 @@ do so using the `PropertyManager::declareXXX` methods, and use `getScalarPropert
 `getVectorProperty`, and/or `getMatrixProperty` to fetch global coefficients for properties in the
 system by name.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

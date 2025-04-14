@@ -22,5 +22,7 @@ Neumann-type boundary conditions.
 
 !syntax children /BCs/MFEMScalarBoundaryIntegratedBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

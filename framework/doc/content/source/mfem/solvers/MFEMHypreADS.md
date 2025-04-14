@@ -23,5 +23,7 @@ Raviart-Thomas elements, in which case the $H(\mathrm{div})$ FE space should be 
 
 !syntax children /Solver/MFEMHypreADS
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

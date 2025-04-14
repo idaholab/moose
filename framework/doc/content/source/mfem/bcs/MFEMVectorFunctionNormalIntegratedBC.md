@@ -22,5 +22,7 @@ vector on the boundary.
 
 !syntax children /BCs/MFEMVectorFunctionNormalIntegratedBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

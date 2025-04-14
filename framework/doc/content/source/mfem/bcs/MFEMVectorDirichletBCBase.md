@@ -13,5 +13,7 @@ remove degrees of freedom from vector variables in the problem on the specified 
 strongly constraining the values a solution may take on boundaries. The imposed values are uniform in space and constant
 in time.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

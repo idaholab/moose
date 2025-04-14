@@ -26,5 +26,7 @@ where $u_{h} \in H^1 \lor L^2$ and $u_{ex}$ is a scalar function.
 
 !syntax children /Postprocessors/MFEML2Error
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

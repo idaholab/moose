@@ -30,5 +30,7 @@ k \dot{u}
 
 !syntax children /Kernels/MFEMTimeDerivativeMassKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

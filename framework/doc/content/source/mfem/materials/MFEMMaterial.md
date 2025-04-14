@@ -26,5 +26,7 @@ manner consistent with the standard MOOSE Materials system.
 
 !syntax children /Materials/MFEMMaterial
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

@@ -19,5 +19,7 @@ be controlled similar to other MOOSE UserObjects using the
 `MFEMPostprocessor` is a purely virtual base class. Derived classes
 should override the `execute` and `getValue` methods.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

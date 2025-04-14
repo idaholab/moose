@@ -20,5 +20,7 @@ Defines and builds an `mfem::HypreBoomerAMG` solver to use as a preconditioner o
 
 !syntax children /Solver/MFEMHypreBoomerAMG
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

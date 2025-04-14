@@ -13,5 +13,7 @@ Defines an [`mfem::BilinearFormIntegrator`](https://mfem.org/bilininteg/) define
 [`mfem::BilinearFormIntegrator`](https://mfem.org/bilininteg/) multiplied by a real constant. Used
 for scaling existing integrators by a timestep in transient solves.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

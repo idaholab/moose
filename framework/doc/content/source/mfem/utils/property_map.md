@@ -18,5 +18,7 @@ Addition of new material properties and coefficients to the `PropertyMap` should
 by calling the appropriate methods of the `PropertyManager`.
 
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

@@ -30,5 +30,7 @@ This term arises from the weak form of the Laplacian operator
 
 !syntax children /Kernels/MFEMDiffusionKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

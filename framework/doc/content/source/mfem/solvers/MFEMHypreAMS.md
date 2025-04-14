@@ -27,5 +27,7 @@ magnetic vector potential in magnetostatic systems in the steady state - users s
 
 !syntax children /Solver/MFEMHypreAMS
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

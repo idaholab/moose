@@ -27,5 +27,7 @@ options available in this class, you can use
 
 !syntax children /FESpaces/MFEMScalarFESpace
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

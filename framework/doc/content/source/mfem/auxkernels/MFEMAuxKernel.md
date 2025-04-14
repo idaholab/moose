@@ -18,5 +18,7 @@ parameter.
 `MFEMAuxKernel` is a purely virtual base class. Derived classes should override the `execute`
  method to update the `_result_var` during execution.  
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

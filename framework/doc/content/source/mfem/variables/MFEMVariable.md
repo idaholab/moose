@@ -29,5 +29,7 @@ create the corresponding `MFEMFESpace` and `MFEMVariable` for that type:
 
 !syntax children /Variables/MFEMVariable
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

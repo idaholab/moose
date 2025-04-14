@@ -23,5 +23,7 @@ where $v \in \vec H^1$ and $\vec f$ is a vector function of the same dimension.
 
 !syntax children /BCs/MFEMVectorFunctionBoundaryIntegratedBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

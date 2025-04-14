@@ -27,5 +27,7 @@ the `getMFEMParMesh()` accessor as needed.
 
 !syntax children /Mesh/MFEMMesh
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

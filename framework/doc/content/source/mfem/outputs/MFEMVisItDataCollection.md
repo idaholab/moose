@@ -22,5 +22,7 @@ output fields is desired.
 
 !syntax children /Outputs/MFEMVisItDataCollection
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

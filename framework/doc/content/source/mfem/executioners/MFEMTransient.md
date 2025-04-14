@@ -27,5 +27,7 @@ are supported.
 
 !syntax children /Executioner/MFEMTransient
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

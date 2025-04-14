@@ -30,5 +30,7 @@ where $u \in H^1$, $\vec v \in H(\mathrm{curl})$ and $\lambda$ is a scalar const
 
 !syntax children /AuxKernels/MFEMGradAux
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

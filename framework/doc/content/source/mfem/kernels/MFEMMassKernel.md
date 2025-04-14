@@ -26,5 +26,7 @@ k u
 
 !syntax children /Kernels/MFEMMassKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

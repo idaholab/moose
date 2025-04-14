@@ -30,5 +30,7 @@ In order to build the FE problem using the MFEM library on the backend, the `MFE
 
 !syntax children /Problem/MFEMProblem
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

@@ -26,5 +26,7 @@ BINARY VTK format.
 
 !syntax children /Outputs/MFEMParaViewDataCollection
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

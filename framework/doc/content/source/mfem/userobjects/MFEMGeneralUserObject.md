@@ -17,5 +17,7 @@ required.
 
 !syntax children /UserObjects/MFEMGeneralUserObject
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

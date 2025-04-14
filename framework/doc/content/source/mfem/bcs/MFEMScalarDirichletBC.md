@@ -21,5 +21,7 @@ boundary, fixing its values to the input on the boundary.
 
 !syntax children /BCs/MFEMScalarDirichletBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

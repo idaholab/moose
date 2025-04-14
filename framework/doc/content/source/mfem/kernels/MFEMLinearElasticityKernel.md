@@ -46,5 +46,7 @@ material Young's modulus $E$ and the Poisson ratio $\nu$ using
 
 !syntax children /Kernels/MFEMLinearElasticityKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

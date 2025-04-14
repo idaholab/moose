@@ -28,5 +28,7 @@ where $\vec u \in H(\mathrm{curl})$, $\vec v \in H(\mathrm{div})$ and $\lambda$ 
 
 !syntax children /AuxKernels/MFEMCurlAux
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

@@ -20,5 +20,7 @@ scalar function on the boundary.
 
 !syntax children /BCs/MFEMScalarFunctionDirichletBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

@@ -22,5 +22,7 @@ a function of space and/or time.
 
 !syntax children /BCs/MFEMVectorFunctionTangentialDirichletBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

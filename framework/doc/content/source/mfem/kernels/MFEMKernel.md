@@ -23,5 +23,7 @@ variable names is the same as the set of trial variable names for a square syste
 `MFEMKernel` is a purely virtual base class. Derived classes should override the `createIntegrator`
  method to return an integrator to add to the `EquationSystem`.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

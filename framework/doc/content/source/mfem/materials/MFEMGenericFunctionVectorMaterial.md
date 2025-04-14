@@ -21,5 +21,7 @@ functions.
 
 !syntax children /Materials/MFEMGenericFunctionVectorMaterial
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

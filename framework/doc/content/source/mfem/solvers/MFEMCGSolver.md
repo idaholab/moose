@@ -17,5 +17,7 @@ equation system. Compatible with use on partially assembled equation systems.
 
 !syntax children /Solver/MFEMCGSolver
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

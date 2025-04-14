@@ -18,5 +18,7 @@ the `Problem` type is set to [`MFEMProblem`](source/mfem/problem/MFEMProblem.md)
 
 !syntax parameters /Preconditioner/AddMFEMPreconditionerAction
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

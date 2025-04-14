@@ -20,5 +20,7 @@ Child classes should override the `getDataCollection()` method to return a refer
 
 !listing test/tests/mfem/outputs/datacollections.i block=Outputs
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

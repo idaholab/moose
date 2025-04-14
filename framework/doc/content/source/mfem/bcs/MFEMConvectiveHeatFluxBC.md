@@ -34,5 +34,7 @@ for the temperature, $v=T'$ as the test variable, and $u_0=T_{inf}$ as the equil
 
 !syntax children /BCs/MFEMConvectiveHeatFluxBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

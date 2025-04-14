@@ -22,5 +22,7 @@ level to use during problem set-up and solution can be selected.
 
 !syntax children /Executioner/MFEMSteady
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

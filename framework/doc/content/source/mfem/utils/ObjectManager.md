@@ -18,5 +18,7 @@ End users should not usually need to interact with the `ObjectManager` directly.
 to add new objects tracked by the `ObjectManager` should do so using the `ObjectManager::make`
 method.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

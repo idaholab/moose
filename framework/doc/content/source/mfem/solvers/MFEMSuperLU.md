@@ -16,5 +16,7 @@ Defines and builds an `mfem::SuperLUSolver` to use as a direct solver to solve t
 
 !syntax children /Solver/MFEMSuperLU
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

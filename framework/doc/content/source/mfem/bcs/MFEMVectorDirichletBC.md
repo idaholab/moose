@@ -21,5 +21,7 @@ vector $H^1$ conforming variable on the boundary. The boundary value is constant
 
 !syntax children /BCs/MFEMVectorDirichletBC
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

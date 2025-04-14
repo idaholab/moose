@@ -16,5 +16,7 @@ Problem-specific information - such as finite element spaces used in the set-up 
 preconditioners - can be passed to the `mfem::Solver` at construction time.
 
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

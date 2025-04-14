@@ -30,5 +30,7 @@ k \vec u
 
 !syntax children /Kernels/MFEMVectorFEMassKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

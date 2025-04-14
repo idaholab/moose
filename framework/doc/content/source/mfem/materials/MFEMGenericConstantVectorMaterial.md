@@ -21,5 +21,7 @@ components, assumed to be the mesh dimension.
 
 !syntax children /Materials/MFEMGenericConstantVectorMaterial
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

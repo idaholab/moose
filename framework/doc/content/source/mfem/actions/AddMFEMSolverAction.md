@@ -18,5 +18,7 @@ Action called to add a linear solver to an MFEM problem, parsing content inside 
 
 !syntax parameters /Solver/AddMFEMSolverAction
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

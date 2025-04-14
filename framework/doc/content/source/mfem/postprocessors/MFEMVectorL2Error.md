@@ -28,5 +28,7 @@ H(\mathrm{div})$ and $\vec{u}_{ex}$ is a vector function.
 
 !syntax children /Postprocessors/MFEMVectorL2Error
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

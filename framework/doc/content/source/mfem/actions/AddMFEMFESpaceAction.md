@@ -18,5 +18,7 @@ Action called to add an MFEM finite element space to the problem, parsing conten
 
 !syntax parameters /FESpaces/AddMFEMFESpaceAction
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

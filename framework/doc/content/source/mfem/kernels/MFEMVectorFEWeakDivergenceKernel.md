@@ -27,5 +27,7 @@ This term arises from the weak form of the divergence operator
 
 !syntax children /Kernels/MFEMVectorFEWeakDivergenceKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

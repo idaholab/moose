@@ -33,5 +33,7 @@ element collections are supported by those classes.
 
 !syntax children /FESpaces/MFEMGenericFESpace
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

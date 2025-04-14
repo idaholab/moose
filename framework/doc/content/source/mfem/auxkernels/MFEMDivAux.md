@@ -29,5 +29,7 @@ where $\vec u \in H(\mathrm{div})$, $v \in L^2$ and $\lambda$ is a scalar consta
 
 !syntax children /AuxKernels/MFEMDivAux
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

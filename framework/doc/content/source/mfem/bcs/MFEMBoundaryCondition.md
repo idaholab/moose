@@ -26,5 +26,7 @@ from:
   to the weak form on the specified boundaries.
 
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

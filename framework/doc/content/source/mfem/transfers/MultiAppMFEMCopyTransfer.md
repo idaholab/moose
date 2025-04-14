@@ -11,5 +11,7 @@ be of the same type and dimension and the [MFEMMesh.md] must be identical in bot
 
 !syntax children /Transfers/MultiAppMFEMCopyTransfer
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

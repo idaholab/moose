@@ -24,5 +24,7 @@ The user may choose the output protocol out of the following options: `hdf5`, `j
 
 !syntax children /Outputs/MFEMConduitDataCollection
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

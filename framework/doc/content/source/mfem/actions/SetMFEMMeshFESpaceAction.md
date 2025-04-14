@@ -19,5 +19,7 @@ and the `displacement` field is set.
 
 !listing test/tests/mfem/kernels/linearelasticity.i block=Mesh
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

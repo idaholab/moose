@@ -28,5 +28,7 @@ were built when the class was constructed then it would not be
 possible for the child classes to implement their own logic to choose
 the appropriate finite element collection name and vdim.
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

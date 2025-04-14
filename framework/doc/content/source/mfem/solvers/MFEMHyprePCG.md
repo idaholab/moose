@@ -18,5 +18,7 @@ Not compatible with use on partially assembled equation systems.
 
 !syntax children /Solver/MFEMHyprePCG
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md

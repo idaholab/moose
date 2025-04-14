@@ -27,5 +27,7 @@ k \vec\nabla u
 
 !syntax children /Kernels/MFEMMixedVectorGradientKernel
 
+!if-end!
+
 !else
 !include mfem/mfem_warning.md
