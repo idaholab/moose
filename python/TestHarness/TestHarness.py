@@ -1014,16 +1014,18 @@ class TestHarness:
                 os.path.join(testharness_dir, '../../../../bin')]
         dirs = list(dict.fromkeys(dirs)) # remove duplicates
         matches = []
+        matched_names = []
         for other_name in all_names:
             for dir in dirs:
                 path = os.path.join(dir, other_name)
                 if os.path.exists(path):
                     matches.append(path)
+                    matched_names.append(other_name)
             exe_path = shutil.which(other_name)
             if exe_path:
                 matches.append(exe_path)
+                matched_names.append(other_name)
 
-        matched_names = [os.path.split(match)[1] for match in matches]
         if name in matched_names:
             return matches[matched_names.index(name)]
         elif len(matched_names):
