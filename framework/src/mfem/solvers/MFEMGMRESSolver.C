@@ -23,9 +23,11 @@ MFEMGMRESSolver::validParams()
 
 MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _preconditioner(isParamSetByUser("preconditioner")
-                        ? getUserObject<MFEMSolverBase>("preconditioner").getSolver()
-                        : nullptr)
+    _preconditioner(
+        isParamSetByUser("preconditioner")
+            ? const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"))
+                  .getSolver()
+            : nullptr)
 {
   constructSolver(parameters);
 }

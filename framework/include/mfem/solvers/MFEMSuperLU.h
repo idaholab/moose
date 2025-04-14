@@ -40,7 +40,7 @@ public:
   MFEMSuperLU(const InputParameters & parameters);
 
   /// Returns a shared pointer to the instance of the Solver derived-class.
-  std::shared_ptr<mfem::Solver> getSolver() const override { return _solver; }
+  std::shared_ptr<mfem::Solver> getSolver() override { return _solver; }
 
 protected:
   void constructSolver(const InputParameters & parameters) override;

@@ -17,7 +17,7 @@ public:
 
   MFEMHypreFGMRES(const InputParameters & parameters);
 
-  std::shared_ptr<mfem::Solver> getSolver() const override { return _solver; }
+  std::shared_ptr<mfem::Solver> getSolver() override { return _solver; }
 
 protected:
   void constructSolver(const InputParameters & parameters) override;

@@ -18,7 +18,7 @@ public:
   MFEMOperatorJacobiSmoother(const InputParameters & parameters);
 
   /// Returns a shared pointer to the instance of the Solver derived-class.
-  std::shared_ptr<mfem::Solver> getSolver() const override { return _preconditioner; }
+  std::shared_ptr<mfem::Solver> getSolver() override { return _preconditioner; }
 
 protected:
   void constructSolver(const InputParameters & parameters) override;
