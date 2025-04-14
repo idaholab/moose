@@ -102,7 +102,8 @@ BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
     // We are neither a Dirichlet nor an internal face
     return true;
 
-  // If we got here, then we're definitely on an internal face
+  if (isSeparatorBoundary(fi))
+    return true;
 
   if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
     // We choose to extrapolate for the element that is downwind
@@ -119,9 +120,15 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
   if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem, time))
     return true;
 
-  if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
-    // We choose to apply the Dirichlet condition for the upwind
-    return std::get<0>(elemIsUpwind(*elem, fi, time));
+  if (isInternalFace(fi))
+  {
+    if (isSeparatorBoundary(fi))
+      return false;
+
+    if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
+      // We choose to apply the Dirichlet condition for the upwind element
+      return std::get<0>(elemIsUpwind(*elem, fi, time));
+  }
 
   return false;
 }
