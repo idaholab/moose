@@ -1,16 +1,11 @@
-/********************************************************************/
-/*                   DO NOT MODIFY THIS HEADER                      */
-/*          Subchannel: Thermal Hydraulics Reactor Analysis         */
-/*                                                                  */
-/*              (c) 2022 Battelle Energy Alliance, LLC              */
-/*                      ALL RIGHTS RESERVED                         */
-/*                                                                  */
-/*             Prepared by Battelle Energy Alliance, LLC            */
-/*               Under Contract No. DE-AC07-05ID14517               */
-/*               With the U. S. Department of Energy                */
-/*                                                                  */
-/*               See COPYRIGHT for full restrictions                */
-/********************************************************************/
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MarvelTriFlowAreaIC.h"
 #include "TriSubChannelMesh.h"
@@ -23,7 +18,7 @@ MarvelTriFlowAreaIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
   params.addClassDescription("Computes flow area of subchannels in a triangular lattice "
-                             "arrangement in the marvel micro-reactor");
+                             "arrangement in a MARVEL-type micro-reactor");
   return params;
 }
 
@@ -41,6 +36,7 @@ MarvelTriFlowAreaIC::value(const Point & p)
   auto wire_diameter = _mesh.getWireDiameter();
   auto wire_lead_length = _mesh.getWireLeadLength();
   auto gap = _mesh.getDuctToPinGap();
+  auto r_ref = rod_diameter / 2.0 + gap;
   auto z_blockage = _mesh.getZBlockage();
   auto index_blockage = _mesh.getIndexBlockage();
   auto reduction_blockage = _mesh.getReductionBlockage();
@@ -61,8 +57,12 @@ MarvelTriFlowAreaIC::value(const Point & p)
   }
   else if (subch_type == EChannelType::EDGE)
   {
-    auto sector = (libMesh::pi / 6.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
-    auto triangle = pitch * (pitch / (2.0 * std::sqrt(3))) / 2.0;
+    auto gamma = std::acos(1 - 0.5 * std::pow(pitch / r_ref, 2.0));
+    auto alpha = (libMesh::pi - gamma) / 2.0;
+    auto sector_angle = libMesh::pi / 2.0 - alpha;
+    auto triangle_height = std::sqrt(std::pow(r_ref, 2.0) - std::pow(pitch / 2.0, 2.0));
+    auto sector = 0.5 * sector_angle * std::pow(r_ref, 2.0);
+    auto triangle = 0.5 * pitch * triangle_height;
     standard_area = 2.0 * sector + triangle;
     rod_area = libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0;
     additional_area = 0.0;
@@ -70,7 +70,7 @@ MarvelTriFlowAreaIC::value(const Point & p)
   }
   else
   {
-    standard_area = (libMesh::pi / 6.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
+    standard_area = (libMesh::pi / 6.0) * std::pow(r_ref, 2.0);
     rod_area = libMesh::pi * std::pow(rod_diameter, 2.0) / 24.0;
     additional_area = 0.0;
     wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 24.0 / std::cos(theta);

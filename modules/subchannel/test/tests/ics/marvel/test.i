@@ -1,6 +1,6 @@
 ################################################################################
-## Marvel surrogate SCM model                                                 ##
-## Marvel SCM geometry setup simulation                                       ##
+## Marvel-type surrogate SCM model                                                 ##
+## Marvel-type SCM geometry setup simulation                                       ##
 ## POC : Vasileios Kyriakopoulos, vasileios.kyriakopoulos@inl.gov             ##
 ################################################################################
 heated_length = 0.51
@@ -9,7 +9,7 @@ heated_length = 0.51
     type = TriSubChannelMeshGenerator
     nrings = 4
     n_cells = 40
-    flat_to_flat = 0.22 #0.21667
+    flat_to_flat = 0.22
     heated_length = ${heated_length}
     unheated_length_entry = 0.2
     unheated_length_exit = 0.2

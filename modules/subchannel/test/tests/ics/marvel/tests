@@ -6,6 +6,6 @@
         input = 'test.i'
         exodiff = 'test_out.e'
         recover = False
-        requirement = 'The system shall calculate the flow area and wetted perimeter for a Marvel-type microreactor core modeled in SCM'
+        requirement = 'The system shall calculate the flow area and wetted perimeter for a MARVEL-type microreactor core modeled in SCM'
     []
 []
