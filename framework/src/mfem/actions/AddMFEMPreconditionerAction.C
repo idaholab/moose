@@ -21,9 +21,9 @@ AddMFEMPreconditionerAction::AddMFEMPreconditionerAction(const InputParameters &
 void
 AddMFEMPreconditionerAction::act()
 {
-  MFEMProblem & mfem_problem = static_cast<MFEMProblem &>(*_problem);
-
-  mfem_problem.addMFEMPreconditioner(_type, _name, _moose_object_pars);
+  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  if (mfem_problem)
+    mfem_problem->addMFEMPreconditioner(_type, _name, _moose_object_pars);
 }
 
 #endif
