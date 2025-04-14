@@ -13,7 +13,6 @@
 
 #include "SlepcSupport.h"
 // MOOSE includes
-#include "MultiMooseEnum.h"
 #include "InputParameters.h"
 #include "Conversion.h"
 #include "EigenProblem.h"
@@ -131,56 +130,81 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
                               const SolverParams & solver_params,
                               const InputParameters & params)
 {
+  const auto & dont_add_these_options = eigen_problem.getPetscOptions().dont_add_these_options;
+
   mooseAssert(solver_params._solver_sys_num != libMesh::invalid_uint,
               "The solver system number must be initialized");
 
-  Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "eps_tol",
-                                            stringify(params.get<Real>("eigen_tol")));
+  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                         solver_params._prefix + "eps_tol",
+                                                         stringify(params.get<Real>("eigen_tol")));
 
-  Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "eps_max_it",
-                                            stringify(params.get<unsigned int>("eigen_max_its")));
+  Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+      dont_add_these_options,
+      solver_params._prefix + "eps_max_it",
+      stringify(params.get<unsigned int>("eigen_max_its")));
 
   // if it is a nonlinear eigenvalue solver, we need to set tolerances for nonlinear solver and
   // linear solver
   if (eigen_problem.isNonlinearEigenvalueSolver(solver_params._solver_sys_num))
   {
     // nonlinear solver tolerances
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "snes_max_it",
-                                              stringify(params.get<unsigned int>("nl_max_its")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "snes_max_it",
+        stringify(params.get<unsigned int>("nl_max_its")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "snes_max_funcs",
-                                              stringify(params.get<unsigned int>("nl_max_funcs")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "snes_max_funcs",
+        stringify(params.get<unsigned int>("nl_max_funcs")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "snes_atol",
-                                              stringify(params.get<Real>("nl_abs_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "snes_atol",
+        stringify(params.get<Real>("nl_abs_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "snes_rtol",
-                                              stringify(params.get<Real>("nl_rel_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "snes_rtol",
+        stringify(params.get<Real>("nl_rel_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "snes_stol",
-                                              stringify(params.get<Real>("nl_rel_step_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "snes_stol",
+        stringify(params.get<Real>("nl_rel_step_tol")));
 
     // linear solver
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "ksp_max_it",
-                                              stringify(params.get<unsigned int>("l_max_its")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "ksp_max_it",
+        stringify(params.get<unsigned int>("l_max_its")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "ksp_rtol",
-                                              stringify(params.get<Real>("l_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                           solver_params._prefix + "ksp_rtol",
+                                                           stringify(params.get<Real>("l_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "ksp_atol",
-                                              stringify(params.get<Real>("l_abs_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "ksp_atol",
+        stringify(params.get<Real>("l_abs_tol")));
   }
   else
   { // linear eigenvalue problem
     // linear solver
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "st_ksp_max_it",
-                                              stringify(params.get<unsigned int>("l_max_its")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "st_ksp_max_it",
+        stringify(params.get<unsigned int>("l_max_its")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "st_ksp_rtol",
-                                              stringify(params.get<Real>("l_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                           solver_params._prefix + "st_ksp_rtol",
+                                                           stringify(params.get<Real>("l_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption(solver_params._prefix + "st_ksp_atol",
-                                              stringify(params.get<Real>("l_abs_tol")));
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options,
+        solver_params._prefix + "st_ksp_atol",
+        stringify(params.get<Real>("l_abs_tol")));
   }
 }
 
@@ -271,32 +295,38 @@ storeSolveType(FEProblemBase & fe_problem, const InputParameters & params)
 }
 
 void
-setEigenProblemOptions(SolverParams & solver_params)
+setEigenProblemOptions(SolverParams & solver_params, const MultiMooseEnum & dont_add_these_options)
 {
   switch (solver_params._eigen_problem_type)
   {
     case Moose::EPT_HERMITIAN:
-      Moose::PetscSupport::setSinglePetscOption("-eps_hermitian");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_hermitian");
       break;
 
     case Moose::EPT_NON_HERMITIAN:
-      Moose::PetscSupport::setSinglePetscOption("-eps_non_hermitian");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_non_hermitian");
       break;
 
     case Moose::EPT_GEN_HERMITIAN:
-      Moose::PetscSupport::setSinglePetscOption("-eps_gen_hermitian");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_gen_hermitian");
       break;
 
     case Moose::EPT_GEN_INDEFINITE:
-      Moose::PetscSupport::setSinglePetscOption("-eps_gen_indefinite");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_gen_indefinite");
       break;
 
     case Moose::EPT_GEN_NON_HERMITIAN:
-      Moose::PetscSupport::setSinglePetscOption("-eps_gen_non_hermitian");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_gen_non_hermitian");
       break;
 
     case Moose::EPT_POS_GEN_NON_HERMITIAN:
-      Moose::PetscSupport::setSinglePetscOption("-eps_pos_gen_non_hermitian");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_pos_gen_non_hermitian");
       break;
 
     case Moose::EPT_SLEPC_DEFAULT:
@@ -308,48 +338,58 @@ setEigenProblemOptions(SolverParams & solver_params)
 }
 
 void
-setWhichEigenPairsOptions(SolverParams & solver_params)
+setWhichEigenPairsOptions(SolverParams & solver_params,
+                          const MultiMooseEnum & dont_add_these_options)
 {
   switch (solver_params._which_eigen_pairs)
   {
     case Moose::WEP_LARGEST_MAGNITUDE:
-      Moose::PetscSupport::setSinglePetscOption("-eps_largest_magnitude");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_largest_magnitude");
       break;
 
     case Moose::WEP_SMALLEST_MAGNITUDE:
-      Moose::PetscSupport::setSinglePetscOption("-eps_smallest_magnitude");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_smallest_magnitude");
       break;
 
     case Moose::WEP_LARGEST_REAL:
-      Moose::PetscSupport::setSinglePetscOption("-eps_largest_real");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_largest_real");
       break;
 
     case Moose::WEP_SMALLEST_REAL:
-      Moose::PetscSupport::setSinglePetscOption("-eps_smallest_real");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_smallest_real");
       break;
 
     case Moose::WEP_LARGEST_IMAGINARY:
-      Moose::PetscSupport::setSinglePetscOption("-eps_largest_imaginary");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_largest_imaginary");
       break;
 
     case Moose::WEP_SMALLEST_IMAGINARY:
-      Moose::PetscSupport::setSinglePetscOption("-eps_smallest_imaginary");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_smallest_imaginary");
       break;
 
     case Moose::WEP_TARGET_MAGNITUDE:
-      Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_target_magnitude");
       break;
 
     case Moose::WEP_TARGET_REAL:
-      Moose::PetscSupport::setSinglePetscOption("-eps_target_real");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_target_real");
       break;
 
     case Moose::WEP_TARGET_IMAGINARY:
-      Moose::PetscSupport::setSinglePetscOption("-eps_target_imaginary");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
+                                                             "-eps_target_imaginary");
       break;
 
     case Moose::WEP_ALL_EIGENVALUES:
-      Moose::PetscSupport::setSinglePetscOption("-eps_all");
+      Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options, "-eps_all");
       break;
 
     case Moose::WEP_SLEPC_DEFAULT:
@@ -511,6 +551,8 @@ slepcSetOptions(EigenProblem & eigen_problem,
                 SolverParams & solver_params,
                 const InputParameters & params)
 {
+  const auto & dont_add_these_options = eigen_problem.getPetscOptions().dont_add_these_options;
+
   Moose::PetscSupport::petscSetOptions(
       eigen_problem.getPetscOptions(), solver_params, &eigen_problem);
   // Call "SolverTolerances" first, so some solver specific tolerance such as "eps_max_it"
@@ -519,9 +561,10 @@ slepcSetOptions(EigenProblem & eigen_problem,
   setEigenSolverOptions(solver_params, params);
   // when Bx norm postprocessor is provided, we switch off the sign normalization
   if (eigen_problem.bxNormProvided())
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_sign_normalization", "0", &eigen_problem);
-  setEigenProblemOptions(solver_params);
-  setWhichEigenPairsOptions(solver_params);
+    Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
+        dont_add_these_options, "-eps_power_sign_normalization", "0", &eigen_problem);
+  setEigenProblemOptions(solver_params, eigen_problem.getPetscOptions().dont_add_these_options);
+  setWhichEigenPairsOptions(solver_params, eigen_problem.getPetscOptions().dont_add_these_options);
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 

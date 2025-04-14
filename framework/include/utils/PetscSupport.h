@@ -12,8 +12,8 @@
 #include "libmesh/libmesh.h"
 
 // MOOSE includes
-#include "MultiMooseEnum.h"
 #include "SolverParams.h"
+#include "MultiMooseEnum.h"
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/linear_solver.h"
