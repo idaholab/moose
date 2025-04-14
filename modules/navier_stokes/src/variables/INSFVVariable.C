@@ -32,10 +32,8 @@ INSFVVariable::INSFVVariable(const InputParameters & params)
 }
 
 void
-INSFVVariable::initialSetup()
+INSFVVariable::cacheSeparatorBoundaries()
 {
-  MooseVariableFVReal::initialSetup();
-
   _boundary_id_to_separator.clear();
   std::vector<FVFluxBC *> bcs;
 
@@ -57,6 +55,27 @@ INSFVVariable::initialSetup()
         _boundary_id_to_separator.emplace(bnd_id, separator);
     }
   }
+}
+
+void
+INSFVVariable::timestepSetup()
+{
+  MooseVariableFVReal::timestepSetup();
+  cacheSeparatorBoundaries();
+}
+
+void
+INSFVVariable::meshChanged()
+{
+  MooseVariableFVReal::meshChanged();
+  cacheSeparatorBoundaries();
+}
+
+void
+INSFVVariable::initialSetup()
+{
+  MooseVariableFVReal::initialSetup();
+  cacheSeparatorBoundaries();
 }
 
 bool

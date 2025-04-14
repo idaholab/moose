@@ -29,6 +29,8 @@ public:
   void computeNeighborValues() override;
   void requireQpComputations() const override { _qp_calculations = true; }
   virtual void initialSetup() override;
+  virtual void timestepSetup() override;
+  virtual void meshChanged() override;
 
   // If the given boundary is a hydraulic separator bouundary for this variable
   bool isSeparatorBoundary(const FaceInfo & fi) const;
@@ -42,6 +44,11 @@ protected:
    * Returns whether the passed-in \p FaceInfo corresponds to a fully-developed flow face
    */
   bool isFullyDevelopedFlowFace(const FaceInfo & fi) const;
+
+  /**
+   * Caches the separator boundaries
+   */
+  void cacheSeparatorBoundaries();
 
   /// A container for quick access of hydraulic separator BCs associated with this
   /// variable.
