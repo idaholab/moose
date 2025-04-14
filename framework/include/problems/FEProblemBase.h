@@ -2462,7 +2462,7 @@ public:
   /**
    * @returns the default blocks (for block restriction)
    */
-  const std::vector<SubdomainName> & getDefaultBlocks() const { return _default_blocks; };
+  const std::vector<SubdomainName> & getDefaultBlocks() const { return _default_blocks; }
 
   virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
 
