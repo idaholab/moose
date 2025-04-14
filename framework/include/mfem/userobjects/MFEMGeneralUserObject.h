@@ -19,8 +19,8 @@ public:
   MFEMGeneralUserObject(const InputParameters & parameters);
 
   /// Returns a reference to the MFEMProblem instance.
-  // FIXME: Should this be marked as const if it is returning a non-const reference?
-  MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
+  MFEMProblem & getMFEMProblem() { return _mfem_problem; }
+  const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
 
   void execute() override {}
 

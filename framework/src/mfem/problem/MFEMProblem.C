@@ -465,7 +465,13 @@ MFEMProblem::mesh()
 {
   mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
               "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
-  return (MFEMMesh &)_mesh;
+  return static_cast<MFEMMesh &>(_mesh);
+}
+
+const MFEMMesh &
+MFEMProblem::mesh() const
+{
+  return const_cast<MFEMProblem *>(this)->mesh();
 }
 
 #endif

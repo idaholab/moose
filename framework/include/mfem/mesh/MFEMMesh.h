@@ -36,12 +36,13 @@ public:
    * not been build, the methods will call the appropriate protected methods to
    * build them.
    */
-  mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; };
+  mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; }
+  const mfem::ParMesh & getMFEMParMesh() const;
 
   /**
    * Copy a shared_ptr to the mfem::ParMesh object.
    */
-  std::shared_ptr<mfem::ParMesh> getMFEMParMeshPtr() { return _mfem_par_mesh; };
+  std::shared_ptr<mfem::ParMesh> getMFEMParMeshPtr() { return _mfem_par_mesh; }
 
   /**
    * Build MFEM ParMesh and a placeholder MOOSE mesh.
@@ -94,5 +95,11 @@ private:
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
 };
+
+inline const mfem::ParMesh &
+MFEMMesh::getMFEMParMesh() const
+{
+  return const_cast<MFEMMesh *>(this)->getMFEMParMesh();
+}
 
 #endif

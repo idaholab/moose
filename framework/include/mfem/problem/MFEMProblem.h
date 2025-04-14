@@ -34,12 +34,12 @@ public:
   virtual bool nlConverged(const unsigned int) override { return true; }
   virtual void syncSolutions(Direction) override {}
 
-  using ExternalProblem::mesh;
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
    * MFEMMesh.
    */
   virtual MFEMMesh & mesh() override;
+  virtual const MFEMMesh & mesh() const override;
 
   /**
    * Returns all the variable names from the auxiliary system base. This is helpful in the

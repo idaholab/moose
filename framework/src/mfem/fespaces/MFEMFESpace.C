@@ -49,7 +49,7 @@ MFEMFESpace::buildFEC(const std::string & fec_name) const
 void
 MFEMFESpace::buildFESpace(const int vdim) const
 {
-  mfem::ParMesh & pmesh = getMFEMProblem().mesh().getMFEMParMesh();
+  mfem::ParMesh & pmesh = const_cast<mfem::ParMesh &>(getMFEMProblem().mesh().getMFEMParMesh());
 
   _fespace = std::make_shared<mfem::ParFiniteElementSpace>(&pmesh, getFEC().get(), vdim, _ordering);
 }
