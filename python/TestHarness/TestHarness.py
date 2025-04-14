@@ -1029,16 +1029,17 @@ class TestHarness:
         elif len(matched_names):
             # Eliminate any duplicates
             matched_names = set(matched_names)
-            available_methods = [matched_name.split('-')[-1] for matched_name in matched_names]
+            available_methods = "'" + "', '".join([matched_name.split('-')[-1] for matched_name in matched_names]) + "'"
+            matched_names = "'" + "', '".join(matched_names) + "'"
             err_message = (f'\nThe following executable(s) were found, but METHOD '
-                           f'is set to {self.options.method}: {", ".join(matched_names)}'
-                           f'\nTo use one of these executables, set the "METHOD" environmental '
-                           f'variable to one of the following values: {", ".join(available_methods)}'
+                           f'is set to \'{self.options.method}\': {matched_names}'
+                           f'\nTo use one of these executables, set the \'METHOD\' environment '
+                           f'variable to one of the following values: {available_methods}'
                            )
         else:
             err_message = ""
 
-        raise FileNotFoundError(f'Failed to find MOOSE executable {name}{err_message}')
+        raise FileNotFoundError(f'Failed to find MOOSE executable \'{name}\'{err_message}')
 
     def initialize(self):
         # Load the scheduler plugins
