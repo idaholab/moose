@@ -6,7 +6,7 @@
 
 <!-- -->
 
-This IC creates an initial field for the subchannel wetted perimeter ([!param](/ICs/MarvelTriWettedPerimIC/variable) = `w_perim`), for a marvel-type sub-assembly with a triangular subchannel/pin arrangement.
+This IC creates an initial field for the subchannel wetted perimeter ([!param](/ICs/MarvelTriWettedPerimIC/variable) = `w_perim`), for a MARVEL-type core.
 
 !syntax parameters /ICs/MarvelTriWettedPerimIC
 
