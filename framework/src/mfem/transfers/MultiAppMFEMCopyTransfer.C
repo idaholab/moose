@@ -27,6 +27,30 @@ MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & param
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
+  auto bad_problem = [this]()
+  {
+    mooseError(type(),
+               " only works with MFEMProblem based applications. Check that all your inputs "
+               "involved in this transfer are MFEMProblem based");
+  };
+  if (hasToMultiApp())
+  {
+    if (!dynamic_cast<MFEMProblem *>(&getToMultiApp()->problemBase()))
+      bad_problem();
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getToMultiApp()->hasLocalApp(i) &&
+          !dynamic_cast<MFEMProblem *>(&getToMultiApp()->appProblemBase(i)))
+        bad_problem();
+  }
+  if (hasFromMultiApp())
+  {
+    if (!dynamic_cast<MFEMProblem *>(&getFromMultiApp()->problemBase()))
+      bad_problem();
+    for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) &&
+          !dynamic_cast<MFEMProblem *>(&getFromMultiApp()->appProblemBase(i)))
+        bad_problem();
+  }
 }
 
 //
