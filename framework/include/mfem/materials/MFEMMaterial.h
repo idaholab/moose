@@ -22,7 +22,7 @@ public:
 
 protected:
   const std::vector<SubdomainName> _block_ids;
-  MooseMFEM::PropertyManager & _properties;
+  Moose::MFEM::PropertyManager & _properties;
 };
 
 #endif
