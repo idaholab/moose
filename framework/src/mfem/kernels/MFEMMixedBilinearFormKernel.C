@@ -17,7 +17,7 @@ MFEMMixedBilinearFormKernel::validParams()
 
 MFEMMixedBilinearFormKernel::MFEMMixedBilinearFormKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _trial_var_name(isParamValid("trial_variable") ? getParam<std::string>("trial_variable")
+    _trial_var_name(isParamValid("trial_variable") ? getParam<VariableName>("trial_variable")
                                                    : _test_var_name)
 {
 }

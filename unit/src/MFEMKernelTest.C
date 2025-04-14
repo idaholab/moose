@@ -252,7 +252,7 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarCurlKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<std::string>("trial_variable") = "trial_variable_name";
+  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
   kernel_params.set<std::string>("coefficient") = "coef1";
   MFEMMixedScalarCurlKernel & kernel =
       addObject<MFEMMixedScalarCurlKernel>("MFEMMixedScalarCurlKernel", "kernel1", kernel_params);

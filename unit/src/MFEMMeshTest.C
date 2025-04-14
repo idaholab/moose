@@ -36,8 +36,8 @@ MFEMMeshTest::buildMFEMMesh(MeshFileName filename, int serial_ref, int parallel_
 {
   InputParameters params = _factory->getValidParams(_mesh_type);
   params.set<MeshFileName>("file") = filename;
-  params.set<int>("serial_refine") = serial_ref;
-  params.set<int>("parallel_refine") = parallel_ref;
+  params.set<unsigned int>("serial_refine") = serial_ref;
+  params.set<unsigned int>("parallel_refine") = parallel_ref;
   _mfem_mesh_ptr = _factory->create<MFEMMesh>(_mesh_type, "moose_mesh", params);
   _app->actionWarehouse().mesh() = _mfem_mesh_ptr;
   _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
