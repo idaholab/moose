@@ -482,14 +482,8 @@ CommandLine::formatEntry(const CommandLine::Entry & entry) const
   oss << entry.name;
   if (entry.value)
   {
-    oss << "=";
-    const auto & value = *entry.value;
-    const auto has_space = value.find_first_not_of(" ") == std::string::npos;
-    if (has_space)
-      oss << "\"";
-    oss << value;
-    if (has_space)
-      oss << "\"";
+    const auto q = (*entry.value).find(" ") != std::string::npos ? "'" : "";
+    oss << *entry.value_separator << q << *entry.value << q;
   }
   return oss.str();
 }
