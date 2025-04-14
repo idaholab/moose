@@ -40,6 +40,7 @@ public:
    */
   virtual MFEMMesh & mesh() override;
   virtual const MFEMMesh & mesh() const override;
+  using ExternalProblem::mesh;
 
   /**
    * Returns all the variable names from the auxiliary system base. This is helpful in the
