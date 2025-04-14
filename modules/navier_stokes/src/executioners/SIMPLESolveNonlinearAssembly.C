@@ -169,6 +169,9 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     _pressure_tag_name(getParam<TagName>("pressure_gradient_tag")),
     _pressure_tag_id(_problem.addVectorTag(_pressure_tag_name))
 {
+  // We disable this considering that this object passes petsc options a little differently
+  _pressure_system.system().prefix_with_name(false);
+
   // We fetch the system numbers for the momentum components plus add vectors
   // for removing the contribution from the pressure gradient terms.
   for (auto system_i : index_range(_momentum_system_names))
@@ -177,6 +180,9 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     _momentum_systems.push_back(
         &_problem.getNonlinearSystemBase(_momentum_system_numbers[system_i]));
     _momentum_systems[system_i]->addVector(_pressure_tag_id, false, ParallelType::PARALLEL);
+
+    // We disable this considering that this object passes petsc options a little differently
+    _momentum_systems[system_i]->system().prefix_with_name(false);
   }
 
   if (_has_passive_scalar_systems)
@@ -186,20 +192,25 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
           _problem.nlSysNum(_passive_scalar_system_names[system_i]));
       _passive_scalar_systems.push_back(
           &_problem.getNonlinearSystemBase(_passive_scalar_system_numbers[system_i]));
+
+      // We disable this considering that this object passes petsc options a little differently
+      _passive_scalar_systems[system_i]->system().prefix_with_name(false);
     }
 
   if (_has_turbulence_systems)
+  {
     for (auto system_i : index_range(_turbulence_system_names))
     {
       _turbulence_system_numbers.push_back(_problem.nlSysNum(_turbulence_system_names[system_i]));
       _turbulence_systems.push_back(
           &_problem.getNonlinearSystemBase(_turbulence_system_numbers[system_i]));
+
+      // We disable this considering that this object passes petsc options a little differently
+      _turbulence_systems[system_i]->system().prefix_with_name(false);
     }
 
-  // We check for input errors with regards to the turbulence equations. At the same time, we
-  // set up the corresponding system numbers
-  if (_has_turbulence_systems)
-  {
+    // We check for input errors with regards to the turbulence equations. At the same time, we
+    // set up the corresponding system numbers
     if (_turbulence_system_names.size() != _turbulence_equation_relaxation.size())
       paramError("turbulence_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
@@ -224,9 +235,15 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
 
   if (_has_energy_system)
   {
+    // We disable this considering that this object passes petsc options a little differently
+    _energy_system->system().prefix_with_name(false);
+
     // We only allow the solve for a solid energy system if we already solve for the fluid energy
     if (_has_solid_energy_system)
     {
+      // We disable this considering that this object passes petsc options a little differently
+      _solid_energy_system->system().prefix_with_name(false);
+
       const auto & solid_energy_petsc_options =
           getParam<MultiMooseEnum>("solid_energy_petsc_options");
       const auto & solid_energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
