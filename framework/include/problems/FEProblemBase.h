@@ -2402,7 +2402,7 @@ public:
   /**
    * @returns the default blocks (for block restriction)
    */
-  const std::vector<SubdomainName> & getDefaultBlocks() const { return _default_blocks; };
+  const std::vector<SubdomainName> & getDefaultBlocks() const { return _default_blocks; }
 
 protected:
   /// Create extra tagged vectors and matrices
