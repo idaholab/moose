@@ -1,6 +1,6 @@
 [Tests]
   design = 'BatchMeshGeneratorAction.md'
-  issues = '#29800 #30129'
+  issues = '#29800 #30129 #30302'
   [single_scalar]
     type = 'Exodiff'
       input = 'single_scalar.i'
@@ -8,6 +8,32 @@
       cli_args = '--mesh-only'
       recover = false
       requirement = 'The system shall be able to generate in batches meshes of the same type with variation in one single scalar parameter'
+  []
+  [single_scalar_mesh_file]
+    type = 'Exodiff'
+      input = 'mfname.i'
+      exodiff = 'mfname_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system shall be able to generate in batches meshes of the same type with variation in one single scalar MeshFileName type parameter'
+  []
+  [single_vector_block_name]
+    type = 'Exodiff'
+      input = 'mg_sd_name.i'
+      exodiff = 'mg_sd_name_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system shall be able to generate in batches meshes of the same type with variation in one single vector SubdomainName type parameter and a fixed MeshGeneratorName type parameter'
+  []
+  [single_vector_boundary_name]
+    type = 'Exodiff'
+      input = 'mg_bdry_name.i'
+      exodiff = 'mg_bdry_name_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system shall be able to generate in batches meshes of the same type with variation in one single vector BoundaryName type parameter and a fixed MeshGeneratorName type parameter'
   []
   [double_scalar_corr]
     type = 'Exodiff'

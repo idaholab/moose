@@ -36,7 +36,8 @@ BatchMeshGeneratorAction::validParams()
   params.addParam<std::vector<std::string>>("batch_scalar_input_param_names",
                                             std::vector<std::string>(),
                                             "Names of the scalar input parameters to be altered.");
-  MultiMooseEnum default_types("BOOL REAL SHORT USHORT INT UINT STRING ENUM", "");
+  MultiMooseEnum default_types(
+      "BOOL REAL SHORT USHORT INT UINT STRING SDNAME BDRYNAME MGNAME MFNAME ENUM", "");
   params.addParam<MultiMooseEnum>(
       "batch_scalar_input_param_types",
       default_types,
@@ -518,6 +519,18 @@ BatchMeshGeneratorAction::setScalarParams(InputParameters & params,
     case (ParameterType::STRING):
       params.set<std::string>(param_name) = param_value;
       break;
+    case (ParameterType::SDNAME):
+      params.set<SubdomainName>(param_name) = param_value;
+      break;
+    case (ParameterType::BDRYNAME):
+      params.set<BoundaryName>(param_name) = param_value;
+      break;
+    case (ParameterType::MGNAME):
+      params.set<MeshGeneratorName>(param_name) = param_value;
+      break;
+    case (ParameterType::MFNAME):
+      params.set<MeshFileName>(param_name) = param_value;
+      break;
     case (ParameterType::BOOL):
       hit::toBool(param_value, &params.set<bool>(param_name));
       break;
@@ -556,6 +569,18 @@ BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
     case (ParameterType::STRING):
       params.set<std::vector<std::string>>(param_name) = param_value;
       break;
+    case (ParameterType::SDNAME):
+      convertAndSetStringLikeVector<SubdomainName>(params, param_name, param_value);
+      break;
+    case (ParameterType::BDRYNAME):
+      convertAndSetStringLikeVector<BoundaryName>(params, param_name, param_value);
+      break;
+    case (ParameterType::MGNAME):
+      convertAndSetStringLikeVector<MeshGeneratorName>(params, param_name, param_value);
+      break;
+    case (ParameterType::MFNAME):
+      convertAndSetStringLikeVector<MeshFileName>(params, param_name, param_value);
+      break;
     case (ParameterType::BOOL):
     {
       std::vector<bool> values(param_value.size());
@@ -588,6 +613,21 @@ BatchMeshGeneratorAction::convertAndSetNumericVector(InputParameters & params,
                  param_value.end(),
                  values.begin(),
                  [](const std::string & val) { return MooseUtils::convert<T>(val); });
+  params.set<std::vector<T>>(param_name) = values;
+}
+
+template <typename T>
+void
+BatchMeshGeneratorAction::convertAndSetStringLikeVector(
+    InputParameters & params,
+    const std::string & param_name,
+    const std::vector<std::string> & param_value)
+{
+  std::vector<T> values(param_value.size());
+  std::transform(param_value.begin(),
+                 param_value.end(),
+                 values.begin(),
+                 [](const std::string & val) { return T(val); });
   params.set<std::vector<T>>(param_name) = values;
 }
 
@@ -629,6 +669,22 @@ BatchMeshGeneratorAction::checkInputParametersTypes(const InputParameters & para
         break;
       case (ParameterType::STRING):
         checkInputParameterType<std::string>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::SDNAME):
+        checkInputParameterType<SubdomainName>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::BDRYNAME):
+        checkInputParameterType<BoundaryName>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::MGNAME):
+        checkInputParameterType<MeshGeneratorName>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::MFNAME):
+        checkInputParameterType<MeshFileName>(
             params, action_input_param_name, param_names[i], is_vector);
         break;
       case (ParameterType::BOOL):
