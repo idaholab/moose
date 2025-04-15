@@ -9,7 +9,7 @@
 
 #include "BinaryTestExecutor.h"
 
-registerMooseObject("MooseApp", BinaryTestExecutor);
+registerMooseObject("MooseTestApp", BinaryTestExecutor);
 
 InputParameters
 BinaryTestExecutor::validParams()
