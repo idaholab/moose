@@ -1322,6 +1322,21 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
   }
 }
 
+void
+Builder::removeFromExtractedParams(const InputParameters & params)
+{
+  for (const auto & param : params.getParametersList())
+  {
+    const auto & fullpath = params.paramFullpath(param);
+    if (!fullpath.empty())
+    {
+      mooseAssert(_extracted_vars.count(fullpath),
+                  "We expect to have found the fullpath in _extracted_vars");
+      _extracted_vars.erase(fullpath);
+    }
+  }
+}
+
 template <typename T>
 bool
 toBool(const std::string & /*s*/, T & /*val*/)

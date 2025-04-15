@@ -46,4 +46,6 @@ CreateProblemAction::act()
     _problem =
         _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
   }
+  else
+    _app.builder().removeFromExtractedParams(_moose_object_pars);
 }

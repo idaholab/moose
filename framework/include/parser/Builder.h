@@ -89,6 +89,11 @@ public:
   void extractParams(const std::string & prefix, InputParameters & p);
 
   /**
+   * Removes from the extracted parameter list the parameters contained in \p p
+   */
+  void removeFromExtractedParams(const InputParameters & p);
+
+  /**
    * Creates a syntax formatter for printing
    */
   void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode);
