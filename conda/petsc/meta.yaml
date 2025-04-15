@@ -38,6 +38,7 @@ requirements:
     - {{ mpi }}
     - {{ moose_mpi }}
     - pkg-config
+    - liblzma-devel                       # [linux]
   run:
     - {{ mpi }}
     - {{ moose_mpi }}

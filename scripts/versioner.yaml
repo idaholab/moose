@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.04.11
+    version: 2025.04.15
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: libmesh-vtk, peacock, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.04.11
+    version: 2025.04.15
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -37,7 +37,7 @@ packages:
       - conda/libmesh-vtk/build.sh
   # dependers: peacock
   peacock:
-    version: 2025.04.11
+    version: 2025.04.15
     conda: conda/peacock
     templates:
       conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml
@@ -66,7 +66,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2025.04.02
-    build_number: 1
+    build_number: 2
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -102,7 +102,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.04.11
+    version: 2025.04.15
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -121,7 +121,7 @@ packages:
       - scripts/setup_libtorch.sh
   # dependers: none
   pprof:
-    version: 2025.04.11
+    version: 2025.04.15
     build_number: 0
     conda: conda/pprof
     templates:

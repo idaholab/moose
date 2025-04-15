@@ -30,12 +30,11 @@ zip_keys:
   - mpi_dev_website
 
 moose_hdf5:
-  - hdf5 1.14.2         # [linux]
+  - hdf5 1.14.3         # [linux]
   - hdf5 1.14.4         # [osx]
 
 moose_libexpat:
-  - libexpat 2.5.0      # [linux]
-  - libexpat 2.7.0      # [osx]
+  - libexpat 2.7.0
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cmake:
@@ -96,12 +95,12 @@ moose_libcxx:
   - libcxx 20.1.2 ha82da77_0                                # [arm64]
 
 moose_libzlib:
-  - libzlib 1.3.1 h4ab18f5_1                                # [linux]
+  - libzlib 1.3.1 hb9d3cd8_2                                # [linux]
   - libzlib 1.3.1 hd23fc13_2                                # [not arm64 and osx]
   - libzlib 1.3.1 h8359307_2                                # [arm64]
 
 moose_icu:
-  - icu 73.2 h59595ed_0                                     # [linux]
+  - icu 75.1 he02047a_0                                     # [linux]
   - icu 75.1 h120a0e1_0                                     # [not arm64 and osx]
   - icu 75.1 hfee45f7_0                                     # [arm64]
 
@@ -126,7 +125,7 @@ moose_llvm_tools:                                           # [osx]
   - llvm-tools 18.1.8 hc4b4ae8_3                            # [arm64]
 
 moose_libclang:
-  - libclang13 15.0.7 default_h5d6823c_5                    # [linux]
+  - libclang13 20.1.2 default_h9c6a7e4_0                    # [linux]
   - libclang-cpp18.1 18.1.8 default_h3571c67_9              # [not arm64 and osx]
   - libclang-cpp18.1 18.1.8 default_hf90f093_9              # [arm64]
 
