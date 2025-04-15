@@ -25,6 +25,7 @@
 #include "InputParameterWarehouse.h"
 #include "Registry.h"
 #include "CommandLine.h"
+#include "Split.h"
 
 #include <filesystem>
 
@@ -385,7 +386,39 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
         << problem.solverTypeString(i) << " ";
   oss << '\n';
 
-  const std::string & pc_desc = problem.getPetscOptions().pc_description;
+  // Check for a selection of common PETSc pc options on the command line for
+  // all solver systems and all field splits within each nonlinear system
+  std::string pc_desc;
+  for (const std::size_t i : make_range(problem.numSolverSystems()))
+  {
+    std::vector<std::string> splits = {""};
+    if (problem.isSolverSystemNonlinear(i))
+      for (const auto & split : problem.getNonlinearSystemBase(i).getSplits().getObjects())
+        splits.push_back("fieldsplit_" + split->name() + "_");
+
+    for (const std::string & split : splits)
+    {
+      std::string pc_desc_split;
+      const std::string prefix = problem.solverParams(i)._prefix + split;
+      for (const auto & entry : std::as_const(*app.commandLine()).getEntries())
+        if (entry.name == prefix + "pc_type" || entry.name == prefix + "sub_pc_type" ||
+            entry.name == prefix + "pc_hypre_type" || entry.name == prefix + "pc_fieldsplit_type")
+          pc_desc_split += entry.value ? *entry.value + " " : "unspecified ";
+
+      if (!pc_desc_split.empty() && prefix.size() > 1)
+        pc_desc += "[" + prefix.substr(1, prefix.size() - 2) + "]: ";
+      pc_desc += pc_desc_split;
+    }
+  }
+
+  // Alert the user any unoverridden options will still be picked up from the input file
+  if (!pc_desc.empty())
+    pc_desc += "(see input file for unoverridden options)";
+
+  // If there are no PETSc pc options on the command line, print the input file options
+  if (pc_desc.empty())
+    pc_desc = problem.getPetscOptions().pc_description;
+
   if (!pc_desc.empty())
     oss << std::setw(console_field_width) << "  PETSc Preconditioner: " << pc_desc << '\n';
 
