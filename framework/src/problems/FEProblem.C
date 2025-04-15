@@ -25,12 +25,7 @@ FEProblem::validParams()
   InputParameters params = FEProblemBase::validParams();
   params.addClassDescription("A normal (default) Problem object that contains a single "
                              "NonlinearSystem and a single AuxiliarySystem object.");
-  params.addParam<bool>("use_hash_table_matrix_assembly",
-                        false,
-                        "Whether to assemble matrices using hash tables instead of preallocating "
-                        "matrix memory. This can be a good option if the sparsity pattern changes "
-                        "throughout the course of the simulation.");
-  params.addParamNamesToGroup("use_hash_table_matrix_assembly", "Nonlinear system(s)");
+
   return params;
 }
 
@@ -69,9 +64,9 @@ FEProblem::FEProblem(const InputParameters & parameters)
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(_solver_systems);
-  const bool use_hash_table_matrix_assembly = getParam<bool>("use_hash_table_matrix_assembly");
   for (auto & solver_system : _solver_systems)
-    solver_system->system().prefer_hash_table_matrix_assembly(use_hash_table_matrix_assembly);
+    solver_system->system().prefer_hash_table_matrix_assembly(
+        getParam<bool>("prefer_hash_table_matrix_assembly"));
 
   if (_num_nl_sys)
     initNullSpaceVectors(parameters, _nl);
