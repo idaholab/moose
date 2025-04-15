@@ -872,6 +872,8 @@ addPetscPairsToPetscOptions(
   }
 #endif
   // Set Preconditioner description
+  if (!pc_description.empty() && prefix.size() > 1)
+    po.pc_description += "[" + prefix.substr(1, prefix.size() - 2) + "]: ";
   po.pc_description += pc_description;
 }
 

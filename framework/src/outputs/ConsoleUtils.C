@@ -379,32 +379,32 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
     oss << std::setw(console_field_width)
         << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, ", ") << '\n';
 
+  oss << std::setw(console_field_width) << "  Solver Mode: ";
   for (const std::size_t i : make_range(problem.numSolverSystems()))
-    oss << std::setw(console_field_width)
-        << "  Solver Mode" +
-               (problem.numSolverSystems() > 1 ? " - system " + std::to_string(i) : "") + ": "
-        << problem.solverTypeString(i) << '\n';
+    oss << (problem.numSolverSystems() > 1 ? "[" + problem.getSolverSystemNames()[i] + "]: " : "")
+        << problem.solverTypeString(i) << " ";
+  oss << '\n';
 
   const std::string & pc_desc = problem.getPetscOptions().pc_description;
   if (!pc_desc.empty())
     oss << std::setw(console_field_width) << "  PETSc Preconditioner: " << pc_desc << '\n';
 
+  std::string mpc_desc;
   for (const std::size_t i : make_range(problem.numNonlinearSystems()))
   {
     MoosePreconditioner const * mpc = problem.getNonlinearSystemBase(i).getPreconditioner();
     if (mpc)
     {
-      oss << std::setw(console_field_width)
-          << "  MOOSE Preconditioner" +
-                 (problem.numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") + ": "
-          << mpc->getParam<std::string>("_type");
+      if (problem.numNonlinearSystems() > 1)
+        mpc_desc += "[" + problem.getNonlinearSystemNames()[i] + "]: ";
+      mpc_desc += mpc->getParam<std::string>("_type") + " ";
       if (mpc->name().find("_moose_auto") != std::string::npos)
-        oss << " (auto)";
-      oss << '\n';
+        mpc_desc += "(auto) ";
     }
-    if (i == cast_int<std::size_t>(problem.numNonlinearSystems() - 1))
-      oss << std::endl;
   }
+
+  if (!mpc_desc.empty())
+    oss << std::setw(console_field_width) << "  MOOSE Preconditioner: " << mpc_desc << '\n';
 
   return oss.str();
 }
