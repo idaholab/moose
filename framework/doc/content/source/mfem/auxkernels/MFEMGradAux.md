@@ -20,7 +20,7 @@ where $u \in H^1$, $\vec v \in H(\mathrm{curl})$ and $\lambda$ is a scalar const
 
 ## Example Input File Syntax
 
-!listing kernels/diffusion.i
+!listing mfem/kernels/diffusion.i
 
 !listing kernels/irrotational.i
 
