@@ -53,6 +53,7 @@ private:
   virtual void addInletBC() override;
   virtual void addOutletBC() override;
   virtual void addWallsBC() override;
+  virtual void addSeparatorBC() override {}
 
   virtual bool hasForchheimerFriction() const override { return false; };
 
@@ -61,7 +62,8 @@ private:
   virtual MooseFunctorName getLinearFrictionCoefName() const override
   {
     mooseError("Not implemented");
-  };
+  }
+
   UserObjectName rhieChowUOName() const override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;

@@ -12,6 +12,12 @@
 /* Whether to use libtorch-related code or not */
 #undef LIBTORCH_ENABLED
 
+/* The directory where mfem is installed */
+#undef MFEM_DIR
+
+/* Whether to use mfem-related code or not */
+#undef MFEM_ENABLED
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

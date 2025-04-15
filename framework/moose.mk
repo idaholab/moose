@@ -1,11 +1,15 @@
+# Include variables defined by MOOSE configure if it's been run
+-include $(MOOSE_DIR)/conf_vars.mk
+
 # Whether or not to do a Unity build
 MOOSE_UNITY ?= true
 MOOSE_HEADER_SYMLINKS ?= true
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch
+IGNORE_CONTRIB_INC ?= libtorch mfem
 ENABLE_LIBTORCH ?= false
+ENABLE_MFEM ?= false
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -124,6 +128,35 @@ ifeq ($(ENABLE_LIBTORCH),true)
 endif
 
 #
+# Conditional parts if the user wants to compile MOOSE with mfem
+#
+ifeq ($(ENABLE_MFEM),true)
+	MFEM_LIB := libmfem.$(lib_suffix)
+	MFEM_COMMON_LIB := libmfem-common.$(lib_suffix)
+
+  ifneq ($(and $(wildcard $(MFEM_DIR)/lib/$(MFEM_LIB)), $(wildcard $(MFEM_DIR)/lib/$(MFEM_COMMON_LIB))),)
+    # Enabling parts that have MFEM dependencies
+    libmesh_CXXFLAGS += -DMFEM_ENABLED
+
+    # Adding the include directories
+	  include $(MFEM_DIR)/share/mfem/config.mk
+	  libmesh_CXXFLAGS += $(MFEM_INCFLAGS)
+
+    # Dynamically linking with the available MFEM library
+	  ifeq ($(shell uname -s),Darwin)
+	  	libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
+	  else
+	    libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
+	  endif
+
+    libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
+
+  else
+    $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem and to run the configure --with-mfem before compiling moose!)
+  endif
+endif
+
+#
 # FParser JIT defines
 #
 ADDITIONAL_CPPFLAGS += -DADFPARSER_INCLUDES="\"-I$(FRAMEWORK_DIR)/include/utils -I$(FRAMEWORK_DIR)/include/base $(libmesh_INCLUDE)\""
@@ -182,6 +215,8 @@ gtest_objects   := $(patsubst %.cc, %.$(no-method-obj-suffix), $(gtest_srcfiles)
 gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
 gtest_deps      := $(patsubst %.cc, %.$(no-method-obj-suffix).d, $(gtest_srcfiles))
+gtest_INCLUDE := -I$(gtest_DIR)
+
 
 #
 # MooseConfigure
@@ -249,7 +284,9 @@ endif
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
 
 # We filter out the unnecessary include dirs from the contribs
-ignore_contrib_include := $(foreach ex_dir, $(IGNORE_CONTRIB_INC), $(if $(dir $(wildcard $(FRAMEWORK_DIR)/contrib/$(ex_dir)/.)),$(shell find $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include -type d),))
+ignore_contrib_include := $(foreach ex_dir, $(IGNORE_CONTRIB_INC), \
+    $(if $(wildcard $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include), \
+        $(shell find $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include -type d),))
 moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)

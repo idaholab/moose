@@ -398,3 +398,17 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
           "energy_wall_types", _energy_wall_types[bc_ind], " wall type is currently unsupported.");
   }
 }
+
+void
+WCNSFVFluidHeatTransferPhysics::addEnergySeparatorBC()
+{
+  if (_flow_equations_physics->getHydraulicSeparators().size())
+  {
+    const std::string bc_type = "INSFVScalarFieldSeparatorBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+    params.set<std::vector<BoundaryName>>("boundary") =
+        _flow_equations_physics->getHydraulicSeparators();
+    getProblem().addFVBC(bc_type, prefix() + _fluid_temperature_name + "_separators", params);
+  }
+}

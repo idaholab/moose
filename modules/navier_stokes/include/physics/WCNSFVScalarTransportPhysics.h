@@ -46,6 +46,6 @@ private:
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
   virtual void addScalarInletBC() override;
-  virtual void addScalarWallBC() override{};
+  virtual void addScalarWallBC() override {}
   virtual void addScalarOutletBC() override;
 };

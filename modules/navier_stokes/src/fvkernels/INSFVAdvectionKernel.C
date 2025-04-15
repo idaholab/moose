@@ -94,32 +94,37 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
   if (avoidBoundary(fi))
     return true;
 
-  // We're not on a boundary, so technically we're not skipping a boundary
-  if (!onBoundary(fi))
-    return false;
+  // We get this to check if we are on a kernel boundary or not
+  const bool on_boundary = onBoundary(fi);
 
-  // Selected boundaries to force
-  for (const auto bnd_to_force : _boundaries_to_force)
-    if (fi.boundaryIDs().count(bnd_to_force))
-      return false;
+  // We are either on a kernel boundary or on an internal sideset
+  // which is handled as a boundary
+  if (on_boundary || !fi.boundaryIDs().empty())
+  {
+    // Selected boundaries to force
+    for (const auto bnd_to_force : _boundaries_to_force)
+      if (fi.boundaryIDs().count(bnd_to_force))
+        return false;
 
-  // If we have flux bcs then we do skip
-  const auto & [have_flux_bcs, flux_bcs] = _var.getFluxBCs(fi);
-  libmesh_ignore(have_flux_bcs);
-  for (const auto * const flux_bc : flux_bcs)
-    // If we have something like an average-value pressure constraint on a flow boundary, then we
-    // still want to execute this advection kernel on the boundary to ensure we're enforcing local
-    // conservation (mass in this example)
-    if (!dynamic_cast<const FVBoundaryScalarLagrangeMultiplierConstraint *>(flux_bc))
-      return true;
+    // If we have flux bcs then we do skip
+    const auto & [have_flux_bcs, flux_bcs] = _var.getFluxBCs(fi);
+    libmesh_ignore(have_flux_bcs);
+    for (const auto * const flux_bc : flux_bcs)
+      // If we have something like an average-value pressure constraint on a flow boundary, then we
+      // still want to execute this advection kernel on the boundary to ensure we're enforcing local
+      // conservation (mass in this example)
+      if (!dynamic_cast<const FVBoundaryScalarLagrangeMultiplierConstraint *>(flux_bc))
+        return true;
 
-  // If we have a flow boundary without a replacement flux BC, then we must not skip. Mass and
-  // momentum are transported via advection across boundaries
-  for (const auto bc_id : fi.boundaryIDs())
-    if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
-      return false;
+    // If we have a flow boundary without a replacement flux BC, then we must not skip. Mass and
+    // momentum are transported via advection across boundaries
+    for (const auto bc_id : fi.boundaryIDs())
+      if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
+        return false;
+  }
 
   // If not a flow boundary, then there should be no advection/flow in the normal direction, e.g. we
-  // should not contribute any advective flux
-  return true;
+  // should not contribute any advective flux. If we are on an internal face though, we still
+  // execute.
+  return on_boundary;
 }

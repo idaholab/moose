@@ -331,7 +331,7 @@ class TestHarness:
         # want to probe for configuration options
         if self.options.no_capabilities:
             checks['compiler'] = set(['ALL'])
-            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch']:
+            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch', 'mfem']:
                 checks[f'{prefix}_version'] = 'N/A'
             for var in ['library_mode', 'mesh_mode', 'unique_ids', 'vtk',
                         'tecplot', 'dof_id_bytes', 'petsc_debug', 'curl',
@@ -339,7 +339,7 @@ class TestHarness:
                         'parmetis', 'chaco', 'party', 'ptscotch',
                         'slepc', 'unique_id', 'boost', 'fparser_jit',
                         'libpng', 'libtorch', 'libtorch_version',
-                        'installation_type']:
+                        'installation_type', 'mfem']:
                 checks[var] = set(['ALL'])
         else:
             def get_option(*args, **kwargs):
@@ -367,7 +367,7 @@ class TestHarness:
             checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
 
             for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',
-                         'ptscotch', 'boost', 'curl']:
+                         'ptscotch', 'boost', 'curl', 'mfem']:
                 checks[name] = get_option(name, from_type=bool, to_set=True)
 
             checks['libpng'] = get_option('libpng', from_type=bool, to_set=True)

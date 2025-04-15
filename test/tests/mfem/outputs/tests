@@ -1,0 +1,16 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#29632'
+  [./MFEMDataCollections]
+    type = 'CheckFiles'
+    input = 'datacollections.i'
+    check_files = 'OutputData/ParaViewDataCollection/Run0/Run0.pvd
+                OutputData/ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                OutputData/VisItDataCollection/Run0_000000/mesh.000000
+                OutputData/VisItDataCollection/Run0_000001/diffused.000000
+                OutputData/VisItDataCollection/Run0_000001.mfem_root'
+    requirement = 'MOOSE shall have the ability to write out solutions to VisIt or ParaView mfem::DataCollections'
+    mfem = true
+    recover = false
+  []
+[]
