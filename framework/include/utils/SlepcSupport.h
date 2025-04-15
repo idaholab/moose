@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MultiMooseEnum.h"
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -29,6 +30,7 @@
 class EigenProblem;
 class InputParameters;
 class SolverParams;
+class MultiMooseEnum;
 
 namespace Moose
 {

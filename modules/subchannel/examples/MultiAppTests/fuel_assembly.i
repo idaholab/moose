@@ -120,6 +120,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [w_perim]
     block = subchannel
   []
+  [displacement]
+    block = subchannel
+  []
   [q_prime]
     block = fuel_pins
   []

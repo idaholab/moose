@@ -53,6 +53,11 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
           &_problem.getLinearSystem(_passive_scalar_system_numbers[system_i]));
       _systems_to_solve.push_back(_passive_scalar_systems.back());
     }
+
+  // We disable the prefix here for the time being, the segregated solvers use a different approach
+  // for setting the petsc parameters
+  for (auto & system : _systems_to_solve)
+    system->system().prefix_with_name(false);
 }
 
 void

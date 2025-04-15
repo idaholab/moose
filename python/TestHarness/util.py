@@ -14,7 +14,6 @@ from collections import OrderedDict
 import json
 import yaml
 import sys
-import pycapabilities
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -570,6 +569,7 @@ def checkCapabilities(supported: dict, requested: str, certain):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
+    import pycapabilities
     [status, message, doc] = pycapabilities.check(requested, supported)
     if status == pycapabilities.PARSE_FAIL:
         raise ValueError(f"Failed to parse capabilities='{requested}'")

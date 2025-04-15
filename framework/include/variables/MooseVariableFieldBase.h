@@ -64,7 +64,7 @@ public:
   virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) = 0;
 
   /**
-   * Filed type of this variable
+   * Field type of this variable
    */
   virtual Moose::VarFieldType fieldType() const = 0;
 
