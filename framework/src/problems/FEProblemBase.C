@@ -350,11 +350,11 @@ FEProblemBase::validParams()
       "If we catch an exception during residual/Jacobian evaluaton for which we don't have "
       "specific handling, immediately error instead of allowing the time step to be cut");
 
-  params.addParam<bool>(
-      "prefer_hash_table_matrix_assembly",
-      false,
-      "Whether to preallocate matrix memory. If this is false, then no sparsity pattern will be "
-      "precomputed and instead a hash table will be used for matrix assembly");
+  params.addParam<bool>("use_hash_table_matrix_assembly",
+                        false,
+                        "Whether to assemble matrices using hash tables instead of preallocating "
+                        "matrix memory. This can be a good option if the sparsity pattern changes "
+                        "throughout the course of the simulation.");
   params.addParam<bool>(
       "restore_original_nonzero_pattern",
       true,
@@ -372,7 +372,7 @@ FEProblemBase::validParams()
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
                               "ignore_zeros_in_jacobian identify_variable_groups_in_nl "
-                              "prefer_hash_table_matrix_assembly restore_original_nonzero_pattern",
+                              "use_hash_table_matrix_assembly restore_original_nonzero_pattern",
                               "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
