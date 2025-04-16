@@ -1,7 +1,7 @@
 [Tests]
   [dirichlet]
-    issues = '#18086'
-    design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
+    issues = '#18086 #29709'
+    design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md WCNSFVMomentumFluxDirichletBC.md'
     requirement = 'The system shall be able to use Dirichlet boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
     [using_velocity]
       type = 'Exodiff'
@@ -225,6 +225,12 @@
       cli_args = 'FVBCs/inlet_scalar/mdot_pp=0'
       expect_err = 'If setting the scalar flux directly, no need for inlet velocity, mass flow or scalar '
       detail = 'redundant information is provided for setting the inlet scalar flux'
+    []
+    [variable_density_channel_test]
+      type = CSVDiff
+      input = 'variable_deansity_channel_test.i'
+      csvdiff = 'variable_deansity_channel_test_out.csv'
+      detail = 'using a functor material automatically defined by the physics syntax to combine the thermal diffusivities.'
     []
   []
 []
