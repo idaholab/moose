@@ -263,6 +263,7 @@
     type = DirectCentralDifference
     mass_matrix_tag = 'mass'
     use_constant_mass = true
+    second_order_vars = 'disp_x disp_y disp_z'
   []
 []
 [Outputs]

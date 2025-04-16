@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
+#include "libmesh/string_to_enum.h"
 
 // Forward declarations
 namespace libMesh
@@ -42,6 +43,19 @@ public:
   {
     mooseError("NOT SUPPORTED");
   }
+  virtual void init() override;
+
+  enum TimeOrder
+  {
+    FIRST,
+    SECOND
+  };
+
+  /**
+   * Retrieve the order of the highest time derivative of a variable.
+   * @return Returns the time order enum of this variable.
+   */
+  virtual TimeOrder findVariableTimeOrder(unsigned int var_num) const;
 
 protected:
   virtual TagID massMatrixTagID() const override;
@@ -52,6 +66,19 @@ protected:
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
+
+  // Variables that forward euler time integration will be used
+  std::unordered_set<unsigned int> & _vars_first;
+
+  // local dofs that will have forward euler time integration
+  std::vector<dof_id_type> & _local_first_order_indicies;
+
+  // Variables that central difference time integration will be used
+  std::unordered_set<unsigned int> & _vars_second;
+
+  // local dofs that will have central difference time integration
+  std::vector<dof_id_type> & _local_second_order_indicies;
+
   /**
    * Helper function that actually does the math for computing the time derivative
    */

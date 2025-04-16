@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "DirectCentralDifference.h"
 #include "NodalBC.h"
 #include "libmesh/numeric_vector.h"
 
@@ -30,7 +31,7 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
-
+  virtual void timestepSetup() override;
   /**
    * Compute the value of the DirichletBC at the current quadrature point
    */
@@ -41,4 +42,10 @@ protected:
 
   const Real & _u_old;
   const Real & _u_dot_old;
+
+  /// explicit time integrator
+  const DirectCentralDifference * _exp_integrator;
+
+  /// variable time order need for computing BC
+  DirectCentralDifference::TimeOrder _var_time_order;
 };

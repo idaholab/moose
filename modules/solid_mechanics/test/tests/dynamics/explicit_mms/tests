@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#30335'
+  design = 'Central.md'
+  [exp_time_int]
+    requirement = "The mechanics system shall predict solutions for explicit
+    "time integration for"
+    [thermo_mech]
+      type = Exodiff
+      input = mms_direct_combined.i
+      exodiff = mms_direct_combined_out.e
+      detail = "systems with both first and second order time derivatives"
+    []
+    [2nd_order_w_ics]
+      type = Exodiff
+      input = mms_direct_second_order_with_ic.i
+      exodiff = mms_direct_second_order_with_ic_out.e
+      detail = "for systems with initial velocity conditions"
+    []
+  []
+  [failures]
+    requirement = "The explicit time integrator will error when not all
+    nonlinear variables are specified because "
+    [forgot_vars_second]
+        type = RunException
+        input = mms_direct_combined.i
+        cli_args = "Executioner/TimeIntegrator/second_order_vars=''"
+        expect_err = "Not all nonlinear variables have their order specified."
+        detail = "second order variables are missing"
+    []
+    [forgot_vars_first]
+        type = RunException
+        input = mms_direct_combined.i
+        cli_args = "Executioner/TimeIntegrator/first_order_vars=''"
+        expect_err = "Not all nonlinear variables have their order specified."
+        detail = "first order variables are missing"
+    []
+  []
+[]

@@ -7,8 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "DirectCentralDifference.h"
 #include "DirectDirichletBCBase.h"
+#include "MooseError.h"
 #include "NonlinearSystemBase.h"
+#include <iostream>
+#include <ostream>
 
 InputParameters
 DirectDirichletBCBase::validParams()
@@ -21,8 +25,12 @@ DirectDirichletBCBase::DirectDirichletBCBase(const InputParameters & parameters)
   : NodalBC(parameters),
     _mass_diag(_sys.getVector("mass_matrix_diag_inverted")),
     _u_old(_var.nodalValueOld()),
-    _u_dot_old(_var.nodalValueDotOld())
+    _u_dot_old(_var.nodalValueDotOld()),
+    _exp_integrator(
+        dynamic_cast<const DirectCentralDifference *>(&_sys.getTimeIntegrator(_var.number())))
 {
+  if (!_exp_integrator)
+    mooseError("Time integrator for the variable is not of the right type.");
 }
 
 Real
@@ -30,12 +38,27 @@ DirectDirichletBCBase::computeQpResidual()
 {
   // Get dof for current var
   const auto dofnum = _variable->nodalDofIndex();
+  Real resid = 0;
+  // Compute residual to enforce BC based on time order
+  switch (_var_time_order)
+  {
+    case DirectCentralDifference::FIRST:
+      resid = (computeQpValue() - _u_old) / _dt;
+      resid /= -_mass_diag(dofnum);
+      break;
 
-  // Compute residual to enforce BC
-  // This is the force required to enforce the BC in a central difference scheme
-  Real avg_dt = (_dt + _dt_old) / 2;
-  Real resid = (computeQpValue() - _u_old) / (avg_dt * _dt) - (_u_dot_old) / avg_dt;
-  resid /= -_mass_diag(dofnum);
-
+    case DirectCentralDifference::SECOND:
+      Real avg_dt = (_dt + _dt_old) / 2;
+      resid = (computeQpValue() - _u_old) / (avg_dt * _dt) - (_u_dot_old) / avg_dt;
+      resid /= -_mass_diag(dofnum);
+      break;
+  }
   return resid;
+}
+
+void
+DirectDirichletBCBase::timestepSetup()
+{
+  // Now is the point that the time integrator has the variable time orders setup
+  _var_time_order = _exp_integrator->findVariableTimeOrder(_var.number());
 }

@@ -345,6 +345,7 @@
   [TimeIntegrator]
     type = DirectCentralDifference
     mass_matrix_tag = 'mass'
+    second_order_vars = 'disp_x disp_y disp_z'
   []
 []
 
