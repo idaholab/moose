@@ -41,12 +41,9 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::validParams()
       "f", "f > 0", "The multiplying factor, required for kozeny_carman_fd2");
   params.addRangeCheckedParam<Real>(
       "d", "d > 0", "The grain diameter, required for kozeny_carman_fd2");
-  params.addClassDescription(
-      "This Material calculates the permeability tensor from a form of the Kozeny-Carman equation, "
-      "k = k_ijk * A * phi^n / (1 - phi)^m, where k_ijk is a tensor providing the anisotropy, phi "
-      "is porosity, n and m are positive scalar constants and A is given in one of the following "
-      "forms: A = k0 * (1 - phi0)^m / phi0^n (where k0 and phi0 are a reference permeability and "
-      "porosity) or A = f * d^2 (where f is a scalar constant and d is grain diameter.");
+  params.addClassDescription("This Material calculates the permeability tensor from a form of the "
+                             "Kozeny-Carman equation based on the spatially constant initial "
+                             "permeability and porosity or grain size.");
   return params;
 }
 

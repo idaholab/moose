@@ -22,9 +22,11 @@ PorousFlowPermeabilityKozenyCarmanBaseTempl<is_ad>::validParams()
   params.addRequiredRangeCheckedParam<Real>("n", "n >= 0", "Porosity exponent");
   params.addRequiredRangeCheckedParam<Real>("m", "m >= 0", "(1-porosity) exponent");
   params.addClassDescription(
-      "Base class for material that calculates the permeability tensor from a form of the Kozeny-Carman equation, "
+      "Base class for material that calculates the permeability tensor from a form of the "
+      "Kozeny-Carman equation, "
       "k = k_ijk * A * phi^n / (1 - phi)^m, where k_ijk is a tensor providing the anisotropy, phi "
-      "is porosity, n and m are positive scalar constants.  Method for computing A is given in the derived classes.");
+      "is porosity, n and m are positive scalar constants.  Method for computing A is given in the "
+      "derived classes.");
   return params;
 }
 

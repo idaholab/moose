@@ -17,21 +17,16 @@ InputParameters
 PorousFlowPermeabilityKozenyCarmanVariableTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowPermeabilityKozenyCarmanBase::validParams();
-  params.addRequiredCoupledVar(
-      "A", "Variable used in permeability function k = k_ijk * A * phi^n / (1 - phi)^m.");
-  params.addClassDescription(
-      "This Material calculates the permeability tensor from a form of the Kozeny-Carman equation, "
-      "k = k_ijk * A * phi^n / (1 - phi)^m, where k_ijk is a tensor providing the anisotropy, phi "
-      "is porosity, n and m are positive scalar constants and A should be a time independent "
-      "AuxVariable.");
+  params.addRequiredCoupledVar("A", "Variable used in permeability function.");
+  params.addClassDescription("This Material calculates the permeability tensor from the "
+                             "Kozeny-Carman equation for spatially varying initial properties.");
   return params;
 }
 
 template <bool is_ad>
-PorousFlowPermeabilityKozenyCarmanVariableTempl<is_ad>::PorousFlowPermeabilityKozenyCarmanVariableTempl(
-    const InputParameters & parameters)
-  : PorousFlowPermeabilityKozenyCarmanBaseTempl<is_ad>(parameters),
-    _A(coupledValue("A"))
+PorousFlowPermeabilityKozenyCarmanVariableTempl<
+    is_ad>::PorousFlowPermeabilityKozenyCarmanVariableTempl(const InputParameters & parameters)
+  : PorousFlowPermeabilityKozenyCarmanBaseTempl<is_ad>(parameters), _A(coupledValue("A"))
 {
 }
 

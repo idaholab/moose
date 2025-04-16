@@ -39,7 +39,7 @@
     threading = '!pthreads'
     requirement = 'The system shall be able to calculate permeability as a Kozeny-Carman function of porosity, where permeability is defined via setting a spatially varying reference value of permeability from an auxvariable.'
     issues = '#30339'
-    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarmanVar.md'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarmanVariable.md'
   []
   [PermFromPoro03]
     type = 'CSVDiff'

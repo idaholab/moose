@@ -39,5 +39,7 @@ protected:
   usingPorousFlowPermeabilityBaseMembers;
 };
 
-typedef PorousFlowPermeabilityKozenyCarmanVariableTempl<false> PorousFlowPermeabilityKozenyCarmanVariable;
-typedef PorousFlowPermeabilityKozenyCarmanVariableTempl<true> ADPorousFlowPermeabilityKozenyCarmanVariable;
+typedef PorousFlowPermeabilityKozenyCarmanVariableTempl<false>
+    PorousFlowPermeabilityKozenyCarmanVariable;
+typedef PorousFlowPermeabilityKozenyCarmanVariableTempl<true>
+    ADPorousFlowPermeabilityKozenyCarmanVariable;
