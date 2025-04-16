@@ -47,8 +47,6 @@ class SinglePhaseFluidProperties;
 
 /**
  * Class for fluid properties of an arbitrary vapor mixture
- *
- *
  */
 class IdealRealGasMixtureFluidProperties : public VaporMixtureFluidProperties, public NaNInterface
 {

@@ -52,9 +52,14 @@ TwoPhaseNCGPartialPressureFluidProperties::TwoPhaseNCGPartialPressureFluidProper
 Real
 TwoPhaseNCGPartialPressureFluidProperties::x_sat_ncg_from_p_T(Real p, Real T) const
 {
-  const auto molar_fraction_ncg = (p - _fp_2phase->p_sat(T)) / p;
-  const std::vector<Real> molar_fractions = {1.0 - molar_fraction_ncg, molar_fraction_ncg};
-  const auto mass_fractions =
-      _fp_vapor_mixture->massFractionsFromMolarFractions(molar_fractions, _molar_masses);
-  return mass_fractions[1];
+  if (T <= _fp_2phase->T_triple())
+    return 1.0;
+  else
+  {
+    const auto molar_fraction_ncg = (p - _fp_2phase->p_sat(T)) / p;
+    const std::vector<Real> molar_fractions = {1.0 - molar_fraction_ncg, molar_fraction_ncg};
+    const auto mass_fractions =
+        _fp_vapor_mixture->massFractionsFromMolarFractions(molar_fractions, _molar_masses);
+    return mass_fractions[1];
+  }
 }

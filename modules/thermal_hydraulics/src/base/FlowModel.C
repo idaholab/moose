@@ -11,6 +11,7 @@
 #include "Component.h"
 #include "FlowChannelBase.h"
 #include "ConstantFunction.h"
+#include "THMNames.h"
 
 using namespace libMesh;
 
@@ -28,14 +29,14 @@ FlowModel::validParams()
   return params;
 }
 
-const std::string FlowModel::AREA = "A";
-const std::string FlowModel::AREA_LINEAR = "A_linear";
-const std::string FlowModel::HEAT_FLUX_WALL = "q_wall";
-const std::string FlowModel::HEAT_FLUX_PERIMETER = "P_hf";
-const std::string FlowModel::NUSSELT_NUMBER = "Nu";
-const std::string FlowModel::TEMPERATURE_WALL = "T_wall";
-const std::string FlowModel::UNITY = "unity";
-const std::string FlowModel::DIRECTION = "direction";
+const std::string FlowModel::AREA = THM::AREA;
+const std::string FlowModel::AREA_LINEAR = THM::AREA_LINEAR;
+const std::string FlowModel::HEAT_FLUX_WALL = THM::HEAT_FLUX_WALL;
+const std::string FlowModel::HEAT_FLUX_PERIMETER = THM::HEAT_FLUX_PERIMETER;
+const std::string FlowModel::NUSSELT_NUMBER = THM::NUSSELT_NUMBER;
+const std::string FlowModel::TEMPERATURE_WALL = THM::TEMPERATURE_WALL;
+const std::string FlowModel::UNITY = THM::UNITY;
+const std::string FlowModel::DIRECTION = THM::DIRECTION;
 
 FlowModel::FlowModel(const InputParameters & params)
   : MooseObject(params),
