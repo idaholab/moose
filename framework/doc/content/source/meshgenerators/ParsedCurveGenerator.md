@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `ParsedCurveGenerator` object generates a 3D curve mesh composed of EDGE2 elements which connect the series of points given by $[x(t),~y(t),~z(t)]$, where the range of t is specified by the user. The curve to be generated is described by the following equations,
+The `ParsedCurveGenerator` object generates a 3D curve mesh composed of EDGE2 or EDGE3 elements (selected by [!param](/Mesh/ParsedCurveGenerator/edge_element_type)) which connect the series of points given by $[x(t),~y(t),~z(t)]$, where the range of t is specified by the user. The curve to be generated is described by the following equations,
 
 !equation id=xyz_formulae
 \begin{cases}
