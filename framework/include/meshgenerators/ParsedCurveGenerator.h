@@ -68,6 +68,8 @@ protected:
   const unsigned int _max_oversample_number_factor;
   /// vector of the names of the boundaries at the ends of the parsed curve
   std::vector<BoundaryName> _node_set_boundaries;
+  /// order of the EDGE elements to be generated
+  const unsigned int _order;
   /// t values that are sampled for curve points
   std::vector<Real> _t_space;
   /// cumulative distances of the curve points from the starting ppint

@@ -1,12 +1,21 @@
 [Tests]
   design = 'meshgenerators/ParsedCurveGenerator.md'
-  issues = '#22848'
+  issues = '#22848 #30337'
   [open_curve]
     type = 'Exodiff'
     input = 'parsed_curve_open.i'
     exodiff = 'parsed_curve_open_in.e'
     cli_args = '--mesh-only'
     requirement = 'The system shall generate a 2D open curve mesh.'
+    recover = false
+  []
+  [open_curve_edge3]
+    type = 'Exodiff'
+    input = 'parsed_curve_open.i'
+    exodiff = 'parsed_curve_open_edge3_in.e'
+    cli_args = '--mesh-only parsed_curve_open_edge3_in.e
+                Mesh/pcg/edge_element_type=EDGE3'
+    requirement = 'The system shall generate a 2D open curve mesh with quadratic elements.'
     recover = false
   []
   [open_curve_3d]
@@ -33,6 +42,15 @@
     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident.'
     recover = false
   []
+  [closed_curve_edge3]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_edge3_in.e'
+    cli_args = '--mesh-only parsed_curve_closed_edge3_in.e
+                Mesh/pcg/edge_element_type=EDGE3'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident and with quadratic elements.'
+    recover = false
+  []
   [forced_closed_curve]
     type = 'Exodiff'
     input = 'parsed_curve_closed.i'
@@ -54,6 +72,18 @@
     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple elements.'
     recover = false
   []
+  [forced_closed_curve_multi_segments_edge3]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_forced_ms_edge3_in.e'
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
+                Mesh/pcg/nums_segments=10
+                Mesh/pcg/forced_closing_num_segments=5
+                Mesh/pcg/edge_element_type=EDGE3
+                --mesh-only parsed_curve_closed_forced_ms_edge3_in.e'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple quadratic elements.'
+    recover = false
+  []
   [xy_delaunay_curve]
     type = 'Exodiff'
     input = 'xy_curve.i'
@@ -62,6 +92,20 @@
     requirement = 'The system shall generate closed 2D curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
     recover = false
   []
+  # Won't work until the libmesh fix is in place
+  # [xy_delaunay_curve_edge3]
+  #   type = 'Exodiff'
+  #   input = 'xy_curve.i'
+  #   exodiff = 'xy_curve_edge3_in.e'
+  #   cli_args = '--mesh-only xy_curve_edge3_in.e
+  #               Mesh/pcg/edge_element_type=EDGE3
+  #               Mesh/hole1/edge_element_type=EDGE3
+  #               Mesh/hole2/edge_element_type=EDGE3
+  #               Mesh/xydg/tri_element_type=TRI6
+  #               Mesh/xydg/add_nodes_per_boundary_segment=0'
+  #   requirement = 'The system shall generate closed 2D quadratic curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
+  #   recover = false
+  # []
   [err_crossed_curve]
     type = 'RunException'
     input = 'err_cross.i'
