@@ -1,17 +1,26 @@
 # Testing permeability from porosity
 # Trivial test, checking calculated permeability is correct
 # k = k_anisotropic * k0 * (1-phi0)^m/phi0^n * phi^n/(1-phi)^m
+# Block 1 has k0 2x that of block 0 so permeability is twice has high in block 1
 
 [Mesh]
-  type = GeneratedMesh
+[gmg]
+  type = GeneratedMeshGenerator
   dim = 1
   nx = 3
   xmin = 0
   xmax = 3
 []
+[top_two_elements]
+  type = SubdomainBoundingBoxGenerator
+  input = gmg
+  bottom_left = '1.1 0 0'
+  top_right = '3.1 0 0'
+  block_id = 1
+[]
+[]
 
 [GlobalParams]
-  block = 0
   PorousFlowDictator = dictator
 []
 
@@ -154,7 +163,7 @@
 []
 
 [Materials]
-  [permeability]
+  [permeability_0]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
     poroperm_function = kozeny_carman_phi0
@@ -162,6 +171,17 @@
     phi0 = 0.05
     m = 2
     n = 7
+    block = 0
+  []
+  [permeability_1]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_phi0
+    k0 = 2e-10
+    phi0 = 0.05
+    m = 2
+    n = 7
+    block = 1
   []
   [temperature]
     type = PorousFlowTemperature
