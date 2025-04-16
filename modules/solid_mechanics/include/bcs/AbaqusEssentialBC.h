@@ -35,5 +35,6 @@ protected:
   const Abaqus::AbaqusID _abaqus_var_id;
 
   /// BC data for the current variable
+  const std::unordered_map<Abaqus::Index, Real> * _node_value_map_previous;
   const std::unordered_map<Abaqus::Index, Real> & _node_value_map;
 };
