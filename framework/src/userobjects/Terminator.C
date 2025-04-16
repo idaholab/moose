@@ -49,6 +49,10 @@ Terminator::validParams()
       errorLevel,
       "The error level for the message. A level of ERROR will always lead to a hard "
       "termination of the entire simulation.");
+  params.addParam<unsigned int>("skip_evals",
+                                0,
+                                "Number of evaluations to skip, useful for avoiding"
+                                "errors due to initialization problems");
   return params;
 }
 
@@ -59,7 +63,8 @@ Terminator::Terminator(const InputParameters & parameters)
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),
-    _fp()
+    _fp(),
+    _skip_evals(getParam<unsigned int>("skip_evals"))
 {
   // sanity check the parameters
   if (_msg_type == MessageType::ERROR && _fail_mode != FailMode::HARD)
@@ -87,6 +92,7 @@ Terminator::Terminator(const InputParameters & parameters)
     _pp_values[i] = &getPostprocessorValueByName(_pp_names[i]);
 
   _params.resize(_pp_num);
+  _n_evals = 0;
 }
 
 void
@@ -150,8 +156,9 @@ Terminator::execute()
   for (unsigned int i = 0; i < _pp_num; ++i)
     _params[i] = *(_pp_values[i]);
 
+  ++_n_evals;
   // request termination of the run or timestep in case the expression evaluates to true
-  if (_fp.Eval(_params.data()) != 0)
+  if ((_fp.Eval(_params.data()) != 0) && (_skip_evals < _n_evals))
   {
     handleMessage();
     if (_fail_mode == FailMode::HARD)

@@ -9,6 +9,17 @@
     requirement = "The system shall terminate the execution of a solve based on post-processing "
                   "calculations performed within the simulation."
   []
+  [terminator_skip_evals]
+    type = 'Exodiff'
+    input = 'terminator.i'
+    exodiff = 'terminator_out_long.e'
+    issues = '#30343'
+    cli_args = "UserObjects/arnold/skip_evals=4
+                Outputs/file_base=terminator_out_long"
+    requirement = "The system shall terminate the execution of a solve based on post-processing "
+                  "calculations performed within the simulation, and skip termination if user "
+                  "specified override criteria are met."
+  []
   [terminator_soft_step_fail]
     type = 'CSVDiff'
     input = 'terminator_soft.i'
