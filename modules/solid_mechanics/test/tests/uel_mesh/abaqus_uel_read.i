@@ -91,14 +91,26 @@
   []
 []
 
+[VectorPostprocessors]
+  [statev]
+    type = AbaqusUELStateVariables
+    uel = uel
+    split = 9
+    column_names = 'not_used SSE S11 S22 S33 S12 E11 E22 E33 E12'
+  []
+[]
+
 [Executioner]
   type = Transient
   solve_type = NEWTON
   line_search = NONE
   dt = 0.1
   end_time = 1.0
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
   exodus = true
+  csv = true
+  print_linear_residuals = false
 []
