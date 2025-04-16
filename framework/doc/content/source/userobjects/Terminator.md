@@ -26,6 +26,10 @@ The message output by the `Terminator` when the condition for termination is met
 - an information message, to indicate that while the `Terminator` is acting on the solve, the conditions
   met are expected or normal. This can be used to make the `Terminator` stop the simulation but accept the result.
 
+An additional constraint may be added with the [!param](/UserObjects/Terminator/skip_evals) parameter,
+which temporarily disables the terminator for the first `n` evaluations (usually the same as timesteps,
+but when executed on `INITIAL`, this will change the count).
+
 
 ## Example input syntax
 

@@ -74,6 +74,9 @@ protected:
 
   /// Fparser parameter buffer
   std::vector<Real> _params;
+
+  unsigned int _n_evals;
+  const unsigned int _skip_evals;
 };
 
 #endif // LIBMESH_HAVE_FPARSER
