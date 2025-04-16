@@ -66,7 +66,8 @@ void
 LoadModelDataAction<T>::load(const T & object)
 {
   // Create the object that will load in data
-  RestartableDataReader reader(_app, _app.getRestartableDataMap(object.modelMetaDataName()));
+  RestartableDataReader reader(
+      _app, _app.getRestartableDataMap(object.modelMetaDataName()), _app.forceRestart());
   reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
 
   // Read the supplied file

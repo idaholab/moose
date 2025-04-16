@@ -1107,6 +1107,12 @@ public:
   static void addAppParam(InputParameters & params);
   static void addInputParam(InputParameters & params);
 
+  /**
+   * Whether or not we are forcefully restarting (allowing the load of potentially
+   * incompatibie checkpoints); used within RestartableDataReader
+   */
+  bool forceRestart() const { return _force_restart; }
+
 protected:
   /**
    * Helper method for dynamic loading of objects
@@ -1303,6 +1309,9 @@ protected:
 
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _use_split;
+
+  /// Whether or not we are forcefully attempting to load checkpoints (--force-restart)
+  const bool _force_restart;
 
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;
