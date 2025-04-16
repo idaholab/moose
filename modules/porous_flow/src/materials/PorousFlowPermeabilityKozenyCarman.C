@@ -16,7 +16,7 @@ template <bool is_ad>
 InputParameters
 PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowPermeabilityBase::validParams();
+  InputParameters params = PorousFlowPermeabilityKozenyCarmanBase::validParams();
   MooseEnum poroperm_function("kozeny_carman_fd2=0 kozeny_carman_phi0=1", "kozeny_carman_fd2");
   params.addParam<MooseEnum>(
       "poroperm_function",
@@ -41,8 +41,6 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::validParams()
       "f", "f > 0", "The multiplying factor, required for kozeny_carman_fd2");
   params.addRangeCheckedParam<Real>(
       "d", "d > 0", "The grain diameter, required for kozeny_carman_fd2");
-  params.addRequiredRangeCheckedParam<Real>("n", "n >= 0", "Porosity exponent");
-  params.addRequiredRangeCheckedParam<Real>("m", "m >= 0", "(1-porosity) exponent");
   params.addClassDescription(
       "This Material calculates the permeability tensor from a form of the Kozeny-Carman equation, "
       "k = k_ijk * A * phi^n / (1 - phi)^m, where k_ijk is a tensor providing the anisotropy, phi "
@@ -55,23 +53,11 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::validParams()
 template <bool is_ad>
 PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::PorousFlowPermeabilityKozenyCarmanTempl(
     const InputParameters & parameters)
-  : PorousFlowPermeabilityBaseTempl<is_ad>(parameters),
+  : PorousFlowPermeabilityKozenyCarmanBaseTempl<is_ad>(parameters),
     _k0(parameters.isParamValid("k0") ? this->template getParam<Real>("k0") : -1),
     _phi0(parameters.isParamValid("phi0") ? this->template getParam<Real>("phi0") : -1),
     _f(parameters.isParamValid("f") ? this->template getParam<Real>("f") : -1),
     _d(parameters.isParamValid("d") ? this->template getParam<Real>("d") : -1),
-    _m(this->template getParam<Real>("m")),
-    _n(this->template getParam<Real>("n")),
-    _k_anisotropy(parameters.isParamValid("k_anisotropy")
-                      ? this->template getParam<RealTensorValue>("k_anisotropy")
-                      : RealTensorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)),
-    _porosity_qp(this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity_qp")),
-    _dporosity_qp_dvar(is_ad ? nullptr
-                             : &this->template getMaterialProperty<std::vector<Real>>(
-                                   "dPorousFlow_porosity_qp_dvar")),
-    _dporosity_qp_dgradvar(is_ad ? nullptr
-                                 : &this->template getMaterialProperty<std::vector<RealGradient>>(
-                                       "dPorousFlow_porosity_qp_dgradvar")),
     _poroperm_function(this->template getParam<MooseEnum>("poroperm_function")
                            .template getEnum<PoropermFunction>())
 {
@@ -88,38 +74,8 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::PorousFlowPermeabilityKozenyCarm
       if (!(parameters.isParamValid("k0") && parameters.isParamValid("phi0")))
         mooseError("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in "
                    "PorousFlowPermeabilityKozenyCarman");
-      _A = _k0 * std::pow(1.0 - _phi0, _m) / std::pow(_phi0, _n);
+      _A = _k0 * std::pow(1.0 - _phi0, this->_m) / std::pow(_phi0, this->_n);
       break;
-  }
-
-  // Make sure that derivatives are included in the Jacobian calculations
-  _dictator.usePermDerivs(true);
-}
-
-template <bool is_ad>
-void
-PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::computeQpProperties()
-{
-  Real A = computeA();
-  _permeability_qp[_qp] =
-      _k_anisotropy * A * std::pow(_porosity_qp[_qp], _n) / std::pow(1.0 - _porosity_qp[_qp], _m);
-
-  if constexpr (!is_ad)
-  {
-    (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
-    for (unsigned int v = 0; v < _num_var; ++v)
-      (*_dpermeability_qp_dvar)[_qp][v] = (*_dporosity_qp_dvar)[_qp][v] * _permeability_qp[_qp] *
-                                          (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
-
-    (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
-    for (const auto i : make_range(Moose::dim))
-    {
-      (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
-      for (unsigned int v = 0; v < _num_var; ++v)
-        (*_dpermeability_qp_dgradvar)[_qp][i][v] =
-            (*_dporosity_qp_dgradvar)[_qp][v](i) * _permeability_qp[_qp] *
-            (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
-    }
   }
 }
 
