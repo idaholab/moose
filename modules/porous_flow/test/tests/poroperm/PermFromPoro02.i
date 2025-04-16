@@ -1,7 +1,7 @@
 # Testing permeability from porosity
 # Trivial test, checking calculated permeability is correct
 # k = k_anisotropic * k0 * (1-phi0)^m/phi0^n * phi^n/(1-phi)^m
-# Block 1 has k0 2x that of block 0 so permeability is twice has high in block 1
+# Block 1 k0 twice that of block 0 so permeability is twice has high in block 1
 
 [Mesh]
 [gmg]
@@ -162,7 +162,24 @@
   []
 []
 
+[AuxVariables]
+  [A_var]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  [A]
+    type = ParsedAux
+    variable = A_var
+    expression = 'if(x<1.1,0.11552,0.23104)'
+    use_xyzt = true
+  []
+[]
+
 [Materials]
+  inactive = 'permeability_all'
   [permeability_0]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
@@ -182,6 +199,13 @@
     m = 2
     n = 7
     block = 1
+  []
+  [permeability_all]
+    type = PorousFlowPermeabilityKozenyCarmanVariable
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    m = 2
+    n = 7
+    A = A_var
   []
   [temperature]
     type = PorousFlowTemperature
