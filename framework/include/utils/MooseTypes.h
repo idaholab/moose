@@ -657,6 +657,8 @@ using GenericRankFourTensor = Moose::GenericType<RankFourTensor, is_ad>;
 template <bool is_ad>
 using GenericVariableValue = Moose::GenericType<VariableValue, is_ad>;
 template <bool is_ad>
+using GenericVectorVariableValue = Moose::GenericType<VectorVariableValue, is_ad>;
+template <bool is_ad>
 using GenericVariableGradient = Moose::GenericType<VariableGradient, is_ad>;
 template <bool is_ad>
 using GenericVariableSecond = Moose::GenericType<VariableSecond, is_ad>;
