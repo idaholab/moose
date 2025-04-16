@@ -100,8 +100,9 @@ template <bool is_ad>
 void
 PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::computeQpProperties()
 {
+  Real A = computeA();
   _permeability_qp[_qp] =
-      _k_anisotropy * _A * std::pow(_porosity_qp[_qp], _n) / std::pow(1.0 - _porosity_qp[_qp], _m);
+      _k_anisotropy * A * std::pow(_porosity_qp[_qp], _n) / std::pow(1.0 - _porosity_qp[_qp], _m);
 
   if constexpr (!is_ad)
   {
@@ -120,6 +121,13 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::computeQpProperties()
             (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
     }
   }
+}
+
+template <bool is_ad>
+Real
+PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::computeA() const
+{
+  return _A;
 }
 
 template class PorousFlowPermeabilityKozenyCarmanTempl<false>;

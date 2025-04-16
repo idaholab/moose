@@ -36,6 +36,8 @@ public:
 protected:
   void computeQpProperties() override;
 
+  Real computeA() const;
+
   /// Reference scalar permeability in A = k0 * (1 - phi0)^m / phi0^n
   const Real _k0;
 
