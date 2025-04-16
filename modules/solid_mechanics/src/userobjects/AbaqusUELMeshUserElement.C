@@ -217,7 +217,7 @@ AbaqusUELMeshUserElement::execute()
     const auto nvar_aux = _aux_variables.size();
     all_aux_var_dof_indices.resize(nnode * nvar_aux);
     all_aux_var_dof_increments.resize(nnode * nvar_aux);
-    std::cout << "nvar_aux = " << nvar_aux << " nnode=" << nnode << '\n';
+    // std::cout << "nvar_aux = " << nvar_aux << " nnode=" << nnode << '\n';
 
     // get the list of dofs, looping over nodes first
     for (const auto i : make_range(nnode))
@@ -321,8 +321,8 @@ AbaqusUELMeshUserElement::execute()
     Real rdummy = 0;
     int idummy = 0;
 
-    std::cout << aux_var_values_to_uel.size() << ": " << Moose::stringify(aux_var_values_to_uel)
-              << '\n';
+    // std::cout << aux_var_values_to_uel.size() << ": " << Moose::stringify(aux_var_values_to_uel)
+    //           << '\n';
 
     // make sure stateful data storage is sized correctly
     auto & current_state = _statev[_statev_index_current][jelem];
