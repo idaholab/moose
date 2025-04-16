@@ -88,6 +88,14 @@ public:
 
   const std::array<Real, 8> * getUELEnergy(dof_id_type element_id) const;
 
+  std::pair<std::size_t, const std::unordered_map<Abaqus::AbaqusID, std::vector<Real>> &>
+  getStateVars() const
+  {
+    return {_nstatev, _statev[_statev_index_current]};
+  }
+  const std::vector<Abaqus::Index> & getActiveElements() const { return _active_elements; }
+  const std::vector<Abaqus::Element> & getElements() const { return _uel_elements; }
+
 protected:
   /// setup the range of elements this object operates on
   void setupElementSet();
