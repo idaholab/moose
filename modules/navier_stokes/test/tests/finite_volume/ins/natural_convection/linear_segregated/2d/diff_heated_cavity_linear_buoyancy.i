@@ -6,6 +6,7 @@ mu = 1.
 k_cond = 38.0
 cp = 640.
 alpha_b = 3.26e-4
+T_0 = 875.0
 
 walls = 'right left top bottom'
 
@@ -230,7 +231,7 @@ walls = 'right left top bottom'
     type = ParsedFunctorMaterial
     property_name = 'rho'
     functor_names = 'T_fluid'
-    expression = '${rho} - ${alpha_b}*T_fluid '
+    expression = '${rho}*(1-${alpha_b}*(T_fluid-${T_0})) '
   []
 []
 
@@ -273,6 +274,8 @@ walls = 'right left top bottom'
 
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
+
+  continue_on_max_its = true
 []
 
 ################################################################################
