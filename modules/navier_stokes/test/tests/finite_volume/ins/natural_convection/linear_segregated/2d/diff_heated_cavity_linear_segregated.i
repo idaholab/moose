@@ -34,8 +34,8 @@ walls = 'right left top bottom'
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 600
-    ny = 600
+    nx = 30
+    ny = 30
   []
 []
 
