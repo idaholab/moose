@@ -1,7 +1,6 @@
 # HDG Kernels
 
-HDG kernels and their boundary condition counterparts,
-[HDGBCs/index.md], are advanced systems that should only be developed by
+HDG kernels are an advanced systems that should only be developed by
 users with a fair amount of finite element experience. For background on
 hybridization, we encourage the user to read [!citep](cockburn2009unified) which
 presents a unified framework for considering hybridization of discontinuous
@@ -48,8 +47,7 @@ that outlined in [!citep](rhebergen2017analysis), may be a good choice.
 HDG kernels derive from [Kernels](Kernels/index.md). However, the methods
 that must be overridden are quite different. These are `onElement` and
 `onInternalSide`, which implement integrations in the volume of elements and on
-internal faces respectively. External boundary condition integration occurs in
-[HDGBCs/index.md].
+internal faces respectively. External boundary condition integration occurs with standard boundary condition classes, see [syntax/BCs/index.md].
 
 Within `onElement` and `onInternalSide`, hybridized kernel developers have eight
 different data structures they need to populate. Six are inherited from the `HDGData`
