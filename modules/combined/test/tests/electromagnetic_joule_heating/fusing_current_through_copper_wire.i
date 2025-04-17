@@ -7,7 +7,7 @@
 []
 
 [Variables]
-  # The real and complex components of the magnetic vector 
+  # The real and complex components of the magnetic vector
   # potential in the frequency domain
   [A_real]
     family = NEDELEC_ONE
@@ -123,7 +123,7 @@
     order = FIRST
   []
 
-  # The electric field profile determined from 
+  # The electric field profile determined from
   # the magnetic vector potential
   [E_real]
     family = NEDELEC_ONE
@@ -173,7 +173,7 @@
     execute_on = 'INITIAL LINEAR TIMESTEP_END'
   []
 
-  # The magnitude of electric field profile determined 
+  # The magnitude of electric field profile determined
   # from the magnetic vector potential using:
   # abs(E) = abs(-j*omega*A) + abs(supplied current / elec_cond)
   # NOTE: The reason for calculationg the magnitude of the electric
@@ -197,12 +197,12 @@
 
 [Functions]
   # The supplied current density to the wire
-  # where only the real x-component is considered 
+  # where only the real x-component is considered
   [curr_real_x]
     type = ParsedFunction
     expression = '60e6' # Units in A/m^2, equivalent to 1178 A in a 5mm diameter wire
   []
-  
+
   # Permeability of free space
   [mu_real_func]
     type = ParsedFunction
@@ -233,7 +233,7 @@
 
 [BCs]
   ### Temperature boundary conditions ###
-  # Convective heat flux BC with copper wire 
+  # Convective heat flux BC with copper wire
   # exposed to air
   [surface]
     type = ADConvectiveHeatFluxBC
@@ -248,7 +248,6 @@
   # a zero curl conditions at the boundaries, such that:
   # A x n = 0
 []
-
 
 [Materials]
   [k]
