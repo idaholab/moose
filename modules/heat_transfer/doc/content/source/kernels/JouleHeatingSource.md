@@ -1,3 +1,9 @@
+!alert warning
+This kernel will be deprecated in the near future
+(10/01/2025) in favor of exclusively using the [ADJouleHeatingSource](ADJouleHeatingSource.md), because
+ADJouleHeatingSource can calculate both electrostatic and electromagnetic Joule heating.
+For more information, please see [ADJouleHeatingSource](ADJouleHeatingSource.md).
+
 # JouleHeatingSource
 
 !syntax description /Kernels/JouleHeatingSource

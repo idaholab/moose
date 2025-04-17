@@ -82,21 +82,21 @@
     required_python_packages = 'sympy os'
   []
 
-  [microwave_heating]
+  [deprecated_microwave_heating]
     type = 'Exodiff'
     input = 'microwave_heating.i'
     exodiff = 'microwave_heating_out.e'
-    requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions.'
+    requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions using the deprecated method.'
     design = 'EMJouleHeatingSource.md'
-    issues = '#28758'
+    issues = '#30000'
   []
-  [microwave_heating_convergence_csv]
+  [deprecated_microwave_heating_convergence_csv]
     type = CSVDiff
     command = microwave_heating_convergence.py
     csvdiff = 'microwave_heating_convergence.csv'
-    requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions.'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions using the deprecated method.'
     design = 'EMJouleHeatingSource.md'
-    issues = '#28758'
+    issues = '#30000'
     heavy = True
     recover = false
     valgrind = none
