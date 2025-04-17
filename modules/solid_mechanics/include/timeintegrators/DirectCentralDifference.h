@@ -37,6 +37,13 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual bool overridesSolve() const override { return true; }
 
+  virtual void postSolve() override
+  { // Once we have the new solution, we want to adanceState to make sure the
+    // coupling between the solution and the computed material properties is kept correctly.
+    _fe_problem.advanceState();
+  }
+  virtual bool controlsState() const override { return true; }
+
   virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix) override;
 
   void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override

@@ -10,6 +10,8 @@
   elem_type = QUAD4
 []
 
+dt_and_v0 = 0.00005
+
 [Problem]
   extra_tag_matrices = 'mass'
 []
@@ -30,7 +32,7 @@
     variable = u
     state = OLD
     # set's v_0 to 1
-    value = -0.00005
+    value = -${dt_and_v0}
   []
 []
 
@@ -86,7 +88,7 @@
   type = Transient
   start_time = 0.0
   num_steps = 20
-  dt = 0.00005
+  dt = ${dt_and_v0}
   l_tol = 1e-12
   [TimeIntegrator]
     type = DirectCentralDifference

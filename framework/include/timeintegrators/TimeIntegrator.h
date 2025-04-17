@@ -127,6 +127,11 @@ public:
    */
   virtual bool isExplicit() const { return false; }
 
+  /*
+  * Returns whether the solver controls it's own state
+  */
+  virtual bool controlsState() const { return false; };
+
   /**
    * Return the number of states this requires in a linear
    * system setting
