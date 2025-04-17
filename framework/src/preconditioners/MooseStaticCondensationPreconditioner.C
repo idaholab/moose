@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "MooseVariableFieldBase.h"
 #include "libmesh/implicit_system.h"
-#include "libmesh/static_condensation.h"
+#include "libmesh/static_condensation_dof_map.h"
 
 registerMooseObjectAliased("MooseApp", MooseStaticCondensationPreconditioner, "StaticCondensation");
 
@@ -33,6 +33,22 @@ MooseStaticCondensationPreconditioner::validParams()
   // Need to make this non-defaulted so that isParamValid doesn't always return true
   params.set<MooseEnum>("mffd_type") = "";
   return params;
+}
+
+std::string
+MooseStaticCondensationPreconditioner::prefix() const
+{
+  // We always prefix the condensed system with the nonlinear system name regardless of the number
+  // of systems in the problem. Maybe we'll change this later for more consistency?
+  return "-" + petscPrefix();
+}
+
+std::string
+MooseStaticCondensationPreconditioner::petscPrefix() const
+{
+  // We always prefix the condensed system with the nonlinear system name regardless of the number
+  // of systems in the problem. Maybe we'll change this later for more consistency?
+  return _nl.name() + "_condensed_";
 }
 
 MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
@@ -73,15 +89,16 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
   if (!implicit_sys)
     mooseError("Static condensation can only be used with implicit systems");
   implicit_sys->create_static_condensation();
-  auto & sc = implicit_sys->get_static_condensation();
+  _sc_dof_map = &implicit_sys->get_dof_map().get_static_condensation();
+  _sc_system_matrix = &implicit_sys->get_static_condensation();
   std::unordered_set<unsigned int> uncondensed_vars;
   for (auto & nl_var_name : getParam<std::vector<NonlinearVariableName>>("dont_condense_vars"))
     uncondensed_vars.insert(_nl.getVariable(0, nl_var_name).number());
-  sc.dont_condense_vars(uncondensed_vars);
+  _sc_dof_map->dont_condense_vars(uncondensed_vars);
 }
 
 void
 MooseStaticCondensationPreconditioner::initialSetup()
 {
-  Moose::PetscSupport::storePetscOptions(_fe_problem, "-" + _nl.name() + "_condensed_", *this);
+  Moose::PetscSupport::storePetscOptions(_fe_problem, prefix(), *this);
 }
