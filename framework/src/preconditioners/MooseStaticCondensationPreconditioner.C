@@ -68,4 +68,5 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
   for (auto & nl_var_name : getParam<std::vector<NonlinearVariableName>>("dont_condense_vars"))
     uncondensed_vars.insert(_nl.getVariable(0, nl_var_name).number());
   sc.dont_condense_vars(uncondensed_vars);
+  _sc = &sc;
 }

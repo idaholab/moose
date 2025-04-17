@@ -187,7 +187,7 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
 }
 
 void
-petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
+petscSetupDM(NonlinearSystemBase & nl, const DofMapBase & dof_map, const std::string & dm_name)
 {
   PetscBool ismoose;
   DM dm = LIBMESH_PETSC_NULLPTR;
@@ -214,7 +214,7 @@ petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
     if (ismoose)
       return;
   }
-  LibmeshPetscCallA(nl.comm().get(), DMCreateMoose(nl.comm().get(), nl, dm_name, &dm));
+  LibmeshPetscCallA(nl.comm().get(), DMCreateMoose(nl.comm().get(), nl, dof_map, dm_name, &dm));
   LibmeshPetscCallA(nl.comm().get(), DMSetFromOptions(dm));
   LibmeshPetscCallA(nl.comm().get(), DMSetUp(dm));
   LibmeshPetscCallA(nl.comm().get(), SNESSetDM(snes, dm));
