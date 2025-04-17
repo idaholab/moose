@@ -138,7 +138,7 @@
 
   [load_z]
     type = ADDistributedLoadShell
-    factor = 10.816
+    function = '10.816'
     variable = disp_z
     displacements = 'disp_x disp_y disp_z'
   []

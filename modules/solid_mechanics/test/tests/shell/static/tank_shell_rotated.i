@@ -138,21 +138,21 @@
 
   [load_x]
     type = ADDistributedLoadShell
-    factor = 40
+    function = '40'
     variable = disp_x
     project_load_to_normal = true
     displacements = 'disp_x disp_y disp_z'
   []
   [load_y]
     type = ADDistributedLoadShell
-    factor = 40
+    function = '40'
     variable = disp_y
     project_load_to_normal = true
     displacements = 'disp_x disp_y disp_z'
   []
   [load_z]
     type = ADDistributedLoadShell
-    factor = 40
+    function = '40'
     variable = disp_z
     project_load_to_normal = true
     displacements = 'disp_x disp_y disp_z'

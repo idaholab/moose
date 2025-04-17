@@ -4,9 +4,9 @@
 
 ## Description
 
-The `ADDistributedLoadShell` kernel calculates the contribution to the residual from the distributed loads (in units of N/m²) on the shell elements. The load can be applied either in a specified direction within the global x-y-z coordinate system (e.g., self-weight, wind load) or normal to the shell plane (e.g., pressure loads). To determine if the distributed load should be treated as a pressure load (applied normal to the shell), the parameter 'project_load_to_normal=true' must be set. When this parameter is enabled, the load is applied perpendicularly to the shell surface. By default, project_load_to_normal=false, meaning the load is applied in the global coordinate directions.
+The `ADDistributedLoadShell` kernel calculates the contribution to the residual from a distributed load (in units of force per area) on the shell elements. The load can be applied either in a specified direction within the global x-y-z coordinate system (e.g., self-weight, wind load) or normal to the shell plane (e.g., pressure loads). The `project_load_to_normal` parameter defines how the direction of the the load is defined. This parameter defaults to `false`, which indicates that the load is applied in the direction of the variable this is applied to (defined by the `variable` parameter). If `project_load_to_normal=true`, the distributed load is treated as a pressure load applied in the shell normal direction, perpendicular to the shell surface. For this case, an instance of this kernel is required for each of the displacement variables.
 
-The magnitude of the distributed load can be specified as either a scalar (use the input parameter factor, which defaults to 1.0), a function parameter, or a Postprocessor name. If more than one of these are given, they are multiplied by one another.
+The magnitude of the distributed load is specified as a function. A scalar value can be supplied to the function (i.e., `function=1.0`) for constant loading.
 
 ## Example Input File syntax
 

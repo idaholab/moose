@@ -118,7 +118,7 @@
   []
   [self_weight]
     type = ADDistributedLoadShell
-    factor = 90
+    function = '90'
     variable = disp_z
     displacements = 'disp_x disp_y disp_z'
   []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,20 +23,16 @@ ADDistributedLoadShellTempl<is_ad>::validParams()
 {
   InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription(
-      "Applies a distributed load (unit N/m2) on the shell plane in a given "
-      "direction (e.g. self_weight, wind load) or normal to the shell plan (e.g. pressure loads)");
+      "Applies a distributed load (specified in units of force per area) on the shell plane in a "
+      "given direction (e.g. self_weight, wind load) or normal to the shell plan (e.g. pressure "
+      "loads)");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
-  params.addParam<Real>(
-      "factor",
-      1.0,
-      "The magnitude to use in computing a constant distributed load on shells (unit N/m2)");
   params.addParam<bool>(
-      "project_load_to_normal", false, "True, if the distributed load is normal to the shell");
-  params.addParam<FunctionName>("function",
-                                "The function that describes the ADDistributedLoadShell");
-  params.addParam<PostprocessorName>(
-      "postprocessor", "Postprocessor that will supply the ADDistributedLoadShell value");
+      "project_load_to_normal", false, "Whether to apply the distributed load normal to the shell");
+  params.addRequiredParam<FunctionName>(
+      "function",
+      "The function that describes the distributed load specified in units of force per area ");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -46,16 +42,16 @@ ADDistributedLoadShellTempl<is_ad>::ADDistributedLoadShellTempl(const InputParam
   : GenericKernel<is_ad>(parameters),
     _ndisp(this->coupledComponents("displacements")),
     _component(libMesh::invalid_uint),
-    _factor(parameters.isParamSetByUser("factor") ? this->template getParam<Real>("factor") : 1.0),
-    _function(this->isParamValid("function") ? &this->getFunction("function") : NULL),
-    _postprocessor(
-        this->isParamValid("postprocessor") ? &this->getPostprocessorValue("postprocessor") : NULL),
+    _function(&this->getFunction("function")),
     _project_load_to_normal(parameters.isParamSetByUser("project_load_to_normal")
                                 ? this->template getParam<bool>("project_load_to_normal")
                                 : false),
     _nodes(4),
     _use_displaced_mesh(this->template getParam<bool>("use_displaced_mesh"))
 {
+  if (_ndisp != 3)
+    mooseError("ADDistributedLoadShell: parameter 'displacements' needs to have exactly three "
+               "components.");
 
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -92,15 +88,7 @@ template <bool is_ad>
 GenericReal<is_ad>
 ADDistributedLoadShellTempl<is_ad>::computeFactor() const
 {
-  GenericReal<is_ad> factor = _factor;
-
-  if (_function)
-    factor *= _function->value(_t, _q_point[_qp]);
-
-  if (_postprocessor)
-    factor *= *_postprocessor;
-
-  return factor;
+  return _function->value(_t, _q_point[_qp]);
 }
 
 template class ADDistributedLoadShellTempl<false>;
