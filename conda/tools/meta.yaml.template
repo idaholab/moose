@@ -45,6 +45,7 @@ requirements:
     - packaging
     - pandas
     - paramiko
+    - plotly
     - psutil
     - psycopg2
     - pyarrow
