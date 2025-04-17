@@ -23,12 +23,12 @@ class SparseMatrix;
  * Implements a form of the central difference time integrator that calculates acceleration directly
  * from the residual forces.
  */
-class DirectCentralDifference : public ExplicitTimeIntegrator
+class ExplicitMixedOrder : public ExplicitTimeIntegrator
 {
 public:
   static InputParameters validParams();
 
-  DirectCentralDifference(const InputParameters & parameters);
+  ExplicitMixedOrder(const InputParameters & parameters);
 
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
@@ -102,10 +102,10 @@ private:
 
 template <typename T, typename T2, typename T3, typename T4>
 void
-DirectCentralDifference::computeTimeDerivativeHelper(T & u_dot,
-                                                     T2 & u_dotdot,
-                                                     const T3 & u_old,
-                                                     const T4 & u_older) const
+ExplicitMixedOrder::computeTimeDerivativeHelper(T & u_dot,
+                                                T2 & u_dotdot,
+                                                const T3 & u_old,
+                                                const T4 & u_older) const
 {
   // computing first derivative
   // using the Central Difference method

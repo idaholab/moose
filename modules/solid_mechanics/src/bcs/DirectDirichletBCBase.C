@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DirectCentralDifference.h"
+#include "ExplicitMixedOrder.h"
 #include "DirectDirichletBCBase.h"
 #include "MooseError.h"
 #include "NonlinearSystemBase.h"
@@ -27,7 +27,7 @@ DirectDirichletBCBase::DirectDirichletBCBase(const InputParameters & parameters)
     _u_old(_var.nodalValueOld()),
     _u_dot_old(_var.nodalValueDotOld()),
     _exp_integrator(
-        dynamic_cast<const DirectCentralDifference *>(&_sys.getTimeIntegrator(_var.number())))
+        dynamic_cast<const ExplicitMixedOrder *>(&_sys.getTimeIntegrator(_var.number())))
 {
   if (!_exp_integrator)
     mooseError("Time integrator for the variable is not of the right type.");
@@ -42,12 +42,12 @@ DirectDirichletBCBase::computeQpResidual()
   // Compute residual to enforce BC based on time order
   switch (_var_time_order)
   {
-    case DirectCentralDifference::FIRST:
+    case ExplicitMixedOrder::FIRST:
       resid = (computeQpValue() - _u_old) / _dt;
       resid /= -_mass_diag(dofnum);
       break;
 
-    case DirectCentralDifference::SECOND:
+    case ExplicitMixedOrder::SECOND:
       Real avg_dt = (_dt + _dt_old) / 2;
       resid = (computeQpValue() - _u_old) / (avg_dt * _dt) - (_u_dot_old) / avg_dt;
       resid /= -_mass_diag(dofnum);

@@ -1,10 +1,10 @@
-# DirectCentralDifference
+# ExplicitMixedOrder
 
-!syntax description /Executioner/TimeIntegrator/DirectCentralDifference
+!syntax description /Executioner/TimeIntegrator/ExplicitMixedOrder
 
 ## Overview
 
-`DirectCentralDifference` applies a time integrator for central difference in which the acceleration used for the solution update is calculated directly from the residual forces.
+`ExplicitMixedOrder` applies a time integrator for central difference in which the acceleration used for the solution update is calculated directly from the residual forces.
 
 \begin{equation}
     \begin{aligned}
@@ -74,10 +74,10 @@ An example input file is shown below:
 
 ```
 
-!! Describe and include an example of how to use the DirectCentralDifference object.
+!! Describe and include an example of how to use the ExplicitMixedOrder object.
 
-!syntax parameters /Executioner/TimeIntegrator/DirectCentralDifference
+!syntax parameters /Executioner/TimeIntegrator/ExplicitMixedOrder
 
-!syntax inputs /Executioner/TimeIntegrator/DirectCentralDifference
+!syntax inputs /Executioner/TimeIntegrator/ExplicitMixedOrder
 
-!syntax children /Executioner/TimeIntegrator/DirectCentralDifference
+!syntax children /Executioner/TimeIntegrator/ExplicitMixedOrder

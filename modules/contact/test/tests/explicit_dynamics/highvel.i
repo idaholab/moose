@@ -343,7 +343,7 @@
   timestep_tolerance = 1e-6
 
   [TimeIntegrator]
-    type = DirectCentralDifference
+    type = ExplicitMixedOrder
     mass_matrix_tag = mass
     second_order_vars = 'disp_x disp_y disp_z'
   []

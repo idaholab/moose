@@ -9,7 +9,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "DirectCentralDifference.h"
+#include "ExplicitMixedOrder.h"
 #include "ExplicitTimeIntegrator.h"
 #include "Moose.h"
 #include "MooseError.h"
@@ -30,10 +30,10 @@
 #include <algorithm>
 #include <iterator>
 
-registerMooseObject("SolidMechanicsApp", DirectCentralDifference);
+registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder);
 
 InputParameters
-DirectCentralDifference::validParams()
+ExplicitMixedOrder::validParams()
 {
   InputParameters params = ExplicitTimeIntegrator::validParams();
 
@@ -67,7 +67,7 @@ DirectCentralDifference::validParams()
   return params;
 }
 
-DirectCentralDifference::DirectCentralDifference(const InputParameters & parameters)
+ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
     _mass_matrix(getParam<TagName>("mass_matrix_tag")),
@@ -87,7 +87,7 @@ DirectCentralDifference::DirectCentralDifference(const InputParameters & paramet
 }
 
 void
-DirectCentralDifference::computeTimeDerivatives()
+ExplicitMixedOrder::computeTimeDerivatives()
 {
   /*
   Because this is called in NonLinearSystemBase
@@ -99,13 +99,13 @@ DirectCentralDifference::computeTimeDerivatives()
 }
 
 TagID
-DirectCentralDifference::massMatrixTagID() const
+ExplicitMixedOrder::massMatrixTagID() const
 {
   return _sys.subproblem().getMatrixTagID(_mass_matrix);
 }
 
 void
-DirectCentralDifference::solve()
+ExplicitMixedOrder::solve()
 {
   // Getting the tagID for the mass matrix
   auto mass_tag = massMatrixTagID();
@@ -160,7 +160,7 @@ DirectCentralDifference::solve()
 }
 
 void
-DirectCentralDifference::postResidual(NumericVector<Number> & residual)
+ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
 {
   residual += *_Re_time;
   residual += *_Re_non_time;
@@ -171,7 +171,7 @@ DirectCentralDifference::postResidual(NumericVector<Number> & residual)
 }
 
 bool
-DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
+ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 {
 
   bool converged = false;
@@ -231,7 +231,7 @@ DirectCentralDifference::performExplicitSolve(SparseMatrix<Number> &)
 }
 
 void
-DirectCentralDifference::init()
+ExplicitMixedOrder::init()
 {
   ExplicitTimeIntegrator::init();
 
@@ -298,7 +298,7 @@ DirectCentralDifference::init()
 }
 
 void
-DirectCentralDifference::computeICs()
+ExplicitMixedOrder::computeICs()
 {
   // Compute the first-order approximation of the velocity at the current time step
   // using the Euler scheme, where the velocity is estimated as the difference
@@ -310,8 +310,8 @@ DirectCentralDifference::computeICs()
   vel->close();
 }
 
-DirectCentralDifference::TimeOrder
-DirectCentralDifference::findVariableTimeOrder(unsigned int var_num) const
+ExplicitMixedOrder::TimeOrder
+ExplicitMixedOrder::findVariableTimeOrder(unsigned int var_num) const
 {
   if (_vars_first.empty() && _vars_second.empty())
     mooseError("Time order sets are both empty.");

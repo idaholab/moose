@@ -4,9 +4,9 @@
 
 ## Overview
 
-This applies a Dirichlet BC meant to be used in conjunction with [DirectCentralDifference](source/timeintegrators/DirectCentralDifference.md).
+This applies a Dirichlet BC meant to be used in conjunction with [ExplicitMixedOrder](source/timeintegrators/ExplicitMixedOrder.md).
 
-BC's are applied by calculating the residual force needed,$\mathbf{F}_g$, to enforce BC's during a central difference solution update.
+BC's are applied by calculating the residual force needed,$\mathbf{F}_g$, to enforce BC's during an explicit solution update.
 
 At each boundary node:
 

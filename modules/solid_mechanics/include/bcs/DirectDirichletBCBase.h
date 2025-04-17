@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "DirectCentralDifference.h"
+#include "ExplicitMixedOrder.h"
 #include "NodalBC.h"
 #include "libmesh/numeric_vector.h"
 
@@ -44,8 +44,8 @@ protected:
   const Real & _u_dot_old;
 
   /// explicit time integrator
-  const DirectCentralDifference * _exp_integrator;
+  const ExplicitMixedOrder * _exp_integrator;
 
   /// variable time order need for computing BC
-  DirectCentralDifference::TimeOrder _var_time_order;
+  ExplicitMixedOrder::TimeOrder _var_time_order;
 };

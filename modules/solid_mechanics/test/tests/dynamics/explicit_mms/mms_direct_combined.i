@@ -126,7 +126,7 @@
   dt = 0.00005
   l_tol = 1e-12
   [TimeIntegrator]
-    type = DirectCentralDifference
+    type = ExplicitMixedOrder
     mass_matrix_tag = 'mass'
     use_constant_mass = true
     second_order_vars = 'u_second'
