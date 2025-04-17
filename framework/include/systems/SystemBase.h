@@ -364,7 +364,7 @@ public:
   virtual const libMesh::SparseMatrix<Number> & getMatrix(TagID tag) const;
 
   /**
-   *  Make all exsiting matrices ative
+   *  Make all existing matrices active
    */
   virtual void activeAllMatrixTags();
 
@@ -962,9 +962,20 @@ public:
   const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
 
   /**
-   * @returns A prefix for solvers
+   * @returns A prefix for solvers. This does have a leading dash
    */
   std::string prefix() const;
+
+  /**
+   * @returns A prefix for solvers ready to immediately pass to PETSc. This does not have a leading
+   * dash
+   */
+  std::string petscPrefix() const;
+
+  /**
+   * size the matrix data for each variable
+   */
+  void sizeVariableMatrixData();
 
 protected:
   /**
@@ -1015,6 +1026,8 @@ protected:
   std::vector<NumericVector<Number> *> _tagged_vectors;
   /// Tagged matrices (pointer)
   std::vector<libMesh::SparseMatrix<Number> *> _tagged_matrices;
+  /// Active tagged matrices. A matrix is active if its tag-matrix pair is present in the map. We use a map instead of a vector so that users can easily add and remove to this container with calls to (de)activeMatrixTag
+  std::unordered_map<TagID, libMesh::SparseMatrix<Number> *> _active_tagged_matrices;
   /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;
 

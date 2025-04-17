@@ -187,49 +187,6 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
 }
 
 void
-petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name)
-{
-  PetscBool ismoose;
-  DM dm = LIBMESH_PETSC_NULLPTR;
-
-  // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this
-  // call would be in DMInitializePackage()
-  LibmeshPetscCallA(nl.comm().get(), DMMooseRegisterAll());
-  // Create and set up the DM that will consume the split options and deal with block matrices.
-  PetscNonlinearSolver<Number> * petsc_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
-  const char * snes_prefix = nullptr;
-  std::string snes_prefix_str;
-  if (nl.system().prefix_with_name())
-  {
-    snes_prefix_str = nl.system().prefix();
-    snes_prefix = snes_prefix_str.c_str();
-  }
-  SNES snes = petsc_solver->snes(snes_prefix);
-  // if there exists a DMMoose object, not to recreate a new one
-  LibmeshPetscCallA(nl.comm().get(), SNESGetDM(snes, &dm));
-  if (dm)
-  {
-    LibmeshPetscCallA(nl.comm().get(), PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose));
-    if (ismoose)
-      return;
-  }
-  LibmeshPetscCallA(nl.comm().get(), DMCreateMoose(nl.comm().get(), nl, dm_name, &dm));
-  LibmeshPetscCallA(nl.comm().get(), DMSetFromOptions(dm));
-  LibmeshPetscCallA(nl.comm().get(), DMSetUp(dm));
-  LibmeshPetscCallA(nl.comm().get(), SNESSetDM(snes, dm));
-  LibmeshPetscCallA(nl.comm().get(), DMDestroy(&dm));
-  // We temporarily comment out this updating function because
-  // we lack an approach to check if the problem
-  // structure has been changed from the last iteration.
-  // The indices will be rebuilt for every timestep.
-  // TODO: figure out a way to check the structure changes of the
-  // matrix
-  // ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
-  // CHKERRABORT(nl.comm().get(),ierr);
-}
-
-void
 addPetscOptionsFromCommandline()
 {
   // commandline options always win

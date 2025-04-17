@@ -32,6 +32,13 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
+/**
+ * Base variable class. Sadly there are a lot of methods in here that should be pure virtual but
+ * can't be because AddVariableAction/MooseObjectAction will retrieve the validParams of
+ * MooseVariableBase which checks to ensure that MooseVariableBase is a registered object, and
+ * registration requires an instantiation. So we add runtime errors instead of compile-time
+ * errors for these would-be pure virtuals
+ */
 class MooseVariableBase : public MooseObject,
                           public BlockRestrictable,
                           public OutputInterface,
@@ -187,6 +194,11 @@ public:
    * @return whether this variable lives on lower dimensional blocks
    */
   bool isLowerD() const { return _is_lower_d; }
+
+  /**
+   * Size data structures related to matrix tagging
+   */
+  virtual void sizeMatrixTagData() { mooseError("Derived class must implement this meethod"); }
 
 protected:
   /**
