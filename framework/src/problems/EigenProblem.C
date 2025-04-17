@@ -83,7 +83,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   if (_linear_sys_names.size())
     paramError("linear_sys_names", "EigenProblem only works with a single nonlinear eigen system");
 
-  const bool use_hash_table_matrix_assembly = getParam<bool>("use_hash_table_matrix_assembly");
   for (const auto i : index_range(_nl_sys_names))
   {
     const auto & sys_name = _nl_sys_names[i];
@@ -92,7 +91,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
     _current_nl_sys = nl.get();
     _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(nl);
-    nl->system().prefer_hash_table_matrix_assembly(use_hash_table_matrix_assembly);
+    nl->system().prefer_hash_table_matrix_assembly(_use_hash_table_matrix_assembly);
   }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");

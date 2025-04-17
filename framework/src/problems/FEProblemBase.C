@@ -357,7 +357,6 @@ FEProblemBase::validParams()
                         "throughout the course of the simulation.");
   params.addParam<bool>(
       "restore_original_nonzero_pattern",
-      true,
       "Whether we should reset matrix memory for every Jacobian evaluation. This option is useful "
       "if the sparsity pattern is constantly changing and you are using hash table assembly or if "
       "you wish to continually restore the matrix to the originally preallocated sparsity pattern "
@@ -486,11 +485,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _line_search(nullptr),
     _using_ad_mat_props(false),
     _current_ic_state(0),
+    _use_hash_table_matrix_assembly(getParam<bool>("use_hash_table_matrix_assembly")),
     _error_on_jacobian_nonzero_reallocation(
         isParamValid("error_on_jacobian_nonzero_reallocation")
             ? getParam<bool>("error_on_jacobian_nonzero_reallocation")
             : _app.errorOnJacobianNonzeroReallocation()),
-    _restore_original_nonzero_pattern(getParam<bool>("restore_original_nonzero_pattern")),
+    _restore_original_nonzero_pattern(isParamValid("restore_original_nonzero_pattern")
+                                          ? getParam<bool>("restore_original_nonzero_pattern")
+                                          : _use_hash_table_matrix_assembly),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _preserve_matrix_sparsity_pattern(true),
     _force_restart(getParam<bool>("force_restart")),

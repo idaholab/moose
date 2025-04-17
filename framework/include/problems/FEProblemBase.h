@@ -2818,6 +2818,10 @@ protected:
   // loop state during projection of initial conditions
   unsigned short _current_ic_state;
 
+  /// Whether to assemble matrices using hash tables instead of preallocating matrix memory. This
+  /// can be a good option if the sparsity pattern changes throughout the course of the simulation
+  const bool _use_hash_table_matrix_assembly;
+
 private:
   /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
