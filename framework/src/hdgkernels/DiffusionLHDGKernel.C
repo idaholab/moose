@@ -36,11 +36,7 @@ DiffusionLHDGKernel::validParams()
 DiffusionLHDGKernel::DiffusionLHDGKernel(const InputParameters & params)
   : HDGKernel(params),
     DiffusionLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
-    _source(getFunctor<Real>("source")),
-    _qrule_face(_assembly.qRuleFace()),
-    _q_point_face(_assembly.qPointsFace()),
-    _JxW_face(_assembly.JxWFace()),
-    _normals(_assembly.normals())
+    _source(getFunctor<Real>("source"))
 {
 }
 

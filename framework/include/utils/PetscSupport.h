@@ -28,6 +28,11 @@ class CommandLine;
 class InputParameters;
 class ParallelParamObject;
 
+namespace libMesh
+{
+class DofMapBase;
+}
+
 namespace Moose
 {
 namespace PetscSupport
@@ -100,11 +105,6 @@ setLinearSolverDefaults(FEProblemBase & problem, libMesh::LinearSolver<T> & line
  * Sets the default options for PETSc
  */
 void petscSetDefaults(FEProblemBase & problem);
-
-/**
- * Setup the PETSc DM object
- */
-void petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 

@@ -131,8 +131,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
     _fdcoloring(nullptr),
-    _have_decomposition(false),
-    _use_field_split_preconditioner(false),
+    _fsp(nullptr),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _assemble_constraints_separately(false),
     _need_residual_ghosted(false),
@@ -413,34 +412,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
 void
 NonlinearSystemBase::setupDM()
 {
-  if (haveFieldSplitPreconditioner())
-    Moose::PetscSupport::petscSetupDM(*this, _decomposition_split);
-}
-
-void
-NonlinearSystemBase::setDecomposition(const std::vector<std::string> & splits)
-{
-  /// Although a single top-level split is allowed in Problem, treat it as a list of splits for conformity with the Split input syntax.
-  if (splits.size() && splits.size() != 1)
-    mooseError("Only a single top-level split is allowed in a Problem's decomposition.");
-
-  if (splits.size())
-  {
-    _decomposition_split = splits[0];
-    _have_decomposition = true;
-  }
-  else
-    _have_decomposition = false;
-}
-
-void
-NonlinearSystemBase::setupFieldDecomposition()
-{
-  if (!_have_decomposition)
-    return;
-
-  std::shared_ptr<Split> top_split = getSplit(_decomposition_split);
-  top_split->setup(*this);
+  if (_fsp)
+    _fsp->setupDM();
 }
 
 void
@@ -2733,6 +2706,9 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
     bool have_scalar_contributions = false;
     for (const auto & kernel : scalars)
     {
+      if (!kernel->computesJacobian())
+        continue;
+
       kernel->reinit();
       const std::vector<dof_id_type> & dof_indices = kernel->variable().dofIndices();
       const DofMap & dof_map = kernel->variable().dofMap();
@@ -4121,4 +4097,13 @@ NonlinearSystemBase::destroyColoring()
 {
   if (matrixFromColoring())
     LibmeshPetscCall(MatFDColoringDestroy(&_fdcoloring));
+}
+
+FieldSplitPreconditionerBase &
+NonlinearSystemBase::getFieldSplitPreconditioner()
+{
+  if (!_fsp)
+    mooseError("No field split preconditioner is present for this system");
+
+  return *_fsp;
 }

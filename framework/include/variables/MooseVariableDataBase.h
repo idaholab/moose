@@ -139,6 +139,11 @@ public:
    */
   void prepareAux() { _has_dof_values = false; }
 
+  /**
+   * size matrix tag data
+   */
+  void sizeMatrixTagData();
+
 protected:
   /**
    * @returns The variable to which the data in this class belongs to

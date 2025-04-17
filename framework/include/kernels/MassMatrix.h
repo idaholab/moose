@@ -18,6 +18,7 @@ class MassMatrix : public Kernel
 {
 public:
   static InputParameters validParams();
+  static void setMassMatrixParams(InputParameters & params);
 
   MassMatrix(const InputParameters & parameters);
 

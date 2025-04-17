@@ -37,6 +37,7 @@ public:
 
   virtual void reinit() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  virtual bool computesJacobian() const override { return _add_jacobian; }
 
 protected:
   virtual Real computeQpResidual() override;
@@ -48,4 +49,7 @@ protected:
 
   /// Name of the Postprocessor value we are trying to equate with 'value'
   const PostprocessorValue & _pp_value;
+
+  /// Whether this object should add its zero Jacobian into matrices
+  const bool _add_jacobian;
 };
