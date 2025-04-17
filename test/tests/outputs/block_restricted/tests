@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#30317'
+  design = 'syntax/Outputs/index.md'
+  [block]
+    type = 'Exodiff'
+    input = 'block.i'
+    exodiff = 'block_out.e'
+    requirement = 'The system shall be able to block restrict exodus output by creating a mesh clone and reducing it to specified blocks.'
+    # oversampling outputs a warning in recover
+    allow_warnings = true
+  []
+[]
