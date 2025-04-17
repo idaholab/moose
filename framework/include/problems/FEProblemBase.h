@@ -2394,6 +2394,10 @@ public:
    * @returns the linear system names in the problem
    */
   const std::vector<LinearSystemName> & getLinearSystemNames() const { return _linear_sys_names; }
+  /**
+   * @returns the solver system names in the problem
+   */
+  const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -2513,7 +2517,7 @@ protected:
   std::map<SolverSystemName, unsigned int> _solver_sys_name_to_num;
 
   /// The union of nonlinear and linear system names
-  std::vector<std::string> _solver_sys_names;
+  std::vector<SolverSystemName> _solver_sys_names;
 
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
