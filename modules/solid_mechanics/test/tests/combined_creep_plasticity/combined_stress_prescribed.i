@@ -143,7 +143,6 @@
   l_tol = 1e-6
   start_time = 0.0
   end_time = 32400
-  dt = 1e-2
   [./TimeStepper]
     type = FunctionDT
     function = dts
