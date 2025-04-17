@@ -1,12 +1,12 @@
 # SCM: SubChannel Module class=center style=font-weight:600;font-size:350%
 
-!style halign=center
+!style halign=left
 SCM is a Subchannel Module for performing reactor core, single-phase thermal-hydraulic
 subchannel simulations, for bare pin, square lattice bundles or wire-wrapped/bare pin, triangular lattice bundles. It can model water cooled or metal cooled (lead, sodium, LBE) bundles. It is based on the [MOOSE framework](https://mooseframework.inl.gov), and builds on the framework and modules for many of its capabilities.
 
 !row!
 
-!col! small=12 medium=4 large=4 icon=school
+!col! small=12 medium=3 large=3 icon=school
 
 ## [General Information](general/subchannel_theory.md) class=center style=font-weight:200;
 
@@ -19,7 +19,7 @@ Familiarize yourself with the theory behind SCM, some important user notes and h
 - [Publication List](general/publication_list.md)
 !col-end!
 
-!col! small=12 medium=4 large=4 icon=settings
+!col! small=12 medium=3 large=3 icon=settings
 
 ## [SCM Kernels](modules/subchannel/syntax.md) class=center style=font-weight:200;font-size:150%
 
@@ -27,12 +27,20 @@ Familiarize yourself with the theory behind SCM, some important user notes and h
 SCM specific Kernel syntax.
 !col-end!
 
-!col! small=12 medium=4 large=4 icon=assessment
+!col! small=12 medium=3 large=3 icon=assessment
 
 ## [Verification & Validation](modules/subchannel/v&v/v&v-list.md) class=center style=font-weight:200;font-size:150%
 
 !style halign=center
 Several problems that are ideal for thermal-hydraulic subchannel analysis have been used for the validation and verification of SCM. These problems can be found [here](modules/subchannel/v&v/v&v-list.md).
+!col-end!
+
+!col! small=12 medium=3 large=3 icon=toys
+
+## [Examples](modules/subchannel/examples/examples-list.md) class=center style=font-weight:200;font-size:150%
+
+!style halign=center
+Several example cases that do not fall under the category of [v&v](modules/subchannel/v&v/v&v-list.md) but demonstrate the capabilities of SCM are collected [here](modules/subchannel/examples/examples-list.md) for user reference.
 !col-end!
 !row-end!
 
@@ -57,4 +65,4 @@ throughout the world.
 
 ## Tutorial style=clear:both
 
-Tutorial can be found [here](subchannel_tutorial/index.md optional=True)
+Tutorial can be found [here](/tutorial/index.md optional=True)

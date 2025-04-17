@@ -44,8 +44,8 @@ The analytical solution is compared with the code results in [enthalpy-ver]. The
 
 To run the enthalpy mixing model verification problem use the following input file:
 
-!listing /examples/verification/enthalpy_mixing_verification/two_channel.i language=cpp
+!listing /verification/enthalpy_mixing_verification/two_channel.i language=cpp
 
 The solution will be projected to the 3D mesh created by the following input file:
 
-!listing /examples/verification/enthalpy_mixing_verification/3d.i language=cpp
+!listing /verification/enthalpy_mixing_verification/3d.i language=cpp
