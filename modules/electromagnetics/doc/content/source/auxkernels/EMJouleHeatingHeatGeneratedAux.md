@@ -1,9 +1,9 @@
 !alert warning
 This kernel will be deprecated in the near future
-(10/01/2025) in favor of exclusively using the [JouleHeatingHeatGeneratedAux](JouleHeatingHeatGeneratedAux.md)
+(10/01/2025) in favor of exclusively using the [JouleHeatingHeatGeneratedAux](source/auxkernels/JouleHeatingHeatGeneratedAux.md optional=true)
 within the Heat Transfer module, because JouleHeatingHeatGeneratedAux can calculate both electrostatic
 and electromagnetic Joule heating. For more information, please see
-[JouleHeatingHeatGeneratedAux](JouleHeatingHeatGeneratedAux.md).
+[JouleHeatingHeatGeneratedAux](source/auxkernels/JouleHeatingHeatGeneratedAux.md optional=true).
 
 # EMJouleHeatingHeatGeneratedAux
 
