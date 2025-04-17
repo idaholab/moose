@@ -256,7 +256,7 @@
   l_max_its = 50
   nl_max_its = 100
   end_time = 1000.0
-  num_steps = 10000
+  num_steps = 60
   l_tol = 1e-3
 
   [./TimeStepper]

@@ -87,6 +87,7 @@ public:
 
   virtual void initialSetup() override;
   virtual void meshChanged() override;
+  virtual void timestepSetup() override;
 
   virtual void initialize() override final;
   virtual void execute() override;
@@ -150,6 +151,7 @@ protected:
   std::array<std::map<dof_id_type, std::vector<Real>>, 2> _statev;
   std::size_t _statev_index_current;
   std::size_t _statev_index_old;
+  int & _t_step_old;
 
   /// Abaqus element type
   const int _jtype;
