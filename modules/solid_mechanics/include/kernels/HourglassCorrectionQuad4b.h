@@ -1,18 +1,14 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
 #include "Kernel.h"
+#include "libmesh/Point.h"
 
 /**
- * Hourglass correction for Quad4 elements
+ * Advanced hourglass correction for QUAD4 elements that computes the correction
+ * for a single displacement component (x or y). It uses the current geometry (via
+ * _current_elem) to compute an affine displacement field, isolates the hourglass modes,
+ * and scales the penalty dynamically. This implementation leverages libMesh::Point's
+ * overloaded operators to simplify vector arithmetic.
  */
 class HourglassCorrectionQuad4b : public Kernel
 {
@@ -21,11 +17,17 @@ public:
 
   HourglassCorrectionQuad4b(const InputParameters & parameters);
 
-  Real computeQpResidual() override;
-  Real computeQpJacobian() override;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
 protected:
+  /// Base penalty parameter (supplied by the user)
   const Real _penalty;
+
+  /// Displacement variable (applied component-wise: x or y)
   const MooseVariable::DoFValue & _v;
-  const unsigned int _component;
+
+  /// Precomputed normalized hourglass mode vectors (for a QUAD4 element)
+  std::vector<Real> _g1; // Mode 1: [ 1, -1, 1, -1 ]
+  std::vector<Real> _g2; // Mode 2: [ 1,  1,-1, -1 ]
 };
