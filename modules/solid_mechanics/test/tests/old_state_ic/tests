@@ -5,12 +5,14 @@
     type = CSVDiff
     input = 'old_state_ic.i'
     csvdiff = 'old_state_ic_out.csv'
+    restep = false # Not actually doing any timesteps
     requirement = 'The system shall be able to set initial conditions for old states of the solution.'
   []
   [current_state_ic]
     type = CSVDiff
     input = 'current_state_ic.i'
     csvdiff = 'current_state_ic_out.csv'
+    restep = false # Not actually doing any timesteps
     requirement = 'When only current state is specified with an initial condition, the old state should equal the current state.'
   []
   [velocity_ic]
