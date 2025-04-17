@@ -28,6 +28,11 @@ class CommandLine;
 class InputParameters;
 class ParallelParamObject;
 
+namespace libMesh
+{
+class DofMapBase;
+}
+
 namespace Moose
 {
 namespace PetscSupport
@@ -104,7 +109,9 @@ void petscSetDefaults(FEProblemBase & problem);
 /**
  * Setup the PETSc DM object
  */
-void petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name);
+void petscSetupDM(NonlinearSystemBase & nl,
+                  const libMesh::DofMapBase & dof_map,
+                  const std::string & dm_name);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 

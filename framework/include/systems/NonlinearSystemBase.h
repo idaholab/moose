@@ -56,6 +56,7 @@ template <typename T>
 class SparseMatrix;
 template <typename T>
 class DiagonalMatrix;
+class DofMapBase;
 } // namespace libMesh
 
 /**
@@ -450,11 +451,14 @@ public:
   }
 
   /**
-   * If called with a single string, it is used as the name of a the top-level decomposition split.
-   * If the array is empty, no decomposition is used.
-   * In all other cases an error occurs.
+   * @param decomposition If called with a single string, it is used as the name of a the top-level
+   * decomposition split. If the array is empty, no decomposition is used. In all other cases an
+   * error occurs.
+   * @param data_management_dof_map The degree of freedom map which will provide the degree of
+   * freedom information needed when creating the field decomposition
    */
-  void setDecomposition(const std::vector<std::string> & decomposition);
+  void setFieldSplitData(const std::vector<std::string> & decomposition,
+                         const libMesh::DofMapBase & data_management_dof_map);
 
   /**
    * If called with true this system will use a field split preconditioner matrix.
@@ -895,6 +899,9 @@ protected:
   std::string _decomposition_split;
   /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
   bool _use_field_split_preconditioner;
+  /// The degree of freedom map which will provide the degree of freedom information needed when
+  /// creating the field decomposition
+  const libMesh::DofMapBase * _field_split_dof_map;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;

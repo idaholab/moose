@@ -16,17 +16,18 @@
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
+#include "MoosePreconditioner.h"
+#include "MooseStaticCondensationPreconditioner.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/coupling_matrix.h"
 
-registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
-
+template <typename Base>
 InputParameters
-FieldSplitPreconditioner::validParams()
+FieldSplitPreconditionerTempl<Base>::validParams()
 {
-  InputParameters params = MoosePreconditioner::validParams();
+  InputParameters params = Base::validParams();
   params.addClassDescription("Preconditioner designed to map onto PETSc's PCFieldSplit.");
 
   params.addRequiredParam<std::vector<std::string>>(
@@ -40,27 +41,31 @@ FieldSplitPreconditioner::validParams()
   return params;
 }
 
-FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & parameters)
-  : MoosePreconditioner(parameters),
-    _top_split(getParam<std::vector<std::string>>("topsplit")),
-    _nl(_fe_problem.getNonlinearSystemBase(_nl_sys_num))
+template <typename Base>
+FieldSplitPreconditionerTempl<Base>::FieldSplitPreconditionerTempl(
+    const InputParameters & parameters)
+  : Base(parameters),
+    _top_split(this->template getParam<std::vector<std::string>>("topsplit")),
+    _nl(this->_fe_problem.getNonlinearSystemBase(this->_nl_sys_num))
 {
   // number of variables
   unsigned int n_vars = _nl.nVariables();
   // if we want to construct a full Jacobian?
   // it is recommended to have a full Jacobian for using
   // the fieldSplit preconditioner
-  bool full = getParam<bool>("full");
+  bool full = this->template getParam<bool>("full");
 
   // how variables couple
   std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
   if (!full)
   {
-    if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
+    if (this->isParamValid("off_diag_row") && this->isParamValid("off_diag_column"))
     {
 
-      const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
-      const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
+      const auto off_diag_rows =
+          this->template getParam<std::vector<NonlinearVariableName>>("off_diag_row");
+      const auto off_diag_columns =
+          this->template getParam<std::vector<NonlinearVariableName>>("off_diag_column");
 
       // put 1s on diagonal
       for (unsigned int i = 0; i < n_vars; i++)
@@ -84,14 +89,28 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
       for (unsigned int j = 0; j < n_vars; j++)
         (*cm)(i, j) = 1; // full coupling
   }
-  setCouplingMatrix(std::move(cm));
+  this->setCouplingMatrix(std::move(cm));
 
   // turn on a flag
   _nl.useFieldSplitPreconditioner(true);
+}
 
+registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
+
+InputParameters
+FieldSplitPreconditioner::validParams()
+{
+  return FieldSplitPreconditionerTempl<MoosePreconditioner>::validParams();
+}
+
+FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & params)
+  : FieldSplitPreconditionerTempl<MoosePreconditioner>(params)
+{
   // set a top splitting
-  _nl.setDecomposition(_top_split);
+  _nl.setFieldSplitData(_top_split, _nl.dofMap());
 
   // apply prefix and store PETSc options
   _nl.setupFieldDecomposition();
 }
+
+template class FieldSplitPreconditionerTempl<MooseStaticCondensationPreconditioner>;

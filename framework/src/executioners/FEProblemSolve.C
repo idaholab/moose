@@ -317,10 +317,11 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
     const auto & all_splittings = getParam<std::vector<std::vector<std::string>>>("splitting");
     if (all_splittings.size())
-      nl.setDecomposition(
-          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>("splitting", i_nl_sys));
+      nl.setFieldSplitData(
+          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>("splitting", i_nl_sys),
+          nl.dofMap());
     else
-      nl.setDecomposition({});
+      nl.setFieldSplitData({}, nl.dofMap());
 
     const auto res_and_jac =
         getParamFromNonlinearSystemVectorParam<bool>("residual_and_jacobian_together", i_nl_sys);

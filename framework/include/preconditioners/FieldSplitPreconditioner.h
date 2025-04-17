@@ -9,15 +9,20 @@
 
 #pragma once
 
-// MOOSE includes
 #include "MoosePreconditioner.h"
 
 // Forward declarations
 class NonlinearSystemBase;
+class InputParameters;
+
+#include <vector>
+#include <string>
+
 /**
  * Implements a preconditioner designed to map onto PETSc's PCFieldSplit.
  */
-class FieldSplitPreconditioner : public MoosePreconditioner
+template <typename Base>
+class FieldSplitPreconditionerTempl : public Base
 {
 public:
   /**
@@ -25,7 +30,7 @@ public:
    */
   static InputParameters validParams();
 
-  FieldSplitPreconditioner(const InputParameters & parameters);
+  FieldSplitPreconditionerTempl(const InputParameters & parameters);
 
   /**
    * top split
@@ -35,4 +40,12 @@ public:
 protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
   NonlinearSystemBase & _nl;
+};
+
+class FieldSplitPreconditioner : public FieldSplitPreconditionerTempl<MoosePreconditioner>
+{
+public:
+  static InputParameters validParams();
+
+  FieldSplitPreconditioner(const InputParameters & parameters);
 };

@@ -11,6 +11,11 @@
 
 #include "SingleMatrixPreconditioner.h"
 
+namespace libMesh
+{
+class StaticCondensation;
+}
+
 /**
  * Static condensation preconditioner
  */
@@ -20,4 +25,8 @@ public:
   static InputParameters validParams();
 
   MooseStaticCondensationPreconditioner(const InputParameters & params);
+
+protected:
+  /// Pointer to the libMesh static condensation object
+  const libMesh::StaticCondensation * _sc;
 };
