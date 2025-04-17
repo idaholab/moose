@@ -90,9 +90,6 @@
     value_type = max
     variable = m
   [../]
-  [./picard_iterations]
-    type = NumFixedPointIterations
-  [../]
 []
 
 [Executioner]
