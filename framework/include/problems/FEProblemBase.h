@@ -2402,6 +2402,16 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
+  class CreateTaggedMatrixKey
+  {
+    CreateTaggedMatrixKey() {}
+    CreateTaggedMatrixKey(const CreateTaggedMatrixKey &) {}
+
+    friend class AddTaggedMatriesAction;
+  };
+
+  void createTagMatrices(CreateTaggedMatrixKey);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

@@ -658,8 +658,11 @@ FEProblemBase::createTagVectors()
       _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
+}
 
-  // add matrices and their tags
+void
+FEProblemBase::createTagMatrices(CreateTaggedMatrixKey)
+{
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
   for (const auto nl_sys_num : index_range(matrices))
     for (auto & matrix : matrices[nl_sys_num])
@@ -667,6 +670,10 @@ FEProblemBase::createTagVectors()
       auto tag = addMatrixTag(matrix);
       _nl[nl_sys_num]->addMatrix(tag);
     }
+
+  for (auto & sys : _solver_systems)
+    sys->sizeVariableMatrixData();
+  _aux->sizeVariableMatrixData();
 }
 
 void
@@ -6875,7 +6882,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         {
           auto & matrix = _current_nl_sys->getMatrix(tag);
           matrix.zero();
-          if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
+          if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
             // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
             // diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7263,7 +7270,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
               matrix.restore_original_nonzero_pattern();
             else
               matrix.zero();
-            if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
+            if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.
