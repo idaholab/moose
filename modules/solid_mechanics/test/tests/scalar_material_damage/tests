@@ -187,6 +187,9 @@
     csvdiff = 'nonlocal_scalar_damage_out.csv'
     abs_zero = 1.e-6
     recover = false
+    # Explicit nature this test is emulating makes it non-restep-able until
+    # there is a state recovery interface for failed solves
+    restep = false
     requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model."
     issues = '#21786'
     capabilities = 'method!=dbg'
@@ -197,6 +200,9 @@
     csvdiff = 'ad_nonlocal_scalar_damage_out.csv'
     abs_zero = 1.e-6
     recover = false
+    # Explicit nature this test is emulating makes it non-restep-able until
+    # there is a state recovery interface for failed solves
+    restep = false
     requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model. "
     "When using automatic differentiation."
     issues = '#21786'

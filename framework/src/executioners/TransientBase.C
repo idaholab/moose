@@ -371,12 +371,11 @@ TransientBase::execute()
 void
 TransientBase::computeDT()
 {
-  // We're repeating the solve of the pervious timestep,
+  // We're repeating the solve of the previous timestep,
   // so we use the same dt
   if (_testing_restep)
   {
     mooseAssert(!_test_restep_step, "Should not be set");
-    _testing_restep = false;
     return;
   }
 
@@ -458,9 +457,17 @@ TransientBase::incrementStepOrReject()
 void
 TransientBase::takeStep(Real input_dt)
 {
-  _dt_old = _dt;
+  if (lastSolveConverged())
+    _dt_old = _dt;
 
-  if (input_dt == -1.0)
+  // We're repeating the solve of the previous timestep,
+  // so we use the same dt
+  if (_testing_restep)
+  {
+    mooseAssert(!_test_restep_step, "Should not be set");
+    _testing_restep = false;
+  }
+  else if (input_dt == -1.0)
     _dt = computeConstrainedDT();
   else
     _dt = input_dt;

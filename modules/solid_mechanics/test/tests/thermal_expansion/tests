@@ -12,6 +12,7 @@
     input = 'constant_expansion_coeff_restart.i'
     exodiff = 'constant_expansion_coeff_restart_out.e'
     prereq = 'constant_expansion_coeff'
+    restep = false # Restep is done in constant_expansion_coeff
     requirement = 'The solid mechanics module shall have the capability to calculate the eigenstrain tensor resulting from isotropic thermal expansion when restarting the simulation when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#7457'
