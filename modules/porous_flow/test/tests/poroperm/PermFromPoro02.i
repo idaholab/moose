@@ -201,7 +201,7 @@
     block = 1
   []
   [permeability_all]
-    type = PorousFlowPermeabilityKozenyCarmanVariable
+    type = PorousFlowPermeabilityKozenyCarmanFromVar
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
     m = 2
     n = 7

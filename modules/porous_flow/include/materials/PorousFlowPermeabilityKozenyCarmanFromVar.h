@@ -21,13 +21,13 @@
  * A is provided as an auxVariable.
  */
 template <bool is_ad>
-class PorousFlowPermeabilityKozenyCarmanVariableTempl
+class PorousFlowPermeabilityKozenyCarmanFromVarTempl
   : public PorousFlowPermeabilityKozenyCarmanBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityKozenyCarmanVariableTempl(const InputParameters & parameters);
+  PorousFlowPermeabilityKozenyCarmanFromVarTempl(const InputParameters & parameters);
 
 protected:
   /// retrieve constant value for A computed in constructor
@@ -39,7 +39,7 @@ protected:
   usingPorousFlowPermeabilityBaseMembers;
 };
 
-typedef PorousFlowPermeabilityKozenyCarmanVariableTempl<false>
-    PorousFlowPermeabilityKozenyCarmanVariable;
-typedef PorousFlowPermeabilityKozenyCarmanVariableTempl<true>
-    ADPorousFlowPermeabilityKozenyCarmanVariable;
+typedef PorousFlowPermeabilityKozenyCarmanFromVarTempl<false>
+    PorousFlowPermeabilityKozenyCarmanFromVar;
+typedef PorousFlowPermeabilityKozenyCarmanFromVarTempl<true>
+    ADPorousFlowPermeabilityKozenyCarmanFromVar;

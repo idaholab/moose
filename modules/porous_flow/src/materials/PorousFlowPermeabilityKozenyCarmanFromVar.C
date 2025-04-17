@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PorousFlowPermeabilityKozenyCarmanVariable.h"
+#include "PorousFlowPermeabilityKozenyCarmanFromVar.h"
 
-registerMooseObject("PorousFlowApp", PorousFlowPermeabilityKozenyCarmanVariable);
-registerMooseObject("PorousFlowApp", ADPorousFlowPermeabilityKozenyCarmanVariable);
+registerMooseObject("PorousFlowApp", PorousFlowPermeabilityKozenyCarmanFromVar);
+registerMooseObject("PorousFlowApp", ADPorousFlowPermeabilityKozenyCarmanFromVar);
 
 template <bool is_ad>
 InputParameters
-PorousFlowPermeabilityKozenyCarmanVariableTempl<is_ad>::validParams()
+PorousFlowPermeabilityKozenyCarmanFromVarTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowPermeabilityKozenyCarmanBase::validParams();
   params.addRequiredCoupledVar("A", "Variable used in permeability function.");
@@ -24,18 +24,18 @@ PorousFlowPermeabilityKozenyCarmanVariableTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-PorousFlowPermeabilityKozenyCarmanVariableTempl<
-    is_ad>::PorousFlowPermeabilityKozenyCarmanVariableTempl(const InputParameters & parameters)
+PorousFlowPermeabilityKozenyCarmanFromVarTempl<
+    is_ad>::PorousFlowPermeabilityKozenyCarmanFromVarTempl(const InputParameters & parameters)
   : PorousFlowPermeabilityKozenyCarmanBaseTempl<is_ad>(parameters), _A(coupledValue("A"))
 {
 }
 
 template <bool is_ad>
 Real
-PorousFlowPermeabilityKozenyCarmanVariableTempl<is_ad>::computeA() const
+PorousFlowPermeabilityKozenyCarmanFromVarTempl<is_ad>::computeA() const
 {
   return _A[_qp];
 }
 
-template class PorousFlowPermeabilityKozenyCarmanVariableTempl<false>;
-template class PorousFlowPermeabilityKozenyCarmanVariableTempl<true>;
+template class PorousFlowPermeabilityKozenyCarmanFromVarTempl<false>;
+template class PorousFlowPermeabilityKozenyCarmanFromVarTempl<true>;

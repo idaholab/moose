@@ -29,7 +29,7 @@ k_{ij} = A k_{ij}^{0} \frac{\phi^{n}}{(1 - \phi)^{m}},
 \end{equation}
 where $n$ and $m$ are user-defined constants and A is computed from predefined functions of porosity and permeability or grain size.
 
-## Spatially-varying Kozeny-Carman: [PorousFlowPermeabilityKozenyCarmanVariable](/PorousFlowPermeabilityKozenyCarmanVariable.md)
+## Spatially-varying Kozeny-Carman: [PorousFlowPermeabilityKozenyCarmanFromVar](/PorousFlowPermeabilityKozenyCarmanFromVar.md)
 
 Permeability is calculated from porosity using the Kozeny-Carman relationship [!citep](oelkers1996)
 \begin{equation}

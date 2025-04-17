@@ -1,6 +1,6 @@
-# PorousFlowPermeabilityKozenyCarmanVariable
+# PorousFlowPermeabilityKozenyCarmanFromVar
 
-!syntax description /Materials/PorousFlowPermeabilityKozenyCarmanVariable
+!syntax description /Materials/PorousFlowPermeabilityKozenyCarmanFromVar
 
 Permeability is calculated from porosity using
 \begin{equation}
@@ -14,8 +14,8 @@ In the following example, `A_var` is a spatially varying `AuxVariable` that prod
 
 !listing modules/porous_flow/test/tests/poroperm/PermFromPoro02.i block=Materials/permeability_all
 
-!syntax parameters /Materials/PorousFlowPermeabilityKozenyCarmanVariable
+!syntax parameters /Materials/PorousFlowPermeabilityKozenyCarmanFromVar
 
-!syntax inputs /Materials/PorousFlowPermeabilityKozenyCarmanVariable
+!syntax inputs /Materials/PorousFlowPermeabilityKozenyCarmanFromVar
 
-!syntax children /Materials/PorousFlowPermeabilityKozenyCarmanVariable
+!syntax children /Materials/PorousFlowPermeabilityKozenyCarmanFromVar

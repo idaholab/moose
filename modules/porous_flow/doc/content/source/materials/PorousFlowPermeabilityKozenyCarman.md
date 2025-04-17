@@ -16,7 +16,7 @@ Input can be entered in one of two forms depending on the value of [!param](/Mat
 | `kozeny_carman_fd2` | $A = f d^2$ |
 | `kozeny_carman_phi0` | $A = k_0 (1 - \phi_0)^m / \phi_0^n$  |
 
-In `kozeny_carman_fd2`, $f=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/f) is a scalar constant and $d=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/d) is the grain diameter.  In `kozeny_carman_phi0`, $k_0=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/k0) is the reference permeability and $\phi_0=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/phi0) is a reference porosity.  These input parameters are converted to $A$ internally.  For problems where $A$ is described by a spatially varying variable, use `[PorousFlowPermeabilityKozenyCarmanVariable.md] .
+In `kozeny_carman_fd2`, $f=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/f) is a scalar constant and $d=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/d) is the grain diameter.  In `kozeny_carman_phi0`, $k_0=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/k0) is the reference permeability and $\phi_0=$[!param](/Materials/PorousFlowPermeabilityKozenyCarman/phi0) is a reference porosity.  These input parameters are converted to $A$ internally.  For problems where $A$ is described by a spatially varying variable, use `[PorousFlowPermeabilityKozenyCarmanFromVar.md] .
 
 
 !syntax parameters /Materials/PorousFlowPermeabilityKozenyCarman
