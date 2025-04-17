@@ -137,7 +137,8 @@
     enable_objects = 'BCs::fix_x BCs::fix_y BCs::fix_z BCs::back_z'
     disable_objects = 'BCs::rotate_x BCs::rotate_y BCs::rotate_z'
     start_time = '0'
-    end_time = '1'
+    end_time = '1.01'
+    execute_on = 'initial timestep_begin'
   [../]
 []
 
