@@ -2,6 +2,8 @@
 {#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
 {#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
 {#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+{#- NEML2_GIT_SHA: The git SHA to use for neml2                                               -#}
+{#- NEML2_GIT_REMOTE: The git remote to use to get neml2                                      -#}
 {#- WASP_GIT_SHA: The git SHA to use for WASP                                                 -#}
 {#- WASP_GIT_REMOTE: The git remote to use to get WASP                                        -#}
 
@@ -42,19 +44,23 @@
 {#- The installation location for pprof                                                       -#}
 {%- set PPROF_DIR = '/opt/pprof' -%}
 {#- The installation location for libtorch                                                    -#}
-{%- set LIBTORCH_DIR = '/opt/libtorch' -%}
-{#- The script used to install conduit                                                           -#}
+{%- set LIBTORCH_DEST = '/opt' -%}
+{#- The script used to install conduit                                                        -#}
 {%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
-{#- The installation location for conduit                                                        -#}
+{#- The installation location for conduit                                                     -#}
 {%- set CONDUIT_DIR = '/opt/conduit' -%}
 {#- The script used to install mfem                                                           -#}
 {%- set MFEM_BUILD_SCRIPT = 'update_and_rebuild_mfem.sh' -%}
 {#- The installation location for mfem                                                        -#}
 {%- set MFEM_DIR = '/opt/mfem' -%}
-{#- The installation location for wasp                                                        -#}
-{%- set WASP_DIR = '/opt/wasp' -%}
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
+{#- The installation location for wasp                                                        -#}
+{%- set WASP_DIR = '/opt/wasp' -%}
+{#- The script used to install neml2                                                          -#}
+{%- set NEML2_BUILD_SCRIPT = 'update_and_rebuild_neml2.sh' -%}
+{#- The installation location for neml2                                                       -#}
+{%- set NEML2_DIR = '/opt/neml2' -%}
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
@@ -77,8 +83,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 {%- if WITH_LIBTORCH %}
-    # Make libtorch visible to moose
-    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
+    export LIBTORCH_DIR={{ LIBTORCH_DEST }}/libtorch
+    export NEML2_DIR={{ NEML2_DIR }}
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
 {%- endif %}
@@ -131,29 +137,65 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     chmod 755 /opt/code-server/bin/*
     chmod 644 /opt/code-server/extensions/*
 
+    # Build and install wasp
+    # This is redundant; hopefully we can use the one from conda in the future
+    cd ${ROOT_BUILD_DIR}
+    WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
+    git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
+    cd ${WASP_SRC_DIR}
+    git checkout ${WASP_GIT_SHA}
+    git submodule update --init --recursive
+    WASP_SRC_DIR=${WASP_SRC_DIR} ${WASP_BUILD_SCRIPT} -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
+    rm -rf ${WASP_SRC_DIR}
+    export WASP_DIR={{ WASP_DIR }}
+
 {%- if WITH_LIBTORCH %}
     # Libtorch-related vars
-    LIBTORCH_DEST=$(realpath -m {{ LIBTORCH_DIR }}/..)
+    LIBTORCH_DEST={{ LIBTORCH_DEST }}
     LIBTORCH_VER=2.1.0
     LIBTORCH_DISTRIBUTION={{ WITH_LIBTORCH }}
 
     # Install libtorch from a precompiled package
+    cd ${ROOT_BUILD_DIR}
     ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest=${LIBTORCH_DEST} --libtorch-distribution=${LIBTORCH_DISTRIBUTION} --cleanup
+    export LIBTORCH_DIR=${LIBTORCH_DEST}/libtorch
 
 {%- if WITH_LIBTORCH.startswith('cu') %}
     # We install CUDA Toolkit if the user wants cuda-based libtorch.
     # Right now this assumes that cuda-based distributions start with -cu-
-        dnf -y install epel-release
-        CUDA_RPM=${BUILD_DIR}/cuda.rpm
-        curl -L https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda-repo-rhel8-11-4-local-11.4.0_470.42.01-1.x86_64.rpm -o ${CUDA_RPM}
-        rpm -i ${CUDA_RPM}
-        dnf -y install cuda
-        rm -rf ${CUDA_RPM}
+    dnf -y install epel-release
+    CUDA_RPM=${BUILD_DIR}/cuda.rpm
+    curl -L https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda-repo-rhel8-11-4-local-11.4.0_470.42.01-1.x86_64.rpm -o ${CUDA_RPM}
+    rpm -i ${CUDA_RPM}
+    dnf -y install cuda
+    rm -rf ${CUDA_RPM}
     # the CUDA libtorch needs a symlink for libnvrtc-builtins (the link removes the hash portion from the name)
-        cd ${LIBTORCH_DEST}/libtorch/lib
-        LIBNVRTC=$(ls libnvrtc-builtins-????????.so.*.* | head -n1)
-        ln -s $LIBNVRTC $(echo $LIBNVRTC | cut -d. -f1 | head -c-10).$(echo $LIBNVRTC | cut -d. -f2-)
+    cd ${LIBTORCH_DEST}/libtorch/lib
+    LIBNVRTC=$(ls libnvrtc-builtins-????????.so.*.* | head -n1)
+    ln -s $LIBNVRTC $(echo $LIBNVRTC | cut -d. -f1 | head -c-10).$(echo $LIBNVRTC | cut -d. -f2-)
 {%- endif %}
+
+    # TODO: Use a separate WITH_NEML2 for this stuff, or something like that
+    # neml2 variables
+    NEML2_GIT_SHA={{ NEML2_GIT_SHA }}
+    NEML2_GIT_REMOTE={{ NEML2_GIT_REMOTE }}
+    NEML2_DIR={{ NEML2_DIR }}
+    NEML2_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}
+
+    # Build and install neml2
+    cd ${ROOT_BUILD_DIR}
+    NEML2_SRC_DIR=${ROOT_BUILD_DIR}/neml2
+    git clone ${NEML2_GIT_REMOTE} ${NEML2_SRC_DIR}
+    cd ${NEML2_SRC_DIR}
+    git checkout ${NEML2_GIT_SHA}
+    git submodule update --init --recursive
+{% if PROFILING is defined %}
+    METHODS="oprof"
+{%- else %}
+    METHODS="opt devel dbg"
+{%- endif %}
+    METHODS="$METHODS" NEML2_SRC_DIR=${NEML2_SRC_DIR} NEML2_DIR=${NEML2_DIR} ${NEML2_BUILD_SCRIPT} --skip-submodule-update
+    rm -rf ${NEML2_SRC_DIR}
 {%- endif %}
 
 {%- if WITH_MFEM %}
@@ -190,11 +232,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
     # Install miniforge in MOOSE_MINIFORGE
+    cd ${ROOT_BUILD_DIR}
     MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
     curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
     bash ${MINIFORGE_SCRIPT} -b -p ${MOOSE_MINIFORGE}
     rm ${MINIFORGE_SCRIPT}
-    PATH=${MOOSE_MINIFORGE}/bin:$PATH
+    export PATH=${MOOSE_MINIFORGE}/bin:$PATH
     conda update -yq --all
 
     # Add moose channels
@@ -203,25 +246,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CONDA_ALT_CHANNEL" ]; then
         conda config --env --add channels ${CONDA_ALT_CHANNEL}
     fi
-
     # Create list of Conda Packages to install
     MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
     conda install -yq python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
     # Needed for coverage
     pip3 --no-cache install lcov-cobertura
-
-    # Clone WASP
-    cd ${ROOT_BUILD_DIR}
-    WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
-    git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
-    cd ${WASP_SRC_DIR}
-    git checkout ${WASP_GIT_SHA}
-    git submodule update --init --recursive
-
-    # Build and install wasp
-    # This is redundant; hopefully we can use the one from conda in the future
-    WASP_SRC_DIR=${WASP_SRC_DIR} ${WASP_BUILD_SCRIPT} -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
 
     # Install node.js. Requested by dschwen for bison
     dnf install -y nodejs npm
@@ -265,12 +295,19 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
+    # code-server helpers
     {{ FILES_DIR }}/opt/code-server/bin/code-server-setup-extensions /opt/code-server/bin/code-server-setup-extensions
     {{ FILES_DIR }}/opt/code-server/bin/code-server-start /opt/code-server/bin/code-server-start
-    {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
-    {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
+    # wasp
     {{ MOOSE_DIR }}/scripts/{{ WASP_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ WASP_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_wasp.sh {{ ROOT_BUILD_DIR }}/configure_wasp.sh
+    # mfem
+    {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
+    {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
 {%- if WITH_LIBTORCH %}
+    # libtorch
     {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
+    # neml2
+    {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
+    {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
 {%- endif %}

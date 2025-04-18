@@ -3,10 +3,7 @@
 The `[NEML2]` block in the MOOSE input file is the entry point for defining NEML2 material model(s). All parameters are listed at [the bottom of the page](syntax/NEML2/index.md#syntax-list).
 
 !alert note
-This page is user-facing, i.e., the [Input file syntax](syntax/NEML2/index.md#input-syntax) section explains how to write the MOOSE input file in order to connect MOOSE to NEML2 for material modeling.
-
-!alert note
-For developers, please refer to the [NEML2Action](NEML2Action.md) and [NEML2ActionCommon](NEML2ActionCommon.md) pages regarding what objects are constructed by the underlying Action.
+This page is +user-facing+, i.e., the [Input file syntax](syntax/NEML2/index.md#input-syntax) section explains how to write the MOOSE input file in order to connect MOOSE to NEML2 for material modeling. +For developers+, please refer to the [NEML2Action](NEML2Action.md) and [NEML2ActionCommon](NEML2ActionCommon.md) pages regarding what objects are constructed by the underlying Action.
 
 ## Input File Syntax id=input-syntax
 
@@ -19,10 +16,10 @@ The `[NEML2]` block has two parts:
 1. A common area directly underneath the `[NEML2]` block.
 2. Nested sub-blocks.
 
-In the above example, there is only one sub-block named `[all]`. However, there can be as many sub-blocks as appropriate. Most of the parameters specified in the common area are also applied to each sub-block. In the case where a parameter is defined both in the common area and under a sub-block, the parameter defined under the sub-block overrides.
+In the above example, there is only one sub-block named `[all]`. However, there can be as many sub-blocks as appropriate. Most of the parameters specified in the common area are also applied to each sub-block. In the case where a parameter is defined both in the common area and under a sub-block, the parameter defined under the sub-block takes precedence.
 
 !alert note
-The only exception to the above rule is the [!param](/NEML2/input) parameter which can only be specified in the common area.
+A notable exception to the above rule is the [!param](/NEML2/input) parameter which can only be specified in the common area.
 
 Sub-blocks are used to specify multiple NEML2 material models used in the same simulation. The following example demonstrates the use of sub-blocks to specify two NEML2 material models on two different subdomains.
 
@@ -74,53 +71,63 @@ solid_mechanics-opt -i input.i --parse-neml2-only
 Below is an example output
 
 ```
-*** NEML2 MATERIAL MODEL SUMMARY BEGIN ***
-Input file location:       modules/solid_mechanics/test/tests/neml2/viscoplasticity_chaboche.i:34
-Input file path:           NEML2/all
-Material model Name:       model
-Evaluation device:         cpu
-Automatic differentiation: Disabled
-Material model structure:
-------------------------------------------------------------------
-|   Type    |         Name          | Tensor type | Storage size |
-------------------------------------------------------------------
-| input     | forces/E              | SR2         |            6 |
-| input     | forces/t              | Scalar      |            1 |
-| input     | old_forces/E          | SR2         |            6 |
-| input     | old_forces/t          | Scalar      |            1 |
-| input     | old_state/S           | SR2         |            6 |
-| input     | old_state/internal/X1 | SR2         |            6 |
-| input     | old_state/internal/X2 | SR2         |            6 |
-| input     | old_state/internal/ep | Scalar      |            1 |
-| input     | state/S               | SR2         |            6 |
-| input     | state/internal/X1     | SR2         |            6 |
-| input     | state/internal/X2     | SR2         |            6 |
-| input     | state/internal/ep     | Scalar      |            1 |
-| output    | state/S               | SR2         |            6 |
-| output    | state/internal/X1     | SR2         |            6 |
-| output    | state/internal/X2     | SR2         |            6 |
-| output    | state/internal/ep     | Scalar      |            1 |
-| parameter | X1rate.A              | Scalar      |            1 |
-| parameter | X1rate.C              | Scalar      |            1 |
-| parameter | X1rate.a              | Scalar      |            1 |
-| parameter | X1rate.g              | Scalar      |            1 |
-| parameter | X2rate.A              | Scalar      |            1 |
-| parameter | X2rate.C              | Scalar      |            1 |
-| parameter | X2rate.a              | Scalar      |            1 |
-| parameter | X2rate.g              | Scalar      |            1 |
-| parameter | elasticity.E          | Scalar      |            1 |
-| parameter | elasticity.nu         | Scalar      |            1 |
-| parameter | flow_rate.eta         | Scalar      |            1 |
-| parameter | flow_rate.n           | Scalar      |            1 |
-| parameter | isoharden.R           | Scalar      |            1 |
-| parameter | isoharden.d           | Scalar      |            1 |
-| parameter | yield.sy              | Scalar      |            1 |
-| buffer    | Eerate.c              | Tensor      |            2 |
-| buffer    | kinharden.c           | Tensor      |            1 |
-| buffer    | overstress.c          | Tensor      |            2 |
-------------------------------------------------------------------
-*** NEML2 MATERIAL MODEL SUMMARY END ***
+NEML2 MATERIAL MODEL SUMMARY BEGIN ********************************************
+NEML2 input file location: /home/thu/projects/moose/modules/solid_mechanics/test/tests/neml2/models/viscoplasticity_chaboche.i
+NEML2 action path:         NEML2/all
+Material model structure ------------------------------------------------------
+Name:       model
+Input:      forces/E [SR2]
+            forces/t [Scalar]
+            old_forces/E [SR2]
+            old_forces/t [Scalar]
+            old_state/S [SR2]
+            old_state/internal/X1 [SR2]
+            old_state/internal/X2 [SR2]
+            old_state/internal/ep [Scalar]
+            state/S [SR2]
+            state/internal/X1 [SR2]
+            state/internal/X2 [SR2]
+            state/internal/ep [Scalar]
+Output:     state/S [SR2]
+            state/internal/X1 [SR2]
+            state/internal/X2 [SR2]
+            state/internal/ep [Scalar]
+Parameters: X1rate_A [Scalar][Double][cpu]
+            X1rate_C [Scalar][Double][cpu]
+            X1rate_a [Scalar][Double][cpu]
+            X1rate_g [Scalar][Double][cpu]
+            X2rate_A [Scalar][Double][cpu]
+            X2rate_C [Scalar][Double][cpu]
+            X2rate_a [Scalar][Double][cpu]
+            X2rate_g [Scalar][Double][cpu]
+            elasticity_E [Scalar][Double][cpu]
+            elasticity_nu [Scalar][Double][cpu]
+            flow_rate_eta [Scalar][Double][cpu]
+            flow_rate_n [Scalar][Double][cpu]
+            isoharden_R [Scalar][Double][cpu]
+            isoharden_d [Scalar][Double][cpu]
+            yield_sy [Scalar][Double][cpu]
+Buffers:    Eerate_c_0 [Scalar][Double][cpu]
+            Eerate_c_1 [Scalar][Double][cpu]
+            kinharden_c_0 [Scalar][Double][cpu]
+            kinharden_c_1 [Scalar][Double][cpu]
+            overstress_c_0 [Scalar][Double][cpu]
+            overstress_c_1 [Scalar][Double][cpu]
+NEML2 MATERIAL MODEL SUMMARY END **********************************************
 ```
+
+## Work scheduling and dispatching
+
+When the number of material updates (i.e., number of quadrature points) gets large, it is ideal to utilize and coordinate work among multiple devices, e.g., CPUs, GPUs, etc. in a heterogeneous computing environment. This can be achieved using NEML2's work schedulers.
+
+NEML2 offers a variety of different work scheduling strategies, the two most commonly used strategies are defined by
+- SimpleScheduler: Dispatch work to a single device.
+- StaticHybridScheduler: Coordinate work scheduling and dispatching among multiple devices.
+
+!alert tip
+For more information on various types of schedulers and dispatchers, please refer to the [NEML2 documentation](https://applied-material-modeling.github.io/neml2/system-schedulers.html).
+
+The schedulers are defined in the NEML2 input file, and can be selected using the [!param](/NEML2/scheduler) parameter. On top of that, the boolean parameter [!param](/NEML2/async_dispatch) can be used to control whether work is dispatched asynchronously.
 
 !syntax parameters /NEML2/NEML2ActionCommon id=syntax-list
                                             heading=Common parameters

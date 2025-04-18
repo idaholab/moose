@@ -14,7 +14,7 @@
 
 #ifdef NEML2_ENABLED
 #include "neml2/base/Factory.h"
-#include "neml2/misc/parser_utils.h"
+#include "neml2/base/Parser.h"
 #endif
 
 registerMooseAction("SolidMechanicsApp", NEML2ActionCommon, "parse_neml2");
@@ -22,7 +22,8 @@ registerMooseAction("SolidMechanicsApp", NEML2ActionCommon, "parse_neml2");
 InputParameters
 NEML2ActionCommon::commonParams()
 {
-  auto params = NEML2ModelExecutor::actionParams();
+  auto params = NEML2ModelInterface<Action>::validParams();
+  params += NEML2ModelExecutor::actionParams();
 
   MultiMooseEnum moose_types("MATERIAL VARIABLE POSTPROCESSOR");
 
