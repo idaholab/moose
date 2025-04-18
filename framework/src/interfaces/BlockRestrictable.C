@@ -86,12 +86,9 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   if (_blk_feproblem != NULL)
     _blk_material_data = &_blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
 
-  // The 'block' input is defined
-  if (moose_object->isParamValid("block"))
+  // helper function to convert the block names to IDs
+  auto BlocksToIDs = [&]()
   {
-    // Extract the blocks from the input
-    _blocks = moose_object->getParam<std::vector<SubdomainName>>("block");
-
     // Store the IDs in a set, handling ANY_BLOCK_ID if supplied
     if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end())
       _blk_ids.insert(Moose::ANY_BLOCK_ID);
@@ -101,6 +98,15 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
       _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
       _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
     }
+  };
+
+  // The 'block' input is defined
+  if (moose_object->isParamValid("block"))
+  {
+    // Extract the blocks from the input
+    _blocks = moose_object->getParam<std::vector<SubdomainName>>("block");
+
+    BlocksToIDs();
   }
 
   // When 'blocks' is not set and there is a "variable", use the blocks from the variable
@@ -114,6 +120,15 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
                                    Moose::VarKindType::VAR_ANY,
                                    Moose::VarFieldType::VAR_FIELD_ANY)
                      .activeSubdomains();
+  }
+
+  // when 'default_block' is set at the [Problem] -> 'block and variable' input should come first
+  // before this
+  else if (_blk_feproblem->isParamSetByUser("default_block"))
+  {
+    _blocks = _blk_feproblem->getDefaultBlocks();
+
+    BlocksToIDs();
   }
 
   // Produce error if the object is not allowed to be both block and boundary restricted

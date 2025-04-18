@@ -221,6 +221,12 @@ FEProblemBase::validParams()
            "be used (again, using the parameter '" +
            list_param_name + "').";
   };
+
+  params.addParam<std::vector<SubdomainName>>(
+      "default_block",
+      {},
+      "Default list of subdomains for block-restrictable objects such as kernels and materials.");
+
   MooseEnum kernel_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
   params.addParam<MooseEnum>("kernel_coverage_check",
                              kernel_coverage_check_modes,
@@ -446,16 +452,27 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
+    _default_blocks(getParam<std::vector<SubdomainName>>("default_block")),
     _kernel_coverage_check(
-        getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()),
-    _kernel_coverage_blocks(getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")),
+        isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("default_block")
+            ? getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()
+            : CoverageCheckMode::ONLY_LIST),
+    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") ||
+                                    !isParamSetByUser("default_block")
+                                ? getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")
+                                : _default_blocks),
     _boundary_restricted_node_integrity_check(
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(
-        getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
-    _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
+        isParamSetByUser("material_coverage_check") || !isParamSetByUser("default_block")
+            ? getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()
+            : CoverageCheckMode::ONLY_LIST),
+    _material_coverage_blocks(
+        isParamSetByUser("material_coverage_check") || !isParamSetByUser("default_block")
+            ? getParam<std::vector<SubdomainName>>("material_coverage_block_list")
+            : _default_blocks),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -497,6 +514,21 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl")),
     _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors"))
 {
+
+  auto checkConflict =
+      [this](const CoverageCheckMode & coverage_check_mode, const std::string & coverage_check)
+  {
+    if ((isParamSetByUser(coverage_check) &&
+         (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
+          coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
+        isParamSetByUser("default_block"))
+      mooseError("Cannot set both '" + coverage_check +
+                 "' as 'ONLY_LIST' or 'SKIP_LIST' and 'default_block'. Please set only one.");
+  };
+
+  checkConflict(_kernel_coverage_check, "kernel_coverage_check");
+  checkConflict(_material_coverage_check, "material_coverage_check");
+
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
   //  We will toggle this to false when doing residual evaluations
@@ -2674,7 +2706,6 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                       bool is_aux,
                                       const std::set<SubdomainID> * const active_subdomains)
 {
-
   std::set<SubdomainID> subdomainIDs;
   if (active_subdomains->size() == 0)
   {
