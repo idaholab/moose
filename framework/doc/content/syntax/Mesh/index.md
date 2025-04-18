@@ -129,12 +129,19 @@ The core of the mesh capabilities are derived from [libMesh], which has two unde
 parallel mesh formats: "replicated" and "distributed".
 
 The replicated mesh format is the default format for MOOSE and is the most appropriate format to
-utilize for nearly all simulations. In parallel, the replicated format copies the complete mesh to
-all processors allowing for efficient access to the geometry elements.
+utilize for nearly all simulations. In parallel, the replicated format generates or reads the
+complete mesh on all processors and keeps the complete mesh on all processors for the duration
+of the simulation allowing for efficient access to the geometry elements.
 
 The distributed mesh format is useful when the mesh data structure dominates memory usage. Only the
-pieces of the mesh "owned" by a processor are actually stored on the processor. If the mesh is too
-large to read in on a single processor, it can be split prior to the simulation.
+pieces of the mesh "owned" by a processor are actually kept on the processor during the simulation.
+Note, however, that even for distributed meshes, if the mesh is not generated or read in a split
+fashion, the mesh will still initially be generated or read in its entirety on all processors, thus
+requiring sufficient memory on each processor for this to happen, before each processor then
+deletes all elements it does not own relieving memory pressure. If the mesh is too large to fit on
+a single processor, the user can either split-generate the mesh using, e.g.
+[DistributedRectilinearMeshGenerator.md], or split the mesh prior to reading it in as explained
+[below](#mesh-splitting).
 
 !alert note
 Both the "replicated" and "distributed" mesh formats are parallel with respect to the execution of
@@ -161,7 +168,7 @@ out.e.4.2
 out.e.4.3
 ```
 
-## Mesh splitting
+## Mesh splitting id=mesh-splitting
 
 For large meshes, MOOSE provides the ability to pre-split a mesh for use in the "distributed"
 format/mode. To split and use a mesh for distributed runs:
@@ -189,7 +196,7 @@ for each spatial dimension in the 'displacements' parameters within the Mesh blo
 
 !listing modules/solid_mechanics/test/tests/truss/truss_2d.i block=Mesh
 
-Once enabled, the any object that should operate on the displaced configuration should set the
+Once enabled, any object that should operate on the displaced configuration should set the
 "use_displaced_mesh" to true. For example, the following snippet enables the computation of a
 [Postprocessor](/Postprocessors/index.md) with and without the displaced configuration.
 

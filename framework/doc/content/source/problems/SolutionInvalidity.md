@@ -25,7 +25,7 @@ Solution Invalid Warnings:
 ---------------------------------------------------------------------------------------------------------
 ```
 
-1. *Object*: shows the moose object name registered for the solution invalid detection and an optional description
+1. *Object*: shows the MOOSE object name registered for the solution invalid detection and an optional description
 2. *Converged*: shows the number of solution invalid warnings for the latest iteration, at convergence
 3. *Timestep*: shows the number of solution invalid warnings for the latest time step over all iterations
 4. *Total*: shows the total number of solution invalid warnings for the entire simulation

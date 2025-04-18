@@ -98,8 +98,8 @@ we implemented the following four APIs:
 
 ## LinearFVBCs source code: LinearFVAdvectionDiffusionFunctorDirichletBC
 
-`LinearFVAdvectionDiffusionFunctorDirichletBC` object assigns a value on a boundary. This value is computed using a moose
-functor. For more information on the functor system in moose, see [Functors/index.md].
+`LinearFVAdvectionDiffusionFunctorDirichletBC` object assigns a value on a boundary. This value is computed using a MOOSE
+functor. For more information on the functor system in MOOSE, see [Functors/index.md].
 
 !listing framework/src/linearfvbcs/LinearFVAdvectionDiffusionFunctorDirichletBC.C
          start=#include
