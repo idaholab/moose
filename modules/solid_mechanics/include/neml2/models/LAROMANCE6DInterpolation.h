@@ -9,6 +9,8 @@
 
 #pragma once
 
+#ifdef NEML2_ENABLED
+
 #include "neml2/models/Model.h"
 #include "nlohmann/json.h"
 
@@ -135,3 +137,5 @@ private:
   // @}
 };
 } // namespace neml2
+
+#endif
