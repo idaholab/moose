@@ -12,6 +12,8 @@ source:
   - git_url: https://github.com/sandialabs/seacas
   - git_rev: {{ seacas_git_rev }}
   - path: ../functions/retry_build.sh
+  - patches:
+    - sequoia15.4_curl.patch
 
 build:
   number: {{ build }}
@@ -27,10 +29,9 @@ requirements:
     - {{ moose_ccompiler }}
     - {{ moose_cxxcompiler }}
     - xorg-libx11 1.8.9
-    - cmake
+    - {{ moose_cmake }}
     - make
     - automake
-    - wget
   run:
     - {{ moose_gfortran }}
     - {{ moose_ccompiler }}

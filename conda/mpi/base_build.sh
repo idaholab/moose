@@ -45,7 +45,8 @@ function baked_flags()
 '-DNDEBUG' \
 '-O2' \
 '-Wl,-dead_strip_dylibs' \
-'-fno-stack-protector')
+'-fno-stack-protector' \
+'-ld_classic')
     fi
 
     # Remove any orphaned -Wl, flags (append last. Do not modify this line)
@@ -69,7 +70,7 @@ function baked_flags()
     # specific OS linker flags
     LDFLAGS=\${b_LDFLAGS}
     if [[ "\$(uname)" == 'Darwin' ]]; then
-        LDFLAGS+=" -Wl,-ld_classic -Wl,-commons,use_dylibs"
+        LDFLAGS+=" -Wl,-ld64 -Wl,-commons,use_dylibs"
     fi
     export LDFLAGS
 }

@@ -1,20 +1,23 @@
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
+moose_cmake:
+  - cmake 3
+
 moose_cc:
-  - gcc 12.3.0 h915e2ae_7                                   # [linux]
-  - clang 16.0.6 hdae98eb_6                                 # [not arm64 and osx]
-  - clang 16.0.6 h30cc82d_6                                 # [arm64]
+  - gcc 12.3.0 h915e2ae_13                                  # [linux]
+  - clang 18.1.8 default_h576c50e_9                         # [not arm64 and osx]
+  - clang 18.1.8 default_h474c9e2_9                         # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
-  - gxx 12.3.0 h915e2ae_7                                   # [linux]
-  - clangxx 16.0.6 default_h7151d67_6                       # [not arm64 and osx]
-  - clangxx 16.0.6 default_h4cf2255_6                       # [arm64]
+  - gxx 12.3.0 h915e2ae_13                                  # [linux]
+  - clangxx 18.1.8 default_heb2e8d1_9                       # [not arm64 and osx]
+  - clangxx 18.1.8 default_h1ffe849_9                       # [arm64]
 
 ### If you change these versions, change also conda/mpi/*
 moose_gfortran:
   - gfortran 12.3.0 h915e2ae_13                             # [linux]
-  - gfortran 12.3.0 h2c809b3_1                              # [not arm64 and osx]
-  - gfortran 12.3.0 h1ca8e4b_1                              # [arm64]
+  - gfortran 13.3.0 hcc3c99d_1                              # [not arm64 and osx]
+  - gfortran 13.3.0 h3ef1dbf_1                              # [arm64]
 
 ### Cmake requires these be installed in order to "find" compilers
 moose_ccompiler:
@@ -29,14 +32,14 @@ moose_cxxcompiler:
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX11.3.sdk                                     # [osx]
+  - /opt/MacOSX13.3.sdk                                     # [osx]
 
 macos_min_version:                                          # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]
 
 macos_machine:                                              # [osx]
   - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
-  - arm64-apple-darwin20.0.0                                # [arm64]
+  - arm64-apple-darwin22.6.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]

@@ -1,0 +1,133 @@
+diff --git a/install-tpl.sh b/install-tpl.sh
+index 8afe895b65..1fccfaa312 100755
+--- a/install-tpl.sh
++++ b/install-tpl.sh
+@@ -236,7 +236,7 @@ fi
+ # Check that cmake, git, wget exist at the beginning instead of erroring out later on...
+ check_exec cmake
+ check_exec git
+-check_exec wget
++check_exec curl
+ 
+ if [ "$NEEDS_SZIP" == "YES" ]
+ then
+@@ -254,7 +254,7 @@ then
+             echo "${txtgrn}+++ Downloading...${txtrst}"
+             rm -rf libaec-${szip_version}
+             rm -rf v-${szip_version}.tar.gz
+-            wget --no-check-certificate https://github.com/MathisRosenhauer/libaec/archive/v${szip_version}.tar.gz
++            curl --insecure -L -O https://github.com/MathisRosenhauer/libaec/archive/v${szip_version}.tar.gz
+             tar -xzf v${szip_version}.tar.gz
+             rm -rf v${szip_version}.tar.gz
+         fi
+@@ -296,7 +296,7 @@ else
+             echo "${txtgrn}+++ Downloading...${txtrst}"
+             rm -rf szip-${szip_version}
+             rm -rf szip-${szip_version}.tar.gz
+-            wget --no-check-certificate https://support.hdfgroup.org/ftp/lib-external/szip/2.1.1/src/szip-${szip_version}.tar.gz
++            curl --insecure -L -O https://support.hdfgroup.org/ftp/lib-external/szip/2.1.1/src/szip-${szip_version}.tar.gz
+             tar -xzf szip-${szip_version}.tar.gz
+             rm -rf szip-${szip_version}.tar.gz
+         fi
+@@ -369,7 +369,7 @@ then
+             fi
+         else
+             echo "${txtgrn}+++ ZLIB${txtrst}"
+-            zlib_version="1.2.13"
++            zlib_version="1.3.1"
+ 
+             cd $ACCESS || exit
+             cd TPL || exit
+@@ -378,7 +378,7 @@ then
+                 echo "${txtgrn}+++ Downloading...${txtrst}"
+                 rm -rf zlib-${zlib_version}
+                 rm -rf zlib-${zlib_version}.tar.gz
+-                wget --no-check-certificate https://zlib.net/fossils/zlib-${zlib_version}.tar.gz
++                curl --insecure -L -O https://zlib.net/fossils/zlib-${zlib_version}.tar.gz
+                 tar -xzf zlib-${zlib_version}.tar.gz
+                 rm -rf zlib-${zlib_version}.tar.gz
+             fi
+@@ -430,7 +430,7 @@ then
+ 	fi
+ 
+ 	echo "${txtgrn}+++ HDF5 ${hdf_version}${txtrst}"
+-	
++
+ 	cd $ACCESS || exit
+ 	cd TPL/hdf5 || exit
+ 	if [ "$DOWNLOAD" == "YES" ]
+@@ -441,15 +441,18 @@ then
+             if [ "${H5VERSION}" == "develop" ]; then
+ 		git clone --depth=1 https://github.com/HDFGroup/hdf5.git hdf5-develop
+             else
+-		wget --no-check-certificate https://github.com/HDFGroup/hdf5/archive/refs/tags/${hdf_version}.tar.gz
++		curl --insecure -L -O https://github.com/HDFGroup/hdf5/archive/refs/tags/${hdf_version}.tar.gz
+             fi
+             if [ "${H5VERSION}" != "develop" ]
+             then
++        ls
++        echo "DEBUG: tar -zxf ${hdf_version}.tar.gz"
++        file ${hdf_version}.tar.gz
+ 		tar -zxf ${hdf_version}.tar.gz
+ 		rm -f ${hdf_version}.tar.gz
+             fi
+ 	fi
+-	
++
+ 	if [ "$BUILD" == "YES" ]
+ 	then
+             echo "${txtgrn}+++ Configuring, Building, and Installing...${txtrst}"
+@@ -497,7 +500,7 @@ then
+             echo "${txtgrn}+++ Downloading...${txtrst}"
+             rm -rf ${pnet_base}-${pnetcdf_version}
+             rm -f ${pnet_base}-${pnetcdf_version}.tar.gz
+-            wget --no-check-certificate https://parallel-netcdf.github.io/Release/${pnet_base}-${pnetcdf_version}.tar.gz
++            curl --insecure -L -O https://parallel-netcdf.github.io/Release/${pnet_base}-${pnetcdf_version}.tar.gz
+             tar -xzf ${pnet_base}-${pnetcdf_version}.tar.gz
+             rm -f ${pnet_base}-${pnetcdf_version}.tar.gz
+         fi
+@@ -646,7 +649,7 @@ then
+             echo "${txtgrn}+++ Downloading...${txtrst}"
+             rm -rf metis-5.1.0
+             rm -f metis-5.1.0.tar.gz
+-            wget --no-check-certificate https://github.com/scivision/METIS/archive/v5.1.0.1.tar.gz
++            curl --insecure -L -O https://github.com/scivision/METIS/archive/v5.1.0.1.tar.gz
+             tar zxvf v5.1.0.1.tar.gz
+         fi
+ 
+@@ -815,7 +818,7 @@ then
+         then
+             echo "${txtgrn}+++ Downloading...${txtrst}"
+             rm -rf kokkos
+-            wget --no-check-certificate https://github.com/kokkos/kokkos/releases/download/${kokkos_version}/kokkos-${kokkos_version}.tar.gz
++            curl --insecure -L -O https://github.com/kokkos/kokkos/releases/download/${kokkos_version}/kokkos-${kokkos_version}.tar.gz
+             tar -zxf kokkos-${kokkos_version}.tar.gz
+             rm -f kokkos-${kokkos_version}.tar.gz
+             ln -s kokkos-${kokkos_version} kokkos
+@@ -1027,7 +1030,7 @@ then
+         then
+             echo "${txtgrn}+++ Downloading...${txtrst}"
+             rm -rf parallel-*
+-            wget --no-check-certificate https://ftp.gnu.org/gnu/parallel/parallel-latest.tar.bz2
++            curl --insecure -L -O https://ftp.gnu.org/gnu/parallel/parallel-latest.tar.bz2
+             tar -jxf parallel-latest.tar.bz2
+             rm -rf parallel-latest.tar.bz2
+         fi
+@@ -1066,7 +1069,7 @@ then
+     BOOST_VER="1_82_0"
+     if [ "$DOWNLOAD" == "YES" ]
+     then
+-	wget --no-check-certificate "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_${BOOST_VER}.tar.bz2" 
++	curl --insecure -L -O "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_${BOOST_VER}.tar.bz2"
+ 	tar xf boost_${BOOST_VER}.tar.bz2
+     fi
+     if [ "$BUILD" == "YES" ]
+@@ -1139,7 +1142,7 @@ then
+     then
+       echo "${txtgrn}+++ Downloading...${txtrst}"
+       rm -rf cereal*
+-      wget --no-check-certificate https://github.com/USCiLab/cereal/archive/v1.3.0.tar.gz
++      curl --insecure -L -O https://github.com/USCiLab/cereal/archive/v1.3.0.tar.gz
+       tar xzf v1.3.0.tar.gz
+       rm -f v1.3.0.tar.gz
+       cp -R cereal-1.3.0/include/cereal $INSTALL_PATH/include/
