@@ -179,7 +179,7 @@
 []
 
 [Materials]
-  inactive = 'permeability_all'
+  inactive = 'permeability_all permeability_0A permeability_1A'
   [permeability_0]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
@@ -196,6 +196,24 @@
     poroperm_function = kozeny_carman_phi0
     k0 = 2e-10
     phi0 = 0.05
+    m = 2
+    n = 7
+    block = 1
+  []
+  [permeability_0A]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_A
+    A = 0.11552
+    m = 2
+    n = 7
+    block = 0
+  []
+  [permeability_1A]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_A
+    A = 0.23104
     m = 2
     n = 7
     block = 1
