@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#'
+  design = ''
+
+  [p]
+    type = JSONDiff
+    requirement = 'The system should be able to print serialized snapshots of a nonlinear unsteady residual and jacobian in a distributed fashion in a json format.'
+    input = parallel_storage_main.i
+    jsondiff = 'parallel_storage_main_out.json parallel_storage_main_out.json.1'
+    allow_test_objects = true
+    min_parallel = 2
+    max_parallel = 2
+  []
+[]
