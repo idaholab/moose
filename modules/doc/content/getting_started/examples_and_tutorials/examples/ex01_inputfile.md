@@ -116,13 +116,12 @@ Peacock or an external application that supports the Exodus format (e.g., Paravi
 ## Next Steps
 
 Although the Diffusion kernel is the only "physics" in the MOOSE framework, a large set of physics
-is included in the MOOSE [modules](https://mooseframework.inl.gov/wiki/PhysicsModules/).  In order to
-implement your own physics, you will need to understand the following:
+is included in the MOOSE [modules](modules/index.md). In order to implement your own physics, you 
+will need to understand the following:
 
-- [Finite Element Methods](https://mooseframework.inl.gov/wiki/MooseTraining/FEM/) and the generating
-  the "weak" form of for PDEs
+- [Finite Element Methods](help/faq/what_is_fem.md) and generating the "weak" form for PDEs
 - [C++](help/c++/index.md) and object-oriented design
-- [The Anatomy of a MOOSE Object](https://mooseframework.inl.gov/wiki/MooseTraining/MooseObject/)
+- The anatomy of a [MOOSE Object](base/MooseObject.md)
 - Check out more [examples](examples_and_tutorials/index.md#examples)
 
 ## Complete Source Files

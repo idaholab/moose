@@ -8,7 +8,7 @@ application developers.
 In particular, testing of both MOOSE and MOOSE-based applications is of primary importance; changes
 are only merged into the framework once manual code review and the automated tests have ensured the
 changes are compatible with the applications. Since MOOSE is an open-source project, the testing
-process is publicly available at [www.moosebuild.org](http://www.moosebuild.org).
+process is publicly available at [https://civet.inl.gov](https://civet.inl.gov).
 
 MOOSE is developed by the Idaho National Laboratory (INL) by a team of computer scientists and
 engineers and is supported by various funding agencies including the
@@ -41,7 +41,7 @@ The documentation for the SQA releases can be found using the following links:
 - [2024-11-11](https://mooseframework.inl.gov/releases/moose/2024-11-11/)
 - [2024-03-08](https://mooseframework.inl.gov/releases/moose/2024-03-08/)
 - [2022-06-13](https://mooseframework.inl.gov/releases/moose/2022-06-13)
-- [2022-06-10](https://mooseframework.inl.gvo/releases/moose/2022-06-10)
+- [2022-06-10](https://mooseframework.inl.gov/releases/moose/2022-06-10)
 - [2021-09-15](https://mooseframework.inl.gov/releases/moose/2021-09-15)
 - [2021-05-18](https://mooseframework.inl.gov/releases/moose/2021-05-18)
 - [v1.0.0](https://mooseframework.inl.gov/releases/moose/v1.0.0)
