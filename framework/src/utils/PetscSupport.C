@@ -744,7 +744,7 @@ addPetscPairsToPetscOptions(
 #endif
 
       // Look for a pc description
-      if (option_name == "-pc_type" || option_name == "-pc_sub_type" ||
+      if (option_name == "-pc_type" || option_name == "-sub_pc_type" ||
           option_name == "-pc_hypre_type")
         pc_description += option_value + ' ';
 
