@@ -53,6 +53,7 @@ checkSize(const std::string & split_name, const I1 split_size, const I2 size_exp
 struct DM_Moose
 {
   NonlinearSystemBase * _nl; // nonlinear system context
+  const DofMapBase * _dof_map;
   DM_Moose * _parent = nullptr;
   std::set<std::string> * _vars; // variables
   std::map<std::string, unsigned int> * _var_ids;
@@ -230,6 +231,20 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
             "Cannot reset the NonlinearSystem after DM has been set up.");
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   dmm->_nl = &nl;
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+PetscErrorCode
+DMMooseSetDofMap(DM dm, const DofMapBase & dof_map)
+{
+  PetscFunctionBegin;
+  LibmeshPetscCallQ(DMMooseValidityCheck(dm));
+  if (dm->setupcalled)
+    SETERRQ(((PetscObject)dm)->comm,
+            PETSC_ERR_ARG_WRONGSTATE,
+            "Cannot reset the degree of freedom map after DM has been set up.");
+  DM_Moose * dmm = (DM_Moose *)(dm->data);
+  dmm->_dof_map = &dof_map;
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -514,7 +529,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
     if (!dmm->_all_vars || !dmm->_all_blocks || !dmm->_nosides || !dmm->_nounsides ||
         !dmm->_nounside_by_var || !dmm->_nocontacts || !dmm->_nouncontacts)
     {
-      DofMap & dofmap = dmm->_nl->system().get_dof_map();
+      auto & dofmap = *dmm->_dof_map;
       // Put this outside the lambda scope to avoid constant memory reallocation
       std::vector<dof_id_type> node_indices;
       auto process_nodal_dof_indices =
@@ -842,7 +857,8 @@ DMCreateFieldDecomposition_Moose(
     DM_Moose::SplitInfo & dinfo = (*dmm->_splits)[dname];
     if (!dinfo._dm)
     {
-      LibmeshPetscCallQ(DMCreateMoose(((PetscObject)dm)->comm, *dmm->_nl, dname, &dinfo._dm));
+      LibmeshPetscCallQ(
+          DMCreateMoose(((PetscObject)dm)->comm, *dmm->_nl, *dmm->_dof_map, dname, &dinfo._dm));
       LibmeshPetscCallQ(
           PetscObjectSetOptionsPrefix((PetscObject)dinfo._dm, ((PetscObject)dm)->prefix));
       std::string suffix = std::string("fieldsplit_") + dname + "_";
@@ -2041,12 +2057,17 @@ DMDestroy_Moose(DM dm)
 }
 
 PetscErrorCode
-DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, const std::string & dm_name, DM * dm)
+DMCreateMoose(MPI_Comm comm,
+              NonlinearSystemBase & nl,
+              const DofMapBase & dof_map,
+              const std::string & dm_name,
+              DM * dm)
 {
   PetscFunctionBegin;
   LibmeshPetscCallQ(DMCreate(comm, dm));
   LibmeshPetscCallQ(DMSetType(*dm, DMMOOSE));
   LibmeshPetscCallQ(DMMooseSetNonlinearSystem(*dm, nl));
+  LibmeshPetscCallQ(DMMooseSetDofMap(*dm, dof_map));
   LibmeshPetscCallQ(DMMooseSetName(*dm, dm_name));
   PetscFunctionReturn(PETSC_SUCCESS);
 }

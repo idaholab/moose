@@ -28,6 +28,11 @@ class CommandLine;
 class InputParameters;
 class ParallelParamObject;
 
+namespace libMesh
+{
+class DofMapBase;
+}
+
 namespace Moose
 {
 namespace PetscSupport
@@ -101,11 +106,6 @@ setLinearSolverDefaults(FEProblemBase & problem, libMesh::LinearSolver<T> & line
  */
 void petscSetDefaults(FEProblemBase & problem);
 
-/**
- * Setup the PETSc DM object
- */
-void petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name);
-
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 
 /**
@@ -136,6 +136,13 @@ void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
 void storePetscOptions(FEProblemBase & fe_problem,
                        const std::string & prefix,
                        const ParallelParamObject & param_object);
+
+/*
+ * Change any prefix in the problem's \p PetscOptions that matches \p old_prefix to \p new_prefix
+ */
+void changePetscOptionsPrefix(FEProblemBase & fe_problem,
+                              const std::string & old_prefix,
+                              const std::string & new_prefix);
 
 /**
  * Set flags that will instruct the user on the reason their simulation diverged from PETSc's
@@ -297,6 +304,16 @@ void dontAddCommonKSPOptions(FEProblemBase & fe_problem);
  * object to be later set unless explicitly specified in input or on the command line.
  */
 void dontAddCommonSNESOptions(FEProblemBase & fe_problem);
+
+/**
+ * Create a matrix from a binary file. Note that the returned libMesh matrix wrapper will not
+ * destroy the created matrix on destruction. \p petsc_mat must be destroyed manually via \p
+ * MatDestroy
+ */
+std::unique_ptr<PetscMatrix<Number>>
+createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
+                     Mat & petsc_mat,
+                     const std::string & binary_mat_file);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

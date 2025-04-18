@@ -338,7 +338,6 @@ SystemBase::prepareLowerD(THREAD_ID tid)
 void
 SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
-
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariableFieldBase *> & active_elemental_moose_variables =
@@ -1648,9 +1647,15 @@ SystemBase::getSubdomainsForVar(const std::string & var_name) const
 }
 
 std::string
+SystemBase::petscPrefix() const
+{
+  return system().prefix_with_name() ? system().prefix() : "";
+}
+
+std::string
 SystemBase::prefix() const
 {
-  return "-" + (system().prefix_with_name() ? system().prefix() : "");
+  return "-" + petscPrefix();
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
