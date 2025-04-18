@@ -258,6 +258,11 @@ MooseApp::validParams()
       "",
       "Continue the calculation. Without <file base>, the most recent recovery file will be used");
   params.setGlobalCommandLineParam("recover");
+  params.addCommandLineParam<bool>(
+      "force_restart",
+      "--force-restart",
+      "Forcefully load checkpoints despite possible incompatibilities");
+  params.setGlobalCommandLineParam("force_restart");
 
   params.addCommandLineParam<bool>("suppress_header",
                                    "--suppress-header",
@@ -454,6 +459,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _restart(false),
     _split_mesh(false),
     _use_split(parameters.get<bool>("use_split")),
+    _force_restart(parameters.get<bool>("force_restart")),
 #ifdef DEBUG
     _trap_fpe(true),
 #else
@@ -472,7 +478,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                : nullptr),
     _mesh_generator_system(*this),
     _chain_control_system(*this),
-    _rd_reader(*this, _restartable_data),
+    _rd_reader(*this, _restartable_data, forceRestart()),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
@@ -2397,7 +2403,7 @@ MooseApp::possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
   const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
   if (RestartableDataReader::isAvailable(meta_data_folder_base))
   {
-    RestartableDataReader reader(*this, getRestartableDataMap(name));
+    RestartableDataReader reader(*this, getRestartableDataMap(name), forceRestart());
     reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
     reader.setInput(meta_data_folder_base);
     reader.restore();

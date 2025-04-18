@@ -22,17 +22,23 @@
 #define RESTARTABLE_SKIP_CHECK_HASH_CODE
 #endif
 
-RestartableDataReader::RestartableDataReader(MooseApp & app, RestartableDataMap & data)
+RestartableDataReader::RestartableDataReader(MooseApp & app,
+                                             RestartableDataMap & data,
+                                             const bool force /* = false */)
   : RestartableDataIO(app, data),
     _is_restoring(false),
-    _error_on_different_number_of_processors(true)
+    _error_on_different_number_of_processors(true),
+    _force(force)
 {
 }
 
-RestartableDataReader::RestartableDataReader(MooseApp & app, std::vector<RestartableDataMap> & data)
+RestartableDataReader::RestartableDataReader(MooseApp & app,
+                                             std::vector<RestartableDataMap> & data,
+                                             const bool force /* = false */)
   : RestartableDataIO(app, data),
     _is_restoring(false),
-    _error_on_different_number_of_processors(true)
+    _error_on_different_number_of_processors(true),
+    _force(force)
 {
 }
 
@@ -109,11 +115,14 @@ RestartableDataReader::readHeader(InputStream & header_input) const
   std::size_t this_compare_hash_code;
   dataLoad(stream, this_compare_hash_code, nullptr);
 #ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
-  if (this_compare_hash_code != typeid(COMPARE_HASH_CODE_TYPE).hash_code())
+  if (this_compare_hash_code != typeid(COMPARE_HASH_CODE_TYPE).hash_code() && !_force)
     error("The backup is not compatible\n\nThe hash code check for a basic type (",
           MooseUtils::prettyCppType<COMPARE_HASH_CODE_TYPE>(),
-          ") failed.\nIt is likely that this backup was stored with a different architecture or "
-          "operating system");
+          ") failed.\nIt is possible that this backup was stored with a different architecture or "
+          "operating system.\n\nTo forcefully attempt loading the backup, use the command line "
+          "option --force-restart");
+#else
+  (void)_force;
 #endif
 
   // Number of procs
