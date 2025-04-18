@@ -25,4 +25,11 @@ public:
   static InputParameters validParams();
 
   StaticCondensationFieldSplitPreconditioner(const InputParameters & parameters);
+
+  virtual void setupDM() override;
+
+protected:
+  virtual const libMesh::DofMapBase & dofMap() const override;
+  virtual const libMesh::System & system() const override;
+  virtual std::string petscPrefix() const override;
 };

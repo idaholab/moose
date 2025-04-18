@@ -962,9 +962,15 @@ public:
   const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
 
   /**
-   * @returns A prefix for solvers
+   * @returns A prefix for solvers. This does have a leading dash
    */
   std::string prefix() const;
+
+  /**
+   * @returns A prefix for solvers ready to immediately pass to PETSc. This does not have a leading
+   * dash
+   */
+  std::string petscPrefix() const;
 
 protected:
   /**

@@ -46,6 +46,7 @@ class HDGKernel;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
+class FieldSplitPreconditionerBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -101,13 +102,12 @@ public:
   virtual void jacobianSetup() override;
 
   virtual void setupFiniteDifferencedPreconditioner() = 0;
-  void setupFieldDecomposition();
 
   bool haveFiniteDifferencedPreconditioner() const
   {
     return _use_finite_differenced_preconditioner;
   }
-  bool haveFieldSplitPreconditioner() const { return _use_field_split_preconditioner; }
+  bool haveFieldSplitPreconditioner() const { return _fsp; }
 
   /**
    * Adds a kernel
@@ -446,19 +446,9 @@ public:
   }
 
   /**
-   * @param decomposition If called with a single string, it is used as the name of a the top-level
-   * decomposition split. If the array is empty, no decomposition is used. In all other cases an
-   * error occurs.
-   * @param data_management_dof_map The degree of freedom map which will provide the degree of
-   * freedom information needed when creating the field decomposition
+   * If called with a non-null object true this system will use a field split preconditioner matrix.
    */
-  void setFieldSplitData(const std::vector<std::string> & decomposition,
-                         const libMesh::DofMapBase & data_management_dof_map);
-
-  /**
-   * If called with true this system will use a field split preconditioner matrix.
-   */
-  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
+  void useFieldSplitPreconditioner(FieldSplitPreconditionerBase * fsp) { _fsp = fsp; }
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom
@@ -888,15 +878,8 @@ protected:
 
   MatFDColoring _fdcoloring;
 
-  /// Whether or not the system can be decomposed into splits
-  bool _have_decomposition;
-  /// Name of the top-level split of the decomposition
-  std::string _decomposition_split;
-  /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
-  bool _use_field_split_preconditioner;
-  /// The degree of freedom map which will provide the degree of freedom information needed when
-  /// creating the field decomposition
-  const libMesh::DofMapBase * _field_split_dof_map;
+  /// The field split preconditioner if this sytem is using one
+  FieldSplitPreconditionerBase * _fsp;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;
