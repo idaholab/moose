@@ -34,6 +34,14 @@ MooseStaticCondensationPreconditioner::validParams()
   return params;
 }
 
+std::string
+MooseStaticCondensationPreconditioner::prefix() const
+{
+  // We always prefix the condensed system with the nonlinear system name regardless of the number
+  // of systems in the problem. Maybe we'll change this later for more consistency?
+  return "-" + _nl.name() + "_condensed_";
+}
+
 MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
     const InputParameters & params)
   : SingleMatrixPreconditioner(params)
@@ -48,9 +56,8 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
         "particular operations can be avoided by using '-ksp_type preonly', disabling printing of "
         "linear residuals, and using the 'cp' or 'basic' line search.");
 
-  const std::string root_old_prefix =
-      _fe_problem.numSolverSystems() > 1 ? ("-" + _nl.name() + "_") : "-";
-  const std::string root_new_prefix = "-" + _nl.name() + "_condensed_";
+  const auto & root_old_prefix = _nl.prefix();
+  const std::string root_new_prefix = prefix();
   auto change_prefix = [this, &root_old_prefix, &root_new_prefix](const std::string & petsc_system)
   {
     Moose::PetscSupport::changePetscOptionsPrefix(
@@ -63,10 +70,9 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
   if (!implicit_sys)
     mooseError("Static condensation can only be used with implicit systems");
   implicit_sys->create_static_condensation();
-  auto & sc = implicit_sys->get_static_condensation();
+  _sc = &implicit_sys->get_static_condensation();
   std::unordered_set<unsigned int> uncondensed_vars;
   for (auto & nl_var_name : getParam<std::vector<NonlinearVariableName>>("dont_condense_vars"))
     uncondensed_vars.insert(_nl.getVariable(0, nl_var_name).number());
-  sc.dont_condense_vars(uncondensed_vars);
-  _sc = &sc;
+  _sc->dont_condense_vars(uncondensed_vars);
 }

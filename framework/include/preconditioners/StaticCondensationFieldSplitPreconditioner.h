@@ -25,4 +25,9 @@ public:
   static InputParameters validParams();
 
   StaticCondensationFieldSplitPreconditioner(const InputParameters & parameters);
+
+  virtual void setupDM() override;
+
+protected:
+  virtual const libMesh::DofMapBase & dofMap() const override;
 };

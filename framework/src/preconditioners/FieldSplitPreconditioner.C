@@ -18,10 +18,14 @@
 #include "PetscSupport.h"
 #include "MoosePreconditioner.h"
 #include "MooseStaticCondensationPreconditioner.h"
+#include "Split.h"
+#include "PetscDMMoose.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/coupling_matrix.h"
+
+using namespace libMesh;
 
 template <typename Base>
 InputParameters
@@ -30,7 +34,7 @@ FieldSplitPreconditionerTempl<Base>::validParams()
   InputParameters params = Base::validParams();
   params.addClassDescription("Preconditioner designed to map onto PETSc's PCFieldSplit.");
 
-  params.addRequiredParam<std::vector<std::string>>(
+  params.addRequiredParam<std::string>(
       "topsplit", "Entrance to splits, the top split will specify how splits will go.");
   // We should use full coupling Jacobian matrix by default
   params.addParam<bool>("full",
@@ -45,9 +49,12 @@ template <typename Base>
 FieldSplitPreconditionerTempl<Base>::FieldSplitPreconditionerTempl(
     const InputParameters & parameters)
   : Base(parameters),
-    _top_split(this->template getParam<std::vector<std::string>>("topsplit")),
-    _nl(this->_fe_problem.getNonlinearSystemBase(this->_nl_sys_num))
+    _nl(this->_fe_problem.getNonlinearSystemBase(this->_nl_sys_num)),
+    _decomposition_split(this->template getParam<std::string>("topsplit"))
 {
+  if (libMesh::default_solver_package() != libMesh::PETSC_SOLVERS)
+    mooseError("The field split preconditioner can only be used with PETSc");
+
   // number of variables
   unsigned int n_vars = _nl.nVariables();
   // if we want to construct a full Jacobian?
@@ -92,7 +99,17 @@ FieldSplitPreconditionerTempl<Base>::FieldSplitPreconditionerTempl(
   this->setCouplingMatrix(std::move(cm));
 
   // turn on a flag
-  _nl.useFieldSplitPreconditioner(true);
+  _nl.useFieldSplitPreconditioner(this);
+}
+
+template <typename Base>
+void
+FieldSplitPreconditionerTempl<Base>::createMooseDM(DM dm)
+{
+  LibmeshPetscCallA(_nl.comm().get(),
+                    DMCreateMoose(_nl.comm().get(), _nl, dofMap(), _decomposition_split, &dm));
+  LibmeshPetscCallA(_nl.comm().get(), DMSetFromOptions(dm));
+  LibmeshPetscCallA(_nl.comm().get(), DMSetUp(dm));
 }
 
 registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
@@ -106,11 +123,47 @@ FieldSplitPreconditioner::validParams()
 FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & params)
   : FieldSplitPreconditionerTempl<MoosePreconditioner>(params)
 {
-  // set a top splitting
-  _nl.setFieldSplitData(_top_split, _nl.dofMap());
+  std::shared_ptr<Split> top_split = _nl.getSplit(_decomposition_split);
+  top_split->setup(_nl, _nl.petscPrefix());
+}
 
-  // apply prefix and store PETSc options
-  _nl.setupFieldDecomposition();
+void
+FieldSplitPreconditioner::setupDM()
+{
+  PetscBool ismoose;
+  DM dm = LIBMESH_PETSC_NULLPTR;
+
+  // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this
+  // call would be in DMInitializePackage()
+  LibmeshPetscCallA(_nl.comm().get(), DMMooseRegisterAll());
+  // Create and set up the DM that will consume the split options and deal with block matrices.
+  auto * const petsc_solver =
+      libMesh::cast_ptr<PetscNonlinearSolver<Number> *>(_nl.nonlinearSolver());
+  const char * snes_prefix = nullptr;
+  std::string snes_prefix_str;
+  if (_nl.system().prefix_with_name())
+  {
+    snes_prefix_str = _nl.system().prefix();
+    snes_prefix = snes_prefix_str.c_str();
+  }
+  SNES snes = petsc_solver->snes(snes_prefix);
+  // if there exists a DMMoose object, not to recreate a new one
+  LibmeshPetscCallA(_nl.comm().get(), SNESGetDM(snes, &dm));
+  if (dm)
+  {
+    LibmeshPetscCallA(_nl.comm().get(), PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose));
+    if (ismoose)
+      return;
+  }
+  createMooseDM(dm);
+  LibmeshPetscCallA(_nl.comm().get(), SNESSetDM(snes, dm));
+  LibmeshPetscCallA(_nl.comm().get(), DMDestroy(&dm));
+}
+
+const DofMapBase &
+FieldSplitPreconditioner::dofMap() const
+{
+  return _nl.dofMap();
 }
 
 template class FieldSplitPreconditionerTempl<MooseStaticCondensationPreconditioner>;

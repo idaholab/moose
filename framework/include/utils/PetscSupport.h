@@ -106,13 +106,6 @@ setLinearSolverDefaults(FEProblemBase & problem, libMesh::LinearSolver<T> & line
  */
 void petscSetDefaults(FEProblemBase & problem);
 
-/**
- * Setup the PETSc DM object
- */
-void petscSetupDM(NonlinearSystemBase & nl,
-                  const libMesh::DofMapBase & dof_map,
-                  const std::string & dm_name);
-
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 
 /**

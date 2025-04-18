@@ -27,6 +27,25 @@ public:
   MooseStaticCondensationPreconditioner(const InputParameters & params);
 
 protected:
+  libMesh::StaticCondensation & sc();
+  const libMesh::StaticCondensation & sc() const;
+
+  std::string prefix() const;
+
+private:
   /// Pointer to the libMesh static condensation object
-  const libMesh::StaticCondensation * _sc;
+  libMesh::StaticCondensation * _sc;
 };
+
+inline libMesh::StaticCondensation &
+MooseStaticCondensationPreconditioner::sc()
+{
+  libmesh_assert(_sc);
+  return *_sc;
+}
+
+inline const libMesh::StaticCondensation &
+MooseStaticCondensationPreconditioner::sc() const
+{
+  return const_cast<MooseStaticCondensationPreconditioner *>(this)->sc();
+}

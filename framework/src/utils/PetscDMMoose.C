@@ -529,7 +529,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
     if (!dmm->_all_vars || !dmm->_all_blocks || !dmm->_nosides || !dmm->_nounsides ||
         !dmm->_nounside_by_var || !dmm->_nocontacts || !dmm->_nouncontacts)
     {
-      DofMap & dofmap = dmm->_nl->system().get_dof_map();
+      auto & dofmap = *dmm->_dof_map;
       // Put this outside the lambda scope to avoid constant memory reallocation
       std::vector<dof_id_type> node_indices;
       auto process_nodal_dof_indices =

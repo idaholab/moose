@@ -131,8 +131,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
     _fdcoloring(nullptr),
-    _have_decomposition(false),
-    _use_field_split_preconditioner(false),
+    _fsp(nullptr),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _assemble_constraints_separately(false),
     _need_residual_ghosted(false),
@@ -410,39 +409,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
 void
 NonlinearSystemBase::setupDM()
 {
-  if (haveFieldSplitPreconditioner())
-  {
-    mooseAssert(_field_split_dof_map, "This must be non-null for setting up the DM");
-    Moose::PetscSupport::petscSetupDM(*this, *_field_split_dof_map, _decomposition_split);
-  }
-}
-
-void
-NonlinearSystemBase::setFieldSplitData(const std::vector<std::string> & splits,
-                                       const DofMapBase & data_management_dof_map)
-{
-  /// Although a single top-level split is allowed in Problem, treat it as a list of splits for conformity with the Split input syntax.
-  if (splits.size() && splits.size() != 1)
-    mooseError("Only a single top-level split is allowed in a Problem's decomposition.");
-
-  _field_split_dof_map = &data_management_dof_map;
-  if (splits.size())
-  {
-    _decomposition_split = splits[0];
-    _have_decomposition = true;
-  }
-  else
-    _have_decomposition = false;
-}
-
-void
-NonlinearSystemBase::setupFieldDecomposition()
-{
-  if (!_have_decomposition)
-    return;
-
-  std::shared_ptr<Split> top_split = getSplit(_decomposition_split);
-  top_split->setup(*this);
+  if (_fsp)
+    _fsp->setupDM();
 }
 
 void
