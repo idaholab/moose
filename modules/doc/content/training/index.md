@@ -6,7 +6,7 @@ Upcoming MOOSE related training in chronological order:
 
 - [Griffin Workshop during M&C 2025](https://www.ans.org/meetings/mc2025/calendar/event-1560/) (2025 April 27, Denver)
 
-- MOOSE Framework Fundamentals (2025 June 3-5, Idaho Falls)
+- [MOOSE Framework Fundamentals](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration) (2025 June 3-5, Idaho Falls)
 
 - [BISON](https://mooseframework.inl.gov/bison) Fuels Performance (2025 June 17-20, Idaho Falls)
 
