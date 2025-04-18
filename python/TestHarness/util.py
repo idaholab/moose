@@ -717,7 +717,11 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
         output = output.split('**END JSON DATA**\n')[0]
         return json.loads(output)
     except IndexError:
-        raise Exception(f'Failed to find JSON header and footer from {context}')
+        output_string = ""
+        if "ERROR" in output:
+            output_string += "\n" + output
+        output_string += f"Failed to find JSON header and footer from {context}"
+        raise Exception(output_string)
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
 
