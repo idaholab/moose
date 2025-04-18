@@ -25,6 +25,7 @@ class NonlinearSystemBase;
 namespace libMesh
 {
 class DofMapBase;
+class System;
 }
 
 extern PetscErrorCode DMMooseRegisterAll();
@@ -39,6 +40,7 @@ extern PetscErrorCode DMMooseRegisterAll();
 extern PetscErrorCode DMCreateMoose(MPI_Comm comm,
                                     NonlinearSystemBase & nl,
                                     const libMesh::DofMapBase & dof_map,
+                                    const libMesh::System & system,
                                     const std::string & dm_name,
                                     DM * dm);
 
