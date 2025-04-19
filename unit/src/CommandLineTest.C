@@ -940,3 +940,23 @@ TEST(CommandLineTest, removeArgumentMissing)
               "CommandLine::removeArgument(): The argument '--arg' does not exist");
   }
 }
+
+TEST(CommandLineTest, formatEntry)
+{
+  const auto test =
+      [](const std::vector<std::string> & args, const std::vector<std::string> & expected)
+  {
+    CommandLine cl;
+    cl.addArguments(args);
+    cl.parse();
+
+    const auto & entries = std::as_const(cl).getEntries();
+    ASSERT_EQ(entries.size(), expected.size());
+
+    for (const auto e : make_range(entries.size()))
+      ASSERT_EQ(cl.formatEntry(*std::next(entries.begin(), e)), expected[e]);
+  };
+
+  test({"-foo", "--foo", "bar", "foo=bar"}, {"-foo", "--foo bar", "foo=bar"});
+  test({"-foo", "bar baz", "foo=bar baz"}, {"-foo 'bar baz'", "foo='bar baz'"});
+}
