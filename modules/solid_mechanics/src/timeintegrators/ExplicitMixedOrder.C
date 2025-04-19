@@ -31,6 +31,10 @@
 #include <iterator>
 
 registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder);
+registerMooseObjectRenamed("SolidMechanicsApp",
+                           DirectCentralDifference,
+                           "10/14/2025 00:00",
+                           ExplicitMixedOrder);
 
 InputParameters
 ExplicitMixedOrder::validParams()
@@ -38,7 +42,7 @@ ExplicitMixedOrder::validParams()
   InputParameters params = ExplicitTimeIntegrator::validParams();
 
   params.addClassDescription(
-      "Implementation of Explicit/Forward Euler without invoking any of the nonlinear solver");
+      "Implementation of explicit time integration without invoking any of the nonlinear solver.");
 
   params.addParam<bool>("use_constant_mass",
                         false,
