@@ -209,6 +209,14 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
 
     case DecompMethod::EigenSolution:
     {
+      // Add a small perturbation to F for the case when F=I, which occurs with no deformation,
+      // which commonly occurs in initialization. The perturbation to F does not affect the computed
+      // stress, but prevents a singularity in the AD-computed material Jacobian.
+      if (this->_fe_problem.currentlyComputingJacobian() &&
+          _Fhat[_qp] == ADRankTwoTensor::Identity())
+        _Fhat[_qp] +=
+            ADRankTwoTensor(0.0, 5.0e-13, 5.0e-13, 5.0e-13, 0.0, 5.0e-13, 5.0e-13, 5.0e-13, 0.0);
+
       FADR2 Chat = ADR2::transposeTimes(_Fhat[_qp]);
       FADR2 Uhat = MathUtils::sqrt(Chat);
       rotation_increment = _Fhat[_qp] * Uhat.inverse().template get<ADRankTwoTensor>();
