@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ExplicitMixedOrder.h"
 #include "NodalBC.h"
 #include "libmesh/numeric_vector.h"
 
@@ -21,16 +22,16 @@ class SparseMatrix;
 /**
  * Base boundary condition of a direct Dirichlet type
  */
-class DirectDirichletBCBase : public NodalBC
+class ExplicitDirichletBCBase : public NodalBC
 {
 public:
   static InputParameters validParams();
 
-  DirectDirichletBCBase(const InputParameters & parameters);
+  ExplicitDirichletBCBase(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
-
+  virtual void timestepSetup() override;
   /**
    * Compute the value of the DirichletBC at the current quadrature point
    */
@@ -41,4 +42,10 @@ protected:
 
   const Real & _u_old;
   const Real & _u_dot_old;
+
+  /// explicit time integrator
+  const ExplicitMixedOrder * _exp_integrator;
+
+  /// variable time order need for computing BC
+  ExplicitMixedOrder::TimeOrder _var_time_order;
 };

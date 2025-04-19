@@ -238,37 +238,37 @@
 
 [BCs]
   [x_front]
-    type = DirectDirichletBC
+    type = ExplicitDirichletBC
     variable = disp_x
     boundary = 'ball_front'
     value = 0.0
   []
   [y_front]
-    type = DirectDirichletBC
+    type = ExplicitDirichletBC
     variable = disp_y
     boundary = 'ball_front'
     value = 0.0
   []
   [x_fixed]
-    type = DirectDirichletBC
+    type = ExplicitDirichletBC
     variable = disp_x
     boundary = 'base_back'
     value = 0.0
   []
   [y_fixed]
-    type = DirectDirichletBC
+    type = ExplicitDirichletBC
     variable = disp_y
     boundary = 'base_back'
     value = 0.0
   []
   [z_fixed]
-    type = DirectDirichletBC
+    type = ExplicitDirichletBC
     variable = disp_z
     boundary = 'base_back'
     value = 0.0
   []
   [z_fixed_front]
-    type = DirectDirichletBC
+    type = ExplicitDirichletBC
     variable = disp_z
     boundary = 'base_front'
     value = 0.0
@@ -343,8 +343,9 @@
   timestep_tolerance = 1e-6
 
   [TimeIntegrator]
-    type = DirectCentralDifference
+    type = ExplicitMixedOrder
     mass_matrix_tag = mass
+    second_order_vars = 'disp_x disp_y disp_z'
   []
 []
 

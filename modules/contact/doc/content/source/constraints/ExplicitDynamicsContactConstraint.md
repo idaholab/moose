@@ -6,7 +6,7 @@ This object implements node-face constraints for the enforcement of normal
 mechanical contact in explicit dynamics. Surrogate balance-momentum equations are
 solved at each node on the secondary surface.
 
-This method MUST be used with the [DirectCentralDifference](source/timeintegrators/DirectCentralDifference.md) time integrator found in the Solid Mechanics module.
+This method MUST be used with the [ExplicitMixedOrder](source/timeintegrators/ExplicitMixedOrder.md) time integrator found in the Solid Mechanics module.
 
 Following the work of [!citep](heinstein2000contact), the contact is constrained as such,
 

@@ -9,27 +9,25 @@
 
 #pragma once
 
-#include "DirectDirichletBCBase.h"
+#include "ExplicitDirichletBCBase.h"
+
+class Function;
 
 /**
- * Boundary condition of a Direct Dirichlet type
+ * Defines a boundary condition that forces the value to be a user specified
+ * function at the boundary.
  * For use with direct central difference time integrator
- *
- * Sets the value in the node
  */
-class DirectDirichletBC : public DirectDirichletBCBase
+class ExplicitFunctionDirichletBC : public ExplicitDirichletBCBase
 {
 public:
   static InputParameters validParams();
 
-  DirectDirichletBC(const InputParameters & parameters);
+  ExplicitFunctionDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpValue() override;
 
-  /// The value for this BC
-  const Real & _value;
-
-  /// Vector of 1's to help with creating the lumped mass matrix
-  NumericVector<Real> * _ones;
+  /// The function being used for evaluation
+  const Function & _func;
 };
