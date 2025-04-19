@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DirectFunctionDirichletBC.h"
+#include "ExplicitFunctionDirichletBC.h"
 #include "Function.h"
 
-registerMooseObject("SolidMechanicsApp", DirectFunctionDirichletBC);
+registerMooseObject("SolidMechanicsApp", ExplicitFunctionDirichletBC);
 
 InputParameters
-DirectFunctionDirichletBC::validParams()
+ExplicitFunctionDirichletBC::validParams()
 {
-  InputParameters params = DirectDirichletBCBase::validParams();
+  InputParameters params = ExplicitDirichletBCBase::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addClassDescription(
       "Imposes the essential boundary condition $u=g(t,\\vec{x})$, where $g$ "
@@ -23,13 +23,13 @@ DirectFunctionDirichletBC::validParams()
   return params;
 }
 
-DirectFunctionDirichletBC::DirectFunctionDirichletBC(const InputParameters & parameters)
-  : DirectDirichletBCBase(parameters), _func(getFunction("function"))
+ExplicitFunctionDirichletBC::ExplicitFunctionDirichletBC(const InputParameters & parameters)
+  : ExplicitDirichletBCBase(parameters), _func(getFunction("function"))
 {
 }
 
 Real
-DirectFunctionDirichletBC::computeQpValue()
+ExplicitFunctionDirichletBC::computeQpValue()
 {
   return _func.value(_t, *_current_node);
 }

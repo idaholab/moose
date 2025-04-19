@@ -94,10 +94,6 @@ protected:
   computeTimeDerivativeHelper(T & u_dot, T2 & u_dotdot, const T3 & u_old, const T4 & u_older) const;
 
   void computeICs();
-
-private:
-  /// flag to only compute once. PR reviewer do not let this in
-  bool _compute_once;
 };
 
 template <typename T, typename T2, typename T3, typename T4>

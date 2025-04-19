@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30335'
-  design = 'Central.md'
+  design = 'ExplicitMixedOrder.md'
   [exp_time_int]
     requirement = "The mechanics system shall predict solutions for explicit"
     "time integration for"

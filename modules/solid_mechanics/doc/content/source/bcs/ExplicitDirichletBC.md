@@ -1,6 +1,6 @@
-# DirectDirichletBC
+# ExplicitDirichletBC
 
-!syntax description /BCs/DirectDirichletBC
+!syntax description /BCs/ExplicitDirichletBC
 
 ## Overview
 
@@ -19,8 +19,8 @@ At each boundary node:
 
 where $\mathbf{F_g}$ is the force required to enforce the BC and ${\mathbf{u}_g}$ is the displacement to be enforced.
 
-!syntax parameters /BCs/DirectDirichletBC
+!syntax parameters /BCs/ExplicitDirichletBC
 
-!syntax inputs /BCs/DirectDirichletBC
+!syntax inputs /BCs/ExplicitDirichletBC
 
-!syntax children /BCs/DirectDirichletBC
+!syntax children /BCs/ExplicitDirichletBC

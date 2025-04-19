@@ -128,8 +128,8 @@ public:
   virtual bool isExplicit() const { return false; }
 
   /*
-  * Returns whether the solver controls it's own state
-  */
+   * Returns whether the solver controls it's own state
+   */
   virtual bool controlsState() const { return false; };
 
   /**

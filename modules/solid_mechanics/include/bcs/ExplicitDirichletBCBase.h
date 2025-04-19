@@ -22,12 +22,12 @@ class SparseMatrix;
 /**
  * Base boundary condition of a direct Dirichlet type
  */
-class DirectDirichletBCBase : public NodalBC
+class ExplicitDirichletBCBase : public NodalBC
 {
 public:
   static InputParameters validParams();
 
-  DirectDirichletBCBase(const InputParameters & parameters);
+  ExplicitDirichletBCBase(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

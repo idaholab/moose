@@ -31,7 +31,7 @@ then,
     \end{aligned}
 \end{equation}
 
-When using Dirichlet BCs, one must use the ([DirectDirichletBC](source/bcs/DirectDirichletBC.md),[DirectFunctionDirichletBC](source/bcs/DirectFunctionDirichletBC.md)) variations to enforce Dirichlet BC's properly.
+When using Dirichlet BCs, one must use the ([ExplicitDirichletBC](source/bcs/ExplicitDirichletBC.md),[ExplicitFunctionDirichletBC](source/bcs/ExplicitFunctionDirichletBC.md)) variations to enforce Dirichlet BC's properly.
 
 Additionally, the time integrator must be used with `MassMatrix`, with a properly tagged mass matrix.
 

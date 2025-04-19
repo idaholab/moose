@@ -94,7 +94,7 @@
 
 [BCs]
   [all]
-    type = DirectFunctionDirichletBC
+    type = ExplicitFunctionDirichletBC
     variable = u_first
     boundary = '0 1 2 3'
     function = exact_fn_first

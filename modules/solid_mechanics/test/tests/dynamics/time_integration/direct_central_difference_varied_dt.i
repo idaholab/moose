@@ -92,13 +92,13 @@
 
 [BCs]
   [left_x]
-    type = DirectFunctionDirichletBC
+    type = ExplicitFunctionDirichletBC
     variable = disp_x
     boundary = 'left'
     function = forcing_fn
   []
   [right_x]
-    type = DirectFunctionDirichletBC
+    type = ExplicitFunctionDirichletBC
     variable = disp_x
     boundary = 'right'
     function = forcing_fn

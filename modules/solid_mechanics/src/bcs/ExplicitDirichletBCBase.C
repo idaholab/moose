@@ -8,20 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExplicitMixedOrder.h"
-#include "DirectDirichletBCBase.h"
+#include "ExplicitDirichletBCBase.h"
 #include "MooseError.h"
 #include "NonlinearSystemBase.h"
 #include <iostream>
 #include <ostream>
 
 InputParameters
-DirectDirichletBCBase::validParams()
+ExplicitDirichletBCBase::validParams()
 {
   InputParameters params = NodalBC::validParams();
   return params;
 }
 
-DirectDirichletBCBase::DirectDirichletBCBase(const InputParameters & parameters)
+ExplicitDirichletBCBase::ExplicitDirichletBCBase(const InputParameters & parameters)
   : NodalBC(parameters),
     _mass_diag(_sys.getVector("mass_matrix_diag_inverted")),
     _u_old(_var.nodalValueOld()),
@@ -34,7 +34,7 @@ DirectDirichletBCBase::DirectDirichletBCBase(const InputParameters & parameters)
 }
 
 Real
-DirectDirichletBCBase::computeQpResidual()
+ExplicitDirichletBCBase::computeQpResidual()
 {
   // Get dof for current var
   const auto dofnum = _variable->nodalDofIndex();
@@ -57,7 +57,7 @@ DirectDirichletBCBase::computeQpResidual()
 }
 
 void
-DirectDirichletBCBase::timestepSetup()
+ExplicitDirichletBCBase::timestepSetup()
 {
   // Now is the point that the time integrator has the variable time orders setup
   _var_time_order = _exp_integrator->findVariableTimeOrder(_var.number());

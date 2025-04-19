@@ -77,8 +77,7 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
         declareRestartableData<std::vector<dof_id_type>>("first_local_indices")),
     _vars_second(declareRestartableData<std::unordered_set<unsigned int>>("second_order_vars")),
     _local_second_order_indicies(
-        declareRestartableData<std::vector<dof_id_type>>("second_local_indices")),
-    _compute_once(false)
+        declareRestartableData<std::vector<dof_id_type>>("second_local_indices"))
 {
   _fe_problem.setUDotRequested(true);
   _fe_problem.setUDotOldRequested(true);
@@ -125,6 +124,8 @@ ExplicitMixedOrder::solve()
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
 
+    // Hit libmesh asserts if we don't close here
+    _mass_matrix_diag_inverted->close();
     // Calculating the lumped mass matrix for use in residual calculation
     mass_matrix.vector_mult(*_mass_matrix_diag_inverted, *_ones);
 
@@ -137,6 +138,8 @@ ExplicitMixedOrder::solve()
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
 
+  // Hit libmesh asserts if we don't close here
+  _explicit_residual->close();
   // Compute the residual
   _explicit_residual->zero();
   _fe_problem.computeResidual(
@@ -177,23 +180,32 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   bool converged = false;
 
   // Grab all the vectors that we will need
-  auto & accel = *_sys.solutionUDotDot();
-  auto & vel = *_sys.solutionUDot();
-  const auto & old_vel = _sys.solutionUDotOld();
+  auto accel = _sys.solutionUDotDot();
+  auto vel = _sys.solutionUDot();
 
+  // Compute Forward Euler
   // Split diag mass and residual vectors into correct subvectors
   const auto mass_first = _mass_matrix_diag_inverted->get_subvector(_local_first_order_indicies);
-  const auto mass_second = _mass_matrix_diag_inverted->get_subvector(_local_second_order_indicies);
   const auto exp_res_first = _explicit_residual->get_subvector(_local_first_order_indicies);
+
+  // Need velocity vector split into subvectors
+  auto vel_first = vel->get_subvector(_local_first_order_indicies);
+
+  // Velocity update for foward euler
+  vel_first->pointwise_mult(*mass_first, *exp_res_first);
+
+  // Restore the velocities
+  vel->restore_subvector(std::move(vel_first), _local_first_order_indicies);
+
+  // Compute Central Difference
+  // Split diag mass and residual vectors into correct subvectors
+  const auto mass_second = _mass_matrix_diag_inverted->get_subvector(_local_second_order_indicies);
   const auto exp_res_second = _explicit_residual->get_subvector(_local_second_order_indicies);
 
   // Only need accelation and old velocity vector for central difference
-  auto accel_second = accel.get_subvector(_local_second_order_indicies);
-  auto old_vel_second = old_vel->get_subvector(_local_second_order_indicies);
+  auto accel_second = accel->get_subvector(_local_second_order_indicies);
 
-  // Need velocity vector split into subvectors
-  auto vel_first = vel.get_subvector(_local_first_order_indicies);
-  auto vel_second = vel.get_subvector(_local_second_order_indicies);
+  auto vel_second = vel->get_subvector(_local_second_order_indicies);
 
   // Compute accerlation for central difference
   accel_second->pointwise_mult(*mass_second, *exp_res_second);
@@ -205,18 +217,13 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   // Velocity update for central difference
   *vel_second += *accel_scaled;
 
-  // Velocity update for foward euler
-  vel_first->pointwise_mult(*mass_first, *exp_res_first);
-
   // Restore acceleration
-  accel.restore_subvector(std::move(accel_second), _local_second_order_indicies);
+  accel->restore_subvector(std::move(accel_second), _local_second_order_indicies);
 
-  // Restore the velocities
-  vel.restore_subvector(std::move(vel_first), _local_first_order_indicies);
-  vel.restore_subvector(std::move(vel_second), _local_second_order_indicies);
+  vel->restore_subvector(std::move(vel_second), _local_second_order_indicies);
 
   // Same solution update for both methods
-  *_solution_update = vel;
+  *_solution_update = *vel;
   _solution_update->scale(_dt);
 
   // Check for convergence by seeing if there is a nan or inf
@@ -225,8 +232,8 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 
   // The linear iteration count remains zero
   _n_linear_iterations = 0;
-  vel.close();
-  accel.close();
+  vel->close();
+  accel->close();
   return converged;
 }
 
