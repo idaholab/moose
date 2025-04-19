@@ -57,8 +57,6 @@ protected:
   /// Normal vector to the shell plane calcualted from cross product of _v1 and _v2
   RealVectorValue _normal;
 
-  const bool _use_displaced_mesh;
-
   usingTransientInterfaceMembers;
   using GenericKernel<is_ad>::_i;
   using GenericKernel<is_ad>::_name;
