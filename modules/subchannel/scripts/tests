@@ -1,0 +1,12 @@
+[Tests]
+    issues = '#30032'
+    design = 'user_notes.md'
+    [index]
+        type = ImageDiff
+        command = 'index.py'
+        imagediff = 'rod_position.png'
+        required_python_packages = 'numpy matplotlib'
+        valgrind = none
+        detail = 'script shall print the index position for SCM Subchannels/Pins'
+      []
+  []
