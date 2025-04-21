@@ -143,6 +143,8 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _fixed_point_status(MooseFixedPointConvergenceReason::UNSOLVED),
     _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
                                                      : nullptr),
+    _fixed_point_custom_pp_old(isParamValid("custom_pp") ? &getPostprocessorValueOld("custom_pp")
+                                                         : nullptr),
     _custom_rel_tol(getParam<Real>("custom_rel_tol")),
     _custom_abs_tol(getParam<Real>("custom_abs_tol")),
     _pp_old(0.0),
@@ -283,8 +285,8 @@ FixedPointSolve::solve()
     }
 
     // Save last postprocessor value as value before solve
-    if (_fixed_point_custom_pp && _fixed_point_it > 0 && !getParam<bool>("direct_pp_value"))
-      _pp_old = *_fixed_point_custom_pp;
+    if (_fixed_point_custom_pp && !getParam<bool>("direct_pp_value"))
+      _pp_old = _fixed_point_it > 0 ? *_fixed_point_custom_pp : *_fixed_point_custom_pp_old;
 
     // Solve a single application for one time step
     bool solve_converged = solveStep(_fixed_point_timestep_begin_norm[_fixed_point_it],
