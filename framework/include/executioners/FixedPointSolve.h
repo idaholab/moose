@@ -245,6 +245,7 @@ protected:
 private:
   /// Postprocessor value for user-defined fixed point convergence check
   const PostprocessorValue * const _fixed_point_custom_pp;
+  const PostprocessorValue * const _fixed_point_custom_pp_old;
   /// Relative tolerance on postprocessor value
   const Real _custom_rel_tol;
   /// Absolute tolerance on postprocessor value
