@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #include "MFEMKernel.h"
 
 InputParameters
@@ -26,3 +28,5 @@ MFEMKernel::MFEMKernel(const InputParameters & parameters)
     _subdomain_attributes[i] = std::stoi(_subdomain_names[i]);
   }
 }
+
+#endif
