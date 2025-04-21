@@ -55,7 +55,7 @@ outputs:
         - {{ moose_ccompiler }}
         - {{ moose_cxxcompiler }}
         - make
-        - cmake
+        - {{ moose_cmake }}
         - pkg-config
 
   - name: moose-pyhit

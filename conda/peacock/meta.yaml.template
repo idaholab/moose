@@ -29,14 +29,15 @@ requirements:
     - vtk
   run_constrained:
     # Python max constraints
-    - python <{{3.12}}
+    - python <{{3.13}}
 
 test:
   imports:
     - PyQt5
     - pandas
     - matplotlib
-    - vtk
+    # vtk out right fails to import on Sequoia 15.4
+    - vtk          # [linux]
 
 about:
   home: https://mooseframework.inl.gov/
