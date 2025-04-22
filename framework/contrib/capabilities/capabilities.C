@@ -96,9 +96,6 @@ capabilities_check(PyObject *self, PyObject *args)
     }
   }
 
-  // throw on errors to properly report the failure back to python
-  Moose::_throw_on_error = true;
-
   try
   {
     // call capabilities C++ code with capabilities map
