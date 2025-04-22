@@ -75,7 +75,7 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 # capabilities python bindings
 #
 CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/capabilities
-capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C
+capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
 
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
@@ -197,14 +197,12 @@ hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 
 capabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)
 capabilities_LIB          := $(CAPABILITIES_DIR)/$(capabilities_LIBNAME)
-capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS)
-capabilities_LDFLAGS      := -Wl,-rpath,$(HIT_DIR) -L$(HIT_DIR) -lhit-$(METHOD) -Wl,-rpath,$(FRAMEWORK_DIR) -L$(FRAMEWORK_DIR) -lmoose-$(METHOD) $(DYNAMIC_LOOKUP)
+capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/utils
+capabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
 
-capabilities $(capabilities_LIB) : $(capabilities_srcfiles) $(moose_LIB) $(app_HEADER) | prebuild
+capabilities $(capabilities_LIB) : $(capabilities_srcfiles)
 	@echo "Building and linking "$@"..."
-# @$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
-# $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB)
-	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(app_INCLUDES) $(libmesh_INCLUDE) $(moose_INCLUDE) -I $(MOOSE_DIR)/framework/contrib/boost/include $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB))'
+	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) -o $(capabilities_LIB))'
 
 #
 # gtest
@@ -489,7 +487,6 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
-$(capabilities_LIB) : | moose_header_symlinks
 
 else
 
@@ -581,10 +578,7 @@ install_python: $(pyhit_LIB) $(capabilities_LIB)
 	@cp -f $(capabilities_LIB) $(python_install_dir)/
 	@echo "Installing python library $(capabilities_LIB)"
 	@$(call remove_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(FRAMEWORK_DIR))
-	@$(call remove_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(HIT_DIR))
 	@$(call patch_rpath,$(python_install_dir)/$(capabilities_LIBNAME),$(lib_install_dir))
-	@$(call patch_relink,$(python_install_dir)/$(capabilities_LIBNAME),$(shell realpath $(moose_DYLIB)),$(shell readlink $(moose_DYLIB)))
-	@$(call patch_relink,$(python_install_dir)/$(capabilities_LIBNAME),$(shell realpath $(hit_DYLIB)),$(shell readlink $(hit_DYLIB)))
 
 install_harness: install_python
 	@echo "Installing TestHarness"
