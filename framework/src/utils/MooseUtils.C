@@ -218,16 +218,6 @@ escape(std::string & str)
 }
 
 std::string
-trim(const std::string & str, const std::string & white_space)
-{
-  const auto begin = str.find_first_not_of(white_space);
-  if (begin == std::string::npos)
-    return ""; // no content
-  const auto end = str.find_last_not_of(white_space);
-  return str.substr(begin, end - begin + 1);
-}
-
-std::string
 removeExtraWhitespace(const std::string & input)
 {
   return std::regex_replace(input, std::regex("^\\s+|\\s+$|\\s+(?=\\s)"), "");
@@ -1054,22 +1044,6 @@ unsigned long long int
 convert<unsigned long long int>(const std::string & str, bool throw_on_failure)
 {
   return convertStringToInt<unsigned long long int>(str, throw_on_failure);
-}
-
-std::string
-toUpper(const std::string & name)
-{
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-  return upper;
-}
-
-std::string
-toLower(const std::string & name)
-{
-  std::string lower(name);
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  return lower;
 }
 
 std::string
