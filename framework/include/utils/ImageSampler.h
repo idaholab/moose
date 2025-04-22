@@ -23,6 +23,25 @@
 // loves to warn about it...
 #include "libmesh/ignore_warnings.h"
 
+// If VTK is built without an external nlohmann, then it assumes it
+// will never be compiled against another nlohmann, and it includes
+// its own copy but modified with macro tricks.  We have probably
+// already included nlohman nheaders, which we didn't tamper with
+// because OF COURSE NOT, but now we need to take care not to let the
+// include guards prevent them from including their copy with their
+// different namespace.
+#ifndef MOOSE_VTK_NLOHMANN_INCLUDED
+#ifdef INCLUDE_NLOHMANN_JSON_HPP_
+#define MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_HPP_
+#undef INCLUDE_NLOHMANN_JSON_HPP_
+#endif
+#ifdef INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#define MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_FWD_HPP_
+#undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#endif
+#define MOOSE_VTK_NLOHMANN_INCLUDED
+#endif
+
 #include "vtkSmartPointer.h"
 #include "vtkPNGReader.h"
 #include "vtkTIFFReader.h"
@@ -34,6 +53,21 @@
 #include "vtkImageShiftScale.h"
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
+
+#ifdef MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_HPP_
+#define INCLUDE_NLOHMANN_JSON_HPP_
+#endif
+#ifdef MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_FWD_HPP_
+#define INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#endif
+
+// If VTK is built without an external nlohmann, then it assumes it
+// will never be compiled against another nlohmann, and it defines an
+// nlohmann macro to point to its vtknlohmann copy.  In MOOSE their
+// assumption is wrong.
+#ifdef nlohmann
+#undef nlohmann
+#endif
 
 #include "libmesh/restore_warnings.h"
 
