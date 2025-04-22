@@ -7,7 +7,9 @@
       type = Exodiff
       input = 'test.i'
       exodiff = upwind.e
-      cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
+      cli_args = 'GlobalParams/advected_interp_method=upwind
+                  Outputs/file_base=upwind
+                  Executioner/num_steps=2' # Approximation for number of steps so that restep happens before steady-state is detected
       detail = 'first-order upwind'
       recover = false # only using final for output in a transient
     []
@@ -15,7 +17,9 @@
       type = Exodiff
       input = 'test.i'
       exodiff = sou.e
-      cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=sou'
+      cli_args = 'GlobalParams/advected_interp_method=sou
+                  Outputs/file_base=sou
+                  Executioner/num_steps=3' # Approximation for number of steps so that restep happens before steady-state is detected
       detail = 'second-order upwind'
       recover = false # only using final for output in a transient
     []
@@ -23,7 +27,9 @@
       type = Exodiff
       input = 'test.i'
       exodiff = vanLeer.e
-      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer
+                  Outputs/file_base=vanLeer
+                  Executioner/num_steps=5' # Approximation for number of steps so that restep happens before steady-state is detected
       detail = 'van Leer'
       recover = false # only using final for output in a transient
     []
@@ -31,7 +37,9 @@
       type = Exodiff
       input = 'test.i'
       exodiff = min_mod.e
-      cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
+      cli_args = 'GlobalParams/advected_interp_method=min_mod
+                  Outputs/file_base=min_mod
+                  Executioner/num_steps=5' # Approximation for number of steps so that restep happens before steady-state is detected
       detail = 'min-mod'
       recover = false # only using final for output in a transient
     []
@@ -39,7 +47,9 @@
       type = Exodiff
       input = 'test.i'
       exodiff = quick.e
-      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
+      cli_args = 'GlobalParams/advected_interp_method=quick
+                  Outputs/file_base=quick
+                  Executioner/num_steps=5' # Approximation for number of steps so that restep happens before steady-state is detected
       detail = 'QUICK'
       recover = false # only using final for output in a transient
     []
