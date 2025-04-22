@@ -378,7 +378,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   const auto time_integrator_names = exec->getTimeIntegratorNames();
   if (!time_integrator_names.empty())
     oss << std::setw(console_field_width)
-        << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, ", ") << '\n';
+        << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, " ") << '\n';
 
   oss << std::setw(console_field_width) << "  Solver Mode: ";
   for (const std::size_t i : make_range(problem.numSolverSystems()))
