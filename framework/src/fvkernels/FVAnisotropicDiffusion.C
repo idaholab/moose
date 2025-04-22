@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVAnisotropicDiffusion.h"
+#include "FVDiffusion.h"
 
 registerMooseObject("MooseApp", FVAnisotropicDiffusion);
 
@@ -24,22 +25,34 @@ FVAnisotropicDiffusion::validParams()
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
+      MooseEnum face_interp_method("average skewness-corrected", "average");
+  params.addParam<MooseEnum>("variable_interp_method",
+                             face_interp_method,
+                             "Switch that can select between face interpolation methods for the variable.");
   params.set<unsigned short>("ghost_layers") = 2;
+
+  // We add the relationship manager there, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+    "ElementSideNeighborLayers",
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::COUPLING,
+    [](const InputParameters & obj_params, InputParameters & rm_params)
+    {
+      // We'll reuse the logic from simple diffusion, should be the same
+      FVDiffusion::setRMParams(obj_params, rm_params);
+    });
+
   return params;
 }
 
 FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
-  : FVFluxKernel(params), _coeff(getFunctor<ADRealVectorValue>("coeff"))
+  : FVFluxKernel(params), _coeff(getFunctor<ADRealVectorValue>("coeff")),
+  _coeff_interp_method(
+    Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method"))),
+_var_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
+_correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
 {
-  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
-  if (interp_method == "average")
-    _coeff_interp_method = Moose::FV::InterpMethod::Average;
-  else if (interp_method == "harmonic")
-    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
-
-  if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
-      (_tid == 0))
-    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
 }
 
 ADReal
@@ -48,8 +61,7 @@ FVAnisotropicDiffusion::computeQpResidual()
   const auto state = determineState();
   const auto & grad_T = _var.adGradSln(*_face_info,
                                        state,
-                                       _var.faceInterpolationMethod() ==
-                                           Moose::FV::InterpMethod::SkewCorrectedAverage);
+                                       _correct_skewness);
 
   ADRealVectorValue coeff;
   // If we are on internal faces, we interpolate the diffusivity as usual
