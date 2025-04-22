@@ -11,7 +11,6 @@
 #include <Python.h>
 
 #include "CapabilityUtils.h"
-#include "Moose.h"
 #include <string>
 
 static PyObject *

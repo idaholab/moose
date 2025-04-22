@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "StreamArguments.h"
+
 #include <exception>
 #include <variant>
 #include <string>

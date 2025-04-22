@@ -47,7 +47,8 @@ check(std::string requirements, const Registry & app_capabilities)
     ~_            <-  [ \t]*
   )");
 
-  mooseAssert(static_cast<bool>(parser) == true, "Capabilities parser build failure.");
+  if (!static_cast<bool>(parser))
+    throw CapabilityException("Capabilities parser build failure.");
 
   parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
 
