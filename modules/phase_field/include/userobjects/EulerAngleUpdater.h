@@ -56,6 +56,8 @@ protected:
   /// Whether the simulation has recovered once. This only serves to prevent using the old angles in initialize()
   /// as problem.converged() returns false on the very first initialize() call after recovering
   bool _first_time_recovered;
+  /// Used to determine whether a timestep is being repeated
+  int & _t_step_old;
 
   /// Current set of Euler angles (one per grain), updated on initialize()
   std::vector<EulerAngles> & _angles;

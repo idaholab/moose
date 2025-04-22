@@ -131,6 +131,7 @@
 
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
+    restep = false # Restep isn't compatible with recover tests
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
                   "serial."
@@ -164,6 +165,7 @@
 
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
+    restep = false # Restep isn't compatible with recover tests
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
                   "parallel."
