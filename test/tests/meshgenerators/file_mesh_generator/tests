@@ -95,7 +95,7 @@
     # when a spline control node is at a finite element's centroid.
     max_parallel = 1
     xmldiff = '3d_steady_diffusion_iga_out_001.pvtu 3d_steady_diffusion_iga_out_001_0.vtu'
-
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with 3D elements and sidesets in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
