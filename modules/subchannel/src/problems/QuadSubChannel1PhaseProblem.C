@@ -356,220 +356,70 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   }
 }
 
-void
-QuadSubChannel1PhaseProblem::computeWijPrime(int iblock)
+Real
+QuadSubChannel1PhaseProblem::computeBeta(int i_gap, int iz)
 {
-  unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size + 1;
-  const Real & pitch = _subchannel_mesh.getPitch();
-  const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
-  if (!_implicit_bool)
+  auto beta = _beta;
+  if (!_constant_beta)
   {
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-      {
-        auto chans = _subchannel_mesh.getGapChannels(i_gap);
-        unsigned int i_ch = chans.first;
-        unsigned int j_ch = chans.second;
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-        auto Si_in = (*_S_flow_soln)(node_in_i);
-        auto Sj_in = (*_S_flow_soln)(node_in_j);
-        auto Si_out = (*_S_flow_soln)(node_out_i);
-        auto Sj_out = (*_S_flow_soln)(node_out_j);
-        // crossflow area between channels i,j (dz*gap_width)
-        auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
-        auto Sij = dz * gap;
-        auto avg_massflux =
-            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-
-        auto beta = _beta;
-        if (!_constant_beta)
-        {
-          auto S_total = Si_in + Sj_in + Si_out + Sj_out;
-          auto Si = 0.5 * (Si_in + Si_out);
-          auto Sj = 0.5 * (Sj_in + Sj_out);
-          auto w_perim_i = 0.5 * ((*_w_perim_soln)(node_in_i) + (*_w_perim_soln)(node_out_i));
-          auto w_perim_j = 0.5 * ((*_w_perim_soln)(node_in_j) + (*_w_perim_soln)(node_out_j));
-          auto avg_mu =
-              (1 / S_total) * ((*_mu_soln)(node_out_i)*Si_out + (*_mu_soln)(node_in_i)*Si_in +
-                               (*_mu_soln)(node_out_j)*Sj_out + (*_mu_soln)(node_in_j)*Sj_in);
-          auto avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
-          auto Re = avg_massflux * avg_hD / avg_mu;
-          Real gamma = 20.0; // empirical constant
-          Real sf = 1.0;     // shape factor
-          Real a = 0.18;
-          Real b = 0.2;
-          auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
-          auto k =
-              (1 / S_total) *
-              (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
-               _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
-               _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
-               _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
-          auto cp =
-              (1 / S_total) *
+    const Real & pitch = _subchannel_mesh.getPitch();
+    const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
+    auto chans = _subchannel_mesh.getGapChannels(i_gap);
+    unsigned int i_ch = chans.first;
+    unsigned int j_ch = chans.second;
+    auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+    auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+    auto Si_in = (*_S_flow_soln)(node_in_i);
+    auto Sj_in = (*_S_flow_soln)(node_in_j);
+    auto Si_out = (*_S_flow_soln)(node_out_i);
+    auto Sj_out = (*_S_flow_soln)(node_out_j);
+    // crossflow area between channels i,j (dz*gap_width)
+    auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
+    auto avg_massflux =
+        0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+               ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+    auto S_total = Si_in + Sj_in + Si_out + Sj_out;
+    auto Si = 0.5 * (Si_in + Si_out);
+    auto Sj = 0.5 * (Sj_in + Sj_out);
+    auto w_perim_i = 0.5 * ((*_w_perim_soln)(node_in_i) + (*_w_perim_soln)(node_out_i));
+    auto w_perim_j = 0.5 * ((*_w_perim_soln)(node_in_j) + (*_w_perim_soln)(node_out_j));
+    auto avg_mu = (1 / S_total) * ((*_mu_soln)(node_out_i)*Si_out + (*_mu_soln)(node_in_i)*Si_in +
+                                   (*_mu_soln)(node_out_j)*Sj_out + (*_mu_soln)(node_in_j)*Sj_in);
+    auto avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
+    auto Re = avg_massflux * avg_hD / avg_mu;
+    Real gamma = 20.0; // empirical constant
+    Real sf = 1.0;     // shape factor
+    Real a = 0.18;
+    Real b = 0.2;
+    auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
+    auto k = (1 / S_total) *
+             (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+              _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+              _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+              _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
+    auto cp = (1 / S_total) *
               (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
                _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
                _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
                _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
-          auto Pr = avg_mu * cp / k;                          // Prandtl number
-          auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
-          auto delta = pitch;                                 // centroid to centroid distance
-          auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
-          auto lamda = gap / L_x; // aspect ratio
-          auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
-          auto z_FP_over_D =
-              (2.0 * L_x / pin_diameter) *
-              (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
-          auto Str =
-              1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
-          auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
-          auto dum2 = (1 / Pr_t) * lamda;
-          auto dum3 = a_x * z_FP_over_D * Str;
-          // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
-          beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
-        }
-
-        // Calculation of Turbulent Crossflow
-        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
-      }
-    }
+    auto Pr = avg_mu * cp / k;                          // Prandtl number
+    auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
+    auto delta = pitch;                                 // centroid to centroid distance
+    auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
+    auto lamda = gap / L_x; // aspect ratio
+    auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
+    auto z_FP_over_D = (2.0 * L_x / pin_diameter) *
+                       (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
+    auto Str = 1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+    auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+    auto dum2 = (1 / Pr_t) * lamda;
+    auto dum3 = a_x * z_FP_over_D * Str;
+    // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
+    beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
   }
-  else
-  {
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-      {
-        auto chans = _subchannel_mesh.getGapChannels(i_gap);
-        unsigned int i_ch = chans.first;
-        unsigned int j_ch = chans.second;
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-        auto Si_in = (*_S_flow_soln)(node_in_i);
-        auto Sj_in = (*_S_flow_soln)(node_in_j);
-        auto Si_out = (*_S_flow_soln)(node_out_i);
-        auto Sj_out = (*_S_flow_soln)(node_out_j);
-        // crossflow area between channels i,j (dz*gap_width)
-        auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
-        auto Sij = dz * gap;
-        auto avg_massflux =
-            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-        auto beta = _beta;
-        if (!_constant_beta)
-        {
-          auto S_total = Si_in + Sj_in + Si_out + Sj_out;
-          auto Si = 0.5 * (Si_in + Si_out);
-          auto Sj = 0.5 * (Sj_in + Sj_out);
-          auto w_perim_i = 0.5 * ((*_w_perim_soln)(node_in_i) + (*_w_perim_soln)(node_out_i));
-          auto w_perim_j = 0.5 * ((*_w_perim_soln)(node_in_j) + (*_w_perim_soln)(node_out_j));
-          auto avg_mu =
-              (1 / S_total) * ((*_mu_soln)(node_out_i)*Si_out + (*_mu_soln)(node_in_i)*Si_in +
-                               (*_mu_soln)(node_out_j)*Sj_out + (*_mu_soln)(node_in_j)*Sj_in);
-          auto avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
-          auto Re = avg_massflux * avg_hD / avg_mu;
-          Real gamma = 20.0; // empirical constant
-          Real sf = 1.0;     // shape factor
-          Real a = 0.18;
-          Real b = 0.2;
-          auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
-          auto k =
-              (1 / S_total) *
-              (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
-               _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
-               _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
-               _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
-          auto cp =
-              (1 / S_total) *
-              (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
-               _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
-               _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
-               _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
-          auto Pr = avg_mu * cp / k;                          // Prandtl number
-          auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
-          auto delta = pitch;                                 // centroid to centroid distance
-          auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
-          auto lamda = gap / L_x; // aspect ratio
-          auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
-          auto z_FP_over_D =
-              (2.0 * L_x / pin_diameter) *
-              (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
-          auto Str =
-              1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
-          auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
-          auto dum2 = (1 / Pr_t) * lamda;
-          auto dum3 = a_x * z_FP_over_D * Str;
-          // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
-          beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
-        }
-
-        // Base value - I don't want to write it every time
-        PetscScalar base_value = beta * 0.5 * Sij;
-
-        // Bottom values
-        if (iz == first_node)
-        {
-          PetscScalar value_tl = -1.0 * base_value / (Si_in + Sj_in) *
-                                 ((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j));
-          PetscInt row = i_gap + _n_gaps * iz_ind;
-          LibmeshPetscCall(
-              VecSetValues(_amc_turbulent_cross_flows_rhs, 1, &row, &value_tl, INSERT_VALUES));
-        }
-        else
-        {
-          PetscScalar value_tl = base_value / (Si_in + Sj_in);
-          PetscInt row = i_gap + _n_gaps * iz_ind;
-
-          PetscInt col_ich = i_ch + _n_channels * (iz_ind - 1);
-          LibmeshPetscCall(MatSetValues(
-              _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_tl, INSERT_VALUES));
-
-          PetscInt col_jch = j_ch + _n_channels * (iz_ind - 1);
-          LibmeshPetscCall(MatSetValues(
-              _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_tl, INSERT_VALUES));
-        }
-
-        // Top values
-        PetscScalar value_bl = base_value / (Si_out + Sj_out);
-        PetscInt row = i_gap + _n_gaps * iz_ind;
-
-        PetscInt col_ich = i_ch + _n_channels * iz_ind;
-        LibmeshPetscCall(MatSetValues(
-            _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_bl, INSERT_VALUES));
-
-        PetscInt col_jch = j_ch + _n_channels * iz_ind;
-        LibmeshPetscCall(MatSetValues(
-            _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_bl, INSERT_VALUES));
-      }
-    }
-    LibmeshPetscCall(MatAssemblyBegin(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY));
-
-    /// Update turbulent crossflow
-    Vec loc_prod;
-    Vec loc_Wij;
-    LibmeshPetscCall(VecDuplicate(_amc_sys_mdot_rhs, &loc_prod));
-    LibmeshPetscCall(VecDuplicate(_Wij_vec, &loc_Wij));
-    LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
-        loc_prod, *_mdot_soln, first_node, last_node, _n_channels));
-    LibmeshPetscCall(MatMult(_amc_turbulent_cross_flows_mat, loc_prod, loc_Wij));
-    LibmeshPetscCall(VecAXPY(loc_Wij, -1.0, _amc_turbulent_cross_flows_rhs));
-    LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
-        loc_Wij, _WijPrime, first_node, last_node, _n_gaps));
-    LibmeshPetscCall(VecDestroy(&loc_prod));
-    LibmeshPetscCall(VecDestroy(&loc_Wij));
-  }
+  return beta;
 }
 
 Real

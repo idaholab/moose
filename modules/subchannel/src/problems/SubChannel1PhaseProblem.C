@@ -1810,6 +1810,102 @@ SubChannel1PhaseProblem::computeWij(int iblock)
   }
 }
 
+void
+SubChannel1PhaseProblem::computeWijPrime(int iblock)
+{
+  unsigned int last_node = (iblock + 1) * _block_size;
+  unsigned int first_node = iblock * _block_size + 1;
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    auto dz = _z_grid[iz] - _z_grid[iz - 1];
+    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
+    {
+      auto chans = _subchannel_mesh.getGapChannels(i_gap);
+      unsigned int i_ch = chans.first;
+      unsigned int j_ch = chans.second;
+      auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+      auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+      auto Si_in = (*_S_flow_soln)(node_in_i);
+      auto Sj_in = (*_S_flow_soln)(node_in_j);
+      auto Si_out = (*_S_flow_soln)(node_out_i);
+      auto Sj_out = (*_S_flow_soln)(node_out_j);
+      auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
+      auto Sij = dz * gap;
+      auto avg_massflux =
+          0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                 ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+      auto beta = computeBeta(i_gap, iz);
+
+      if (!_implicit_bool)
+      {
+        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
+      }
+      else
+      {
+        auto iz_ind = iz - first_node;
+        PetscScalar base_value = beta * 0.5 * Sij;
+
+        // Bottom values
+        if (iz == first_node)
+        {
+          PetscScalar value_tl = -1.0 * base_value / (Si_in + Sj_in) *
+                                 ((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j));
+          PetscInt row = i_gap + _n_gaps * iz_ind;
+          LibmeshPetscCall(
+              VecSetValues(_amc_turbulent_cross_flows_rhs, 1, &row, &value_tl, INSERT_VALUES));
+        }
+        else
+        {
+          PetscScalar value_tl = base_value / (Si_in + Sj_in);
+          PetscInt row = i_gap + _n_gaps * iz_ind;
+
+          PetscInt col_ich = i_ch + _n_channels * (iz_ind - 1);
+          LibmeshPetscCall(MatSetValues(
+              _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_tl, INSERT_VALUES));
+
+          PetscInt col_jch = j_ch + _n_channels * (iz_ind - 1);
+          LibmeshPetscCall(MatSetValues(
+              _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_tl, INSERT_VALUES));
+        }
+
+        // Top values
+        PetscScalar value_bl = base_value / (Si_out + Sj_out);
+        PetscInt row = i_gap + _n_gaps * iz_ind;
+
+        PetscInt col_ich = i_ch + _n_channels * iz_ind;
+        LibmeshPetscCall(MatSetValues(
+            _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_bl, INSERT_VALUES));
+
+        PetscInt col_jch = j_ch + _n_channels * iz_ind;
+        LibmeshPetscCall(MatSetValues(
+            _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_bl, INSERT_VALUES));
+      }
+    }
+  }
+
+  if (_implicit_bool)
+  {
+    LibmeshPetscCall(MatAssemblyBegin(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY));
+
+    /// Update turbulent crossflow
+    Vec loc_prod;
+    Vec loc_Wij;
+    LibmeshPetscCall(VecDuplicate(_amc_sys_mdot_rhs, &loc_prod));
+    LibmeshPetscCall(VecDuplicate(_Wij_vec, &loc_Wij));
+    LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
+        loc_prod, *_mdot_soln, first_node, last_node, _n_channels));
+    LibmeshPetscCall(MatMult(_amc_turbulent_cross_flows_mat, loc_prod, loc_Wij));
+    LibmeshPetscCall(VecAXPY(loc_Wij, -1.0, _amc_turbulent_cross_flows_rhs));
+    LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
+        loc_Wij, _WijPrime, first_node, last_node, _n_gaps));
+    LibmeshPetscCall(VecDestroy(&loc_prod));
+    LibmeshPetscCall(VecDestroy(&loc_Wij));
+  }
+}
+
 libMesh::DenseVector<Real>
 SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real> solution)
 {
