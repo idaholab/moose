@@ -2660,7 +2660,8 @@ Coupleable::coupledValuesOlder(const std::string & var_name) const
 std::vector<const VectorVariableValue *>
 Coupleable::coupledVectorValuesOld(const std::string & var_name) const
 {
-  auto func = [this, &var_name](unsigned int comp) { return &coupledVectorValueOld(var_name, comp); };
+  auto func = [this, &var_name](unsigned int comp)
+  { return &coupledVectorValueOld(var_name, comp); };
   return coupledVectorHelper<const VectorVariableValue *>(var_name, func);
 }
 

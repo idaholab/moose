@@ -569,7 +569,8 @@ protected:
    * @param var_name Name of coupled vector variable
    * @return Vector of VectorVariableValue pointers for each component of \p var_name
    */
-  std::vector<const VectorVariableValue *> coupledVectorValuesOld(const std::string & var_name) const;
+  std::vector<const VectorVariableValue *>
+  coupledVectorValuesOld(const std::string & var_name) const;
 
   /**
    * Returns an old value from two time steps previous of a coupled variable
