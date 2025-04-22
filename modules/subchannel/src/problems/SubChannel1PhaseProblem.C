@@ -69,7 +69,9 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
   params.addParam<MooseEnum>(
-      "interpolation_scheme", schemes, "Interpolation scheme used for the method.");
+      "interpolation_scheme",
+      schemes,
+      "Interpolation scheme used for the method. Default is central difference");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -341,27 +343,20 @@ SubChannel1PhaseProblem::solverSystemConverged(const unsigned int)
 PetscScalar
 SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
 {
-  if (_interpolation_scheme == "upwind")
+  switch (_interpolation_scheme)
   {
-    return 1.0;
-  }
-  else if (_interpolation_scheme == "downwind")
-  {
-    return 0.0;
-  }
-  else if (_interpolation_scheme == "central_difference")
-  {
-    return 0.5;
-  }
-  else if (_interpolation_scheme == "exponential")
-  {
-    return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
-  }
-  else
-  {
-    mooseError(name(),
-               ": Interpolation scheme should be a string: upwind, downwind, central_difference, "
-               "exponential");
+    case 0: // upwind
+      return 1.0;
+    case 1: // downwind
+      return 0.0;
+    case 2: // central_difference
+      return 0.5;
+    case 3: // exponential
+      return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
+    default:
+      mooseError(name(),
+                 ": Interpolation scheme should be a string: upwind, downwind, central_difference, "
+                 "exponential");
   }
 }
 

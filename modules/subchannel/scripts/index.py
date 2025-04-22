@@ -1,5 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
+
+# Save the _subchannel_to_rod_map as a CSV file with zero-based indices
+def save_map_as_csv(map_data, filename):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Subchannel", "Rod1", "Rod2", "Rod3"])  # Header
+        for key, value in map_data.items():
+            # Adjust indices to be zero-based
+            adjusted_value = [v - 1 for v in value]
+            # Ensure that each row has exactly 4 columns (Subchannel, Rod1, Rod2, Rod3)
+            row = [key] + adjusted_value + [None] * (3 - len(adjusted_value))
+            writer.writerow(row)
 
 ###################################
 # Control parameters
@@ -388,5 +401,7 @@ plt.ylabel('Y [m]')
 plt.xlabel('X [m]')
 plt.xlim([-0.85*(_n_rings - 1)*pitch - 2*_pin_diameter, 0.85 *(_n_rings - 1)*pitch + 2*_pin_diameter])
 plt.ylim([-0.7*(_n_rings - 1)*pitch - 2*_pin_diameter, 0.7 *(_n_rings - 1)*pitch + 2*_pin_diameter])
-plt.savefig('rod_position.png', bbox_inches='tight', pad_inches=0.1)
+# plt.savefig('rod_position.png', bbox_inches='tight', pad_inches=0.1)
 # plt.show()
+
+save_map_as_csv(_subchannel_to_rod_map, 'subchannel_to_rod_map.csv')
