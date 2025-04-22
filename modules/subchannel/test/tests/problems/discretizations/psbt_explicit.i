@@ -8,7 +8,7 @@ P_out = 4.923e6 # Pa
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 3
+    n_cells = 10
     pitch = 0.0126
     pin_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -81,7 +81,7 @@ P_out = 4.923e6 # Pa
   fp = water
   n_blocks = 1
   beta = 0.006
-  CT = 2.0
+  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -109,7 +109,7 @@ P_out = 4.923e6 # Pa
   [q_prime_IC]
     type = SCMQuadPowerIC
     variable = q_prime
-    power = 3.44e6 # W
+    power = 1.0e6 # W
     filename = "power_profile.txt" #type in name of file that describes radial power profile
   []
 
@@ -188,26 +188,35 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "Temp_Out.txt"
-    height = 3.658
-  []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_Out.txt"
-    height = 3.658
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_In.txt"
-    height = 0.0
+  csv = true
+  # [Temp_Out_MATRIX]
+  #   type = QuadSubChannelNormalSliceValues
+  #   variable = T
+  #   execute_on = final
+  #   file_base = "Temp_Out.txt"
+  #   height = 3.658
+  # []
+  # [mdot_Out_MATRIX]
+  #   type = QuadSubChannelNormalSliceValues
+  #   variable = mdot
+  #   execute_on = final
+  #   file_base = "mdot_Out.txt"
+  #   height = 3.658
+  # []
+  # [mdot_In_MATRIX]
+  #   type = QuadSubChannelNormalSliceValues
+  #   variable = mdot
+  #   execute_on = final
+  #   file_base = "mdot_In.txt"
+  #   height = 0.0
+  # []
+[]
+
+[Postprocessors]
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
   []
 []
 

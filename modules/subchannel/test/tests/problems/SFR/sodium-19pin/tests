@@ -3,8 +3,8 @@
   issues = '#29194 #29490 #29505'
   [test_explicit]
     type = Exodiff
-    input = test19.i
-    exodiff = test19_out.e
+    input = test19_explicit.i
+    exodiff = test19_explicit_out.e
     custom_cmp = 'test.exodiff'
     capabilities = 'method!=dbg'
     valgrind = NONE
