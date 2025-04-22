@@ -288,7 +288,7 @@ FVFluxKernel::adjustRMGhostLayers(const unsigned short ghost_layers) const
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
       Moose::RelationshipManagerType::COUPLING;
   FVKernel::setRMParams(
-      _pars, rm_params, std::max(ghost_layers, _pars.get<unsigned short>("ghost_layers")));
+      _pars, rm_params, std::max(ghost_layers, _pars.get<unsigned short>("ghost_layers")), false);
   mooseAssert(rm_params.areAllRequiredParamsValid(),
               "All relationship manager parameters should be valid.");
 

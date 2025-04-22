@@ -21,6 +21,18 @@ FVAdvection::validParams()
       "Residual contribution from advection operator for finite volume method.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   params += Moose::FV::advectedInterpolationParameter();
+
+  // We add the relationship manager there, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+    "ElementSideNeighborLayers",
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::COUPLING,
+    [](const InputParameters & obj_params, InputParameters & rm_params)
+    {
+      FVAdvection::setRMParams(obj_params, rm_params);
+    });
+
   return params;
 }
 
@@ -30,15 +42,11 @@ FVAdvection::FVAdvection(const InputParameters & params)
   const bool need_more_ghosting =
       Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
   if (need_more_ghosting && _tid == 0)
-  {
-    adjustRMGhostLayers(std::max((unsigned short)(2), _pars.get<unsigned short>("ghost_layers")));
-
     // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
     // is liable to change upon wind-direction change. Consequently we need to tell our problem that
     // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
     getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
         ->setErrorOnJacobianNonzeroReallocation(false);
-  }
 
   if (dynamic_cast<Steady *>(_app.getExecutioner()))
   {
@@ -68,4 +76,26 @@ FVAdvection::computeQpResidual()
   ADReal u_interface = _var(face, state);
 
   return _normal * _velocity * u_interface;
+}
+
+void
+FVAdvection::setRMParams(const InputParameters & obj_params,
+                         InputParameters & rm_params)
+{
+  auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
+  const auto & interp_method_in = obj_params.get<MooseEnum>("advected_interp_method");
+  const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
+
+  // For the interpolation techniques below, we will need at least two layers
+  if (interp_method == Moose::FV::InterpMethod::SOU || interp_method == Moose::FV::InterpMethod::MinMod ||
+      interp_method == Moose::FV::InterpMethod::VanLeer || interp_method == Moose::FV::InterpMethod::QUICK ||
+      interp_method == Moose::FV::InterpMethod::Venkatakrishnan)
+      ghost_layers = std::max((unsigned short)(2), ghost_layers);
+
+  // Considering that this only depends on the input parameters, it is safe to attach
+  // it early
+  FVRelationshipManagerInterface::setRMParams(obj_params,
+    rm_params,
+    ghost_layers,
+    /*attach_early*/ true);
 }
