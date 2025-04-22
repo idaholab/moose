@@ -5,6 +5,7 @@
     type = CSVDiff
     input = test.i
     csvdiff = test_out.csv
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to switch Dirichlet boundary conditions on and off over the course of a transient in finite volume contexts.'
   []
   [test_boundary_switch]
