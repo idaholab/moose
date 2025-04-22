@@ -6,6 +6,7 @@
     input =  hllc_sod_shocktube.i
     exodiff = hllc_sod_shocktube_out.e
     abs_zero = 1e-9
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to impose boundary advective fluxes for HLLC discretizations that use implicit/interior cell information."
   []
 []
