@@ -7,5 +7,6 @@
     exodiff = mass-frac-advection_out.e
     requirement = 'The system shall be able to advect a scalar using density and velocity computed through solution of the Euler equations.'
     abs_zero = 3e-9
+    restep = false # Test is prescribed to abort on failed timestep
   []
 []
