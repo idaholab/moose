@@ -17,6 +17,8 @@ source:
   - vtk_friendly_version: {{ vtk_friendly_version }}
   - sha256: {{ sha256 }}
   - path: ../functions/retry_build.sh
+  - patches:
+    - vtk9.4.2_mr11854_nlohmann.patch # see moose issue #30372
 
 build:
   number: {{ build }}

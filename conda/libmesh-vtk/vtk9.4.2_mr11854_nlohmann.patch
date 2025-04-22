@@ -1,0 +1,296 @@
+diff --git a/Common/Core/Testing/Cxx/CMakeLists.txt b/Common/Core/Testing/Cxx/CMakeLists.txt
+index dded0e378d..82dd9c91cb 100644
+--- a/Common/Core/Testing/Cxx/CMakeLists.txt
++++ b/Common/Core/Testing/Cxx/CMakeLists.txt
+@@ -147,6 +147,7 @@ vtk_add_test_cxx(vtkCommonCoreCxxTests tests
+   TestObservers.cxx
+   TestObserversPerformance.cxx
+   TestOStreamWrapper.cxx
++  TestPrintArrayValues.cxx
+   TestSMP.cxx
+   TestSmartPointer.cxx
+   TestSOADataArray.cxx
+diff --git a/Common/Core/Testing/Cxx/TestPrintArrayValues.cxx b/Common/Core/Testing/Cxx/TestPrintArrayValues.cxx
+new file mode 100644
+index 0000000000..c1f08c3db0
+--- /dev/null
++++ b/Common/Core/Testing/Cxx/TestPrintArrayValues.cxx
+@@ -0,0 +1,38 @@
++// SPDX-FileCopyrightText: Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
++// SPDX-License-Identifier: BSD-3-Clause
++#include "vtkNew.h"
++#include "vtkStringArray.h"
++#include "vtkTypeUInt32Array.h"
++
++#include <sstream>
++
++int TestPrintArrayValues(int, char*[])
++{
++  {
++    vtkNew<vtkTypeUInt32Array> uint32Array;
++    for (int i = 0; i < 10; ++i)
++    {
++      uint32Array->InsertNextValue(i);
++    }
++    std::ostringstream oss;
++    uint32Array->PrintValues(oss);
++    if (oss.str() != "0 1 2 3 4 5 6 7 8 9 ")
++    {
++      std::cerr << oss.str() << " != 0 1 2 3 4 5 6 7 8 9\n";
++      return EXIT_FAILURE;
++    }
++  }
++  {
++    vtkNew<vtkStringArray> stringArray;
++    stringArray->InsertNextValue("VTK");
++    stringArray->InsertNextValue("vtk");
++    std::ostringstream oss;
++    stringArray->PrintValues(oss);
++    if (oss.str() != "VTK vtk ")
++    {
++      std::cerr << oss.str() << " != VTK vtk\n";
++      return EXIT_FAILURE;
++    }
++  }
++  return EXIT_SUCCESS;
++}
+diff --git a/Common/Core/vtkAbstractArray.cxx b/Common/Core/vtkAbstractArray.cxx
+index c1c1628b14..e517fb0db2 100644
+--- a/Common/Core/vtkAbstractArray.cxx
++++ b/Common/Core/vtkAbstractArray.cxx
+@@ -48,11 +48,6 @@
+ #include <iterator>
+ #include <set>
+ 
+-// clang-format off
+-#include "vtk_nlohmannjson.h"
+-#include VTK_NLOHMANN_JSON(json.hpp)
+-// clang-format on
+-
+ VTK_ABI_NAMESPACE_BEGIN
+ vtkInformationKeyMacro(vtkAbstractArray, GUI_HIDE, Integer);
+ vtkInformationKeyMacro(vtkAbstractArray, PER_COMPONENT, InformationVector);
+@@ -65,6 +60,17 @@ VTK_ABI_NAMESPACE_END
+ namespace
+ {
+ typedef std::vector<std::string*> vtkInternalComponentNameBase;
++
++struct PrintDataArrayWorker
++{
++  template <typename InArrayT>
++  void operator()(InArrayT* inArray, std::ostream& outStream)
++  {
++    using T = vtk::GetAPIType<InArrayT>;
++    const auto inRange = vtk::DataArrayValueRange(inArray);
++    std::copy(inRange.begin(), inRange.end(), std::ostream_iterator<T>(outStream, " "));
++  }
++};
+ }
+ 
+ VTK_ABI_NAMESPACE_BEGIN
+@@ -792,29 +798,6 @@ void SampleProminentValues(std::vector<std::vector<vtkVariant>>& uniques, vtkIdT
+     std::copy(si->begin(), si->end(), bi);
+   }
+ }
+-
+-struct WriteDataArrayWorker
+-{
+-  WriteDataArrayWorker(nlohmann::json& result)
+-    : m_result(result)
+-  {
+-  }
+-
+-  template <typename InArrayT>
+-  void operator()(InArrayT* inArray)
+-  {
+-    using T = vtk::GetAPIType<InArrayT>;
+-    const auto inRange = vtk::DataArrayValueRange(inArray);
+-    T val;
+-    for (const auto& value : inRange)
+-    {
+-      val = value;
+-      m_result.push_back(val);
+-    }
+-  }
+-
+-  nlohmann::json& m_result;
+-};
+ } // End anonymous namespace.
+ 
+ VTK_ABI_NAMESPACE_BEGIN
+@@ -928,32 +911,23 @@ void vtkAbstractArray::UpdateDiscreteValueSet(double uncertainty, double minimum
+ }
+ 
+ //------------------------------------------------------------------------------
+-nlohmann::json vtkAbstractArray::SerializeValues()
++void vtkAbstractArray::PrintValues(ostream& os)
+ {
+-  auto result = nlohmann::json::array();
+-
+-  if (auto* darr = vtkDataArray::SafeDownCast(this))
++  if (auto* dataArray = vtkDataArray::SafeDownCast(this))
+   {
+     using Dispatcher = vtkArrayDispatch::DispatchByValueType<vtkArrayDispatch::AllTypes>;
+-    WriteDataArrayWorker worker(result);
+-    if (!Dispatcher::Execute(darr, worker))
++    ::PrintDataArrayWorker worker;
++    if (!Dispatcher::Execute(dataArray, worker, os))
+     {
+-      worker(darr);
++      worker(dataArray, os);
+     }
+   }
+   else
+   {
+     for (vtkIdType ii = 0; ii < this->GetNumberOfValues(); ++ii)
+     {
+-      result.push_back(this->GetVariantValue(ii).ToString());
++      os << this->GetVariantValue(ii).ToString() << ' ';
+     }
+   }
+-  return result;
+-}
+-
+-//------------------------------------------------------------------------------
+-void vtkAbstractArray::PrintValues(ostream& os)
+-{
+-  os << this->SerializeValues().dump() << '\n';
+ }
+ VTK_ABI_NAMESPACE_END
+diff --git a/Common/Core/vtkAbstractArray.h b/Common/Core/vtkAbstractArray.h
+index 2df39d3b00..90d084f01c 100644
+--- a/Common/Core/vtkAbstractArray.h
++++ b/Common/Core/vtkAbstractArray.h
+@@ -45,6 +45,13 @@
+  * Unless `Modified` is called, various cached entities, like array range,
+  * map created for `LookupValue` may become obsolete and yield incorrect results.
+  *
++ * @warning
++ * In VTK 9.4, new method `nlohmann::json vtkAbstractArray::SerializeValues()` was
++ * introduced which required exposing symbols from
++ * VTK::nlohmannjson library in public API. This method will be removed in VTK 9.5 as it caused
++ * difficulty for downstream projects that linked to a different nlohmannjson. It cannot be
++ * deprecated because doing so prevents fixing the underlying issue.
++ *
+  * @sa
+  * vtkDataArray vtkStringArray vtkCellArray
+  */
+@@ -58,9 +65,6 @@
+ #include "vtkVariant.h"       // for variant arguments
+ #include "vtkWrappingHints.h" // For VTK_MARSHALAUTO
+ 
+-#include "vtk_nlohmannjson.h"
+-#include VTK_NLOHMANN_JSON(json_fwd.hpp)
+-
+ VTK_ABI_NAMESPACE_BEGIN
+ class vtkArrayIterator;
+ class vtkDataArray;
+@@ -78,8 +82,11 @@ class VTKCOMMONCORE_EXPORT VTK_MARSHALAUTO vtkAbstractArray : public vtkObject
+ public:
+   vtkTypeMacro(vtkAbstractArray, vtkObject);
+   void PrintSelf(ostream& os, vtkIndent indent) override;
++
++  /**
++   * Print the array values to an `ostream` object.
++   */
+   void PrintValues(ostream& os);
+-  nlohmann::json SerializeValues();
+ 
+   /**
+    * Allocate memory for this array. Delete old storage only if necessary.
+diff --git a/Documentation/release/dev/breaking-change-remove-nlohmann-json-from-public-API.md b/Documentation/release/dev/breaking-change-remove-nlohmann-json-from-public-API.md
+new file mode 100644
+index 0000000000..e06f38bd11
+--- /dev/null
++++ b/Documentation/release/dev/breaking-change-remove-nlohmann-json-from-public-API.md
+@@ -0,0 +1,7 @@
++# Remove usage of the nlohmannjson library from public facing API
++
++The `nlohmann::json vtkAbstractArray::SerializeValues()` method is now removed
++as the public exposure of VTK's vendored `nlohmannjson` library caused difficulty for downstream projects that link to a different nlohmannjson.
++
++These methods were added in [vtk/vtk!11163](https://gitlab.kitware.com/vtk/vtk/-/merge_requests/11163) which was released in 9.4. That merge
++request has now been reverted. These methods are removed (instead of deprecation) because deprecation would prevent fixing the problem.
+diff --git a/IO/CellGrid/vtkCellGridWriter.cxx b/IO/CellGrid/vtkCellGridWriter.cxx
+index 0566aeb6b8..dcb689d2fa 100644
+--- a/IO/CellGrid/vtkCellGridWriter.cxx
++++ b/IO/CellGrid/vtkCellGridWriter.cxx
+@@ -157,6 +157,56 @@ std::string dataTypeToString(int dataType)
+   return "unhandled";
+ }
+ 
++struct WriteDataArrayWorker
++{
++  WriteDataArrayWorker(nlohmann::json& result)
++    : m_result(result)
++  {
++  }
++
++  template <typename InArrayT>
++  void operator()(InArrayT* inArray)
++  {
++    using T = vtk::GetAPIType<InArrayT>;
++    const auto inRange = vtk::DataArrayValueRange(inArray);
++    T val;
++    for (const auto& value : inRange)
++    {
++      val = value;
++      m_result.push_back(val);
++    }
++  }
++
++  nlohmann::json& m_result;
++};
++
++nlohmann::json serializeArrayValues(vtkAbstractArray* arr)
++{
++  auto result = nlohmann::json::array();
++  if (!arr)
++  {
++    return result;
++  }
++
++  if (auto* darr = vtkDataArray::SafeDownCast(arr))
++  {
++    using Dispatcher = vtkArrayDispatch::DispatchByValueType<vtkArrayDispatch::AllTypes>;
++    WriteDataArrayWorker worker(result);
++    if (!Dispatcher::Execute(darr, worker))
++    {
++      worker(darr);
++    }
++  }
++  else
++  {
++    for (vtkIdType ii = 0; ii < arr->GetNumberOfValues(); ++ii)
++    {
++      result.push_back(arr->GetVariantValue(ii).ToString());
++    }
++  }
++  return result;
++}
++
+ bool getCachedRange(vtkCellGridRangeQuery::CacheMap& rangeCache, vtkCellAttribute* attribute,
+   nlohmann::json& rangeInfo)
+ {
+@@ -233,7 +283,7 @@ bool vtkCellGridWriter::ToJSON(nlohmann::json& data, vtkCellGrid* grid)
+       arrayLocations[arr] = groupName;
+       nlohmann::json arrayRecord{ { "name", arr->GetName() },
+         { "tuples", arr->GetNumberOfTuples() }, { "components", arr->GetNumberOfComponents() },
+-        { "type", dataTypeToString(arr->GetDataType()) }, { "data", arr->SerializeValues() } };
++        { "type", dataTypeToString(arr->GetDataType()) }, { "data", serializeArrayValues(arr) } };
+       if (arr == groupScalars)
+       {
+         arrayRecord["default_scalars"] = true;
+diff --git a/Imaging/Core/vtkImageSSIM.cxx b/Imaging/Core/vtkImageSSIM.cxx
+index 8c695784b6..cfc623c31c 100644
+--- a/Imaging/Core/vtkImageSSIM.cxx
++++ b/Imaging/Core/vtkImageSSIM.cxx
+@@ -18,6 +18,8 @@
+ #include "vtkPointData.h"
+ #include "vtkStreamingDemandDrivenPipeline.h"
+ 
++#include <cstdint>
++
+ VTK_ABI_NAMESPACE_BEGIN
+ 
+ vtkStandardNewMacro(vtkImageSSIM);
