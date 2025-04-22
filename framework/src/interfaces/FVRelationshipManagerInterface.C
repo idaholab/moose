@@ -41,8 +41,12 @@ FVRelationshipManagerInterface::validParams()
           Moose::RelationshipManagerType::COUPLING,
       [](const InputParameters & obj_params, InputParameters & rm_params)
       {
-        FVRelationshipManagerInterface::setRMParams(
-            obj_params, rm_params, obj_params.get<unsigned short>("ghost_layers"));
+        // If someone specifies the ghost layers on the input file, we can just attach these
+        // RMs early
+        FVRelationshipManagerInterface::setRMParams(obj_params,
+                                                    rm_params,
+                                                    obj_params.get<unsigned short>("ghost_layers"),
+                                                    /*attach_early*/ true);
       });
 
   return params;
@@ -51,10 +55,12 @@ FVRelationshipManagerInterface::validParams()
 void
 FVRelationshipManagerInterface::setRMParams(const InputParameters & obj_params,
                                             InputParameters & rm_params,
-                                            const unsigned short ghost_layers)
+                                            const unsigned short ghost_layers,
+                                            const bool attach_geometric_early)
 {
   rm_params.set<unsigned short>("layers") = ghost_layers;
   rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
-  rm_params.set<bool>("attach_geometric_early") = false;
+
+  rm_params.set<bool>("attach_geometric_early") = attach_geometric_early;
   rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
 }

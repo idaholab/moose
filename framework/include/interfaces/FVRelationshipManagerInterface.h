@@ -26,7 +26,8 @@ public:
    */
   static void setRMParams(const InputParameters & obj_params,
                           InputParameters & rm_params,
-                          unsigned short ghost_layers);
+                          const unsigned short ghost_layers,
+                          const bool attach_geometric_early);
 
   FVRelationshipManagerInterface() {}
 };

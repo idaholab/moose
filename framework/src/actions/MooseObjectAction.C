@@ -43,5 +43,6 @@ MooseObjectAction::MooseObjectAction(const InputParameters & params)
 void
 MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
+  std::cout << "Getting added wohoo " << name() << std::endl;
   addRelationshipManagers(input_rm_type, _moose_object_pars);
 }

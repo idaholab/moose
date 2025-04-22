@@ -6608,6 +6608,7 @@ FEProblemBase::outputStep(ExecFlagType type)
   for (auto & sys : _solver_systems)
     sys->update();
   _aux->update();
+
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
   _app.getOutputWarehouse().outputStep(type);
@@ -6778,6 +6779,14 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & sys,
   parallel_object_only();
 
   TIME_SECTION("computeResidualSys", 5);
+
+  auto begin = _mesh.getMesh().active_elements_begin();
+  auto end = _mesh.getMesh().active_elements_end();
+
+  // We prepare a map connecting the Elem* and the corresponding ElemInfo
+  // for the active elements.
+  for (const Elem * elem : as_range(begin, end))
+    std::cout << elem->vertex_average() << std::endl;
 
   computeResidual(soln, residual, sys.number());
 }

@@ -94,6 +94,8 @@ SetupMeshCompleteAction::act()
   {
     TIME_SECTION("deleteRemoteElems", 2, "Deleting Remote Elements");
 
+    std::cout << "Deleting remote elements" << std::endl;
+
     if (_displaced_mesh &&
         (_mesh->needsRemoteElemDeletion() != _displaced_mesh->needsRemoteElemDeletion()))
       mooseError("Our reference and displaced meshes are not in sync with respect to whether we "
@@ -103,6 +105,7 @@ SetupMeshCompleteAction::act()
     // geometric ghosting functor and/or we have a displaced mesh
     if (_mesh->needsRemoteElemDeletion())
     {
+      std::cout << " I Actually am deleting things here. " << std::endl;
       // Must make sure to create the mortar meshes to build our data structures that ensure we will
       // keep the correct elements in the mesh around
       _problem->updateMortarMesh();

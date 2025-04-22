@@ -2918,6 +2918,8 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
     }
   }
 
+  std::cout << "Adding " << new_rm->getInfo() << " actually added " << add << std::endl;
+
   // Inform the caller whether the object was added or not
   return add;
 }
@@ -3024,10 +3026,12 @@ MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
                                       MeshBase & mesh,
                                       const DofMap * const dof_map)
 {
+  std::cout << "Adding " << template_rm.getInfo() << std::endl;
   auto & mesh_to_clone = _template_to_clones[&template_rm];
   auto it = mesh_to_clone.find(&mesh);
   if (it != mesh_to_clone.end())
   {
+    std::cout << " Operating on already cloned mesh" << std::endl;
     // We've already created a clone for this mesh
     auto & clone_rm = *it->second;
     if (!clone_rm.dofMap() && dof_map)
@@ -3045,6 +3049,7 @@ MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
   // functor that is init'd with another MeshBase object. So the safe thing to do is to make a
   // different RM for every MeshBase object that gets called here. Then the
   // RelationshipManagers stored here in MooseApp are serving as a template only
+  std::cout << " Operating on non cloned mesh" << std::endl;
   auto pr = mesh_to_clone.emplace(
       std::make_pair(&const_cast<const MeshBase &>(mesh),
                      dynamic_pointer_cast<RelationshipManager>(template_rm.clone())));
@@ -3059,6 +3064,7 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
 {
   for (auto & rm : _relationship_managers)
   {
+    std::cout << "Attaching GM only " << rm->getInfo() << std::endl;
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
     {
       if (rm->attachGeometricEarly())
@@ -3090,18 +3096,25 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
 {
   for (auto & rm : _relationship_managers)
   {
+    std::cout << "Attaching " << rm->getInfo() << std::endl;
     if (!rm->isType(rm_type))
       continue;
+
+    std::cout << " This is the right type " << std::endl;
 
     // RM is already attached (this also handles the geometric early case)
     if (_attached_relationship_managers[rm_type].count(rm.get()))
       continue;
+
+    std::cout << " Not attached yet " << std::endl;
 
     if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
     {
       // The problem is not built yet - so the ActionWarehouse currently owns the mesh
       MooseMesh * const mesh = _action_warehouse.mesh().get();
 
+      std::cout << " Early " << rm->attachGeometricEarly() << " Final " << attach_geometric_rm_final
+                << std::endl;
       // "attach_geometric_rm_final = true" inidicate that it is the last chance to attach
       // geometric RMs. Therefore, we need to attach them.
       if (!rm->attachGeometricEarly() && !attach_geometric_rm_final)

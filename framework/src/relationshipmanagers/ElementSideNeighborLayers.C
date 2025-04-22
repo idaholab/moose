@@ -94,6 +94,8 @@ ElementSideNeighborLayers::initFunctor(Functor & functor)
 {
   functor.set_n_levels(_layers);
 
+  std::cout << "Initializing Functor with layers: " << _layers << std::endl;
+
   if (_dof_map)
   {
     // Need to see if there are periodic BCs - if so we need to dig them out

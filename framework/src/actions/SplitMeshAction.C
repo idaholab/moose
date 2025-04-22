@@ -35,6 +35,11 @@ SplitMeshAction::act()
                                          ? _app.parameters().get<std::string>("split_file")
                                          : "";
 
+  auto begin = mesh->getMesh().active_elements_begin();
+  auto end = mesh->getMesh().active_elements_end();
+  for (const Elem * elem : as_range(begin, end))
+    std::cout << " Elem " << elem->vertex_average() << std::endl;
+
   if (mesh->getFileName() == "" && split_file_arg == "")
     mooseError("Output mesh file name must be specified (with --split-file) when splitting "
                "non-file-based meshes");
@@ -86,6 +91,7 @@ SplitMeshAction::act()
     auto cp = libMesh::split_mesh(*mesh, n);
     Moose::out << "    - writing " << cp->current_processor_ids().size() << " files per process..."
                << std::endl;
+    Moose::out << " procids " << cp->current_processor_ids() << std::endl;
     cp->binary() = checkpoint_binary_flag;
 
     // different splits will be written into subfolders with n being the folder name
