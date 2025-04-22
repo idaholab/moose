@@ -10,6 +10,7 @@
       detail = 'the Kurganov-Tadmor scheme'
       recover = false # See https://github.com/idaholab/moose/issues/17906
       valgrind = HEAVY
+      cli_args = 'Executioner/num_steps=100' # Somewhat arbitrary number of time steps so restep can happen during simulation
     []
     [continuous_eps_hllc]
       type = Exodiff
@@ -27,6 +28,7 @@
     recover = false # See https://github.com/idaholab/moose/issues/17906
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md PCNSFVMomentumFriction.md'
+    cli_args = 'Executioner/num_steps=100' # Somewhat arbitrary number of time steps so restep can happen during simulation
   []
   [twod_y_channel_upwind_frictional_porosity_function_mixed]
     type = Exodiff
@@ -37,6 +39,7 @@
     recover = false # See https://github.com/idaholab/moose/issues/17906
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousMixedVarMaterial.md PCNSFVMomentumFriction.md'
+    cli_args = 'Executioner/num_steps=100' # Somewhat arbitrary number of time steps so restep can happen during simulation
   []
   [deferred_correction]
     type = Exodiff
