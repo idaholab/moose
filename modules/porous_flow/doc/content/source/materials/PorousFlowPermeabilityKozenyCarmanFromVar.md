@@ -6,7 +6,7 @@ Permeability is calculated from porosity using
 \begin{equation}
 k_{ij} = A k_{ij}^{0} \frac{\phi^{n}}{(1 - \phi)^{m}},
 \end{equation}
-where $n$ and $m$ are user-defined constants and $A$ is a given by a variable.  See [PorousFlowPermeabilityKozenyCarman.md] for functional forms commonly used for $A$.  Spatially varying `A` allows us to capture spatially varying changes in aperature according to the permeability and porosity equations given in the Materials properties section of [multiapp_fracture_flow_PorousFlow_3D.md].
+where $n$ and $m$ are user-defined constants and $A$ is a given by a variable.  An error is thrown if $A<0$.  See [PorousFlowPermeabilityKozenyCarman.md] for functional forms commonly used for $A$.  Spatially varying `A` allows us to capture spatially varying changes in aperature according to the permeability and porosity equations given in the Materials properties section of [multiapp_fracture_flow_PorousFlow_3D.md].
 
 ## Example Input File Syntax
 

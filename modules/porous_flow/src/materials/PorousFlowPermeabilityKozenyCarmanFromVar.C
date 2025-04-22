@@ -34,6 +34,8 @@ template <bool is_ad>
 Real
 PorousFlowPermeabilityKozenyCarmanFromVarTempl<is_ad>::computeA() const
 {
+  if (_A[_qp] < 0)
+    mooseError("The variable A must be greater than zero; A = ", _A[_qp], ".");
   return _A[_qp];
 }
 

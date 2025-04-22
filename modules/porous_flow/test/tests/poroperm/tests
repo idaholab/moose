@@ -140,6 +140,15 @@
     issues = '#10847'
     design = 'porous_flow/porosity.md PorousFlowPorosity.md'
   []
+  [poroPermException]
+    type = RunException
+    input = PermFromPoroError.i
+    expect_err = 'The variable A must be greater than zero; A = -0.01.'
+    threading = '!pthreads'
+    requirement = 'The system shall produce an error if the variable value used for A in the Kozeny Carman permeability is less than 0.'
+    issues = '#30339'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarmanFromVar.md'
+  []
 
   [PermTensorFromVar01]
     type = 'CSVDiff'
