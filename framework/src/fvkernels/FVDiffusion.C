@@ -22,7 +22,24 @@ FVDiffusion::validParams()
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
+  MooseEnum face_interp_method("average skewness-corrected", "average");
+  params.addParam<MooseEnum>("variable_interp_method",
+                              face_interp_method,
+                              "Switch that can select between face interpolation methods for the variable.");
+
+  // We need at least 2 layers here with the least accurate interpolation
   params.set<unsigned short>("ghost_layers") = 2;
+
+  // We add the relationship manager there, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+    "ElementSideNeighborLayers",
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::COUPLING,
+    [](const InputParameters & obj_params, InputParameters & rm_params)
+    {
+      FVDiffusion::setRMParams(obj_params, rm_params);
+    });
 
   return params;
 }
@@ -31,11 +48,10 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _coeff(getFunctor<ADReal>("coeff")),
     _coeff_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method")))
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method"))),
+    _var_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
+    _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
 {
-  if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
-      (_tid == 0))
-    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
 }
 
 ADReal
@@ -44,7 +60,7 @@ FVDiffusion::computeQpResidual()
   using namespace Moose::FV;
   const auto state = determineState();
 
-  auto dudn = gradUDotNormal(state);
+  auto dudn = gradUDotNormal(state, _correct_skewness);
   ADReal coeff;
 
   // If we are on internal faces, we interpolate the diffusivity as usual
@@ -68,4 +84,24 @@ FVDiffusion::computeQpResidual()
   }
 
   return -1 * coeff * dudn;
+}
+
+void
+FVDiffusion::setRMParams(const InputParameters & obj_params,
+                         InputParameters & rm_params)
+{
+  auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
+  const auto & interp_method_in = obj_params.get<MooseEnum>("variable_interp_method");
+  const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
+
+  // For the interpolation techniques below, we will need at least three layers
+  if (interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+      ghost_layers = std::max((unsigned short)(3), ghost_layers);
+
+  // Considering that this only depends on the input parameters, it is safe to attach
+  // it early
+  FVRelationshipManagerInterface::setRMParams(obj_params,
+    rm_params,
+    ghost_layers,
+    /*attach_early*/ true);
 }

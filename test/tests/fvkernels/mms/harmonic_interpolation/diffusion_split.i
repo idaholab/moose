@@ -27,6 +27,7 @@
     variable = v
     coeff = 1
     coeff_interp_method = average
+    variable_interp_method = skewness-corrected
   []
   [body_v]
     type = FVBodyForce
