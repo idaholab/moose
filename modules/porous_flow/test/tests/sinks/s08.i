@@ -147,27 +147,6 @@
   []
 []
 
-[Functions]
-  [mass1_00]
-    type = ParsedFunction
-    expression = 'fgas*vol*por*dens0gas*exp(pgas/bulkgas)*(1-pow(1+pow(al*(pgas-pwater),1.0/(1-m)),-m))+fwater*vol*por*dens0water*exp(pwater/bulkwater)*(pow(1+pow(al*(pgas-pwater),1.0/(1-m)),-m))'
-    symbol_names = 'vol  por dens0gas pgas    pwater    bulkgas al  m   dens0water bulkwater fgas           fwater'
-    symbol_values = '0.25 0.1 1.1      pgas_00 pwater_00 1.3     1.1 0.5 1.5        2.3       frac_ph1_c1_00 frac_ph0_c1_00'
-  []
-  [expected_mass_change1_00]
-    type = ParsedFunction
-    expression = 'frac*fcn*area*dt*pow(1-pow(1+pow(al*(pgas-pwater),1.0/(1-m)),-m), 2)'
-    symbol_names = 'frac           fcn area dt  pgas    pwater    al m'
-    symbol_values = 'frac_ph1_c1_00 100 0.5 1E-3 pgas_00 pwater_00 1.1 0.5'
-  []
-  [mass1_00_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-mass_change'
-    symbol_names = 'mass_prev mass_change'
-    symbol_values = 'm1_00_prev  del_m1_00'
-  []
-[]
-
 [Postprocessors]
   [total_mass_comp0]
     type = PorousFlowFluidMass
@@ -212,26 +191,36 @@
     execute_on = 'initial timestep_end'
   []
   [m1_00]
-    type = FunctionValuePostprocessor
-    function = mass1_00
+    type = ParsedPostprocessor
+    expression = 'frac_ph1_c1_00*vol*por*dens0gas*exp(pgas_00/bulkgas)*(1-pow(1+pow(al*(pgas_00-pwater_00),1.0/(1-m)),-m))+frac_ph0_c1_00*vol*por*dens0water*exp(pwater_00/bulkwater)*(pow(1+pow(al*(pgas_00-pwater_00),1.0/(1-m)),-m))'
+    constant_names = 'vol  por dens0gas bulkgas al m dens0water bulkwater'
+    constant_expressions = '0.25 0.1 1.1 1.3 1.1 0.5 1.5 2.3'
+    pp_names = 'pgas_00 pwater_00 frac_ph1_c1_00 frac_ph0_c1_00'
     execute_on = 'initial timestep_end'
   []
+  [dm1_00]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m1_00
+    outputs = none
+  []
   [m1_00_prev]
-    type = FunctionValuePostprocessor
-    function = mass1_00
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm1_00 - dm1_00'
+    pp_names = 'm1_00 dm1_00'
     outputs = 'console'
   []
   [del_m1_00]
-    type = FunctionValuePostprocessor
-    function = expected_mass_change1_00
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'frac_ph1_c1_00*fcn*area*dt*pow(1-pow(1+pow(al*(pgas_00-pwater_00),1.0/(1-m)),-m), 2)'
+    constant_names = 'fcn area dt al m'
+    constant_expressions = '100 0.5 1E-3 1.1 0.5'
+    pp_names = 'frac_ph1_c1_00 pgas_00 pwater_00'
     outputs = 'console'
   []
   [m1_00_expect]
-    type = FunctionValuePostprocessor
-    function = mass1_00_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm1_00_prev - del_m1_00'
+    pp_names = 'm1_00_prev del_m1_00'
   []
 []
 
