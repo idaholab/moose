@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../../../../../../unit/data/square.msh
+  file = ../../../../../unit/data/square.msh
   dim = 3
 []
 
@@ -67,6 +67,29 @@
   l_max_its = 1000
 []
 
+[Executioner]
+  type = MFEMSteady
+  device = cpu
+[]
+
+[MultiApps]
+  active = ''
+  [subapp]
+    type = FullSolveMultiApp
+    input_files = parent.i
+    execute_on = FINAL
+  []
+[]
+
+[Transfers]
+  active = ''
+  [to_sub]
+    type = MultiAppMFEMCopyTransfer
+    source_variable = u
+    variable = u
+    to_multi_app = subapp
+  []
+[]
 
 [Outputs]
   [ParaViewDataCollection]
@@ -74,26 +97,4 @@
     file_base = OutputData/DiffusionSub
     vtk_format = ASCII
   []
-[]
-
-[Executioner]
-  type = MFEMSteady
-  device = cpu
-[]
-
-[MultiApps]
-  [subapp]
-    type = FullSolveMultiApp
-    input_files = sub.i
-    execute_on = FINAL
-  []
-[]
-
-[Transfers]
-    [to_sub]
-        type = MultiAppMFEMCopyTransfer
-        source_variable = u
-        variable = u
-        to_multi_app = subapp
-    []
 []

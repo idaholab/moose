@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../../../../../../unit/data/square.msh
+  file = ../../../../../unit/data/square.msh
   dim = 3
 []
 
@@ -24,6 +24,11 @@
   []
 []
 
+[Executioner]
+  type = MFEMSteady
+  device = cpu
+[]
+
 [MultiApps]
   [subapp]
     type = FullSolveMultiApp
@@ -32,18 +37,13 @@
   []
 []
 
-[Executioner]
-  type = MFEMSteady
-  device = cpu
-[]
-
 [Transfers]
-    [to_sub]
-        type = MultiAppMFEMCopyTransfer
-        source_variable = u
-        variable = u
-        from_multi_app = subapp
-    []
+  [from_sub]
+    type = MultiAppMFEMCopyTransfer
+    source_variable = u
+    variable = u
+    from_multi_app = subapp
+  []
 []
 
 [Outputs]
@@ -53,4 +53,3 @@
     vtk_format = ASCII
   []
 []
-

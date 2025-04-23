@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../../../../../../unit/data/square.msh
+  file = ../../../../../unit/data/square.msh
   dim = 3
 []
 
@@ -18,7 +18,7 @@
 []
 
 [AuxVariables]
-  [u]
+  [recv]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -29,12 +29,10 @@
   device = cpu
 []
 
-
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/DiffusionRecvApp
     vtk_format = ASCII
   []
 []
-

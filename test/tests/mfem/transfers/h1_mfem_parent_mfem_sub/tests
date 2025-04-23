@@ -1,0 +1,50 @@
+[Tests]
+  issues = '#29632'
+  design = MultiAppMFEMCopyTransfer.md
+  [FromSubToParent]
+    requirement = 'The system shall be able to copy MFEM variable data from a sub-application to the parent application, verified through '
+    [run]
+      type = RunApp
+      input = parent.i
+      mfem = true
+      recover = false
+      detail = 'running the inputs, and '
+    []
+    [verify]
+      type = RunCommand
+      command = '../check.sh
+                u
+                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                u
+                OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+      prereq = FromSubToParent/run
+      mfem = true
+      recover = false
+      detail = 'checking the results against gold output data.'
+    []
+  []
+  [ToSubFromParent]
+    requirement = 'The system shall be able to copy MFEM variable data from a parent application to a sub-application, verified through '
+    [run]
+      type = RunApp
+      input = sub.i
+      mfem = true
+      recover = false
+      cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
+                 'subapp:MultiApps/active="" subapp:Transfers/active=""'
+      detail = 'running the inputs, and '
+    []
+    [verify]
+      type = RunCommand
+      command = '../check.sh
+                u
+                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                u
+                OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+      prereq = ToSubFromParent/run
+      mfem = true
+      recover = false
+      detail = 'checking the results against gold output data.'
+    []
+  []
+[]
