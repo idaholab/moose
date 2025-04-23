@@ -7,8 +7,8 @@ MFEMKernel::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Kernel");
-  params.addParam<std::string>("variable",
-                               "Variable labelling the weak form this kernel is added to");
+  params.addParam<VariableName>("variable",
+                                "Variable labelling the weak form this kernel is added to");
   params.addParam<std::vector<SubdomainName>>("block",
                                               {},
                                               "The list of blocks (ids) that this "
@@ -19,7 +19,7 @@ MFEMKernel::validParams()
 
 MFEMKernel::MFEMKernel(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    _test_var_name(getParam<std::string>("variable")),
+    _test_var_name(getParam<VariableName>("variable")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_attributes(_subdomain_names.size())
 {

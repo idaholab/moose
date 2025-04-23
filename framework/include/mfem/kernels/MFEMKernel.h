@@ -34,7 +34,7 @@ public:
 
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
-  const VariableName _test_var_name;
+  const VariableName & _test_var_name;
   std::vector<SubdomainName> _subdomain_names;
   mfem::Array<int> _subdomain_attributes;
 };
