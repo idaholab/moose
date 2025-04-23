@@ -30,7 +30,7 @@ FVAdvection::validParams()
         Moose::RelationshipManagerType::COUPLING,
     [](const InputParameters & obj_params, InputParameters & rm_params)
     {
-      FVAdvection::setRMParams(obj_params, rm_params);
+      FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 2, true);
     });
 
   return params;
@@ -76,26 +76,4 @@ FVAdvection::computeQpResidual()
   ADReal u_interface = _var(face, state);
 
   return _normal * _velocity * u_interface;
-}
-
-void
-FVAdvection::setRMParams(const InputParameters & obj_params,
-                         InputParameters & rm_params)
-{
-  auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
-  const auto & interp_method_in = obj_params.get<MooseEnum>("advected_interp_method");
-  const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
-
-  // For the interpolation techniques below, we will need at least two layers
-  if (interp_method == Moose::FV::InterpMethod::SOU || interp_method == Moose::FV::InterpMethod::MinMod ||
-      interp_method == Moose::FV::InterpMethod::VanLeer || interp_method == Moose::FV::InterpMethod::QUICK ||
-      interp_method == Moose::FV::InterpMethod::Venkatakrishnan)
-      ghost_layers = std::max((unsigned short)(2), ghost_layers);
-
-  // Considering that this only depends on the input parameters, it is safe to attach
-  // it early
-  FVRelationshipManagerInterface::setRMParams(obj_params,
-    rm_params,
-    ghost_layers,
-    /*attach_early*/ true);
 }

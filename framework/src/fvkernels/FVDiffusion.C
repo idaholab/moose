@@ -38,7 +38,7 @@ FVDiffusion::validParams()
         Moose::RelationshipManagerType::COUPLING,
     [](const InputParameters & obj_params, InputParameters & rm_params)
     {
-      FVDiffusion::setRMParams(obj_params, rm_params);
+      FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true);
     });
 
   return params;
@@ -84,24 +84,4 @@ FVDiffusion::computeQpResidual()
   }
 
   return -1 * coeff * dudn;
-}
-
-void
-FVDiffusion::setRMParams(const InputParameters & obj_params,
-                         InputParameters & rm_params)
-{
-  auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
-  const auto & interp_method_in = obj_params.get<MooseEnum>("variable_interp_method");
-  const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
-
-  // For the interpolation techniques below, we will need at least three layers
-  if (interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
-      ghost_layers = std::max((unsigned short)(3), ghost_layers);
-
-  // Considering that this only depends on the input parameters, it is safe to attach
-  // it early
-  FVRelationshipManagerInterface::setRMParams(obj_params,
-    rm_params,
-    ghost_layers,
-    /*attach_early*/ true);
 }

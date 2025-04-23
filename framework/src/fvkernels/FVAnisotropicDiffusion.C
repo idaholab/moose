@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVAnisotropicDiffusion.h"
-#include "FVDiffusion.h"
 
 registerMooseObject("MooseApp", FVAnisotropicDiffusion);
 
@@ -25,7 +24,7 @@ FVAnisotropicDiffusion::validParams()
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
-      MooseEnum face_interp_method("average skewness-corrected", "average");
+  MooseEnum face_interp_method("average skewness-corrected", "average");
   params.addParam<MooseEnum>("variable_interp_method",
                              face_interp_method,
                              "Switch that can select between face interpolation methods for the variable.");
@@ -39,8 +38,7 @@ FVAnisotropicDiffusion::validParams()
         Moose::RelationshipManagerType::COUPLING,
     [](const InputParameters & obj_params, InputParameters & rm_params)
     {
-      // We'll reuse the logic from simple diffusion, should be the same
-      FVDiffusion::setRMParams(obj_params, rm_params);
+      FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true);
     });
 
   return params;

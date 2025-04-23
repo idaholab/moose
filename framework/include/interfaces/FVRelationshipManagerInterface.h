@@ -29,5 +29,31 @@ public:
                           const unsigned short ghost_layers,
                           const bool attach_geometric_early);
 
+  /**
+   * Helper function to set the relationship manager parameters
+   * for advection-related kernels.
+   * @param obj_params The input parameters of the object
+   * @param rm_params The input parameters of the relationship manager
+   * @param conditional_extended_layers Number of layers the will get assigned if the conditions in the function are met
+   * @param attach_geometric_early If the relationship manager should be attached early
+   */
+  static void setRMParamsAdvection(const InputParameters & obj_params,
+    InputParameters & rm_params,
+    const unsigned short conditional_extended_layers,
+    const bool attach_geometric_early);
+
+  /**
+   * Helper function to set the relationship manager parameters
+   * for diffusion-related kernels.
+   * @param obj_params The input parameters of the object
+   * @param rm_params The input parameters of the relationship manager
+   * @param conditional_extended_layers Number of layers the will get assigned if the conditions in the function are met
+   * @param attach_geometric_early If the relationship manager should be attached early
+   */
+  static void setRMParamsDiffusion(const InputParameters & obj_params,
+    InputParameters & rm_params,
+    const unsigned short conditional_extended_layers,
+    const bool attach_geometric_early);
+
   FVRelationshipManagerInterface() {}
 };

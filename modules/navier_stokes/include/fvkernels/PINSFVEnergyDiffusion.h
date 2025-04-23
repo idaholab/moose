@@ -34,4 +34,11 @@ protected:
   const bool _porosity_factored_in;
   /// which interpolation method for the diffusivity on faces
   const Moose::FV::InterpMethod _k_interp_method;
+
+  /// Decides which interpolation method should be used for the computation of
+  /// the gradients within the face normal gradient.
+  const Moose::FV::InterpMethod _var_interp_method;
+
+  /// Just a convenience member for using skewness correction
+  const bool _correct_skewness;
 };

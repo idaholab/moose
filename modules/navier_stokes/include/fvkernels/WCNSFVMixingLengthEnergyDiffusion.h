@@ -45,6 +45,13 @@ protected:
   /// Turbulent eddy mixing length
   const Moose::Functor<ADReal> & _mixing_len;
 
+  /// Decides which interpolation method should be used for the computation of
+  /// the gradients within the face normal gradient.
+  const Moose::FV::InterpMethod _var_interp_method;
+
+  /// Just a convenience member for using skewness correction
+  const bool _correct_skewness;
+
   /// Turbulent Schmidt number (or turbulent Prandtl number)
   const Real & _schmidt_number;
 };

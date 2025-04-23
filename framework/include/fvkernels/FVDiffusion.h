@@ -27,14 +27,6 @@ public:
   static InputParameters validParams();
   FVDiffusion(const InputParameters & params);
 
-  /**
-   * Helper function to set the relationship manager parameters
-   * used for proper ghosting setup. Needed, because the required ghosting
-   * depends on the interpolation parameters supplied to this object.
-   */
-  static void setRMParams(const InputParameters & obj_params,
-    InputParameters & rm_params);
-
 protected:
   virtual ADReal computeQpResidual() override;
 

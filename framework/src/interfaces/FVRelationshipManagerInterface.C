@@ -64,3 +64,48 @@ FVRelationshipManagerInterface::setRMParams(const InputParameters & obj_params,
   rm_params.set<bool>("attach_geometric_early") = attach_geometric_early;
   rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
 }
+
+void
+FVRelationshipManagerInterface::setRMParamsAdvection(const InputParameters & obj_params,
+  InputParameters & rm_params,
+  const unsigned short conditional_extended_layers,
+  const bool attach_geometric_early)
+{
+  auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
+  const auto & interp_method_in = obj_params.get<MooseEnum>("advected_interp_method");
+  const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
+
+  // For the interpolation techniques below, we will need to extend ghosting
+  if (interp_method == Moose::FV::InterpMethod::SOU || interp_method == Moose::FV::InterpMethod::MinMod ||
+      interp_method == Moose::FV::InterpMethod::VanLeer || interp_method == Moose::FV::InterpMethod::QUICK ||
+      interp_method == Moose::FV::InterpMethod::Venkatakrishnan)
+      ghost_layers = std::max(conditional_extended_layers, ghost_layers);
+
+  // Considering that this only depends on the input parameters, it is safe to attach
+  // it early
+  setRMParams(obj_params,
+    rm_params,
+    ghost_layers,
+    attach_geometric_early);
+}
+
+void
+FVRelationshipManagerInterface::setRMParamsDiffusion(const InputParameters & obj_params,
+  InputParameters & rm_params,
+  const unsigned short conditional_extended_layers,
+  const bool attach_geometric_early)
+{
+  auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
+  const auto & interp_method_in = obj_params.get<MooseEnum>("variable_interp_method");
+  const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
+
+  // For the interpolation techniques below, we will need to extend ghosting
+  if (interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+      ghost_layers = std::max(conditional_extended_layers, ghost_layers);
+
+
+  setRMParams(obj_params,
+    rm_params,
+    ghost_layers,
+    attach_geometric_early);
+}

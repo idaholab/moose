@@ -29,6 +29,17 @@ INSFVAdvectionKernel::validParams()
   // advection kernels
   params.suppressParameter<bool>("force_boundary_execution");
 
+  // We add the relationship manager there, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+    "ElementSideNeighborLayers",
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::COUPLING,
+    [](const InputParameters & obj_params, InputParameters & rm_params)
+    {
+      FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 3, true);
+    });
+
   return params;
 }
 
@@ -40,8 +51,6 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   if (need_more_ghosting && _tid == 0)
   {
-    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
-
     // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
     // is liable to change upon wind-direction change. Consequently we need to tell our problem that
     // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
