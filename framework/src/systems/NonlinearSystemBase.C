@@ -79,7 +79,6 @@
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
-#include "HDGIntegratedBC.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -132,8 +131,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
     _fdcoloring(nullptr),
-    _have_decomposition(false),
-    _use_field_split_preconditioner(false),
+    _fsp(nullptr),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _assemble_constraints_separately(false),
     _need_residual_ghosted(false),
@@ -411,34 +409,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
 void
 NonlinearSystemBase::setupDM()
 {
-  if (haveFieldSplitPreconditioner())
-    Moose::PetscSupport::petscSetupDM(*this, _decomposition_split);
-}
-
-void
-NonlinearSystemBase::setDecomposition(const std::vector<std::string> & splits)
-{
-  /// Although a single top-level split is allowed in Problem, treat it as a list of splits for conformity with the Split input syntax.
-  if (splits.size() && splits.size() != 1)
-    mooseError("Only a single top-level split is allowed in a Problem's decomposition.");
-
-  if (splits.size())
-  {
-    _decomposition_split = splits[0];
-    _have_decomposition = true;
-  }
-  else
-    _have_decomposition = false;
-}
-
-void
-NonlinearSystemBase::setupFieldDecomposition()
-{
-  if (!_have_decomposition)
-    return;
-
-  std::shared_ptr<Split> top_split = getSplit(_decomposition_split);
-  top_split->setup(*this);
+  if (_fsp)
+    _fsp->setupDM();
 }
 
 void
@@ -466,30 +438,13 @@ NonlinearSystemBase::addHDGKernel(const std::string & kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
-  // The hybridized objects require that the residual and Jacobian be computed together
-  residualAndJacobianTogether();
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<MooseObjectWarehouse<HDGIntegratedBC> *>("hibc_warehouse") = &_hybridized_ibcs;
     // Create the kernel object via the factory and add to warehouse
     auto kernel = _factory.create<HDGKernel>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
     _hybridized_kernels.addObject(kernel, tid);
     postAddResidualObject(*kernel);
-  }
-}
-
-void
-NonlinearSystemBase::addHDGIntegratedBC(const std::string & bc_name,
-                                        const std::string & name,
-                                        InputParameters & parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // Create the bc object via the factory and add to warehouse
-    auto bc = _factory.create<HDGIntegratedBC>(bc_name, name, parameters, tid);
-    _hybridized_ibcs.addObject(bc, tid);
   }
 }
 
@@ -1938,6 +1893,10 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
+      if (_fe_problem.ignoreZerosInJacobian())
+        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                      MAT_IGNORE_ZERO_ENTRIES,
+                                      PETSC_TRUE));
     }
   }
 
@@ -2778,6 +2737,10 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
+      if (_fe_problem.ignoreZerosInJacobian())
+        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                      MAT_IGNORE_ZERO_ENTRIES,
+                                      PETSC_TRUE));
     }
   }
 
