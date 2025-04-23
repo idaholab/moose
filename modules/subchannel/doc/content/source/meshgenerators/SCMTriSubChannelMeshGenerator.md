@@ -15,7 +15,7 @@ The center of the mesh is the origin.
 
 ## Example Input File Syntax
 
-!listing /examples/Toshiba_37_pin/toshiba_37_pin.i block=TriSubChannelMesh language=cpp
+!listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=TriSubChannelMesh language=cpp
 
 !syntax parameters /Mesh/SCMTriSubChannelMeshGenerator
 
