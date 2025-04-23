@@ -182,6 +182,11 @@ MooseApp::validParams()
       "--required-capabilities",
       "A list of conditions that is checked against the registered capabilities (see "
       "--show-capabilities). The executable will terminate early if the conditions are not met.");
+  params.addCommandLineParam<std::string>(
+      "check_capabilities",
+      "--check-capabilities",
+      "A list of conditions that is checked against the registered capabilities. Will exit based "
+      "on whether or not the capaiblities are fulfilled. Does not check dynamically loaded apps.");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    "Check the input file (i.e. requires -i <filename>) and quit");
@@ -1391,6 +1396,19 @@ MooseApp::setupOptions()
                               Moose::Capabilities::getCapabilityRegistry().dump());
     _ready_to_exit = true;
   }
+  else if (isParamValid("check_capabilities"))
+  {
+    _perf_graph.disableLivePrint();
+    const auto & capabilities = getParam<std::string>("check_capabilities");
+    auto [status, reason, doc] = Moose::Capabilities::getCapabilityRegistry().check(capabilities);
+    const bool pass = status == CapabilityUtils::CERTAIN_PASS;
+    _console << "Capabilities '" << capabilities << "' are " << (pass ? "" : "not ") << "fulfilled."
+             << std::endl;
+    _ready_to_exit = true;
+    if (!pass)
+      _exit_code = 77;
+    return;
+  }
   else if (!getInputFileNames().empty())
   {
     if (isParamSetByUser("recover"))
@@ -1410,7 +1428,7 @@ MooseApp::setupOptions()
 
     _builder.build();
 
-    if (isParamSetByUser("required_capabilities"))
+    if (isParamValid("required_capabilities"))
     {
       _perf_graph.disableLivePrint();
 
