@@ -79,6 +79,9 @@
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
+  []
 []
 
 [Solver]

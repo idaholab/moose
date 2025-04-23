@@ -25,9 +25,11 @@
   []
   [MFEMDiffusionPartial]
     type = XMLDiff
-    input = diffusion_partial.i
-    xmldiff = 'OutputData/DiffusionPartial/Run0/Run0.pvd
-                OutputData/DiffusionPartial/Run0/Cycle000001/proc000000.vtu'
+    input = diffusion.i
+    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
+              'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Executioner/assembly_level=partial'
     requirement = 'MOOSE shall have the ability to solve a diffusion problem with partial assembly set up from MOOSE and produce the same result as a native run.'
     mfem = true
     max_parallel = 1
