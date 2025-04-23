@@ -1,7 +1,7 @@
 [Tests]
   design = 'syntax/Problem/index.md'
   issues = '#29632'
-  [./MFEMDataCollections]
+  [MFEMDataCollections]
     type = 'CheckFiles'
     input = 'datacollections.i'
     check_files = 'OutputData/ParaViewDataCollection/Run0/Run0.pvd

@@ -1,7 +1,7 @@
 [Tests]
   design = 'syntax/Problem/index.md'
   issues = '#29632'
-  [./MFEMCurlCurl]
+  [MFEMCurlCurl]
     type = XMLDiff
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
@@ -13,7 +13,7 @@
     max_threads = 1
     platform = 'linux'
   []
-  [./MFEMDiffusion]
+  [MFEMDiffusion]
     type = XMLDiff
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
@@ -23,7 +23,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMDiffusionPartial]
+  [MFEMDiffusionPartial]
     type = XMLDiff
     input = diffusion_partial.i
     xmldiff = 'OutputData/DiffusionPartial/Run0/Run0.pvd
@@ -33,7 +33,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMGradDiv]
+  [MFEMGradDiv]
     type = XMLDiff
     input = graddiv.i
     xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
@@ -43,7 +43,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMHeatConduction]
+  [MFEMHeatConduction]
     type = XMLDiff
     input = heatconduction.i
     xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd
@@ -54,7 +54,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMHeatConductionElement]
+  [MFEMHeatConductionElement]
     type = XMLDiff
     input = heatconduction_element.i
     xmldiff = 'OutputData/HeatConductionElement/Run0/Run0.pvd
@@ -65,7 +65,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMHeatTransfer]
+  [MFEMHeatTransfer]
     type = XMLDiff
     input = heattransfer.i
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
@@ -75,7 +75,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMLinearElasticity]
+  [MFEMLinearElasticity]
     type = XMLDiff
     input = linearelasticity.i
     xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
@@ -85,7 +85,7 @@
     max_parallel = 1
     recover = false
   []
-  [./MFEMGravity]
+  [MFEMGravity]
     type = XMLDiff
     input = gravity.i
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
@@ -97,7 +97,7 @@
     max_threads = 1
     platform = 'linux'
   []
-  [./MFEMIrrotational]
+  [MFEMIrrotational]
     type = CSVDiff
     input = irrotational.i
     csvdiff = 'OutputData/Irrotational.csv'

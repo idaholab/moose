@@ -25,11 +25,11 @@
 []
 
 [MultiApps]
-  [./subapp]
+  [subapp]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [Executioner]
@@ -38,12 +38,12 @@
 []
 
 [Transfers]
-    [./to_sub]
+    [to_sub]
         type = MultiAppMFEMCopyTransfer
         source_variable = u
         variable = u
         from_multi_app = subapp
-    [../]
+    []
 []
 
 [Outputs]

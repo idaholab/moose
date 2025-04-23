@@ -1,7 +1,7 @@
 [Tests]
   design = 'syntax/Problem/index.md'
   issues = '#29632'
-  [./MFEMVariableSetupFromMOOSEVariables]
+  [MFEMVariableSetupFromMOOSEVariables]
     type = XMLDiff
     input = mfem_variables_from_moose.i
     xmldiff = 'OutputData/VariableSetupTest/Run0/Cycle000000/data.pvtu

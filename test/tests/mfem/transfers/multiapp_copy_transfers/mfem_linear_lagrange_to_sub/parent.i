@@ -82,18 +82,18 @@
 []
 
 [MultiApps]
-  [./subapp]
+  [subapp]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = FINAL
-  [../]
+  []
 []
 
 [Transfers]
-    [./to_sub]
+    [to_sub]
         type = MultiAppMFEMCopyTransfer
         source_variable = u
         variable = u
         to_multi_app = subapp
-    [../]
+    []
 []
