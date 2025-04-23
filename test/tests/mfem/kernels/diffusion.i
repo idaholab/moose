@@ -97,9 +97,19 @@
 []
 
 [Outputs]
+  active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/Diffusion
     vtk_format = ASCII
+  []
+  [VisItDataCollection]
+    type = MFEMVisItDataCollection
+    file_base = OutputData/VisItDataCollection
+  []
+  [ConduitDataCollection]
+    type = MFEMConduitDataCollection
+    file_base = OutputData/ConduitDataCollection
+    protocol = conduit_bin
   []
 []
