@@ -65,4 +65,4 @@ throughout the world.
 
 ## Tutorial style=clear:both
 
-Tutorial can be found [here](/tutorial/index.md optional=True)
+Tutorial can be found [here](/modules/subchannel/tutorial/index.md optional=True)

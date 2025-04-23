@@ -50,9 +50,9 @@ T_in = 359.15
     []
 []
 
-[Modules]
-    [TensorMechanics]
-        [Master]
+[Physics]
+    [SolidMechanics]
+        [QuasiStatic]
             add_variables = true
             strain = SMALL
             incremental = true
@@ -157,10 +157,6 @@ T_in = 359.15
         value = 0.0
     []
 []
-
-# [DefaultElementQuality]
-#   failure_type = warning
-# []
 
 [ICs]
     [temperature_ic]
