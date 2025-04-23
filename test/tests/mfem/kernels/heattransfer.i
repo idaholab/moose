@@ -48,18 +48,25 @@
 []
 
 [BCs]
+  active = 'bottom top_convective'
   [bottom]
     type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '1'
     value = 1.0
   []
-  [top]
+  [top_convective]
     type = MFEMConvectiveHeatFluxBC
     variable = temperature
     boundary = '2'
     T_infinity = reservoir_far_temperature
     heat_transfer_coefficient = heat_transfer_coefficient
+  []
+  [top_dirichlet]
+    type = MFEMScalarDirichletBC
+    variable = temperature
+    boundary = '2'
+    value = 0.0
   []
 []
 
@@ -75,6 +82,9 @@
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
+  []
 []
 
 [Solver]
@@ -87,6 +97,7 @@
 [Executioner]
   type = MFEMTransient
   device = cpu
+  assembly_level = legacy
   dt = 2.0
   start_time = 0.0
   end_time = 6.0
