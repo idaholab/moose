@@ -6,7 +6,7 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind and produce results consistent with MFEM Example 3'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -18,7 +18,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a diffusion problem set up from MOOSE and produce the same result as a native run.'
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -30,7 +30,7 @@
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
-    requirement = 'MOOSE shall have the ability to solve a diffusion problem with partial assembly set up from MOOSE and produce the same result as a native run.'
+    requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -40,7 +40,7 @@
     input = graddiv.i
     xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
                 OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a grad-div problem with Raviart-Thomas elements set up from MOOSE and produce the same result as a native run.'
+    requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -54,7 +54,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
-    requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem set up from MOOSE and produce the same result as a native run.'
+    requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -70,7 +70,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=element'
-    requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with element assembly set up from MOOSE and produce the same result as a native run.'
+    requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -80,7 +80,7 @@
     input = heattransfer.i
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
                 OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary set up from MOOSE.'
+    requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -90,7 +90,7 @@
     input = linearelasticity.i
     xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a linear elasticity problem set up from MOOSE and produce the same result as a native run.'
+    requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -100,7 +100,7 @@
     input = gravity.i
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads.'
+    requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -111,7 +111,7 @@
     type = CSVDiff
     input = irrotational.i
     csvdiff = 'OutputData/Irrotational.csv'
-    requirement = 'MOOSE shall have the ability to solve for an irrotational vortext in two dimensions.'
+    requirement = 'The system shall have the ability to solve for an irrotational vortex in two dimensions using MFEM.'
     abs_zero = 1e-6
     mfem = true
     recover = false

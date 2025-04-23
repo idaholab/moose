@@ -11,8 +11,8 @@
                   'OutputData/VisItDataCollection/Run0_000000/mesh.000000 '
                   'OutputData/VisItDataCollection/Run0_000001/concentration.000000 '
                   'OutputData/VisItDataCollection/Run0_000001.mfem_root'
-    requirement = 'MOOSE shall have the ability to write out solutions to ParaView, '
-                  'VisIt and Conduit mfem::DataCollections.'
+    requirement = 'The system shall have the ability to write out MFEM solutions to '
+                  'ParaView, VisIt and Conduit mfem::DataCollections.'
     mfem = true
     recover = false
   []

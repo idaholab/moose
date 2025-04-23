@@ -20,7 +20,7 @@
       prereq = test/run
       mfem = true
       recover = false
-      detail = 'checking the results against gold output data.'
+      detail = 'checking the sub-application and parent application outputs against each other.'
     []
   []
 []
