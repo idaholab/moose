@@ -17,6 +17,7 @@
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'theis_full'
     threading = '!pthreads'
+    restep = false # Restep is not compatible with recover
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
@@ -51,6 +52,7 @@
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'pffltvd_full'
     threading = '!pthreads'
+    restep = false # Restep is not compatible with recover
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
