@@ -1113,6 +1113,12 @@ public:
    */
   bool forceRestart() const { return _force_restart; }
 
+  /// Returns whether the flag for unused parameters is set to throw a warning only
+  bool unusedFlagIsWarning() const { return _enable_unused_check == WARN_UNUSED; }
+
+  /// Returns whether the flag for unused parameters is set to throw an error
+  bool unusedFlagIsError() const { return _enable_unused_check == ERROR_UNUSED; }
+
 protected:
   /**
    * Helper method for dynamic loading of objects
