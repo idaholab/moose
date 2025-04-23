@@ -69,7 +69,15 @@ for i in range(1,_n_rings):
         theta1 = (theta + 1.0e-10) % (pi / 3.0);
         distance = ((pow(i * pitch, 2) + (theta1 / dtheta * pitch)**2 -
                      2.0 * i * pitch * (theta1 / dtheta * pitch) * np.cos(pi / 3.0)))**0.5;
-        theta_corrected = np.arccos(1.0 / (i * pitch) / distance / 2.0 * ((i * pitch)**2.0 + (distance)**2.0 - (theta1 / dtheta * pitch)**2.0));
+        # original calculation
+        value = 1.0 / (i * pitch) / distance / 2.0 * ((i * pitch)**2.0 + (distance)**2.0 - (theta1 / dtheta * pitch)**2.0)
+
+        # Ensure the value is within the valid range for arccos
+        if value < -1.0:
+            value = -1.0
+        elif value > 1.0:
+            value = 1.0
+        theta_corrected = np.arccos(value);
         if (theta1 < 1.0e-6):
             theta_corrected = theta;
         else:

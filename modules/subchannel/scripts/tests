@@ -2,8 +2,8 @@
     issues = '#30032'
     design = 'user_notes.md'
     [index]
-        type = PythonUnitTest
-        input = 'index.py'
+        type = RunCommand
+        command = "python index.py"
         required_python_packages = 'numpy matplotlib'
         valgrind = none
         detail = 'script shall print the index position for SCM Subchannels/Pins'
