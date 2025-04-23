@@ -22,7 +22,7 @@ This term arises from the weak form of the curl curl operator
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/curlcurl.i
+!listing mfem/kernels/curlcurl.i block=Kernels
 
 !syntax parameters /Kernels/MFEMCurlCurlKernel
 

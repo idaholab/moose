@@ -21,7 +21,7 @@ where $\vec u \in H(\mathrm{div})$, $v \in L^2$ and $\lambda$ is a scalar consta
 
 ## Example Input File Syntax
 
-!listing graddiv.i
+!listing graddiv.i block=AuxKernels
 
 !syntax parameters /AuxKernels/MFEMDivAux
 
