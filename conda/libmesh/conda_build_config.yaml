@@ -3,12 +3,12 @@ mpi:
   - openmpi
 
 moose_petsc:
-  - moose-petsc 3.23.0.6.gd9d7fd11dca mpich_0
-  - moose-petsc 3.23.0.6.gd9d7fd11dca openmpi_0
+  - moose-petsc 3.23.0.6.gd9d7fd11dca mpich_1
+  - moose-petsc 3.23.0.6.gd9d7fd11dca openmpi_1
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.3.0 mpich_6
-  - moose-libmesh-vtk 9.3.0 openmpi_6
+  - moose-libmesh-vtk 9.4.2 mpich_1
+  - moose-libmesh-vtk 9.4.2 openmpi_1
 
 zip_keys:
   - mpi
@@ -17,14 +17,14 @@ zip_keys:
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX11.3.sdk                                     # [osx]
+  - /opt/MacOSX13.3.sdk                                     # [osx]
 
 macos_min_version:                                          # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]
 
 macos_machine:                                              # [osx]
   - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
-  - arm64-apple-darwin20.0.0                                # [arm64]
+  - arm64-apple-darwin22.6.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]

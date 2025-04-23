@@ -3,18 +3,18 @@ mpi:
   - openmpi
 
 moose_dev:
-  - moose-dev 2025.04.11
+  - moose-dev 2025.04.22
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX11.3.sdk                                     # [osx]
+  - /opt/MacOSX13.3.sdk                                     # [osx]
 
 macos_min_version:                                          # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]
 
 macos_machine:                                              # [osx]
   - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
-  - arm64-apple-darwin20.0.0                                # [arm64]
+  - arm64-apple-darwin22.6.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 11.3                                                    # [osx]
+  - 13.3                                                    # [osx]

@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.03.24
+    version: 2025.04.17
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: libmesh-vtk, peacock, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.03.24
+    version: 2025.04.17
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -25,8 +25,8 @@ packages:
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.3.0
-    build_number: 6
+    version: 9.4.2
+    build_number: 1
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -35,9 +35,10 @@ packages:
       - mpi
     influential:
       - conda/libmesh-vtk/build.sh
+      - conda/libmesh-vtk/vtk9.4.2_mr11854_nlohmann.patch
   # dependers: peacock
   peacock:
-    version: 2025.03.24
+    version: 2025.04.17
     conda: conda/peacock
     templates:
       conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml
@@ -47,7 +48,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.23.0.6.gd9d7fd11dca
-    build_number: 0
+    build_number: 1
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -65,8 +66,8 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2025.04.02
-    build_number: 1
+    version: 2025.04.22
+    build_number: 0
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -85,7 +86,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.02.25
-    build_number: 1
+    build_number: 2
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -102,7 +103,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.04.11
+    version: 2025.04.22
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -121,7 +122,7 @@ packages:
       - scripts/setup_libtorch.sh
   # dependers: none
   pprof:
-    version: 2024.12.23
+    version: 2025.04.17
     build_number: 0
     conda: conda/pprof
     templates:
@@ -131,7 +132,7 @@ packages:
   # dependers: none
   seacas:
     version: 2025.02.27
-    build_number: 0
+    build_number: 1
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
