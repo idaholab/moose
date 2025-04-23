@@ -308,6 +308,11 @@ class TestHarness:
             self.options._capabilities = None
         else:
             assert self.executable
+
+            # Make sure capabilities are available early; this will exit
+            # if we fail
+            import pycapabilities
+
             self.options._capabilities = util.getCapabilities(self.executable)
 
         # Load app json output if we can
