@@ -6,6 +6,7 @@
     cli_args = '-r 1'
     recover = false
     max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
+    restep = false # Test is prescribed to abort on failed timestep
 
     issues = "#226"
     design = "THMCreateMeshAction.md"
