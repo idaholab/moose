@@ -62,13 +62,9 @@ The SCM deformation model is implemented by a custom IC: [FCTFdisplacementIC](/i
 
 The deformed duct simulation is run by the following input files:
 
-main file:
+!listing /validation/areva_FCTF/FCTF_deformed.i language=cpp
 
-!listing /examples/areva_FCTF/FCTF_deformed.i language=cpp
-
-file that groups all the postprocessors:
-
-!listing /examples/areva_FCTF/deformed_duct_pp.i language=cpp
+!listing /validation/areva_FCTF/deformed_duct_pp.i language=cpp
 
 ## Results
 
