@@ -451,6 +451,12 @@ public:
   void useFieldSplitPreconditioner(FieldSplitPreconditionerBase * fsp) { _fsp = fsp; }
 
   /**
+   * @returns A field split preconditioner. This will error if there is no field split
+   * preconditioner
+   */
+  FieldSplitPreconditionerBase & getFieldSplitPreconditioner();
+
+  /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom
    * that are found to
    * be related through the geometric search system.

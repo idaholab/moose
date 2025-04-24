@@ -4033,3 +4033,12 @@ NonlinearSystemBase::destroyColoring()
   if (matrixFromColoring())
     LibmeshPetscCall(MatFDColoringDestroy(&_fdcoloring));
 }
+
+FieldSplitPreconditionerBase &
+NonlinearSystemBase::getFieldSplitPreconditioner()
+{
+  if (!_fsp)
+    mooseError("No field split preconditioner is present for this system");
+
+  return *_fsp;
+}

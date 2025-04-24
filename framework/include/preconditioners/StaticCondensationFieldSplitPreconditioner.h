@@ -27,6 +27,7 @@ public:
   StaticCondensationFieldSplitPreconditioner(const InputParameters & parameters);
 
   virtual void setupDM() override;
+  virtual KSP getKSP() override;
 
 protected:
   virtual const libMesh::DofMapBase & dofMap() const override;

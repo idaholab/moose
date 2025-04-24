@@ -114,8 +114,8 @@ FieldSplitPreconditionerTempl<Base>::createMooseDM(DM * dm)
       DMCreateMoose(_nl.comm().get(), _nl, dofMap(), system(), _decomposition_split, dm));
   LibmeshPetscCallA(_nl.comm().get(),
                     PetscObjectSetOptionsPrefix((PetscObject)*dm, petscPrefix().c_str()));
-  LibmeshPetscCallA(_nl.comm().get(), DMSetFromOptions(*dm));
-  LibmeshPetscCallA(_nl.comm().get(), DMSetUp(*dm));
+  LibmeshPetscCall(DMSetFromOptions(*dm));
+  LibmeshPetscCall(DMSetUp(*dm));
 }
 
 registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
@@ -141,22 +141,22 @@ FieldSplitPreconditioner::setupDM()
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this
   // call would be in DMInitializePackage()
-  LibmeshPetscCallA(_nl.comm().get(), DMMooseRegisterAll());
+  LibmeshPetscCall(DMMooseRegisterAll());
   // Create and set up the DM that will consume the split options and deal with block matrices.
   auto * const petsc_solver =
       libMesh::cast_ptr<PetscNonlinearSolver<Number> *>(_nl.nonlinearSolver());
   SNES snes = petsc_solver->snes(petscPrefix().c_str());
   // if there exists a DMMoose object, not to recreate a new one
-  LibmeshPetscCallA(_nl.comm().get(), SNESGetDM(snes, &dm));
+  LibmeshPetscCall(SNESGetDM(snes, &dm));
   if (dm)
   {
-    LibmeshPetscCallA(_nl.comm().get(), PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose));
+    LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose));
     if (ismoose)
       return;
   }
   createMooseDM(&dm);
-  LibmeshPetscCallA(_nl.comm().get(), SNESSetDM(snes, dm));
-  LibmeshPetscCallA(_nl.comm().get(), DMDestroy(&dm));
+  LibmeshPetscCall(SNESSetDM(snes, dm));
+  LibmeshPetscCall(DMDestroy(&dm));
 }
 
 const DofMapBase &
@@ -175,6 +175,15 @@ std::string
 FieldSplitPreconditioner::petscPrefix() const
 {
   return _nl.petscPrefix();
+}
+
+KSP
+FieldSplitPreconditioner::getKSP()
+{
+  KSP ksp;
+  auto snes = _nl.getSNES();
+  LibmeshPetscCall(SNESGetKSP(snes, &ksp));
+  return ksp;
 }
 
 template class FieldSplitPreconditionerTempl<MooseStaticCondensationPreconditioner>;
