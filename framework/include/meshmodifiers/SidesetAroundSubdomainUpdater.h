@@ -60,7 +60,7 @@ protected:
   BoundaryName _boundary_name;
   BoundaryID _boundary_id;
   ///@}
-
+  const BoundaryID _mask_side;
   BoundaryInfo & _boundary_info;
   BoundaryInfo * _displaced_boundary_info;
 
