@@ -96,23 +96,6 @@ gamma = 1e5
     coeff = '${fparse -rho}'
     self_advection = false
   []
-
-  [u_jump]
-    type = MassFluxPenalty
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    component = 0
-    gamma = ${gamma}
-  []
-  [v_jump]
-    type = MassFluxPenalty
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    component = 1
-    gamma = ${gamma}
-  []
 []
 
 [Kernels]
@@ -147,6 +130,23 @@ gamma = 1e5
     variable = pressure_bar
     matrix_tags = 'mass'
     density = '${fparse -1/gamma}'
+  []
+
+  [u_jump]
+    type = MassFluxPenalty
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    gamma = ${gamma}
+  []
+  [v_jump]
+    type = MassFluxPenalty
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    gamma = ${gamma}
   []
 []
 

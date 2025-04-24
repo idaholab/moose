@@ -93,27 +93,6 @@ l = 1
     coeff = '${fparse -rho}'
     self_advection = false
   []
-
-  [u_jump]
-    type = MassFluxPenalty
-    matrix_only = true
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    component = 0
-    vector_tags = ''
-    matrix_tags = 'jump combined'
-  []
-  [v_jump]
-    type = MassFluxPenalty
-    matrix_only = true
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    component = 1
-    vector_tags = ''
-    matrix_tags = 'jump combined'
-  []
 []
 
 [Kernels]
@@ -175,6 +154,27 @@ l = 1
     type = MassMatrixDGKernel
     variable = pressure_bar
     matrix_tags = 'mass'
+  []
+
+  [u_jump]
+    type = MassFluxPenalty
+    matrix_only = true
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    vector_tags = ''
+    matrix_tags = 'jump combined'
+  []
+  [v_jump]
+    type = MassFluxPenalty
+    matrix_only = true
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    vector_tags = ''
+    matrix_tags = 'jump combined'
   []
 []
 

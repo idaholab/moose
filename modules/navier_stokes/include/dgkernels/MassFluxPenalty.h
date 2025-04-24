@@ -9,34 +9,25 @@
 
 #pragma once
 
-#include "HDGKernel.h"
+#include "ADDGKernel.h"
 
-class MassFluxPenalty : public HDGKernel
+class MassFluxPenalty : public ADDGKernel
 {
 public:
   static InputParameters validParams();
 
   MassFluxPenalty(const InputParameters & parameters);
 
-  virtual void computeResidual() override {}
-  virtual void computeJacobian() override {}
-  virtual void computeOffDiagJacobian(unsigned int) override {}
-  virtual void computeResidualOnSide() override;
-  virtual void computeJacobianOnSide() override;
+  virtual void computeResidual() override;
 
 protected:
-  ADReal computeQpResidualOnSide();
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   const ADVariableValue & _vel_x;
+  const ADVariableValue & _vel_x_neighbor;
   const ADVariableValue & _vel_y;
+  const ADVariableValue & _vel_y_neighbor;
   const unsigned short _comp;
   const bool _matrix_only;
   const Real _gamma;
-
-  std::vector<Real> _residuals;
-  std::vector<ADReal> _ad_residuals;
-
-private:
-  template <typename T>
-  void computeOnSideHelper(std::vector<T> & residuals);
 };
