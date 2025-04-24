@@ -7,12 +7,14 @@
       type = CSVDiff
       input = 'single.i'
       csvdiff = 'single_out.csv'
+      restep = false # Test isn't performing any timesteps
       detail = 'when there is a single heat transfer.'
     []
     [multiple]
       type = CSVDiff
       input = 'multiple.i'
       csvdiff = 'multiple_out.csv'
+      restep = false # Test isn't performing any timesteps
       detail = 'when there are multiple heat transfers.'
     []
   []

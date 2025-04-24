@@ -10,6 +10,7 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     max_parallel = 1
+    restep = false # Test is prescribed to abort on failed timestep
     group = '1phase rdg explicit pipe solid_wall free_boundary'
     requirement = 'The system shall be able to solve the Sedov blast wave problem using a 1D single phase compressible flow formulation.'
   []

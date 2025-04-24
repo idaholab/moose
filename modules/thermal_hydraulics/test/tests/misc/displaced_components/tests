@@ -8,6 +8,7 @@
     exodiff = 'displaced_components_out.e'
     custom_cmp = 'displaced_components.exodiff'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to use mesh displacement with components.'
   []
 []
