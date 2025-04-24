@@ -31,4 +31,11 @@
     design = MooseMesh.md
     requirement = 'The system shall be able to remove sides from sidesets when tese sides elements are moved to new blocks.'
   []
+  [map_sidesets]
+    type = CSVDiff
+    input = simple.i
+    csvdiff = simple_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall be able to map sidesets as elements are ghosted/activated.'
+  []
 []
