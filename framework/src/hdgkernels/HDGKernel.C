@@ -17,7 +17,14 @@ HDGKernel::validParams()
   return params;
 }
 
-HDGKernel::HDGKernel(const InputParameters & parameters) : Kernel(parameters) {}
+HDGKernel::HDGKernel(const InputParameters & parameters)
+  : Kernel(parameters),
+    _qrule_face(_assembly.qRuleFace()),
+    _q_point_face(_assembly.qPointsFace()),
+    _JxW_face(_assembly.JxWFace()),
+    _normals(_assembly.normals())
+{
+}
 
 void
 HDGKernel::computeResidualAndJacobianOnSide()
