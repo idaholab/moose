@@ -1060,8 +1060,8 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
                                           (i != extra_dist.size() - 1) &&
                                               _create_outward_interface_boundaries);
 
-      if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
-        meshp0->prepare_for_use();
+      // The other_mesh must be prepared before stitching
+      meshp0->prepare_for_use();
 
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
