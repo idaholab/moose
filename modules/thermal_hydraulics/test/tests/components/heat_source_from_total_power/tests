@@ -8,6 +8,7 @@
     exodiff = 'phy.cylinder_power_shape_fn_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = "The system shall provide the heat source shape for a cylindrical heat structure "
                   "when power component and power shape function are supplied"
@@ -18,6 +19,7 @@
     exodiff = 'phy.plate_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = "The system shall provide the heat source shape for a plate heat structure when "
                   "power component and power shape function are supplied"
