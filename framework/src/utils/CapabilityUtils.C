@@ -311,7 +311,7 @@ check(std::string requirements, const Registry & app_capabilities)
 
   CheckState state = CheckState::CERTAIN_FAIL;
   if (!parser.parse(requirements, state))
-    state = CheckState::PARSE_FAIL;
+    throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
 
   std::string reason;
   std::string doc;
