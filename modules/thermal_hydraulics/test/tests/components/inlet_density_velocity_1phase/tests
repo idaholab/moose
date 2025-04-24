@@ -8,6 +8,7 @@
     input = 'phy.densityvelocity_3eqn.i'
     exodiff = 'phy.densityvelocity_3eqn_out.e'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to set an inlet boundary condition for 1D single phase flow by setting the fluid density and its velocity at the boundary.'
   []
 
@@ -17,6 +18,7 @@
     input = 'clg.densityvelocity_3eqn.i'
     csvdiff = 'clg.densityvelocity_3eqn_out.csv'
     rel_err = 1e-5
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to control both the density and the velocity at an inlet with single phase flow.'
   []
 

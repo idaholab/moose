@@ -4,6 +4,7 @@
     input = 'steady_state.i'
     exodiff = 'steady_state_out.e'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in flow channels'
     design = 'FlowChannel1Phase.md'

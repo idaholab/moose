@@ -8,6 +8,7 @@
     cli_args = "Components/hs/axial_region_names='region1 region2 region3'"
     exodiff = 'axial_regions_out.e'
     rel_err = 1e-5
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for the thermal behavior of a heat structure with several axial regions.'
   []
 
@@ -15,6 +16,7 @@
     type = Exodiff
     input = 'phy.variable_init_t.i'
     exodiff = 'phy.variable_init_t_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to initialize the temperature in a heat structure using a function.'
   []
 
@@ -22,6 +24,7 @@
     type = Exodiff
     input = 'phy.sub_discretization.i'
     exodiff = 'phy.sub_discretization_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for the thermal behavior of a heat structure with several axial regions with different axial discretizations.'
   []
 
@@ -30,6 +33,7 @@
     input = 'inner_radial_boundary.i'
     csvdiff = 'inner_radial_boundary_out_test_vpp_0000.csv'
     recover = false
+    restep = false # Test isn't performing any timesteps
     requirement = 'The system shall be able to discretize the inner boundary of a heat structure.'
   []
 
@@ -38,6 +42,7 @@
     input = 'interior_axial_boundaries.i'
     csvdiff = 'interior_axial_boundaries_out.csv'
     recover = false
+    restep = false # Test isn't performing any timesteps
     requirement = 'The system shall be able to create interior axial boundaries in a heat structure.'
   []
 

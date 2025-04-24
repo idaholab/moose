@@ -8,6 +8,7 @@
     exodiff = 'phy.cylinder_power_shape_aux_var_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = "The system shall provide the heat source shape when power density is supplied"
   []

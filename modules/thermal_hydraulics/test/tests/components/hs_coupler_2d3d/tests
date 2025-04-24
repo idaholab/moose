@@ -22,6 +22,7 @@
         Components/hs_coupler/emissivity_3d=0.6
         Outputs/file_base=conduction_plus_radiation"
       exodiff = conduction_plus_radiation.e
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'using conduction and radiation.'
     []
     [conduction_only]
@@ -29,6 +30,7 @@
       input = hs_coupler_2d3d.i
       cli_args = 'Outputs/file_base=conduction_only'
       exodiff = conduction_only.e
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'using conduction only.'
     []
     [convection_only]
@@ -39,6 +41,7 @@
         Components/hs_coupler/gap_htc=100
         Outputs/file_base=convection_only"
       exodiff = convection_only.e
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'using convection only.'
     []
   []

@@ -7,6 +7,7 @@
     input = 'phy.energy_walltemperature_ss_1phase.i'
     csvdiff = 'phy.energy_walltemperature_ss_1phase_out.csv'
     abs_zero = 1e-9
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for heat transfer with a specified wall temperature.'
   []
 
@@ -15,6 +16,7 @@
     type = 'CSVDiff'
     input = 'clg.Hw.i'
     csvdiff = 'clg.Hw_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for heat transfer with a specified wall temperature, and dynamically controlling the wall heat transfer coefficient.'
   []
 
@@ -22,6 +24,7 @@
     type = 'CSVDiff'
     input = 'clg.T_wall.i'
     csvdiff = 'clg.T_wall_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for heat transfer with a specified wall temperature, and dynamically controlling the wall temperature.'
   []
 
