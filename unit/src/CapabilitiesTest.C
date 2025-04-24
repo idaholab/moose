@@ -13,6 +13,29 @@
 
 #include "gtest/gtest.h"
 
+namespace
+{
+void
+checkError(Moose::Capabilities & capabilities,
+           const std::string & required,
+           const std::string & msg)
+{
+  EXPECT_THROW(
+      {
+        try
+        {
+          capabilities.check(required);
+        }
+        catch (const CapabilityUtils::CapabilityException & e)
+        {
+          EXPECT_EQ(msg, e.what());
+          throw;
+        }
+      },
+      CapabilityUtils::CapabilityException);
+}
+}
+
 TEST(CapabilitiesTest, boolTest)
 {
   Moose::Capabilities capabilities;
@@ -30,9 +53,11 @@ TEST(CapabilitiesTest, boolTest)
   for (const auto & [requirement, state] : tests)
     EXPECT_EQ(std::get<0>(capabilities.check(requirement)), state);
 
-  EXPECT_THROW(capabilities.check("unittest_bool2=>1.0.0"), std::runtime_error);
-  EXPECT_THROW(capabilities.check("unittest_bool="), std::runtime_error);
-  EXPECT_THROW(capabilities.check("unittest_bool=="), std::runtime_error);
+  checkError(capabilities, "unittest_bool2=>1.0.0", "Unknown operator '=>'.");
+  checkError(
+      capabilities, "unittest_bool=", "Unable to parse requested capabilities 'unittest_bool='.");
+  checkError(
+      capabilities, "unittest_bool==", "Unable to parse requested capabilities 'unittest_bool=='.");
 }
 
 TEST(CapabilitiesTest, intTest)
@@ -56,7 +81,11 @@ TEST(CapabilitiesTest, intTest)
     EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_int" + c + ")")),
               CapabilityUtils::CERTAIN_PASS);
   }
-  EXPECT_THROW(capabilities.check("unittest_int<"), std::runtime_error);
+
+  checkError(
+      capabilities, "unittest_int<", "Unable to parse requested capabilities 'unittest_int<'.");
+  checkError(capabilities, "unittest_int<bla", "Unexpected comparison to a string.");
+  checkError(capabilities, "unittest_int>1.0", "Expected an integer value in comparison");
 }
 
 TEST(CapabilitiesTest, stringTest)
@@ -72,7 +101,12 @@ TEST(CapabilitiesTest, stringTest)
   EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=CLANG")),
             CapabilityUtils::CERTAIN_PASS);
   EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=gcc")), CapabilityUtils::CERTAIN_FAIL);
-  EXPECT_THROW(capabilities.check("unittest_string>"), std::runtime_error);
+
+  checkError(capabilities,
+             "unittest_string>",
+             "Unable to parse requested capabilities 'unittest_string>'.");
+  checkError(capabilities, "unittest_string>0", "Expected a version number.");
+  checkError(capabilities, "unittest_string>1.0", "Expected a version number.");
 }
 
 TEST(CapabilitiesTest, versionTest)
@@ -113,7 +147,9 @@ TEST(CapabilitiesTest, versionTest)
     EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_version" + c + ")")),
               CapabilityUtils::CERTAIN_PASS);
   }
-  EXPECT_THROW(capabilities.check("!unittest_version<"), std::runtime_error);
+  checkError(capabilities,
+             "!unittest_version<",
+             "Unable to parse requested capabilities '!unittest_version<'.");
 }
 
 TEST(CapabilitiesTest, multipleTest)
@@ -152,19 +188,5 @@ TEST(CapabilitiesTest, multipleTest)
 TEST(CapabilitiesTest, parseFail)
 {
   Moose::Capabilities capabilities;
-  const std::string bad_capabilities = "foo bar";
-
-  const auto result = CapabilityUtils::check(bad_capabilities, capabilities._capability_registry);
-  EXPECT_EQ(std::get<0>(result), CapabilityUtils::PARSE_FAIL);
-
-  try
-  {
-    capabilities.check(bad_capabilities);
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    ASSERT_EQ(std::string(err.what()),
-              "Unable to parse requested capabilities '" + bad_capabilities + "'.");
-  }
+  checkError(capabilities, "foo bar", "Unable to parse requested capabilities 'foo bar'.");
 }

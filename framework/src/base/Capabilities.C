@@ -82,8 +82,6 @@ CapabilityUtils::Result
 Capabilities::check(const std::string & requested_capabilities) const
 {
   const auto result = CapabilityUtils::check(requested_capabilities, _capability_registry);
-  if (std::get<0>(result) == CapabilityUtils::PARSE_FAIL)
-    mooseError("Unable to parse requested capabilities '", requested_capabilities, "'.");
   return result;
 }
 

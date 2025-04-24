@@ -137,6 +137,5 @@ PyInit_capabilities(void)
   PyModule_AddIntConstant(module, "UNKNOWN", 2);
   PyModule_AddIntConstant(module, "POSSIBLE_PASS", 3);
   PyModule_AddIntConstant(module, "CERTAIN_PASS", 4);
-  PyModule_AddIntConstant(module, "PARSE_FAIL", 5);
   return module;
 }
