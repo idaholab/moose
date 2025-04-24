@@ -63,12 +63,22 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::PorousFlowPermeabilityKozenyCarm
                            .template getEnum<PoropermFunction>()),
     _A(parameters.isParamValid("A") ? this->template getParam<Real>("A") : -1)
 {
+  auto checkForInvalidParams =
+      [&](const std::string & bad_param, const std::string & poroperm_function)
+  {
+    if (parameters.isParamValid(bad_param))
+      this->paramError(bad_param, "Not compatible with '" + poroperm_function + "'.");
+  };
+
   switch (_poroperm_function)
   {
     case PoropermFunction::kozeny_carman_fd2:
       if (!(parameters.isParamValid("f") && parameters.isParamValid("d")))
         mooseError("You must specify f and d in order to use kozeny_carman_fd2 in "
                    "PorousFlowPermeabilityKozenyCarman");
+      checkForInvalidParams("A", "kozeny_carman_fd2");
+      checkForInvalidParams("k0", "kozeny_carman_fd2");
+      checkForInvalidParams("phi0", "kozeny_carman_fd2");
       _A = _f * _d * _d;
       break;
 
@@ -76,12 +86,20 @@ PorousFlowPermeabilityKozenyCarmanTempl<is_ad>::PorousFlowPermeabilityKozenyCarm
       if (!(parameters.isParamValid("k0") && parameters.isParamValid("phi0")))
         mooseError("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in "
                    "PorousFlowPermeabilityKozenyCarman");
+      checkForInvalidParams("A", "kozeny_carman_phi0");
+      checkForInvalidParams("f", "kozeny_carman_phi0");
+      checkForInvalidParams("d", "kozeny_carman_phi0");
       _A = _k0 * std::pow(1.0 - _phi0, this->_m) / std::pow(_phi0, this->_n);
       break;
     case PoropermFunction::kozeny_carman_A:
       if (!(parameters.isParamValid("A")))
         mooseError("You must specify A in order to use kozeny_carman_A in "
                    "PorousFlowPermeabilityKozenyCarman");
+      checkForInvalidParams("k0", "kozeny_carman_A");
+      checkForInvalidParams("phi0", "kozeny_carman_A");
+      checkForInvalidParams("f", "kozeny_carman_A");
+      checkForInvalidParams("d", "kozeny_carman_A");
+
       break;
   }
 }

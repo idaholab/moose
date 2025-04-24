@@ -167,6 +167,10 @@
     order = CONSTANT
     family = MONOMIAL
   []
+  [A_var_bad]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -176,10 +180,16 @@
     expression = 'if(x<1.1,0.11552,0.23104)'
     use_xyzt = true
   []
+  [A_bad]
+    type = ParsedAux
+    variable = A_var_bad
+    expression = 'if(x<1.1,0.11552,-.01)'
+    use_xyzt = true
+  []
 []
 
 [Materials]
-  inactive = 'permeability_all permeability_0A permeability_1A'
+  inactive = 'permeability_all permeability_0A permeability_1A var_error param_error'
   [permeability_0]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
@@ -225,6 +235,23 @@
     n = 7
     A = A_var
   []
+  [var_error]
+    type = PorousFlowPermeabilityKozenyCarmanFromVar
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    m = 2
+    n = 7
+    A = A_var_bad
+  []
+  [param_error]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_A
+    A = 0.23104
+    phi0 = .01
+    m = 2
+    n = 7
+  []
+
   [temperature]
     type = PorousFlowTemperature
   []

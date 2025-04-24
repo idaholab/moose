@@ -34,7 +34,7 @@
     type = 'CSVDiff'
     input = 'PermFromPoro02.i'
     csvdiff = 'PermFromPoro02_out.csv'
-    cli_args = 'Materials/inactive="permeability_0 permeability_1 permeability_all"'
+    cli_args = 'Materials/inactive="permeability_0 permeability_1 permeability_all var_error param_error"'
     rel_err = 1.0E-5
     threading = '!pthreads'
     requirement = 'The system shall be able to calculate permeability as a Kozeny-Carman function where the permeability multiplying factor is defined directly.'
@@ -45,13 +45,34 @@
     type = 'CSVDiff'
     input = 'PermFromPoro02.i'
     csvdiff = 'PermFromPoro02_out.csv'
-    cli_args = 'Materials/inactive="permeability_0 permeability_1 permeability_0A permeability_1A"'
+    cli_args = 'Materials/inactive="permeability_0 permeability_1 permeability_0A permeability_1A var_error param_error"'
     rel_err = 1.0E-5
     threading = '!pthreads'
     requirement = 'The system shall be able to calculate permeability as a Kozeny-Carman function of porosity, where permeability is defined via setting a spatially varying reference value of permeability from an auxvariable.'
     issues = '#30339'
     design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarmanFromVar.md'
   []
+  [PermFromPoro02_var_error]
+    type = RunException
+    input = 'PermFromPoro02.i'
+    cli_args = 'Materials/inactive="permeability_all permeability_0 permeability_1 permeability_0A permeability_1A param_error"'
+    expect_err = 'The variable A must be greater than zero; A = -0.01.'
+    threading = '!pthreads'
+    requirement = 'The system shall produce an error if the variable value used for A in the Kozeny Carman permeability is less than 0.'
+    issues = '#30339'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarmanFromVar.md'
+  []
+  [PermFromPoro02_param_error]
+    type = RunException
+    input = 'PermFromPoro02.i'
+    cli_args = 'Materials/inactive="permeability_all permeability_0 permeability_1 permeability_0A permeability_1A var_error"'
+    expect_err = 'Not compatible with \'kozeny_carman_A\''
+    threading = '!pthreads'
+    requirement = 'The system shall produce an error if a parameter incompatible with the permeability function is provided.'
+    issues = '#30339'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarman.md'
+  []
+
   [PermFromPoro03]
     type = 'CSVDiff'
     input = 'PermFromPoro03.i'
@@ -139,15 +160,6 @@
     requirement = 'The system shall produce an error if the porosity depends on porepressure but no solid bulk modulus is provided.'
     issues = '#10847'
     design = 'porous_flow/porosity.md PorousFlowPorosity.md'
-  []
-  [poroPermException]
-    type = RunException
-    input = PermFromPoroError.i
-    expect_err = 'The variable A must be greater than zero; A = -0.01.'
-    threading = '!pthreads'
-    requirement = 'The system shall produce an error if the variable value used for A in the Kozeny Carman permeability is less than 0.'
-    issues = '#30339'
-    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarmanFromVar.md'
   []
 
   [PermTensorFromVar01]
