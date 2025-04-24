@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../../../../../unit/data/square.msh
+  file = ../../mesh/square.msh
   dim = 3
 []
 

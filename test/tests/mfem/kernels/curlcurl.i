@@ -3,7 +3,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ../../../../unit/data/small_fichera.mesh
+  file = ../mesh/small_fichera.mesh
   dim = 3
 []
 

@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../../../../unit/data/mug.e
+  file = ../mesh/mug.e
   dim = 3
 []
 
