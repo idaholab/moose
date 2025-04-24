@@ -2,8 +2,8 @@
 
 [TransportSystems]
   particle = neutron
-  G = 33
-  VacuumBoundary = 'outer_core top bottom'
+  G = 6
+  VacuumBoundary = 'outer_core'
   equation_type = eigenvalue
   [sn]
     scheme = DFEM-SN
@@ -19,7 +19,7 @@
 [Materials]
   [matid]
     type = MixedMatIDNeutronicsMaterial
-    block = 'RGMB_CORE'
+    block = 'RGMB_CORE RGMB_CORE_TRI'
     isotopes = 'pseudo'
   []
 []

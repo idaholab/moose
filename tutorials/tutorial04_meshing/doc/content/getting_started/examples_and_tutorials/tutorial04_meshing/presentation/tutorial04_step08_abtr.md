@@ -241,6 +241,8 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference (CMFD)
 
 This ABTR example uses option 1, where the CMFD acceleration uses the same mesh as the fine mesh, so no additional mesh generation is performed.
 
+So far, the example shown in this section has relied on explicit region ID mappings for the homogeneous core. Section ["RGMB Example: Heterogeneous to Homogeneous Conversion for Fast Reactor Core"](tutorial04_meshing/presentation/index.md#/11) will explore how the Reactor Geometry Mesh Builder can be used to generate the heterogeneous input mesh and automatically define the homogeneous core mesh from the heterogeneous mesh specifications.
+
 !---
 
 ### Output Postprocessing

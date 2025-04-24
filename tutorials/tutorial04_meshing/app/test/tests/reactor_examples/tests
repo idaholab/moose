@@ -18,17 +18,17 @@
   []
 
   [rgmb_abtr]
-    requirement = "The system shall include example input for meshing tutorial RGMB ABTR example."
+    requirement = "The system shall include example input for meshing tutorial RGMB heterogeneous ABTR example."
     type = RunApp
-    input = 'rgmb_abtr/rgmb_abtr.i'
+    input = 'rgmb_abtr/rgmb_abtr_het_mesh.i'
     cli_args= '--mesh-only --error-deprecated'
     installation_type = in_tree
   []
 
-  [rgmb_lfr_assembly]
-    requirement = "The system shall include example input for meshing tutorial RGMB HPMR example."
+  [rgmb_empire]
+    requirement = "The system shall include example input for meshing tutorial RGMB Empire example."
     type = RunApp
-    input = 'rgmb_lfr/rgmb_lfr_assembly.i'
+    input = 'rgmb_empire/rgmb_empire.i'
     cli_args= '--mesh-only --error-deprecated'
     installation_type = in_tree
   []
