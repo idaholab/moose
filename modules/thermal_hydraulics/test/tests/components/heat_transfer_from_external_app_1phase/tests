@@ -6,6 +6,7 @@
     type = Exodiff
     input = 'phy.q_wall_transfer_3eqn.parent.i'
     exodiff = 'phy.q_wall_transfer_3eqn.parent_out.e phy.q_wall_transfer_3eqn.parent_out_thm0.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for single phase heat transfer in a component with the wall heat flux provided by an external application.'
   []
 
@@ -14,6 +15,7 @@
     input = 'phy.T_wall_transfer_3eqn.parent.i'
     exodiff = 'phy.T_wall_transfer_3eqn.parent_out.e phy.T_wall_transfer_3eqn.parent_out_thm0_out.e'
     cli_args = 'thm:Components/hxconn/initial_T_wall=300'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for single phase heat transfer in a component with the wall temperature provided by an external application.'
   []
 
@@ -24,6 +26,7 @@
     cli_args = "Outputs/file_base=phy.T_wall_transfer_ext_3eqn Transfers/T_to_child/variable=T_ext "
                "thm:AuxVariables/T_ext/initial_condition=300 "
                "thm:Components/hxconn/T_ext=T_ext thm:Outputs/out/show='T_ext'"
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for single phase heat transfer in a component with the exterior temperature provided by an external application.'
   []
 
@@ -31,6 +34,7 @@
     type = Exodiff
     input = 'phy.T_wall_transfer_elem_3eqn.parent.i'
     exodiff = 'phy.T_wall_transfer_elem_3eqn.parent_out.e phy.T_wall_transfer_elem_3eqn.parent_out_thm0_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve for single phase heat transfer in a component with the wall temperature provided by an external application and represented as an elemental field.'
   []
 []

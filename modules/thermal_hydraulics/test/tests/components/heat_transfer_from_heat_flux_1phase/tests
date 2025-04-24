@@ -14,6 +14,7 @@
     input = 'phy.energy_heatflux_ss_1phase.i'
     csvdiff = 'phy.energy_heatflux_ss_1phase_out.csv'
     abs_zero = 1e-8
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall conserve energy when applying a heat flux function to a single-phase flow channel."
   []
 

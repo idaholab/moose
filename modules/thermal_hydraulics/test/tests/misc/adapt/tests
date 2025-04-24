@@ -9,6 +9,7 @@
     abs_zero = 1e-7
     recover = false
     mesh_mode = 'replicated'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to use adaptive mesh refinement in a 1D single phase compressible flow simulation.'
   []
 
