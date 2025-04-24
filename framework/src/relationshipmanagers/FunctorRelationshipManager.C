@@ -60,7 +60,6 @@ FunctorRelationshipManager::dofmap_reinit()
 void
 FunctorRelationshipManager::redistribute()
 {
-  std::cout << "Redistributing" << std::endl;
   if (!_functor)
     mooseError("Functor was not initialized!");
 

@@ -3748,7 +3748,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
-    std::cout << "Build FV " << elem->vertex_average() << std::endl;
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element

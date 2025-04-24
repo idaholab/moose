@@ -294,7 +294,6 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
     mesh->needsRemoteElemDeletion(false);
   }
 
-  std::cout << "Uniform refinement level incoming" << std::endl;
   mesh_refinement.uniformly_refine(level);
 }
 

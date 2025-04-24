@@ -168,18 +168,7 @@ OutputWarehouse::outputStep(ExecFlagType type)
 
   for (const auto & obj : _all_objects)
     if (obj->enabled())
-    {
-      std::cout << obj->name() << std::endl;
       obj->outputStep(type);
-
-      auto begin = _app.feProblem().mesh().getMesh().active_elements_begin();
-      auto end = _app.feProblem().mesh().getMesh().active_elements_end();
-
-      // We prepare a map connecting the Elem* and the corresponding ElemInfo
-      // for the active elements.
-      for (const Elem * elem : as_range(begin, end))
-        std::cout << "In outputstep " << type << " " << elem->vertex_average() << std::endl;
-    }
 
   /**
    * This is one of three locations where we explicitly flush the output buffers during a

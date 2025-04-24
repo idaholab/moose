@@ -36,6 +36,20 @@ BernoulliPressureVariable::validParams()
       "WARNING: This might lead to crushes in parallel runs if porosity jump faces are connected "
       "with one cell (usually corners) due to the insufficient number of ghosted "
       "layers.");
+
+  // Assuming that this variable is used for advection problems, due to the
+  // utilization of the pressure gradient in the advecting velocity
+  // through the Rhie-Chow interpolation, we have to extend the ghosted layers
+  // if we allow 2-term extrapolation for the determination of the downwind pressure
+  params.addRelationshipManager("ElementSideNeighborLayers",
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+    Moose::RelationshipManagerType::COUPLING,
+        [](const InputParameters & obj_params, InputParameters & rm_params)
+        {
+          if (obj_params.get<bool>("allow_two_term_expansion_on_bernoulli_faces"))
+            rm_params.set<unsigned short>("layers") =
+              std::max((unsigned short)(3), obj_params.get<unsigned short>("ghost_layers"));
+        });
   return params;
 }
 

@@ -161,8 +161,6 @@ RelationshipManager::init(MooseMesh & moose_mesh,
   mooseAssert(_dof_map ? dof_map == _dof_map : true,
               "Trying to initialize with a different dof map");
 
-  std::cout << "Initializing RM " << this->getInfo() << std::endl;
-
   _dof_map = dof_map;
   // During the mesh generation phase we haven't set the mesh base in the moose mesh yet
   if (moose_mesh.getMeshPtr())
