@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import subprocess
 import sys
 import traceback
 
@@ -144,7 +145,7 @@ class SpecModifier:
     # Did something
     return True
 
-  def run(self) -> bool:
+  def run(self, dry_run: bool) -> bool:
     """
     Main runner to modify a spec.
 
@@ -170,7 +171,8 @@ class SpecModifier:
       return False
 
     # Overwrite changes
-    pyhit.write(self.file, root)
+    if not dry_run:
+      pyhit.write(self.file, root)
     return True
 
 def parse_args():
@@ -178,17 +180,44 @@ def parse_args():
   parser.add_argument('root_dir', type=str, help='Root directory to start the search')
   parser.add_argument('--spec-file', type=str, default='tests',
                       help='Name of the spec file (default: tests)')
+  parser.add_argument('--check', action='store_true', default=False,
+                      help='Perform a check; do not make changes and exit nonzero if changes are needed')
   return parser.parse_args()
 
 def main():
   args = parse_args()
+  root_dir = os.path.abspath(args.root_dir)
+  check = args.check
 
-  if not os.path.exists(args.root_dir):
-    print(f'ERROR: Root directory {args.root_dir} does not exist')
+  if not os.path.exists(root_dir):
+    print(f'ERROR: Root directory {root_dir} does not exist')
     sys.exit(1)
 
+  skip_dirs = []
+
+  # See if we're in a git repository so we can skip checking submodules
+  git_root = None
+  try:
+    git_root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
+                                        cwd=root_dir, text=True).strip()
+  except:
+    pass
+
+  # In a git repository, skip checking .git directory and all submodules
+  if git_root:
+    skip_dirs.append(os.path.join(git_root, '.git'))
+    gitmodules = subprocess.check_output(['git', 'config', '--file', '.gitmodules',
+                                          '--name-only', '--get-regexp', 'path'],
+                                          cwd=git_root, text=True).strip()
+    for entry in gitmodules.splitlines():
+      skip_dirs.append(os.path.join(git_root, ''.join(entry.split('.')[1:-1])))
+
   test_specs = []
-  for dirpath, _, filenames in os.walk(args.root_dir, followlinks=True):
+  for dirpath, _, filenames in os.walk(root_dir, followlinks=True):
+    # Directory is skipped
+    if [d for d in skip_dirs if dirpath.startswith(d)]:
+      continue
+
     for filename in filenames:
       path = os.path.abspath(os.path.join(dirpath, filename))
       if path.endswith(f'/{args.spec_file}'):
@@ -198,17 +227,23 @@ def main():
   num_modified = 0
   num_failed = 0
   for path in test_specs:
+    path = os.path.relpath(path)
     modified = False
     try:
-      modified = SpecModifier(path).run()
+      modified = SpecModifier(path).run(check)
     except:
       print(f'FAILED {path}')
       print(traceback.format_exc())
       num_failed += 1
     if modified:
-      print(f'MODIFIED {path}')
+      print('CHANGES REQUIRED' if check else 'MODIFIED', path)
       num_modified += 1
-  print(f'Modified {num_modified} test specs, {num_failed} failed modifications')
+  if check:
+    print(f'{num_modified} test specs require changes')
+    if num_modified:
+      sys.exit(1)
+  else:
+    print(f'Modified {num_modified} test specs, {num_failed} failed modifications')
 
 if __name__ == '__main__':
   main()

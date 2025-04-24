@@ -11,7 +11,6 @@
 #include <Python.h>
 
 #include "CapabilityUtils.h"
-#include "Moose.h"
 #include <string>
 
 static PyObject *
@@ -95,9 +94,6 @@ capabilities_check(PyObject *self, PyObject *args)
       return nullptr;
     }
   }
-
-  // throw on errors to properly report the failure back to python
-  Moose::_throw_on_error = true;
 
   try
   {
