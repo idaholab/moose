@@ -34,6 +34,11 @@ public:
    * setup the data management data structure that manages the field split
    */
   virtual void setupDM() = 0;
+
+  /**
+   * @returns The KSP object associated with the field split preconditioner
+   */
+  virtual KSP getKSP() = 0;
 };
 
 /**
@@ -88,6 +93,7 @@ public:
   FieldSplitPreconditioner(const InputParameters & parameters);
 
   virtual void setupDM() override;
+  virtual KSP getKSP() override;
 
 protected:
   virtual const libMesh::DofMapBase & dofMap() const override;
