@@ -13,6 +13,7 @@ MFEMBoundaryCondition::validParams()
   params.addClassDescription("Base class for applying boundary conditions to MFEM problems.");
   params.registerBase("BoundaryCondition");
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
+  // MFEM uses the boundary -1 to signify every sideset
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
       {"-1"},
