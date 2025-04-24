@@ -108,4 +108,23 @@
     should_crash = true
     capabilities = 'method!=dbg'
   []
+  [mesh_only_allow_unused]
+    type = 'Exodiff'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --allow-unused --mesh-only 3d_chimney.e'
+    exodiff = '3d_chimney.e'
+    recover = false
+    issues = '#30370'
+    requirement = 'The system shall allow writing out the mesh without running a simulation when unused parameters exist but the flag to allow unused parameters is turned on.'
+    capabilities = 'method!=dbg'
+  []
+  [mesh_only_with_check_input_allow_unused]
+    type = 'RunApp'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --allow-unused --check-input --mesh-only'
+    expect_out = 'Syntax OK'
+    max_parallel = 1
+    issues = '#30370'
+    requirement = 'The system shall report the successful parsing and interpretation of input file sytax with unused parameters when using the "--check-input", "--mesh-only", and "--allow-unused" command line flags'
+  []
 []

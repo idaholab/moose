@@ -287,4 +287,10 @@
     requirement = 'The system shall provide a common interface for storing and retrieving output that supports sanitization
     issues = '#27562'
   []
+  [test_method]
+    type = PythonUnitTest
+    input = test_GetExecutable.py
+    requirement = "The system shall test the functionality of the TestHarness.getExecutable method."
+    issues = '#30200'
+  []
 []
