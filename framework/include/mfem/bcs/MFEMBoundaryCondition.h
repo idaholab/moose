@@ -22,7 +22,10 @@ public:
   // Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
 
-  bool isBoundaryRestricted() { return !(_bdr_attributes.Size() == 1 && _bdr_attributes[0] == -1); }
+  bool isBoundaryRestricted() const
+  {
+    return !(_bdr_attributes.Size() == 1 && _bdr_attributes[0] == -1);
+  }
 
   mfem::Array<int> & getBoundaries() { return _bdr_markers; }
 
