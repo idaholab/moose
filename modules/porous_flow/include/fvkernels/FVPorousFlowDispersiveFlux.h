@@ -80,4 +80,11 @@ protected:
 
   /// Transverse dispersivity for each phase
   const std::vector<Real> _disp_trans;
+
+  /// Decides which interpolation method should be used for the computation of
+  /// the gradients within the face normal gradient.
+  const Moose::FV::InterpMethod _var_interp_method;
+
+  /// Just a convenience member for using skewness correction
+  const bool _correct_skewness;
 };
