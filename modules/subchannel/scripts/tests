@@ -6,6 +6,6 @@
         command = "python index.py"
         required_python_packages = 'numpy matplotlib'
         valgrind = none
-        detail = 'script shall print the index position for SCM Subchannels/Pins'
+        requirement = 'script shall print the index position for SCM Subchannels/Pins'
     []
 []
