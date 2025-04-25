@@ -163,8 +163,6 @@ SidesetAroundSubdomainUpdater::finalize()
     for (auto & [elem_id, side] : sent_data)
     {
       _boundary_info.add_side(mesh.elem_ptr(elem_id), side, _boundary_id);
-      _boundary_info.clear_boundary_node_ids();
-      _boundary_info.build_node_list_from_side_list();
       if (_displaced_boundary_info)
         _displaced_boundary_info->add_side(displaced_mesh->elem_ptr(elem_id), side, _boundary_id);
     }
@@ -176,8 +174,6 @@ SidesetAroundSubdomainUpdater::finalize()
     for (const auto & [elem_id, side] : sent_data)
     {
       _boundary_info.remove_side(mesh.elem_ptr(elem_id), side, _boundary_id);
-      _boundary_info.clear_boundary_node_ids();
-      _boundary_info.build_node_list_from_side_list();
       if (_displaced_boundary_info)
         _displaced_boundary_info->remove_side(
             displaced_mesh->elem_ptr(elem_id), side, _boundary_id);
@@ -192,6 +188,8 @@ SidesetAroundSubdomainUpdater::finalize()
   {
     mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
     mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
+    mesh.getMesh().get_boundary_info().clear_boundary_node_ids();
+    mesh.getMesh().get_boundary_info().build_node_list_from_side_list();
     mesh.update();
   };
   sync(_mesh);
