@@ -300,8 +300,15 @@ IterationAdaptiveDT::constrainStep(Real & dt)
 {
   bool at_sync_point = TimeStepper::constrainStep(dt);
 
-  // Limit the timestep to postprocessor value
-  limitDTToPostprocessorValue(dt);
+  // Use value from computed dt while rejecting the timestep
+  if (_dt_from_reject)
+  {
+    dt = *_dt_from_reject;
+    _dt_from_reject.reset();
+  }
+  // Otherwise, limit the timestep to the current postprocessor value
+  else
+    limitDTToPostprocessorValue(dt);
 
   // Limit the timestep to limit change in the function
   limitDTByFunction(dt);
@@ -366,7 +373,11 @@ IterationAdaptiveDT::converged() const
   // if the time step is much smaller than the current time step
   // we need to repeat the current iteration with a smaller time step
   if (dt_test < _dt * _large_step_rejection_threshold)
+  {
+    mooseAssert(!_dt_from_reject, "Should not be set!");
+    _dt_from_reject = dt_test;
     return false;
+  }
 
   // otherwise we move one
   return true;

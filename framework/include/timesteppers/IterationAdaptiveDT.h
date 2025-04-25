@@ -112,4 +112,6 @@ protected:
   bool _reject_large_step;
   /// Threshold used to detect whether we need to reject a step
   double _large_step_rejection_threshold;
+  /// Timestep used to reject a timestep, used to constrain the next attempt
+  mutable std::optional<Real> _dt_from_reject;
 };
