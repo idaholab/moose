@@ -90,6 +90,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     paramError("w",
                "The w velocity must be defined when 'complete_expansion=true'"
                "and problem dimension is larger or equal to three.");
+  std::cout << "Correct skewness??" << _correct_skewness << std::endl;
 }
 
 ADReal

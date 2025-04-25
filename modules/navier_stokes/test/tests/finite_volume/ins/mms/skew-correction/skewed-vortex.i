@@ -29,12 +29,12 @@ rho = 1.0
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    # initial_condition = 1
     face_interp_method = 'skewness-corrected'
   []
   [vel_y]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    # initial_condition = 1
     face_interp_method = 'skewness-corrected'
   []
   [pressure]
@@ -44,6 +44,19 @@ rho = 1.0
   [lambda]
     family = SCALAR
     order = FIRST
+  []
+[]
+
+[FVICs]
+  [u_ic]
+    type = FVFunctionIC
+    variable = vel_x
+    function = 'exact_u'
+  []
+  [v_ic]
+    type = FVFunctionIC
+    variable = vel_y
+    function = 'exact_v'
   []
 []
 
@@ -74,6 +87,7 @@ rho = 1.0
     variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
+    variable_interp_method = skewness-corrected
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -101,6 +115,7 @@ rho = 1.0
     variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
+    variable_interp_method = skewness-corrected
   []
   [v_pressure]
     type = INSFVMomentumPressure

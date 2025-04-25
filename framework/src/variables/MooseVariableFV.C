@@ -51,11 +51,19 @@ MooseVariableFV<OutputType>::validParams()
                                       "Switch that can select between face interpolation methods.");
   params.template addParam<bool>(
       "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
-  // Just evaluating finite volume variables at an arbitrary location in a cell requires a layer of
-  // ghosting since we will use two term expansions
+
+  // Depending on the face interpolation we might have to do more than one layer ghosting.
   params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC);
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+    Moose::RelationshipManagerType::COUPLING,
+        [](const InputParameters & obj_params, InputParameters & rm_params)
+        {
+          unsigned short layers = 1;
+          if (obj_params.get<MooseEnum>("face_interp_method") == "skewness-corrected")
+            layers = 2;
+
+          rm_params.set<unsigned short>("layers") = layers;
+        });
   return params;
 }
 
