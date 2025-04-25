@@ -373,8 +373,9 @@ XYDelaunayGenerator::generate()
       else
         _output_subdomain_id = id;
     }
-
-    mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
+    // We do not want to set an empty subdomain name
+    if (output_subdomain_name.size())
+      mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
   }
 
   if (_smooth_tri || _output_subdomain_id)
