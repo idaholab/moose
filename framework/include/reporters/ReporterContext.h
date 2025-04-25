@@ -77,6 +77,9 @@ public:
   /// Called by FEProblemBase::advanceState via ReporterData
   virtual void copyValuesBack() = 0;
 
+  /// Called by FEProblemBase::restoreSolutions via ReporterData
+  virtual bool restoreState() = 0;
+
   /// Called by JSONOutput::outputReporters to output meta data independent of calculated
   /// values
   virtual void storeInfo(nlohmann::json & json) const = 0;
@@ -315,6 +318,9 @@ protected:
 
   // The following are called by the ReporterData and are not indented for external use
   virtual void copyValuesBack() override;
+
+  /// Restore state to its old values. @see ReporterState::restoreState
+  virtual bool restoreState() override { return _state.restoreState(); }
 
   /// The state on which this context object operates
   ReporterState<T> & _state;

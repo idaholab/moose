@@ -2778,6 +2778,9 @@ protected:
   /// Whether or not to be verbose with multiapps
   bool _verbose_multiapps;
 
+  /// Whether or not to be verbose on solution restoration
+  bool _verbose_restore;
+
   /// The error message to go with an exception
   std::string _exception_message;
 

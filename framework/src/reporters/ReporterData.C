@@ -9,6 +9,7 @@
 
 #include "ReporterData.h"
 #include "MooseApp.h"
+#include "VariadicTable.h"
 
 ReporterData::ReporterData(MooseApp & moose_app) : _app(moose_app) {}
 
@@ -17,6 +18,30 @@ ReporterData::copyValuesBack()
 {
   for (const auto & name_context_pair : _context_ptrs)
     name_context_pair.second->copyValuesBack();
+}
+
+void
+ReporterData::restoreState(bool verbose)
+{
+  // Table of reporter values that were and were not restored
+  VariadicTable<std::string, std::string, std::string> summary_table({"Name", "Type", "Restored?"});
+
+  for (const auto & [rname, context] : _context_ptrs)
+  {
+    const bool restored = context->restoreState();
+
+    if (verbose)
+      summary_table.addRow(
+          rname.getCombinedName(), rname.specialTypeToName(), restored ? "YES" : "NO");
+  }
+
+  if (verbose && !_context_ptrs.empty())
+  {
+    std::stringstream oss;
+    oss << "Reporter Restoration Summary:\n";
+    summary_table.print(oss);
+    mooseInfo(oss.str());
+  }
 }
 
 void

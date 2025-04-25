@@ -275,6 +275,10 @@ FEProblemBase::validParams()
   params.addParam<bool>("verbose_multiapps",
                         false,
                         "Set to True to enable verbose screen printing related to MultiApps");
+  params.addParam<bool>(
+      "verbose_restore",
+      false,
+      "Set to True to enable verbose screen printing related to solution restoration");
 
   params.addParam<FileNameNoExtension>("restart_file_base",
                                        "File base name used for restart (e.g. "
@@ -362,8 +366,8 @@ FEProblemBase::validParams()
                               "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
-  params.addParamNamesToGroup("verbose_setup verbose_multiapps parallel_barrier_messaging",
-                              "Verbosity");
+  params.addParamNamesToGroup(
+      "verbose_setup verbose_multiapps verbose_restore parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
       "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
       "Null space removal");
@@ -466,6 +470,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
     _verbose_setup(getParam<MooseEnum>("verbose_setup")),
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
+    _verbose_restore(getParam<bool>("verbose_restore")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _is_petsc_options_inserted(false),
@@ -6571,8 +6576,19 @@ FEProblemBase::restoreSolutions()
   TIME_SECTION("restoreSolutions", 5, "Restoring Solutions");
 
   for (auto & sys : _solver_systems)
+  {
+    if (_verbose_restore)
+      _console << "Restoring solutions on system " << sys->name() << "..." << std::endl;
     sys->restoreSolutions();
+  }
+
+  if (_verbose_restore)
+    _console << "Restoring solutions on system " << _aux->name() << "..." << std::endl;
   _aux->restoreSolutions();
+
+  if (_verbose_restore)
+    _console << "Restoring postprocessor, vector-postprocessor, and reporter data..." << std::endl;
+  _reporter_data.restoreState(_verbose_restore);
 
   if (_displaced_problem)
     _displaced_problem->updateMesh();
@@ -9073,6 +9089,7 @@ FEProblemBase::setVerboseProblem(bool verbose)
 {
   _verbose_setup = verbose ? "true" : "false";
   _verbose_multiapps = verbose;
+  _verbose_restore = verbose;
 }
 
 void

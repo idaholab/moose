@@ -229,6 +229,14 @@ public:
   void copyValuesBack();
 
   /**
+   * When a time step fails, this method is called to revert the current reporter values to their
+   * old state. @see FEProblemBase::restoreSolutions
+   *
+   * @param verbose Set true to print whether the reporters were restored or not.
+   */
+  void restoreState(bool verbose = false);
+
+  /**
    * Perform integrity check for get/declare calls
    */
   void check() const;
