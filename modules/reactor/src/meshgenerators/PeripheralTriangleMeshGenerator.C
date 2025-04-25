@@ -59,8 +59,8 @@ PeripheralTriangleMeshGenerator::validParams()
       "Polynomial power of the inverse distance interpolation algorithm for automatic area "
       "function calculation.");
 
-  params.addParam<SubdomainName>("peripheral_ring_block_name",
-                                 "The block name assigned to the created peripheral layer.");
+  params.addParam<SubdomainName>(
+      "peripheral_ring_block_name", "", "The block name assigned to the created peripheral layer.");
   params.addParam<BoundaryName>("external_boundary_name",
                                 "Optional customized external boundary name.");
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
@@ -139,9 +139,8 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     if (isParamValid("external_boundary_name"))
       params.set<BoundaryName>("output_boundary") =
           getParam<BoundaryName>("external_boundary_name");
-    if (isParamValid("peripheral_ring_block_name"))
-      params.set<SubdomainName>("output_subdomain_name") =
-          getParam<SubdomainName>("peripheral_ring_block_name");
+    params.set<SubdomainName>("output_subdomain_name") =
+        getParam<SubdomainName>("peripheral_ring_block_name");
     params.set<MooseEnum>("tri_element_type") = getParam<MooseEnum>("tri_element_type");
     params.set<bool>("verbose_stitching") = false;
     addMeshSubgenerator("XYDelaunayGenerator", _input_name + "_periphery", params);
