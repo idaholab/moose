@@ -29,8 +29,13 @@
 #include "libmesh/vector_value.h"
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder);
+registerMooseObjectRenamed("SolidMechanicsApp",
+                           DirectCentralDifference,
+                           "10/14/2025 00:00",
+                           ExplicitMixedOrder);
 
 InputParameters
 ExplicitMixedOrder::validParams()
@@ -38,7 +43,7 @@ ExplicitMixedOrder::validParams()
   InputParameters params = ExplicitTimeIntegrator::validParams();
 
   params.addClassDescription(
-      "Implementation of Explicit/Forward Euler without invoking any of the nonlinear solver");
+      "Implementation of explicit time integration without invoking any of the nonlinear solver.");
 
   params.addParam<bool>("use_constant_mass",
                         false,
@@ -124,8 +129,6 @@ ExplicitMixedOrder::solve()
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
 
-    // Hit libmesh asserts if we don't close here
-    _mass_matrix_diag_inverted->close();
     // Calculating the lumped mass matrix for use in residual calculation
     mass_matrix.vector_mult(*_mass_matrix_diag_inverted, *_ones);
 
@@ -138,8 +141,6 @@ ExplicitMixedOrder::solve()
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
 
-  // Hit libmesh asserts if we don't close here
-  _explicit_residual->close();
   // Compute the residual
   _explicit_residual->zero();
   _fe_problem.computeResidual(
@@ -185,8 +186,12 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 
   // Compute Forward Euler
   // Split diag mass and residual vectors into correct subvectors
-  const auto mass_first = _mass_matrix_diag_inverted->get_subvector(_local_first_order_indicies);
-  const auto exp_res_first = _explicit_residual->get_subvector(_local_first_order_indicies);
+  const std::unique_ptr<NumericVector<Number>> mass_first(
+      NumericVector<Number>::build(_communicator));
+  const std::unique_ptr<NumericVector<Real>> exp_res_first(
+      NumericVector<Number>::build(_communicator));
+  _mass_matrix_diag_inverted->create_subvector(*mass_first, _local_first_order_indicies, false);
+  _explicit_residual->create_subvector(*exp_res_first, _local_first_order_indicies, false);
 
   // Need velocity vector split into subvectors
   auto vel_first = vel->get_subvector(_local_first_order_indicies);
@@ -199,8 +204,12 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 
   // Compute Central Difference
   // Split diag mass and residual vectors into correct subvectors
-  const auto mass_second = _mass_matrix_diag_inverted->get_subvector(_local_second_order_indicies);
-  const auto exp_res_second = _explicit_residual->get_subvector(_local_second_order_indicies);
+  const std::unique_ptr<NumericVector<Real>> mass_second(
+      NumericVector<Number>::build(_communicator));
+  const std::unique_ptr<NumericVector<Real>> exp_res_second(
+      NumericVector<Number>::build(_communicator));
+  _mass_matrix_diag_inverted->create_subvector(*mass_second, _local_second_order_indicies, false);
+  _explicit_residual->create_subvector(*exp_res_second, _local_second_order_indicies, false);
 
   // Only need accelation and old velocity vector for central difference
   auto accel_second = accel->get_subvector(_local_second_order_indicies);
@@ -234,6 +243,7 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   _n_linear_iterations = 0;
   vel->close();
   accel->close();
+
   return converged;
 }
 

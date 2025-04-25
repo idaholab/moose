@@ -11,6 +11,10 @@
 #include "Function.h"
 
 registerMooseObject("SolidMechanicsApp", ExplicitFunctionDirichletBC);
+registerMooseObjectRenamed("SolidMechanicsApp",
+                           DirectFunctionDirichletBC,
+                           "10/14/2025 00:00",
+                           ExplicitFunctionDirichletBC);
 
 InputParameters
 ExplicitFunctionDirichletBC::validParams()

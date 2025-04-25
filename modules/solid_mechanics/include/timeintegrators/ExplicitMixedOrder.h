@@ -74,13 +74,13 @@ protected:
   /// The older solution
   const NumericVector<Number> & _solution_older;
 
-  // Variables that forward euler time integration will be used
+  // Variables that forward Euler time integration will be used for
   std::unordered_set<unsigned int> & _vars_first;
 
   // local dofs that will have forward euler time integration
   std::vector<dof_id_type> & _local_first_order_indicies;
 
-  // Variables that central difference time integration will be used
+  // Variables that central difference time integration will be used for
   std::unordered_set<unsigned int> & _vars_second;
 
   // local dofs that will have central difference time integration

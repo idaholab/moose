@@ -16,7 +16,7 @@ class Function;
 /**
  * Defines a boundary condition that forces the value to be a user specified
  * function at the boundary.
- * For use with direct central difference time integrator
+ * For use with the ExplicitMixedOrder time integrator
  */
 class ExplicitFunctionDirichletBC : public ExplicitDirichletBCBase
 {

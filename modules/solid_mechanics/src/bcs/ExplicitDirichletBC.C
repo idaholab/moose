@@ -10,6 +10,10 @@
 #include "ExplicitDirichletBC.h"
 
 registerMooseObject("SolidMechanicsApp", ExplicitDirichletBC);
+registerMooseObjectRenamed("SolidMechanicsApp",
+                           DirectDirichletBC,
+                           "10/14/2025 00:00",
+                           ExplicitDirichletBC);
 
 InputParameters
 ExplicitDirichletBC::validParams()

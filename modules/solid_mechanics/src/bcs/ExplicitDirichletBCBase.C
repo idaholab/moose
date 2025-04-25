@@ -11,6 +11,7 @@
 #include "ExplicitDirichletBCBase.h"
 #include "MooseError.h"
 #include "NonlinearSystemBase.h"
+#include "libmesh/numeric_vector.h"
 #include <iostream>
 #include <ostream>
 
@@ -23,7 +24,7 @@ ExplicitDirichletBCBase::validParams()
 
 ExplicitDirichletBCBase::ExplicitDirichletBCBase(const InputParameters & parameters)
   : NodalBC(parameters),
-    _mass_diag(_sys.getVector("mass_matrix_diag_inverted")),
+    _mass_diag(initMassDiag()),
     _u_old(_var.nodalValueOld()),
     _u_dot_old(_var.nodalValueDotOld()),
     _exp_integrator(
