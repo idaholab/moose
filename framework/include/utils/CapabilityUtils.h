@@ -9,8 +9,13 @@
 
 #pragma once
 
+#include "StreamArguments.h"
+
+#include <exception>
 #include <variant>
 #include <string>
+#include <sstream>
+#include <tuple>
 #include <map>
 
 /**
@@ -18,6 +23,27 @@
  */
 namespace CapabilityUtils
 {
+
+class CapabilityException : public std::runtime_error
+{
+public:
+  CapabilityException(const CapabilityException &) = default;
+
+  template <typename... Args>
+  static std::string stringify(Args &&... args)
+  {
+    std::ostringstream ss;
+    streamArguments(ss, args...);
+    return ss.str();
+  }
+
+  template <typename... Args>
+  explicit CapabilityException(Args &&... args) : std::runtime_error(stringify(args...))
+  {
+  }
+
+  ~CapabilityException() throw() {}
+};
 
 /**
  * Return state for check. We use a plain enum because we rely on implicit conversion to int.

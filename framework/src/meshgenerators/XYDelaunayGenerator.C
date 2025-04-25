@@ -284,6 +284,8 @@ XYDelaunayGenerator::generate()
   for (auto hole_i : index_range(_hole_ptrs))
   {
     hole_ptrs[hole_i] = std::move(*_hole_ptrs[hole_i]);
+    if (!hole_ptrs[hole_i]->is_prepared())
+      hole_ptrs[hole_i]->prepare_for_use();
     meshed_holes.emplace_back(*hole_ptrs[hole_i]);
     holes_with_midpoints[hole_i] = meshed_holes.back().n_midpoints();
     stitch_second_order_holes =

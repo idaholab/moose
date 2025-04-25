@@ -18,7 +18,16 @@ except ImportError:
         import capabilities
     except ImportError:
         moose_test_dir = os.path.abspath(os.path.join(moose_dir, 'test'))
-        subprocess.run(['make', 'capabilities'], cwd=moose_test_dir)
-        import capabilities
+        cmd = ['make', 'capabilities']
+        print(f'INFO: Building capabilities with "{" ".join(cmd)}" in {moose_test_dir}')
+        try:
+            subprocess.run(cmd, cwd=moose_test_dir, check=True)
+        except subprocess.CalledProcessError:
+            raise SystemExit('ERROR: Failed to build capabilities')
+        try:
+            import capabilities
+        except:
+            print('ERROR: Failed to import capabilities after building')
+            raise
 
 from capabilities import *

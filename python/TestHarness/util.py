@@ -580,8 +580,6 @@ def checkCapabilities(supported: dict, requested: str, certain):
     """
     import pycapabilities
     [status, message, doc] = pycapabilities.check(requested, supported)
-    if status == pycapabilities.PARSE_FAIL:
-        raise ValueError(f"Failed to parse capabilities='{requested}'")
     success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
     return success, message
 

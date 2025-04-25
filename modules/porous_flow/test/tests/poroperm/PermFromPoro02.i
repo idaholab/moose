@@ -1,17 +1,26 @@
 # Testing permeability from porosity
 # Trivial test, checking calculated permeability is correct
 # k = k_anisotropic * k0 * (1-phi0)^m/phi0^n * phi^n/(1-phi)^m
+# Block 1 k0 twice that of block 0 so permeability is twice has high in block 1
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 3
-  xmin = 0
-  xmax = 3
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 3
+    xmin = 0
+    xmax = 3
+  []
+  [top_two_elements]
+    type = SubdomainBoundingBoxGenerator
+    input = gmg
+    bottom_left = '1.1 0 0'
+    top_right = '3.1 0 0'
+    block_id = 1
+  []
 []
 
 [GlobalParams]
-  block = 0
   PorousFlowDictator = dictator
 []
 
@@ -153,8 +162,35 @@
   []
 []
 
+[AuxVariables]
+  [A_var]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [A_var_bad]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  [A]
+    type = ParsedAux
+    variable = A_var
+    expression = 'if(x<1.1,0.11552,0.23104)'
+    use_xyzt = true
+  []
+  [A_bad]
+    type = ParsedAux
+    variable = A_var_bad
+    expression = 'if(x<1.1,0.11552,-.01)'
+    use_xyzt = true
+  []
+[]
+
 [Materials]
-  [permeability]
+  inactive = 'permeability_all permeability_0A permeability_1A var_error param_error'
+  [permeability_0]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
     poroperm_function = kozeny_carman_phi0
@@ -162,7 +198,60 @@
     phi0 = 0.05
     m = 2
     n = 7
+    block = 0
   []
+  [permeability_1]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_phi0
+    k0 = 2e-10
+    phi0 = 0.05
+    m = 2
+    n = 7
+    block = 1
+  []
+  [permeability_0A]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_A
+    A = 0.11552
+    m = 2
+    n = 7
+    block = 0
+  []
+  [permeability_1A]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_A
+    A = 0.23104
+    m = 2
+    n = 7
+    block = 1
+  []
+  [permeability_all]
+    type = PorousFlowPermeabilityKozenyCarmanFromVar
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    m = 2
+    n = 7
+    A = A_var
+  []
+  [var_error]
+    type = PorousFlowPermeabilityKozenyCarmanFromVar
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    m = 2
+    n = 7
+    A = A_var_bad
+  []
+  [param_error]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_A
+    A = 0.23104
+    phi0 = .01
+    m = 2
+    n = 7
+  []
+
   [temperature]
     type = PorousFlowTemperature
   []

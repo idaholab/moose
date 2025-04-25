@@ -11,7 +11,6 @@
 #include <Python.h>
 
 #include "CapabilityUtils.h"
-#include "Moose.h"
 #include <string>
 
 static PyObject *
@@ -96,9 +95,6 @@ capabilities_check(PyObject *self, PyObject *args)
     }
   }
 
-  // throw on errors to properly report the failure back to python
-  Moose::_throw_on_error = true;
-
   try
   {
     // call capabilities C++ code with capabilities map
@@ -141,6 +137,5 @@ PyInit_capabilities(void)
   PyModule_AddIntConstant(module, "UNKNOWN", 2);
   PyModule_AddIntConstant(module, "POSSIBLE_PASS", 3);
   PyModule_AddIntConstant(module, "CERTAIN_PASS", 4);
-  PyModule_AddIntConstant(module, "PARSE_FAIL", 5);
   return module;
 }

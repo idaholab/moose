@@ -10,9 +10,7 @@
 #include "peglib.h"
 
 #include "CapabilityUtils.h"
-#include "MooseUtils.h"
-#include "MooseError.h"
-#include "Conversion.h"
+#include "MooseStringUtils.h"
 #include <vector>
 
 namespace CapabilityUtils
@@ -49,7 +47,8 @@ check(std::string requirements, const Registry & app_capabilities)
     ~_            <-  [ \t]*
   )");
 
-  mooseAssert(static_cast<bool>(parser) == true, "Capabilities parser build failure.");
+  if (!static_cast<bool>(parser))
+    throw CapabilityException("Capabilities parser build failure.");
 
   parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
 
@@ -69,7 +68,7 @@ check(std::string requirements, const Registry & app_capabilities)
         return std::vector<int>{std::any_cast<int>(vs[0])};
 
       default:
-        mooseError("Unknown Number match");
+        throw CapabilityException("Unknown Number match");
     }
   };
 
@@ -86,7 +85,7 @@ check(std::string requirements, const Registry & app_capabilities)
       return OP_AND;
     if (op == "|")
       return OP_OR;
-    mooseError("Unknown logic operator.");
+    throw CapabilityException("Unknown logic operator.");
   };
 
   enum Operator
@@ -114,7 +113,7 @@ check(std::string requirements, const Registry & app_capabilities)
       return OP_NOT_EQ;
     if (op == "=" || op == "==")
       return OP_EQ;
-    mooseError("Unknown operator '", op, "'.");
+    throw CapabilityException("Unknown operator '", op, "'.");
   };
 
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
@@ -169,7 +168,7 @@ check(std::string requirements, const Registry & app_capabilities)
         if (std::holds_alternative<int>(app_value))
         {
           if (right.size() != 1)
-            mooseError("Expected an integer value in comparison");
+            throw CapabilityException("Expected an integer value in comparison");
 
           return comp(op, std::get<int>(app_value), right[0]) ? CheckState::CERTAIN_PASS
                                                               : CheckState::CERTAIN_FAIL;
@@ -179,13 +178,13 @@ check(std::string requirements, const Registry & app_capabilities)
         std::vector<int> app_value_version;
 
         if (!std::holds_alternative<std::string>(app_value))
-          mooseError(right.size() == 1
-                         ? "Cannot compare capability " + left + " to a number."
-                         : "Cannot compare capability " + left + " to a version number.");
+          throw CapabilityException(
+              right.size() == 1 ? "Cannot compare capability " + left + " to a number."
+                                : "Cannot compare capability " + left + " to a version number.");
 
         if (!MooseUtils::tokenizeAndConvert(
                 std::get<std::string>(app_value), app_value_version, "."))
-          mooseError("Expected a version number.");
+          throw CapabilityException("Expected a version number.");
 
         // compare versions
         return comp(op, app_value_version, right) ? CheckState::CERTAIN_PASS
@@ -197,7 +196,7 @@ check(std::string requirements, const Registry & app_capabilities)
         const auto right = std::any_cast<std::string>(vs[2]);
         // the app value has to be a string
         if (!std::holds_alternative<std::string>(app_value))
-          mooseError("Unexpected comparison to a string.");
+          throw CapabilityException("Unexpected comparison to a string.");
 
         return comp(op, std::get<std::string>(app_value), MooseUtils::toLower(right))
                    ? CheckState::CERTAIN_PASS
@@ -205,7 +204,7 @@ check(std::string requirements, const Registry & app_capabilities)
       }
     }
 
-    mooseError("Failed comparison.");
+    throw CapabilityException("Failed comparison.");
   };
 
   parser["Bool"] = [&app_capabilities](const SemanticValues & vs)
@@ -258,7 +257,7 @@ check(std::string requirements, const Registry & app_capabilities)
       }
 
       default:
-        mooseError("Unknown choice in Bool non-terminal");
+        throw CapabilityException("Unknown choice in Bool non-terminal");
     }
   };
 
@@ -282,7 +281,7 @@ check(std::string requirements, const Registry & app_capabilities)
                                      CheckState::CERTAIN_PASS})
               if (left == state || right == state)
                 return state;
-            mooseError("Conjunction failure");
+            throw CapabilityException("Conjunction failure");
 
           case OP_OR:
             for (const auto state : {CheckState::CERTAIN_PASS,
@@ -292,10 +291,10 @@ check(std::string requirements, const Registry & app_capabilities)
                                      CheckState::CERTAIN_FAIL})
               if (left == state || right == state)
                 return state;
-            mooseError("Conjunction failure");
+            throw CapabilityException("Conjunction failure");
 
           default:
-            mooseError("Unknown logic operator");
+            throw CapabilityException("Unknown logic operator");
         }
       }
 
@@ -303,7 +302,7 @@ check(std::string requirements, const Registry & app_capabilities)
         return std::any_cast<CheckState>(vs[0]);
 
       default:
-        mooseError("Unknown choice in Expression non-terminal");
+        throw CapabilityException("Unknown choice in Expression non-terminal");
     }
   };
 
@@ -312,7 +311,7 @@ check(std::string requirements, const Registry & app_capabilities)
 
   CheckState state = CheckState::CERTAIN_FAIL;
   if (!parser.parse(requirements, state))
-    state = CheckState::PARSE_FAIL;
+    throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
 
   std::string reason;
   std::string doc;

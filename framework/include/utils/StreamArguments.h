@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <tuple>
+
 /***
  * Streams all of the given arguments into the given stream
  */

@@ -7,7 +7,7 @@
       csvdiff = FCTF_deformed_out.csv
       # custom_cmp = 'test.exodiff'
       heavy = true
-      method = '!DBG'
+      capabilities = 'method!=dbg'
       valgrind = NONE
       recover = false
       abs_zero = 1e-5
