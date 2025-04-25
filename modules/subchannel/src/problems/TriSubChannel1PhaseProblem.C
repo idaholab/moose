@@ -539,7 +539,10 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
     // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
     beta = freq_factor * (rod_mixing + axial_mixing) * std::pow(Re, -b / 2.0);
   }
-  mooseAssert(beta > 0, "beta should be positive");
+  mooseAssert(beta >= 0,
+              "beta should be positive for the inner gaps, or zero for the edge gaps, because this "
+              "case is covered "
+              "explicitly in the computeh method.");
   return beta;
 }
 
