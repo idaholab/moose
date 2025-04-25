@@ -125,13 +125,8 @@ _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
 _subchannel_to_rod_map = {} # Reserve 3
 _subch_type = {}
 _n_gaps = _n_channels + _nrods - 1;
-# _gap_to_chan_map = {}
 gap_fill = {}
 _chan_to_gap_map = {} # Reserve 3
-# _gap_pairs_sf = {}
-# _chan_pairs_sf = {}
-# _gij_map = {}
-# _sign_id_crossflow_map = {} # Reserve 3
 _gap_to_rod_map = {} # Reserve 2
 _gap_type = {}
 _subchannel_position = {} # Reserve 3
@@ -389,8 +384,7 @@ plt.ylabel('Y [m]')
 plt.xlabel('X [m]')
 plt.xlim([-(_n_rings - 1)*pitch - 2*_pin_diameter, (_n_rings - 1)*pitch + 2*_pin_diameter])
 plt.ylim([-(_n_rings - 1)*pitch - 2*_pin_diameter, (_n_rings - 1)*pitch + 2*_pin_diameter])
-# plt.savefig('subchannel_position.png', bbox_inches='tight', pad_inches=0.1)
-# plt.show()
+plt.savefig('subchannel_position.png', bbox_inches='tight', pad_inches=0.1)
 
 plt.figure(figsize=[9,9])
 _rod_position = np.array(_rod_position)
@@ -409,7 +403,6 @@ plt.ylabel('Y [m]')
 plt.xlabel('X [m]')
 plt.xlim([-0.85*(_n_rings - 1)*pitch - 2*_pin_diameter, 0.85 *(_n_rings - 1)*pitch + 2*_pin_diameter])
 plt.ylim([-0.7*(_n_rings - 1)*pitch - 2*_pin_diameter, 0.7 *(_n_rings - 1)*pitch + 2*_pin_diameter])
-# plt.savefig('rod_position.png', bbox_inches='tight', pad_inches=0.1)
-# plt.show()
+plt.savefig('rod_position.png', bbox_inches='tight', pad_inches=0.1)
 
 save_map_as_csv(_subchannel_to_rod_map, 'subchannel_to_rod_map.csv')

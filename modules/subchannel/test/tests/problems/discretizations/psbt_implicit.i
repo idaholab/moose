@@ -189,27 +189,6 @@ P_out = 4.923e6 # Pa
 [Outputs]
   exodus = true
   csv = true
-  # [Temp_Out_MATRIX]
-  #   type = QuadSubChannelNormalSliceValues
-  #   variable = T
-  #   execute_on = final
-  #   file_base = "Temp_Out.txt"
-  #   height = 3.658
-  # []
-  # [mdot_Out_MATRIX]
-  #   type = QuadSubChannelNormalSliceValues
-  #   variable = mdot
-  #   execute_on = final
-  #   file_base = "mdot_Out.txt"
-  #   height = 3.658
-  # []
-  # [mdot_In_MATRIX]
-  #   type = QuadSubChannelNormalSliceValues
-  #   variable = mdot
-  #   execute_on = final
-  #   file_base = "mdot_In.txt"
-  #   height = 0.0
-  # []
 []
 
 [Postprocessors]

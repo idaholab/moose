@@ -60,7 +60,7 @@ protected:
   /// Computes turbulent crossflow per gap for block iblock
   virtual void computeWijPrime(int iblock);
   /// Computes turbulent mixing coefficient
-  virtual Real computeBeta(int i_gap, int iz) = 0;
+  virtual Real computeBeta(unsigned int i_gap, unsigned int iz) = 0;
   /// Computes Pressure Drop per channel for block iblock
   virtual void computeDP(int iblock);
   /// Computes Pressure per channel for block iblock

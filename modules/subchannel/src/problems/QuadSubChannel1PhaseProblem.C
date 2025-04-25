@@ -357,7 +357,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 }
 
 Real
-QuadSubChannel1PhaseProblem::computeBeta(int i_gap, int iz)
+QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
 {
   auto beta = _beta;
   if (!_constant_beta)
@@ -413,12 +413,13 @@ QuadSubChannel1PhaseProblem::computeBeta(int i_gap, int iz)
     auto z_FP_over_D = (2.0 * L_x / pin_diameter) *
                        (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
     auto Str = 1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
-    auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
-    auto dum2 = (1 / Pr_t) * lamda;
-    auto dum3 = a_x * z_FP_over_D * Str;
+    auto freq_factor = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+    auto rod_mixing = (1 / Pr_t) * lamda;
+    auto axial_mixing = a_x * z_FP_over_D * Str;
     // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
-    beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
+    beta = freq_factor * (rod_mixing + axial_mixing) * std::pow(Re, -b / 2.0);
   }
+  mooseAssert(beta > 0, "beta should be positive");
   return beta;
 }
 

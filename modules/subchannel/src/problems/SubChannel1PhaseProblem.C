@@ -345,13 +345,13 @@ SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
 {
   switch (_interpolation_scheme)
   {
-    case 0: // upwind
+    case 0: // upwind interpolation
       return 1.0;
-    case 1: // downwind
+    case 1: // downwind interpolation
       return 0.0;
-    case 2: // central_difference
+    case 2: // central_difference interpolation
       return 0.5;
-    case 3: // exponential
+    case 3: // exponential interpolation (Peclet limited)
       return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
     default:
       mooseError(name(),
