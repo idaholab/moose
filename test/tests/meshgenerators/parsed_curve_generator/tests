@@ -18,6 +18,15 @@
     requirement = 'The system shall generate a 2D open curve mesh with quadratic elements.'
     recover = false
   []
+  [open_curve_edge4]
+    type = 'Exodiff'
+    input = 'parsed_curve_open.i'
+    exodiff = 'parsed_curve_open_edge4_in.e'
+    cli_args = '--mesh-only parsed_curve_open_edge4_in.e
+                Mesh/pcg/edge_element_type=EDGE4'
+    requirement = 'The system shall generate a 2D open curve mesh with cubic elements.'
+    recover = false
+  []
   [open_curve_3d]
     type = 'Exodiff'
     input = 'parsed_curve_3d.i'
@@ -51,6 +60,15 @@
     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident and with quadratic elements.'
     recover = false
   []
+  [closed_curve_edge4]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_edge4_in.e'
+    cli_args = '--mesh-only parsed_curve_closed_edge4_in.e
+                Mesh/pcg/edge_element_type=EDGE4'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident and with cubic elements.'
+    recover = false
+  []
   [forced_closed_curve]
     type = 'Exodiff'
     input = 'parsed_curve_closed.i'
@@ -82,6 +100,18 @@
                 Mesh/pcg/edge_element_type=EDGE3
                 --mesh-only parsed_curve_closed_forced_ms_edge3_in.e'
     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple quadratic elements.'
+    recover = false
+  []
+  [forced_closed_curve_multi_segments_edge4]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_forced_ms_edge4_in.e'
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
+                Mesh/pcg/nums_segments=10
+                Mesh/pcg/forced_closing_num_segments=5
+                Mesh/pcg/edge_element_type=EDGE4
+                --mesh-only parsed_curve_closed_forced_ms_edge4_in.e'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple cubic elements.'
     recover = false
   []
   [xy_delaunay_curve]

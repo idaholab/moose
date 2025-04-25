@@ -13,8 +13,8 @@
 #include "FunctionParserUtils.h"
 
 /**
- * his ParsedCurveGenerator object is designed to generate a mesh of a curve that consists of EDGE2
- * elements.
+ * his ParsedCurveGenerator object is designed to generate a mesh of a curve that consists of EDGE2,
+ * EDGE3, or EDGE4 elements.
  */
 class ParsedCurveGenerator : public MeshGenerator, public FunctionParserUtils<false>
 {

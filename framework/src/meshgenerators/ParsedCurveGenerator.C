@@ -16,6 +16,7 @@
 #include "libmesh/fparser_ad.hh"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
+#include "libmesh/edge_edge4.h"
 
 // C++ includes
 #include <cmath>
@@ -28,7 +29,7 @@ ParsedCurveGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params += FunctionParserUtils<false>::validParams();
 
-  MooseEnum edge_elem_type("EDGE2 EDGE3", "EDGE2");
+  MooseEnum edge_elem_type("EDGE2 EDGE3 EDGE4", "EDGE2");
 
   params.addRequiredParam<std::string>("x_formula", "Function expression of x(t)");
   params.addRequiredParam<std::string>("y_formula", "Function expression of y(t)");
@@ -36,7 +37,7 @@ ParsedCurveGenerator::validParams()
   params.addRequiredRangeCheckedParam<std::vector<unsigned int>>(
       "nums_segments",
       "nums_segments>=1",
-      "Numbers of segments (EDGE2 elements) of each section of the curve to be generated. The "
+      "Numbers of segments (EDGE elements) of each section of the curve to be generated. The "
       "number of entries in this parameter should be equal to one less than the number of entries "
       "in 'section_bounding_t_values'");
   params.addRequiredParam<std::vector<Real>>(
@@ -58,7 +59,7 @@ ParsedCurveGenerator::validParams()
   params.addRangeCheckedParam<unsigned int>(
       "forced_closing_num_segments",
       "forced_closing_num_segments>1",
-      "Number of segments (EDGE2 elements) of the curve section that is generated to forcefully "
+      "Number of segments (EDGE elements) of the curve section that is generated to forcefully "
       "close the loop.");
   params.addRangeCheckedParam<Real>("oversample_factor",
                                     10.0,
@@ -75,7 +76,7 @@ ParsedCurveGenerator::validParams()
   params.addParam<MooseEnum>(
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
   params.addClassDescription("This ParsedCurveGenerator object is designed to generate a mesh of a "
-                             "curve that consists of EDGE2 elements.");
+                             "curve that consists of EDGE2, EDGE3, or EDGE4 elements.");
 
   return params;
 }
@@ -96,7 +97,9 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
     _oversample_factor(getParam<Real>("oversample_factor")),
     _max_oversample_number_factor(getParam<unsigned int>("max_oversample_number_factor")),
     _node_set_boundaries(getParam<std::vector<BoundaryName>>("edge_nodesets")),
-    _order(getParam<MooseEnum>("edge_element_type") == "EDGE2" ? 1 : 2)
+    _order(getParam<MooseEnum>("edge_element_type") == "EDGE2"
+               ? 1
+               : (getParam<MooseEnum>("edge_element_type") == "EDGE3" ? 2 : 3))
 {
   if (std::adjacent_find(_section_bounding_t_values.begin(), _section_bounding_t_values.end()) !=
       _section_bounding_t_values.end())
@@ -243,9 +246,14 @@ ParsedCurveGenerator::generate()
   {
     std::unique_ptr<Elem> new_elem;
     new_elem = std::make_unique<Edge2>();
-    if (_order == 2)
+    if (_order > 1)
     {
       new_elem = std::make_unique<Edge3>();
+      if (_order == 3)
+      {
+        new_elem = std::make_unique<Edge4>();
+        new_elem->set_node(3) = nodes[i * _order + 2];
+      }
       new_elem->set_node(2) = nodes[i * _order + 1];
     }
     new_elem->set_node(0) = nodes[i * _order];
