@@ -40,13 +40,12 @@ BernoulliPressureVariable::validParams()
   // Assuming that this variable is used for advection problems, due to the
   // utilization of the pressure gradient in the advecting velocity
   // through the Rhie-Chow interpolation, we have to extend the ghosted layers.
-  params.addRelationshipManager("ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-    Moose::RelationshipManagerType::COUPLING,
-        [](const InputParameters & /*obj_params*/, InputParameters & rm_params)
-        {
-            rm_params.set<unsigned short>("layers") = 3;
-        });
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & /*obj_params*/, InputParameters & rm_params)
+      { rm_params.set<unsigned short>("layers") = 3; });
   return params;
 }
 

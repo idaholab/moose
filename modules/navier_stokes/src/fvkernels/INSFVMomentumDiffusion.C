@@ -32,21 +32,20 @@ INSFVMomentumDiffusion::validParams()
                              coeff_interp_method,
                              "Switch that can select face interpolation method for the viscosity.");
   MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>("variable_interp_method",
-                            face_interp_method,
-                            "Switch that can select between face interpolation methods for the variable.");
+  params.addParam<MooseEnum>(
+      "variable_interp_method",
+      face_interp_method,
+      "Switch that can select between face interpolation methods for the variable.");
   params.set<unsigned short>("ghost_layers") = 2;
 
   // We add the relationship manager there, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
-    "ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING,
-    [](const InputParameters & obj_params, InputParameters & rm_params)
-    {
-      FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true);
-    });
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true); });
 
   params.addParam<bool>(
       "complete_expansion",
@@ -68,7 +67,8 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
-    _var_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
+    _var_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
     _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage),
     _u_var(params.isParamValid("u") ? &getFunctor<ADReal>("u") : nullptr),
     _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),

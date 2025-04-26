@@ -31,20 +31,19 @@ FVPorousFlowDispersiveFlux::validParams()
   params.set<unsigned short>("ghost_layers") = 2;
 
   MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>("variable_interp_method",
-                             face_interp_method,
-                             "Switch that can select between face interpolation methods for the variable.");
+  params.addParam<MooseEnum>(
+      "variable_interp_method",
+      face_interp_method,
+      "Switch that can select between face interpolation methods for the variable.");
 
   // We add the relationship manager there, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
-    "ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING,
-    [](const InputParameters & obj_params, InputParameters & rm_params)
-    {
-      FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true);
-    });
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true); });
 
   params.addClassDescription("Advective Darcy flux");
   return params;
@@ -88,7 +87,8 @@ FVPorousFlowDispersiveFlux::FVPorousFlowDispersiveFlux(const InputParameters & p
     _identity_tensor(ADRankTwoTensor::initIdentity),
     _disp_long(getParam<std::vector<Real>>("disp_long")),
     _disp_trans(getParam<std::vector<Real>>("disp_trans")),
-    _var_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
+    _var_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
     _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
 {
   if (_fluid_component >= _dictator.numComponents())

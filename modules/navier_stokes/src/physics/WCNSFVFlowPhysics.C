@@ -449,7 +449,8 @@ WCNSFVFlowPhysics::addMomentumViscousDissipationKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
   params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
-  params.set<MooseEnum>("variable_interp_method") = getParam<MooseEnum>("momentum_face_interpolation");
+  params.set<MooseEnum>("variable_interp_method") =
+      getParam<MooseEnum>("momentum_face_interpolation");
   if (getParam<bool>("include_deviatoric_stress"))
   {
     params.set<bool>("complete_expansion") = true;

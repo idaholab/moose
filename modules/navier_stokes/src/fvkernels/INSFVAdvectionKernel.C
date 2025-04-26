@@ -32,13 +32,11 @@ INSFVAdvectionKernel::validParams()
   // We add the relationship manager there, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
-    "ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING,
-    [](const InputParameters & obj_params, InputParameters & rm_params)
-    {
-      FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 3, true);
-    });
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 3, true); });
 
   return params;
 }

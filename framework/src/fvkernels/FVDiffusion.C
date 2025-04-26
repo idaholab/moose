@@ -23,9 +23,10 @@ FVDiffusion::validParams()
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
   MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>("variable_interp_method",
-                              face_interp_method,
-                              "Switch that can select between face interpolation methods for the variable.");
+  params.addParam<MooseEnum>(
+      "variable_interp_method",
+      face_interp_method,
+      "Switch that can select between face interpolation methods for the variable.");
 
   // We need at least 2 layers here with the least accurate interpolation
   params.set<unsigned short>("ghost_layers") = 2;
@@ -33,13 +34,11 @@ FVDiffusion::validParams()
   // We add the relationship manager there, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
-    "ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING,
-    [](const InputParameters & obj_params, InputParameters & rm_params)
-    {
-      FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true);
-    });
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true); });
 
   return params;
 }
@@ -49,7 +48,8 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
     _coeff(getFunctor<ADReal>("coeff")),
     _coeff_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method"))),
-    _var_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
+    _var_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
     _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
 {
 }

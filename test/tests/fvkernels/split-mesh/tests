@@ -8,6 +8,7 @@
     requirement = "The system shall be able to generate a split mesh for finite volume problems with the correct ghosting setup."
     mesh_mode = 'REPLICATED'
     check_files = 'foo.cpr/2/header.cpr foo.cpr/2/split-2-0.cpr foo.cpr/2/split-2-1.cpr'
+    recover = false
   []
   [split-mesh]
     type = 'Exodiff'

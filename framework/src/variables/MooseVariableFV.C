@@ -53,17 +53,18 @@ MooseVariableFV<OutputType>::validParams()
       "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
 
   // Depending on the face interpolation we might have to do more than one layer ghosting.
-  params.addRelationshipManager("ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-    Moose::RelationshipManagerType::COUPLING,
-        [](const InputParameters & obj_params, InputParameters & rm_params)
-        {
-          unsigned short layers = 1;
-          if (obj_params.get<MooseEnum>("face_interp_method") == "skewness-corrected")
-            layers = 2;
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        unsigned short layers = 1;
+        if (obj_params.get<MooseEnum>("face_interp_method") == "skewness-corrected")
+          layers = 2;
 
-          rm_params.set<unsigned short>("layers") = layers;
-        });
+        rm_params.set<unsigned short>("layers") = layers;
+      });
   return params;
 }
 

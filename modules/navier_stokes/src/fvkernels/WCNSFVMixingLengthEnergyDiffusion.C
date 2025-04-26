@@ -31,20 +31,19 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
 
   MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>("variable_interp_method",
-                             face_interp_method,
-                             "Switch that can select between face interpolation methods for the variable.");
+  params.addParam<MooseEnum>(
+      "variable_interp_method",
+      face_interp_method,
+      "Switch that can select between face interpolation methods for the variable.");
 
   // We add the relationship manager there, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
-    "ElementSideNeighborLayers",
-    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING,
-    [](const InputParameters & obj_params, InputParameters & rm_params)
-    {
-      FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true);
-    });
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true); });
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -59,7 +58,8 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
     _rho(getFunctor<ADReal>(NS::density)),
     _cp(getFunctor<ADReal>(NS::cp)),
     _mixing_len(getFunctor<ADReal>("mixing_length")),
-    _var_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
+    _var_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
     _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
