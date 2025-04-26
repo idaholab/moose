@@ -1,20 +1,3 @@
-[Mesh]
-  [gen_mesh]
-    type = GeneratedMeshGenerator
-    dim = 2
-    nx = 5
-    ny = 5
-  []
-[]
-
-# [Mesh]
-#   [fmg]
-#     type = FileMeshGenerator
-#     file = 'foo.cpr'
-#   []
-#   parallel_type = distributed
-# []
-
 [Variables]
   [v]
     type = MooseVariableFVReal
@@ -26,28 +9,11 @@
     type = FVDiffusion
     variable = v
     coeff = 1
-    coeff_interp_method = average
-    variable_interp_method = skewness-corrected
   []
   [body_v]
     type = FVBodyForce
     variable = v
     function = 'forcing'
-  []
-[]
-
-[AuxVariables]
-  [pid]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [pid_aux]
-    type = ProcessorIDAux
-    variable = pid
-    execute_on = 'INITIAL'
   []
 []
 
@@ -77,11 +43,5 @@
 []
 
 [Outputs]
-  csv = true
   exodus = true
-[]
-
-[Debug]
-  show_actions = true
-  show_execution_order = ALWAYS
 []

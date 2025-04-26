@@ -1,0 +1,21 @@
+[Tests]
+  design = "fv_design.md Mesh/splitting.md"
+  issues = '#25621'
+  [prereq]
+    type = CheckFiles
+    input = 'mesh.i diffusion.i'
+    cli_args = '--split-mesh=2 --split-file foo.cpr'
+    requirement = "The system shall be able to generate a split mesh for finite volume problems with the correct ghosting setup."
+    mesh_mode = 'REPLICATED'
+    check_files = 'foo.cpr/2/header.cpr foo.cpr/2/split-2-0.cpr foo.cpr/2/split-2-1.cpr'
+  []
+  [split-mesh]
+    type = 'Exodiff'
+    prereq = prereq
+    input = 'split_mesh.i diffusion.i'
+    exodiff = 'diffusion_out.e'
+    requirement = "The system shall be able to read a split mesh for finite volume problems with the correct ghosting setup."
+    min_parallel = 2
+    max_parallel = 2
+  []
+[]
