@@ -78,16 +78,15 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
     _mass_matrix(getParam<TagName>("mass_matrix_tag")),
     _solution_older(_sys.solutionState(2)),
     _vars_first(declareRestartableData<std::unordered_set<unsigned int>>("first_order_vars")),
-    _local_first_order_indicies(
+    _local_first_order_indices(
         declareRestartableData<std::vector<dof_id_type>>("first_local_indices")),
     _vars_second(declareRestartableData<std::unordered_set<unsigned int>>("second_order_vars")),
-    _local_second_order_indicies(
+    _local_second_order_indices(
         declareRestartableData<std::vector<dof_id_type>>("second_local_indices"))
 {
   _fe_problem.setUDotRequested(true);
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);
-  _fe_problem.setUDotDotOldRequested(true);
 }
 
 void
@@ -190,17 +189,17 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
       NumericVector<Number>::build(_communicator));
   const std::unique_ptr<NumericVector<Real>> exp_res_first(
       NumericVector<Number>::build(_communicator));
-  _mass_matrix_diag_inverted->create_subvector(*mass_first, _local_first_order_indicies, false);
-  _explicit_residual->create_subvector(*exp_res_first, _local_first_order_indicies, false);
+  _mass_matrix_diag_inverted->create_subvector(*mass_first, _local_first_order_indices, false);
+  _explicit_residual->create_subvector(*exp_res_first, _local_first_order_indices, false);
 
   // Need velocity vector split into subvectors
-  auto vel_first = vel->get_subvector(_local_first_order_indicies);
+  auto vel_first = vel->get_subvector(_local_first_order_indices);
 
   // Velocity update for foward euler
   vel_first->pointwise_mult(*mass_first, *exp_res_first);
 
   // Restore the velocities
-  vel->restore_subvector(std::move(vel_first), _local_first_order_indicies);
+  vel->restore_subvector(std::move(vel_first), _local_first_order_indices);
 
   // Compute Central Difference
   // Split diag mass and residual vectors into correct subvectors
@@ -208,15 +207,15 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
       NumericVector<Number>::build(_communicator));
   const std::unique_ptr<NumericVector<Real>> exp_res_second(
       NumericVector<Number>::build(_communicator));
-  _mass_matrix_diag_inverted->create_subvector(*mass_second, _local_second_order_indicies, false);
-  _explicit_residual->create_subvector(*exp_res_second, _local_second_order_indicies, false);
+  _mass_matrix_diag_inverted->create_subvector(*mass_second, _local_second_order_indices, false);
+  _explicit_residual->create_subvector(*exp_res_second, _local_second_order_indices, false);
 
-  // Only need accelation and old velocity vector for central difference
-  auto accel_second = accel->get_subvector(_local_second_order_indicies);
+  // Only need acceleration and old velocity vector for central difference
+  auto accel_second = accel->get_subvector(_local_second_order_indices);
 
-  auto vel_second = vel->get_subvector(_local_second_order_indicies);
+  auto vel_second = vel->get_subvector(_local_second_order_indices);
 
-  // Compute accerlation for central difference
+  // Compute acceleration for central difference
   accel_second->pointwise_mult(*mass_second, *exp_res_second);
 
   // Scaling the acceleration
@@ -227,9 +226,9 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   *vel_second += *accel_scaled;
 
   // Restore acceleration
-  accel->restore_subvector(std::move(accel_second), _local_second_order_indicies);
+  accel->restore_subvector(std::move(accel_second), _local_second_order_indices);
 
-  vel->restore_subvector(std::move(vel_second), _local_second_order_indicies);
+  vel->restore_subvector(std::move(vel_second), _local_second_order_indices);
 
   // Same solution update for both methods
   *_solution_update = *vel;
@@ -288,14 +287,14 @@ ExplicitMixedOrder::init()
   std::vector<dof_id_type> var_dof_indices, work_vec;
   for (const auto var_num : _vars_first)
   {
-    work_vec = _local_first_order_indicies;
-    _local_first_order_indicies.clear();
+    work_vec = _local_first_order_indices;
+    _local_first_order_indices.clear();
     lm_sys.get_dof_map().local_variable_indices(var_dof_indices, lm_sys.get_mesh(), var_num);
     std::merge(work_vec.begin(),
                work_vec.end(),
                var_dof_indices.begin(),
                var_dof_indices.end(),
-               std::back_inserter(_local_first_order_indicies));
+               std::back_inserter(_local_first_order_indices));
   }
 
   work_vec.clear();
@@ -303,14 +302,14 @@ ExplicitMixedOrder::init()
 
   for (const auto var_num : _vars_second)
   {
-    work_vec = _local_second_order_indicies;
-    _local_second_order_indicies.clear();
+    work_vec = _local_second_order_indices;
+    _local_second_order_indices.clear();
     lm_sys.get_dof_map().local_variable_indices(var_dof_indices, lm_sys.get_mesh(), var_num);
     std::merge(work_vec.begin(),
                work_vec.end(),
                var_dof_indices.begin(),
                var_dof_indices.end(),
-               std::back_inserter(_local_second_order_indicies));
+               std::back_inserter(_local_second_order_indices));
   }
 }
 
@@ -337,5 +336,6 @@ ExplicitMixedOrder::findVariableTimeOrder(unsigned int var_num) const
   else if (_vars_second.count(var_num))
     return SECOND;
   else
-    mooseError("Variable does not exist in time order sets.");
+    mooseError("Variable " + _sys.system().variable_name(var_num) +
+               " does not exist in time order sets.");
 }

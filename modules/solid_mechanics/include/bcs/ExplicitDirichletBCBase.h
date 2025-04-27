@@ -61,6 +61,7 @@ private:
     if (nl.hasVector("mass_matrix_diag_inverted"))
       return nl.getVector("mass_matrix_diag_inverted");
 
-    mooseError("Lumped mass matrix is missing. Make sure ExplicitMixedOrder is being used.");
+    mooseError("Lumped mass matrix is missing. Make sure ExplicitMixedOrder is being used as the "
+               "time integrator.");
   }
 };

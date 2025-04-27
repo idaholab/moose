@@ -67,8 +67,10 @@ public:
 protected:
   virtual TagID massMatrixTagID() const override;
 
+  /// Whether we are reusing the mass matrix
   const bool & _constant_mass;
 
+  /// Mass matrix name
   const TagName & _mass_matrix;
 
   /// The older solution
@@ -78,13 +80,13 @@ protected:
   std::unordered_set<unsigned int> & _vars_first;
 
   // local dofs that will have forward euler time integration
-  std::vector<dof_id_type> & _local_first_order_indicies;
+  std::vector<dof_id_type> & _local_first_order_indices;
 
   // Variables that central difference time integration will be used for
   std::unordered_set<unsigned int> & _vars_second;
 
   // local dofs that will have central difference time integration
-  std::vector<dof_id_type> & _local_second_order_indicies;
+  std::vector<dof_id_type> & _local_second_order_indices;
 
   /**
    * Helper function that actually does the math for computing the time derivative
