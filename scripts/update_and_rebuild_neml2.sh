@@ -92,7 +92,7 @@ export HIT_SRC_DIR
 if [[ -n "$NEML2_SRC_DIR" ]]; then
   SKIP_SUBMODULE_UPDATE=true
 else
-  NEML2_SRC_DIR=${MOOSE_DIR}/modules/solid_mechanics/contrib/neml2
+  NEML2_SRC_DIR=${MOOSE_DIR}/framework/contrib/neml2
 fi
 NEML2_DIR=${NEML2_DIR:-${NEML2_SRC_DIR}/installed}
 

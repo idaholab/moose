@@ -19,10 +19,6 @@
 [submodule "framework/contrib/wasp"]
     path = framework/contrib/wasp
     url = https://code.ornl.gov/neams-workbench/wasp.git
-[submodule "modules/solid_mechanics/contrib/neml2"]
-    path = modules/solid_mechanics/contrib/neml2
-    url = ../../applied-material-modeling/neml2.git
-    update = none
 [submodule "modules/fluid_properties/contrib/sodium"]
 	path = modules/fluid_properties/contrib/sodium
 	url = https://github.com/idaholab/sodium.git
@@ -54,4 +50,8 @@
 [submodule "framework/contrib/conduit"]
 	path = framework/contrib/conduit
 	url = https://github.com/LLNL/conduit.git
+    update = none
+[submodule "framework/contrib/neml2"]
+	path = framework/contrib/neml2
+	url = ../../applied-material-modeling/neml2.git
     update = none

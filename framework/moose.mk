@@ -100,7 +100,7 @@ libmesh_LDFLAGS   += $(wasp_LDFLAGS)
 #
 # neml2
 #
-include $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2.mk
+include $(FRAMEWORK_DIR)/contrib/neml2.mk
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib

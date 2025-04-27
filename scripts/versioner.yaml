@@ -129,7 +129,7 @@ packages:
       # neml2
       - scripts/configure_neml2.sh
       - scripts/update_and_rebuild_neml2.sh
-      - modules/solid_mechanics/contrib/neml2
+      - framework/contrib/neml2
   # dependers: none
   pprof:
     version: 2025.04.17
