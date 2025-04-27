@@ -15,7 +15,7 @@ ifeq ($(NEML2_DIR),)
 ifneq ($(NEML2_SRC_DIR),)
 NEML2_DIR := $(NEML2_SRC_DIR)/installed
 else
-NEML2_DIR := $(MOOSE_DIR)/modules/solid_mechanics/contrib/neml2/installed
+NEML2_DIR := $(MOOSE_DIR)/framework/contrib/neml2/installed
 endif
 endif
 
