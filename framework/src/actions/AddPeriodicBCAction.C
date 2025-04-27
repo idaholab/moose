@@ -110,14 +110,10 @@ AddPeriodicBCAction::setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
       if (var.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
       {
         for (unsigned int component = 0; component < var.count(); ++component)
-        {
           applyPeriodicBC(var_num + component, var_name + "_" + std::to_string(component));
-        }
       }
       else
-      {
         applyPeriodicBC(var_num, var_name);
-      }
     }
   }
 }

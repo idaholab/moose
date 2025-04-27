@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#935 #1530'
+  issues = '#935 #1530 #29825'
   design = 'syntax/BCs/Periodic/index.md'
   [all_periodic_trans_test]
     type = 'Exodiff'
@@ -101,6 +101,16 @@
     abs_zero = 1e-6
     rel_err = 1e-5
     requirement = "The system shall support periodic boundary conditions on vector variables with transforms prescribed as a translation."
+  []
+
+  [testperiodic_array]
+    type = 'Exodiff'
+    input = 'periodic_array_bc_test.i'
+    exodiff = 'array_out.e'
+    group = 'periodic'
+    abs_zero = 1e-6
+    rel_err = 1e-5
+    requirement = "The system shall support periodic boundary conditions on array variables with transforms prescribed as a translation."
   []
 
   [testperiodic_dp]
