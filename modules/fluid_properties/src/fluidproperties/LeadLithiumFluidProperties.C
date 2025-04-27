@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "LeadLithiumFluidProperties.h"
 
 registerMooseObject("FluidPropertiesApp", LeadLithiumFluidProperties);
@@ -28,13 +37,11 @@ LeadLithiumFluidProperties::molarMass() const
   return 1.73e-1; // in kg/mol
 }
 
-//------------------------------------------------------
-// Density & Volume (based on a linear fit)
-// ρ(T) = 10520.35 - 1.19051*T    [kg/m³]
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::rho_from_p_T(Real /*p*/, Real T) const
 {
+  if (T < _T_mo || T > 880)
+    flagInvalidSolution("Temperature out of bounds for the PbLi density computation");
   return 10520.35 - 1.19051 * T;
 }
 
@@ -67,18 +74,17 @@ LeadLithiumFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, R
 {
   v = v_from_p_T(p, T);
   dv_dp = 0;
-  dv_dT = 1.19051 / std::pow(10520.35 - 1.19051 * T, 2);
+  dv_dT = 1.19051 / Utility::pow<2>(10520.35 - 1.19051 * T);
 }
 
-//------------------------------------------------------
-// Temperature from Specific Volume and Energy
-// We invert ρ = 10520.35 - 1.19051*T  (with v = 1/ρ)
-//   => T = (10520.35 - 1/v)/1.19051
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::T_from_v_e(Real v, Real /*e*/) const
 {
-  return (10520.35 - 1.0 / v) / 1.19051;
+  Real T = (10520.35 - 1.0 / v) / 1.19051;
+  // This is computed from rho(T), thus shares the same validity range
+  if (T < _T_mo || T > 880)
+    flagInvalidSolution("Specific volume out of bounds for the PbLi temperature computation");
+  return T;
 }
 
 void
@@ -89,26 +95,17 @@ LeadLithiumFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, R
   dT_dv = 1.0 / (1.19051 * v * v);
 }
 
-//------------------------------------------------------
-// Bulk modulus (isentropic) [Pa]
-// A quadratic fit was derived to give ~33 GPa at 500K, ~31 GPa at 600K,
-// and ~16 GPa by 1800K.
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::bulk_modulus_from_p_T(Real /*p*/, Real T) const
 {
   return (44.73077 - 0.02634615 * T + 5.76923e-6 * T * T) * 1e9;
 }
 
-//------------------------------------------------------
-// Speed of sound (c)
-// Using a linear fit from ultrasonic measurements:
-//   c(T) ≈ 1959.63 - 0.306 * T   [m/s]  (with T in K)
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::c_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
+  // This is from Schulz 1991. Ueki 2009 in Martelli has 1876 - 0.306 * T
   return 1959.63 - 0.306 * T;
 }
 
@@ -119,10 +116,6 @@ LeadLithiumFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
   return 1959.63 - 0.306 * T;
 }
 
-//------------------------------------------------------
-// Pressure from specific volume and energy:
-//   p = (h - e) / v
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::p_from_v_e(Real v, Real e) const
 {
@@ -140,14 +133,12 @@ LeadLithiumFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, R
   dp_de = (dh_de - 1) / v;
 }
 
-//------------------------------------------------------
-// Specific heat at constant pressure (cp)
-// Using a linear correlation: cp(T) = 195 - 9.116e-3 * T  [J/(kg·K)]
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::cp_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
+  if (T < _T_mo || T > 800)
+    flagInvalidSolution("Temperature out of bounds for the PbLi specific heat computation");
   return 195.0 - 9.116e-3 * T;
 }
 
@@ -163,18 +154,12 @@ LeadLithiumFluidProperties::cp_from_v_e(
   dcp_de = dcp_dT * dT_de;
 }
 
-//------------------------------------------------------
-// Specific heat at constant volume (cv)
-// Calculated via the thermodynamic relation:
-//   cv = cp / (1 + alpha² * bulk_modulus * T/(rho * cp))
-// where the thermal expansion coefficient is α = 1.19051/(10520.35 - 1.19051*T).
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::cv_from_p_T(Real p, Real T) const
 {
   Real rho, drho_dT, drho_dp;
   rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-  Real alpha = 1.19051 / (10520.35 - 1.19051 * T);
+  Real alpha = -drho_dT / rho;
   Real bulk_modulus = bulk_modulus_from_p_T(p, T);
   Real cp = cp_from_p_T(p, T);
   return cp / (1.0 + alpha * alpha * bulk_modulus * T / (rho * cp));
@@ -184,12 +169,10 @@ void
 LeadLithiumFluidProperties::cv_from_p_T(
     Real p, Real T, Real & cv, Real & dcv_dp, Real & dcv_dT) const
 {
-  // A full analytical derivative is complex; here we assume minimal pressure dependence.
-  Real cp, dcp_dp, dcp_dT;
-  cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
   cv = cv_from_p_T(p, T);
+  // A full analytical derivative is complex; here we assume minimal pressure dependence.
   dcv_dp = 0;
-  const Real dT = 1e-3;
+  const Real dT = 1e-6;
   Real cv_plus = cv_from_p_T(p, T + dT);
   dcv_dT = (cv_plus - cv) / dT;
 }
@@ -216,16 +199,13 @@ LeadLithiumFluidProperties::cv_from_v_e(
   dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
 }
 
-//------------------------------------------------------
-// Dynamic viscosity (mu)
-// Using an Arrhenius-type correlation:
-//   mu(T) = 1.87e-4 * exp(11640/(8.314*T))   [Pa·s]
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::mu_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
-  return 1.87e-4 * std::exp(11640.0 / (8.314 * T));
+  if (T < _T_mo || T > 625)
+    flagInvalidSolution("Temperature out of bounds for the PbLi viscosity computation");
+  return 1.87e-4 * std::exp(11640.0 / (FluidProperties::_R * T));
 }
 
 void
@@ -235,21 +215,18 @@ LeadLithiumFluidProperties::mu_from_v_e(
   Real T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
   mu = mu_from_v_e(v, e);
-  Real factor = -11640.0 / (8.314 * T * T);
+  Real factor = -11640.0 / (FluidProperties::_R * T * T);
   dmu_dv = factor * mu * dT_dv;
   dmu_de = factor * mu * dT_de;
 }
 
-//------------------------------------------------------
-// Thermal conductivity (k)
-// Using a linear fit: k(T) = 9.144 + 0.019631 * T   [W/(m·K)]
-// (Derived by converting literature data from °C to K.)
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::k_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
-  return 9.144 + 0.019631 * T;
+  if (T < _T_mo || T > 873)
+    flagInvalidSolution("Temperature out of bounds for the PbLi dynamic viscosity computation");
+  return 14.51 + 1.9631e-2 * T;
 }
 
 void
@@ -262,16 +239,11 @@ LeadLithiumFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, R
   dk_de = 0.019631 * dT_de;
 }
 
-//------------------------------------------------------
-// Enthalpy (h)
-// We integrate cp from the melting point (_T_mo) to T.
-// Here, with cp(T) = 195 - 9.116e-3 * T, the integral gives:
-//   h = 195*(T - _T_mo) - 0.5*9.116e-3*(T² - _T_mo²)
-// (Pressure effects are negligible.)
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::h_from_p_T(Real /*p*/, Real T) const
 {
+  if (T < _T_mo || T > 800)
+    flagInvalidSolution("Temperature out of bounds for the PbLi enthalpy computation");
   return 195.0 * (T - _T_mo) - 0.5 * 9.116e-3 * (T * T - _T_mo * _T_mo);
 }
 
@@ -301,10 +273,6 @@ LeadLithiumFluidProperties::h_from_v_e(Real v, Real e, Real & h, Real & dh_dv, R
   dh_de = cp * dT_de;
 }
 
-//------------------------------------------------------
-// Internal energy (e)
-// Using the definition: h = e + p*v  =>  e = h - p*v
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::e_from_p_T(Real p, Real T) const
 {
@@ -342,14 +310,13 @@ LeadLithiumFluidProperties::e_from_p_rho(
   de_drho = de_dT * dT_drho;
 }
 
-//------------------------------------------------------
-// Temperature from pressure and density
-// Inverting ρ = 10520.35 - 1.19051*T  =>  T = (10520.35 - ρ)/1.19051
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::T_from_p_rho(Real /*p*/, Real rho) const
 {
-  return (10520.35 - rho) / 1.19051;
+  Real T = (10520.35 - rho) / 1.19051;
+  if (T < _T_mo || T > 880)
+    flagInvalidSolution("Temperature out of bounds for the PbLi density computation");
+  return T;
 }
 
 void
@@ -361,20 +328,15 @@ LeadLithiumFluidProperties::T_from_p_rho(
   dT_drho = -1.0 / 1.19051;
 }
 
-//------------------------------------------------------
-// Temperature from pressure and enthalpy
-// (Uses an iterative Newton solver; see FluidPropertiesUtils.)
-//------------------------------------------------------
 Real
-LeadLithiumFluidProperties::T_from_p_h(Real p, Real h) const
+LeadLithiumFluidProperties::T_from_p_h(Real /*p*/, Real h) const
 {
-  auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
-               .first;
-  if (std::isnan(T))
-    mooseError("Conversion from pressure and enthalpy to temperature failed to converge.");
+  // h = 195.0 * (T - _T_mo) - 0.5 * 9.116e-3 * (T * T - _T_mo * _T_mo);
+  //
+  const auto a = -0.5 * 9.116e-3;
+  const auto b = 195.;
+  const auto c = 0.5 * 9.116e-3 * _T_mo * _T_mo - h - 195. * _T_mo;
+  const auto T = (-b + std::sqrt(b * b - 4 * a * c)) / (2 * a);
   return T;
 }
 
@@ -388,12 +350,11 @@ LeadLithiumFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, R
   dT_dh = 1.0 / dh_dT;
 }
 
-//------------------------------------------------------
-// cp, mu, and k from pressure and temperature (wrappers)
-//------------------------------------------------------
 Real
 LeadLithiumFluidProperties::cp_from_p_T(Real /*p*/, Real T) const
 {
+  if (T < _T_mo || T > 800)
+    flagInvalidSolution("Temperature out of bounds for the PbLi specific heat computation");
   return 195.0 - 9.116e-3 * T;
 }
 
@@ -409,7 +370,9 @@ LeadLithiumFluidProperties::cp_from_p_T(
 Real
 LeadLithiumFluidProperties::mu_from_p_T(Real /*p*/, Real T) const
 {
-  return 1.87e-4 * std::exp(11640.0 / (8.314 * T));
+  if (T < _T_mo || T > 625)
+    flagInvalidSolution("Temperature out of bounds for the PbLi viscosity computation");
+  return 1.87e-4 * std::exp(11640.0 / (FluidProperties::_R * T));
 }
 
 void
@@ -418,13 +381,15 @@ LeadLithiumFluidProperties::mu_from_p_T(
 {
   mu = mu_from_p_T(p, T);
   dmu_dp = 0;
-  dmu_dT = -11640.0 / (8.314 * T * T) * mu;
+  dmu_dT = -11640.0 / (FluidProperties::_R * T * T) * mu;
 }
 
 Real
 LeadLithiumFluidProperties::k_from_p_T(Real /*p*/, Real T) const
 {
-  return 9.144 + 0.019631 * T;
+  if (T < _T_mo || T > 880)
+    flagInvalidSolution("Temperature out of bounds for the PbLi dynamic viscosity computation");
+  return 14.51 + 1.9631e-2 * T;
 }
 
 void

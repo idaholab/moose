@@ -30,14 +30,14 @@ TEST_F(LeadLithiumFluidPropertiesTest, molarMass)
  * The expected reference values are computed from:
  *
  *   ρ(T)   = 10520.35 - 1.19051*T
- *   h(T)   = 195*(T - 508) - 0.5*9.116e-3*(T² - 508²)    (T_mo = 508 K)
+ *   h(T)   = 195*(T - 508) - 0.5*9.116e-3*(T^2 - 508^2)    (T_mo = 508 K)
  *   e      = h - p/ρ
  *   k(T)   = 9.144 + 0.019631*T
- *   E(T)   = (44.73077 - 0.02634615*T + 5.76923e-6*T²)*1e9
+ *   E(T)   = (44.73077 - 0.02634615*T + 5.76923e-6*T^2)*1e9
  *   c(T)   = 1959.63 - 0.306*T
  *   cp(T)  = 195 - 9.116e-3*T
- *   cv(T)  ≈ cp/(1 + α²*E*T/(ρ*cp)),   α = 1.19051/(10520.35 - 1.19051*T)
- *   μ(T)   = 1.87e-4 * exp(11640/(8.314*T))
+ *   cv(T)  ≈ cp/(1 + α^2*E*T/(ρ*cp)),   α = 1.19051/(10520.35 - 1.19051*T)
+ *   μ(T)   = 1.87e-4 * exp(11640/(R*T))
  *
  * The test uses three pressure/temperature pairs.
  */
@@ -62,7 +62,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       // Compute reference internal energy:
       const Real e_ref = h_ref - p / rho_ref;
       // Compute thermal conductivity:
-      const Real k_ref = 9.144 + 0.019631 * T;
+      const Real k_ref = 14.51 + 0.019631 * T;
       // Compute bulk modulus:
       const Real E_ref = (44.73077 - 0.02634615 * T + 5.76923e-6 * T * T) * 1e9;
       // Compute speed of sound:
@@ -74,7 +74,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       // Compute isochoric specific heat:
       const Real cv_ref = cp_ref / (1.0 + (alpha * alpha * E_ref * T) / (rho_ref * cp_ref));
       // Compute dynamic viscosity:
-      const Real mu_ref = 1.87e-4 * std::exp(11640.0 / (8.314 * T));
+      const Real mu_ref = 1.87e-4 * std::exp(11640.0 / (FluidProperties::_R * T));
 
       // Obtain computed values from the property object
       const Real rho = _fp->rho_from_p_T(p, T);

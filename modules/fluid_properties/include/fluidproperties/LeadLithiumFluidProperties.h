@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- *  Fluid properties for 83Pb17Li (LeadLithium) \cite richard.
+ *  Fluid properties for 83Pb17Li (LeadLithium) \cite Martelli.
  */
 class LeadLithiumFluidProperties : public SinglePhaseFluidProperties
 {
@@ -107,7 +107,7 @@ public:
   ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
 
 private:
-  /// Melting temperature of 2LiF-BeF2
+  /// Melting temperature (K) of 83Pb17Li
   static constexpr Real _T_mo = 508.;
 };
 #pragma GCC diagnostic pop
