@@ -288,8 +288,10 @@ XYDelaunayGenerator::generate()
       hole_ptrs[hole_i]->prepare_for_use();
     meshed_holes.emplace_back(*hole_ptrs[hole_i]);
     holes_with_midpoints[hole_i] = meshed_holes.back().n_midpoints();
-    stitch_second_order_holes =
-        (holes_with_midpoints.back() && _stitch_holes[hole_i]) || stitch_second_order_holes;
+    stitch_second_order_holes = _stitch_holes.empty()
+                                    ? false
+                                    : ((holes_with_midpoints[hole_i] && _stitch_holes[hole_i]) ||
+                                       stitch_second_order_holes);
     if (hole_i < _refine_holes.size())
       meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
 
