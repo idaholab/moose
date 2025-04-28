@@ -178,8 +178,8 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
         sample_deriv += i * j * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 1) *
                         MathUtils::pow(u, j - 1);
 
-    Real d1 = _x1[x1u] - _x1[x1l];
-    Real d2 = _x2[x2u] - _x2[x2l];
+    const Real d1 = _x1[x1u] - _x1[x1l];
+    const Real d2 = _x2[x2u] - _x2[x2l];
 
     if (!MooseUtils::absoluteFuzzyEqual(d1, Real(0.0)) &&
         !MooseUtils::absoluteFuzzyEqual(d2, Real(0.0)))

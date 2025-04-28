@@ -104,12 +104,12 @@ AddPeriodicBCAction::setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
     // Exclude scalar variables for which periodic boundary conditions dont make sense
     if (!nl.hasScalarVariable(var_name))
     {
-      MooseVariableFieldBase & var = nl.getVariable(0, var_name);
+      const auto & var = nl.getVariable(0, var_name);
       unsigned int var_num = var.number();
 
       if (var.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
       {
-        for (unsigned int component = 0; component < var.count(); ++component)
+        for (const auto component : make_range(var.count()))
           applyPeriodicBC(var_num + component, var_name + "_" + std::to_string(component));
       }
       else
