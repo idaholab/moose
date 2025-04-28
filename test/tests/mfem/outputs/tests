@@ -12,7 +12,7 @@
                   'OutputData/VisItDataCollection/Run0_000001/concentration.000000 '
                   'OutputData/VisItDataCollection/Run0_000001.mfem_root'
     requirement = 'The system shall have the ability to write out MFEM solutions to '
-                  'ParaView, VisIt and Conduit mfem::DataCollections.'
+                  'ParaView, VisIt and Conduit data collections.'
     mfem = true
     recover = false
   []
