@@ -362,6 +362,10 @@ IterationAdaptiveDT::converged() const
   if (_dt == _dt_min || _t_step < 2)
     return true;
 
+  // This means we haven't tried constraining the latest step yet
+  if (_dt_from_reject)
+    return false;
+
   // we get what the next time step should be
   Real dt_test = _dt;
   limitDTToPostprocessorValue(dt_test);
@@ -374,7 +378,6 @@ IterationAdaptiveDT::converged() const
   // we need to repeat the current iteration with a smaller time step
   if (dt_test < _dt * _large_step_rejection_threshold)
   {
-    mooseAssert(!_dt_from_reject, "Should not be set!");
     _dt_from_reject = dt_test;
     return false;
   }
