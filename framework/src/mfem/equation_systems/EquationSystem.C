@@ -143,10 +143,11 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
       FormLegacySystem(op, trueX, trueRHS);
       break;
     default:
-      MFEM_VERIFY(_test_var_names.size() == 1,
+      mooseAssert(_test_var_names.size() == 1,
                   "Non-legacy assembly is only supported for single-variable systems");
-      MFEM_VERIFY(_test_var_names.size() == _trial_var_names.size(),
-                  "Non-legacy assembly is only supported for square systems");
+      mooseAssert(
+          _test_var_names.size() == _trial_var_names.size(),
+          "Non-legacy assembly is only supported for single test and trial variable systems");
       FormSystem(op, trueX, trueRHS);
   }
 }
