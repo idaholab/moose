@@ -25,4 +25,10 @@
     # uses same output file names
     prereq = 'linear_lagrange_source'
   []
+  [update_mesh]
+    type = CSVDiff
+    input = 'consistent_volume.i'
+    csvdiff = 'consistent_volume_out.csv'
+    requirement = "The system shall properly displace the mesh after adaptivity is performed."
+  []
 []
