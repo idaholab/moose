@@ -25,19 +25,19 @@ TEST_F(LeadLithiumFluidPropertiesTest, molarMass)
 }
 
 /**
- * Verify calculation of the Lead–Lithium fluid properties.
+ * Verify calculation of the LeadLithium fluid properties.
  *
  * The expected reference values are computed from:
  *
- *   ρ(T)   = 10520.35 - 1.19051*T
+ *   (T)   = 10520.35 - 1.19051*T
  *   h(T)   = 195*(T - 508) - 0.5*9.116e-3*(T^2 - 508^2)    (T_mo = 508 K)
- *   e      = h - p/ρ
+ *   e      = h - p/
  *   k(T)   = 9.144 + 0.019631*T
  *   E(T)   = (44.73077 - 0.02634615*T + 5.76923e-6*T^2)*1e9
  *   c(T)   = 1959.63 - 0.306*T
  *   cp(T)  = 195 - 9.116e-3*T
- *   cv(T)  ≈ cp/(1 + α^2*E*T/(ρ*cp)),   α = 1.19051/(10520.35 - 1.19051*T)
- *   μ(T)   = 1.87e-4 * exp(11640/(R*T))
+ *   cv(T)   cp/(1 + alpha^2*E*T/(*cp)),    = 1.19051/(10520.35 - 1.19051*T)
+ *   (T)   = 1.87e-4 * exp(11640/(R*T))
  *
  * The test uses three pressure/temperature pairs.
  */
@@ -93,11 +93,11 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       REL_TEST(h, h_ref, tol);
       REL_TEST(_fp->h_from_v_e(v, e), h_ref, tol);
 
-      // Test internal energy (both from p,T and from p,ρ)
+      // Test internal energy (both from p,T and from p,)
       REL_TEST(e, e_ref, tol);
       REL_TEST(_fp->e_from_p_rho(p, rho), e_ref, tol);
 
-      // Test temperature (from v,e, from p,ρ, and from p,h)
+      // Test temperature (from v,e, from p,, and from p,h)
       REL_TEST(_fp->T_from_v_e(v, e), T, tol);
       REL_TEST(_fp->T_from_p_rho(p, rho), T, tol);
       REL_TEST(_fp->T_from_p_h(p, h), T, tol);
@@ -110,7 +110,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       REL_TEST(_fp->bulk_modulus_from_p_T(p, T), E_ref, tol);
 
       // Test speed of sound
-      REL_TEST(_fp->c_from_v_e(v, e), c_ref, tol);
+      nd REL_TEST(_fp->c_from_v_e(v, e), c_ref, tol);
 
       // Test isobaric specific heat
       REL_TEST(_fp->cp_from_p_T(p, T), cp_ref, tol);
@@ -128,7 +128,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
 }
 
 /**
- * Verify the calculation of the derivatives of Lead–Lithium properties
+ * Verify the calculation of the derivatives of LeadLithium properties
  * by comparing with finite differences.
  *
  * Note: The test temperature is chosen above the melting point (e.g., 600 K)
