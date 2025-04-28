@@ -32,7 +32,7 @@ protected:
    */
   virtual Real computeFrictionFactor(FrictionStruct friction_args) override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
-  virtual void computeWijPrime(int iblock) override;
+  virtual Real computeBeta(unsigned int i_gap, unsigned int iz) override;
   virtual void computeh(int iblock) override;
   PetscErrorCode cleanUp();
   TriSubChannelMesh & _tri_sch_mesh;

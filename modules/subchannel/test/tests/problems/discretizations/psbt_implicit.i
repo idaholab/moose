@@ -8,7 +8,7 @@ P_out = 4.923e6 # Pa
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 3
+    n_cells = 10
     pitch = 0.0126
     pin_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -188,12 +188,14 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "Temp_Out_Implicit_Segregated.txt"
-    height = 1.0
+  csv = true
+[]
+
+[Postprocessors]
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
   []
 []
 
