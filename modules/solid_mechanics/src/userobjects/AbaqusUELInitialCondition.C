@@ -64,8 +64,6 @@ AbaqusUELInitialCondition::execute()
 
   for (auto & [var, value] : it->second)
   {
-    std::cout << "Node  " << _current_node->id() << " var " << var->name() << " to " << value
-              << std::endl;
     var->reinitNode();
     var->computeNodalValues();
     var->setNodalValue(value);
