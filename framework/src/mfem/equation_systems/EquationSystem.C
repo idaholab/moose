@@ -203,7 +203,7 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto test_var_name = _test_var_names.at(i);
     for (const auto j : index_range(_test_var_names))
     {
-      auto trial_var_name = _test_var_names.at(j);
+      auto trial_var_name = _trial_var_names.at(j);
 
       mfem::Vector aux_x, aux_rhs;
       mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
@@ -353,7 +353,7 @@ EquationSystem::BuildMixedBilinearForms()
     auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_test_var_names))
     {
-      auto trial_var_name = _test_var_names.at(j);
+      auto trial_var_name = _trial_var_names.at(j);
       auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble
