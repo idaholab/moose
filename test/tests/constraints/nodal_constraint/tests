@@ -6,7 +6,6 @@
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
     max_parallel = 1
-    max_threads = 1 #6511
     requirement = "The system shall support the ability to constrain nodal values."
   []
 
@@ -15,7 +14,6 @@
     input = 'nodal_constraint_displaced_test.i'
     exodiff = 'nodal_constraint_displaced_test_out.e'
     max_parallel = 1
-    max_threads = 1 #6511
     requirement = "The system shall support the ability to constrain nodal values using a displaced mesh."
   []
 
@@ -24,7 +22,6 @@
     input = 'linear_nodal_constraint.i'
     exodiff = 'linear_nodal_constraint_out.e'
     max_parallel = 1
-    max_threads = 1 #6511
     requirement = "The system shall support the ability to linearly constrain nodal values."
   []
 
@@ -33,7 +30,6 @@
     input = 'linear_nodal_constraint_different_variables.i'
     exodiff = 'linear_nodal_constraint_different_variables_out.e'
     max_parallel = 1
-    max_threads = 1
     requirement = "The system shall support the ability to constrain nodal values of different variables."
   []
 []
