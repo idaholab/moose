@@ -6,6 +6,7 @@ import pandas
 import matplotlib.pyplot as plt
 import multiprocessing
 import mooseutils
+import os
 
 
 def execute(infile, outfile, n_samples, processors, test_type):
@@ -13,6 +14,7 @@ def execute(infile, outfile, n_samples, processors, test_type):
 
     data = dict(n_procs=[], n_samples=[], total=[], per_proc=[], max_proc=[], time=[])
     exe = mooseutils.find_moose_executable_recursive()
+    cmd = os.getenv('MOOSE_MPI_COMMAND', 'mpiexec')
 
     for n_procs in processors:
         file_base = '{}_{}'.format(infile[:-2], n_procs)
@@ -21,7 +23,7 @@ def execute(infile, outfile, n_samples, processors, test_type):
                     'Postprocessors/test/test_type={}'.format(test_type),
                     'Samplers/sampler/num_rows={}'.format(int(n_samples))]
 
-        print('mpiexec -n {} {} {}'.format(n_procs, exe, ' '.join(exe_args)))
+        print('{} -n {} {} {}'.format(cmd, n_procs, exe, ' '.join(exe_args)))
         t = time.time()
         out = mooseutils.run_executable(exe, *exe_args, mpi=n_procs, suppress_output=True)
         t = time.time() - t
