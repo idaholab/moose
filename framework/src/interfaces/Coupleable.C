@@ -1056,6 +1056,8 @@ Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int com
     return *getDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
 
+  if (_c_nodal)
+    return (_c_is_implicit) ? var->nodalValueOldArray() : var->nodalValueOlderArray();
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->slnOld() : var->slnOlder();
   return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
