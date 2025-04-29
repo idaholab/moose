@@ -67,7 +67,7 @@ centre_y = 0.1
     type = MFEMScalarFunctorDirichletBC
     variable = velocity_potential
     boundary = '1'
-    functor = theta
+    coefficient = theta
   []
 []
 

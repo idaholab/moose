@@ -9,7 +9,7 @@ MFEMScalarFunctorDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
   params.addRequiredParam<MFEMScalarCoefficientName>(
-      "functor",
+      "coefficient",
       "The functor setting the values on the essential boundary. A functor is any of the "
       "following: a variable, an MFEM material property, a function, or a post-processor.");
   return params;
@@ -17,7 +17,7 @@ MFEMScalarFunctorDirichletBC::validParams()
 
 MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef_name(getParam<MFEMScalarCoefficientName>("functor")),
+    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     _coef(getScalarCoefficient(_coef_name))
 {
 }
