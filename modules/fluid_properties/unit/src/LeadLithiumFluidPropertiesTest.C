@@ -29,15 +29,15 @@ TEST_F(LeadLithiumFluidPropertiesTest, molarMass)
  *
  * The expected reference values are computed from:
  *
- *   (T)   = 10520.35 - 1.19051*T
+ *   rho(T) = 10520.35 - 1.19051*T
  *   h(T)   = 195*(T - 508) - 0.5*9.116e-3*(T^2 - 508^2)    (T_mo = 508 K)
- *   e      = h - p/
+ *   e      = h - p/rho
  *   k(T)   = 9.144 + 0.019631*T
  *   E(T)   = (44.73077 - 0.02634615*T + 5.76923e-6*T^2)*1e9
  *   c(T)   = 1959.63 - 0.306*T
  *   cp(T)  = 195 - 9.116e-3*T
- *   cv(T)   cp/(1 + alpha^2*E*T/(*cp)),    = 1.19051/(10520.35 - 1.19051*T)
- *   (T)   = 1.87e-4 * exp(11640/(R*T))
+ *   cv(T)  = cp/(1 + alpha^2*E*T/(rho*cp)),  alpha  = 1.19051/(10520.35 - 1.19051*T)
+ *   mu(T)  = 1.87e-4 * exp(11640/(R*T))
  *
  * The test uses three pressure/temperature pairs.
  */
@@ -110,7 +110,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       REL_TEST(_fp->bulk_modulus_from_p_T(p, T), E_ref, tol);
 
       // Test speed of sound
-      nd REL_TEST(_fp->c_from_v_e(v, e), c_ref, tol);
+      REL_TEST(_fp->c_from_v_e(v, e), c_ref, tol);
 
       // Test isobaric specific heat
       REL_TEST(_fp->cp_from_p_T(p, T), cp_ref, tol);

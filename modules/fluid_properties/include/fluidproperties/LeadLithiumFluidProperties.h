@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- *  Fluid properties for 83Pb17Li (LeadLithium) \cite Martelli.
+ *  Fluid properties for 83Pb17Li (LeadLithium)
  */
 class LeadLithiumFluidProperties : public SinglePhaseFluidProperties
 {
@@ -99,7 +99,7 @@ public:
    *
    * @param p   pressure (Pa)
    * @param T   temperature (K)
-   * @return Bulk Modules (N/m^2)
+   * @return Bulk Modulus (N/m^2)
    */
   Real bulk_modulus_from_p_T(Real p, Real T) const;
 
