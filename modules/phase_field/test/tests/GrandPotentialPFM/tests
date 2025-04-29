@@ -66,6 +66,7 @@
     design = '/GrandPotentialSinteringMaterial.md'
     installation_type = in_tree
     requirement = 'The system shall provide a Grand Potential based sintering model'
+    abs_zero = 4e-10
   []
   [SinteringParabolic]
     type = 'Exodiff'

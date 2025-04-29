@@ -59,8 +59,6 @@ PFCFreezingIC::PFCFreezingIC(const InputParameters & parameters)
     _inside(getParam<Real>("inside")),
     _outside(getParam<Real>("outside"))
 {
-  _console << "MooseEnum? " << _crystal_structure << std::endl;
-
   for (const auto i : make_range(Moose::dim))
     if (_range(i) < 0.0)
       mooseError("x1, y1 or z1 is not less than x2, y2 or z2");

@@ -7,6 +7,8 @@
     requirement = 'A smooth circle initial condition with a hyperbolic tangent profile shall be provided'
     design = 'ics/SmoothCircleIC.md'
     issues = '#12143'
+    # uses exodus oversampling see #2295
+    recover = false
   [../]
 
   # prepare and relax a polycrystalline variable sample...
