@@ -173,10 +173,18 @@ SidesetAroundSubdomainUpdater::finalize()
   {
     for (const auto & [elem_id, side] : sent_data)
     {
-      _boundary_info.remove_side(mesh.elem_ptr(elem_id), side, _boundary_id);
+      const auto elem = mesh.elem_ptr(elem_id);
+      _boundary_info.remove_side(elem, side, _boundary_id);
+      for (const auto local_node_id : elem->nodes_on_side(side))
+        _boundary_info.remove_node(elem->node_ptr(local_node_id), _boundary_id);
       if (_displaced_boundary_info)
-        _displaced_boundary_info->remove_side(
-            displaced_mesh->elem_ptr(elem_id), side, _boundary_id);
+      {
+        const auto displaced_elem = displaced_mesh->elem_ptr(elem_id);
+        _displaced_boundary_info->remove_side(displaced_elem, side, _boundary_id);
+        for (const auto local_node_id : displaced_elem->nodes_on_side(side))
+          _displaced_boundary_info->remove_node(displaced_elem->node_ptr(local_node_id),
+                                                _boundary_id);
+      }
     }
   };
 
@@ -188,7 +196,6 @@ SidesetAroundSubdomainUpdater::finalize()
   {
     mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
     mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
-    mesh.getMesh().get_boundary_info().clear_boundary_node_ids();
     mesh.getMesh().get_boundary_info().build_node_list_from_side_list();
     mesh.update();
   };
