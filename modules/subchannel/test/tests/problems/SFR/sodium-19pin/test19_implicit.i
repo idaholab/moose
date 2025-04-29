@@ -81,17 +81,14 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.6
+  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  T_tol = 1.0e-4
-  P_tol = 1.0e-4
+  T_tol = 1.0e-6
+  P_tol = 1.0e-6
   implicit = true
   segregated = true
-  staggered_pressure = false
-  monolithic_thermal = false
-  interpolation_scheme = 'exponential'
 []
 
 [ICs]
@@ -179,16 +176,17 @@ P_out = 2.0e5 # Pa
   []
 []
 
+[Outputs]
+  exodus = true
+  csv = true
+[]
+
 [Postprocessors]
   [total_pressure_drop]
     type = SubChannelDelta
     variable = P
     execute_on = "timestep_end"
   []
-[]
-
-[Outputs]
-  exodus = true
 []
 
 [Executioner]

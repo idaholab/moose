@@ -1,0 +1,11 @@
+[Tests]
+    issues = '#30032'
+    design = 'user_notes.md'
+    [index]
+        type = RunCommand
+        command = "python index.py"
+        required_python_packages = 'numpy matplotlib'
+        valgrind = none
+        requirement = 'The system shall include a script that can print the index position for SCM Subchannels and Pins.'
+    []
+[]
