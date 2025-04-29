@@ -222,30 +222,6 @@ public:
   getMeshDisplacementGridFunction();
 
 protected:
-  /**
-   * Template method for adding kernels. We can only add kernels using equation system problem
-   * builders.
-   */
-  template <class T>
-  void addKernel(std::string var_name, std::shared_ptr<MFEMKernel<T>> kernel)
-  {
-    using namespace Moose::MFEM;
-    if (getProblemData().eqn_system)
-    {
-      getProblemData().eqn_system->AddTrialVariableNameIfMissing(var_name);
-      getProblemData().eqn_system->AddKernel(var_name, std::move(kernel));
-    }
-    else
-    {
-      mooseError("Cannot add kernel with name '" + var_name +
-                 "' because there is no equation system.");
-    }
-  }
-
-  void addKernel(std::string trial_var_name,
-                 std::string test_var_name,
-                 std::shared_ptr<MFEMMixedBilinearFormKernel> kernel);
-
   MFEMProblemData _problem_data;
   std::map<std::string, std::shared_ptr<mfem::FunctionCoefficient>> _scalar_functions;
   std::map<std::string, std::shared_ptr<mfem::VectorFunctionCoefficient>> _vector_functions;

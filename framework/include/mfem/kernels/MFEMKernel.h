@@ -7,30 +7,19 @@
 
 /*
 Class to construct an MFEM integrator to apply to the equation system.
-
-TODO: Support for marker arrays specifying the block each kernel is applied on.
 */
-template <typename T>
 class MFEMKernel : public MFEMGeneralUserObject
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = MFEMGeneralUserObject::validParams();
-    params.registerBase("Kernel");
-    params.addParam<VariableName>("variable",
-                                  "Variable labelling the weak form this kernel is added to");
-    return params;
-  }
+  static InputParameters validParams();
 
-  MFEMKernel(const InputParameters & parameters)
-    : MFEMGeneralUserObject(parameters), _test_var_name(getParam<VariableName>("variable"))
-  {
-  }
+  MFEMKernel(const InputParameters & parameters);
+
   virtual ~MFEMKernel() = default;
 
   // Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
-  virtual T * createIntegrator() = 0;
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; }
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() { return nullptr; }
 
   // Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
@@ -39,9 +28,15 @@ public:
   // Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
 
+  bool isSubdomainRestricted() { return _subdomain_names.size(); }
+
+  mfem::Array<int> & getSubdomains() { return _subdomain_attributes; }
+
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
-  const VariableName _test_var_name;
+  const VariableName & _test_var_name;
+  std::vector<SubdomainName> _subdomain_names;
+  mfem::Array<int> _subdomain_attributes;
 };
 
 #endif

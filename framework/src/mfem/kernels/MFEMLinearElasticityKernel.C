@@ -37,7 +37,7 @@ MFEMLinearElasticityKernel::MFEMLinearElasticityKernel(const InputParameters & p
 }
 
 mfem::BilinearFormIntegrator *
-MFEMLinearElasticityKernel::createIntegrator()
+MFEMLinearElasticityKernel::createBFIntegrator()
 {
   return new mfem::ElasticityIntegrator(_lambda, _mu);
 }

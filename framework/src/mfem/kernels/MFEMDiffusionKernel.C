@@ -27,7 +27,7 @@ MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
 }
 
 mfem::BilinearFormIntegrator *
-MFEMDiffusionKernel::createIntegrator()
+MFEMDiffusionKernel::createBFIntegrator()
 {
   return new mfem::DiffusionIntegrator(_coef);
 }

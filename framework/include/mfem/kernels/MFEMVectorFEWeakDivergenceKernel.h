@@ -8,14 +8,14 @@
  * (\sigma u, \nabla V')
  * \f]
  */
-class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
 
   MFEMVectorFEWeakDivergenceKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
   const std::string _coef_name;

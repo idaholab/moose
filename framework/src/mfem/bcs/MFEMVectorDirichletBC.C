@@ -23,7 +23,7 @@ void
 MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
 {
   mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
-  ess_bdrs = GetMarkers(mesh);
+  ess_bdrs = getBoundaries();
   gridfunc.ProjectBdrCoefficient(*_vec_coef, ess_bdrs);
 }
 
