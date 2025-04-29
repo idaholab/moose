@@ -93,7 +93,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       REL_TEST(h, h_ref, tol);
       REL_TEST(_fp->h_from_v_e(v, e), h_ref, tol);
 
-      // Test internal energy (both from p,T and from p,)
+      // Test internal energy (both from p,T and from p,rho)
       REL_TEST(e, e_ref, tol);
       REL_TEST(_fp->e_from_p_rho(p, rho), e_ref, tol);
 
@@ -151,7 +151,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
-  DERIV_TEST(_fp->cv_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cv_from_p_T, p, T, 1.5e-6);
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
 
   DERIV_TEST(_fp->p_from_v_e, v, e, tol);

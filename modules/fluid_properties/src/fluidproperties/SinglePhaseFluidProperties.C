@@ -30,7 +30,7 @@ SinglePhaseFluidProperties::validParams()
       "Pressure initial guess for Newton Method variable set conversion");
   params.addParam<unsigned int>(
       "max_newton_its", 100, "Maximum number of Newton iterations for variable set conversions");
-  params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess",
+  params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess max_newton_its",
                               "Variable set conversions Newton solve");
 
   return params;
