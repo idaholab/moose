@@ -128,9 +128,11 @@ public:
   virtual bool isExplicit() const { return false; }
 
   /*
-   * Returns whether the time integrator controls its own state
+   * Returns whether the time integrator controls its own state. Explicit
+   * methods require extra care for determing when to store old solutions and
+   * stateful material properties.
    */
-  virtual bool controlsState() const { return false; };
+  virtual bool advancesProblemState() const { return false; }
 
   /**
    * Return the number of states this requires in a linear

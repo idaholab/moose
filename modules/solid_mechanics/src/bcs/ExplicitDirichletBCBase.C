@@ -24,7 +24,7 @@ ExplicitDirichletBCBase::validParams()
 
 ExplicitDirichletBCBase::ExplicitDirichletBCBase(const InputParameters & parameters)
   : NodalBC(parameters),
-    _mass_diag(initMassDiag()),
+    _mass_diag(initLumpedMass()),
     _u_old(_var.nodalValueOld()),
     _u_dot_old(_var.nodalValueDotOld()),
     _exp_integrator(
@@ -62,4 +62,15 @@ ExplicitDirichletBCBase::timestepSetup()
 {
   // Now is the point that the time integrator has the variable time orders setup
   _var_time_order = _exp_integrator->findVariableTimeOrder(_var.number());
+}
+
+const NumericVector<Number> &
+ExplicitDirichletBCBase::initLumpedMass()
+{
+  const auto & nl = _fe_problem.getNonlinearSystemBase(_sys.number());
+  if (nl.hasVector("mass_matrix_diag_inverted"))
+    return nl.getVector("mass_matrix_diag_inverted");
+
+  mooseError("Lumped mass matrix is missing. Make sure ExplicitMixedOrder is being used as the "
+             "time integrator.");
 }

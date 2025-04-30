@@ -42,7 +42,7 @@ public:
     // coupling between the solution and the computed material properties is kept correctly.
     _fe_problem.advanceState();
   }
-  virtual bool controlsState() const override { return true; }
+  virtual bool advancesProblemState() const override { return true; }
 
   virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix) override;
 
@@ -62,7 +62,7 @@ public:
    * Retrieve the order of the highest time derivative of a variable.
    * @return Returns the time order enum of this variable.
    */
-  virtual TimeOrder findVariableTimeOrder(unsigned int var_num) const;
+  TimeOrder findVariableTimeOrder(unsigned int var_num) const;
 
 protected:
   virtual TagID massMatrixTagID() const override;
