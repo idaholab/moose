@@ -5,7 +5,7 @@
 ## Mesh Trimming Along Lines of Symmetry
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [HexagonMeshTrimmer.md]
 - (Cartesian sibling -- [CartesianMeshTrimmer.md])
@@ -16,10 +16,14 @@
 - Peripheral trimming can only be used for assembly meshes
 - Through-the-center trimming can be used for both assembly and core meshes
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_hmt.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -28,30 +32,38 @@
 ## Mesh Trimming Examples
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !media tutorial04_meshing/base_ex_peripheral_trim.png
-       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+       style=width:70%;display:block;margin-left:auto;margin-right:auto;
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/base_ex_center_trim.png
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
+!col-end!
+
 !row-end!
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/pattern_assm_peri_trim
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/core_trim
          link=False
+
+!col-end!
 
 !row-end!
 
@@ -60,7 +72,7 @@
 ## Assembly Periphery Modification
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [PatternedHexPeripheralModifier.md]
 - (Cartesian sibling -- [PatternedCartesianPeripheralModifier.md])
@@ -69,10 +81,14 @@
 
 - The input mesh must be an assembly with a hexagonal boundary (coolant and/or duct region(s) present).
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_phpm.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -85,19 +101,23 @@
 ## Extrusion to 3D
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [AdvancedExtruderGenerator.md]
 - Extrudes a 1D mesh into 2D, or 2D into 3D
-- Variable height / # of layers in each elevation
+- Variable height / # of layers in each height
 - Variable growth factors of axial element sizes within each elevation
 - Remap subdomain IDs, boundary IDs and element EEIDs in each elevation and boundaries between neighboring elevations
 - Extrusion may be performed along any direction specified by an $(x,y,z)$ vector. Most common is $(0,0,1)$ (+$z$-direction).
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_aeg.png
-       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 

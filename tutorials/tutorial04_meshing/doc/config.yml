@@ -22,6 +22,8 @@ Executioner:
 Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple
+    extra-css:
+        - getting_started/examples_and_tutorials/tutorial04_meshing/css/styles.css
 
 Extensions:
     disable_defaults: True

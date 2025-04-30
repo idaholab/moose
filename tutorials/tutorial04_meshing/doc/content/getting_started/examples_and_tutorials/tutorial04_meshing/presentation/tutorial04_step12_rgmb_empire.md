@@ -7,9 +7,9 @@
 This example illustrates the use of RGMB mesh generators to define a heterogeneous 2D hexagonal microreactor core with control drum structures for the EMPIRE problem ([!cite](matthews2021coupled)). The primary focus of this tutorial is to familiarize users with [ControlDrumMeshGenerator.md] to create control drum structures for stitching into the core lattice.
 
 !media tutorial04_meshing/rgmb_empire_stepbystep.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
 
-+Hands-on package MOOSE input file (Heterogeneous EMPIRE mesh)+: `combined/reactor_workshop/tests/reactor_examples/rgmb_empire/rgmb_empire.i`
++Hands-on package MOOSE input file (Heterogeneous EMPIRE mesh)+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_empire/rgmb_empire.i`
 
 !---
 
@@ -63,18 +63,28 @@ In order to define homogeneous assembly structures to stitch into the core, we u
 
 ## Control drum structures using ControlDrumMeshGenerator
 
-In order to define control drum structures to stitch into the core, we use [ControlDrumMeshGenerator.md].
+In order to define control drum structures to stitch into the core, we use [ControlDrumMeshGenerator.md]. This process is repeated for each of the 6 unique drum orientations that are part of the core lattice.
+
+!row!
+
+!col! width=66%
 
 - [!param](/Mesh/ControlDrumMeshGenerator/drum_inner_radius) and [!param](/Mesh/ControlDrumMeshGenerator/drum_outer_radius) control the inner and outer radius of the drum region, while [!param](/Mesh/ControlDrumMeshGenerator/drum_inner_intervals) and [!param](/Mesh/ControlDrumMeshGenerator/drum_intervals) control the radial mesh density of the drum inner and drum regions respectively.
 - [!param](/Mesh/ControlDrumMeshGenerator/num_azimuthal_sectors) controls the azimuthal mesh density of the control drum structure.
 - Additional parameters are provided to [ControlDrumMeshGenerator.md] to create explicit drum pad regions. [!param](/Mesh/ControlDrumMeshGenerator/pad_start_angle) and [!param](/Mesh/ControlDrumMeshGenerator/pad_end_angle) set the start and end angles of the drum pad region.
 - The [!param](/Mesh/ControlDrumMeshGenerator/region_ids) parameter takes four values per axial layer, representing the four radial regions of the control drum structure (drum inner, drum pad, drum ex-pad, background)
 
-This process is repeated for each of the 6 unique drum orientations that are part of the core lattice.
+!col-end!
+
+!col! width=33%
 
 !listing reactor_examples/rgmb_empire/rgmb_empire.i
          block=Mesh/cd_ne
          link=False
+
+!col-end!
+
+!row-end!
 
 !---
 
@@ -85,12 +95,24 @@ This process is repeated for each of the 6 unique drum orientations that are par
 
 - Since [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) = `true` in [ReactorMeshParams.md], the different assembly types are stitched together without hanging nodes.
 
+!row!
+
+!col! width=50%
+
 !listing reactor_examples/rgmb_empire/rgmb_empire.i
          block=Mesh/core
          link=False
 
+!col-end!
+
+!col! width=50%
+
 !media tutorial04_meshing/rgmb_empire_mesh.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
+
+!row-end!
 
 !---
 

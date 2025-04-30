@@ -31,7 +31,7 @@ MOOSE's [Reactor Module](modules/reactor/index.md) offers several benefits over 
 - Automatic fuel volume preservation useful for mesh convergence studies
 - Saves analyst and computer time -- easier to learn than generic FEM tools and runs quickly
 
-The [Reactor Module](modules/reactor/index.md) is currently not suited for non-extruded geometries, ex-core components such as piping, heat exchangers, or complex 3D meshing of inlet plenums, CAD geometries, or wire wrapped pins. No tetrahedral meshing options are currently available.
+The [Reactor Module](modules/reactor/index.md) is currently best suited for extruded and rotated geometries. It is not intended for complex components such as heat exchangers, 3D meshing of inlet plenums, CAD geometries, or wire-wrapped pins. However, tetrahedral meshing algorithms are in the progress of being added.
 
 !---
 

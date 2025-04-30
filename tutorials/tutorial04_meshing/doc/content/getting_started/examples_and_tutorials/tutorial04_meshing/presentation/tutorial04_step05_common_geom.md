@@ -11,7 +11,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 ## Pin Cell
 
 !row!
-!col small=12 medium=6 large=4
+!col! width=66%
 
 - [PolygonConcentricCircleMeshGenerator.md]
 
@@ -21,13 +21,18 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - Fuel area preservation using the [!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes) parameter
 - Different azimuthal discretization possible per pin cell face
 
-!col small=12 medium=6 large=8
+!col-end!
+
+!col! width=33%
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/hex_1
          link=False
 
 !media tutorial04_meshing/base_ex_pccmg.png
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -46,16 +51,20 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
   - +HYBRID+: 6 triangles + 6 \* number of layers of quadrilateral elements
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=25%
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/hex_simple
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/base_ex_shg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -64,7 +73,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 ## Assembly (with multiple heterogeneous pins)
 
 !row!
-!col small=12 medium=6 large=4
+!col! width=66%
 
 - [PatternedHexMeshGenerator.md]
 - (Cartesian sibling -- [PatternedCartesianMeshGenerator.md])
@@ -75,13 +84,18 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - When generating an assembly mesh using [PatternedHexMeshGenerator.md], be sure to set [!param](/Mesh/PatternedHexMeshGenerator/generate_core_metadata) as `false`
 - Input will be automatically rotated 90 degrees CCW unless specified with [!param](/Mesh/PatternedHexMeshGenerator/rotate_angle)
 - !media tutorial04_meshing/base_ex_phmg_assm.png
-       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       style=width:40%;display:block;margin-left:auto;margin-right:auto;
 
-!col small=12 medium=6 large=8
+!col-end!
+
+!col! width=33%
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/pattern_assm
          link=False
+
+!col-end!
+
 !row-end!
 
 
@@ -90,7 +104,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 ## Assembly (control drum, duct-heterogeneous, or single pin)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
 - (Cartesian sibling -- [CartesianConcentricCircleAdaptiveBoundaryMeshGenerator.md])
@@ -100,10 +114,14 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 - It can be used without specifying [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/sides_to_adapt) and [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/meshes_to_adapt_to) to generate [PolygonConcentricCircleMeshGenerator.md] -style hexagonal mesh with assembly mesh metadata
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_hccabmg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -125,16 +143,20 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - The pattern will be automatically rotated 90 degrees CCW unless specified with [!param](/Mesh/PatternedHexMeshGenerator/rotate_angle)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/pattern_core
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_phmg_core.png
-       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -143,7 +165,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 ## Core Periphery (PRMG)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [PeripheralRingMeshGenerator.md] (abbreviated as PRMG)
 
@@ -152,10 +174,14 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 - [PeripheralRingMeshGenerator.md] generates a structured peripheral mesh with +QUAD4+ elements
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_prmg.png
-       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -168,7 +194,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 ## Core Periphery (PTMG)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [PeripheralTriangleMeshGenerator.md] (abbreviated as PTMG)
 
@@ -178,10 +204,14 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 - Automatic element area refinement is available
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/base_ex_ptmg.png
-       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
