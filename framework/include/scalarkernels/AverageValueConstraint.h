@@ -37,6 +37,7 @@ public:
 
   virtual void reinit() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  virtual bool computesJacobian() const override { return false; }
 
 protected:
   virtual Real computeQpResidual() override;
