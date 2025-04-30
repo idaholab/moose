@@ -15,6 +15,7 @@ InputParameters
 FVAnisotropicDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription(
       "Computes residual for anisotropic diffusion operator for finite volume method.");
   params.addRequiredParam<MooseFunctorName>("coeff",
@@ -24,11 +25,6 @@ FVAnisotropicDiffusion::validParams()
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
-  MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>(
-      "variable_interp_method",
-      face_interp_method,
-      "Switch that can select between face interpolation methods for the variable.");
   params.set<unsigned short>("ghost_layers") = 2;
 
   // We add the relationship manager here, this will select the right number of
@@ -45,12 +41,10 @@ FVAnisotropicDiffusion::validParams()
 
 FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _coeff(getFunctor<ADRealVectorValue>("coeff")),
     _coeff_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method"))),
-    _var_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
-    _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method")))
 {
 }
 

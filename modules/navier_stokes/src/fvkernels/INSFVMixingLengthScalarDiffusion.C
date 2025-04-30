@@ -16,16 +16,12 @@ InputParameters
 INSFVMixingLengthScalarDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes the turbulent diffusive flux that appears in "
                              "Reynolds-averaged fluid conservation equations.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
-  MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>(
-      "variable_interp_method",
-      face_interp_method,
-      "Switch that can select between face interpolation methods for the variable.");
   params.addRequiredParam<MooseFunctorName>("mixing_length", "The turbulent mixing length.");
   params.addRequiredParam<Real>(
       "schmidt_number",
@@ -47,13 +43,11 @@ INSFVMixingLengthScalarDiffusion::validParams()
 
 INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _dim(_subproblem.mesh().dimension()),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
-    _var_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
-    _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage),
     _mixing_len(getFunctor<ADReal>("mixing_length")),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {

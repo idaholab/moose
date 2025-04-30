@@ -12,12 +12,15 @@
 #include "FVFluxKernel.h"
 #include "MathFVUtils.h"
 #include "SolutionInvalidInterface.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
  * isotropic diffusion coefficient, using functor material properties
  */
-class PINSFVEnergyDiffusion : public FVFluxKernel, protected SolutionInvalidInterface
+class PINSFVEnergyDiffusion : public FVFluxKernel,
+                              protected SolutionInvalidInterface,
+                              public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
@@ -34,11 +37,4 @@ protected:
   const bool _porosity_factored_in;
   /// which interpolation method for the diffusivity on faces
   const Moose::FV::InterpMethod _k_interp_method;
-
-  /// Decides which interpolation method should be used for the computation of
-  /// the gradients within the face normal gradient.
-  const Moose::FV::InterpMethod _var_interp_method;
-
-  /// Just a convenience member for using skewness correction
-  const bool _correct_skewness;
 };

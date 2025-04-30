@@ -47,19 +47,6 @@ rho = 1.0
   []
 []
 
-[FVICs]
-  [u_ic]
-    type = FVFunctionIC
-    variable = vel_x
-    function = 'exact_u'
-  []
-  [v_ic]
-    type = FVFunctionIC
-    variable = vel_y
-    function = 'exact_v'
-  []
-[]
-
 [FVKernels]
   [mass]
     type = INSFVMassAdvection

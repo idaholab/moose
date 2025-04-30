@@ -10,12 +10,13 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * FVAnisotropicDiffusion implements a standard diffusion term
  * but with a diagonal tensor diffusion coefficient (provided as a vector)
  */
-class FVAnisotropicDiffusion : public FVFluxKernel
+class FVAnisotropicDiffusion : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
@@ -30,11 +31,4 @@ protected:
   /// Decides if a geometric arithmetic or harmonic average is used for the
   /// face interpolation of the diffusion coefficient.
   const Moose::FV::InterpMethod _coeff_interp_method;
-
-  /// Decides which interpolation method should be used for the computation of
-  /// the gradients within the face normal gradient.
-  const Moose::FV::InterpMethod _var_interp_method;
-
-  /// Just a convenience member for using skewness correction
-  const bool _correct_skewness;
 };

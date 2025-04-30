@@ -17,6 +17,7 @@ InputParameters
 PINSFVEnergyDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Diffusion term in the porous media incompressible Navier-Stokes "
                              "fluid energy equations :  $-div(eps * k * grad(T))$");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
@@ -32,11 +33,6 @@ PINSFVEnergyDiffusion::validParams()
       "kappa_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for the thermal conductivity.");
-  MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>(
-      "variable_interp_method",
-      face_interp_method,
-      "Switch that can select between face interpolation methods for the variable.");
 
   // We add the relationship manager here, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
@@ -54,14 +50,12 @@ PINSFVEnergyDiffusion::validParams()
 PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     SolutionInvalidInterface(this),
+    FVDiffusionInterpolationInterface(params),
     _k(getFunctor<ADReal>(NS::k)),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _porosity_factored_in(getParam<bool>("effective_conductivity")),
     _k_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method"))),
-    _var_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
-    _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method")))
 {
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     mooseError("PINSFVEnergyDiffusion may only be used with a fluid temperature variable, "

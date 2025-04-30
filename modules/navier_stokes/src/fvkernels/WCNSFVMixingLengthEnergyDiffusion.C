@@ -17,6 +17,7 @@ InputParameters
 WCNSFVMixingLengthEnergyDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes the turbulent diffusive flux that appears in "
                              "Reynolds-averaged fluid energy conservation equations.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
@@ -29,12 +30,6 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
       "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
-
-  MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>(
-      "variable_interp_method",
-      face_interp_method,
-      "Switch that can select between face interpolation methods for the variable.");
 
   // We add the relationship manager here, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
@@ -51,6 +46,7 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
 
 WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _dim(_subproblem.mesh().dimension()),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
@@ -58,9 +54,6 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
     _rho(getFunctor<ADReal>(NS::density)),
     _cp(getFunctor<ADReal>(NS::cp)),
     _mixing_len(getFunctor<ADReal>("mixing_length")),
-    _var_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
-    _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
   if (_dim >= 2 && !_v)

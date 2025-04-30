@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /// FVDiffusion implements a standard diffusion term:
 ///
@@ -21,7 +22,7 @@
 /// the elem and neighbor k-values (which should be face-values) is used to
 /// compute k on the face. Cross-diffusion correction factors are currently not
 /// implemented for the "grad_u*n" term.
-class FVDiffusion : public FVFluxKernel
+class FVDiffusion : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
@@ -35,11 +36,4 @@ protected:
   /// Decides if a geometric arithmetic or harmonic average is used for the
   /// face interpolation of the diffusion coefficient.
   const Moose::FV::InterpMethod _coeff_interp_method;
-
-  /// Decides which interpolation method should be used for the computation of
-  /// the gradients within the face normal gradient.
-  const Moose::FV::InterpMethod _var_interp_method;
-
-  /// Just a convenience member for using skewness correction
-  const bool _correct_skewness;
 };

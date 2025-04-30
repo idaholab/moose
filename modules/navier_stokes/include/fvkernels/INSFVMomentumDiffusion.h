@@ -14,8 +14,11 @@
 #include "INSFVMomentumResidualObject.h"
 #include "INSFVVelocityVariable.h"
 #include "SolutionInvalidInterface.h"
+#include "FVDiffusionInterpolationInterface.h"
 
-class INSFVMomentumDiffusion : public INSFVFluxKernel, public SolutionInvalidInterface
+class INSFVMomentumDiffusion : public INSFVFluxKernel,
+                               public SolutionInvalidInterface,
+                               public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
@@ -37,13 +40,6 @@ protected:
 
   /// The face interpolation method for the viscosity
   const Moose::FV::InterpMethod _mu_interp_method;
-
-  /// Decides which interpolation method should be used for the computation of
-  /// the gradients within the face normal gradient.
-  const Moose::FV::InterpMethod _var_interp_method;
-
-  /// Just a convenience member for using skewness correction
-  const bool _correct_skewness;
 
   /// The a coefficient for the element
   ADReal _ae = 0;

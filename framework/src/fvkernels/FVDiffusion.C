@@ -15,6 +15,7 @@ InputParameters
 FVDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
   params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
@@ -22,11 +23,6 @@ FVDiffusion::validParams()
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
-  MooseEnum face_interp_method("average skewness-corrected", "average");
-  params.addParam<MooseEnum>(
-      "variable_interp_method",
-      face_interp_method,
-      "Switch that can select between face interpolation methods for the variable.");
 
   // We need at least 2 layers here with the least accurate interpolation
   params.set<unsigned short>("ghost_layers") = 2;
@@ -45,12 +41,10 @@ FVDiffusion::validParams()
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _coeff(getFunctor<ADReal>("coeff")),
     _coeff_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method"))),
-    _var_interp_method(
-        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("variable_interp_method"))),
-    _correct_skewness(_var_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method")))
 {
 }
 
