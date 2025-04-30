@@ -88,7 +88,8 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-6
   P_tol = 1.0e-6
   implicit = true
-  segregated = true
+  segregated = false
+  monolithic_thermal = true
 []
 
 [ICs]
