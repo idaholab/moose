@@ -56,9 +56,9 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
                                    InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMSolverBase & mfem_preconditioner = getUserObject<MFEMSolverBase>(name);
-
-  getProblemData().mfem_preconditioner = &mfem_preconditioner;
+  auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
+  
+  getProblemData().mfem_preconditioner = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
 }
 
 void
@@ -67,9 +67,9 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                            InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  MFEMSolverBase & mfem_solver = getUserObject<MFEMSolverBase>(name);
+  auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
 
-  getProblemData().mfem_solver = &mfem_solver;
+  getProblemData().mfem_solver = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
 }
 
 void
