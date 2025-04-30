@@ -15,7 +15,7 @@ gamma = 1e5
     ymax = ${l}
     nx = ${n}
     ny = ${n}
-    elem_type = TRI6
+    elem_type = QUAD9
   []
 []
 
