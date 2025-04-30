@@ -29,12 +29,12 @@ rho = 1.0
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    # initial_condition = 1
+    initial_condition = 1
     face_interp_method = 'skewness-corrected'
   []
   [vel_y]
     type = INSFVVelocityVariable
-    # initial_condition = 1
+    initial_condition = 1
     face_interp_method = 'skewness-corrected'
   []
   [pressure]

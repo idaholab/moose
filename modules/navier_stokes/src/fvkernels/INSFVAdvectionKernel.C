@@ -29,14 +29,14 @@ INSFVAdvectionKernel::validParams()
   // advection kernels
   params.suppressParameter<bool>("force_boundary_execution");
 
-  // We add the relationship manager there, this will select the right number of
+  // We add the relationship manager here, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
           Moose::RelationshipManagerType::COUPLING,
       [](const InputParameters & obj_params, InputParameters & rm_params)
-      { FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 3, true); });
+      { FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 3); });
 
   return params;
 }

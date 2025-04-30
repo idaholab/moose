@@ -42,37 +42,24 @@ FVRelationshipManagerInterface::validParams()
           Moose::RelationshipManagerType::COUPLING,
       [](const InputParameters & obj_params, InputParameters & rm_params)
       {
-        // If someone specifies the ghost layers on the input file, we can just attach these
-        // RMs early
-        FVRelationshipManagerInterface::setRMParams(obj_params,
-                                                    rm_params,
-                                                    obj_params.get<unsigned short>("ghost_layers"),
-                                                    /*attach_early*/ true);
+        FVRelationshipManagerInterface::setRMParams(
+            obj_params, rm_params, obj_params.get<unsigned short>("ghost_layers"));
       });
 
   return params;
 }
 
 void
-FVRelationshipManagerInterface::setRMParams(const InputParameters & obj_params,
-                                            InputParameters & rm_params,
-                                            const unsigned short ghost_layers,
-                                            const bool attach_geometric_early)
-{
-  rm_params.set<unsigned short>("layers") = ghost_layers;
-  rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
-
-  rm_params.set<bool>("attach_geometric_early") = attach_geometric_early;
-  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-}
-
-void
 FVRelationshipManagerInterface::setRMParamsAdvection(
     const InputParameters & obj_params,
     InputParameters & rm_params,
-    const unsigned short conditional_extended_layers,
-    const bool attach_geometric_early)
+    const unsigned short conditional_extended_layers)
 {
+  parameterError<unsigned short>(
+      obj_params, "ghost_layers", "setRMParamsAdvection", "non-advection");
+  parameterError<MooseEnum>(
+      obj_params, "advected_interp_method", "setRMParamsAdvection", "non-advection");
+
   auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
   const auto & interp_method_in = obj_params.get<MooseEnum>("advected_interp_method");
   const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
@@ -85,18 +72,20 @@ FVRelationshipManagerInterface::setRMParamsAdvection(
       interp_method == Moose::FV::InterpMethod::Venkatakrishnan)
     ghost_layers = std::max(conditional_extended_layers, ghost_layers);
 
-  // Considering that this only depends on the input parameters, it is safe to attach
-  // it early
-  setRMParams(obj_params, rm_params, ghost_layers, attach_geometric_early);
+  setRMParams(obj_params, rm_params, ghost_layers);
 }
 
 void
 FVRelationshipManagerInterface::setRMParamsDiffusion(
     const InputParameters & obj_params,
     InputParameters & rm_params,
-    const unsigned short conditional_extended_layers,
-    const bool attach_geometric_early)
+    const unsigned short conditional_extended_layers)
 {
+  parameterError<unsigned short>(
+      obj_params, "ghost_layers", "setRMParamsDiffusion", "non-diffusion");
+  parameterError<MooseEnum>(
+      obj_params, "variable_interp_method", "setRMParamsDiffusion", "non-diffusion");
+
   auto ghost_layers = obj_params.get<unsigned short>("ghost_layers");
   const auto & interp_method_in = obj_params.get<MooseEnum>("variable_interp_method");
   const auto interp_method = Moose::FV::selectInterpolationMethod(interp_method_in);
@@ -105,5 +94,17 @@ FVRelationshipManagerInterface::setRMParamsDiffusion(
   if (interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
     ghost_layers = std::max(conditional_extended_layers, ghost_layers);
 
-  setRMParams(obj_params, rm_params, ghost_layers, attach_geometric_early);
+  setRMParams(obj_params, rm_params, ghost_layers);
+}
+
+void
+FVRelationshipManagerInterface::setRMParams(const InputParameters & obj_params,
+                                            InputParameters & rm_params,
+                                            const unsigned short ghost_layers)
+{
+  rm_params.set<unsigned short>("layers") = ghost_layers;
+  rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
+
+  rm_params.set<bool>("attach_geometric_early") = true;
+  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
 }

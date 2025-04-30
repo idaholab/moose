@@ -38,14 +38,14 @@ PINSFVEnergyDiffusion::validParams()
       face_interp_method,
       "Switch that can select between face interpolation methods for the variable.");
 
-  // We add the relationship manager there, this will select the right number of
+  // We add the relationship manager here, this will select the right number of
   // ghosting layers depending on the chosen interpolation method
   params.addRelationshipManager(
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
           Moose::RelationshipManagerType::COUPLING,
       [](const InputParameters & obj_params, InputParameters & rm_params)
-      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3, true); });
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;

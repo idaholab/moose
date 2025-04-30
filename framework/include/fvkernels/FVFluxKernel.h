@@ -127,12 +127,6 @@ protected:
    */
   bool avoidBoundary(const FaceInfo & fi) const;
 
-  /**
-   * Adjust the number of ghost layers in the relationship manager
-   * @param ghost_layers The new number of requested ghost layers
-   */
-  void adjustRMGhostLayers(const unsigned short ghost_layers) const;
-
   /// Which boundaries/sidesets to force the execution of flux kernels on
   std::unordered_set<BoundaryID> _boundaries_to_force;
 

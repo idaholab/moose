@@ -60,7 +60,7 @@ public:
   {
     return _momentum_advection_interpolation;
   }
-  /// Get the face interpolation method for momentum (mostly sued in the stress terms)
+  /// Get the face interpolation method for momentum (mostly used in the stress terms)
   const MooseEnum & getMomentumFaceInterpolationMethod() const
   {
     return _momentum_face_interpolation;
