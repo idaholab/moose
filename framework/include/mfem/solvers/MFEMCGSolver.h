@@ -20,15 +20,15 @@ public:
   /// Returns a shared pointer to the instance of the Solver derived-class.
   std::shared_ptr<mfem::Solver> getSolver() override { return _solver; }
 
-  void updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs,
-    std::shared_ptr<mfem::Solver> &solver, std::shared_ptr<mfem::Solver> preconditioner) const override;
+  void updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs) override;
 
 protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
-  std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
-  std::shared_ptr<mfem::CGSolver> _solver{nullptr};
+  std::shared_ptr<MFEMSolverBase> _preconditioner{nullptr};
+  std::shared_ptr<mfem::CGSolver> _jacobian_solver{nullptr};
+  std::shared_ptr<mfem::Solver> _solver{nullptr};
 };
 
 #endif
