@@ -30,6 +30,9 @@
 // because OF COURSE NOT, but now we need to take care not to let the
 // include guards prevent them from including their copy with their
 // different namespace.
+#if __has_include("vtk_nlohmannjson.h")
+#include "vtk_nlohmannjson.h"
+#if !(VTK_MODULE_USE_EXTERNAL_vtknlohmannjson == 1)
 #ifndef MOOSE_VTK_NLOHMANN_INCLUDED
 #ifdef INCLUDE_NLOHMANN_JSON_HPP_
 #define MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_HPP_
@@ -40,6 +43,8 @@
 #undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
 #endif
 #define MOOSE_VTK_NLOHMANN_INCLUDED
+#endif
+#endif
 #endif
 
 #include "vtkSmartPointer.h"
