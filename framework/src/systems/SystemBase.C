@@ -31,6 +31,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/static_condensation.h"
 
 using namespace libMesh;
 
@@ -336,7 +337,7 @@ SystemBase::prepareLowerD(THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
+SystemBase::reinitElem(const Elem * const elem, THREAD_ID tid)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
@@ -352,6 +353,13 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
     for (const auto & var : vars)
       var->computeElemValues();
   }
+
+  if (system().has_static_condensation())
+    for (auto & [tag, matrix] : _active_tagged_matrices)
+    {
+      libmesh_ignore(tag);
+      cast_ptr<StaticCondensation *>(matrix)->set_current_elem(*elem);
+    }
 }
 
 void
@@ -1077,7 +1085,10 @@ SystemBase::activeMatrixTag(TagID tag)
   if (_matrix_tag_active_flags.size() < tag + 1)
     _matrix_tag_active_flags.resize(tag + 1);
 
+  mooseAssert(hasMatrix(tag),
+              "Requested to activate a matrix tag, but there is no associated matrix");
   _matrix_tag_active_flags[tag] = true;
+  _active_tagged_matrices.emplace(tag, &getMatrix(tag));
 }
 
 void
@@ -1090,6 +1101,7 @@ SystemBase::deactiveMatrixTag(TagID tag)
     _matrix_tag_active_flags.resize(tag + 1);
 
   _matrix_tag_active_flags[tag] = false;
+  _active_tagged_matrices.erase(tag);
 }
 
 void
@@ -1101,6 +1113,7 @@ SystemBase::deactiveAllMatrixTags()
 
   for (decltype(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
     _matrix_tag_active_flags[tag] = false;
+  _active_tagged_matrices.clear();
 }
 
 void
@@ -1109,10 +1122,14 @@ SystemBase::activeAllMatrixTags()
   auto num_matrix_tags = _subproblem.numMatrixTags();
 
   _matrix_tag_active_flags.resize(num_matrix_tags);
+  _active_tagged_matrices.clear();
 
-  for (decltype(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
+  for (const auto tag : make_range(num_matrix_tags))
     if (hasMatrix(tag))
+    {
       _matrix_tag_active_flags[tag] = true;
+      _active_tagged_matrices.emplace(tag, &getMatrix(tag));
+    }
     else
       _matrix_tag_active_flags[tag] = false;
 }

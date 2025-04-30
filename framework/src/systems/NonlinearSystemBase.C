@@ -2662,6 +2662,9 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
     bool have_scalar_contributions = false;
     for (const auto & kernel : scalars)
     {
+      if (!kernel->computesJacobian())
+        continue;
+
       kernel->reinit();
       const std::vector<dof_id_type> & dof_indices = kernel->variable().dofIndices();
       const DofMap & dof_map = kernel->variable().dofMap();
