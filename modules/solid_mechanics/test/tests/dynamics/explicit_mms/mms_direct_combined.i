@@ -141,3 +141,51 @@
     max_rows = 10
   []
 []
+
+# Tests stateful material properties below
+
+[Materials]
+  [u_sqrd]
+    type = ParsedMaterial
+    expression = 'u_first^2'
+    property_name = u_sqrd
+    coupled_variables = 'u_first'
+  []
+[]
+
+[AuxVariables]
+  [diff_t_begin]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [diff_t_end]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [diff_t_begin]
+    type = MaterialRateRealAux
+    property = u_sqrd
+    variable = diff_t_begin
+    execute_on = LINEAR
+  []
+  [diff_t_end]
+    type = MaterialRateRealAux
+    property = u_sqrd
+    variable = diff_t_end
+    execute_on = TIMESTEP_END
+  []
+[]
+
+[Postprocessors]
+  [l2_norm_begin]
+    type = ElementL2Norm
+    variable = diff_t_begin
+  []
+  [l2_norm_end]
+    type = ElementL2Norm
+    variable = diff_t_end
+  []
+[]
