@@ -1,34 +1,27 @@
-T_in = 588.5
-flow_area = 0.0004980799633447909 #m2
-# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
+T_in = 660
+mass_flux_in = '${fparse 1e+6 * 300.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
+
+[GlobalParams]
+  nrings = 3
+  n_cells = 20
+  flat_to_flat = 0.056
+  heated_length = 0.5
+  pitch = 0.012
+[]
+
 [TriSubChannelMesh]
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
-    nrings = 3
-    n_cells = 50
-    flat_to_flat = 3.41e-2
-    heated_length = 0.5334
-    unheated_length_entry = 0.4064
-    unheated_length_exit = 0.0762
-    pin_diameter = 5.84e-3
-    pitch = 7.26e-3
-    dwire = 1.42e-3
-    hwire = 0.3048
-    spacer_z = '0.0'
-    spacer_k = '0.0'
+    pin_diameter = 0.01
+    dwire = 0.002
+    hwire = 0.0833
+    spacer_z = '0'
+    spacer_k = '5.0'
   []
-
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
+  [duct]
+    type = SCMTriDuctMeshGenerator
     input = subchannel
-    nrings = 3
-    n_cells = 50
-    heated_length = 0.5334
-    unheated_length_entry = 0.4064
-    unheated_length_exit = 0.0762
-    pitch = 7.26e-3
   []
 []
 
@@ -64,16 +57,16 @@ P_out = 2.0e5 # Pa
     block = subchannel
   []
   [q_prime]
-    block = fuel_pins
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
+    block = subchannel
   []
   [displacement]
     block = subchannel
+  []
+  [q_prime_duct]
+    block = duct
+  []
+  [Tduct]
+    block = duct
   []
 []
 
@@ -92,12 +85,10 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
+  T_tol = 1.0e-6
+  P_tol = 1.0e-6
   implicit = true
   segregated = false
-  staggered_pressure = false
-  monolithic_thermal = false
 []
 
 [ICs]
@@ -114,7 +105,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 16975 #W
+    power = 1000.0 # W
     filename = "pin_power_profile19.txt"
   []
 
@@ -122,12 +113,6 @@ P_out = 2.0e5 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
-  []
-
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 5.84e-3
   []
 
   [P_ic]
@@ -197,17 +182,10 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  [Temp_B]
-    type = SCMPlanarMean
-    variable = T
-    execute_on = 'TIMESTEP_END'
-    height = 0.5
-  []
-
-  [PinTemp]
-    type = SCMPinSurfaceTemperature
-    index = 10
-    height = 2
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
   []
 []
 

@@ -4,7 +4,7 @@ P_out = 2.0e5 # Pa
 
 [GlobalParams]
   nrings = 3
-  n_cells = 5
+  n_cells = 20
   flat_to_flat = 0.056
   heated_length = 0.5
   pitch = 0.012
@@ -85,8 +85,8 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  T_tol = 1.0e-6
-  P_tol = 1.0e-6
+  T_tol = 1.0e-8
+  P_tol = 1.0e-8
   implicit = false
   segregated = true
 []
@@ -105,7 +105,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 1000 # W
+    power = 1000.0 # W
     filename = "pin_power_profile19.txt"
   []
 
