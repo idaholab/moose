@@ -10,12 +10,13 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * FVAnisotropicDiffusion implements a standard diffusion term
  * but with a diagonal tensor diffusion coefficient (provided as a vector)
  */
-class FVAnisotropicDiffusion : public FVFluxKernel
+class FVAnisotropicDiffusion : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
@@ -24,10 +25,10 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Decides if a geometric arithmetic or harmonic average is used for the
-  /// face interpolation of the diffusion coefficient.
-  Moose::FV::InterpMethod _coeff_interp_method;
-
   /// Functor returning the diagonal coefficients of a diffusion tensor
   const Moose::Functor<ADRealVectorValue> & _coeff;
+
+  /// Decides if a geometric arithmetic or harmonic average is used for the
+  /// face interpolation of the diffusion coefficient.
+  const Moose::FV::InterpMethod _coeff_interp_method;
 };

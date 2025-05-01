@@ -229,14 +229,9 @@ FVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
 }
 
 ADReal
-FVFluxKernel::gradUDotNormal(const Moose::StateArg & time) const
+FVFluxKernel::gradUDotNormal(const Moose::StateArg & time, const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-
-  // Utlimately this will be a property of the kernel
-  const bool correct_skewness =
-      (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
-
   return Moose::FV::gradUDotNormal(*_face_info, _var, time, correct_skewness);
 }
 
@@ -273,32 +268,6 @@ FVFluxKernel::avoidBoundary(const FaceInfo & fi) const
     if (_boundaries_to_avoid.count(bnd_id))
       return true;
   return false;
-}
-
-void
-FVFluxKernel::adjustRMGhostLayers(const unsigned short ghost_layers) const
-{
-  auto & factory = _app.getFactory();
-
-  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
-
-  rm_params.set<std::string>("for_whom") = name();
-  rm_params.set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
-  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-      Moose::RelationshipManagerType::COUPLING;
-  FVKernel::setRMParams(
-      _pars, rm_params, std::max(ghost_layers, _pars.get<unsigned short>("ghost_layers")));
-  mooseAssert(rm_params.areAllRequiredParamsValid(),
-              "All relationship manager parameters should be valid.");
-
-  auto rm_obj = factory.create<RelationshipManager>(
-      "ElementSideNeighborLayers", name() + "_skew_correction", rm_params);
-
-  // Delete the resources created on behalf of the RM if it ends up not being added to the
-  // App.
-  if (!_app.addRelationshipManager(rm_obj))
-    factory.releaseSharedObjects(*rm_obj);
 }
 
 void

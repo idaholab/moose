@@ -6608,6 +6608,7 @@ FEProblemBase::outputStep(ExecFlagType type)
   for (auto & sys : _solver_systems)
     sys->update();
   _aux->update();
+
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
   _app.getOutputWarehouse().outputStep(type);

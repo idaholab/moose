@@ -17,6 +17,7 @@ InputParameters
 PINSFVEnergyDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Diffusion term in the porous media incompressible Navier-Stokes "
                              "fluid energy equations :  $-div(eps * k * grad(T))$");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
@@ -33,6 +34,15 @@ PINSFVEnergyDiffusion::validParams()
       coeff_interp_method,
       "Switch that can select face interpolation method for the thermal conductivity.");
 
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
+
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -40,6 +50,7 @@ PINSFVEnergyDiffusion::validParams()
 PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     SolutionInvalidInterface(this),
+    FVDiffusionInterpolationInterface(params),
     _k(getFunctor<ADReal>(NS::k)),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _porosity_factored_in(getParam<bool>("effective_conductivity")),
@@ -93,7 +104,7 @@ PINSFVEnergyDiffusion::computeQpResidual()
   }
 
   // Compute the temperature gradient dotted with the surface normal
-  auto dTdn = gradUDotNormal(state);
+  auto dTdn = gradUDotNormal(state, _correct_skewness);
 
   return -k_eps_face * dTdn;
 }
