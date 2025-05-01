@@ -85,10 +85,10 @@ public:
   void addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell);
 
 protected:
-  /// Mapping of cell names to pointers of stored cell objects
-  std::map<std::string, std::shared_ptr<CSGCell>> _cells;
-
   /// Checks whether cell name already exists within CSGCellList object
   void checkCellName(const std::string name);
+
+  /// Mapping of cell names to pointers of stored cell objects
+  std::map<std::string, std::shared_ptr<CSGCell>> _cells;
 };
 } // namespace CSG
