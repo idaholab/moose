@@ -44,7 +44,7 @@ CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGR
 }
 
 void
-CSGBase::_joinSurfaceLists(CSGSurfaceList & surf_list)
+CSGBase::joinSurfaceLists(CSGSurfaceList & surf_list)
 {
   auto all_surfs = surf_list.getAllSurfaces();
   for (auto s : all_surfs)
@@ -52,7 +52,7 @@ CSGBase::_joinSurfaceLists(CSGSurfaceList & surf_list)
 }
 
 void
-CSGBase::_joinCellList(CSGCellList & cell_list)
+CSGBase::joinCellList(CSGCellList & cell_list)
 {
   auto all_cells = cell_list.getAllCells();
   for (auto c : all_cells)
@@ -60,7 +60,7 @@ CSGBase::_joinCellList(CSGCellList & cell_list)
 }
 
 void
-CSGBase::_joinUniverseList(CSGUniverseList & univ_list)
+CSGBase::joinUniverseList(CSGUniverseList & univ_list)
 {
   auto all_univs = univ_list.getAllUniverses();
   for (auto u : all_univs)
@@ -118,7 +118,7 @@ CSGBase::generateOutput() const
 
   // Print out universe information
   auto all_univs = getAllUniverses();
-  int num_univs = all_univs.size();
+  unsigned int num_univs = all_univs.size();
   for (const auto & u_pair : all_univs)
   {
     const auto univ_ptr = u_pair.second;
@@ -129,9 +129,7 @@ CSGBase::generateOutput() const
     const auto univ_cells = univ_ptr->getAllCells();
     csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
     for (const auto & c : univ_cells)
-    {
       csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c->getName());
-    }
   }
 
   return csg_json;
