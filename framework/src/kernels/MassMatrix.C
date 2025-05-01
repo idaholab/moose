@@ -10,8 +10,10 @@
 #include "Kernel.h"
 #include "MassMatrix.h"
 #include "MaterialProperty.h"
-#include "MooseError.h"
 #include "Registry.h"
+#include "MooseStaticCondensationPreconditioner.h"
+#include "NonlinearSystemBase.h"
+#include "libmesh/system.h"
 
 registerMooseObject("MooseApp", MassMatrix);
 
@@ -35,6 +37,11 @@ MassMatrix::MassMatrix(const InputParameters & parameters)
 {
   if (!isParamValid("matrix_tags") && !isParamValid("extra_matrix_tags"))
     mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
+  if (_sys.system().has_static_condensation() &&
+      dynamic_cast<const MooseStaticCondensationPreconditioner *>(
+          cast_ref<NonlinearSystemBase &>(_sys).getPreconditioner()) &&
+      _var.getContinuity() == libMesh::DISCONTINUOUS)
+    mooseError("Elemental mass matrices likely don't make sense when using static condensation");
 }
 
 Real
