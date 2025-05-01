@@ -276,9 +276,9 @@ public:
    */
   void joinOtherBase(std::unique_ptr<CSGBase> & base)
   {
-    _joinSurfaceLists(base->getSurfaceList());
-    _joinCellList(base->getCellList());
-    _joinUniverseList(base->getUniverseList());
+    joinSurfaceLists(base->getSurfaceList());
+    joinCellList(base->getCellList());
+    joinUniverseList(base->getUniverseList());
   }
 
   /**
@@ -302,20 +302,20 @@ private:
    *
    * @param surf_list
    */
-  void _joinSurfaceLists(CSGSurfaceList & surf_list);
+  void joinSurfaceLists(CSGSurfaceList & surf_list);
 
   /**
    * @brief join a separate CSGCellList object to this one
    *
    * @param cell_list
    */
-  void _joinCellList(CSGCellList & cell_list);
+  void joinCellList(CSGCellList & cell_list);
 
   /**
    * @brief join a separate CSGUniverseList object to this one
    *
    * @param univ_list
    */
-  void _joinUniverseList(CSGUniverseList & univ_list);
+  void joinUniverseList(CSGUniverseList & univ_list);
 };
 } // namespace CSG
