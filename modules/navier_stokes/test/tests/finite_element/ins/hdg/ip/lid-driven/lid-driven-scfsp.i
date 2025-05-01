@@ -120,13 +120,6 @@ gamma = 1e5
 []
 
 [Kernels]
-  [mass_matrix_pressure]
-    type = MassMatrix
-    variable = pressure
-    matrix_tags = 'mass'
-    density = '${fparse -1/gamma}'
-  []
-
   [grad_div_x]
     type = GradDiv
     variable = vel_x
