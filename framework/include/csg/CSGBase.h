@@ -253,21 +253,21 @@ public:
    *
    * @return CSGSurfaceList
    */
-  CSGSurfaceList getSurfaceList() { return _surface_list; }
+  CSGSurfaceList & getSurfaceList() { return _surface_list; }
 
   /**
    * @brief Get the CSGCellList object
    *
    * @return CSGCellList
    */
-  CSGCellList getCellList() { return _cell_list; }
+  CSGCellList & getCellList() { return _cell_list; }
 
   /**
    * @brief Get the CSGUniverseList object
    *
    * @return CSGUniverseList
    */
-  CSGUniverseList getUniverseList() { return _universe_list; }
+  CSGUniverseList & getUniverseList() { return _universe_list; }
 
   /**
    * @brief join another CSGBase object to this one
@@ -302,20 +302,20 @@ private:
    *
    * @param surf_list
    */
-  void _joinSurfaceLists(CSGSurfaceList surf_list);
+  void _joinSurfaceLists(CSGSurfaceList & surf_list);
 
   /**
    * @brief join a separate CSGCellList object to this one
    *
    * @param cell_list
    */
-  void _joinCellList(CSGCellList cell_list);
+  void _joinCellList(CSGCellList & cell_list);
 
   /**
    * @brief join a separate CSGUniverseList object to this one
    *
    * @param univ_list
    */
-  void _joinUniverseList(CSGUniverseList univ_list);
+  void _joinUniverseList(CSGUniverseList & univ_list);
 };
 } // namespace CSG
