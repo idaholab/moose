@@ -174,6 +174,9 @@ SidesetAroundSubdomainUpdater::finalize()
     for (const auto & [elem_id, side] : sent_data)
     {
       const auto elem = mesh.elem_ptr(elem_id);
+      if (!_mesh.getConstructNodeListFromSideList())
+        mooseWarning("The user has selected 'construct_node_list_from_side_list' as false, but "
+                     "SidesetAroundSubdomainUpdate is building node lists from the side lists.");
       _boundary_info.remove_side(elem, side, _boundary_id);
       for (const auto local_node_id : elem->nodes_on_side(side))
         _boundary_info.remove_node(elem->node_ptr(local_node_id), _boundary_id);
