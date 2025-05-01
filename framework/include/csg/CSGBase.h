@@ -196,6 +196,11 @@ public:
    */
   std::shared_ptr<CSGUniverse> getRootUniverse() const { return _universe_list.getRoot(); }
 
+  /**
+   * @brief rename the root universe for this instance (default is ROOT_UNIVERSE)
+   *
+   * @param name
+   */
   void renameRootUniverse(const std::string name) { _universe_list.renameRoot(name); };
 
   /**
