@@ -1675,6 +1675,14 @@ SystemBase::prefix() const
   return "-" + petscPrefix();
 }
 
+void
+SystemBase::sizeVariableMatrixData()
+{
+  for (const auto & warehouse : _vars)
+    for (const auto & [var_num, var_ptr] : warehouse.numberToVariableMap())
+      var_ptr->sizeMatrixTagData();
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 
