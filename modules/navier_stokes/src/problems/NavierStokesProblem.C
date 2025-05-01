@@ -185,16 +185,22 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   // preconditioner for the Schur complement
   Mat global_Q = nullptr;
   if (_have_mass_matrix)
-    global_Q =
-        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(massMatrixTagID()))
-            .mat();
+  {
+    auto & sparse_mass_mat = _current_nl_sys->getMatrix(massMatrixTagID());
+    if (_current_nl_sys->system().has_static_condensation())
+      global_Q = cast_ref<const PetscMatrixBase<Number> &>(
+                     cast_ref<StaticCondensation &>(sparse_mass_mat).get_condensed_mat())
+                     .mat();
+    else
+      global_Q = cast_ref<PetscMatrixBase<Number> &>(sparse_mass_mat).mat();
+  }
+
   // The Poisson operator matrix corresponding to the velocity degrees of freedom. This is only used
   // and is required for Olshanskii LSC preconditioning
   Mat global_L = nullptr;
   if (_have_L_matrix)
     global_L =
-        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(LMatrixTagID()))
-            .mat();
+        cast_ref<PetscMatrixBase<Number> &>(_current_nl_sys->getMatrix(LMatrixTagID())).mat();
 
   //
   // Process down from our system matrices to the sub-matrix containing the velocity-pressure dofs
