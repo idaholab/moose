@@ -73,7 +73,7 @@ FEProblem::FEProblem(const InputParameters & parameters)
 
   es().parameters.set<FEProblem *>("_fe_problem") = this;
 
-  // Create extra vectors and matrices if any
+  // Create extra vectors if any
   createTagVectors();
 
   // Create extra solution vectors if any

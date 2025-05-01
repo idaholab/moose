@@ -972,6 +972,11 @@ public:
    */
   std::string petscPrefix() const;
 
+  /**
+   * size the matrix data for each variable
+   */
+  void sizeVariableMatrixData();
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.

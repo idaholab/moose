@@ -636,8 +636,11 @@ FEProblemBase::createTagVectors()
       _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
+}
 
-  // add matrices and their tags
+void
+FEProblemBase::createTagMatrices(CreateTaggedMatrixKey)
+{
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
   for (const auto nl_sys_num : index_range(matrices))
     for (auto & matrix : matrices[nl_sys_num])
@@ -645,6 +648,10 @@ FEProblemBase::createTagVectors()
       auto tag = addMatrixTag(matrix);
       _nl[nl_sys_num]->addMatrix(tag);
     }
+
+  for (auto & sys : _solver_systems)
+    sys->sizeVariableMatrixData();
+  _aux->sizeVariableMatrixData();
 }
 
 void
@@ -6095,6 +6102,9 @@ FEProblemBase::init()
     return;
 
   TIME_SECTION("init", 2, "Initializing");
+
+  // Create extra vectors and matrices if any
+  createTagVectors();
 
   // call executioner's preProblemInit so that it can do some setups before problem init
   _app.getExecutioner()->preProblemInit();

@@ -2392,6 +2392,16 @@ public:
    */
   const std::vector<LinearSystemName> & getLinearSystemNames() const { return _linear_sys_names; }
 
+  class CreateTaggedMatrixKey
+  {
+    CreateTaggedMatrixKey() {}
+    CreateTaggedMatrixKey(const CreateTaggedMatrixKey &) {}
+
+    friend class AddTaggedMatriesAction;
+  };
+
+  void createTagMatrices(CreateTaggedMatrixKey);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

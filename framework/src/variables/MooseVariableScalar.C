@@ -48,7 +48,11 @@ MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
 
   _vector_tag_u.resize(num_vector_tags);
   _need_vector_tag_u.resize(num_vector_tags);
+}
 
+void
+MooseVariableScalar::sizeMatrixTagData()
+{
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
 
   _matrix_tag_u.resize(num_matrix_tags);
