@@ -1390,6 +1390,8 @@ public:
    * @return The set of lower-dimensional blocks for boundary sides
    */
   const std::set<SubdomainID> & boundaryLowerDBlocks() const { return _lower_d_boundary_blocks; }
+  /// Return construct node list from side list boolean
+  bool getConstructNodeListFromSideList() { return _construct_node_list_from_side_list; }
 
 protected:
   /// Deprecated (DO NOT USE)
