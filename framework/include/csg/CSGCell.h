@@ -129,6 +129,7 @@ protected:
   /// Cell region, represented as a CSGRegion object
   CSGRegion _region;
 
+  /// Fill object if fill is CSGUniverse
   const CSGUniverse * _fill_universe;
 };
 } // namespace CSG
