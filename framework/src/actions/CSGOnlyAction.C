@@ -61,8 +61,6 @@ CSGOnlyAction::act()
     if (!_csg_mesh)
       mooseError("Expecting final generator with name " + final_mg_name + " but not found in mesh generator tree");
 
-    // TODO add error checking here to check that there aren't any hanging mesh objects
-
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
 
     auto csg_json = _csg_mesh->generateOutput();

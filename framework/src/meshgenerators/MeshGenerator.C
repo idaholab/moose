@@ -234,6 +234,7 @@ MeshGenerator::getCSGMeshByName(const MeshGeneratorName & mesh_generator_name)
   auto & csg_mesh = _app.getMeshGeneratorSystem().getCSGMeshGeneratorOutput(mesh_generator_name);
   if (!csg_mesh)
     mooseError("Requested CSG mesh " + mesh_generator_name + " returned a null mesh.");
+  _requested_csg_meshes.emplace_back(mesh_generator_name, &csg_mesh);
   return csg_mesh;
 }
 
@@ -366,7 +367,19 @@ std::unique_ptr<CSG::CSGBase>
 MeshGenerator::generateInternalCSG()
 {
   mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
-  return generateCSG();
+  auto csg_mesh = generateCSG();
+  for (const auto & [requested_name, requested_mesh] : _requested_csg_meshes)
+    if (*requested_mesh)
+      mooseError(
+          "The CSG mesh from input ",
+          _app.getMeshGenerator(requested_name).type(),
+          " '",
+          _app.getMeshGenerator(requested_name).name(),
+          "' was not moved.\n\nThe MeshGenerator system requires that the memory from all input "
+          "meshes\nare managed by the requesting MeshGenerator during the generate phase.\n\nThis "
+          "is achieved with a std::move() operation within the generateCSG() method.");
+
+  return csg_mesh;
 }
 
 void

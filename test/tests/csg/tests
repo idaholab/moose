@@ -42,6 +42,13 @@
 
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG only mode when'
+    [csg_only_chained_not_moved]
+      type = 'RunException'
+      input = 'csg_only_chained_not_moved.i'
+      detail = ' a CSG object from an input mesh generator is not moved upon retrieval'
+      cli_args = '--csg-only'
+      expect_err = "The CSG mesh from input TestCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
+    []
     [distributed_mesh]
       type = RunException
       input = 'csg_only_inf_planes.i'
