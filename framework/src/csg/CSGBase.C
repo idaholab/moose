@@ -44,7 +44,7 @@ CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGR
 }
 
 void
-CSGBase::_joinSurfaceLists(CSGSurfaceList surf_list)
+CSGBase::_joinSurfaceLists(CSGSurfaceList & surf_list)
 {
   auto all_surfs = surf_list.getAllSurfaces();
   for (auto s : all_surfs)
@@ -52,7 +52,7 @@ CSGBase::_joinSurfaceLists(CSGSurfaceList surf_list)
 }
 
 void
-CSGBase::_joinCellList(CSGCellList cell_list)
+CSGBase::_joinCellList(CSGCellList & cell_list)
 {
   auto all_cells = cell_list.getAllCells();
   for (auto c : all_cells)
@@ -60,7 +60,7 @@ CSGBase::_joinCellList(CSGCellList cell_list)
 }
 
 void
-CSGBase::_joinUniverseList(CSGUniverseList univ_list)
+CSGBase::_joinUniverseList(CSGUniverseList & univ_list)
 {
   auto all_univs = univ_list.getAllUniverses();
   for (auto u : all_univs)

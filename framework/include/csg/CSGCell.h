@@ -130,6 +130,6 @@ protected:
   CSGRegion _region;
 
   /// Fill object if fill is CSGUniverse
-  const CSGUniverse * _fill_universe;
+  const std::shared_ptr<CSGUniverse> _fill_universe;
 };
 } // namespace CSG
