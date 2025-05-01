@@ -27,10 +27,10 @@ ExplicitDirichletBCBase::ExplicitDirichletBCBase(const InputParameters & paramet
     _mass_diag(initLumpedMass()),
     _u_old(_var.nodalValueOld()),
     _u_dot_old(_var.nodalValueDotOld()),
-    _exp_integrator(
+    _explicit_integrator(
         dynamic_cast<const ExplicitMixedOrder *>(&_sys.getTimeIntegrator(_var.number())))
 {
-  if (!_exp_integrator)
+  if (!_explicit_integrator)
     mooseError("Time integrator for the variable is not of the right type.");
 }
 
@@ -61,7 +61,7 @@ void
 ExplicitDirichletBCBase::timestepSetup()
 {
   // Now is the point that the time integrator has the variable time orders setup
-  _var_time_order = _exp_integrator->findVariableTimeOrder(_var.number());
+  _var_time_order = _explicit_integrator->findVariableTimeOrder(_var.number());
 }
 
 const NumericVector<Number> &

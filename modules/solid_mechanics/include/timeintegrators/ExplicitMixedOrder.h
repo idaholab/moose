@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
-#include "libmesh/string_to_enum.h"
 
 // Forward declarations
 namespace libMesh

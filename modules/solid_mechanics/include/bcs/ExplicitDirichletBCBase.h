@@ -45,7 +45,7 @@ protected:
   const Real & _u_dot_old;
 
   /// explicit time integrator
-  const ExplicitMixedOrder * _exp_integrator;
+  const ExplicitMixedOrder * _explicit_integrator;
 
   /// variable time order need for computing BC
   ExplicitMixedOrder::TimeOrder _var_time_order;
