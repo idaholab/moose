@@ -11,6 +11,7 @@
 #include "NonlinearSystemBase.h"
 #include "FieldSplitPreconditioner.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/static_condensation.h"
 
 using namespace libMesh;
 
@@ -97,6 +98,20 @@ NavierStokesProblem::~NavierStokesProblem()
   }
 }
 
+void
+NavierStokesProblem::initialSetup()
+{
+  FEProblem::initialSetup();
+  for (const auto & solver_sys : _solver_systems)
+    if (solver_sys->system().has_static_condensation())
+    {
+      if (_have_L_matrix)
+        mooseError("Static condensation and LSC preconditioning not supported together");
+      if (_have_mass_matrix)
+        cast_ref<StaticCondensation &>(solver_sys->getMatrix(massMatrixTagID()))
+            .uncondensed_dofs_only();
+    }
+}
 KSP
 NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
 {
