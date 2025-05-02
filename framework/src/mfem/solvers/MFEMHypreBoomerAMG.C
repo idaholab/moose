@@ -33,17 +33,29 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 void
 MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 {
-  _solver = std::make_shared<mfem::HypreBoomerAMG>();
+  _jacobian_solver = std::make_shared<mfem::HypreBoomerAMG>();
 
-  _solver->SetTol(getParam<double>("l_tol"));
-  _solver->SetMaxIter(getParam<int>("l_max_its"));
-  _solver->SetPrintLevel(getParam<int>("print_level"));
-  _solver->SetStrengthThresh(_strength_threshold);
+  _jacobian_solver->SetTol(getParam<double>("l_tol"));
+  _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
+  _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
+  _jacobian_solver->SetStrengthThresh(_strength_threshold);
 
   if (_mfem_fespace)
   {
-    _solver->SetElasticityOptions(_mfem_fespace.get());
+    mooseAssert(!HypreUsingGPU(), "Setting elasticity options for MFEMHypreBoomerAMG on GPUs is not supported.");
+    _jacobian_solver->SetElasticityOptions(_mfem_fespace.get());
   }
+
+  _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+}
+
+void
+MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+{
+
+  if (getParam<bool>("low_order_refined"))
+    _solver.reset(new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs));
+  
 }
 
 #endif

@@ -65,7 +65,6 @@ MFEMCGSolver::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
     _solver.reset(new mfem::LORSolver<mfem::CGSolver>(a, tdofs));
   }
     
-    
 }
 
 

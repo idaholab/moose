@@ -24,11 +24,10 @@ MFEMHypreGMRES::validParams()
 
 MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _preconditioner(
-        isParamSetByUser("preconditioner")
-            ? const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"))
-                  .getSolver()
-            : nullptr)
+  _preconditioner(
+    isParamSetByUser("preconditioner")
+        ? getMFEMProblem().getProblemData().mfem_preconditioner
+        : nullptr)
 {
   constructSolver(parameters);
 }
@@ -36,17 +35,42 @@ MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
 void
 MFEMHypreGMRES::constructSolver(const InputParameters &)
 {
-  auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner);
 
-  _solver = std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  _solver->SetTol(getParam<double>("l_tol"));
-  _solver->SetAbsTol(getParam<double>("l_abs_tol"));
-  _solver->SetMaxIter(getParam<int>("l_max_its"));
-  _solver->SetKDim(getParam<int>("kdim"));
-  _solver->SetPrintLevel(getParam<int>("print_level"));
+  _jacobian_solver = std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  _jacobian_solver->SetTol(getParam<double>("l_tol"));
+  _jacobian_solver->SetAbsTol(getParam<double>("l_abs_tol"));
+  _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
+  _jacobian_solver->SetKDim(getParam<int>("kdim"));
+  _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
 
-  if (hypre_preconditioner)
-    _solver->SetPreconditioner(*hypre_preconditioner);
+  if (_preconditioner)
+  {
+    auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
+  }
+  
+  _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+}
+
+void
+MFEMHypreGMRES::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+{
+  bool lor = getParam<bool>("low_order_refined");
+  
+  mooseAssert(!(lor && _preconditioner), "LOR solver cannot take a preconditioner");
+
+  if (_preconditioner)
+  {
+    _preconditioner->updateSolver(a,tdofs);
+    auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
+    _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+  }
+  else if (lor)
+  {
+    mooseError("HypreGMRES solver does not support LOR solve");
+  }
+    
 }
 
 #endif

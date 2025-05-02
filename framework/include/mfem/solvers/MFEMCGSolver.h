@@ -20,6 +20,7 @@ public:
   /// Returns a shared pointer to the instance of the Solver derived-class.
   std::shared_ptr<mfem::Solver> getSolver() override { return _solver; }
 
+  // Updates the solver with the bilinear form in case LOR solve is required
   void updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs) override;
 
 protected:

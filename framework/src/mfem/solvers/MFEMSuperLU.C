@@ -22,8 +22,18 @@ MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : MFEMSolverBase(pa
 void
 MFEMSuperLU::constructSolver(const InputParameters &)
 {
-  _solver = std::make_shared<Moose::MFEM::SuperLUSolver>(
+  _jacobian_solver = std::make_shared<Moose::MFEM::SuperLUSolver>(
       getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+}
+
+void
+MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+{
+
+  if (getParam<bool>("low_order_refined"))
+    mooseError("SuperLU solver does not support LOR solve");
+  
 }
 
 #endif
