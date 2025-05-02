@@ -27,4 +27,6 @@ public:
   static void registerApps();
 
   virtual std::string header() const override;
+
+  virtual bool errorOnJacobianNonzeroReallocation() const override { return true; }
 };

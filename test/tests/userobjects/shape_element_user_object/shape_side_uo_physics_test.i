@@ -98,6 +98,7 @@ u_left = 0.5
 
 [Problem]
   type = FEProblem
+  use_hash_table_matrix_assembly = true
 []
 
 [Preconditioning]
