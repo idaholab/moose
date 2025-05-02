@@ -47,7 +47,7 @@ MFEMHypreFGMRES::constructSolver(const InputParameters &)
         std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
     if (!hypre_preconditioner)
       mooseError("Hypre FGMRES preconditioner must be a Hypre Solver");
-      _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
+    _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
   }
 
   _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
