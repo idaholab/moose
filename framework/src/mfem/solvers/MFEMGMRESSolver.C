@@ -16,6 +16,7 @@ MFEMGMRESSolver::validParams()
   params.addParam<double>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
+  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
   params.addParam<UserObjectName>("preconditioner", "Optional choice of preconditioner to use.");
 
   return params;

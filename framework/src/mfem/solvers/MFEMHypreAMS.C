@@ -16,6 +16,8 @@ MFEMHypreAMS::validParams()
                         "Declare that the system is singular; use when solving curl-curl problem "
                         "if mass term is zero");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
+  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
+
   return params;
 }
 

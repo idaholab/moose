@@ -11,6 +11,8 @@ MFEMSuperLU::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the SuperLU_DIST library.");
+  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
+
   return params;
 }
 

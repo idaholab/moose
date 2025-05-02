@@ -14,6 +14,7 @@ MFEMHypreBoomerAMG::validParams()
   params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
+  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
   params.addParam<UserObjectName>(
       "fespace", "H1 FESpace to use in HypreBoomerAMG setup for elasticity problems.");
   params.addParam<mfem::real_t>(

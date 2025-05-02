@@ -50,9 +50,9 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
   }
   BuildEquationSystemOperator(dt);
   
-  _problem.mfem_solver->updateSolver(*_equation_system->_blfs.Get(_equation_system->_trial_var_names.at(0)),_equation_system->_ess_tdof_lists.at(0));
+  _problem.mfem_solver->updateSolver(*_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),_equation_system->_ess_tdof_lists.at(0));
 
-  _problem.nonlinear_solver->SetSolver(*_problem.jacobian_solver);
+  _problem.nonlinear_solver->SetSolver(*_problem.mfem_solver->getSolver());
   _problem.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem.nonlinear_solver->Mult(_true_rhs, dX_dt);
   SetTrialVariablesFromTrueVectors();
