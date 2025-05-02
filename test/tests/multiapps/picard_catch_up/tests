@@ -11,6 +11,7 @@
       max_threads = 1 # NanAtCountKernel changes behavior with threads
       recover = false
       allow_warnings = true
+      restep = false # Test is already testing failed timesteps
       detail = 'resetting the initial condition for every coupling'
     []
     [keep_solution]

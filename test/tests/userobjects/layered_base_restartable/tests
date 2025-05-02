@@ -3,6 +3,8 @@
     type = 'Exodiff'
     input = 'layered_base_restartable.i'
     exodiff = 'layered_base_restartable_out.e'
+    # With restep, we need to execute UOs between the solution restore and auxkernel evaluation
+    cli_args = "UserObjects/npla/execute_on='multiapp_fixed_point_begin timestep_end'"
 
     issues = '#7570 #11711'
     design = '/LayeredBase.md'
