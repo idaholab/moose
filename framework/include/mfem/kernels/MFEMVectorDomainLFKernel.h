@@ -6,14 +6,14 @@
 /*
 (\\vec f, \\vec u')
 */
-class MFEMVectorDomainLFKernel : public MFEMKernel<mfem::LinearFormIntegrator>
+class MFEMVectorDomainLFKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
 
   MFEMVectorDomainLFKernel(const InputParameters & parameters);
 
-  virtual mfem::LinearFormIntegrator * createIntegrator() override;
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
 protected:
   const std::string _vec_coef_name;

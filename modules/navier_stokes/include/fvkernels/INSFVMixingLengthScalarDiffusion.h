@@ -11,8 +11,10 @@
 
 #include "FVFluxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "FVDiffusionInterpolationInterface.h"
 
-class INSFVMixingLengthScalarDiffusion : public FVFluxKernel
+class INSFVMixingLengthScalarDiffusion : public FVFluxKernel,
+                                         public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();

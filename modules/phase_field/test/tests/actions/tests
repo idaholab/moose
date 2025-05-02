@@ -38,6 +38,8 @@
     issues = '#9336'
     design = 'actions/ConservedAction.md'
     requirement = 'The phase field module shall provide an action to set up a non-split Cahn-Hilliard problem'
+    # uses exodus oversampling see #2295
+    recover = false
   [../]
   [./conserved_split_1var]
     type = Exodiff
@@ -62,6 +64,8 @@
     issues = '#9336'
     design = 'actions/ConservedAction.md'
     requirement = 'The phase field module shall provide an action to set up a non-split Cahn-Hilliard problem with variable dependent mobilities'
+    # uses exodus oversampling see #2295
+    recover = false
   [../]
   [./conserved_split_1var_variable_mob]
     type = Exodiff
@@ -87,7 +91,9 @@
     issues = '#9336'
     design = 'actions/ConservedAction.md actions/NonconservedAction.md'
     requirement = 'The phase field module NonconservedAction and ConservedAction can be combined to construct a coupled Allen-Chan and non-split Cahn-Hilliard problem'
-  [../]
+    # uses exodus oversampling see #2295
+    recover = false
+    [../]
   [./conserved_forward_split_1var]
     type = Exodiff
     input = 'conserved_forward_split_1var.i'

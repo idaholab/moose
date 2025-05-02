@@ -27,7 +27,7 @@ MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
 }
 
 mfem::BilinearFormIntegrator *
-MFEMVectorFEWeakDivergenceKernel::createIntegrator()
+MFEMVectorFEWeakDivergenceKernel::createBFIntegrator()
 {
   return new mfem::VectorFEWeakDivergenceIntegrator(_coef);
 }

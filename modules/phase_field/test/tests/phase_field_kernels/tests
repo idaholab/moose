@@ -6,6 +6,8 @@
     issues = '#3356'
     design = '/CahnHilliard.md'
     requirement = 'The system shall provide a non-split Cahn-Hilliard formalism'
+    # uses exodus oversampling see #2295
+    recover = false
   [../]
 
   [./SplitCahnHilliard]
@@ -167,6 +169,8 @@
     issues = '#6910'
     design = '/SimpleCHInterface.md'
     requirement = 'The system shall provide a suite of simple to understand phase field kernels for novice users.'
+    # Use exodus oversampling. See #2295
+    recover = false
   [../]
 
   [./ACInterfaceStress]

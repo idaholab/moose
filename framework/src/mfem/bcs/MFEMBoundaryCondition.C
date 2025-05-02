@@ -1,6 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMBoundaryCondition.h"
+#include "MFEMProblem.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mesh_extras.hpp"
 #include "libmesh/restore_warnings.h"
@@ -12,9 +13,12 @@ MFEMBoundaryCondition::validParams()
   params.addClassDescription("Base class for applying boundary conditions to MFEM problems.");
   params.registerBase("BoundaryCondition");
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
+  // MFEM uses the boundary -1 to signify every sideset
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
-      "The list of boundaries (ids or names) from the mesh where this boundary condition applies");
+      {"-1"},
+      "The list of boundaries (ids) from the mesh where this boundary condition applies. "
+      "Defaults to applying BC on all boundaries.");
   params.addParam<VariableName>("variable", "Variable on which to apply the boundary condition");
   return params;
 }
@@ -29,13 +33,8 @@ MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
   {
     _bdr_attributes[i] = std::stoi(_boundary_names[i]);
   }
-}
-
-mfem::Array<int>
-MFEMBoundaryCondition::GetMarkers(mfem::Mesh & mesh)
-{
+  mfem::ParMesh & mesh(getMFEMProblem().mesh().getMFEMParMesh());
   mfem::common::AttrToMarker(mesh.bdr_attributes.Max(), _bdr_attributes, _bdr_markers);
-  return _bdr_markers;
 }
 
 #endif

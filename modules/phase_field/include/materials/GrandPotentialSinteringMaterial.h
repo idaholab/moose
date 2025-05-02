@@ -163,5 +163,5 @@ protected:
   const Real _kB;
 
   /// strict mass conservation flag
-  bool _mass_conservation;
+  const bool _mass_conservation;
 };

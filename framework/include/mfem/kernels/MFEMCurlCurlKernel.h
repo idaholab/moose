@@ -8,14 +8,14 @@
  * (\alpha \nabla \times u, \nabla \times u')
  * \f]
  */
-class MFEMCurlCurlKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMCurlCurlKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
 
   MFEMCurlCurlKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
   const std::string _coef_name;

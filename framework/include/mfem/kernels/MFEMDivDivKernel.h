@@ -8,14 +8,14 @@
  * (\alpha \nabla \cdot u, \nabla \cdot u')
  * \f]
  */
-class MFEMDivDivKernel : public MFEMKernel<mfem::BilinearFormIntegrator>
+class MFEMDivDivKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
 
   MFEMDivDivKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
   const std::string _coef_name;

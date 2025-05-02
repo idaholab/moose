@@ -13,10 +13,10 @@ public:
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
-  virtual mfem::LinearFormIntegrator * createLinearFormIntegrator() = 0;
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() = 0;
 
   // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBilinearFormIntegrator() = 0;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() = 0;
 
   // Get name of the trial variable (gridfunction) the kernel acts on.
   // Defaults to the name of the test variable labelling the weak form.

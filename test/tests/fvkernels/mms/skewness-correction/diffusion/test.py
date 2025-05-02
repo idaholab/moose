@@ -20,7 +20,7 @@ class TestAverageStencil(unittest.TestCase):
 
 class TestSkewnessCorrectedStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=skewness-corrected')
+        df1 = mms.run_spatial('skewed.i', 5, 'FVKernels/diff_v/variable_interp_method=skewness-corrected Variables/v/face_interp_method=skewness-corrected')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

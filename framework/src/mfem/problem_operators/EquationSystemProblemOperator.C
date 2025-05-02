@@ -16,7 +16,7 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   ProblemOperator::Init(X);
 
-  GetEquationSystem()->BuildEquationSystem(_problem.bc_map);
+  GetEquationSystem()->BuildEquationSystem();
 }
 
 void

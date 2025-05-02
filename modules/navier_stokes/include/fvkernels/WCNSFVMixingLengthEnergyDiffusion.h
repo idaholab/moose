@@ -11,12 +11,14 @@
 
 #include "FVFluxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * Computes the turbulent diffusion of energy term in the weakly compressible formulation
  * of the energy equation, using functor material properties
  */
-class WCNSFVMixingLengthEnergyDiffusion : public FVFluxKernel
+class WCNSFVMixingLengthEnergyDiffusion : public FVFluxKernel,
+                                          public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();

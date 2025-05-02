@@ -15,6 +15,7 @@ InputParameters
 FVDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
   params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
@@ -22,20 +23,29 @@ FVDiffusion::validParams()
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
+
+  // We need at least 2 layers here with the least accurate interpolation
   params.set<unsigned short>("ghost_layers") = 2;
+
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
 
   return params;
 }
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _coeff(getFunctor<ADReal>("coeff")),
     _coeff_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method")))
 {
-  if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
-      (_tid == 0))
-    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
 }
 
 ADReal
@@ -44,7 +54,7 @@ FVDiffusion::computeQpResidual()
   using namespace Moose::FV;
   const auto state = determineState();
 
-  auto dudn = gradUDotNormal(state);
+  auto dudn = gradUDotNormal(state, _correct_skewness);
   ADReal coeff;
 
   // If we are on internal faces, we interpolate the diffusivity as usual

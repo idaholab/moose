@@ -35,14 +35,14 @@ MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & param
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMConvectiveHeatFluxBC::createLinearFormIntegrator()
+MFEMConvectiveHeatFluxBC::createLFIntegrator()
 {
   return new mfem::BoundaryLFIntegrator(*_external_heat_flux_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMConvectiveHeatFluxBC::createBilinearFormIntegrator()
+MFEMConvectiveHeatFluxBC::createBFIntegrator()
 {
   return new mfem::BoundaryMassIntegrator(*_heat_transfer_coef);
 }

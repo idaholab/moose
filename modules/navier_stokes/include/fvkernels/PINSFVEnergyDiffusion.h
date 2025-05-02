@@ -12,12 +12,15 @@
 #include "FVFluxKernel.h"
 #include "MathFVUtils.h"
 #include "SolutionInvalidInterface.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
  * isotropic diffusion coefficient, using functor material properties
  */
-class PINSFVEnergyDiffusion : public FVFluxKernel, protected SolutionInvalidInterface
+class PINSFVEnergyDiffusion : public FVFluxKernel,
+                              protected SolutionInvalidInterface,
+                              public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();

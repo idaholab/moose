@@ -34,7 +34,7 @@ public:
 
 protected:
   const GrainTrackerInterface & _grain_tracker;
-  std::vector<EulerAngles> _angles;
+  std::vector<EulerAngles> & _angles;
 
   MooseRandom _random;
 };

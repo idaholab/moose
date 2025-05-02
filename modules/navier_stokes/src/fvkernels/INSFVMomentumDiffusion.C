@@ -23,6 +23,7 @@ InputParameters
 INSFVMomentumDiffusion::validParams()
 {
   auto params = INSFVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The viscosity");
   params.addClassDescription(
       "Implements the Laplace form of the viscous stress in the Navier-Stokes equation.");
@@ -31,8 +32,17 @@ INSFVMomentumDiffusion::validParams()
   params.addParam<MooseEnum>("mu_interp_method",
                              coeff_interp_method,
                              "Switch that can select face interpolation method for the viscosity.");
-
   params.set<unsigned short>("ghost_layers") = 2;
+
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
+
   params.addParam<bool>(
       "complete_expansion",
       false,
@@ -50,6 +60,7 @@ INSFVMomentumDiffusion::validParams()
 INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
   : INSFVFluxKernel(params),
     SolutionInvalidInterface(this),
+    FVDiffusionInterpolationInterface(params),
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
@@ -61,10 +72,6 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _dim(_subproblem.mesh().dimension()),
     _newton_solve(getParam<bool>("newton_solve"))
 {
-  if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
-      (_tid == 0))
-    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
-
   if (_complete_expansion && !_u_var)
     paramError("u", "The u velocity must be defined when 'complete_expansion=true'.");
 
@@ -83,7 +90,7 @@ ADReal
 INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 {
   const Moose::StateArg state = determineState();
-  const auto dudn = gradUDotNormal(state);
+  const auto dudn = gradUDotNormal(state, _correct_skewness);
   ADReal face_mu;
 
   if (onBoundary(*_face_info))
@@ -142,12 +149,10 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     // Normally, we can do this with `_var.gradient(face, state)` but we will need the transpose
     // gradient. So, we compute all at once
     Moose::FaceArg face;
-    const bool skewness_correction =
-        (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
     if (onBoundary(*_face_info))
       face = singleSidedFaceArg();
     else
-      face = makeCDFace(*_face_info, skewness_correction);
+      face = makeCDFace(*_face_info, _correct_skewness);
 
     ADRealTensorValue gradient;
     if (_dim == 1)
