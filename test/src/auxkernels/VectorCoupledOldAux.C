@@ -33,6 +33,5 @@ VectorCoupledOldAux::VectorCoupledOldAux(const InputParameters & parameters)
 
 RealVectorValue VectorCoupledOldAux::computeValue()
 {
-    std::cout << _vector[_qp] <<"\n";
     return _vector[_qp];
 }
