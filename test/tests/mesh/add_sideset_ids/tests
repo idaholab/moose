@@ -31,20 +31,4 @@
     design = MooseMesh.md
     requirement = 'The system shall be able to remove sides from sidesets when tese sides elements are moved to new blocks.'
   []
-  [map_sidesets]
-    type = CSVDiff
-    input = simple.i
-    csvdiff = simple_out.csv
-    design = MooseMesh.md
-    requirement = 'The system shall be able to map sidesets as elements are ghosted/activated.'
-  []
-  [sideset_warning]
-    type = RunException
-    input = simple.i
-    cli_args ='Mesh/construct_node_list_from_side_list=false'
-    expect_err ="The user has selected 'construct_node_list_from_side_list' as false, but SidesetAroundSubdomainUpdate is building node lists from the side lists."
-    design = MooseMesh.md
-    requirement ='The system shall throw a warning if the user has selected not to construct node list from side list while the SidesetAroundSubdomainUpdate does so.'
-    allow_warnings = false
-  []
 []

@@ -15,4 +15,19 @@
     cli_args = 'MeshModifiers/side_updater/assign_outer_surface_sides=false Outputs/file_base=no_surface'
     requirement = 'The system shall be able to dynamically update sidesets excluding on mesh boundaries.'
   []
+  [map_sidesets]
+    type = CSVDiff
+    input = simple.i
+    csvdiff = simple_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall be able to map sidesets as the subdomain of elements are changed.'
+  []
+  [sideset_warning]
+    type = RunException
+    input = simple.i
+    cli_args ='Mesh/construct_node_list_from_side_list=false'
+    expect_err ="The user has selected 'construct_node_list_from_side_list' as false, but SidesetAroundSubdomainUpdate is building node lists from the side lists."
+    design = MooseMesh.md
+    requirement ='The system shall throw a warning if the user has selected not to construct node list from side list while the SidesetAroundSubdomainUpdate does so.'
+  []
 []
