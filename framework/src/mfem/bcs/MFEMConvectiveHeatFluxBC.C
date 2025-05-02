@@ -16,11 +16,13 @@ MFEMConvectiveHeatFluxBC::validParams()
       "transfer coefficent given by material properties to add to MFEM problems.");
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "T_infinity",
-      "Name of a functor specifying the far-field temperature. A functor is any of the following: "
+      "Name of a coefficient specifying the far-field temperature. A coefficient can be any of the "
+      "following: "
       "a variable, an MFEM material property, a function, or a post-processor.");
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "heat_transfer_coefficient",
-      "Name of the functor specifying the heat transfer coefficient. A functor is any of the "
+      "Name of the coefficient specifying the heat transfer coefficient. A coefficient can be any "
+      "of the "
       "following: a variable, an MFEM material property, a function, or a post-processor.");
   return params;
 }

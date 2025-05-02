@@ -9,13 +9,14 @@ InputParameters
 MFEMGenericFunctorMaterial::validParams()
 {
   InputParameters params = MFEMMaterial::validParams();
-  params.addClassDescription("Declares material scalar properties based on names and functors "
+  params.addClassDescription("Declares material scalar properties based on names and coefficients "
                              "prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
       "prop_names", "The names of the properties this material will have");
   params.addRequiredParam<std::vector<MFEMScalarCoefficientName>>(
       "prop_values",
-      "The corresponding names of functors associated with the named properties. A functor is any "
+      "The corresponding names of coefficients associated with the named properties. A coefficient "
+      "can be any "
       "of the following: a variable, an MFEM material property, a function, or a post-processor.");
 
   return params;

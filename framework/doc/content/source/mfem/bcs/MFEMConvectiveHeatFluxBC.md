@@ -13,7 +13,7 @@ Adds the boundary integrator for integrating the bilinear form
 !equation
 \lambda(u-u_0, v)_{\partial\Omega} \,\,\, \forall v \in V
 
-where $u, v \in H^1$ are the test and trial variables, and $\lambda, u_0$ are scalar functors on the boundary independent of $u$.
+where $u, v \in H^1$ are the test and trial variables, and $\lambda, u_0$ are scalar coefficients on the boundary independent of $u$.
 
 This boundary condition is particularly useful for thermal problems, where it can be used to
 represent a heat transfer boundary condition

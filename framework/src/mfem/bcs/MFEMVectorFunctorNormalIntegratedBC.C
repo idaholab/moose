@@ -10,7 +10,8 @@ MFEMVectorFunctorNormalIntegratedBC::validParams()
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
-      "Vector functor whose normal component will be used in the integrated BC. A functor is any "
+      "Vector coefficient whose normal component will be used in the integrated BC. A coefficient "
+      "can be any "
       "of the following: a variable, an MFEM material property, a function, or a post-processor.");
   return params;
 }
