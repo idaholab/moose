@@ -40,10 +40,10 @@
 #else
 #define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 1
 #endif // (VTK_MODULE_USE_EXTERNAL_vtknlohmannjson == 1)
-#else // __has_include("vtk_nlohmannjson.h")
+#else  // __has_include("vtk_nlohmannjson.h")
 #define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
 #endif // __has_include("vtk_nlohmannjson.h")
-#else // __has_include
+#else  // __has_include
 #error "Could not auto-detect whether VTK built with external nlohmann json. \
 Define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=1 if built with vendored nlohmann \
 , otherwise define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=0"
