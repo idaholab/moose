@@ -46,6 +46,9 @@ MFEMHyprePCG::constructSolver(const InputParameters &)
   {
     auto hypre_preconditioner =
         std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    if (!hypre_preconditioner)
+      mooseError("Hypre GMRES preconditioner must be a Hypre Solver");
+
     _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
   }
 
