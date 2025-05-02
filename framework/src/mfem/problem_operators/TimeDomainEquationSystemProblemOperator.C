@@ -37,17 +37,8 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
   }
   _problem.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
-
-  //////////////////////////////////////
-  //if (_problem.mfem_preconditioner)
-  //{
-  //  std::cout << "Updating preconditioner..." << std::endl;
-  //  _problem.mfem_preconditioner->updateSolver(*_equation_system->_blfs.Get(_equation_system->_trial_var_names.at(0)),_equation_system->_ess_tdof_lists.at(0), _problem.jacobian_preconditioner);
-  //}
   
   _problem.mfem_solver->updateSolver(*_equation_system->_blfs.Get(_equation_system->_trial_var_names.at(0)),_equation_system->_ess_tdof_lists.at(0));
-  //////////////////////////////////////
-  
 
   _problem.nonlinear_solver->SetSolver(*_problem.jacobian_solver);
   _problem.nonlinear_solver->SetOperator(*GetEquationSystem());

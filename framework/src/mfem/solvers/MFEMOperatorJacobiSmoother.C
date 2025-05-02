@@ -22,7 +22,17 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 void
 MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 {
-  _preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
+  _jacobian_preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
+  _preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_preconditioner);
+}
+
+void
+MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+{
+
+  if (getParam<bool>("low_order_refined"))
+    _preconditioner.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, tdofs));
+  
 }
 
 #endif

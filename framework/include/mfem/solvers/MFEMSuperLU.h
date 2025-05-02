@@ -45,8 +45,12 @@ public:
 protected:
   void constructSolver(const InputParameters & parameters) override;
 
+  // Updates the solver with the bilinear form in case LOR solve is required
+  void updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs) override;
+
 private:
-  std::shared_ptr<Moose::MFEM::SuperLUSolver> _solver{nullptr};
+  std::shared_ptr<Moose::MFEM::SuperLUSolver> _jacobian_solver{nullptr};
+  std::shared_ptr<mfem::Solver> _solver{nullptr};
 };
 
 #endif
