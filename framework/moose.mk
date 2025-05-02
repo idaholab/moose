@@ -457,6 +457,13 @@ prebuild::
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
 moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(capabilities_LIB)
 
+# On MacOs with clang + gfortran, we get very many warnings for compact unwinding issues
+# We deliberately keep relying on the less performant dwarf unwinding until the over-production
+# of warnings is solved.
+ifeq ($(shell uname -s),Darwin)
+libmesh_LDFLAGS += -Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind
+endif
+
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
 $(pcre_LIB): $(pcre_objects)
@@ -482,7 +489,6 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) 
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
-
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 
