@@ -43,7 +43,8 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 
   if (_mfem_fespace)
   {
-    mooseAssert(!HypreUsingGPU(), "Setting elasticity options for MFEMHypreBoomerAMG on GPUs is not supported.");
+    mooseAssert(!HypreUsingGPU(),
+                "Setting elasticity options for MFEMHypreBoomerAMG on GPUs is not supported.");
     _jacobian_solver->SetElasticityOptions(_mfem_fespace.get());
   }
 
@@ -51,12 +52,11 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 }
 
 void
-MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
     _solver.reset(new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs));
-  
 }
 
 #endif

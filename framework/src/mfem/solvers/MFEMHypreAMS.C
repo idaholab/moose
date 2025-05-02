@@ -33,21 +33,18 @@ MFEMHypreAMS::constructSolver(const InputParameters &)
   _jacobian_preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
     _jacobian_preconditioner->SetSingularProblem();
-  
+
   _jacobian_preconditioner->SetPrintLevel(getParam<int>("print_level"));
 
   _preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_preconditioner);
-
 }
 
 void
-MFEMHypreAMS::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
     _preconditioner.reset(new mfem::LORSolver<mfem::HypreAMS>(a, tdofs));
-  
 }
-
 
 #endif

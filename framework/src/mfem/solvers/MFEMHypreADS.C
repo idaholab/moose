@@ -13,7 +13,7 @@ MFEMHypreADS::validParams()
   params.addParam<UserObjectName>("fespace", "H(div) FESpace to use in HypreADS setup.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
-  
+
   return params;
 }
 
@@ -30,17 +30,14 @@ MFEMHypreADS::constructSolver(const InputParameters &)
   _jacobian_preconditioner->SetPrintLevel(getParam<int>("print_level"));
 
   _preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_preconditioner);
-
 }
 
 void
-MFEMHypreADS::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
     _preconditioner.reset(new mfem::LORSolver<mfem::HypreADS>(a, tdofs));
-  
 }
-
 
 #endif

@@ -29,12 +29,11 @@ MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 }
 
 void
-MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
     _preconditioner.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, tdofs));
-  
 }
 
 #endif
