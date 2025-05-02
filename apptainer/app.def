@@ -25,6 +25,8 @@
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
+{#- The location for the packed python environment                                            -#}
+{%- set PYTHON_DIR = '/opt/python' -%}
 {#- Set method if not set                                                                     -#}
 {%- if METHOD is not defined %}
 {%- set METHOD = 'opt' -%}
@@ -80,7 +82,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 %environment
-    export PATH=/opt/{{ BINARY_NAME }}/bin:/opt/code-server-{{ BINARY_NAME }}/bin:$PATH
+    export PATH={{ PYTHON_DIR }}/bin:/opt/{{ BINARY_NAME }}/bin:/opt/code-server-{{ BINARY_NAME }}/bin:$PATH
     export INSTALLED_BINARIES={{ BINARY_NAME }}-{{ METHOD }}:exodiff:hit
     export MOOSE_LANGUAGE_SERVER={{ BINARY_NAME }}-{{ METHOD }}
 {%- if BINARY_NAME == 'moose' %}
@@ -105,6 +107,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
     MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
     MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
+    PYTHON_DIR={{ PYTHON_DIR }}
     TEMP_LOC={{ ROOT_BUILD_DIR }}
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
@@ -128,6 +131,15 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     done
 
     umask 022
+
+    # Pack conda environment
+    PYTHON_TAR=${TEMP_LOC}/python.tar.gz
+    conda install -yq conda-pack
+    conda pack -q -p $CONDA_PREFIX -o $PYTHON_TAR
+    mkdir $PYTHON_DIR
+    tar -xzf $PYTHON_TAR -C $PYTHON_DIR
+    rm -rf $PYTHON_TAR $CONDA_PREFIX
+    export PATH=${PYTHON_DIR}/bin:${PATH}
 
     # Install the application
     MOOSE_PREFIX=/opt/${BINARY_NAME}
