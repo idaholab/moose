@@ -4,7 +4,7 @@
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 866.0
-P_out = 253727.1   # Pa
+P_out = 253727.1 # Pa
 reactor_power = 671337.24 #WTh
 mass_flow = '${fparse 6.15}' # kg/(s)
 
@@ -20,16 +20,9 @@ wire_z_spacing = '${fparse 0*scale_factor}'
 wire_diameter = '${fparse 0*scale_factor}'
 n_rings = 8
 length_heated_fuel = '${fparse 35.56*scale_factor}'
+entry_length = 0
 duct_inside = '${fparse 11.43*2*scale_factor}'
 
-entry1 = '${fparse 0/100}'
-entry2 = '${fparse 0/100}'
-entry3 = '${fparse 0/100}'
-entry_length = '${fparse entry1 + entry2 + entry3}'
-exit1 = '${fparse 0/100}'
-exit2 = '${fparse 0/100}'
-exit3 = '${fparse 0/100}'
-exit_length = '${fparse exit1 + exit2 + exit3}'
 ###################################################
 
 [TriSubChannelMesh]
@@ -38,9 +31,7 @@ exit_length = '${fparse exit1 + exit2 + exit3}'
     nrings = '${fparse n_rings}'
     n_cells = 10
     flat_to_flat = '${fparse duct_inside}'
-    unheated_length_entry = '${fparse entry_length}'
     heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse exit_length}'
     pin_diameter = '${fparse fuel_pin_diameter}'
     pitch = '${fparse fuel_pin_pitch}'
     dwire = '${fparse wire_diameter}'
@@ -54,9 +45,7 @@ exit_length = '${fparse exit1 + exit2 + exit3}'
     input = subchannel
     nrings = '${fparse n_rings}'
     n_cells = 10
-    unheated_length_entry = '${fparse entry_length}'
     heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse exit_length}'
     pitch = '${fparse fuel_pin_pitch}'
   []
 
@@ -66,9 +55,7 @@ exit_length = '${fparse exit1 + exit2 + exit3}'
     nrings = '${fparse n_rings}'
     n_cells = 10
     flat_to_flat = '${fparse duct_inside}'
-    unheated_length_entry = '${fparse entry_length}'
     heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse exit_length}'
     pitch = '${fparse fuel_pin_pitch}'
   []
 []
@@ -151,8 +138,6 @@ exit_length = '${fparse exit1 + exit2 + exit3}'
   # Solver settings
   implicit = true
   segregated = false
-  staggered_pressure = false
-  monolithic_thermal = false
 
   # Output
   verbose_multiapps = true
@@ -161,7 +146,6 @@ exit_length = '${fparse exit1 + exit2 + exit3}'
   compute_viscosity = false
   compute_power = false
 []
-
 
 [ICs]
   [S_IC]
