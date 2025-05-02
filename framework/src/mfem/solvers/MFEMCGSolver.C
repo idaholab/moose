@@ -24,10 +24,9 @@ MFEMCGSolver::validParams()
 
 MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _preconditioner(
-        isParamSetByUser("preconditioner")
-            ? getMFEMProblem().getProblemData().mfem_preconditioner
-            : nullptr)
+    _preconditioner(isParamSetByUser("preconditioner")
+                        ? getMFEMProblem().getProblemData().mfem_preconditioner
+                        : nullptr)
 {
   constructSolver(parameters);
 }
@@ -35,7 +34,8 @@ MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
 void
 MFEMCGSolver::constructSolver(const InputParameters &)
 {
-  _jacobian_solver = std::make_shared<mfem::CGSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  _jacobian_solver =
+      std::make_shared<mfem::CGSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   _jacobian_solver->SetRelTol(getParam<double>("l_tol"));
   _jacobian_solver->SetAbsTol(getParam<double>("l_abs_tol"));
   _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
@@ -48,15 +48,15 @@ MFEMCGSolver::constructSolver(const InputParameters &)
 }
 
 void
-MFEMCGSolver::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+MFEMCGSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   bool lor = getParam<bool>("low_order_refined");
-  
+
   mooseAssert(!(lor && _preconditioner), "LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a,tdofs);
+    _preconditioner->updateSolver(a, tdofs);
     _jacobian_solver->SetPreconditioner(*_preconditioner->getSolver());
     _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
   }
@@ -64,8 +64,6 @@ MFEMCGSolver::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
   {
     _solver.reset(new mfem::LORSolver<mfem::CGSolver>(a, tdofs));
   }
-    
 }
-
 
 #endif

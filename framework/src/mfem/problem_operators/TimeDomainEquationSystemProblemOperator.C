@@ -37,8 +37,10 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
   }
   _problem.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
-  
-  _problem.mfem_solver->updateSolver(*_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),_equation_system->_ess_tdof_lists.at(0));
+
+  _problem.mfem_solver->updateSolver(
+      *_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),
+      _equation_system->_ess_tdof_lists.at(0));
 
   _problem.nonlinear_solver->SetSolver(*_problem.mfem_solver->getSolver());
   _problem.nonlinear_solver->SetOperator(*GetEquationSystem());

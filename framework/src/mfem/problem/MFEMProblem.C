@@ -57,7 +57,7 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
-  
+
   getProblemData().mfem_preconditioner = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
 }
 

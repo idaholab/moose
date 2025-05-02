@@ -23,10 +23,9 @@ MFEMHypreFGMRES::validParams()
 
 MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-  _preconditioner(
-    isParamSetByUser("preconditioner")
-        ? getMFEMProblem().getProblemData().mfem_preconditioner
-        : nullptr)
+    _preconditioner(isParamSetByUser("preconditioner")
+                        ? getMFEMProblem().getProblemData().mfem_preconditioner
+                        : nullptr)
 {
   constructSolver(parameters);
 }
@@ -35,7 +34,8 @@ void
 MFEMHypreFGMRES::constructSolver(const InputParameters &)
 {
 
-  _jacobian_solver = std::make_shared<mfem::HypreFGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  _jacobian_solver =
+      std::make_shared<mfem::HypreFGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   _jacobian_solver->SetTol(getParam<double>("l_tol"));
   _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
   _jacobian_solver->SetKDim(getParam<int>("kdim"));
@@ -43,24 +43,26 @@ MFEMHypreFGMRES::constructSolver(const InputParameters &)
 
   if (_preconditioner)
   {
-    auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    auto hypre_preconditioner =
+        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
     _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
   }
-  
+
   _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
 }
 
 void
-MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
+MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   bool lor = getParam<bool>("low_order_refined");
-  
+
   mooseAssert(!(lor && _preconditioner), "LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a,tdofs);
-    auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    _preconditioner->updateSolver(a, tdofs);
+    auto hypre_preconditioner =
+        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
     _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
     _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
   }
@@ -68,7 +70,6 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs)
   {
     mooseError("HypreFGMRES solver does not support LOR solve");
   }
-    
 }
 
 #endif

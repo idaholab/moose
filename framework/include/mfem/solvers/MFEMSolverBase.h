@@ -21,8 +21,7 @@ public:
   virtual std::shared_ptr<mfem::Solver> getSolver() = 0;
 
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm &a, mfem::Array<int> &tdofs) = 0;
-
+  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
 protected:
   /// Override in derived classes to construct and set the solver options.
