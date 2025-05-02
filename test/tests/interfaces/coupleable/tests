@@ -39,4 +39,30 @@
     csvdiff = 'coupled_dots_nodal_out.csv'
     requirement = 'The system shall be able to retrieve the time derivatives of nodal variables through the coupling interface.'
   []
+  [coupled_old_vector_value]
+    [run]
+      type = RunApp
+      input = coupled_old_vector.i
+    []
+    [verify]
+      type = PythonUnitTest
+      input = 'test.py'
+      prereq = coupled_old_vector_value/run
+      test_case = TestMonomialCoupledVectorValueOld
+      issues = '#30224'
+    []
+  []
+  [coupled_old_vector_value_nodal]
+    [run]
+      type = RunApp
+      input = coupled_old_vector_nodal.i
+    []
+    [verify]
+      type = PythonUnitTest
+      input = 'test.py'
+      prereq = coupled_old_vector_value_nodal/run
+      test_case = TestNodalCoupledVectorValueOld
+      issues = '#30224'
+    []
+  []
 []
