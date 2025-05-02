@@ -7464,22 +7464,26 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
     _functions.jacobianSetup(tid);
   }
 
-  try
-  {
-    computeSystems(EXEC_NONLINEAR);
-  }
-  catch (MooseException & e)
-  {
-    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
-             << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
-             << std::endl;
+  _current_linear_sys->compute(EXEC_NONLINEAR);
 
-    // We know the next solve is going to fail, so there's no point in
-    // computing anything else after this.  Plus, using incompletely
-    // computed AuxVariables in subsequent calculations could lead to
-    // other errors or unhandled exceptions being thrown.
-    return;
-  }
+  /*
+   try
+   {
+     computeSystems(EXEC_NONLINEAR);
+   }
+   catch (MooseException & e)
+   {
+     _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+              << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
+              << std::endl;
+
+     // We know the next solve is going to fail, so there's no point in
+     // computing anything else after this.  Plus, using incompletely
+     // computed AuxVariables in subsequent calculations could lead to
+     // other errors or unhandled exceptions being thrown.
+     return;
+   }
+   */
 
   computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
   executeControls(EXEC_NONLINEAR);
