@@ -52,7 +52,8 @@ MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
 {
   bool lor = getParam<bool>("low_order_refined");
 
-  mooseAssert(!(lor && _preconditioner), "LOR solver cannot take a preconditioner");
+  if (lor && _preconditioner)
+    mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
