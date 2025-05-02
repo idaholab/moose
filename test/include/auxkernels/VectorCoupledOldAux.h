@@ -29,6 +29,5 @@ public:
 protected:
   RealVectorValue computeValue() override;
 
-  const VectorVariableValue& _vector;
-
+  const VectorVariableValue & _vector;
 };

@@ -11,27 +11,25 @@
 
 registerMooseObject("MooseApp", VectorCoupledOldAux);
 
-
-
 InputParameters
 VectorCoupledOldAux::validParams()
 {
-    InputParameters params = VectorAuxKernel::validParams();
+  InputParameters params = VectorAuxKernel::validParams();
 
-    params.addClassDescription("OldValueTestAux that return old value.");
+  params.addClassDescription("OldValueTestAux that return old value.");
 
-    params.addRequiredCoupledVar("v", "Variable vector");
+  params.addRequiredCoupledVar("v", "Variable vector");
 
-    return params;
+  return params;
 }
 
 VectorCoupledOldAux::VectorCoupledOldAux(const InputParameters & parameters)
-    : VectorAuxKernel(parameters),
-    _vector(coupledVectorValueOld("v"))
+  : VectorAuxKernel(parameters), _vector(coupledVectorValueOld("v"))
 {
 }
 
-RealVectorValue VectorCoupledOldAux::computeValue()
+RealVectorValue
+VectorCoupledOldAux::computeValue()
 {
-    return _vector[_qp];
+  return _vector[_qp];
 }
