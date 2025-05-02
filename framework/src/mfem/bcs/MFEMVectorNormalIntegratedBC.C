@@ -21,7 +21,7 @@ MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters
   : MFEMIntegratedBC(parameters),
     _vec_value(getParam<std::vector<Real>>("values")),
     _vec_coef(getMFEMProblem().getCoefficients().declareVector<mfem::VectorConstantCoefficient>(
-        "__VectorNormalIntegratedBC" + std::to_string(reinterpret_cast<intptr_t>(this)),
+        "__VectorNormalIntegratedBC_" + parameters.get<std::string>("_unique_name"),
         mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }

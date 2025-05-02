@@ -17,7 +17,7 @@ MFEMScalarDirichletBC::validParams()
 MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
     _coef(getMFEMProblem().getCoefficients().declareScalar<mfem::ConstantCoefficient>(
-        "__DirichletBC" + std::to_string(reinterpret_cast<intptr_t>(this)),
+        "__ScalarDirichletBC_" + parameters.get<std::string>("_unique_name"),
         getParam<Real>("value")))
 {
 }

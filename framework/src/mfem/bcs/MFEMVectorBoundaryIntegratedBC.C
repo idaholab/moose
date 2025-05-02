@@ -21,7 +21,7 @@ MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParame
   : MFEMIntegratedBC(parameters),
     _vec_value(getParam<std::vector<Real>>("values")),
     _vec_coef(getMFEMProblem().getCoefficients().declareVector<mfem::VectorConstantCoefficient>(
-        "__VectorBoundaryIntegratedBC" + std::to_string(reinterpret_cast<intptr_t>(this)),
+        "__VectorBoundaryIntegratedBC_" + parameters.get<std::string>("_unique_name"),
         mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }
