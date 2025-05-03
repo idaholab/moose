@@ -9,121 +9,126 @@
 ###########################################################
 
 [GlobalParams]
-    displacements = 'disp_x disp_y'
+  displacements = 'disp_x disp_y'
+[]
+
+[Problem]
+  extra_tag_matrices = 'mass'
 []
 
 [Mesh]
-    type = GeneratedMesh
-    dim = 2
-    xmin = -1
-    xmax = 1
-    ymin = -1
-    ymax = 1
-    nx = 4
-    ny = 4
+  type = GeneratedMesh
+  dim = 2
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  nx = 4
+  ny = 4
 []
 
 [Variables]
-    [disp_x]
-    []
-    [disp_y]
-    []
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [Functions]
-    [forcing_fn]
-        type = ParsedFunction
-        expression = 't'
-    []
+  [forcing_fn]
+    type = ParsedFunction
+    expression = 't'
+  []
 []
 
 [Kernels]
-    [DynamicSolidMechanics]
-        displacements = 'disp_x disp_y'
-    []
-    [massmatrix]
-        type = MassMatrix
-        density = density
-        matrix_tags = 'system'
-        variable = disp_x
-    []
-    [massmatrix_y]
-        type = MassMatrix
-        density = density
-        matrix_tags = 'system'
-        variable = disp_y
-    []
+  [DynamicSolidMechanics]
+    displacements = 'disp_x disp_y'
+  []
+  [massmatrix]
+    type = MassMatrix
+    density = density
+    matrix_tags = 'mass'
+    variable = disp_x
+  []
+  [massmatrix_y]
+    type = MassMatrix
+    density = density
+    matrix_tags = 'mass'
+    variable = disp_y
+  []
 []
 
 [Materials]
-    [elasticity_tensor_block_one]
-        type = ComputeIsotropicElasticityTensor
-        youngs_modulus = 1e1
-        poissons_ratio = 0.33
-    []
+  [elasticity_tensor_block_one]
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e1
+    poissons_ratio = 0.33
+  []
 
-    [strain_block]
-        type = ComputeFiniteStrain
-        displacements = 'disp_x disp_y'
-        implicit = false
-    []
-    [stress_block]
-        type = ComputeFiniteStrainElasticStress
-        implicit = false
-    []
-    [density]
-        type = GenericConstantMaterial
-        prop_names = 'density'
-        prop_values = 1
-    []
+  [strain_block]
+    type = ComputeFiniteStrain
+    displacements = 'disp_x disp_y'
+    implicit = false
+  []
+  [stress_block]
+    type = ComputeFiniteStrainElasticStress
+    implicit = false
+  []
+  [density]
+    type = GenericConstantMaterial
+    prop_names = 'density'
+    prop_values = 1
+  []
 []
 
 [BCs]
-    [left_x]
-        type = DirectDirichletBC
-        variable = disp_x
-        boundary = 'left'
-        value = 0
-    []
-    [left_y]
-        type = DirectDirichletBC
-        variable = disp_y
-        boundary = 'left'
-        value = 0
-    []
-    [right_x]
-        type = DirectFunctionDirichletBC
-        variable = disp_x
-        boundary = 'right'
-        function = forcing_fn
-    []
+  [left_x]
+    type = ExplicitDirichletBC
+    variable = disp_x
+    boundary = 'left'
+    value = 0
+  []
+  [left_y]
+    type = ExplicitDirichletBC
+    variable = disp_y
+    boundary = 'left'
+    value = 0
+  []
+  [right_x]
+    type = ExplicitFunctionDirichletBC
+    variable = disp_x
+    boundary = 'right'
+    function = forcing_fn
+  []
 []
 
 [Executioner]
-    type = Transient
+  type = Transient
 
-    [TimeIntegrator]
-        type = DirectCentralDifference
-        mass_matrix_tag = 'system'
-    []
-    start_time = 0.0
-    num_steps = 6
-    dt = 0.1
+  [TimeIntegrator]
+    type = ExplicitMixedOrder
+    mass_matrix_tag = 'mass'
+    second_order_vars = 'disp_x disp_y'
+  []
+  start_time = 0.0
+  num_steps = 6
+  dt = 0.1
 []
 
 [Postprocessors]
-    [left_x]
-        type = AverageNodalVariableValue
-        variable = disp_x
-        boundary = left
-    []
-    [right_y]
-        type = AverageNodalVariableValue
-        variable = disp_x
-        boundary = left
-    []
+  [left_x]
+    type = AverageNodalVariableValue
+    variable = disp_x
+    boundary = left
+  []
+  [right_y]
+    type = AverageNodalVariableValue
+    variable = disp_x
+    boundary = left
+  []
 []
 
 [Outputs]
-    exodus = true
+  exodus = true
 []
