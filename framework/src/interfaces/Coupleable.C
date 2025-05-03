@@ -478,6 +478,20 @@ Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int
   return adCoupledValue(var_name, comp);
 }
 
+template <>
+const GenericVectorVariableValue<false> &
+Coupleable::coupledGenericVectorValue<false>(const std::string & var_name, unsigned int comp) const
+{
+  return coupledVectorValue(var_name, comp);
+}
+
+template <>
+const GenericVectorVariableValue<true> &
+Coupleable::coupledGenericVectorValue<true>(const std::string & var_name, unsigned int comp) const
+{
+  return adCoupledVectorValue(var_name, comp);
+}
+
 const VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
 {

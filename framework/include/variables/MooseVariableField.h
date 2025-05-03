@@ -373,6 +373,9 @@ public:
   virtual const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const = 0;
   virtual const MooseArray<libMesh::Number> & dofValuesDuDotDotDuNeighbor() const = 0;
 
+  template <bool is_ad>
+  const MooseArray<GenericReal<is_ad>> & genericDofValues() const;
+
   /**
    * tag values getters
    */
@@ -408,6 +411,24 @@ protected:
   /// A dummy ADReal variable
   mutable ADReal _ad_real_dummy = 0;
 };
+
+template <>
+template <>
+const MooseArray<Real> & MooseVariableField<Real>::genericDofValues<false>() const;
+template <>
+template <>
+const MooseArray<Real> & MooseVariableField<RealVectorValue>::genericDofValues<false>() const;
+template <>
+template <>
+const MooseArray<Real> & MooseVariableField<RealEigenVector>::genericDofValues<false>() const;
+
+template <typename OutputType>
+template <bool is_ad>
+const MooseArray<GenericReal<is_ad>> &
+MooseVariableField<OutputType>::genericDofValues() const
+{
+  return adDofValues();
+}
 
 #define usingMooseVariableFieldMembers                                                             \
   usingMooseVariableFieldBaseMembers;                                                              \

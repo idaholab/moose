@@ -801,9 +801,10 @@ InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 void
 InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value, unsigned int i)
 {
-  _params[coupling_name]._coupled_default.resize(i + 1);
-  _params[coupling_name]._coupled_default[i] = value;
-  _params[coupling_name]._have_coupled_default = true;
+  const auto actual_name = checkForRename(coupling_name);
+  _params[actual_name]._coupled_default.resize(i + 1);
+  _params[actual_name]._coupled_default[i] = value;
+  _params[actual_name]._have_coupled_default = true;
 }
 
 Real

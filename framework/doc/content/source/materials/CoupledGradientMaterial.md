@@ -2,7 +2,7 @@
 
 !syntax description /Materials/CoupledGradientMaterial
 
-This material provides the ability to create a material property from the gradient of a variable. In addition, the gradient can be scaled with a scalar material property allows for additional flexibility. This gradient material property can then be used in kernels such as [ADConservativeAdvection](/ADConservativeAdvection.md).
+This material provides the ability to create a material property from the gradient of a variable. In addition, the gradient can be scaled with a scalar material property allows for additional flexibility. This gradient material property can then be used in kernels such as [ConservativeAdvection](/ConservativeAdvection.md).
 
 ## Example Input File Syntax
 
