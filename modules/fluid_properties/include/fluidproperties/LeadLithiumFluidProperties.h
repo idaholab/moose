@@ -103,6 +103,7 @@ public:
    */
   Real bulk_modulus_from_p_T(Real p, Real T) const;
 
+  Real c_from_p_T(Real p, Real T) const override;
   Real c_from_v_e(Real v, Real e) const override;
   ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
 
