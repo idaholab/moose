@@ -1,10 +1,12 @@
 [Tests]
-  [./heat_conduction_xfem]
+  [heat_conduction_xfem]
     type = Exodiff
     input = heat.i
     exodiff = 'heat_out.e'
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-  [../]
+    # XFEM does not support recover
+    recover = false
+  []
 []
