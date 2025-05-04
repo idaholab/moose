@@ -77,6 +77,7 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _Iy(coupledValue("Iy")),
     _Iz(coupledValue("Iz")),
     _Ix(_has_Ix ? coupledValue("Ix") : _zero),
+    _original_local_config(declareRestartableData<RankTwoTensor>("original_local_config")),
     _original_length(declareProperty<Real>("original_length")),
     _total_rotation(declareProperty<RankTwoTensor>("total_rotation")),
     _total_disp_strain(declareProperty<RealVectorValue>("total_disp_strain")),
