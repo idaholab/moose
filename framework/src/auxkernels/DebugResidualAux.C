@@ -42,6 +42,9 @@ DebugResidualAux::DebugResidualAux(const InputParameters & parameters)
                _debug_var.name(),
                " in ",
                this->getParam<std::string>("_object_name"));
+  if (!_nodal && debug_order > 0)
+    mooseWarning("Residual output is approximate for variable order " +
+                 Moose::stringify(debug_order));
 }
 
 Real
