@@ -165,6 +165,8 @@
     capabilities = 'ad_size>=50'
     map = False
     partial = True
+    # Only mesh output, no transient steps taken
+    recover = false
     requirement = 'The system shall allow for a user controllable input such that the mortar segment '
                   'mesh does not contain segments built from oblique projections. Therefore, the '
                   'system shall generate many segments from oblique projections if a very small '
