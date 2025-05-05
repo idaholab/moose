@@ -6583,7 +6583,7 @@ FEProblemBase::restoreSolutions()
   }
 
   if (_verbose_restore)
-    _console << "Restoring solutions on system " << _aux->name() << "..." << std::endl;
+    _console << "Restoring solutions on Auxiliary system..." << std::endl;
   _aux->restoreSolutions();
 
   if (_verbose_restore)

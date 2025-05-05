@@ -2778,7 +2778,7 @@ protected:
   /// Whether or not to be verbose with multiapps
   bool _verbose_multiapps;
 
-  /// Whether or not to be verbose on solution restoration
+  /// Whether or not to be verbose on solution restoration post a failed time step
   bool _verbose_restore;
 
   /// The error message to go with an exception
