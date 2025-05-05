@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#29237'
+  design = 'SCMSolutionTransfer.md SCMPinSolutionTransfer.md'
+  [check]
+    type = CSVDiff
+    input = fuel_assembly.i
+    # Make the test a little cheaper
+    cli_args = "Problem/P_tol=1e-1 MultiApps/viz/cli_args='n_cells=50'"
+    # Differences between macos & civet
+    rel_err = 6e-4
+    abs_zero = 1e-8
+    ignore_columns = 'SumWij'
+
+    csvdiff = "fuel_assembly_out_viz0_sample_pin_center_0001.csv
+               fuel_assembly_out_viz0_sample_channel_corner_0001.csv
+               fuel_assembly_out_viz0_sample_channel_edge_0001.csv
+               fuel_assembly_out_viz0_sample_channel_center_0001.csv"
+    requirement = 'The system shall include an example of using another simulation for presenting multi-dimensional results.'
+
+    # Runtime goes from 160 to ~300 depending on the civet machine
+    heavy = true
+    method = 'opt'
+    max_time = 400
+  []
+[]
