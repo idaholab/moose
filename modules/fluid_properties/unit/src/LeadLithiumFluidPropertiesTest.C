@@ -63,10 +63,10 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       const Real e_ref = h_ref - p / rho_ref;
       // Compute thermal conductivity:
       const Real k_ref = 14.51 + 0.019631 * T;
-      // Compute bulk modulus:
-      const Real E_ref = (44.73077 - 0.02634615 * T + 5.76923e-6 * T * T) * 1e9;
       // Compute speed of sound:
-      const Real c_ref = 1959.63 - 0.306 * T;
+      const Real c_ref = 1876. - 0.306 * T;
+      // Compute bulk modulus:
+      const Real E_ref = c_ref * c_ref * rho_ref;
       // Compute isobaric specific heat:
       const Real cp_ref = 195.0 - 9.116e-3 * T;
       // Compute thermal expansion coefficient:
@@ -110,6 +110,7 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       REL_TEST(_fp->bulk_modulus_from_p_T(p, T), E_ref, tol);
 
       // Test speed of sound
+      REL_TEST(_fp->c_from_p_T(p, T), c_ref, tol);
       REL_TEST(_fp->c_from_v_e(v, e), c_ref, tol);
 
       // Test isobaric specific heat
