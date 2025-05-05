@@ -6,6 +6,7 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
             - help/finite_element_concepts/nodal_patch_recovery.md
+            - application_usage/restart_recover.md
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
@@ -28,6 +29,9 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.bibtex:
+        duplicates:
+            - puso2008segment # also in framework
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.sqa:
