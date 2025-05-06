@@ -65,7 +65,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
   auto all_univs = univ_list.getAllUniverses();
   for (auto u : all_univs)
   {
-    if (u.first == "ROOT_UNIVERSE")
+    if (u.second->isRoot())
     {
       // add existing cells to current root instead of creating new universe
       auto root = getRootUniverse();
@@ -118,18 +118,16 @@ CSGBase::generateOutput() const
 
   // Print out universe information
   auto all_univs = getAllUniverses();
-  unsigned int num_univs = all_univs.size();
   for (const auto & u_pair : all_univs)
   {
     const auto univ_ptr = u_pair.second;
     const auto univ_name = univ_ptr->getName();
-    // only print root universe if root is the only universe that exists
-    if (num_univs > 1 && univ_name == "ROOT_UNIVERSE")
-      continue;
     const auto univ_cells = univ_ptr->getAllCells();
     csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
     for (const auto & c : univ_cells)
       csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c->getName());
+    if (univ_ptr->isRoot())
+      csg_json["UNIVERSES"][univ_name]["ROOT"] = univ_ptr->isRoot();
   }
 
   return csg_json;

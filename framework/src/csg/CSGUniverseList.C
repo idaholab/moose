@@ -16,7 +16,7 @@ CSGUniverseList::CSGUniverseList()
 {
   // create root universe by default when CSG object is initialized
   std::string root_name = "ROOT_UNIVERSE";
-  _root_universe = std::make_shared<CSGUniverse>(root_name);
+  _root_universe = std::make_shared<CSGUniverse>(root_name, true); // is_root = true
   _universes.insert(std::make_pair(root_name, _root_universe));
 }
 
