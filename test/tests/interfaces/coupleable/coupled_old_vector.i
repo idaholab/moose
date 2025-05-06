@@ -1,73 +1,68 @@
-# Simple example of the TimeAverageAux
-# ------------------------------------
-# The example can be easily modified to test VectorTimeAverageAux by
-# replacing the Kernels, Variables, ICs, AuxVariables and AuxKernels
-# with the vector counterparts.
+# Test for coupledVectorValuesOld for constant monomials
 
 [Mesh]
-    [gmg]
-      type=GeneratedMeshGenerator
-      dim=3
-      nx = 10
-      ny = 1
-      nz = 1
-    []
+  [gmg]
+    type=GeneratedMeshGenerator
+    dim=3
+    nx = 10
+    ny = 1
+    nz = 1
   []
+[]
 
-  [Kernels]
-    [time_deriv]
-      type=VectorTimeDerivative
-      variable=var
-    []
-    [bodyf]
-      type=VectorBodyForce
-      variable=var
-      function_x='-1'
-      function_y='-1'
-      function_z='-1'
-    []
+[Kernels]
+  [time_deriv]
+    type=VectorTimeDerivative
+    variable=var
   []
-
-
-  [ICs]
-    [ics]
-      type=VectorFunctionIC
-      variable=var
-      function_x='x + y + z'
-      function_y='x + y + z'
-      function_z='x + y + z'
-    []
+  [bodyf]
+    type=VectorBodyForce
+    variable=var
+    function_x='-1'
+    function_y='-1'
+    function_z='-1'
   []
+[]
 
-  [Variables]
-    [var]
-      order=CONSTANT
-      family =MONOMIAL_VEC
-    []
+[ICs]
+  [ics]
+    type=VectorFunctionIC
+    variable=var
+    function_x='x + y + z'
+    function_y='2*(x + y + z)'
+    function_z='3*(x + y + z)'
   []
-  [AuxVariables]
-    [old_var]
-      order=CONSTANT
-      family =MONOMIAL_VEC
-    []
-  []
+[]
 
-  [AuxKernels]
-    [old]
-      type=VectorCoupledOldAux
-      variable=old_var
-      v=var
-      execute_on=TIMESTEP_END
-    []
-
+[Variables]
+  [var]
+    order=CONSTANT
+    family =MONOMIAL_VEC
   []
+[]
 
-  [Executioner]
-    type=Transient
-    num_steps=10
-    dt=0.1
+[AuxVariables]
+  [old_var]
+    order=CONSTANT
+    family =MONOMIAL_VEC
   []
+[]
 
-  [Outputs]
-    exodus=true
+[AuxKernels]
+  [old]
+    type=VectorCoupledOldAux
+    variable=old_var
+    v='var var'
+    execute_on=TIMESTEP_END
   []
+[]
+
+[Executioner]
+  type=Transient
+  num_steps=10
+  dt=0.1
+[]
+
+[Outputs]
+  exodus=true
+[]

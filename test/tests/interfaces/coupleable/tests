@@ -50,6 +50,7 @@
       prereq = coupled_old_vector_value/run
       test_case = TestMonomialCoupledVectorValueOld
       issues = '#30224'
+      required_python_packages = 'numpy vtk'
     []
   []
   [coupled_old_vector_value_nodal]
@@ -63,6 +64,7 @@
       prereq = coupled_old_vector_value_nodal/run
       test_case = TestNodalCoupledVectorValueOld
       issues = '#30224'
+      required_python_packages = 'numpy vtk'
     []
   []
 []

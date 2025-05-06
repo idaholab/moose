@@ -9,11 +9,8 @@
 
 #pragma once
 
-#include "Assembly.h"
 #include "AuxKernel.h"
-#include "MooseArray.h"
 #include "MooseTypes.h"
-#include "SubProblem.h"
 
 /**
  * Old coupled vector variable
@@ -29,5 +26,5 @@ public:
 protected:
   RealVectorValue computeValue() override;
 
-  const VectorVariableValue & _vector;
+  std::vector<const VectorVariableValue *> _vectors;
 };
