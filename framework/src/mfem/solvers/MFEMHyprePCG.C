@@ -73,7 +73,8 @@ MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
   }
   else if (lor)
   {
-    mooseError("HyprePCG solver does not support LOR solve");
+    mfem::ParLORDiscretization lor_disc(a, tdofs);
+    _solver.reset(new mfem::LORSolver<mfem::HyprePCG>(lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm()));
   }
 }
 
