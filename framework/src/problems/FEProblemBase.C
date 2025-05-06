@@ -7901,6 +7901,11 @@ FEProblemBase::adaptMesh()
     }
     else
     {
+      // If the mesh didn't change, we still need to update the displaced mesh
+      // to undo the undisplacement performed in Adaptivity::adaptMesh
+      if (_displaced_problem)
+        _displaced_problem->updateMesh();
+
       _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
       break;
     }

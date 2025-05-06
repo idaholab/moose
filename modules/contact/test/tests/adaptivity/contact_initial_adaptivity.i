@@ -101,7 +101,7 @@
 []
 
 [Adaptivity]
-  steps = 0
+  cycles_per_step = 0
   marker = box
   max_h_level = 2
   initial_steps = 2
