@@ -81,10 +81,15 @@ private:
    */
   void cloneMesh();
 
+  /// Used to decide which variable is output as a nodal variable for oversampling purposes
+  bool isOversampledAsNodal(const FEType & fe_type) const;
+
   /**
-   * A vector of pointers to the mesh functions
+   * A vector of pointers to the mesh functions on the oversampled mesh
    * This is only populated when the oversample() function is called, it must
    * be cleaned up by the destructor.
+   * Outer-indexing by system
+   * Inner-indexing for each variable in a system
    */
   std::vector<std::vector<std::unique_ptr<libMesh::MeshFunction>>> _mesh_functions;
 
