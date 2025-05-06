@@ -166,8 +166,12 @@ OversampleOutput::initOversample()
   unsigned int num_systems = source_es.n_systems();
   _mesh_functions.resize(num_systems);
 
+  // Get the list of nodal and elemental output data
+  const auto & nodal_data = getNodalVariableOutput();
+  const auto & elemental_data = getElementalVariableOutput();
+
   // Loop over the number of systems
-  for (unsigned int sys_num = 0; sys_num < num_systems; sys_num++)
+  for (const auto sys_num : make_range(num_systems))
   {
     // Reference to the current system
     System & source_sys = source_es.get_system(sys_num);
@@ -176,10 +180,10 @@ OversampleOutput::initOversample()
     ExplicitSystem & dest_sys = _oversample_es->add_system<ExplicitSystem>(source_sys.name());
 
     // Loop through the variables in the System
-    unsigned int num_vars = source_sys.n_vars();
+    const auto num_vars = source_sys.n_vars();
+    unsigned int num_actual_vars = 0;
     if (num_vars > 0)
     {
-      _mesh_functions[sys_num].resize(num_vars);
       _serialized_solution = NumericVector<Number>::build(_communicator);
       _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
 
@@ -188,16 +192,26 @@ OversampleOutput::initOversample()
       source_sys.solution->localize(*_serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
-      for (unsigned int var_num = 0; var_num < num_vars; var_num++)
+      for (const auto var_num : make_range(num_vars))
       {
-        // Add the variable, allow for first and second lagrange
+        // Is the variable supposed to be output?
+        const auto & var_name = source_sys.variable_name(var_num);
+        if (!nodal_data.count(var_name) && !elemental_data.count(var_name))
+          continue;
+        num_actual_vars++;
+
+        // Add the variable. We essentially support nodal variables and constant monomials
         const FEType & fe_type = source_sys.variable_type(var_num);
-        FEType second(SECOND, LAGRANGE);
-        if (fe_type == second)
-          dest_sys.add_variable(source_sys.variable_name(var_num), second);
+        if (isOversampledAsNodal(fe_type))
+          dest_sys.add_variable(source_sys.variable_name(var_num), fe_type);
         else
-          dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
+          dest_sys.add_variable(source_sys.variable_name(var_num), FEType(CONSTANT, MONOMIAL));
+        // Note: we could do more, using the generic projector. But exodus output of higher order
+        // or more exotic variables is limited anyway
       }
+
+      // Size for the actual number of variables output
+      _mesh_functions[sys_num].resize(num_actual_vars);
     }
   }
 
@@ -214,9 +228,10 @@ OversampleOutput::updateOversample()
 
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
+  unsigned int num_systems = source_es.n_systems();
 
   // Loop through each system
-  for (unsigned int sys_num = 0; sys_num < source_es.n_systems(); ++sys_num)
+  for (const auto sys_num : make_range(num_systems))
   {
     if (!_mesh_functions[sys_num].empty())
     {
@@ -230,9 +245,8 @@ OversampleOutput::updateOversample()
       source_sys.solution->localize(*_serialized_solution);
 
       // Update the mesh functions
-      for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+      for (const auto var_num : index_range(_mesh_functions[sys_num]))
       {
-
         // If the mesh has changed, the MeshFunctions need to be re-built, otherwise simply clear it
         // for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
@@ -245,20 +259,35 @@ OversampleOutput::updateOversample()
         _mesh_functions[sys_num][var_num]->init();
       }
 
-      // Now loop over the nodes of the oversampled mesh setting values for each variable.
-      for (const auto & node : as_range(_mesh_ptr->localNodesBegin(), _mesh_ptr->localNodesEnd()))
-        for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
-          if (node->n_dofs(sys_num, var_num))
-            dest_sys.solution->set(node->dof_number(sys_num, var_num, 0),
-                                   (*_mesh_functions[sys_num][var_num])(
-                                       *node - _position)); // 0 value is for component
+      //
+      for (const auto var_num : index_range(_mesh_functions[sys_num]))
+      {
+        const FEType & fe_type = source_sys.variable_type(var_num);
+        // Loop over the mesh, nodes for nodal data, elements for element data
+        if (isOversampledAsNodal(fe_type))
+        {
+          for (const auto & node :
+               as_range(_mesh_ptr->localNodesBegin(), _mesh_ptr->localNodesEnd()))
+            if (node->n_dofs(sys_num, var_num))
+              dest_sys.solution->set(node->dof_number(sys_num, var_num, 0),
+                                     (*_mesh_functions[sys_num][var_num])(
+                                         *node - _position)); // 0 value is for component
+        }
+        else
+          for (const auto & elem : (*_mesh_ptr->getActiveLocalElementRange()))
+            if (elem->n_dofs(sys_num, var_num))
+              dest_sys.solution->set(
+                  elem->dof_number(sys_num, var_num, 0),
+                  (*_mesh_functions[sys_num][var_num])(elem->true_centroid() -
+                                                       _position)); // 0 value is for component
+      }
 
       dest_sys.solution->close();
     }
   }
 
-  // Set this to false so that new output files are not created, since the oversampled mesh doesn't
-  // actually change
+  // Set this to false so that new output files are not created, since the oversampled mesh
+  // doesn't actually change
   _oversample_mesh_changed = false;
 }
 
@@ -316,4 +345,12 @@ OversampleOutput::setFileBaseInternal(const std::string & file_base)
   // ** DEPRECATED SUPPORT **
   if (getParam<bool>("append_oversample"))
     _file_base += "_oversample";
+}
+
+bool
+OversampleOutput::isOversampledAsNodal(const FEType & fe_type) const
+{
+  // This is the same criterion as in MooseVariableData
+  const auto continuity = FEInterface::get_continuity(fe_type);
+  return (continuity == C_ZERO || continuity == C_ONE);
 }
