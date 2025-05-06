@@ -23,17 +23,23 @@ class CSGUniverse
 {
 public:
   /**
-   * Default constructor
+   * @brief Construct a new CSGUniverse object
+   *
+   * @param name unique name of universe
+   * @param is_root true to set universe as the root universe (default false)
    */
-  CSGUniverse(const std::string name);
+  CSGUniverse(const std::string name, bool is_root=false);
 
   /**
    * @brief Construct a new CSGUniverse object from list of cells
    *
    * @param name unique name of universe
    * @param cells list of cells to add to universe
+   * @param is_root true to set universe as the root universe (default false)
    */
-  CSGUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells);
+  CSGUniverse(const std::string name,
+              std::vector<std::shared_ptr<CSGCell>> cells,
+              bool is_root = false);
 
   /**
    * Destructor
@@ -93,11 +99,21 @@ public:
 
   void setName(const std::string name) { _name = name; }
 
+  /**
+   * @brief return true if the universe is the root universe
+   *
+   * @return true / false
+   */
+  bool isRoot() {return _is_root;}
+
 protected:
   /// Name of universe
   std::string _name;
 
   /// list of cells in universe
   std::vector<std::shared_ptr<CSGCell>> _cells;
+
+  // whether or not this universe is the root universe
+  bool _is_root;
 };
 } // namespace CSG

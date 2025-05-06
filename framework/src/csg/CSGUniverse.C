@@ -12,10 +12,13 @@
 namespace CSG
 {
 
-CSGUniverse::CSGUniverse(const std::string name) : _name(name) {}
+CSGUniverse::CSGUniverse(const std::string name, bool is_root) : _name(name), _is_root(is_root) {
+}
 
-CSGUniverse::CSGUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells)
-  : _name(name)
+CSGUniverse::CSGUniverse(const std::string name,
+                         std::vector<std::shared_ptr<CSGCell>> cells,
+                         bool is_root)
+  : _name(name), _is_root(is_root)
 {
   _cells.insert(_cells.end(), cells.begin(), cells.end());
 }
