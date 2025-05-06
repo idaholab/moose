@@ -317,25 +317,10 @@ ElementSubdomainModifierBase::gatherMovingBoundaryChanges(
           // Find the active neighbors of the element
           std::vector<const Elem *> active_neighs;
           // Neighbor has active children, they are neighbors of the element along that side
-          if (!neigh->subactive())
-            neigh->active_family_tree_by_neighbor(active_neighs, elem);
-          // Active element we look for is coarser, the neighbor is inside of it
-          else if (neigh->top_parent() == elem->top_parent())
-          {
-            // The element and the neighbors are both children of the same top parent, we have to
-            // look at the parents of the neighbor one by one.
-            // We could refine this by only looking one level away from the element's refinement
-            auto parent = neigh->parent();
-            while (parent)
-            {
-              if (parent->active() && parent->has_neighbor(elem))
-                active_neighs.push_back(parent);
-              parent = parent->parent();
-            }
-          }
-          // two different top parents, we can search the family tree of the top parent
-          else
-            neigh->top_parent()->active_family_tree_by_neighbor(active_neighs, elem);
+          mooseAssert(!neigh->subactive(),
+                      "The case where the active neighbor is an ancestor of this neighbor is not "
+                      "handled at this time.");
+          neigh->active_family_tree_by_neighbor(active_neighs, elem);
 
           for (auto active_neigh : active_neighs)
             gatherMovingBoundaryChangesHelper(elem, side, active_neigh, neigh_side);
