@@ -489,6 +489,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     const auto & add_sideset_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
     _mesh_boundary_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
     _mesh_sideset_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
+    _mesh_nodeset_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
   }
   else if (isParamValid("add_sideset_ids") && isParamValid("add_sideset_names"))
   {
@@ -499,6 +500,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // add sideset id
       _mesh_boundary_ids.insert(sideset_id);
       _mesh_sideset_ids.insert(sideset_id);
+      _mesh_nodeset_ids.insert(sideset_id);
       // set name of the sideset just added
       setBoundaryName(sideset_id, sideset_name);
     }

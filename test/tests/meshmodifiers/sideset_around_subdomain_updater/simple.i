@@ -169,6 +169,18 @@
     boundary = '4001'
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [top_nodes]
+    type = NodalSum
+    variable = u
+    boundary = '4002'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [right_nodes]
+    type = NodalSum
+    variable = u
+    boundary = '4001'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
 []
 
 [Outputs]
