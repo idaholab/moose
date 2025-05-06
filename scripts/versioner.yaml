@@ -99,7 +99,6 @@ packages:
       - conda/wasp/pyhit.patch
       - python/moosetree
       - python/mooseutils/message.py
-      - python/mooseutils/mooseutils.py
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
