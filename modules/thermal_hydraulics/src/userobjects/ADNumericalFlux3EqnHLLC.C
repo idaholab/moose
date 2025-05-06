@@ -121,7 +121,9 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
     sR = std::max(unL + cL, unR + cR);
   }
   else
-    mooseError("Invalid 'wave_speed_formulation'.");
+  {
+    mooseAssert(false, "Invalid 'wave_speed_formulation'.");
+  }
 
   // compute middle wave speed
   const ADReal sm = (rhoR * unR * (sR - unR) - rhoL * unL * (sL - unL) + pL - pR) /

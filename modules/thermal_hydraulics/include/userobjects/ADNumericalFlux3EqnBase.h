@@ -24,6 +24,5 @@ public:
 protected:
   virtual std::vector<ADReal> convert1DInputTo3D(const std::vector<ADReal> & U_1d) const override;
   virtual std::vector<ADReal> convert3DFluxTo1D(const std::vector<ADReal> & F_3d) const override;
-  virtual void transform3DFluxDirection(std::vector<ADReal> & F_3d,
-                                        const ADReal & nLR_dot_d) const override;
+  virtual void transform3DFluxDirection(std::vector<ADReal> & F_3d, Real nLR_dot_d) const override;
 };

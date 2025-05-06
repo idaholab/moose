@@ -55,7 +55,7 @@ NumericalFlux1D::getFlux(const unsigned int iside,
                          bool res_side_is_left,
                          const std::vector<ADReal> & UL_1d,
                          const std::vector<ADReal> & UR_1d,
-                         const ADReal & nLR_dot_d) const
+                         Real nLR_dot_d) const
 {
   if (_cached_flux_elem_id != ielem || _cached_flux_side_id != iside)
   {
@@ -65,7 +65,7 @@ NumericalFlux1D::getFlux(const unsigned int iside,
     const auto UL_3d = convert1DInputTo3D(UL_1d);
     const auto UR_3d = convert1DInputTo3D(UR_1d);
 
-    const RealVectorValue nLR(nLR_dot_d.value(), 0, 0);
+    const RealVectorValue nLR(nLR_dot_d, 0, 0);
     RealVectorValue t1, t2;
     THM::computeOrthogonalDirections(nLR, t1, t2);
 

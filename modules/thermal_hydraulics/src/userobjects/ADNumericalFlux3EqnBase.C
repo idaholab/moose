@@ -48,8 +48,7 @@ ADNumericalFlux3EqnBase::convert3DFluxTo1D(const std::vector<ADReal> & F_3d) con
 }
 
 void
-ADNumericalFlux3EqnBase::transform3DFluxDirection(std::vector<ADReal> & F_3d,
-                                                  const ADReal & nLR_dot_d) const
+ADNumericalFlux3EqnBase::transform3DFluxDirection(std::vector<ADReal> & F_3d, Real nLR_dot_d) const
 {
   F_3d[THMVACE3D::MASS] *= nLR_dot_d;
   F_3d[THMVACE3D::ENERGY] *= nLR_dot_d;

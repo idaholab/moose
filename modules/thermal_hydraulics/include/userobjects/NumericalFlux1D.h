@@ -48,7 +48,7 @@ public:
                                               bool res_side_is_left,
                                               const std::vector<ADReal> & UL_1d,
                                               const std::vector<ADReal> & UR_1d,
-                                              const ADReal & nLR_dot_d) const;
+                                              Real nLR_dot_d) const;
 
   /**
    * Gets the 3D flux vector for an element/side combination
@@ -139,8 +139,7 @@ protected:
    * @param[in] nLR_dot_d   Dot product of direction from "left" to "right" with
    *                        the flow channel direction
    */
-  virtual void transform3DFluxDirection(std::vector<ADReal> & F_3d,
-                                        const ADReal & nLR_dot_d) const = 0;
+  virtual void transform3DFluxDirection(std::vector<ADReal> & F_3d, Real nLR_dot_d) const = 0;
 
   /// element ID of the cached flux values
   mutable unsigned int _cached_flux_elem_id;
