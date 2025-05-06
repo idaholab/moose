@@ -18,7 +18,7 @@ In [kernel-inheritance], notice that the `ADDiffusion` object is declared as one
          caption=Syntax defining the `ADDiffusion` class as an object which inherits from the `ADKernelGrad` class.
 
 !alert note title=Automatic Differentiation
-"AD" (often used as a prefix for class names) stands for "Automatic Differentiation," which is a feature available to MOOSE application developers that drastically simplifies the implementation of new a `MooseObject`. <!--The non-AD counterparts of objects are the subject of the next tutorial-->
+"AD" (often used as a prefix for class names) stands for "Automatic Differentiation," which is a feature available to MOOSE application developers that drastically simplifies the implementation of a new `MooseObject`.
 
 Now, one might inspect the files that provide the base class, i.e., [`ADKernel.h`](framework/include/kernels/ADKernel.h) and [`ADKernel.C`](framework/src/kernels/ADKernel.C), to see what tools are available and decide how to properly implement a new object of this type. Variable members that `ADKernel` objects have access to include, but are not limited to, the following:
 
