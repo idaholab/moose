@@ -80,9 +80,9 @@ UELThread::onElement(const Elem * elem)
 
   // Get solution values
   _all_dof_values.resize(ndofel);
+  _all_dof_increments.resize(ndofel);
 
   _sys.currentSolution()->get(_all_dof_indices, _all_dof_increments);
-  _all_dof_increments.resize(ndofel);
   _sys.solutionOld().get(_all_dof_indices, _all_dof_values);
 
   mooseAssert(_all_dof_values.size() == _all_dof_increments.size(), "Inconsistent solution size.");
@@ -166,7 +166,8 @@ UELThread::onElement(const Elem * elem)
   Real time = _fe_problem.time();
   std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
 
-  std::array<Real, 8> energy;
+  std::array<Real, 8> dummy_energy;
+
   int jelem = elem->id() + 1; // User-assigned element number
   Real pnewdt;
 
@@ -178,16 +179,13 @@ UELThread::onElement(const Elem * elem)
 
   // stateful data
   if (_uel_uo._nstatev)
-  {
-    const auto & statev_old = _uel_uo._statev[_uel_uo._statev_index_old][elem->id()];
-    std::copy(statev_old.begin(), statev_old.end(), _statev_copy.begin());
-  }
+    _statev_copy = _uel_uo._statev[_uel_uo._statev_index_old][elem->id()];
 
   // call the plugin
   _uel(_local_re.get_values().data(),
        _local_ke.get_values().data(),
        _statev_copy.data(),
-       energy.data(),
+       _uel_uo._use_energy ? _uel_uo._energy[elem->id()].data() : dummy_energy.data(),
        &ndofel,
        &nrhs,
        &_uel_uo._nstatev,
@@ -212,7 +210,7 @@ UELThread::onElement(const Elem * elem)
        nullptr /* ADLMAG[] */,
        _aux_var_values_to_uel.data() /* PREDEF[] */,
        &npredf /* NPREDF */,
-       nullptr /* LFLAGS[] */,
+       _lflags.data() /* LFLAGS[] */,
        &ndofel /* MLVARX */,
        nullptr /* DDLMAG[] */,
        &idummy /* MDLOAD */,
@@ -222,11 +220,11 @@ UELThread::onElement(const Elem * elem)
        &rdummy /* PERIOD */
   );
 
+  if (pnewdt < _min_pnewdt && pnewdt != 0.0)
+    _min_pnewdt = pnewdt;
+
   if (_uel_uo._nstatev)
-  {
-    auto & statev_current = _uel_uo._statev[_uel_uo._statev_index_current][elem->id()];
-    std::copy(_statev_copy.begin(), _statev_copy.end(), statev_current.begin());
-  }
+    _uel_uo._statev[_uel_uo._statev_index_current][elem->id()] = _statev_copy;
 
   // write to the residual vector
   // sign of 'residuals' has been tested with external loading and matches that of moose-umat
@@ -242,4 +240,18 @@ UELThread::onElement(const Elem * elem)
                         _all_dof_indices,
                         _all_dof_indices,
                         -1.0);
+}
+
+void
+UELThread::pre()
+{
+  // reset pnewdt for the next element loop
+  _min_pnewdt = 0.0;
+}
+
+void
+UELThread::join(const UELThread & other)
+{
+  if (other._min_pnewdt < _min_pnewdt && other._min_pnewdt != 0.0)
+    _min_pnewdt = other._min_pnewdt;
 }
