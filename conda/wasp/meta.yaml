@@ -17,8 +17,6 @@ source:
     folder: pyhit/moosetree
   - path: ../../python/mooseutils/message.py
     folder: pyhit/mooseutils/message.py
-  - path: ../../python/mooseutils/mooseutils.py
-    folder: pyhit/mooseutils/mooseutils.py
   - path: ../../framework/contrib/hit
     folder: src
   - path: ../../python/pyhit/pyhit.py
