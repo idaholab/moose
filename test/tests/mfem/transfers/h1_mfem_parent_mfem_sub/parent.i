@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = square.msh
+  file = ../../mesh/square.msh
   dim = 3
 []
 
@@ -18,7 +18,7 @@
 []
 
 [AuxVariables]
-  [recv]
+  [u]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -29,10 +29,27 @@
   device = cpu
 []
 
+[MultiApps]
+  [subapp]
+    type = FullSolveMultiApp
+    input_files = sub.i
+    execute_on = INITIAL
+  []
+[]
+
+[Transfers]
+  [from_sub]
+    type = MultiAppMFEMCopyTransfer
+    source_variable = u
+    variable = u
+    from_multi_app = subapp
+  []
+[]
+
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionRecvApp
+    file_base = OutputData/Diffusion
     vtk_format = ASCII
   []
 []

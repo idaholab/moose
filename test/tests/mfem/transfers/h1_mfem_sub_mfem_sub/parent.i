@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = square.msh
+  file = ../../mesh/square.msh
   dim = 3
 []
 
@@ -25,16 +25,16 @@
 #[]
 
 [MultiApps]
-  [./recv_app]
+  [recv_app]
     type = FullSolveMultiApp
     input_files = sub_recv.i
     execute_on = FINAL
-  [../]
-  [./send_app]
+  []
+  [send_app]
     type = FullSolveMultiApp
     input_files = sub_send.i
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [Executioner]
@@ -43,13 +43,11 @@
 []
 
 [Transfers]
-    [./to_sub]
+    [to_sub]
         type = MultiAppMFEMCopyTransfer
         source_variable = send
         variable = recv
         from_multi_app = send_app
         to_multi_app = recv_app
-    [../]
+    []
 []
-
-

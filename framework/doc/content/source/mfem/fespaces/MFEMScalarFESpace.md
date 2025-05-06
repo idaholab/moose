@@ -19,7 +19,7 @@ options available in this class, you can use
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/diffusion_partial.i block=FESpaces Variables
+!listing test/tests/mfem/kernels/heattransfer.i block=FESpaces Variables
 
 !syntax parameters /FESpaces/MFEMScalarFESpace
 
