@@ -227,8 +227,6 @@ FlowModel1PhaseBase::addTimeDerivativeKernelIfTransient(const VariableName & var
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = var_name;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    if (_lump_mass_matrix)
-      params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, genName(_comp_name, var_name + "_td"), params);
   }
 }
