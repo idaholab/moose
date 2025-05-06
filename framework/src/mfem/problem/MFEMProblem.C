@@ -477,4 +477,16 @@ MFEMProblem::mesh() const
   return const_cast<MFEMProblem *>(this)->mesh();
 }
 
+void
+MFEMProblem::addSubMesh(const std::string & var_type,
+                             const std::string & var_name,
+                             InputParameters & parameters)
+{
+  // Add MFEM SubMesh.
+  FEProblemBase::addUserObject(var_type, var_name, parameters);
+  // Register submesh.
+  MFEMSubMesh & mfem_submesh = getUserObject<MFEMSubMesh>(var_name);
+  getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
+}
+
 #endif

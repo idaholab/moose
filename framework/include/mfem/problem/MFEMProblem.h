@@ -8,6 +8,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
+#include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "MFEMVariable.h"
 #include "MFEMBoundaryCondition.h"
@@ -80,6 +81,10 @@ public:
    * Initialise the required ProblemOperator used in the Executioner to solve the problem.
    */
   void initProblemOperator();
+
+  void addSubMesh(const std::string & user_object_name,
+                       const std::string & name,
+                       InputParameters & parameters);
 
   /**
    * Override of ExternalProblem::addVariable. Sets a

@@ -1,0 +1,14 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#29632'
+  [./MFEMSubMesh]
+    type = XMLDiff
+    input = diffusion.i
+    xmldiff = 'OutputData/Potential/Run0/Run0.pvd
+                OutputData/Potential/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM SubMesh.'
+    mfem = true
+    max_parallel = 1
+    recover = false
+  []
+[]
