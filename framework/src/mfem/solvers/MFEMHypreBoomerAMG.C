@@ -43,7 +43,7 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 
   if (_mfem_fespace && !mfem::HypreUsingGPU())
     _jacobian_solver->SetElasticityOptions(_mfem_fespace.get());
-  
+
   _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
 }
 
