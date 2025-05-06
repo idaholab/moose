@@ -41,13 +41,9 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
   _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
   _jacobian_solver->SetStrengthThresh(_strength_threshold);
 
-  if (_mfem_fespace)
-  {
-    mooseAssert(!HypreUsingGPU(),
-                "Setting elasticity options for MFEMHypreBoomerAMG on GPUs is not supported.");
+  if (_mfem_fespace && !mfem::HypreUsingGPU())
     _jacobian_solver->SetElasticityOptions(_mfem_fespace.get());
-  }
-
+  
   _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
 }
 
