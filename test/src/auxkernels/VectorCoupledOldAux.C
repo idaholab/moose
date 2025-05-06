@@ -15,21 +15,33 @@ InputParameters
 VectorCoupledOldAux::validParams()
 {
   InputParameters params = VectorAuxKernel::validParams();
-
   params.addClassDescription("OldValueTestAux that return old value.");
-
-  params.addRequiredCoupledVar("v", "Variable vector");
+  params.addRequiredCoupledVar("v", "This should be the same vector variable specified twice.");
 
   return params;
 }
 
 VectorCoupledOldAux::VectorCoupledOldAux(const InputParameters & parameters)
-  : VectorAuxKernel(parameters), _vector(coupledVectorValueOld("v"))
+  : VectorAuxKernel(parameters), _vectors(coupledVectorValuesOld("v"))
 {
+  if (_vectors.size() != 2)
+  {
+    mooseError("v must have 2 entries not ", _vectors.size());
+  }
+
+  std::string name1 = getVectorVar("v", 0)->name();
+  std::string name2 = getVectorVar("v", 1)->name();
+
+  if (name1 != name2)
+  {
+    mooseError("v must contain the same entry specified twice.");
+  }
 }
 
 RealVectorValue
 VectorCoupledOldAux::computeValue()
 {
-  return _vector[_qp];
+  const VectorVariableValue & v1 = *_vectors[0];
+  const VectorVariableValue & v2 = *_vectors[1];
+  return 2. * v1[_qp] - v2[_qp];
 }
