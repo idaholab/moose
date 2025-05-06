@@ -72,9 +72,6 @@ protected:
   /// Gravitational acceleration magnitude
   const Real _gravity_magnitude;
 
-  /// Lump the mass matrix
-  const bool _lump_mass_matrix;
-
   // Solution variable names
   std::vector<VariableName> _solution_vars;
 

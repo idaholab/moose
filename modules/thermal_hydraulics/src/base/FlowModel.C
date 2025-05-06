@@ -48,7 +48,6 @@ FlowModel::FlowModel(const InputParameters & params)
     _comp_name(name()),
     _gravity_vector(_flow_channel.getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
-    _lump_mass_matrix(_flow_channel.getParam<bool>("lump_mass_matrix")),
     _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
 }
