@@ -4,7 +4,7 @@ P_out = 2.0e5 # Pa
 
 [GlobalParams]
   nrings = 3
-  n_cells = 20
+  n_cells = 5
   flat_to_flat = 0.056
   heated_length = 0.5
   pitch = 0.012

@@ -8,7 +8,7 @@ P_out = 4.923e6 # Pa
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 20
+    n_cells = 5
     pitch = 0.0126
     pin_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -22,7 +22,7 @@ P_out = 4.923e6 # Pa
     input = sub_channel
     nx = 6
     ny = 6
-    n_cells = 20
+    n_cells = 5
     pitch = 0.0126
     heated_length = 1.0
   []
