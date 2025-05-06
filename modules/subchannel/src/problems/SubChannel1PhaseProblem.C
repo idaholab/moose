@@ -796,7 +796,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
           auto fi = computeFrictionFactor(_friction_args);
-          auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], 0.5);
+          auto ki = k_grid[i_ch][iz - 1];
           Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
@@ -1029,7 +1029,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
         auto fi = computeFrictionFactor(_friction_args);
-        auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], Pe);
+        auto ki = k_grid[i_ch][iz - 1];
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
