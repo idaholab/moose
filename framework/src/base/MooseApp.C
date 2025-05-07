@@ -817,7 +817,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "NVIDIA GPU parallel computing platform";
-#ifdef CUDA_SUPPORTED
+#ifdef PETSC_HAVE_CUDA
     haveCapability("cuda", doc);
 #else
     missingCapability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
