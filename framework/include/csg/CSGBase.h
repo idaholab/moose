@@ -249,27 +249,6 @@ public:
   }
 
   /**
-   * @brief Get the CSGSurfaceList object
-   *
-   * @return CSGSurfaceList
-   */
-  CSGSurfaceList & getSurfaceList() { return _surface_list; }
-
-  /**
-   * @brief Get the CSGCellList object
-   *
-   * @return CSGCellList
-   */
-  CSGCellList & getCellList() { return _cell_list; }
-
-  /**
-   * @brief Get the CSGUniverseList object
-   *
-   * @return CSGUniverseList
-   */
-  CSGUniverseList & getUniverseList() { return _universe_list; }
-
-  /**
    * @brief join another CSGBase object to this one
    *
    * @param base pointer to a different CSGBase object
@@ -296,6 +275,27 @@ private:
 
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
+
+  /**
+   * @brief Get the CSGSurfaceList object
+   *
+   * @return CSGSurfaceList
+   */
+  CSGSurfaceList & getSurfaceList() { return _surface_list; }
+
+  /**
+   * @brief Get the CSGCellList object
+   *
+   * @return CSGCellList
+   */
+  CSGCellList & getCellList() { return _cell_list; }
+
+  /**
+   * @brief Get the CSGUniverseList object
+   *
+   * @return CSGUniverseList
+   */
+  CSGUniverseList & getUniverseList() { return _universe_list; }
 
   /**
    * @brief join a separate CSGSurfaceList object to this one
