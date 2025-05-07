@@ -34,14 +34,14 @@ class MeshFunction;
  *
  * @see Exodus
  */
-class OversampleOutput : public AdvancedOutput
+class SampledOutput : public AdvancedOutput
 {
 public:
   static InputParameters validParams();
 
-  OversampleOutput(const InputParameters & parameters);
+  SampledOutput(const InputParameters & parameters);
 
-  virtual ~OversampleOutput();
+  virtual ~SampledOutput();
 
   virtual void initialSetup() override;
   virtual void meshChanged() override;
@@ -51,7 +51,7 @@ protected:
   /**
    * Performs the update of the solution vector for the oversample/re-positioned mesh
    */
-  virtual void updateOversample();
+  virtual void updateSample();
 
   /// Appends the base class's file base string
   virtual void setFileBaseInternal(const std::string & file_base) override;
@@ -72,7 +72,7 @@ private:
    * upon. This function is called by the creating action (addOutputAction) and should not be called
    * by the user as it will create a memory leak if called multiple times.
    */
-  void initOversample();
+  void initSample();
 
   /**
    * Clone mesh in preperation for re-positioning or oversampling.
@@ -82,7 +82,7 @@ private:
   void cloneMesh();
 
   /// Used to decide which variable is output as a nodal variable for oversampling purposes
-  bool isOversampledAsNodal(const FEType & fe_type) const;
+  bool isSampledAsNodal(const FEType & fe_type) const;
 
   /**
    * A vector of pointers to the mesh functions on the oversampled mesh
@@ -105,7 +105,7 @@ private:
   std::unique_ptr<EquationSystems> _oversample_es;
   std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
 
-  /// Oversample solution vector
+  /// Sample solution vector
   /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the
    * current system
    * and variable before the MeshFunction is applied. This allows for the same MeshFunction object

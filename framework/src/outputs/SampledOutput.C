@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "SampledOutput.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "MooseApp.h"
@@ -21,7 +21,7 @@
 using namespace libMesh;
 
 InputParameters
-OversampleOutput::validParams()
+SampledOutput::validParams()
 {
 
   // Get the parameters from the parent object
@@ -51,7 +51,7 @@ OversampleOutput::validParams()
   return params;
 }
 
-OversampleOutput::OversampleOutput(const InputParameters & parameters)
+SampledOutput::SampledOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _refinements(getParam<unsigned int>("refinements")),
     _oversample(_refinements > 0 || isParamValid("file") || isParamValid("block")),
@@ -62,16 +62,16 @@ OversampleOutput::OversampleOutput(const InputParameters & parameters)
 }
 
 void
-OversampleOutput::initialSetup()
+SampledOutput::initialSetup()
 {
   AdvancedOutput::initialSetup();
 
   // Creates and initializes the oversampled mesh
-  initOversample();
+  initSample();
 }
 
 void
-OversampleOutput::outputStep(const ExecFlagType & type)
+SampledOutput::outputStep(const ExecFlagType & type)
 {
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)
@@ -95,14 +95,14 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   if (shouldOutput())
   {
     TIME_SECTION("outputStep", 2, "Outputting Step");
-    updateOversample();
+    updateSample();
     output();
   }
 
   _current_execute_flag = EXEC_NONE;
 }
 
-OversampleOutput::~OversampleOutput()
+SampledOutput::~SampledOutput()
 {
   // TODO: Remove once libmesh Issue #1184 is fixed
   _oversample_es.reset();
@@ -110,13 +110,13 @@ OversampleOutput::~OversampleOutput()
 }
 
 void
-OversampleOutput::meshChanged()
+SampledOutput::meshChanged()
 {
   _oversample_mesh_changed = true;
 }
 
 void
-OversampleOutput::initOversample()
+SampledOutput::initSample()
 {
   // Perform the mesh cloning, if needed
   if (_change_position || _oversample)
@@ -209,7 +209,7 @@ OversampleOutput::initOversample()
 
         // Add the variable. We essentially support nodal variables and constant monomials
         const FEType & fe_type = source_sys.variable_type(var_num);
-        if (isOversampledAsNodal(fe_type))
+        if (isSampledAsNodal(fe_type))
           dest_sys.add_variable(source_sys.variable_name(var_num), fe_type);
         else
           dest_sys.add_variable(source_sys.variable_name(var_num), FEType(CONSTANT, MONOMIAL));
@@ -227,7 +227,7 @@ OversampleOutput::initOversample()
 }
 
 void
-OversampleOutput::updateOversample()
+SampledOutput::updateSample()
 {
   // Do nothing if oversampling and changing position are not enabled
   if (!_oversample && !_change_position)
@@ -287,7 +287,7 @@ OversampleOutput::updateOversample()
         const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
         const FEType & fe_type = source_sys.variable_type(original_var_num);
         // Loop over the mesh, nodes for nodal data, elements for element data
-        if (isOversampledAsNodal(fe_type))
+        if (isSampledAsNodal(fe_type))
         {
           for (const auto & node : _mesh_ptr->getMesh().node_ptr_range())
           {
@@ -333,7 +333,7 @@ OversampleOutput::updateOversample()
 }
 
 void
-OversampleOutput::cloneMesh()
+SampledOutput::cloneMesh()
 {
   // Create the new mesh from a file
   if (isParamValid("file"))
@@ -353,7 +353,7 @@ OversampleOutput::cloneMesh()
   else
   {
     if (_app.isRecovering())
-      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with "
+      mooseWarning("Recovering or Restarting with oversampling may not work (especially with "
                    "adapted meshes)!!  Refs #2295");
     _cloned_mesh_ptr = _mesh_ptr->safeClone();
   }
@@ -379,7 +379,7 @@ OversampleOutput::cloneMesh()
 }
 
 void
-OversampleOutput::setFileBaseInternal(const std::string & file_base)
+SampledOutput::setFileBaseInternal(const std::string & file_base)
 {
   AdvancedOutput::setFileBaseInternal(file_base);
   // ** DEPRECATED SUPPORT **
@@ -388,7 +388,7 @@ OversampleOutput::setFileBaseInternal(const std::string & file_base)
 }
 
 bool
-OversampleOutput::isOversampledAsNodal(const FEType & fe_type) const
+SampledOutput::isSampledAsNodal(const FEType & fe_type) const
 {
   // This is the same criterion as in MooseVariableData
   const auto continuity = FEInterface::get_continuity(fe_type);

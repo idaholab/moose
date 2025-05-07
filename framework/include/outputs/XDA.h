@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "SampledOutput.h"
 
 /**
  * Class for output data to the XDAII format
  */
-class XDA : public OversampleOutput
+class XDA : public SampledOutput
 {
 public:
   static InputParameters validParams();
