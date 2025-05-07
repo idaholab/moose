@@ -176,8 +176,7 @@ TEST_F(MFEMSolverTest, MFEMCGSolver)
   solver_params.set<double>("l_abs_tol") = 1e-5;
 
   // Construct kernel
-  MFEMCGSolver & solver =
-      addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
+  MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
 
   testDiffusionSolve(solver, 1e-5);
 }
@@ -308,7 +307,7 @@ TEST_F(MFEMSolverTest, MFEMHyprePCGLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHyprePCG");
   solver_params.set<bool>("low_order_refined") = true;
-  
+
   // Construct kernel
   MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
 
@@ -324,7 +323,7 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolverLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMGMRESSolver");
   solver_params.set<bool>("low_order_refined") = true;
-  
+
   // Construct kernel
   MFEMGMRESSolver & solver =
       addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
@@ -339,8 +338,7 @@ TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
   solver_params.set<bool>("low_order_refined") = true;
 
   // Construct kernel
-  MFEMCGSolver & solver =
-      addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
+  MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
 
   testDiffusionSolve(solver, 1e-1);
 }
