@@ -21,7 +21,7 @@ InputParameters
 Tecplot::validParams()
 {
   // Get the base class parameters
-  InputParameters params = OversampleOutput::validParams();
+  InputParameters params = SampledOutput::validParams();
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
@@ -45,7 +45,7 @@ Tecplot::validParams()
 }
 
 Tecplot::Tecplot(const InputParameters & parameters)
-  : OversampleOutput(parameters),
+  : SampledOutput(parameters),
     _binary(getParam<bool>("binary")),
     _ascii_append(getParam<bool>("ascii_append")),
     _first_time(declareRestartableData<bool>("first_time", true))
