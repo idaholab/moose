@@ -44,7 +44,7 @@ CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGR
 }
 
 void
-CSGBase::joinSurfaceLists(CSGSurfaceList & surf_list)
+CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
 {
   auto all_surfs = surf_list.getAllSurfaces();
   for (auto s : all_surfs)
