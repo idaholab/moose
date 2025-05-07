@@ -25,6 +25,7 @@
 #include "InputParameterWarehouse.h"
 #include "Registry.h"
 #include "CommandLine.h"
+#include "Split.h"
 
 #include <filesystem>
 
@@ -377,34 +378,66 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   const auto time_integrator_names = exec->getTimeIntegratorNames();
   if (!time_integrator_names.empty())
     oss << std::setw(console_field_width)
-        << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, ", ") << '\n';
+        << "  TimeIntegrator(s): " << MooseUtils::join(time_integrator_names, " ") << '\n';
 
+  oss << std::setw(console_field_width) << "  Solver Mode: ";
   for (const std::size_t i : make_range(problem.numSolverSystems()))
-    oss << std::setw(console_field_width)
-        << "  Solver Mode" +
-               (problem.numSolverSystems() > 1 ? " - system " + std::to_string(i) : "") + ": "
-        << problem.solverTypeString(i) << '\n';
+    oss << (problem.numSolverSystems() > 1 ? "[" + problem.getSolverSystemNames()[i] + "]: " : "")
+        << problem.solverTypeString(i) << " ";
+  oss << '\n';
 
-  const std::string & pc_desc = problem.getPetscOptions().pc_description;
+  // Check for a selection of common PETSc pc options on the command line for
+  // all solver systems and all field splits within each nonlinear system
+  std::string pc_desc;
+  for (const std::size_t i : make_range(problem.numSolverSystems()))
+  {
+    std::vector<std::string> splits = {""};
+    if (problem.isSolverSystemNonlinear(i))
+      for (const auto & split : problem.getNonlinearSystemBase(i).getSplits().getObjects())
+        splits.push_back("fieldsplit_" + split->name() + "_");
+
+    for (const std::string & split : splits)
+    {
+      std::string pc_desc_split;
+      const std::string prefix = problem.solverParams(i)._prefix + split;
+      for (const auto & entry : std::as_const(*app.commandLine()).getEntries())
+        if (entry.name == prefix + "pc_type" || entry.name == prefix + "sub_pc_type" ||
+            entry.name == prefix + "pc_hypre_type" || entry.name == prefix + "pc_fieldsplit_type")
+          pc_desc_split += entry.value ? *entry.value + " " : "unspecified ";
+
+      if (!pc_desc_split.empty() && prefix.size() > 1)
+        pc_desc += "[" + prefix.substr(1, prefix.size() - 2) + "]: ";
+      pc_desc += pc_desc_split;
+    }
+  }
+
+  // Alert the user any unoverridden options will still be picked up from the input file
+  if (!pc_desc.empty())
+    pc_desc += "(see input file for unoverridden options)";
+
+  // If there are no PETSc pc options on the command line, print the input file options
+  if (pc_desc.empty())
+    pc_desc = problem.getPetscOptions().pc_description;
+
   if (!pc_desc.empty())
     oss << std::setw(console_field_width) << "  PETSc Preconditioner: " << pc_desc << '\n';
 
+  std::string mpc_desc;
   for (const std::size_t i : make_range(problem.numNonlinearSystems()))
   {
     MoosePreconditioner const * mpc = problem.getNonlinearSystemBase(i).getPreconditioner();
     if (mpc)
     {
-      oss << std::setw(console_field_width)
-          << "  MOOSE Preconditioner" +
-                 (problem.numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") + ": "
-          << mpc->getParam<std::string>("_type");
+      if (problem.numNonlinearSystems() > 1)
+        mpc_desc += "[" + problem.getNonlinearSystemNames()[i] + "]: ";
+      mpc_desc += mpc->getParam<std::string>("_type") + " ";
       if (mpc->name().find("_moose_auto") != std::string::npos)
-        oss << " (auto)";
-      oss << '\n';
+        mpc_desc += "(auto) ";
     }
-    if (i == cast_int<std::size_t>(problem.numNonlinearSystems() - 1))
-      oss << std::endl;
   }
+
+  if (!mpc_desc.empty())
+    oss << std::setw(console_field_width) << "  MOOSE Preconditioner: " << mpc_desc << '\n';
 
   return oss.str();
 }
