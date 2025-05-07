@@ -92,6 +92,19 @@ This tells MOOSE that the data is already replicated and there is no need to bro
 
 The `time_data` parameter produces an additional CSV file containing just the real time and the corresponding time step for any VectorPostprocessor output information. This file may be useful in producing animations or your simulation results.
 
+## Restore on Rejected Timesteps
+
+When a timestep is rejected due to a failed solve, a failed multiapp solve, or
+any other reason, the timestep is usually repeated, usually with a smaller
+timestep size. However, unlike postprocessors, VPPs are not restored to their
+old values, i.e. before the initial timestep, unless an old value is requested
+by another object. This can cause statefulness in objects dependent on the VPP
+between the repeated timesteps. If you suspect this might be causing
+indeterminate behavior in your simulation, you can check all the data being
+restored between the failed and repeated timestep by setting
+`Problem/`[!param](/Problem/FEProblem/verbose_restore)` = true`.
+
+
 # VectorPostprocessor List
 
 !syntax list /VectorPostprocessors objects=True actions=False subsystems=False
