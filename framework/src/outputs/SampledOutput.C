@@ -56,8 +56,8 @@ SampledOutput::SampledOutput(const InputParameters & parameters)
     _refinements(getParam<unsigned int>("refinements")),
     _using_external_sampling_file(isParamValid("file")),
     _change_position(isParamValid("position")),
-    _use_sampled_output(_refinements > 0 || _use_external_sampling_file || isParamValid("block") ||
-                        _change_position),
+    _use_sampled_output(_refinements > 0 || _using_external_sampling_file ||
+                        isParamValid("block") || _change_position),
     _position(_change_position ? getParam<Point>("position") : Point()),
     _oversample_mesh_changed(true)
 {
@@ -146,6 +146,19 @@ SampledOutput::initSample()
   // steps to the same Exodus file
   _mesh_ptr->getMesh().allow_renumbering(false);
 
+  // Check the source and target mesh in case their subdomains match
+  const std::vector<SubdomainID> mesh_subdomain_ids_vec(_mesh_ptr->meshSubdomains().begin(),
+                                                        _mesh_ptr->meshSubdomains().end());
+  const std::vector<SubdomainID> initial_mesh_subdomain_ids_vec(
+      _problem_ptr->mesh().meshSubdomains().begin(), _problem_ptr->mesh().meshSubdomains().end());
+  bool mesh_subdomains_match =
+      (_mesh_ptr->meshSubdomains() == _problem_ptr->mesh().meshSubdomains() &&
+       _mesh_ptr->getSubdomainNames(mesh_subdomain_ids_vec) ==
+           _problem_ptr->mesh().getSubdomainNames(initial_mesh_subdomain_ids_vec));
+  if (_using_external_sampling_file && !mesh_subdomains_match)
+    mooseInfoRepeated("Variable block restriction disabled in sampled output due to non-matching "
+                      "subdomain names and ids");
+
   // Create the new EquationSystems
   _oversample_es = std::make_unique<EquationSystems>(_mesh_ptr->getMesh());
   _es_ptr = _oversample_es.get();
@@ -209,17 +222,22 @@ SampledOutput::initSample()
         _variable_numbers_in_system[sys_num].push_back(var_num);
         num_actual_vars++;
 
+        // We do what we can to preserve the block restriction
+        const auto * subdomains = (_using_external_sampling_file && !mesh_subdomains_match)
+                                      ? nullptr
+                                      : &source_sys.variable(var_num).active_subdomains();
+
         // Add the variable. We essentially support nodal variables and constant monomials
         const FEType & fe_type = source_sys.variable_type(var_num);
         if (isSampledAsNodal(fe_type))
-          dest_sys.add_variable(source_sys.variable_name(var_num), fe_type);
+          dest_sys.add_variable(source_sys.variable_name(var_num), fe_type, subdomains);
         else
         {
           const auto & var_name = source_sys.variable_name(var_num);
           if (fe_type != FEType(CONSTANT, MONOMIAL))
             mooseInfoRepeated("Sampled output projects variable '" + var_name +
                               "' onto a constant monomial");
-          dest_sys.add_variable(var_name, FEType(CONSTANT, MONOMIAL));
+          dest_sys.add_variable(var_name, FEType(CONSTANT, MONOMIAL), subdomains);
         }
         // Note: we could do more, using the generic projector. But exodus output of higher order
         // or more exotic variables is limited anyway
