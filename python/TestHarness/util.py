@@ -529,6 +529,9 @@ def getCapabilities(exe):
     """
     assert exe
     output = runCommand("%s --show-capabilities" % exe)
+    if output.startswith("ERROR"):
+        print("Error! Executable crashed running --show-capbilities.")
+        exit(1)
     return parseMOOSEJSON(output, '--show-capabilities')
 
 def getCapability(exe, name):
