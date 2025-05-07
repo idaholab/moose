@@ -93,6 +93,9 @@ private:
    */
   std::vector<std::vector<std::unique_ptr<libMesh::MeshFunction>>> _mesh_functions;
 
+  /// A vector of vector that keeps track of the variable numbers in each system for each mesh function
+  std::vector<std::vector<unsigned int>> _variable_numbers_in_system;
+
   /// When oversampling, the output is shift by this amount
   Point _position;
 

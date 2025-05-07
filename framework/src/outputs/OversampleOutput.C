@@ -155,6 +155,9 @@ OversampleOutput::initOversample()
   // original elements as ghost elements even if it gets grossly
   // repartitioned, since we can't repartition the oversample mesh to
   // match.
+  // FIXME: this is not enough. It assumes our initial partition of the sampling mesh
+  // and the source mesh match. But that's usually only true in the 'refinement' case,
+  // not with an arbitrary sampling mesh file
   DistributedMesh * dist_mesh = dynamic_cast<DistributedMesh *>(&source_es.get_mesh());
   if (dist_mesh)
   {
@@ -165,6 +168,9 @@ OversampleOutput::initOversample()
   // Initialize the _mesh_functions vector
   unsigned int num_systems = source_es.n_systems();
   _mesh_functions.resize(num_systems);
+
+  // Keep track of the variable numbering in both regular and sampled system
+  _variable_numbers_in_system.resize(num_systems);
 
   // Get the list of nodal and elemental output data
   const auto & nodal_data = getNodalVariableOutput();
@@ -198,6 +204,7 @@ OversampleOutput::initOversample()
         const auto & var_name = source_sys.variable_name(var_num);
         if (!nodal_data.count(var_name) && !elemental_data.count(var_name))
           continue;
+        _variable_numbers_in_system[sys_num].push_back(var_num);
         num_actual_vars++;
 
         // Add the variable. We essentially support nodal variables and constant monomials
@@ -226,6 +233,11 @@ OversampleOutput::updateOversample()
   if (!_oversample && !_change_position)
     return;
 
+  // We need the mesh functions to extend the whole domain so we serialize both the mesh and the
+  // solution. We need this because the partitioning of the sampling mesh may not match the
+  // partitioning of the source mesh
+  _problem_ptr->mesh().getMesh().gather_to_zero();
+
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
   unsigned int num_systems = source_es.n_systems();
@@ -247,41 +259,70 @@ OversampleOutput::updateOversample()
       // Update the mesh functions
       for (const auto var_num : index_range(_mesh_functions[sys_num]))
       {
+        const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
         // If the mesh has changed, the MeshFunctions need to be re-built, otherwise simply clear it
         // for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
           _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
-              source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
+              source_es, *_serialized_solution, source_sys.get_dof_map(), original_var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
 
         // Initialize the MeshFunctions for application to the oversampled solution
         _mesh_functions[sys_num][var_num]->init();
+
+        // Mesh functions are still defined on the original mesh, which might not fully overlap with
+        // the sampling mesh. We don't want to error with a libMesh assert on the out of mesh mode
+        _mesh_functions[sys_num][var_num]->enable_out_of_mesh_mode(-1e6);
       }
 
-      //
+      // Fill solution vectors by evaluating mesh functions on sampling mesh
       for (const auto var_num : index_range(_mesh_functions[sys_num]))
       {
-        const FEType & fe_type = source_sys.variable_type(var_num);
+        // we serialized the mesh and the solution vector, we might as well just do this only on
+        // processor 0.
+        if (processor_id() > 0)
+          break;
+
+        const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
+        const FEType & fe_type = source_sys.variable_type(original_var_num);
         // Loop over the mesh, nodes for nodal data, elements for element data
         if (isOversampledAsNodal(fe_type))
         {
-          for (const auto & node :
-               as_range(_mesh_ptr->localNodesBegin(), _mesh_ptr->localNodesEnd()))
+          for (const auto & node : _mesh_ptr->getMesh().node_ptr_range())
+          {
             if (node->n_dofs(sys_num, var_num))
-              dest_sys.solution->set(node->dof_number(sys_num, var_num, 0),
-                                     (*_mesh_functions[sys_num][var_num])(
-                                         *node - _position)); // 0 value is for component
+            {
+              const auto value = (*_mesh_functions[sys_num][var_num])(*node - _position);
+              if (value != -1e6)
+                dest_sys.solution->set(node->dof_number(sys_num, var_num, /*comp=*/0), value);
+              else
+                mooseDoOnce(mooseWarning(
+                    "Sampling at location ",
+                    *node - _position,
+                    " was outside the problem mesh.\nThis message will not be repeated"));
+            }
+          }
         }
         else
-          for (const auto & elem : (*_mesh_ptr->getActiveLocalElementRange()))
+          for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
+          {
             if (elem->n_dofs(sys_num, var_num))
-              dest_sys.solution->set(
-                  elem->dof_number(sys_num, var_num, 0),
-                  (*_mesh_functions[sys_num][var_num])(elem->true_centroid() -
-                                                       _position)); // 0 value is for component
+            {
+              const auto value =
+                  (*_mesh_functions[sys_num][var_num])(elem->true_centroid() - _position);
+              if (value != -1e6)
+                dest_sys.solution->set(elem->dof_number(sys_num, var_num, /*comp=*/0), value);
+              else
+                mooseDoOnce(mooseWarning(
+                    "Sampling at location ",
+                    elem->true_centroid() - _position,
+                    " was outside the problem mesh.\nThis message will not be repeated."));
+            }
+          }
       }
 
+      // We don't really need to do that
       dest_sys.solution->close();
     }
   }
@@ -314,7 +355,6 @@ OversampleOutput::cloneMesh()
     if (_app.isRecovering())
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with "
                    "adapted meshes)!!  Refs #2295");
-
     _cloned_mesh_ptr = _mesh_ptr->safeClone();
   }
 
