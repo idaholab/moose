@@ -29,7 +29,7 @@ InputParameters
 Exodus::validParams()
 {
   // Get the base class parameters
-  InputParameters params = OversampleOutput::validParams();
+  InputParameters params = SampledOutput::validParams();
   params +=
       AdvancedOutput::enableOutputTypes("nodal elemental scalar postprocessor reporter input");
 
@@ -93,7 +93,7 @@ Exodus::validParams()
 }
 
 Exodus::Exodus(const InputParameters & parameters)
-  : OversampleOutput(parameters),
+  : SampledOutput(parameters),
     _exodus_initialized(false),
     _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence")
@@ -139,7 +139,7 @@ void
 Exodus::initialSetup()
 {
   // Call base class setup method
-  OversampleOutput::initialSetup();
+  SampledOutput::initialSetup();
 
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
@@ -164,8 +164,8 @@ Exodus::initialSetup()
 void
 Exodus::meshChanged()
 {
-  // Maintain Oversample::meshChanged() functionality
-  OversampleOutput::meshChanged();
+  // Maintain Sampled::meshChanged() functionality
+  SampledOutput::meshChanged();
 
   // Indicate to the Exodus object that the mesh has changed
   _exodus_mesh_changed = true;
