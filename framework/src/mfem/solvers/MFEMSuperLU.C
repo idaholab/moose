@@ -30,11 +30,15 @@ MFEMSuperLU::constructSolver(const InputParameters &)
 }
 
 void
-MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+MFEMSuperLU::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
-    mooseError("SuperLU solver does not support LOR solve");
+  {
+    mfem::ParLORDiscretization lor_disc(a, tdofs);
+    _solver.reset(new mfem::LORSolver<Moose::MFEM::SuperLUSolver>(
+        lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm()));
+  }
 }
 
 #endif
