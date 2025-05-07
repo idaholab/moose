@@ -9,6 +9,8 @@
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
 #include "MFEMGMRESSolver.h"
+#include "MFEMCGSolver.h"
+#include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMVectorFESpace.h"
 
 class MFEMSolverTest : public MFEMObjectUnitTest
@@ -170,6 +172,23 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolver)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto solver_downcast = std::dynamic_pointer_cast<mfem::GMRESSolver>(solver.getSolver());
+  ASSERT_NE(solver_downcast.get(), nullptr);
+  testDiffusionSolve(*solver_downcast.get(), 1e-5);
+}
+
+TEST_F(MFEMSolverTest, MFEMCGSolver)
+{
+  // Build required kernel inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMCGSolver");
+  solver_params.set<double>("l_tol") = 0.0;
+  solver_params.set<double>("l_abs_tol") = 1e-5;
+
+  // Construct kernel
+  MFEMCGSolver & solver =
+      addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto solver_downcast = std::dynamic_pointer_cast<mfem::CGSolver>(solver.getSolver());
   ASSERT_NE(solver_downcast.get(), nullptr);
   testDiffusionSolve(*solver_downcast.get(), 1e-5);
 }
