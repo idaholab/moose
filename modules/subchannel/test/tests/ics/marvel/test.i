@@ -1,6 +1,5 @@
 ################################################################################
-## Marvel-type surrogate SCM model                                                 ##
-## Marvel-type SCM geometry setup simulation                                       ##
+## MARVEL-type SCM geometry setup simulation                                  ##
 ## POC : Vasileios Kyriakopoulos, vasileios.kyriakopoulos@inl.gov             ##
 ################################################################################
 heated_length = 0.51
