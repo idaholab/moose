@@ -36,16 +36,28 @@ CSGCell::CSGCell(const std::string name, const CSGUniverse & univ, const CSGRegi
 {
 }
 
-template <typename T>
-T
-CSGCell::getFill()
+const std::shared_ptr<CSGUniverse>
+CSGCell::getFillUniverse()
 {
-  if (getFillType() == FillType::VOID)
+  if (getFillType() != FillType::UNIVERSE)
+  {
+    mooseWarning("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not UNIVERSE.");
     return nullptr;
-  if (getFillType() == FillType::MATERIAL)
-    return static_cast<std::string>(_fill_name); // TODO: return material object when available
-  if (getFillType() == FillType::UNIVERSE)
+  }
+  else
     return _fill_universe;
+}
+
+const std::string
+CSGCell::getFillMaterial()
+{
+  if (getFillType() != FillType::MATERIAL)
+  {
+    mooseWarning("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not MATERIAL.");
+    return "";
+  }
+  else
+    return _fill_name;
 }
 
 const std::string
