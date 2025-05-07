@@ -73,13 +73,19 @@ public:
   const std::string getFillTypeString();
 
   /**
-   * @brief Get the cell fill
+   * @brief Get the cell fill if FillType is UNIVERSE
    *
-   * @return nullptr for void cell, material name (string) for material cell,
-   * or CSGUniverse for universe cell
+   * @return CSGUniverse pointer
    */
-  template <typename T>
-  T getFill();
+  const std::shared_ptr<CSGUniverse> getFillUniverse();
+
+  /**
+   * @brief Get the cell fill material name if FillType is MATERIAL
+   * //TODO: update to return material object when materials are implemented
+   *
+   * @return const std::string
+   */
+  const std::string getFillMaterial();
 
   /**
    * @brief Get the name of the fill
