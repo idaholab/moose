@@ -737,9 +737,14 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
         auto fi = computeFrictionFactor(_friction_args);
-        auto ki = k_grid[i_ch][iz - 1];
+        /// Upwind local form loss
+        auto ki = 0.0;
+        if ((*_mdot_soln)(node_out) >= 0)
+          ki = k_grid[i_ch][iz - 1];
+        else
+          ki = k_grid[i_ch][iz];
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
-                             (std::pow((*_mdot_soln)(node_out), 2.0)) /
+                             (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
         auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
         auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
@@ -796,7 +801,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
           auto fi = computeFrictionFactor(_friction_args);
-          auto ki = k_grid[i_ch][iz - 1];
+          /// Upwind local form loss
+          auto ki = 0.0;
+          if ((*_mdot_soln)(node_out) >= 0)
+            ki = k_grid[i_ch][iz - 1];
+          else
+            ki = k_grid[i_ch][iz];
           Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
@@ -1029,7 +1039,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
         auto fi = computeFrictionFactor(_friction_args);
-        auto ki = k_grid[i_ch][iz - 1];
+        /// Upwind local form loss
+        auto ki = 0.0;
+        if ((*_mdot_soln)(node_out) >= 0)
+          ki = k_grid[i_ch][iz - 1];
+        else
+          ki = k_grid[i_ch][iz];
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
