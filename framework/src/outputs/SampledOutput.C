@@ -54,8 +54,10 @@ SampledOutput::validParams()
 SampledOutput::SampledOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _refinements(getParam<unsigned int>("refinements")),
-    _oversample(_refinements > 0 || isParamValid("file") || isParamValid("block")),
+    _using_external_sampling_file(isParamValid("file")),
     _change_position(isParamValid("position")),
+    _use_sampled_output(_refinements > 0 || _use_external_sampling_file || isParamValid("block") ||
+                        _change_position),
     _position(_change_position ? getParam<Point>("position") : Point()),
     _oversample_mesh_changed(true)
 {
@@ -119,7 +121,7 @@ void
 SampledOutput::initSample()
 {
   // Perform the mesh cloning, if needed
-  if (_change_position || _oversample)
+  if (_use_sampled_output)
     cloneMesh();
   else
     return;
@@ -130,7 +132,7 @@ SampledOutput::initSample()
       *node += _position;
 
   // Perform the mesh refinement
-  if (_oversample)
+  if (_refinements > 0)
   {
     MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
 
@@ -212,7 +214,13 @@ SampledOutput::initSample()
         if (isSampledAsNodal(fe_type))
           dest_sys.add_variable(source_sys.variable_name(var_num), fe_type);
         else
-          dest_sys.add_variable(source_sys.variable_name(var_num), FEType(CONSTANT, MONOMIAL));
+        {
+          const auto & var_name = source_sys.variable_name(var_num);
+          if (fe_type != FEType(CONSTANT, MONOMIAL))
+            mooseInfoRepeated("Sampled output projects variable '" + var_name +
+                              "' onto a constant monomial");
+          dest_sys.add_variable(var_name, FEType(CONSTANT, MONOMIAL));
+        }
         // Note: we could do more, using the generic projector. But exodus output of higher order
         // or more exotic variables is limited anyway
       }
@@ -230,7 +238,7 @@ void
 SampledOutput::updateSample()
 {
   // Do nothing if oversampling and changing position are not enabled
-  if (!_oversample && !_change_position)
+  if (!_use_sampled_output)
     return;
 
   // We need the mesh functions to extend the whole domain so we serialize both the mesh and the
