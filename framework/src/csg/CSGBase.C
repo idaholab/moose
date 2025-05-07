@@ -46,6 +46,9 @@ CSGBase::createCell(const std::string name, const CSGUniverse & univ, const CSGR
 void
 CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
 {
+  // TODO: check if surface is a duplicate (by definition) and skip
+  // adding if duplicate; must update references to the surface in cell
+  // region definitions.
   auto all_surfs = surf_list.getAllSurfaces();
   for (auto s : all_surfs)
     _surface_list.addSurface(s);
