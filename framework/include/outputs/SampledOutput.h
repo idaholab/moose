@@ -59,11 +59,14 @@ protected:
   /// The number of oversampling refinements
   const unsigned int _refinements;
 
-  /// Flag indicating that oversampling is enabled
-  bool _oversample;
+  /// Flag indicating another file is being used for the sampling
+  const bool _using_external_sampling_file;
 
   /// Flag for re-positioning
-  bool _change_position;
+  const bool _change_position;
+
+  /// Flag indicating that the sampled output should be used to re-sample the underlying EquationSystem of the output
+  bool _use_sampled_output;
 
 private:
   /**

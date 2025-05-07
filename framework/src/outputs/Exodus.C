@@ -188,7 +188,7 @@ Exodus::outputSetup()
 
     // Do nothing if the output is using oversampling. In this case the mesh that is being output
     // has not been changed, so there is no need to create a new ExodusII_IO object
-    if (_oversample || _change_position)
+    if (_use_sampled_output)
       return;
 
     // Do nothing if the mesh has not changed and sequential output is not desired
