@@ -105,6 +105,9 @@ private:
   /// A flag indicating that the mesh has changed and the oversampled mesh needs to be re-initialized
   bool _oversample_mesh_changed;
 
+  /// Flag indicating whether we are outputting in serial or parallel
+  bool _serialize;
+
   std::unique_ptr<EquationSystems> _oversample_es;
   std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
 

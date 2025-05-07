@@ -37,6 +37,11 @@ SampledOutput::validParams()
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of blocks to restrict the mesh sampling to");
+  params.addParam<bool>(
+      "serialize_sampling",
+      false,
+      "If set to true, all sampled output (see sampling parameters) will be done "
+      "on rank 0. This option is useful to debug suspected parallel output issues");
 
   // **** DEPRECATED PARAMETERS ****
   params.addDeprecatedParam<bool>("append_oversample",
@@ -46,7 +51,8 @@ SampledOutput::validParams()
                                   "'_oversample' utilize the output block name or 'file_base'");
 
   // 'Oversampling' Group
-  params.addParamNamesToGroup("refinements position file block", "Modified Mesh Sampling");
+  params.addParamNamesToGroup("refinements position file block serialize_sampling",
+                              "Modified Mesh Sampling");
 
   return params;
 }
@@ -59,7 +65,8 @@ SampledOutput::SampledOutput(const InputParameters & parameters)
     _use_sampled_output(_refinements > 0 || _using_external_sampling_file ||
                         isParamValid("block") || _change_position),
     _position(_change_position ? getParam<Point>("position") : Point()),
-    _oversample_mesh_changed(true)
+    _oversample_mesh_changed(true),
+    _serialize(getParam<bool>("serialize_sampling"))
 {
 }
 
@@ -140,6 +147,8 @@ SampledOutput::initSample()
     // query from one to the other safely on distributed meshes.
     _mesh_ptr->getMesh().skip_partitioning(true);
     mesh_refinement.uniformly_refine(_refinements);
+
+    // TODO: the nodesets dont seem to be propagated with the mesh refinement
   }
 
   // We can't allow renumbering if we want to output multiple time
@@ -205,12 +214,17 @@ SampledOutput::initSample()
     unsigned int num_actual_vars = 0;
     if (num_vars > 0)
     {
-      _serialized_solution = NumericVector<Number>::build(_communicator);
-      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      // _serialized_solution = NumericVector<Number>::build(_communicator);
+      // if (_serialize)
+      //   _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      // else
+      //   // not serialized
+      //   _serialized_solution->init(source_sys.solution->size(), false,
+      //   source_sys.solution->type());
 
       // Need to pull down a full copy of this vector on every processor so we can get values in
       // parallel
-      source_sys.solution->localize(*_serialized_solution);
+      // source_sys.solution->localize(*_serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
       for (const auto var_num : make_range(num_vars))
@@ -262,7 +276,11 @@ SampledOutput::updateSample()
   // We need the mesh functions to extend the whole domain so we serialize both the mesh and the
   // solution. We need this because the partitioning of the sampling mesh may not match the
   // partitioning of the source mesh
-  _problem_ptr->mesh().getMesh().gather_to_zero();
+  if (_serialize)
+    _problem_ptr->mesh().getMesh().gather_to_zero();
+
+  std::cout << "Source mesh   :" << _problem_ptr->mesh().getMesh() << std::endl;
+  std::cout << "Sampling mesh :" << _mesh_ptr->getMesh() << std::endl;
 
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
@@ -278,9 +296,15 @@ SampledOutput::updateSample()
       System & dest_sys = _oversample_es->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
-      _serialized_solution->clear();
-      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-      source_sys.solution->localize(*_serialized_solution);
+      if (_serialize)
+        _serialized_solution->clear();
+      if (_serialize)
+        _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      // else
+      //   _serialized_solution->init(source_sys.solution->size(), false,
+      //   source_sys.solution->type());
+      if (_serialize)
+        source_sys.solution->localize(*_serialized_solution);
 
       // Update the mesh functions
       for (const auto var_num : index_range(_mesh_functions[sys_num]))
@@ -290,7 +314,10 @@ SampledOutput::updateSample()
         // for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
           _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
-              source_es, *_serialized_solution, source_sys.get_dof_map(), original_var_num);
+              source_es,
+              _serialize ? *_serialized_solution : *source_sys.solution,
+              source_sys.get_dof_map(),
+              original_var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
 
@@ -307,7 +334,7 @@ SampledOutput::updateSample()
       {
         // we serialized the mesh and the solution vector, we might as well just do this only on
         // processor 0.
-        if (processor_id() > 0)
+        if (_serialize && processor_id() > 0)
           break;
 
         const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
@@ -315,8 +342,11 @@ SampledOutput::updateSample()
         // Loop over the mesh, nodes for nodal data, elements for element data
         if (isSampledAsNodal(fe_type))
         {
-          for (const auto & node : _mesh_ptr->getMesh().node_ptr_range())
+          for (const auto & node : (_serialize ? _mesh_ptr->getMesh().node_ptr_range()
+                                               : _mesh_ptr->getMesh().local_node_ptr_range()))
           {
+            std::cout << "Executing on " << *node
+                      << "dof :" << node->dof_number(sys_num, var_num, /*comp=*/0) << std::endl;
             if (node->n_dofs(sys_num, var_num))
             {
               const auto value = (*_mesh_functions[sys_num][var_num])(*node - _position);
@@ -331,8 +361,15 @@ SampledOutput::updateSample()
           }
         }
         else
-          for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
+        {
+          const auto elem_range = _serialize
+                                      ? _mesh_ptr->getMesh().active_element_ptr_range()
+                                      : _mesh_ptr->getMesh().active_local_element_ptr_range();
+          std::cout << "In elem loop " << std::endl;
+          for (const auto & elem : elem_range)
           {
+            std::cout << processor_id() << " " << elem->true_centroid() << " dof "
+                      << elem->dof_number(sys_num, var_num, /*comp=*/0) << std::endl;
             if (elem->n_dofs(sys_num, var_num))
             {
               const auto value =
@@ -346,9 +383,11 @@ SampledOutput::updateSample()
                     " was outside the problem mesh.\nThis message will not be repeated."));
             }
           }
+        }
       }
 
-      // We don't really need to do that
+      // We don't really need to do that in serial?
+      // dest_sys.update();
       dest_sys.solution->close();
     }
   }
@@ -371,10 +410,7 @@ SampledOutput::cloneMesh()
         _app.getFactory().createUnique<MooseMesh>("FileMesh", "output_problem_mesh", mesh_params);
     _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _cloned_mesh_ptr->init();
-    _cloned_mesh_ptr->prepare(/*mesh_to_clone=*/nullptr);
-    _cloned_mesh_ptr->meshChanged();
   }
-
   // Clone the existing mesh
   else
   {
@@ -395,10 +431,31 @@ SampledOutput::cloneMesh()
           blocks_to_keep.end())
         _cloned_mesh_ptr->getMesh().delete_elem(elem_ptr);
 
-    // Remove isolated nodes
+    // Deleting elements and isolated nodes would cause renumbering. Not renumbering might help user
+    // examining the sampled mesh and the regular mesh
     _cloned_mesh_ptr->getMesh().allow_renumbering(false);
-    _cloned_mesh_ptr->getMesh().prepare_for_use();
   }
+  // Partition the same way as the initial mesh
+  // auto pl = _mesh_ptr->getPointLocator();
+  // pl->enable_out_of_mesh_mode();
+  // for (const auto & elem : _cloned_mesh_ptr->getMesh().active_element_ptr_range())
+  // {
+  //   const auto & elem_found = (*pl)(elem->vertex_average());
+  //   if (elem_found)
+  //     elem->processor_id() = elem_found->processor_id();
+  //   else
+  //     elem->processor_id() =
+  // }
+
+  std::cout << "Constraints : " << _cloned_mesh_ptr->getMesh().n_constraint_rows() << std::endl;
+  // Prepare mesh, needed for the mesh functions
+  if (_using_external_sampling_file)
+    _cloned_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
+  else
+    // constraints have not been initialized
+    _cloned_mesh_ptr->getMesh().prepare_for_use();
+  // TODO: why is this needed?
+  _cloned_mesh_ptr->meshChanged();
 
   // Make sure that the mesh pointer points to the newly cloned mesh
   _mesh_ptr = _cloned_mesh_ptr.get();
