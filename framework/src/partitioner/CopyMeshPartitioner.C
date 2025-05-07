@@ -22,7 +22,8 @@ CopyMeshPartitioner::validParams()
 {
   InputParameters params = MoosePartitioner::validParams();
   params.addClassDescription("Assigns element to match the partitioning of another mesh. If in a "
-                             "subapp, defaults to the parent app mesh.");
+                             "child application, defaults to the parent app mesh if the other mesh "
+                             "is not specified programmatically.");
   params.addPrivateParam<MooseMesh *>("source_mesh");
 
   return params;
@@ -39,8 +40,6 @@ CopyMeshPartitioner::CopyMeshPartitioner(const InputParameters & params) : Moose
                "'source_mesh' (private) parameter to be set programmatically.");
 }
 
-CopyMeshPartitioner::~CopyMeshPartitioner() {}
-
 std::unique_ptr<Partitioner>
 CopyMeshPartitioner::clone() const
 {
@@ -53,22 +52,24 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   mooseAssert(_base_mesh, "Should have a base mesh to copy the partitioning from");
 
   // First check that it makes sense to copy the partitioning
-  // If we use the same number of procs, we are matching regions. Makes sense
-  // If we use more procs, this will leave some processors with no elements. It is not ideal, let's
-  // just give a warning. This does not happen in practice with MultiApps
+  // If we use the same number of procs to partition this mesh than to partition the source mesh, we
+  // are effectively matching regions to processes the same way in both meshes. Makes sense.
+  // If we use more procs, this will leave some processes with no elements. It is not ideal, let's
+  // just give a warning. This does not happen in practice with MultiApps.
   // If we use less procs (N_source > N_current), then either:
   // - the elements on our mesh always get matched to elements from only N_current processes among
   //   the N_source processes. We can accomodate that
-  // - the elements on our mesh get matched to the full spectrum of N_source processes. We would
-  //   need a heuristic to accomodate that. We won't support it
+  // - the elements on our mesh get matched to more processes than we have. We would
+  //   need a heuristic (for example a nested partitioner) to re-distribute these elements. We won't
+  //   support it
   std::set<unsigned int> pids_used;
+
+  if (dynamic_cast<DistributedMesh *>(&mesh))
+    mooseError("Distributed meshes not supported");
 
   // Get point locator
   auto pl = _base_mesh->getPointLocator();
   pl->enable_out_of_mesh_mode();
-
-  if (dynamic_cast<DistributedMesh *>(&mesh))
-    mooseError("Distributed meshes not supported");
 
   // Assign processor ids to all elements
   for (auto & elem_ptr : mesh.active_element_ptr_range())
@@ -96,6 +97,11 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
     pids_used.insert(tentative_pid);
   }
 
+  // Synchronize the pids used across all ranks
+  std::vector<unsigned int> pids_used_vec(pids_used.begin(), pids_used.end());
+  mesh.comm().allgather(pids_used_vec);
+  pids_used.insert(pids_used_vec.begin(), pids_used_vec.end());
+
   // Check the pids used
   // We cannot use more process ids to partition the mesh than the current app is using
   const auto max_pid = mesh.comm().size();
@@ -103,6 +109,10 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
     mooseError("Partitioning copy used more regions (" + std::to_string(pids_used.size()) +
                ") than the number of parallel processes (" + std::to_string(mesh.comm().size()) +
                ")");
+  if (pids_used.size() < max_pid)
+    mooseWarning(
+        "Some parallel (MPI) processes were not assigned any element during partitioning. These "
+        "processes will not perform any work.");
 
   // The pids are not too many, but their numbering is not contiguous, renumber the process id
   // assignment
