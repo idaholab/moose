@@ -255,7 +255,7 @@ public:
    */
   void joinOtherBase(std::unique_ptr<CSGBase> & base)
   {
-    joinSurfaceLists(base->getSurfaceList());
+    joinSurfaceList(base->getSurfaceList());
     joinCellList(base->getCellList());
     joinUniverseList(base->getUniverseList());
   }
@@ -302,7 +302,7 @@ private:
    *
    * @param surf_list
    */
-  void joinSurfaceLists(CSGSurfaceList & surf_list);
+  void joinSurfaceList(CSGSurfaceList & surf_list);
 
   /**
    * @brief join a separate CSGCellList object to this one
