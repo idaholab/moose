@@ -52,7 +52,8 @@
     "ROOT_UNIVERSE": {
       "CELLS": [
         "square_cell"
-      ]
+      ],
+      "ROOT": true
     }
   }
 }
