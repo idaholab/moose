@@ -278,9 +278,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         conda config --env --add channels ${CONDA_ALT_CHANNEL}
     fi
     # Create list of Conda Packages to install
-    MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
+    CONDA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
-    conda install -yq python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
+    conda install -yq python=${PYTHON_VERSION} ${CONDA_PACKAGES}
     # Needed for coverage
     pip3 --no-cache install lcov-cobertura
 
