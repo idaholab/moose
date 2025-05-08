@@ -142,7 +142,7 @@ gamma=${U}
   []
 []
 
-[UserObjects]
+[Correctors]
   [set_pressure]
     type = NSPressurePin
     pin_type = 'average'
