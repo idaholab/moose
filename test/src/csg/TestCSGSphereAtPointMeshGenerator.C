@@ -17,9 +17,7 @@ TestCSGSphereAtPointMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<Real>("radius", "radius of sphere.");
-  params.addRequiredParam<Real>("x0", "x coord of center point of sphere.");
-  params.addRequiredParam<Real>("y0", "y coord of center point of sphere.");
-  params.addRequiredParam<Real>("z0", "z coord of center point of sphere.");
+  params.addRequiredParam<Point>("center", "center point of sphere");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -30,7 +28,7 @@ TestCSGSphereAtPointMeshGenerator::validParams()
 TestCSGSphereAtPointMeshGenerator::TestCSGSphereAtPointMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
     _radius(getParam<Real>("radius")),
-    _center(Point(getParam<Real>("x0"), getParam<Real>("y0"), getParam<Real>("z0")))
+    _center(getParam<Point>("center"))
 {
 }
 
