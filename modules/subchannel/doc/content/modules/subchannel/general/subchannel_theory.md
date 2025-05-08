@@ -126,7 +126,7 @@ where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient 
 - Triangular assembly with bare pins: A scale analysis of the turbulent mixing rate for various Prandtl number flow fields in rod bundles eq 25,Kim and Chung (2001) [!cite](kim2001scale).
 - Triangular assembly with wire-wrapped pins: Hydrodynamic models and correlations for bare and wire-wrapped hexagonal rod bundles—bundle friction factors, subchannel friction factors and mixing parameters, Cheng and Todreas [!cite](cheng1986hydrodynamic).
 
-## Calibrated parameter values
+### Calibrated parameter values
 
 For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$. [!cite](kyriakopoulos2022development)
 
