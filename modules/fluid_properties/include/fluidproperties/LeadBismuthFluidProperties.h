@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- *  Fluid properties for 2LiF-BeF2 (LeadBismuth) \cite richard.
+ *  Fluid properties for LeadBismuth \cite richard.
  */
 class LeadBismuthFluidProperties : public SinglePhaseFluidProperties
 {

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#15795 #17100 #17239 #21383 #27486'
+  issues = '#15795 #17100 #17239 #21383 #27486 #30275'
   design = 'CoupledVarThresholdElementSubdomainModifier.md VariableValueElementSubdomainModifier.md'
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during simulation'
@@ -86,6 +86,13 @@
       input = 'return_moving_boundary.i'
       exodiff = 'return_moving_boundary_out.e return_moving_boundary_out.e-s002 return_moving_boundary_out.e-s003'
       detail = 'continue updating the boundary if it temporarily contains no element sides, '
+    []
+
+    [refined_boundary_refined_different_levels]
+      type = CSVDiff
+      input = 'moving_boundary_h_refinement.i'
+      csvdiff = 'moving_boundary_h_refinement_out.csv'
+      detail = 'update a boundary with element h-refinement happening with more refinement on the boundary primary side,'
     []
   []
 

@@ -65,6 +65,7 @@
     property_name = M
     coupled_variables = c
     expression = 'if(c<-1,0.1,if(c>1,0.1,1-.9*c^2))'
+    epsilon = 1e-12
     outputs = exodus
     derivative_order = 2
   [../]

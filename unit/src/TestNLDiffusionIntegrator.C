@@ -85,7 +85,7 @@ TEST(CheckData, NLDiffusionTest)
 {
 
   // 1. Parse command line options
-  const char * mesh_file = "./data/star.mesh";
+  const char * mesh_file = "../test/tests/mfem/mesh/star.mesh";
 
   int order = 1;
   bool nonzero_rhs = true;

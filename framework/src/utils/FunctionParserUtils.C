@@ -42,7 +42,7 @@ FunctionParserUtils<is_ad>::validParams()
   params.addParamNamesToGroup(
       "enable_jit enable_ad_cache enable_auto_optimize disable_fpoptimizer evalerror_behavior",
       "Parsed expression advanced");
-  params.addParam<Real>("epsilon", FunctionParser::epsilon(), "Fuzzy comparison tolerance");
+  params.addParam<Real>("epsilon", 0, "Fuzzy comparison tolerance");
   return params;
 }
 
@@ -191,22 +191,34 @@ template <>
 void
 FunctionParserUtils<false>::functionsOptimize(SymFunctionPtr & parsed_function)
 {
+  // set desired epsilon for optimization!
+  auto tmp_eps = parsed_function->epsilon();
+  parsed_function->setEpsilon(_epsilon);
+
   // base function
   if (!_disable_fpoptimizer)
     parsed_function->Optimize();
   if (_enable_jit && !parsed_function->JITCompile())
     mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
+
+  parsed_function->setEpsilon(tmp_eps);
 }
 
 template <>
 void
 FunctionParserUtils<true>::functionsOptimize(SymFunctionPtr & parsed_function)
 {
+  // set desired epsilon for optimization!
+  auto tmp_eps = parsed_function->epsilon();
+  parsed_function->setEpsilon(_epsilon);
+
   // base function
   if (!_disable_fpoptimizer)
     parsed_function->Optimize();
   if (!_enable_jit || !parsed_function->JITCompile())
     mooseError("AD parsed objects require JIT compilation to be enabled and working.");
+
+  parsed_function->setEpsilon(tmp_eps);
 }
 
 // explicit instantiation

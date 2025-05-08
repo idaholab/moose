@@ -19,7 +19,7 @@ are supported.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/heatconduction.i block=Executioner
+!listing test/tests/mfem/kernels/heattransfer.i block=Executioner
 
 !syntax parameters /Executioner/MFEMTransient
 

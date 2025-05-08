@@ -1446,6 +1446,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
       LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+      LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "h_sys_"));
       LibmeshPetscCall(KSPSetFromOptions(ksploc));
       LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
       // VecView(sol, PETSC_VIEWER_STDOUT_WORLD);

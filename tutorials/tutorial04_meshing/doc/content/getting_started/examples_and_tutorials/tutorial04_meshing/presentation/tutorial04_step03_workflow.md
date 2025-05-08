@@ -41,18 +41,23 @@ The [Exodus](outputs/Exodus.md) output format is the preferred way to write out 
 To save a lot of clicks, the following settings are recommended (in `Edit`->`Settings`):
 
 !row!
-!col small=12 medium=6 large=8
+
+!col! width=50%
 
 - +Auto Apply+: Automatically apply changes in the 'Properties' panel
 - +Load All Variables+: Load all variables when loading a data set
 - +Default Time Step+: Go to last timestep
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/paraview-defaults.png
        id=tutorial04-paraview-defaults
        caption=Recommended default settings in ParaView. [!cite](ParaView2005)
-       style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       style=height:40%;display:block;margin-left:auto;margin-right:auto;
+
+!col-end!
 
 !row-end!
 
@@ -81,7 +86,7 @@ There are also a variety of toggles in the Properties dialog in the lower left c
 !media tutorial04_meshing/paraview-properties.png
        id=tutorial04-paraview-properties
        caption=ParaView properties dialogue. [!cite](ParaView2005)
-       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       style=width:30%;display:block;margin-left:auto;margin-right:auto;
 
 !---
 

@@ -185,6 +185,14 @@ be retrieved. One reason you might use older values is to break cyclic dependenc
 not consider a dependence on an old value when considering the order of evaluation among objects
 with dependencies.
 
+## Restore on Rejected Timesteps
+
+When a timestep is rejected due to a failed solve, a failed multiapp solve, or
+any other reason, the timestep is usually repeated, usually with a smaller
+timestep size. Before performing the solve on the repeated timestep,
+postprocessors are restored to their old values, in order to facilitate a fresh
+attempt at the timestep.
+
 !syntax list /Postprocessors objects=True actions=False subsystems=False
 
 !syntax list /Postprocessors objects=False actions=False subsystems=True

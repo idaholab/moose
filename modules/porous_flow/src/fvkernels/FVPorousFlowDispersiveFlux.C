@@ -17,6 +17,7 @@ InputParameters
 FVPorousFlowDispersiveFlux::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   RealVectorValue g(0, 0, -9.81);
   params.addParam<RealVectorValue>("gravity", g, "Gravity vector. Defaults to (0, 0, -9.81)");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator",
@@ -29,12 +30,23 @@ FVPorousFlowDispersiveFlux::validParams()
   params.addClassDescription(
       "Dispersive and diffusive flux of the component given by fluid_component in all phases");
   params.set<unsigned short>("ghost_layers") = 2;
+
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
+
   params.addClassDescription("Advective Darcy flux");
   return params;
 }
 
 FVPorousFlowDispersiveFlux::FVPorousFlowDispersiveFlux(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_dictator.numPhases()),
     _fluid_component(getParam<unsigned int>("fluid_component")),
@@ -106,7 +118,7 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
     ADRealGradient gradX;
 
     const auto state = determineState();
-    const auto dudn = gradUDotNormal(state);
+    const auto dudn = gradUDotNormal(state, _correct_skewness);
 
     // If we are on a boundary face, use the reconstructed gradient computed in _grad_mass_frac
     if (onBoundary(*_face_info))

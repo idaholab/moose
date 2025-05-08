@@ -56,9 +56,14 @@ public:
   /// Get the face interpolation method for velocity
   const MooseEnum & getVelocityFaceInterpolationMethod() const { return _velocity_interpolation; }
   /// Get the face interpolation method for momentum in the advection term
-  const MooseEnum & getMomentumFaceInterpolationMethod() const
+  const MooseEnum & getMomentumAdvectionFaceInterpolationMethod() const
   {
     return _momentum_advection_interpolation;
+  }
+  /// Get the face interpolation method for momentum (mostly used in the stress terms)
+  const MooseEnum & getMomentumFaceInterpolationMethod() const
+  {
+    return _momentum_face_interpolation;
   }
   /// Get the inlet boundaries
   const std::vector<BoundaryName> & getInletBoundaries() const { return _inlet_boundaries; }
@@ -169,6 +174,8 @@ protected:
   const MooseEnum _velocity_interpolation;
   /// The momentum face interpolation method for being advected
   const MooseEnum _momentum_advection_interpolation;
+  /// The momentum face interpolation method for stress terms
+  const MooseEnum _momentum_face_interpolation;
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;

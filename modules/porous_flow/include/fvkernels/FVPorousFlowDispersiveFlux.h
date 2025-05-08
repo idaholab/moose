@@ -11,6 +11,7 @@
 
 #include "FVFluxKernel.h"
 #include "RankTwoTensor.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 class PorousFlowDictator;
 
@@ -18,7 +19,7 @@ class PorousFlowDictator;
  * Dispersive flux of component k in fluid phase alpha. Includes the effects
  * of both molecular diffusion and hydrodynamic dispersion
  */
-class FVPorousFlowDispersiveFlux : public FVFluxKernel
+class FVPorousFlowDispersiveFlux : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
