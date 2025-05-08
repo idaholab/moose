@@ -68,7 +68,8 @@
       "CELLS": [
         "square_cell",
         "void_cell"
-      ]
+      ],
+      "ROOT": true
     }
   }
 }
