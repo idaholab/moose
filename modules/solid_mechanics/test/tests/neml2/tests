@@ -180,5 +180,6 @@
     exodiff = 'heat_conduction_out.e'
     capabilities = 'neml2'
     libtorch_devices = 'cpu cuda'
+    requirement = 'To solve a heat conduction probelem using a neural network to compute temperature dependent thermal conductivity.'
   []
 []

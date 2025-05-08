@@ -16,8 +16,8 @@ namespace neml2
 {
 
 /**
- * Compute a doped UO2 creep flow rate using an ANN surrogate model.
- * This does not include irradiation creep.
+ * Evaluate a pretrained libtorch model in `.pt` format, such as a neural network.
+ * Evaluates models with an arbitrary number of inputs and maps them to an arbitrary number of outputs.
  */
 class LibtorchModel : public Model
 {
@@ -44,12 +44,6 @@ protected:
   Moose::DataFileUtils::Path _file_path;
   /// We need to use a pointer here because forward is not const qualified
   std::unique_ptr<torch::jit::script::Module> _surrogate;
-
-  // Linear scaling factors for the inputs and outputs
-  const std::vector<Real> _x_mean;
-  const std::vector<Real> _x_std;
-  const std::vector<Real> _y_mean;
-  const std::vector<Real> _y_std;
 };
 
 }

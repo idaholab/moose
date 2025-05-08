@@ -3,11 +3,11 @@
 !alert note
 This is a custom [NEML2](solid_mechanics/NEML2.md) object for solid_mechanics. To enable it, configure MOOSE with libtorch and initialize the [NEML2 submodule](https://github.com/applied-material-modeling/neml2).
 
-The documentation is for a NEML2 [!citep](neml2osti, neml2_anl_report) material for evaluating libtorch neural networks. This allows evaluating neural networks with an arbitrary number of inputs and mapping them to an arbitrary number of outputs. This material does not currently support backwards propagation to train the neural network, and is only meant for rapid evaluation of pre-trained neural networks.
+The documentation is for a NEML2 [!citep](neml2osti, neml2_anl_report) material for evaluating pretrained libtorch models in `.pt` format, such as neural networks. This allows evaluating models with an arbitrary number of inputs and mapping them to an arbitrary number of outputs.
 
 ## Example Input File
 
-Running NEML2 models using MOOSE requires a separate NEML2 input file that builds the material. An example input for a NEML2 LibtorchModel is shown below. The inputs to the libtorch model are provided using `inputs = 'forces/T'`, and the model outputs are mapped to `outputs = 'state/k_T'`. Since neural networks are typically trained on scaled inputs, the user is also required to specify the `x_mean`,`x_std` and `y_mean`,`y_std` for the input and outputs to be scaled linearly.
+Running NEML2 models using MOOSE requires a separate NEML2 input file that builds the material. An example input for a NEML2 LibtorchModel is shown below. The inputs to the libtorch model are provided using `inputs = 'forces/T'`, and the model outputs are mapped to `outputs = 'state/k_T'`. The scaling of inputs and outputs is built into the libtorch model during training.
 
 !listing test/tests/neml2/models/libtorch_model.i block=Models/rom
 
