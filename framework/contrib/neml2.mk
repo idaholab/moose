@@ -83,7 +83,8 @@ NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX
 neml2_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
 neml2_CPPFLAGS    += -DNEML2_ENABLED
 neml2_LDFLAGS     += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
-libmesh_CXXFLAGS += $(neml2_CPPFLAGS) $(neml2_INCLUDES)
-libmesh_LIBS     += $(neml2_LDFLAGS)
+libmesh_CXXFLAGS  += $(neml2_CPPFLAGS)
+libmesh_INCLUDE   += $(neml2_INCLUDES)
+libmesh_LIBS      += $(neml2_LDFLAGS)
 
 endif
