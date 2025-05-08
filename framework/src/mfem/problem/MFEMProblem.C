@@ -489,4 +489,19 @@ MFEMProblem::addSubMesh(const std::string & var_type,
   getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
 }
 
+void
+MFEMProblem::addTransfer(const std::string & transfer_name,
+                             const std::string & name,
+                             InputParameters & parameters)
+{
+  if (parameters.get<std::string>("_moose_base") == "MFEMSubMeshTransfer")
+  {
+    FEProblemBase::addUserObject(transfer_name, name, parameters);
+  } 
+  else
+  {
+    FEProblemBase::addTransfer(transfer_name, name, parameters);    
+  }
+}
+
 #endif
