@@ -1,14 +1,9 @@
 {
   "CELLS": {
-    "OriginSphere_sphere_cell": {
-      "FILL": "",
-      "FILLTYPE": "VOID",
-      "REGION": "-OriginSphere_sphere_surf"
-    },
-    "PointSphere_sphere_cell": {
-      "FILL": "new_mat",
-      "FILLTYPE": "MATERIAL",
-      "REGION": "-PointSphere_sphere_surf"
+    "CylsUniverse_box": {
+      "FILL": "CylsUniverse_univ",
+      "FILLTYPE": "UNIVERSE",
+      "REGION": "(-CylsUniverse_bb_x_pos_surf & +CylsUniverse_bb_x_neg_surf & -CylsUniverse_bb_y_pos_surf & +CylsUniverse_bb_y_neg_surf & -CylsUniverse_bb_z_pos_surf & +CylsUniverse_bb_z_neg_surf)"
     },
     "XCyls_cell_cyl_x_0": {
       "FILL": "",
@@ -47,25 +42,65 @@
     }
   },
   "SURFACES": {
-    "OriginSphere_sphere_surf": {
+    "CylsUniverse_bb_x_neg_surf": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "r": 5.0,
-        "x0": 0.0,
-        "y0": 0.0,
-        "z0": 0.0
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -15.0
       },
-      "TYPE": "sphere"
+      "TYPE": "plane"
     },
-    "PointSphere_sphere_surf": {
+    "CylsUniverse_bb_x_pos_surf": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
-        "r": 5.0,
-        "x0": -3.0,
-        "y0": -2.0,
-        "z0": -1.0
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 15.0
       },
-      "TYPE": "sphere"
+      "TYPE": "plane"
+    },
+    "CylsUniverse_bb_y_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -15.0
+      },
+      "TYPE": "plane"
+    },
+    "CylsUniverse_bb_y_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 15.0
+      },
+      "TYPE": "plane"
+    },
+    "CylsUniverse_bb_z_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -15.0
+      },
+      "TYPE": "plane"
+    },
+    "CylsUniverse_bb_z_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 15.0
+      },
+      "TYPE": "plane"
     },
     "XCyls_neg_plane": {
       "BOUNDARY": "transmission",
@@ -192,7 +227,7 @@
     }
   },
   "UNIVERSES": {
-    "CylsUniverse_root": {
+    "CylsUniverse_univ": {
       "CELLS": [
         "XCyls_cell_cyl_x_0",
         "XCyls_cell_cyl_x_1",
@@ -203,43 +238,18 @@
         "ZCyls_cell_cyl_z_1"
       ]
     },
-    "OriginSphere_sphere_univ": {
-      "CELLS": [
-        "OriginSphere_sphere_cell"
-      ]
-    },
-    "PointSphere_sphere_univ": {
-      "CELLS": [
-        "PointSphere_sphere_cell"
-      ]
-    },
-    "SpheresUniverse_root": {
-      "CELLS": [
-        "PointSphere_sphere_cell",
-        "OriginSphere_sphere_cell"
-      ]
-    },
-    "XCyls_universe": {
+    "ROOT_UNIVERSE": {
       "CELLS": [
         "XCyls_cell_cyl_x_0",
         "XCyls_cell_cyl_x_1",
-        "XCyls_cell_cyl_x_2"
-      ]
-    },
-    "YCyls_universe": {
-      "CELLS": [
+        "XCyls_cell_cyl_x_2",
         "YCyls_cell_cyl_y_0",
-        "YCyls_cell_cyl_y_1"
-      ]
-    },
-    "ZCyls_universe": {
-      "CELLS": [
+        "YCyls_cell_cyl_y_1",
         "ZCyls_cell_cyl_z_0",
-        "ZCyls_cell_cyl_z_1"
-      ]
-    },
-    "fullmodel_root": {
-      "CELLS": null
+        "ZCyls_cell_cyl_z_1",
+        "CylsUniverse_box"
+      ],
+      "ROOT": true
     }
   }
 }
