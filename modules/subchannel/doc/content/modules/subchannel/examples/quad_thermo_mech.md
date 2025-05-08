@@ -19,5 +19,6 @@ Fuel Pin Model.
 
 !listing /examples/coupling/thermo_mech/quad/one_pin_problem_sub.i language=cpp
 
+## Caveat
 
-
+The SCM input file utilizes the [MultiApp](https://mooseframework.inl.gov/syntax/MultiApps/index.html) functionality and runs the fuel model as a SubApp. The executable to be used is the combined-opt that is compiled with the make file in combined folder of MOOSE.
