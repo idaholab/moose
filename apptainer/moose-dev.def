@@ -21,10 +21,6 @@
 {#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
 
-{#- Set WITH_LIBTORCH default if not set                                                      -#}
-{%- if WITH_LIBTORCH is not defined %}
-{%- set WITH_LIBTORCH = 'cpu' %}
-{%- endif %}
 {#- Set WITH_MFEM default if not set                                                          -#}
 {%- if WITH_MFEM is not defined %}
 {%- set WITH_MFEM = '1' %}
@@ -61,6 +57,8 @@
 {%- set NEML2_BUILD_SCRIPT = 'update_and_rebuild_neml2.sh' -%}
 {#- The installation location for neml2                                                       -#}
 {%- set NEML2_DIR = '/opt/neml2' -%}
+{#- Version of python to use in the conda environment                                         -#}
+{%- set PYTHON_VERSION = '3.12' -%}
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
@@ -82,7 +80,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MFEM_DIR={{ MFEM_DIR }}
 {%- endif %}
 
-{%- if WITH_LIBTORCH %}
+{% if WITHOUT_PYTORCH is not defined %}
     export LIBTORCH_DIR={{ LIBTORCH_DEST }}/libtorch
     export NEML2_DIR={{ NEML2_DIR }}
     # Adding this to not get GPU initialization errors from MPICH
@@ -113,7 +111,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Pinned versions
     MINIFORGE_VERSION=23.3.1-1
-    PYTHON_VERSION=3.12
+    PYTHON_VERSION={{ PYTHON_VERSION }}
     CODE_SERVER_VERSION=4.96.4
 
     # Install code-server
@@ -239,6 +237,39 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm ${MINIFORGE_SCRIPT}
     export PATH=${MOOSE_MINIFORGE}/bin:$PATH
     conda update -yq --all
+
+{% if WITHOUT_PYTORCH is not defined %}
+    # Clone pytorch
+    PYTORCH_VER=2.6.0
+    cd ${ROOT_BUILD_DIR}
+    git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
+    PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
+
+    # Create a temporary python environment for building pytorch
+    PYTORCH_CONDA_ENV=pytorch_build
+    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
+    source activate ${MOOSE_MINIFORGE}/envs/${PYTORCH_CONDA_ENV}
+    pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+
+    # Build and install pytorch
+    PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
+    mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
+    TORCH_CUDA_ARCH_LIST="7.0 8.0 8.6 8.9 9.0" \
+        CFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict" \
+        CXXFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict" \
+        cmake \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DCMAKE_BUILD_TYPE:STRING=Release \
+        -DPYTHON_EXECUTABLE:PATH=`which python3` \
+        -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} ${PYTORCH_DIR}
+    cmake --build . --target install -- -j ${MOOSE_JOBS}
+
+    # Cleanup the temporary python environment
+    source deactivate
+    conda env remove -n ${PYTORCH_CONDA_ENV}
+    rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+    cd ${ROOT_BUILD_DIR}
+{%- endif %}
 
     # Add moose channels
     conda config --env --add channels https://conda.software.inl.gov/public
