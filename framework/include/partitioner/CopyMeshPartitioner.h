@@ -19,7 +19,7 @@ class CopyMeshPartitioner : public MoosePartitioner
 {
 public:
   CopyMeshPartitioner(const InputParameters & params);
-  virtual ~CopyMeshPartitioner();
+  virtual ~CopyMeshPartitioner() {};
 
   static InputParameters validParams();
 
