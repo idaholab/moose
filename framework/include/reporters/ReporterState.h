@@ -127,6 +127,15 @@ public:
    */
   void copyValuesBack();
 
+  /**
+   * Restore values to their old values, i.e. value(0) = value(1). This only occurs if old values
+   * have been declared, which happens automatically for postprocessors.
+   *
+   * @return true State was restored
+   * @return false State was NOT restored
+   */
+  bool restoreState();
+
   std::string valueType() const override final { return MooseUtils::prettyCppType<T>(); }
 
   /**
@@ -163,6 +172,15 @@ ReporterState<T>::value(const std::size_t time_index)
   if (this->get().empty())
     this->set().resize(1);
 
+  // If we are a postprocessor, we want to always store an old value so that we can restore the data
+  // if needed. See restoreState.
+  // Note: This can easily be extended to other states like vector-postprocessors or any other
+  // reporter value. However, these states have indeterminate sizes and could create significant,
+  // unecessary memory overhead. In the future, we can extend this to other reporter types if
+  // the need justifies the overhead.
+  if (this->getReporterName().isPostprocessor() && time_index == 0 && this->get().size() <= 1)
+    this->set().push_back(this->get().back());
+
   // Initialize old, older, ... data
   if (this->get().size() <= time_index)
     this->set().resize(time_index + 1, this->get().back());
@@ -195,6 +213,17 @@ ReporterState<T>::copyValuesBack()
        std::next(iter) != values.rend();
        ++iter)
     (*iter) = (*std::next(iter));
+}
+
+template <typename T>
+bool
+ReporterState<T>::restoreState()
+{
+  if (this->get().size() <= 1)
+    return false;
+
+  this->set().front() = *std::next(this->get().begin());
+  return true;
 }
 
 template <typename T>

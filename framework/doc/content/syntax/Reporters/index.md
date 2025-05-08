@@ -130,6 +130,19 @@ Automatically performs an MPI gather to a vector of data on the root processor f
 
 The [ReporterDebugOutput.md] output can be added to output to screen all of the Reporter values that were declared and requested, along with their types, producers, contexts, consumers, and consumer modes. This debug output can also be enabled with the `Debug/show_reporters` parameter.
 
+## Restore on Rejected Timesteps
+
+When a timestep is rejected due to a failed solve, a failed multiapp solve, or
+any other reason, the timestep is usually repeated, usually with a smaller
+timestep size. However, unlike postprocessors, generic reporters are not
+restored to their old values, i.e. before the initial timestep, unless an old
+value is requested by another object. This can cause statefulness in objects
+dependent on the reporter between the repeated timesteps. If you suspect this
+might be causing indeterminate behavior in your simulation, you can check all
+the data being restored between the failed and repeated timestep by setting
+`Problem/`[!param](/Problem/FEProblem/verbose_restore)` = true`.
+
+
 !syntax list /Reporters objects=True actions=False subsystems=False
 
 !syntax list /Reporters objects=False actions=False subsystems=True

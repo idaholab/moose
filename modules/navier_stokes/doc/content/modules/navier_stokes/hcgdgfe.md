@@ -51,10 +51,10 @@ for pressure.
 We then add the `Kernels` block which adds the parts of the finite element weak
 form terms that are integrated over element volumes. The first three kernels
 comprise the x-momentum equation advection, diffusion, and pressure terms and
-are of type [ADConservativeAdvection.md], [MatDiffusion.md], and
+are of type [ConservativeAdvection.md], [MatDiffusion.md], and
 [PressureGradient.md] respectively. The next three kernels are the same physics
 but for the y-momentum equation. The final kernel, `mass`, reuses the
-[ADConservativeAdvection.md] kernel but is applied to the mass continuity
+[ConservativeAdvection.md] kernel but is applied to the mass continuity
 equation which is applied to the `pressure` variable.
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/cg-dg-hybrid/lid-driven/hybrid-cg-dg.i block=Kernels

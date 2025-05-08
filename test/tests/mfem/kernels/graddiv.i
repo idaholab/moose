@@ -3,7 +3,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = gold/beam-tet.mesh
+  file = ../mesh/beam-tet.mesh
   dim = 3
   uniform_refine = 1
 []

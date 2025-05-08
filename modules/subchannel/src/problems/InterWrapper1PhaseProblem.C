@@ -662,6 +662,7 @@ InterWrapper1PhaseProblem::computeMdot(int iblock)
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
       LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+      LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "mass_sys_"));
       LibmeshPetscCall(KSPSetFromOptions(ksploc));
       LibmeshPetscCall(KSPSolve(ksploc, _mc_axial_convection_rhs, sol));
       LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
@@ -1353,6 +1354,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
         LibmeshPetscCall(KSPGetPC(ksploc, &pc));
         LibmeshPetscCall(PCSetType(pc, PCJACOBI));
         LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+        LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "pressure_sys_"));
         LibmeshPetscCall(KSPSetFromOptions(ksploc));
         LibmeshPetscCall(KSPSolve(ksploc, _amc_pressure_force_rhs, sol));
         PetscScalar * xx;
@@ -1447,6 +1449,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
         LibmeshPetscCall(KSPGetPC(ksploc, &pc));
         LibmeshPetscCall(PCSetType(pc, PCJACOBI));
         LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+        LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "axial_mom_sys_"));
         LibmeshPetscCall(KSPSetFromOptions(ksploc));
         LibmeshPetscCall(KSPSolve(ksploc, _amc_pressure_force_rhs, sol));
         PetscScalar * xx;
@@ -1863,6 +1866,7 @@ InterWrapper1PhaseProblem::computeh(int iblock)
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
       LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+      LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "h_cons_sys_"));
       LibmeshPetscCall(KSPSetFromOptions(ksploc));
       LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
       PetscScalar * xx;

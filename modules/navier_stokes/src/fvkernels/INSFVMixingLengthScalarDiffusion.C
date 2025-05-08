@@ -16,6 +16,7 @@ InputParameters
 INSFVMixingLengthScalarDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes the turbulent diffusive flux that appears in "
                              "Reynolds-averaged fluid conservation equations.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
@@ -27,11 +28,22 @@ INSFVMixingLengthScalarDiffusion::validParams()
       "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
       "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
   params.set<unsigned short>("ghost_layers") = 2;
+
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
+
   return params;
 }
 
 INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _dim(_subproblem.mesh().dimension()),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
@@ -82,7 +94,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   // the scalar variable
   eddy_diff /= _schmidt_number;
 
-  // Compute the diffusive flux of the scalar variable
-  auto dudn = gradUDotNormal(state);
+  // Compute the diffusive flux of the scalar variable, skewness correction is not used here
+  auto dudn = gradUDotNormal(state, _correct_skewness);
   return -1 * eddy_diff * dudn;
 }

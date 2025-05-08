@@ -8,30 +8,29 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [BCs]
-  [./u_injection_left]
+  [u_injection_left]
     type = InflowBC
     boundary = left
     variable = u
     velocity = '1 0 0'
     inlet_conc = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./udot]
+  [udot]
     type = TimeDerivative
     variable = u
-  [../]
-  [./advection]
+  []
+  [advection]
     type = ConservativeAdvection
     variable = u
-    velocity = '1 0 0'
-  [../]
+  []
 []
 
 [Executioner]

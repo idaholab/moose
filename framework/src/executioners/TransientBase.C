@@ -347,7 +347,22 @@ TransientBase::incrementStepOrReject()
       _time_old = _time;
       _t_step++;
 
-      _problem.advanceState();
+      bool advance_problem_state = true;
+      const auto & tis = getTimeIntegrators();
+      for (auto & ti : tis)
+        // We do not want to advance the problem state here if a time integrator is already doing so
+        // itself
+        if (ti->advancesProblemState())
+        {
+          advance_problem_state = false;
+          break;
+        }
+
+      if (advance_problem_state)
+        _problem.advanceState();
+      else if (tis.size() > 1)
+        mooseError("Either there must be a single time integrator which advances state or none of "
+                   "the time integrators should advance state.");
 
       if (_t_step == 1)
         return;

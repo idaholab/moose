@@ -17,6 +17,7 @@ InputParameters
 WCNSFVMixingLengthEnergyDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes the turbulent diffusive flux that appears in "
                              "Reynolds-averaged fluid energy conservation equations.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
@@ -30,12 +31,22 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
 
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
+
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _dim(_subproblem.mesh().dimension()),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
@@ -88,7 +99,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   // the scalar variable
   eddy_diff /= _schmidt_number;
 
-  const auto dTdn = gradUDotNormal(state);
+  const auto dTdn = gradUDotNormal(state, _correct_skewness);
 
   ADReal rho_cp_face;
   if (onBoundary(*_face_info))

@@ -10,6 +10,8 @@
 #include "DebugResidualAux.h"
 #include "NonlinearSystem.h"
 
+#include "libmesh/string_to_enum.h"
+
 registerMooseObject("MooseApp", DebugResidualAux);
 
 InputParameters
@@ -28,6 +30,21 @@ DebugResidualAux::DebugResidualAux(const InputParameters & parameters)
     _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
     _residual_copy(_nl_sys.residualGhosted())
 {
+  // Check that variable order/family match aux_variable order/family
+  auto var_order = Utility::string_to_enum<Order>(_var.getParam<MooseEnum>("order"));
+  auto debug_order = Utility::string_to_enum<Order>(_debug_var.getParam<MooseEnum>("order"));
+  auto var_family = Utility::string_to_enum<FEFamily>(_var.getParam<MooseEnum>("family"));
+  auto debug_family = Utility::string_to_enum<FEFamily>(_debug_var.getParam<MooseEnum>("family"));
+  if (var_order != debug_order || var_family != debug_family)
+    mooseError("A mismatch was found between family and order parameters for ",
+               _var.name(),
+               " and ",
+               _debug_var.name(),
+               " in ",
+               this->getParam<std::string>("_object_name"));
+  if (!_nodal && debug_order > 0)
+    mooseWarning("Residual output is approximate for variable order " +
+                 Moose::stringify(debug_order));
 }
 
 Real

@@ -22,7 +22,7 @@ This term arises from the weak form of the grad div operator
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/graddiv.i
+!listing mfem/kernels/graddiv.i block=Kernels
 
 !syntax parameters /Kernels/MFEMDivDivKernel
 

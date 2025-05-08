@@ -131,6 +131,7 @@ C2 = 1.0
                  "if(mat_den<${rho1},E1,E2)"
     coupled_variables = 'mat_den'
     property_name = E_phys
+    epsilon = 1e-12
   []
 
   [Cost_mat]
@@ -143,6 +144,7 @@ C2 = 1.0
                  "if(mat_den<${rho1},C1,C2)"
     coupled_variables = 'mat_den'
     property_name = Cost_mat
+    epsilon = 1e-12
   []
 
   [poissons_ratio]

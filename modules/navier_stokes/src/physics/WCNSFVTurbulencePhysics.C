@@ -480,6 +480,8 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     params.set<MooseFunctorName>("mu") = _turbulent_viscosity_name;
     params.set<MooseEnum>("mu_interp_method") =
         getParam<MooseEnum>("turbulent_viscosity_interp_method");
+    params.set<MooseEnum>("variable_interp_method") =
+        _flow_equations_physics->getMomentumFaceInterpolationMethod();
     params.set<bool>("complete_expansion") = true;
 
     std::string kernel_name = prefix() + "ins_momentum_k_epsilon_reynolds_stress_";
