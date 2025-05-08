@@ -19,8 +19,8 @@ public:
   SolidMechanicsApp(const InputParameters & parameters);
   virtual ~SolidMechanicsApp();
 
-  virtual void setupOptions() override;
-  virtual void runInputFile() override;
+  void setupOptions() override;
+  void runInputFile() override;
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);

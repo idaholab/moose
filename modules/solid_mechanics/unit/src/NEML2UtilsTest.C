@@ -12,6 +12,9 @@
 #include "NEML2Utils.h"
 
 #ifdef NEML2_ENABLED
+
+#include <torch/torch.h>
+
 TEST(NEML2Utils, fromBlob_Real)
 {
   std::vector<Real> data(3);

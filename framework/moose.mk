@@ -7,7 +7,7 @@ MOOSE_HEADER_SYMLINKS ?= true
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch mfem
+IGNORE_CONTRIB_INC ?= libtorch mfem neml2
 ENABLE_LIBTORCH ?= false
 ENABLE_MFEM ?= false
 
@@ -96,6 +96,11 @@ wasp_CXXFLAGS     := -DWASP_ENABLED -I$(WASP_DIR)/include
 wasp_LDFLAGS      := -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 libmesh_CXXFLAGS  += $(wasp_CXXFLAGS)
 libmesh_LDFLAGS   += $(wasp_LDFLAGS)
+
+#
+# neml2
+#
+include $(FRAMEWORK_DIR)/contrib/neml2.mk
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
