@@ -25,15 +25,3 @@ LinearFVExtrapolatedPressureBC::LinearFVExtrapolatedPressureBC(const InputParame
   : LinearFVAdvectionDiffusionExtrapolatedBC(parameters)
 {
 }
-
-Real
-LinearFVExtrapolatedPressureBC::computeBoundaryGradientMatrixContribution() const
-{
-  return 0;
-}
-
-Real
-LinearFVExtrapolatedPressureBC::computeBoundaryGradientRHSContribution() const
-{
-  return 0;
-}

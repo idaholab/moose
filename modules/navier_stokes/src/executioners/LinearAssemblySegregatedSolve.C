@@ -192,6 +192,20 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   PetscLinearSolver<Real> & pressure_solver =
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
+  if (_pin_pressure)
+  {
+    Real pressure_value = 0.0;
+    if (_pressure_pin_dof >= mmat.row_start() && _pressure_pin_dof < mmat.row_stop())
+    {
+      pressure_value = solution(_pressure_pin_dof);
+    }
+    solution.comm().sum(pressure_value);
+
+    solution.add(_pressure_pin_value - pressure_value);
+    current_local_solution.add(_pressure_pin_value - pressure_value);
+    _pressure_system.computeGradients();
+  }
+
   _problem.computeLinearSystemSys(pressure_system, mmat, rhs, false);
 
   if (_print_fields)
@@ -211,10 +225,38 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   pressure_solver.set_solver_configuration(_pressure_linear_control);
 
   if (_pin_pressure)
-    NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+  {
+    // Real pressure_value = 0.0;
+    // if (_pressure_pin_dof >= mmat.row_start() && _pressure_pin_dof < mmat.row_stop())
+    // {
+    //   pressure_value = solution(_pressure_pin_dof);
+    // }
+    // solution.comm().sum(pressure_value);
+
+    // solution.add(_pressure_pin_value - pressure_value);
+    // current_local_solution.add(_pressure_pin_value - pressure_value);
+    // _pressure_system.computeGradients();
+
+    // NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+  }
   pressure_system.update();
 
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
+
+  if (_pin_pressure)
+  {
+    Real pressure_value = 0.0;
+    if (_pressure_pin_dof >= mmat.row_start() && _pressure_pin_dof < mmat.row_stop())
+    {
+      pressure_value = solution(_pressure_pin_dof);
+    }
+    solution.comm().sum(pressure_value);
+
+    solution.add(_pressure_pin_value - pressure_value);
+    current_local_solution.add(_pressure_pin_value - pressure_value);
+    _pressure_system.computeGradients();
+  }
+
   pressure_system.update();
 
   if (_print_fields)
