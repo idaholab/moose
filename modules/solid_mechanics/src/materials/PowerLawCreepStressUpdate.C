@@ -69,6 +69,13 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeStressInitialize(
   _exp_time = std::pow(_t - _start_time, _m_exponent);
 }
 
+template<bool is_ad>
+Real 
+PowerLawCreepStressUpdateTempl<is_ad>::computeCreepStrainRate(const Real& stress_eq)
+{
+  return _coefficient*std::pow(stress_eq, _n_exponent)* MetaPhysicL::raw_value(_exponential) * _exp_time;
+}
+
 template <bool is_ad>
 template <typename ScalarType>
 ScalarType
@@ -76,8 +83,7 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(
     const GenericReal<is_ad> & effective_trial_stress, const ScalarType & scalar)
 {
   const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
-  const ScalarType creep_rate =
-      _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _exp_time;
+  Real creep_rate = computeCreepStrainRate(MetaPhysicL::raw_value(stress_delta)); 
   return creep_rate * _dt - scalar;
 }
 
@@ -102,9 +108,13 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeStrainEnergyRateDensity(
   if (_n_exponent <= 1)
     return 0.0;
 
-  Real creep_factor = _n_exponent / (_n_exponent + 1);
-
-  return MetaPhysicL::raw_value(creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]));
+  if(!RadialReturnCreepStressUpdateBaseTempl<is_ad>::_compute_numerical_serd)
+  {
+    Real creep_factor = _n_exponent / (_n_exponent + 1);
+    return MetaPhysicL::raw_value(creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]));
+  }
+  else
+    return RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainEnergyRateDensity(stress, strain_rate);
 }
 
 template <bool is_ad>

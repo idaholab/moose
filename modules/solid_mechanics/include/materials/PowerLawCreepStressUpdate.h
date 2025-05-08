@@ -58,6 +58,8 @@ protected:
     return computeResidualInternal<GenericChainedReal<is_ad>>(effective_trial_stress, scalar);
   }
 
+  virtual Real computeCreepStrainRate(const Real& stress_eq) override;
+
   /// Temperature variable value
   const GenericVariableValue<is_ad> * const _temperature;
 
