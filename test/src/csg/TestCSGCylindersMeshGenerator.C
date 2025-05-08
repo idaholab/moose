@@ -91,10 +91,5 @@ TestCSGCylindersMeshGenerator::generateCSG()
     prev_surf_name = surf_name;
   }
 
-  // make universe for this set of cylinders
-  auto all_cells = csg_mesh->getRootUniverse()->getAllCells();
-  std::string univ_name = this->name() + "_universe";
-  csg_mesh->createUniverse(univ_name, all_cells);
-
   return csg_mesh;
 }
