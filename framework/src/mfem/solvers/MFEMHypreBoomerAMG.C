@@ -58,13 +58,12 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     lor_solver->GetSolver().SetStrengthThresh(_strength_threshold);
-  
+
     if (_mfem_fespace && !mfem::HypreUsingGPU())
       lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
-  
+
     _solver.reset(lor_solver);
   }
-    
 }
 
 #endif

@@ -42,7 +42,6 @@ MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     _preconditioner.reset(lor_solver);
   }
-    
 }
 
 #endif

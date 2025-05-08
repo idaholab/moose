@@ -73,7 +73,7 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   {
     mfem::ParLORDiscretization lor_disc(a, tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(
-      lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+        lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm());
     lor_solver->GetSolver().SetTol(getParam<double>("l_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
     lor_solver->GetSolver().SetKDim(getParam<int>("kdim"));
