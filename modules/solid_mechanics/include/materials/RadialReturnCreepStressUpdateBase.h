@@ -50,7 +50,7 @@ protected:
     return TangentCalculationMethod::PARTIAL;
   }
 
-  virtual Real computeCreepStrainRate(const Real& stress_eq) ;
+  virtual GenericReal<is_ad> computeCreepStrainRate(const GenericReal<is_ad> & /*stress_eq*/);
 
   virtual Real computeStrainEnergyRateDensity(
       const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
@@ -59,7 +59,6 @@ protected:
   /// Creep strain material property
   GenericMaterialProperty<RankTwoTensor, is_ad> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
-  const bool & _compute_numerical_serd;
 };
 
 typedef RadialReturnCreepStressUpdateBaseTempl<false> RadialReturnCreepStressUpdateBase;
