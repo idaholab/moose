@@ -154,6 +154,9 @@ FEProblemBase::validParams()
       "transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");
   params.addParam<unsigned int>(
       "near_null_space_dimension", 0, "The dimension of the near nullspace");
+  params.addParam<bool>("constant_nullspace",
+                        false,
+                        "Whether the operator has a nullspace containing the constant vector");
   params.addParam<bool>("solve",
                         true,
                         "Whether or not to actually solve the Nonlinear system.  "
@@ -364,9 +367,9 @@ FEProblemBase::validParams()
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
   params.addParamNamesToGroup("verbose_setup verbose_multiapps parallel_barrier_messaging",
                               "Verbosity");
-  params.addParamNamesToGroup(
-      "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
-      "Null space removal");
+  params.addParamNamesToGroup("null_space_dimension transpose_null_space_dimension "
+                              "near_null_space_dimension constant_nullspace",
+                              "Null space removal");
   params.addParamNamesToGroup(
       "extra_tag_vectors extra_tag_matrices extra_tag_solutions not_zeroed_tag_vectors",
       "Contribution to tagged field data");
@@ -478,6 +481,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
             : _app.errorOnJacobianNonzeroReallocation()),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _preserve_matrix_sparsity_pattern(true),
+    _constant_nullspace(nullptr),
     _force_restart(getParam<bool>("force_restart")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
@@ -597,6 +601,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsCreate(&_petsc_option_data_base));
 #endif
+
+  if (getParam<bool>("constant_nullspace"))
+    LibmeshPetscCall(
+        MatNullSpaceCreate(this->comm().get(), PETSC_TRUE, 0, nullptr, &_constant_nullspace));
 
   if (!_solve)
   {

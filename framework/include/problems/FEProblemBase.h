@@ -1904,6 +1904,11 @@ public:
   void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
 
   /**
+   * @returns The constant nullspace if it exists
+   */
+  MatNullSpace constantNullspace() { return _constant_nullspace; }
+
+  /**
    * Whether or not to accept the solution based on its invalidity.
    *
    * If this returns false, it means that an invalid solution was encountered
@@ -2889,6 +2894,8 @@ private:
   bool _ignore_zeros_in_jacobian;
   /// Whether to preserve the system matrix / Jacobian sparsity pattern, using 0-valued entries usually
   bool _preserve_matrix_sparsity_pattern;
+  /// The constant nullspace if the system matrix has one. Null otherwise
+  MatNullSpace _constant_nullspace;
 
   const bool _force_restart;
   const bool _allow_ics_during_restart;
