@@ -44,7 +44,15 @@ MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
-    _preconditioner.reset(new mfem::LORSolver<mfem::HypreAMS>(a, tdofs));
+  {
+    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(a, tdofs);
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+    if (getParam<bool>("singular"))
+      lor_solver->GetSolver().SetSingularProblem();
+
+    _preconditioner.reset(lor_solver);
+  }
+
 }
 
 #endif

@@ -37,7 +37,12 @@ MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
   if (getParam<bool>("low_order_refined"))
-    _preconditioner.reset(new mfem::LORSolver<mfem::HypreADS>(a, tdofs));
+  {
+    auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(a, tdofs);
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+    _preconditioner.reset(lor_solver);
+  }
+    
 }
 
 #endif

@@ -52,7 +52,19 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
 {
 
   if (getParam<bool>("low_order_refined"))
-    _solver.reset(new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs));
+  {
+    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
+    lor_solver->GetSolver().SetTol(getParam<double>("l_tol"));
+    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+    lor_solver->GetSolver().SetStrengthThresh(_strength_threshold);
+  
+    if (_mfem_fespace && !mfem::HypreUsingGPU())
+      lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
+  
+    _solver.reset(lor_solver);
+  }
+    
 }
 
 #endif

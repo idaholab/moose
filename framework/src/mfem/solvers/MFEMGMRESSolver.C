@@ -63,7 +63,14 @@ MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   }
   else if (lor)
   {
-    _solver.reset(new mfem::LORSolver<mfem::GMRESSolver>(a, tdofs));
+    auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, tdofs);
+    lor_solver->GetSolver().SetRelTol(getParam<double>("l_tol"));
+    lor_solver->GetSolver().SetAbsTol(getParam<double>("l_abs_tol"));
+    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+  
+    _solver.reset(lor_solver);
+
   }
 }
 
