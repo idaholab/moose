@@ -18,6 +18,10 @@ FlowChannel1Phase::validParams()
 {
   InputParameters params = FlowChannel1PhaseBase::validParams();
 
+  MooseEnum wave_speed_formulation("einfeldt davis", "einfeldt");
+  params.addParam<MooseEnum>(
+      "wave_speed_formulation", wave_speed_formulation, "Method for computing wave speeds");
+
   std::vector<Real> sf_1phase(3, 1.0);
   params.addParam<std::vector<Real>>(
       "scaling_factor_1phase",

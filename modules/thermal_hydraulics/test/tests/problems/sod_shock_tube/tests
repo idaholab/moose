@@ -67,4 +67,10 @@
     group = '1phase rdg implicit pipe free_boundary'
     requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation using a first order time integration scheme and a Newton nonlinear solver.'
   []
+  [davis_wave_speed]
+    type = CSVDiff
+    input = 'davis_wave_speed.i'
+    csvdiff = 'davis_wave_speed_vpp_FINAL.csv'
+    requirement = 'The system shall be able to use the Davis wave speed formulation for the HLLC Riemann solver.'
+  []
 []

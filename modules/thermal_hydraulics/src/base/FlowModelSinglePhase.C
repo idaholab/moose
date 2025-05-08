@@ -41,9 +41,15 @@ InputParameters
 FlowModelSinglePhase::validParams()
 {
   InputParameters params = FlowModel1PhaseBase::validParams();
+
+  MooseEnum wave_speed_formulation("einfeldt davis", "einfeldt");
+  params.addParam<MooseEnum>(
+      "wave_speed_formulation", wave_speed_formulation, "Method for computing wave speeds");
+
   params.addRequiredParam<std::vector<Real>>(
       "scaling_factor_1phase",
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
+
   return params;
 }
 
@@ -164,6 +170,7 @@ FlowModelSinglePhase::addNumericalFluxUserObject()
 {
   const std::string class_name = "ADNumericalFlux3EqnHLLC";
   InputParameters params = _factory.getValidParams(class_name);
+  params.applySpecificParameters(parameters(), {"wave_speed_formulation"});
   params.set<UserObjectName>("fluid_properties") = _fp_name;
   params.set<MooseEnum>("emit_on_nan") = "none";
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
