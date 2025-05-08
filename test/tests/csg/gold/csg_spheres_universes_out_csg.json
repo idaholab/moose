@@ -1,0 +1,117 @@
+{
+  "CELLS": {
+    "OriginSphere_sphere_cell": {
+      "FILL": "",
+      "FILLTYPE": "VOID",
+      "REGION": "-OriginSphere_sphere_surf"
+    },
+    "PointSphere_sphere_cell": {
+      "FILL": "new_mat",
+      "FILLTYPE": "MATERIAL",
+      "REGION": "-PointSphere_sphere_surf"
+    },
+    "SpheresUniverse_box": {
+      "FILL": "SpheresUniverse_univ",
+      "FILLTYPE": "UNIVERSE",
+      "REGION": "(-SpheresUniverse_bb_x_pos_surf & +SpheresUniverse_bb_x_neg_surf & -SpheresUniverse_bb_y_pos_surf & +SpheresUniverse_bb_y_neg_surf & -SpheresUniverse_bb_z_pos_surf & +SpheresUniverse_bb_z_neg_surf)"
+    }
+  },
+  "SURFACES": {
+    "OriginSphere_sphere_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "r": 5.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "TYPE": "sphere"
+    },
+    "PointSphere_sphere_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "r": 5.0,
+        "x0": -3.0,
+        "y0": -2.0,
+        "z0": -1.0
+      },
+      "TYPE": "sphere"
+    },
+    "SpheresUniverse_bb_x_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -10.0
+      },
+      "TYPE": "plane"
+    },
+    "SpheresUniverse_bb_x_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 10.0
+      },
+      "TYPE": "plane"
+    },
+    "SpheresUniverse_bb_y_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -10.0
+      },
+      "TYPE": "plane"
+    },
+    "SpheresUniverse_bb_y_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 10.0
+      },
+      "TYPE": "plane"
+    },
+    "SpheresUniverse_bb_z_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -10.0
+      },
+      "TYPE": "plane"
+    },
+    "SpheresUniverse_bb_z_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 10.0
+      },
+      "TYPE": "plane"
+    }
+  },
+  "UNIVERSES": {
+    "ROOT_UNIVERSE": {
+      "CELLS": [
+        "PointSphere_sphere_cell",
+        "OriginSphere_sphere_cell",
+        "SpheresUniverse_box"
+      ],
+      "ROOT": true
+    },
+    "SpheresUniverse_univ": {
+      "CELLS": [
+        "PointSphere_sphere_cell",
+        "OriginSphere_sphere_cell"
+      ]
+    }
+  }
+}
