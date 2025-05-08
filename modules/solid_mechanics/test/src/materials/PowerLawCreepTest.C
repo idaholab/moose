@@ -64,3 +64,13 @@ PowerLawCreepTestTempl<is_ad>::computeDerivative(const GenericReal<is_ad> & effe
 
   return PowerLawCreepStressUpdateTempl<is_ad>::computeDerivative(effective_trial_stress, scalar);
 }
+
+
+template <bool is_ad>
+Real
+PowerLawCreepTestTempl<is_ad>::computeStrainEnergyRateDensity(
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate)
+{
+    return RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainEnergyRateDensity(stress, strain_rate);
+}

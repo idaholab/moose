@@ -15,7 +15,6 @@ RadialReturnCreepStressUpdateBaseTempl<is_ad>::validParams()
 {
   InputParameters params = RadialReturnStressUpdateTempl<is_ad>::validParams();
   params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";
-  params.addParam<bool>("compute_numerical_serd", false, "method to compute strain energy rate density either numerically or analytically");
   return params;
 }
 
@@ -26,8 +25,7 @@ RadialReturnCreepStressUpdateBaseTempl<is_ad>::RadialReturnCreepStressUpdateBase
     _creep_strain(this->template declareGenericProperty<RankTwoTensor, is_ad>(this->_base_name +
                                                                               "creep_strain")),
     _creep_strain_old(
-        this->template getMaterialPropertyOld<RankTwoTensor>(this->_base_name + "creep_strain")),
-    _compute_numerical_serd(this->template getParam<bool>("compute_numerical_serd"))
+        this->template getMaterialPropertyOld<RankTwoTensor>(this->_base_name + "creep_strain"))
 {
 }
 
@@ -86,8 +84,6 @@ RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainEnergyRateDensity(
       const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
       const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate)
 {
-  if(_compute_numerical_serd)
-  {
     // Gaussian quadrature weights and points for 5-point rule
     const Real weights[5] = {0.2369268851, 0.4786286705, 0.5688888889, 0.4786286705, 0.2369268851};
     const Real points[5] = {-0.9061798459, -0.5384693101, 0.0, 0.5384693101, 0.9061798459};
@@ -104,10 +100,6 @@ RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainEnergyRateDensity(
       integral -= 0.5*sigma_eq*weights[k]*strain_rate_tmp;
     }
     return integral;
-
-  }
-  else
-    mooseError("The base class does not have a close-form for strain energy rate density");
 }      
 
 template class RadialReturnCreepStressUpdateBaseTempl<false>;

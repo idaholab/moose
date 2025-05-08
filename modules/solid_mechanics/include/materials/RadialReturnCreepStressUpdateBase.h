@@ -59,7 +59,6 @@ protected:
   /// Creep strain material property
   GenericMaterialProperty<RankTwoTensor, is_ad> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
-  const bool & _compute_numerical_serd;
 };
 
 typedef RadialReturnCreepStressUpdateBaseTempl<false> RadialReturnCreepStressUpdateBase;
