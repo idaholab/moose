@@ -52,7 +52,6 @@ MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 
     _preconditioner.reset(lor_solver);
   }
-
 }
 
 #endif
