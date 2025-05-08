@@ -87,7 +87,6 @@ NumericalFlux1D::getFlux(const unsigned int iside,
 const std::vector<ADReal> &
 NumericalFlux1D::getFlux3D(const unsigned int iside,
                            const dof_id_type ielem,
-                           bool res_side_is_left,
                            const std::vector<ADReal> & UL_3d,
                            const std::vector<ADReal> & UR_3d,
                            const RealVectorValue & nLR,
@@ -102,8 +101,5 @@ NumericalFlux1D::getFlux3D(const unsigned int iside,
     calcFlux(UL_3d, UR_3d, nLR, t1, t2, _FL_3d, _FR_3d);
   }
 
-  if (res_side_is_left)
-    return _FL_3d;
-  else
-    return _FR_3d;
+  return _FL_3d;
 }

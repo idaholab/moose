@@ -51,14 +51,13 @@ public:
                                               Real nLR_dot_d) const;
 
   /**
-   * Gets the 3D flux vector for an element/side combination
+   * Gets the 3D flux vector for an element/side combination on the left side
    *
    * If the element/side is cached, the cached values are used. Otherwise the
    * values are computed, cached, and returned.
    *
    * @param[in] iside    local index of current side
    * @param[in] ielem    global index of the current element
-   * @param[in] res_side_is_left    getting flux on the left ("elem") side?
    * @param[in] UL_3d    vector of 3D flux inputs on the "left"
    * @param[in] UR_3d    vector of 3D flux inputs on the "right"
    * @param[in] nLR      Direction from "left" to "right"
@@ -69,7 +68,6 @@ public:
    */
   virtual const std::vector<ADReal> & getFlux3D(const unsigned int iside,
                                                 const dof_id_type ielem,
-                                                bool res_side_is_left,
                                                 const std::vector<ADReal> & UL_3d,
                                                 const std::vector<ADReal> & UR_3d,
                                                 const RealVectorValue & nLR,
