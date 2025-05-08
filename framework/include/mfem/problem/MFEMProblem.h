@@ -8,7 +8,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
-#include "MFEMSubMesh.h"
+#include "MFEMSubMeshBase.h"
 #include "MFEMMaterial.h"
 #include "MFEMVariable.h"
 #include "MFEMBoundaryCondition.h"
