@@ -42,10 +42,7 @@
     mfem = true
     max_parallel = 1
     recover = false
-    rel_err = 1e-2
-    abs_zero = 1e-2
-    # Set to >=9.0 once #21449 is resolved
-    capabilities = 'vtk>=9.1'
+    abs_zero = 1e-6
   []
   [./MFEMGradDiv]
     type = XMLDiff
@@ -89,10 +86,6 @@
     mfem = true
     max_parallel = 1
     recover = false
-    rel_err = 1e-2
-    abs_zero = 1e-1
-    # Set to >=9.0 once #21449 is resolved
-    capabilities = 'vtk>=9.1'
   []
   [./MFEMHeatTransfer]
     type = XMLDiff
