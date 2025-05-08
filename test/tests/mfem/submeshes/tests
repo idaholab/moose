@@ -1,12 +1,22 @@
 [Tests]
   design = 'syntax/Problem/index.md'
   issues = '#29632'
-  [./MFEMSubMesh]
+  [./MFEMDomainSubMesh]
     type = XMLDiff
-    input = diffusion.i
-    xmldiff = 'OutputData/Potential/Run0/Run0.pvd
-                OutputData/Potential/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM SubMesh.'
+    input = submesh.i
+    xmldiff = 'OutputData/DomainPotential/Run0/Run0.pvd
+                OutputData/DomainPotential/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM domain restricted SubMesh.'
+    mfem = true
+    max_parallel = 1
+    recover = false
+  []
+  [./MFEMDomainSubMeshTransfer]
+    type = XMLDiff
+    input = submesh_transfer.i
+    xmldiff = 'OutputData/DomainPotentialTransfer/Run0/Run0.pvd
+                OutputData/DomainPotentialTransfer/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to transfer a domain restricted submesh variable data to a corresponding variable defined on the parent mesh.'
     mfem = true
     max_parallel = 1
     recover = false

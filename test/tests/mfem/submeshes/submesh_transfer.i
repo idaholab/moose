@@ -9,7 +9,7 @@
 
 [SubMeshes]
   [coil]
-    type = MFEMSubMesh
+    type = MFEMDomainSubMesh
     block = 1
   []
 []
@@ -102,7 +102,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Potential
+    file_base = OutputData/DomainPotentialTransfer
     vtk_format = ASCII
   []
 []

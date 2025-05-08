@@ -9,7 +9,7 @@
 
 [SubMeshes]
   [coil]
-    type = MFEMSubMesh
+    type = MFEMDomainSubMesh
     block = 1
   []
 []
@@ -33,10 +33,6 @@
     type = MFEMVariable
     fespace = SubMeshH1FESpace
   []
-  # [potential]
-  #   type = MFEMVariable
-  #   fespace = H1FESpace
-  # []
 []
 
 [BCs]
@@ -91,7 +87,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Potential
+    file_base = OutputData/DomainPotential
     vtk_format = ASCII
     submesh = coil
   []

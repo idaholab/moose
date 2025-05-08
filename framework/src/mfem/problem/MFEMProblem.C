@@ -485,7 +485,7 @@ MFEMProblem::addSubMesh(const std::string & var_type,
   // Add MFEM SubMesh.
   FEProblemBase::addUserObject(var_type, var_name, parameters);
   // Register submesh.
-  MFEMSubMesh & mfem_submesh = getUserObject<MFEMSubMesh>(var_name);
+  MFEMSubMeshBase & mfem_submesh = getUserObject<MFEMSubMeshBase>(var_name);
   getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
 }
 
