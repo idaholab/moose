@@ -7,7 +7,7 @@ MOOSE_HEADER_SYMLINKS ?= true
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch mfem
+IGNORE_CONTRIB_INC ?= libtorch mfem neml2
 ENABLE_LIBTORCH ?= false
 ENABLE_MFEM ?= false
 
