@@ -17,18 +17,24 @@
 
 registerMooseObject("MooseApp", MassMatrix);
 
-InputParameters
-MassMatrix::validParams()
+void
+MassMatrix::setMassMatrixParams(InputParameters & params)
 {
-  InputParameters params = Kernel::validParams();
-  params.addClassDescription("Computes a finite element mass matrix");
-  params.addParam<MaterialPropertyName>("density", 1, "The material property defining the density");
   params.set<MultiMooseEnum>("vector_tags") = "";
   params.set<MultiMooseEnum>("matrix_tags") = "";
   params.suppressParameter<MultiMooseEnum>("vector_tags");
   params.suppressParameter<std::vector<TagName>>("extra_vector_tags");
   params.suppressParameter<std::vector<TagName>>("absolute_value_vector_tags");
   params.set<bool>("matrix_only") = true;
+}
+
+InputParameters
+MassMatrix::validParams()
+{
+  InputParameters params = Kernel::validParams();
+  params.addClassDescription("Computes a finite element mass matrix");
+  setMassMatrixParams(params);
+  params.addParam<MaterialPropertyName>("density", 1, "The material property defining the density");
   return params;
 }
 
