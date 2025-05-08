@@ -12,7 +12,7 @@
   [H1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
-    fec_order = THIRD
+    fec_order = SECOND
   []
 []
 
@@ -63,14 +63,16 @@
   [hyprefgmres]
     type = MFEMHypreFGMRES
     low_order_refined = true
-    l_tol = 1e-4
+    l_tol = 1e-22
+    l_max_its = 2000  
   []
 []
 
 [Solver]
   type = MFEMCGSolver
-  print_level = 1
   preconditioner = hyprefgmres
+  l_tol = 1e-22
+  l_max_its = 2000
 []
 
 [Executioner]
