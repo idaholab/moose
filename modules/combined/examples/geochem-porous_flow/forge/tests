@@ -14,6 +14,8 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals, for water in a reservoir."
     issues = '#15693'
     design = 'forge.md'
+    # Geochemistry solver does not support recover
+    recover = false
   [../]
   [./kinetic]
     type = CSVDiff
@@ -22,6 +24,8 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with kinetic minerals"
     issues = '#15693'
     design = 'forge.md'
+    # Geochemistry solver does not support recover
+    recover = false
   [../]
   [./water_3]
     type = CSVDiff
@@ -39,6 +43,8 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals, for water enclosed in a natural reservoir."
     issues = '#15693'
     design = 'forge.md'
+    # Geochemistry solver does not support recover
+    recover = false
   [../]
   [./reservoir_and_water_3]
     type = CSVDiff
@@ -48,6 +54,8 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals to examine water injection in a natural reservoir."
     issues = '#15693'
     design = 'forge.md'
+    # Geochemistry solver does not support recover
+    recover = false
   [../]
   [./porous_flow]
     type = CSVDiff
@@ -66,5 +74,7 @@
     requirement = "The system shall be able to solve aqueous geochemical systems in contact with minerals to examine water injection in a natural reservoir with reactive transport / geochemistry."
     issues = '#15693'
     design = 'forge.md'
+    # Geochemistry solver does not support recover
+    recover = false
   [../]
 []
