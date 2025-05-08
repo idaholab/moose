@@ -268,8 +268,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DPYTHON_EXECUTABLE:PATH=`which python3` \
-        -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} ${PYTORCH_DIR} \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} ${PYTORCH_DIR}
     cmake --build . --target install -- -j ${MOOSE_JOBS}
 
     # Cleanup the temporary python environment
