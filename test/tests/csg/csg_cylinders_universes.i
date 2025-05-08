@@ -23,27 +23,9 @@
     x1 = 10
     axis = 'z'
   []
-  [PointSphere]
-    type = TestCSGSphereAtPointMeshGenerator
-    radius = 5
-    x0 = -3
-    y0 = -2
-    z0 = -1
-  []
-  [OriginSphere]
-    type = TestCSGSphereAtOriginMeshGenerator
-    radius = 5
-  []
   [CylsUniverse]
     type=TestCSGUniverseMeshGenerator
     input_meshes = 'XCyls YCyls ZCyls'
-  []
-  [SpheresUniverse]
-    type=TestCSGUniverseMeshGenerator
-    input_meshes = 'PointSphere OriginSphere'
-  []
-  [fullmodel]
-    type=TestCSGUniverseMeshGenerator
-    input_meshes = 'CylsUniverse SpheresUniverse'
+    bounding_box = '30 40 50'
   []
 []

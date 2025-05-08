@@ -1,8 +1,17 @@
 [Tests]
   design = 'MeshGenerator.md'
   issues = '#29095'
-  requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file by correctly constructing a CSG model and '
+  requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file by correctly constructing a CSG model that '
 
+  [csg_only]
+    type = 'JSONDiff'
+    input = 'csg_only_inf_planes.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_only_inf_planes_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'has a single CSG instance with planes constructed from 3 points and can generate a unique cell.'
+  []
   [csg_only_chained]
     type = 'JSONDiff'
     input = 'csg_only_chained.i'
@@ -10,16 +19,25 @@
     jsondiff = 'csg_only_chained_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    detail = 'passing a single CSGBase object between MeshGenerators to be updated'
+    detail = 'passes a single CSGBase object between MeshGenerators to be updated by updating the region of an existing cell and constructing planes from coefficients.'
   []
-  [csg_only_multi_universes]
+  [csg_only_cylinders_universes]
     type = 'JSONDiff'
-    input = 'csg_full_geom.i'
+    input = 'csg_cylinders_universes.i'
     cli_args = '--csg-only'
-    jsondiff = 'csg_full_geom_out_csg.json'
+    jsondiff = 'csg_cylinders_universes_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    detail = 'joining multiple CSGBase objects to create one object with multiple universes'
+    detail = 'joins multiple CSGBase objects to create one object with multiple universes and constructing cylinder surfaces aligned with each axis.'
+  []
+  [csg_only_spheres_universes]
+    type = 'JSONDiff'
+    input = 'csg_spheres_universes.i'
+    cli_args = '--csg-only'
+    jsondiff = 'csg_spheres_universes_out_csg.json'
+    recover = false
+    mesh_mode = REPLICATED
+    detail = 'joins multiple CSGBase objects to create one object with multiple universes and constructing sphere surfaces with and without a center point specified.'
   []
   [csg_only_final_generator]
     type = 'JSONDiff'
@@ -28,7 +46,7 @@
     jsondiff = 'csg_only_inf_planes_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    detail = 'specifying a final generator to create a CSGBase object for an intermediate generator'
+    detail = 'specifies a final generator to create a CSGBase object for an intermediate generator.'
   []
   [all_region_types]
     type = 'JSONDiff'
@@ -37,7 +55,7 @@
     jsondiff = 'csg_only_region_types_out_csg.json'
     recover = false
     mesh_mode = REPLICATED
-    detail = 'correctly defining regions as a combination of halfspaces, intersections, unions, and complements'
+    detail = 'correctly defines regions as a combination of halfspaces, intersections, unions, and complements.'
   []
 
   [errors]
