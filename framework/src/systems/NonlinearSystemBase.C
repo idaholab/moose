@@ -1899,9 +1899,6 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
                                       PETSC_TRUE));
     }
   }
-  if (auto nullsp = _fe_problem.constantNullspace())
-    LibmeshPetscCall(MatSetNullSpace(
-        cast_ref<PetscMatrixBase<Number> &>(getMatrix(systemMatrixTag())).mat(), nullsp));
 
   residualSetup();
 
@@ -2749,9 +2746,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
                                       PETSC_TRUE));
     }
   }
-  if (auto nullsp = _fe_problem.constantNullspace())
-    LibmeshPetscCall(MatSetNullSpace(
-        cast_ref<PetscMatrixBase<Number> &>(getMatrix(systemMatrixTag())).mat(), nullsp));
 
   jacobianSetup();
 
