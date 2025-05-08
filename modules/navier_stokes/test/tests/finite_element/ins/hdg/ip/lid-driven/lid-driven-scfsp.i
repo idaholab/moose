@@ -1,7 +1,7 @@
 mu = 1
 rho = 1
 l = 1
-U = 1e3
+U = 100
 n = 1
 gamma = 1e5
 
@@ -15,7 +15,7 @@ gamma = 1e5
     ymax = ${l}
     nx = ${n}
     ny = ${n}
-    elem_type = QUAD9
+    elem_type = TRI6
   []
 []
 
@@ -28,24 +28,24 @@ gamma = 1e5
 
 [Variables]
   [vel_x]
-    family = MONOMIAL
-    order = FIRST
+    family = L2_HIERARCHIC
+    order = SECOND
   []
   [vel_y]
-    family = MONOMIAL
-    order = FIRST
+    family = L2_HIERARCHIC
+    order = SECOND
   []
   [pressure]
-    family = MONOMIAL
-    order = CONSTANT
+    family = L2_HIERARCHIC
+    order = FIRST
   []
   [vel_bar_x]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [vel_bar_y]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
@@ -117,6 +117,12 @@ gamma = 1e5
     component = 1
     gamma = ${gamma}
   []
+  [pb_mass]
+    type = MassMatrixHDG
+    variable = pressure_bar
+    matrix_tags = 'mass'
+    density = '${fparse -1/gamma}'
+  []
 []
 
 [Kernels]
@@ -135,15 +141,6 @@ gamma = 1e5
     v = vel_y
     gamma = ${gamma}
     component = 1
-  []
-[]
-
-[DGKernels]
-  [pb_mass]
-    type = MassMatrixDGKernel
-    variable = pressure_bar
-    matrix_tags = 'mass'
-    density = '${fparse -1/gamma}'
   []
 []
 
@@ -244,20 +241,21 @@ gamma = 1e5
     [up]
       splitting = 'u p'
       splitting_type = schur
-      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol'
-      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4'
+      petsc_options = '-ksp_monitor'
+      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol -ksp_max_it'
+      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4      30'
     []
     [u]
       vars = 'vel_bar_x vel_bar_y'
-      petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type'
-      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack'
+      # petsc_options = '-ksp_converged_reason -ksp_monitor'
+      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
+      petsc_options_value = 'lu       gmres     1e-2      300                right        mumps                      30'
     []
     [p]
       vars = 'pressure_bar'
-      petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side'
-      petsc_options_value = 'gmres     300                1e-2      ilu      right'
+      petsc_options = '-ksp_converged_reason -ksp_monitor'
+      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
+      petsc_options_value = 'gmres     300                1e-2      lu      right         mumps                      30'
     []
   []
 []
@@ -268,6 +266,7 @@ gamma = 1e5
 []
 
 [Outputs]
+  print_linear_residuals = true
   [out]
     type = Exodus
     hide = 'pressure_average'
