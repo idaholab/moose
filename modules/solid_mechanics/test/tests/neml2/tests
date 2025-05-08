@@ -192,7 +192,7 @@
       prereq = 'neml2_modular/crystal_plasticity'
       input = 'crystal_plasticity_simple_scheduler.i'
       exodiff = 'crystal_plasticity.e'
-      capabilities = neml2
+      capabilities = 'neml2'
       recover = false
       valgrind = heavy
     []
@@ -202,7 +202,7 @@
       prereq = 'scheduler/simple_scheduler'
       input = 'crystal_plasticity_simple_scheduler_async.i'
       exodiff = 'crystal_plasticity.e'
-      capabilities = neml2
+      capabilities = 'neml2'
       recover = false
       valgrind = heavy
     []
