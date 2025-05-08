@@ -6120,9 +6120,6 @@ FEProblemBase::init()
 
   TIME_SECTION("init", 2, "Initializing");
 
-  // Create extra vectors and matrices if any
-  createTagVectors();
-
   // call executioner's preProblemInit so that it can do some setups before problem init
   _app.getExecutioner()->preProblemInit();
 
