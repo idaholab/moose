@@ -34,18 +34,18 @@
     recover = false
   []
   [./MFEMDiffusionLOR]
-  type = XMLDiff
-  input = diffusion_lor.i
-  xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd
-              OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
-  requirement = 'MOOSE shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native run.'
-  mfem = true
-  max_parallel = 1
-  recover = false
-  rel_err = 1e-2
-  abs_zero = 1e-2
-  # Set to >=9.0 once #21449 is resolved
-  capabilities = 'vtk>=9.1'
+    type = XMLDiff
+    input = diffusion_lor.i
+    xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd
+                OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native run.'
+    mfem = true
+    max_parallel = 1
+    recover = false
+    rel_err = 1e-2
+    abs_zero = 1e-2
+    # Set to >=9.0 once #21449 is resolved
+    capabilities = 'vtk>=9.1'
   []
   [./MFEMGradDiv]
     type = XMLDiff
