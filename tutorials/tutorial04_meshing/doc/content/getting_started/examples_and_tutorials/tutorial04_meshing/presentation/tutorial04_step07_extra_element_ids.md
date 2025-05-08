@@ -22,7 +22,7 @@
 !col! width=33%
 
 !media tutorial04_meshing/block_vs_reporting_id.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
 
 !col-end!
 
