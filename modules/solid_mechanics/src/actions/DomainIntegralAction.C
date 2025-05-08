@@ -133,6 +133,9 @@ DomainIntegralAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
+  params.addParam<bool>("use_incremental_serd",
+                        false,
+                        "Flag to use incremetnal computation of strain energy rate density");
   params.addParam<bool>("output_vpp",
                         true,
                         "Flag to control the vector postprocessor outputs. Select false to "
@@ -173,7 +176,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _incremental(getParam<bool>("incremental")),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false),
     _fgm_crack(false),
-    _use_ad(getParam<bool>("use_automatic_differentiation"))
+    _use_ad(getParam<bool>("use_automatic_differentiation")),
+    _use_incremental_serd(getParam<bool>("use_incremental_serd"))
 {
 
   if (isParamValid("functionally_graded_youngs_modulus_crack_dir_gradient") !=
@@ -971,7 +975,7 @@ DomainIntegralAction::act()
         params.set<std::vector<SubdomainName>>("block") = {_blocks};
         params.set<std::vector<MaterialName>>("inelastic_models") =
             getParam<std::vector<MaterialName>>("inelastic_models");
-
+        params.set<bool>("use_incremental_serd") = _use_incremental_serd;
         _problem->addMaterial(mater_type_name, mater_name, params);
       }
     }

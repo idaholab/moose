@@ -26,6 +26,10 @@ StrainEnergyRateDensityTempl<is_ad>::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
+  params.addParam<bool>(
+      "use_incremental_serd",
+      false,
+      "Use the incremental approach to compute compute strain energy rate density.");
   params.addRequiredRangeCheckedParam<std::vector<MaterialName>>(
       "inelastic_models",
       "inelastic_models_size=1",
@@ -39,9 +43,14 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _strain_energy_rate_density(declareProperty<Real>(_base_name + "strain_energy_rate_density")),
+    _strain_energy_rate_density_old(
+        getMaterialPropertyOld<Real>(_base_name + "strain_energy_rate_density")),
     _stress(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "stress")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _strain_rate(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_rate")),
-    _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size())
+    _strain_rate_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "strain_rate")),
+    _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size()),
+    _use_incremental_serd(getParam<bool>("use_incremental_serd"))
 {
 }
 
@@ -73,10 +82,25 @@ template <bool is_ad>
 void
 StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
 {
-  for (unsigned int i = 0; i < _inelastic_models.size(); ++i)
+  if (_use_incremental_serd)
   {
-    _inelastic_models[i]->setQp(_qp);
-    _strain_energy_rate_density[_qp] = MetaPhysicL::raw_value(
-        _inelastic_models[i]->computeStrainEnergyRateDensity(_stress, _strain_rate));
+    Real seq = MetaPhysicL::raw_value(_stress[_qp].secondInvariant());
+    Real seq_old = MetaPhysicL::raw_value(_stress_old[_qp].secondInvariant());
+    Real eps_eq =
+        2.0 / 3.0 * MetaPhysicL::raw_value(_strain_rate[_qp].doubleContraction(_strain_rate[_qp]));
+    Real eps_eq_old =
+        2.0 / 3.0 *
+        MetaPhysicL::raw_value(_strain_rate_old[_qp].doubleContraction(_strain_rate_old[_qp]));
+    _strain_energy_rate_density[_qp] =
+        _strain_energy_rate_density_old[_qp] + 0.5 * (seq + seq_old) * (eps_eq - eps_eq_old);
+  }
+  else
+  {
+    for (unsigned int i = 0; i < _inelastic_models.size(); ++i)
+    {
+      _inelastic_models[i]->setQp(_qp);
+      _strain_energy_rate_density[_qp] = MetaPhysicL::raw_value(
+          _inelastic_models[i]->computeStrainEnergyRateDensity(_stress, _strain_rate));
+    }
   }
 }
