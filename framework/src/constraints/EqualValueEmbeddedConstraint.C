@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
+#include "EigenADReal.h"
 #include "EqualValueEmbeddedConstraint.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
@@ -136,13 +137,13 @@ EqualValueEmbeddedConstraint::reinitConstraint()
 Real
 EqualValueEmbeddedConstraint::computeQpSecondaryValue()
 {
-  return _u_secondary[_qp];
+  return MetaPhysicL::raw_value(_u_secondary[_qp]);
 }
 
-Real
+ADReal
 EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-  Real resid = _constraint_residual;
+  ADReal resid = _constraint_residual;
 
   switch (type)
   {
@@ -150,7 +151,7 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
     {
       if (_formulation == Formulation::KINEMATIC)
       {
-        Real pen_force = _penalty * (_u_secondary[_qp] - _u_primary[_qp]);
+        ADReal pen_force = _penalty * (_u_secondary[_qp] - _u_primary[_qp]);
         resid += pen_force;
       }
       return _test_secondary[_i][_qp] * resid;
@@ -158,111 +159,6 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
 
     case Moose::Primary:
       return _test_primary[_i][_qp] * -resid;
-  }
-
-  return 0.0;
-}
-
-Real
-EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
-{
-  unsigned int sys_num = _sys.number();
-  const Real penalty = _penalty;
-  Real curr_jac, secondary_jac;
-
-  switch (type)
-  {
-    case Moose::SecondarySecondary:
-      switch (_formulation)
-      {
-        case Formulation::KINEMATIC:
-          curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                  _connected_dof_indices[_j]);
-          return -curr_jac + _phi_secondary[_j][_qp] * penalty * _test_secondary[_i][_qp];
-        case Formulation::PENALTY:
-          return _phi_secondary[_j][_qp] * penalty * _test_secondary[_i][_qp];
-        default:
-          mooseError("Invalid formulation");
-      }
-
-    case Moose::SecondaryPrimary:
-      switch (_formulation)
-      {
-        case Formulation::KINEMATIC:
-          return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp];
-        case Formulation::PENALTY:
-          return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp];
-        default:
-          mooseError("Invalid formulation");
-      }
-
-    case Moose::PrimarySecondary:
-      switch (_formulation)
-      {
-        case Formulation::KINEMATIC:
-          secondary_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                       _connected_dof_indices[_j]);
-          return secondary_jac * _test_primary[_i][_qp];
-        case Formulation::PENALTY:
-          return -_phi_secondary[_j][_qp] * penalty * _test_primary[_i][_qp];
-        default:
-          mooseError("Invalid formulation");
-      }
-
-    case Moose::PrimaryPrimary:
-      switch (_formulation)
-      {
-        case Formulation::KINEMATIC:
-          return 0.0;
-        case Formulation::PENALTY:
-          return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp];
-        default:
-          mooseError("Invalid formulation");
-      }
-
-    default:
-      mooseError("Unsupported type");
-      break;
-  }
-  return 0.0;
-}
-
-Real
-EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                       unsigned int /*jvar*/)
-{
-  Real curr_jac, secondary_jac;
-  unsigned int sys_num = _sys.number();
-
-  switch (type)
-  {
-    case Moose::SecondarySecondary:
-      curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                              _connected_dof_indices[_j]);
-      return -curr_jac;
-
-    case Moose::SecondaryPrimary:
-      return 0.0;
-
-    case Moose::PrimarySecondary:
-      switch (_formulation)
-      {
-        case Formulation::KINEMATIC:
-          secondary_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                       _connected_dof_indices[_j]);
-          return secondary_jac * _test_primary[_i][_qp];
-        case Formulation::PENALTY:
-          return 0.0;
-        default:
-          mooseError("Invalid formulation");
-      }
-
-    case Moose::PrimaryPrimary:
-      return 0.0;
-
-    default:
-      mooseError("Unsupported type");
-      break;
   }
 
   return 0.0;

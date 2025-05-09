@@ -43,10 +43,7 @@ public:
 protected:
   virtual void prepareSecondaryToPrimaryMap() override;
   virtual Real computeQpSecondaryValue() override;
-  virtual Real computeQpResidual(Moose::ConstraintType type) override;
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                        unsigned int jvar) override;
+  virtual ADReal computeQpResidual(Moose::ConstraintType type) override;
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   FEProblem & _fe_problem;
@@ -58,5 +55,5 @@ protected:
   /// copy of the residual before the constraint is applied
   NumericVector<Number> & _residual_copy;
   /// constraint force needed to enforce the constraint
-  Real _constraint_residual;
+  ADReal _constraint_residual;
 };

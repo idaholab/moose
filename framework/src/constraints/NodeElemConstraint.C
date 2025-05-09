@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "MooseEnum.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
@@ -42,13 +43,13 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     _primary(_mesh.getSubdomainID(getParam<SubdomainName>("primary"))),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
-    _primary_q_point(_assembly.qPoints()),
+    _primary_q_point(_assembly.adQPoints()),
     _primary_qrule(_assembly.qRule()),
 
     _current_node(_var.node()),
     _current_elem(_var.neighbor()),
 
-    _u_secondary(_var.dofValues()),
+    _u_secondary(_var.adDofValues()),
     _u_secondary_old(_var.dofValuesOld()),
     _phi_secondary(1),
     _test_secondary(1), // One entry
@@ -62,9 +63,9 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     _test_primary(_var.phiNeighbor()),
     _grad_test_primary(_var.gradPhiNeighbor()),
 
-    _u_primary(_primary_var.slnNeighbor()),
+    _u_primary(_primary_var.adSlnNeighbor()),
     _u_primary_old(_primary_var.slnOldNeighbor()),
-    _grad_u_primary(_primary_var.gradSlnNeighbor()),
+    _grad_u_primary(_primary_var.adGradSlnNeighbor()),
 
     _dof_map(_sys.dofMap()),
     _node_to_elem_map(_mesh.nodeToElemMap()),
@@ -96,83 +97,60 @@ NodeElemConstraint::computeSecondaryValue(NumericVector<Number> & current_soluti
 void
 NodeElemConstraint::computeResidual()
 {
+
   _qp = 0;
 
   prepareVectorTagNeighbor(_assembly, _var.number());
+
+  _residuals.resize(_test_primary.size(), 0);
+  for (auto & r : _residuals)
+    r = 0;
+
   for (_i = 0; _i < _test_primary.size(); _i++)
-    _local_re(_i) += computeQpResidual(Moose::Primary);
-  accumulateTaggedLocalResidual();
+    _residuals[_i] += raw_value(computeQpResidual(Moose::Primary));
+
+  addResiduals(_assembly, _residuals, _var.dofIndicesNeighbor(), _var.scalingFactor());
 
   prepareVectorTag(_assembly, _var.number());
+
+  _residuals.resize(_test_secondary.size(), 0);
+
+  for (auto & r : _residuals)
+    r = 0;
+
   for (_i = 0; _i < _test_secondary.size(); _i++)
-    _local_re(_i) += computeQpResidual(Moose::Secondary);
-  accumulateTaggedLocalResidual();
+    _residuals[_i] += raw_value(computeQpResidual(Moose::Secondary));
+
+  addResiduals(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 }
 
 void
 NodeElemConstraint::computeJacobian()
 {
-  getConnectedDofIndices(_var.number());
+  _qp = 0;
 
-  _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
-  _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
+  const VariableTestValue & primary_test_space = _test_primary;
+  std::vector<ADReal> primary_residual(primary_test_space.size(), 0);
 
-  for (_i = 0; _i < _test_secondary.size(); _i++)
-    // Loop over the connected dof indices so we can get all the jacobian contributions
-    for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpJacobian(Moose::SecondarySecondary);
+  for (_i = 0; _i < primary_test_space.size(); _i++)
+    primary_residual[_i] += computeQpResidual(Moose::Primary);
 
-  prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), Moose::ElementNeighbor);
-  if (_local_ke.m() && _local_ke.n())
-    for (_i = 0; _i < _test_secondary.size(); _i++)
-      for (_j = 0; _j < _phi_primary.size(); _j++)
-        _local_ke(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
-  accumulateTaggedLocalMatrix();
+  addJacobian(_assembly, primary_residual, _var.dofIndicesNeighbor(), _var.scalingFactor());
 
-  for (_i = 0; _i < _test_primary.size(); _i++)
-    // Loop over the connected dof indices so we can get all the jacobian contributions
-    for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kne(_i, _j) += computeQpJacobian(Moose::PrimarySecondary);
+  const VariableTestValue & secondary_test_space = _test_secondary;
+  std::vector<ADReal> secondary_residual(secondary_test_space.size(), 0);
 
-  prepareMatrixTagNeighbor(
-      _assembly, _primary_var.number(), _var.number(), Moose::NeighborNeighbor);
-  if (_local_ke.m() && _local_ke.n())
-    for (_i = 0; _i < _test_primary.size(); _i++)
-      for (_j = 0; _j < _phi_primary.size(); _j++)
-        _local_ke(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
-  accumulateTaggedLocalMatrix();
+  for (_i = 0; _i < secondary_test_space.size(); _i++)
+    secondary_residual[_i] += computeQpResidual(Moose::Secondary);
+
+  addJacobian(_assembly, secondary_residual, _var.dofIndices(), _var.scalingFactor());
 }
 
 void
 NodeElemConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  getConnectedDofIndices(jvar_num);
-
-  _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
-  _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
-
-  for (_i = 0; _i < _test_secondary.size(); _i++)
-    // Loop over the connected dof indices so we can get all the jacobian contributions
-    for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
-
-  prepareMatrixTagNeighbor(_assembly, _var.number(), jvar_num, Moose::ElementNeighbor);
-  for (_i = 0; _i < _test_secondary.size(); _i++)
-    for (_j = 0; _j < _phi_primary.size(); _j++)
-      _local_ke(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
-  accumulateTaggedLocalMatrix();
-
-  if (_Kne.m() && _Kne.n())
-    for (_i = 0; _i < _test_primary.size(); _i++)
-      // Loop over the connected dof indices so we can get all the jacobian contributions
-      for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar_num);
-
-  prepareMatrixTagNeighbor(_assembly, _primary_var.number(), jvar_num, Moose::NeighborNeighbor);
-  for (_i = 0; _i < _test_primary.size(); _i++)
-    for (_j = 0; _j < _phi_primary.size(); _j++)
-      _local_ke(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
-  accumulateTaggedLocalMatrix();
+  if (jvar_num == _var.number())
+    computeJacobian();
 }
 
 void
