@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MassFluxPenaltyBC.h"
+#include "Function.h"
 
 registerMooseObject("NavierStokesApp", MassFluxPenaltyBC);
 
@@ -21,6 +22,7 @@ MassFluxPenaltyBC::validParams()
                                           "The velocity component this object is being applied to");
   params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
   params.addClassDescription("Adds the exterior boundary contribution of penalized jumps.");
+  params.addParam<FunctionName>("dirichlet_value", "The velocity Dirichlet value on the boundary");
   return params;
 }
 
@@ -30,7 +32,8 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _vel_y(adCoupledValue("v")),
     _comp(getParam<unsigned short>("component")),
     _matrix_only(getParam<bool>("matrix_only")),
-    _gamma(getParam<Real>("gamma"))
+    _gamma(getParam<Real>("gamma")),
+    _dirichlet_func(isParamValid("dirichlet_value") ? &getFunction("dirichlet_value") : nullptr)
 {
   if (_mesh.dimension() > 2)
     mooseError("This class only supports 2D simulations at this time");
@@ -46,7 +49,9 @@ MassFluxPenaltyBC::computeResidual()
 ADReal
 MassFluxPenaltyBC::computeQpResidual()
 {
-  const ADRealVectorValue soln_jump(_vel_x[_qp], _vel_y[_qp], 0);
+  ADRealVectorValue soln_jump(_vel_x[_qp], _vel_y[_qp], 0);
+  if (_dirichlet_func)
+    soln_jump -= _dirichlet_func->vectorValue(_t, _q_point[_qp]);
 
   return _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
 }

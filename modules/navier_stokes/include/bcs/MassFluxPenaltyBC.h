@@ -11,12 +11,14 @@
 
 #include "ADIntegratedBC.h"
 
+class Function;
+
 /*
  * The external face pair to the MassFluxPenalty DGKernel. The DGKernel adds a residual/Jacobian
- * contribution proportional to the jump in velocity at an internal face. This can be done in order
- * to produce an augmented Lagrange like perturbation for DG discretizations. Obviously there is no
- * jump at an external face, but we must have this object anyway in order to compute a consistent
- * term diagonal for both internal and external faces
+ * contribution proportional to the jump in velocity at an internal face. This object running on the
+ * external boundary adds a residual proportional to the jump between the finite element solution
+ * and the Dirichlet value (which this object currently requires). These jump terms are added in
+ * order to produce an augmented Lagrange like perturbation for DG discretizations
  */
 class MassFluxPenaltyBC : public ADIntegratedBC
 {
@@ -37,4 +39,5 @@ protected:
   const bool _matrix_only;
   /// Stabilization magnitude parameter
   const Real _gamma;
+  const Function * const _dirichlet_func;
 };

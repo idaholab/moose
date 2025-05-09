@@ -207,23 +207,58 @@ gamma = 1e5
     density = '${fparse -1/gamma}'
   []
 
-  [u_jump]
+  [u_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_x
     u = vel_x
     v = vel_y
     component = 0
-    boundary = 'left right bottom top'
+    boundary = 'left right bottom'
     gamma = ${gamma}
+    dirichlet_value = 'walls'
   []
-  [v_jump]
+  [v_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_y
     u = vel_x
     v = vel_y
     component = 1
-    boundary = 'left right bottom top'
+    boundary = 'left right bottom'
     gamma = ${gamma}
+    dirichlet_value = 'walls'
+  []
+  [u_jump_top]
+    type = MassFluxPenaltyBC
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    boundary = 'top'
+    gamma = ${gamma}
+    dirichlet_value = 'top'
+  []
+  [v_jump_top]
+    type = MassFluxPenaltyBC
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    boundary = 'top'
+    gamma = ${gamma}
+    dirichlet_value = 'top'
+  []
+[]
+
+[Functions]
+  [top]
+    type = ParsedVectorFunction
+    value_x = ${U}
+    value_y = 0
+  []
+  [walls]
+    type = ParsedVectorFunction
+    value_x = 0
+    value_y = 0
   []
 []
 
