@@ -43,12 +43,12 @@
     type = MFEMMassKernel
     variable = submesh_potential
     coefficient = mass
-  []    
+  []
   [source]
     type = MFEMDomainLFKernel
     variable = submesh_potential
     coefficient = source
-  []  
+  []
 []
 
 [Preconditioner]
