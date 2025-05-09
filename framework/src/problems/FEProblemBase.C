@@ -3190,8 +3190,7 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
 
   if (active_subdomains)
     for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(
-          Moose::stringify(id)); // missing the dafault_block
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
 
   logAdd("Variable", var_name, "ArrayMooseVariable", params);
   _aux->addVariable("ArrayMooseVariable", var_name, params);
