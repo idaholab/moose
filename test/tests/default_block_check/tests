@@ -9,6 +9,12 @@
       exodiff = 'diffusion_with_null_material_out.e'
       detail = 'Verify that defining a default set of blocks correctly limits kernel and material coverage checks, and automatically applies block restrictions to kernels and variables.'
     []
+    [default_block]
+      type = 'Exodiff'
+      input = 'diffusion_with_null_material_empty_blocks_check.i'
+      exodiff = 'diffusion_with_null_material_empty_blocks_check_out.e'
+      detail = 'Verify that if block is empty in UserObjects (e.g., block = ''), the system correctly handles it without producing invalid results. This issue rarely occurs due to user input, but may occasionally arise from dynamic object creation via Actions, where block is considered valid but ends up being empty.'
+    []
     [different_kernel_different_blocks]
       type = 'Exodiff'
       input = 'diffusion_with_null_material_different_kernel_differnt_blocks.i'

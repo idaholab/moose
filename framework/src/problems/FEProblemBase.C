@@ -2822,9 +2822,12 @@ FEProblemBase::addVariable(const std::string & var_type,
   const auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
   const auto fe_type = FEType(order, family);
 
-  const auto active_subdomains_vector = _mesh.getSubdomainIDs(
-      params.isParamSetByUser("block") ? params.get<std::vector<SubdomainName>>("block")
-                                       : _default_blocks);
+  auto active_subdomains_vector =
+      _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
+
+  if (active_subdomains_vector.empty())
+    active_subdomains_vector = _mesh.getSubdomainIDs(_default_blocks);
+
   const std::set<SubdomainID> active_subdomains(active_subdomains_vector.begin(),
                                                 active_subdomains_vector.end());
 
@@ -3107,9 +3110,12 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   const auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
   const auto fe_type = FEType(order, family);
 
-  const auto active_subdomains_vector = _mesh.getSubdomainIDs(
-      params.isParamSetByUser("block") ? params.get<std::vector<SubdomainName>>("block")
-                                       : _default_blocks);
+  auto active_subdomains_vector =
+      _mesh.getSubdomainIDs(params.get<std::vector<SubdomainName>>("block"));
+
+  if (active_subdomains_vector.empty())
+    active_subdomains_vector = _mesh.getSubdomainIDs(_default_blocks);
+
   const std::set<SubdomainID> active_subdomains(active_subdomains_vector.begin(),
                                                 active_subdomains_vector.end());
 
