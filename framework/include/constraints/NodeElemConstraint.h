@@ -89,17 +89,7 @@ protected:
   virtual Real computeQpSecondaryValue() = 0;
 
   /// This is the virtual that derived classes should override for computing the residual.
-  virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
-
-  /// This is the virtual that derived classes should override for computing the Jacobian.
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
-
-  /// This is the virtual that derived classes should override for computing the off-diag Jacobian.
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
-                                        unsigned int /*jvar*/)
-  {
-    return 0;
-  }
+  virtual ADReal computeQpResidual(Moose::ConstraintType type) = 0;
 
   // coupling interface:
   virtual const VariableValue & coupledSecondaryValue(const std::string & var_name,
@@ -185,7 +175,7 @@ protected:
 
   MooseVariable & _var;
 
-  const MooseArray<Point> & _primary_q_point;
+  const MooseArray<ADPoint> & _primary_q_point;
   const QBase * const & _primary_qrule;
 
   /// current node being processed
@@ -193,7 +183,7 @@ protected:
   const Elem * const & _current_elem;
 
   /// Value of the unknown variable on the secondary node
-  const VariableValue & _u_secondary;
+  const ADVariableValue & _u_secondary;
   /// old solution
   const VariableValue & _u_secondary_old;
   /// Shape function on the secondary side.
@@ -218,11 +208,11 @@ protected:
   const VariableTestGradient & _grad_test_primary;
 
   /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_primary;
+  const ADVariableValue & _u_primary;
   /// Holds the old solution at the current quadrature point
   const VariableValue & _u_primary_old;
   /// Holds the current solution gradient at the current quadrature point
-  const VariableGradient & _grad_u_primary;
+  const ADVariableGradient & _grad_u_primary;
 
   /// DOF map
   const DofMap & _dof_map;
@@ -239,6 +229,10 @@ protected:
    * the residual previously at that node for that variable.
    */
   bool _overwrite_secondary_residual;
+
+  /// Data members for holding residuals
+  ADReal _r;
+  std::vector<Real> _residuals;
 
 public:
   SparseMatrix<Number> * _jacobian;
