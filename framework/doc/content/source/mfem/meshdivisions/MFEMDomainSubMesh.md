@@ -23,4 +23,5 @@ the parent `mfem::ParMesh` used in the `MFEMProblem`, from a user-specified set 
 
 !if-end!
 
-!else !include mfem/mfem_warning.md
+!else
+!include mfem/mfem_warning.md

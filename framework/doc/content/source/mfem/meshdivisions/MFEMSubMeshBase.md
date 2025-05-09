@@ -23,4 +23,5 @@ to construct the desired `mfem::ParSubMesh` from the parent mesh.
 
 !if-end!
 
-!else !include mfem/mfem_warning.md
+!else
+!include mfem/mfem_warning.md
