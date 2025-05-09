@@ -51,7 +51,7 @@ protected:
   /// Formulations, currently only supports KINEMATIC and PENALTY
   const enum class Formulation { KINEMATIC, PENALTY } _formulation;
   /// Penalty parameter used in constraint enforcement for kinematic and penalty formulations
-  const Real _penalty;
+  const ADReal _penalty;
   /// copy of the residual before the constraint is applied
   NumericVector<Number> & _residual_copy;
   /// constraint force needed to enforce the constraint

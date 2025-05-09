@@ -100,8 +100,6 @@ NodeElemConstraint::computeResidual()
 
   _qp = 0;
 
-  prepareVectorTagNeighbor(_assembly, _var.number());
-
   _residuals.resize(_test_primary.size(), 0);
   for (auto & r : _residuals)
     r = 0;
@@ -109,9 +107,7 @@ NodeElemConstraint::computeResidual()
   for (_i = 0; _i < _test_primary.size(); _i++)
     _residuals[_i] += raw_value(computeQpResidual(Moose::Primary));
 
-  addResiduals(_assembly, _residuals, _var.dofIndicesNeighbor(), _var.scalingFactor());
-
-  prepareVectorTag(_assembly, _var.number());
+  addResiduals(_assembly, _residuals, _primary_var.dofIndicesNeighbor(), _var.scalingFactor());
 
   _residuals.resize(_test_secondary.size(), 0);
 
@@ -129,18 +125,16 @@ NodeElemConstraint::computeJacobian()
 {
   _qp = 0;
 
-  const VariableTestValue & primary_test_space = _test_primary;
-  std::vector<ADReal> primary_residual(primary_test_space.size(), 0);
+  std::vector<ADReal> primary_residual(_test_primary.size(), 0);
 
-  for (_i = 0; _i < primary_test_space.size(); _i++)
+  for (_i = 0; _i < _test_primary.size(); _i++)
     primary_residual[_i] += computeQpResidual(Moose::Primary);
 
   addJacobian(_assembly, primary_residual, _var.dofIndicesNeighbor(), _var.scalingFactor());
 
-  const VariableTestValue & secondary_test_space = _test_secondary;
-  std::vector<ADReal> secondary_residual(secondary_test_space.size(), 0);
+  std::vector<ADReal> secondary_residual(_test_secondary.size(), 0);
 
-  for (_i = 0; _i < secondary_test_space.size(); _i++)
+  for (_i = 0; _i < _test_secondary.size(); _i++)
     secondary_residual[_i] += computeQpResidual(Moose::Secondary);
 
   addJacobian(_assembly, secondary_residual, _var.dofIndices(), _var.scalingFactor());
