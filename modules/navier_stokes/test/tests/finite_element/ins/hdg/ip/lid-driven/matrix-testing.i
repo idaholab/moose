@@ -234,7 +234,7 @@ l = 1
     boundary = 'left right bottom top'
   []
 
-  [u_jump]
+  [u_jump_walls]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_x
@@ -243,9 +243,10 @@ l = 1
     component = 0
     vector_tags = ''
     matrix_tags = 'jump combined'
-    boundary = 'left right bottom top'
+    boundary = 'left right bottom'
+    dirichlet_value = 'walls'
   []
-  [v_jump]
+  [v_jump_walls]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_y
@@ -254,7 +255,45 @@ l = 1
     component = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
-    boundary = 'left right bottom top'
+    boundary = 'left right bottom'
+    dirichlet_value = 'walls'
+  []
+  [u_jump_top]
+    type = MassFluxPenaltyBC
+    matrix_only = true
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    vector_tags = ''
+    matrix_tags = 'jump combined'
+    boundary = 'top'
+    dirichlet_value = 'top'
+  []
+  [v_jump_top]
+    type = MassFluxPenaltyBC
+    matrix_only = true
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    vector_tags = ''
+    matrix_tags = 'jump combined'
+    boundary = 'top'
+    dirichlet_value = 'top'
+  []
+[]
+
+[Functions]
+  [top]
+    type = ParsedVectorFunction
+    value_x = ${U}
+    value_y = 0
+  []
+  [walls]
+    type = ParsedVectorFunction
+    value_x = 0
+    value_y = 0
   []
 []
 
