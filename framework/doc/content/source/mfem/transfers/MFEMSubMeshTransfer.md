@@ -21,4 +21,5 @@ the same type.
 
 !if-end!
 
-!else !include mfem/mfem_warning.md
+!else
+!include mfem/mfem_warning.md

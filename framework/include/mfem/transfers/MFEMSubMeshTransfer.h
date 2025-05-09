@@ -3,6 +3,9 @@
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
 
 /**
  * Constructs and stores an mfem::ParGridFunction object.
