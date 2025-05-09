@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/coil.gen
+  file = ../mesh/cylinder-hex-q2.gen
 []
 
 [Problem]
@@ -8,7 +8,7 @@
 []
 
 [SubMeshes]
-  [coil]
+  [wire]
     type = MFEMDomainSubMesh
     block = 1
   []
@@ -19,7 +19,7 @@
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
-    submesh = coil
+    submesh = wire
   []
   [H1FESpace]
     type = MFEMScalarFESpace
@@ -89,6 +89,6 @@
     type = MFEMParaViewDataCollection
     file_base = OutputData/DomainPotential
     vtk_format = ASCII
-    submesh = coil
+    submesh = wire
   []
 []
