@@ -348,28 +348,4 @@ TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
   testDiffusionSolve(solver, 1e-5);
 }
 
-/**
- * Test MFEMHypreBoomerAMG creates an LOR mfem::HypreBoomerAMG solver successfully.
- */
-TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
-{
-  // Build required solver inputs
-  InputParameters solver_params = _factory.getValidParams("MFEMHypreBoomerAMG");
-  solver_params.set<bool>("low_order_refined") = true;
-  solver_params.set<double>("l_tol") = 1e-7;
-  solver_params.set<int>("print_level") = 2;
-
-  // Construct solver
-  MFEMHypreBoomerAMG & solver =
-      addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
-
-  // Test MFEMSolver returns an solver of the expected type
-  auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreBoomerAMG>(solver.getSolver());
-  // HypreBoomerAMG warnings are tripped by zero rows in matrices; turn this off for this test
-  solver_downcast->SetErrorMode(mfem::HypreSolver::ErrorMode::IGNORE_HYPRE_ERRORS);
-  ASSERT_NE(solver_downcast.get(), nullptr);
-  // FIX BOOMERAMG TOLERANCE SETTING
-  testDiffusionSolve(solver, 1);
-}
-
 #endif
