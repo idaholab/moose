@@ -19,7 +19,7 @@
     type = CSVDiff
     input = simple.i
     csvdiff = simple_out.csv
-    design = MooseMesh.md
+    design = SidesetAroundSubdomainUpdater.md
     requirement = 'The system shall be able to map sidesets as the subdomain of elements are changed.'
   []
   [sideset_warning]
@@ -27,7 +27,7 @@
     input = simple.i
     cli_args ='Mesh/construct_node_list_from_side_list=false'
     expect_err ="The user has selected 'construct_node_list_from_side_list' as false, but SidesetAroundSubdomainUpdate is building node lists from the side lists."
-    design = MooseMesh.md
-    requirement ='The system shall throw a warning if the user has selected not to construct node list from side list while the SidesetAroundSubdomainUpdate does so.'
+    design = SidesetAroundSubdomainUpdater.md
+    requirement ='The system shall throw a warning if the user has selected not to construct node list from side list but it does so anyway while updating sidesets.'
   []
 []

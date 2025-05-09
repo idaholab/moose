@@ -30,12 +30,12 @@ SidesetAroundSubdomainUpdater::validParams()
   params.addParam<bool>("assign_outer_surface_sides",
                         true,
                         "Assign sides of elements im `inner_subdomains` that have no neighbor.");
-  params.addRequiredParam<BoundaryName>("update_sideset_name",
+  params.addRequiredParam<BoundaryName>("update_boundary_name",
                                         "The name of the sideset to be updated. If the boundary "
                                         "does not exist it will be added to the system.");
-  params.addParam<BoundaryID>("update_sideset_id",
+  params.addParam<BoundaryID>("update_boundary_id",
                               Moose::INVALID_BOUNDARY_ID,
-                              "The name of the sideset to be updated. If the boundary "
+                              "The ID of the sideset to be updated. If the boundary "
                               "does not exist it will be added to the system.");
   params.registerBase("MeshModifier");
   return params;
@@ -47,7 +47,7 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
     _neighbor_side(_assembly.neighborSide()),
     _assign_outer_surface_sides(getParam<bool>("assign_outer_surface_sides")),
-    _boundary_name(getParam<BoundaryName>("update_sideset_name")),
+    _boundary_name(getParam<BoundaryName>("update_boundary_name")),
     _boundary_id(_mesh.getBoundaryID(_boundary_name)),
     _mask_side(isParamValid("mask_side") ? _mesh.getBoundaryID(getParam<BoundaryName>("mask_side"))
                                          : Moose::INVALID_BOUNDARY_ID),
@@ -79,6 +79,10 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
     _displaced_boundary_info->sideset_name(_boundary_id) = _boundary_name;
     _displaced_boundary_info->nodeset_name(_boundary_id) = _boundary_name;
   }
+  if (!_mesh.getConstructNodeListFromSideList())
+    mooseDoOnce(
+        mooseWarning("The user has selected 'construct_node_list_from_side_list' as false, but "
+                     "SidesetAroundSubdomainUpdate is building node lists from the side lists."));
 }
 
 void
@@ -174,10 +178,6 @@ SidesetAroundSubdomainUpdater::finalize()
     for (const auto & [elem_id, side] : sent_data)
     {
       const auto elem = mesh.elem_ptr(elem_id);
-      if (!_mesh.getConstructNodeListFromSideList())
-        mooseDoOnce(mooseWarning(
-            "The user has selected 'construct_node_list_from_side_list' as false, but "
-            "SidesetAroundSubdomainUpdate is building node lists from the side lists."));
       _boundary_info.remove_side(elem, side, _boundary_id);
       for (const auto local_node_id : elem->nodes_on_side(side))
         _boundary_info.remove_node(elem->node_ptr(local_node_id), _boundary_id);

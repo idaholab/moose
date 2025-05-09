@@ -54,7 +54,7 @@
     type = SidesetAroundSubdomainUpdater
     inner_subdomains = 0
     outer_subdomains = 0
-    update_sideset_name = 999
+    update_boundary_name = 999
     execute_on = TIMESTEP_END
     execution_order_group = -1
   []
