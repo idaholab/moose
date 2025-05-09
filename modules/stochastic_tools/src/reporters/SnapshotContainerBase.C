@@ -13,11 +13,11 @@ InputParameters
 SnapshotContainerBase::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-
   params.addParam<NonlinearSystemName>(
       "nonlinear_system_name",
       "nl0",
       "Option to select which nonlinear system's solution shall be stored.");
+  params.addParam<Real>("save_tolerance", 1e-8, "Tolerance for determining a duplicate snapshot.");
   return params;
 }
 
@@ -26,7 +26,8 @@ SnapshotContainerBase::SnapshotContainerBase(const InputParameters & parameters)
     _accumulated_data(
         declareRestartableDataWithContext<Snapshots>("accumulated_snapshots", (void *)&comm())),
     _nonlinear_system_number(
-        _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
+        _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name"))),
+    _save_tolerance(getParam<Real>("save_tolerance"))
 {
 }
 
