@@ -46,6 +46,7 @@ Please refer to the [NEML2 syntax](syntax/NEML2/index.md) documentation for more
 A list of custom NEML2 material models that reside in MOOSE:
 
 - [Los Alamos Reduced Order Model (LAROMance)](solid_mechanics/common/LAROMANCE6DInterpolation.md)
+- [LibtorchModel](solid_mechanics/common/LibtorchModel.md)
 
 ## Citing NEML2
 
