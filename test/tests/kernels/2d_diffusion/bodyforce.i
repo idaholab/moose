@@ -7,78 +7,71 @@
 # volumetric source.
 ###########################################################
 
+AD = ''
+
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
-  active = 'u'
-
-  [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
-    type = ADDiffusion
+  [diff]
+    type = ${AD}Diffusion
     variable = u
-  [../]
-  [./bf]
-    type = ADBodyForce
+  []
+  [bf]
+    type = ${AD}BodyForce
     variable = u
     postprocessor = ramp
-  [../]
+  []
 []
 
 [Functions]
-  [./ramp]
+  [ramp]
     type = ParsedFunction
     expression = 't'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./ramp]
+  [ramp]
     type = FunctionValuePostprocessor
     function = ramp
     execute_on = linear
-  [../]
+  []
 []
 
 [BCs]
-  active = 'left right'
-
-  [./left]
-    type = DirichletBC
+  [left]
+    type = ${AD}DirichletBC
     variable = u
-    boundary = 3
+    boundary = left
     value = 0
-  [../]
-
-  [./right]
-    type = DirichletBC
+  []
+  [right]
+    type = ${AD}DirichletBC
     variable = u
-    boundary = 1
+    boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   dt = 1.0
   end_time = 1.0
-
   solve_type = 'NEWTON'
 []
 
 [Outputs]
-  file_base = bodyforce_out
   exodus = true
 []
