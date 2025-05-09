@@ -2,86 +2,124 @@
 
 !---
 
-## Polynomial Fitting
+## Function Approximation
 
-To introduce the concept of FEM, consider a polynomial fitting exercise. When fitting a polynomial
-there is a known set of points as well as a set of coefficients that are unkown for a function
-that has the form:
+To introduce the concept of FEM, consider a polynomial regression exercise. We can
+determine a polynomial function in a:
 
-!equation
-f(x) = a + bx + cx^2 + \dots,
+- +Discrete sense+: Using sampled locations with associated values, we want our polynomial function to be as close to the given data as possible.
+- +Continuous sense+: Using a complicated function, we want to have our polynomial function as close to the given function as possible.
 
-where $a$, $b$ and $c$ are scalar coefficients and $1$, $x$, $x^2$ are "basis functions". Thus, the
-problem is to find $a$, $b$, $c$, etc. such that $f(x)$ passes through the points given.
 
-More generally,
+Let us take the polynomial in the following form:
 
 !equation
-f(x) = \sum_{i=0}^d c_i x^i,
+f(x) = \sum_{i=0}^d c_i x^i
 
-where the $c_i$ are coefficients to be determined. $f(x)$ is unique and interpolary if $d+1$ is the
-same as the number of points needed to fit. This defines a linear system that must be solved to
-find the coefficients.
+where $c_i$ are scalar coefficients (expansion coefficients) and $x^i$ are "basis functions". Thus, the
+problem is to find $c_i$ such that $f(x)$ is closest the the given points or a
+given function.
 
 !---
 
-## Polynomial Example
+## Polynomial Example (Discrete)
 
-Define a set of points:
+!row!
+!col! width=49%
 
-!equation
-(x_1, y_1) = (1,4) \\
-(x_2, y_2) = (3,1) \\
-(x_3, y_3) = (4,2)
-
-Substitute $(x_i, y_i)$ data into the model:
+Define a set of points (Let's pick the points using $sin(x)$):
 
 !equation
-y_i = a + bx_i + cx_i^2, i=1,2,3.
+(x_1, y_1) = (0.25,0.247) \\
+(x_2, y_2) = (0.50,0.479) \\
+(x_3, y_3) = (0.75,0.682) \\
+(x_4, y_4) = (1.00,0.841)
 
-This leads to the following linear system for $a$, $b$, and $c$:
+
+Substitute $(x_i, y_i)$ data into the polynomial model:
 
 !equation
-\begin{bmatrix}
-  1 & 1 &  1 \\
-  1 & 3 &  9 \\
-  1 & 4 & 16
-\end{bmatrix}
-\begin{bmatrix}
-  a \\
-  b \\
-  c
-\end{bmatrix}
+c_0 + c_1 x_i + c_2 x_i^2 = y_i,\quad i=1,..,4.
+
+This leads to the following linear system for $c_i$:
+
+!equation
+\mathbf{A}
+\vec{c}
 =
-\begin{bmatrix}
-  4 \\
-  1 \\
-  2
+\vec{y}
+
+where
+
+!equation
+\mathbf{A} = \begin{bmatrix}
+  1 & 0.25 & 0.25^2 \\
+  1 & 0.50 & 0.50^2 \\
+  1 & 0.75 & 0.75^2 \\
+  1 & 1.00 & 1.00^2
+\end{bmatrix}, \quad
+\vec{c} = \begin{bmatrix}
+  c_0 \\
+  c_1 \\
+  c_2 \\
+  c_3
+\end{bmatrix} \quad
+\vec{y}\begin{bmatrix}
+  0.247 \\
+  0.479 \\
+  0.682 \\
+  0.841
 \end{bmatrix}
+
+!col-end!
+
+!col! width=49%
+
+!alert! note title=Solving this problem
+
+We want to get the function closest to the points.
+Distance in this case can be expressed by the discrete
+$L^2$ norm:
+
+!equation
+R = ||\mathbf{A}\vec{c}-\vec{y}||^2_2,\quad \text{where} \quad
+||\vec{v}||^2_2 = \vec{v}^T \vec{v},
+
+We want to minimize the norm of the squared distances ("least squares"):
+
+!equation
+\frac{\partial R}{\partial \vec{c}} = \mathbf{A}^T (\mathbf{A}\vec{c} - \vec{y}) = 0
+
+which requires the solution of this problem:
+
+!equation
+\mathbf{A}^T \mathbf{A}\vec{c} = \mathbf{A}^T\vec{y}
+
+which results in:
+
+!equation
+\vec{c} =
+\begin{bmatrix}
+  -0.024 \\
+  1.155 \\
+  -0.289
+\end{bmatrix}
+
+!alert-end!
+
+!col-end!
+
+!row-end!
 
 !---
-
-Solving for the coefficients results in:
-
-!equation
-\begin{bmatrix}
-  a \\
-  b \\
-  c
-\end{bmatrix}
-=
-\begin{bmatrix}
-  8 \\
-  \frac{29}{6} \\
-  \frac{5}{6}
-\end{bmatrix}
 
 These coefficients define the solution function:
 
 !equation
 f(x) = 8 - \frac{29}{6} x + \frac{5}{6} x^2
 
-!media darcy_thermo_mech/fem_example.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
+!plot scatter data=[{'x':[0.25,0.5,0.75,1.0], 'y':[0.247,0.479,0.682,0.841], 'name':'Data', 'mode':'markers', 'color':'red', 'marker':{'size':14}}, {'x':[0.0,0.025,0.05,0.075,0.1,0.125,0.15,0.175,0.2,0.225,0.25,0.275,0.3,0.325,0.35,0.375,0.4,0.425,0.45,0.475,0.5,0.525,0.55,0.575,0.6,0.625,0.65,0.675,0.7,0.725,0.75,0.775,0.8,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1], 'y':[-0.023855457,0.004831882,0.033158274,0.061123719,0.088728218,0.11597177,0.142854375,0.169376033,0.195536745,0.221336509,0.246775327,0.271853199,0.296570123,0.320926101,0.344921131,0.368555216,0.391828353,0.414740543,0.437291787,0.459482084,0.481311434,0.502779838,0.523887295,0.544633804,0.565019368,0.585043984,0.604707654,0.624010376,0.642952152,0.661532982,0.679752864,0.6976118,0.715109789,0.732246831,0.749022927,0.765438075,0.781492277,0.797185532,0.81251784,0.827489202,0.842099617], 'name':'f(x)'}]
+             layout={'margin':{'t':5,'b':5}}
 
 !style halign=center fontsize=115%
 +The solution is the function, *not* the coefficients.+
