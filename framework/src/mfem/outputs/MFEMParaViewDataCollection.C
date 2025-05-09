@@ -31,8 +31,7 @@ MFEMParaViewDataCollection::validParams()
 
 MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & parameters)
   : MFEMDataCollection(parameters),
-    _pv_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str(),
-           &_pmesh),
+    _pv_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str(), &_pmesh),
     _high_order_output(getParam<bool>("high_order_output")),
     _refinements(getParam<unsigned int>("refinements")),
     _vtk_format(parameters.get<MooseEnum>("vtk_format").getEnum<mfem::VTKFormat>())
