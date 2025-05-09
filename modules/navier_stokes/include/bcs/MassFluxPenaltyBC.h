@@ -11,6 +11,8 @@
 
 #include "ADIntegratedBC.h"
 
+class Function;
+
 class MassFluxPenaltyBC : public ADIntegratedBC
 {
 public:
@@ -28,4 +30,5 @@ protected:
   const unsigned short _comp;
   const bool _matrix_only;
   const Real _gamma;
+  const Function * const _dirichlet_func;
 };
