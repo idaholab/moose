@@ -103,15 +103,14 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 
     if (!variable_name.empty())
     {
-      const auto & active_subdomain_set = _blk_feproblem
-                                              ->getVariable(_blk_tid,
-                                                            variable_name,
-                                                            Moose::VarKindType::VAR_ANY,
-                                                            Moose::VarFieldType::VAR_FIELD_ANY)
-                                              .activeSubdomains();
+      _blk_ids = _blk_feproblem
+                     ->getVariable(_blk_tid,
+                                   variable_name,
+                                   Moose::VarKindType::VAR_ANY,
+                                   Moose::VarFieldType::VAR_FIELD_ANY)
+                     .activeSubdomains();
 
-      std::vector<SubdomainID> active_subdomain_vec(active_subdomain_set.begin(),
-                                                    active_subdomain_set.end());
+      std::vector<SubdomainID> active_subdomain_vec(_blk_ids.begin(), _blk_ids.end());
 
       _blocks = _blk_mesh->getSubdomainNames(active_subdomain_vec);
     }
@@ -123,13 +122,16 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     _blocks = _blk_feproblem->getDefaultBlocks();
 
   // Store the IDs in a set, handling ANY_BLOCK_ID if supplied
-  if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end())
-    _blk_ids.insert(Moose::ANY_BLOCK_ID);
-  else
+  if (_blk_ids.empty())
   {
-    // Get the IDs from the supplied names
-    _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
-    _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
+    if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end())
+      _blk_ids.insert(Moose::ANY_BLOCK_ID);
+    else
+    {
+      // Get the IDs from the supplied names
+      _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
+      _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
+    }
   }
 
   // Produce error if the object is not allowed to be both block and boundary restricted
