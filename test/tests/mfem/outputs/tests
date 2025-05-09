@@ -5,7 +5,8 @@
     type = CheckFiles
     input = ../kernels/diffusion.i
     cli_args = 'Outputs/active="ParaViewDataCollection VisItDataCollection ConduitDataCollection" '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/ParaViewDataCollection'
+               'Outputs/ParaViewDataCollection/file_base=OutputData/ParaViewDataCollection '
+               'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg'
     check_files = 'OutputData/ParaViewDataCollection/Run0/Run0.pvd '
                   'OutputData/ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu '
                   'OutputData/VisItDataCollection/Run0_000000/mesh.000000 '
