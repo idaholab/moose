@@ -14,6 +14,7 @@ MFEMHypreBoomerAMG::validParams()
   params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
+  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
   params.addParam<UserObjectName>(
       "fespace", "H1 FESpace to use in HypreBoomerAMG setup for elasticity problems.");
   params.addParam<mfem::real_t>(
@@ -33,16 +34,35 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 void
 MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 {
-  _solver = std::make_shared<mfem::HypreBoomerAMG>();
+  _jacobian_solver = std::make_shared<mfem::HypreBoomerAMG>();
 
-  _solver->SetTol(getParam<double>("l_tol"));
-  _solver->SetMaxIter(getParam<int>("l_max_its"));
-  _solver->SetPrintLevel(getParam<int>("print_level"));
-  _solver->SetStrengthThresh(_strength_threshold);
+  _jacobian_solver->SetTol(getParam<double>("l_tol"));
+  _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
+  _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
+  _jacobian_solver->SetStrengthThresh(_strength_threshold);
 
-  if (_mfem_fespace)
+  if (_mfem_fespace && !mfem::HypreUsingGPU())
+    _jacobian_solver->SetElasticityOptions(_mfem_fespace.get());
+
+  _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+}
+
+void
+MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+
+  if (getParam<bool>("low_order_refined"))
   {
-    _solver->SetElasticityOptions(_mfem_fespace.get());
+    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
+    lor_solver->GetSolver().SetTol(getParam<double>("l_tol"));
+    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+    lor_solver->GetSolver().SetStrengthThresh(_strength_threshold);
+
+    if (_mfem_fespace && !mfem::HypreUsingGPU())
+      lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
+
+    _solver.reset(lor_solver);
   }
 }
 

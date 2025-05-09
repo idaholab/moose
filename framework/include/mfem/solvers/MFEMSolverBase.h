@@ -20,6 +20,9 @@ public:
   /// Returns a shared pointer to the instance of the Solver derived-class.
   virtual std::shared_ptr<mfem::Solver> getSolver() = 0;
 
+  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
+  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
+
 protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver(const InputParameters & parameters) = 0;

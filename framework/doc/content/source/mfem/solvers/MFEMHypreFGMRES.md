@@ -12,6 +12,10 @@ Defines and builds an `mfem::HypreFGMRES` solver to use as an iterative solver t
 
 Not compatible with use on partially assembled equation systems.
 
+A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter 
+`low_order_refined` to `true`. Using an LOR solver improves performance for high polynomial 
+order systems.
+
 !syntax parameters /Solver/MFEMHypreFGMRES
 
 !syntax inputs /Solver/MFEMHypreFGMRES
