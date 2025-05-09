@@ -37,6 +37,9 @@ EMJouleHeatingSource::EMJouleHeatingSource(const InputParameters & parameters)
     _cond(getADMaterialProperty<Real>(getParam<std::string>("conductivity"))),
     _scale(getParam<Real>("value"))
 {
+  mooseDeprecated("This kernel will be deprecated in the near future (10/01/2025) in favor of "
+                  "exclusively using the Heat Transfer module's 'ADJouleHeatingSource' for "
+                  "coupling electromagnetics to heat transfer problems.");
 }
 
 ADReal

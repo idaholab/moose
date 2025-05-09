@@ -5,19 +5,38 @@
 ## Overview
 
 `ADJouleHeatingSource` is the implementation of a heat source corresponding to
-electric Joule heating, as in [JouleHeatingSource](JouleHeatingSource.md), within
-the framework of automatic differentiation.
+electric Joule heating ($Q$) within the framework of automatic differentiation. 
+The residual is provided by the [ElectromagneticHeatingMaterial](ElectromagneticHeatingMaterial.md) 
+material object and can be structured in the following formulations:
 
-The strong form for `ADJouleHeatingSource` is defined as
-
+Time domain formulation:
 \begin{equation}
-q = \mathbf{J} \cdot \mathbf{E} = (\sigma_{elec} \nabla \phi) \cdot \nabla \phi
+  Q = (\sigma_{elec} E) \cdot E
 \end{equation}
 
-where $\phi$ is the electrostatic potential and $\sigma_{elec}$ is the
-electrical conductivity of the material. $\sigma_{elec}$ is defined as an
+- where $E$ is the time domain electric field,
+- and $\sigma_{elec}$ is th electrical conductivity.
+
+Frequency domain formulation:
+\begin{equation}
+  Q = 0.5 Re( \sigma_{elec} E \cdot E^* )
+\end{equation}
+
+- where $E$ is the real component of the frequency domain electric field,
+- and $E^*$ is the complex conjugate of the electric field.
+
+$\sigma_{elec}$ is defined as an
 `ADMaterialProperty`. Within the heat transfer module, this property could
 currently be provided by [ADElectricalConductivity](ADElectricalConductivity.md).
+
+In the case of the time domain formulation, the electric field can be
+defined using an electromagnetic solver or using the electrostatic
+approximation, where:
+\begin{equation}
+  E = \nabla \left( V \right)
+\end{equation}
+
+- where $V$ is the electrostatic potential
 
 This class inherits from the [ADKernelValue](Kernel.md) class.
 
