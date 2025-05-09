@@ -1,9 +1,6 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
 #include "MFEMGeneralUserObject.h"
 
 /**
