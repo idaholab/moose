@@ -1,9 +1,9 @@
-mu = 1
+mu = 1e-2
 rho = 1
 l = 1
 U = 1
 n = 6
-gamma = 1
+gamma = 1e4
 
 [Mesh]
   [gen]
@@ -97,26 +97,26 @@ gamma = 1
     self_advection = false
   []
 
-  # [u_jump]
-  #   type = MassFluxPenaltyIPHDG
-  #   variable = vel_x
-  #   u = vel_x
-  #   v = vel_y
-  #   u_face = vel_bar_x
-  #   v_face = vel_bar_y
-  #   component = 0
-  #   gamma = ${gamma}
-  # []
-  # [v_jump]
-  #   type = MassFluxPenaltyIPHDG
-  #   variable = vel_y
-  #   u = vel_x
-  #   v = vel_y
-  #   u_face = vel_bar_x
-  #   v_face = vel_bar_y
-  #   component = 1
-  #   gamma = ${gamma}
-  # []
+  [u_jump]
+    type = MassFluxPenaltyIPHDG
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    u_face = vel_bar_x
+    v_face = vel_bar_y
+    component = 0
+    gamma = ${gamma}
+  []
+  [v_jump]
+    type = MassFluxPenaltyIPHDG
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    u_face = vel_bar_x
+    v_face = vel_bar_y
+    component = 1
+    gamma = ${gamma}
+  []
   [pb_mass]
     type = MassMatrixHDG
     variable = pressure_bar
@@ -124,25 +124,6 @@ gamma = 1
     density = '${fparse -1/gamma}'
   []
 []
-
-# [Kernels]
-#   [grad_div_x]
-#     type = GradDiv
-#     variable = vel_x
-#     u = vel_x
-#     v = vel_y
-#     gamma = ${gamma}
-#     component = 0
-#   []
-#   [grad_div_y]
-#     type = GradDiv
-#     variable = vel_y
-#     u = vel_x
-#     v = vel_y
-#     gamma = ${gamma}
-#     component = 1
-#   []
-# []
 
 [BCs]
   [momentum_x_diffusion_walls]
@@ -200,24 +181,51 @@ gamma = 1
     density = '${fparse -1/gamma}'
   []
 
-  # [u_jump]
-  #   type = MassFluxPenaltyBC
-  #   variable = vel_x
-  #   u = vel_x
-  #   v = vel_y
-  #   component = 0
-  #   boundary = 'left right bottom top'
-  #   gamma = ${gamma}
-  # []
-  # [v_jump]
-  #   type = MassFluxPenaltyBC
-  #   variable = vel_y
-  #   u = vel_x
-  #   v = vel_y
-  #   component = 1
-  #   boundary = 'left right bottom top'
-  #   gamma = ${gamma}
-  # []
+  [u_jump_walls]
+    type = MassFluxPenaltyBC
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    boundary = 'left right bottom'
+    gamma = ${gamma}
+  []
+  [v_jump_walls]
+    type = MassFluxPenaltyBC
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    boundary = 'left right bottom'
+    gamma = ${gamma}
+  []
+  [u_jump_top]
+    type = MassFluxPenaltyBC
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    component = 0
+    boundary = 'top'
+    gamma = ${gamma}
+    dirichlet_value = top_vel
+  []
+  [v_jump_top]
+    type = MassFluxPenaltyBC
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    component = 1
+    boundary = 'top'
+    gamma = ${gamma}
+    dirichlet_value = top_vel
+  []
+[]
+
+[Functions]
+  [top_vel]
+    type = ParsedVectorFunction
+    expression_x = ${U}
+  []
 []
 
 [Materials]
