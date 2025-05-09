@@ -35,7 +35,7 @@ SidesetAroundSubdomainUpdater::validParams()
                                         "does not exist it will be added to the system.");
   params.addParam<BoundaryID>("update_sideset_id",
                               Moose::INVALID_BOUNDARY_ID,
-                              "The name of the sideset to be updated. If the boundary "
+                              "The ID of the sideset to be updated. If the boundary "
                               "does not exist it will be added to the system.");
   params.registerBase("MeshModifier");
   return params;
