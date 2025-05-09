@@ -486,16 +486,16 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   // This is done *after* the side boundaries (e.g. "right", ...) have been generated.
   if (isParamValid("add_sideset_ids") && !isParamValid("add_sideset_names"))
   {
-    const auto & add_sideset_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
-    _mesh_boundary_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
-    _mesh_sideset_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
-    _mesh_nodeset_ids.insert(add_sideset_ids.begin(), add_sideset_ids.end());
+    const auto & add_boundary_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
+    _mesh_boundary_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+    _mesh_sideset_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+    _mesh_nodeset_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
   }
   else if (isParamValid("add_sideset_ids") && isParamValid("add_sideset_names"))
   {
-    const auto add_sidesets =
+    const auto add_boundary_names =
         getParam<BoundaryID, BoundaryName>("add_sideset_ids", "add_sideset_names");
-    for (const auto & [sideset_id, sideset_name] : add_sidesets)
+    for (const auto & [sideset_id, sideset_name] : add_boundary_names)
     {
       // add sideset id
       _mesh_boundary_ids.insert(sideset_id);
