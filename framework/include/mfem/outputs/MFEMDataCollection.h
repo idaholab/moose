@@ -20,7 +20,7 @@ protected:
 
   MFEMProblemData & _problem_data;
   const std::string _submesh_name;
-  mfem::ParMesh & _pmesh;  
+  mfem::ParMesh & _pmesh;
 };
 
 #endif

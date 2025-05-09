@@ -497,10 +497,10 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
   if (parameters.get<std::string>("_moose_base") == "MFEMSubMeshTransfer")
   {
     FEProblemBase::addUserObject(transfer_name, name, parameters);
-  } 
+  }
   else
   {
-    FEProblemBase::addTransfer(transfer_name, name, parameters);    
+    FEProblemBase::addTransfer(transfer_name, name, parameters);
   }
 }
 

@@ -11,7 +11,7 @@ MFEMDomainSubMesh::validParams()
   InputParameters params = MFEMSubMeshBase::validParams();
   params.addParam<std::vector<SubdomainName>>("block",
     {},
-    "The list of blocks (ids) comprising this SubMesh");  
+    "The list of blocks (ids) comprising this SubMesh");
   return params;
 }
 

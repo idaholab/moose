@@ -16,7 +16,7 @@ MFEMFESpace::validParams()
 }
 
 MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters), 
+  : MFEMGeneralUserObject(parameters),
   _ordering(parameters.get<MooseEnum>("ordering")),
   _submesh_name(getParam<std::string>("submesh")),
   _pmesh(parameters.isParamSetByUser("submesh") ? getMFEMProblem().getProblemData().submeshes.GetRef(_submesh_name) :

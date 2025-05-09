@@ -17,7 +17,7 @@ MFEMSubMeshTransfer::validParams()
   params.addRequiredParam<VariableName>("from_variable",
         "MFEM variable to transfer data from. Can be defined on either the parent mesh or a submesh of it.");
   params.addRequiredParam<VariableName>("to_variable",
-          "MFEM variable to transfer data into. Can be defined on either the parent mesh or a submesh of it.");        
+          "MFEM variable to transfer data into. Can be defined on either the parent mesh or a submesh of it.");
   return params;
 }
 

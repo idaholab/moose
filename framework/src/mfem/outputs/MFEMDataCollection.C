@@ -16,7 +16,7 @@ MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
     _problem_data(static_cast<MFEMProblem *>(_problem_ptr)->getProblemData()),
     _submesh_name(getParam<std::string>("submesh")),
     _pmesh(parameters.isParamSetByUser("submesh") ? _problem_data.submeshes.GetRef(_submesh_name) :
-      const_cast<mfem::ParMesh &>(*_problem_data.pmesh.get()))    
+      const_cast<mfem::ParMesh &>(*_problem_data.pmesh.get()))
 {
 }
 
