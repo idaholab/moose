@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Problem/index.md'
-  issues = '#29632'
+  issues = '#30478'
   [./MFEMDomainSubMesh]
     type = XMLDiff
     input = domain_submesh.i
