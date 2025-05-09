@@ -34,9 +34,9 @@ MFEMDataCollection::registerFields()
     }
     else
     {
-      mooseWarning("The variable ",
-                   gf_name,
-                   " is not defined on the same mesh as the output DataCollection.");
+      mooseInfo("The variable ",
+                gf_name,
+                " is not defined on the same mesh as the output DataCollection.");
     }
   }
 }
