@@ -9,31 +9,36 @@
 
 #pragma once
 
-#include "FlowModel.h"
+#include "FlowModel1PhaseBase.h"
 
 /**
- * Sets up the single-phase flow model using Euler's equations
+ * Flow model for a single-component, single-phase fluid using the Euler equations
  */
-class FlowModelSinglePhase : public FlowModel
+class FlowModelSinglePhase : public FlowModel1PhaseBase
 {
 public:
+  static InputParameters validParams();
+
   FlowModelSinglePhase(const InputParameters & params);
 
-  virtual void init() override;
-  virtual void addVariables() override;
-  virtual void addInitialConditions() override;
-  virtual void addMooseObjects() override;
-
 protected:
-  virtual void addNumericalFluxUserObject();
-  virtual void addRDGAdvectionDGKernels();
-  virtual void addRDGMooseObjects();
+  virtual Real getScalingFactorRhoA() const override;
+  virtual Real getScalingFactorRhoUA() const override;
+  virtual Real getScalingFactorRhoEA() const override;
 
-  /// Slope reconstruction type for rDG
-  const MooseEnum _rdg_slope_reconstruction;
+  virtual std::vector<VariableName> solutionVariableNames() const override;
 
-  /// Numerical flux user object name
-  const UserObjectName _numerical_flux_name;
+  virtual void addRhoEAIC() override;
+  virtual void addDensityIC() override;
+
+  virtual void addPressureAux() override;
+  virtual void addTemperatureAux() override;
+
+  virtual void addFluidPropertiesMaterials() override;
+
+  virtual void addNumericalFluxUserObject() override;
+  virtual void addSlopeReconstructionMaterial() override;
+  virtual void addRDGAdvectionDGKernels() override;
 
   /// Scaling factors for each solution variable (rhoA, rhouA, rhoEA)
   const std::vector<Real> _scaling_factors;
@@ -61,6 +66,4 @@ public:
   static const std::string VELOCITY_Y;
   static const std::string VELOCITY_Z;
   static const std::string REYNOLDS_NUMBER;
-
-  static InputParameters validParams();
 };

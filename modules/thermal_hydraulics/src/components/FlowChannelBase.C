@@ -88,7 +88,6 @@ FlowChannelBase::validParams()
       "pipe_pars_transferred",
       false,
       "Set to true if Dh, P_hf and A are going to be transferred in from an external source");
-  params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
   params.addParam<std::vector<std::string>>(
       "closures",
       {},
@@ -107,7 +106,6 @@ FlowChannelBase::validParams()
 
   params.addPrivateParam<std::string>("component_type", "pipe");
   params.declareControllable("A f");
-  params.addParamNamesToGroup("lump_mass_matrix", "Numerical scheme");
 
   return params;
 }

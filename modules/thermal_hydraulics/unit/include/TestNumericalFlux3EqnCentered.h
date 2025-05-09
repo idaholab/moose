@@ -16,8 +16,11 @@
  */
 class TestNumericalFlux3EqnCentered : public TestNumericalFlux3EqnBase
 {
+public:
+  TestNumericalFlux3EqnCentered();
+
 protected:
-  virtual const ADNumericalFlux3EqnBase * createFluxObject() override;
+  virtual const NumericalFlux1D & createFluxObject() override;
 
   virtual std::vector<std::pair<std::vector<ADReal>, std::vector<ADReal>>>
   getPrimitiveSolutionsSymmetryTest() const override;

@@ -18,6 +18,7 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   std::vector<Real> x = {0.7};
 
   const Real v = 1.38490747936373;
+  const Real rho = 0.7220698962933115;
   const Real e = 1.995566878921797e+06;
   const Real s = 3129.64317643634;
   const Real c = 442.127817187648;
@@ -29,7 +30,9 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   REL_TEST(_fp_mix->p_from_v_e(v, e, x), p, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->T_from_v_e(v, e, x), T, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->v_from_p_T(p, T, x), v, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp_mix->rho_from_p_T(p, T, x), rho, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->e_from_p_T(p, T, x), e, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp_mix->e_from_p_rho(p, rho, x), e, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->s_from_p_T(p, T, x), s, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->c_from_p_T(p, T, x), c, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->cp_from_p_T(p, T, x), cp, REL_TOL_SAVED_VALUE);

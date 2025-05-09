@@ -251,6 +251,61 @@ IdealGasMixtureFluidProperties::molarFractionsFromMassFractions(const std::vecto
   return molarFractionsFromMassFractions_templ(x);
 }
 
+ADReal
+IdealGasMixtureFluidProperties::rho_from_p_T(const ADReal & p,
+                                             const ADReal & T,
+                                             const std::vector<ADReal> & x_secondary) const
+{
+  return 1.0 / v_from_p_T(p, T, x_secondary);
+}
+
+Real
+IdealGasMixtureFluidProperties::rho_from_p_T(Real p,
+                                             Real T,
+                                             const std::vector<Real> & x_secondary) const
+{
+  return 1.0 / v_from_p_T(p, T, x_secondary);
+}
+
+template <typename CppType>
+CppType
+IdealGasMixtureFluidProperties::e_from_p_rho_templ(const CppType & p,
+                                                   const CppType & rho,
+                                                   const std::vector<CppType> & x_secondary) const
+{
+  const auto x = secondaryToAllMassFractions(x_secondary);
+  mooseAssert(x.size() == _n_components, "Size mismatch");
+
+  const auto M = mixtureMolarMass(x);
+
+  CppType e_ref_sum = 0;
+  CppType cv_sum = 0;
+  for (const auto i : make_range(_n_components))
+  {
+    e_ref_sum += x[i] * _component_fps[i]->referenceSpecificInternalEnergy();
+    // cv is constant due to ideal gas assumption; any (p, T) is fine:
+    cv_sum += x[i] * _component_fps[i]->cv_from_p_T(0, 0);
+  }
+
+  return cv_sum * M * p / (_R * rho) + e_ref_sum;
+}
+
+ADReal
+IdealGasMixtureFluidProperties::e_from_p_rho(const ADReal & p,
+                                             const ADReal & rho,
+                                             const std::vector<ADReal> & x_secondary) const
+{
+  return e_from_p_rho_templ(p, rho, x_secondary);
+}
+
+Real
+IdealGasMixtureFluidProperties::e_from_p_rho(Real p,
+                                             Real rho,
+                                             const std::vector<Real> & x_secondary) const
+{
+  return e_from_p_rho_templ(p, rho, x_secondary);
+}
+
 template <typename CppType>
 CppType
 IdealGasMixtureFluidProperties::p_from_v_e_templ(const CppType & v,

@@ -18,17 +18,26 @@ ADNumericalFlux3EqnHLLC::validParams()
 {
   InputParameters params = ADNumericalFlux3EqnBase::validParams();
   params += NaNInterface::validParams();
+
+  MooseEnum wave_speed_formulation("einfeldt davis", "einfeldt");
+  params.addParam<MooseEnum>(
+      "wave_speed_formulation", wave_speed_formulation, "Method for computing wave speeds");
+
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "Name for fluid properties user object");
+
   params.addClassDescription("Computes internal side flux for the 1-D, 1-phase, variable-area "
                              "Euler equations using the HLLC approximate Riemann solver.");
+
   return params;
 }
 
 ADNumericalFlux3EqnHLLC::ADNumericalFlux3EqnHLLC(const InputParameters & parameters)
   : ADNumericalFlux3EqnBase(parameters),
     NaNInterface(this),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties")),
+    _wave_speed_formulation(
+        getParam<MooseEnum>("wave_speed_formulation").getEnum<WaveSpeedFormulation>())
 {
 }
 
@@ -69,7 +78,6 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal EL = rhoEAL / rhoAL;
   const ADReal eL = EL - 0.5 * uvecL * uvecL;
   const ADReal pL = _fp.p_from_v_e(vL, eL);
-  const ADReal HL = EL + pL / rhoL;
   const ADReal cL = _fp.c_from_v_e(vL, eL);
 
   const ADReal rhoR = rhoAR / AR;
@@ -82,26 +90,42 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal ER = rhoEAR / rhoAR;
   const ADReal eR = ER - 0.5 * uvecR * uvecR;
   const ADReal pR = _fp.p_from_v_e(vR, eR);
-  const ADReal HR = ER + pR / rhoR;
   const ADReal cR = _fp.c_from_v_e(vR, eR);
 
-  // compute Roe-averaged variables
-  const ADReal sqrt_rhoL = std::sqrt(rhoL);
-  const ADReal sqrt_rhoR = std::sqrt(rhoR);
-  const ADReal un_roe = (sqrt_rhoL * unL + sqrt_rhoR * unR) / (sqrt_rhoL + sqrt_rhoR);
-  const ADReal ut1_roe = (sqrt_rhoL * ut1L + sqrt_rhoR * ut1R) / (sqrt_rhoL + sqrt_rhoR);
-  const ADReal ut2_roe = (sqrt_rhoL * ut2L + sqrt_rhoR * ut2R) / (sqrt_rhoL + sqrt_rhoR);
-  const ADReal H_roe = (sqrt_rhoL * HL + sqrt_rhoR * HR) / (sqrt_rhoL + sqrt_rhoR);
-  const ADRealVectorValue uvec_roe(un_roe, ut1_roe, ut2_roe);
-  const ADReal h_roe = H_roe - 0.5 * uvec_roe * uvec_roe;
-  const ADReal rho_roe = std::sqrt(rhoL * rhoR);
-  const ADReal v_roe = 1.0 / rho_roe;
-  const ADReal e_roe = _fp.e_from_v_h(v_roe, h_roe);
-  const ADReal c_roe = _fp.c_from_v_e(v_roe, e_roe);
+  // compute left and right wave speeds
+  ADReal sL, sR;
+  if (_wave_speed_formulation == WaveSpeedFormulation::EINFELDT)
+  {
+    // compute Roe-averaged variables
+    const ADReal sqrt_rhoL = std::sqrt(rhoL);
+    const ADReal sqrt_rhoR = std::sqrt(rhoR);
+    const ADReal un_roe = (sqrt_rhoL * unL + sqrt_rhoR * unR) / (sqrt_rhoL + sqrt_rhoR);
+    const ADReal ut1_roe = (sqrt_rhoL * ut1L + sqrt_rhoR * ut1R) / (sqrt_rhoL + sqrt_rhoR);
+    const ADReal ut2_roe = (sqrt_rhoL * ut2L + sqrt_rhoR * ut2R) / (sqrt_rhoL + sqrt_rhoR);
+    const ADReal HL = EL + pL / rhoL;
+    const ADReal HR = ER + pR / rhoR;
+    const ADReal H_roe = (sqrt_rhoL * HL + sqrt_rhoR * HR) / (sqrt_rhoL + sqrt_rhoR);
+    const ADRealVectorValue uvec_roe(un_roe, ut1_roe, ut2_roe);
+    const ADReal h_roe = H_roe - 0.5 * uvec_roe * uvec_roe;
+    const ADReal rho_roe = std::sqrt(rhoL * rhoR);
+    const ADReal v_roe = 1.0 / rho_roe;
+    const ADReal e_roe = _fp.e_from_v_h(v_roe, h_roe);
+    const ADReal c_roe = _fp.c_from_v_e(v_roe, e_roe);
 
-  // compute wave speeds
-  const ADReal sL = std::min(unL - cL, un_roe - c_roe);
-  const ADReal sR = std::max(unR + cR, un_roe + c_roe);
+    sL = std::min(unL - cL, un_roe - c_roe);
+    sR = std::max(unR + cR, un_roe + c_roe);
+  }
+  else if (_wave_speed_formulation == WaveSpeedFormulation::DAVIS)
+  {
+    sL = std::min(unL - cL, unR - cR);
+    sR = std::max(unL + cL, unR + cR);
+  }
+  else
+  {
+    mooseAssert(false, "Invalid 'wave_speed_formulation'.");
+  }
+
+  // compute middle wave speed
   const ADReal sm = (rhoR * unR * (sR - unR) - rhoL * unL * (sL - unL) + pL - pR) /
                     (rhoR * (sR - unR) - rhoL * (sL - unL));
 
