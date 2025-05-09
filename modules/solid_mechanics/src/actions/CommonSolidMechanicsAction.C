@@ -68,12 +68,20 @@ CommonSolidMechanicsAction::act()
         }
 
         // with block-restriction?
-        if (add_variables_block_restricted && action->isParamValid("block") &&
-            action->getParam<std::vector<SubdomainName>>("block").size())
+        if (add_variables_block_restricted)
         {
-          auto action_blocks = action->getParam<std::vector<SubdomainName>>("block");
-          mooseAssert(action_blocks.size(), "Block restriction must not be empty");
-          add_variables_blocks.insert(action_blocks.cbegin(), action_blocks.cend());
+          std::vector<SubdomainName> blocks;
+
+          if (action->isParamValid("block") &&
+              !action->getParam<std::vector<SubdomainName>>("block").empty())
+            blocks = action->getParam<std::vector<SubdomainName>>("block");
+          else if (_problem->isParamSetByUser("default_block") &&
+                   !_problem->getDefaultBlocks().empty())
+            blocks = _problem->getDefaultBlocks();
+
+          mooseAssert(!blocks.empty(), "No valid blocks specified.");
+
+          add_variables_blocks.insert(blocks.begin(), blocks.end());
         }
         else
           add_variables_block_restricted = false;
