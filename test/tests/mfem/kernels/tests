@@ -19,7 +19,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
+    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     mfem = true
     max_parallel = 1
@@ -71,7 +71,9 @@
               'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
+               'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg '
+               'Executioner/assembly_level=element'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     mfem = true
@@ -115,7 +117,8 @@
     type = XMLDiff
     input = heattransfer.i
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
-                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+               OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg '
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     mfem = true
