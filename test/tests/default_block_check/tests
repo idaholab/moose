@@ -1,0 +1,40 @@
+[Tests]
+  issues = '#30300'
+  design = 'BlockRestrictable.md'
+  [block_test]
+    requirement = 'The system shall allow users to define a default set of blocks for the simulation, which (1) limits kernel and material coverage checks to those blocks, and (2) automatically applies block restrictions to kernels and variables unless explicitly overridden by the user.'
+    [default_block]
+      type = 'Exodiff'
+      input = 'diffusion_with_null_material.i'
+      exodiff = 'diffusion_with_null_material_out.e'
+      detail = 'Verify that defining a default set of blocks correctly limits kernel and material coverage checks, and automatically applies block restrictions to kernels and variables.'
+    []
+    [default_block]
+      type = 'Exodiff'
+      input = 'diffusion_with_null_material_empty_blocks_check.i'
+      exodiff = 'diffusion_with_null_material_empty_blocks_check_out.e'
+      detail = 'Verify that if block is empty in UserObjects (e.g., block = ''), the system correctly handles it without producing invalid results. This issue rarely occurs due to user input, but may occasionally arise from dynamic object creation via Actions, where block is considered valid but ends up being empty.'
+    []
+    [different_kernel_different_blocks]
+      type = 'Exodiff'
+      input = 'diffusion_with_null_material_different_kernel_differnt_blocks.i'
+      exodiff = 'diffusion_with_null_material_different_kernel_differnt_blocks_out.e'
+      detail = 'Verify that different kernels can be assigned to different blocks, as long as the block IDs are within the default block list provided by the user.'
+    []
+    [default_block_with_kernel_coverage_check_false]
+      type = 'Exodiff'
+      input = 'diffusion_with_null_material_kernel_coverage_check_false.i'
+      exodiff = 'diffusion_with_null_material_kernel_coverage_check_false_out.e'
+      detail = 'Verify the scenario where users define a default set of blocks but explicitly disable kernel coverage checking.'
+    []
+  []
+  [error_test]
+    requirement = 'The system shall throw an error if the user enables kernel or material coverage checking within a specified list while also defining a default set of blocks.'
+    [error]
+      type = RunException
+      input = 'diffusion_with_null_material_kernel_coverage_override.i'
+      expect_err = "Cannot set both 'kernel_coverage_check' as 'ONLY_LIST' or 'SKIP_LIST' and 'default_block'. Please set only one."
+      detail = 'Verify that an error is thrown when users enable kernel or material coverage checking within a list while also defining a default set of blocks.'
+    []
+  []
+[]
