@@ -54,6 +54,14 @@ pressure_tag = "pressure_grad"
     nx = 12
     ny = 12
   []
+  [break_symmetries]
+    type = ParsedNodeTransformGenerator
+    input = gen
+    constant_names = 'side_length'
+    constant_expressions = '${side_length}'
+    x_function = 'if(x<side_length*1.001 / 2 & x > side_length * 0.999 / 2, x * 1.05, x)'
+    y_function = 'if(y<side_length*1.001 / 2 & y > side_length * 0.999 / 2, y * 1.05, y)'
+  []
 []
 
 [Problem]
