@@ -383,6 +383,7 @@ author = {Guillaume Giudicelli and Christopher Green and Joshua Hansel and David
 keywords = {Modeling & simulation, Fluid properties, MOOSE},
 }
 ```
+
 Available on OSTI at [https://www.osti.gov/pages/biblio/2476597] after October 2025.
 
 ### Electromagnetics Module
