@@ -1070,6 +1070,8 @@ Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int com
     return *getDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
 
+  if (_c_nodal)
+    return (_c_is_implicit) ? var->nodalValueOldArray() : var->nodalValueOlderArray();
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->slnOld() : var->slnOlder();
   return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
@@ -2693,6 +2695,14 @@ Coupleable::coupledValuesOlder(const std::string & var_name) const
 {
   auto func = [this, &var_name](unsigned int comp) { return &coupledValueOlder(var_name, comp); };
   return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VectorVariableValue *>
+Coupleable::coupledVectorValuesOld(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp)
+  { return &coupledVectorValueOld(var_name, comp); };
+  return coupledVectorHelper<const VectorVariableValue *>(var_name, func);
 }
 
 std::vector<const VariableGradient *>
