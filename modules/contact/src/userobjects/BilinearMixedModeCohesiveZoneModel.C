@@ -26,11 +26,9 @@ registerMooseObject("ContactApp", BilinearMixedModeCohesiveZoneModel);
 InputParameters
 BilinearMixedModeCohesiveZoneModel::validParams()
 {
-  InputParameters params = PenaltySimpleCohesiveZoneModel::validParams();
+  InputParameters params = CohesiveZoneModelBase::validParams();
 
   params.addClassDescription("Computes the bilinear mixed mode cohesive zone model.");
-  params.addRequiredCoupledVar("displacements",
-                               "The string of displacements suitable for the problem statement");
 
   // Input parameters for bilinear mixed mode traction.
   params.addParam<MaterialPropertyName>("GI_c",
@@ -48,6 +46,10 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "lag_displacement_jump",
       false,
       "Whether to use old displacement jumps to compute the effective displacement jump.");
+  params.addParam<bool>("apply_zero_traction_after_damage",
+                        false,
+                        "After full damage, set traction to zero (allow it to use with Mortar "
+                        "contact for mechanical contact.)");
   params.addParam<Real>(
       "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
   params.addRangeCheckedParam<Real>(
@@ -59,10 +61,6 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "Bilinear mixed mode traction");
   // End of input parameters for bilinear mixed mode traction.
 
-  // Suppress augmented Lagrange parameters. AL implementation for CZM remains to be done.
-  params.suppressParameter<Real>("max_penalty_multiplier");
-  params.suppressParameter<Real>("penalty_multiplier");
-  params.suppressParameter<Real>("penetration_tolerance");
   return params;
 }
 
@@ -71,8 +69,8 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
   : WeightedGapUserObject(parameters),
     PenaltyWeightedGapUserObject(parameters),
     WeightedVelocitiesUserObject(parameters),
-    PenaltySimpleCohesiveZoneModel(parameters),
-    _ndisp(coupledComponents("displacements")),
+    CohesiveZoneModelBase(parameters),
+    _apply_zero_traction_after_damage(getParam<bool>("apply_zero_traction_after_damage")),
     _normal_strength(getMaterialProperty<Real>("normal_strength")),
     _shear_strength(getMaterialProperty<Real>("shear_strength")),
     _GI_c(getMaterialProperty<Real>("GI_c")),
@@ -83,20 +81,6 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     _viscosity(getParam<Real>("viscosity")),
     _regularization_alpha(getParam<Real>("regularization_alpha"))
 {
-  _czm_interpolated_traction.resize(_ndisp);
-
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _grad_disp.push_back(&adCoupledGradient("displacements", i));
-    _grad_disp_neighbor.push_back(&adCoupledGradient("displacements", i));
-  }
-
-  // Set non-intervening components to zero
-  for (unsigned int i = _ndisp; i < 3; i++)
-  {
-    _grad_disp.push_back(&_ad_grad_zero);
-    _grad_disp_neighbor.push_back(&_ad_grad_zero);
-  }
 
   // Checks for bilinear traction input.
   if (!isParamValid("GI_c") || !isParamValid("GII_c") || !isParamValid("normal_strength") ||
@@ -111,22 +95,8 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
 void
 BilinearMixedModeCohesiveZoneModel::computeQpProperties()
 {
-  WeightedVelocitiesUserObject::computeQpProperties();
+  CohesiveZoneModelBase::computeQpProperties();
 
-  // Called after computeQpProperties() within the same algorithmic step.
-
-  // Compute F and R.
-  const auto F = (ADRankTwoTensor::Identity() +
-                  ADRankTwoTensor::initializeFromRows(
-                      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
-  const auto F_neighbor = (ADRankTwoTensor::Identity() +
-                           ADRankTwoTensor::initializeFromRows((*_grad_disp_neighbor[0])[_qp],
-                                                               (*_grad_disp_neighbor[1])[_qp],
-                                                               (*_grad_disp_neighbor[2])[_qp]));
-
-  // TODO in follow-on PRs: Trim interior node variable derivatives
-  _F_interpolation = F * (_JxW_msm[_qp] * _coord[_qp]);
-  _F_neighbor_interpolation = F_neighbor * (_JxW_msm[_qp] * _coord[_qp]);
   _normal_strength_interpolation = _normal_strength[_qp] * _JxW_msm[_qp] * _coord[_qp];
   _shear_strength_interpolation = _shear_strength[_qp] * _JxW_msm[_qp] * _coord[_qp];
   _GI_c_interpolation = _GI_c[_qp] * _JxW_msm[_qp] * _coord[_qp];
@@ -136,14 +106,12 @@ BilinearMixedModeCohesiveZoneModel::computeQpProperties()
 void
 BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
 {
-  WeightedVelocitiesUserObject::computeQpIProperties();
+  CohesiveZoneModelBase::computeQpIProperties();
 
   // Get the _dof_to_weighted_gap map
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   // TODO: Probably better to interpolate the deformation gradients.
-  _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
-  _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
   _dof_to_normal_strength[dof] += (*_test)[_i][_qp] * _normal_strength_interpolation;
   _dof_to_shear_strength[dof] += (*_test)[_i][_qp] * _shear_strength_interpolation;
 
@@ -151,19 +119,11 @@ BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
   _dof_to_GII_c[dof] += (*_test)[_i][_qp] * _GII_c_interpolation;
 }
 
-template <class T>
-T
-BilinearMixedModeCohesiveZoneModel::normalizeQuantity(
-    const std::unordered_map<const DofObject *, T> & map, const Node * const node)
-{
-  return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
-}
-
 void
 BilinearMixedModeCohesiveZoneModel::timestepSetup()
 {
   // instead we call it explicitly here
-  PenaltySimpleCohesiveZoneModel::timestepSetup();
+  CohesiveZoneModelBase::timestepSetup();
 
   // save off tangential traction from the last timestep
   for (auto & map_pr : _dof_to_damage)
@@ -173,19 +133,17 @@ BilinearMixedModeCohesiveZoneModel::timestepSetup()
     damage = {0.0};
   }
 
-  for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
-    delta_tangential_lm.setZero();
+  // for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+  //   delta_tangential_lm.setZero();
 }
 
 void
 BilinearMixedModeCohesiveZoneModel::initialize()
 {
   // instead we call it explicitly here
-  PenaltySimpleCohesiveZoneModel::initialize();
+  CohesiveZoneModelBase::initialize();
 
   // Avoid accumulating interpolation over the time step
-  _dof_to_F.clear();
-  _dof_to_F_neighbor.clear();
   _dof_to_mode_mixity_ratio.clear();
   _dof_to_normal_strength.clear();
   _dof_to_shear_strength.clear();
@@ -194,14 +152,7 @@ BilinearMixedModeCohesiveZoneModel::initialize()
   _dof_to_delta_initial.clear();
   _dof_to_delta_final.clear();
   _dof_to_delta_max.clear();
-  _dof_to_czm_traction.clear();
-  _dof_to_interface_displacement_jump.clear();
-  _dof_to_czm_normal_traction.clear();
-  _dof_to_interface_F.clear();
-  _dof_to_interface_R.clear();
-
-  for (auto & map_pr : _dof_to_rotation_matrix)
-    map_pr.second.setToIdentity();
+  // _dof_to_czm_normal_traction.clear();
 }
 
 void
@@ -281,6 +232,13 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   computeEffectiveDisplacementJump(node);
   computeDamage(node);
 
+  if (_apply_zero_traction_after_damage &&
+      MooseUtils::absoluteFuzzyEqual(_dof_to_damage[node].first, 1.0))
+  {
+    _dof_to_czm_traction[node] = 0.0;
+    return;
+  }
+
   // Split displacement jump into active and inactive parts
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
@@ -294,20 +252,6 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   _dof_to_czm_traction[node] =
       -(1.0 - _dof_to_damage[node].first) * _penalty_stiffness_czm * delta_active -
       _penalty_stiffness_czm * delta_inactive;
-}
-
-void
-BilinearMixedModeCohesiveZoneModel::computeGlobalTraction(const Node * const node)
-{
-  // First call does not have maps available
-  const bool return_boolean = _dof_to_czm_traction.find(node) == _dof_to_czm_traction.end();
-  if (return_boolean)
-    return;
-
-  const auto local_traction_vector = libmesh_map_find(_dof_to_czm_traction, node);
-  const auto rotation_matrix = libmesh_map_find(_dof_to_rotation_matrix, node);
-
-  _dof_to_czm_traction[node] = rotation_matrix * local_traction_vector;
 }
 
 void
@@ -440,48 +384,11 @@ BilinearMixedModeCohesiveZoneModel::computeDamage(const Node * const node)
 }
 
 void
-BilinearMixedModeCohesiveZoneModel::reinit()
-{
-  // Normal contact pressure with penalty
-  PenaltySimpleCohesiveZoneModel::reinit();
-
-  for (const auto i : index_range(_czm_interpolated_traction))
-  {
-    _czm_interpolated_traction[i].resize(_qrule_msm->n_points());
-
-    for (const auto qp : make_range(_qrule_msm->n_points()))
-      _czm_interpolated_traction[i][qp] = 0.0;
-  }
-
-  // iterate over nodes
-  for (const auto i : make_range(_test->size()))
-  {
-    // current node
-    const Node * const node = _lower_secondary_elem->node_ptr(i);
-
-    // End of CZM bilinear computations
-    if (_dof_to_czm_traction.find(node) == _dof_to_czm_traction.end())
-      return;
-
-    const auto & test_i = (*_test)[i];
-    for (const auto qp : make_range(_qrule_msm->n_points()))
-      for (const auto idx : index_range(_czm_interpolated_traction))
-        _czm_interpolated_traction[idx][qp] += test_i[qp] * _dof_to_czm_traction[node](idx);
-  }
-}
-
-void
 BilinearMixedModeCohesiveZoneModel::finalize()
 {
-  PenaltySimpleCohesiveZoneModel::finalize();
+  CohesiveZoneModelBase::finalize();
 
   const bool send_data_back = !constrainedByOwner();
-
-  Moose::Mortar::Contact::communicateR2T(
-      _dof_to_F, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-
-  Moose::Mortar::Contact::communicateR2T(
-      _dof_to_F_neighbor, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
   Moose::Mortar::Contact::communicateRealObject(
       _dof_to_normal_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
@@ -494,18 +401,6 @@ BilinearMixedModeCohesiveZoneModel::finalize()
 
   Moose::Mortar::Contact::communicateRealObject(
       _dof_to_GII_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-
-  Moose::Mortar::Contact::communicateRealObject(
-      _dof_to_weighted_displacements, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-}
-
-const ADVariableValue &
-BilinearMixedModeCohesiveZoneModel::czmGlobalTraction(const unsigned int i) const
-{
-  mooseAssert(i <= 3,
-              "Internal error in czmGlobalTraction. Index exceeds the traction vector size.");
-
-  return _czm_interpolated_traction[i];
 }
 
 Real
