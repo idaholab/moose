@@ -2,8 +2,8 @@
 
 [Mesh]
   [gmg]
-    type=GeneratedMeshGenerator
-    dim=3
+    type = GeneratedMeshGenerator
+    dim = 3
     nx = 10
     ny = 1
     nz = 1
@@ -12,68 +12,68 @@
 
 [Kernels]
   [time_deriv]
-    type=VectorTimeDerivative
-    variable=var
+    type = VectorTimeDerivative
+    variable = var
   []
   [bodyf]
-    type=VectorBodyForce
-    variable=var
-    function_x='-1'
-    function_y='-1'
-    function_z='-1'
+    type = VectorBodyForce
+    variable = var
+    function_x = '-1'
+    function_y = '-1'
+    function_z = '-1'
   []
 []
 
 [ICs]
   [ics]
-    type=VectorFunctionIC
-    variable=var
-    function_x='x + y + z'
-    function_y='2*(x + y + z)'
-    function_z='3*(x + y + z)'
+    type = VectorFunctionIC
+    variable = var
+    function_x = 'x + y + z'
+    function_y = '2*(x + y + z)'
+    function_z = '3*(x + y + z)'
   []
 []
 
 [Variables]
   [var]
-    order=CONSTANT
-    family =MONOMIAL_VEC
+    order = CONSTANT
+    family = MONOMIAL_VEC
   []
 []
 
 [AuxVariables]
   [old_var]
-    order=CONSTANT
-    family =MONOMIAL_VEC
+    order = CONSTANT
+    family = MONOMIAL_VEC
   []
   [old_var_mag]
-    order=FIRST
-    family =LAGRANGE
+    order = FIRST
+    family = LAGRANGE
   []
   [var_mag]
-    order=FIRST
-    family =LAGRANGE
+    order = FIRST
+    family = LAGRANGE
   []
 []
 
 [AuxKernels]
   [old]
-    type=VectorCoupledOldAux
-    variable=old_var
-    v='var var'
-    execute_on=TIMESTEP_END
+    type = VectorCoupledOldAux
+    variable = old_var
+    v = 'var var'
+    execute_on = TIMESTEP_END
   []
 []
 
 [Executioner]
-  type=Transient
-  num_steps=10
-  dt=0.1
+  type = Transient
+  num_steps = 10
+  dt = 0.1
 []
 
 [Outputs]
-  exodus=true
-  csv=true
+  exodus = true
+  csv = true
 []
 
 [VectorPostprocessors]

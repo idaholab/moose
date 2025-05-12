@@ -40,6 +40,9 @@
     requirement = 'The system shall be able to retrieve the time derivatives of nodal variables through the coupling interface.'
   []
   [coupled_old_vector_value]
+    issues = '#30224'
+    requirement = 'The system shall retrieve the old value of a vector through the coupling interface.'
+    design = 'Coupleable.md'
     [run]
       type = RunApp
       input = coupled_old_vector.i
@@ -49,10 +52,12 @@
       input = 'test.py'
       prereq = coupled_old_vector_value/run
       test_case = TestMonomialCoupledVectorValueOld
-      issues = '#30224'
     []
   []
   [coupled_old_vector_value_nodal]
+    issues = '#30224'
+    requirement = 'The system shall retrieve the old value of a nodal vector through the coupling interface.'
+    design = 'Coupleable.md'
     [run]
       type = RunApp
       input = coupled_old_vector_nodal.i
@@ -62,7 +67,6 @@
       input = 'test.py'
       prereq = 'coupled_old_vector_value_nodal/run'
       test_case = TestNodalCoupledVectorValueOld
-      issues = '#30224'
     []
   []
 []
