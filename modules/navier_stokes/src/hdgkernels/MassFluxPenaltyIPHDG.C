@@ -94,9 +94,9 @@ MassFluxPenaltyIPHDG::computeJacobianOnSide()
   const auto & test = _comp == 0 ? _vel_x_phi : _vel_y_phi;
   const auto & face_test = _comp == 0 ? _vel_x_face_phi : _vel_y_face_phi;
   computeOnSideHelper(_ad_residuals, test, 1);
-  addResiduals(_assembly, _ad_residuals, var.dofIndices(), var.scalingFactor());
+  addJacobian(_assembly, _ad_residuals, var.dofIndices(), var.scalingFactor());
   computeOnSideHelper(_ad_residuals, face_test, -1);
-  addResiduals(_assembly, _ad_residuals, face_var.dofIndices(), face_var.scalingFactor());
+  addJacobian(_assembly, _ad_residuals, face_var.dofIndices(), face_var.scalingFactor());
 }
 
 ADReal
