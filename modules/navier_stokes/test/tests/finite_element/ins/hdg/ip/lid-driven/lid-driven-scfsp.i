@@ -1,12 +1,14 @@
-re = 200
+final_re = 10000
+starting_re = 10
 rho = 1
 l = 2
 U = 1
-mu = '${fparse U * l / re}'
 n = 16
 gamma = 1e4
 degree = 2
 alpha = '${fparse 10 * degree^2}'
+num_steps = 10
+step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)}'
 
 [Mesh]
   [gen]
@@ -229,19 +231,31 @@ alpha = '${fparse 10 * degree^2}'
     type = ParsedVectorFunction
     expression_x = ${U}
   []
+  [reynolds]
+    type = ParsedFunction
+    expression = '10^(log10(${starting_re}) + (t - 1) * ${step_length})'
+  []
 []
 
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'rho mu'
-    prop_values = '${rho} ${mu}'
+    prop_names = 'rho'
+    prop_values = '${rho}'
   []
   [vel]
     type = ADVectorFromComponentVariablesMaterial
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
+  []
+  [mu]
+    type = ADParsedMaterial
+    functor_names = 'reynolds'
+    functor_symbols = 'reynolds'
+    property_name = 'mu'
+    expression = '${U} * ${l} / reynolds'
+    output_properties = 'mu'
   []
 []
 
@@ -272,7 +286,8 @@ alpha = '${fparse 10 * degree^2}'
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = ${num_steps}
 []
 
 [Outputs]
@@ -280,14 +295,14 @@ alpha = '${fparse 10 * degree^2}'
   [out]
     type = Exodus
     hide = 'pressure_average'
+    output_material_properties = true
   []
 []
 
 [Postprocessors]
   [Re]
-    type = ParsedPostprocessor
-    pp_names = ''
-    expression = '${rho} * ${U} * ${l} / ${mu}'
+    type = FunctionValuePostprocessor
+    function = 'reynolds'
   []
   [pressure_average]
     type = ElementAverageValue
