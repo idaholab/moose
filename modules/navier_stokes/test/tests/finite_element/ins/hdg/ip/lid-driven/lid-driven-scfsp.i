@@ -274,13 +274,13 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
       vars = 'vel_bar_x vel_bar_y'
       petsc_options = '-ksp_converged_reason'
       petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
-      petsc_options_value = 'lu       gmres     1e-2      300                right        mumps                      30'
+      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30'
     []
     [p]
       vars = 'pressure_bar'
       petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
-      petsc_options_value = 'gmres     300                1e-2      lu      right         mumps                      30'
+      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
+      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30'
     []
   []
 []
