@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "NodeElemConstraint.h"
+#include "ADNodeElemConstraint.h"
 
 class DisplacedProblem;
 class FEProblemBase;
@@ -19,7 +19,7 @@ class FEProblemBase;
  * A EqualValueEmbeddedConstraint forces the value of a variable to be the same
  * on overlapping portion of two blocks
  */
-class EqualValueEmbeddedConstraint : public NodeElemConstraint
+class EqualValueEmbeddedConstraint : public ADNodeElemConstraint
 {
 public:
   static InputParameters validParams();
