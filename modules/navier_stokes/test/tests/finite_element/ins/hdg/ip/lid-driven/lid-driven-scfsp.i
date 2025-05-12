@@ -261,8 +261,8 @@ alpha = '${fparse 10 * degree^2}'
       splitting = 'u p'
       splitting_type = schur
       petsc_options = '-ksp_monitor'
-      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol -ksp_max_it'
-      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4      30'
+      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol -ksp_max_it -ksp_atol'
+      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4      30          1e-9'
     []
     [u]
       vars = 'vel_bar_x vel_bar_y'
