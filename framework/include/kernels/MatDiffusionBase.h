@@ -12,6 +12,7 @@
 #include "Kernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
+#include "RankThreeTensor.h"
 
 /**
  * This class template implements a diffusion kernel with a mobility that can vary
@@ -46,6 +47,9 @@ protected:
 
   /// diffusion coefficient derivatives w.r.t. coupled variables
   std::vector<const MaterialProperty<T> *> _dDdarg;
+
+  /// diffusion coefficient derivatives w.r.t. variables that have explicit dependence on gradients
+  std::vector<const MaterialProperty<RankThreeTensor> *> _dDdgradarg;
 
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
@@ -89,6 +93,8 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
     _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
                                            _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
+    _dDdgradarg(
+        1), // replace this with number of entries in list of variables with gradient dependencices
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
     _grad_v(_is_coupled ? coupledGradient("v")
@@ -102,6 +108,8 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
     _dDdarg[i] = &getMaterialPropertyDerivative<T>(
         isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
+  _dDdgradarg[0] = &getMaterialPropertyDerivative<RankThreeTensor>(
+      isParamValid("D_name") ? "D_name" : "diffusivity", "gradc");
 }
 
 template <typename T>
@@ -138,6 +146,19 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  if (cvar == 0)
+  {
+    RankTwoTensor gradphij;
+    for (unsigned int a = 0; a < 3; ++a)
+      for (unsigned int b = 0; b < 3; ++b)
+      {
+        gradphij(a, b) = (*_dDdgradarg[cvar])[_qp](0, a, b) * _grad_phi[_j][_qp](0) +
+                         (*_dDdgradarg[cvar])[_qp](1, a, b) * _grad_phi[_j][_qp](1) +
+                         (*_dDdgradarg[cvar])[_qp](2, a, b) * _grad_phi[_j][_qp](2);
+      }
+
+    sum += gradphij * _grad_v[_qp] * _grad_test[_i][_qp];
+  }
   if (_v_var == jvar)
     sum += computeQpCJacobian();
 
