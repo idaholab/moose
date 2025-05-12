@@ -18,19 +18,19 @@ ElectromagneticHeatingMaterial::validParams()
   InputParameters params = ADMaterial::validParams();
   params.addClassDescription(
       "Material class used to provide the electric field as a material property and computes the "
-      "residuals for electromagnetic/electrostatic heating based objects.");
+      "residual contributions for electromagnetic/electrostatic heating objects.");
   params.addCoupledVar(
       "electric_field",
-      "The electic field vector or electrostatic potential scalar to produce the field.");
+      "The electric field vector or electrostatic potential scalar to produce the field.");
   params.addCoupledVar(
       "complex_electric_field",
-      "The complex component of the electic field vector for the harmonic formulation.");
+      "The complex component of the electric field vector for the time-harmonic formulation.");
   params.addParam<std::string>("electric_field_material_name",
                                "electric_field",
                                "User-specified material property name for the field.");
   params.addParam<std::string>("electric_field_heating_name",
                                "electric_field_heating",
-                               "User-specified material property name for the Joule Heating.");
+                               "User-specified material property name for the Joule heating.");
   params.addParam<Real>("heating_scaling", 1.0, "Coefficient to multiply by heating term.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",

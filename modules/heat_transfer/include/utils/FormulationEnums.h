@@ -11,7 +11,7 @@
 
 /**
  *  FormulationEnums contains the enumeration used to determine between
- *  time or frequency formulations involving electromagnetic electical fields
+ *  time or frequency (i.e., time-harmonic) formulations involving electromagnetic electrical fields
  *  and used to determine between solving for an electrostatic or
  *  electromagnetic electric field
  */

@@ -176,7 +176,7 @@
   # The magnitude of electric field profile determined
   # from the magnetic vector potential using:
   # abs(E) = abs(-j*omega*A) + abs(supplied current / elec_cond)
-  # NOTE: The reason for calculationg the magnitude of the electric
+  # NOTE: The reason for calculating the magnitude of the electric
   #       field is the heating term is defined as:
   #       Q = 1/2 abs(E)^2 for frequency domain field formulations
   [E_real]
@@ -244,8 +244,8 @@
   []
 
   ### Magnetic vector potential boundary conditions ###
-  # No inputted boundary conditions represents
-  # a zero curl conditions at the boundaries, such that:
+  # No defined boundary conditions represents
+  # zero curl conditions at the boundaries, such that:
   # A x n = 0
 []
 

@@ -1,9 +1,10 @@
-!alert warning
+!alert! warning
 This kernel will be deprecated in the near future
 (10/01/2025) in favor of exclusively using the [ADJouleHeatingSource](source/kernels/ADJouleHeatingSource.md optional=true)
-within the Heat Transfer module, because ADJouleHeatingSource can calculate both electrostatic
+within the [Heat Transfer](modules/heat_transfer/index.md optional=True) module, because `ADJouleHeatingSource` can calculate both electrostatic
 and electromagnetic Joule heating. For more information, please see
 [ADJouleHeatingSource](source/kernels/ADJouleHeatingSource.md optional=true).
+!alert-end!
 
 # EMJouleHeatingSource
 

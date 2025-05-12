@@ -31,7 +31,7 @@
     exodiff = 'transient_ad_jouleheating_out.e'
     cli_args = 'Kernels/HeatSrc/elec=elec Kernels/HeatSrc/heating_term='' Materials/ElectromagneticMaterial/enable=false'
     requirement = 'The system shall compute Joule heating using the deprecated method with automatic differentiation'
-    issues = '#30000'
+    issues = '#15536 #30000'
     design = 'ADJouleHeatingSource.md'
   [../]
 
@@ -39,7 +39,7 @@
     type = 'Exodiff'
     input = 'transient_aux_jouleheating.i'
     exodiff = 'transient_aux_jouleheating_out.e'
-    requirement = 'The system shall compute Joule heating as an auxvariable'
+    requirement = 'The system shall compute Joule heating as an AuxVariable.'
     issues = '#30000'
     design = 'JouleHeatingHeatGeneratedAux.md'
   [../]
@@ -48,7 +48,7 @@
     input = 'transient_aux_jouleheating.i'
     exodiff = 'transient_aux_jouleheating_out.e'
     cli_args = 'Kernels/HeatSrc/elec=elec Kernels/HeatSrc/heating_term='' AuxKernels/joule_heating_calculation/elec=elec AuxKernels/joule_heating_calculation/heating_term='' Materials/ElectromagneticMaterial/enable=false'
-    requirement = 'The system shall compute Joule heating as an auxvariable using the deprecated method'
+    requirement = 'The system shall compute Joule heating as an AuxVariable using the deprecated method.'
     issues = '#30000'
     design = 'JouleHeatingHeatGeneratedAux.md'
   [../]

@@ -17,8 +17,8 @@ JouleHeatingHeatGeneratedAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute heat generated from Joule heating.");
   params.addParam<MaterialPropertyName>(
-      "heating_term", "electric_field_heating", "Material property providing the Joule Heating.");
-  params.addCoupledVar("elec", "Electric potential for joule heating.");
+      "heating_term", "electric_field_heating", "Material property providing the Joule heating.");
+  params.addCoupledVar("elec", "Electric potential for Joule heating.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",
       "electrical_conductivity",
@@ -54,9 +54,9 @@ Real
 JouleHeatingHeatGeneratedAux::computeValue()
 {
   /*
-   * Note: Coupling in the gradient of the potential will deprecated in the
-   *       near future. After the deprecation, the residual of this kernel will
-   *       solely be provided by the 'ElectromagneticHeatingMaterial' material object.
+   * NOTE: Coupling in the gradient of the potential will be deprecated in the
+   *       near future (10/01/2025). After the deprecation, the residual contribution of this kernel will
+   *       be solely provided by the 'ElectromagneticHeatingMaterial' material object.
    */
   if (_supplied_potential)
   {

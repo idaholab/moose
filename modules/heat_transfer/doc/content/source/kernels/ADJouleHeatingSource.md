@@ -26,11 +26,11 @@ Frequency domain formulation:
 - and $E^*$ is the complex conjugate of the electric field.
 
 $\sigma_{elec}$ is defined as an
-`ADMaterialProperty`. Within the heat transfer module, this property could
+`ADMaterialProperty`. Within the [heat transfer](modules/heat_transfer/index.md) module, this property could
 currently be provided by [ADElectricalConductivity](ADElectricalConductivity.md).
 
 In the case of the time domain formulation, the electric field can be
-defined using an electromagnetic solver or using the electrostatic
+defined using an electromagnetic solver (like the [electromagnetics module](modules/electromagnetics/index.md)) or using the electrostatic
 approximation, where:
 \begin{equation}
   E = \nabla \left( V \right)

@@ -17,7 +17,7 @@ ADJouleHeatingSource::validParams()
   InputParameters params = ADKernelValue::validParams();
   params.addCoupledVar("elec", "Electrostatic potential for joule heating.");
   params.addParam<MaterialPropertyName>(
-      "heating_term", "electric_field_heating", "Material property providing the Joule Heating.");
+      "heating_term", "electric_field_heating", "Material property providing the Joule heating.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",
       "electrical_conductivity",
@@ -43,7 +43,7 @@ ADJouleHeatingSource::ADJouleHeatingSource(const InputParameters & parameters)
   if (_supplied_potential)
     mooseDeprecated(
         "Directly coupling an electrostatic potential will be deprecated in the near future "
-        "(10/01/2025). Please use the material object 'ElectromagneticHeatingMaterial' to coupled "
+        "(10/01/2025). Please use the material object 'ElectromagneticHeatingMaterial' to couple "
         "either the electrostatic or electromagnetic field for Joule heating.");
 }
 
@@ -51,9 +51,9 @@ ADReal
 ADJouleHeatingSource::precomputeQpResidual()
 {
   /*
-   * Note: Coupling in the gradient of the potential will deprecated in the
-   *       near future. After the deprecation, the residual of this kernel will
-   *       solely be provided by the 'ElectromagneticHeatingMaterial' material object.
+   * NOTE: Coupling in the gradient of the potential will be deprecated in the
+   *       near future (10/01/2025). After the deprecation, the residual contribution of this kernel will
+   *       be solely provided by the 'ElectromagneticHeatingMaterial' material object.
    */
   if (_supplied_potential)
     return -_elec_cond[_qp] * _grad_potential[_qp] * _grad_potential[_qp];

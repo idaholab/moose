@@ -4,9 +4,9 @@
 
 ## Overview
 
-`ElectromagneticHeatingMaterial` provides the electric field and residuals of electromagnetic/electrostatic
-heating based objects as material properties. In particular, `ElectromagneticHeatingMaterial` provides the
-residuals for [ADJouleHeatingSource](ADJouleHeatingSource.md) and [JouleHeatingHeatGeneratedAux](JouleHeatingHeatGeneratedAux.md) within the Heat Transfer module.
+`ElectromagneticHeatingMaterial` provides the electric field and residual contributions of electromagnetic/electrostatic
+heating objects as material properties. In particular, `ElectromagneticHeatingMaterial` provides the
+residuals for [ADJouleHeatingSource](ADJouleHeatingSource.md) and [JouleHeatingHeatGeneratedAux](JouleHeatingHeatGeneratedAux.md) within the [heat transfer](modules/heat_transfer/index.md) module.
 
 For the formulation of the electric field, users can declare:
 

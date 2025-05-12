@@ -13,7 +13,7 @@
 
 /**
  *  Material class used to provide the electric field as a material property and computes
- *  the residuals for electromagnetic/electrostatic heating based objects.
+ *  the residual contributions for electromagnetic/electrostatic heating objects.
  */
 class ElectromagneticHeatingMaterial : public ADMaterial
 {
@@ -25,7 +25,7 @@ public:
   virtual void computeQpProperties() override;
   /// Function that defines the field depending on supplied variable type.
   virtual void computeFieldValue();
-  /// Function that defines the residule for Joule heating
+  /// Function that defines the residual for Joule heating
   virtual void computeJouleHeating();
 
 protected:
@@ -35,7 +35,7 @@ protected:
   const bool _is_vector;
   /// The electric field defined from a vector variable
   const ADVectorVariableValue & _efield;
-  /// The complex component of the electric field, needed for harmonic formulation
+  /// The complex component of the electric field, needed for time-harmonic formulations
   const ADVectorVariableValue & _efield_complex;
   /// The electric field defined from the gradient of a scalar variable
   const ADVariableGradient & _grad_potential;
@@ -43,7 +43,7 @@ protected:
   ADMaterialProperty<RealVectorValue> & _electric_field;
   /// Complex electric field material property
   ADMaterialProperty<RealVectorValue> & _electric_field_complex;
-  /// Joule Heating residual material property
+  /// Joule heating residual material property
   ADMaterialProperty<Real> & _electric_field_heating;
   /// Coefficient to multiply by heating term
   const Real & _heating_scaling;

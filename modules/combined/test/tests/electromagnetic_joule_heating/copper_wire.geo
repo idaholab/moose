@@ -1,9 +1,10 @@
 // Copper wire mesh for microwave heating in a copper wire
+// This file should be used with the Gmsh mesh generator (https://gmsh.info/)
 // Wire length = 4.5 cm
 // Wire diameter = 0.5 cm
 // Entry location (lower left coordinate) = (0.0, 0.0)
 
-//Declare scaling factor and second order meshing
+// Declare scaling factor and second order meshing
 sf = 0.002;
 Mesh.ElementOrder = 2;
 Mesh.SecondOrderLinear = 0;
