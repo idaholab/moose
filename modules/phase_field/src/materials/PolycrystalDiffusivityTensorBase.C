@@ -44,6 +44,9 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _dDdc(isCoupledConstant("_c_name")
               ? nullptr
               : &declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _c_name)),
+    _dDdgradc(isCoupledConstant("_c_name")
+                  ? nullptr
+                  : &declarePropertyDerivative<RankThreeTensor>(_diffusivity_name, "gradc")),
     _D0(getParam<Real>("D0")),
     _Em(getParam<Real>("Em")),
     _s_index(getParam<Real>("surfindex")),
@@ -118,8 +121,21 @@ PolycrystalDiffusivityTensorBase::computeProperties()
         Ts(a, b) = I(a, b) - ns(a) * ns(b);
       }
 
+    Real dcx = _grad_c[_qp](0);
+    Real dcy = _grad_c[_qp](1);
+    Real norm4 = pow(_grad_c[_qp].norm(), 4.0);
+    RankThreeTensor dTs;
+    dTs(0, 0, 0) = -2.0 * dcx * dcy * dcy / norm4;
+    dTs(0, 1, 0) = dTs(0, 0, 1) = (dcx * dcx * dcy - dcy * dcy * dcy) / norm4;
+    dTs(0, 1, 1) = 2.0 * dcx * dcy * dcy / norm4;
+
+    dTs(1, 0, 0) = 2.0 * dcx * dcx * dcy / norm4;
+    dTs(1, 1, 0) = dTs(1, 0, 1) = (-dcx * dcx * dcx + dcx * dcy * dcy) / norm4;
+    dTs(1, 1, 1) = -2.0 * dcx * dcx * dcy / norm4;
+
     RealTensorValue Dsurf = c * c * mc * mc * Ts;
     RealTensorValue dDsurfdc = (2.0 * c * mc * mc - 2.0 * c * c * mc) * Ts;
+    RankThreeTensor dDsurfdgradc = c * c * mc * mc * dTs;
 
     // Compute bulk properties
     _Dbulk = _D0 * std::exp(-_Em / _kb / _T[_qp]);
@@ -130,6 +146,8 @@ PolycrystalDiffusivityTensorBase::computeProperties()
     _D[_qp] = _Dbulk * (_b_index * mult_bulk * I + _gb_index * Dgb + _s_index * Dsurf);
     if (_dDdc)
       (*_dDdc)[_qp] = _Dbulk * (_b_index * dmult_bulk * I + _s_index * dDsurfdc);
+    if (_dDdgradc)
+      (*_dDdgradc)[_qp] = _Dbulk * _s_index * dDsurfdgradc;
     for (unsigned int i = 0; i < _op_num; ++i)
       if (_dDdeta[i])
         (*_dDdeta[i])[_qp] = _Dbulk * _gb_index * dDgbdeta[i];
