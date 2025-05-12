@@ -28,7 +28,7 @@ InputParameters
 EqualValueEmbeddedConstraint::validParams()
 {
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  InputParameters params = NodeElemConstraint::validParams();
+  InputParameters params = ADNodeElemConstraint::validParams();
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
@@ -43,7 +43,7 @@ EqualValueEmbeddedConstraint::validParams()
 }
 
 EqualValueEmbeddedConstraint::EqualValueEmbeddedConstraint(const InputParameters & parameters)
-  : NodeElemConstraint(parameters),
+  : ADNodeElemConstraint(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _formulation(getParam<MooseEnum>("formulation").getEnum<Formulation>()),
