@@ -23,12 +23,14 @@
 #include "libmesh/sparse_matrix.h"
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
+registerMooseObject("MooseApp", ADEqualValueEmbeddedConstraint);
 
+template <bool is_ad>
 InputParameters
-EqualValueEmbeddedConstraint::validParams()
+EqualValueEmbeddedConstraintTempl<is_ad>::validParams()
 {
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  InputParameters params = ADNodeElemConstraint::validParams();
+  InputParameters params = GenericNodeElemConstraint<is_ad>::validParams();
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
@@ -42,20 +44,23 @@ EqualValueEmbeddedConstraint::validParams()
   return params;
 }
 
-EqualValueEmbeddedConstraint::EqualValueEmbeddedConstraint(const InputParameters & parameters)
-  : ADNodeElemConstraint(parameters),
+template <bool is_ad>
+EqualValueEmbeddedConstraintTempl<is_ad>::EqualValueEmbeddedConstraintTempl(
+    const InputParameters & parameters)
+  : GenericNodeElemConstraint<is_ad>(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _formulation(getParam<MooseEnum>("formulation").getEnum<Formulation>()),
-    _penalty(getParam<Real>("penalty")),
+    _formulation(this->template getParam<MooseEnum>("formulation").template getEnum<Formulation>()),
+    _penalty(this->template getParam<Real>("penalty")),
     _residual_copy(_sys.residualGhosted())
 {
   _overwrite_secondary_residual = false;
   prepareSecondaryToPrimaryMap();
 }
 
+template <bool is_ad>
 void
-EqualValueEmbeddedConstraint::prepareSecondaryToPrimaryMap()
+EqualValueEmbeddedConstraintTempl<is_ad>::prepareSecondaryToPrimaryMap()
 {
   // get mesh pointLocator
   std::unique_ptr<libMesh::PointLocatorBase> pointLocator = _mesh.getPointLocator();
@@ -89,8 +94,9 @@ EqualValueEmbeddedConstraint::prepareSecondaryToPrimaryMap()
   }
 }
 
+template <bool is_ad>
 bool
-EqualValueEmbeddedConstraint::shouldApply()
+EqualValueEmbeddedConstraintTempl<is_ad>::shouldApply()
 {
   // primary element
   auto it = _secondary_to_primary_map.find(_current_node->id());
@@ -111,8 +117,9 @@ EqualValueEmbeddedConstraint::shouldApply()
   return false;
 }
 
+template <bool is_ad>
 void
-EqualValueEmbeddedConstraint::reinitConstraint()
+EqualValueEmbeddedConstraintTempl<is_ad>::reinitConstraint()
 {
   const Node * node = _current_node;
   unsigned int sys_num = _sys.number();
@@ -134,16 +141,18 @@ EqualValueEmbeddedConstraint::reinitConstraint()
   }
 }
 
+template <bool is_ad>
 Real
-EqualValueEmbeddedConstraint::computeQpSecondaryValue()
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpSecondaryValue()
 {
   return MetaPhysicL::raw_value(_u_secondary[_qp]);
 }
 
-ADReal
-EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
+template <bool is_ad>
+GenericReal<is_ad>
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpResidual(Moose::ConstraintType type)
 {
-  ADReal resid = _constraint_residual;
+  GenericReal<is_ad> resid = _constraint_residual;
 
   switch (type)
   {
@@ -151,7 +160,7 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
     {
       if (_formulation == Formulation::KINEMATIC)
       {
-        ADReal pen_force = _penalty * (_u_secondary[_qp] - _u_primary[_qp]);
+        GenericReal<is_ad> pen_force = _penalty * (_u_secondary[_qp] - _u_primary[_qp]);
         resid += pen_force;
       }
       return _test_secondary[_i][_qp] * resid;
@@ -163,3 +172,121 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
 
   return 0.0;
 }
+
+template <bool is_ad>
+Real
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpJacobian(Moose::ConstraintJacobianType type)
+{
+  mooseAssert(!is_ad,
+              "In ADEqualValueEmbeddedConstraint, computeQpJacobian should not be called. "
+              "Check computeJacobian implementation.");
+
+  unsigned int sys_num = _sys.number();
+  const Real penalty = MetaPhysicL::raw_value(_penalty);
+  Real curr_jac, secondary_jac;
+
+  switch (type)
+  {
+    case Moose::SecondarySecondary:
+      switch (_formulation)
+      {
+        case Formulation::KINEMATIC:
+          curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                                  _connected_dof_indices[_j]);
+          return -curr_jac + _phi_secondary[_j][_qp] * penalty * _test_secondary[_i][_qp];
+        case Formulation::PENALTY:
+          return _phi_secondary[_j][_qp] * penalty * _test_secondary[_i][_qp];
+        default:
+          mooseError("Invalid formulation");
+      }
+
+    case Moose::SecondaryPrimary:
+      switch (_formulation)
+      {
+        case Formulation::KINEMATIC:
+          return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp];
+        case Formulation::PENALTY:
+          return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp];
+        default:
+          mooseError("Invalid formulation");
+      }
+
+    case Moose::PrimarySecondary:
+      switch (_formulation)
+      {
+        case Formulation::KINEMATIC:
+          secondary_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                                       _connected_dof_indices[_j]);
+          return secondary_jac * _test_primary[_i][_qp];
+        case Formulation::PENALTY:
+          return -_phi_secondary[_j][_qp] * penalty * _test_primary[_i][_qp];
+        default:
+          mooseError("Invalid formulation");
+      }
+
+    case Moose::PrimaryPrimary:
+      switch (_formulation)
+      {
+        case Formulation::KINEMATIC:
+          return 0.0;
+        case Formulation::PENALTY:
+          return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp];
+        default:
+          mooseError("Invalid formulation");
+      }
+
+    default:
+      mooseError("Unsupported type");
+      break;
+  }
+  return 0.0;
+}
+
+template <bool is_ad>
+Real
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpOffDiagJacobian(
+    Moose::ConstraintJacobianType type, unsigned int /*jvar*/)
+{
+  mooseAssert(!is_ad,
+              "In ADEqualValueEmbeddedConstraint, computeQpOffDiagJacobian should not be called. "
+              "Check computeJacobian implementation.");
+
+  Real curr_jac, secondary_jac;
+  unsigned int sys_num = _sys.number();
+
+  switch (type)
+  {
+    case Moose::SecondarySecondary:
+      curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                              _connected_dof_indices[_j]);
+      return -curr_jac;
+
+    case Moose::SecondaryPrimary:
+      return 0.0;
+
+    case Moose::PrimarySecondary:
+      switch (_formulation)
+      {
+        case Formulation::KINEMATIC:
+          secondary_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                                       _connected_dof_indices[_j]);
+          return secondary_jac * _test_primary[_i][_qp];
+        case Formulation::PENALTY:
+          return 0.0;
+        default:
+          mooseError("Invalid formulation");
+      }
+
+    case Moose::PrimaryPrimary:
+      return 0.0;
+
+    default:
+      mooseError("Unsupported type");
+      break;
+  }
+
+  return 0.0;
+}
+
+template class EqualValueEmbeddedConstraintTempl<false>;
+template class EqualValueEmbeddedConstraintTempl<true>;

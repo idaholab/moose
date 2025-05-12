@@ -28,3 +28,25 @@ public:
   static InputParameters validParams() { return ADNodeElemConstraint::validParams(); };
   GenericNodeElemConstraint(const InputParameters & parameters) : ADNodeElemConstraint(parameters) {}
 };
+
+#define usingGenericNodeElemConstraint                                                             \
+  using GenericNodeElemConstraint<is_ad>::_mesh;                                                   \
+  using GenericNodeElemConstraint<is_ad>::_secondary;                                              \
+  using GenericNodeElemConstraint<is_ad>::_primary;                                                \
+  using GenericNodeElemConstraint<is_ad>::_secondary_to_primary_map;                               \
+  using GenericNodeElemConstraint<is_ad>::_current_node;                                           \
+  using GenericNodeElemConstraint<is_ad>::_u_secondary;                                            \
+  using GenericNodeElemConstraint<is_ad>::_u_primary;                                              \
+  using GenericNodeElemConstraint<is_ad>::_j;                                                      \
+  using GenericNodeElemConstraint<is_ad>::_i;                                                      \
+  using GenericNodeElemConstraint<is_ad>::_jacobian;                                               \
+  using GenericNodeElemConstraint<is_ad>::_phi_secondary;                                          \
+  using GenericNodeElemConstraint<is_ad>::_phi_primary;                                            \
+  using GenericNodeElemConstraint<is_ad>::_var;                                                    \
+  using GenericNodeElemConstraint<is_ad>::_qp;                                                     \
+  using GenericNodeElemConstraint<is_ad>::_subproblem;                                             \
+  using GenericNodeElemConstraint<is_ad>::_test_primary;                                           \
+  using GenericNodeElemConstraint<is_ad>::_test_secondary;                                         \
+  using GenericNodeElemConstraint<is_ad>::_connected_dof_indices;                                  \
+  using GenericNodeElemConstraint<is_ad>::_sys;                                                    \
+  using GenericNodeElemConstraint<is_ad>::_overwrite_secondary_residual;

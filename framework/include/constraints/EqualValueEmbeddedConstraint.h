@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "ADNodeElemConstraint.h"
+#include "GenericNodeElemConstraint.h"
 
 class DisplacedProblem;
 class FEProblemBase;
@@ -19,12 +19,13 @@ class FEProblemBase;
  * A EqualValueEmbeddedConstraint forces the value of a variable to be the same
  * on overlapping portion of two blocks
  */
-class EqualValueEmbeddedConstraint : public ADNodeElemConstraint
+template <bool is_ad>
+class EqualValueEmbeddedConstraintTempl : public GenericNodeElemConstraint<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  EqualValueEmbeddedConstraint(const InputParameters & parameters);
+  EqualValueEmbeddedConstraintTempl(const InputParameters & parameters);
 
   virtual void timestepSetup() override {}
   virtual void jacobianSetup() override {}
@@ -43,7 +44,10 @@ public:
 protected:
   virtual void prepareSecondaryToPrimaryMap() override;
   virtual Real computeQpSecondaryValue() override;
-  virtual ADReal computeQpResidual(Moose::ConstraintType type) override;
+  virtual GenericReal<is_ad> computeQpResidual(Moose::ConstraintType type) override;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar) override;
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   FEProblem & _fe_problem;
@@ -51,9 +55,14 @@ protected:
   /// Formulations, currently only supports KINEMATIC and PENALTY
   const enum class Formulation { KINEMATIC, PENALTY } _formulation;
   /// Penalty parameter used in constraint enforcement for kinematic and penalty formulations
-  const ADReal _penalty;
+  const GenericReal<is_ad> _penalty;
   /// copy of the residual before the constraint is applied
   NumericVector<Number> & _residual_copy;
   /// constraint force needed to enforce the constraint
-  ADReal _constraint_residual;
+  GenericReal<is_ad> _constraint_residual;
+
+  usingGenericNodeElemConstraint;
 };
+
+typedef EqualValueEmbeddedConstraintTempl<false> EqualValueEmbeddedConstraint;
+typedef EqualValueEmbeddedConstraintTempl<true> ADEqualValueEmbeddedConstraint;
