@@ -1,9 +1,9 @@
-re = 1
+re = 200
 rho = 1
 l = 2
 U = 1
 mu = '${fparse U * l / re}'
-n = 1
+n = 16
 gamma = 1e4
 degree = 2
 alpha = '${fparse 10 * degree^2}'
