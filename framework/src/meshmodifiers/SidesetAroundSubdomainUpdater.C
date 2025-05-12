@@ -30,13 +30,17 @@ SidesetAroundSubdomainUpdater::validParams()
   params.addParam<bool>("assign_outer_surface_sides",
                         true,
                         "Assign sides of elements im `inner_subdomains` that have no neighbor.");
-  params.addRequiredParam<BoundaryName>("update_boundary_name",
+  params.addRequiredParam<BoundaryName>("update_sideset_name",
                                         "The name of the sideset to be updated. If the boundary "
                                         "does not exist it will be added to the system.");
-  params.addParam<BoundaryID>("update_boundary_id",
+  params.renameParam(
+      "update_sideset_name", "update_boundary_name", "The boundary name which is updated.");
+  params.addParam<BoundaryID>("update_sideset_id",
                               Moose::INVALID_BOUNDARY_ID,
                               "The ID of the sideset to be updated. If the boundary "
                               "does not exist it will be added to the system.");
+  params.renameParam(
+      "update_sideset_id", "update_boundary_id", "The boundary id which is updated.");
   params.registerBase("MeshModifier");
   return params;
 }
