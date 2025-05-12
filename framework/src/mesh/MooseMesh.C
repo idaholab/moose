@@ -186,6 +186,20 @@ MooseMesh::validParams()
       "be provided using add_sideset_ids. In this case this list and add_sideset_ids must contain "
       "the same number of items.");
 
+  params.addParam<std::vector<BoundaryID>>(
+      "add_nodeset_ids",
+      "The listed nodeset ids will be assumed valid for the mesh. This permits setting up boundary "
+      "restrictions for node initially containing no sides. Names for this nodesets may be "
+      "provided using add_nodeset_names. In this case this list and add_nodeset_names must contain "
+      "the same number of items.");
+  params.addParam<std::vector<BoundaryName>>(
+      "add_nodeset_names",
+      "The listed nodeset names will be assumed valid for the mesh. This permits setting up "
+      "boundary restrictions for nodesets initially containing no sides. Ids for this nodesets may "
+      "be provided using add_nodesets_ids. In this case this list and add_nodesets_ids must "
+      "contain "
+      "the same number of items.");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -200,9 +214,9 @@ MooseMesh::validParams()
   // groups
   params.addParamNamesToGroup("patch_update_strategy patch_size max_leaf_size", "Geometric search");
   params.addParamNamesToGroup("nemesis", "Advanced");
-  params.addParamNamesToGroup(
-      "add_subdomain_ids add_subdomain_names add_sideset_ids add_sideset_names",
-      "Pre-declaration of future mesh sub-entities");
+  params.addParamNamesToGroup("add_subdomain_ids add_subdomain_names add_sideset_ids "
+                              "add_sideset_names add_nodeset_ids add_nodeset_names",
+                              "Pre-declaration of future mesh sub-entities");
   params.addParamNamesToGroup("construct_node_list_from_side_list build_all_side_lowerd_mesh",
                               "Automatic definition of mesh element sides entities");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
@@ -481,6 +495,105 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   const std::set<BoundaryID> & local_side_bids =
       getMesh().get_boundary_info().get_side_boundary_ids();
   _mesh_sideset_ids.insert(local_side_bids.begin(), local_side_bids.end());
+
+  // Add explicitly requested sidesets
+  // This is done *after* the side boundaries (e.g. "right", ...) have been generated.
+  if (isParamValid("add_sideset_ids") && !isParamValid("add_sideset_names"))
+  {
+    const auto & add_boundary_ids = getParam<std::vector<BoundaryID>>("add_sideset_ids");
+    _mesh_boundary_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+    _mesh_sideset_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+    _mesh_nodeset_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+  }
+  else if (isParamValid("add_sideset_ids") && isParamValid("add_sideset_names"))
+  {
+    const auto add_boundary_names =
+        getParam<BoundaryID, BoundaryName>("add_sideset_ids", "add_sideset_names");
+    for (const auto & [sideset_id, sideset_name] : add_boundary_names)
+    {
+      // add sideset id
+      _mesh_boundary_ids.insert(sideset_id);
+      _mesh_sideset_ids.insert(sideset_id);
+      _mesh_nodeset_ids.insert(sideset_id);
+      // set name of the sideset just added
+      setBoundaryName(sideset_id, sideset_name);
+    }
+  }
+  else if (isParamValid("add_sideset_names"))
+  {
+    // the user has defined add_sideset_names, but not add_sideset_ids
+    const auto & add_sideset_names = getParam<std::vector<BoundaryName>>("add_sideset_names");
+
+    // to define sideset ids, we need the largest sideset id defined yet.
+    boundary_id_type offset = 0;
+    if (!_mesh_sideset_ids.empty())
+      offset = *_mesh_sideset_ids.rbegin();
+    if (!_mesh_boundary_ids.empty())
+      offset = std::max(offset, *_mesh_boundary_ids.rbegin());
+
+    // add all sidesets (and auto-assign ids)
+    for (const BoundaryName & sideset_name : add_sideset_names)
+    {
+      // to avoid two sidesets with the same ID (notably on recover)
+      if (getBoundaryID(sideset_name) != Moose::INVALID_BOUNDARY_ID)
+        continue;
+      const auto sideset_id = ++offset;
+      // add sideset id
+      _mesh_boundary_ids.insert(sideset_id);
+      _mesh_sideset_ids.insert(sideset_id);
+      // set name of the sideset just added
+      setBoundaryName(sideset_id, sideset_name);
+    }
+  }
+  // Add explicitly requested nodesets
+  // This is done *after* the side boundaries (e.g. "right", ...) have been generated.
+  if (isParamValid("add_nodeset_ids") && !isParamValid("add_nodeset_names"))
+  {
+    const auto & add_boundary_ids = getParam<std::vector<BoundaryID>>("add_nodeset_ids");
+    _mesh_boundary_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+    _mesh_sideset_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+    _mesh_nodeset_ids.insert(add_boundary_ids.begin(), add_boundary_ids.end());
+  }
+  else if (isParamValid("add_nodeset_ids") && isParamValid("add_nodeset_names"))
+  {
+    const auto add_boundary_names =
+        getParam<BoundaryID, BoundaryName>("add_nodeset_ids", "add_nodeset_names");
+    for (const auto & [nodeset_id, nodeset_name] : add_boundary_names)
+    {
+      // add nodeset id
+      _mesh_boundary_ids.insert(nodeset_id);
+      _mesh_sideset_ids.insert(nodeset_id);
+      _mesh_nodeset_ids.insert(nodeset_id);
+      // set name of the nodeset just added
+      setBoundaryName(nodeset_id, nodeset_name);
+    }
+  }
+  else if (isParamValid("add_nodeset_names"))
+  {
+    // the user has defined add_nodeset_names, but not add_nodeset_ids
+    const auto & add_nodeset_names = getParam<std::vector<BoundaryName>>("add_nodeset_names");
+
+    // to define nodeset ids, we need the largest nodeset id defined yet.
+    boundary_id_type offset = 0;
+    if (!_mesh_nodeset_ids.empty())
+      offset = *_mesh_nodeset_ids.rbegin();
+    if (!_mesh_boundary_ids.empty())
+      offset = std::max(offset, *_mesh_boundary_ids.rbegin());
+
+    // add all nodesets (and auto-assign ids)
+    for (const BoundaryName & nodeset_name : add_nodeset_names)
+    {
+      // to avoid two nodesets with the same ID (notably on recover)
+      if (getBoundaryID(nodeset_name) != Moose::INVALID_BOUNDARY_ID)
+        continue;
+      const auto nodeset_id = ++offset;
+      // add nodeset id
+      _mesh_boundary_ids.insert(nodeset_id);
+      _mesh_nodeset_ids.insert(nodeset_id);
+      // set name of the nodeset just added
+      setBoundaryName(nodeset_id, nodeset_name);
+    }
+  }
 
   // Add explicitly requested sidesets
   // This is done *after* the side boundaries (e.g. "right", ...) have been generated.
