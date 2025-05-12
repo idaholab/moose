@@ -3,7 +3,7 @@
 #include "MFEMScalarFunctorBoundaryIntegratedBC.h"
 
 registerMooseObject("MooseApp", MFEMScalarFunctorBoundaryIntegratedBC);
-=======
+
 InputParameters
 MFEMScalarFunctorBoundaryIntegratedBC::validParams()
 {

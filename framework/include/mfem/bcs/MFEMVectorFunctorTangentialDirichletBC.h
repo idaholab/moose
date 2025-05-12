@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMVectorFunctorDirichletBCBase.h"
@@ -7,5 +9,7 @@ class MFEMVectorFunctorTangentialDirichletBC : public MFEMVectorFunctorDirichlet
 public:
   MFEMVectorFunctorTangentialDirichletBC(const InputParameters & parameters);
   ~MFEMVectorFunctorTangentialDirichletBC() override = default;
-  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh * mesh_) override;
+  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
 };
+
+#endif

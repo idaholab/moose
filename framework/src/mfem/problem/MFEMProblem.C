@@ -365,7 +365,7 @@ MFEMProblem::addPostprocessor(const std::string & type,
   ExternalProblem::addPostprocessor(type, name, parameters);
   const PostprocessorValue & val = getPostprocessorValueByName(name);
   getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-      name, [&val](const mfem::Vector & p, double t) -> mfem::real_t { return val; });
+      name, [&val](const mfem::Vector &, double) -> mfem::real_t { return val; });
 }
 
 InputParameters

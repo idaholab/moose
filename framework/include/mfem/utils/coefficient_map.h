@@ -113,12 +113,12 @@ public:
       {
         return std::get<std::shared_ptr<T>>(coeff);
       }
-      catch (std::bad_variant_access)
+      catch (const std::bad_variant_access &)
       {
         return std::get<0>(std::get<PWData>(coeff));
       }
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range &)
     {
       throw MooseException("Property with name '" + name + "' has not been declared.");
     }

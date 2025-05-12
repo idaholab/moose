@@ -28,7 +28,7 @@ MFEMGenericConstantMaterial::MFEMGenericConstantMaterial(const InputParameters &
     paramError("prop_names", "Must match the number of prop_values");
 
   for (const auto i : index_range(_prop_names))
-    _properties.declareScalar<mfem::ConstantCoefficient>(
+    _properties.declareScalarProperty<mfem::ConstantCoefficient>(
         _prop_names[i], subdomainsToStrings(_block_ids), _prop_values[i]);
 }
 

@@ -1,7 +1,9 @@
+#ifdef MFEM_ENABLED
+
 #include "CoefficientManager.h"
 #include <algorithm>
 
-namespace platypus
+namespace Moose::MFEM
 {
 
 mfem::Coefficient &
@@ -163,3 +165,5 @@ CoefficientManager::setTime(const double time)
   this->_matrix_coeffs.setTime(time);
 }
 }
+
+#endif

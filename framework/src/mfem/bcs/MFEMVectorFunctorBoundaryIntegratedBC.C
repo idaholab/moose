@@ -2,7 +2,7 @@
 
 #include "MFEMVectorFunctorBoundaryIntegratedBC.h"
 
-registerMooseObject("PlatypusApp", MFEMVectorFunctorBoundaryIntegratedBC);
+registerMooseObject("MooseApp", MFEMVectorFunctorBoundaryIntegratedBC);
 
 InputParameters
 MFEMVectorFunctorBoundaryIntegratedBC::validParams()
