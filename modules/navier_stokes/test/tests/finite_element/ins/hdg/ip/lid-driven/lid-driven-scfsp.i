@@ -50,7 +50,7 @@ gamma = 1e4
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
 []
 
