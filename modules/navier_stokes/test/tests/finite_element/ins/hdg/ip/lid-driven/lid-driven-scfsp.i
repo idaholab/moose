@@ -246,6 +246,14 @@ alpha = '${fparse 10 * degree^2}'
 []
 
 [Preconditioning]
+  active = 'FSP'
+  [SMP]
+    type = SMP
+    full = true
+    petsc_options = '-pc_svd_monitor'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'svd'
+  []
   [FSP]
     type = SCFSP
     topsplit = 'up'
