@@ -684,23 +684,6 @@ addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
                  "command line.  Please "
                  "remove it from the input file");
 
-    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in
-    // their input files)
-    else
-    {
-      std::string help_string;
-      if (option == "-snes" || option == "-snes_mf" || option == "-snes_mf_operator")
-        help_string = "Please set the solver type through \"solve_type\".";
-      else if (option == "-ksp_monitor")
-        help_string = "Please use \"Outputs/print_linear_residuals=true\"";
-
-      if (help_string != "")
-        mooseWarning("The PETSc option ",
-                     string_option,
-                     " should not be used directly in a MOOSE input file. ",
-                     help_string);
-    }
-
     // Update the stored items, but do not create duplicates
     const std::string prefixed_option = prefix + string_option.substr(1);
     if (!po.flags.isValueSet(prefixed_option))
