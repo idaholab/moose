@@ -10,7 +10,7 @@ The `SidesetAroundSubdomainUpdater` mesh modifier updates a sideset during a sim
 Use the [!param](/MeshModifiers/SidesetAroundSubdomainUpdater/execution_order_group) parameter to ensure that this user object is run after any subdomain changing user object has fully traversed the mesh.
 
 !alert warning
-Nodesets are also updated as well as sidesets, so the use of `construct_node_list_from_side_list = false` will not run as expected.
+Nodesets are also updated as well as sidesets, so the [!param](/Mesh/FileMesh/construct_node_list_from_side_list) `Mesh` parameter will not be respected.
 
 
 ## Example Input Syntax
