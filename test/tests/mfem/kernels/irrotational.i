@@ -5,7 +5,7 @@ centre_y = 0.1
 
 [Mesh]
   type = MFEMMesh
-  file = gold/vortex.msh
+  file = ../mesh/vortex.msh
   dim = 2
 []
 

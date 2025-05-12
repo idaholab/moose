@@ -30,6 +30,27 @@
 // because OF COURSE NOT, but now we need to take care not to let the
 // include guards prevent them from including their copy with their
 // different namespace.
+#ifndef MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+// Detect if VTK built with external nlohmann
+#ifdef __has_include
+#if __has_include("vtk_nlohmannjson.h")
+#include "vtk_nlohmannjson.h"
+#if (VTK_MODULE_USE_EXTERNAL_vtknlohmannjson == 1)
+#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
+#else
+#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 1
+#endif // (VTK_MODULE_USE_EXTERNAL_vtknlohmannjson == 1)
+#else  // __has_include("vtk_nlohmannjson.h")
+#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
+#endif // __has_include("vtk_nlohmannjson.h")
+#else  // __has_include
+#error "Could not auto-detect whether VTK built with external nlohmann json. \
+Define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=1 if built with vendored nlohmann \
+, otherwise define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=0"
+#endif // __has_include
+#endif // MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+
+#if (MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS == 1)
 #ifndef MOOSE_VTK_NLOHMANN_INCLUDED
 #ifdef INCLUDE_NLOHMANN_JSON_HPP_
 #define MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_HPP_
@@ -40,6 +61,7 @@
 #undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
 #endif
 #define MOOSE_VTK_NLOHMANN_INCLUDED
+#endif
 #endif
 
 #include "vtkSmartPointer.h"

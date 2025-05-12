@@ -14,7 +14,7 @@ output fields is desired.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/outputs/datacollections.i block=Outputs/VisItDataCollection
+!listing test/tests/mfem/kernels/diffusion.i block=Outputs/VisItDataCollection
 
 !syntax parameters /Outputs/MFEMVisItDataCollection
 

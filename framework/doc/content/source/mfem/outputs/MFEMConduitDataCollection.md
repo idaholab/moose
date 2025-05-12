@@ -16,7 +16,7 @@ The user may choose the output protocol out of the following options: `hdf5`, `j
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/outputs/datacollections.i block=Outputs/ConduitDataCollection
+!listing test/tests/mfem/kernels/diffusion.i block=Outputs/ConduitDataCollection
 
 !syntax parameters /Outputs/MFEMConduitDataCollection
 

@@ -133,6 +133,13 @@ public:
   /**
    * Adapts the mesh based on the error estimator used
    *
+   * This method calls DisplacedProblem::undisplaceMesh, so it is necessary to
+   * update the displaced problem's mesh (undoing the undisplacement) before any
+   * objects relying on the displaced mesh are executed. However, projection of
+   * the displacement variables is required before doing so; therefore, the
+   * DisplacedProblem::updateMesh call needs to happen outside of this method.
+   * @see FEProblemBase::adaptMesh and FEProblemMase::meshChangedHelper.
+   *
    * @return a boolean that indicates whether the mesh was changed
    */
   bool adaptMesh(std::string marker_name = std::string());

@@ -14,7 +14,7 @@
     rel_err = 1e-5
     heavy = true
     recover = false
-    max_parallel = 1
+    max_parallel = 1 # https://github.com/idaholab/moose/issues/30482
     group = '1phase rdg explicit pipe free_boundary'
     requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation.'
   []
@@ -28,7 +28,7 @@
       Outputs/file_base=sod_shock_tube_erk2_light'
     abs_zero = 1e-10
     rel_err = 1e-5
-    max_parallel = 1
+    max_parallel = 1 # https://github.com/idaholab/moose/issues/30482
     group = '1phase rdg explicit pipe free_boundary'
     requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation for a few time steps.'
   []
@@ -46,7 +46,7 @@
       Outputs/file_base=non_x_direction_1phase'
     abs_zero = 1e-10
     rel_err = 1e-5
-    max_parallel = 1
+    max_parallel = 1 # https://github.com/idaholab/moose/issues/30482
     group = '1phase rdg explicit pipe free_boundary'
     requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation when the shock tube is not aligned with the X axis.'
   []
@@ -63,8 +63,15 @@
       Outputs/file_base=sod_shock_tube_be'
     abs_zero = 1e-7
     rel_err = 1e-5
-    max_parallel = 1
+    max_parallel = 1 # https://github.com/idaholab/moose/issues/30482
     group = '1phase rdg implicit pipe free_boundary'
     requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation using a first order time integration scheme and a Newton nonlinear solver.'
+  []
+  [davis_wave_speed]
+    type = CSVDiff
+    input = 'davis_wave_speed.i'
+    csvdiff = 'davis_wave_speed_vpp_FINAL.csv'
+    max_parallel = 1 # https://github.com/idaholab/moose/issues/30482
+    requirement = 'The system shall be able to use the Davis wave speed formulation for the HLLC Riemann solver.'
   []
 []

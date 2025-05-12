@@ -18,7 +18,7 @@ where $u_{h} \in H^1 \lor L^2$ and $u_{ex}$ is a scalar function.
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/irrotational.i
+!listing mfem/kernels/irrotational.i block=Postprocessors
 
 !syntax parameters /Postprocessors/MFEML2Error
 

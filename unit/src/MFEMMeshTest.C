@@ -49,7 +49,7 @@ MFEMMeshTest::buildMFEMMesh(MeshFileName filename, int serial_ref, int parallel_
  */
 TEST_F(MFEMMeshTest, ExodusIIFormatReader)
 {
-  buildMFEMMesh("data/mug.e");
+  buildMFEMMesh("../test/tests/mfem/mesh/mug.e");
   mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
 
   // Check expected number of vertices have been read
@@ -76,7 +76,7 @@ TEST_F(MFEMMeshTest, ExodusIIFormatReader)
  */
 TEST_F(MFEMMeshTest, MFEMMeshFormatReader)
 {
-  buildMFEMMesh("data/beam-tet.mesh");
+  buildMFEMMesh("../test/tests/mfem/mesh/beam-tet.mesh");
   mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
 
   // Check expected number of vertices have been read
@@ -103,7 +103,7 @@ TEST_F(MFEMMeshTest, MFEMMeshFormatReader)
  */
 TEST_F(MFEMMeshTest, MFEMHighOrderMeshFormatReader)
 {
-  buildMFEMMesh("data/fichera-q3.mesh");
+  buildMFEMMesh("../test/tests/mfem/mesh/fichera-q3.mesh");
   mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
 
   // Check expected number of vertices have been read
@@ -127,7 +127,7 @@ TEST_F(MFEMMeshTest, MFEMHighOrderMeshFormatReader)
 
 TEST_F(MFEMMeshTest, Refinement)
 {
-  buildMFEMMesh("data/fichera-q3.mesh", 1, 2);
+  buildMFEMMesh("../test/tests/mfem/mesh/fichera-q3.mesh", 1, 2);
   mfem::ParMesh & pmesh(_mfem_mesh_ptr->getMFEMParMesh());
 
   // Check expected number of vertices have been read
