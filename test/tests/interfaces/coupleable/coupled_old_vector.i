@@ -46,6 +46,14 @@
     order=CONSTANT
     family =MONOMIAL_VEC
   []
+  [old_var_mag]
+    order=FIRST
+    family =LAGRANGE
+  []
+  [var_mag]
+    order=FIRST
+    family =LAGRANGE
+  []
 []
 
 [AuxKernels]
@@ -65,4 +73,24 @@
 
 [Outputs]
   exodus=true
+  csv=true
+[]
+
+[VectorPostprocessors]
+  [var]
+    type = LineValueSampler
+    end_point = '1 1 1'
+    num_points = 10
+    sort_by = x
+    start_point = '0 0 0'
+    variable = var_mag
+  []
+  [old_var]
+    type = LineValueSampler
+    end_point = '1 1 1'
+    num_points = 10
+    sort_by = x
+    start_point = '0 0 0'
+    variable = old_var_mag
+  []
 []

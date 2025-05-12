@@ -47,6 +47,14 @@
     order=FIRST
     family =LAGRANGE_VEC
   []
+  [old_var_mag]
+    order=FIRST
+    family =LAGRANGE
+  []
+  [var_mag]
+    order=FIRST
+    family =LAGRANGE
+  []
 []
 
 [AuxKernels]
@@ -57,6 +65,16 @@
     execute_on=TIMESTEP_END
   []
 
+  [var_mag]
+    type= VectorVariableMagnitudeAux
+    variable = var_mag
+    vector_variable = var
+  []
+  [old_var_mag]
+    type= VectorVariableMagnitudeAux
+    variable = old_var_mag
+    vector_variable = old_var
+  []
 []
 [Executioner]
   type=Transient
@@ -66,4 +84,24 @@
 
 [Outputs]
   exodus=true
+  csv=true
+[]
+
+[VectorPostprocessors]
+  [var]
+    type = LineValueSampler
+    end_point = '1 1 1'
+    num_points = 10
+    sort_by = x
+    start_point = '0 0 0'
+    variable = var_mag
+  []
+  [old_var]
+    type = LineValueSampler
+    end_point = '1 1 1'
+    num_points = 10
+    sort_by = x
+    start_point = '0 0 0'
+    variable = old_var_mag
+  []
 []
