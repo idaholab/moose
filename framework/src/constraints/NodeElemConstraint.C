@@ -107,7 +107,8 @@ NodeElemConstraint::computeResidual()
   for (_i = 0; _i < _test_primary.size(); _i++)
     _residuals[_i] += raw_value(computeQpResidual(Moose::Primary));
 
-  addResiduals(_assembly, _residuals, _primary_var.dofIndicesNeighbor(), _var.scalingFactor());
+  addResiduals(
+      _assembly, _residuals, _primary_var.dofIndicesNeighbor(), _primary_var.scalingFactor());
 
   _residuals.resize(_test_secondary.size(), 0);
 
@@ -130,7 +131,7 @@ NodeElemConstraint::computeJacobian()
   for (_i = 0; _i < _test_primary.size(); _i++)
     primary_residual[_i] += computeQpResidual(Moose::Primary);
 
-  addJacobian(_assembly, primary_residual, _var.dofIndicesNeighbor(), _var.scalingFactor());
+  addJacobian(_assembly, primary_residual, _primary_var.dofIndicesNeighbor(), _var.scalingFactor());
 
   std::vector<ADReal> secondary_residual(_test_secondary.size(), 0);
 
@@ -141,10 +142,8 @@ NodeElemConstraint::computeJacobian()
 }
 
 void
-NodeElemConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
+NodeElemConstraint::computeOffDiagJacobian(const unsigned int /*jvar_num*/)
 {
-  if (jvar_num == _var.number())
-    computeJacobian();
 }
 
 void
