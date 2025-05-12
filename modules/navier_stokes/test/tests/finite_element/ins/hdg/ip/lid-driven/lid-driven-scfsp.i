@@ -266,13 +266,13 @@ alpha = '${fparse 10 * degree^2}'
     []
     [u]
       vars = 'vel_bar_x vel_bar_y'
-      # petsc_options = '-ksp_converged_reason -ksp_monitor'
+      petsc_options = '-ksp_converged_reason'
       petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
       petsc_options_value = 'lu       gmres     1e-2      300                right        mumps                      30'
     []
     [p]
       vars = 'pressure_bar'
-      petsc_options = '-ksp_converged_reason -ksp_monitor'
+      petsc_options = '-ksp_converged_reason'
       petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
       petsc_options_value = 'gmres     300                1e-2      lu      right         mumps                      30'
     []
@@ -285,7 +285,7 @@ alpha = '${fparse 10 * degree^2}'
 []
 
 [Outputs]
-  print_linear_residuals = true
+  print_linear_residuals = 'false'
   [out]
     type = Exodus
     hide = 'pressure_average'
