@@ -18,7 +18,7 @@
  */
 
 /**
- *  Supplies the heating due to the electic field (E) in the form of
+ *  Supplies the heating due to the electric field (E) in the form of
  *  0.5 Re( conductivity * E * E^* )
  *  where E^* is the complex conjugate of the electric field.
  */

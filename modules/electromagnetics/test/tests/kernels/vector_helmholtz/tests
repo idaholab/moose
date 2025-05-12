@@ -88,7 +88,7 @@
     exodiff = 'microwave_heating_out.e'
     requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions using the deprecated method.'
     design = 'EMJouleHeatingSource.md'
-    issues = '#30000'
+    issues = '#28758 #30000'
   []
   [deprecated_microwave_heating_convergence_csv]
     type = CSVDiff
@@ -96,7 +96,7 @@
     csvdiff = 'microwave_heating_convergence.csv'
     requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions using the deprecated method.'
     design = 'EMJouleHeatingSource.md'
-    issues = '#30000'
+    issues = '#28758 #30000'
     heavy = True
     recover = false
     valgrind = none

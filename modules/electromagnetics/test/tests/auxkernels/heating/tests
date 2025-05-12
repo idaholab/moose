@@ -5,7 +5,7 @@
     exodiff = aux_microwave_heating_out.e
     requirement = 'The system shall calculate the power deposition based on the material conductivity and electric field using the deprecated method.'
     design = 'EMJouleHeatingHeatGeneratedAux.md'
-    issues = '#30000'
+    issues = '#28758 #30000'
   []
   [deprecated_aux_microwave_heating_csv]
     type = CSVDiff
@@ -13,7 +13,7 @@
     csvdiff = 'aux_microwave_heating_convergence.csv'
     requirement = 'The system shall be able to perform a convergence analysis for the power deposition based on the material conductivity and electric field using the deprecated method.'
     design = 'EMJouleHeatingHeatGeneratedAux.md'
-    issues = '#30000'
+    issues = '#28758 #30000'
     heavy = True
     recover = false
     valgrind = none
