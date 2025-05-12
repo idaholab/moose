@@ -1,8 +1,9 @@
-mu = 1e-2
+re = 1
 rho = 1
-l = 1
+l = 2
 U = 1
-n = 6
+mu = '${fparse U * l / re}'
+n = 1
 gamma = 1e4
 
 [Mesh]
