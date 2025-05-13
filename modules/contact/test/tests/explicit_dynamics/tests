@@ -18,6 +18,7 @@
     abs_zero = 1.0e-4
     allow_warnings = true
     capabilities = 'method!=dbg'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve a simple few-element normal contact problem '
                   'using explicit dynamics solving uncoupled, local equations of momentum balance.'
   []
@@ -28,6 +29,7 @@
     abs_zero = 1.0e-4
     allow_warnings = true
     cli_args = 'Outputs/file_base=test_balance_short_out Executioner/end_time=0.001'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve a simple few-element normal contact problem '
                   'using explicit dynamics solving uncoupled, local equations of momentum balance in debug mode.'
   []
@@ -62,6 +64,7 @@
     method = '!dbg'
     prereq = 'test_balance'
     cli_args ='Executioner/TimeIntegrator/use_constant_mass=true Mesh/patch_update_strategy=always'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve an explicit contact problem with the constant mass option and with updating the contact patch often.'
   []
   [optimized_contact]
@@ -74,6 +77,7 @@
     abs_zero = 1.0e-4
     allow_warnings = true
     method = '!dbg'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve an explicit contact problem quickly, omitting verbose output.'
   []
   [deep_impact]
