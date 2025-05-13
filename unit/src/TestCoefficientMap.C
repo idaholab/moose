@@ -5,7 +5,9 @@
 #include "gtest/gtest.h"
 #include "CoefficientMap.h"
 
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 class CheckCoefficientMap : public testing::Test
 {
