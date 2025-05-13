@@ -135,4 +135,6 @@ private:
   std::size_t _curr_num_samples = 0;
   /// The indices of the samples in the last execution
   std::set<std::size_t, std::greater<std::size_t>> _curr_indices;
+  /// The full size of the vector since the last execution
+  std::size_t _curr_total_samples = 0;
 };
