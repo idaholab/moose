@@ -194,7 +194,7 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
           l0 = l;
           dist0 = dist;
         } // if
-      }   // l
+      } // l
 
       _gap_to_pin_map[kgap].first = _pins_in_rings[i][j];
       _gap_to_pin_map[kgap].second = _pins_in_rings[i - 1][l0];
@@ -275,7 +275,7 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
             dist0 = dist;
             l0 = l;
           } // if
-        }   // l
+        } // l
 
         _gap_to_pin_map[kgap].first = _pins_in_rings[i][j];
         _gap_to_pin_map[kgap].second = _pins_in_rings[i + 1][l0];
@@ -284,8 +284,8 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
         _subch_type[k] = EChannelType::CENTER;
         k = k + 1;
       } // if
-    }   // for j
-  }     // for i
+    } // for j
+  } // for i
 
   // find the _gap_to_chan_map and _chan_to_gap_map using the gap_to_rod and subchannel_to_rod_maps
 
@@ -349,7 +349,7 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
           icorner = 1;
           break;
         } // if
-      }   // for
+      } // for
 
       for (unsigned int k = 0; k < _n_channels; k++)
       {
@@ -415,7 +415,7 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
         }
       }
     } // i
-  }   // j
+  } // j
 
   for (unsigned int k = 0; k < _n_channels; k++)
   {
@@ -515,7 +515,7 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
             }
           }
         } // j
-      }   // k
+      } // k
     }
     else if (_subch_type[i] == EChannelType::CORNER)
     {
@@ -546,9 +546,9 @@ SCMTriInterWrapperMeshGenerator::SCMTriInterWrapperMeshGenerator(const InputPara
             }
           }
         } // j
-      }   // k
-    }     // subch_type =2
-  }       // i
+      } // k
+    } // subch_type =2
+  } // i
 
   // set the subchannel positions
   for (unsigned int i = 0; i < _n_channels; i++)
@@ -664,8 +664,8 @@ SCMTriInterWrapperMeshGenerator::generate()
       elem = mesh_base->add_elem(elem);
       const int indx1 = (_n_cells + 1) * i + iz;
       const int indx2 = (_n_cells + 1) * i + (iz + 1);
-      elem->set_node(0) = mesh_base->node_ptr(indx1);
-      elem->set_node(1) = mesh_base->node_ptr(indx2);
+      elem->set_node(0, mesh_base->node_ptr(indx1));
+      elem->set_node(1, mesh_base->node_ptr(indx2));
 
       if (iz == 0)
         boundary_info.add_side(elem, 0, 0);

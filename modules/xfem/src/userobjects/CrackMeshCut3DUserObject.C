@@ -1169,7 +1169,7 @@ CrackMeshCut3DUserObject::triangulation()
       for (unsigned int i = 0; i < _cut_elem_nnode; ++i)
       {
         mooseAssert(_cut_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
-        new_elem->set_node(i) = _cut_mesh->node_ptr(elem[i]);
+        new_elem->set_node(i, _cut_mesh->node_ptr(elem[i]));
       }
 
       _cut_mesh->add_elem(new_elem);

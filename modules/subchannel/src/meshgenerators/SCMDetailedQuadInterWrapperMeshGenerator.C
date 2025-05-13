@@ -535,19 +535,19 @@ SCMDetailedQuadInterWrapperMeshGenerator::generate()
           elem->set_id(elem_id++);
           elem = mesh_base->add_elem(elem);
 
-          elem->set_node(0) = mesh_base->node_ptr(indx1);
-          elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
+          elem->set_node(0, mesh_base->node_ptr(indx1));
+          elem->set_node(1, mesh_base->node_ptr(indx1 + i + 1));
           if (i != elems_per_channel - 1)
-            elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
+            elem->set_node(2, mesh_base->node_ptr(indx1 + i + 2));
           else
-            elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
+            elem->set_node(2, mesh_base->node_ptr(indx1 + 1));
 
-          elem->set_node(3) = mesh_base->node_ptr(indx2);
-          elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
+          elem->set_node(3, mesh_base->node_ptr(indx2));
+          elem->set_node(4, mesh_base->node_ptr(indx2 + i + 1));
           if (i != elems_per_channel - 1)
-            elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
+            elem->set_node(5, mesh_base->node_ptr(indx2 + i + 2));
           else
-            elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
+            elem->set_node(5, mesh_base->node_ptr(indx2 + 1));
 
           if (iz == 0)
             boundary_info.add_side(elem, 0, 0);

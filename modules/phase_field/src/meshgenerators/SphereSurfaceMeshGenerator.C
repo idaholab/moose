@@ -78,9 +78,9 @@ SphereSurfaceMeshGenerator::generate()
   for (unsigned int i = 0; i < 20; ++i)
   {
     Elem * elem = mesh->add_elem(new Tri3);
-    elem->set_node(0) = mesh->node_ptr(tindices[i][0]);
-    elem->set_node(1) = mesh->node_ptr(tindices[i][1]);
-    elem->set_node(2) = mesh->node_ptr(tindices[i][2]);
+    elem->set_node(0, mesh->node_ptr(tindices[i][0]));
+    elem->set_node(1, mesh->node_ptr(tindices[i][1]));
+    elem->set_node(2, mesh->node_ptr(tindices[i][2]));
   }
 
   // we need to prepare distributed meshes before using refinement

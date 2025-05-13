@@ -354,8 +354,8 @@ MeshGeneratorPD::generate()
           new_elem->subdomain_id() = bid_i + bid_j;
 
         new_elem = new_mesh->add_elem(new_elem);
-        new_elem->set_node(0) = new_mesh->node_ptr(i);
-        new_elem->set_node(1) = new_mesh->node_ptr(pd_node_neighbors[j]);
+        new_elem->set_node(0, new_mesh->node_ptr(i));
+        new_elem->set_node(1, new_mesh->node_ptr(pd_node_neighbors[j]));
 
         ++new_elem_id;
       }
@@ -542,9 +542,9 @@ MeshGeneratorPD::generate()
               else
                 new_elem->subdomain_id() = old_elem->subdomain_id() + _phantom_blk_offset_number;
               new_elem = new_mesh->add_elem(new_elem);
-              new_elem->set_node(0) = new_mesh->node_ptr(pd_nodes[0]);
-              new_elem->set_node(1) = new_mesh->node_ptr(pd_nodes[1]);
-              new_elem->set_node(2) = new_mesh->node_ptr(pd_nodes[2]);
+              new_elem->set_node(0, new_mesh->node_ptr(pd_nodes[0]));
+              new_elem->set_node(1, new_mesh->node_ptr(pd_nodes[1]));
+              new_elem->set_node(2, new_mesh->node_ptr(pd_nodes[2]));
 
               ++new_elem_id;
 
@@ -657,10 +657,10 @@ MeshGeneratorPD::generate()
                             old_elem->subdomain_id() + _phantom_blk_offset_number;
 
                       new_elem = new_mesh->add_elem(new_elem);
-                      new_elem->set_node(0) = new_mesh->node_ptr(pd_nodes[0]);
-                      new_elem->set_node(1) = new_mesh->node_ptr(pd_nodes[1]);
-                      new_elem->set_node(2) = new_mesh->node_ptr(pd_nodes[2]);
-                      new_elem->set_node(3) = new_mesh->node_ptr(pd_nodes[3]);
+                      new_elem->set_node(0, new_mesh->node_ptr(pd_nodes[0]));
+                      new_elem->set_node(1, new_mesh->node_ptr(pd_nodes[1]));
+                      new_elem->set_node(2, new_mesh->node_ptr(pd_nodes[2]));
+                      new_elem->set_node(3, new_mesh->node_ptr(pd_nodes[3]));
 
                       // save the edges and nodes used in the new phantom elem, which will be used
                       // for creating new phantom elements
@@ -700,7 +700,7 @@ MeshGeneratorPD::generate()
     new_elem->subdomain_id() = old_elem->subdomain_id();
     new_elem = new_mesh->add_elem(new_elem);
     for (unsigned int j = 0; j < old_elem->n_nodes(); ++j)
-      new_elem->set_node(j) = new_mesh->node_ptr(fe_nodes_map.at(old_elem->node_ptr(j)->id()));
+      new_elem->set_node(j, new_mesh->node_ptr(fe_nodes_map.at(old_elem->node_ptr(j)->id())));
 
     fe_elems_map.insert(std::make_pair(old_elem->id(), new_elem_id));
 

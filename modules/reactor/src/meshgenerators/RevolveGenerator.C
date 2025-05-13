@@ -1582,35 +1582,38 @@ RevolveGenerator::createQUADfromEDGE(const ElemType quad_elem_type,
   if (quad_elem_type == QUAD9)
   {
     new_elem = std::make_unique<Quad9>();
-    new_elem->set_node(4) =
-        mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(5) =
-        mesh->node_ptr(elem->node_ptr(1)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(6) =
+    new_elem->set_node(4,
+                       mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        5, mesh->node_ptr(elem->node_ptr(1)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        6,
         mesh->node_ptr(elem->node_ptr(2)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(7) =
-        mesh->node_ptr(elem->node_ptr(0)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(8) =
-        mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes));
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        7, mesh->node_ptr(elem->node_ptr(0)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        8, mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes)));
   }
 
-  new_elem->set_node(0) =
-      mesh->node_ptr(elem->node_ptr(0)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(1) =
-      mesh->node_ptr(elem->node_ptr(1)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(3) =
+  new_elem->set_node(
+      0, mesh->node_ptr(elem->node_ptr(0)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      1, mesh->node_ptr(elem->node_ptr(1)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      3,
       mesh->node_ptr(elem->node_ptr(0)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(2) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      2,
       mesh->node_ptr(elem->node_ptr(1)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -1647,27 +1650,31 @@ RevolveGenerator::createTRIfromEDGE(
   if (tri_elem_type == TRI7)
   {
     new_elem = std::make_unique<Tri7>();
-    new_elem->set_node(3) =
-        mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(4) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 2)->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(5) =
+    new_elem->set_node(3,
+                       mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(4,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 2)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        5,
         mesh->node_ptr(elem->node_ptr(2)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(6) =
-        mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes));
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        6, mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes)));
   }
 
-  new_elem->set_node(0) = mesh->node_ptr(elem->node_ptr(axis_node_case)->id());
-  new_elem->set_node(1) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 2)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(2) =
+  new_elem->set_node(0, mesh->node_ptr(elem->node_ptr(axis_node_case)->id()));
+  new_elem->set_node(1,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 2)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      2,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 2)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -1703,71 +1710,78 @@ RevolveGenerator::createPRISMfromTRI(const ElemType prism_elem_type,
     if (prism_elem_type == PRISM21)
     {
       new_elem = std::make_unique<Prism21>();
-      new_elem->set_node(18) =
-          mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes));
-      new_elem->set_node(19) = mesh->node_ptr(
-          elem->node_ptr(6)->id() +
-          ((current_layer + 1) %
-           (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-           orig_nodes));
-      new_elem->set_node(20) =
-          mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer * 2 + 1) * orig_nodes));
+      new_elem->set_node(
+          18, mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes)));
+      new_elem->set_node(
+          19,
+          mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer + 1) %
+                                                    (total_num_azimuthal_intervals + 1 -
+                                                     (unsigned int)_full_circle_revolving) *
+                                                    2 * orig_nodes)));
+      new_elem->set_node(
+          20, mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer * 2 + 1) * orig_nodes)));
     }
-    new_elem->set_node(6) =
-        mesh->node_ptr(elem->node_ptr(3)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(7) =
-        mesh->node_ptr(elem->node_ptr(4)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(8) =
-        mesh->node_ptr(elem->node_ptr(5)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(9) =
-        mesh->node_ptr(elem->node_ptr(0)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(10) =
-        mesh->node_ptr(elem->node_ptr(1)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(11) =
-        mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(12) =
+    new_elem->set_node(6,
+                       mesh->node_ptr(elem->node_ptr(3)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(7,
+                       mesh->node_ptr(elem->node_ptr(4)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(8,
+                       mesh->node_ptr(elem->node_ptr(5)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        9, mesh->node_ptr(elem->node_ptr(0)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        10, mesh->node_ptr(elem->node_ptr(1)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        11, mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        12,
         mesh->node_ptr(elem->node_ptr(3)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(13) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        13,
         mesh->node_ptr(elem->node_ptr(4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(14) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        14,
         mesh->node_ptr(elem->node_ptr(5)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(15) =
-        mesh->node_ptr(elem->node_ptr(3)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(16) =
-        mesh->node_ptr(elem->node_ptr(4)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(17) =
-        mesh->node_ptr(elem->node_ptr(5)->id() + ((current_layer * 2 + 1) * orig_nodes));
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        15, mesh->node_ptr(elem->node_ptr(3)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        16, mesh->node_ptr(elem->node_ptr(4)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        17, mesh->node_ptr(elem->node_ptr(5)->id() + ((current_layer * 2 + 1) * orig_nodes)));
   }
-  new_elem->set_node(0) =
-      mesh->node_ptr(elem->node_ptr(0)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(1) =
-      mesh->node_ptr(elem->node_ptr(1)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(2) =
-      mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(3) =
+  new_elem->set_node(
+      0, mesh->node_ptr(elem->node_ptr(0)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      1, mesh->node_ptr(elem->node_ptr(1)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      2, mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      3,
       mesh->node_ptr(elem->node_ptr(0)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(4) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      4,
       mesh->node_ptr(elem->node_ptr(1)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(5) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      5,
       mesh->node_ptr(elem->node_ptr(2)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -1818,61 +1832,77 @@ RevolveGenerator::createPYRAMIDfromTRI(
     if (pyramid_elem_type == PYRAMID18)
     {
       new_elem = std::make_unique<Pyramid18>();
-      new_elem->set_node(13) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3 + 3)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(15) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3 + 3)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(17) = mesh->node_ptr(elem->node_ptr(axis_node_case + 3)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(14) =
-          mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes));
-      new_elem->set_node(16) = mesh->node_ptr(
-          elem->node_ptr(6)->id() +
-          ((current_layer + 1) %
-           (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-           orig_nodes));
+      new_elem->set_node(13,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3 + 3)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(15,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3 + 3)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(17,
+                         mesh->node_ptr(elem->node_ptr(axis_node_case + 3)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          14, mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes)));
+      new_elem->set_node(
+          16,
+          mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer + 1) %
+                                                    (total_num_azimuthal_intervals + 1 -
+                                                     (unsigned int)_full_circle_revolving) *
+                                                    2 * orig_nodes)));
     }
-    new_elem->set_node(6) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3)->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(8) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3)->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(5) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3 + 3)->id() +
-                                           (current_layer * 2 * orig_nodes));
-    new_elem->set_node(7) =
+    new_elem->set_node(6,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(8,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(5,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3 + 3)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        7,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3 + 3)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(9) =
-        mesh->node_ptr(elem->node_ptr(axis_node_case + 3)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(10) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3 + 3)->id() +
-                                            (current_layer * 2 * orig_nodes));
-    new_elem->set_node(12) =
+                        2 * orig_nodes)));
+    new_elem->set_node(9,
+                       mesh->node_ptr(elem->node_ptr(axis_node_case + 3)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(10,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3 + 3)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        12,
         mesh->node_ptr(elem->node_ptr(axis_node_case + 3)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(11) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        11,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3 + 3)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
+                        2 * orig_nodes)));
   }
-  new_elem->set_node(4) = mesh->node_ptr(elem->node_ptr(axis_node_case)->id());
-  new_elem->set_node(0) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(1) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(2) =
+  new_elem->set_node(4, mesh->node_ptr(elem->node_ptr(axis_node_case)->id()));
+  new_elem->set_node(0,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(1,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      2,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 3)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(3) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      3,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 3)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -1927,56 +1957,71 @@ RevolveGenerator::createTETfromTRI(
     if (tet_elem_type == TET14)
     {
       new_elem = std::make_unique<Tet14>();
-      new_elem->set_node(12) = mesh->node_ptr(
-          elem->node_ptr(node_order ? (nodes_cates.first[1] + 3) : (nodes_cates.second.front() + 3))
-              ->id() +
-          ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(13) = mesh->node_ptr(
-          elem->node_ptr(node_order ? (nodes_cates.second.front() + 3) : (nodes_cates.first[0] + 3))
-              ->id() +
-          ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(10) =
-          mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes));
-      new_elem->set_node(11) = mesh->node_ptr(
-          elem->node_ptr(6)->id() +
-          ((current_layer + 1) %
-           (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-           orig_nodes));
+      new_elem->set_node(
+          12,
+          mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.first[1] + 3)
+                                                   : (nodes_cates.second.front() + 3))
+                             ->id() +
+                         ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(13,
+                         mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.second.front() + 3)
+                                                                  : (nodes_cates.first[0] + 3))
+                                            ->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          10, mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes)));
+      new_elem->set_node(
+          11,
+          mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer + 1) %
+                                                    (total_num_azimuthal_intervals + 1 -
+                                                     (unsigned int)_full_circle_revolving) *
+                                                    2 * orig_nodes)));
     }
-    new_elem->set_node(4) = mesh->node_ptr(
-        elem->node_ptr(node_order ? (nodes_cates.first[0] + 3) : (nodes_cates.first[1] + 3))->id());
-    new_elem->set_node(5) = mesh->node_ptr(
-        elem->node_ptr(node_order ? (nodes_cates.first[1] + 3) : (nodes_cates.second.front() + 3))
-            ->id() +
-        (current_layer * 2 * orig_nodes));
-    new_elem->set_node(6) = mesh->node_ptr(
-        elem->node_ptr(node_order ? (nodes_cates.second.front() + 3) : (nodes_cates.first[0] + 3))
-            ->id() +
-        (current_layer * 2 * orig_nodes));
-    new_elem->set_node(8) = mesh->node_ptr(
-        elem->node_ptr(node_order ? (nodes_cates.first[1] + 3) : (nodes_cates.second.front() + 3))
-            ->id() +
-        ((current_layer + 1) %
-         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-         orig_nodes));
-    new_elem->set_node(7) = mesh->node_ptr(
-        elem->node_ptr(node_order ? (nodes_cates.second.front() + 3) : (nodes_cates.first[0] + 3))
-            ->id() +
-        ((current_layer + 1) %
-         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-         orig_nodes));
-    new_elem->set_node(9) = mesh->node_ptr(elem->node_ptr(nodes_cates.second.front())->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
+    new_elem->set_node(4,
+                       mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.first[0] + 3)
+                                                                : (nodes_cates.first[1] + 3))
+                                          ->id()));
+    new_elem->set_node(5,
+                       mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.first[1] + 3)
+                                                                : (nodes_cates.second.front() + 3))
+                                          ->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(6,
+                       mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.second.front() + 3)
+                                                                : (nodes_cates.first[0] + 3))
+                                          ->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        8,
+        mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.first[1] + 3)
+                                                 : (nodes_cates.second.front() + 3))
+                           ->id() +
+                       ((current_layer + 1) %
+                        (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        7,
+        mesh->node_ptr(elem->node_ptr(node_order ? (nodes_cates.second.front() + 3)
+                                                 : (nodes_cates.first[0] + 3))
+                           ->id() +
+                       ((current_layer + 1) %
+                        (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
+                        2 * orig_nodes)));
+    new_elem->set_node(9,
+                       mesh->node_ptr(elem->node_ptr(nodes_cates.second.front())->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
   }
-  new_elem->set_node(0) = mesh->node_ptr(elem->node_ptr(nodes_cates.first[0])->id());
-  new_elem->set_node(1) = mesh->node_ptr(elem->node_ptr(nodes_cates.first[1])->id());
-  new_elem->set_node(2) = mesh->node_ptr(elem->node_ptr(nodes_cates.second.front())->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(3) =
+  new_elem->set_node(0, mesh->node_ptr(elem->node_ptr(nodes_cates.first[0])->id()));
+  new_elem->set_node(1, mesh->node_ptr(elem->node_ptr(nodes_cates.first[1])->id()));
+  new_elem->set_node(2,
+                     mesh->node_ptr(elem->node_ptr(nodes_cates.second.front())->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      3,
       mesh->node_ptr(elem->node_ptr(nodes_cates.second.front())->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -2018,89 +2063,98 @@ RevolveGenerator::createHEXfromQUAD(const ElemType hex_elem_type,
     if (hex_elem_type == HEX27)
     {
       new_elem = std::make_unique<Hex27>();
-      new_elem->set_node(20) =
-          mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes));
-      new_elem->set_node(25) = mesh->node_ptr(
-          elem->node_ptr(8)->id() +
-          ((current_layer + 1) %
-           (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-           orig_nodes));
-      new_elem->set_node(26) =
-          mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(21) =
-          mesh->node_ptr(elem->node_ptr(4)->id() + ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(22) =
-          mesh->node_ptr(elem->node_ptr(5)->id() + ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(23) =
-          mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(24) =
-          mesh->node_ptr(elem->node_ptr(7)->id() + ((current_layer * 2 + 1) * orig_nodes));
+      new_elem->set_node(
+          20, mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes)));
+      new_elem->set_node(
+          25,
+          mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer + 1) %
+                                                    (total_num_azimuthal_intervals + 1 -
+                                                     (unsigned int)_full_circle_revolving) *
+                                                    2 * orig_nodes)));
+      new_elem->set_node(
+          26, mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          21, mesh->node_ptr(elem->node_ptr(4)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          22, mesh->node_ptr(elem->node_ptr(5)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          23, mesh->node_ptr(elem->node_ptr(6)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          24, mesh->node_ptr(elem->node_ptr(7)->id() + ((current_layer * 2 + 1) * orig_nodes)));
     }
-    new_elem->set_node(8) =
-        mesh->node_ptr(elem->node_ptr(4)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(9) =
-        mesh->node_ptr(elem->node_ptr(5)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(10) =
-        mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(11) =
-        mesh->node_ptr(elem->node_ptr(7)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(16) =
+    new_elem->set_node(8,
+                       mesh->node_ptr(elem->node_ptr(4)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(9,
+                       mesh->node_ptr(elem->node_ptr(5)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(10,
+                       mesh->node_ptr(elem->node_ptr(6)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(11,
+                       mesh->node_ptr(elem->node_ptr(7)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        16,
         mesh->node_ptr(elem->node_ptr(4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(17) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        17,
         mesh->node_ptr(elem->node_ptr(5)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(18) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        18,
         mesh->node_ptr(elem->node_ptr(6)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(19) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        19,
         mesh->node_ptr(elem->node_ptr(7)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(12) =
-        mesh->node_ptr(elem->node_ptr(0)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(13) =
-        mesh->node_ptr(elem->node_ptr(1)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(14) =
-        mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(15) =
-        mesh->node_ptr(elem->node_ptr(3)->id() + ((current_layer * 2 + 1) * orig_nodes));
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        12, mesh->node_ptr(elem->node_ptr(0)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        13, mesh->node_ptr(elem->node_ptr(1)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        14, mesh->node_ptr(elem->node_ptr(2)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        15, mesh->node_ptr(elem->node_ptr(3)->id() + ((current_layer * 2 + 1) * orig_nodes)));
   }
-  new_elem->set_node(0) =
-      mesh->node_ptr(elem->node_ptr(0)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(1) =
-      mesh->node_ptr(elem->node_ptr(1)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(2) =
-      mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(3) =
-      mesh->node_ptr(elem->node_ptr(3)->id() + (current_layer * order * orig_nodes));
-  new_elem->set_node(4) =
+  new_elem->set_node(
+      0, mesh->node_ptr(elem->node_ptr(0)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      1, mesh->node_ptr(elem->node_ptr(1)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      2, mesh->node_ptr(elem->node_ptr(2)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      3, mesh->node_ptr(elem->node_ptr(3)->id() + (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      4,
       mesh->node_ptr(elem->node_ptr(0)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(5) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      5,
       mesh->node_ptr(elem->node_ptr(1)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(6) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      6,
       mesh->node_ptr(elem->node_ptr(2)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(7) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      7,
       mesh->node_ptr(elem->node_ptr(3)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -2161,59 +2215,73 @@ RevolveGenerator::createPRISMfromQUAD(
     if (prism_elem_type == PRISM18)
     {
       new_elem = std::make_unique<Prism18>();
-      new_elem->set_node(15) =
-          mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes));
-      new_elem->set_node(16) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-      new_elem->set_node(17) = mesh->node_ptr(
-          elem->node_ptr(8)->id() +
-          ((current_layer + 1) %
-           (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) * 2 *
-           orig_nodes));
+      new_elem->set_node(
+          15, mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes)));
+      new_elem->set_node(16,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+      new_elem->set_node(
+          17,
+          mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer + 1) %
+                                                    (total_num_azimuthal_intervals + 1 -
+                                                     (unsigned int)_full_circle_revolving) *
+                                                    2 * orig_nodes)));
     }
-    new_elem->set_node(9) = mesh->node_ptr(elem->node_ptr(axis_node_case + 4)->id());
-    new_elem->set_node(10) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
-                                            (current_layer * 2 * orig_nodes));
-    new_elem->set_node(12) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
-                                            (current_layer * 2 * orig_nodes));
-    new_elem->set_node(6) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4 + 4)->id() +
-                                           (current_layer * 2 * orig_nodes));
-    new_elem->set_node(14) =
+    new_elem->set_node(9, mesh->node_ptr(elem->node_ptr(axis_node_case + 4)->id()));
+    new_elem->set_node(10,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(12,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(6,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4 + 4)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(
+        14,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(8) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        8,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4 + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(11) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        11,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(7) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(13) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
-                                            ((current_layer * 2 + 1) * orig_nodes));
+                        2 * orig_nodes)));
+    new_elem->set_node(7,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(13,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
   }
-  new_elem->set_node(0) = mesh->node_ptr(elem->node_ptr(axis_node_case)->id());
-  new_elem->set_node(3) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id());
-  new_elem->set_node(4) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(1) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(5) =
+  new_elem->set_node(0, mesh->node_ptr(elem->node_ptr(axis_node_case)->id()));
+  new_elem->set_node(3, mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id()));
+  new_elem->set_node(4,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(1,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      5,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(2) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      2,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -2261,49 +2329,60 @@ RevolveGenerator::createPYRAMIDPRISMfromQUAD(
   if (pyramid_elem_type == PYRAMID14)
   {
     new_elem = std::make_unique<Pyramid14>();
-    new_elem->set_node(9) =
-        mesh->node_ptr(elem->node_ptr(axis_node_case + 4)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(10) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4 + 4)->id() +
-                                            (current_layer * 2 * orig_nodes));
-    new_elem->set_node(5) =
-        mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes));
-    new_elem->set_node(8) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(6) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
-                                           ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(13) =
-        mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem->set_node(7) =
+    new_elem->set_node(9,
+                       mesh->node_ptr(elem->node_ptr(axis_node_case + 4)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(10,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4 + 4)->id() +
+                                      (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(5,
+                       mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem->set_node(8,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(6,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
+                                      ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        13, mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem->set_node(
+        7,
         mesh->node_ptr(elem->node_ptr(8)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(11) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        11,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4 + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem->set_node(12) =
+                        2 * orig_nodes)));
+    new_elem->set_node(
+        12,
         mesh->node_ptr(elem->node_ptr(axis_node_case + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
+                        2 * orig_nodes)));
   }
-  new_elem->set_node(4) = mesh->node_ptr(elem->node_ptr(axis_node_case)->id());
-  new_elem->set_node(0) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(1) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
-                                         (current_layer * order * orig_nodes));
-  new_elem->set_node(2) =
+  new_elem->set_node(4, mesh->node_ptr(elem->node_ptr(axis_node_case)->id()));
+  new_elem->set_node(0,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(1,
+                     mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
+                                    (current_layer * order * orig_nodes)));
+  new_elem->set_node(
+      2,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem->set_node(3) =
+                      order * orig_nodes)));
+  new_elem->set_node(
+      3,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem->volume() < 0.0)
   {
@@ -2323,61 +2402,77 @@ RevolveGenerator::createPYRAMIDPRISMfromQUAD(
   if (prism_elem_type == PRISM18)
   {
     new_elem_1 = std::make_unique<Prism18>();
-    new_elem_1->set_node(6) =
-        mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes));
-    new_elem_1->set_node(8) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
-                                             (current_layer * 2 * orig_nodes));
-    new_elem_1->set_node(7) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
-                                             (current_layer * 2 * orig_nodes));
-    new_elem_1->set_node(9) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
-                                             ((current_layer * 2 + 1) * orig_nodes));
-    new_elem_1->set_node(10) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-    new_elem_1->set_node(11) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-    new_elem_1->set_node(15) =
-        mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer * 2 + 1) * orig_nodes));
-    new_elem_1->set_node(17) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-    new_elem_1->set_node(16) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
-                                              ((current_layer * 2 + 1) * orig_nodes));
-    new_elem_1->set_node(12) =
+    new_elem_1->set_node(
+        6, mesh->node_ptr(elem->node_ptr(8)->id() + (current_layer * 2 * orig_nodes)));
+    new_elem_1->set_node(8,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
+                                        (current_layer * 2 * orig_nodes)));
+    new_elem_1->set_node(7,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
+                                        (current_layer * 2 * orig_nodes)));
+    new_elem_1->set_node(9,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem_1->set_node(10,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem_1->set_node(11,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem_1->set_node(
+        15, mesh->node_ptr(elem->node_ptr(8)->id() + ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem_1->set_node(17,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem_1->set_node(16,
+                         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
+                                        ((current_layer * 2 + 1) * orig_nodes)));
+    new_elem_1->set_node(
+        12,
         mesh->node_ptr(elem->node_ptr(8)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem_1->set_node(13) =
+                        2 * orig_nodes)));
+    new_elem_1->set_node(
+        13,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4 + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
-    new_elem_1->set_node(14) =
+                        2 * orig_nodes)));
+    new_elem_1->set_node(
+        14,
         mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4 + 4)->id() +
                        ((current_layer + 1) %
                         (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                        2 * orig_nodes));
+                        2 * orig_nodes)));
   }
-  new_elem_1->set_node(0) = mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
-                                           (current_layer * order * orig_nodes));
-  new_elem_1->set_node(1) = mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
-                                           (current_layer * order * orig_nodes));
-  new_elem_1->set_node(2) = mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
-                                           (current_layer * order * orig_nodes));
-  new_elem_1->set_node(3) =
+  new_elem_1->set_node(0,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
+                                      (current_layer * order * orig_nodes)));
+  new_elem_1->set_node(1,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
+                                      (current_layer * order * orig_nodes)));
+  new_elem_1->set_node(2,
+                       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
+                                      (current_layer * order * orig_nodes)));
+  new_elem_1->set_node(
+      3,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 1) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem_1->set_node(4) =
+                      order * orig_nodes)));
+  new_elem_1->set_node(
+      4,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 3) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
-  new_elem_1->set_node(5) =
+                      order * orig_nodes)));
+  new_elem_1->set_node(
+      5,
       mesh->node_ptr(elem->node_ptr((axis_node_case + 2) % 4)->id() +
                      ((current_layer + 1) %
                       (total_num_azimuthal_intervals + 1 - (unsigned int)_full_circle_revolving) *
-                      order * orig_nodes));
+                      order * orig_nodes)));
 
   if (new_elem_1->volume() < 0.0)
   {

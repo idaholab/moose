@@ -195,10 +195,10 @@ add_element_Quad4(DM da,
   // Make sure our unique_id doesn't overlap any nodes'
   elem->set_unique_id(elem_id + (nx + 1) * (ny + 1));
   elem = mesh.add_elem(elem);
-  elem->set_node(0) = node0_ptr;
-  elem->set_node(1) = node1_ptr;
-  elem->set_node(2) = node2_ptr;
-  elem->set_node(3) = node3_ptr;
+  elem->set_node(0, node0_ptr);
+  elem->set_node(1, node1_ptr);
+  elem->set_node(2, node2_ptr);
+  elem->set_node(3, node3_ptr);
 
   // Bottom
   if (j == 0)
