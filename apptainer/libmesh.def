@@ -63,11 +63,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         # Build VTK
         cd ${ROOT_BUILD_DIR}/$(basename ${VTK_URL} .tar.gz)
 
-        # Patch nlohmann issue, see MOOSE issue #30372
-        # and discourse.vtk.org/t/nlohmann-json-and-vtks-public-api/15131
-        patch -p1 < ${ROOT_BUILD_DIR}/vtk9.4.2_mr11854_nlohmann.patch
-        rm ${ROOT_BUILD_DIR}/vtk9.4.2_mr11854_nlohmann.patch
-
         mkdir -p build; cd build
         cmake .. \
             -Wno-dev \
@@ -113,4 +108,3 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 %files
     {{ MOOSE_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_libmesh.sh {{ ROOT_BUILD_DIR }}/scripts/configure_libmesh.sh
-    {{ MOOSE_DIR }}/conda/libmesh-vtk/vtk9.4.2_mr11854_nlohmann.patch {{ ROOT_BUILD_DIR }}/vtk9.4.2_mr11854_nlohmann.patch
