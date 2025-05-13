@@ -49,8 +49,17 @@
 []
 
 [Constraints]
+  inactive = ADequal
   [equal]
-    type = EqualValueEmbeddedConstraint
+    type = ADEqualValueEmbeddedConstraint
+    secondary = 2
+    primary = 1
+    penalty = 1e3
+    primary_variable = phi
+    variable = phi
+  []
+  [ADequal]
+    type = ADEqualValueEmbeddedConstraint
     secondary = 2
     primary = 1
     penalty = 1e3

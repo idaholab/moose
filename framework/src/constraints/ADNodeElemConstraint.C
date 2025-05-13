@@ -75,7 +75,6 @@ ADNodeElemConstraint::~ADNodeElemConstraint()
 void
 ADNodeElemConstraint::computeResidual()
 {
-
   _qp = 0;
 
   _residuals.resize(_test_primary.size(), 0);

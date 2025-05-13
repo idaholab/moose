@@ -196,3 +196,10 @@ NodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
       _phi_secondary[j][_qp] = 0.0;
   }
 }
+
+Real
+NodeElemConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
+{
+  mooseError("Derived classes must implement computeQpJacobian.");
+  return 0;
+}
