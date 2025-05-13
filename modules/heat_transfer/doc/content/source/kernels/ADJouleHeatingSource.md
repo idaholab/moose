@@ -5,8 +5,8 @@
 ## Overview
 
 `ADJouleHeatingSource` is the implementation of a heat source corresponding to
-electric Joule heating ($Q$) within the framework of automatic differentiation. 
-The residual is provided by the [ElectromagneticHeatingMaterial](ElectromagneticHeatingMaterial.md) 
+electric Joule heating ($Q$) within the framework of automatic differentiation.
+The residual is provided by the [ElectromagneticHeatingMaterial](ElectromagneticHeatingMaterial.md)
 material object and can be structured in the following formulations:
 
 Time domain formulation:
@@ -30,7 +30,7 @@ $\sigma_{elec}$ is defined as an
 currently be provided by [ADElectricalConductivity](ADElectricalConductivity.md).
 
 In the case of the time domain formulation, the electric field can be
-defined using an electromagnetic solver (like the [electromagnetics module](modules/electromagnetics/index.md)) or using the electrostatic
+defined using an electromagnetic solver (like the [electromagnetics module](modules/electromagnetics/index.md optional=true)) or using the electrostatic
 approximation, where:
 \begin{equation}
   E = \nabla \left( V \right)
