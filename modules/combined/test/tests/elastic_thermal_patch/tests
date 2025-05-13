@@ -26,6 +26,7 @@
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
     max_parallel = 1
+    restep = False # Cannot compare restep output when outputting on nonlinear
     requirement = 'The system shall compute consistent nonlinear solver behavior for thermal strain problems'
   [../]
 
@@ -36,6 +37,7 @@
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
     max_parallel = 1
+    restep = False # Cannot compare restep output when outputting on nonlinear
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates with a full preconditioning matrix'
   [../]
 
