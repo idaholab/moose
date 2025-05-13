@@ -97,11 +97,20 @@ SamplerBase::initialize()
       vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
       // Erase the elements from the last execution
       for (auto vec_ptr : vec_ptrs)
+      {
+        // Vector may have already been restored, if so, skip the erasure
+        if (_curr_total_samples > vec_ptr->size())
+        {
+          mooseAssert(vec_ptr->size() == (_curr_total_samples - _curr_num_samples),
+                      "Number of samples is not what is expected.");
+          continue;
+        }
         for (auto ind : _curr_indices)
         {
           mooseAssert(ind < vec_ptr->size(), "Trying to remove a sample that doesn't exist.");
           vec_ptr->erase(vec_ptr->begin() + ind);
         }
+      }
     }
     _curr_indices.clear();
   }
@@ -205,7 +214,10 @@ SamplerBase::finalize()
   {
     _comm.sum(_curr_num_samples);
     if (_comm.rank() == 0)
+    {
       _curr_indices.insert(sorted_indices.end() - _curr_num_samples, sorted_indices.end());
+      _curr_total_samples = vec_ptrs[0]->size();
+    }
   }
 }
 
