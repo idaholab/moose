@@ -26,7 +26,9 @@ class GenericNodeElemConstraint<true> : public ADNodeElemConstraint
 {
 public:
   static InputParameters validParams() { return ADNodeElemConstraint::validParams(); };
-  GenericNodeElemConstraint(const InputParameters & parameters) : ADNodeElemConstraint(parameters) {}
+  GenericNodeElemConstraint(const InputParameters & parameters) : ADNodeElemConstraint(parameters)
+  {
+  }
 };
 
 #define usingGenericNodeElemConstraint                                                             \
@@ -49,4 +51,4 @@ public:
   using GenericNodeElemConstraint<is_ad>::_test_secondary;                                         \
   using GenericNodeElemConstraint<is_ad>::_connected_dof_indices;                                  \
   using GenericNodeElemConstraint<is_ad>::_sys;                                                    \
-  using GenericNodeElemConstraint<is_ad>::_overwrite_secondary_residual;
+  using GenericNodeElemConstraint<is_ad>::_overwrite_secondary_residual
