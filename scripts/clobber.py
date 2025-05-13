@@ -81,6 +81,8 @@ class Clobber(object):
                 ".gcov",
                 ".gch",
                 ".so",
+                ".so.0",
+                ".so.0.0.0",
                 )
 
         for root, subdirs, files in os.walk(self.top_dir, topdown=True):
