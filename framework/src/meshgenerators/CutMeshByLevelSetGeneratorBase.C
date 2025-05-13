@@ -310,10 +310,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
             pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0])));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
-      new_elem_tet4->set_node(0) = const_cast<Node *>(tet4_nodes_inside_plane[0]);
-      new_elem_tet4->set_node(1) = const_cast<Node *>(new_plane_nodes[0]);
-      new_elem_tet4->set_node(2) = const_cast<Node *>(new_plane_nodes[1]);
-      new_elem_tet4->set_node(3) = const_cast<Node *>(new_plane_nodes[2]);
+      new_elem_tet4->set_node(0, const_cast<Node *>(tet4_nodes_inside_plane[0]));
+      new_elem_tet4->set_node(1, const_cast<Node *>(new_plane_nodes[0]));
+      new_elem_tet4->set_node(2, const_cast<Node *>(new_plane_nodes[1]));
+      new_elem_tet4->set_node(3, const_cast<Node *>(new_plane_nodes[2]));
       new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
@@ -345,10 +345,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
         auto new_elem_tet4 = std::make_unique<Tet4>();
-        new_elem_tet4->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
-        new_elem_tet4->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
-        new_elem_tet4->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
-        new_elem_tet4->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
+        new_elem_tet4->set_node(0, const_cast<Node *>(optimized_node_list[i][0]));
+        new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
+        new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
+        new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
         new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
@@ -378,10 +378,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
         auto new_elem_tet4 = std::make_unique<Tet4>();
-        new_elem_tet4->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
-        new_elem_tet4->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
-        new_elem_tet4->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
-        new_elem_tet4->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
+        new_elem_tet4->set_node(0, const_cast<Node *>(optimized_node_list[i][0]));
+        new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
+        new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
+        new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
         new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
@@ -394,10 +394,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
           pointPairLevelSetInterception(*tet4_nodes_inside_plane[0], *tet4_nodes_outside_plane[0]));
       // A smaller Tet4 is created, this solution is unique
       auto new_elem_tet4 = std::make_unique<Tet4>();
-      new_elem_tet4->set_node(0) = const_cast<Node *>(new_plane_node);
-      new_elem_tet4->set_node(1) = const_cast<Node *>(tet4_nodes_on_plane[0]);
-      new_elem_tet4->set_node(2) = const_cast<Node *>(tet4_nodes_on_plane[1]);
-      new_elem_tet4->set_node(3) = const_cast<Node *>(tet4_nodes_inside_plane[0]);
+      new_elem_tet4->set_node(0, const_cast<Node *>(new_plane_node));
+      new_elem_tet4->set_node(1, const_cast<Node *>(tet4_nodes_on_plane[0]));
+      new_elem_tet4->set_node(2, const_cast<Node *>(tet4_nodes_on_plane[1]));
+      new_elem_tet4->set_node(3, const_cast<Node *>(tet4_nodes_inside_plane[0]));
       new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
@@ -413,10 +413,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
             pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0])));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
-      new_elem_tet4->set_node(0) = const_cast<Node *>(new_plane_nodes[0]);
-      new_elem_tet4->set_node(1) = const_cast<Node *>(new_plane_nodes[1]);
-      new_elem_tet4->set_node(2) = const_cast<Node *>(tet4_nodes_on_plane[0]);
-      new_elem_tet4->set_node(3) = const_cast<Node *>(tet4_nodes_inside_plane[0]);
+      new_elem_tet4->set_node(0, const_cast<Node *>(new_plane_nodes[0]));
+      new_elem_tet4->set_node(1, const_cast<Node *>(new_plane_nodes[1]));
+      new_elem_tet4->set_node(2, const_cast<Node *>(tet4_nodes_on_plane[0]));
+      new_elem_tet4->set_node(3, const_cast<Node *>(tet4_nodes_inside_plane[0]));
       new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
@@ -444,10 +444,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       for (unsigned int i = 0; i < optimized_node_list.size(); i++)
       {
         auto new_elem_tet4 = std::make_unique<Tet4>();
-        new_elem_tet4->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
-        new_elem_tet4->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
-        new_elem_tet4->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
-        new_elem_tet4->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
+        new_elem_tet4->set_node(0, const_cast<Node *>(optimized_node_list[i][0]));
+        new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
+        new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
+        new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
         new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
@@ -465,8 +465,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       if (elem_tet4->volume() < 0.0)
       {
         Node * temp = elem_tet4->node_ptr(0);
-        elem_tet4->set_node(0) = elem_tet4->node_ptr(1);
-        elem_tet4->set_node(1) = temp;
+        elem_tet4->set_node(0, elem_tet4->node_ptr(1));
+        elem_tet4->set_node(1, temp);
       }
     }
     // Find the boundary id of the new element

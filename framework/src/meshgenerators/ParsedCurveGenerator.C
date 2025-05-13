@@ -252,12 +252,12 @@ ParsedCurveGenerator::generate()
       if (_order == 3)
       {
         new_elem = std::make_unique<Edge4>();
-        new_elem->set_node(3) = nodes[i * _order + 2];
+        new_elem->set_node(3, nodes[i * _order + 2]);
       }
-      new_elem->set_node(2) = nodes[i * _order + 1];
+      new_elem->set_node(2, nodes[i * _order + 1]);
     }
-    new_elem->set_node(0) = nodes[i * _order];
-    new_elem->set_node(1) = nodes[((i + 1) * _order) % nodes.size()];
+    new_elem->set_node(0, nodes[i * _order]);
+    new_elem->set_node(1, nodes[((i + 1) * _order) % nodes.size()]);
 
     new_elem->subdomain_id() = 1;
     mesh->add_elem(std::move(new_elem));

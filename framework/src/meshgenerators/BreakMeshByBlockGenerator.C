@@ -226,7 +226,7 @@ BreakMeshByBlockGenerator::generate()
                   // subdomain elem
                   new_node->processor_id() = current_elem->processor_id();
                   mesh->add_node(new_node);
-                  current_elem->set_node(node_id) = new_node;
+                  current_elem->set_node(node_id, new_node);
                   // Add boundary info to the new node
                   boundary_info.boundary_ids(current_node, node_boundary_ids);
                   boundary_info.add_node(new_node, node_boundary_ids);
@@ -253,7 +253,7 @@ BreakMeshByBlockGenerator::generate()
                     if (connected_elem->node_id(node_id) ==
                         current_node->id()) // if current node == node on element
                     {
-                      connected_elem->set_node(node_id) = new_node;
+                      connected_elem->set_node(node_id, new_node);
                       break;
                     }
                 }
@@ -330,8 +330,8 @@ BreakMeshByBlockGenerator::generate()
         }
 
       } // end multiplicity check
-    }   // end loop over nodes
-  }     // end nodeptr check
+    } // end loop over nodes
+  } // end nodeptr check
 
   addInterfaceBoundary(*mesh);
   Partitioner::set_node_processor_ids(*mesh);

@@ -97,7 +97,7 @@ ElementGenerator::generate()
   {
     for (unsigned int j = 0; j < n; j++)
     {
-      elem->set_node(j) = nodes[_element_connectivity[j + i]];
+      elem->set_node(j, nodes[_element_connectivity[j + i]]);
     }
   }
 
