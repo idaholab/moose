@@ -63,7 +63,6 @@
     secondary = 2
     primary = 1
     penalty = 1e3
-    formulation = PENALTY
     primary_variable = phi
     variable = phi
   []

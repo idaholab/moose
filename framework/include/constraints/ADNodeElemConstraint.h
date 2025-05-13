@@ -31,9 +31,6 @@ public:
   /// Computes the jacobian for the current element.
   virtual void computeJacobian() override;
 
-  /// Computes d-residual / d-jvar...
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) override {};
-
 protected:
   /// prepare the _secondary_to_primary_map
   virtual void prepareSecondaryToPrimaryMap() = 0;
