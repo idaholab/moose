@@ -47,7 +47,7 @@
 #include "PenetrationLocator.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
-#include "NodeElemConstraint.h"
+#include "NodeElemConstraintBase.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
 #include "ScalarKernelBase.h"
