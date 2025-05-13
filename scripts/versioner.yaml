@@ -35,7 +35,6 @@ packages:
       - mpi
     influential:
       - conda/libmesh-vtk/build.sh
-      - conda/libmesh-vtk/vtk9.4.2_mr11854_nlohmann.patch
   # dependers: peacock
   peacock:
     version: 2025.04.17
