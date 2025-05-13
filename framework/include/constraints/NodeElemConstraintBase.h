@@ -75,11 +75,11 @@ public:
 
 protected:
   /// Compute the value the secondary node should have at the beginning of a timestep.
-  virtual Real computeQpSecondaryValue() { return 0; } //fixme error
+  virtual Real computeQpSecondaryValue() = 0;
 
-   MooseVariable & _var;
-    /// Primary side variable
-   MooseVariable & _primary_var;
+  MooseVariable & _var;
+  /// Primary side variable
+  MooseVariable & _primary_var;
 
   /**
    * Whether or not the secondary's residual should be overwritten.

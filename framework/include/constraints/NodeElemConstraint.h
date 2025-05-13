@@ -45,10 +45,7 @@ protected:
   virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
 
   /// This is the virtual that derived classes should override for computing the Jacobian.
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
-  {
-    return 0;
-  } // fixme mooseERRROR This is so AD can build
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
   /// This is the virtual that derived classes should override for computing the off-diag Jacobian.
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
