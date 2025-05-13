@@ -14,9 +14,9 @@ public:
 
   MFEMGenericFESpace(const InputParameters & parameters);
 
-  virtual bool isScalar() const;
+  virtual bool isScalar() const override;
 
-  virtual bool isVector() const;
+  virtual bool isVector() const override;
 
 protected:
   /// Get the name of the desired FECollection.

@@ -10,9 +10,9 @@ public:
 
   MFEMScalarFESpace(const InputParameters & parameters);
 
-  virtual bool isScalar() const { return true; }
+  virtual bool isScalar() const override { return true; }
 
-  virtual bool isVector() const { return false; }
+  virtual bool isVector() const override { return false; }
 
 protected:
   /// Get the name of the desired FECollection.
