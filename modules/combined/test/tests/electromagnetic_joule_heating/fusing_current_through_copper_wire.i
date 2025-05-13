@@ -1,3 +1,39 @@
+# This test is a simpified coupled case between the electromagnetic and
+# heat transfer modules. While the file microwave_heating.i is a test
+# utilizing the method of manufactured solutions, where both real and
+# complex components of the electromagnetic properties are provided
+# (such that no term is zeroed out), this test involves only the
+# real components of the electromagnetic properties. In particular,
+# this test supplies the fusing current to a copper wire and simulations
+# the spatial and temporal heating profile until the wire reaches its
+# melting point. The PDE's of this test file are as follows:
+#
+#   curl(curl(A)) + j*mu*omega*(sigma*A) = J
+#   mag(E) = mag(-j*omega*A) + mag(J/sigma)
+#   rho*C*dT/dt - div(k*grad(T)) = Q
+#   Q = 0.5*sigma*mag(E)^2
+#
+# Where:
+#   - A is the magnetic vector potential
+#   - j is the sqrt(-1)
+#   - mu is the permeability of free space
+#   - omega is the angular frequency of the system
+#   - sigma is the electric conductivity of the wire
+#   - J is the supplied DC current
+#   - E is the electric field
+#   - rho is the density of copper
+#   - C is the heat capacity of copper
+#   - T is the temperature
+#   - k is the thermal conductivity of the wire
+#   - Q is the Joule heating
+#
+# The BCs are as follows:
+#
+#   curl(n) x curl(A) = 0,  where n is the normal vector
+#   q * n = h (T - T_infty), where q is the heat flux,
+#                            h is the convective heat transfer coefficient,
+#                            and T_infty is the far-field temperature.
+
 [Mesh]
   # Mesh of the copper wire
   [fmg]

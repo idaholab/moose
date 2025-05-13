@@ -1,4 +1,28 @@
 # Test for ADJouleHeatingSource
+#
+# This test utilizes the method of manufactured solutions, such that
+# all terms of the PDE's and all supplied parameter are are non-zero.
+# The exact PDE's are the following:
+#
+#   curl(curl(E)) - mu*omega^2*epsilon*E + j*mu*omega*sigma*E = F_E_supplied
+#   div(-grad(n)) - 0.5*Re(sigma*E * E^*) = F_n_supplied
+#
+# Where:
+#   - E is the electric field
+#   - mu is the permeability
+#   - omega is the angular frequency of the system
+#   - epsilon is the permittivity
+#   - j is the sqrt(-1)
+#   - sigma is the electric conductivity
+#   - F_E_supplied is the forcing term of the electric field MMS
+#   - n is the energy density of a species
+#       (this is analogous to the electron energy density in plasma physics)
+#   - E^* is the complex conjugate of the electric field
+#   - F_n_supplied is the forcing term of the energy density MMS
+#
+# All boundary conditions in this test are Dirichlet BCs. The manufactured
+# solutions are as follow:
+#
 # Manufactured solution: E_real = cos(pi*y) * x_hat - cos(pi*x) * y_hat
 #                        E_imag = sin(pi*y) * x_hat - sin(pi*x) * y_hat
 #                        n = x^2*y^2

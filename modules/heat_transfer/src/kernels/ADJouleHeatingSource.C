@@ -52,8 +52,8 @@ ADJouleHeatingSource::precomputeQpResidual()
 {
   /*
    * NOTE: Coupling in the gradient of the potential will be deprecated in the
-   *       near future (10/01/2025). After the deprecation, the residual contribution of this kernel will
-   *       be solely provided by the 'ElectromagneticHeatingMaterial' material object.
+   *       near future (10/01/2025). After the deprecation, the residual contribution of this kernel
+   * will be solely provided by the 'ElectromagneticHeatingMaterial' material object.
    */
   if (_supplied_potential)
     return -_elec_cond[_qp] * _grad_potential[_qp] * _grad_potential[_qp];
