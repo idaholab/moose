@@ -949,7 +949,7 @@ XFEM::healMesh()
             if (!xfce->isPointPhysical(*e1node) &&
                 e1node != e2node) // This would happen at the crack tip
             {
-              elem1->set_node(in) = e2node;
+              elem1->set_node(in, e2node);
               nodes_to_delete.insert(e1node);
             }
             else if (e1node != e2node)
@@ -1000,7 +1000,7 @@ XFEM::healMesh()
               if (!xfce->isPointPhysical(*elem1->node_ptr(in)) &&
                   e1node_displaced != e2node_displaced)
               {
-                elem1_displaced->set_node(in) = e2node_displaced;
+                elem1_displaced->set_node(in, e2node_displaced);
                 nodes_to_delete_displaced.insert(e1node_displaced);
               }
               else if (e1node_displaced != e2node_displaced)
@@ -1244,7 +1244,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
       if (libmesh_node->processor_id() == DofObject::invalid_processor_id)
         libmesh_node->processor_id() = parent_elem->processor_id();
 
-      libmesh_elem->set_node(j) = libmesh_node;
+      libmesh_elem->set_node(j, libmesh_node);
 
       // Store solution for all nodes affected by XFEM (even existing nodes)
       if (parent_elem->is_semilocal(_mesh->processor_id()))
@@ -1288,7 +1288,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
         if (libmesh_node->processor_id() == DofObject::invalid_processor_id)
           libmesh_node->processor_id() = parent_elem2->processor_id();
 
-        libmesh_elem2->set_node(j) = libmesh_node;
+        libmesh_elem2->set_node(j, libmesh_node);
 
         parent_node = parent_elem2->node_ptr(j);
         _displaced_mesh->get_boundary_info().boundary_ids(parent_node, parent_boundary_ids);
