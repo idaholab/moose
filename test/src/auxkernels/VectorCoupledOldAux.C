@@ -15,7 +15,8 @@ InputParameters
 VectorCoupledOldAux::validParams()
 {
   InputParameters params = VectorAuxKernel::validParams();
-  params.addClassDescription("OldValueTestAux that return old value.");
+  params.addClassDescription(
+      "OldValueTestAux that returns a combination of the components of the old value.");
   params.addRequiredCoupledVar("v", "This should be the same vector variable specified twice.");
 
   return params;
