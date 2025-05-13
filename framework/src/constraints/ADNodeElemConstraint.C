@@ -14,15 +14,13 @@
 #include "MooseEnum.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
-#include "MooseVariableFE.h"
-#include "SystemBase.h"
 
 #include "libmesh/string_to_enum.h"
 
 InputParameters
 ADNodeElemConstraint::validParams()
 {
-  InputParameters params = Constraint::validParams();
+  InputParameters params = NodeElemConstraintBase::validParams();
   params.addRequiredParam<SubdomainName>("secondary", "secondary block id");
   params.addRequiredParam<SubdomainName>("primary", "primary block id");
   params.addRequiredCoupledVar("primary_variable",
@@ -32,16 +30,9 @@ ADNodeElemConstraint::validParams()
 }
 
 ADNodeElemConstraint::ADNodeElemConstraint(const InputParameters & parameters)
-  : Constraint(parameters),
-    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side
-    // and it is not at nodes (so passing false)
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
-    NeighborMooseVariableInterface<Real>(
-        this, true, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
-
+  : NodeElemConstraintBase(parameters),
     _secondary(_mesh.getSubdomainID(getParam<SubdomainName>("secondary"))),
     _primary(_mesh.getSubdomainID(getParam<SubdomainName>("primary"))),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _primary_q_point(_assembly.adQPoints()),
     _primary_qrule(_assembly.qRule()),
@@ -54,7 +45,6 @@ ADNodeElemConstraint::ADNodeElemConstraint(const InputParameters & parameters)
     _phi_secondary(1),
     _test_secondary(1), // One entry
 
-    _primary_var(*getVar("primary_variable", 0)),
     _primary_var_num(_primary_var.number()),
 
     _phi_primary(_assembly.phiNeighbor(_primary_var)),
@@ -68,13 +58,9 @@ ADNodeElemConstraint::ADNodeElemConstraint(const InputParameters & parameters)
     _grad_u_primary(_primary_var.adGradSlnNeighbor()),
 
     _dof_map(_sys.dofMap()),
-    _node_to_elem_map(_mesh.nodeToElemMap()),
-
-    _overwrite_secondary_residual(false)
+    _node_to_elem_map(_mesh.nodeToElemMap())
 {
   _mesh.errorIfDistributedMesh("ADNodeElemConstraint");
-
-  addMooseVariableDependency(&_var);
   // Put a "1" into test_secondary
   // will always only have one entry that is 1
   _test_secondary[0].push_back(1);
@@ -84,14 +70,6 @@ ADNodeElemConstraint::~ADNodeElemConstraint()
 {
   _phi_secondary.release();
   _test_secondary.release();
-}
-
-void
-ADNodeElemConstraint::computeSecondaryValue(NumericVector<Number> & current_solution)
-{
-  const dof_id_type & dof_idx = _var.nodalDofIndex();
-  _qp = 0;
-  current_solution.set(dof_idx, computeQpSecondaryValue());
 }
 
 void
@@ -189,10 +167,4 @@ ADNodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
     else
       _phi_secondary[j][_qp] = 0.0;
   }
-}
-
-bool
-ADNodeElemConstraint::overwriteSecondaryResidual()
-{
-  return _overwrite_secondary_residual;
 }

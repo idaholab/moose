@@ -10,33 +10,21 @@
 #pragma once
 
 // MOOSE includes
-#include "Constraint.h"
+#include "NodeElemConstraintBase.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-
-// libMesh forward declarations
-namespace libMesh
-{
-template <typename T>
-class SparseMatrix;
-}
 
 /**
  * A ADNodeElemConstraint is used when you need to create constraints between
  * a secondary node and a primary element. It works by allowing you to modify the
  * residual and jacobian entries on the secondary node and the primary element.
  */
-class ADNodeElemConstraint : public Constraint,
-                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                           public NeighborMooseVariableInterface<Real>
+class ADNodeElemConstraint : public NodeElemConstraintBase
 {
 public:
   static InputParameters validParams();
 
   ADNodeElemConstraint(const InputParameters & parameters);
   virtual ~ADNodeElemConstraint();
-
-  /// Compute the value the secondary node should have at the beginning of a timestep.
-  void computeSecondaryValue(NumericVector<Number> & current_solution);
 
   /// Computes the residual Nodal residual.
   virtual void computeResidual() override;
@@ -50,43 +38,9 @@ public:
   /// Gets the indices for all dofs connected to the constraint
   virtual void getConnectedDofIndices(unsigned int var_num);
 
-  /**
-   * Whether or not this constraint should be applied.
-   * @return bool true if this constraint is active, false otherwise
-   */
-  virtual bool shouldApply() { return true; }
-
-  /**
-   * Whether or not the secondary's residual should be overwritten.
-   * @return bool When this returns true the secondary's residual as computed by the constraint will
-   * _replace_ the residual previously at that node for that variable.
-   */
-  virtual bool overwriteSecondaryResidual();
-
-  /**
-   * Whether or not the secondary's Jacobian row should be overwritten.
-   * @return bool When this returns true the secondary's Jacobian row as computed by the constraint
-   * will _replace_ the residual previously at that node for that variable.
-   */
-  virtual bool overwriteSecondaryJacobian() { return overwriteSecondaryResidual(); };
-
-  /**
-   * The variable on the primary elem.
-   * @return MooseVariable & a reference to the primary variable
-   */
-  virtual MooseVariable & primaryVariable() { return _primary_var; }
-
-  /**
-   * The variable number that this object operates on.
-   */
-  const MooseVariable & variable() const override { return _var; }
-
 protected:
   /// prepare the _secondary_to_primary_map
   virtual void prepareSecondaryToPrimaryMap() = 0;
-
-  /// Compute the value the secondary node should have at the beginning of a timestep.
-  virtual Real computeQpSecondaryValue() = 0;
 
   /// This is the virtual that derived classes should override for computing the residual.
   virtual ADReal computeQpResidual(Moose::ConstraintType type) = 0;
@@ -183,8 +137,6 @@ protected:
   /// primary block id
   unsigned short _primary;
 
-  MooseVariable & _var;
-
   const MooseArray<ADPoint> & _primary_q_point;
   const QBase * const & _primary_qrule;
 
@@ -200,9 +152,6 @@ protected:
   VariablePhiValue _phi_secondary;
   /// Shape function on the secondary side.  This will always only have one entry and that entry will always be "1"
   VariableTestValue _test_secondary;
-
-  /// Primary side variable
-  MooseVariable & _primary_var;
 
   /// Number for the primary variable
   unsigned int _primary_var_num;
@@ -232,24 +181,7 @@ protected:
   /// maps secondary node ids to primary element ids
   std::map<dof_id_type, dof_id_type> _secondary_to_primary_map;
 
-  /**
-   * Whether or not the secondary's residual should be overwritten.
-   *
-   * When this is true the secondary's residual as computed by the constraint will _replace_
-   * the residual previously at that node for that variable.
-   */
-  bool _overwrite_secondary_residual;
-
   /// Data members for holding residuals
   ADReal _r;
   std::vector<Real> _residuals;
-
-public:
-  SparseMatrix<Number> * _jacobian;
-  /// dofs connected to the secondary node
-  std::vector<dof_id_type> _connected_dof_indices;
-  /// stiffness matrix holding primary-secondary jacobian
-  DenseMatrix<Number> _Kne;
-  /// stiffness matrix holding secondary-secondary jacobian
-  DenseMatrix<Number> _Kee;
 };

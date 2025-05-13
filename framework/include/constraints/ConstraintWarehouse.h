@@ -17,7 +17,7 @@ class Constraint;
 class NodalConstraint;
 class NodeFaceConstraint;
 class ElemElemConstraint;
-class NodeElemConstraint;
+class NodeElemConstraintBase;
 class MortarConstraintBase;
 
 /**
@@ -48,7 +48,7 @@ public:
   getActiveElemElemConstraints(InterfaceID interface_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
   getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
-  const std::vector<std::shared_ptr<NodeElemConstraint>> & getActiveNodeElemConstraints(
+  const std::vector<std::shared_ptr<NodeElemConstraintBase>> & getActiveNodeElemConstraints(
       SubdomainID secondary_id, SubdomainID primary_id, bool displaced) const;
   ///@}
 
@@ -105,10 +105,10 @@ protected:
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _displaced_element_constraints;
 
   /// NodeElemConstraint objects
-  std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraint>>
+  std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraintBase>>
       _node_elem_constraints;
 
   /// NodeElemConstraint objects
-  std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraint>>
+  std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraintBase>>
       _displaced_node_elem_constraints;
 };
