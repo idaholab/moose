@@ -9,7 +9,7 @@ therefore ensuring stability and robustness.
 
 The test folder in SCM contains the suite of all problems that are used for regression and code coverage testing.
 The example folder in SCM contains various examples cases for how to use the code. This includes verification and validation cases as well as other examples.
-Finally, a list of publications supporting SCM development can be found [here](publication_list.md).
+Finally, a list of publications supporting SCM development can be found [here](subchannel/general/publication_list.md).
 
 ## List of verification cases
 
@@ -17,8 +17,8 @@ Finally, a list of publications supporting SCM development can be found [here](p
 
 | Case | Title |
 | :- | :- |
-| 1 | [Friction Model, Verification](friction.md) |
-| 2 | [Enthalpy Mixing Model, Verification](enthalpy.md) |
+| 1 | [Friction Model, Verification](subchannel/v&v/friction.md) |
+| 2 | [Enthalpy Mixing Model, Verification](subchannel/v&v/enthalpy.md) |
 
 ## List of validation cases
 
@@ -26,16 +26,16 @@ Finally, a list of publications supporting SCM development can be found [here](p
 
 | Case | Title |
 | :- | :- |
-| 1 | [PSBT $5\times5$-pin, Validation](PSBT.md) |
-| 2 | [PNNL $2\times6$-pin, Validation](pnnl_12_pin.md) |
-| 3 | [PNNL $7\times7$-pin sleeve blockage, Validation](pnnl_blockage.md) |
-| 4 | [AREVA FCTF $61$-pin deformed duct, Validation](areva_fctf.md) |
+| 1 | [PSBT $5\times5$-pin, Validation](subchannel/v&v/PSBT.md) |
+| 2 | [PNNL $2\times6$-pin, Validation](subchannel/v&v/pnnl_12_pin.md) |
+| 3 | [PNNL $7\times7$-pin sleeve blockage, Validation](subchannel/v&v/pnnl_blockage.md) |
+| 4 | [AREVA FCTF $61$-pin deformed duct, Validation](subchannel/v&v/areva_fctf.md) |
 
 ### Liquid Sodium benchmarks
 
 | Case | Title |
 | :- | :- |
-| 1 | [ORNL $19$-pin, Validation](ornl_19_pin.md) |
-| 2 | [Toshiba $37$-pin, Validation](toshiba_37_pin.md) |
-| 3 | [EBR-II, SHRT-17,SHRT-45R, Validation](EBR-II.md) |
-| 4 | [ORNL Thermal-Hydraulic Out-of-Reactor Safety (THORS) Facility blockage, Validation](thors.md) |
+| 1 | [ORNL $19$-pin, Validation](subchannel/v&v/ornl_19_pin.md) |
+| 2 | [Toshiba $37$-pin, Validation](subchannel/v&v/toshiba_37_pin.md) |
+| 3 | [EBR-II, SHRT-17,SHRT-45R, Validation](subchannel/v&v/EBR-II.md) |
+| 4 | [ORNL Thermal-Hydraulic Out-of-Reactor Safety (THORS) Facility blockage, Validation](subchannel/v&v/thors.md) |
