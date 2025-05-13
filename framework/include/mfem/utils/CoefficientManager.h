@@ -14,7 +14,7 @@
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
-#include "coefficient_map.h"
+#include "CoefficientMap.h"
 
 namespace Moose::MFEM
 {
@@ -41,6 +41,7 @@ public:
   }
 
   /// Use an existing coefficient for a property on some blocks of the mesh
+  ///@{
   mfem::Coefficient & declareScalarProperty(const std::string & name,
                                             const std::vector<std::string> & blocks,
                                             const std::string & existing_coef);
@@ -51,8 +52,10 @@ public:
   {
     return this->declareScalarProperty(name, blocks, _scalar_coeffs.make<P>(args...));
   }
+  ///@}
 
   /// Declare an alias to an existing coefficient
+  ///@{
   mfem::VectorCoefficient & declareVector(const std::string & name,
                                           const std::string & existing_coef);
   template <class P, class... Args>
@@ -62,8 +65,10 @@ public:
     this->declareVector(name, coef);
     return *coef;
   }
+  ///@}
 
   /// Use an existing coefficient for a property on some blocks of the mesh
+  ///@{
   mfem::VectorCoefficient & declareVectorProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
                                                   const std::string & existing_coef);
@@ -74,11 +79,12 @@ public:
   {
     return this->declareVectorProperty(name, blocks, _vector_coeffs.make<P>(args...));
   }
+  ///@}
 
   /// Declare an alias to an existing coefficient
+  ///@{
   mfem::MatrixCoefficient & declareMatrix(const std::string & name,
                                           const std::string & existing_coef);
-
   template <class P, class... Args>
   P & declareMatrix(const std::string & name, Args &&... args)
   {
@@ -86,8 +92,10 @@ public:
     this->declareMatrix(name, coef);
     return *coef;
   }
+  ///@}
 
   /// Use an existing coefficient for a property on some blocks of the mesh
+  ///@{
   mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
                                                   const std::string & existing_coef);
@@ -98,6 +106,7 @@ public:
   {
     return this->declareMatrixProperty(name, blocks, _matrix_coeffs.make<P>(args...));
   }
+  ///@}
 
   mfem::Coefficient & getScalarCoefficient(const std::string name);
   mfem::VectorCoefficient & getVectorCoefficient(const std::string name);

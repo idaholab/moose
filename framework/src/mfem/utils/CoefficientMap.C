@@ -1,5 +1,5 @@
 #ifdef MFEM_ENABLED
-#include "coefficient_map.h"
+#include "CoefficientMap.h"
 
 namespace Moose::MFEM
 {

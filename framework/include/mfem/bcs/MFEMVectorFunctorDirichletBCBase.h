@@ -1,3 +1,5 @@
+#ifdef MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMEssentialBC.h"
@@ -14,3 +16,5 @@ protected:
   const MFEMVectorCoefficientName & _vec_coef_name;
   mfem::VectorCoefficient & _vec_coef;
 };
+
+#endif

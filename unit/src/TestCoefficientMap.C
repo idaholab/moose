@@ -1,7 +1,9 @@
+#ifdef MFEM_ENABLED
+
 #include <algorithm>
 
 #include "gtest/gtest.h"
-#include "coefficient_map.h"
+#include "CoefficientMap.h"
 
 #include "mfem.hpp"
 
@@ -262,3 +264,5 @@ TEST_F(CheckCoefficientMap, DifferentMatSize)
                                    {"3"}),
       MooseException);
 }
+
+#endif
