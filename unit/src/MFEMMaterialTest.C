@@ -222,7 +222,8 @@ TEST_F(MFEMMaterialTest, MFEMGenericConstantVectorMaterial_PW)
   _mfem_problem->addMaterial("MFEMGenericConstantVectorMaterial", "material2", coef_params2);
 
   mfem::VectorCoefficient & coef = _mfem_problem->getCoefficients().getVectorCoefficient("coef1");
-  auto c = dynamic_cast<mfem::PWCoefficient *>(&coef);
+  auto c = dynamic_cast<mfem::PWVectorCoefficient *>(&coef);
+  EXPECT_NE(c, nullptr);
   fe_transform.Attribute = 1;
   EXPECT_TRUE(check_vector(coef, fe_transform, point1, expected1));
   EXPECT_TRUE(check_vector(coef, fe_transform, point2, expected1));
