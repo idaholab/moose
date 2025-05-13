@@ -269,7 +269,7 @@ ExamplePatchMeshGenerator::makeQuad4Elems(MeshBase & mesh, const std::vector<Nod
   {
     Elem * elem = mesh.add_elem(new Quad4);
     for (unsigned j = 0; j < 4; ++j)
-      elem->set_node(j) = nodes[element_connectivity[i][j]];
+      elem->set_node(j, nodes[element_connectivity[i][j]]);
 
     elem->subdomain_id() = i + 1;
 
@@ -294,7 +294,7 @@ ExamplePatchMeshGenerator::makeQuad8Elems(MeshBase & mesh, const std::vector<Nod
   {
     Elem * elem = mesh.add_elem(new Quad8);
     for (unsigned j = 0; j < 8; ++j)
-      elem->set_node(j) = nodes[element_connectivity[i][j]];
+      elem->set_node(j, nodes[element_connectivity[i][j]]);
 
     elem->subdomain_id() = i + 1;
 
@@ -322,7 +322,7 @@ ExamplePatchMeshGenerator::makeHex8Elems(MeshBase & mesh, const std::vector<Node
   {
     Elem * elem = mesh.add_elem(new Hex8);
     for (unsigned j = 0; j < 8; ++j)
-      elem->set_node(j) = nodes[element_connectivity[i][j]];
+      elem->set_node(j, nodes[element_connectivity[i][j]]);
 
     elem->subdomain_id() = i + 1;
     if (i < 6)
@@ -349,7 +349,7 @@ ExamplePatchMeshGenerator::makeHex20Elems(MeshBase & mesh, const std::vector<Nod
   {
     Elem * elem = mesh.add_elem(new Hex20);
     for (unsigned j = 0; j < 20; ++j)
-      elem->set_node(j) = nodes[element_connectivity[i][j]];
+      elem->set_node(j, nodes[element_connectivity[i][j]]);
 
     elem->subdomain_id() = i + 1;
     if (i < 6)

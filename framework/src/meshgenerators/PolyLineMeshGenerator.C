@@ -91,8 +91,8 @@ PolyLineMeshGenerator::generate()
   {
     const auto ip1 = (i + 1) % max_nodes;
     auto elem = Elem::build(EDGE2);
-    elem->set_node(0) = mesh.node_ptr(i);
-    elem->set_node(1) = mesh.node_ptr(ip1);
+    elem->set_node(0, mesh.node_ptr(i));
+    elem->set_node(1, mesh.node_ptr(ip1));
     elem->set_id() = i;
     mesh.add_elem(std::move(elem));
   }
