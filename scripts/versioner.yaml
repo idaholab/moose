@@ -26,7 +26,7 @@ packages:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
     version: 9.4.2
-    build_number: 1
+    build_number: 2
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -35,7 +35,6 @@ packages:
       - mpi
     influential:
       - conda/libmesh-vtk/build.sh
-      - conda/libmesh-vtk/vtk9.4.2_mr11854_nlohmann.patch
   # dependers: peacock
   peacock:
     version: 2025.04.17
@@ -67,7 +66,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2025.04.22
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -103,7 +102,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.05.20
+    version: 2025.05.22
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
