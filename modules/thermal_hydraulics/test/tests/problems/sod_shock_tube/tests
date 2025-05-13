@@ -75,6 +75,7 @@
     input = 'davis_wave_speed.i'
     csvdiff = 'davis_wave_speed_vpp_FINAL.csv'
     max_parallel = 1 # https://github.com/idaholab/moose/issues/30482
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to use the Davis wave speed formulation for the HLLC Riemann solver.'
   []
 []
