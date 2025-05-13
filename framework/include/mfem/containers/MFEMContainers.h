@@ -192,20 +192,4 @@ using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
 } // namespace Moose::MFEM
 
-// FIXME: Making these real MOOSE derived string types requires
-// modifying Moose::Builder::extractParams and maybe
-// Moose::InputParameters::getMooseType as well.
-
-/// This type is used for objects that expect mfem::Coefficient objects
-using MFEMScalarCoefficientName = MooseFunctorName;
-// DerivativeStringClass(MFEMScalarCoefficientName);
-
-/// This type is used for objects that expect mfem::VectorCoefficient objects
-using MFEMVectorCoefficientName = MooseFunctorName;
-// DerivativeStringClass(MFEMVectorCoefficientName);
-
-/// This type is used for objects that expect mfem::MatrixCoefficient objects
-using MFEMMatrixCoefficientName = MooseFunctorName;
-// DerivativeStringClass(MFEMMatrixCoefficientName);
-
 #endif
