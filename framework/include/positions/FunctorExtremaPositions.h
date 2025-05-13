@@ -44,5 +44,5 @@ private:
   } _type;
 
   /// Values of the functor at the extrema
-  std::vector<Real> _positions_values;
+  std::vector<Real> & _positions_values;
 };

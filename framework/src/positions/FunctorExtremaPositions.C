@@ -52,7 +52,9 @@ FunctorExtremaPositions::FunctorExtremaPositions(const InputParameters & paramet
     BlockRestrictable(this),
     _functor(getFunctor<Real>("functor")),
     _n_extrema(getParam<unsigned int>("num_extrema")),
-    _type(getParam<MooseEnum>("extrema_type").getEnum<ExtremeType>())
+    _type(getParam<MooseEnum>("extrema_type").getEnum<ExtremeType>()),
+    _positions_values(declareValueByName<std::vector<Real>, ReporterVectorContext<Real>>(
+        "functor_extrema", REPORTER_MODE_REPLICATED))
 {
   // Constants and postprocessors are not interesting here
   const auto functor_name = getParam<MooseFunctorName>("functor");
@@ -79,6 +81,7 @@ FunctorExtremaPositions::initialize()
 {
   clearPositions();
   _positions.resize(_n_extrema);
+  _positions_values.resize(_n_extrema);
 
   std::vector<Real> extrema;
   std::vector<Point> extrema_locs;
@@ -103,6 +106,7 @@ FunctorExtremaPositions::initialize()
       {
         case ExtremeType::MAX_ABS:
           value = std::abs(value);
+          // fallthrough
         case ExtremeType::MAX:
         {
           if (value > extrema[i])
@@ -130,7 +134,7 @@ FunctorExtremaPositions::initialize()
           temp = other_temp;
           temp_loc = other_temp_loc;
         }
-        // Found an extrema, filled the extrema vector, done
+        // Found an extremum, filled the extrema vector, done
         break;
       }
     }
@@ -141,7 +145,7 @@ FunctorExtremaPositions::initialize()
   for (const auto i : make_range(_n_extrema))
   {
     unsigned int rank = 0;
-    // dont modify the extrema, they might be the global n-th extrema in a later call
+    // dont modify the extremum, it might be the global n-th extremum in a later call
     auto copy = extrema[current_candidate];
     if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
       comm().maxloc(copy, rank);
@@ -152,7 +156,7 @@ FunctorExtremaPositions::initialize()
     if (rank == processor_id())
     {
       extreme_point = extrema_locs[current_candidate];
-      // Our candidate for ith max got accepted, move on
+      // Our candidate for ith max got accepted, move on to offering the next extremal one
       current_candidate++;
     }
 
@@ -160,6 +164,7 @@ FunctorExtremaPositions::initialize()
     // The broadcast and scatter are for root 0 sending to all. The sum works just as well
     comm().sum(extreme_point);
     _positions[i] = extreme_point;
+    _positions_values[i] = copy;
   }
 
   _initialized = true;
