@@ -120,9 +120,9 @@
     [1D_2D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/1D_2D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=1D_2D_penalty_out Constraints/inactive=equal'
-      exodiff = '1D_2D_penalty_out.e'
+      cli_args = 'Mesh/file=gold/1D_2D.e '
+                 'Outputs/file_base=1D_2D_ADpenalty_out Constraints/inactive=equal'
+      exodiff = '1D_2D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
       detail = "1D and 2D;"
@@ -130,9 +130,9 @@
     [1D_3D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/1D_3D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=1D_3D_penalty_out Constraints/inactive=equal'
-      exodiff = '1D_3D_penalty_out.e'
+      cli_args = 'Mesh/file=gold/1D_3D.e '
+                 'Outputs/file_base=1D_3D_ADpenalty_out Constraints/inactive=equal'
+      exodiff = '1D_3D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
       detail = "1D and 3D;"
@@ -140,9 +140,9 @@
     [2D_2D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/2D_2D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=2D_2D_penalty_out Constraints/inactive=equal'
-      exodiff = '2D_2D_penalty_out.e'
+      cli_args = 'Mesh/file=gold/2D_2D.e '
+                 'Outputs/file_base=2D_2D_ADpenalty_out Constraints/inactive=equal'
+      exodiff = '2D_2D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
       detail = "2D;"
@@ -150,9 +150,9 @@
     [2D_3D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/2D_3D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=2D_3D_penalty_out Constraints/inactive=equal'
-      exodiff = '2D_3D_penalty_out.e'
+      cli_args = 'Mesh/file=gold/2D_3D.e '
+                 'Outputs/file_base=2D_3D_ADpenalty_out Constraints/inactive=equal'
+      exodiff = '2D_3D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
       detail = "2D and 3D; and"
@@ -160,9 +160,9 @@
     [3D_3D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=3D_3D_penalty_out Constraints/inactive=equal'
-      exodiff = '3D_3D_penalty_out.e'
+      cli_args = 'Mesh/file=gold/3D_3D.e '
+                 'Outputs/file_base=3D_3D_ADpenalty_out Constraints/inactive=equal'
+      exodiff = '3D_3D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
       detail = "3D subdomains."

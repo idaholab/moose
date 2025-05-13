@@ -21,55 +21,14 @@ InputParameters
 ADNodeElemConstraint::validParams()
 {
   InputParameters params = NodeElemConstraintBase::validParams();
-  params.addRequiredParam<SubdomainName>("secondary", "secondary block id");
-  params.addRequiredParam<SubdomainName>("primary", "primary block id");
-  params.addRequiredCoupledVar("primary_variable",
-                               "The variable on the primary side of the domain");
-
   return params;
 }
 
 ADNodeElemConstraint::ADNodeElemConstraint(const InputParameters & parameters)
   : NodeElemConstraintBase(parameters),
-    _secondary(_mesh.getSubdomainID(getParam<SubdomainName>("secondary"))),
-    _primary(_mesh.getSubdomainID(getParam<SubdomainName>("primary"))),
-
-    _primary_q_point(_assembly.adQPoints()),
-    _primary_qrule(_assembly.qRule()),
-
-    _current_node(_var.node()),
-    _current_elem(_var.neighbor()),
-
-    _u_secondary(_var.adDofValues()),
-    _u_secondary_old(_var.dofValuesOld()),
-    _phi_secondary(1),
-    _test_secondary(1), // One entry
-
-    _primary_var_num(_primary_var.number()),
-
-    _phi_primary(_assembly.phiNeighbor(_primary_var)),
-    _grad_phi_primary(_assembly.gradPhiNeighbor(_primary_var)),
-
-    _test_primary(_var.phiNeighbor()),
-    _grad_test_primary(_var.gradPhiNeighbor()),
-
     _u_primary(_primary_var.adSlnNeighbor()),
-    _u_primary_old(_primary_var.slnOldNeighbor()),
-    _grad_u_primary(_primary_var.adGradSlnNeighbor()),
-
-    _dof_map(_sys.dofMap()),
-    _node_to_elem_map(_mesh.nodeToElemMap())
+    _u_secondary(_var.adDofValues())
 {
-  _mesh.errorIfDistributedMesh("ADNodeElemConstraint");
-  // Put a "1" into test_secondary
-  // will always only have one entry that is 1
-  _test_secondary[0].push_back(1);
-}
-
-ADNodeElemConstraint::~ADNodeElemConstraint()
-{
-  _phi_secondary.release();
-  _test_secondary.release();
 }
 
 void
@@ -116,54 +75,4 @@ ADNodeElemConstraint::computeJacobian()
     secondary_residual[_i] += computeQpResidual(Moose::Secondary);
 
   addJacobian(_assembly, secondary_residual, _var.dofIndices(), _var.scalingFactor());
-}
-
-void
-ADNodeElemConstraint::computeOffDiagJacobian(const unsigned int /*jvar_num*/)
-{
-}
-
-void
-ADNodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
-{
-  MooseVariableFEBase & var = _sys.getVariable(0, var_num);
-
-  _connected_dof_indices.clear();
-  std::set<dof_id_type> unique_dof_indices;
-
-  auto node_to_elem_pair = _node_to_elem_map.find(_current_node->id());
-  mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
-  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
-
-  // Get the dof indices from each elem connected to the node
-  for (const auto & cur_elem : elems)
-  {
-    std::vector<dof_id_type> dof_indices;
-
-    var.getDofIndices(_mesh.elemPtr(cur_elem), dof_indices);
-
-    for (const auto & dof : dof_indices)
-      unique_dof_indices.insert(dof);
-  }
-
-  for (const auto & dof : unique_dof_indices)
-    _connected_dof_indices.push_back(dof);
-
-  _phi_secondary.resize(_connected_dof_indices.size());
-
-  const dof_id_type current_node_var_dof_index = _sys.getVariable(0, var_num).nodalDofIndex();
-
-  // Fill up _phi_secondary so that it is 1 when j corresponds to the dof associated with this node
-  // and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  _qp = 0;
-  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
-  {
-    _phi_secondary[j].resize(1);
-
-    if (_connected_dof_indices[j] == current_node_var_dof_index)
-      _phi_secondary[j][_qp] = 1.0;
-    else
-      _phi_secondary[j][_qp] = 0.0;
-  }
 }
