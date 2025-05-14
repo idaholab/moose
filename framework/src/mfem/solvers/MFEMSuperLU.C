@@ -32,7 +32,7 @@ void
 MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
 
-  if (getParam<bool>("low_order_refined"))
+  if (_lor)
     mooseError("SuperLU solver does not support LOR solve");
 }
 

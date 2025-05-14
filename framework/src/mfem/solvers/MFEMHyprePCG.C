@@ -57,9 +57,8 @@ MFEMHyprePCG::constructSolver(const InputParameters &)
 void
 MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-  bool lor = getParam<bool>("low_order_refined");
 
-  if (lor && _preconditioner)
+  if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
@@ -70,7 +69,7 @@ MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
     _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
     _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
   }
-  else if (lor)
+  else if (_lor)
   {
     mfem::ParLORDiscretization lor_disc(a, tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(
