@@ -51,7 +51,7 @@
 [Constraints]
   inactive = ADequal
   [equal]
-    type = ADEqualValueEmbeddedConstraint
+    type = EqualValueEmbeddedConstraint
     secondary = 2
     primary = 1
     penalty = 1e3
@@ -70,7 +70,7 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   line_search = none
