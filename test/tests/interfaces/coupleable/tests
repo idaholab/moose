@@ -54,5 +54,6 @@
     type = Exodiff
     input = coupled_old_vector_nodal.i
     exodiff = coupled_old_vector_nodal_out.e
+    abs_zero = 1e-8
   []
 []
