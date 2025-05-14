@@ -24,7 +24,7 @@ void
 MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 {
   _jacobian_preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
-  _preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_preconditioner);
+  _preconditioner = _jacobian_preconditioner;
 }
 
 void
