@@ -286,4 +286,16 @@
     requirement = "The system shall support systematically capturing performance statistics from the execution of MOOSE application tests."
     issues = '#30569'
   []
+  [validationcase]
+    type = PythonUnitTest
+    input = test_ValidationCase.py
+    requirement = 'The system shall provide an interface for storing results and data for validation cases'
+    issues = '#30517'
+  []
+  [validation]
+    type = PythonUnitTest
+    input = test_Validation.py
+    requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
+    issues = '#30517'
+  []
 []

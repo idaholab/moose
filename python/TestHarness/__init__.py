@@ -15,4 +15,5 @@ if sys.version_info < (3, 6):
 from .TestHarness import TestHarness
 from .OutputInterface import OutputInterface
 from .TestHarness import findDepApps
+from .validation.ValidationCase import ValidationCase
 __all__=['TestHarness', 'findDepApps']
