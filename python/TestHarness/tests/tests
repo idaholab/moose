@@ -293,4 +293,16 @@
     requirement = "The system shall test the functionality of the TestHarness.getExecutable method."
     issues = '#30200'
   []
+  [validationcase]
+    type = PythonUnitTest
+    input = test_ValidationCase.py
+    requirement = 'The system shall provide an interface for storing results and data for validation cases'
+    issues = '#30517'
+  []
+  [validation]
+    type = PythonUnitTest
+    input = test_Validation.py
+    requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
+    issues = '#30517'
+  []
 []
