@@ -16,6 +16,7 @@ Options are available to control how this constraint is applied:
 
 This option strictly enforces value of the solution at the secondary nodes to be equal to the value in the primary element at that point. The constraint is enforced by updating the secondary residual $r_s$ and primary residual $r_m$ as:
 \begin{equation}
+\label{eqn:kinematic}
 \begin{aligned}
 r_s &= r_s + f_c + k_p(u_{secondary} - u_{primary})\\
 r_m &= r_m + \phi_i r_{s,copy}
