@@ -165,8 +165,10 @@ def run_executable(app_path, *args, mpi=None, suppress_output=False):
     A function for running an application.
     """
     import subprocess
+    import os
+    mpiname = os.getenv('MOOSE_MPI_COMMAND', 'mpiexec')
     if mpi and isinstance(mpi, int) and mpi > 1:
-        cmd = ['mpiexec', '-n', str(mpi), app_path]
+        cmd = [mpiname, '-n', str(mpi), app_path]
     else:
         cmd = [app_path]
     cmd += args
