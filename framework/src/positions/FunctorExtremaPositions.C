@@ -60,10 +60,10 @@ FunctorExtremaPositions::FunctorExtremaPositions(const InputParameters & paramet
         "functor_extrema", REPORTER_MODE_REPLICATED))
 {
   // Constants and postprocessors are not interesting here
-  const auto functor_name = getParam<MooseFunctorName>("functor");
+  const auto & functor_name = getParam<MooseFunctorName>("functor");
   if (_fe_problem.hasPostprocessorValueByName(functor_name) ||
       MooseUtils::parsesToReal(functor_name))
-    paramWarning(
+    paramError(
         "functor",
         "Postprocessors and constants do not have extrema, they are constant over the domain.");
 
@@ -126,6 +126,7 @@ FunctorExtremaPositions::initialize()
       if (extrema_found)
       {
         // Move the extrema down the list of extrema
+        // TODO: optimization could be to use a std::list with a constant insertion time here
         Real temp = value;
         Point temp_loc = elem->true_centroid();
         for (const auto j : make_range(i, _n_extrema))
@@ -169,6 +170,7 @@ FunctorExtremaPositions::initialize()
     _positions[i] = extreme_point;
     _positions_values[i] = copy;
   }
-
+  mooseAssert(comm().verify(_positions_values),
+              "Positions extrema should be the same across all MPI processes.");
   _initialized = true;
 }
