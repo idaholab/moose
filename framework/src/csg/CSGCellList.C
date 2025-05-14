@@ -52,7 +52,7 @@ CSGCellList::addMaterialCell(const std::string name,
 
 std::shared_ptr<CSGCell>
 CSGCellList::addUniverseCell(const std::string name,
-                             const CSGUniverse & univ,
+                             const std::shared_ptr<CSGUniverse> univ,
                              const CSGRegion & region)
 {
   checkCellName(name);

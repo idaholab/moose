@@ -26,6 +26,7 @@
   [CylsUniverse]
     type=TestCSGUniverseMeshGenerator
     input_meshes = 'XCyls YCyls ZCyls'
+    input_boxes = '10 20 15'
     bounding_box = '30 40 50'
   []
 []
