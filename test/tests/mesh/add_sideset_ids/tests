@@ -14,7 +14,7 @@
     prereq = 'add_sideset_ids'
     csvdiff = add_sideset_ids_out.csv
     cli_args = "Mesh/add_sideset_names='future' Postprocessors/flux/boundary='future' "
-               "UserObjects/side_updater/update_sideset_name=future"
+               "UserObjects/side_updater/update_boundary_name=future"
     requirement = 'The system shall allow specifying valid sideset IDs and names that do not exist on the initial mesh.'
   []
   [add_sideset_names]
