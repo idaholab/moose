@@ -1,1 +1,0 @@
-3D_3D_kinematic_out.e
