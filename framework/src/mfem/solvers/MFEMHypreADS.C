@@ -34,7 +34,6 @@ MFEMHypreADS::constructSolver(const InputParameters &)
 void
 MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-
   if (getParam<bool>("low_order_refined"))
   {
     auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(a, tdofs);
