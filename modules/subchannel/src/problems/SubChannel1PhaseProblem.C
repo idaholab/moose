@@ -369,98 +369,6 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
   return alpha * botValue + (1.0 - alpha) * topValue;
 }
 
-PetscErrorCode
-SubChannel1PhaseProblem::createPetscVector(Vec & v, PetscInt n)
-{
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &v));
-  LibmeshPetscCall(PetscObjectSetName((PetscObject)v, "Solution"));
-  LibmeshPetscCall(VecSetSizes(v, PETSC_DECIDE, n));
-  LibmeshPetscCall(VecSetFromOptions(v));
-  LibmeshPetscCall(VecZeroEntries(v));
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-PetscErrorCode
-SubChannel1PhaseProblem::createPetscMatrix(Mat & M, PetscInt n, PetscInt m)
-{
-  PetscFunctionBegin;
-  LibmeshPetscCall(MatCreate(PETSC_COMM_WORLD, &M));
-  LibmeshPetscCall(MatSetSizes(M, PETSC_DECIDE, PETSC_DECIDE, n, m));
-  LibmeshPetscCall(MatSetFromOptions(M));
-  LibmeshPetscCall(MatSetUp(M));
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-template <class T>
-PetscErrorCode
-SubChannel1PhaseProblem::populateVectorFromDense(Vec & x,
-                                                 const T & loc_solution,
-                                                 const unsigned int first_axial_level,
-                                                 const unsigned int last_axial_level,
-                                                 const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int iz = first_axial_level; iz < last_axial_level; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      xx[iz_ind * cross_dimension + i_l] = loc_solution(i_l, iz);
-    }
-  }
-  LibmeshPetscCall(VecRestoreArray(x, &xx));
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-template <class T>
-PetscErrorCode
-SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
-                                              T & loc_solution,
-                                              const unsigned int first_axial_level,
-                                              const unsigned int last_axial_level,
-                                              const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  Node * loc_node;
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
-      loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
-    }
-  }
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-template <class T>
-
-PetscErrorCode
-SubChannel1PhaseProblem::populateSolutionGap(const Vec & x,
-                                             T & loc_solution,
-                                             const unsigned int first_axial_level,
-                                             const unsigned int last_axial_level,
-                                             const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      loc_solution(iz * cross_dimension + i_l) = xx[iz_ind * cross_dimension + i_l];
-    }
-  }
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
 void
 SubChannel1PhaseProblem::computeWijFromSolve(int iblock)
 {
@@ -1948,7 +1856,7 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
   computeDP(iblock);
   // Solving for pressure
   computeP(iblock);
-  // Solving cross fluxes
+  // Populating lateral crossflow residual matrix
   computeWijResidual(iblock);
 
   // Turn the residual matrix into a residual vector
