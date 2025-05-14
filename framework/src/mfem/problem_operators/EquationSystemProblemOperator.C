@@ -24,6 +24,9 @@ EquationSystemProblemOperator::Solve(mfem::Vector &)
 {
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
+  if (_problem.jacobian_solver->getParam<bool>("low_order_refined") && _equation_system->_test_var_names.size() > 1)
+    mooseError("LOR solve is only supported for single-variable systems");
+  
   _problem.jacobian_solver->updateSolver(
       *_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),
       _equation_system->_ess_tdof_lists.at(0));
