@@ -143,30 +143,42 @@ public:
    * @param mat_name material name (TODO: this will eventually be a material object and not just a
    * name)
    * @param region cell region
+   * @param add_to_univ (optional) universe to which this cell will be added (default is root
+   * universe)
    * @return std::shared_ptr<CSGCell>
    */
-  std::shared_ptr<CSGCell>
-  createCell(const std::string name, const std::string mat_name, const CSGRegion & region);
+  std::shared_ptr<CSGCell> createCell(const std::string name,
+                                      const std::string mat_name,
+                                      const CSGRegion & region,
+                                      const std::shared_ptr<CSGUniverse> add_to_univ = nullptr);
 
   /**
    * @brief Create a Void Cell object
    *
    * @param name unique cell name
    * @param region cell region
+   * @param add_to_univ (optional) universe to which this cell will be added (default is root
+   * universe)
    * @return std::shared_ptr<CSGCell>
    */
-  std::shared_ptr<CSGCell> createCell(const std::string name, const CSGRegion & region);
+  std::shared_ptr<CSGCell> createCell(const std::string name,
+                                      const CSGRegion & region,
+                                      const std::shared_ptr<CSGUniverse> add_to_univ = nullptr);
 
   /**
    * @brief Create a Universe Cell object
    *
    * @param name unique cell name
-   * @param univ universe
+   * @param fill_univ universe that will fill the cell
    * @param region cell region
+   * @param add_to_univ (optional) universe to which this cell will be added (default is root
+   * universe)
    * @return std::shared_ptr<CSGCell>
    */
-  std::shared_ptr<CSGCell>
-  createCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
+  std::shared_ptr<CSGCell> createCell(const std::string name,
+                                      const std::shared_ptr<CSGUniverse> fill_univ,
+                                      const CSGRegion & region,
+                                      const std::shared_ptr<CSGUniverse> add_to_univ = nullptr);
 
   /**
    * @brief Get all cell objects
@@ -249,7 +261,8 @@ public:
   }
 
   /**
-   * @brief join another CSGBase object to this one
+   * @brief join another CSGBase object to this one. The root universe of the
+   * incoming CSGBase will be combined with the existing root universe.
    *
    * @param base pointer to a different CSGBase object
    */
@@ -258,6 +271,39 @@ public:
     joinSurfaceList(base->getSurfaceList());
     joinCellList(base->getCellList());
     joinUniverseList(base->getUniverseList());
+  }
+
+  /**
+   * @brief join another CSGBase object to this one. For the incoming CSGbase,
+   * create a new universe from the existing root universe with the new name
+   * provided.
+   *
+   * @param base pointer to a different CSGBase object
+   * @param new_root_name_join new name for the universe generated from the incoming root universe
+   */
+  void joinOtherBase(std::unique_ptr<CSGBase> & base, std::string new_root_name_join)
+  {
+    joinSurfaceList(base->getSurfaceList());
+    joinCellList(base->getCellList());
+    joinUniverseList(base->getUniverseList(), new_root_name_join);
+  }
+
+  /**
+   * @brief join another CSGBase object to this one. For each base, create
+   * a new universe from the existing root universes in both with the new names
+   * provided.
+   *
+   * @param base pointer to a different CSGBase object
+   * @param new_root_name_base new name for universe generated from this root universe
+   * @param new_root_name_join new name for the universe generated from the incoming root universe
+   */
+  void joinOtherBase(std::unique_ptr<CSGBase> & base,
+                     std::string new_root_name_base,
+                     std::string new_root_name_join)
+  {
+    joinSurfaceList(base->getSurfaceList());
+    joinCellList(base->getCellList());
+    joinUniverseList(base->getUniverseList(), new_root_name_base, new_root_name_join);
   }
 
   /**
@@ -312,10 +358,36 @@ private:
   void joinCellList(CSGCellList & cell_list);
 
   /**
-   * @brief join a separate CSGUniverseList object to this one
+   * @brief join a separate CSGUniverseList object to this one;
+   * root universes from univ_list will be combined into this root universe
    *
-   * @param univ_list
+   * @param univ_list incoming CSGUniverseList to join to this base
    */
   void joinUniverseList(CSGUniverseList & univ_list);
+
+  /**
+   * @brief join a separate CSGUniverseList object to this one;
+   * the incoming root universe will be moved to a new universe of the new
+   * name specified.
+   *
+   * @param univ_list incoming CSGUniverseList to join to this base
+   * @param new_root_name_incoming new name for the universe generated from the incoming root
+   * universe
+   */
+  void joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name_incoming);
+
+  /**
+   * @brief join a separate CSGUniverseList object to this one;
+   * both this root universe and the incoming root universe will be
+   * maintained as separate universes of the specified names.
+   *
+   * @param univ_list incoming CSGUniverseList to join to this base
+   * @param new_root_name_base new name for universe generated from this root universe
+   * @param new_root_name_incoming new name for the universe generated from the incoming root
+   * universe
+   */
+  void joinUniverseList(CSGUniverseList & univ_list,
+                        std::string new_root_name_base,
+                        std::string new_root_name_incoming);
 };
 } // namespace CSG

@@ -59,8 +59,9 @@ public:
    * @param region cell region
    * @return std::shared_ptr<CSGCell>
    */
-  std::shared_ptr<CSGCell>
-  addUniverseCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
+  std::shared_ptr<CSGCell> addUniverseCell(const std::string name,
+                                           const std::shared_ptr<CSGUniverse> univ,
+                                           const CSGRegion & region);
 
   /**
    * @brief Get the all cells in CSGBase instance
