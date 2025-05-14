@@ -384,7 +384,7 @@ keywords = {Modeling & simulation, Fluid properties, MOOSE},
 }
 ```
 
-Available on OSTI at [https://www.osti.gov/pages/biblio/2476597] after October 2025.
+Available on OSTI at [https://www.osti.gov/pages/biblio/2476597](https://www.osti.gov/pages/biblio/2476597) after October 2025.
 
 ### Electromagnetics Module
 
