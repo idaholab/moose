@@ -35,7 +35,7 @@ MFEMHypreAMS::constructSolver(const InputParameters &)
 
   _jacobian_preconditioner->SetPrintLevel(getParam<int>("print_level"));
 
-  _preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_preconditioner);
+  _preconditioner = _jacobian_preconditioner;
 }
 
 void

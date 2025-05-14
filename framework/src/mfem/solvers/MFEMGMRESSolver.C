@@ -43,7 +43,7 @@ MFEMGMRESSolver::constructSolver(const InputParameters &)
   if (_preconditioner)
     _jacobian_solver->SetPreconditioner(*_preconditioner->getSolver());
 
-  _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+  _solver = _jacobian_solver;
 }
 
 void

@@ -25,7 +25,7 @@ MFEMSuperLU::constructSolver(const InputParameters &)
 {
   _jacobian_solver = std::make_shared<Moose::MFEM::SuperLUSolver>(
       getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+  _solver = _jacobian_solver;
 }
 
 void

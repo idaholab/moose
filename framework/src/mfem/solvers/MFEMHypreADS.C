@@ -28,7 +28,7 @@ MFEMHypreADS::constructSolver(const InputParameters &)
   _jacobian_preconditioner = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   _jacobian_preconditioner->SetPrintLevel(getParam<int>("print_level"));
 
-  _preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_preconditioner);
+  _preconditioner = _jacobian_preconditioner;
 }
 
 void
