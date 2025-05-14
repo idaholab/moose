@@ -115,6 +115,8 @@ class Tester(MooseObject, OutputInterface):
 
         params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
 
+        params.addParam("validation_test", None, "TODO")
+
         return params
 
     # This is what will be checked for when we look for valid testers
