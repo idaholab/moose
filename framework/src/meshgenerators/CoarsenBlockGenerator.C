@@ -284,7 +284,7 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
       // Set the nodes to the coarse element
       // They were sorted previously in getFineElementFromInteriorNode
       for (auto i : index_range(tentative_coarse_nodes))
-        parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
+        parent_ptr->set_node(i, mesh_copy->node_ptr(tentative_coarse_nodes[i]->id()));
 
       // Gather targets / next candidates for the next element coarsening
       // Find the face neighbors, then look for the center node

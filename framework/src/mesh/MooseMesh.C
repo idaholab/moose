@@ -2377,7 +2377,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
 
     Elem * const elem = mesh.add_elem(Elem::build(elem_type).release());
     for (const auto i : elem->node_index_range())
-      elem->set_node(i) = mesh.node_ptr(i);
+      elem->set_node(i, mesh.node_ptr(i));
 
     std::unique_ptr<FEBase> fe_face(FEBase::build(dim, p_refinable_fe_type));
     fe_face->get_phi();
@@ -2610,7 +2610,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   Elem * elem = mesh.add_elem(Elem::build(template_elem->type()).release());
 
   for (unsigned int i = 0; i < template_elem->n_nodes(); ++i)
-    elem->set_node(i) = mesh.node_ptr(i);
+    elem->set_node(i, mesh.node_ptr(i));
 
   std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType()));
   fe->get_phi();

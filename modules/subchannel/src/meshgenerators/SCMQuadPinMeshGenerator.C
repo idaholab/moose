@@ -103,8 +103,8 @@ SCMQuadPinMeshGenerator::generate()
         const int indx1 = ((_n_cells + 1) * (_nx - 1)) * iy + (_n_cells + 1) * ix + iz + node_sub;
         const int indx2 =
             ((_n_cells + 1) * (_nx - 1)) * iy + (_n_cells + 1) * ix + (iz + 1) + node_sub;
-        elem->set_node(0) = mesh_base->node_ptr(indx1);
-        elem->set_node(1) = mesh_base->node_ptr(indx2);
+        elem->set_node(0, mesh_base->node_ptr(indx1));
+        elem->set_node(1, mesh_base->node_ptr(indx2));
       }
     }
   }

@@ -277,8 +277,8 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
   elem->processor_id() = pid;
   elem->set_unique_id(elem_id);
   elem = mesh.add_elem(elem);
-  elem->set_node(0) = node0_ptr;
-  elem->set_node(1) = node1_ptr;
+  elem->set_node(0, node0_ptr);
+  elem->set_node(1, node1_ptr);
 
   if (elem_id == 0)
     boundary_info.add_side(elem, 0, 0);
@@ -521,10 +521,10 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
   elem->processor_id() = pid;
   elem->set_unique_id(elem_id);
   elem = mesh.add_elem(elem);
-  elem->set_node(0) = node0_ptr;
-  elem->set_node(1) = node1_ptr;
-  elem->set_node(2) = node2_ptr;
-  elem->set_node(3) = node3_ptr;
+  elem->set_node(0, node0_ptr);
+  elem->set_node(1, node1_ptr);
+  elem->set_node(2, node2_ptr);
+  elem->set_node(3, node3_ptr);
 
   // Bottom
   if (j == 0)
@@ -747,14 +747,14 @@ DistributedRectilinearMeshGenerator::addElement<Hex8>(const dof_id_type nx,
   elem->processor_id() = pid;
   elem->set_unique_id(elem_id);
   elem = mesh.add_elem(elem);
-  elem->set_node(0) = node0_ptr;
-  elem->set_node(1) = node1_ptr;
-  elem->set_node(2) = node2_ptr;
-  elem->set_node(3) = node3_ptr;
-  elem->set_node(4) = node4_ptr;
-  elem->set_node(5) = node5_ptr;
-  elem->set_node(6) = node6_ptr;
-  elem->set_node(7) = node7_ptr;
+  elem->set_node(0, node0_ptr);
+  elem->set_node(1, node1_ptr);
+  elem->set_node(2, node2_ptr);
+  elem->set_node(3, node3_ptr);
+  elem->set_node(4, node4_ptr);
+  elem->set_node(5, node5_ptr);
+  elem->set_node(6, node6_ptr);
+  elem->set_node(7, node7_ptr);
 
   if (k == 0)
     boundary_info.add_side(elem, 0, 0);

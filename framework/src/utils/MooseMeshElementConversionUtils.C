@@ -62,10 +62,10 @@ hexElemSplitter(ReplicatedMesh & mesh,
   for (const auto i : index_range(optimized_node_list))
   {
     auto new_elem = std::make_unique<Tet4>();
-    new_elem->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
-    new_elem->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
-    new_elem->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
-    new_elem->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
+    new_elem->set_node(0, const_cast<Node *>(optimized_node_list[i][0]));
+    new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
+    new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
+    new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
     new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
@@ -124,10 +124,10 @@ prismElemSplitter(ReplicatedMesh & mesh,
   for (const auto i : index_range(optimized_node_list))
   {
     auto new_elem = std::make_unique<Tet4>();
-    new_elem->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
-    new_elem->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
-    new_elem->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
-    new_elem->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
+    new_elem->set_node(0, const_cast<Node *>(optimized_node_list[i][0]));
+    new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
+    new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
+    new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
     new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
@@ -184,10 +184,10 @@ pyramidElemSplitter(ReplicatedMesh & mesh,
   for (const auto i : index_range(optimized_node_list))
   {
     auto new_elem = std::make_unique<Tet4>();
-    new_elem->set_node(0) = const_cast<Node *>(optimized_node_list[i][0]);
-    new_elem->set_node(1) = const_cast<Node *>(optimized_node_list[i][1]);
-    new_elem->set_node(2) = const_cast<Node *>(optimized_node_list[i][2]);
-    new_elem->set_node(3) = const_cast<Node *>(optimized_node_list[i][3]);
+    new_elem->set_node(0, const_cast<Node *>(optimized_node_list[i][0]));
+    new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
+    new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
+    new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
     new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
