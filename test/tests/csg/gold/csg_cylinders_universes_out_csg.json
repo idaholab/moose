@@ -5,6 +5,11 @@
       "FILLTYPE": "UNIVERSE",
       "REGION": "(-CylsUniverse_bb_x_pos_surf & +CylsUniverse_bb_x_neg_surf & -CylsUniverse_bb_y_pos_surf & +CylsUniverse_bb_y_neg_surf & -CylsUniverse_bb_z_pos_surf & +CylsUniverse_bb_z_neg_surf)"
     },
+    "XCyls_cell": {
+      "FILL": "XCyls_univ",
+      "FILLTYPE": "UNIVERSE",
+      "REGION": "(-XCyls_x_pos_surf & +XCyls_x_neg_surf & -XCyls_y_pos_surf & +XCyls_y_neg_surf & -XCyls_z_pos_surf & +XCyls_z_neg_surf)"
+    },
     "XCyls_cell_cyl_x_0": {
       "FILL": "",
       "FILLTYPE": "VOID",
@@ -20,6 +25,11 @@
       "FILLTYPE": "VOID",
       "REGION": "(+XCyls_surf_cyl_x_1 & -XCyls_surf_cyl_x_2 & -XCyls_pos_plane & +XCyls_neg_plane)"
     },
+    "YCyls_cell": {
+      "FILL": "YCyls_univ",
+      "FILLTYPE": "UNIVERSE",
+      "REGION": "(-YCyls_x_pos_surf & +YCyls_x_neg_surf & -YCyls_y_pos_surf & +YCyls_y_neg_surf & -YCyls_z_pos_surf & +YCyls_z_neg_surf)"
+    },
     "YCyls_cell_cyl_y_0": {
       "FILL": "",
       "FILLTYPE": "VOID",
@@ -29,6 +39,11 @@
       "FILL": "",
       "FILLTYPE": "VOID",
       "REGION": "(+YCyls_surf_cyl_y_0 & -YCyls_surf_cyl_y_1 & -YCyls_pos_plane & +YCyls_neg_plane)"
+    },
+    "ZCyls_cell": {
+      "FILL": "ZCyls_univ",
+      "FILLTYPE": "UNIVERSE",
+      "REGION": "(-ZCyls_x_pos_surf & +ZCyls_x_neg_surf & -ZCyls_y_pos_surf & +ZCyls_y_neg_surf & -ZCyls_z_pos_surf & +ZCyls_z_neg_surf)"
     },
     "ZCyls_cell_cyl_z_0": {
       "FILL": "",
@@ -68,7 +83,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": -15.0
+        "d": -20.0
       },
       "TYPE": "plane"
     },
@@ -78,7 +93,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": 15.0
+        "d": 20.0
       },
       "TYPE": "plane"
     },
@@ -86,9 +101,9 @@
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
-        "b": 1.0,
-        "c": 0.0,
-        "d": -15.0
+        "b": 0.0,
+        "c": 1.0,
+        "d": -25.0
       },
       "TYPE": "plane"
     },
@@ -96,9 +111,9 @@
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
         "a": 0.0,
-        "b": 1.0,
-        "c": 0.0,
-        "d": 15.0
+        "b": 0.0,
+        "c": 1.0,
+        "d": 25.0
       },
       "TYPE": "plane"
     },
@@ -149,6 +164,66 @@
       },
       "TYPE": "xcylinder"
     },
+    "XCyls_x_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -5.0
+      },
+      "TYPE": "plane"
+    },
+    "XCyls_x_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 5.0
+      },
+      "TYPE": "plane"
+    },
+    "XCyls_y_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -5.0
+      },
+      "TYPE": "plane"
+    },
+    "XCyls_y_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 5.0
+      },
+      "TYPE": "plane"
+    },
+    "XCyls_z_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -5.0
+      },
+      "TYPE": "plane"
+    },
+    "XCyls_z_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 5.0
+      },
+      "TYPE": "plane"
+    },
     "YCyls_neg_plane": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
@@ -187,6 +262,66 @@
       },
       "TYPE": "ycylinder"
     },
+    "YCyls_x_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -10.0
+      },
+      "TYPE": "plane"
+    },
+    "YCyls_x_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 10.0
+      },
+      "TYPE": "plane"
+    },
+    "YCyls_y_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -10.0
+      },
+      "TYPE": "plane"
+    },
+    "YCyls_y_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 10.0
+      },
+      "TYPE": "plane"
+    },
+    "YCyls_z_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -10.0
+      },
+      "TYPE": "plane"
+    },
+    "YCyls_z_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 10.0
+      },
+      "TYPE": "plane"
+    },
     "ZCyls_neg_plane": {
       "BOUNDARY": "transmission",
       "COEFFICIENTS": {
@@ -224,32 +359,100 @@
         "y0": 10.0
       },
       "TYPE": "zcylinder"
+    },
+    "ZCyls_x_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -7.5
+      },
+      "TYPE": "plane"
+    },
+    "ZCyls_x_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 7.5
+      },
+      "TYPE": "plane"
+    },
+    "ZCyls_y_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -7.5
+      },
+      "TYPE": "plane"
+    },
+    "ZCyls_y_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 7.5
+      },
+      "TYPE": "plane"
+    },
+    "ZCyls_z_neg_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -7.5
+      },
+      "TYPE": "plane"
+    },
+    "ZCyls_z_pos_surf": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 7.5
+      },
+      "TYPE": "plane"
     }
   },
   "UNIVERSES": {
     "CylsUniverse_univ": {
       "CELLS": [
-        "XCyls_cell_cyl_x_0",
-        "XCyls_cell_cyl_x_1",
-        "XCyls_cell_cyl_x_2",
-        "YCyls_cell_cyl_y_0",
-        "YCyls_cell_cyl_y_1",
-        "ZCyls_cell_cyl_z_0",
-        "ZCyls_cell_cyl_z_1"
+        "XCyls_cell",
+        "YCyls_cell",
+        "ZCyls_cell"
       ]
     },
     "ROOT_UNIVERSE": {
       "CELLS": [
-        "XCyls_cell_cyl_x_0",
-        "XCyls_cell_cyl_x_1",
-        "XCyls_cell_cyl_x_2",
-        "YCyls_cell_cyl_y_0",
-        "YCyls_cell_cyl_y_1",
-        "ZCyls_cell_cyl_z_0",
-        "ZCyls_cell_cyl_z_1",
         "CylsUniverse_box"
       ],
       "ROOT": true
+    },
+    "XCyls_univ": {
+      "CELLS": [
+        "XCyls_cell_cyl_x_0",
+        "XCyls_cell_cyl_x_1",
+        "XCyls_cell_cyl_x_2"
+      ]
+    },
+    "YCyls_univ": {
+      "CELLS": [
+        "YCyls_cell_cyl_y_0",
+        "YCyls_cell_cyl_y_1"
+      ]
+    },
+    "ZCyls_univ": {
+      "CELLS": [
+        "ZCyls_cell_cyl_z_0",
+        "ZCyls_cell_cyl_z_1"
+      ]
     }
   }
 }
