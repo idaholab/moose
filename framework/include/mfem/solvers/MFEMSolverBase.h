@@ -23,9 +23,14 @@ public:
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
+  bool isLOR() const { return _lor; }
+
 protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver(const InputParameters & parameters) = 0;
+
+  // Variable defining whether to use LOR solver
+  bool _lor;
 };
 
 #endif

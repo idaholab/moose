@@ -14,7 +14,7 @@ MFEMSolverBase::validParams()
 }
 
 MFEMSolverBase::MFEMSolverBase(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters)
+  : MFEMGeneralUserObject(parameters), _lor{getParam<bool>("low_order_refined")}
 {
 }
 

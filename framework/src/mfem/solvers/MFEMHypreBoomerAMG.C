@@ -50,7 +50,7 @@ void
 MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
 
-  if (getParam<bool>("low_order_refined"))
+  if (_lor)
   {
     auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
     lor_solver->GetSolver().SetTol(getParam<double>("l_tol"));
