@@ -73,19 +73,20 @@ protected:
   virtual void computeRho(int iblock);
   /// Computes Viscosity per channel for block iblock
   virtual void computeMu(int iblock);
-  /// Computes cross fluxes for block iblock
-  virtual void computeWij(int iblock);
+  /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
+  virtual void computeWijResidual(int iblock);
   /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat flux added by the duct
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
-  /// Computes Residual per gap for block iblock
+  /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
   virtual libMesh::DenseVector<Real> residualFunction(int iblock,
                                                       libMesh::DenseVector<Real> solution);
-  /// Computes solution of nonlinear equation using snes
+  /// Computes solution of nonlinear equation using snes and provided a residual in a formFunction
   virtual PetscErrorCode petscSnesSolver(int iblock,
                                          const libMesh::DenseVector<Real> & solution,
                                          libMesh::DenseVector<Real> & root);
+  /// This is the residual Vector function in a form compatible with the SNES PETC solvers
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
   /// Computes implicit solve using PetSc
