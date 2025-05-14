@@ -25,12 +25,12 @@
   # make this work, so right now I dont expect re-partitioning would work as expected
   [errors]
     requirement = 'The system shall throw an error'
-    [less_procs_subapp]
+    [fewer_procs_subapp]
       type = RunException
       input = 'parent.i'
       cli_args = 'MultiApps/full_solve/max_procs_per_app=2'
       min_parallel = 3
-      expect_err = 'his partitioner does not support using less ranks to partition the mesh than are used to partition the source mesh'
+      expect_err = 'his partitioner does not support using fewer ranks to partition the mesh than are used to partition the source mesh'
       detail = 'if the copy-partitioned mesh cannot be fit on the child application processors,'
     []
     [no_source_mesh]

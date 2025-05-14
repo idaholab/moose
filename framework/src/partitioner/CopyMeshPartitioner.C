@@ -14,6 +14,7 @@
 #include "MooseRandom.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/parallel_algebra.h"
 
 // TIMPI includes
 #include "timpi/communicator.h"
@@ -60,7 +61,8 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   // are effectively matching regions to processes the same way in both meshes. Makes sense.
   // If we use more procs, this will leave some processes with no elements. It is not ideal, let's
   // just give a warning. This does not happen in practice with MultiApps.
-  // If we use less procs (N_source > N_current), we error. If we could avoid erroring, then either:
+  // If we use fewer procs (N_source > N_current), we error. If we could avoid erroring, then
+  // either:
   // - the elements on our mesh always get matched to elements from only N_current processes among
   //   the N_source processes. We can accomodate that
   // - the elements on our mesh get matched to more processes than we have. We would
@@ -70,12 +72,15 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 
   // We cannot get the point locator only on some ranks of the base mesh, so we must error here
   if (_base_mesh->comm().size() > mesh.comm().size())
-    mooseError("This partitioner does not support using less ranks to partition the mesh than are "
+    mooseError("This partitioner does not support using fewer ranks to partition the mesh than are "
                "used to partition the source mesh (the mesh we are copying the partitioning from)");
+  mooseAssert(_base_mesh->comm().rank() == mesh.comm().rank(),
+              "Should be the same rank on both mesh MPI communicators");
 
   // Get point locator
   auto pl = _base_mesh->getPointLocator();
-  pl->enable_out_of_mesh_mode();
+  if (!_base_mesh->getMesh().is_serial())
+    pl->enable_out_of_mesh_mode();
 
   // We use the pull_parallel_vector_data algorithm.
   // This code is very similar to partitioner::assign_partitioning in libMesh partitioner.C
@@ -95,10 +100,9 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   // We send an index for the ordering of the requests to facilitate retrieving the results
   // NOTE: in partitioner.C they manage to unpack the filled requests in the same order that
   //       the requests are sent, thus saving the need for that last index. Possible rework..
-  std::map<processor_id_type,
-           std::vector<std::tuple<Real, Real, Real, processor_id_type, unsigned int>>>
+  std::map<processor_id_type, std::vector<std::tuple<Point, processor_id_type, unsigned int>>>
       requested_elements;
-  const bool distributed_mesh = dynamic_cast<const DistributedMesh *>(&_base_mesh->getMesh());
+  const bool distributed_mesh = !_base_mesh->getMesh().is_serial();
   unsigned int request_i = 0;
   for (auto & elem : mesh.active_element_ptr_range())
   {
@@ -108,31 +112,27 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
     const auto elem_pt = elem->vertex_average();
     if (distributed_mesh)
       for (const auto pid : make_range(mesh.comm().size()))
-        requested_elements[pid].push_back(
-            {elem_pt(0), elem_pt(1), elem_pt(2), elem->processor_id(), request_i});
+        requested_elements[pid].push_back({elem_pt, elem->processor_id(), request_i});
     // source mesh is replicated, let's just ask the sending processor what the processor id is
     else
-      requested_elements[processor_id()].push_back(
-          {elem_pt(0), elem_pt(1), elem_pt(2), processor_id(), request_i});
+      requested_elements[processor_id()].push_back({elem_pt, processor_id(), request_i});
     request_i++;
   }
 
   // For each requests, find which process is able to fill the request
   // Every processor fills these requests as best it can.
   auto gather_functor =
-      [&pl](processor_id_type /*pid*/,
-            const std::vector<std::tuple<Real, Real, Real, processor_id_type, unsigned int>> &
-                incoming_elements,
-            std::vector<processor_id_type> & outgoing_pids)
+      [&pl](
+          processor_id_type /*pid*/,
+          const std::vector<std::tuple<Point, processor_id_type, unsigned int>> & incoming_elements,
+          std::vector<processor_id_type> & outgoing_pids)
   {
     outgoing_pids.resize(incoming_elements.size(), libMesh::invalid_uint);
 
     // Try the pl on the incoming element
     for (const auto i : index_range(incoming_elements))
     {
-      const auto & elem = (*pl)(Point(std::get<0>(incoming_elements[i]),
-                                      std::get<1>(incoming_elements[i]),
-                                      std::get<2>(incoming_elements[i])));
+      const auto & elem = (*pl)(Point(std::get<0>(incoming_elements[i])));
       if (elem)
         outgoing_pids[i] = elem->processor_id();
     }
@@ -149,14 +149,14 @@ CopyMeshPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   auto action_functor =
       [&filled_request](
           processor_id_type,
-          const std::vector<std::tuple<Real, Real, Real, processor_id_type, unsigned int>> & elems,
+          const std::vector<std::tuple<Point, processor_id_type, unsigned int>> & elems,
           const std::vector<processor_id_type> & new_procids)
   {
     for (const auto i : index_range(new_procids))
       if (new_procids[i] != libMesh::invalid_uint)
       {
-        const auto elem_pid = std::get<3>(elems[i]);
-        const auto request_i = std::get<4>(elems[i]);
+        const auto elem_pid = std::get<1>(elems[i]);
+        const auto request_i = std::get<2>(elems[i]);
         filled_request[elem_pid][request_i] = new_procids[i];
       }
   };
