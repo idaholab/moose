@@ -37,7 +37,7 @@ SampledOutput::validParams()
                          "nodal coordinates to move the domain.");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of blocks to restrict the mesh sampling to");
+      "sampling_blocks", "The list of blocks to restrict the mesh sampling to");
   params.addParam<bool>(
       "serialize_sampling",
       true,
@@ -52,7 +52,7 @@ SampledOutput::validParams()
                                   "'_oversample' utilize the output block name or 'file_base'");
 
   // 'Oversampling' Group
-  params.addParamNamesToGroup("refinements position file block serialize_sampling",
+  params.addParamNamesToGroup("refinements position file sampling_blocks serialize_sampling",
                               "Modified Mesh Sampling");
 
   return params;
@@ -64,7 +64,7 @@ SampledOutput::SampledOutput(const InputParameters & parameters)
     _using_external_sampling_file(isParamValid("file")),
     _change_position(isParamValid("position")),
     _use_sampled_output(_refinements > 0 || _using_external_sampling_file ||
-                        isParamValid("block") || _change_position),
+                        isParamValid("sampling_blocks") || _change_position),
     _position(_change_position ? getParam<Point>("position") : Point()),
     _oversample_mesh_changed(true),
     _mesh_subdomains_match(true),
@@ -409,10 +409,10 @@ SampledOutput::cloneMesh()
   }
 
   // Remove unspecified blocks
-  if (isParamValid("block"))
+  if (isParamValid("sampling_blocks"))
   {
     // Remove all elements not in the blocks
-    const auto & blocks_to_keep_names = getParam<std::vector<SubdomainName>>("block");
+    const auto & blocks_to_keep_names = getParam<std::vector<SubdomainName>>("sampling_blocks");
     const auto & blocks_to_keep = _cloned_mesh_ptr->getSubdomainIDs(blocks_to_keep_names);
     for (const auto & elem_ptr : _cloned_mesh_ptr->getMesh().element_ptr_range())
       if (std::find(blocks_to_keep.begin(), blocks_to_keep.end(), elem_ptr->subdomain_id()) ==

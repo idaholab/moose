@@ -70,6 +70,6 @@
 [Outputs]
   [out]
     type = Exodus
-    block = '2 3'
+    sampling_blocks = '2 3'
   []
 []
