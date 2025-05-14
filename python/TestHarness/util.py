@@ -216,17 +216,6 @@ LIBTORCH_OPTIONS = {
                  }
 }
 
-## Check for MOOSE_MPI_COMMAND in environment and make the appropriate command
-def getMPICommand():
-    # default to no MPI
-    mpi_command = ''
-    # use MOOSE_MPI_COMMAND if set
-    if os.environ.get('MOOSE_MPI_COMMAND'):
-        # run on one cpu
-        mpi_command = os.environ['MOOSE_MPI_COMMAND'] + ' -n 1 '
-    return mpi_command
-
-
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
@@ -539,7 +528,7 @@ def getCapabilities(exe):
     Get capabilities JSON and compare it to the required capabilities
     """
     assert exe
-    output = runCommand(f"{getMPICommand()}{exe} --show-capabilities")
+    output = runCommand(f"{os.environ.get('MOOSE_MPI_COMMAND', 'mpiexec')} -n 1 {exe} --show-capabilities")
     return parseMOOSEJSON(output, '--show-capabilities')
 
 def getCapability(exe, name):
@@ -734,7 +723,7 @@ def getExeJSON(exe: str) -> str:
     """
     Calls --json on the given executable
     """
-    return runCommand(f"{getMPICommand()}{exe} --json")
+    return runCommand(f"{os.environ.get('MOOSE_MPI_COMMAND', 'mpiexec')} -n 1 {exe} --json")
 
 def getExeObjects(json: dict) -> set[str]:
     """
