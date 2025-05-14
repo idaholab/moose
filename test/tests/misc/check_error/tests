@@ -6,6 +6,7 @@
     type = 'RunApp'
     input = 'steady_no_converge.i'
     expect_out = 'Aborting as solve did not converge'
+    should_crash = true
 
     requirement = 'The system shall report an error when the system solver is unable to find a converged solution.'
     design = 'Executioner/index.md'
@@ -598,6 +599,7 @@
     input = 'nan_test.i'
     cli_args = '--no-trap-fpe'
     expect_out = 'Solve Did NOT Converge'
+    should_crash = true
 
     requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Steady executioner.'
     issues = '#374 #3614'

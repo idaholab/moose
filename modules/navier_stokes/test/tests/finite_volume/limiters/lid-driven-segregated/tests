@@ -12,10 +12,12 @@
       heavy = true
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
+      should_crash = true
     []
     [upwind_run]
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
+      should_crash = true
       exodiff = 'upwind_run.e'
       detail = 'and pass debugging checks with segregated solvers with upwind advection scheme.'
       cli_args = 'GlobalParams/advected_interp_method=upwind Executioner/num_iterations=10 Outputs/file_base=upwind_run'
@@ -35,6 +37,7 @@
     [vanLeer_run]
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
+      should_crash = true
       exodiff = 'vanLeer_run.e'
       detail = 'and pass debugging checks with segregated solvers with van Leer limiter.'
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Executioner/num_iterations=10 Outputs/file_base=vanLeer_run Mesh/gen/nx=10 Mesh/gen/ny=10'
@@ -50,10 +53,12 @@
       heavy = true
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
+      should_crash = true
     []
     [min_mod_run]
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
+      should_crash = true
       exodiff = 'min_mod_run.e'
       detail = 'and pass debugging checks with segregated solvers with min-mod limiter.'
       abs_zero = 1e-5 # limiter sensitive to roundoff
@@ -72,10 +77,12 @@
       heavy = true
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
+      should_crash = true
     []
     [quick_run]
       type = 'Exodiff'
       input = 'lid-driven-segregated.i'
+      should_crash = true
       exodiff = 'quick_run.e'
       detail = 'and pass debugging checks with segregated solvers with QUICK limiter.'
       abs_zero = 1e-5 # limiter sensitive to roundoff

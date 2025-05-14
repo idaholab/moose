@@ -38,6 +38,7 @@
   [phy:T_wall_transfer_3eqn_z]
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_z.i'
+    should_crash = true
     exodiff = 'phy.T_wall_transfer_3eqn_z_out.e'
     recover = false
 
