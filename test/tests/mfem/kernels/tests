@@ -46,7 +46,7 @@
     cli_args = 'FESpaces/H1FESpace/fec_order=SECOND Solver/type=MFEMCGSolver Solver/l_tol=1e-16 '
                'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR '
-    requirement = 'MOOSE shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native run.'
+    requirement = 'MOOSE shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     mfem = true
     max_parallel = 1
     recover = false
@@ -108,7 +108,7 @@
                'FESpaces/H1FESpace/fec_order=SECOND Solver/type=MFEMCGSolver Solver/l_tol=1e-22 '
                'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR '
-    requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native run.'
+    requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     mfem = true
     max_parallel = 1
     recover = false
