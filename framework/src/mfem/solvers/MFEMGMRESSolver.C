@@ -25,7 +25,7 @@ MFEMGMRESSolver::validParams()
 MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
     _preconditioner(isParamSetByUser("preconditioner")
-                        ? getMFEMProblem().getProblemData().mfem_preconditioner
+                        ? getMFEMProblem().getProblemData().jacobian_preconditioner
                         : nullptr)
 {
   constructSolver(parameters);

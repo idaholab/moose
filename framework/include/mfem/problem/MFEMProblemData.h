@@ -29,8 +29,8 @@ public:
   std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
   std::shared_ptr<mfem::NewtonSolver> nonlinear_solver{nullptr};
 
-  std::shared_ptr<MFEMSolverBase> mfem_preconditioner{nullptr};
-  std::shared_ptr<MFEMSolverBase> mfem_solver{nullptr};
+  std::shared_ptr<MFEMSolverBase> jacobian_preconditioner{nullptr};
+  std::shared_ptr<MFEMSolverBase> jacobian_solver{nullptr};
 
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;
