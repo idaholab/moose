@@ -1498,7 +1498,7 @@ SubChannel1PhaseProblem::computeMu(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeWij(int iblock)
+SubChannel1PhaseProblem::computeWijResidual(int iblock)
 {
   // Cross flow residual
   if (!_implicit_bool)
@@ -1949,7 +1949,7 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
   // Solving for pressure
   computeP(iblock);
   // Solving cross fluxes
-  computeWij(iblock);
+  computeWijResidual(iblock);
 
   // Turn the residual matrix into a residual vector
   for (unsigned int iz = 0; iz < _block_size; iz++)
@@ -2051,7 +2051,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Assembling pressure matrix
   computeP(iblock);
   // Assembling cross fluxes matrix
-  computeWij(iblock);
+  computeWijResidual(iblock);
   // If monolithic solve - Assembling enthalpy matrix
   if (_monolithic_thermal_bool)
     computeh(iblock);
