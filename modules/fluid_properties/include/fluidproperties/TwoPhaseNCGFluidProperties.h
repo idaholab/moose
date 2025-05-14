@@ -50,6 +50,7 @@ public:
    * @param[in] p  pressure
    */
   virtual Real T_sat(Real p) const override { return _fp_2phase->T_sat(p); }
+  virtual ADReal T_sat(const ADReal & p) const override { return _fp_2phase->T_sat(p); }
 
   /**
    * Computes the saturation pressure at a temperature
@@ -57,6 +58,7 @@ public:
    * @param[in] T  temperature
    */
   virtual Real p_sat(Real T) const override { return _fp_2phase->p_sat(T); }
+  virtual ADReal p_sat(const ADReal & T) const override { return _fp_2phase->p_sat(T); }
 
   /**
    * Computes dT/dp along the saturation line
@@ -72,6 +74,10 @@ public:
    * @param T  temperature
    */
   virtual Real h_lat(Real p, Real T) const override { return _fp_2phase->h_lat(p, T); }
+  virtual ADReal h_lat(const ADReal & p, const ADReal & T) const override
+  {
+    return _fp_2phase->h_lat(p, T);
+  }
 
   virtual bool supportsPhaseChange() const override { return _fp_2phase->supportsPhaseChange(); }
 
