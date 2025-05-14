@@ -116,6 +116,8 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
         params.addParam('hpc_mem_per_cpu', "Memory requirement per CPU to use for HPC submission")
 
+        params.addParam("validation_test", None, "TODO")
+
         return params
 
     # This is what will be checked for when we look for valid testers

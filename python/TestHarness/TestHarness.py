@@ -929,7 +929,8 @@ class TestHarness:
         # 1 - Initial tracking of version
         # 2 - Added 'unique_test_id' (tests/*/tests/*/unique_test_id) to Job output if set
         # 3 - Added 'json_metadata' (tests/*/tests/*/tester/json_metadata) to Tester output
-        testharness = {'version': 3,
+        # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
+        testharness = {'version': 4,
                        'start_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                        'end_time': None,
                        'args': sys.argv[1:],
