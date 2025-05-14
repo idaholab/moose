@@ -1,6 +1,6 @@
 [Tests]
-  design = 'source/constraints/EqualValueEmbeddedConstraint.md'
   [kinematic]
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall support embedded constraints using a "
                   "kinematic formulation between "
     issues = '#11722'
@@ -58,6 +58,7 @@
   []
 
   [penalty]
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall support embedded constraints using a "
                   "penalty formulation between "
     issues = '#11722'
@@ -114,6 +115,7 @@
   []
 
   [penalty_AD]
+    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
     requirement = "The system shall support embedded constraints with "
                   "automatic differentiation using a penalty formulation between "
     issues = '#30499'
@@ -169,6 +171,7 @@
     []
   []
   [error_kinematic_AD]
+    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
     requirement = "The system shall error when kinematic constraints are used with automatic differentiation."
     issues = '#30499'
     type = RunException
