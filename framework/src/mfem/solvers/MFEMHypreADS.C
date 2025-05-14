@@ -12,7 +12,6 @@ MFEMHypreADS::validParams()
                              "iterative solution of MFEM equation systems.");
   params.addParam<UserObjectName>("fespace", "H(div) FESpace to use in HypreADS setup.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
 
   return params;
 }

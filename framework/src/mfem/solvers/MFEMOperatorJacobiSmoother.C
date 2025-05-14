@@ -10,7 +10,6 @@ MFEMOperatorJacobiSmoother::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
-  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
 
   return params;
 }
