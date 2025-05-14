@@ -9,6 +9,10 @@
 
 #include "gtest/gtest.h"
 
+#include <algorithm> // std::upper_bound
+#include <iterator>  // std::distance
+#include <vector>
+
 int
 getLocation(const std::vector<unsigned int> & offsets, unsigned int global_index)
 {
