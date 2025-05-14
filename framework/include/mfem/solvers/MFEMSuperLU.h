@@ -49,7 +49,6 @@ protected:
   void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
 private:
-  std::shared_ptr<Moose::MFEM::SuperLUSolver> _jacobian_solver{nullptr};
   std::shared_ptr<mfem::Solver> _solver{nullptr};
 };
 

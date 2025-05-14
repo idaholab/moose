@@ -28,7 +28,6 @@ protected:
 
 private:
   std::shared_ptr<MFEMSolverBase> _preconditioner{nullptr};
-  std::shared_ptr<mfem::CGSolver> _jacobian_solver{nullptr};
   std::shared_ptr<mfem::Solver> _solver{nullptr};
 };
 

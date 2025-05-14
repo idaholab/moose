@@ -25,10 +25,10 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 void
 MFEMHypreADS::constructSolver(const InputParameters &)
 {
-  _jacobian_preconditioner = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
-  _jacobian_preconditioner->SetPrintLevel(getParam<int>("print_level"));
+  auto preconditioner = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
+  preconditioner->SetPrintLevel(getParam<int>("print_level"));
 
-  _preconditioner = _jacobian_preconditioner;
+  _preconditioner = preconditioner;
 }
 
 void

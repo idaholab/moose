@@ -27,7 +27,6 @@ protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
-  std::shared_ptr<mfem::OperatorJacobiSmoother> _jacobian_preconditioner{nullptr};
   std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
 };
 

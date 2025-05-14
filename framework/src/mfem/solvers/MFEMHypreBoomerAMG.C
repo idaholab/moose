@@ -33,17 +33,17 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 void
 MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 {
-  _jacobian_solver = std::make_shared<mfem::HypreBoomerAMG>();
+  auto solver = std::make_shared<mfem::HypreBoomerAMG>();
 
-  _jacobian_solver->SetTol(getParam<double>("l_tol"));
-  _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
-  _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
-  _jacobian_solver->SetStrengthThresh(_strength_threshold);
+  solver->SetTol(getParam<double>("l_tol"));
+  solver->SetMaxIter(getParam<int>("l_max_its"));
+  solver->SetPrintLevel(getParam<int>("print_level"));
+  solver->SetStrengthThresh(_strength_threshold);
 
   if (_mfem_fespace && !mfem::HypreUsingGPU())
-    _jacobian_solver->SetElasticityOptions(_mfem_fespace.get());
+    solver->SetElasticityOptions(_mfem_fespace.get());
 
-  _solver = _jacobian_solver;
+  _solver = solver;
 }
 
 void

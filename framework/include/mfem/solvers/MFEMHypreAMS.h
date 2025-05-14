@@ -25,7 +25,6 @@ protected:
 
 private:
   const MFEMFESpace & _mfem_fespace;
-  std::shared_ptr<mfem::HypreAMS> _jacobian_preconditioner{nullptr};
   std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
 };
 

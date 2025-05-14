@@ -29,13 +29,13 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 void
 MFEMHypreAMS::constructSolver(const InputParameters &)
 {
-  _jacobian_preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  auto preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
-    _jacobian_preconditioner->SetSingularProblem();
+    preconditioner->SetSingularProblem();
 
-  _jacobian_preconditioner->SetPrintLevel(getParam<int>("print_level"));
+  preconditioner->SetPrintLevel(getParam<int>("print_level"));
 
-  _preconditioner = _jacobian_preconditioner;
+  _preconditioner = preconditioner;
 }
 
 void
