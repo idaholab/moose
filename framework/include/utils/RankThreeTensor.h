@@ -133,6 +133,9 @@ public:
   /// b_i = r_ijk * a_jk
   libMesh::VectorValue<T> operator*(const RankTwoTensorTempl<T> & a) const;
 
+  /// b_ij = r_ijk * a_k
+  RankTwoTensorTempl<T> operator*(const libMesh::VectorValue<T> & a) const;
+
   /// r_ijk*a
   RankThreeTensorTempl<T> operator*(const T a) const;
 
