@@ -35,10 +35,7 @@ CoefficientManager::declareScalarProperty(const std::string & name,
 {
   std::shared_ptr<mfem::Coefficient> coef = this->_scalar_coeffs.getCoefficientPtr(existing_coef);
   if (std::dynamic_pointer_cast<mfem::PWCoefficient>(coef))
-  {
-    throw MooseException(
-        "Properties must not be defined out of other properties or piecewise coefficients.");
-  }
+    mooseError("Properties must not be defined out of other properties or piecewise coefficients.");
   return this->declareScalarProperty(name, blocks, coef);
 }
 
@@ -73,10 +70,7 @@ CoefficientManager::declareVectorProperty(const std::string & name,
   std::shared_ptr<mfem::VectorCoefficient> coef =
       this->_vector_coeffs.getCoefficientPtr(existing_coef);
   if (std::dynamic_pointer_cast<mfem::PWVectorCoefficient>(coef))
-  {
-    throw MooseException(
-        "Properties must not be defined out of other properties or piecewise coefficients.");
-  }
+    mooseError("Properties must not be defined out of other properties or piecewise coefficients.");
   return this->declareVectorProperty(name, blocks, coef);
 }
 
@@ -111,10 +105,7 @@ CoefficientManager::declareMatrixProperty(const std::string & name,
   std::shared_ptr<mfem::MatrixCoefficient> coef =
       this->_matrix_coeffs.getCoefficientPtr(existing_coef);
   if (std::dynamic_pointer_cast<mfem::PWMatrixCoefficient>(coef))
-  {
-    throw MooseException(
-        "Properties must not be defined out of other properties or piecewise coefficients.");
-  }
+    mooseError("Properties must not be defined out of other properties or piecewise coefficients.");
   return this->declareMatrixProperty(name, blocks, coef);
 }
 

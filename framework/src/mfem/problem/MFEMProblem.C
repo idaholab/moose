@@ -329,7 +329,6 @@ MFEMProblem::addFunction(const std::string & type,
   {
     getCoefficients().declareScalar<mfem::FunctionCoefficient>(
         name,
-
         [&func](const mfem::Vector & p, double t) -> mfem::real_t
         { return func.value(t, pointFromMFEMVector(p)); });
   }

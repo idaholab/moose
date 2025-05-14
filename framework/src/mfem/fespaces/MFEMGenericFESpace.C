@@ -48,9 +48,7 @@ MFEMGenericFESpace::isVector() const
 {
   std::string fec = getFECName();
   if (!strncmp(fec.c_str(), "RT", 2) || !strncmp(fec.c_str(), "ND", 2))
-  {
     return true;
-  }
   // FIXME: This assumes ALL other possible FEC types be scalar. Is that correct?
   return getVDim() > 1;
 }

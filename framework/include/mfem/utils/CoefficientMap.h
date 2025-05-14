@@ -15,6 +15,7 @@
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
+#include "libmesh/utility.h"
 
 namespace Moose::MFEM
 {
@@ -50,10 +51,8 @@ public:
 
     const auto [_, inserted] = this->_coefficients.emplace(name, std::move(coeff));
     if (!inserted)
-    {
       throw MooseException("Coefficient with name '" + name +
                            "' already present in CoefficientMap object");
-    }
   }
 
   /// Add piecewise material property. The coefficient must have been created with the `make` method on this object.
@@ -73,16 +72,12 @@ public:
 
     // Initialise property with empty coefficients, if it does not already exist
     if (!this->hasCoefficient(name))
-    {
       this->_coefficients.insert({name, this->emptyPWData(coeff)});
-    }
     PWData * data = std::get_if<PWData>(&this->_coefficients[name]);
     // Throw an exception if the data is not piecewise
     if (!data)
-    {
       throw MooseException("Global coefficient with name '" + name +
                            "' already present in CoefficientMap");
-    }
     mooseAssert(std::find(this->_iterable_coefficients.cbegin(),
                           this->_iterable_coefficients.cend(),
                           coeff) != this->_iterable_coefficients.cend(),
@@ -93,10 +88,8 @@ public:
     for (const auto & block : blocks)
     {
       if (coeff_map.count(block) > 0)
-      {
         throw MooseException("Property with name '" + name + "' already assigned to block " +
                              block + " in CoefficientMap object");
-      }
       coeff_map[block] = coeff;
       pw_coeff->UpdateCoefficient(std::stoi(block), *coeff);
     }
@@ -133,7 +126,7 @@ public:
   {
     if (!this->hasCoefficient(name))
       return false;
-    auto & coeff = this->_coefficients.at(name);
+    auto & coeff = libmesh_map_find(this->_coefficients, name);
     if (std::holds_alternative<std::shared_ptr<T>>(coeff))
       return true;
     auto block_map = std::get<1>(std::get<PWData>(coeff));
@@ -143,9 +136,7 @@ public:
   void setTime(const double time)
   {
     for (auto & coef : this->_iterable_coefficients)
-    {
       coef->SetTime(time);
-    }
   }
 
 private:

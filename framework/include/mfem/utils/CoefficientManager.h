@@ -18,7 +18,6 @@
 
 namespace Moose::MFEM
 {
-
 /**
  * Front-end class for creating and storing MFEM coefficients. They
  * can be created so they are global (defined across the entire
@@ -26,12 +25,12 @@ namespace Moose::MFEM
  */
 class CoefficientManager
 {
-
 public:
   CoefficientManager() = default;
 
-  /// Declare an alias to an existing coefficient
+  /// Declare an alias to an existing scalar coefficient
   mfem::Coefficient & declareScalar(const std::string & name, const std::string & existing_coef);
+  /// Create a new scalar coefficient, constructed from the argument pack
   template <class P, class... Args>
   P & declareScalar(const std::string & name, Args &&... args)
   {
@@ -40,11 +39,20 @@ public:
     return *coef;
   }
 
-  /// Use an existing coefficient for a property on some blocks of the mesh
-  ///@{
+  /**
+   * Use an existing scalar coefficient for a property on some blocks of the
+   * mesh. The property will be a piecewise coefficient and it will have
+   * the value of `existing_coef` on these blocks.
+   */
   mfem::Coefficient & declareScalarProperty(const std::string & name,
                                             const std::vector<std::string> & blocks,
                                             const std::string & existing_coef);
+  /**
+   * Use a new scalar coefficient, constructed from the argument pack, for a
+   * property on some blocks of the mesh. The property will be a piecewise
+   * coefficient and it will have the value of the new coefficient on these
+   * blocks.
+   */
   template <class P, class... Args>
   mfem::Coefficient & declareScalarProperty(const std::string & name,
                                             const std::vector<std::string> & blocks,
@@ -52,12 +60,11 @@ public:
   {
     return this->declareScalarProperty(name, blocks, _scalar_coeffs.make<P>(args...));
   }
-  ///@}
 
-  /// Declare an alias to an existing coefficient
-  ///@{
+  /// Declare an alias to an existing vector coefficient.
   mfem::VectorCoefficient & declareVector(const std::string & name,
                                           const std::string & existing_coef);
+  /// Create a new vector coefficient, constructed from the argument pack.
   template <class P, class... Args>
   P & declareVector(const std::string & name, Args &&... args)
   {
@@ -65,13 +72,21 @@ public:
     this->declareVector(name, coef);
     return *coef;
   }
-  ///@}
 
-  /// Use an existing coefficient for a property on some blocks of the mesh
-  ///@{
+  /**
+   * Use an existing vector coefficient for a property on some blocks of the
+   * mesh. The property will be a piecewise coefficient and it will have
+   * the value of `existing_coef` on these blocks.
+   */
   mfem::VectorCoefficient & declareVectorProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
                                                   const std::string & existing_coef);
+  /**
+   * Use a new vector coefficient, constructed from the argument pack, for a
+   * property on some blocks of the mesh. The property will be a piecewise
+   * coefficient and it will have the value of the new coefficient on these
+   * blocks.
+   */
   template <class P, class... Args>
   mfem::VectorCoefficient & declareVectorProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
@@ -79,12 +94,11 @@ public:
   {
     return this->declareVectorProperty(name, blocks, _vector_coeffs.make<P>(args...));
   }
-  ///@}
 
-  /// Declare an alias to an existing coefficient
-  ///@{
+  /// Declare an alias to an existing matrix coefficient
   mfem::MatrixCoefficient & declareMatrix(const std::string & name,
                                           const std::string & existing_coef);
+  /// Create a new matrix coefficient, constructed from the argument pack.
   template <class P, class... Args>
   P & declareMatrix(const std::string & name, Args &&... args)
   {
@@ -92,13 +106,21 @@ public:
     this->declareMatrix(name, coef);
     return *coef;
   }
-  ///@}
 
-  /// Use an existing coefficient for a property on some blocks of the mesh
-  ///@{
+  /**
+   * Use an existing matrix coefficient for a property on some blocks of the
+   * mesh. The property will be a piecewise coefficient and it will have
+   * the value of `existing_coef` on these blocks.
+   */
   mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
                                                   const std::string & existing_coef);
+  /**
+   * Use a new matrix coefficient, constructed from the argument pack, for a
+   * property on some blocks of the mesh. The property will be a piecewise
+   * coefficient and it will have the value of the new coefficient on these
+   * blocks.
+   */
   template <class P, class... Args>
   mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
@@ -106,7 +128,6 @@ public:
   {
     return this->declareMatrixProperty(name, blocks, _matrix_coeffs.make<P>(args...));
   }
-  ///@}
 
   mfem::Coefficient & getScalarCoefficient(const std::string name);
   mfem::VectorCoefficient & getVectorCoefficient(const std::string name);

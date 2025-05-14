@@ -27,7 +27,6 @@ MFEMConvectiveHeatFluxBC::validParams()
   return params;
 }
 
-// TODO: Currently assumes the vector function coefficient is 3D
 MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _heat_transfer_coef(
