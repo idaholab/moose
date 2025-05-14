@@ -155,6 +155,7 @@ SetupDebugAction::act()
 
     InputParameters params = _factory.getValidParams("ProcessorIDAux");
     params.set<AuxVariableName>("variable") = "pid";
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
     _problem->addAuxKernel("ProcessorIDAux", "pid_aux", params);
   }
 
