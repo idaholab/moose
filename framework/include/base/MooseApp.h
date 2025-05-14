@@ -847,6 +847,11 @@ public:
   bool isUltimateMaster() const { return !_multiapp_level; }
 
   /**
+   * Returns whether to use the parent app mesh as the mesh for this app
+   */
+  bool useMasterMesh() const { return _use_master_mesh; }
+
+  /**
    * Returns a pointer to the master mesh
    */
   const MooseMesh * masterMesh() const { return _master_mesh; }
@@ -1497,6 +1502,9 @@ private:
 
   /// Numbering in all the sub-apps on the same level
   unsigned int _multiapp_number;
+
+  /// Whether to use the parent app mesh for this app
+  const bool _use_master_mesh;
 
   /// The mesh from master app
   const MooseMesh * const _master_mesh;
