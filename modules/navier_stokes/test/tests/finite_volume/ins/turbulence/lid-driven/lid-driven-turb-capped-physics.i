@@ -67,7 +67,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         dynamic_viscosity = ${mu}
 
         initial_pressure = 0.2
-        initial_velocity = '1e-10 1e-10 0'
+        initial_velocity = 'ini_vx ini_vy 0'
 
         wall_boundaries = 'top left right bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
@@ -113,6 +113,17 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         mu_t_as_aux_variable = true
       []
     []
+  []
+[]
+
+[Functions]
+  [ini_vx]
+    type = ParsedFunction
+    expression = 'if(y>0.09, 0.1, -0.0001)'
+  []
+  [ini_vy]
+    type = ParsedFunction
+    expression = 'if(x>0.05, -0.001, 0.001)'
   []
 []
 

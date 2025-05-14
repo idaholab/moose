@@ -81,13 +81,11 @@ pressure_tag = "pressure_grad"
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    initial_condition = 0.0
     solver_sys = u_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
-    initial_condition = 0.0
     solver_sys = v_system
     two_term_boundary_expansion = false
   []
@@ -106,6 +104,19 @@ pressure_tag = "pressure_grad"
     type = INSFVEnergyVariable
     solver_sys = TKED_system
     initial_condition = ${eps_init}
+  []
+[]
+
+[ICs]
+  [vx]
+    type = FunctionIC
+    variable = vel_x
+    function = 'if(y>0.09, 0.1, -0.001)'
+  []
+  [vy]
+    type = FunctionIC
+    variable = vel_y
+    function = 'if(x>0.05, -0.001, 0.001)'
   []
 []
 
