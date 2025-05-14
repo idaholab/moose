@@ -51,7 +51,9 @@ public:
   /**
    * Constructor for Universe Cell
    */
-  CSGCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
+  CSGCell(const std::string name,
+          const std::shared_ptr<CSGUniverse> univ,
+          const CSGRegion & region);
 
   /**
    * Destructor
