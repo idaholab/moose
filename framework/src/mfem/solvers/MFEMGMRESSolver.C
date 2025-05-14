@@ -33,17 +33,17 @@ MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
 void
 MFEMGMRESSolver::constructSolver(const InputParameters &)
 {
-  _jacobian_solver =
+  auto solver =
       std::make_shared<mfem::GMRESSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  _jacobian_solver->SetRelTol(getParam<double>("l_tol"));
-  _jacobian_solver->SetAbsTol(getParam<double>("l_abs_tol"));
-  _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
-  _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
+  solver->SetRelTol(getParam<double>("l_tol"));
+  solver->SetAbsTol(getParam<double>("l_abs_tol"));
+  solver->SetMaxIter(getParam<int>("l_max_its"));
+  solver->SetPrintLevel(getParam<int>("print_level"));
 
   if (_preconditioner)
-    _jacobian_solver->SetPreconditioner(*_preconditioner->getSolver());
+    solver->SetPreconditioner(*_preconditioner->getSolver());
 
-  _solver = _jacobian_solver;
+  _solver = solver;
 }
 
 void
@@ -56,8 +56,9 @@ MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   if (_preconditioner)
   {
     _preconditioner->updateSolver(a, tdofs);
-    _jacobian_solver->SetPreconditioner(*_preconditioner->getSolver());
-    _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+    auto solver = std::dynamic_pointer_cast<mfem::GMRESSolver>(_solver);
+    solver->SetPreconditioner(*_preconditioner->getSolver());
+    _solver = solver;
   }
   else if (_lor)
   {

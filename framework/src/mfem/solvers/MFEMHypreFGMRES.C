@@ -33,12 +33,12 @@ void
 MFEMHypreFGMRES::constructSolver(const InputParameters &)
 {
 
-  _jacobian_solver =
+  auto solver =
       std::make_shared<mfem::HypreFGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  _jacobian_solver->SetTol(getParam<double>("l_tol"));
-  _jacobian_solver->SetMaxIter(getParam<int>("l_max_its"));
-  _jacobian_solver->SetKDim(getParam<int>("kdim"));
-  _jacobian_solver->SetPrintLevel(getParam<int>("print_level"));
+  solver->SetTol(getParam<double>("l_tol"));
+  solver->SetMaxIter(getParam<int>("l_max_its"));
+  solver->SetKDim(getParam<int>("kdim"));
+  solver->SetPrintLevel(getParam<int>("print_level"));
 
   if (_preconditioner)
   {
@@ -46,10 +46,10 @@ MFEMHypreFGMRES::constructSolver(const InputParameters &)
         std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
     if (!hypre_preconditioner)
       mooseError("Hypre FGMRES preconditioner must be a Hypre Solver");
-    _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
+    solver->SetPreconditioner(*hypre_preconditioner);
   }
 
-  _solver = _jacobian_solver;
+  _solver = solver;
 }
 
 void
@@ -64,8 +64,9 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
     _preconditioner->updateSolver(a, tdofs);
     auto hypre_preconditioner =
         std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
-    _jacobian_solver->SetPreconditioner(*hypre_preconditioner);
-    _solver = std::dynamic_pointer_cast<mfem::Solver>(_jacobian_solver);
+    auto solver = std::dynamic_pointer_cast<mfem::HypreFGMRES>(_solver);
+    solver->SetPreconditioner(*hypre_preconditioner);
+    _solver = solver;
   }
   else if (_lor)
   {
