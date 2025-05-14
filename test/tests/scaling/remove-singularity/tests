@@ -28,6 +28,7 @@
     input = 'test.i'
     expect_out = '198 of 242 singular values'
     absent_out = ' 0 of 242 singular values'
+    should_crash = true
     cli_args = 'Outputs/exodus=false Executioner/automatic_scaling=false -snes_max_it 1 -ksp_max_it 1'
     requirement = 'The system shall display a very poor condition number for an ill-conditioned system.'
   []

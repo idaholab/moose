@@ -12,12 +12,14 @@
     type = RunApp
     input = 'test_diverge_default.i'
     expect_out = "did not converge"
+    should_crash = true
     requirement = 'ParsedConvergence objects shall have a default divergence criteria based on the provided Convergence objects.'
   []
   [test_diverge_custom]
     type = RunApp
     input = 'test_diverge_custom.i'
     expect_out = "did not converge"
+    should_crash = true
     requirement = "ParsedConvergence objects shall allow custom divergence criteria to be specified."
   []
   [error_invalid_value]

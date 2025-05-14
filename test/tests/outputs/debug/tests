@@ -133,6 +133,7 @@
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
       expect_out = '\[DBG\] limit_v limit_u'
+      should_crash = true
       detail = 'elemental dampers,'
       cli_args = "--color off Dampers/active='limit_v limit_u'"
     []
@@ -232,6 +233,7 @@
       type = RunApp
       input = 'show_execution_nodal_aux_bcs.i'
       expect_out = '\[DBG\] limit_u'
+      should_crash = true
       detail = 'nodal dampers,'
       cli_args = "--color off Dampers/inactive=''"
     []

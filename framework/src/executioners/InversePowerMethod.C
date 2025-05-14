@@ -81,7 +81,10 @@ void
 InversePowerMethod::execute()
 {
   if (_app.isRecovering())
+  {
+    _last_solve_converged = true;
     return;
+  }
 
   preExecute();
 

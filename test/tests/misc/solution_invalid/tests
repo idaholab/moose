@@ -49,6 +49,7 @@
     allow_warnings = true
     cli_args = 'Problem/immediately_print_invalid_solution=true'
     expect_out = 'NonsafeMaterial: The diffusivity is greater than the threshold value!'
+    should_crash = true
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output to screen immediately a detailed reason as to why a solution is invalid'
@@ -59,6 +60,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
+    should_crash = true
     jsondiff = 'solution_invalid.json'
     hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
@@ -71,6 +73,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
+    should_crash = true
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
     hpc = false # iteration counts can be MPI dependent
@@ -84,6 +87,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
+    should_crash = true
     cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
     jsondiff = 'solution_invalid_parallel.json'
     hpc = false # iteration counts can be MPI dependent
