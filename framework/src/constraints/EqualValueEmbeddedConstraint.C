@@ -16,10 +16,9 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
-#include "Executioner.h"
 #include "AddVariableAction.h"
+#include "MooseEnum.h"
 
-#include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
@@ -56,8 +55,11 @@ EqualValueEmbeddedConstraintTempl<is_ad>::EqualValueEmbeddedConstraintTempl(
 {
   _overwrite_secondary_residual = false;
   prepareSecondaryToPrimaryMap();
-  if (is_ad && (_formulation == Formulation::KINEMATIC))
-    this->paramError("formulation", "AD constraints cannot be used with KINEMATIC formulation.");
+  if constexpr (is_ad)
+  {
+    if (_formulation == Formulation::KINEMATIC)
+      this->paramError("formulation", "AD constraints cannot be used with KINEMATIC formulation.");
+  }
 }
 
 template <bool is_ad>

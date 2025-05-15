@@ -11,10 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseEnum.h"
 #include "MooseMesh.h"
-
-#include "libmesh/string_to_enum.h"
 
 InputParameters
 NodeElemConstraint::validParams()
