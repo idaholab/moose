@@ -121,11 +121,11 @@ TEST_F(ADFluidPropsTest, error_imperfect_jacobian)
   ADReal e = 214000;
 
   // This throws because g_from_v_e has no derivatives version implemented:
-  EXPECT_THROW(_fp->g_from_v_e(v, e), std::runtime_error);
+  EXPECT_THROW(_fp->g_from_v_e(v, e), MooseException);
 
   // create fp with allow_imperfect_jacobians on - but warnings are errors still
   auto & fp = buildObj("fp2", true);
-  EXPECT_THROW(fp.g_from_v_e(v, e), std::runtime_error);
+  EXPECT_THROW(fp.g_from_v_e(v, e), MooseException);
 
   // missing derivs become warnings instead of errors
   bool wae = Moose::_warnings_are_errors;

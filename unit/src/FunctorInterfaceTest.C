@@ -43,7 +43,7 @@ TEST(FunctorInterfaceTest, deduceFunctorName)
       FunctorInterface::deduceFunctorName("test", params);
       ASSERT_TRUE(false);
     }
-    catch (std::runtime_error & e)
+    catch (MooseException & e)
     {
       ASSERT_TRUE(std::string(e.what()).find("single variable name") != std::string::npos);
     }
@@ -71,7 +71,7 @@ TEST(FunctorInterfaceTest, deduceFunctorName)
       FunctorInterface::deduceFunctorName("test", params);
       ASSERT_TRUE(false);
     }
-    catch (std::runtime_error & e)
+    catch (MooseException & e)
     {
       ASSERT_TRUE(std::string(e.what()).find("Invalid parameter type for retrieving a functor") !=
                   std::string::npos);

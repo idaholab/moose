@@ -134,7 +134,7 @@ TEST(CyclicSyntaxTest, cyclic)
     syntax.getSortedTask();
     FAIL() << "missing expected error";
   }
-  catch (std::runtime_error & e)
+  catch (MooseException & e)
   {
     EXPECT_TRUE(std::string(e.what()).find("a <- b") != std::string::npos);
   }

@@ -36,27 +36,27 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Rigidium]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = 'lambda mu'
     prop_values = '50.0 50.0'
     block = 1
   []
   [Bendium]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = 'lambda mu'
     prop_values = '1.0 1.0'
     block = 2
   []
   [RigidiumWeightDensity]
-    type = MFEMGenericConstantVectorMaterial
+    type = MFEMGenericConstantVectorFunctorMaterial
     prop_names = 'gravitational_force_density'
     prop_values = '0.0 0.0 -1e-2'
     block = 1
   []
   [BendiumWeightDensity]
-    type = MFEMGenericConstantVectorMaterial
+    type = MFEMGenericConstantVectorFunctorMaterial
     prop_names = 'gravitational_force_density'
     prop_values = '0.0 0.0 -5e-3'
     block = 2
