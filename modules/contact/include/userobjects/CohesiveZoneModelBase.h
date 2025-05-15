@@ -48,6 +48,8 @@ protected:
   /// Encapsulate the CZM constitutive behavior.
   virtual void computeCZMTraction(const Node * const /*node*/) {}
 
+  virtual void computeDamage(const Node * const /*node*/) {}
+
   /// Compute global traction for mortar application.
   virtual void computeGlobalTraction(const Node * const node);
 
@@ -96,22 +98,21 @@ protected:
   // /// The normal penalty factor
   // const Real _penalty;
 
-  // /// The penalty factor for the frictional constraints
-  // const Real _penalty_friction;
+  /// The penalty factor for the frictional constraints
+  const Real _penalty_friction;
 
-  // /// The friction coefficient
-  // const Real _friction_coefficient;
+  /// The friction coefficient
+  const Real _friction_coefficient;
 
-  // /// Map from degree of freedom to current and old step slip
-  // std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_step_slip;
+  /// Map from degree of freedom to current and old step slip
+  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_step_slip;
 
-  // /// Map from degree of freedom to current and old accumulated slip
-  // std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>>
-  // _dof_to_accumulated_slip;
+  /// Map from degree of freedom to current and old accumulated slip
+  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip;
 
-  /// Map from degree of freedom to current and old tangential traction
-  // std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
-  //     _dof_to_tangential_traction;
+  // Map from degree of freedom to current and old tangential traction
+  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
+      _dof_to_tangential_traction;
 
   // /// Map from degree of freedom to czm normal traction
   // std::unordered_map<const DofObject *, ADReal> _dof_to_czm_normal_traction;
@@ -122,11 +123,11 @@ protected:
   /// The second frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_two;
 
-  // /// Map from degree of freedom to augmented lagrange multiplier
-  // std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
+  /// Map from degree of freedom to augmented lagrange multiplier
+  std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
 
-  // /// Map from degree of freedom to local friction penalty value
-  // std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
+  /// Map from degree of freedom to local friction penalty value
+  std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
 
   /// Tolerance to avoid NaN/Inf in automatic differentiation operations.
   const Real _epsilon_tolerance;
@@ -135,4 +136,6 @@ protected:
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_czm_traction;
 
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_displacement_jump;
+
+  std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_damage;
 };
