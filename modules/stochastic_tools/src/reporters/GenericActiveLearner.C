@@ -117,9 +117,7 @@ GenericActiveLearner::computeGPOutput(std::vector<Real> & eval_outputs)
 void
 GenericActiveLearner::setupGeneric()
 {
-  std::vector<Real> norm_gp_outputs = _gp_outputs;
-  _al_gp.getNormTrainingOuts(norm_gp_outputs);
-  _generic = norm_gp_outputs;
+  _generic = _gp_outputs;
 }
 
 void
