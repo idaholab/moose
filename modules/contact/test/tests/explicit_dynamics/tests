@@ -60,6 +60,7 @@
     abs_zero = 1.0e-4
     allow_warnings = true
     method = '!dbg'
+    prereq = 'test_balance'
     cli_args ='Executioner/TimeIntegrator/use_constant_mass=true Mesh/patch_update_strategy=always'
     requirement = 'The system shall be able to solve an explicit contact problem with the constant mass option and with updating the contact patch often.'
   []
@@ -68,6 +69,8 @@
     custom_cmp = 'optimize.cmp'
     input = 'test_balance_optimized.i'
     exodiff = 'test_balance_out.e'
+    # uses same output name
+    prereq = 'exp_constant_mass'
     abs_zero = 1.0e-4
     allow_warnings = true
     method = '!dbg'

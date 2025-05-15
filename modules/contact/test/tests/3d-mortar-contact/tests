@@ -79,6 +79,7 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes.'
     max_parallel = 1
+    prereq = 'frictionless-mortar-3d'
   []
   [frictional-mortar-3d]
     type = 'Exodiff'
@@ -158,6 +159,8 @@
     abs_zero = 1.0e-5
     allow_warnings = true
     max_parallel = 1
+    # not running any time step, just examining nodal geometry
+    recover = false
   []
   [frictional-mortar-3d-penalty]
     type = 'Exodiff'
