@@ -251,7 +251,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !row!
 !col! width=15%
-!listing test/tests/kernels/2d_diffusion/2d_diffusion_neumannbc_test.i block=Kernels remove=Kernels/active
+!listing test/tests/kernels/2d_diffusion/neumannbc.i block=Kernels
 !col-end!
 
 !col! width=1%
@@ -259,7 +259,7 @@ $\quad$
 !col-end!
 
 !col! width=15%
-!listing test/tests/kernels/2d_diffusion/2d_diffusion_neumannbc_test.i block=BCs remove=BCs/active BCs/left
+!listing test/tests/kernels/2d_diffusion/neumannbc.i block=BCs BCs/left
 !col-end!
 
 !col! width=1%

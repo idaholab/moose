@@ -1,54 +1,52 @@
+AD = ''
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
-  xmax = 1.0
-  ymax = 1.0
-  elem_type = QUAD4
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./cres]
-    type = MatDiffusion
+  [diff]
+    type = ${AD}MatDiffusion
     variable = u
     diffusivity = Du
-  [../]
-  [./ctime]
-    type = TimeDerivative
+  []
+  [dt]
+    type = ${AD}TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Materials]
-  [./Dc]
-    type = DerivativeParsedMaterial
+  [Dc]
+    type = ${AD}DerivativeParsedMaterial
     property_name = Du
     expression = '0.01+u^2'
     coupled_variables = 'u'
     derivative_order = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
+  [right]
+    type = ${AD}DirichletBC
     variable = u
-    boundary = 1
+    boundary = right
     value = 0
-  [../]
-
-  [./right]
-    type = NeumannBC
+  []
+  [top]
+    type = ${AD}NeumannBC
     variable = u
-    boundary = 2
+    boundary = top
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
