@@ -103,6 +103,13 @@ public:
    */
   void addSurface(const std::pair<std::string, std::shared_ptr<CSGSurface>> surf);
 
+  /**
+   * @brief rename the specified cell
+   *
+   * @param name new name
+   */
+  void renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name);
+
 protected:
   /// Mapping of surface names to pointers of stored surface objects
   std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;

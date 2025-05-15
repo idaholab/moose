@@ -137,6 +137,17 @@ public:
   }
 
   /**
+   * @brief rename the specified surface
+   *
+   * @param surface
+   * @param name new name
+   */
+  void renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name)
+  {
+    _surface_list.renameSurface(surface, name);
+  }
+
+  /**
    * @brief Create a Material Cell object
    *
    * @param name unique cell name
@@ -199,6 +210,17 @@ public:
   const std::shared_ptr<CSGCell> & getCellByName(const std::string name)
   {
     return _cell_list.getCell(name);
+  }
+
+  /**
+   * @brief rename the specified cell
+   *
+   * @param cell
+   * @param name new name
+   */
+  void renameCell(const std::shared_ptr<CSGCell> cell, const std::string name)
+  {
+    _cell_list.renameCell(cell, name);
   }
 
   /**
