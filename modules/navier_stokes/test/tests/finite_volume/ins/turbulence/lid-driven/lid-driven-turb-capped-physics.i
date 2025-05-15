@@ -47,6 +47,14 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     nx = 12
     ny = 12
   []
+  [break_symmetries]
+    type = ParsedNodeTransformGenerator
+    input = gen
+    constant_names = 'side_length'
+    constant_expressions = '${side_length}'
+    x_function = 'if(x<side_length*1.001 / 2 & x > side_length * 0.999 / 2, x * 1.05, x)'
+    y_function = 'if(y<side_length*1.001 / 2 & y > side_length * 0.999 / 2, y * 1.05, y)'
+  []
 []
 
 [Physics]
@@ -59,7 +67,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         dynamic_viscosity = ${mu}
 
         initial_pressure = 0.2
-        initial_velocity = '1e-10 1e-10 0'
+        initial_velocity = 'ini_vx ini_vy 0'
 
         wall_boundaries = 'top left right bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
@@ -105,6 +113,17 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         mu_t_as_aux_variable = true
       []
     []
+  []
+[]
+
+[Functions]
+  [ini_vx]
+    type = ParsedFunction
+    expression = 'if(y>0.09, 0.1, -0.0001)'
+  []
+  [ini_vy]
+    type = ParsedFunction
+    expression = 'if(x>0.05, -0.001, 0.001)'
   []
 []
 
