@@ -43,8 +43,7 @@ CSGCell::getFillUniverse()
 {
   if (getFillType() != FillType::UNIVERSE)
   {
-    mooseWarning("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not UNIVERSE.");
-    return nullptr;
+    mooseError("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not UNIVERSE.");
   }
   else
     return _fill_universe;
@@ -55,8 +54,7 @@ CSGCell::getFillMaterial()
 {
   if (getFillType() != FillType::MATERIAL)
   {
-    mooseWarning("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not MATERIAL.");
-    return "";
+    mooseError("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not MATERIAL.");
   }
   else
     return _fill_name;
