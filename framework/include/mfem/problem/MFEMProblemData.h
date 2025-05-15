@@ -17,6 +17,7 @@ public:
   virtual ~MFEMProblemData() { ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> pmesh{nullptr};
+  Moose::MFEM::SubMeshes submeshes;
   Moose::MFEM::ScalarCoefficientManager scalar_manager;
   Moose::MFEM::VectorCoefficientManager vector_manager;
   Moose::MFEM::MatrixCoefficientManager matrix_manager;

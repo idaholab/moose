@@ -476,4 +476,31 @@ MFEMProblem::mesh() const
   return const_cast<MFEMProblem *>(this)->mesh();
 }
 
+void
+MFEMProblem::addSubMesh(const std::string & var_type,
+                        const std::string & var_name,
+                        InputParameters & parameters)
+{
+  // Add MFEM SubMesh.
+  FEProblemBase::addUserObject(var_type, var_name, parameters);
+  // Register submesh.
+  MFEMSubMeshBase & mfem_submesh = getUserObject<MFEMSubMeshBase>(var_name);
+  getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
+}
+
+void
+MFEMProblem::addTransfer(const std::string & transfer_name,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  if (parameters.get<std::string>("_moose_base") == "MFEMSubMeshTransfer")
+  {
+    FEProblemBase::addUserObject(transfer_name, name, parameters);
+  }
+  else
+  {
+    FEProblemBase::addTransfer(transfer_name, name, parameters);
+  }
+}
+
 #endif
