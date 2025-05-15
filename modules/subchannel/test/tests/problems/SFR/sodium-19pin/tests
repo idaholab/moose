@@ -37,6 +37,18 @@
     max_parallel = 1
     requirement = 'The system will examine the subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
   []
+  [test_full_monolithic]
+    type = Exodiff
+    input = test19_full_monolithic.i
+    exodiff = test19_full_monolithic_out.e
+    custom_cmp = 'test.exodiff'
+    capabilities = 'method!=dbg'
+    abs_zero = 1e-7
+    valgrind = NONE
+    recover = false
+    max_parallel = 1
+    requirement = 'The system will examine the subchannel full monolithic solver for a 19pin liquid sodium cooled assembly'
+  []
   [test_monolithic_csv]
     type = CSVDiff
     input = 'test19_monolithic.i'
