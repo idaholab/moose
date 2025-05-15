@@ -50,6 +50,7 @@ public:
    * Test a solver can solve a dummy diffusion problem to the expected tolerance.
    * Based on mfem/tests/unit/linalg/test_direct_solvers.cpp.
    */
+  template <typename SolverType>
   void testDiffusionSolve(MFEMSolverBase & solver, mfem::real_t tol)
   {
     int rank;
@@ -90,7 +91,7 @@ public:
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
     solver.updateSolver(a, ess_tdof_list);
-    auto solver_ptr = std::dynamic_pointer_cast<mfem::Solver>(solver.getSolver()).get();
+    auto solver_ptr = std::dynamic_pointer_cast<SolverType>(solver.getSolver()).get();
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);
     solver_ptr->SetOperator(*A);
@@ -116,7 +117,7 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRES)
   // Construct kernel
   MFEMHypreGMRES & solver = addObject<MFEMHypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::HypreGMRES>(solver, 1e-5);
 }
 
 /**
@@ -131,7 +132,7 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRES)
   MFEMHypreFGMRES & solver =
       addObject<MFEMHypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::HypreFGMRES>(solver, 1e-5);
 }
 
 /**
@@ -147,7 +148,7 @@ TEST_F(MFEMSolverTest, MFEMHyprePCG)
   // Construct kernel
   MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::HyprePCG>(solver, 1e-5);
 }
 
 /**
@@ -165,7 +166,7 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolver)
   MFEMGMRESSolver & solver =
       addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::GMRESSolver>(solver, 1e-5);
 }
 
 TEST_F(MFEMSolverTest, MFEMCGSolver)
@@ -178,7 +179,7 @@ TEST_F(MFEMSolverTest, MFEMCGSolver)
   // Construct kernel
   MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::CGSolver>(solver, 1e-5);
 }
 
 /**
@@ -199,7 +200,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
   // HypreBoomerAMG warnings are tripped by zero rows in matrices; turn this off for this test
   solver_downcast->SetErrorMode(mfem::HypreSolver::ErrorMode::IGNORE_HYPRE_ERRORS);
   ASSERT_NE(solver_downcast.get(), nullptr);
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::HypreBoomerAMG>(solver, 1e-5);
 }
 
 /**
@@ -265,7 +266,7 @@ TEST_F(MFEMSolverTest, MFEMSuperLU)
   // Construct kernel
   MFEMSuperLU & solver = addObject<MFEMSuperLU>("MFEMSuperLU", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-12);
+  testDiffusionSolve<mfem::SuperLUSolver>(solver, 1e-12);
 }
 
 /**
@@ -281,7 +282,7 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRESLOR)
   // Construct kernel
   MFEMHypreGMRES & solver = addObject<MFEMHypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::LORSolver<mfem::HypreGMRES>>(solver, 1e-5);
 }
 
 /**
@@ -298,7 +299,7 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRESLOR)
   MFEMHypreFGMRES & solver =
       addObject<MFEMHypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::LORSolver<mfem::HypreFGMRES>>(solver, 1e-5);
 }
 
 /**
@@ -314,7 +315,7 @@ TEST_F(MFEMSolverTest, MFEMHyprePCGLOR)
   // Construct kernel
   MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::LORSolver<mfem::HyprePCG>>(solver, 1e-5);
 }
 
 /**
@@ -332,7 +333,7 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolverLOR)
   MFEMGMRESSolver & solver =
       addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::LORSolver<mfem::GMRESSolver>>(solver, 1e-5);
 }
 
 TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
@@ -345,7 +346,7 @@ TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
   // Construct kernel
   MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
 
-  testDiffusionSolve(solver, 1e-5);
+  testDiffusionSolve<mfem::LORSolver<mfem::CGSolver>>(solver, 1e-5);
 }
 
 #endif
