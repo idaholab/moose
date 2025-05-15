@@ -35,6 +35,11 @@ CohesiveZoneModelBase::validParams()
   params.addClassDescription(
       "Computes the mortar frictional contact force via a penalty approach.");
   // Suppress augmented Lagrange parameters. AL implementation for CZM remains to be done.
+  params.addParam<Real>("penalty_friction",
+                        "The penalty factor for frictional interaction. If not provide, the normal "
+                        "penalty factor is also used for the frictional problem.");
+  params.addParam<Real>(
+      "friction_coefficient", 0.0, "The friction coefficient ruling Coulomb friction equations.");
   params.suppressParameter<Real>("max_penalty_multiplier");
   params.suppressParameter<Real>("penalty_multiplier");
   params.suppressParameter<Real>("penetration_tolerance");
@@ -60,6 +65,9 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
     PenaltyWeightedGapUserObject(parameters),
     WeightedVelocitiesUserObject(parameters),
     _ndisp(coupledComponents("displacements")),
+    _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
+                                                       : getParam<Real>("penalty")),
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
     _epsilon_tolerance(1.0e-40)
 
 {
@@ -171,27 +179,43 @@ CohesiveZoneModelBase::timestepSetup()
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
 
-  // // save off accumulated slip from the last timestep
-  // for (auto & map_pr : _dof_to_accumulated_slip)
-  // {
-  //   auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
-  //   old_accumulated_slip = accumulated_slip;
-  // }
+  // Clear step slip (values used in between AL iterations for penalty adaptivity)
+  for (auto & map_pr : _dof_to_step_slip)
+  {
+    auto & [step_slip, old_step_slip] = map_pr.second;
+    old_step_slip = {0.0, 0.0};
+    step_slip = {0.0, 0.0};
+  }
 
-  // for (auto & dof_lp : _dof_to_local_penalty_friction)
-  //   dof_lp.second = _penalty_friction;
+  // save off accumulated slip from the last timestep
+  for (auto & map_pr : _dof_to_accumulated_slip)
+  {
+    auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
+    old_accumulated_slip = accumulated_slip;
+  }
 
-  // // save off tangential traction from the last timestep
-  // for (auto & map_pr : _dof_to_tangential_traction)
-  // {
-  //   auto & [tangential_traction, old_tangential_traction] = map_pr.second;
-  //   old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
-  //                              MetaPhysicL::raw_value(tangential_traction(1))};
-  //   tangential_traction = {0.0, 0.0};
-  // }
+  for (auto & dof_lp : _dof_to_local_penalty_friction)
+    dof_lp.second = _penalty_friction;
 
-  // for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
-  //   delta_tangential_lm.setZero();
+  // save off tangential traction from the last timestep
+  for (auto & map_pr : _dof_to_tangential_traction)
+  {
+    auto & [tangential_traction, old_tangential_traction] = map_pr.second;
+    old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
+                               MetaPhysicL::raw_value(tangential_traction(1))};
+    tangential_traction = {0.0, 0.0};
+  }
+
+  for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+    delta_tangential_lm.setZero();
+
+  // save off tangential traction from the last timestep
+  for (auto & map_pr : _dof_to_damage)
+  {
+    auto & [damage, old_damage] = map_pr.second;
+    old_damage = {MetaPhysicL::raw_value(damage)};
+    damage = {0.0};
+  }
 }
 
 void
@@ -249,6 +273,89 @@ CohesiveZoneModelBase::reinit()
 
     // Build final traction vector
     computeGlobalTraction(node);
+
+    // Compute mechanical contact until end of method.
+    const auto penalty_friction = findValue(
+        _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
+
+    // utilized quantities
+    const auto & normal_pressure = _dof_to_normal_pressure[node];
+
+    // map the tangential traction and accumulated slip
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node];
+    auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node];
+
+    Real normal_lm = -1;
+    if (_dof_to_lagrange_multiplier.find(node) != _dof_to_lagrange_multiplier.end())
+      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node);
+
+    // Keep active set fixed from second Uzawa loop
+    if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
+    {
+      using namespace std;
+
+      auto damage = _dof_to_damage[node].first;
+
+      const auto & real_tangential_velocity =
+          libmesh_map_find(_dof_to_real_tangential_velocity, node);
+      const ADTwoVector slip_distance = {real_tangential_velocity[0] * _dt,
+                                         real_tangential_velocity[1] * _dt};
+
+      // frictional lagrange multiplier (delta lambda^(k)_T)
+      const auto & tangential_lm =
+          _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node] : zero;
+
+      // tangential trial traction (Simo 3.12)
+      // Modified for implementation in MOOSE: Avoid pingponging on frictional sign (max. 0.4
+      // capacity)
+      ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
+
+      const auto slip_metric = std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(0)) +
+                               std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
+
+      if (slip_metric > _epsilon_tolerance &&
+          penalty_friction * slip_distance.norm() >
+              0.4 * _friction_coefficient * damage * std::abs(normal_pressure))
+      {
+        inner_iteration_penalty_friction =
+            MetaPhysicL::raw_value(0.4 * _friction_coefficient * damage *
+                                   std::abs(normal_pressure) /
+                                   (penalty_friction * slip_distance.norm())) *
+            penalty_friction * slip_distance;
+      }
+
+      ADTwoVector tangential_trial_traction =
+          old_tangential_traction + tangential_lm + inner_iteration_penalty_friction;
+
+      // Nonlinearity below
+      ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
+      ADReal phi_trial = tangential_trial_traction_norm - _friction_coefficient * normal_pressure;
+      tangential_traction = tangential_trial_traction;
+
+      // Simo considers this a 'return mapping'; we are just capping friction to the Coulomb limit.
+      if (phi_trial > 0.0)
+        // Simo 3.13/3.14 (the penalty formulation has an error in the paper)
+        tangential_traction -=
+            phi_trial * tangential_trial_traction / tangential_trial_traction_norm;
+
+      // track accumulated slip for output purposes
+      accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
+    }
+    else
+    {
+      // reset slip and clear traction
+      accumulated_slip.setZero();
+      tangential_traction.setZero();
+    }
+
+    // Now that we have consistent nodal frictional values, create an interpolated frictional
+    // pressure variable.
+    const auto & test_i = (*_test)[i];
+    for (const auto qp : make_range(_qrule_msm->n_points()))
+    {
+      _frictional_contact_traction_one[qp] += test_i[qp] * tangential_traction(0);
+      _frictional_contact_traction_two[qp] += test_i[qp] * tangential_traction(1);
+    }
   }
 
   for (const auto i : index_range(_czm_interpolated_traction))

@@ -46,14 +46,14 @@ protected:
   virtual void computeCriticalDisplacementJump(const Node * const node);
   virtual void computeFinalDisplacementJump(const Node * const node);
   virtual void computeEffectiveDisplacementJump(const Node * const node);
-  virtual void computeDamage(const Node * const node);
+  virtual void computeDamage(const Node * const node) override;
   // @}
 
   /// Encapsulate the CZM constitutive behavior.
   virtual void computeCZMTraction(const Node * const node) override;
 
-  /// After full damage, set traction to zero
-  const bool _apply_zero_traction_after_damage;
+  /// Zero compressive traction
+  const bool _zero_compressive_traction;
 
   /// Map from degree of freedom to mode mixity ratio (AD needed?)
   std::unordered_map<const DofObject *, ADReal> _dof_to_mode_mixity_ratio;
@@ -118,6 +118,5 @@ protected:
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_initial;
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_final;
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_max;
-  std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_damage;
   // @}
 };
