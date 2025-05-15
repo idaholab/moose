@@ -122,8 +122,8 @@
     [1D_2D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/1D_2D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=1D_2D_ADpenalty_out Constraints/inactive=equal'
+      cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=penalty '
+                 'Constraints/equal/type=ADEqualValueEmbeddedConstraint Outputs/file_base=1D_2D_ADpenalty_out'
       exodiff = '1D_2D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
@@ -132,8 +132,8 @@
     [1D_3D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/1D_3D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=1D_3D_ADpenalty_out Constraints/inactive=equal'
+      cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=penalty '
+                 'Constraints/equal/type=ADEqualValueEmbeddedConstraint Outputs/file_base=1D_3D_ADpenalty_out'
       exodiff = '1D_3D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
@@ -142,8 +142,8 @@
     [2D_2D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/2D_2D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=2D_2D_ADpenalty_out Constraints/inactive=equal'
+      cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=penalty '
+                 'Constraints/equal/type=ADEqualValueEmbeddedConstraint Outputs/file_base=2D_2D_ADpenalty_out'
       exodiff = '2D_2D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
@@ -152,8 +152,8 @@
     [2D_3D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/2D_3D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=2D_3D_ADpenalty_out Constraints/inactive=equal'
+      cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=penalty '
+                 'Constraints/equal/type=ADEqualValueEmbeddedConstraint Outputs/file_base=2D_3D_ADpenalty_out'
       exodiff = '2D_3D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
@@ -162,8 +162,8 @@
     [3D_3D]
       type = 'Exodiff'
       input = 'embedded_constraint.i'
-      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/ADequal/formulation=penalty '
-                 'Outputs/file_base=3D_3D_ADpenalty_out Constraints/inactive=equal'
+      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=penalty '
+                 'Constraints/equal/type=ADEqualValueEmbeddedConstraint Outputs/file_base=3D_3D_ADpenalty_out'
       exodiff = '3D_3D_ADpenalty_out.e'
       abs_zero = 1e-9
       mesh_mode = REPLICATED
@@ -176,10 +176,29 @@
     issues = '#30499'
     type = RunException
     input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/1D_2D.e Constraints/ADequal/formulation=kinematic '
-               'Outputs/file_base=1D_2D_ADkinematic_out Constraints/inactive=equal '
-               'Executioner/solve_type=NEWTON'
+    cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=kinematic '
+               'Constraints/equal/type=ADEqualValueEmbeddedConstraint Executioner/solve_type=NEWTON'
     expect_err = "AD constraints cannot be used with KINEMATIC formulation."
+    mesh_mode = REPLICATED
+  []
+  [two_var_AD]
+    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
+    requirement = "The system shall couple two different variables using automatic "
+                  "differentiation and penalty constraint and it will produce the same "
+                  "results as a single variable simulation."
+    issues = '#30499'
+    type = RunApp
+    input = 'two_var_embedded_constraint.i'
+    mesh_mode = REPLICATED
+  []
+  [error_two_var_AD]
+    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
+    requirement = "The system shall error when the nonAD constraint is used for coupling two variables."
+    issues = '#30499'
+    type = RunException
+    input = 'two_var_embedded_constraint.i'
+    cli_args = 'Constraints/equal_phi1_phi2/type=EqualValueEmbeddedConstraint'
+    expect_err = "The primary_variable and variable must be the same."
     mesh_mode = REPLICATED
   []
 []
