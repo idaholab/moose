@@ -46,10 +46,9 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "lag_displacement_jump",
       false,
       "Whether to use old displacement jumps to compute the effective displacement jump.");
-  params.addParam<bool>("apply_zero_traction_after_damage",
+  params.addParam<bool>("zero_compressive_traction",
                         false,
-                        "After full damage, set traction to zero (allow it to use with Mortar "
-                        "contact for mechanical contact.)");
+                        "Zero compressive traction (Allow it to use Mortar contact).");
   params.addParam<Real>(
       "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
   params.addRangeCheckedParam<Real>(
@@ -70,7 +69,7 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     PenaltyWeightedGapUserObject(parameters),
     WeightedVelocitiesUserObject(parameters),
     CohesiveZoneModelBase(parameters),
-    _apply_zero_traction_after_damage(getParam<bool>("apply_zero_traction_after_damage")),
+    _zero_compressive_traction(getParam<bool>("zero_compressive_traction")),
     _normal_strength(getMaterialProperty<Real>("normal_strength")),
     _shear_strength(getMaterialProperty<Real>("shear_strength")),
     _GI_c(getMaterialProperty<Real>("GI_c")),
@@ -124,14 +123,6 @@ BilinearMixedModeCohesiveZoneModel::timestepSetup()
 {
   // instead we call it explicitly here
   CohesiveZoneModelBase::timestepSetup();
-
-  // save off tangential traction from the last timestep
-  for (auto & map_pr : _dof_to_damage)
-  {
-    auto & [damage, old_damage] = map_pr.second;
-    old_damage = {MetaPhysicL::raw_value(damage)};
-    damage = {0.0};
-  }
 
   // for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
   //   delta_tangential_lm.setZero();
@@ -232,13 +223,6 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   computeEffectiveDisplacementJump(node);
   computeDamage(node);
 
-  if (_apply_zero_traction_after_damage &&
-      MooseUtils::absoluteFuzzyEqual(_dof_to_damage[node].first, 1.0))
-  {
-    _dof_to_czm_traction[node] = 0.0;
-    return;
-  }
-
   // Split displacement jump into active and inactive parts
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
@@ -251,7 +235,7 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   // This traction vector is local at this point.
   _dof_to_czm_traction[node] =
       -(1.0 - _dof_to_damage[node].first) * _penalty_stiffness_czm * delta_active -
-      _penalty_stiffness_czm * delta_inactive;
+      _penalty_stiffness_czm * (_zero_compressive_traction ? 0.0 : delta_inactive);
 }
 
 void
