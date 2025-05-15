@@ -49,4 +49,6 @@ def get_language(filename):
         return 'cpp'
     elif ext == '.py':
         return 'python'
+    elif ext == '.i':
+        return 'moose'
     return 'text'
