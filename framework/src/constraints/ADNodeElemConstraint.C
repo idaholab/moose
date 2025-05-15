@@ -67,7 +67,8 @@ ADNodeElemConstraint::computeJacobian()
   for (_i = 0; _i < _test_primary.size(); _i++)
     primary_residual[_i] += computeQpResidual(Moose::Primary);
 
-  addJacobian(_assembly, primary_residual, _primary_var.dofIndicesNeighbor(), _var.scalingFactor());
+  addJacobian(
+      _assembly, primary_residual, _primary_var.dofIndicesNeighbor(), _primary_var.scalingFactor());
 
   std::vector<ADReal> secondary_residual(_test_secondary.size(), 0);
 

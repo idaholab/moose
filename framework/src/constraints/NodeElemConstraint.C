@@ -31,6 +31,8 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     _grad_test_primary(_var.gradPhiNeighbor()),
     _grad_u_primary(_primary_var.gradSlnNeighbor())
 {
+  if (_primary_var.number() != _var.number())
+    paramError("primary_variable", "The primary_variable and variable must be the same.");
 }
 
 void
@@ -38,7 +40,7 @@ NodeElemConstraint::computeResidual()
 {
   _qp = 0;
 
-  prepareVectorTagNeighbor(_assembly, _var.number());
+  prepareVectorTagNeighbor(_assembly, _primary_var.number());
   for (_i = 0; _i < _test_primary.size(); _i++)
     _local_re(_i) += computeQpResidual(Moose::Primary);
   accumulateTaggedLocalResidual();
