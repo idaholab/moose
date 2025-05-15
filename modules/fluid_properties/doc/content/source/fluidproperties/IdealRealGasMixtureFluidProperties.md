@@ -1,7 +1,7 @@
 # IdealRealGasMixtureFluidProperties
 
-This class computes fluid properties for gaseous mixtures with a condensable
-(primary) component and one or more non-condensable (secondary) components.
+This is a [VaporMixtureFluidProperties.md] that assumes an ideal vapor mixture but allows real vapor components,
+rather than assume that each component is an ideal gas.
 This model (which corresponds to "Model A" in [!citep](hansel2018ncgs))
 assumes that each gas in the mixture occupies the entire mixture
 volume at a common temperature and each has a partial pressure and is considered
