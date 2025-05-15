@@ -86,4 +86,15 @@ CSGSurfaceList::addSurface(const std::pair<std::string, std::shared_ptr<CSGSurfa
   _surfaces.insert(surf);
 }
 
+void
+CSGSurfaceList::renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name)
+{
+  checkSurfaceName(name);
+
+  auto prev_name = surface->getName();
+  surface->setName(name);
+  _surfaces.erase(prev_name);
+  _surfaces.insert(std::make_pair(name, surface));
+}
+
 } // namespace CSG

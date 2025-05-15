@@ -108,6 +108,11 @@ public:
    */
   virtual CSGSurface::Direction directionFromPoint(const Point p) = 0; // Pure virtual function
 
+  /**
+   * @brief Get the name of surface
+   *
+   * @return std::string
+   */
   std::string getName() const { return _name; }
 
 protected:
@@ -119,5 +124,12 @@ protected:
 
   /// Boundary type of surface
   BoundaryType _boundary_type;
+
+  // set the name of the surface - intentionally not public because
+  // name needs to be managed at the CSGSurfaceList level
+  void setName(const std::string name) { _name = name; }
+
+  // CSGSurfaceList needs to be friend to access setName()
+  friend class CSGSurfaceList;
 };
 } // namespace CSG

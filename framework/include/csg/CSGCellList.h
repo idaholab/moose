@@ -85,6 +85,13 @@ public:
    */
   void addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell);
 
+  /**
+   * @brief rename the specified cell
+   *
+   * @param name new name
+   */
+  void renameCell(const std::shared_ptr<CSGCell> cell, const std::string name);
+
 protected:
   /// Checks whether cell name already exists within CSGCellList object
   void checkCellName(const std::string name);

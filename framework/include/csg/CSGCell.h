@@ -126,7 +126,7 @@ public:
 
 protected:
   /// Name of surface
-  const std::string _name;
+  std::string _name;
 
   /// Fill type of cell
   FillType _fill_type;
@@ -139,5 +139,12 @@ protected:
 
   /// Fill object if fill is CSGUniverse
   const std::shared_ptr<CSGUniverse> _fill_universe;
+
+  // set the name of the cell - intentionally not public because
+  // name needs to be managed at the CSGCellList level
+  void setName(const std::string name) { _name = name; }
+
+  // CSGCellList needs to be friend to access setName()
+  friend class CSGCellList;
 };
 } // namespace CSG

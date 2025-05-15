@@ -67,4 +67,14 @@ CSGCellList::addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell
   _cells.insert(cell);
 }
 
+void
+CSGCellList::renameCell(const std::shared_ptr<CSGCell> cell, const std::string name)
+{
+  checkCellName(name);
+  auto prev_name = cell->getName();
+  cell->setName(name);
+  _cells.erase(prev_name);
+  _cells.insert(std::make_pair(name, cell));
+}
+
 } // namespace CSG
