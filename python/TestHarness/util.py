@@ -528,7 +528,7 @@ def getCapabilities(exe):
     Get capabilities JSON and compare it to the required capabilities
     """
     assert exe
-    output = runCommand("%s --show-capabilities" % exe)
+    output = runCommand(f"{os.environ.get('MOOSE_MPI_COMMAND', 'mpiexec')} -n 1 {exe} --show-capabilities")
     return parseMOOSEJSON(output, '--show-capabilities')
 
 def getCapability(exe, name):
@@ -723,7 +723,7 @@ def getExeJSON(exe: str) -> str:
     """
     Calls --json on the given executable
     """
-    return runCommand("%s --json" % exe)
+    return runCommand(f"{os.environ.get('MOOSE_MPI_COMMAND', 'mpiexec')} -n 1 {exe} --json")
 
 def getExeObjects(json: dict) -> set[str]:
     """
