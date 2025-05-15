@@ -24,7 +24,7 @@ public:
 
 private:
   const VariableName & _var_name;
-  const FunctionName & _coeff_name;
+  const MFEMVectorCoefficientName & _coeff_name;
   mfem::VectorCoefficient & _vec_coeff;
   mfem::GridFunction & _var;
 };

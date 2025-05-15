@@ -43,7 +43,7 @@ public:
 TEST_F(MFEMPostprocessorTest, MFEML2Error)
 {
   InputParameters pp_params = _factory.getValidParams("MFEML2Error");
-  pp_params.set<FunctionName>("function") = "scalar_ones";
+  pp_params.set<MFEMScalarCoefficientName>("function") = "scalar_ones";
   pp_params.set<VariableName>("variable") = "scalar_var";
   auto & l2_pp = addObject<MFEML2Error>("MFEML2Error", "ppl2", pp_params);
 
@@ -62,7 +62,7 @@ TEST_F(MFEMPostprocessorTest, MFEML2Error)
 TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
 {
   InputParameters pp_params = _factory.getValidParams("MFEML2Error");
-  pp_params.set<FunctionName>("function") = "scalar_ones";
+  pp_params.set<MFEMScalarCoefficientName>("function") = "scalar_ones";
   pp_params.set<VariableName>("variable") = "scalar_var";
   _mfem_problem->addPostprocessor("MFEML2Error", "ppl2", pp_params);
   auto & l2_pp = _mfem_problem->getUserObject<MFEML2Error>("ppl2");
@@ -87,7 +87,7 @@ TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
 TEST_F(MFEMPostprocessorTest, MFEMVectorL2Error)
 {
   InputParameters pp_params = _factory.getValidParams("MFEMVectorL2Error");
-  pp_params.set<FunctionName>("function") = "vector_ones";
+  pp_params.set<MFEMVectorCoefficientName>("function") = "vector_ones";
   pp_params.set<VariableName>("variable") = "vector_var";
   auto & l2_pp = addObject<MFEMVectorL2Error>("MFEMVectorL2Error", "ppl2", pp_params);
 
