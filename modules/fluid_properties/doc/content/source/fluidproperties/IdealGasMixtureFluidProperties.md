@@ -1,6 +1,6 @@
 # IdealGasMixtureFluidProperties
 
-This class computes fluid properties for a mixture of ideal gases (see [IdealGasFluidProperties.md]).
+This is a [VaporMixtureFluidProperties.md] where each of the components are assumed to be ideal gases (see [IdealGasFluidProperties.md]).
 
 First note the following definitions and relations:
 

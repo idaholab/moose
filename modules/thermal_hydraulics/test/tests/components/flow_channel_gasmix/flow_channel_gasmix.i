@@ -6,17 +6,11 @@ initial_T = 500
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 0.029
-    T_c = 132.63
-    rho_c = 99.55884676
-    e_c = 9.5064379593e+04
   []
   [fp2]
     type = IdealGasFluidProperties
     gamma = 1.5
     molar_mass = 0.04
-    T_c = 132.63
-    rho_c = 99.55884676
-    e_c = 9.5064379593e+04
   []
   [fp_mix]
     type = IdealGasMixtureFluidProperties
