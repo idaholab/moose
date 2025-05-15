@@ -16,10 +16,9 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
-#include "Executioner.h"
 #include "AddVariableAction.h"
+#include "MooseEnum.h"
 
-#include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);

@@ -77,3 +77,18 @@ ADNodeElemConstraint::computeJacobian()
 
   addJacobian(_assembly, secondary_residual, _var.dofIndices(), _var.scalingFactor());
 }
+
+Real
+ADNodeElemConstraint::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
+{
+  mooseAssert(false, "Should not be used");
+  return 0;
+}
+
+Real
+ADNodeElemConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
+                                               unsigned int /*jvar*/)
+{
+  mooseAssert(false, "Should not be used");
+  return 0;
+}

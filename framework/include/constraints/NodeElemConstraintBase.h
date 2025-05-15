@@ -49,20 +49,20 @@ public:
    * @return bool When this returns true the secondary's residual as computed by the constraint will
    * _replace_ the residual previously at that node for that variable.
    */
-  virtual bool overwriteSecondaryResidual();
+  virtual bool overwriteSecondaryResidual() const;
 
   /**
    * Whether or not the secondary's Jacobian row should be overwritten.
    * @return bool When this returns true the secondary's Jacobian row as computed by the constraint
    * will _replace_ the residual previously at that node for that variable.
    */
-  virtual bool overwriteSecondaryJacobian() { return overwriteSecondaryResidual(); };
+  virtual bool overwriteSecondaryJacobian() const { return overwriteSecondaryResidual(); };
 
   /**
    * The variable on the primary elem.
    * @return MooseVariable & a reference to the primary variable
    */
-  virtual MooseVariable & primaryVariable() { return _primary_var; }
+  virtual MooseVariable & primaryVariable() const { return _primary_var; }
 
   /**
    * The variable number that this object operates on.
@@ -73,6 +73,7 @@ protected:
   /// Compute the value the secondary node should have at the beginning of a timestep.
   virtual Real computeQpSecondaryValue() = 0;
 
+  /// secondary node variable
   MooseVariable & _var;
   /// Primary side variable
   MooseVariable & _primary_var;
@@ -84,6 +85,7 @@ protected:
 
   /// current node being processed
   const Node * const & _current_node;
+  /// current element being processed
   const Elem * const & _current_elem;
 
   /// Shape function on the secondary side.
@@ -97,6 +99,7 @@ protected:
   /// Side test function
   const VariableTestValue & _test_primary;
 
+  /// MooseMesh map of current nodes to the connected elements
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
   /// maps secondary node ids to primary element ids
@@ -109,8 +112,9 @@ protected:
    * the residual previously at that node for that variable.
    */
   bool _overwrite_secondary_residual;
-  // fixme move
+
 public:
+  /// system Jacobian, provides pre-constraint Jacobian for nonAD kinematic constraints
   SparseMatrix<Number> * _jacobian;
   /// dofs connected to the secondary node
   std::vector<dof_id_type> _connected_dof_indices;

@@ -70,7 +70,7 @@ NodeElemConstraintBase::computeSecondaryValue(NumericVector<Number> & current_so
 }
 
 bool
-NodeElemConstraintBase::overwriteSecondaryResidual()
+NodeElemConstraintBase::overwriteSecondaryResidual() const
 {
   return _overwrite_secondary_residual;
 }

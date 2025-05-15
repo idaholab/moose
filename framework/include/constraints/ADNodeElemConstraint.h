@@ -14,9 +14,9 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 /**
- * A ADNodeElemConstraint is used when you need to create constraints between
- * a secondary node and a primary element. It works by allowing you to modify the
- * residual and jacobian entries on the secondary node and the primary element.
+ * An ADNodeElemConstraint is used when you need to create constraints between a subdomain of
+ * secondary nodes and a subdomain of primary elements. It works by allowing you to modify the
+ * residual and jacobian entries on the secondary nodes and the primary elements.
  */
 class ADNodeElemConstraint : public NodeElemConstraintBase
 {
@@ -25,7 +25,7 @@ public:
 
   ADNodeElemConstraint(const InputParameters & parameters);
 
-  /// Computes the residual Nodal residual.
+  /// Computes the Nodal residual.
   virtual void computeResidual() override;
 
   /// Computes the jacobian for the current element.
@@ -35,18 +35,15 @@ protected:
   /// prepare the _secondary_to_primary_map
   virtual void prepareSecondaryToPrimaryMap() = 0;
 
-  /// This is the virtual that derived classes should override for computing the residual.
+  /// This is the virtual method that derived classes should override for computing the residual.
   virtual ADReal computeQpResidual(Moose::ConstraintType type) = 0;
 
   /// This is the virtual that derived classes should override for computing the Jacobian.
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType /*type*/) { return 0; }
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType /*type*/);
 
   /// This is the virtual that derived classes should override for computing the off-diag Jacobian.
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
-                                        unsigned int /*jvar*/)
-  {
-    return 0;
-  }
+                                        unsigned int /*jvar*/);
 
   /// Holds the current solution at the current quadrature point
   const ADVariableValue & _u_primary;

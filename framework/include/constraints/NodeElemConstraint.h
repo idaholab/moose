@@ -13,9 +13,9 @@
 #include "NodeElemConstraintBase.h"
 
 /**
- * A NodeElemConstraint is used when you need to create constraints between
- * a secondary node and a primary element. It works by allowing you to modify the
- * residual and jacobian entries on the secondary node and the primary element.
+ * A NodeElemConstraintBase is a base class for constraints between a subdomain with secondary nodes
+ * and a subdomain with primary elements. It works by allowing you to modify the residual and
+ * jacobian entries on the secondary nodes and the primary elements.
  */
 class NodeElemConstraint : public NodeElemConstraintBase
 {
