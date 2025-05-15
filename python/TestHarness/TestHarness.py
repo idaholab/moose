@@ -842,7 +842,8 @@ class TestHarness:
                 # Store the results from each job
                 for job_group in all_jobs:
                     for job in job_group:
-                        job.storeResults(self.scheduler)
+                        if not job.isSilent():
+                            job.storeResults(self.scheduler)
 
                 # And write the results, including the stats
                 self.writeResults(complete=True, stats=stats)
