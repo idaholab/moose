@@ -97,8 +97,6 @@ public:
    */
   const std::string getName() const { return _name; }
 
-  void setName(const std::string name) { _name = name; }
-
   /**
    * @brief return true if the universe is the root universe
    *
@@ -115,5 +113,12 @@ protected:
 
   // whether or not this universe is the root universe
   bool _is_root;
+
+  // set the name of the universe - intentionally not public because
+  // name needs to be managed at the CSGUniverseList level
+  void setName(const std::string name) { _name = name; }
+
+  // CSGUniverseList needs to be friend to access setName()
+  friend class CSGUniverseList;
 };
 } // namespace CSG
