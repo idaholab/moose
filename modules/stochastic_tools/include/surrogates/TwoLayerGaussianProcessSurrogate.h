@@ -27,7 +27,6 @@ public:
   virtual void
   evaluate(const std::vector<Real> & x, std::vector<Real> & y, std::vector<Real> & std) const;
 
-  // void predict();
 
   /**
    * This function is called by LoadCovarianceDataAction when the surrogate is
@@ -39,23 +38,6 @@ public:
   StochasticTools::TwoLayerGaussianProcess & tgp() { return _tgp; }
   const StochasticTools::TwoLayerGaussianProcess & getTGP() const { return _tgp; }
 
-  // struct KrigResult {
-  //   RealEigenMatrix mean;
-  //   RealEigenMatrix sigma;
-  // };
-
-  // void squared_exponential_covariance(const RealEigenMatrix &x1, 
-  //                 const RealEigenMatrix &x2, 
-  //                 Real tau2, 
-  //                 const RealEigenMatrix &theta, 
-  //                 Real g, 
-  //                 RealEigenMatrix &k);
-
-  // void krig(const RealEigenMatrix & y, const RealEigenMatrix & x, const RealEigenMatrix & x_new,
-  //                                  const RealEigenMatrix & theta, Real g, Real tau2, bool cal_sigma,
-  //                                  const RealEigenMatrix & prior_mean, const RealEigenMatrix & prior_mean_new, KrigResult & result);
-
-  // void predict(const RealEigenMatrix & x_new);
 
 private:
   StochasticTools::TwoLayerGaussianProcess & _tgp;

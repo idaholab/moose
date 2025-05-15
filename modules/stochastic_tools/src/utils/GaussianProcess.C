@@ -208,8 +208,6 @@ GaussianProcess::sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMat
   Real beta = settings.beta.noise;
   Real l = settings.l;
   Real u = settings.u;
-  MooseRandom generator;
-  generator.seed(0, 101);
   Real ru1 = MooseRandom::rand();
   Real ru = MooseRandom::rand();
   Real noise_star = Uniform::quantile(ru1, l * noise_t / u, u * noise_t / l);
@@ -245,8 +243,6 @@ GaussianProcess::sampleLengthscale(const RealEigenMatrix & out_vec, const RealEi
     Real beta = settings.beta.noise;
     Real l = settings.l;
     Real u = settings.u;
-    MooseRandom generator;
-    generator.seed(0, 101);
     RealEigenMatrix lengthscale_star = lengthscale_t;
     Real ru1 = MooseRandom::rand();
     Real ru = MooseRandom::rand();
@@ -306,8 +302,6 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
   RealEigenMatrix x = training_params;
   RealEigenMatrix y = training_data;
   
-  MooseRandom generator;
-  generator.seed(0, 101);
   unsigned int nmcmc = 10000;
   unsigned int burn = 0;
   unsigned int thin = 2;

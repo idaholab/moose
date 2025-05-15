@@ -198,10 +198,6 @@ TwoLayerGaussianProcess::sampleNoise(const RealEigenMatrix & out_vec, const Real
   Real l = settings.l;
   Real u = settings.u;
 
-  MooseRandom generator;
-  generator.seed(0, 1980);
-  // Real check_seed = MooseRandom::rand();
-  // std::cout << "check_seed0 is " << check_seed << std::endl;
   Real ru1 = MooseRandom::rand();
   Real ru = MooseRandom::rand();
   Real noise_star = Uniform::quantile(ru1, l * noise_t / u, u * noise_t / l);
@@ -272,7 +268,6 @@ TwoLayerGaussianProcess::multiVariateNormalSampling(const RealEigenMatrix & mean
 {
   Eigen::LLT<RealEigenMatrix> cho_decomp = cov.llt();
   RealEigenMatrix L = cho_decomp.matrixL();
-  // std::cout << "matrix l is " << L.rows() << ", " << L.cols() << std::endl;
   RealEigenMatrix standard_sample_matrix(n_dim, n_draw);
   Real ru;
   
