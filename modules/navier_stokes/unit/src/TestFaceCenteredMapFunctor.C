@@ -104,7 +104,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
       u.gradient(arg, Moose::currentState());
       EXPECT_TRUE(false);
     }
-    catch (std::runtime_error & e)
+    catch (MooseException & e)
     {
       EXPECT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
     }
@@ -119,7 +119,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
       u(arg, Moose::currentState());
       EXPECT_TRUE(false);
     }
-    catch (std::runtime_error & e)
+    catch (MooseException & e)
     {
       EXPECT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
     }
@@ -152,7 +152,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
         Moose::currentState());
     EXPECT_TRUE(false);
   }
-  catch (std::runtime_error & e)
+  catch (MooseException & e)
   {
     EXPECT_TRUE(std::string(e.what()).find("not_restricted") != std::string::npos);
     EXPECT_TRUE(std::string(e.what()).find("Make sure to fill") != std::string::npos);
@@ -167,7 +167,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
         Moose::currentState());
     EXPECT_TRUE(false);
   }
-  catch (std::runtime_error & e)
+  catch (MooseException & e)
   {
     EXPECT_TRUE(std::string(e.what()).find("is_restricted") != std::string::npos);
     EXPECT_TRUE(std::string(e.what()).find("0") != std::string::npos);

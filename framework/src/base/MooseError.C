@@ -11,6 +11,7 @@
 #include "MooseUtils.h"
 #include "MooseVariable.h"
 #include "Registry.h"
+#include "MooseException.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -53,7 +54,7 @@ mooseMsgFmt(const std::string & msg, const std::string & color)
 mooseErrorRaw(std::string msg, const std::string prefix)
 {
   if (Moose::_throw_on_error)
-    throw std::runtime_error(msg);
+    throw MooseException(msg);
 
   msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
 

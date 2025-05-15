@@ -234,7 +234,7 @@ TEST_P(InvalidVectorFESpaceTest, TestInvalidVectorFESpace)
   buildFESpace();
   // The fespace object is lazily-constructed, so isn't actually built
   // until we ask to retreive it
-  EXPECT_THROW(fespace->getFESpace(), std::runtime_error);
+  EXPECT_THROW(fespace->getFESpace(), MooseException);
 }
 
 INSTANTIATE_TEST_SUITE_P(
