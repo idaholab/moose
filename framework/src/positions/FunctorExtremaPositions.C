@@ -86,8 +86,8 @@ FunctorExtremaPositions::initialize()
   _positions.resize(_n_extrema);
   _positions_values.resize(_n_extrema);
 
-  std::vector<Real> extrema;
-  std::vector<Point> extrema_locs;
+  std::list<Real> extrema;
+  std::list<Point> extrema_locs;
   if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
     extrema.resize(_n_extrema, -std::numeric_limits<Real>::max());
   else
@@ -102,8 +102,13 @@ FunctorExtremaPositions::initialize()
   {
     const Moose::ElemArg elem_arg = {elem, false};
     auto value = _functor(elem_arg, time_arg);
+
+    auto extremum = extrema.begin();
+    auto extremum_loc = extrema_locs.begin();
+
     for (const auto i : make_range(_n_extrema))
     {
+      libmesh_ignore(i);
       bool extrema_found = false;
       switch (_type)
       {
@@ -112,13 +117,13 @@ FunctorExtremaPositions::initialize()
           // fallthrough
         case ExtremeType::MAX:
         {
-          if (value > extrema[i])
+          if (value > *extremum)
             extrema_found = true;
           break;
         }
         case ExtremeType::MIN:
         {
-          if (value < extrema[i])
+          if (value < *extremum)
             extrema_found = true;
           break;
         }
@@ -126,31 +131,27 @@ FunctorExtremaPositions::initialize()
       if (extrema_found)
       {
         // Move the extrema down the list of extrema
-        // TODO: optimization could be to use a std::list with a constant insertion time here
-        Real temp = value;
-        Point temp_loc = elem->true_centroid();
-        for (const auto j : make_range(i, _n_extrema))
-        {
-          const auto other_temp = extrema[j];
-          const auto other_temp_loc = extrema_locs[j];
-          extrema[j] = temp;
-          extrema_locs[j] = temp_loc;
-          temp = other_temp;
-          temp_loc = other_temp_loc;
-        }
+        extrema.insert(extremum, value);
+        extrema_locs.insert(extremum_loc, elem->true_centroid());
+        extrema.pop_back();
+        extrema_locs.pop_back();
         // Found an extremum, filled the extrema vector, done
         break;
       }
+      // Consider the next extremum
+      std::advance(extremum, 1);
+      std::advance(extremum_loc, 1);
     }
   }
 
   // Synchronize across all ranks
-  unsigned int current_candidate = 0;
+  auto current_candidate = extrema.begin();
+  auto current_candidate_loc = extrema_locs.begin();
   for (const auto i : make_range(_n_extrema))
   {
-    unsigned int rank = 0;
+    unsigned int rank;
     // dont modify the extremum, it might be the global n-th extremum in a later call
-    auto copy = extrema[current_candidate];
+    auto copy = *current_candidate;
     if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
       comm().maxloc(copy, rank);
     else
@@ -159,9 +160,10 @@ FunctorExtremaPositions::initialize()
     RealVectorValue extreme_point(0., 0., 0.);
     if (rank == processor_id())
     {
-      extreme_point = extrema_locs[current_candidate];
+      extreme_point = *current_candidate_loc;
       // Our candidate for ith max got accepted, move on to offering the next extremal one
-      current_candidate++;
+      std::advance(current_candidate, 1);
+      std::advance(current_candidate_loc, 1);
     }
 
     // Send the position
