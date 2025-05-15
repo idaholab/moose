@@ -9,7 +9,7 @@
       exodiff = 'diffusion_with_null_material_out.e'
       detail = 'Verify that defining a default set of blocks correctly limits kernel and material coverage checks, and automatically applies block restrictions to kernels and variables.'
     []
-    [default_block]
+    [block_empty_test]
       type = 'Exodiff'
       input = 'diffusion_with_null_material_empty_blocks_check.i'
       exodiff = 'diffusion_with_null_material_empty_blocks_check_out.e'
