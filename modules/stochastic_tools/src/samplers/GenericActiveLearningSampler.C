@@ -32,6 +32,8 @@ GenericActiveLearningSampler::validParams()
       "num_tries",
       "num_tries>0",
       "Number of samples to propose in each iteration (not all are sent for subApp evals).");
+  params.addRequiredParam<std::vector<Real>>("initial_values",
+                                             "The starting values of the inputs to be calibrated.");
   params.addParam<unsigned int>(
       "num_random_seeds",
       100000,
@@ -44,6 +46,7 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
     TransientInterface(this),
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
+    _initial_values(getParam<std::vector<Real>>("initial_values")),
     _num_tries(getParam<unsigned int>("num_tries"))
 {
   // Filling the `distributions` vector with the user-provided distributions.
@@ -57,8 +60,8 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
   setNumberOfCols(_distributions.size());
 
   // Setting the sizes for the different vectors enabling sampling and selection
-  _inputs_all.resize(_num_tries, std::vector<Real>(_distributions.size()));
-  _sample_vector.resize(_distributions.size());
+  _inputs_all.resize(_num_tries, std::vector<Real>(_distributions.size(), 0.0));
+  _sample_vector.resize(_distributions.size(), 0.0);
   _new_samples.resize(_num_parallel_proposals, std::vector<Real>(_distributions.size(), 0.0));
 
   setNumberOfRandomSeeds(getParam<unsigned int>("num_random_seeds"));
@@ -110,5 +113,9 @@ GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 Real
 GenericActiveLearningSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  if (_t_step < 1)
+    for (unsigned int i = 0; i < _num_parallel_proposals; ++i)
+      _new_samples[i] = _initial_values;
+
   return _new_samples[row_index][col_index];
 }
