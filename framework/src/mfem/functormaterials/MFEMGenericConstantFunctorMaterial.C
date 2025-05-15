@@ -1,13 +1,13 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMGenericConstantMaterial.h"
+#include "MFEMGenericConstantFunctorMaterial.h"
 
-registerMooseObject("MooseApp", MFEMGenericConstantMaterial);
+registerMooseObject("MooseApp", MFEMGenericConstantFunctorMaterial);
 
 InputParameters
-MFEMGenericConstantMaterial::validParams()
+MFEMGenericConstantFunctorMaterial::validParams()
 {
-  InputParameters params = MFEMMaterial::validParams();
+  InputParameters params = MFEMFunctorMaterial::validParams();
   params.addClassDescription("Declares constant material properties based on names and values "
                              "prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
@@ -19,8 +19,9 @@ MFEMGenericConstantMaterial::validParams()
   return params;
 }
 
-MFEMGenericConstantMaterial::MFEMGenericConstantMaterial(const InputParameters & parameters)
-  : MFEMMaterial(parameters),
+MFEMGenericConstantFunctorMaterial::MFEMGenericConstantFunctorMaterial(
+    const InputParameters & parameters)
+  : MFEMFunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<Real>>("prop_values"))
 {
@@ -32,6 +33,6 @@ MFEMGenericConstantMaterial::MFEMGenericConstantMaterial(const InputParameters &
         _prop_names[i], subdomainsToStrings(_block_ids), _prop_values[i]);
 }
 
-MFEMGenericConstantMaterial::~MFEMGenericConstantMaterial() {}
+MFEMGenericConstantFunctorMaterial::~MFEMGenericConstantFunctorMaterial() {}
 
 #endif

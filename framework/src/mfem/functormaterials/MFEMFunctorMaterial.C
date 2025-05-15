@@ -1,17 +1,17 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMMaterial.h"
+#include "MFEMFunctorMaterial.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMMaterial);
+registerMooseObject("MooseApp", MFEMFunctorMaterial);
 
 InputParameters
-MFEMMaterial::validParams()
+MFEMFunctorMaterial::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.addClassDescription(
       "Base class for declaration of material properties to add to MFEM problems.");
-  params.set<std::string>("_moose_base") = "MaterialBase";
+  params.set<std::string>("_moose_base") = "FunctorMaterial";
   params.addPrivateParam<bool>("_neighbor", false);
   params.addPrivateParam<bool>("_interface", false);
 
@@ -24,7 +24,7 @@ MFEMMaterial::validParams()
 }
 
 std::vector<std::string>
-MFEMMaterial::subdomainsToStrings(const std::vector<SubdomainName> & blocks)
+MFEMFunctorMaterial::subdomainsToStrings(const std::vector<SubdomainName> & blocks)
 {
   std::vector<std::string> result(blocks.size());
   // FIXME: Is there really no better way to do this conversion? It doesn't seem like it should be
@@ -38,18 +38,18 @@ MFEMMaterial::subdomainsToStrings(const std::vector<SubdomainName> & blocks)
 }
 
 libMesh::Point
-MFEMMaterial::pointFromMFEMVector(const mfem::Vector & vec)
+MFEMFunctorMaterial::pointFromMFEMVector(const mfem::Vector & vec)
 {
   return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
 }
 
-MFEMMaterial::MFEMMaterial(const InputParameters & parameters)
+MFEMFunctorMaterial::MFEMFunctorMaterial(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _block_ids(getParam<std::vector<SubdomainName>>("block")),
     _properties(getMFEMProblem().getCoefficients())
 {
 }
 
-MFEMMaterial::~MFEMMaterial() {}
+MFEMFunctorMaterial::~MFEMFunctorMaterial() {}
 
 #endif

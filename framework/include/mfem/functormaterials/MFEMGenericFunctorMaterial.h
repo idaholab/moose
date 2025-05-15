@@ -1,7 +1,7 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "MFEMMaterial.h"
+#include "MFEMFunctorMaterial.h"
 #include "MFEMContainers.h"
 
 /**
@@ -9,7 +9,7 @@
  *
  * This is identical in function to the GenericFunctionMaterial in Moose.
  */
-class MFEMGenericFunctorMaterial : public MFEMMaterial
+class MFEMGenericFunctorMaterial : public MFEMFunctorMaterial
 {
 public:
   static InputParameters validParams();

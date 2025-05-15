@@ -79,9 +79,9 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Beamium]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = 'alpha beta'
     prop_values = '1.0 1.0'
     block = '1 2'

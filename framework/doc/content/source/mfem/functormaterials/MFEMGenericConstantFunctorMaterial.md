@@ -1,14 +1,14 @@
-# MFEMGenericConstantMaterial
+# MFEMGenericConstantFunctorMaterial
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /Materials/MFEMGenericConstantMaterial
+!syntax description /FunctorMaterials/MFEMGenericConstantFunctorMaterial
 
 ## Overview
 
-`MFEMGenericConstantMaterial` defines one or more scalar material properties with constant values on
+`MFEMGenericConstantFunctorMaterial` defines one or more scalar material properties with constant values on
 one or more subdomains of the mesh, given by the `blocks` parameter if provided, or applied to the
 entire mesh if missing. The scalar material properties are named according to members in the
 `prop_names` parameter, with respective (constant) values given by the members of `prop_values`.
@@ -17,11 +17,11 @@ entire mesh if missing. The scalar material properties are named according to me
 
 !listing test/tests/mfem/kernels/heattransfer.i block=Materials
 
-!syntax parameters /Materials/MFEMGenericConstantMaterial
+!syntax parameters /FunctorMaterials/MFEMGenericConstantFunctorMaterial
 
-!syntax inputs /Materials/MFEMGenericConstantMaterial
+!syntax inputs /FunctorMaterials/MFEMGenericConstantFunctorMaterial
 
-!syntax children /Materials/MFEMGenericConstantMaterial
+!syntax children /FunctorMaterials/MFEMGenericConstantFunctorMaterial
 
 !if-end!
 

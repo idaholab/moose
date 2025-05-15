@@ -75,10 +75,10 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorNormalIntegratedBC)
 TEST_F(MFEMIntegratedBCTest, MFEMScalarFunctorBoundaryIntegratedBC)
 {
   // Build required BC inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {3.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctorBoundaryIntegratedBC");

@@ -1,18 +1,18 @@
-# MFEMMaterial
+# MFEMFunctorMaterial
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /Materials/MFEMMaterial
+!syntax description /FunctorMaterials/MFEMFunctorMaterial
 
 ## Overview
 
-`MFEMMaterial` is the base class for materials defined for MFEM problems. They may be defined on one
+`MFEMFunctorMaterial` is the base class for materials defined for MFEM problems. They may be defined on one
 or more subdomains (blocks); if no subdomains are provided, the material will be applied on all
 subdomains in the mesh.
 
-`MFEMMaterial` is intended to allow the specification of `mfem::Coefficient`,
+`MFEMFunctorMaterial` is intended to allow the specification of `mfem::Coefficient`,
 `mfem::VectorCoefficient`, and `mfem::MatrixCoefficient` objects to add to the MFEM problem in a
 manner consistent with the standard MOOSE Materials system.
 
@@ -20,11 +20,11 @@ manner consistent with the standard MOOSE Materials system.
 
 !listing test/tests/mfem/kernels/diffusion.i block=Materials
 
-!syntax parameters /Materials/MFEMMaterial
+!syntax parameters /FunctorMaterials/MFEMFunctorMaterial
 
-!syntax inputs /Materials/MFEMMaterial
+!syntax inputs /FunctorMaterials/MFEMFunctorMaterial
 
-!syntax children /Materials/MFEMMaterial
+!syntax children /FunctorMaterials/MFEMFunctorMaterial
 
 !if-end!
 

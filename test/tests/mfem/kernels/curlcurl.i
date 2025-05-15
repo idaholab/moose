@@ -78,9 +78,9 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = one
     prop_values = 1.0
   []

@@ -24,10 +24,10 @@ public:
 TEST_F(MFEMKernelTest, MFEMCurlCurlKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<Real>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMCurlCurlKernel");
@@ -48,10 +48,10 @@ TEST_F(MFEMKernelTest, MFEMCurlCurlKernel)
 TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMDiffusionKernel");
@@ -72,10 +72,10 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
 TEST_F(MFEMKernelTest, MFEMDivDivKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMDivDivKernel");
@@ -95,10 +95,10 @@ TEST_F(MFEMKernelTest, MFEMDivDivKernel)
 TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"lambda", "mu"};
   coef_params.set<std::vector<Real>>("prop_values") = {2.0, 3.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMLinearElasticityKernel");
@@ -120,10 +120,10 @@ TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
 TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorGradientKernel");
@@ -145,10 +145,11 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
 TEST_F(MFEMKernelTest, MFEMVectorDomainLFKernel)
 {
   mfem::Vector expected1({2.0, 1.0, 0.0});
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantVectorMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantVectorFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<Real>>("prop_values") = {expected1[0], expected1[1], expected1[2]};
-  _mfem_problem->addMaterial("MFEMGenericConstantVectorMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial(
+      "MFEMGenericConstantVectorFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorDomainLFKernel");
@@ -195,10 +196,10 @@ TEST_F(MFEMKernelTest, MFEMVectorFEDomainLFKernel)
 TEST_F(MFEMKernelTest, MFEMVectorFEMassKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEMassKernel");
@@ -220,10 +221,10 @@ TEST_F(MFEMKernelTest, MFEMVectorFEMassKernel)
 TEST_F(MFEMKernelTest, MFEMVectorFEWeakDivergenceKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEWeakDivergenceKernel");
@@ -245,10 +246,10 @@ TEST_F(MFEMKernelTest, MFEMVectorFEWeakDivergenceKernel)
 TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
 {
   // Build required kernel inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<Real>>("prop_values") = {2.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarCurlKernel");

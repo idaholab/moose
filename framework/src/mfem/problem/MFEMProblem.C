@@ -129,12 +129,19 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
-MFEMProblem::addMaterial(const std::string & kernel_name,
-                         const std::string & name,
-                         InputParameters & parameters)
+MFEMProblem::addMaterial(const std::string &, const std::string &, InputParameters &)
 {
-  FEProblemBase::addUserObject(kernel_name, name, parameters);
-  getUserObject<MFEMMaterial>(name);
+  mooseError(
+      "MFEM materials must be added through the 'FunctorMaterials' block and not 'Materials'");
+}
+
+void
+MFEMProblem::addFunctorMaterial(const std::string & material_name,
+                                const std::string & name,
+                                InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(material_name, name, parameters);
+  getUserObject<MFEMFunctorMaterial>(name);
 }
 
 void

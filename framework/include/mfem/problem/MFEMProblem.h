@@ -8,7 +8,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
-#include "MFEMMaterial.h"
+#include "MFEMFunctorMaterial.h"
 #include "MFEMVariable.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
@@ -52,9 +52,13 @@ public:
                             const std::string & name,
                             InputParameters & parameters) override;
 
-  void addMaterial(const std::string & kernel_name,
+  void addMaterial(const std::string & material_name,
                    const std::string & name,
                    InputParameters & parameters) override;
+
+  void addFunctorMaterial(const std::string & material_name,
+                          const std::string & name,
+                          InputParameters & parameters) override;
 
   /**
    * Add an MFEM FESpace to the problem.
