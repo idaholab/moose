@@ -213,7 +213,21 @@ public:
    *
    * @param name
    */
-  void renameRootUniverse(const std::string name) { _universe_list.renameRoot(name); };
+  void renameRootUniverse(const std::string name)
+  {
+    _universe_list.renameUniverse(_universe_list.getRoot(), name);
+  }
+
+  /**
+   * @brief rename the specified universe
+   *
+   * @param universe
+   * @param name new name
+   */
+  void renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name)
+  {
+    _universe_list.renameUniverse(universe, name);
+  }
 
   /**
    * @brief Create an empty Universe object
