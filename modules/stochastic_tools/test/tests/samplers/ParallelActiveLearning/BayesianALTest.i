@@ -14,6 +14,15 @@
   []
 []
 
+[Likelihood]
+  [gaussian]
+    type = Gaussian
+    noise = 'noise_specified/noise_specified'
+    file_name = 'exp_0_05.csv'
+    log_likelihood = true
+  []
+[]
+
 [Samplers]
   [sample]
     type = AffineInvariantDES
@@ -21,7 +30,7 @@
     num_parallel_proposals = 5
     num_columns = 1
     file_name = 'confg.csv'
-    execute_on = PRE_MULTIAPP_SETUP
+    # execute_on = PRE_MULTIAPP_SETUP
     seed = 2547
     initial_values = '0.1 0.1'
     previous_state = 'mcmc_reporter/inputs'
@@ -33,11 +42,16 @@
   [constant]
     type = StochasticReporter
   []
+  [noise_specified]
+    type = ConstantReporter
+    real_names = 'noise_specified'
+    real_values = '0.05'
+  []
   [mcmc_reporter]
     type = GPAffineInvariantDifferentialDecision
     sampler = sample
     gp_evaluator = GP_eval
-    likelihoods = ''
+    likelihoods = 'gaussian'
   []
 []
 
