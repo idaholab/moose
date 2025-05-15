@@ -81,11 +81,11 @@ public:
   void addUniverse(const std::pair<std::string, std::shared_ptr<CSGUniverse>> universe);
 
   /**
-   * @brief rename the root universe (default ROOT_UNIVERSE)
+   * @brief rename the specified universe
    *
-   * @param name
+   * @param name new name
    */
-  void renameRoot(const std::string name);
+  void renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name);
 
 protected:
   /// Mapping of universe names to pointers of stored universe objects
