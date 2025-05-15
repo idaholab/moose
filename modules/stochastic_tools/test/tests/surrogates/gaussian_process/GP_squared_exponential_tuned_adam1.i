@@ -1,9 +1,9 @@
-[StochasticTools]
+[StochasticTools] 
 []
 
 [Distributions]
   [k_dist]
-    type = Uniform
+    type = Uniform  # input file gold folder tgp
     lower_bound = 1
     upper_bound = 10
   []
@@ -130,5 +130,6 @@
   [out]
     type = CSV
     execute_on = FINAL
+    file_base = 'tgpgold'
   []
 []

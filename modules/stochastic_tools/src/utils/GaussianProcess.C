@@ -31,6 +31,7 @@ namespace StochasticTools
 GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nth_iteration,
                                                         const unsigned int num_iter,
                                                         const unsigned int batch_size,
+                                                        const unsigned int tune_method,
                                                         const Real learning_rate,
                                                         const Real b1,
                                                         const Real b2,
@@ -39,6 +40,7 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nt
   : show_every_nth_iteration(show_every_nth_iteration),
     num_iter(num_iter),
     batch_size(batch_size),
+    tune_method(tune_method),
     learning_rate(learning_rate),
     b1(b1),
     b2(b2),
@@ -79,9 +81,17 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
   _batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
-  if (_tuning_data.size())
-    tuneHyperParamsAdam(training_params, training_data, opts);
-    // tuneHyperParamsMcmc(training_params, training_data);
+  if (_tuning_data.size()) {
+    if (opts.tune_method == 0) {
+      tuneHyperParamsAdam(training_params, training_data, opts);
+    }
+    else if (opts.tune_method == 1) {
+      tuneHyperParamsMcmc(training_params, training_data);
+    }
+    else {
+      throw std::invalid_argument("Unsupported tune_method: must be 0 (Adam) or 1 (MCMC)");
+    }
+  }
 
   _K.resize(training_params.rows() * training_data.cols(),
             training_params.rows() * training_data.cols());
@@ -154,20 +164,22 @@ GaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_moments)
 }
                                     
 void
-GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta, 
-          LogLResult & result, bool outer, bool tau2) {
+GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale, 
+          LogLResult & result, bool scale) {
   int n = out_vec.rows();
-  RealEigenMatrix K(x1.rows(), x2.rows());
+  RealEigenMatrix K(x1.rows(), x1.rows());
 
   std::vector<Real> theta1(_num_tunable, 0.0);
+
   theta1[0] = 1;
-  theta1[1] = theta(0,0);
-  theta1[2] = theta(0,1);
+  for (unsigned int i = 0; i < _num_tunable-1; ++i) {
+    theta1[i + 1] = lengthscale(0,i);
+  }
 
   vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
   _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
-  _covariance_function->computeCovarianceMatrix(_K, x1, x2, true);
+  _covariance_function->computeCovarianceMatrix(_K, x1, x1, true);
 
   RealEigenMatrix Mi = _K.llt().solve(RealEigenMatrix::Identity(_K.rows(), _K.cols()));
   Real ldet = std::log(_K.determinant());
@@ -176,89 +188,95 @@ GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x
   Real quadterm = (diff.transpose() * Mi * diff)(0,0);
 
   Real logl_val;
-  if (outer) {
-      logl_val = (-n * 0.5) * std::log(quadterm) - 0.5 * ldet;
+  logl_val = -0.5 * quadterm - 0.5 * ldet;
+  
+  Real scale_val;
+  if (scale) {
+      scale_val = quadterm / n;
   } else {
-      logl_val = -0.5 * quadterm - 0.5 * ldet;
-  }
-
-  Real tau2_val;
-  if (tau2) {
-      tau2_val = quadterm / n;
-  } else {
-      tau2_val = NAN;
+      scale_val = -999;
   }
 
   result.logl = logl_val;
-  result.tau2 = tau2_val; 
+  result.scale = scale_val; 
 }
 
 void
-GaussianProcess::sample_g(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g_t, const RealEigenMatrix theta, 
-              Real alpha, Real beta, Real l, Real u, Real ll_prev, SampleGResult & result) {
-
+GaussianProcess::sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, Real noise_t, const RealEigenMatrix lengthscale, 
+              Settings & settings, Real ll_prev, SampleNoiseResult & result) {
+  Real alpha = settings.alpha.noise;
+  Real beta = settings.beta.noise;
+  Real l = settings.l;
+  Real u = settings.u;
+  MooseRandom generator;
+  generator.seed(0, 101);
   Real ru1 = MooseRandom::rand();
   Real ru = MooseRandom::rand();
-  Real g_star = Uniform::quantile(ru1, l * g_t / u, u * g_t / l);
+  Real noise_star = Uniform::quantile(ru1, l * noise_t / u, u * noise_t / l);
 
-  if (std::isnan(ll_prev)) {
+  if (ll_prev == -999) {
     LogLResult ll_result;
-    logl(out_vec, x1, x2, g_t, theta, ll_result, true, false);
+    logl(out_vec, x1, lengthscale, ll_result, false);
     ll_prev = ll_result.logl;
   }
-  Real lpost_threshold = ll_prev + std::log(Gamma::pdf(g_t - 1.5e-8, alpha, beta)) + 
-                            std::log(ru) - std::log(g_t) + std::log(g_star);
+  Real lpost_threshold = ll_prev + std::log(Gamma::pdf(noise_t - 1.5e-8, alpha, beta)) + 
+                            std::log(ru) - std::log(noise_t) + std::log(noise_star);
 
   Real ll_new;
   LogLResult ll_result;
-  logl(out_vec, x1, x2, g_star, theta, ll_result, true, false);
+  logl(out_vec, x1, lengthscale, ll_result, false);
   ll_new = ll_result.logl;
 
-  Real new_val = ll_new + std::log(Gamma::pdf(g_star - 1.5e-8, alpha, beta));
+  Real new_val = ll_new + std::log(Gamma::pdf(noise_star - 1.5e-8, alpha, beta));
   
   if (new_val > lpost_threshold) {
-    result.g = g_star;
+    result.noise = noise_star;
     result.ll = ll_new;
   } else {
-    result.g = g_t;
+    result.noise = noise_t;
     result.ll = ll_prev;
   }
 }
 
 void
-GaussianProcess::sample_theta(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
-              unsigned int i, Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev) {
-
-    RealEigenMatrix theta_star = theta_t;
+GaussianProcess::sampleLengthscale(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale_t,
+              unsigned int i, Settings & settings, SampleLengthscaleResult & result, Real ll_prev) {
+    Real alpha = settings.alpha.noise;
+    Real beta = settings.beta.noise;
+    Real l = settings.l;
+    Real u = settings.u;
+    MooseRandom generator;
+    generator.seed(0, 101);
+    RealEigenMatrix lengthscale_star = lengthscale_t;
     Real ru1 = MooseRandom::rand();
     Real ru = MooseRandom::rand();
-    theta_star(0, i) = Uniform::quantile(ru1, l * theta_t(0,i) / u, u * theta_t(0,i) / l);
+    lengthscale_star(0, i) = Uniform::quantile(ru1, l * lengthscale_t(0,i) / u, u * lengthscale_t(0,i) / l);
 
-    if (std::isnan(ll_prev)) {
+    if (ll_prev == -999) {
       LogLResult ll_result;
-      logl(out_vec, x1, x2, g, theta_t, ll_result, true, true);
+      logl(out_vec, x1, lengthscale_t, ll_result, true);
       ll_prev = ll_result.logl;
     }
               
-    Real lpost_threshold = ll_prev + std::log(Gamma::pdf(theta_t(0,i), alpha, beta)) + 
-                             std::log(ru) - std::log(theta_t(0,i)) + std::log(theta_star(0,i));
+    Real lpost_threshold = ll_prev + std::log(Gamma::pdf(lengthscale_t(0,i), alpha, beta)) + 
+                             std::log(ru) - std::log(lengthscale_t(0,i)) + std::log(lengthscale_star(0,i));
 
     Real ll_new;
-    Real tau2_new;
+    Real scale_new;
     LogLResult ll_result;
-    logl(out_vec, x1, x2, g, theta_star, ll_result, true, true);
+    logl(out_vec, x1, lengthscale_star, ll_result, true);
     ll_new = ll_result.logl;
-    tau2_new = ll_result.tau2;
+    scale_new = ll_result.scale;
       
-    Real new_val = ll_new + std::log(Gamma::pdf(theta_star(0,i), alpha, beta));
+    Real new_val = ll_new + std::log(Gamma::pdf(lengthscale_star(0,i), alpha, beta));
     if (new_val > lpost_threshold) {
-      result.theta = theta_star(0,i);
+      result.lengthscale = lengthscale_star(0,i);
       result.ll = ll_new;
-      result.tau2 = tau2_new;
+      result.scale = scale_new;
     } else {
-      result.theta = theta_t(0,i);
+      result.lengthscale = lengthscale_t(0,i);
       result.ll = ll_prev;
-      result.tau2 = NAN;
+      result.scale = -999;
     }
 }
 
@@ -268,11 +286,11 @@ GaussianProcess::check_settings(Settings &settings) {
   settings.l = 1;
   settings.u = 2;
 
-  settings.alpha.g = 1.5;
-  settings.beta.g = 3.9;
+  settings.alpha.noise = 1.5;
+  settings.beta.noise = 3.9;
 
-  settings.alpha.theta = 1.5;
-  settings.beta.theta = 3.9 / 1.5;
+  settings.alpha.lengthscale = 1.5;
+  settings.beta.lengthscale = 3.9 / 1.5;
 }
 
 
@@ -280,7 +298,6 @@ void
 GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data)
 { 
-  std::cout << "enter onelayer mcmc" << std::endl;
   std::vector<Real> theta1(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
@@ -290,69 +307,88 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
   RealEigenMatrix y = training_data;
   
   MooseRandom generator;
-  generator.seed(0, 1980);
+  generator.seed(0, 101);
   unsigned int nmcmc = 10000;
+  unsigned int burn = 0;
+  unsigned int thin = 2;
 
   Settings settings;
   check_settings(settings);
 
-  Real g_0 = 0.01;
-  RealEigenMatrix theta_0(1,x.cols());
-  theta_0 << 0.5,0.5;
-  Real tau_0 = 1;
+  Real noise_0 = 0.01;
+  RealEigenMatrix lengthscale_0 = RealEigenMatrix::Constant(1, x.cols(), 0.5);
+  Real scale_0 = 1;
 
-  Initial initial = {theta_0, g_0, tau_0};
+  Initial initial = {lengthscale_0, noise_0, scale_0};
 
 
-  RealEigenMatrix g(nmcmc, 1);
-  g(0,0) = initial.g;
-  RealEigenMatrix theta(nmcmc, x.cols());
-  theta.row(0) = initial.theta;
-  RealEigenMatrix tau2(nmcmc, 1);
-  tau2(0,0) = initial.tau2;
+  RealEigenMatrix noise(nmcmc, 1);
+  noise(0,0) = initial.noise;
+  RealEigenMatrix lengthscale(nmcmc, x.cols());
+  lengthscale.row(0) = initial.lengthscale;
+  RealEigenMatrix scale(nmcmc, 1);
+  scale(0,0) = initial.scale;
   RealEigenMatrix ll_store(nmcmc, x.cols());
-  ll_store.row(0) << NAN, NAN;
-  Real ll = NAN;
+  for (unsigned int j = 0; j < x.cols(); j++) {
+    lengthscale_0(0, j) = -999;
+  }
+  Real ll = -999;
   
   for (unsigned int j = 1; j < nmcmc; ++j) {
-    SampleGResult sample_g_result;
-    sample_g(y, x, x, g(j-1,0), theta.row(j-1), settings.alpha.g, settings.beta.g, settings.l, settings.u, ll, sample_g_result);
+    SampleNoiseResult sample_noise_result;
+    sampleNoise(y, x, noise(j-1,0), lengthscale.row(j-1), settings, ll, sample_noise_result);
 
-    g(j,0) = sample_g_result.g;
-    ll = sample_g_result.ll;
+    noise(j,0) = sample_noise_result.noise;
+    ll = sample_noise_result.ll;
 
     for (unsigned int i=0; i<x.cols(); i++){
-      SampleThetaResult sample_theta_result;
-      sample_theta(y, x, x, g(j,0), theta.row(j-1), i, settings.alpha.theta, settings.beta.theta, settings.l,
-                  settings.u, sample_theta_result, ll);
-      theta(j,i) = sample_theta_result.theta;
-      ll = sample_theta_result.ll;
+      SampleLengthscaleResult sample_lengthscale_result;
+      sampleLengthscale(y, x, lengthscale.row(j-1), i, settings, sample_lengthscale_result, ll);
+      lengthscale(j,i) = sample_lengthscale_result.lengthscale;
+      ll = sample_lengthscale_result.ll;
       ll_store(j,i) = ll;
-      if (std::isnan(sample_theta_result.tau2)) {
-        tau2(j,0) = tau2(j-1,0);
+      if (sample_lengthscale_result.scale == -999) {
+        scale(j,0) = scale(j-1,0);
       }
       else {
-        tau2(j,0) = sample_theta_result.tau2;
+        scale(j,0) = sample_lengthscale_result.scale;
       }
     }
-    
-    Real sum_tau2 = 0;
-    Real sum_theta0 = 0;
-    Real sum_theta1 = 0;
-
-    for (unsigned int k = 0; k < j+1; ++k) {
-        sum_tau2 += tau2(k,0);
-        sum_theta0 += theta(k,0);
-        sum_theta1 += theta(k,1);
-    }
-
-    theta1[0] = sum_tau2 / j;
-    theta1[1] = sum_theta0 / j;
-    theta1[2] = sum_theta1 / j;
-
-    vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
-    _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   }
+
+
+  unsigned int final_nmcmc = (nmcmc - burn) / thin;
+
+  RealEigenMatrix noise_thinned(final_nmcmc, noise.cols());
+  RealEigenMatrix lengthscale_thinned(final_nmcmc, lengthscale.cols());
+  RealEigenMatrix scale_thinned(final_nmcmc, scale.cols());
+
+  unsigned int index = 0;
+  for (unsigned int i = burn; i < nmcmc; i += thin) {
+    noise_thinned.row(index) = noise.row(i);
+    lengthscale_thinned.row(index) = lengthscale.row(i);
+    scale_thinned.row(index) = scale.row(i);
+    index++;
+  }
+
+
+  Real sum_scale = 0;
+  std::vector<Real> sum_lengthscale(_num_tunable - 1, 0.0);  
+
+
+  for (unsigned int k = 0; k < final_nmcmc; k++) {
+    sum_scale += scale_thinned(k, 0);
+    for (unsigned int i = 0; i < _num_tunable-1; i++) {
+      sum_lengthscale[i] += lengthscale_thinned(k, i);
+    }
+  }
+  theta1[0] = sum_scale / final_nmcmc;
+  for (unsigned int i = 0; i < _num_tunable-1; ++i) {
+    theta1[i + 1] = sum_lengthscale[i] / final_nmcmc;
+  }
+
+  vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
+  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
 
 void
@@ -360,7 +396,6 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data,
                                      const GPOptimizerOptions & opts)
 {
-  std::cout << "enter onelayer adam" << std::endl;
   std::vector<Real> theta(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 

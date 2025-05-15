@@ -63,14 +63,12 @@ Standardizer::computeSet(const RealEigenMatrix & input)
   unsigned int n = input.cols();
   // comptue mean
   RealEigenVector mean = input.colwise().mean();
-  std::cout << "center mean: " << mean << std::endl;
   // Compute standard deviation
   RealEigenVector stdev =
       ((input.rowwise() - mean.transpose()).colwise().squaredNorm() / num_samples)
           .transpose()
           .array()
           .sqrt();
-  std::cout << "center std: " << stdev << std::endl;
   // Store in std:vector format
   _mean.resize(n);
   _stdev.resize(n);

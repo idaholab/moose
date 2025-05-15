@@ -2,7 +2,7 @@
 []
 [Distributions]
   [a_dist]
-    type = TruncatedNormal
+    type = TruncatedNormal  # input file navier stokes gp
     mean = -0.287682
     standard_deviation = 0.25
     lower_bound = -0.693147
@@ -149,8 +149,8 @@
 []
 [Outputs]
   [out]
-    type = JSON
+    type = CSV
     execute_on = FINAL
-    file_base = 'gp'
+    file_base = 'gpmc'
   []
 []

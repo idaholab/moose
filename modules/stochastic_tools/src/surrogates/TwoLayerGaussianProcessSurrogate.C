@@ -214,11 +214,11 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
       // std::cout << "constant theta w0 is : " << _tgp.getNmcmc() << ", " << _training_params.cols() << ", " << _tgp.getThetaW().rows() << ", " << _tgp.getThetaW().cols() << std::endl;
       // std::cout << "constant theta w1 is : " << _training_params.cols() << "," << t << ", " << i << std::endl;
       // std::cout << "constant theta w2 is : " << _tgp.getThetaW()(t,i) << std::endl;
-      theta_w = RealEigenMatrix::Constant(1, _training_params.cols(), _tgp.getThetaW()(t,i));
+      theta_w = RealEigenMatrix::Constant(1, _training_params.cols(), _tgp.getLengthscaleW()(t,i));
       _tgp.krig(w_t.col(i), x_old, test_points, theta_w, 1e-10, prior_tau2, false, prior_mean, prior_mean_new, krig_mean, krig_sigma);
       w_new.col(i) = krig_mean;
     }
-    _tgp.krig(_tgp.getY(), _tgp.getW()[t], w_new, _tgp.getThetaY().row(t), _tgp.getG()(t,0), _tgp.getTau2()(t,0), true, prior_mean, prior_mean_new, krig_mean, krig_sigma);
+    _tgp.krig(_tgp.getY(), _tgp.getW()[t], w_new, _tgp.getLengthscaleY().row(t), _tgp.getNoise()(t,0), _tgp.getScale()(t,0), true, prior_mean, prior_mean_new, krig_mean, krig_sigma);
     mu_t.col(t) = krig_mean;
     sigma_sum += krig_sigma;
   }

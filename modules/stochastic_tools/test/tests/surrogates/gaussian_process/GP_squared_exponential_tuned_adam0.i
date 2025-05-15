@@ -1,8 +1,8 @@
-[StochasticTools]
+[StochasticTools] 
 []
 [Distributions]
   [a_dist]
-    type = TruncatedNormal  # input file navior stokes tgp
+    type = TruncatedNormal  # input file navier stokes gp
     mean = -0.287682
     standard_deviation = 0.25
     lower_bound = -0.693147
@@ -64,6 +64,11 @@
     input_files = Navier_Stokes.i
     sampler = train_sample
   []
+  [sub_test]
+    type = SamplerFullSolveMultiApp
+    input_files = Navier_Stokes.i
+    sampler = test_sample
+  []
 []
 [Controls]
   [cmdline]
@@ -89,7 +94,7 @@
   []
   [samp_avg]
     type = EvaluateSurrogate
-    model = TGP_avg
+    model = GP_avg
     sampler = test_sample
     evaluate_std = 'true'
     parallel_type = ROOT
@@ -98,7 +103,7 @@
   []
   [train_avg]
     type = EvaluateSurrogate
-    model = TGP_avg
+    model = GP_avg
     sampler = train_sample
     evaluate_std = 'true'
     parallel_type = ROOT
@@ -107,8 +112,8 @@
 []
 [VectorPostprocessors]
   [hyperparams]
-    type = TwoLayerGaussianProcessData
-    tgp_name = 'TGP_avg'
+    type = GaussianProcessData
+    gp_name = 'GP_avg'
     execute_on = final
   []
   [data]
@@ -118,8 +123,8 @@
   []
 []
 [Trainers]
-  [TGP_avg_trainer]
-    type = TwoLayerGaussianProcessTrainer
+  [GP_avg_trainer]
+    type = GaussianProcessTrainer
     execute_on = timestep_end
     covariance_function = 'covar' #Choose a squared exponential for the kernel
     standardize_params = 'true' #Center and scale the training params
@@ -134,9 +139,9 @@
   []
 []
 [Surrogates]
-  [TGP_avg]
-    type = TwoLayerGaussianProcessSurrogate
-    trainer = TGP_avg_trainer
+  [GP_avg]
+    type = GaussianProcessSurrogate
+    trainer = GP_avg_trainer
   []
 []
 [Covariance]
@@ -151,6 +156,6 @@
   [out]
     type = CSV
     execute_on = FINAL
-    file_base = 'tgp'
+    file_base = 'real'
   []
 []

@@ -136,8 +136,7 @@ TwoLayerGaussianProcessTrainer::postTrain()
       _training_data(ii, jj) = _data_buffer[ii][jj];
   }
 
-  std::cout << "training params is " << _training_params << std::endl;
-  std::cout << "training data is " << _training_data << std::endl;
+
 
   // Standardize (center and scale) training params
   if (_standardize_params)

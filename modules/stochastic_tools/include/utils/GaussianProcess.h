@@ -60,10 +60,12 @@ public:
      * @param b2 Tuning constant for the Adam algorithm
      * @param eps Tuning constant for the Adam algorithm
      * @param lambda Tuning constant for the Adam algorithm
+     * @param tune_method Method for tuning hyperparameters
      */
     GPOptimizerOptions(const bool show_every_nth_iteration = 1,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
+                       const unsigned int tune_method = 1,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
@@ -76,6 +78,8 @@ public:
     const unsigned int num_iter = 1000;
     /// The batch isize for Adam optimizer
     const unsigned int batch_size = 0;
+    /// Method for tuning hyperparameters
+    const unsigned int tune_method = 0;
     /// The learning rate for Adam optimizer
     const Real learning_rate = 1e-3;
     /// Tuning parameter from the paper
@@ -143,8 +147,8 @@ public:
    * Parameter setting for MCMC sampling.
    * @param l Constant parameter from the paper.
    * @param u Constant parameter from the paper.
-   * @param g Noise level.
-   * @param theta Lengthscale.
+   * @param noise Noise level.
+   * @param lengthscale Lengthscale.
    * @param alpha Parameter for gamma distribution.
    * @param beta Parameter for gamma distribution.
    */
@@ -152,103 +156,93 @@ public:
     Real l;
     Real u;
     struct {
-      Real g;
-      Real theta;
+      Real noise;
+      Real lengthscale;
     } alpha, beta;
   };
 
   /**
    * Initialzed value for GP hyperparameters.
-   * @param theta Lengthscale.
-   * @param g Noise level.
-   * @param tau2 Scale.
+   * @param lengthscale Lengthscale.
+   * @param noise Noise level.
+   * @param scale Scale.
    */
   struct Initial {
-    RealEigenMatrix theta;
-    Real g;
-    Real tau2;
+    RealEigenMatrix lengthscale;
+    Real noise;
+    Real scale;
   };
 
   /**
-   * Return value computed in the sample_g function.
-   * @param g Sampled noise level.
+   * Return value computed in the sampleNoise function.
+   * @param noise Sampled noise level.
    * @param ll Log likelihood.
    */
-  struct SampleGResult {
-    Real g;
+  struct SampleNoiseResult {
+    Real noise;
     Real ll;
   };
 
   /**
-   * Return value computed in the sample_theta function.
-   * @param g Sampled noise level.
+   * Return value computed in the sampleLengthscale function.
+   * @param lengthscale Sampled lengthscale.
    * @param ll Log likelihood.
-   * @param tau2 Sampled scale.
+   * @param scale Sampled scale.
    */
-  struct SampleThetaResult {
-    Real theta;
+  struct SampleLengthscaleResult {
+    Real lengthscale;
     Real ll;
-    Real tau2;
+    Real scale;
   };
 
   /**
    * Return value computed in the logl function.
    * @param logl Marginal log likelihood.
-   * @param tau2 Scale.
+   * @param scale Scale.
    */
   struct LogLResult {
     Real logl;
-    Real tau2;
+    Real scale;
   };
 
   /**
    * Computes multivariate normal marginal log likelihood and scale.
    * @param outvec Observed outputs (response values).
    * @param x1 Input data 1.
-   * @param x2 Input data 2.
-   * @param g Noise level.
-   * @param theta Lengthscale.
+   * @param noise Noise level.
+   * @param lengthscale Lengthscale.
    * @param result Return value.
    * @param outer If the function is called for computing outermost layer.
-   * @param tau2 If tau2 is needed to be computed.
+   * @param scale If scale is needed to be computed.
    */
-  void logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta, 
-          LogLResult & result, bool outer=true, bool tau2=false);
+  void logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale, 
+          LogLResult & result, bool scale=false);
 
   /**
-   * Samples noise level g using MH algorithm.
+   * Samples noise level using MH algorithm.
    * @param outvec Observed outputs (response values).
    * @param x1 Input data 1.
-   * @param x2 Input data 2.
-   * @param g_t Noise level.
-   * @param theta Lengthscale.
-   * @param alpha Parameter for gamma distribution.
-   * @param beta Parameter for gamma distribution.
-   * @param l Constant parameter from the paper.
-   * @param u Constant parameter from the paper.
+   * @param noise_t Noise level.
+   * @param lengthscale Lengthscale.
+   * @param settings parameter setting
    * @param ll_prev Log likelihood from the previous MCMC round.
    * @param result Return value.
    */
-  void sample_g(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g_t, const RealEigenMatrix theta, 
-              Real alpha, Real beta, Real l, Real u, Real ll_prev, SampleGResult & result);
+  void sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, Real noise_t, const RealEigenMatrix lengthscale, 
+              Settings & settings, Real ll_prev, SampleNoiseResult & result);
 
   /**
    * Samples lengthscale theta using MH algorithm.
    * @param outvec Observed outputs (response values).
    * @param x1 Input data 1.
-   * @param x2 Input data 2.
-   * @param g Noise level.
-   * @param theta_t Lengthscale.
+   * @param lengthscale_t Lengthscale.
    * @param i index for input data dimension.
-   * @param alpha Parameter for gamma distribution.
-   * @param beta Parameter for gamma distribution.
-   * @param l Constant parameter from the paper.
-   * @param u Constant parameter from the paper.
+   * @param settings parameter setting
    * @param ll_prev Log likelihood from the previous MCMC round.
    * @param result Return value.
    */
-  void sample_theta(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g, const RealEigenMatrix & theta_t,
-              unsigned int i, Real alpha, Real beta, Real l, Real u, SampleThetaResult & result, Real ll_prev);
+  void sampleLengthscale(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale_t,
+              unsigned int i, Settings & settings, SampleLengthscaleResult & result, Real ll_prev);
 
   /**
    * Sets up constant parameter.

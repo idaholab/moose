@@ -36,6 +36,10 @@ GaussianProcessTrainer::validParams()
   // Already preparing to use Adam here
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
+  params.addParam<unsigned int>(
+      "tune_method",
+      0,
+      "Select method for tuning hyperparameters");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
   params.addParam<unsigned int>(
       "show_every_nth_iteration",
@@ -61,6 +65,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
+        getParam<unsigned int>("tune_method"),
         getParam<Real>("learning_rate"))),
     _sampler_row(getSamplerData())
 {
