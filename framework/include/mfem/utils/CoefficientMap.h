@@ -51,8 +51,7 @@ public:
 
     const auto [_, inserted] = this->_coefficients.emplace(name, std::move(coeff));
     if (!inserted)
-      throw MooseException("Coefficient with name '" + name +
-                           "' already present in CoefficientMap object");
+      mooseError("Coefficient with name '" + name + "' already present in CoefficientMap object");
   }
 
   /// Add piecewise material property. The coefficient must have been created with the `make` method on this object.
@@ -76,8 +75,7 @@ public:
     PWData * data = std::get_if<PWData>(&this->_coefficients[name]);
     // Throw an exception if the data is not piecewise
     if (!data)
-      throw MooseException("Global coefficient with name '" + name +
-                           "' already present in CoefficientMap");
+      mooseError("Global coefficient with name '" + name + "' already present in CoefficientMap");
     mooseAssert(std::find(this->_iterable_coefficients.cbegin(),
                           this->_iterable_coefficients.cend(),
                           coeff) != this->_iterable_coefficients.cend(),
@@ -88,8 +86,8 @@ public:
     for (const auto & block : blocks)
     {
       if (coeff_map.count(block) > 0)
-        throw MooseException("Property with name '" + name + "' already assigned to block " +
-                             block + " in CoefficientMap object");
+        mooseError("Property with name '" + name + "' already assigned to block " + block +
+                   " in CoefficientMap object");
       coeff_map[block] = coeff;
       pw_coeff->UpdateCoefficient(std::stoi(block), *coeff);
     }
@@ -113,7 +111,7 @@ public:
     }
     catch (const std::out_of_range &)
     {
-      throw MooseException("Property with name '" + name + "' has not been declared.");
+      mooseError("Property with name '" + name + "' has not been declared.");
     }
   }
 
