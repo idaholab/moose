@@ -88,7 +88,7 @@ GenericActiveLearner::initialize()
   _eval_outputs_current.resize(_props);
   _generic.resize(1);
   _inputs_required.resize(_props, std::vector<Real>(_n_dim, 0.0));
-  _sorted_indices.resize(_props);
+  _sorted_indices.resize(_props, 1u);
 }
 
 void
@@ -117,9 +117,7 @@ GenericActiveLearner::computeGPOutput(std::vector<Real> & eval_outputs)
 void
 GenericActiveLearner::setupGeneric()
 {
-  std::vector<Real> norm_gp_outputs = _gp_outputs;
-  _al_gp.getNormTrainingOuts(norm_gp_outputs);
-  _generic = norm_gp_outputs;
+  _generic = _gp_outputs;
 }
 
 void

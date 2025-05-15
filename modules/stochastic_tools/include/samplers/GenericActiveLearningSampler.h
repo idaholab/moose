@@ -58,12 +58,15 @@ protected:
   /// Ensure that the algorithm proceeds in a sequential fashion
   int _check_step;
 
+  /// Initial values of the input params to get the MCMC scheme started
+  const std::vector<Real> & _initial_values;
+
   /// Vectors of new proposed samples
   std::vector<std::vector<Real>> _new_samples;
 
 private:
   /// Number of samples to propose in each iteration (not all are sent for subApp evals)
-  const unsigned int & _num_tries;
+  const unsigned int _num_tries;
 
   /// Storage for all the proposed samples
   std::vector<std::vector<Real>> _inputs_all;

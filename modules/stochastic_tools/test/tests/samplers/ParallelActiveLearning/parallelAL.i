@@ -26,8 +26,9 @@
     distributions = 'left right'
     sorted_indices = 'conditional/sorted_indices'
     num_parallel_proposals = 5
-    num_tries = 100
+    num_tries = 1000
     seed = 100
+    initial_values = '0.1 0.1'
     execute_on = PRE_MULTIAPP_SETUP
   []
 []

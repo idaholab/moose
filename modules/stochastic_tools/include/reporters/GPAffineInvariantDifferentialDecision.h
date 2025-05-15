@@ -57,7 +57,7 @@ private:
   const AffineInvariantDES * const _aides;
 
   /// The GP evaluator object
-  const SurrogateModel & _gp_eval;
+  const SurrogateModel * _gp_eval;
 
   /// The GP estimated value of the log-likelihood
   std::vector<Real> & _estimated_loglikelihood;

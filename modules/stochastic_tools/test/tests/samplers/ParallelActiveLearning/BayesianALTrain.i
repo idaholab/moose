@@ -134,5 +134,6 @@
   [out2_BayesianAL]
     type = SurrogateTrainerOutput
     trainers = 'GP_al_trainer'
+    execute_on = FINAL
   []
 []
