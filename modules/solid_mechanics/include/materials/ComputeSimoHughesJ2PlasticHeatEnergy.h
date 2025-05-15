@@ -49,6 +49,5 @@ protected:
 
   /// computed property: stress * (plastic_strain - plastic_strain_old) / dt
   MaterialProperty<Real> & _plastic_heat;
-  MaterialProperty<Real> & _dplastic_heat_dT;
-  MaterialProperty<Real> & _dplastic_heat_dstrain;
+
 };
