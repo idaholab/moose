@@ -25,5 +25,5 @@ public:
 
   virtual void initialize() override;
 
-  MooseMesh & _mesh;
+  const MooseMesh & _mesh;
 };
