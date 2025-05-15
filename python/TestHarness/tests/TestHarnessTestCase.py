@@ -12,21 +12,33 @@ import unittest
 import subprocess
 import tempfile
 import re
+import json
+from contextlib import nullcontext
 
 class TestHarnessTestCase(unittest.TestCase):
     """
     TestCase class for running TestHarness commands.
     """
 
-    def runTests(self, *args, tmp_output=True):
+    def runTests(self, *args, tmp_output=True, as_json=False):
         cmd = ['./run_tests'] + list(args) + ['--term-format', 'njCst']
         sp_kwargs = {'cwd': os.path.join(os.getenv('MOOSE_DIR'), 'test'),
                      'text': True}
-        if tmp_output:
-            with tempfile.TemporaryDirectory() as output_dir:
-                cmd += ['-o', output_dir]
-            return subprocess.check_output(cmd, **sp_kwargs)
-        return subprocess.check_output(cmd, **sp_kwargs)
+        context = tempfile.TemporaryDirectory if tmp_output else nullcontext
+        output = None
+        with context() as c:
+            if tmp_output:
+                cmd += ['-o', c]
+            try:
+                output = subprocess.check_output(cmd, **sp_kwargs)
+            except subprocess.CalledProcessError:
+                if not as_json:
+                    raise
+            if as_json:
+                with open(os.path.join(c, '.previous_test_results.json'), 'r') as f:
+                    return json.loads(f.read())
+            else:
+                return output
 
     def runExceptionTests(self, *args, tmp_output=True):
         try:
