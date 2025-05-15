@@ -25,20 +25,20 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 void
 MFEMHypreADS::constructSolver(const InputParameters &)
 {
-  auto preconditioner = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
-  preconditioner->SetPrintLevel(getParam<int>("print_level"));
+  auto solver = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
+  solver->SetPrintLevel(getParam<int>("print_level"));
 
-  _preconditioner = preconditioner;
+  _solver = solver;
 }
 
 void
 MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-  if (getParam<bool>("low_order_refined"))
+  if (_lor)
   {
     auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(a, tdofs);
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    _preconditioner.reset(lor_solver);
+    _solver.reset(lor_solver);
   }
 }
 
