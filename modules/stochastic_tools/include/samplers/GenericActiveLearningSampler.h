@@ -58,6 +58,9 @@ protected:
   /// Ensure that the algorithm proceeds in a sequential fashion
   int _check_step;
 
+  /// Initial values of the input params to get the MCMC scheme started
+  const std::vector<Real> & _initial_values;
+
   /// Vectors of new proposed samples
   std::vector<std::vector<Real>> _new_samples;
 
