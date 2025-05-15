@@ -19,8 +19,7 @@ TestCSGCylindersMeshGenerator::validParams()
 
   params.addRequiredParam<std::vector<Real>>("radii", "list of radii for concentric cylinders");
   params.addRequiredParam<Real>("height", "cylinder height");
-  params.addRequiredParam<Real>("x0", "first coordinate of center");
-  params.addRequiredParam<Real>("x1", "second coordinate of center");
+  params.addRequiredParam<std::vector<Real>>("center", "center point of cylinder");
   params.addRequiredParam<std::string>("axis", "axis alignment");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
@@ -33,8 +32,8 @@ TestCSGCylindersMeshGenerator::TestCSGCylindersMeshGenerator(const InputParamete
   : MeshGenerator(params),
     _radii(getParam<std::vector<Real>>("radii")),
     _h(getParam<Real>("height")),
-    _x0(getParam<Real>("x0")),
-    _x1(getParam<Real>("x1")),
+    _x0(getParam<std::vector<Real>>("center")[0]),
+    _x1(getParam<std::vector<Real>>("center")[1]),
     _axis(getParam<std::string>("axis"))
 {
 }

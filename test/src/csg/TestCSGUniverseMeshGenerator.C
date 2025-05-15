@@ -67,20 +67,41 @@ TestCSGUniverseMeshGenerator::generateCSG()
     csg_mesh->joinOtherBase(inp_csg_mesh, img_univ_name);
 
     // create a cell containing the new (root) univ
+    // cell is located at the origin of the original cells - just use one cell to get origin
+    auto tmp_cell = cells_to_add.begin()->second;
+    auto tmp_cell_reg = tmp_cell->getRegion();
+    auto cell_surfs = tmp_cell_reg.getSurfaces();
+    Real x = 0, y = 0, z = 0;
+    for (auto cs : cell_surfs)
+    { // find first non-plane surf to get the origin
+      if (cs->getSurfaceType() == CSG::CSGSurface::SurfaceType::PLANE)
+        continue;
+      else
+      {
+        auto coeffs = cs->getCoeffs();
+        if (coeffs.find("x0") != coeffs.end())
+          x = coeffs.at("x0");
+        if (coeffs.find("y0") != coeffs.end())
+          y = coeffs.at("y0");
+        if (coeffs.find("z0") != coeffs.end())
+          z = coeffs.at("z0");
+        break;
+      }
+    }
 
-    // bounding box for new cell
+    // bounding box for new cell - located at the origin of the
     auto x_pos_surf = csg_mesh->createPlaneFromCoefficients(
-        img + "_x_pos_surf", 1.0, 0, 0, 0.5 * side_lengths[i]);
+        img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * side_lengths[i]);
     auto x_neg_surf = csg_mesh->createPlaneFromCoefficients(
-        img + "_x_neg_surf", 1.0, 0, 0, -0.5 * side_lengths[i]);
+        img + "_x_neg_surf", 1.0, 0, 0, x - 0.5 * side_lengths[i]);
     auto y_pos_surf = csg_mesh->createPlaneFromCoefficients(
-        img + "_y_pos_surf", 0, 1.0, 0, 0.5 * side_lengths[i]);
+        img + "_y_pos_surf", 0, 1.0, 0, y + 0.5 * side_lengths[i]);
     auto y_neg_surf = csg_mesh->createPlaneFromCoefficients(
-        img + "_y_neg_surf", 0, 1.0, 0, -0.5 * side_lengths[i]);
+        img + "_y_neg_surf", 0, 1.0, 0, y - 0.5 * side_lengths[i]);
     auto z_pos_surf = csg_mesh->createPlaneFromCoefficients(
-        img + "_z_pos_surf", 0, 1.0, 0, 0.5 * side_lengths[i]);
+        img + "_z_pos_surf", 0, 0, 1.0, z + 0.5 * side_lengths[i]);
     auto z_neg_surf = csg_mesh->createPlaneFromCoefficients(
-        img + "_z_neg_surf", 0, 1.0, 0, -0.5 * side_lengths[i]);
+        img + "_z_neg_surf", 0, 0, 1.0, z - 0.5 * side_lengths[i]);
     auto new_region =
         -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 
