@@ -213,6 +213,7 @@ protected:
   /// Postprocessor value for user-defined fixed point convergence check
   const PostprocessorValue *
       _fixed_point_custom_pp; // FIXME Make const and private once picard_custom_pp is gone
+  const PostprocessorValue * _fixed_point_custom_pp_old;
 
   /// Relaxation factor for fixed point Iteration
   const Real _relax_factor;

@@ -26,7 +26,7 @@ AbaqusUserElement::validParams()
   // execute during residual and Jacobian evaluation
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
-  exec_enum = {EXEC_PRE_KERNELS, EXEC_TIMESTEP_END};
+  exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
   // Avoid uninitialized residual objects
@@ -73,6 +73,7 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _nstatev(getParam<unsigned int>("num_state_vars")),
     _statev_index_current(0),
     _statev_index_old(1),
+    _t_step_old(declareRestartableData<int>("uel_tstep_old", -1)),
     _jtype(getParam<int>("jtype"))
 {
   // coupled variables must be nonlinear scalar fields
@@ -116,6 +117,18 @@ AbaqusUserElement::meshChanged()
 }
 
 void
+AbaqusUserElement::timestepSetup()
+{
+  // In case we are on the same timestep, that means this is being redone and we
+  // don't want to swap the stateful data yet
+  if (_t_step == _t_step_old)
+    return;
+
+  std::swap(_statev_index_old, _statev_index_current);
+  _t_step_old = _t_step;
+}
+
+void
 AbaqusUserElement::initialize()
 {
 }
@@ -123,13 +136,6 @@ AbaqusUserElement::initialize()
 void
 AbaqusUserElement::execute()
 {
-  // swap the current and old state data at the end of a converged timestep
-  if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_TIMESTEP_END)
-  {
-    std::swap(_statev_index_old, _statev_index_current);
-    return;
-  }
-
   PARALLEL_TRY
   {
     UELThread ut(_fe_problem, *this);

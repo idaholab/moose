@@ -23,6 +23,7 @@
     input = 'perf_graph_reporter_recover.i'
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     recover = false
+    restep = false
 
     requirement = 'The system shall include the ability to serialize report performance information with the recover system'
   []
