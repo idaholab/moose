@@ -35,8 +35,7 @@ ComputeSimoHughesJ2PlasticHeatEnergy::ComputeSimoHughesJ2PlasticHeatEnergy(
     _ep_old(getMaterialPropertyOld<Real>(_ep_name)),
     _F(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _cauchy_stress(getMaterialProperty<RankTwoTensor>(_base_name + "cauchy_stress")),
-    _plastic_heat(declareProperty<Real>(_base_name + "plastic_heat")),
-    _dplastic_heat_dT(declareProperty<Real>(_base_name + "dplastic_heat_dT"))
+    _plastic_heat(declareProperty<Real>(_base_name + "plastic_heat"))
 {
 }
 
