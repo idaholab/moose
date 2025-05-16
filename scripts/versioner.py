@@ -113,8 +113,10 @@ class Package:
     full_version: str
     # The hash for the packaged based on influential files
     hash: str
-    # The influential files
-    influential: list[str]
+    # All influential files and their hashes (file -> hash)
+    all_influential: dict[str, str]
+    # The influential files, by package (package -> (file -> hash))
+    influential: dict[str, dict[str, str]]
     # The Packages this package depends on
     dependencies: list
     # The templates for this package (template -> output)
@@ -279,6 +281,39 @@ class Versioner:
                      f'Found {num_templates} templates, {num_templates_failed} failed')
         print()
 
+        # Build modified influential files
+        all_influential = list(set(itertools.chain(*[p.all_influential for p in head.values()])))
+        influential_change = 0
+        influential_new = 0
+        influential_removed = 0
+        entries = []
+        for package in head.values():
+            base_package = base.get(package.name)
+            if base_package is not None:
+                influential = package.influential[package.name]
+                base_influential = base_package.influential.get(package.name, {})
+                for file, hash in influential.items():
+                    base_hash = base_influential.get(file)
+                    if base_hash != hash:
+                        if base_hash is None:
+                            status = 'NEW'
+                            influential_new += 1
+                        else:
+                            status = 'CHANGE'
+                            influential_change += 1
+                        entries.append([package.name, colorize(status, 'YELLOW'), file])
+                for file, hash in base_influential.items():
+                    if file not in influential:
+                        influential_removed += 1
+                        entries.append([package.name, colorize('REMOVED', 'YELLOW'), file])
+        status = f'Found {len(all_influential)} influential files, {influential_change} changed, '
+        status += f'{influential_new} added, {influential_removed} removed'
+        print_result(entries,
+                     'Versioner influential files',
+                     ['package', 'status', 'file'],
+                     status)
+        print()
+
         # Build version table
         entries = []
         num_packages = 0
@@ -437,7 +472,7 @@ class Versioner:
         if args.json:
             return json.dumps(package.output())
         if args.yaml:
-            return yaml.dump(package.output())
+            return yaml.dump(package.output(), sort_keys=False)
 
         return package.full_version
 
@@ -489,7 +524,8 @@ class Versioner:
                        'build_number': values.get('build_number'),
                        'full_version': None,
                        'hash': None,
-                       'influential': values.get('influential', []),
+                       'influential': None,
+                       'all_influential': values.get('influential', []),
                        'dependencies': values.get('dependencies', []),
                        'templates': values.get('templates', {}),
                        'apptainer': None,
@@ -501,7 +537,7 @@ class Versioner:
             # they have templated variables)
             conda_dir = package['conda']
             if conda_dir:
-                package['influential'].extend(Versioner.conda_influential(conda_dir))
+                package['all_influential'].extend(Versioner.conda_influential(conda_dir))
 
             # Make sure dependencies exist
             for dep in package['dependencies']:
@@ -530,30 +566,37 @@ class Versioner:
                 if dep not in package.dependencies:
                     package.dependencies = [dep] + package.dependencies
 
-        # Add influential files from dependencies. This ordering is
-        # verify important, as before we had explicit dependencies
-        # we filled in influential files in order top down from
-        # the config
-        add_influential: dict[str, list[str]] = {}
-        for name, package in packages.items():
-            add_influential[name] = sum([dep.influential for dep in package.dependencies], [])
-        for name, files in add_influential.items():
-            packages[name].influential = add_influential[name] + packages[name].influential
+        # Add influential files from dependencies. Ordering is important
+        # as before we had explicit dependncies we filled in influential
+        # files in order top down from the config
+        for package in packages.values():
+            influential = {dep.name: dep.all_influential.copy() for dep in package.dependencies}
+            influential[package.name] = package.all_influential.copy()
+            package.influential = {name: {file: None for file in influential[name]} for name in influential}
+            package.all_influential = {}
+            for values in package.influential.values():
+                package.all_influential.update(values)
+
+        # Get the hashes for all influential files
+        files = list(set(itertools.chain(*[p.all_influential for p in packages.values()])))
+        hashes = Versioner.get_influential_hashes(files, commit)
+        for package in packages.values():
+            package.all_influential = {k: hashes[k] for k in package.all_influential}
+            for name in package.influential:
+                package.influential[name] = {k: hashes[k] for k in package.influential[name]}
 
         # Sort the influential files so that the hash is
         # independent of the order that they are defined
         if not old_influential:
             for package in packages.values():
-                package.influential = sorted(list(set(package.influential)))
-
-        # Get the hashes for all influential files
-        files = list(itertools.chain(*[p.influential for p in packages.values()]))
-        all_hashes = Versioner.get_influential_hashes(files, commit)
+                package.all_influential = dict(sorted(package.all_influential.items()))
+                for name in package.influential:
+                    package.influential[name] = dict(sorted(package.influential[name].items()))
 
         # Build the hashes from the influential files. Needs to
         # be done later after dependencies are provessed
         for package in packages.values():
-            package.hash = Versioner.get_package_hash(package, all_hashes)
+            package.hash = Versioner.get_package_hash(package)
 
             # Without Versioner version management, the version
             # is just the hash
@@ -623,7 +666,7 @@ class Versioner:
         """
         conda_dir = package.config.get('conda')
         if not conda_dir:
-            for file in package.influential:
+            for file in package.all_influential:
                 if file.endswith(f'{package.name}/meta.yaml'):
                     conda_dir = os.path.dirname(file)
                     break
@@ -984,16 +1027,14 @@ class Versioner:
         return hashes
 
     @staticmethod
-    def get_package_hash(package: Package,
-                         hashes: dict[str, str]) -> str:
+    def get_package_hash(package: Package) -> str:
         """
         Gets the version hash for the given package
         """
         if package.is_app:
             return Versioner.get_app_info().hash
 
-        hashes = [hashes[f] for f in package.influential]
-        combined = ''.join(hashes).encode('utf-8')
+        combined = ''.join(package.all_influential.values()).encode('utf-8')
         return hashlib.md5(combined).hexdigest()[:7]
 
 if __name__ == '__main__':
