@@ -42,7 +42,7 @@ public:
 protected:
   void constructSolver(const InputParameters & parameters) override;
 
-  // Updates the solver with the bilinear form in case LOR solve is required
+  /// Updates the solver with the bilinear form in case LOR solve is required
   void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 };
 
