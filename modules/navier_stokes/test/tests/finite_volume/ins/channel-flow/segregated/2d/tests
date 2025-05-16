@@ -89,6 +89,7 @@
     cli_args = "FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
                "scalar_2_coupled_source' Postprocessors/inactive=''"
     recover = false # we don't support recovery for SIMPLE yet
+    should_crash = true
   []
   [with-scalar-symmetry]
     type = 'Exodiff'

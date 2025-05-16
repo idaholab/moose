@@ -175,6 +175,7 @@ finite elements for velocity and pressure.'
     type = 'RunApp'
     input = 'lid_driven_stabilized.i'
     expect_out = 'Aborting as solve did not converge'
+    should_crash = true
     cli_args = 'GlobalParams/alpha=0 Outputs/exodus=false'
     capabilities = 'method=opt'
     issues = '#9687'

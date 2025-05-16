@@ -4,6 +4,7 @@
     input = 'unconverged_1st_stage.i'
     expect_out = '1st stage'
     absent_out = '2nd stage'
+    should_crash = true
 
     requirement = "Multi-stage time integrators shall check convergence for all stages"
     design = "TimeIntegrator/index.md"
