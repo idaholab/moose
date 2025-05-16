@@ -2393,7 +2393,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                                    nfc->_Kne,
                                    nfc->primaryVariable().dofIndicesNeighbor(),
                                    nfc->_connected_dof_indices,
-                                   nfc->variable().scalingFactor());
+                                   nfc->primaryVariable().scalingFactor());
 
                   // We've handled Ken and Kne, finally handle Knn
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2610,7 +2610,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                                  nec->_Kne,
                                  nec->primaryVariable().dofIndicesNeighbor(),
                                  nec->_connected_dof_indices,
-                                 nec->variable().scalingFactor());
+                                 nec->primaryVariable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
                 _fe_problem.cacheJacobianNeighbor(0);
