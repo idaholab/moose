@@ -39,7 +39,7 @@ public:
     std::string name;
     /// The name of the subapp, if any (with subapp:something=value syntax)
     std::optional<std::string> subapp_name;
-    /// The value, i.e. ["-foo=bar"] -> "-foo" or ["-foo"] -> empty, if any
+    /// The value, i.e. ["-foo=bar"] -> "bar" or ["-foo"] -> empty, if any
     std::optional<std::string> value;
     /// The string that separates the value, if a value exists (space or =)
     std::optional<std::string> value_separator;

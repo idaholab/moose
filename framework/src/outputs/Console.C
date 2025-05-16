@@ -714,10 +714,12 @@ Console::outputSystemInformation()
     {
       std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
       if (!output.empty())
-        _console << "Nonlinear System" +
-                        (_problem_ptr->numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
-                        ":\n"
-                 << output;
+      {
+        _console << "Nonlinear System";
+        if (_problem_ptr->numNonlinearSystems() > 1)
+          _console << " [" + _problem_ptr->getNonlinearSystemNames()[i] + "]";
+        _console << ":\n" << output;
+      }
     }
   }
 
@@ -773,10 +775,12 @@ Console::meshChanged()
     {
       output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
       if (!output.empty())
-        _console << "Nonlinear System" +
-                        (_problem_ptr->numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
-                        ":\n"
-                 << output;
+      {
+        _console << "Nonlinear System";
+        if (_problem_ptr->numNonlinearSystems() > 1)
+          _console << " [" + _problem_ptr->getNonlinearSystemNames()[i] + "]";
+        _console << ":\n" << output;
+      }
     }
 
     output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);

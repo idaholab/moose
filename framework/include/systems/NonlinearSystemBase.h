@@ -233,6 +233,11 @@ public:
   std::shared_ptr<Split> getSplit(const std::string & name);
 
   /**
+   * Retrieves all splits
+   */
+  MooseObjectWarehouseBase<Split> & getSplits() { return _splits; }
+
+  /**
    * We offer the option to check convergence against the pre-SMO residual. This method handles the
    * logic as to whether we should perform such residual evaluation.
    *
