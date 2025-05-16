@@ -1,14 +1,11 @@
 [Mesh]
-  [gmg]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 1
-    ny = 1
-    nz = 1
+  [fmg]
+    type = FileMeshGenerator
+    file = 'gold/2d_cube.e'
   []
   [outer_bdy]
     type = ParsedNodeTransformGenerator
-    input = gmg
+    input = fmg
     x_function = "x"
     y_function = "y"
     z_function = "z+x*y*z"
@@ -36,5 +33,8 @@
 []
 
 [Outputs]
-  csv = true
+  [output]
+    type = CSV
+    file_base = 'xyzdelaunay_mesh_generator_out'
+  []
 []
