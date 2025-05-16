@@ -5,6 +5,7 @@
 #include "MFEMContainers.h"
 #include "ObjectManager.h"
 #include "PropertyManager.h"
+#include "MFEMSolverBase.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -26,9 +27,10 @@ public:
   mfem::BlockVector f;
 
   std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
-  std::shared_ptr<mfem::Solver> jacobian_preconditioner{nullptr};
-  std::shared_ptr<mfem::Solver> jacobian_solver{nullptr};
   std::shared_ptr<mfem::NewtonSolver> nonlinear_solver{nullptr};
+
+  std::shared_ptr<MFEMSolverBase> jacobian_preconditioner{nullptr};
+  std::shared_ptr<MFEMSolverBase> jacobian_solver{nullptr};
 
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;

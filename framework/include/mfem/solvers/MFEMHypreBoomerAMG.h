@@ -17,8 +17,8 @@ public:
 
   MFEMHypreBoomerAMG(const InputParameters &);
 
-  /// Returns a shared pointer to the instance of the Solver derived-class.
-  std::shared_ptr<mfem::Solver> getSolver() override { return _solver; }
+  /// Updates the solver with the bilinear form in case LOR solve is required
+  void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
 protected:
   void constructSolver(const InputParameters & parameters) override;
@@ -26,7 +26,6 @@ protected:
 private:
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
   mfem::real_t _strength_threshold;
-  std::shared_ptr<mfem::HypreBoomerAMG> _solver{nullptr};
 };
 
 #endif

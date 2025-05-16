@@ -23,11 +23,9 @@ MFEMCGSolver::validParams()
 
 MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _preconditioner(
-        isParamSetByUser("preconditioner")
-            ? const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"))
-                  .getSolver()
-            : nullptr)
+    _preconditioner(isParamSetByUser("preconditioner")
+                        ? getMFEMProblem().getProblemData().jacobian_preconditioner
+                        : nullptr)
 {
   constructSolver(parameters);
 }
@@ -35,16 +33,43 @@ MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
 void
 MFEMCGSolver::constructSolver(const InputParameters &)
 {
-  auto preconditioner = std::dynamic_pointer_cast<mfem::Solver>(_preconditioner);
+  auto solver =
+      std::make_shared<mfem::CGSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  solver->SetRelTol(getParam<double>("l_tol"));
+  solver->SetAbsTol(getParam<double>("l_abs_tol"));
+  solver->SetMaxIter(getParam<int>("l_max_its"));
+  solver->SetPrintLevel(getParam<int>("print_level"));
 
-  _solver = std::make_shared<mfem::CGSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  _solver->SetRelTol(getParam<double>("l_tol"));
-  _solver->SetAbsTol(getParam<double>("l_abs_tol"));
-  _solver->SetMaxIter(getParam<int>("l_max_its"));
-  _solver->SetPrintLevel(getParam<int>("print_level"));
+  if (_preconditioner)
+    solver->SetPreconditioner(*_preconditioner->getSolver());
 
-  if (preconditioner)
-    _solver->SetPreconditioner(*preconditioner);
+  _solver = solver;
+}
+
+void
+MFEMCGSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+
+  if (_lor && _preconditioner)
+    mooseError("LOR solver cannot take a preconditioner");
+
+  if (_preconditioner)
+  {
+    _preconditioner->updateSolver(a, tdofs);
+    auto solver = std::dynamic_pointer_cast<mfem::CGSolver>(_solver);
+    solver->SetPreconditioner(*_preconditioner->getSolver());
+    _solver = solver;
+  }
+  else if (_lor)
+  {
+    auto lor_solver = new mfem::LORSolver<mfem::CGSolver>(a, tdofs);
+    lor_solver->GetSolver().SetRelTol(getParam<double>("l_tol"));
+    lor_solver->GetSolver().SetAbsTol(getParam<double>("l_abs_tol"));
+    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+
+    _solver.reset(lor_solver);
+  }
 }
 
 #endif

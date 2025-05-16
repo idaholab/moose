@@ -33,16 +33,35 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 void
 MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 {
-  _solver = std::make_shared<mfem::HypreBoomerAMG>();
+  auto solver = std::make_shared<mfem::HypreBoomerAMG>();
 
-  _solver->SetTol(getParam<double>("l_tol"));
-  _solver->SetMaxIter(getParam<int>("l_max_its"));
-  _solver->SetPrintLevel(getParam<int>("print_level"));
-  _solver->SetStrengthThresh(_strength_threshold);
+  solver->SetTol(getParam<double>("l_tol"));
+  solver->SetMaxIter(getParam<int>("l_max_its"));
+  solver->SetPrintLevel(getParam<int>("print_level"));
+  solver->SetStrengthThresh(_strength_threshold);
 
-  if (_mfem_fespace)
+  if (_mfem_fespace && !mfem::HypreUsingGPU())
+    solver->SetElasticityOptions(_mfem_fespace.get());
+
+  _solver = solver;
+}
+
+void
+MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+
+  if (_lor)
   {
-    _solver->SetElasticityOptions(_mfem_fespace.get());
+    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
+    lor_solver->GetSolver().SetTol(getParam<double>("l_tol"));
+    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+    lor_solver->GetSolver().SetStrengthThresh(_strength_threshold);
+
+    if (_mfem_fespace && !mfem::HypreUsingGPU())
+      lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
+
+    _solver.reset(lor_solver);
   }
 }
 
