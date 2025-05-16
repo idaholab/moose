@@ -38,7 +38,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
   _problem.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
-  if (_problem.jacobian_solver->getParam<bool>("low_order_refined") &&
+  if ((_problem.jacobian_solver->isLOR() || _problem.jacobian_preconditioner->isLOR()) &&
       _equation_system->_test_var_names.size() > 1)
     mooseError("LOR solve is only supported for single-variable systems");
 
