@@ -40,13 +40,13 @@ protected:
   /// prepare the _secondary_to_primary_map (see NodeElemConstraintBase)
   virtual void prepareSecondaryToPrimaryMap() = 0;
 
-  /// This is the virtual that derived classes should override for computing the residual.
+  /// This is the virtual method that derived classes should override for computing the residual.
   virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
 
-  /// This is the virtual that derived classes should override for computing the Jacobian.
+  /// This is the virtual method that derived classes should override for computing the Jacobian.
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
-  /// This is the virtual that derived classes should override for computing the off-diag Jacobian.
+  /// This is the virtual method that derived classes should override for computing the off-diag Jacobian.
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
                                         unsigned int /*jvar*/)
   {

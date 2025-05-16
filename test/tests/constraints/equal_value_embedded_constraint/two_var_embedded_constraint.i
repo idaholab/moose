@@ -17,12 +17,13 @@
     order = FIRST
     family = LAGRANGE
     block = 1
+    scaling = .001
   []
   [phi2]
     order = FIRST
     family = LAGRANGE
     block = 2
-    # scaling = 10000
+    scaling = 10000
   []
 []
 
@@ -150,7 +151,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   line_search = none
-  nl_rel_tol = 1e-15
+  nl_rel_tol = 1e-12
   nl_abs_tol = 1e-8
   l_max_its = 100
   nl_max_its = 10
