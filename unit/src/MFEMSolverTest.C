@@ -46,6 +46,19 @@ public:
     return -d2u;
   }
 
+  // Create a simple 3D mesh for testing
+  mfem::ParMesh makeMesh()
+  {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    const int ne = 4;
+    mfem::Mesh mesh;
+    mesh = mfem::Mesh::MakeCartesian3D(ne, ne, ne, mfem::Element::HEXAHEDRON, 1.0, 1.0, 1.0);
+    mfem::ParMesh pmesh(MPI_COMM_WORLD, mesh);
+    mesh.Clear();
+    return pmesh;
+  }
+
   /**
    * Test a solver can solve a dummy diffusion problem to the expected tolerance.
    * Based on mfem/tests/unit/linalg/test_direct_solvers.cpp.
@@ -53,15 +66,9 @@ public:
   template <typename SolverType>
   void testDiffusionSolve(MFEMSolverBase & solver, mfem::real_t tol)
   {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    const int ne = 4;
-    int dim = 3;
-    mfem::Mesh mesh;
-    mesh = mfem::Mesh::MakeCartesian3D(ne, ne, ne, mfem::Element::HEXAHEDRON, 1.0, 1.0, 1.0);
-    mfem::ParMesh pmesh(MPI_COMM_WORLD, mesh);
-    mesh.Clear();
+    mfem::ParMesh pmesh = makeMesh();
     int order = 3;
+    int dim = 3;
     mfem::H1_FECollection fec(order, dim);
     mfem::ParFiniteElementSpace fespace(&pmesh, &fec);
     mfem::Array<int> ess_tdof_list, ess_bdr;
@@ -348,5 +355,36 @@ TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
 
   testDiffusionSolve<mfem::LORSolver<mfem::CGSolver>>(solver, 1e-5);
 }
+
+TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
+{
+  // Build required kernel inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMHypreBoomerAMG");
+  solver_params.set<bool>("low_order_refined") = true;
+
+  // Construct kernel
+  MFEMHypreBoomerAMG & solver =
+  addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
+
+  mfem::ParMesh pmesh = makeMesh();
+  mfem::ParFiniteElementSpace fespace(&pmesh, new mfem::H1_FECollection(3,3));
+  mfem::Array<int> ess_tdof_list;
+  mfem::ParBilinearForm a(&fespace);
+  mfem::ParGridFunction x(&fespace);
+  mfem::ParLinearForm b(&fespace);
+  a.Assemble();
+  b.Assemble();
+
+  mfem::OperatorPtr A;
+  mfem::Vector B, X;
+  a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
+
+  solver.updateSolver(a, ess_tdof_list);
+
+  auto solver_ptr = std::dynamic_pointer_cast<mfem::LORSolver<mfem::HypreBoomerAMG>>(solver.getSolver()).get();
+  // Test MFEMKernel returns an integrator of the expected type
+  ASSERT_TRUE(solver_ptr != nullptr);
+}
+
 
 #endif
