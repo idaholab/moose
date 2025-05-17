@@ -1870,7 +1870,7 @@ public:
   /*
    * @return The MaterialData for the type \p type for thread \p tid
    */
-  MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0);
+  MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0) const;
 
   /**
    * Will return True if the user wants to get an error when

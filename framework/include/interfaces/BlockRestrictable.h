@@ -241,7 +241,7 @@ private:
   FEProblemBase * _blk_feproblem;
 
   /// Pointer to Mesh
-  MooseMesh * _blk_mesh;
+  const MooseMesh * _blk_mesh;
 
   /// An empty set for referencing when boundary_ids is not included
   const std::set<BoundaryID> _empty_boundary_ids;
