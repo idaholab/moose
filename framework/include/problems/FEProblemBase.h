@@ -1867,7 +1867,7 @@ public:
   /*
    * @return The MaterialData for the type \p type for thread \p tid
    */
-  MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0);
+  MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0) const;
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly

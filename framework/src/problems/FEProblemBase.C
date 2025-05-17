@@ -3736,7 +3736,7 @@ FEProblemBase::getMaterial(std::string name,
 }
 
 MaterialData &
-FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid)
+FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid) const
 {
   switch (type)
   {
