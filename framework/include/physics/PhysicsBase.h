@@ -175,6 +175,17 @@ protected:
   void addPetscPairsToPetscOptions(
       const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options);
 
+  // Routines to help with deciding when to create objects
+  /**
+   * Returns whether this Physics should create the variable or if it already exists
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param error_if_aux error if the variable is auxiliary
+   */
+  bool shouldCreateVariable(const VariableName & var_name,
+                            const std::vector<SubdomainName> & blocks,
+                            const bool error_if_aux);
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 

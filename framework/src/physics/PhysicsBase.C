@@ -529,3 +529,27 @@ PhysicsBase::addPetscPairsToPetscOptions(
         *this,
         po);
 }
+
+bool
+PhysicsBase::shouldCreateVariable(const VariableName & var_name,
+                                  const std::vector<SubdomainName> & blocks,
+                                  const bool error_if_aux,
+                                  const bool error_if_missing_subdomains,
+                                  const bool add_missing_subdomains)
+{
+  mooseAssert(!error_if_missing_subdomains || !add_missing_subdomains,
+              "These two options are not compatible");
+  if (!variableExists(var_name, error_if_aux))
+    return true;
+  // check block restriction
+  auto & var = _problem->getVariable(0, var_name);
+  if (var.hasBlocks(blocks))
+    return false;
+  else if (!error_if_missing_subdomains)
+    mooseError("Variable '" + var_name + "' already exists with subdomain restriction '" +
+               Moose::stringify(var.blocks()) + "' which does not include the subdomains '" +
+               Moose::stringify(blocks) + "', required for this Physics.");
+  // Looks like the missing subdomains were not an issue since we set 'error_if_missing..' to false
+  else
+    return true;
+}
