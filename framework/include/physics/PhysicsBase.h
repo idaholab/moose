@@ -175,6 +175,12 @@ protected:
   void addPetscPairsToPetscOptions(
       const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options);
 
+  // Helpers to check on variable types
+  /// Whether the variable is a finite volume variable
+  bool isVariableFV(const VariableName & var_name) const;
+  /// Whether the variable is a scalar variable (global single scalar, not a field)
+  bool isVariableScalar(const VariableName & var_name) const;
+
   // Routines to help with deciding when to create objects
   /**
    * Returns whether this Physics should create the variable or if it already exists
