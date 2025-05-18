@@ -222,6 +222,12 @@ BlockRestrictable::hasBlocks(const std::vector<SubdomainName> & names) const
 }
 
 bool
+BlockRestrictable::hasBlocks(const std::set<SubdomainName> & names) const
+{
+  return hasBlocks(_blk_mesh->getSubdomainIDs(names));
+}
+
+bool
 BlockRestrictable::hasBlocks(const SubdomainID id) const
 {
   if (_blk_ids.empty() || _blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())

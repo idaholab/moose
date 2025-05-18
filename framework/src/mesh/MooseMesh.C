@@ -1716,6 +1716,12 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
   return MooseMeshUtils::getSubdomainIDs(getMesh(), subdomain_name);
 }
 
+std::set<SubdomainID>
+MooseMesh::getSubdomainIDs(const std::set<SubdomainName> & subdomain_name) const
+{
+  return MooseMeshUtils::getSubdomainIDs(getMesh(), subdomain_name);
+}
+
 void
 MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
 {
