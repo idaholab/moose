@@ -90,7 +90,10 @@ public:
    */
   bool hasObjects(THREAD_ID tid = 0) const;
   bool hasActiveObjects(THREAD_ID tid = 0) const;
-  bool hasVariableObjects(const VariableName & var_name) const;
+  bool hasObjectsForVariable(const VariableName & var_name) const;
+  bool hasObjectsForVariableAndBlocks(const VariableName & var_name,
+                                      const std::set<SubdomainName> & blocks,
+                                      std::set<SubdomainName> & blocks_covered) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
@@ -470,9 +473,47 @@ MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid /* = 0*/) const
 
 template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasVariableObjects(const VariableName & var_name) const
+MooseObjectWarehouseBase<T>::hasObjectsForVariable(const VariableName & var_name) const
 {
-  return !(_all_variable_objects.count(var_name));
+  return _all_variable_objects.count(var_name);
+}
+
+template <typename T>
+bool
+MooseObjectWarehouseBase<T>::hasObjectsForVariableAndBlocks(
+    const VariableName & var_name,
+    const std::set<SubdomainName> & blocks,
+    std::set<SubdomainName> & blocks_covered) const
+{
+  blocks_covered.clear();
+  if (!hasObjectsForVariable(var_name))
+    return false;
+
+  // Check block restriction as a whole
+  for (const auto & object : libmesh_map_find(_all_variable_objects, var_name))
+  {
+    std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(object);
+    if (blk && blk->hasBlocks(blocks))
+    {
+      blocks_covered = blocks;
+      return true;
+    }
+  }
+  // No object has all the blocks, but one might overlap, which could be troublesome.
+  // We'll keep track of which blocks are covered in case several overlap
+  for (const auto & object : libmesh_map_find(_all_variable_objects, var_name))
+  {
+    std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(object);
+    if (blk)
+      for (const auto & block : blocks)
+        if (blk->hasBlocks(block))
+          blocks_covered.insert(block);
+  }
+  // No overlap at all
+  if (blocks_covered.empty())
+    return false;
+
+  return (blocks == blocks_covered);
 }
 
 template <typename T>
