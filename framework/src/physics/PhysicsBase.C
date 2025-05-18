@@ -15,6 +15,7 @@
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
 #include "ActionComponent.h"
+#include "InitialConditionBase.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -552,4 +553,61 @@ PhysicsBase::shouldCreateVariable(const VariableName & var_name,
   // Looks like the missing subdomains were not an issue since we set 'error_if_missing..' to false
   else
     return true;
+}
+
+bool
+PhysicsBase::shouldCreateIC(const VariableName & var_name,
+                            const std::vector<SubdomainName> & blocks,
+                            const bool ic_is_default_ic,
+                            const bool error_if_already_defined) const
+{
+  // Handle recover
+  if (ic_is_default_ic && (_app.isRecovering() || _app.isRecovering()))
+    return false;
+
+  // Check whether there are any ICs for this variable already in the problem
+  const auto & ics_wh = _problem->getInitialConditionWarehouse();
+  if (!ics_wh.hasObjectsForVariable(var_name))
+    return true;
+
+  const auto & ics_var = ics_wh.getObjectsForVariable(var_name);
+  // Check block restriction
+  for (const auto & ic : ics_var)
+  {
+    if (ic->hasBlocks(blocks))
+    {
+      if (error_if_already_defined)
+        mooseError("ICs for variable '" + var_name + "' have already been defined for blocks '" +
+                   Moose::stringify(blocks) + "' by IC object: " + ic->name());
+      else
+        return false;
+    }
+  }
+  // No IC has all the blocks, but one might overlap, which could be troublesome.
+  // We'll keep track of which blocks are covered in case several overlap
+  std::set<SubdomainName> blocks_covered;
+  for (const auto & ic : ics_var)
+  {
+    for (const auto & block : blocks)
+      if (ic->hasBlocks(block))
+      {
+        if (error_if_already_defined)
+          mooseError("ICs for variable '" + var_name + "' have already been defined for block '" +
+                     block + "' by IC object: " + ic->name());
+        blocks_covered.insert(block);
+      }
+  }
+  // No overlap at all, let's create the IC
+  if (blocks_covered.empty())
+    return true;
+
+  std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  if (blocks_set == blocks_covered && !error_if_already_defined)
+    return false;
+  else
+    mooseError("There is a partial overlap between the subdomains covered by pre-existing initial "
+               "conditions (ICs) and a newly created IC for variable " +
+               var_name +
+               ". We should be creating the Physics' IC only for non-covered blocks. This is not "
+               "implemented at this time.");
 }

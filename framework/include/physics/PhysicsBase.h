@@ -186,6 +186,23 @@ protected:
                             const std::vector<SubdomainName> & blocks,
                             const bool error_if_aux);
 
+  /**
+   * Returns whether this Physics should create the IC or whether it already exists
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param ic_is_default_ic whether this IC is from a default parameter, and therefore should be
+   * skipped when recovering/restarting
+   * @param error_if_already_defined two ICs cannot be defined on the same subdomain, so if this is
+   * set to true, any overlap between the subdomains of two ICs for the same variable will cause an
+   * error. If set to false, the existing ICs will take priority, and this routine will return
+   * false. Setting 'error_if_already_defined' to '!ic_is_default_ic' is a good idea if it is ok to
+   * overwrite the default IC value of the Physics.
+   */
+  bool shouldCreateIC(const VariableName & var_name,
+                      const std::vector<SubdomainName> & blocks,
+                      const bool ic_is_default_ic,
+                      const bool error_if_already_defined) const;
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 
