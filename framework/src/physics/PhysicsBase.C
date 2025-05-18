@@ -16,6 +16,8 @@
 #include "BlockRestrictable.h"
 #include "ActionComponent.h"
 #include "InitialConditionBase.h"
+#include "FVInitialConditionBase.h"
+#include "MooseVariableScalar.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -532,6 +534,21 @@ PhysicsBase::addPetscPairsToPetscOptions(
 }
 
 bool
+PhysicsBase::isVariableFV(const VariableName & var_name) const
+{
+  const auto var = &_problem->getVariable(0, var_name);
+  if (const auto & field_var = dynamic_cast<MooseVariableFieldBase *>(var))
+    return field_var->isFV();
+  return false;
+}
+
+bool
+PhysicsBase::isVariableScalar(const VariableName & var_name) const
+{
+  return _problem->hasScalarVariable(var_name);
+}
+
+bool
 PhysicsBase::shouldCreateVariable(const VariableName & var_name,
                                   const std::vector<SubdomainName> & blocks,
                                   const bool error_if_aux,
@@ -564,50 +581,41 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
   // Handle recover
   if (ic_is_default_ic && (_app.isRecovering() || _app.isRecovering()))
     return false;
+  // do not set initial conditions if we are loading fields from the mesh file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return false;
+  // Different type of ICs, not block restrictable
+  mooseAssert(!isVariableScalar(var_name), "shouldCreateIC not implemented for scalar variables");
 
   // Check whether there are any ICs for this variable already in the problem
-  const auto & ics_wh = _problem->getInitialConditionWarehouse();
-  if (!ics_wh.hasObjectsForVariable(var_name))
-    return true;
-
-  const auto & ics_var = ics_wh.getObjectsForVariable(var_name);
-  // Check block restriction
-  for (const auto & ic : ics_var)
-  {
-    if (ic->hasBlocks(blocks))
-    {
-      if (error_if_already_defined)
-        mooseError("ICs for variable '" + var_name + "' have already been defined for blocks '" +
-                   Moose::stringify(blocks) + "' by IC object: " + ic->name());
-      else
-        return false;
-    }
-  }
-  // No IC has all the blocks, but one might overlap, which could be troublesome.
-  // We'll keep track of which blocks are covered in case several overlap
+  bool has_all_blocks;
   std::set<SubdomainName> blocks_covered;
-  for (const auto & ic : ics_var)
-  {
-    for (const auto & block : blocks)
-      if (ic->hasBlocks(block))
-      {
-        if (error_if_already_defined)
-          mooseError("ICs for variable '" + var_name + "' have already been defined for block '" +
-                     block + "' by IC object: " + ic->name());
-        blocks_covered.insert(block);
-      }
-  }
-  // No overlap at all, let's create the IC
-  if (blocks_covered.empty())
+  const std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  if (isVariableFV(var_name))
+    has_all_blocks = _problem->getFVInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
+        var_name, blocks_set, blocks_covered);
+  else
+    has_all_blocks = _problem->getInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
+        var_name, blocks_set, blocks_covered);
+
+  const bool has_some_blocks = !blocks_covered.empty();
+  if (!has_some_blocks)
     return true;
 
-  std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
-  if (blocks_set == blocks_covered && !error_if_already_defined)
-    return false;
-  else
-    mooseError("There is a partial overlap between the subdomains covered by pre-existing initial "
-               "conditions (ICs) and a newly created IC for variable " +
-               var_name +
-               ". We should be creating the Physics' IC only for non-covered blocks. This is not "
-               "implemented at this time.");
+  if (has_all_blocks)
+  {
+    if (error_if_already_defined)
+      mooseError("ICs for variable '" + var_name + "' have already been defined for blocks '" +
+                 Moose::stringify(blocks) + "'.");
+    else
+      return false;
+  }
+
+  // Not implemented.
+  mooseError("There is a partial overlap between the subdomains covered by pre-existing initial "
+             "conditions (ICs), defined on blocks: " +
+             Moose::stringify(blocks_covered) + "\n and a newly created IC for variable " +
+             var_name + ", to be defined on blocks: " + Moose::stringify(blocks) +
+             ".\n We should be creating the Physics' IC only for non-covered blocks. This is not "
+             "implemented at this time.");
 }
