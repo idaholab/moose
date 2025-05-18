@@ -128,6 +128,13 @@ public:
   bool hasBlocks(const std::vector<SubdomainName> & names) const;
 
   /**
+   * Test if the supplied set of block names are valid for this object
+   * @param names A vector of SubdomainNames to check
+   * @return True if the given ids are valid for this object
+   */
+  bool hasBlocks(const std::set<SubdomainName> & names) const;
+
+  /**
    * Test if the supplied block ids are valid for this object
    * @param id A SubdomainID to check
    * @return True if the given id is valid for this object
