@@ -90,6 +90,7 @@ public:
    */
   bool hasObjects(THREAD_ID tid = 0) const;
   bool hasActiveObjects(THREAD_ID tid = 0) const;
+  bool hasVariableObjects(const VariableName & var_name) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
@@ -110,6 +111,10 @@ public:
   std::shared_ptr<T> getObject(const std::string & name, THREAD_ID tid = 0) const;
   std::shared_ptr<T> getActiveObject(const std::string & name, THREAD_ID tid = 0) const;
   ///@}
+
+  /// Getter for objects that have the 'variable' set to a particular variable
+  const std::vector<std::shared_ptr<T>> &
+  getObjectsForVariable(const VariableName & var_name) const;
 
   /**
    * Updates the active objects storage.
@@ -205,6 +210,9 @@ protected:
 
   /// Active boundary restricted objects (THREAD_ID on outer vector)
   std::vector<std::map<BoundaryID, std::vector<std::shared_ptr<T>>>> _active_boundary_objects;
+
+  /// All objects with a certain variable selected, as the 'variable' parameter
+  std::map<VariableName, std::vector<std::shared_ptr<T>>> _all_variable_objects;
 
   /**
    * Helper method for updating active vectors
@@ -337,6 +345,9 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object,
 
       blk->checkVariable(problem.getVariable(
           tid, variable_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY));
+
+      mooseAssert(tid == 0, "This isnt written for threaded use");
+      _all_variable_objects[variable_name].push_back(object);
     }
   }
 }
@@ -459,6 +470,13 @@ MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid /* = 0*/) const
 
 template <typename T>
 bool
+MooseObjectWarehouseBase<T>::hasVariableObjects(const VariableName & var_name) const
+{
+  return !(_all_variable_objects.count(var_name));
+}
+
+template <typename T>
+bool
 MooseObjectWarehouseBase<T>::hasActiveBlockObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
@@ -528,6 +546,13 @@ MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID
     if (object->name() == name)
       return object;
   mooseError("Unable to locate active object: ", name, ".");
+}
+
+template <typename T>
+const std::vector<std::shared_ptr<T>> &
+MooseObjectWarehouseBase<T>::getObjectsForVariable(const VariableName & var_name) const
+{
+  return libmesh_map_find(_all_variable_objects, var_name);
 }
 
 template <typename T>
