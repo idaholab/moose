@@ -14,6 +14,7 @@
     [restart_with_user_ics]
       type = CSVDiff
       input = test_cg.i
+      prereq = 'restart/user_ics'
       csvdiff = 'restart_user_ics.csv'
       cli_args = "Physics/MultiSpeciesDiffusion/ContinuousGalerkin/diff/initial_conditions_species='2 3 4'
                   Problem/restart_file_base=user_ics_cp/LATEST Problem/allow_initial_conditions_with_restart=true
@@ -23,6 +24,7 @@
     [restart_from_file]
       type = CSVDiff
       input = test_cg.i
+      prereq = 'restart/restart_with_user_ics'
       csvdiff = 'from_file.csv'
       cli_args = "Mesh/active='fmg_restart' Outputs/file_base=from_file"
       detail = 'when performing manual restart from a mesh file, ignoring the default initial condition.'
