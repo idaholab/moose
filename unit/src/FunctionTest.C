@@ -28,8 +28,8 @@ TEST_F(FunctionTest, GetScalarFunctionCoefficient)
   mfem::Coefficient & coef(_mfem_problem->getCoefficients().getScalarCoefficient("coef1"));
   EXPECT_EQ(coef.Eval(fe_transform, point), 1);
 
-  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("coef1"), MooseException);
-  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("coef2"), MooseException);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("coef1"), std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("coef2"), std::runtime_error);
 }
 
 /**
@@ -52,8 +52,10 @@ TEST_F(FunctionTest, GetVectorFunctionCoefficient)
   EXPECT_EQ(vec[1], 2.);
   EXPECT_EQ(vec[2], 3.);
 
-  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("vec_coef2"), MooseException);
-  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("vec_coef1"), MooseException);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("vec_coef2"),
+               std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("vec_coef1"),
+               std::runtime_error);
 }
 
 /**
@@ -114,8 +116,8 @@ TEST_F(FunctionTest, AddUnknownFunction)
   _mfem_problem->getFunction("coef2").initialSetup();
   _mfem_problem->getFunction("coef3").initialSetup();
 
-  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("coef3"), MooseException);
-  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("coef3"), MooseException);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("coef3"), std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("coef3"), std::runtime_error);
 }
 
 #endif

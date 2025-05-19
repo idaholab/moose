@@ -211,13 +211,13 @@ TEST_F(CheckCoefficientMap, OverwriteCoefficient)
   coeff_map.addCoefficient("resistivity", coeff_map.make<mfem::ConstantCoefficient>(2.));
   EXPECT_THROW(
       coeff_map.addCoefficient("resistivity", coeff_map.make<mfem::ConstantCoefficient>(4.)),
-      MooseException);
+      std::runtime_error);
 }
 
 TEST_F(CheckCoefficientMap, CoefficientNotDeclared)
 {
   Moose::MFEM::ScalarMap coeff_map;
-  EXPECT_THROW(coeff_map.getCoefficient("NotDeclared"), MooseException);
+  EXPECT_THROW(coeff_map.getCoefficient("NotDeclared"), std::runtime_error);
 }
 
 TEST_F(CheckCoefficientMap, AddBlocksForGlobalCoefficient)
@@ -226,7 +226,7 @@ TEST_F(CheckCoefficientMap, AddBlocksForGlobalCoefficient)
   coeff_map.addCoefficient("resistivity", coeff_map.make<mfem::ConstantCoefficient>(2.));
   EXPECT_THROW(coeff_map.addPiecewiseBlocks(
                    "resistivity", coeff_map.make<mfem::ConstantCoefficient>(1.), {"1", "2"}),
-               MooseException);
+               std::runtime_error);
 }
 
 TEST_F(CheckCoefficientMap, OverwriteBlocks)
@@ -236,7 +236,7 @@ TEST_F(CheckCoefficientMap, OverwriteBlocks)
       "resistivity", coeff_map.make<mfem::ConstantCoefficient>(2.), {"2", "3"});
   EXPECT_THROW(coeff_map.addPiecewiseBlocks(
                    "resistivity", coeff_map.make<mfem::ConstantCoefficient>(1.), {"1", "2"}),
-               MooseException);
+               std::runtime_error);
 }
 
 TEST_F(CheckCoefficientMap, DifferentVecSize)
@@ -249,7 +249,7 @@ TEST_F(CheckCoefficientMap, DifferentVecSize)
   EXPECT_THROW(
       coeff_map.addPiecewiseBlocks(
           "test", coeff_map.make<mfem::VectorConstantCoefficient>(mfem::Vector({1., 0.})), {"3"}),
-      MooseException);
+      std::runtime_error);
 }
 
 TEST_F(CheckCoefficientMap, DifferentMatSize)
@@ -264,7 +264,7 @@ TEST_F(CheckCoefficientMap, DifferentMatSize)
                                    coeff_map.make<mfem::MatrixConstantCoefficient>(
                                        mfem::DenseMatrix({{11., 0., 42.}, {0., -1., 10.}})),
                                    {"3"}),
-      MooseException);
+      std::runtime_error);
 }
 
 #endif

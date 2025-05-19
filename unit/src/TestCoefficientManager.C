@@ -237,9 +237,9 @@ TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameScalar)
 
 TEST_F(CheckCoefficientManager, NonexistentAliasScalar)
 {
-  EXPECT_THROW(manager.declareScalar("thingy", "undeclared name"), MooseException);
+  EXPECT_THROW(manager.declareScalar("thingy", "undeclared name"), std::runtime_error);
   EXPECT_THROW(manager.declareScalarProperty("test2", {"1", "2", "3"}, "another undeclared name"),
-               MooseException);
+               std::runtime_error);
 }
 
 TEST_F(CheckCoefficientManager, DeclareCoefficientPWScalar)
@@ -587,9 +587,9 @@ TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameVector)
 
 TEST_F(CheckCoefficientManager, NonexistentAliasVector)
 {
-  EXPECT_THROW(manager.declareVector("thingy", "undeclared name"), MooseException);
+  EXPECT_THROW(manager.declareVector("thingy", "undeclared name"), std::runtime_error);
   EXPECT_THROW(manager.declareVectorProperty("test2", {"1", "2", "3"}, "another undeclared name"),
-               MooseException);
+               std::runtime_error);
 }
 
 TEST_F(CheckCoefficientManager, DeclareCoefficientPWVector)
@@ -849,9 +849,9 @@ TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameMatrix)
 
 TEST_F(CheckCoefficientManager, NonexistentAliasMatrix)
 {
-  EXPECT_THROW(manager.declareMatrix("thingy", "undeclared name"), MooseException);
+  EXPECT_THROW(manager.declareMatrix("thingy", "undeclared name"), std::runtime_error);
   EXPECT_THROW(manager.declareMatrixProperty("test2", {"1", "2", "3"}, "another undeclared name"),
-               MooseException);
+               std::runtime_error);
 }
 
 TEST_F(CheckCoefficientManager, DeclareFunctionPWMatrix)
@@ -1158,12 +1158,12 @@ TEST_F(CheckCoefficientManager, CheckRepeatedNames)
   manager.declareScalar<mfem::ConstantCoefficient>("c", 2.);
 
   // Check that coefficients can not be redefined
-  EXPECT_THROW(manager.declareScalar<mfem::ConstantCoefficient>("a", 2.), MooseException);
+  EXPECT_THROW(manager.declareScalar<mfem::ConstantCoefficient>("a", 2.), std::runtime_error);
   EXPECT_THROW(manager.declareVector<mfem::VectorConstantCoefficient>("a", mfem::Vector({2., 1.})),
-               MooseException);
+               std::runtime_error);
   EXPECT_THROW(manager.declareMatrix<mfem::MatrixConstantCoefficient>(
                    "a", mfem::DenseMatrix({{2., 1.}, {0., 1.}})),
-               MooseException);
+               std::runtime_error);
 }
 
 #endif
