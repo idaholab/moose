@@ -90,10 +90,11 @@ public:
    */
   bool hasObjects(THREAD_ID tid = 0) const;
   bool hasActiveObjects(THREAD_ID tid = 0) const;
-  bool hasObjectsForVariable(const VariableName & var_name) const;
+  bool hasObjectsForVariable(const VariableName & var_name, THREAD_ID tid /* = 0*/) const;
   bool hasObjectsForVariableAndBlocks(const VariableName & var_name,
                                       const std::set<SubdomainName> & blocks,
-                                      std::set<SubdomainName> & blocks_covered) const;
+                                      std::set<SubdomainName> & blocks_covered,
+                                      THREAD_ID tid /* = 0*/) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
@@ -116,8 +117,8 @@ public:
   ///@}
 
   /// Getter for objects that have the 'variable' set to a particular variable
-  const std::vector<std::shared_ptr<T>> &
-  getObjectsForVariable(const VariableName & var_name) const;
+  const std::vector<std::shared_ptr<T>> & getObjectsForVariable(const VariableName & var_name,
+                                                                THREAD_ID tid /* = 0*/) const;
 
   /**
    * Updates the active objects storage.
@@ -215,7 +216,7 @@ protected:
   std::vector<std::map<BoundaryID, std::vector<std::shared_ptr<T>>>> _active_boundary_objects;
 
   /// All objects with a certain variable selected, as the 'variable' parameter
-  std::map<VariableName, std::vector<std::shared_ptr<T>>> _all_variable_objects;
+  std::vector<std::map<VariableName, std::vector<std::shared_ptr<T>>>> _all_variable_objects;
 
   /**
    * Helper method for updating active vectors
@@ -263,7 +264,8 @@ MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/)
     _all_block_objects(_num_threads),
     _active_block_objects(_num_threads),
     _all_boundary_objects(_num_threads),
-    _active_boundary_objects(_num_threads)
+    _active_boundary_objects(_num_threads),
+    _all_variable_objects(_num_threads)
 {
 }
 
@@ -349,8 +351,7 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object,
       blk->checkVariable(problem.getVariable(
           tid, variable_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY));
 
-      mooseAssert(tid == 0, "This isnt written for threaded use");
-      _all_variable_objects[variable_name].push_back(object);
+      _all_variable_objects[tid][variable_name].push_back(object);
     }
   }
 }
@@ -473,9 +474,11 @@ MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid /* = 0*/) const
 
 template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasObjectsForVariable(const VariableName & var_name) const
+MooseObjectWarehouseBase<T>::hasObjectsForVariable(const VariableName & var_name,
+                                                   THREAD_ID tid /* = 0*/) const
 {
-  return _all_variable_objects.count(var_name);
+  checkThreadID(tid);
+  return _all_variable_objects[tid].count(var_name);
 }
 
 template <typename T>
@@ -483,14 +486,16 @@ bool
 MooseObjectWarehouseBase<T>::hasObjectsForVariableAndBlocks(
     const VariableName & var_name,
     const std::set<SubdomainName> & blocks,
-    std::set<SubdomainName> & blocks_covered) const
+    std::set<SubdomainName> & blocks_covered,
+    THREAD_ID tid /* = 0*/) const
 {
+  checkThreadID(tid);
   blocks_covered.clear();
-  if (!hasObjectsForVariable(var_name))
+  if (!hasObjectsForVariable(var_name, tid))
     return false;
 
   // Check block restriction as a whole
-  for (const auto & object : libmesh_map_find(_all_variable_objects, var_name))
+  for (const auto & object : libmesh_map_find(_all_variable_objects[tid], var_name))
   {
     std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(object);
     if (blk && blk->hasBlocks(blocks))
@@ -501,7 +506,7 @@ MooseObjectWarehouseBase<T>::hasObjectsForVariableAndBlocks(
   }
   // No object has all the blocks, but one might overlap, which could be troublesome.
   // We'll keep track of which blocks are covered in case several overlap
-  for (const auto & object : libmesh_map_find(_all_variable_objects, var_name))
+  for (const auto & object : libmesh_map_find(_all_variable_objects[tid], var_name))
   {
     std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(object);
     if (blk)
@@ -591,9 +596,10 @@ MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID
 
 template <typename T>
 const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getObjectsForVariable(const VariableName & var_name) const
+MooseObjectWarehouseBase<T>::getObjectsForVariable(const VariableName & var_name,
+                                                   THREAD_ID tid /* = 0*/) const
 {
-  return libmesh_map_find(_all_variable_objects, var_name);
+  return libmesh_map_find(_all_variable_objects[tid], var_name);
 }
 
 template <typename T>
