@@ -533,17 +533,34 @@ class Job(OutputInterface):
         """
         Initilizes (constructs) the validation cases, if any
         """
-        assert self.specs['validation_test'] is not None
+        assert self.specs['validation_test']
 
-        # Load the validation classes defined by the user
-        test_path = os.path.join(self.getTestDir(), self.specs['validation_test'])
-        spec = importlib.util.spec_from_file_location('validation_module', test_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        subclasses = module.ValidationCase._subclasses
+        scripts = self.specs['validation_test'].split()
 
-        # And instantiate them
-        self.validation_cases = [subclass() for subclass in subclasses]
+        if len(set(scripts)) != len(scripts):
+            message = 'Duplicate validation script paths found'
+            self.appendOutput(message)
+            self.setStatus(self.error, 'VALIDATION TEST ERROR')
+
+        self.validation_cases = []
+        for i in range(len(scripts)):
+            script = scripts[i]
+            if '..' in script:
+                message = f'Validation script {script} out of test directory'
+                self.appendOutput(message)
+                self.setStatus(self.error, 'VALIDATION TEST ERROR')
+            path = os.path.join(self.getTestDir(), script)
+            if not os.path.exists(path):
+                message = f'Validation script {path} not found'
+                self.appendOutput(message)
+                self.setStatus(self.error, 'VALIDATION TEST ERROR')
+
+            spec = importlib.util.spec_from_file_location(f'validation{i}', path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            subclasses = module.ValidationCase._subclasses.copy()
+            module.ValidationCase._subclasses = []
+            self.validation_cases += [(path, subclass()) for subclass in subclasses]
 
     def runValidation(self):
         """
@@ -553,22 +570,33 @@ class Job(OutputInterface):
         assert self.validation_output is not None
         output = self.validation_output
 
-        test_path = os.path.join(self.getTestDir(), self.specs['validation_test'])
-        output.appendOutput(f'Running validation case(s) in {test_path}\n\n')
+        all_data = set()
+        for path, test_case in self.validation_cases:
+            name = type(test_case).__name__
+            message = f'Running validation case(s) in {path}:{name}\n\n'
+            output.appendOutput(message)
 
-        # Do the actual execution; here we lazily mock around print()
-        # in order to capture all output. This isn't exhaustive, but
-        # is probably good enough for now
-        run_exception = False
-        def wrapped_print(*args, **kwargs):
-            end = kwargs.get('end', '\n')
-            output.appendOutput(" ".join(args) + end)
-        with patch("builtins.print", wraps=wrapped_print):
-            for test_case in self.validation_cases:
+            # Do the actual execution; here we lazily mock around print()
+            # in order to capture all output. This isn't exhaustive, but
+            # is probably good enough for now
+            run_exception = False
+            def wrapped_print(*args, **kwargs):
+                end = kwargs.get('end', '\n')
+                output.appendOutput(" ".join(args) + end)
+            with patch("builtins.print", wraps=wrapped_print):
                 try:
                     test_case.run()
                 except test_case.TestRunException:
                     run_exception = True
+            output.appendOutput('\n')
+
+            for key in test_case.getData():
+                if key in all_data:
+                    message = f'ERROR: Validation data with key "{key}" was declared multiple times'
+                    output.appendOutput(message)
+                    self.setStatus(self.job_status.error, 'VALIDATION TEST ERROR')
+                    return
+                all_data.add(key)
 
         if run_exception:
             output.appendOutput(f'\nEncountered exception(s) while running tests')
@@ -576,8 +604,8 @@ class Job(OutputInterface):
             self.setStatus(self.job_status.error, 'VALIDATION TEST EXCEPTION')
             return
 
-        num_failed = sum([c.getNumResultsByStatus(ValidationCase.Status.FAIL) for c in self.validation_cases])
-        output.appendOutput(f'\nRan validation case(s); {num_failed} result(s) failed')
+        num_failed = sum([c.getNumResultsByStatus(ValidationCase.Status.FAIL) for _, c in self.validation_cases])
+        output.appendOutput(f'Ran validation case(s); {num_failed} result(s) failed')
         if num_failed > 0:
             self.setStatus(self.job_status.error, 'VALIDATION FAILED')
 
@@ -882,20 +910,19 @@ class Job(OutputInterface):
 
         # Append validation data, if any
         if self.validation_cases:
-            job_data['validation'] = {'script': os.path.join(self.getTestDir(),
-                                                             self.specs['validation_test']),
-                                      'results': [],
-                                      'data': {}}
-            for case in self.validation_cases:
+            job_data['validation'] = {'results': [], 'data': {}}
+            for path, case in self.validation_cases:
                 results = [r for r in case.getResults() if r.validation]
                 for result in results:
                     value = asdict(result)
                     value.pop('validation')
+                    value['script'] = path
                     job_data['validation']['results'].append(value)
                 data = {k: v for k, v in case.getData().items() if v.validation}
                 for key, value in data.items():
                     value = asdict(value)
                     value.pop('validation')
+                    value['script'] = path
                     job_data['validation']['data'][key] = value
 
         # Extend with data from the scheduler, if any
