@@ -744,7 +744,7 @@ addPetscPairsToPetscOptions(
 #endif
 
       // Look for a pc description
-      if (option_name == "-pc_type" || option_name == "-pc_sub_type" ||
+      if (option_name == "-pc_type" || option_name == "-sub_pc_type" ||
           option_name == "-pc_hypre_type")
         pc_description += option_value + ' ';
 
@@ -872,6 +872,8 @@ addPetscPairsToPetscOptions(
   }
 #endif
   // Set Preconditioner description
+  if (!pc_description.empty() && prefix.size() > 1)
+    po.pc_description += "[" + prefix.substr(1, prefix.size() - 2) + "]: ";
   po.pc_description += pc_description;
 }
 

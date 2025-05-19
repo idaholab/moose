@@ -725,8 +725,28 @@ TransientBase::getTimeIntegratorNames() const
 
   std::vector<std::string> ret;
   for (const auto & ti : tis)
-    ret.push_back(ti->type());
+  {
+    const auto & sys = ti->getCheckedPointerParam<SystemBase *>("_sys")->system();
+    const auto & uvars = ti->getParam<std::vector<VariableName>>("variables");
 
+    std::vector<VariableName> vars;
+    for (const auto & var : uvars)
+      if (sys.has_variable(var))
+        vars.push_back(var);
+
+    if (!uvars.empty() && vars.empty())
+      continue;
+
+    if (tis.size() > 1)
+    {
+      const std::string sys_prefix = _problem.numSolverSystems() > 1 ? sys.name() : "";
+      const std::string var_prefix = MooseUtils::join(vars, ", ");
+      const bool both = !sys_prefix.empty() && !var_prefix.empty();
+      ret.push_back("[" + sys_prefix + (both ? " (" : "") + var_prefix + (both ? ")" : "") + "]:");
+    }
+
+    ret.push_back(ti->type());
+  }
   return ret;
 }
 
