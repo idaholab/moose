@@ -120,6 +120,7 @@ fi
 # opt   <--> Release
 # devel <--> RelWithDebInfo
 # dbg   <--> Debug
+# oprof <--> RelWithDebInfo + NEML2_CPU_PROFILER=ON
 METHODS=${METHODS:-opt,dbg}
 if [[ -n "$METHOD" ]]; then
   METHODS=$METHOD
@@ -179,6 +180,14 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
     exit 1
   fi
 
+  # Check that gperftools directory is specified
+  if [[ ${METHOD} == "oprof" ]]; then
+    if [[ -z "${GPERF_DIR}" ]]; then
+      echo "Error: The GPERF_DIR environment variable must be set to the gperftools installation directory."
+      exit 1
+    fi
+  fi
+
   # Build and install directories
   NEML2_BUILD_DIR=${NEML2_SRC_DIR}/build/${METHOD}
 
@@ -189,12 +198,16 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   fi
 
   # CMake build type
-  if [[ ${METHOD} == "opt" ]] || [[ ${METHOD} == "oprof" ]]; then
+  NEML2_CPU_PROFILER="OFF"
+  if [[ ${METHOD} == "opt" ]]; then
     CMAKE_BUILD_TYPE="Release"
   elif [[ ${METHOD} == "devel" ]]; then
     CMAKE_BUILD_TYPE="RelWithDebInfo"
   elif [[ ${METHOD} == "dbg" ]]; then
     CMAKE_BUILD_TYPE="Debug"
+  elif [[ ${METHOD} == "oprof" ]]; then
+    CMAKE_BUILD_TYPE="RelWithDebInfo"
+    NEML2_CPU_PROFILER="ON"
   else
     echo "Error: Unknown build method ${METHOD}"
     exit 1
@@ -217,6 +230,7 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
     configure_neml2 "${NEML2_SRC_DIR}" \
                     "${NEML2_BUILD_DIR}" \
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+                    -DNEML2_CPU_PROFILER=${NEML2_CPU_PROFILER} \
                     "${EXTRA_ARGS[@]}"
     if [[ $? -ne 0 ]] ; then
       echo "Error: Failed to configure NEML2"

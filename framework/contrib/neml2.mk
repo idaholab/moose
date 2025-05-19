@@ -52,6 +52,8 @@ endif
 # NEML2 libraries are suffixed with the CMake build type
 ifeq ($(METHOD),devel)
 NEML2_SUFFIX := _RelWithDebInfo
+else ifeq ($(METHOD),oprof)
+NEML2_SUFFIX := _RelWithDebInfo
 else ifeq ($(METHOD),dbg)
 NEML2_SUFFIX := _Debug
 endif
