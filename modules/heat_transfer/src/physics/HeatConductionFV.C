@@ -68,6 +68,7 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("coeff") =
         getParam<MooseFunctorName>("thermal_conductivity_functor");
@@ -77,6 +78,7 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVCoupledForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("v") = getParam<VariableName>("heat_source_var");
     if (isParamValid("heat_source_blocks"))
@@ -88,6 +90,7 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVBodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
     if (MooseUtils::parsesToReal(functor_name))
@@ -101,13 +104,14 @@ HeatConductionFV::addFVKernels()
                  "Unsupported functor type. Consider using 'heat_source_var'.");
     getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
-  if (isTransient())
+  if (shouldCreateTimeDerivative(_temperature_name, _blocks, false))
   {
     const bool use_functors =
         isParamValid("density_functor") || isParamValid("specific_heat_functor");
     const std::string kernel_type =
         use_functors ? "FVFunctorHeatConductionTimeDerivative" : "FVHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     if (use_functors)
     {
@@ -234,11 +238,12 @@ HeatConductionFV::addFVBCs()
 void
 HeatConductionFV::addSolverVariables()
 {
-  if (variableExists(_temperature_name, /*error_if_aux=*/true))
+  if (shouldCreateVariable(_temperature_name, _blocks, true, true, true))
     return;
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
+  assignBlocks(params, _blocks);
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
   params.set<SolverSystemName>("solver_sys") = getSolverSystem(_temperature_name);
 

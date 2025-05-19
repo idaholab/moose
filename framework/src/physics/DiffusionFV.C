@@ -100,7 +100,7 @@ DiffusionFV::addFVKernels()
     getProblem().addFVKernel(kernel_type, prefix() + _var_name + "_source", params);
   }
   // Time derivative
-  if (isTransient())
+  if (shouldCreateTimeDerivative(_var_name, _blocks, false))
   {
     const std::string kernel_type = "FVTimeKernel";
     InputParameters params = getFactory().getValidParams(kernel_type);

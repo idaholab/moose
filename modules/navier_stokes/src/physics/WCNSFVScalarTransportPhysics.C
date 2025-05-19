@@ -75,7 +75,8 @@ WCNSFVScalarTransportPhysics::addScalarTimeKernels()
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = vname;
 
-    getProblem().addFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
+    if (shouldCreateTimeDerivative(vname, _blocks, false))
+      getProblem().addFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
   }
 }
 
