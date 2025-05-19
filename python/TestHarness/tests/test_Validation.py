@@ -13,9 +13,9 @@ class TestHarnessTester(TestHarnessTestCase):
     def test(self):
         out = self.runTests('-i', 'validation', '--re', 'ok', as_json=True)
         test = out['tests']['tests/test_harness']['tests']['ok']
-        self.assertEqual(test['status'], 'OK')
+        status = test['status']
+        self.assertEqual(status['status'], 'OK')
         validation = test['validation']
-        self.assertTrue(validation['script'].endswith('validation_ok.py'))
         results = validation['results']
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -23,6 +23,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('within bounds', result['message'])
         self.assertEqual('TestCase.testValidation', result['test'],)
         self.assertEqual('number', result['data_key'])
+        self.assertTrue(result['script'].endswith('validation_ok.py'))
         data = validation['data']
         self.assertEqual(len(data), 1)
         number = data['number']
@@ -31,6 +32,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('K', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(106.0, number['bounds'][1])
+        self.assertTrue(number['script'].endswith('validation_ok.py'))
         output = test['output']
         validation_output = output['validation']
         self.assertIn('Running validation case', validation_output)
@@ -42,8 +44,9 @@ class TestHarnessTester(TestHarnessTestCase):
     def testFail(self):
         out = self.runTests('-i', 'validation', '--re', 'fail', as_json=True)
         test = out['tests']['tests/test_harness']['tests']['fail']
-        self.assertEqual(test['status'], 'ERROR')
-        self.assertEqual(test['status_message'], 'VALIDATION FAILED')
+        status = test['status']
+        self.assertEqual(status['status'], 'ERROR')
+        self.assertEqual(status['status_message'], 'VALIDATION FAILED')
         validation = test['validation']
         results = validation['results']
         self.assertEqual(len(results), 1)
@@ -71,8 +74,9 @@ class TestHarnessTester(TestHarnessTestCase):
     def testException(self):
         out = self.runTests('-i', 'validation', '--re', 'exception', as_json=True)
         test = out['tests']['tests/test_harness']['tests']['exception']
-        self.assertEqual(test['status'], 'ERROR')
-        self.assertEqual(test['status_message'], 'VALIDATION TEST EXCEPTION')
+        status = test['status']
+        self.assertEqual(status['status'], 'ERROR')
+        self.assertEqual(status['status_message'], 'VALIDATION TEST EXCEPTION')
         validation = test['validation']
         self.assertEqual(0, len(validation['results']))
         self.assertEqual(0, len(validation['data']))
@@ -84,7 +88,16 @@ class TestHarnessTester(TestHarnessTestCase):
     def testBadPython(self):
         out = self.runTests('-i', 'validation', '--re', 'badpython', as_json=True)
         test = out['tests']['tests/test_harness']['tests']['badpython']
-        self.assertEqual(test['status'], 'ERROR')
-        self.assertEqual(test['status_message'], 'VALIDATION INIT EXCEPTION')
+        status = test['status']
+        self.assertEqual(status['status'], 'ERROR')
+        self.assertEqual(status['status_message'], 'VALIDATION INIT EXCEPTION')
         job_output = test['output']['job']
         self.assertIn('SyntaxError: invalid syntax', job_output)
+
+    def testMultipleSameKey(self):
+        out = self.runTests('-i', 'validation', '--re', 'multiple_same_key', as_json=True)
+        test = out['tests']['tests/test_harness']['tests']['multiple_same_key']
+        status = test['status']
+        self.assertEqual(status['status'], 'ERROR')
+        self.assertEqual(status['status_message'], 'VALIDATION TEST ERROR')
+        self.assertIn('was declared multiple times', test['output']['validation'])
