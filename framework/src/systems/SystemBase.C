@@ -1593,6 +1593,13 @@ SystemBase::serializedSolution()
 }
 
 void
+SystemBase::cleanserializedSolution()
+{
+  _serialized_solution = NumericVector<Number>::build(_communicator);
+  _serialized_solution->init(system().n_dofs(), false, SERIAL);
+}
+
+void
 SystemBase::addTimeIntegrator(const std::string & type,
                               const std::string & name,
                               InputParameters & parameters)
