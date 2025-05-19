@@ -45,7 +45,7 @@ TEST(MooseCoordTest, testRotations)
       transform.setUpDirection(up_direction);
       FAIL();
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       std::string error_message(e.what());
       EXPECT_TRUE(error_message.find(error_string) != std::string::npos);
@@ -91,7 +91,7 @@ TEST(MooseCoordTest, testRotations)
       transform.setRotation(alpha, beta, gamma);
       FAIL();
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       std::string error_message(e.what());
       EXPECT_TRUE(error_message.find(error_string) != std::string::npos);
@@ -144,7 +144,7 @@ TEST(MooseCoordTest, testCoordCollapse)
       xyz.mapBack(pt);
       FAIL();
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       std::string error_message(e.what());
       EXPECT_TRUE(error_message.find(return_mapping_error_message) != std::string::npos);
@@ -162,7 +162,7 @@ TEST(MooseCoordTest, testCoordCollapse)
       xyz.mapBack(pt);
       FAIL();
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       std::string error_message(e.what());
       EXPECT_TRUE(error_message.find(return_mapping_error_message) != std::string::npos);
@@ -180,7 +180,7 @@ TEST(MooseCoordTest, testCoordCollapse)
       rz.mapBack(pt);
       FAIL();
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       std::string error_message(e.what());
       EXPECT_TRUE(error_message.find(return_mapping_error_message) != std::string::npos);

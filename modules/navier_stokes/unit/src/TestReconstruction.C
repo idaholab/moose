@@ -198,7 +198,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       unrestricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false}), Moose::currentState());
       EXPECT_TRUE(false);
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       EXPECT_TRUE(std::string(e.what()).find("not_restricted") != std::string::npos);
       EXPECT_TRUE(std::string(e.what()).find("Make sure to fill") != std::string::npos);
@@ -211,7 +211,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       restricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false}), Moose::currentState());
       EXPECT_TRUE(false);
     }
-    catch (MooseException & e)
+    catch (std::runtime_error & e)
     {
       EXPECT_TRUE(std::string(e.what()).find("is_restricted") != std::string::npos);
       EXPECT_TRUE(std::string(e.what()).find("0") != std::string::npos);

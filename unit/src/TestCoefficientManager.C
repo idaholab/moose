@@ -232,7 +232,7 @@ TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameScalar)
 {
   manager.declareScalarProperty<mfem::ConstantCoefficient>("test", {"1", "2"}, 2.);
   manager.declareScalarProperty<mfem::ConstantCoefficient>("test2", {"1", "2"}, 3.);
-  EXPECT_THROW(manager.declareScalarProperty("test2", {"3"}, "test"), MooseException);
+  EXPECT_THROW(manager.declareScalarProperty("test2", {"3"}, "test"), std::runtime_error);
 }
 
 TEST_F(CheckCoefficientManager, NonexistentAliasScalar)
@@ -582,7 +582,7 @@ TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameVector)
       "test", {"1", "2"}, mfem::Vector({2., 1.}));
   manager.declareVectorProperty<mfem::VectorConstantCoefficient>(
       "test2", {"1", "2"}, (mfem::Vector({2., 1.})));
-  EXPECT_THROW(manager.declareVectorProperty("test2", {"3"}, "test"), MooseException);
+  EXPECT_THROW(manager.declareVectorProperty("test2", {"3"}, "test"), std::runtime_error);
 }
 
 TEST_F(CheckCoefficientManager, NonexistentAliasVector)
@@ -844,7 +844,7 @@ TEST_F(CheckCoefficientManager, DeclarePropertyFromPropertyNameMatrix)
       "test", {"1", "2"}, mfem::DenseMatrix({{1., 2.}, {3., 4.}}));
   manager.declareMatrixProperty<mfem::MatrixConstantCoefficient>(
       "test2", {"1", "2"}, mfem::DenseMatrix({{2., 2.}, {3., 3.}}));
-  EXPECT_THROW(manager.declareMatrixProperty("test2", {"3"}, "test"), MooseException);
+  EXPECT_THROW(manager.declareMatrixProperty("test2", {"3"}, "test"), std::runtime_error);
 }
 
 TEST_F(CheckCoefficientManager, NonexistentAliasMatrix)

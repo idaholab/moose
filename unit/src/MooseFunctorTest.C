@@ -149,7 +149,7 @@ TEST(MooseFunctorTest, testArgs)
         test.dot(arg, current_time);
         EXPECT_TRUE(false);
       }
-      catch (MooseException & e)
+      catch (std::runtime_error & e)
       {
         EXPECT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
       }
@@ -169,7 +169,7 @@ TEST(MooseFunctorTest, testArgs)
         test.gradient(arg, current_time);
         EXPECT_TRUE(false);
       }
-      catch (MooseException & e)
+      catch (std::runtime_error & e)
       {
         EXPECT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
       }
@@ -381,7 +381,7 @@ TEST(MooseFunctorTest, testArgs)
         null(arg, current_time);
         EXPECT_TRUE(false);
       }
-      catch (MooseException & e)
+      catch (std::runtime_error & e)
       {
         EXPECT_TRUE(std::string(e.what()).find("should never get here") != std::string::npos);
       }
@@ -411,7 +411,7 @@ TEST(MooseFunctorTest, testArgs)
           errorful(arg, current_time);
           EXPECT_TRUE(false);
         }
-        catch (MooseException & e)
+        catch (std::runtime_error & e)
         {
           std::string error_message(e.what());
           EXPECT_TRUE(error_message.find(
