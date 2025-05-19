@@ -61,6 +61,7 @@ class TestValidationCase(unittest.TestCase):
         data = test.getData()[args['key']]
         for key, value in args.items():
             self.assertEqual(getattr(data, key), value)
+        self.assertEqual(None, data.test)
 
     def testAddFloatDataNotFloat(self):
         test = ValidationCase()
@@ -109,6 +110,8 @@ class TestValidationCase(unittest.TestCase):
             status = test.Status.OK if case == 'pass' else test.Status.FAIL
             self.assertEqual(status, result.status)
             self.assertEqual(case, result.data_key)
+            data = test.getData()[case]
+            self.assertEqual(f'Test.test_{case}', data.test)
 
     def testInitialize(self):
         class Test(ValidationCase):

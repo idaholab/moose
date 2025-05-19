@@ -11,6 +11,7 @@
 import inspect
 import traceback
 import typing
+from typing import Optional
 from enum import Enum
 from dataclasses import dataclass
 
@@ -62,7 +63,7 @@ class ValidationCase():
         validation: bool = True
         # The data that this result is attached to,
         # if any
-        data_key: typing.Optional[str] = None
+        data_key: Optional[str] = None
 
     @dataclass
     class Data:
@@ -76,17 +77,19 @@ class ValidationCase():
         key: str
         # Human readable description of the data
         description: str
+        # The test that added this data
+        test: Optional[str]
         # Units for the data, if any
-        units: typing.Optional[str]
+        units: Optional[str]
         # Whether or not this result is considered
         # a validation result (enables running verification
         # cases but not storing them in a database)
         validation: bool = True
         # A nominal value for this data; unused
         # in the test but useful in postprocessing
-        nominal: typing.Optional[data_types] = None
+        nominal: Optional[data_types] = None
         # Bounds for the data (min and max)
-        bounds: typing.Optional[tuple[data_types, data_types]] = None
+        bounds: Optional[tuple[data_types, data_types]] = None
 
         def printableValue(self) -> str:
             """
@@ -162,7 +165,7 @@ class ValidationCase():
             self.key: str = key
             super().__init__(f'Data "{self.key}" is already registered')
 
-    def addFloatData(self, key: str, value: float, units: typing.Optional[str],
+    def addFloatData(self, key: str, value: float, units: Optional[str],
                      description: str, **kwargs):
         """
         Adds a piece of float data to the validation data.
@@ -188,6 +191,7 @@ class ValidationCase():
                               units=units,
                               key=key,
                               description=description,
+                              test=self._current_test,
                               **kwargs)
         self._data[key] = data
 

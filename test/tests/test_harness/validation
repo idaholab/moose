@@ -20,4 +20,9 @@
     command = 'echo foo'
     validation_test = validation_badpython.py
   []
+  [multiple_same_key]
+    type = RunCommand
+    command = 'echo foo'
+    validation_test = 'validation_ok.py validation_ok_duplicate.py'
+  []
 []
