@@ -1,3 +1,5 @@
+final_re = 10000
+starting_re = 10
 rho = 1
 l = 2
 U = 1
@@ -5,6 +7,8 @@ n = 16
 gamma = 1e4
 degree = 2
 alpha = '${fparse 10 * degree^2}'
+num_steps = 10
+step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)}'
 
 [Mesh]
   [gen]
@@ -54,17 +58,6 @@ alpha = '${fparse 10 * degree^2}'
   []
 []
 
-[Kernels]
-  [utime]
-    type = TimeDerivative
-    variable = vel_x
-  []
-  [vtime]
-    type = TimeDerivative
-    variable = vel_y
-  []
-[]
-
 [HDGKernels]
   [momentum_x_convection]
     type = AdvectionIPHDGKernel
@@ -77,7 +70,7 @@ alpha = '${fparse 10 * degree^2}'
     type = NavierStokesStressIPHDGKernel
     variable = vel_x
     face_variable = vel_bar_x
-    diffusivity = 'mu_t_traditional'
+    diffusivity = 'mu'
     alpha = ${alpha}
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
@@ -94,7 +87,7 @@ alpha = '${fparse 10 * degree^2}'
     type = NavierStokesStressIPHDGKernel
     variable = vel_y
     face_variable = vel_bar_y
-    diffusivity = 'mu_t_traditional'
+    diffusivity = 'mu'
     alpha = ${alpha}
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
@@ -147,7 +140,7 @@ alpha = '${fparse 10 * degree^2}'
     pressure_face_variable = pressure_bar
     alpha = ${alpha}
     functor = '0'
-    diffusivity = 'mu_t_traditional'
+    diffusivity = 'mu'
     component = 0
   []
   [momentum_x_diffusion_top]
@@ -159,7 +152,7 @@ alpha = '${fparse 10 * degree^2}'
     pressure_face_variable = pressure_bar
     alpha = ${alpha}
     functor = '${U}'
-    diffusivity = 'mu_t_traditional'
+    diffusivity = 'mu'
     component = 0
   []
   [momentum_y_diffusion_all]
@@ -171,7 +164,7 @@ alpha = '${fparse 10 * degree^2}'
     pressure_face_variable = pressure_bar
     alpha = ${alpha}
     functor = '0'
-    diffusivity = 'mu_t_traditional'
+    diffusivity = 'mu'
     component = 1
   []
 
@@ -240,40 +233,7 @@ alpha = '${fparse 10 * degree^2}'
   []
   [reynolds]
     type = ParsedFunction
-    expression = '100 * t'
-  []
-[]
-
-[AuxVariables]
-  [mixing_len]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-
-[AuxKernels]
-  [mixing_len]
-    type = WallDistanceMixingLengthAux
-    variable = mixing_len
-    walls = 'left right top bottom'
-    execute_on = 'initial'
-  []
-[]
-
-[FunctorMaterials]
-  [mu]
-    type = ADParsedFunctorMaterial
-    expression = '${U} * ${l} / reynolds'
-    property_name = mu
-    functor_names = 'reynolds'
-  []
-  [total_viscosity]
-    type = MixingLengthTurbulentViscosityFunctorMaterial
-    u = vel_x
-    v = vel_y
-    mixing_length = mixing_len
-    mu = mu
-    rho = ${rho}
+    expression = '10^(log10(${starting_re}) + (t - 1) * ${step_length})'
   []
 []
 
@@ -289,10 +249,13 @@ alpha = '${fparse 10 * degree^2}'
     u = vel_x
     v = vel_y
   []
-  [mu_t_traditional]
-    type = MaterialFunctorConverter
-    ad_props_out = 'mu_t_traditional'
-    functors_in = 'total_viscosity'
+  [mu]
+    type = ADParsedMaterial
+    functor_names = 'reynolds'
+    functor_symbols = 'reynolds'
+    property_name = 'mu'
+    expression = '${U} * ${l} / reynolds'
+    output_properties = 'mu'
   []
 []
 
@@ -309,13 +272,13 @@ alpha = '${fparse 10 * degree^2}'
     []
     [u]
       vars = 'vel_bar_x vel_bar_y'
-      petsc_options = '-ksp_monitor'
-      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_interp_type -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths -pc_hypre_boomeramg_truncfactor'
-      petsc_options_value = 'hypre boomeramg 301 0.25 ext+i PMIS 4 2 0.4'
+      petsc_options = '-ksp_converged_reason'
+      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
+      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30'
     []
     [p]
       vars = 'pressure_bar'
-      petsc_options = '-ksp_monitor'
+      petsc_options = '-ksp_converged_reason'
       petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it'
       petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30'
     []
@@ -324,23 +287,11 @@ alpha = '${fparse 10 * degree^2}'
 
 [Executioner]
   type = Transient
-  end_time = 1e3
-  nl_abs_tol = 1e-7
-  nl_rel_tol = 1e-8
-  petsc_options_iname = '-snes_linesearch_type'
-  petsc_options_value = 'basic'
-  nl_max_its = 10
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1
-    optimal_iterations = 6
-    growth_factor = 1.5
-  []
+  num_steps = ${num_steps}
 []
 
 [Outputs]
   print_linear_residuals = 'false'
-  checkpoint = true
   [out]
     type = Exodus
     hide = 'pressure_average'
