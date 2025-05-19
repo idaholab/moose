@@ -28,11 +28,8 @@ VectorMap::checkPWData(std::shared_ptr<mfem::VectorCoefficient> coeff,
 {
   const int new_dim = coeff->GetVDim(), old_dim = existing_pw->GetVDim();
   if (new_dim != old_dim)
-  {
-    throw MooseException("Trying to assign vector of dimension " + std::to_string(new_dim) +
-                         " to property '" + name + "' with dimension dimension " +
-                         std::to_string(old_dim));
-  }
+    mooseError("Trying to assign vector of dimension " + std::to_string(new_dim) +
+               " to property '" + name + "' with dimension dimension " + std::to_string(old_dim));
 }
 
 template <>
@@ -44,12 +41,9 @@ MatrixMap::checkPWData(std::shared_ptr<mfem::MatrixCoefficient> coeff,
   const int new_height = coeff->GetHeight(), new_width = coeff->GetWidth(),
             old_height = existing_pw->GetHeight(), old_width = existing_pw->GetWidth();
   if (new_height != old_height || new_width != old_width)
-  {
-    throw MooseException("Trying to assign matrix with dimensions (" + std::to_string(new_height) +
-                         ", " + std::to_string(new_width) + ") to property '" + name +
-                         "' with dimensions (" + std::to_string(old_height) + ", " +
-                         std::to_string(old_width) + ")");
-  }
+    mooseError("Trying to assign matrix with dimensions (" + std::to_string(new_height) + ", " +
+               std::to_string(new_width) + ") to property '" + name + "' with dimensions (" +
+               std::to_string(old_height) + ", " + std::to_string(old_width) + ")");
 }
 }
 
