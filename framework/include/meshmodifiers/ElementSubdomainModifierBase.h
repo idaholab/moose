@@ -13,6 +13,22 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 
+struct NeighborInfo
+{
+  std::vector<std::vector<Real>> solution_values;
+  std::vector<Real> distances;
+};
+
+namespace ICStrategyForNewlyActivated
+{
+enum Type
+{
+  IC_DEFAULT,
+  IC_EXTRAPOLATE_FIRST_LAYER,
+  IC_EXTRAPOLATE_SECOND_LAYER
+};
+}
+
 /**
  * Base class for mesh modifiers modifying element subdomains
  */
@@ -58,6 +74,34 @@ protected:
 
   /// Boundary names associated with each moving boundary ID
   std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
+
+  inline void MPIAllgatherVectorAll_Int(const std::vector<int> & local_vec,
+                                        std::vector<int> & global_vec,
+                                        MPI_Comm comm = MPI_COMM_WORLD) const
+  {
+    int nProc, myRank;
+    MPI_Comm_size(comm, &nProc);
+    MPI_Comm_rank(comm, &myRank);
+
+    int local_size = static_cast<int>(local_vec.size());
+    std::vector<int> recv_counts(nProc);
+    MPI_Allgather(&local_size, 1, MPI_INT, recv_counts.data(), 1, MPI_INT, comm);
+
+    std::vector<int> displs(nProc, 0);
+    std::partial_sum(recv_counts.begin(), recv_counts.end() - 1, displs.begin() + 1);
+
+    int total_size = std::accumulate(recv_counts.begin(), recv_counts.end(), 0);
+    global_vec.resize(total_size);
+
+    MPI_Allgatherv(local_vec.data(),
+                   local_size,
+                   MPI_INT,
+                   global_vec.data(),
+                   recv_counts.data(),
+                   displs.data(),
+                   MPI_INT,
+                   comm);
+  }
 
 private:
   /// Create moving boundaries
@@ -145,4 +189,52 @@ private:
   std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
+
+  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_to_second_neighbors;
+
+  ///
+  std::unordered_set<dof_id_type> _newactivated_nodes;
+  std::unordered_set<dof_id_type> _newactivated_nodes_first_pass;
+
+  std::string _ic_strategy_string;
+  ICStrategyForNewlyActivated::Type _ic_strategy;
+  int _inactive_subdomain_ID /*this is actually inactive element*/;
+
+  /// @brief find the second layer of neighbors for each element
+  /// @param sys
+  /// @param displaced
+  void computeSecondNeighborInfo(SystemBase & sys, bool displaced);
+  void verifySecondNeighborInfo();
+  bool nodeIsNewlyActivated(dof_id_type node_id) const;
+  void gatherGlobalNewlyActivatedNodes(
+      const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
+  void findNewlyActivatedNodes(
+      const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
+
+  inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
+  {
+    if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
+      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
+    else if (input == "IC_EXTRAPOLATE_SECOND_LAYER")
+      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_SECOND_LAYER;
+    else if (input == "default_value")
+      return ICStrategyForNewlyActivated::IC_DEFAULT;
+    else
+      throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
+  }
+  void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
+
+  std::vector<dof_id_type> _global_reinitialized_elems;
+  std::vector<dof_id_type> _global_newactivated_nodes;
+  std::vector<dof_id_type> _global_newactivated_nodes_temp;
+  std::vector<dof_id_type> _global_newactivated_nodes_diff;
+
+  void synchronizeReinitializedElems();
+  void synchronizeNewActivatedNodes();
+  void collectNewActivatedNodesToMaster();
+  void requestMasterActivatedNodes();
+  void clearGlobalActivatedNodesAtMaster();
+  void synchronizeNewActivatedNodes2TempGlobal();
+  void computeSetDifference();
+  void findMissingNewlyActivatedNodes();
 };
