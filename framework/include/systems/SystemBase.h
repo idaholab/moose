@@ -424,7 +424,7 @@ public:
    */
   virtual NumericVector<Number> & serializedSolution();
 
-  virtual void cleanserializedSolution();
+  virtual void cleanSerializedSolution();
 
   virtual NumericVector<Number> & residualCopy()
   {

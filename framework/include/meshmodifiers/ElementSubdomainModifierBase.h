@@ -198,16 +198,30 @@ private:
 
   std::string _ic_strategy_string;
   ICStrategyForNewlyActivated::Type _ic_strategy;
-  int _inactive_subdomain_ID /*this is actually inactive element*/;
 
-  /// @brief find the second layer of neighbors for each element
+  /// Inactive subdomain ID
+  int _inactive_subdomain_ID;
+
+  /// @brief find the second/first layer of neighbors for each element
   /// @param sys
   /// @param displaced
   void computeSecondNeighborInfo(SystemBase & sys, bool displaced);
   void verifySecondNeighborInfo();
+
+  /**
+    * * Check if the node is newly activated.
+    * * If all elements (excluding inactive elements) with the node are reinitialized, then the node is newly reinitialized.
+    */
   bool nodeIsNewlyActivated(dof_id_type node_id) const;
+
   void gatherGlobalNewlyActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
+
+  /**
+    * * @brief This function is used to find the newly activated nodes
+    * * @param moved_elems
+    * * @details This function is processor locally
+    */
   void findNewlyActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
@@ -222,6 +236,8 @@ private:
     else
       throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
   }
+
+  /// Using weighted averaging to obtain the solution on the newly-activated nodes
   void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
 
   std::vector<dof_id_type> _global_reinitialized_elems;
@@ -229,12 +245,15 @@ private:
   std::vector<dof_id_type> _global_newactivated_nodes_temp;
   std::vector<dof_id_type> _global_newactivated_nodes_diff;
 
+  /// Let every processor know what are the reinitialized elements (save to _global_reinitialized_elems)
   void synchronizeReinitializedElems();
+  /// Let every processor know what are the newly activated nodes (save to _global_newactivated_nodes)
   void synchronizeNewActivatedNodes();
+  void synchronizeNewActivatedNodes2TempGlobal();
+
   void collectNewActivatedNodesToMaster();
   void requestMasterActivatedNodes();
   void clearGlobalActivatedNodesAtMaster();
-  void synchronizeNewActivatedNodes2TempGlobal();
   void computeSetDifference();
   void findMissingNewlyActivatedNodes();
 };

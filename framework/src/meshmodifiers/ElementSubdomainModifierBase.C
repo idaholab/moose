@@ -215,7 +215,7 @@ ElementSubdomainModifierBase::modify(
   if (_displaced_mesh)
     createMovingBoundaries(*_displaced_mesh);
 
-  // This has to be done _before_ subdomain changes are applied
+  // This has to be done *before* subdomain changes are applied
   findReinitializedElemsAndNodes(moved_elems);
   synchronizeReinitializedElems();
 
@@ -242,7 +242,7 @@ ElementSubdomainModifierBase::modify(
   _fe_problem.meshChanged();
 
   // important
-  _sys.cleanserializedSolution();
+  _sys.cleanSerializedSolution();
 
   // Initialize solution and stateful material properties
   applyIC(/*displaced=*/false);
@@ -569,11 +569,6 @@ ElementSubdomainModifierBase::gatherGlobalNewlyActivatedNodes(
   synchronizeNewActivatedNodes2TempGlobal();
 }
 
-/**
- * * @brief This function is used to find the newly activated nodes
- * * @param moved_elems
- * * @details This function is processor locally
- */
 void
 ElementSubdomainModifierBase::findNewlyActivatedNodes(
     const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems)
@@ -607,13 +602,6 @@ ElementSubdomainModifierBase::findNewlyActivatedNodes(
       // Skip if not newly activated
       if (!nodeIsNewlyActivated(node_id))
         continue;
-
-      // // Skip if this node is already in the other processor (we already have first pass to gather
-      // // this)
-      // if (std::find(_global_newactivated_nodes.begin(),
-      //               _global_newactivated_nodes.end(),
-      //               node_id) != _global_newactivated_nodes.end())
-      //   continue;
 
       // Insert if not already in set
       _newactivated_nodes.insert(node_id);
@@ -676,9 +664,6 @@ ElementSubdomainModifierBase::nodeIsNewlyReinitialized(dof_id_type node_id) cons
   return true;
 }
 
-/**
- * * Check if the node is newly activated.
- */
 bool
 ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
 {
@@ -689,7 +674,7 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
   total_neighbor_elems = 0;
   for (auto neighbor_elem_id : _mesh.nodeToElemMap().at(node_id))
     if (_mesh.elemPtr(neighbor_elem_id)->subdomain_id() != _inactive_subdomain_ID
-      /*exclude the element which has the subdomainID the same as the original subdomainID of the newly activated element*/)
+      /*exclude the element which has the inative subdomainID*/)
     {
       total_neighbor_elems++;
     }
@@ -748,9 +733,6 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
 void
 ElementSubdomainModifierBase::applyIC(bool displaced)
 {
-
-  // std::cout << "displaced = " << displaced << "\n";
-
   switch (_ic_strategy)
   {
     case ICStrategyForNewlyActivated::IC_DEFAULT:
@@ -946,7 +928,7 @@ ElementSubdomainModifierBase::setCurrentSolutionsOnNewlyActivatedNodes(SystemBas
     for (auto point_dof_id : _newactivated_nodes)
     {
 
-      Node * node = _mesh.nodePtr(point_dof_id);
+      const auto * node = _mesh.nodePtr(point_dof_id);
       std::vector<dof_id_type> solution_indices;
       dof_map.dof_indices(node, solution_indices);
       int solution_dofs = solution_indices.size();
@@ -995,13 +977,12 @@ ElementSubdomainModifierBase::setCurrentSolutionsOnNewlyActivatedNodes(SystemBas
 void
 ElementSubdomainModifierBase::computeSecondNeighborInfo(SystemBase & sys, bool displaced)
 {
-  // NumericVector<Number> & current_solution = *sys.system().current_local_solution;
 
   // Access solution for postprocessing
   NumericVector<Number> & ghosted = sys.solution();
   ghosted.close();
 
-  NumericVector<Number> & serial = sys.serializedSolution() /*sys.serializedSolution_Clean()*/;
+  NumericVector<Number> & serial = sys.serializedSolution();
   ghosted.localize(serial);
 
   // copy or assign if needed
@@ -1170,21 +1151,9 @@ ElementSubdomainModifierBase::synchronizeReinitializedElems()
   std::vector<std::vector<dof_id_type>> gathered;
   _mesh.comm().allgather(local, gathered);
 
-  // std::cout << "gathered.size() = " << gathered.size() << "\n";
-
-  // for (int i = 0; i < gathered.size(); ++i)
-  // {
-  //   std::cout << "gathered[" << i << "]: ";
-  //   for (const auto & elem_id : gathered[i])
-  //     std::cout << elem_id << " ";
-  //   std::cout << "\n";
-  // }
-
   _global_reinitialized_elems.clear();
   for (const auto & vec : gathered)
     _global_reinitialized_elems.insert(_global_reinitialized_elems.end(), vec.begin(), vec.end());
-
-  // std::cout << "Global reinitialized elements: " << _global_reinitialized_elems.size() << "\n";
 }
 
 void
@@ -1202,10 +1171,6 @@ ElementSubdomainModifierBase::synchronizeNewActivatedNodes2TempGlobal()
     unique_nodes.insert(vec.begin(), vec.end());
 
   _global_newactivated_nodes_temp.assign(unique_nodes.begin(), unique_nodes.end());
-
-  // std::cout << "_global_newactivated_nodes_temp.size() = " <<
-  // _global_newactivated_nodes_temp.size()
-  //           << "\n";
 }
 
 void
@@ -1219,9 +1184,6 @@ ElementSubdomainModifierBase::synchronizeNewActivatedNodes()
   _global_newactivated_nodes.clear();
   for (const auto & vec : gathered)
     _global_newactivated_nodes.insert(_global_newactivated_nodes.end(), vec.begin(), vec.end());
-
-  // std::cout << "_global_newactivated_nodes.size() = " << _global_newactivated_nodes.size() <<
-  // "\n";
 }
 
 void
