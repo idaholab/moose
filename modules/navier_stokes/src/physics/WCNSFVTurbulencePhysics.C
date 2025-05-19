@@ -846,7 +846,7 @@ WCNSFVTurbulencePhysics::addInitialConditions()
     // Always obey the user specification of an initial condition
     if (shouldCreateIC(_turbulent_viscosity_name,
                        _blocks,
-                       /*whether IC is a default*/ isParamSetByUser("initial_mu_t"),
+                       /*whether IC is a default*/ !isParamSetByUser("initial_mu_t"),
                        /*error if already an IC*/ isParamSetByUser("initial_mu_t")))
       getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_turb", params);
   }
@@ -856,16 +856,16 @@ WCNSFVTurbulencePhysics::addInitialConditions()
 
   params.set<VariableName>("variable") = _tke_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tke");
-  if (shouldCreateIC(_turbulent_viscosity_name,
+  if (shouldCreateIC(_tke_name,
                      _blocks,
-                     /*whether IC is a default*/ isParamSetByUser("initial_tke"),
+                     /*whether IC is a default*/ !isParamSetByUser("initial_tke"),
                      /*error if already an IC*/ isParamSetByUser("initial_tke")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tke", params);
   params.set<VariableName>("variable") = _tked_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tked");
-  if (shouldCreateIC(_turbulent_viscosity_name,
+  if (shouldCreateIC(_tked_name,
                      _blocks,
-                     /*whether IC is a default*/ isParamSetByUser("initial_tked"),
+                     /*whether IC is a default*/ !isParamSetByUser("initial_tked"),
                      /*error if already an IC*/ isParamSetByUser("initial_tked")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tked", params);
 }
