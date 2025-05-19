@@ -168,6 +168,7 @@ protected:
    * @param blocks the vector blocks to check for whether it contains every block in the mesh
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
+  bool allMeshBlocks(const std::set<SubdomainName> & blocks) const;
 
   /**
    * Process the given petsc option pairs into the system solver settings
