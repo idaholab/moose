@@ -12,7 +12,7 @@
 #include "MeshGenerator.h"
 
 /**
- * MeshGenerator for defining a subdomain on the layer(s) next to one or more boundaries
+ * MeshGenerator for defining a subdomain on the layer next to one or more boundaries
  */
 class BoundaryLayerSubdomainGenerator : public MeshGenerator
 {

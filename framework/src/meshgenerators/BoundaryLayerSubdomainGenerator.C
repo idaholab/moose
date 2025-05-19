@@ -34,7 +34,7 @@ BoundaryLayerSubdomainGenerator::validParams()
                         "Whether to include nodesets in the boundaries. Nodesets are not sided so "
                         "elements on both sides of the nodesets will be included");
   params.addRequiredParam<std::vector<BoundaryName>>("boundaries",
-                                                     "Boundaries to add the layers next to");
+                                                     "Boundaries to add the layer next to");
   return params;
 }
 
@@ -71,8 +71,9 @@ BoundaryLayerSubdomainGenerator::generate()
         if (boundary_info.has_boundary_id(elem, side, bid))
         {
           next_to_a_boundary = true;
-          break;
+          goto out_loop_1;
         }
+  out_loop_1:;
 
     // Check all the nodes in case the boundary is a nodeset
     if (!next_to_a_boundary && _include_nodesets)
@@ -82,8 +83,9 @@ BoundaryLayerSubdomainGenerator::generate()
           if (boundary_info.has_boundary_id(elem->node_ptr(node_index), bid))
           {
             next_to_a_boundary = true;
-            break;
+            goto out_loop_2;
           }
+    out_loop_2:;
     }
 
     if (next_to_a_boundary)
