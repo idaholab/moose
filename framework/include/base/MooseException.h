@@ -11,34 +11,19 @@
 
 #include "StreamArguments.h"
 
-#include <stdexcept>
+#include <exception>
 #include <sstream>
-
-namespace moose
-{
-namespace internal
-{
-template <typename... Args>
-std::string
-streamArgsToString(Args &&... args)
-{
-  std::ostringstream ss;
-  streamArguments(ss, args...);
-  return ss.str();
-}
-}
-}
 
 /**
  * Provides a way for users to bail out of the current solve.
  */
-class MooseException : public std::runtime_error
+class MooseException : public std::exception
 {
 public:
   /**
    * @param message The message to display
    */
-  MooseException(const std::string & message) : std::runtime_error(message) {}
+  MooseException(std::string message) : _message(message) {}
 
   /**
    * Set an explicit default constructor to avoid the variadic template constructor
@@ -52,7 +37,28 @@ public:
    */
   template <typename... Args>
   explicit MooseException(Args &&... args)
-    : std::runtime_error(moose::internal::streamArgsToString(std::forward<Args>(args)...))
   {
+    std::ostringstream ss;
+    streamArguments(ss, args...);
+    _message = ss.str();
   }
+
+  /**
+   * For some reason, on GCC 4.6.3, I get 'error: looser throw
+   * specifier' when deriving from std::exception unless I declare
+   * that the destructor *won't* throw by adding the throw()
+   * specification.  Clang doesn't seem to care about this line of
+   * code.
+   */
+  ~MooseException() throw() {}
+
+  /**
+   * Get out the error message.
+   *
+   * Satisfies the interface of std::exception
+   */
+  virtual const char * what() const throw() { return _message.c_str(); }
+
+protected:
+  std::string _message;
 };
