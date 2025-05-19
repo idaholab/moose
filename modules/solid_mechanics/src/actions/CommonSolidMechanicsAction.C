@@ -79,12 +79,11 @@ CommonSolidMechanicsAction::act()
                    !_problem->getDefaultBlocks().empty())
             blocks = _problem->getDefaultBlocks();
 
-          mooseAssert(!blocks.empty(), "No valid blocks specified.");
-
-          add_variables_blocks.insert(blocks.begin(), blocks.end());
+          if (!blocks.empty())
+            add_variables_blocks.insert(blocks.begin(), blocks.end());
+          else
+            add_variables_block_restricted = false;
         }
-        else
-          add_variables_block_restricted = false;
 
         // scaling?
         if (action->getParam<bool>("add_variables") && action->isParamValid("scaling"))
