@@ -552,25 +552,24 @@ PhysicsBase::isVariableScalar(const VariableName & var_name) const
 bool
 PhysicsBase::shouldCreateVariable(const VariableName & var_name,
                                   const std::vector<SubdomainName> & blocks,
-                                  const bool error_if_aux,
-                                  const bool error_if_missing_subdomains,
-                                  const bool add_missing_subdomains)
+                                  const bool error_if_aux)
 {
-  mooseAssert(!error_if_missing_subdomains || !add_missing_subdomains,
-              "These two options are not compatible");
   if (!variableExists(var_name, error_if_aux))
     return true;
   // check block restriction
   auto & var = _problem->getVariable(0, var_name);
-  if (var.hasBlocks(blocks))
+  const bool not_block_restricted =
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end()) ||
+      allMeshBlocks(blocks);
+  if (!var.blockRestricted() || (!not_block_restricted && var.hasBlocks(blocks)))
     return false;
-  else if (!error_if_missing_subdomains)
+
+  if (allMeshBlocks(var.blocks()) && not_block_restricted)
+    return false;
+  else
     mooseError("Variable '" + var_name + "' already exists with subdomain restriction '" +
                Moose::stringify(var.blocks()) + "' which does not include the subdomains '" +
                Moose::stringify(blocks) + "', required for this Physics.");
-  // Looks like the missing subdomains were not an issue since we set 'error_if_missing..' to false
-  else
-    return true;
 }
 
 bool
@@ -645,6 +644,7 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
   const auto time_vector_tag =
       (sys_num < _problem->numNonlinearSystems())
           ? var->sys().timeVectorTag()
+          // this is not quite correct. Many kernels can contribute to RHS time vector on paper
           : dynamic_cast<LinearSystem *>(&var->sys())->rightHandSideTimeVectorTag();
 
   // We just use the warehouse, it should cover every time derivative object type
@@ -688,4 +688,46 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
                ", to be defined on blocks: " + Moose::stringify(blocks) +
                ".\n We should be creating the Physics' time derivative only for non-covered "
                "blocks. This is not implemented at this time.");
+}
+
+void
+PhysicsBase::reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
+                                               const std::string & object_type) const
+{
+  std::vector<std::string> defaults_unused;
+  std::vector<std::string> user_values_unused;
+  for (const auto & param : param_names)
+  {
+    if (isParamSetByUser(param))
+      user_values_unused.push_back(param);
+    else if (isParamValid(param))
+      defaults_unused.push_back(param);
+  }
+  if (defaults_unused.size() && _verbose)
+    mooseInfoRepeated("Defaults for parameters '" + Moose::stringify(defaults_unused) +
+                      "' for object of type '" + object_type +
+                      "' were not used because the object was not created by this Physics.");
+  if (user_values_unused.size())
+  {
+    if (_app.unusedFlagIsWarning())
+<<<<<<< HEAD
+      mooseWarning("User-specifed values for parameters '" + Moose::stringify(defaults_unused) +
+                   "' for object of type '" + object_type +
+                   "' were not used because the object was not created by this Physics.");
+    else if (_app.unusedFlagIsError())
+      mooseError("User-specified for parameters '" + Moose::stringify(defaults_unused) +
+                 "' for object of type '" + object_type +
+                 "' were not used because the object was not created by this Physics.");
+=======
+      mooseWarning(
+          "User-specifed values for parameters '" + Moose::stringify(user_values_unused) +
+          "' for object of type '" + object_type +
+          "' were not used because the corresponding object was not created by this Physics.");
+    else if (_app.unusedFlagIsError())
+      mooseError(
+          "User-specified values for parameters '" + Moose::stringify(user_values_unused) +
+          "' for object of type '" + object_type +
+          "' were not used because the corresponding object was not created by this Physics.");
+>>>>>>> 1c294e3a71 (fixup! Simplify shouldCreateVariable Add a routine to report on unused parameters refs #30533)
+  }
 }

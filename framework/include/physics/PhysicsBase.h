@@ -227,6 +227,14 @@ protected:
   // - shouldCreateTimeIntegrator
   // - shouldCreatePredictor/Corrector
 
+  /**
+   * When this is called, we are knowingly not using the value of these parameters. This routine
+   * checks whether these parameters simply have defaults or were passed by the user
+   * @param param_names the parameters we are ignoring
+   */
+  void reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
+                                         const std::string & object_type) const;
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 
