@@ -9,9 +9,14 @@
 
 #ifdef NEML2_ENABLED
 
-#include "LibtorchModel.h"
-#include "LibtorchUtils.h"
+// libtorch headers
 #include <ATen/ops/ones_like.h>
+
+// neml2 headers
+#include "neml2/misc/assertions.h"
+
+// moose headers
+#include "LibtorchModel.h"
 
 namespace neml2
 {
@@ -20,7 +25,6 @@ register_NEML2_object(LibtorchModel);
 OptionSet
 LibtorchModel::expected_options()
 {
-  using vecstr = std::vector<std::string>;
   auto options = Model::expected_options();
   options.set<std::vector<VariableName>>("inputs");
   options.set<std::vector<VariableName>>("outputs");
@@ -64,7 +68,7 @@ LibtorchModel::request_AD()
 }
 
 void
-LibtorchModel::set_value(bool out, bool dout_din, bool d2out_din2)
+LibtorchModel::set_value(bool out, bool /*dout_din*/, bool /*d2out_din2*/)
 {
   if (out)
   {

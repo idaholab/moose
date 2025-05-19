@@ -11,9 +11,15 @@
 
 #ifdef NEML2_ENABLED
 
-#include "neml2/models/Model.h"
+// libtorch headers
 #include <torch/script.h>
+
+// neml2 headers
+#include "neml2/models/Model.h"
+
+// moose headers
 #include "DataFileUtils.h"
+
 namespace neml2
 {
 
