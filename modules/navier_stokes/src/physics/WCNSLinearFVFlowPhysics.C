@@ -218,7 +218,8 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
   for (const auto d : make_range(dimension()))
   {
     params.set<LinearVariableName>("variable") = _velocity_names[d];
-    getProblem().addLinearFVKernel(kernel_type, kernel_name + "_" + NS::directions[d], params);
+    if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, false))
+      getProblem().addLinearFVKernel(kernel_type, kernel_name + "_" + NS::directions[d], params);
   }
 }
 

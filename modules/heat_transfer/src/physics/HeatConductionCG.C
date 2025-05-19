@@ -90,7 +90,7 @@ HeatConductionCG::addFEKernels()
       paramError("heat_source_functor", "Unsupported functor type.");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
-  if (isTransient())
+  if (shouldCreateTimeDerivative( _temperature_name, _blocks, false))
   {
     const std::string kernel_type =
         _use_ad ? "ADHeatConductionTimeDerivative" : "SpecificHeatConductionTimeDerivative";
