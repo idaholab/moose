@@ -216,7 +216,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 void
 ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
 {
-  // These dof maps are not recoverable as they are
+  // These dof maps are not recoverable as they are maps of pointers, and recovering old pointers
+  // would be wrong. We would need to create a custom dataStore() and dataLoad()
   if (_app.isRecovering())
     mooseError("This object does not support recovering");
 
