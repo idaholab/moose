@@ -168,9 +168,12 @@ WCNSFVFlowPhysics::addSolverVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
-    if (variableExists(_velocity_names[d], true))
-      checkBlockRestrictionIdentical(_velocity_names[d],
-                                     getProblem().getVariable(0, _velocity_names[d]).blocks());
+    if (!shouldCreateVariable(_velocity_names[d], _blocks, true))
+      reportPotentiallyMissedParameters({"system_names",
+                                         "momentum_scaling",
+                                         "momentum_face_interpolation",
+                                         "momentum_two_term_bc_expansion"},
+                                        "INSFVVelocityVariable");
     else if (_define_variables)
     {
       std::string variable_type = "INSFVVelocityVariable";
@@ -185,11 +188,8 @@ WCNSFVFlowPhysics::addSolverVariables()
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("momentum_two_term_bc_expansion");
 
-      for (const auto d : make_range(dimension()))
-      {
-        params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
-        getProblem().addVariable(variable_type, _velocity_names[d], params);
-      }
+      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
+      getProblem().addVariable(variable_type, _velocity_names[d], params);
     }
     else
       paramError("velocity_variable",
@@ -198,14 +198,26 @@ WCNSFVFlowPhysics::addSolverVariables()
   }
 
   // Pressure
-  if (variableExists(_pressure_name, true))
-    checkBlockRestrictionIdentical(_pressure_name,
-                                   getProblem().getVariable(0, _pressure_name).blocks());
+  const bool using_pinsfv_pressure_var =
+      _porous_medium_treatment &&
+      getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic";
+  if (!shouldCreateVariable(_pressure_name, _blocks, true))
+  {
+    std::vector<std::string> potentially_missed = {"system_names",
+                                                   "mass_scaling",
+                                                   "pressure_face_interpolation",
+                                                   "pressure_two_term_bc_expansion"};
+    if (using_pinsfv_pressure_var)
+    {
+      std::vector<std::string> other_missed = {"pressure_allow_expansion_on_bernoulli_faces",
+                                               "pressure_drop_sidesets",
+                                               "pressure_drop_form_factors"};
+      potentially_missed.insert(potentially_missed.end(), other_missed.begin(), other_missed.end());
+    }
+    reportPotentiallyMissedParameters(potentially_missed, "INSFVPressureVariable");
+  }
   else if (_define_variables)
   {
-    const bool using_pinsfv_pressure_var =
-        _porous_medium_treatment &&
-        getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic";
     const auto pressure_type =
         using_pinsfv_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
 
@@ -249,11 +261,13 @@ WCNSFVFlowPhysics::addSolverVariables()
     lm_params.set<MooseEnum>("family") = "scalar";
     lm_params.set<MooseEnum>("order") = "first";
 
-    if (type == "point-value" || type == "average")
+    if ((type == "point-value" || type == "average") && !_problem->hasScalarVariable("lambda"))
     {
       lm_params.set<SolverSystemName>("solver_sys") = getSolverSystem("lambda");
       getProblem().addVariable("MooseVariableScalar", "lambda", lm_params);
     }
+    else
+      reportPotentiallyMissedParameters({"system_names"}, "MooseVariableScalar");
   }
 }
 
