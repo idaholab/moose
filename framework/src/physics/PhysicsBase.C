@@ -580,7 +580,7 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
                             const bool error_if_already_defined) const
 {
   // Handle recover
-  if (ic_is_default_ic && (_app.isRecovering() || _app.isRecovering()))
+  if (ic_is_default_ic && (_app.isRestarting() || _app.isRecovering()))
     return false;
   // do not set initial conditions if we are loading fields from the mesh file
   if (getParam<bool>("initialize_variables_from_mesh_file"))

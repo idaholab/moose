@@ -264,7 +264,8 @@ WCNSFVFlowPhysics::addFVKernels()
     return;
 
   // Mass equation: time derivative
-  if (_compressibility == "weakly-compressible" && isTransient())
+  if (_compressibility == "weakly-compressible" &&
+      shouldCreateTimeDerivative(_pressure_name, _blocks, false))
     addMassTimeKernels();
 
   // Mass equation: divergence of momentum
@@ -397,7 +398,8 @@ WCNSFVFlowPhysics::addMomentumTimeKernels()
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];
     params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    getProblem().addFVKernel(kernel_type, kernel_name + _velocity_names[d], params);
+    if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, false))
+      getProblem().addFVKernel(kernel_type, kernel_name + _velocity_names[d], params);
   }
 }
 

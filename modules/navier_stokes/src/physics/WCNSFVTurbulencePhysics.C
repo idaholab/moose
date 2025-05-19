@@ -600,9 +600,11 @@ WCNSFVTurbulencePhysics::addKEpsilonTimeDerivatives()
   assignBlocks(params, _blocks);
 
   params.set<NonlinearVariableName>("variable") = _tke_name;
-  getProblem().addFVKernel(kernel_type, prefix() + "tke_time", params);
+  if (shouldCreateTimeDerivative(_tke_name, _blocks, false))
+    getProblem().addFVKernel(kernel_type, prefix() + "tke_time", params);
   params.set<NonlinearVariableName>("variable") = _tked_name;
-  getProblem().addFVKernel(kernel_type, prefix() + "tked_time", params);
+  if (shouldCreateTimeDerivative(_tked_name, _blocks, false))
+    getProblem().addFVKernel(kernel_type, prefix() + "tked_time", params);
 }
 
 void
@@ -816,9 +818,6 @@ WCNSFVTurbulencePhysics::addInitialConditions()
     mooseError("inital_mu_t/tke/tked should not be provided if we are restarting from a mesh file "
                "or not defining variables in the Physics");
 
-  // do not set initial conditions if we are loading from file
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
-    return;
   // do not set initial conditions if we are not defining variables
   if (!_define_variables)
     return;
@@ -845,7 +844,10 @@ WCNSFVTurbulencePhysics::addInitialConditions()
 
     params.set<VariableName>("variable") = _turbulent_viscosity_name;
     // Always obey the user specification of an initial condition
-    if (!_app.isRestarting() || parameters().isParamSetByUser("initial_mu_t"))
+    if (shouldCreateIC(_turbulent_viscosity_name,
+                       _blocks,
+                       /*whether IC is a default*/ isParamSetByUser("initial_mu_t"),
+                       /*error if already an IC*/ isParamSetByUser("initial_mu_t")))
       getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_turb", params);
   }
   else if (isParamSetByUser("initial_mu_t"))
@@ -854,11 +856,17 @@ WCNSFVTurbulencePhysics::addInitialConditions()
 
   params.set<VariableName>("variable") = _tke_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tke");
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_tke"))
+  if (shouldCreateIC(_turbulent_viscosity_name,
+                     _blocks,
+                     /*whether IC is a default*/ isParamSetByUser("initial_tke"),
+                     /*error if already an IC*/ isParamSetByUser("initial_tke")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tke", params);
   params.set<VariableName>("variable") = _tked_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tked");
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_tked"))
+  if (shouldCreateIC(_turbulent_viscosity_name,
+                     _blocks,
+                     /*whether IC is a default*/ isParamSetByUser("initial_tked"),
+                     /*error if already an IC*/ isParamSetByUser("initial_tked")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tked", params);
 }
 

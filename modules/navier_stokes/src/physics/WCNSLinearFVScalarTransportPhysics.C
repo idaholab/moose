@@ -79,7 +79,8 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
   for (const auto & vname : _passive_scalar_names)
   {
     params.set<LinearVariableName>("variable") = vname;
-    getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
+    if (shouldCreateTimeDerivative(vname, _blocks, false))
+      getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
   }
 }
 
