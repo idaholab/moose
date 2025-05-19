@@ -9,6 +9,8 @@
 
 #pragma once
 
+#ifdef NEML2_ENABLED
+
 #include "neml2/models/Model.h"
 #include <torch/script.h>
 #include "DataFileUtils.h"
@@ -48,3 +50,5 @@ protected:
 };
 
 }
+
+#endif

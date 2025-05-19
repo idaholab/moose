@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef NEML2_ENABLED
+
 #include "LibtorchModel.h"
 #include "LibtorchUtils.h"
 #include <ATen/ops/ones_like.h>
@@ -92,3 +94,5 @@ LibtorchModel::set_value(bool out, bool dout_din, bool d2out_din2)
 }
 
 }
+
+#endif
