@@ -209,6 +209,24 @@ protected:
                       const bool ic_is_default_ic,
                       const bool error_if_already_defined) const;
 
+  /**
+   * Returns whether this Physics should create the time derivative for this
+   * variable and these blocks
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param error_if_already_defined two time derivatives can be defined on the same subdomain, but
+   * it is usually not correct. So if this is set to true, any overlap between the subdomains of two
+   * time derivatives for the same variable will cause an error. If set to false, the existing time
+   * derivative will be deemed as sufficient, and this routine will return false.
+   */
+  bool shouldCreateTimeDerivative(const VariableName & var_name,
+                                  const std::vector<SubdomainName> & blocks,
+                                  const bool error_if_already_defined) const;
+
+  // Other conceivable "shouldCreate" routines for things that are unique to a variable
+  // - shouldCreateTimeIntegrator
+  // - shouldCreatePredictor/Corrector
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 

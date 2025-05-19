@@ -18,6 +18,7 @@
 #include "InitialConditionBase.h"
 #include "FVInitialConditionBase.h"
 #include "MooseVariableScalar.h"
+#include "LinearSystem.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -618,4 +619,73 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
              var_name + ", to be defined on blocks: " + Moose::stringify(blocks) +
              ".\n We should be creating the Physics' IC only for non-covered blocks. This is not "
              "implemented at this time.");
+}
+
+bool
+PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
+                                        const std::vector<SubdomainName> & blocks,
+                                        const bool error_if_already_defined) const
+{
+  // Follow the transient setting of the Physics
+  if (!isTransient())
+    return false;
+
+  // Variable is either nonlinear (FV/FE), nodal nonlinear (field of ODEs), linear, or scalar.
+  // The warehouses hosting the time kernels are different for each of these types
+  // Different type of time derivatives, not block restrictable
+  mooseAssert(!isVariableScalar(var_name),
+              "shouldCreateTimeKernel not implemented for scalar variables");
+  mooseAssert(!_problem->hasAuxiliaryVariable(var_name),
+              "Should not be called with auxiliary variables");
+
+  // Get solver system type
+  const auto var = &_problem->getVariable(0, var_name);
+  const auto var_id = var->number();
+  const auto sys_num = var->sys().number();
+  const auto time_vector_tag =
+      (sys_num < _problem->numNonlinearSystems())
+          ? var->sys().timeVectorTag()
+          : dynamic_cast<LinearSystem *>(&var->sys())->rightHandSideTimeVectorTag();
+
+  // We just use the warehouse, it should cover every time derivative object type
+  bool all_blocks_covered = true, some_block_covered = false;
+  std::set<SubdomainName> blocks_covered;
+  // we examine subdomain by subdomain, because mutiple kernels could be covering every block in
+  // the 'blocks' parameter
+  for (const auto & block : blocks)
+  {
+    std::vector<MooseObject *> time_kernels;
+    const auto bid = _mesh->getSubdomainID(block);
+    _problem->theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(sys_num)
+        .template condition<AttribVar>(var_id)
+        .template condition<AttribSubdomains>(bid)
+        // we use the time tag as a proxy for time derivatives
+        .template condition<AttribVectorTags>(var->sys().timeVectorTag())
+        .queryInto(time_kernels);
+    if (time_kernels.size())
+    {
+      some_block_covered = true;
+      blocks_covered.insert(block);
+    }
+    else
+      all_blocks_covered = false;
+  }
+
+  if (!some_block_covered)
+    return true;
+  if (!error_if_already_defined && all_blocks_covered)
+    return false;
+  if (error_if_already_defined && all_blocks_covered)
+    mooseError("A time kernel for variable '" + var_name +
+               "' has already been defined on blocks '" + Moose::stringify(blocks) + "'.");
+  else
+    mooseError("There is a partial overlap between the subdomains covered by pre-existing time "
+               "derivatives, defined on blocks: " +
+               Moose::stringify(blocks_covered) +
+               "\nand a newly created time derivative kernel for variable " + var_name +
+               ", to be defined on blocks: " + Moose::stringify(blocks) +
+               ".\n We should be creating the Physics' time derivative only for non-covered "
+               "blocks. This is not implemented at this time.");
 }
