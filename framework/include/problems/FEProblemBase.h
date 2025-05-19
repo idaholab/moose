@@ -208,6 +208,7 @@ public:
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
 
   virtual bool hasVariable(const std::string & var_name) const override;
+  // NOTE: hasAuxiliaryVariable defined in parent class
   bool hasSolverVariable(const std::string & var_name) const;
   using SubProblem::getVariable;
   virtual const MooseVariableFieldBase &
