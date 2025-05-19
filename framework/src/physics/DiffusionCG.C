@@ -220,14 +220,10 @@ void
 DiffusionCG::addSolverVariables()
 {
   // If the variable was added outside the Physics
-  if (variableExists(_var_name, /*error_if_aux*/ true))
+  if (!shouldCreateVariable(_var_name, _blocks, true))
   {
-    if (isParamSetByUser("variable_order"))
-      paramError("variable_order",
-                 "Cannot specify the variable order if variable " + _var_name +
-                     " is defined outside the Physics block");
-    else
-      return;
+    reportPotentiallyMissedParameters({"variable_order", "system_names"}, "MooseVariable");
+    return;
   }
 
   const std::string variable_type = "MooseVariable";

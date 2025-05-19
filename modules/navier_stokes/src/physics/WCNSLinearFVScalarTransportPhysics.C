@@ -52,11 +52,10 @@ WCNSLinearFVScalarTransportPhysics::addSolverVariables()
   for (const auto name_i : index_range(_passive_scalar_names))
   {
     // Dont add if the user already defined the variable
-    if (variableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
+    if (!shouldCreateVariable(_passive_scalar_names[name_i], _blocks, true))
     {
-      checkBlockRestrictionIdentical(
-          _passive_scalar_names[name_i],
-          getProblem().getVariable(0, _passive_scalar_names[name_i]).blocks());
+      reportPotentiallyMissedParameters({"system_names", "passive_scalar_scaling"},
+                                        "MooseLinearVariableFVReal");
       continue;
     }
 

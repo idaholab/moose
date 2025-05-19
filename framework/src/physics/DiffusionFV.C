@@ -181,16 +181,16 @@ DiffusionFV::addFVBCs()
 void
 DiffusionFV::addSolverVariables()
 {
-  if (variableExists(_var_name, true))
+  if (!shouldCreateVariable(_var_name, _blocks, true))
+  {
+    reportPotentiallyMissedParameters({"system_names"}, "MooseVariableFVReal");
     return;
+  }
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
   assignBlocks(params, _blocks);
   params.set<SolverSystemName>("solver_sys") = getSolverSystem(_var_name);
-
-  // TODO: Do we need to use a different variable name maybe?
-  // Or add API to extend block definition of a boundary
   getProblem().addVariable(variable_type, _var_name, params);
 }
 

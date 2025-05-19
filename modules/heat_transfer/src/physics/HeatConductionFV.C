@@ -238,8 +238,12 @@ HeatConductionFV::addFVBCs()
 void
 HeatConductionFV::addSolverVariables()
 {
-  if (shouldCreateVariable(_temperature_name, _blocks, true, true, true))
+  if (!shouldCreateVariable(_temperature_name, _blocks, true))
+  {
+    reportPotentiallyMissedParameters({"system_names", "temperature_scaling"},
+                                      "MooseVariableFVReal");
     return;
+  }
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);

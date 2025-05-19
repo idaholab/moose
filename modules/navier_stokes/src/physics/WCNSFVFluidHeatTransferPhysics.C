@@ -40,10 +40,12 @@ WCNSFVFluidHeatTransferPhysics::addSolverVariables()
     return;
 
   // Dont add if the user already defined the variable
-  if (variableExists(_fluid_temperature_name,
-                     /*error_if_aux=*/true))
-    checkBlockRestrictionIdentical(_fluid_temperature_name,
-                                   getProblem().getVariable(0, _fluid_temperature_name).blocks());
+  if (!shouldCreateVariable(_fluid_temperature_name, _blocks, true))
+    reportPotentiallyMissedParameters({"system_names",
+                                       "energy_scaling",
+                                       "energy_face_interpolation",
+                                       "energy_two_term_bc_expansion"},
+                                      "INSFVEnergyVariable");
   else if (_define_variables)
   {
     auto params = getFactory().getValidParams("INSFVEnergyVariable");

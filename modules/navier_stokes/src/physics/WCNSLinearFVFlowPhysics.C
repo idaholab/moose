@@ -110,9 +110,8 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
-    if (variableExists(_velocity_names[d], true))
-      checkBlockRestrictionIdentical(_velocity_names[d],
-                                     getProblem().getVariable(0, _velocity_names[d]).blocks());
+    if (!shouldCreateVariable(_velocity_names[d], _blocks, true))
+      reportPotentiallyMissedParameters({"system_names"}, "MooseLinearVariableFVReal");
     else if (_define_variables)
     {
       std::string variable_type = "MooseLinearVariableFVReal";
@@ -130,9 +129,8 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
   }
 
   // Pressure
-  if (variableExists(_pressure_name, true))
-    checkBlockRestrictionIdentical(_pressure_name,
-                                   getProblem().getVariable(0, _pressure_name).blocks());
+  if (!shouldCreateVariable(_pressure_name, _blocks, true))
+    reportPotentiallyMissedParameters({"system_names"}, "MooseLinearVariableFVReal");
   else if (_define_variables)
   {
     const auto pressure_type = "MooseLinearVariableFVReal";
