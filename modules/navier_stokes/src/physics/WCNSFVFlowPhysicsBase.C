@@ -332,14 +332,14 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
 
     if (shouldCreateIC(_velocity_names[d],
                        _blocks,
-                       /*whether IC is a default*/ isParamSetByUser("initial_velocity"),
+                       /*whether IC is a default*/ !isParamSetByUser("initial_velocity"),
                        /*error if already an IC*/ isParamSetByUser("initial_velocity")))
       getProblem().addInitialCondition("FunctionIC", prefix() + _velocity_names[d] + "_ic", params);
   }
 
   if (shouldCreateIC(_pressure_name,
                      _blocks,
-                     /*whether IC is a default*/ isParamSetByUser("initial_pressure"),
+                     /*whether IC is a default*/ !isParamSetByUser("initial_pressure"),
                      /*error if already an IC*/ isParamSetByUser("initial_pressure")))
   {
     params.set<VariableName>("variable") = _pressure_name;

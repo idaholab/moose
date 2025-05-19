@@ -222,7 +222,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 
   if (shouldCreateIC(_fluid_temperature_name,
                      _blocks,
-                     /*whether IC is a default*/ isParamSetByUser("initial_temperature"),
+                     /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
                      /*error if already an IC*/ isParamSetByUser("initial_temperature")))
   {
     params.set<VariableName>("variable") = _fluid_temperature_name;
