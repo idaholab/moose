@@ -770,14 +770,15 @@ class Job(OutputInterface):
         """ Store the results for this Job into the results storage """
         joint_status = self.getJointStatus()
 
+        status = {'status': joint_status.status,
+                  'status_message': joint_status.message,
+                  'fail': self.isFail(),
+                  'caveats': list(self.getCaveats())}
+
         # Base job data
-        job_data = {'timing'               : self.timer.totalTimes(),
-                    'status'               : joint_status.status,
-                    'status_message'       : joint_status.message,
-                    'fail'                 : self.isFail(),
-                    'color'                : joint_status.color,
-                    'caveats'              : list(self.getCaveats()),
-                    'tester'               : self.getTester().getResults(self.options)}
+        job_data = {'status': status,
+                    'timing': self.timer.totalTimes(),
+                    'tester': self.getTester().getResults(self.options)}
         if self.hasSeperateOutput():
             job_data['output_files'] = self.getCombinedSeparateOutputPaths()
         else:
