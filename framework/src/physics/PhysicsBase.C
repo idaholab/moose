@@ -593,10 +593,10 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
   const std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
   if (isVariableFV(var_name))
     has_all_blocks = _problem->getFVInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
-        var_name, blocks_set, blocks_covered);
+        var_name, blocks_set, blocks_covered, 0);
   else
     has_all_blocks = _problem->getInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
-        var_name, blocks_set, blocks_covered);
+        var_name, blocks_set, blocks_covered, 0);
 
   const bool has_some_blocks = !blocks_covered.empty();
   if (!has_some_blocks)
@@ -667,7 +667,14 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
     if (time_kernels.size())
     {
       some_block_covered = true;
-      blocks_covered.insert(block);
+      if (block == "ANY_BLOCK_ID")
+      {
+        for (const auto & time_kernel : time_kernels)
+          if (const auto blk = dynamic_cast<BlockRestrictable *>(time_kernel))
+            blocks_covered.insert(blk->blocks().begin(), blk->blocks().end());
+      }
+      else
+        blocks_covered.insert(block);
     }
     else
       all_blocks_covered = false;
