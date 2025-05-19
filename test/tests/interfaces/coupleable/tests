@@ -39,4 +39,21 @@
     csvdiff = 'coupled_dots_nodal_out.csv'
     requirement = 'The system shall be able to retrieve the time derivatives of nodal variables through the coupling interface.'
   []
+  [coupled_old_vector_value]
+    issues = '#30224'
+    requirement = 'The system shall retrieve the old value of a vector through the coupling interface.'
+    design = 'Coupleable.md'
+    type = Exodiff
+    input = coupled_old_vector.i
+    exodiff = coupled_old_vector_out.e
+  []
+  [coupled_old_vector_value_nodal]
+    issues = '#30224'
+    requirement = 'The system shall retrieve the old value of a nodal vector through the coupling interface.'
+    design = 'Coupleable.md'
+    type = Exodiff
+    input = coupled_old_vector_nodal.i
+    exodiff = coupled_old_vector_nodal_out.e
+    abs_zero = 1e-8
+  []
 []

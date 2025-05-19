@@ -796,12 +796,14 @@ MooseVariableDataBase<RealVectorValue>::assignNodalValue()
       auto & dof_values_old = _vector_tags_dof_u[_old_solution_tag];
       for (decltype(n) i = 0; i < n; ++i)
         _nodal_value_old(i) = dof_values_old[i];
+      _nodal_value_old_array[0] = _nodal_value_old;
     }
     if (oldestSolutionStateRequested() >= 2)
     {
       auto & dof_values_older = _vector_tags_dof_u[_older_solution_tag];
       for (decltype(n) i = 0; i < n; ++i)
         _nodal_value_older(i) = dof_values_older[i];
+      _nodal_value_older_array[0] = _nodal_value_older;
     }
     if (_need_dof_values_dot)
       for (decltype(n) i = 0; i < n; ++i)
