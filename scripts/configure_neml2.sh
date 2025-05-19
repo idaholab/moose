@@ -44,6 +44,7 @@ function configure_neml2()
     -DNEML2_DOC=OFF \
     -DNEML2_CPU_PROFILER=OFF \
     -DNEML2_WORK_DISPATCHER=ON \
+    -DNEML2_JSON=OFF \
     -DTorch_ROOT="$(get_variable LIBTORCH_DIR)" \
     -DWASP_ROOT="$(get_variable WASP_DIR)" \
     -DTIMPI_ROOT="$(get_variable TIMPI_DIR)" \
