@@ -1593,7 +1593,7 @@ SystemBase::serializedSolution()
 }
 
 void
-SystemBase::cleanserializedSolution()
+SystemBase::cleanSerializedSolution()
 {
   _serialized_solution = NumericVector<Number>::build(_communicator);
   _serialized_solution->init(system().n_dofs(), false, SERIAL);
