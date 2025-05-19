@@ -520,6 +520,13 @@ PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
   return true;
 }
 
+bool
+PhysicsBase::allMeshBlocks(const std::set<SubdomainName> & blocks) const
+{
+  std::vector<SubdomainName> blocks_vec(blocks.begin(), blocks.end());
+  return allMeshBlocks(blocks_vec);
+}
+
 void
 PhysicsBase::addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options)
@@ -655,15 +662,27 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
   for (const auto & block : blocks)
   {
     std::vector<MooseObject *> time_kernels;
-    const auto bid = _mesh->getSubdomainID(block);
-    _problem->theWarehouse()
-        .query()
-        .template condition<AttribSysNum>(sys_num)
-        .template condition<AttribVar>(var_id)
-        .template condition<AttribSubdomains>(bid)
-        // we use the time tag as a proxy for time derivatives
-        .template condition<AttribVectorTags>(var->sys().timeVectorTag())
-        .queryInto(time_kernels);
+    if (block != "ANY_BLOCK_ID")
+    {
+      const auto bid = _mesh->getSubdomainID(block);
+      _problem->theWarehouse()
+          .query()
+          .template condition<AttribSysNum>(sys_num)
+          .template condition<AttribVar>(var_id)
+          .template condition<AttribSubdomains>(bid)
+          // we use the time tag as a proxy for time derivatives
+          .template condition<AttribVectorTags>(time_vector_tag)
+          .queryInto(time_kernels);
+    }
+    else
+      _problem->theWarehouse()
+          .query()
+          .template condition<AttribSysNum>(sys_num)
+          .template condition<AttribVar>(var_id)
+          // we use the time tag as a proxy for time derivatives
+          .template condition<AttribVectorTags>(time_vector_tag)
+          .queryInto(time_kernels);
+
     if (time_kernels.size())
     {
       some_block_covered = true;
@@ -679,6 +698,13 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
     else
       all_blocks_covered = false;
   }
+
+  // From the list of covered blocks, see if the blocks we needed are found
+  std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  if (includes(blocks_covered.begin(), blocks_covered.end(), blocks_set.begin(), blocks_set.end()))
+    all_blocks_covered = true;
+  else if (allMeshBlocks(blocks_covered))
+    all_blocks_covered = true;
 
   if (!some_block_covered)
     return true;
@@ -717,15 +743,6 @@ PhysicsBase::reportPotentiallyMissedParameters(const std::vector<std::string> & 
   if (user_values_unused.size())
   {
     if (_app.unusedFlagIsWarning())
-<<<<<<< HEAD
-      mooseWarning("User-specifed values for parameters '" + Moose::stringify(defaults_unused) +
-                   "' for object of type '" + object_type +
-                   "' were not used because the object was not created by this Physics.");
-    else if (_app.unusedFlagIsError())
-      mooseError("User-specified for parameters '" + Moose::stringify(defaults_unused) +
-                 "' for object of type '" + object_type +
-                 "' were not used because the object was not created by this Physics.");
-=======
       mooseWarning(
           "User-specifed values for parameters '" + Moose::stringify(user_values_unused) +
           "' for object of type '" + object_type +
@@ -735,6 +752,5 @@ PhysicsBase::reportPotentiallyMissedParameters(const std::vector<std::string> & 
           "User-specified values for parameters '" + Moose::stringify(user_values_unused) +
           "' for object of type '" + object_type +
           "' were not used because the corresponding object was not created by this Physics.");
->>>>>>> 1c294e3a71 (fixup! Simplify shouldCreateVariable Add a routine to report on unused parameters refs #30533)
   }
 }
