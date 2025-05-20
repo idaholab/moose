@@ -9,9 +9,6 @@
 
 #include "DiffusionLHDGAssemblyHelper.h"
 #include "DiffusionLHDGDirichletBC.h"
-#include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
-#include "Function.h"
 
 registerMooseObject("MooseApp", DiffusionLHDGDirichletBC);
 
@@ -21,7 +18,7 @@ DiffusionLHDGDirichletBC::validParams()
   auto params = IntegratedBC::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
                              "hybridized discretization of a diffusion equation");
-  params.addParam<MooseFunctorName>("functor", 0, "The Dirichlet value for the diffusing specie");
+  params.addRequiredParam<MooseFunctorName>("functor", "The Dirichlet value for the diffusing specie");
   params += DiffusionLHDGAssemblyHelper::validParams();
   params.renameParam("variable", "u", "The diffusing specie concentration");
   return params;

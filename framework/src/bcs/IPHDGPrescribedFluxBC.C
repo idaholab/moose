@@ -14,8 +14,8 @@ InputParameters
 IPHDGPrescribedFluxBC::validParams()
 {
   auto params = IPHDGBC::validParams();
-  params.addParam<MooseFunctorName>(
-      "prescribed_normal_flux", 0, "The prescribed value of the flux dotted with the normal");
+  params.addRequiredParam<MooseFunctorName>(
+      "prescribed_normal_flux", "The prescribed value of the flux dotted with the normal");
   return params;
 }
 

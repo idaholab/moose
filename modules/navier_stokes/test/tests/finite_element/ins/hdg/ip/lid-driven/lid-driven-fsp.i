@@ -196,6 +196,7 @@ gamma = 1e5
     coeff = '${fparse -rho}'
     self_advection = false
     boundary = 'left bottom top right'
+    prescribed_normal_flux = 0
   []
 
   [pb_mass]
