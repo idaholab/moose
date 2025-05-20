@@ -43,12 +43,6 @@ IsMatrixSymmetric::IsMatrixSymmetric(const InputParameters & parameters)
 }
 
 void
-IsMatrixSymmetric::initialSetup()
-{
-  _mat_transpose = SparseMatrix<Number>::build(_communicator);
-}
-
-void
 IsMatrixSymmetric::execute()
 {
   _equiv = true;
@@ -72,13 +66,11 @@ IsMatrixSymmetric::execute()
     mat = &sys_mat;
   }
 
-  mat->get_transpose(*_mat_transpose);
-
   for (const auto i : make_range(mat->row_start(), mat->row_stop()))
     for (const auto j : make_range(mat->col_start(), mat->col_stop()))
     {
       const auto val1 = (*mat)(i, j);
-      const auto val2 = (*_mat_transpose)(i, j);
+      const auto val2 = (*mat)(j, i);
       if (!MooseUtils::relativeFuzzyEqual(val1, val2, _symm_tol) &&
           !MooseUtils::absoluteFuzzyEqual(val1, val2, _symm_tol))
       {

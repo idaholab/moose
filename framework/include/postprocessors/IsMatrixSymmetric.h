@@ -11,12 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-namespace libMesh
-{
-template <typename>
-class PetscMatrix;
-}
-
 /**
  * Checks whether the nonlinear system matrix is symmetric
  */
@@ -27,7 +21,6 @@ public:
 
   IsMatrixSymmetric(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
   virtual void initialize() override {}
   virtual void execute() override;
   virtual Real getValue() const override;
@@ -39,8 +32,6 @@ protected:
   const std::string _mat_file_name;
   /// Tolerance for the comparison between coefficients and transpose counterparts
   const Real _symm_tol;
-  /// Transpose of the system matrix
-  std::unique_ptr<SparseMatrix<Number>> _mat_transpose;
   /// Whether the matrix is symmetric
   bool _equiv;
 };
