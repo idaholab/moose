@@ -72,7 +72,6 @@ DiffusionLHDGAssemblyHelper::DiffusionLHDGAssemblyHelper(
     _dhah_fe_problem(fe_problem),
     _dhah_sys(sys)
 {
-  mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_var));
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<RealVectorValue> &>(_grad_u_var));
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_face_var));
 }
