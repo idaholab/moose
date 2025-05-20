@@ -48,7 +48,6 @@ function configure_neml2()
     -DTorch_ROOT="$(get_variable LIBTORCH_DIR)" \
     -DWASP_ROOT="$(get_variable WASP_DIR)" \
     -DTIMPI_ROOT="$(get_variable TIMPI_DIR)" \
-    -DGperftools_ROOT="$(get_variable GPERF_DIR)" \
     -G "Unix Makefiles" \
     -B "$2" \
     -S "$1" \
