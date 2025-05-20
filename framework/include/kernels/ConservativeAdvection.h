@@ -32,6 +32,9 @@ protected:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 
+  /// Scalar material property
+  const GenericMaterialProperty<Real, is_ad> & _scalar;
+
   /// field variable
   const VariableGradient * _field_variable;
 

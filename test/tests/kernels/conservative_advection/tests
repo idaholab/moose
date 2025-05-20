@@ -69,6 +69,14 @@
       cli_args = "Outputs/file_base=no_upwinding_1D_mat_out Kernels/advection/velocity_material=v"
       detail = 'without upwinding in 1D, with velocity given as a material,'
     []
+    [no_upwinding_1D_field]
+      type = Exodiff
+      input = no_upwinding_1D_field.i
+      prereq = upwinding/no_upwinding_1D
+      exodiff = no_upwinding_1D_field_out.e
+      abs_zero = 1E-7
+      detail = 'without upwinding in 1D, with velocity given as a material,'
+    []
     [ad_no_upwinding_1D]
       type = Exodiff
       input = ad_no_upwinding_1D.i

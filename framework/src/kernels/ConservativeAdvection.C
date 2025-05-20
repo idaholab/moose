@@ -22,6 +22,7 @@ ConservativeAdvectionTempl<is_ad>::generalParams()
   InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                              "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
+  params.addParam<MaterialPropertyName>("scalar", "1.0", "Material property scalar multiplier.");
   MooseEnum upwinding_type("none full", "none");
   params.addParam<MooseEnum>("upwinding_type",
                              upwinding_type,
@@ -31,7 +32,7 @@ ConservativeAdvectionTempl<is_ad>::generalParams()
   params.addParam<MaterialPropertyName>("advected_quantity",
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");
-  params.addParam<VariableName>(
+  params.addCoupledVar(
       "field_variable",
       "Variable for which the gradient defines the advection velocity. Can be supplied instead of "
       "velocity material or velocity variable.");
@@ -63,7 +64,8 @@ ConservativeAdvectionTempl<true>::validParams()
 template <bool is_ad>
 ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _field_variable(isParamValid("field_variable") ? &this->coupledGradient("coupled_variable")
+    _scalar(this->template getGenericMaterialProperty<Real, is_ad>("scalar")),
+    _field_variable(isParamValid("field_variable") ? &this->coupledGradient("field_variable")
                                                    : nullptr),
     _field_variable_var(_field_variable ? coupled("field_variable") : 0),
     _velocity(
@@ -112,8 +114,8 @@ GenericReal<is_ad>
 ConservativeAdvectionTempl<is_ad>::negSpeedQp() const
 {
   if (_field_variable)
-    return -_grad_test[_i][_qp] * (*_field_variable)[_qp];
-  return -_grad_test[_i][_qp] * (*_velocity)[_qp];
+    return -_grad_test[_i][_qp] * (*_field_variable)[_qp] * _scalar[_qp];
+  return -_grad_test[_i][_qp] * (*_velocity)[_qp] * _scalar[_qp];
 }
 
 template <bool is_ad>
@@ -151,7 +153,7 @@ ConservativeAdvectionTempl<false>::computeQpOffDiagJacobian(unsigned int jvar)
   // This is the no-upwinded version
   // It gets called via GenericKernel<false>::computeOffDiagJacobian()
   if (_field_variable && _field_variable_var == jvar)
-    return -_grad_test[_i][_qp] * _grad_phi[_j][_qp] * _adv_quant[_qp];
+    return -_grad_test[_i][_qp] * _grad_phi[_j][_qp] * _adv_quant[_qp] * _scalar[_qp];
   else
     return 0.0;
 }
