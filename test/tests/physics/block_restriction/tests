@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#30533'
+  design = 'Physics/index.md'
+  [variable_already_exists]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    cli_args = "Variables/u/block='1 0' Physics/Diffusion/ContinuousGalerkin/diff/block='0 1'"
+    csvdiff = 'diffusion_cg_out_sample_0010.csv'
+    requirement = 'The system shall be able to define the variables outside the Physics shorthand syntax.'
+  []
+  # DiffusionPhysics does not have a default IC, so specifying an IC to it would need to be obeyed
+  # and would always cause an error if there is another IC
+  [time_derivative_already_exists]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    cli_args = "Kernels/active='extern'"
+    csvdiff = 'diffusion_cg_out_sample_0010.csv'
+    requirement = 'The system shall be able to define the time derivative outside the Physics shorthand syntax.'
+  []
+
+  [errors]
+    requirement = 'The system shall return an error if'
+    [variable_block_res_conflicting]
+     type = RunException
+      input = 'diffusion_cg.i'
+      cli_args = "Variables/u/block='1'"
+      expect_err = "Variable 'u' already exists with subdomain restriction '1' which does not include the subdomains 'ANY_BLOCK_ID', required for this Physics."
+      detail = 'a variable is defined both in the Physics shorthand syntax and the regular syntax but with different block restrictions,'
+    []
+    [variable_parameter_ignored]
+      type = RunException
+      input = 'diffusion_cg.i'
+      cli_args = "Variables/u/block='0 1' Physics/Diffusion/ContinuousGalerkin/diff/blocks='0 1' Physics/Diffusion/ContinuousGalerkin/diff/variable_order=SECOND"
+      expect_err = "User-specified values for parameters 'variable_order' for object of type 'MooseVariable' were not used because the corresponding object was not created by this Physics"
+      detail = 'parameters for the variable are specified to the Physics shorthand syntax but then ignored due to a pre-existing variable definition,'
+    []
+    [ic_conflicting]
+      type = RunException
+      input = 'diffusion_cg.i'
+      cli_args = 'Physics/Diffusion/ContinuousGalerkin/diff/initial_condition=2'
+      expect_err = "ICs for variable 'u' have already been defined for blocks 'ANY_BLOCK_ID'."
+      detail = 'a variable initial condition is defined both in the Physics shorthand syntax and the regular syntax for the same variable on the same blocks,'
+    []
+    [td_defined_on_not_enough_blocks]
+      type = RunException
+      input = 'diffusion_cg.i'
+      cli_args = "Kernels/active='extern' Kernels/extern/block=1"
+      expect_err = 'There is a partial overlap between the subdomains covered by pre-existing time derivatives, defined on blocks: 1'
+      detail = 'a time derivative is specified with a block restriction in the regular syntax, while the Physics shorthand syntax seeks to define it without a block restriction.'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall emit a warning if'
+    [variable_parameter_ignored]
+      type = RunApp
+      input = 'diffusion_cg.i'
+      cli_args = "Variables/u/block='0 1' Physics/Diffusion/ContinuousGalerkin/diff/variable_order=SECOND"
+      expect_out = "User-specifed values for parameters 'variable_order' for object of type 'MooseVariable' were not used because the corresponding object was not created by this Physics"
+      allow_unused = true
+      allow_warnings = true
+      detail = 'parameters for the variable are specified to the Physics shorthand syntax but then ignored due to a pre-existing variable definition.'
+    []
+  []
+[]
