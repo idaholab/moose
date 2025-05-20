@@ -364,10 +364,10 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
 
   // Construct kernel
   MFEMHypreBoomerAMG & solver =
-  addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
+      addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
 
   mfem::ParMesh pmesh = makeMesh();
-  mfem::ParFiniteElementSpace fespace(&pmesh, new mfem::H1_FECollection(3,3));
+  mfem::ParFiniteElementSpace fespace(&pmesh, new mfem::H1_FECollection(3, 3));
   mfem::Array<int> ess_tdof_list;
   mfem::ParBilinearForm a(&fespace);
   mfem::ParGridFunction x(&fespace);
@@ -381,10 +381,10 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
 
   solver.updateSolver(a, ess_tdof_list);
 
-  auto solver_ptr = std::dynamic_pointer_cast<mfem::LORSolver<mfem::HypreBoomerAMG>>(solver.getSolver()).get();
+  auto solver_ptr =
+      std::dynamic_pointer_cast<mfem::LORSolver<mfem::HypreBoomerAMG>>(solver.getSolver()).get();
   // Test MFEMKernel returns an integrator of the expected type
   ASSERT_TRUE(solver_ptr != nullptr);
 }
-
 
 #endif
