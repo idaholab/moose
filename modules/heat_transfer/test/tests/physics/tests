@@ -59,7 +59,7 @@
       input = 'test_fv_functor.i'
       exodiff = 'test_fv_functor_all_out.e'
       cli_args = "Outputs/file_base=test_fv_functor_all_out"
-      detail = 'with all material properties defined using functors,'
+      detail = 'with all properties defined using functors,'
     []
     [convective_bc]
       type = Exodiff

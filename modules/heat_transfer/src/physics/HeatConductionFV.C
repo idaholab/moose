@@ -28,10 +28,9 @@ HeatConductionFV::validParams()
   params.addRequiredParam<MooseFunctorName>("thermal_conductivity_functor",
                                             "Thermal conductivity functor material property");
   params.addParam<MaterialPropertyName>("specific_heat", "Specific heat material property");
-  params.addParam<MooseFunctorName>("specific_heat_functor",
-                                    "Specific heat functor material property");
+  params.addParam<MooseFunctorName>("specific_heat_functor", "Specific heat functor");
   params.addParam<MaterialPropertyName>("density", "Density material property");
-  params.addParam<MooseFunctorName>("density_functor", "Density functor material property");
+  params.addParam<MooseFunctorName>("density_functor", "Density functor");
   params.addParamNamesToGroup(
       "thermal_conductivity_functor specific_heat specific_heat_functor density density_functor",
       "Thermal properties");
@@ -104,7 +103,8 @@ HeatConductionFV::addFVKernels()
   }
   if (isTransient())
   {
-    bool use_functors = isParamValid("density_functor") || isParamValid("specific_heat_functor");
+    const bool use_functors =
+        isParamValid("density_functor") || isParamValid("specific_heat_functor");
     const std::string kernel_type =
         use_functors ? "FVFunctorHeatConductionTimeDerivative" : "FVHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);

@@ -11,6 +11,9 @@
 
 #include "FVTimeKernel.h"
 
+/**
+ * A finite volume kernel to add the time derivative term in the heat conduction equation
+ */
 class FVHeatConductionTimeDerivative : public FVTimeKernel
 {
 public:

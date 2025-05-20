@@ -9,9 +9,13 @@
 
 #pragma once
 
-#include "FVTimeKernel.h"
+#include "FVFunctorTimeKernel.h"
 
-class FVFunctorHeatConductionTimeDerivative : public FVTimeKernel
+/**
+ * A finite volume kernel to add the time derivative term in the heat conduction equation, using
+ * functors for the material properties
+ */
+class FVFunctorHeatConductionTimeDerivative : public FVFunctorTimeKernel
 {
 public:
   static InputParameters validParams();
@@ -21,9 +25,9 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Specific heat material property
+  /// Specific heat capacity at constant pressure
   const Moose::Functor<ADReal> & _specific_heat;
 
-  /// Density material property
+  /// Density
   const Moose::Functor<ADReal> & _density;
 };

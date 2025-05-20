@@ -13,7 +13,7 @@ constant pressure and $u$ the temperature variable.
 
 !alert note
 The [FVFunctorHeatConductionTimeDerivative.md] can be used to use functors for these properties instead
-of material properties.
+of traditional material properties.
 
 !syntax parameters /FVKernels/FVHeatConductionTimeDerivative
 
