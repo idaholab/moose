@@ -14,6 +14,26 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankThreeTensor.h"
 
+template <typename T>
+struct GradientType;
+
+template <>
+struct GradientType<Real>
+{
+  typedef RealVectorValue type;
+};
+
+/**
+ * In the long term the GradientType struct can be eliminated by using the specialization of
+ * libmesh::TensorTools::IncrementRank for RankTwoTensor, this will require changing the derived
+ * class MatAnisoDiffusion and several other classes from RealTensorValue to RankTwoTensor
+ */
+template <>
+struct GradientType<RealTensorValue>
+{
+  typedef RankThreeTensor type;
+};
+
 /**
  * This class template implements a diffusion kernel with a mobility that can vary
  * spatially and can depend on variables in the simulation. Two classes are derived from
@@ -49,7 +69,7 @@ protected:
   std::vector<const MaterialProperty<T> *> _dDdarg;
 
   /// diffusion coefficient derivatives w.r.t. variables that have explicit dependence on gradients
-  const MaterialProperty<RankThreeTensor> & _dDdgradc;
+  const MaterialProperty<typename GradientType<T>::type> & _dDdgradc;
 
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
@@ -102,7 +122,7 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
     _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
                                            _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
-    _dDdgradc(getMaterialPropertyDerivative<RankThreeTensor>(
+    _dDdgradc(getMaterialPropertyDerivative<typename GradientType<T>::type>(
         isParamValid("D_name") ? "D_name" : "diffusivity", "gradc")),
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
@@ -156,19 +176,8 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
   if ((_surface_args_loc != libMesh::invalid_uint) && (cvar == _surface_args_loc))
-  {
-    // RankTwoTensor gradphij;
-    // for (unsigned int a = 0; a < 3; ++a)  //TODO delete all this commented stuff
-    //   for (unsigned int b = 0; b < 3; ++b)
-    //   {
-    //     gradphij(a, b) = (*_dDdgradarg[cvar])[_qp](a, b, 0) * _grad_phi[_j][_qp](0) +
-    //                      (*_dDdgradarg[cvar])[_qp](a, b, 1) * _grad_phi[_j][_qp](1) +
-    //                      (*_dDdgradarg[cvar])[_qp](a, b, 2) * _grad_phi[_j][_qp](2);
-    //   }
-    // gradphij = _dDdgradc[_qp] * _grad_phi[_j][_qp];
-
     sum += _dDdgradc[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
-  }
+
   if (_v_var == jvar)
     sum += computeQpCJacobian();
 
