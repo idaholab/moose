@@ -118,8 +118,8 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRES)
 {
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreGMRES");
-  solver_params.set<double>("l_tol") = 0.0;
-  solver_params.set<double>("l_abs_tol") = 1e-5;
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
   MFEMHypreGMRES & solver = addObject<MFEMHypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
@@ -134,7 +134,7 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRES)
 {
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreFGMRES");
-  solver_params.set<double>("l_tol") = 1e-7; // HypreFGMRES cannot set absolute tolerance
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7; // HypreFGMRES cannot set absolute tolerance
   // Construct kernel
   MFEMHypreFGMRES & solver =
       addObject<MFEMHypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
@@ -149,8 +149,8 @@ TEST_F(MFEMSolverTest, MFEMHyprePCG)
 {
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHyprePCG");
-  solver_params.set<double>("l_tol") = 0.0;
-  solver_params.set<double>("l_abs_tol") = 1e-5;
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
   MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
@@ -166,8 +166,8 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolver)
 {
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMGMRESSolver");
-  solver_params.set<double>("l_tol") = 0.0;
-  solver_params.set<double>("l_abs_tol") = 1e-5;
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
   MFEMGMRESSolver & solver =
@@ -180,8 +180,8 @@ TEST_F(MFEMSolverTest, MFEMCGSolver)
 {
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMCGSolver");
-  solver_params.set<double>("l_tol") = 0.0;
-  solver_params.set<double>("l_abs_tol") = 1e-5;
+  solver_params.set<mfem::real_t>("l_tol") = 0.0;
+  solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
   MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
@@ -196,7 +196,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
 {
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreBoomerAMG");
-  solver_params.set<double>("l_tol") = 1e-7; // HypreBoomerAMG cannot set absolute tolerance
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7; // HypreBoomerAMG cannot set absolute tolerance
 
   // Construct solver
   MFEMHypreBoomerAMG & solver =
@@ -284,7 +284,7 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRESLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreGMRES");
   solver_params.set<bool>("low_order_refined") = true;
-  solver_params.set<double>("l_tol") = 1e-7;
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
   MFEMHypreGMRES & solver = addObject<MFEMHypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
@@ -300,7 +300,7 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRESLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreFGMRES");
   solver_params.set<bool>("low_order_refined") = true;
-  solver_params.set<double>("l_tol") = 1e-7;
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
   MFEMHypreFGMRES & solver =
@@ -317,7 +317,7 @@ TEST_F(MFEMSolverTest, MFEMHyprePCGLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHyprePCG");
   solver_params.set<bool>("low_order_refined") = true;
-  solver_params.set<double>("l_tol") = 1e-7;
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
   MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
@@ -334,7 +334,7 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolverLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMGMRESSolver");
   solver_params.set<bool>("low_order_refined") = true;
-  solver_params.set<double>("l_tol") = 1e-7;
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
   MFEMGMRESSolver & solver =
@@ -348,7 +348,7 @@ TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
   // Build required kernel inputs
   InputParameters solver_params = _factory.getValidParams("MFEMCGSolver");
   solver_params.set<bool>("low_order_refined") = true;
-  solver_params.set<double>("l_tol") = 1e-7;
+  solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
   MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
