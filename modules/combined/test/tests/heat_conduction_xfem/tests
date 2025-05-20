@@ -6,7 +6,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    # XFEM does not support recover
+    # XFEM does not support recover (see #11567 notably)
     recover = false
   []
 []
