@@ -31,6 +31,10 @@ ConservativeAdvectionTempl<is_ad>::generalParams()
   params.addParam<MaterialPropertyName>("advected_quantity",
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");
+  params.addParam<VariableName>(
+      "field_variable",
+      "Variable for which the gradient defines the advection velocity. Can be supplied instead of "
+      "velocity material or velocity variable.");
   return params;
 }
 
@@ -59,15 +63,22 @@ ConservativeAdvectionTempl<true>::validParams()
 template <bool is_ad>
 ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _velocity(this->isParamValid("velocity_variable")
-                  ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
-                  : (this->isParamValid("velocity_material")
-                         ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
-                                    "velocity_material")
-                                .get()
-                         : nullptr)),
+    _field_variable(isParamValid("field_variable") ? &this->coupledGradient("coupled_variable")
+                                                   : nullptr),
+    _field_variable_var(_field_variable ? coupled("field_variable") : 0),
+    _velocity(
+        _field_variable
+            ? nullptr
+            : (this->isParamValid("velocity_variable")
+                   ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
+                   : (this->isParamValid("velocity_material")
+                          ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
+                                     "velocity_material")
+                                 .get()
+                          : nullptr))),
+    _adv_quant_valid(isParamValid("advected_quantity")),
     _adv_quant(
-        isParamValid("advected_quantity")
+        _adv_quant_valid
             ? this->template getGenericMaterialProperty<Real, is_ad>("advected_quantity").get()
             : _u),
     _upwinding(
@@ -81,10 +92,14 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
         "advected_quantity",
         "Upwinding is not compatable with an advected quantity that is not the primary variable.");
 
-  if (!_velocity ||
+  if ((!_velocity && !_field_variable) ||
+      (_field_variable && this->isParamValid("velocity_material")) ||
+      (_field_variable && this->isParamValid("velocity_variable")) ||
       (this->isParamValid("velocity_variable") && this->isParamValid("velocity_material")))
-    paramError("velocity_variable",
-               "Either velocity_variable or velocity_material must be specified");
+    paramError(
+        "field_variable",
+        "One and only one of the following input variables must be specified: velocity_variable, "
+        "velocity_material, or field_variable.");
 
   if (this->_has_diag_save_in)
     paramError("diag_save_in",
@@ -96,6 +111,8 @@ template <bool is_ad>
 GenericReal<is_ad>
 ConservativeAdvectionTempl<is_ad>::negSpeedQp() const
 {
+  if (_field_variable)
+    return -_grad_test[_i][_qp] * (*_field_variable)[_qp];
   return -_grad_test[_i][_qp] * (*_velocity)[_qp];
 }
 
@@ -114,12 +131,34 @@ ConservativeAdvectionTempl<false>::computeQpJacobian()
 {
   // This is the no-upwinded version
   // It gets called via GenericKernel<false>::computeJacobian()
-  return negSpeedQp() * _phi[_j][_qp];
+  if (!_adv_quant_valid)
+    return negSpeedQp() * _phi[_j][_qp];
+  return 0.0;
 }
 
 template <>
 Real
 ConservativeAdvectionTempl<true>::computeQpJacobian()
+{
+  mooseError("Internal error, should never get here when using AD");
+  return 0.0;
+}
+
+template <>
+Real
+ConservativeAdvectionTempl<false>::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // This is the no-upwinded version
+  // It gets called via GenericKernel<false>::computeOffDiagJacobian()
+  if (_field_variable && _field_variable_var == jvar)
+    return -_grad_test[_i][_qp] * _grad_phi[_j][_qp] * _adv_quant[_qp];
+  else
+    return 0.0;
+}
+
+template <>
+Real
+ConservativeAdvectionTempl<true>::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   mooseError("Internal error, should never get here when using AD");
   return 0.0;
