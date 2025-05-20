@@ -14,6 +14,7 @@
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "LinearFVAnisotropicDiffusion.h"
+#include "LinearFVElementalKernel.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -152,6 +153,11 @@ protected:
    * A map functor from faces to mass fluxes which are used in the advection terms.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
+
+  /// Pointer to the body force terms
+  std::vector<LinearFVElementalKernel *> _body_force_kernels;
+  /// Vector of body force term names
+  std::vector<std::string> _body_force_kernels_name;
 
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
