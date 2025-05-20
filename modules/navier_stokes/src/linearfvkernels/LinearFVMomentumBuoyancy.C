@@ -55,6 +55,5 @@ LinearFVMomentumBuoyancy::computeRightHandSideContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-
-  return - _rho.gradient(elem, state)(_index) * _gravity *  (_current_elem_info->centroid()-_ref_point) *_current_elem_volume;
+  return - _rho.gradient(elem, state)(_index) *_gravity *  (_current_elem_info->centroid()-_ref_point) *_current_elem_volume;
 }
