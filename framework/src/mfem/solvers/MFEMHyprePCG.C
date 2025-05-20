@@ -12,8 +12,8 @@ MFEMHyprePCG::validParams()
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the preconditioned conjugate gradient method.");
 
-  params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
-  params.addParam<double>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
+  params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
+  params.addParam<mfem::real_t>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   params.addParam<UserObjectName>("preconditioner", "Optional choice of preconditioner to use.");
@@ -36,8 +36,8 @@ MFEMHyprePCG::constructSolver(const InputParameters &)
 
   auto solver =
       std::make_shared<mfem::HyprePCG>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  solver->SetTol(getParam<double>("l_tol"));
-  solver->SetAbsTol(getParam<double>("l_abs_tol"));
+  solver->SetTol(getParam<mfem::real_t>("l_tol"));
+  solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
 
@@ -75,8 +75,8 @@ MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
     mfem::ParLORDiscretization lor_disc(a, tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(
         lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-    lor_solver->GetSolver().SetTol(getParam<double>("l_tol"));
-    lor_solver->GetSolver().SetAbsTol(getParam<double>("l_abs_tol"));
+    lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
+    lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
 
