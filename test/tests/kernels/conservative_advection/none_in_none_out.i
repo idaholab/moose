@@ -12,37 +12,37 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u]
+  [u]
     type = FunctionIC
     variable = u
     function = 'if(x<5,x,10-x)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = MassLumpedTimeDerivative
     variable = u
-  [../]
-  [./advection]
+  []
+  [advection]
     type = ConservativeAdvection
     variable = u
     upwinding_type = full
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_mass]
+  [total_mass]
     type = VariableInnerProduct
     variable = u
     second_variable = 1
-  [../]
+  []
 []
 
 [Executioner]
