@@ -7,8 +7,6 @@ aforementioned theory but just highlight the differences introduced by the addit
 component.
 The mass, momentum, and energy equations remain largely unchanged, except that
 in most cases, the properties correspond to the mixture properties.
-The gas mixture properties are computed using [/IdealGasMixtureFluidProperties.md],
-which uses Dalton's law of partial pressures.
 Note the following notation: the subscript $v$ corresponds to the primary gas component,
 the subscript $g$ corresponds to the secondary gas component, and no subscript
 is used for mixture quantities.

@@ -56,10 +56,6 @@ arguments. For example, $\rho(p,T)$ has the interface `rho_from_p_T(p, T, x, rho
 where `drho_dp`, `drho_dT`, and `drho_dx` correspond to $(\partial\rho/\partial p)|_{T,\mathbf{x}}$,
 $(\partial\rho/\partial T)|_{p,\mathbf{x}}$, and $(\partial\rho/\partial \mathbf{x})|_{p,T}$ respectively.
 
-!alert note title=Automatic Differentiation
-Fluid properties objects have interfaces for taking advantage of MOOSE's
-Automatic Differentiation capability. See the example in the next section.
-
 Additionally, the following interfaces are available:
 
 - `getPrimaryFluidProperties()`: The primary component of the mixture.
