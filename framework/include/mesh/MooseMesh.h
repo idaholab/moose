@@ -738,8 +738,9 @@ public:
    * @param subdomain_names The names of the subdomains
    * @return The subdomain ids from the passed subdomain names.
    */
-  std::vector<SubdomainID> getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) const;
-  std::set<SubdomainID> getSubdomainIDs(const std::set<SubdomainName> & subdomain_name) const;
+  std::vector<SubdomainID>
+  getSubdomainIDs(const std::vector<SubdomainName> & subdomain_names) const;
+  std::set<SubdomainID> getSubdomainIDs(const std::set<SubdomainName> & subdomain_names) const;
 
   /**
    * This method sets the name for \p subdomain_id to \p name
