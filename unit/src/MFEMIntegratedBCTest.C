@@ -1,11 +1,11 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMObjectUnitTest.h"
-#include "MFEMScalarBoundaryIntegratedBC.h"
+#include "MFEMScalarFunctorBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMVectorNormalIntegratedBC.h"
-#include "MFEMVectorFunctionBoundaryIntegratedBC.h"
-#include "MFEMVectorFunctionNormalIntegratedBC.h"
+#include "MFEMVectorFunctorBoundaryIntegratedBC.h"
+#include "MFEMVectorFunctorNormalIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
 
 class MFEMIntegratedBCTest : public MFEMObjectUnitTest
@@ -41,7 +41,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
 /**
  * Test MFEMVectorNormalIntegratedBC creates an mfem::BoundaryNormalLFIntegrator successfully.
  */
-TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorNormalIntegratedBC)
 {
   // Construct boundary condition
   InputParameters func_params = _factory.getValidParams("ParsedVectorFunction");
@@ -49,13 +49,13 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
   func_params.set<std::string>("expression_y") = "x + y + 1";
   func_params.set<std::string>("expression_z") = "x + y + 2";
   _mfem_problem->addFunction("ParsedVectorFunction", "func1", func_params);
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionNormalIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorNormalIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<FunctionName>("function") = "func1";
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMVectorFunctionNormalIntegratedBC & integrated_bc =
-      addObject<MFEMVectorFunctionNormalIntegratedBC>(
-          "MFEMVectorFunctionNormalIntegratedBC", "bc1", bc_params);
+  MFEMVectorFunctorNormalIntegratedBC & integrated_bc =
+      addObject<MFEMVectorFunctorNormalIntegratedBC>(
+          "MFEMVectorFunctorNormalIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
@@ -69,25 +69,27 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionNormalIntegratedBC)
 }
 
 /**
- * Test MFEMScalarBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator successfully.
+ * Test MFEMScalarFunctorBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator
+ * successfully.
  */
-TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMScalarFunctorBoundaryIntegratedBC)
 {
   // Build required BC inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
   coef_params.set<std::vector<double>>("prop_values") = {3.0};
-  _mfem_problem->addMaterial("MFEMGenericConstantMaterial", "material1", coef_params);
+  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
 
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMScalarBoundaryIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctorBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<std::string>("coefficient") = "coef1";
+  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "coef1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMScalarBoundaryIntegratedBC & integrated_bc =
-      addObject<MFEMScalarBoundaryIntegratedBC>("MFEMScalarBoundaryIntegratedBC", "bc1", bc_params);
+  MFEMScalarFunctorBoundaryIntegratedBC & integrated_bc =
+      addObject<MFEMScalarFunctorBoundaryIntegratedBC>(
+          "MFEMScalarFunctorBoundaryIntegratedBC", "bc1", bc_params);
 
-  // Test MFEMScalarBoundaryIntegratedBC returns an integrator of the expected type
+  // Test MFEMScalarFunctorBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
@@ -115,8 +117,8 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMConvectiveHeatFluxBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<FunctionName>("heat_transfer_coefficient") = "htc";
-  bc_params.set<FunctionName>("T_infinity") = "Tinf";
+  bc_params.set<MFEMScalarCoefficientName>("heat_transfer_coefficient") = "htc";
+  bc_params.set<MFEMScalarCoefficientName>("T_infinity") = "Tinf";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   MFEMConvectiveHeatFluxBC & integrated_bc =
       addObject<MFEMConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", bc_params);
@@ -153,7 +155,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
   delete blf_integrator;
 }
 
-TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionBoundaryIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorBoundaryIntegratedBC)
 {
   // Build required BC inputs
   InputParameters func_params = _factory.getValidParams("ParsedVectorFunction");
@@ -163,12 +165,12 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctionBoundaryIntegratedBC)
   _mfem_problem->addFunction("ParsedVectorFunction", "func1", func_params);
 
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctionBoundaryIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  bc_params.set<FunctionName>("function") = "func1";
-  auto & bc = addObject<MFEMVectorFunctionBoundaryIntegratedBC>(
-      "MFEMVectorFunctionBoundaryIntegratedBC", "bc1", bc_params);
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func1";
+  auto & bc = addObject<MFEMVectorFunctorBoundaryIntegratedBC>(
+      "MFEMVectorFunctorBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator = dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLFIntegrator());

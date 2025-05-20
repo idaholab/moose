@@ -64,16 +64,16 @@ centre_y = 0.1
 
 [BCs]
   [potential_velocity_boundary]
-    type = MFEMScalarFunctionDirichletBC
+    type = MFEMScalarFunctorDirichletBC
     variable = velocity_potential
     boundary = '1'
-    function = theta
+    coefficient = theta
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = one
     prop_values = 1.0
   []

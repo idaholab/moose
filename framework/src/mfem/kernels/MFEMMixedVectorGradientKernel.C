@@ -14,16 +14,16 @@ MFEMMixedVectorGradientKernel::validParams()
       "$(k\\vec\\nabla u, \\vec v)_\\Omega$ "
       "arising from the weak form of the gradient operator "
       "$k\\vec \\nabla u$.");
-  params.addParam<std::string>("coefficient", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>("coefficient", "Name of property k to use.");
   return params;
 }
 
 MFEMMixedVectorGradientKernel::MFEMMixedVectorGradientKernel(const InputParameters & parameters)
   : MFEMMixedBilinearFormKernel(parameters),
-    _coef_name(getParam<std::string>("coefficient")),
+    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     // FIXME: The MFEM bilinear form can also handle vector and matrix
     // coefficients, so ideally we'd handle all three too.
-    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
+    _coef(getScalarCoefficient(_coef_name))
 {
 }
 

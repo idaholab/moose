@@ -1071,6 +1071,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(LinearSystemName, string);
         setscalar(SolverSystemName, string);
         setscalar(CLIArgString, string);
+#ifdef MFEM_ENABLED
+        setscalar(MFEMScalarCoefficientName, string);
+        setscalar(MFEMVectorCoefficientName, string);
+        setscalar(MFEMMatrixCoefficientName, string);
+#endif
 
         // Moose Compound Scalars
         setscalar(RealVectorValue, RealVectorValue);
@@ -1153,6 +1158,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(NonlinearSystemName, string);
         setvector(LinearSystemName, string);
         setvector(SolverSystemName, string);
+#ifdef MFEM_ENABLED
+        setvector(MFEMScalarCoefficientName, string);
+        setvector(MFEMVectorCoefficientName, string);
+        setvector(MFEMMatrixCoefficientName, string);
+#endif
 
         // map types
         setmap(string, unsigned int);
@@ -1206,6 +1216,11 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvectorvector(DistributionName);
         setvectorvector(SamplerName);
         setvectorvector(TagName);
+#ifdef MFEM_ENABLED
+        setvectorvector(MFEMScalarCoefficientName);
+        setvectorvector(MFEMVectorCoefficientName);
+        setvectorvector(MFEMMatrixCoefficientName);
+#endif
 
         // Triple indexed types
         setvectorvectorvector(Real);
