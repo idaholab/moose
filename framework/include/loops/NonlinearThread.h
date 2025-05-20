@@ -167,8 +167,9 @@ protected:
   const bool _has_active_objects;
 
 private:
-  /// Whether DG kernels should be executed for a given internal side. This can be false if HDG
-  /// kernels are present because in that case we visit the internal side from both sides and we
-  /// don't want to double execute DG kernels
+  /// Whether DG kernels should be executed for a given elem-neighbor pairing. This is determined by
+  /// calling down to our parent (\p ThreadedElementLoop) class's \p shouldComputeOnInternalSide
+  /// method which checks things like whether the elem id is less than the neighbor id such that we
+  /// make sure we do not execute DGKernels twice on the same face
   mutable bool _should_execute_dg;
 };

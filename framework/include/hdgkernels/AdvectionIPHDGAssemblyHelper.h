@@ -66,6 +66,12 @@ public:
   /// The velocity on the element faces
   const ADMaterialProperty<RealVectorValue> & _face_velocity;
 
+  /// The quantity we are advecting, e.g. something like a density. If \p _self_advection is true
+  /// then the advected quantity value is this \p _coeff value multipled by the
+  /// variable/side_variable pair (for element upwind/downwind of the face respectively)
   const Real _coeff;
+
+  /// Whether this kernel should advect itself, e.g. it's variable/side_variable pair (for element
+  /// upwind/downwind of the face respectively). If false, we will advect just the \p _coeff value
   const bool _self_advection;
 };
