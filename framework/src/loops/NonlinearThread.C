@@ -160,8 +160,10 @@ NonlinearThread::onBoundary(const Elem * const elem,
 {
   if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
-    // still remember to swap back during stack unwinding.
+    // Set up Sentinel class so that, after we swap in reinitMaterialsFace in prepareFace, even if
+    // one of our callees throws we remember to swap back during stack unwinding. We put our
+    // sentinel here as opposed to in prepareFace because we certainly don't want our materials
+    // swapped back before we proceed to residual/Jacobian computation
     SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
     prepareFace(elem, side, bnd_id, lower_d_elem);
@@ -258,8 +260,10 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
   }
   if (_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
-    // still remember to swap back during stack unwinding.
+    // Set up Sentinel class so that, after we swap in reinitMaterialsFace in prepareFace, even if
+    // one of our callees throws we remember to swap back during stack unwinding. We put our
+    // sentinel here as opposed to in prepareFace because we certainly don't want our materials
+    // swapped back before we proceed to residual/Jacobian computation
     SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
     prepareFace(elem, side, Moose::INVALID_BOUNDARY_ID, nullptr);
