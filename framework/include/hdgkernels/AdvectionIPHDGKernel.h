@@ -12,7 +12,7 @@
 #include "IPHDGKernel.h"
 
 /**
- * Implements the Advection equation for a interior penalty hybridized discretization
+ * Implements an advection term for a interior penalty hybridized discretization
  */
 class AdvectionIPHDGKernel : public IPHDGKernel
 {
