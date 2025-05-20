@@ -49,7 +49,7 @@ walls = 'right left top bottom'
     u = superficial_vel_x
     v = superficial_vel_y
     pressure = pressure
-    rho = 'rho' # 'rho'
+    rho = ${rho} # 'rho'
     p_diffusion_kernel = p_diffusion
   []
 []
