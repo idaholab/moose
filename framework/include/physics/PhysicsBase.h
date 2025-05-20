@@ -184,7 +184,8 @@ protected:
 
   // Routines to help with deciding when to create objects
   /**
-   * Returns whether this Physics should create the variable or if it already exists
+   * Returns whether this Physics should create the variable. Will return false if the variable
+   * already exists and has the necessary block restriction.
    * @param var_name name of the variable
    * @param blocks block restriction to use. If empty, no block restriction
    * @param error_if_aux error if the variable is auxiliary
@@ -194,7 +195,8 @@ protected:
                             const bool error_if_aux);
 
   /**
-   * Returns whether this Physics should create the IC or whether it already exists
+   * Returns whether this Physics should create the variable. Will return false if the initial
+   * condition already exists and has the necessary block restriction.
    * @param var_name name of the variable
    * @param blocks block restriction to use. If empty, no block restriction
    * @param ic_is_default_ic whether this IC is from a default parameter, and therefore should be
@@ -211,8 +213,8 @@ protected:
                       const bool error_if_already_defined) const;
 
   /**
-   * Returns whether this Physics should create the time derivative for this
-   * variable and these blocks
+   * Returns whether this Physics should create the variable. Will return false if the time
+   * derivative kernel already exists and has the necessary block restriction.
    * @param var_name name of the variable
    * @param blocks block restriction to use. If empty, no block restriction
    * @param error_if_already_defined two time derivatives can be defined on the same subdomain, but
