@@ -32,6 +32,8 @@ JSONOutput::validParams()
                         "Create a unique output file for each time step of the simulation.");
   params.addParam<std::vector<ReporterName>>(
       "reporters", "Specific reporter values to output; if not set, all will be output");
+  params.addParam<bool>(
+      "distributed", true, "Whether or not to output distributed data (data not on rank 0)");
   return params;
 }
 
@@ -125,11 +127,13 @@ JSONOutput::outputReporters()
   }
 
   // Is there ANY distributed data
-  _has_distributed = std::any_of(
-      r_names.begin(),
-      r_names.end(),
-      [this](const ReporterName & n)
-      { return _reporter_data.hasReporterWithMode(n.getObjectName(), REPORTER_MODE_DISTRIBUTED); });
+  _has_distributed = getParam<bool>("distributed") &&
+                     std::any_of(r_names.begin(),
+                                 r_names.end(),
+                                 [this](const ReporterName & n) {
+                                   return _reporter_data.hasReporterWithMode(
+                                       n.getObjectName(), REPORTER_MODE_DISTRIBUTED);
+                                 });
   if (processor_id() == 0 || _has_distributed)
   {
     // Create the current output node

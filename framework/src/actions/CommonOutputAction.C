@@ -292,6 +292,7 @@ CommonOutputAction::act()
         params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
         params.set<ExecFlagEnum>("execute_system_information_on") = EXEC_NONE;
         params.set<std::string>("file_base_suffix") = "perf_graph";
+        params.set<bool>("distributed") = false;
         create("JSON",
                *from_param_name,
                from_params,
