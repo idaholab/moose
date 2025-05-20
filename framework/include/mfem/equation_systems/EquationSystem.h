@@ -22,7 +22,6 @@ class EquationSystem : public mfem::Operator
 {
 
 public:
-
   friend class EquationSystemProblemOperator;
   friend class TimeDomainEquationSystemProblemOperator;
 
