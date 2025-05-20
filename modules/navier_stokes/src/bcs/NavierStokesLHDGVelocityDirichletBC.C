@@ -36,7 +36,7 @@ NavierStokesLHDGVelocityDirichletBC::NavierStokesLHDGVelocityDirichletBC(
     const InputParameters & parameters)
   : IntegratedBC(parameters),
     NavierStokesLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
-    _my_side(libMesh::invalid_uint)
+    _cached_side(libMesh::invalid_uint)
 {
   _dirichlet_vel[0] = &getFunctor<Real>("dirichlet_u");
   _dirichlet_vel[1] = &getFunctor<Real>("dirichlet_v");
@@ -53,18 +53,18 @@ NavierStokesLHDGVelocityDirichletBC::initialSetup()
 void
 NavierStokesLHDGVelocityDirichletBC::jacobianSetup()
 {
-  _my_elem = nullptr;
-  _my_side = libMesh::invalid_uint;
+  _cached_elem = nullptr;
+  _cached_side = libMesh::invalid_uint;
 }
 
 void
 NavierStokesLHDGVelocityDirichletBC::computeOffDiagJacobian(const unsigned int)
 {
-  if ((_my_elem != _current_elem) || (_my_side != _current_side))
+  if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
   {
     computeJacobian();
-    _my_elem = _current_elem;
-    _my_side = _current_side;
+    _cached_elem = _current_elem;
+    _cached_side = _current_side;
   }
 }
 

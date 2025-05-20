@@ -37,5 +37,5 @@ protected:
   const Moose::Functor<Real> & _normal_gradient;
 
   /// A cache variable to prevent multiple computations of Jacobians
-  unsigned int _my_side;
+  unsigned int _cached_side;
 };

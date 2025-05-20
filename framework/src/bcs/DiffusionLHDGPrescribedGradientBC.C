@@ -30,7 +30,7 @@ DiffusionLHDGPrescribedGradientBC::DiffusionLHDGPrescribedGradientBC(
   : IntegratedBC(parameters),
     DiffusionLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _normal_gradient(getFunctor<Real>("normal_gradient")),
-    _my_side(libMesh::invalid_uint)
+    _cached_side(libMesh::invalid_uint)
 {
 }
 
@@ -109,17 +109,17 @@ DiffusionLHDGPrescribedGradientBC::computeJacobian()
 void
 DiffusionLHDGPrescribedGradientBC::jacobianSetup()
 {
-  _my_elem = nullptr;
-  _my_side = libMesh::invalid_uint;
+  _cached_elem = nullptr;
+  _cached_side = libMesh::invalid_uint;
 }
 
 void
 DiffusionLHDGPrescribedGradientBC::computeOffDiagJacobian(const unsigned int)
 {
-  if ((_my_elem != _current_elem) || (_my_side != _current_side))
+  if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
   {
     computeJacobian();
-    _my_elem = _current_elem;
-    _my_side = _current_side;
+    _cached_elem = _current_elem;
+    _cached_side = _current_side;
   }
 }
