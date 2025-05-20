@@ -26,9 +26,9 @@ DiffusionLHDGAssemblyHelper::validParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredParam<NonlinearVariableName>(
-      "grad_u", "The gradient of the _diffusing specie concentration");
+      "gradient_variable", "The gradient of the diffusing specie concentration");
   params.addRequiredParam<NonlinearVariableName>(
-      "face_u", "The concentration of the _diffusing specie on faces");
+      "face_variable", "The concentration of the diffusing specie on faces");
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
   params.addParam<Real>("tau",
                         1,
@@ -46,11 +46,11 @@ DiffusionLHDGAssemblyHelper::DiffusionLHDGAssemblyHelper(
     SystemBase & sys,
     const THREAD_ID tid)
   : NonADFunctorInterface(moose_obj),
-    _u_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("u"))),
+    _u_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("variable"))),
     _grad_u_var(sys.getFieldVariable<RealVectorValue>(
-        tid, moose_obj->getParam<NonlinearVariableName>("grad_u"))),
-    _u_face_var(
-        sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("face_u"))),
+        tid, moose_obj->getParam<NonlinearVariableName>("gradient_variable"))),
+    _u_face_var(sys.getFieldVariable<Real>(
+        tid, moose_obj->getParam<NonlinearVariableName>("face_variable"))),
     _qu_dof_indices(_grad_u_var.dofIndices()),
     _u_dof_indices(_u_var.dofIndices()),
     _lm_u_dof_indices(_u_face_var.dofIndices()),
