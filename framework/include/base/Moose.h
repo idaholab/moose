@@ -132,7 +132,9 @@ extern const ExecFlagType EXEC_PRE_MULTIAPP_SETUP;
 extern const ExecFlagType EXEC_TRANSFER;
 extern const ExecFlagType EXEC_PRE_KERNELS;
 extern const ExecFlagType EXEC_ALWAYS;
+#ifdef LIBMESH_ENABLE_AMR
 extern const ExecFlagType EXEC_POST_ADAPTIVITY;
+#endif
 
 namespace Moose
 {

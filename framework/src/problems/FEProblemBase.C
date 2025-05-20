@@ -7875,10 +7875,13 @@ FEProblemBase::initialAdaptMesh()
       else
       {
         _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
-        return;
+        break;
       }
     }
   }
+
+  // Execute multi-apps that need to run after adaptivity, but before the next timestep.
+  execMultiApps(EXEC_POST_ADAPTIVITY);
 }
 
 bool
@@ -7934,6 +7937,9 @@ FEProblemBase::adaptMesh()
   // for real if necessary.
   if (mesh_changed)
     es().reinit_systems();
+
+  // Execute multi-apps that need to run after adaptivity, but before the next timestep.
+  execMultiApps(EXEC_POST_ADAPTIVITY);
 
   return mesh_changed;
 }
