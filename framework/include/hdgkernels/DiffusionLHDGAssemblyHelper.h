@@ -265,7 +265,7 @@ protected:
   const Real _tau;
 
   /// A data member used for determining when to compute the Jacobian
-  const Elem * _my_elem;
+  const Elem * _cached_elem;
 
   // Local residual vectors
   DenseVector<Number> _vector_re, _scalar_re, _lm_re;
