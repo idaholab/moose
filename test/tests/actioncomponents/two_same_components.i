@@ -6,12 +6,14 @@
     length = 10
     n_axial = 1
     n_radial = 1
-    position = '1 0 0'
+    position = '0 -1 0'
+    # points down
     direction = '0 1 0'
   []
   [cylinder_2]
     type = CylinderComponent
     dimension = 2
+    # thick radius, which is why it 'looks' pointing up
     radius = 4
     length = 1
     n_axial = 1
