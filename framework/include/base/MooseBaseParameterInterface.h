@@ -78,6 +78,14 @@ public:
   const T & getParam(const std::string & name) const;
 
   /**
+   * Retrieve a parameter for the object, if it is valid
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
+  template <typename T>
+  const T * getOptionalParam(const std::string & name) const;
+
+  /**
    * Retrieve a renamed parameter for the object. This helper makes sure we
    * check both names before erroring, and that only one parameter is passed to avoid
    * silent errors
@@ -204,6 +212,15 @@ const T &
 MooseBaseParameterInterface::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), &_moose_base);
+}
+
+template <typename T>
+const T *
+MooseBaseParameterInterface::getOptionalParam(const std::string & name) const
+{
+  if (isParamValid(name))
+    return &InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), &_moose_base);
+  return nullptr;
 }
 
 template <typename T>

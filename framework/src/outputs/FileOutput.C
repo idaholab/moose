@@ -32,6 +32,7 @@ FileOutput::validParams()
       "with Outputs/file_base when available. Otherwise, MOOSE uses input file name and this "
       "object name for a master input or uses master file_base, the subapp name and this object "
       "name for a subapp input to set it.");
+  params.addParam<std::string>("file_base_suffix", "Suffix to add to the file base");
   params.addParam<bool>(
       "append_date", false, "When true the date and time are appended to the output filename.");
   params.addParam<std::string>("append_date_format",
@@ -125,6 +126,9 @@ void
 FileOutput::setFileBaseInternal(const std::string & file_base)
 {
   _file_base = file_base;
+
+  if (isParamValid("file_base_suffix"))
+    _file_base += "_" + getParam<std::string>("file_base_suffix");
 
   // Append the date/time
   if (getParam<bool>("append_date"))

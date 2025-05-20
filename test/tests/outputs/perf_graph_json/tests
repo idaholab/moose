@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = JSONDiff
+    input = perf_graph_json.i
+    jsondiff = perf_graph_json_out_perf_graph.json
+    skip_keys = "root['time_steps'][0]['perf_graph_json']['graph']"
+    issues = '#30552'
+    requirement = 'The system shall support the systematic file output of timing and memory usage data using an output parameter'
+    recover = false
+  []
+[]

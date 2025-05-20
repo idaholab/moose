@@ -14,6 +14,7 @@
 #include "JsonIO.h"
 #include "Reporter.h"
 #include "TheWarehouse.h"
+#include "CommonOutputAction.h"
 
 registerMooseObjectAliased("MooseApp", JSONOutput, "JSON");
 
@@ -29,6 +30,8 @@ JSONOutput::validParams()
   params.addParam<bool>("one_file_per_timestep",
                         false,
                         "Create a unique output file for each time step of the simulation.");
+  params.addParam<std::vector<ReporterName>>(
+      "reporters", "Specific reporter values to output; if not set, all will be output");
   return params;
 }
 
@@ -36,8 +39,18 @@ JSONOutput::JSONOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _reporter_data(_problem_ptr->getReporterData()),
     _one_file_per_timestep(getParam<bool>("one_file_per_timestep")),
+    _reporters(getOptionalParam<std::vector<ReporterName>>("reporters")),
     _json(declareRestartableData<nlohmann::json>("json_out_str"))
 {
+}
+
+void
+JSONOutput::initialSetup()
+{
+  if (_reporters && _reporters->size())
+    for (const auto & name : *_reporters)
+      if (!_problem_ptr->getReporterData().hasReporterValue(name))
+        paramError("reporters", "Reporter value '", name, "' was not found");
 }
 
 std::string
@@ -79,10 +92,37 @@ JSONOutput::timestepSetup()
 void
 JSONOutput::outputReporters()
 {
+  // Get the reporter values that we should skip. The common output action can
+  // add JSON output objects for specific reporters, of which we don't want to
+  // include within the standard json output
+  std::set<ReporterName> skip_names;
+  const auto common_actions = _app.actionWarehouse().getActions<CommonOutputAction>();
+  if (common_actions.size())
+  {
+    mooseAssert(common_actions.size() == 1, "Should not be more than one");
+    const auto & action = *common_actions[0];
+    const auto & common_names = action.getCommonReporterNames();
+    skip_names.insert(common_names.begin(), common_names.end());
+  }
+
   // Set of ReporterNames for output
   std::set<ReporterName> r_names;
   for (const std::string & c_name : getReporterOutput())
-    r_names.emplace(c_name);
+  {
+    const ReporterName r_name(c_name);
+
+    // If specific values are requested, skip anything that isn't that value
+    if (_reporters)
+    {
+      if (std::find(_reporters->begin(), _reporters->end(), r_name) == _reporters->end())
+        continue;
+    }
+    // If all values are requested, skip those that should be skipped
+    else if (skip_names.count(r_name))
+      continue;
+
+    r_names.emplace(r_name);
+  }
 
   // Is there ANY distributed data
   _has_distributed = std::any_of(

@@ -26,6 +26,9 @@
 
 registerMooseAction("MooseApp", CommonOutputAction, "common_output");
 registerMooseAction("MooseApp", CommonOutputAction, "add_output");
+registerMooseAction("MooseApp", CommonOutputAction, "add_reporter");
+
+const ReporterName CommonOutputAction::perf_graph_json_reporter("perf_graph_json", "graph");
 
 InputParameters
 CommonOutputAction::validParams()
@@ -128,6 +131,7 @@ CommonOutputAction::validParams()
       "perf_graph_live_time_limit", 5.0, "Time (in seconds) to wait before printing a message.");
   params.addParam<unsigned int>(
       "perf_graph_live_mem_limit", 100, "Memory (in MB) to cause a message to be printed.");
+  params.addParam<bool>("perf_graph_json", false, "Enable and output the perf graph in JSON");
 
   params.addParam<bool>("print_mesh_changed_info",
                         false,
@@ -270,9 +274,30 @@ CommonOutputAction::act()
         from_param_name = "timing";
         from_params = &_app.parameters();
       }
+      else if (getParam<bool>("perf_graph_json"))
+      {
+        from_param_name = "perf_graph_json";
+        from_params = &parameters();
+      }
       if (from_param_name)
         create("PerfGraphOutput", *from_param_name, from_params);
 
+      if (getParam<bool>("perf_graph_json"))
+      {
+        // To avoid this reporter value appearing in all other JSON output
+        _common_reporter_names.push_back(perf_graph_json_reporter);
+
+        auto params = _factory.getValidParams("JSON");
+        params.set<std::vector<ReporterName>>("reporters") = {perf_graph_json_reporter};
+        params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
+        params.set<ExecFlagEnum>("execute_system_information_on") = EXEC_NONE;
+        params.set<std::string>("file_base_suffix") = "perf_graph";
+        create("JSON",
+               *from_param_name,
+               from_params,
+               &params,
+               perf_graph_json_reporter.getObjectName());
+      }
       if (!getParam<bool>("perf_graph_live"))
       {
         if (!from_param_name)
@@ -310,38 +335,61 @@ CommonOutputAction::act()
                                        !getParam<bool>("print_linear_converged_reason")))
       Moose::PetscSupport::dontAddLinearConvergedReason(*_problem);
   }
+  else if (_current_task == "add_reporter")
+  {
+    if (getParam<bool>("perf_graph_json"))
+    {
+      auto params = _factory.getValidParams("PerfGraphReporter");
+      params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
+      _problem->addReporter("PerfGraphReporter", perf_graph_json_reporter.getObjectName(), params);
+    }
+  }
   else
     mooseError("unrecognized task ", _current_task, " in CommonOutputAction.");
 }
 
 void
-CommonOutputAction::create(std::string object_type,
+CommonOutputAction::create(const std::string & object_type,
                            const std::optional<std::string> & param_name,
-                           const InputParameters * const from_params /* = nullptr */)
+                           const InputParameters * const from_params /* = nullptr */,
+                           const InputParameters * const apply_params /* = nullptr */,
+                           const std::optional<std::string> & object_name /* = {} */)
 {
   // Create our copy of the parameters
   auto params = _action_params;
+
+  // Set the 'type =' parameters for the desired object
+  params.set<std::string>("type") = object_type;
+
+  // Create the complete object name (uses lower case of type)
+  std::string name;
+  if (object_name)
+    name = *object_name;
+  else
+  {
+    name = object_type;
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  }
+
+  // Create the action
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+      _action_factory.create("AddOutputAction", name, params));
+  auto & object_params = action->getObjectParams();
+
+  // Set flag indicating that the object to be created was created with short-cut syntax
+  object_params.set<bool>("_built_by_moose") = true;
+
+  // Apply any additional parameters
+  if (apply_params)
+    object_params.applyParameters(*apply_params);
 
   // Associate all action output object errors with param_name
   // If from_params is specified, it means to associate it with parameters other than parameters()
   if (param_name)
   {
     const InputParameters & associated_params = from_params ? *from_params : parameters();
-    associateWithParameter(associated_params, *param_name, params);
+    associateWithParameter(associated_params, *param_name, object_params);
   }
-
-  // Set the 'type =' parameters for the desired object
-  params.set<std::string>("type") = object_type;
-
-  // Create the complete object name (uses lower case of type)
-  std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
-
-  // Create the action
-  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create("AddOutputAction", object_type, params));
-
-  // Set flag indicating that the object to be created was created with short-cut syntax
-  action->getObjectParams().set<bool>("_built_by_moose") = true;
 
   // Add the action to the warehouse
   _awh.addActionBlock(action);
