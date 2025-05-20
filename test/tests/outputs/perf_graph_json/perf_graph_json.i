@@ -21,4 +21,5 @@
 
 [Outputs]
   perf_graph_json = true
+  json = true
 []
