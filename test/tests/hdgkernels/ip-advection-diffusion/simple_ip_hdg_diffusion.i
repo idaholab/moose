@@ -44,6 +44,7 @@
   [zero_flux]
     type = DiffusionIPHDGPrescribedFluxBC
     boundary = 'top bottom'
+    prescribed_normal_flux = 0
   []
 []
 
