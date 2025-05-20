@@ -7875,13 +7875,10 @@ FEProblemBase::initialAdaptMesh()
       else
       {
         _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
-        break;
+        return;
       }
     }
   }
-
-  // Execute multi-apps that need to run after adaptivity, but before the next timestep.
-  execMultiApps(EXEC_POST_ADAPTIVITY);
 }
 
 bool
