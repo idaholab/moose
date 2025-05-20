@@ -34,8 +34,8 @@ class MooseVariableDependencyInterface;
 class TransientInterface;
 
 /**
- * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
- * (IPDG-H), which is a type of HDG method, discretization of the diffusion equation. These routines
+ * Base class that declares all the methods for assembling a hybridized interior penalty discontinuous Galerkin
+ * (IPDG-H), which is a type of HDG method, discretization of an equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
 class IPHDGAssemblyHelper : public ThreeMaterialPropertyInterface
