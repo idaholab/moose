@@ -18,6 +18,7 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "SubProblem.h"
+#include "MooseApp.h"
 
 // Forward declarations
 class MooseVariableFieldBase;

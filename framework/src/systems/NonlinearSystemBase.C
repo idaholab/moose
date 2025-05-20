@@ -453,6 +453,8 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
         _factory.create<KernelBase>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
     postAddResidualObject(*kernel);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(kernel);
   }
 
   if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -476,6 +478,8 @@ NonlinearSystemBase::addHDGKernel(const std::string & kernel_name,
     auto kernel = _factory.create<HDGKernel>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
     _hybridized_kernels.addObject(kernel, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(kernel);
     postAddResidualObject(*kernel);
   }
 }
@@ -490,6 +494,8 @@ NonlinearSystemBase::addHDGIntegratedBC(const std::string & bc_name,
     // Create the bc object via the factory and add to warehouse
     auto bc = _factory.create<HDGIntegratedBC>(bc_name, name, parameters, tid);
     _hybridized_ibcs.addObject(bc, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(bc);
   }
 }
 
@@ -504,6 +510,8 @@ NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
     std::shared_ptr<NodalKernelBase> kernel =
         _factory.create<NodalKernelBase>(kernel_name, name, parameters, tid);
     _nodal_kernels.addObject(kernel, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(kernel);
     postAddResidualObject(*kernel);
   }
 
@@ -521,6 +529,8 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
   std::shared_ptr<ScalarKernelBase> kernel =
       _factory.create<ScalarKernelBase>(kernel_name, name, parameters);
   postAddResidualObject(*kernel);
+  // Add to theWarehouse, a centralized storage for all moose objects
+  _fe_problem.theWarehouse().add(kernel);
   _scalar_kernels.addObject(kernel);
 }
 
@@ -557,6 +567,8 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
                  "'.");
 
     _nodal_bcs.addObject(nbc);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(nbc);
     _vars[tid].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
 
     if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -578,6 +590,8 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
   else if (ibc)
   {
     _integrated_bcs.addObject(ibc, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(ibc);
     _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
 
     if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -632,6 +646,8 @@ NonlinearSystemBase::addDiracKernel(const std::string & kernel_name,
         _factory.create<DiracKernelBase>(kernel_name, name, parameters, tid);
     postAddResidualObject(*kernel);
     _dirac_kernels.addObject(kernel, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(kernel);
   }
 }
 
@@ -644,6 +660,8 @@ NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
   {
     auto dg_kernel = _factory.create<DGKernelBase>(dg_kernel_name, name, parameters, tid);
     _dg_kernels.addObject(dg_kernel, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(dg_kernel);
     postAddResidualObject(*dg_kernel);
   }
 
@@ -671,6 +689,8 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
     _vars[tid].addBoundaryVar(boundary_ids, ik_var);
 
     _interface_kernels.addObject(interface_kernel, tid);
+    // Add to theWarehouse, a centralized storage for all moose objects
+    _fe_problem.theWarehouse().add(interface_kernel);
     _vars[tid].addBoundaryVars(boundary_ids, interface_kernel->getCoupledVars());
   }
 }
@@ -710,6 +730,8 @@ NonlinearSystemBase::addSplit(const std::string & split_name,
 {
   std::shared_ptr<Split> split = _factory.create<Split>(split_name, name, parameters);
   _splits.addObject(split);
+  // Add to theWarehouse, a centralized storage for all moose objects
+  _fe_problem.theWarehouse().add(split);
 }
 
 std::shared_ptr<Split>
