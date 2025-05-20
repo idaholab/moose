@@ -1,7 +1,7 @@
 [GlobalParams]
-  u = u
-  grad_u = grad_u
-  face_u = face_u
+  variable = u
+  gradient_variable = grad_u
+  face_variable = face_u
   diffusivity = 1
   tau = 0
 []
