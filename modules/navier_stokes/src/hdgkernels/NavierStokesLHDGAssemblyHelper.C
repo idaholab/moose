@@ -30,11 +30,11 @@ NavierStokesLHDGAssemblyHelper::validParams()
   params.addRequiredParam<NonlinearVariableName>(NS::pressure, "The pressure variable.");
   params.addRequiredParam<NonlinearVariableName>("v", "The y-component of velocity");
   params.addParam<NonlinearVariableName>("w", "The z-component of velocity");
-  params.setDocString("grad_u", "The gradient of the x-component of velocity");
+  params.renameParam("gradient_variable", "grad_u", "The gradient of the x-component of velocity");
   params.addRequiredParam<NonlinearVariableName>("grad_v",
                                                  "The gradient of the y-component of velocity");
   params.addParam<NonlinearVariableName>("grad_w", "The gradient of the z-component of velocity");
-  params.setDocString("face_u", "The x-component of the face velocity");
+  params.renameParam("face_variable", "face_u", "The x-component of the face velocity");
   params.addRequiredParam<NonlinearVariableName>("face_v", "The y-component of the face velocity");
   params.addParam<NonlinearVariableName>("face_w", "The z-component of the face velocity");
   params.addParam<NonlinearVariableName>(
