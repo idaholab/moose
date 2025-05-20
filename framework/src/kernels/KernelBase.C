@@ -23,6 +23,7 @@ KernelBase::validParams()
   auto params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += MaterialPropertyInterface::validParams();
+  params.registerSystemAttributeName("Kernel");
 
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",

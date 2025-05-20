@@ -514,9 +514,16 @@ PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
 {
   mooseAssert(_mesh, "The mesh should exist already");
   for (const auto mesh_block : _mesh->meshSubdomains())
-    if (std::find(blocks.begin(), blocks.end(), _mesh->getSubdomainName(mesh_block)) ==
-        blocks.end())
+  {
+    const auto & subdomain_name = _mesh->getSubdomainName(mesh_block);
+    // Check subdomain name
+    if (!subdomain_name.empty() &&
+        std::find(blocks.begin(), blocks.end(), subdomain_name) == blocks.end())
       return false;
+    // no subdomain name, check the IDs being used as names instead
+    else if (std::find(blocks.begin(), blocks.end(), std::to_string(mesh_block)) == blocks.end())
+      return false;
+  }
   return true;
 }
 
@@ -571,6 +578,7 @@ PhysicsBase::shouldCreateVariable(const VariableName & var_name,
   if (!var.blockRestricted() || (!not_block_restricted && var.hasBlocks(blocks)))
     return false;
 
+  // This is an edge case, which might warrant a warning
   if (allMeshBlocks(var.blocks()) && not_block_restricted)
     return false;
   else
@@ -594,10 +602,29 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
   // Different type of ICs, not block restrictable
   mooseAssert(!isVariableScalar(var_name), "shouldCreateIC not implemented for scalar variables");
 
-  // Check whether there are any ICs for this variable already in the problem
+  // Deal with block restriction
   bool has_all_blocks;
   std::set<SubdomainName> blocks_covered;
-  const std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  const bool not_block_restricted =
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end()) ||
+      allMeshBlocks(blocks);
+  // use a set for simplicity. Note that subdomain names are unique, except maybe the empty one,
+  // which cannot be specified by the user to the Physics.
+  std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  // Various routines cannot deal with the ANY_BLOCK_ID name
+  if (not_block_restricted)
+  {
+    const auto & mesh_blocks_id_set = _mesh->meshSubdomains();
+    const std::vector<SubdomainID> mesh_blocks_id_vec(mesh_blocks_id_set.begin(),
+                                                      mesh_blocks_id_set.end());
+    const std::vector<SubdomainName> mesh_blocks_names_vec =
+        _mesh->getSubdomainNames(mesh_blocks_id_vec);
+    std::set<SubdomainName> new_blocks_set(mesh_blocks_names_vec.begin(),
+                                           mesh_blocks_names_vec.end());
+    blocks_set = new_blocks_set;
+  }
+
+  // Check whether there are any ICs for this variable already in the problem
   if (isVariableFV(var_name))
     has_all_blocks = _problem->getFVInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
         var_name, blocks_set, blocks_covered, 0);
@@ -640,7 +667,7 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
   // The warehouses hosting the time kernels are different for each of these types
   // Different type of time derivatives, not block restrictable
   mooseAssert(!isVariableScalar(var_name),
-              "shouldCreateTimeKernel not implemented for scalar variables");
+              "shouldCreateTimeDerivative not implemented for scalar variables");
   mooseAssert(!_problem->hasAuxiliaryVariable(var_name),
               "Should not be called with auxiliary variables");
 
@@ -705,6 +732,10 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
     all_blocks_covered = true;
   else if (allMeshBlocks(blocks_covered))
     all_blocks_covered = true;
+  else if (blocks_covered.count("ANY_BLOCK_ID"))
+    all_blocks_covered = true;
+  else
+    all_blocks_covered = false;
 
   if (!some_block_covered)
     return true;
