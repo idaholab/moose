@@ -106,15 +106,19 @@ DiffusionLHDGAssemblyHelper::vectorVolumeResidual(const MooseArray<Gradient> & v
                                                   const QBase & qrule,
                                                   DenseVector<Number> & vector_re)
 {
-  for (const auto i : index_range(vector_re))
-    for (const auto qp : make_range(qrule.n_points()))
+  for (const auto qp : make_range(qrule.n_points()))
+  {
+    const auto vector_qp_term = JxW[qp] * vector_sol[qp];
+    const auto scalar_qp_term = JxW[qp] * scalar_sol[qp];
+    for (const auto i : index_range(vector_re))
     {
       // Vector equation dependence on vector dofs
-      vector_re(i) += JxW[qp] * (_vector_phi[i][qp] * vector_sol[qp]);
+      vector_re(i) += _vector_phi[i][qp] * vector_qp_term;
 
       // Vector equation dependence on scalar dofs
-      vector_re(i) += JxW[qp] * (_div_vector_phi[i][qp] * scalar_sol[qp]);
+      vector_re(i) += _div_vector_phi[i][qp] * scalar_qp_term;
     }
+  }
 }
 
 void
@@ -123,16 +127,18 @@ DiffusionLHDGAssemblyHelper::vectorVolumeJacobian(const MooseArray<Real> & JxW,
                                                   DenseMatrix<Number> & vector_vector_jac,
                                                   DenseMatrix<Number> & vector_scalar_jac)
 {
-  for (const auto i : make_range(vector_vector_jac.m()))
-    for (const auto qp : make_range(qrule.n_points()))
+  for (const auto qp : make_range(qrule.n_points()))
+    for (const auto i : make_range(vector_vector_jac.m()))
     {
       // Vector equation dependence on vector dofs
+      const auto vector_qpi_term = JxW[qp] * _vector_phi[i][qp];
       for (const auto j : make_range(vector_vector_jac.n()))
-        vector_vector_jac(i, j) += JxW[qp] * (_vector_phi[i][qp] * _vector_phi[j][qp]);
+        vector_vector_jac(i, j) += vector_qpi_term * _vector_phi[j][qp];
 
       // Vector equation dependence on scalar dofs
+      const auto scalar_qpi_term = JxW[qp] * _div_vector_phi[i][qp];
       for (const auto j : make_range(vector_scalar_jac.n()))
-        vector_scalar_jac(i, j) += JxW[qp] * (_div_vector_phi[i][qp] * _scalar_phi[j][qp]);
+        vector_scalar_jac(i, j) += scalar_qpi_term * _scalar_phi[j][qp];
     }
 }
 
@@ -147,16 +153,18 @@ DiffusionLHDGAssemblyHelper::scalarVolumeResidual(const MooseArray<Gradient> & v
 {
   for (const auto qp : make_range(qrule.n_points()))
   {
+    const auto vector_qp_term = JxW[qp] * _diff[qp] * vector_field[qp];
     // Evaluate source
     const auto f =
         source(Moose::ElemQpArg{current_elem, qp, &qrule, q_point[qp]}, _ti.determineState());
+    const auto source_qp_term = JxW[qp] * f;
 
     for (const auto i : index_range(scalar_re))
     {
-      scalar_re(i) += JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * vector_field[qp]);
+      scalar_re(i) += _grad_scalar_phi[i][qp] * vector_qp_term;
 
       // Scalar equation RHS
-      scalar_re(i) -= JxW[qp] * _scalar_phi[i][qp] * f;
+      scalar_re(i) -= _scalar_phi[i][qp] * source_qp_term;
     }
   }
 }
@@ -166,12 +174,17 @@ DiffusionLHDGAssemblyHelper::scalarVolumeJacobian(const MooseArray<Real> & JxW,
                                                   const QBase & qrule,
                                                   DenseMatrix<Number> & scalar_vector_jac)
 {
-  for (const auto i : make_range(scalar_vector_jac.m()))
-    // Scalar equation dependence on vector dofs
-    for (const auto j : make_range(scalar_vector_jac.n()))
-      for (const auto qp : make_range(qrule.n_points()))
-        scalar_vector_jac(i, j) +=
-            JxW[qp] * _diff[qp] * (_grad_scalar_phi[i][qp] * _vector_phi[j][qp]);
+  for (const auto qp : make_range(qrule.n_points()))
+  {
+    const auto qp_term = JxW[qp] * _diff[qp];
+    for (const auto i : make_range(scalar_vector_jac.m()))
+    {
+      const auto qpi_term = qp_term * _grad_scalar_phi[i][qp];
+      // Scalar equation dependence on vector dofs
+      for (const auto j : make_range(scalar_vector_jac.n()))
+        scalar_vector_jac(i, j) += qpi_term * _vector_phi[j][qp];
+    }
+  }
 }
 
 void
@@ -182,9 +195,12 @@ DiffusionLHDGAssemblyHelper::vectorFaceResidual(const MooseArray<Number> & lm_so
                                                 DenseVector<Number> & vector_re)
 {
   // Vector equation dependence on LM dofs
-  for (const auto i : index_range(vector_re))
-    for (const auto qp : make_range(qrule_face.n_points()))
-      vector_re(i) -= JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * lm_sol[qp];
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto qp_term = JxW_face[qp] * lm_sol[qp] * normals[qp];
+    for (const auto i : index_range(vector_re))
+      vector_re(i) -= _vector_phi_face[i][qp] * qp_term;
+  }
 }
 
 void
@@ -193,12 +209,17 @@ DiffusionLHDGAssemblyHelper::vectorFaceJacobian(const MooseArray<Real> & JxW_fac
                                                 const MooseArray<Point> & normals,
                                                 DenseMatrix<Number> & vector_lm_jac)
 {
-  // Vector equation dependence on LM dofs
-  for (const auto i : make_range(vector_lm_jac.m()))
-    for (const auto j : make_range(vector_lm_jac.n()))
-      for (const auto qp : make_range(qrule_face.n_points()))
-        vector_lm_jac(i, j) -=
-            JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * _lm_phi_face[j][qp];
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto qp_term = JxW_face[qp] * normals[qp];
+    // Vector equation dependence on LM dofs
+    for (const auto i : make_range(vector_lm_jac.m()))
+    {
+      const auto qpi_term = qp_term * _vector_phi_face[i][qp];
+      for (const auto j : make_range(vector_lm_jac.n()))
+        vector_lm_jac(i, j) -= qpi_term * _lm_phi_face[j][qp];
+    }
+  }
 }
 
 void
@@ -210,21 +231,19 @@ DiffusionLHDGAssemblyHelper::scalarFaceResidual(const MooseArray<Gradient> & vec
                                                 const MooseArray<Point> & normals,
                                                 DenseVector<Number> & scalar_re)
 {
-  for (const auto i : index_range(scalar_re))
-    for (const auto qp : make_range(qrule_face.n_points()))
-    {
-      // vector
-      scalar_re(i) -=
-          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
-
-      // scalar from stabilization term
-      scalar_re(i) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] * normals[qp] *
-                      normals[qp];
-
-      // lm from stabilization term
-      scalar_re(i) -=
-          JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * lm_sol[qp] * normals[qp] * normals[qp];
-    }
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    // vector
+    const auto vector_qp_term = JxW_face[qp] * _diff[qp] * (vector_sol[qp] * normals[qp]);
+    // stabilization term
+    const auto stab_qp_term = JxW_face[qp] * _tau * (normals[qp] * normals[qp]);
+    // scalar from stabilization term
+    const auto scalar_qp_term = stab_qp_term * scalar_sol[qp];
+    // lm from stabilization term
+    const auto lm_qp_term = stab_qp_term * lm_sol[qp];
+    for (const auto i : index_range(scalar_re))
+      scalar_re(i) += _scalar_phi_face[i][qp] * (scalar_qp_term - vector_qp_term - lm_qp_term);
+  }
 }
 
 void
@@ -235,22 +254,24 @@ DiffusionLHDGAssemblyHelper::scalarFaceJacobian(const MooseArray<Real> & JxW_fac
                                                 DenseMatrix<Number> & scalar_scalar_jac,
                                                 DenseMatrix<Number> & scalar_lm_jac)
 {
-  for (const auto i : make_range(scalar_vector_jac.m()))
-    for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto vector_qp_term = JxW_face[qp] * _diff[qp] * normals[qp];
+    const auto stab_qp_term = JxW_face[qp] * _tau * normals[qp] * normals[qp];
+
+    for (const auto i : make_range(scalar_vector_jac.m()))
     {
+      const auto vector_qpi_term = vector_qp_term * _scalar_phi_face[i][qp];
       for (const auto j : make_range(scalar_vector_jac.n()))
-        scalar_vector_jac(i, j) -= JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] *
-                                   (_vector_phi_face[j][qp] * normals[qp]);
+        scalar_vector_jac(i, j) -= vector_qpi_term * _vector_phi_face[j][qp];
 
+      const auto scalar_qpi_term = stab_qp_term * _scalar_phi_face[i][qp];
       for (const auto j : make_range(scalar_scalar_jac.n()))
-        scalar_scalar_jac(i, j) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau *
-                                   _scalar_phi_face[j][qp] * normals[qp] * normals[qp];
-
+        scalar_scalar_jac(i, j) += scalar_qpi_term * _scalar_phi_face[j][qp];
       for (const auto j : make_range(scalar_lm_jac.n()))
-        // from stabilization term
-        scalar_lm_jac(i, j) -= JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * _lm_phi_face[j][qp] *
-                               normals[qp] * normals[qp];
+        scalar_lm_jac(i, j) -= scalar_qpi_term * _lm_phi_face[j][qp];
     }
+  }
 }
 
 void
@@ -262,20 +283,19 @@ DiffusionLHDGAssemblyHelper::lmFaceResidual(const MooseArray<Gradient> & vector_
                                             const MooseArray<Point> & normals,
                                             DenseVector<Number> & lm_re)
 {
-  for (const auto i : index_range(lm_re))
-    for (const auto qp : make_range(qrule_face.n_points()))
-    {
-      // vector
-      lm_re(i) -= JxW_face[qp] * _diff[qp] * _lm_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
-
-      // scalar from stabilization term
-      lm_re(i) +=
-          JxW_face[qp] * _lm_phi_face[i][qp] * _tau * scalar_sol[qp] * normals[qp] * normals[qp];
-
-      // lm from stabilization term
-      lm_re(i) -=
-          JxW_face[qp] * _lm_phi_face[i][qp] * _tau * lm_sol[qp] * normals[qp] * normals[qp];
-    }
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    // vector
+    const auto vector_qp_term = JxW_face[qp] * _diff[qp] * (vector_sol[qp] * normals[qp]);
+    // stabilization term
+    const auto stab_qp_term = JxW_face[qp] * _tau * (normals[qp] * normals[qp]);
+    // scalar from stabilization term
+    const auto scalar_qp_term = stab_qp_term * scalar_sol[qp];
+    // lm from stabilization term
+    const auto lm_qp_term = stab_qp_term * lm_sol[qp];
+    for (const auto i : index_range(lm_re))
+      lm_re(i) += _lm_phi_face[i][qp] * (scalar_qp_term - vector_qp_term - lm_qp_term);
+  }
 }
 
 void
@@ -286,22 +306,24 @@ DiffusionLHDGAssemblyHelper::lmFaceJacobian(const MooseArray<Real> & JxW_face,
                                             DenseMatrix<Number> & lm_scalar_jac,
                                             DenseMatrix<Number> & lm_lm_jac)
 {
-  for (const auto i : make_range(lm_vec_jac.m()))
-    for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto vector_qp_term = JxW_face[qp] * _diff[qp] * normals[qp];
+    const auto stab_qp_term = JxW_face[qp] * _tau * normals[qp] * normals[qp];
+
+    for (const auto i : make_range(lm_vec_jac.m()))
     {
+      const auto vector_qpi_term = vector_qp_term * _lm_phi_face[i][qp];
       for (const auto j : make_range(lm_vec_jac.n()))
-        lm_vec_jac(i, j) -= JxW_face[qp] * _diff[qp] * _lm_phi_face[i][qp] *
-                            (_vector_phi_face[j][qp] * normals[qp]);
+        lm_vec_jac(i, j) -= vector_qpi_term * _vector_phi_face[j][qp];
 
+      const auto lm_qpi_term = stab_qp_term * _lm_phi_face[i][qp];
       for (const auto j : make_range(lm_scalar_jac.n()))
-        lm_scalar_jac(i, j) += JxW_face[qp] * _lm_phi_face[i][qp] * _tau * _scalar_phi_face[j][qp] *
-                               normals[qp] * normals[qp];
-
+        lm_scalar_jac(i, j) += lm_qpi_term * _scalar_phi_face[j][qp];
       for (const auto j : make_range(lm_lm_jac.n()))
-        // from stabilization term
-        lm_lm_jac(i, j) -= JxW_face[qp] * _lm_phi_face[i][qp] * _tau * _lm_phi_face[j][qp] *
-                           normals[qp] * normals[qp];
+        lm_lm_jac(i, j) -= lm_qpi_term * _lm_phi_face[j][qp];
     }
+  }
 }
 
 void
@@ -319,10 +341,11 @@ DiffusionLHDGAssemblyHelper::vectorDirichletResidual(const Moose::Functor<Real> 
     const auto scalar_value = dirichlet_value(
         Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
         _ti.determineState());
+    const auto qp_term = JxW_face[qp] * normals[qp] * scalar_value;
 
     // External boundary -> Dirichlet faces -> Vector equation RHS
     for (const auto i : index_range(_qu_dof_indices))
-      vector_re(i) -= JxW_face[qp] * (_vector_phi_face[i][qp] * normals[qp]) * scalar_value;
+      vector_re(i) -= qp_term * _vector_phi_face[i][qp];
   }
 }
 
@@ -343,21 +366,13 @@ DiffusionLHDGAssemblyHelper::scalarDirichletResidual(const MooseArray<Gradient> 
     const auto scalar_value = dirichlet_value(
         Moose::ElemSideQpArg{current_elem, current_side, qp, &qrule_face, q_point_face[qp]},
         _ti.determineState());
+    const auto vector_qp_term = JxW_face[qp] * _diff[qp] * (vector_sol[qp] * normals[qp]);
+    const auto stab_qp_term = JxW_face[qp] * _tau * normals[qp] * normals[qp];
+    const auto scalar_qp_term = stab_qp_term * scalar_sol[qp];
+    const auto lm_qp_term = stab_qp_term * scalar_value;
 
     for (const auto i : index_range(_u_dof_indices))
-    {
-      // vector
-      scalar_re(i) -=
-          JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] * (vector_sol[qp] * normals[qp]);
-
-      // scalar from stabilization term
-      scalar_re(i) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_sol[qp] * normals[qp] *
-                      normals[qp];
-
-      // dirichlet lm from stabilization term
-      scalar_re(i) -=
-          JxW_face[qp] * _scalar_phi_face[i][qp] * _tau * scalar_value * normals[qp] * normals[qp];
-    }
+      scalar_re(i) += (scalar_qp_term - vector_qp_term - lm_qp_term) * _scalar_phi_face[i][qp];
   }
 }
 
@@ -368,17 +383,21 @@ DiffusionLHDGAssemblyHelper::scalarDirichletJacobian(const MooseArray<Real> & Jx
                                                      DenseMatrix<Number> & scalar_vector_jac,
                                                      DenseMatrix<Number> & scalar_scalar_jac)
 {
-  for (const auto i : index_range(_u_dof_indices))
-    for (const auto qp : make_range(qrule_face.n_points()))
+  for (const auto qp : make_range(qrule_face.n_points()))
+  {
+    const auto vector_qp_term = JxW_face[qp] * _diff[qp] * normals[qp];
+    const auto scalar_qp_term = JxW_face[qp] * _tau * normals[qp] * normals[qp];
+    for (const auto i : index_range(_u_dof_indices))
     {
+      const auto vector_qpi_term = vector_qp_term * _scalar_phi_face[i][qp];
       for (const auto j : index_range(_qu_dof_indices))
-        scalar_vector_jac(i, j) -= JxW_face[qp] * _diff[qp] * _scalar_phi_face[i][qp] *
-                                   (_vector_phi_face[j][qp] * normals[qp]);
+        scalar_vector_jac(i, j) -= vector_qpi_term * _vector_phi_face[j][qp];
 
+      const auto scalar_qpi_term = scalar_qp_term * _scalar_phi_face[i][qp];
       for (const auto j : index_range(_u_dof_indices))
-        scalar_scalar_jac(i, j) += JxW_face[qp] * _scalar_phi_face[i][qp] * _tau *
-                                   _scalar_phi_face[j][qp] * normals[qp] * normals[qp];
+        scalar_scalar_jac(i, j) += scalar_qpi_term * _scalar_phi_face[j][qp];
     }
+  }
 }
 
 void
@@ -389,8 +408,11 @@ DiffusionLHDGAssemblyHelper::createIdentityResidual(const MooseArray<Real> & JxW
                                                     DenseVector<Number> & re)
 {
   for (const auto qp : make_range(qrule.n_points()))
+  {
+    const auto qp_term = JxW[qp] * sol[qp];
     for (const auto i : index_range(phi))
-      re(i) -= JxW[qp] * phi[i][qp] * sol[qp];
+      re(i) -= phi[i][qp] * qp_term;
+  }
 }
 
 void
@@ -401,6 +423,9 @@ DiffusionLHDGAssemblyHelper::createIdentityJacobian(const MooseArray<Real> & JxW
 {
   for (const auto qp : make_range(qrule.n_points()))
     for (const auto i : index_range(phi))
+    {
+      const auto qpi_term = JxW[qp] * phi[i][qp];
       for (const auto j : index_range(phi))
-        ke(i, j) -= JxW[qp] * phi[i][qp] * phi[j][qp];
+        ke(i, j) -= phi[j][qp] * qpi_term;
+    }
 }
