@@ -52,7 +52,7 @@ BoundaryLayerSubdomainGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   // Get the next free block id
-  _new_block_id = MooseMeshUtils::getNextFreeBoundaryID(*mesh);
+  _new_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
 
   // Get the ids for the boundaries
   const auto boundary_ids = MooseMeshUtils::getBoundaryIDs(
