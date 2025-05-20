@@ -209,19 +209,26 @@ private:
   void verifySecondNeighborInfo();
 
   /**
-    * * Check if the node is newly activated.
-    * * If all elements (excluding inactive elements) with the node are reinitialized, then the node is newly reinitialized.
-    */
+   * * Check if the node is newly activated.
+   * * If all elements (excluding inactive elements) with the node are reinitialized, then the node
+   * is newly reinitialized.
+   */
   bool nodeIsNewlyActivated(dof_id_type node_id) const;
 
+  /// @brief Collect all newly activated nodes globally across processors
+  /// @param moved_elems Map from element ID to a pair of (old subdomain ID, new subdomain ID)
+  /// @details This function gathers all nodes associated with moved elements that are newly
+  /// activated, regardless of processor ownership. This is typically the first pass in
+  /// a parallel algorithm and is followed by synchronization to build a global view.
   void gatherGlobalNewlyActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
-  /**
-    * * @brief This function is used to find the newly activated nodes
-    * * @param moved_elems
-    * * @details This function is processor locally
-    */
+  /// @brief Identify newly activated nodes that are locally owned by the current processor
+  /// @param moved_elems Map from element ID to a pair of (old subdomain ID, new subdomain ID)
+  /// @details This function processes only the nodes owned by the local processor and stores
+  /// the locally owned subset of newly activated nodes. This step is typically performed
+  /// after the global gather step to ensure that only owned nodes are used for further
+  /// operations such as mesh updates or DoF assignments.
   void findNewlyActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
@@ -244,6 +251,8 @@ private:
   std::vector<dof_id_type> _global_newactivated_nodes;
   std::vector<dof_id_type> _global_newactivated_nodes_temp;
   std::vector<dof_id_type> _global_newactivated_nodes_diff;
+  /// Node ID to whether the node has been set IC
+  std::unordered_map<dof_id_type, bool> _node2IC_set;
 
   /// Let every processor know what are the reinitialized elements (save to _global_reinitialized_elems)
   void synchronizeReinitializedElems();
@@ -251,9 +260,21 @@ private:
   void synchronizeNewActivatedNodes();
   void synchronizeNewActivatedNodes2TempGlobal();
 
-  void collectNewActivatedNodesToMaster();
-  void requestMasterActivatedNodes();
-  void clearGlobalActivatedNodesAtMaster();
+  /// @brief  An additional check ensures that the number of globally activated nodes
+  /// in the second pass is not less than that of the first pass.
+  /// If a mismatch is detected, we identify which processor is missing the expected node
+  /// using findMissingNewlyActivatedNodes()
   void computeSetDifference();
+
+  /// @brief Identify the processor that is missing the newly activated nodes
   void findMissingNewlyActivatedNodes();
+
+  /// @brief Find the first layer of neighbors for a given node (need to safisfy
+  /// (a) the neighbor node should belong to the active subdomain
+  /// (b) the neighbor node be solved previously if it is in inactive subdomain)
+  /// @param nid The ID of the node
+  /// @return A vector of pointers to the neighboring nodes
+  std::vector<const Node *> firstLayerNeighbours(dof_id_type nid) const;
+  void applyICForNodeList(SystemBase & sys, const std::vector<dof_id_type> & nodes);
+  void computeFirstLayerNeighborInfo(SystemBase & sys);
 };
