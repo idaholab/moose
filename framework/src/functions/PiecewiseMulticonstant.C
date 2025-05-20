@@ -11,6 +11,7 @@
 #include "GriddedData.h"
 
 registerMooseObject("MooseApp", PiecewiseMulticonstant);
+registerMooseObjectAliased("MooseApp", PiecewiseMulticonstant, "PiecewiseMultiConstant");
 
 InputParameters
 PiecewiseMulticonstant::validParams()

@@ -383,11 +383,29 @@ author = {Guillaume Giudicelli and Christopher Green and Joshua Hansel and David
 keywords = {Modeling & simulation, Fluid properties, MOOSE},
 }
 ```
-Available on OSTI at [https://www.osti.gov/pages/biblio/2476597] after October 2025.
+
+Available on OSTI at [https://www.osti.gov/pages/biblio/2476597](https://www.osti.gov/pages/biblio/2476597) after October 2025.
 
 ### Electromagnetics Module
 
-!include modules/electromagnetics/index.md start=em-citation-start end=em-citation-end
+This paper documents the initial development, function, verification, and validation
+of the electromagnetics module.
+
+```
+@article{icenhour2024electromagnetics,
+  author = {Casey T. Icenhour and Alexander D. Lindsay and Cody J. Permann and Richard C. Martineau and David L. Green and Steven C. Shannon},
+  title = {The MOOSE electromagnetics module},
+  journal = {SoftwareX},
+  publisher = {Elsevier},
+  volume = {25},
+  pages = {101621},
+  year = {2024},
+  month = {February},
+  issn = {2352-7110},
+  doi = {https://doi.org/10.1016/j.softx.2023.101621},
+  url = {https://www.sciencedirect.com/science/article/pii/S2352711023003175}
+}
+```
 
 ### Stochastic Tools Module
 

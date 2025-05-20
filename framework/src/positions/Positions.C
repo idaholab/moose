@@ -233,6 +233,9 @@ Positions::finalize()
 
   // Make a KDTree with the positions
   _positions_kd_tree = std::make_unique<KDTree>(_positions, 1);
+
+  // For now at least, we expect positions to be the same on all ranks
+  mooseAssert(comm().verify(_positions), "Positions should be the same across all MPI processes.");
 }
 
 Real

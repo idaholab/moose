@@ -46,7 +46,8 @@ MaterialFunctorConverterTempl<T>::MaterialFunctorConverterTempl(const InputParam
                type(),
                "'. Please create two instances, one for regular and one for AD.");
 
-  if (functors_in.size() != reg_props_out.size() && functors_in.size() != ad_props_out.size())
+  if ((reg_props_out.size() && (functors_in.size() != reg_props_out.size())) ||
+      (ad_props_out.size() && (functors_in.size() != ad_props_out.size())))
     paramError(
         "functors_in",
         "The number of output properties must match the number of input functors, which is " +
