@@ -41,7 +41,7 @@ JSONOutput::JSONOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _reporter_data(_problem_ptr->getReporterData()),
     _one_file_per_timestep(getParam<bool>("one_file_per_timestep")),
-    _reporters(getOptionalParam<std::vector<ReporterName>>("reporters")),
+    _reporters(queryParam<std::vector<ReporterName>>("reporters")),
     _json(declareRestartableData<nlohmann::json>("json_out_str"))
 {
 }
