@@ -30,6 +30,14 @@ class Assembly;
 template <typename T>
 InputParameters validParams();
 
+/**
+ * Utility structure for packaging up all of the residual object's information needed to add into
+ * the system residual and Jacobian in the context of automatic differentiation. The necessary
+ * information includes the vector of residuals and Jacobians represented by dual numbers, the
+ * vector of degrees of freedom (this should be the same length as the vector of dual numbers), and
+ * a scaling factor that will multiply the dual numbers before their addition into the global
+ * residual and Jacobian
+ */
 struct ADResidualsPacket
 {
   const DenseVector<ADReal> & residuals;
