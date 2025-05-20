@@ -9,7 +9,6 @@
 
 #include "MooseStaticCondensationPreconditioner.h"
 
-// MOOSE includes
 #include "FEProblem.h"
 #include "MooseUtils.h"
 #include "NonlinearSystemBase.h"
@@ -44,7 +43,7 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
         "provides a means to compute the action of the Jacobian on vectors, which we otherwise "
         "would not have because when using static condensation, the Jacobian is never formed. Note "
         "that actions of the Jacobian on a vector are necessary for things like: GMRES, printing "
-        "of linear residuals, or application of line searches like cubit backtracking. These "
+        "of linear residuals, or application of line searches like cubic backtracking. These "
         "particular operations can be avoided by using '-ksp_type preonly', disabling printing of "
         "linear residuals, and using the 'cp' or 'basic' line search.");
 
