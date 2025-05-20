@@ -40,5 +40,5 @@ private:
   std::array<const Moose::Functor<Real> *, 3> _dirichlet_vel;
 
   /// A cache variable to prevent multiple computations of Jacobians
-  unsigned int _my_side;
+  unsigned int _cached_side;
 };

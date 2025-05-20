@@ -323,16 +323,16 @@ NavierStokesLHDGKernel::initialSetup()
 void
 NavierStokesLHDGKernel::jacobianSetup()
 {
-  _my_elem = nullptr;
+  _cached_elem = nullptr;
 }
 
 void
 NavierStokesLHDGKernel::computeOffDiagJacobian(const unsigned int)
 {
-  if (_my_elem != _current_elem)
+  if (_cached_elem != _current_elem)
   {
     computeJacobian();
-    _my_elem = _current_elem;
+    _cached_elem = _current_elem;
   }
 }
 

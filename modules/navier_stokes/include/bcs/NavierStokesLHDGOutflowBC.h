@@ -42,5 +42,5 @@ protected:
   virtual Real computeQpResidual() override { mooseError("this will never be called"); }
 
   /// A cache variable to prevent multiple computations of Jacobians
-  unsigned int _my_side;
+  unsigned int _cached_side;
 };

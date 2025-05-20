@@ -67,7 +67,7 @@ DiffusionLHDGAssemblyHelper::DiffusionLHDGAssemblyHelper(
     _diff(mpi->getMaterialProperty<Real>("diffusivity")),
     _ti(*ti),
     _tau(moose_obj->getParam<Real>("tau")),
-    _my_elem(nullptr),
+    _cached_elem(nullptr),
     _moose_obj(*moose_obj),
     _dhah_fe_problem(fe_problem),
     _dhah_sys(sys)

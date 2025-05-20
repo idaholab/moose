@@ -28,7 +28,7 @@ DiffusionLHDGDirichletBC::DiffusionLHDGDirichletBC(const InputParameters & param
   : IntegratedBC(parameters),
     DiffusionLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _tid),
     _dirichlet_val(getFunctor<Real>("functor")),
-    _my_side(libMesh::invalid_uint)
+    _cached_side(libMesh::invalid_uint)
 {
 }
 
@@ -92,17 +92,17 @@ DiffusionLHDGDirichletBC::computeJacobian()
 void
 DiffusionLHDGDirichletBC::jacobianSetup()
 {
-  _my_elem = nullptr;
-  _my_side = libMesh::invalid_uint;
+  _cached_elem = nullptr;
+  _cached_side = libMesh::invalid_uint;
 }
 
 void
 DiffusionLHDGDirichletBC::computeOffDiagJacobian(const unsigned int)
 {
-  if ((_my_elem != _current_elem) || (_my_side != _current_side))
+  if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
   {
     computeJacobian();
-    _my_elem = _current_elem;
-    _my_side = _current_side;
+    _cached_elem = _current_elem;
+    _cached_side = _current_side;
   }
 }
