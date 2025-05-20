@@ -28,11 +28,21 @@ public:
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 
+  /// field variable
+  const VariableGradient * _field_variable;
+
+  /// field variable variable number
+  const unsigned int _field_variable_var;
+
   /// advection velocity
   const MooseArray<GenericRealVectorValue<is_ad>> * _velocity;
+
+  /// advective quantity present
+  const bool _adv_quant_valid;
 
   /// advected quantity
   const MooseArray<GenericReal<is_ad>> & _adv_quant;
