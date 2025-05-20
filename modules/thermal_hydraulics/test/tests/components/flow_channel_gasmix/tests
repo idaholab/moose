@@ -1,0 +1,11 @@
+[Tests]
+  design = 'FlowChannelGasMix.md'
+  issues = '#28335'
+
+  [test]
+    type = Exodiff
+    input = 'flow_channel_gasmix.i'
+    exodiff = 'flow_channel_gasmix.e'
+    requirement = 'The system shall provide a flow channel component that simulates a gas mixture.'
+  []
+[]
