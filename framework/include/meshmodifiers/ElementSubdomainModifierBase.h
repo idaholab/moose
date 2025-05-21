@@ -312,6 +312,9 @@ private:
   /// @brief Compute the first layer neighbor information for a given system
   void propagateICFromNeighborsLayerByLayer(SystemBase & sys);
 
+  /// @brief Names of the NodalPatchRecoveryBase user objects
+  const std::vector<UserObjectName> _npr_names;
+
   /// @brief Apply initial conditions using polynomial extrapolation
   std::vector<const NodalPatchRecoveryBase *> _npr_vec;
 
