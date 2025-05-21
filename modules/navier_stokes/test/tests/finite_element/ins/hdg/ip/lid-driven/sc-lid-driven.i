@@ -50,7 +50,7 @@ n = 8
 []
 
 [HDGKernels]
-  [momentum_x_convection]
+  [momentum_x_advection]
     type = AdvectionIPHDGKernel
     variable = vel_x
     face_variable = vel_bar_x
@@ -67,7 +67,7 @@ n = 8
     pressure_face_variable = pressure_bar
     component = 0
   []
-  [momentum_y_convection]
+  [momentum_y_advection]
     type = AdvectionIPHDGKernel
     variable = vel_y
     face_variable = vel_bar_y
@@ -84,7 +84,7 @@ n = 8
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
+  [mass_advection]
     type = AdvectionIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
@@ -149,7 +149,7 @@ n = 8
     component = 1
   []
 
-  [mass_convection]
+  [mass_advection]
     type = AdvectionIPHDGPrescribedFluxBC
     face_variable = pressure_bar
     variable = pressure
