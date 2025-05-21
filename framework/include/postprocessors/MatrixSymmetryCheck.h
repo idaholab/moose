@@ -14,12 +14,12 @@
 /**
  * Checks whether the nonlinear system matrix is symmetric
  */
-class IsMatrixSymmetric : public GeneralPostprocessor
+class MatrixSymmetryCheck : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  IsMatrixSymmetric(const InputParameters & parameters);
+  MatrixSymmetryCheck(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override;

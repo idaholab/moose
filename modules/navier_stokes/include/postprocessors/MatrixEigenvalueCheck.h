@@ -20,12 +20,12 @@ class PetscMatrix;
 /**
  * Returns the number of zero eigenvalues in a PETSc matrix
  */
-class NumZeroEigenvalues : public GeneralPostprocessor
+class MatrixEigenvalueCheck : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  NumZeroEigenvalues(const InputParameters & parameters);
+  MatrixEigenvalueCheck(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

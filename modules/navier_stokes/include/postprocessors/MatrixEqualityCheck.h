@@ -20,12 +20,12 @@ class PetscMatrix;
 /**
  * Checks if two matrices are the same by comparing their coefficients
  */
-class AreMatricesTheSame : public GeneralPostprocessor
+class MatrixEqualityCheck : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  AreMatricesTheSame(const InputParameters & parameters);
+  MatrixEqualityCheck(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override;

@@ -93,7 +93,7 @@
 
 [Postprocessors]
   [symmetric]
-    type = IsMatrixSymmetric
+    type = MatrixSymmetryCheck
     mat = binaryoutput
   []
 []
