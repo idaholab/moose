@@ -98,4 +98,5 @@
 
 [Outputs]
   exodus = true
+  hide = 'side_u'
 []
