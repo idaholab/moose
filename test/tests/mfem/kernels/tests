@@ -13,6 +13,22 @@
     max_threads = 1
     platform = 'linux'
   []
+  [MFEMCurlCurlLOR]
+    type = XMLDiff
+    input = curlcurl.i
+    xmldiff = 'OutputData/CurlCurlLOR/Run0/Run0.pvd
+                OutputData/CurlCurlLOR/Run0/Cycle000001/proc000000.vtu'
+    cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD Solver/type=MFEMGMRESSolver '
+               'Solver/l_tol=1e-14 Solver/preconditioner=ams Preconditioner/ams/low_order_refined=true '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR '
+    requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
+    mfem = true
+    max_parallel = 1
+    recover = false
+    max_threads = 1
+    platform = 'linux'
+    abs_zero = 1e-6
+  []
   [MFEMDiffusion]
     type = XMLDiff
     input = diffusion.i
