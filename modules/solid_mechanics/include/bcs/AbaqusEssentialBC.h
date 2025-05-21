@@ -10,12 +10,14 @@
 
 #pragma once
 
-#include "AbaqusUELMesh.h"
+#include "AbaqusInputObjects.h"
+#include "AbaqusUELStepUserObject.h"
 #include "DirichletBCBase.h"
 
+class AbaqusUELStepUserObject;
+
 /**
- * Implements a simple constant Dashpot BC where grad(u)=value on the boundary.
- * Uses the term produced from integrating the diffusion operator by parts.
+ * Implements Abaqus essential boundary conditions
  */
 class AbaqusEssentialBC : public DirichletBCBase
 {
@@ -29,12 +31,12 @@ public:
 protected:
   Real computeQpValue() override;
 
-  AbaqusUELMesh * _uel_mesh;
+  const AbaqusUELStepUserObject & _step_uo;
 
   /// Abaqus ID of the current variable
   const Abaqus::AbaqusID _abaqus_var_id;
 
   /// BC data for the current variable
-  const std::unordered_map<Abaqus::Index, Real> * _node_value_map_previous;
-  const std::unordered_map<Abaqus::Index, Real> & _node_value_map;
+  // const std::unordered_map<Abaqus::Index, Real> * _node_value_map_previous;
+  // const std::unordered_map<Abaqus::Index, Real> & _node_value_map;
 };

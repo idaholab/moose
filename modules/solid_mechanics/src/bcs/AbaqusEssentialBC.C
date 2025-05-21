@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusEssentialBC.h"
-#include "AbaqusInputObjects.h"
+#include "AbaqusUELStepUserObject.h"
 #include "FEProblem.h"
 
 registerMooseObject("SolidMechanicsApp", AbaqusEssentialBC);
@@ -30,22 +30,15 @@ AbaqusEssentialBC::validParams()
 
 AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
   : DirichletBCBase(parameters),
-    _uel_mesh(
-        [this]()
-        {
-          auto uel_mesh = dynamic_cast<AbaqusUELMesh *>(&_mesh);
-          if (!uel_mesh)
-            mooseError("Must use an AbaqusUELMesh for UEL support.");
-          return uel_mesh;
-        }()),
-    _abaqus_var_id(getParam<Abaqus::AbaqusID>("abaqus_var_id")),
-    _node_value_map_previous(
-        isParamValid("abaqus_previous_step")
-            ? &_uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_previous_step"))
-            : nullptr),
-    _node_value_map(isParamValid("abaqus_step")
-                        ? _uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_step"))
-                        : _uel_mesh->getBCFor(_abaqus_var_id))
+    _step_uo(getUserObject<AbaqusUELStepUserObject>("step_user_object")),
+    _abaqus_var_id(getParam<Abaqus::AbaqusID>("abaqus_var_id")) //,
+    // _node_value_map_previous(
+    //     isParamValid("abaqus_previous_step")
+    //         ? &_uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_previous_step"))
+    //         : nullptr),
+    // _node_value_map(isParamValid("abaqus_step")
+    //                     ? _uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_step"))
+    //                     : _uel_mesh->getBCFor(_abaqus_var_id))
 {
   if (isParamValid("abaqus_previous_step") && !isParamValid("abaqus_step"))
     paramError("abaqus_previous_step", "Must supply `abaqus_step` parameter as well.");
@@ -54,23 +47,25 @@ AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
 bool
 AbaqusEssentialBC::shouldApply() const
 {
-  return _node_value_map.find(_current_node->id()) != _node_value_map.end();
+  // return _node_value_map.find(_current_node->id()) != _node_value_map.end();
+  return false;
 }
 
 Real
 AbaqusEssentialBC::computeQpValue()
 {
-  Real previous = 0.0;
-  if (_node_value_map_previous)
-  {
-    const auto it = _node_value_map_previous->find(_current_node->id());
-    if (it != _node_value_map_previous->end())
-      previous = it->second;
-  }
-  const auto current = _node_value_map.at(_current_node->id());
+  // Real previous = 0.0;
+  // if (_node_value_map_previous)
+  // {
+  //   const auto it = _node_value_map_previous->find(_current_node->id());
+  //   if (it != _node_value_map_previous->end())
+  //     previous = it->second;
+  // }
+  // const auto current = _node_value_map.at(_current_node->id());
 
-  // we need to compute the current step time (use StepUserObject)
-  const auto fraction = _fe_problem.time();
+  // // we need to compute the current step time (use StepUserObject)
+  // const auto fraction = _fe_problem.time();
 
-  return previous + (current - previous) * fraction;
+  // return previous + (current - previous) * fraction;
+  return 0.0;
 }
