@@ -50,25 +50,46 @@ TestCSGUniverseMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGUniverseMeshGenerator::generateCSG()
 {
-  auto csg_mesh = std::make_unique<CSG::CSGBase>();
-  auto new_univ = csg_mesh->createUniverse(this->name() + "_univ");
   auto mg_name = this->name();
   auto side_lengths = getParam<std::vector<Real>>("input_boxes");
-  auto root_univ = csg_mesh->getRootUniverse();
 
+  // start by joining the first two sets of cylinders at the same level and push
+  // one level down from root.
+  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(getCSGMeshByName(_input_mgs[0]));
+  std::string new_base_name = _input_mgs[0] + "_univ";
+  std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(_input_mgs[1]));
+  std::string new_join_name = _input_mgs[1] + "_univ";
+
+  // joining via this method will move both roots into new universes
+  csg_mesh->joinOtherBase(inp_csg_mesh, new_base_name, new_join_name);
+
+  // new universe to collect all others into a main one
+  auto new_univ = csg_mesh->createUniverse(mg_name + "_univ");
+
+  // for all input meshes, create a containment cell, but only join CSGBases
+  // for ones that were not joined above (i > 1)
   int i = 0;
   for (auto img : _input_mgs)
   {
-    std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(img));
-    // get list of cells that are to be added to the new universe
-    auto cells_to_add = inp_csg_mesh->getAllCells();
-    // providing new names for new universes based on existing root universes
-    std::string img_univ_name = img + "_univ";
-    csg_mesh->joinOtherBase(inp_csg_mesh, img_univ_name);
+    if (i > 1)
+    {
+      // join this incoming base at the same level as the other bases that already
+      // were joined, so incoming root is renamed but the current root remains
+      inp_csg_mesh = std::move(getCSGMeshByName(img));
+      new_join_name = img + "_univ";
+      csg_mesh->joinOtherBase(inp_csg_mesh, new_join_name);
+    }
+
+    std::string current_univ_name;
+    if (i == 0)
+      current_univ_name = new_base_name;
+    else
+      current_univ_name = new_join_name;
 
     // create a cell containing the new (root) univ
     // cell is located at the origin of the original cells - just use one cell to get origin
-    auto tmp_cell = cells_to_add.begin()->second;
+    auto inp_cells = csg_mesh->getUniverseByName(current_univ_name)->getAllCells();
+    auto tmp_cell = inp_cells[0];
     auto tmp_cell_reg = tmp_cell->getRegion();
     auto cell_surfs = tmp_cell_reg.getSurfaces();
     Real x = 0, y = 0, z = 0;
@@ -106,7 +127,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
         -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 
     // create a cell and add it to the new universe
-    auto univ_ptr = csg_mesh->getUniverseByName(img_univ_name);
+    auto univ_ptr = csg_mesh->getUniverseByName(current_univ_name);
     std::string new_cell_name = img + "_cell";
     auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region, new_univ);
     i++;
