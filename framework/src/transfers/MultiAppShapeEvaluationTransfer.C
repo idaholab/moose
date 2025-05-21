@@ -208,8 +208,8 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
                 outgoing_points[i_proc].push_back(std::move(transformed_point));
                 point_found = true;
               } // if
-            }   // i_from
-          }     //  i_proc
+            } // i_from
+          } //  i_proc
           offset++;
         } // point
 
@@ -483,7 +483,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
           dof_id_type dof = elem->dof_number(sys_num, var_num, offset);
           solution->set(dof, best_val);
         } // point
-      }   // element
+      } // element
     }
     solution->close();
     to_sys->update();

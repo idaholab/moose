@@ -36,6 +36,9 @@ NodalPatchRecoveryBase::validParams()
 
   params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
+  params.addParam<bool>(
+      "use_specific_elements", false, "Whether to use specific elements for patch recovery");
+
   return params;
 }
 
@@ -45,7 +48,8 @@ NodalPatchRecoveryBase::NodalPatchRecoveryBase(const InputParameters & parameter
     _patch_polynomial_order(
         static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))),
     _multi_index(MathUtils::multiIndex(_mesh.dimension(), _patch_polynomial_order)),
-    _q(_multi_index.size())
+    _q(_multi_index.size()),
+    _use_specific_elements(getParam<bool>("use_specific_elements"))
 {
 }
 
@@ -58,6 +62,7 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
     mooseError("There are not enough sample points to recover the nodal value, try reducing the "
                "polynomial order or using a higher-order quadrature scheme.");
 
+  _console << "nodalPatchRecovery." << std::endl;
   // Assemble the least squares problem over the patch
   RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
   RealEigenVector b = RealEigenVector::Zero(_q);
@@ -134,7 +139,7 @@ NodalPatchRecoveryBase::execute()
   _Ae[elem_id] = Ae;
   _be[elem_id] = be;
 
-  std::cout << "[Rank " << processor_id() << "] assembled elem " << elem_id << std::endl;
+  _console << "[Rank " << processor_id() << "] assembled elem " << elem_id << std::endl;
 }
 
 void
@@ -145,113 +150,74 @@ NodalPatchRecoveryBase::threadJoin(const UserObject & uo)
   _be.insert(npr._be.begin(), npr._be.end());
 }
 
-// void
-// NodalPatchRecoveryBase::finalize()
-// {
-//   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
-//   // elements. However, this userobject is only run on local elements, so we need to query those
-//   // information from other processors in this finalize() method.
-
-//   // Populate algebraically ghosted elements to query
-//   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
-//   const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
-//   for (auto elem : evaluable_elem_range)
-//     if (elem->processor_id() != processor_id())
-//       query_ids[elem->processor_id()].push_back(elem->id());
-
-//   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
-
-//   // Answer queries received from other processors
-//   auto gather_data = [this](const processor_id_type /*pid*/,
-//                             const std::vector<dof_id_type> & elem_ids,
-//                             std::vector<AbPair> & ab_pairs)
-//   {
-//     for (const auto i : index_range(elem_ids))
-//     {
-//       const auto elem_id = elem_ids[i];
-//       ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
-//     }
-//   };
-
-//   // Gather answers received from other processors
-//   auto act_on_data = [this](const processor_id_type /*pid*/,
-//                             const std::vector<dof_id_type> & elem_ids,
-//                             const std::vector<AbPair> & ab_pairs)
-//   {
-//     for (const auto i : index_range(elem_ids))
-//     {
-//       const auto elem_id = elem_ids[i];
-//       const auto & [Ae, be] = ab_pairs[i];
-//       _Ae[elem_id] = Ae;
-//       _be[elem_id] = be;
-//     }
-//   };
-
-//   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
-//       _communicator, query_ids, gather_data, act_on_data, 0);
-// }
-
-// void
-// NodalPatchRecoveryBase::finalize()
-// {
-//   // Type alias for (Ae, be) pair
-//   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
-
-//   // Each entry: element ID to (Ae, be)
-//   typedef std::pair<dof_id_type, AbPair> ElementEntry;
-
-//   // (a) Package local Ae and be into a list
-//   std::vector<ElementEntry> ab_pairs;
-//   ab_pairs.reserve(_Ae.size());
-
-//   for (const auto & entry : _Ae)
-//   {
-//     const dof_id_type elem_id = entry.first;
-//     const RealEigenMatrix & Ae = entry.second;
-
-//     // Look up the corresponding be vector
-//     const RealEigenVector & be = _be.at(elem_id);
-
-//     // Create the pair and add it to the list
-//     ab_pairs.emplace_back(elem_id, AbPair(Ae, be));
-//   }
-
-//   // (b) Gather ab_pairs from all processors
-//   std::vector<ElementEntry> gathered_ab_pairs;
-//   _communicator.allgather(ab_pairs, gathered_ab_pairs); // cannot work
-
-//   // (c) Merge all gathered data into local _Ae and _be
-//   for (const auto & entry : gathered_ab_pairs)
-//   {
-//     const dof_id_type elem_id = entry.first;
-//     const RealEigenMatrix & Ae = entry.second.first;
-//     const RealEigenVector & be = entry.second.second;
-
-//     // Store into local maps
-//     _Ae[elem_id] = Ae;
-//     _be[elem_id] = be;
-//   }
-// }
-
 void
 NodalPatchRecoveryBase::finalize()
 {
-  // When calling nodalPatchRecovery, we may need to know _Ae and _be the whole set of mesh
+  // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
   // elements. However, this userobject is only run on local elements, so we need to query those
   // information from other processors in this finalize() method.
 
-  // Gather elements from other processors
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
-  for (processor_id_type pid = 0; pid < _communicator.size(); ++pid)
-  {
-    if (pid == processor_id())
-      continue;
+  // Populate algebraically ghosted elements to query
+  // First issue: getEvaluableElementRange is not block restricted and cause some issues
+  if (!_use_specific_elements)
+    identifyGhostElementsFromOtherProcs();
 
-    // Ask this processor for everything it owns
-    for (const auto & entry : _Ae)
-      query_ids[pid].push_back(entry.first);
+  /// It become super long in UO and do not know what happened
+  if (_query_ids.empty())
+    // No need to send or receive data
+    return;
+
+  // std::cout << "_additional_elems size: " << _additional_elems.size() << std::endl;
+  synchronizeAebe();
+}
+
+void
+NodalPatchRecoveryBase::identifyAdditionalElementsFromOtherProcs() const
+{
+  if (_additional_elems.empty())
+    return;
+  for (const auto & entry : _additional_elems)
+  {
+    const Elem * elem = _mesh.elemPtr(entry);
+    if (elem->processor_id() != processor_id())
+      _query_ids[elem->processor_id()].push_back(elem->id());
   }
 
+  _console << "_query_ids size: " << _query_ids.size() << std::endl;
+}
+
+void
+NodalPatchRecoveryBase::identifyGhostElementsFromOtherProcs() const
+{
+  const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
+
+  for (const auto & elem : evaluable_elem_range)
+  {
+    // for (unsigned i = 0; i < elem->n_nodes(); ++i)
+    // {
+    //   const Node * node_ptr = elem->node_ptr(i);
+    //   const Point & node_pos = *node_ptr;
+
+    //   std::ofstream fout1("evaluable_elem.txt", std::ios::app);
+    //   if (fout1.is_open())
+    //   {
+    //     fout1 << node_pos(0) << ", " << node_pos(1) << "\n";
+    //     fout1.close();
+    //   }
+    //   else
+    //   {
+    //     std::cerr << "Error: Unable to open evaluable_elem.txt for writing!" << std::endl;
+    //   }
+    // }
+
+    if (elem->processor_id() != processor_id())
+      _query_ids[elem->processor_id()].push_back(elem->id());
+  }
+}
+
+void
+NodalPatchRecoveryBase::synchronizeAebe() const
+{
   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
 
   // Answer queries received from other processors
@@ -260,7 +226,12 @@ NodalPatchRecoveryBase::finalize()
                             std::vector<AbPair> & ab_pairs)
   {
     for (const auto & elem_id : elem_ids)
-      ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
+    {
+      if (!_Ae.count(elem_id))
+        std::cout << "_Ae does not contain elem_id: " << elem_id << std::endl;
+
+      ab_pairs.emplace_back(_Ae.at(elem_id), _be.at(elem_id));
+    }
   };
 
   // Gather answers received from other processors
@@ -277,6 +248,7 @@ NodalPatchRecoveryBase::finalize()
     }
   };
 
+  // the send and receive are called inside the pull_parallel_vector_data function
   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
-      _communicator, query_ids, gather_data, act_on_data, 0);
+      _communicator, _query_ids, gather_data, act_on_data, 0);
 }
