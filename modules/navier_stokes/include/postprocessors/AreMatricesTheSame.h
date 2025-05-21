@@ -17,6 +17,9 @@ template <typename>
 class PetscMatrix;
 }
 
+/**
+ * Checks if two matrices are the same by comparing their coefficients
+ */
 class AreMatricesTheSame : public GeneralPostprocessor
 {
 public:

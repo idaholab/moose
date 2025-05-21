@@ -11,6 +11,14 @@
 
 #include "ADKernel.h"
 
+/**
+ * This class implements an augmented Lagrange term, whose weak form is given by:
+ * \f[
+ * \int \gamma \nabla \cdot \vec{u} \nabla \psi
+ * \f]
+ * where \f$\gamma\f$ is the stabilization parameter, \f$\vec{u}\f$ is the velocity, and \f$\psi\f$
+ * corresponds to the velocity test function
+ */
 class GradDiv : public ADKernel
 {
 public:

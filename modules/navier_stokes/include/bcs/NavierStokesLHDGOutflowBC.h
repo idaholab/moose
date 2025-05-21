@@ -39,7 +39,11 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
+  virtual Real computeQpResidual() override
+  {
+    mooseAssert(false, "this will never be called");
+    return 0;
+  }
 
   /// A cache variable to prevent multiple computations of Jacobians
   unsigned int _cached_side;

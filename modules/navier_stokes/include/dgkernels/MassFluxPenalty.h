@@ -11,6 +11,11 @@
 
 #include "ADDGKernel.h"
 
+/**
+ * This class introduces a jump correction for grad-div stabilization (see \p GradDiv) for
+ * discontinuous Galerkin methods. Note that, as is the case for all DGKernels, this class cannot be
+ * used with static condensation
+ */
 class MassFluxPenalty : public ADDGKernel
 {
 public:
@@ -28,6 +33,8 @@ protected:
   const ADVariableValue & _vel_y;
   const ADVariableValue & _vel_y_neighbor;
   const unsigned short _comp;
+  /// whether to avoid contributing to the residual
   const bool _matrix_only;
+  /// Stabilization magnitude parameter
   const Real _gamma;
 };

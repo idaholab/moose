@@ -12,8 +12,10 @@
 #include "IPHDGPrescribedFluxBC.h"
 
 /**
- * Implements an outflow boundary condition for use with a hybridized discretization of
- * the Advection equation
+ * Implements a prescribed advective flux boundary condition for use with a hybridized
+ * discretization of an advection term. This BC may most often be used to prescribe zero advective
+ * flux conditions at wall-type boundaries but it could also be used to prescribe inlet advective
+ * fluxes
  */
 class AdvectionIPHDGPrescribedFluxBC : public IPHDGPrescribedFluxBC
 {

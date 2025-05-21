@@ -33,7 +33,11 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  virtual Real computeQpResidual() override { mooseError("this will never be called"); }
+  virtual Real computeQpResidual() override
+  {
+    mooseAssert(false, "this will never be called");
+    return 0;
+  }
 
 private:
   /// Dirichlet velocity
