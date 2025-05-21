@@ -112,6 +112,25 @@ NodalPatchRecoveryBase::execute()
   }
 
   dof_id_type elem_id = _current_elem->id();
+
+  for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
+  {
+    const Node * node_ptr = _current_elem->node_ptr(i);
+
+    // print node position
+    Point node_pos = *node_ptr;
+
+    std::ofstream fout1("assembly_nodes.txt", std::ios::app);
+    if (fout1.is_open())
+    {
+      fout1 << node_pos(0) << ", " << node_pos(1) << "\n";
+      fout1.close();
+    }
+    else
+    {
+      std::cerr << "Error: Unable to open assembly_nodes.txt for writing!" << std::endl;
+    }
+  }
   _Ae[elem_id] = Ae;
   _be[elem_id] = be;
 }

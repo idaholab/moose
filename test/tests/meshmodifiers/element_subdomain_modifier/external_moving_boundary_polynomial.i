@@ -25,6 +25,15 @@
   []
 []
 
+[UserObjects]
+  [extrapolation_patch]
+    type = NodalPatchRecoveryVariable
+    patch_polynomial_order = FIRST
+    var = 'diff'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+[]
+
 [MeshModifiers]
   [moving_circle]
     type = CoupledVarThresholdElementSubdomainModifier
@@ -40,6 +49,8 @@
     # --- new for setting IC --- #
     inactive_subdomain_ID = 2
     ic_strategy = "IC_POLYNOMIAL"
+
+    nodal_patch_recovery_uo = extrapolation_patch
   []
 []
 
