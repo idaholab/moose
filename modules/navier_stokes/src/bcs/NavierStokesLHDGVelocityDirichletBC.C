@@ -22,10 +22,10 @@ NavierStokesLHDGVelocityDirichletBC::validParams()
   params += NavierStokesLHDGAssemblyHelper::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for the velocity for a "
                              "hybridized discretization of the Navier-Stokes equations");
-  params.addParam<MooseFunctorName>(
-      "dirichlet_u", 0, "The Dirichlet value for the x-component of velocity");
-  params.addParam<MooseFunctorName>(
-      "dirichlet_v", 0, "The Dirichlet value for the y-component of velocity");
+  params.addRequiredParam<MooseFunctorName>("dirichlet_u",
+                                            "The Dirichlet value for the x-component of velocity");
+  params.addRequiredParam<MooseFunctorName>("dirichlet_v",
+                                            "The Dirichlet value for the y-component of velocity");
   params.addParam<MooseFunctorName>(
       "dirichlet_w", 0, "The Dirichlet value for the z-component of velocity");
   params.renameParam("variable", "u", "The x-component of velocity");
@@ -38,6 +38,10 @@ NavierStokesLHDGVelocityDirichletBC::NavierStokesLHDGVelocityDirichletBC(
     NavierStokesLHDGAssemblyHelper(this, this, this, this, _fe_problem, _sys, _mesh, _tid),
     _cached_side(libMesh::invalid_uint)
 {
+  if (_mesh.dimension() > 2 && !isParamSetByUser("dirichlet_w"))
+    paramError("dirichlet_w",
+               "For a 3D simulation, the Dirichlet value of the z-velocity must be supplied");
+
   _dirichlet_vel[0] = &getFunctor<Real>("dirichlet_u");
   _dirichlet_vel[1] = &getFunctor<Real>("dirichlet_v");
   _dirichlet_vel[2] = &getFunctor<Real>("dirichlet_w");

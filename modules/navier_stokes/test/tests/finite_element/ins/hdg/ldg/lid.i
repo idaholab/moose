@@ -1,4 +1,4 @@
-mu=4e-3
+mu = 4e-3
 
 [GlobalParams]
   u = vel_x
@@ -64,11 +64,14 @@ mu=4e-3
   [walls]
     type = NavierStokesLHDGVelocityDirichletBC
     boundary = 'left right bottom'
+    dirichlet_u = 0
+    dirichlet_v = 0
   []
   [lid]
     type = NavierStokesLHDGVelocityDirichletBC
     boundary = 'top'
-    dirichlet_u = '1'
+    dirichlet_u = 1
+    dirichlet_v = 0
   []
 []
 
