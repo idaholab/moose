@@ -293,9 +293,9 @@ CommonOutputAction::act()
       if (isParamValid("perf_graph_json_file"))
       {
         const auto & file = getParam<FileName>("perf_graph_json_file");
-        if (MooseUtils::getExtension(file) != "json")
+        if (MooseUtils::getExtension(file, true) != "json")
           paramError("perf_graph_json_file", "File must end with .json");
-        const auto file_stripped = MooseUtils::stripExtension(file);
+        const auto file_stripped = MooseUtils::stripExtension(file, true);
         add_perf_graph_json("perf_graph_json_file", "file_base", file_stripped);
       }
 
