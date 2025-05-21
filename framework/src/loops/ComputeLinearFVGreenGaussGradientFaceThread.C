@@ -137,7 +137,6 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
                                       face_info->faceCoord() *
                                       (bc_pointer ? bc_pointer->computeBoundaryValue()
                                                   : solution_reader(dof_id_container[face_i]));
-
             for (const auto i : make_range(_dim))
               contribution_container[i][face_i] = contribution(i);
           }

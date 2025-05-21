@@ -17,6 +17,7 @@
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
+#include "LinearFVBoundaryCondition.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -327,6 +328,9 @@ RhieChowMassFlux::computeFaceMassFlux()
       {
         mooseAssert(fi->boundaryIDs().size() == 1,
                     "We should only have one boundary on every face.");
+
+        bc_pointer->setupFaceData(
+            fi, fi->faceType(std::make_pair(_p->number(), _global_pressure_system_number)));
 
         const ElemInfo & elem_info =
             hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
