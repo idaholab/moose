@@ -44,7 +44,8 @@ MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 
   if (_lor)
   {
-    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
+    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
+        mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreAMS Solver only supports hex meshes.");
 
     auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(a, tdofs);
