@@ -2759,7 +2759,7 @@ SubChannel1PhaseProblem::externalSolve()
         if (rod_counter > 0)
           _Tpin_soln->set(pin_node, sumTemp / rod_counter);
         else
-          mooseWarning("Pin was not found for pin index:  " + std::to_string(i_pin));
+          mooseError("Pin was not found for pin index:  " + std::to_string(i_pin));
       }
     }
   }

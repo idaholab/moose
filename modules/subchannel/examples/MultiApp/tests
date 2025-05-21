@@ -15,11 +15,11 @@
                fuel_assembly_out_viz0_sample_channel_corner_0001.csv
                fuel_assembly_out_viz0_sample_channel_edge_0001.csv
                fuel_assembly_out_viz0_sample_channel_center_0001.csv"
-    requirement = 'The system shall include an example of using another simulation for presenting multi-dimensional results.'
+    requirement = 'The system shall include an example of using a separate multi-dimensional simulation, with only a volumetric mesh, simply to project and represent subchannel field results.'
 
     # Runtime goes from 160 to ~300 depending on the civet machine
     heavy = true
-    method = 'opt'
+    capabilities = 'method=opt'
     max_time = 400
   []
 []
