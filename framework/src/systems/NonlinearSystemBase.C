@@ -297,6 +297,9 @@ NonlinearSystemBase::initialSetup()
     else
       _scaling_matrix = std::make_unique<DiagonalMatrix<Number>>(_communicator);
   }
+
+  if (_preconditioner)
+    _preconditioner->initialSetup();
 }
 
 void

@@ -7,14 +7,13 @@
       type = Exodiff
       exodiff = test_out.e
       input = test.i
-      cli_args = '-ksp_norm_type preconditioned'
+      cli_args = "Preconditioning/active='' -ksp_type gmres -ksp_norm_type preconditioned"
       detail = 'using an iterative preconditioner applied to all the degrees of freedom, and'
     []
     [sc]
       type = Exodiff
       exodiff = test_out.e
       input = test.i
-      cli_args = '--nl0-static-condensation -nl0_condensed_ksp_norm_type preconditioned'
       prereq = 'test/regular'
       detail = 'using an iterative preconditioner applied to only degrees of freedom remaining after static condensation.'
       max_threads = 1

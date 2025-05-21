@@ -63,6 +63,7 @@
     face_variable = side_u
     diffusivity = 1
     alpha = 6
+    prescribed_normal_flux = 0
   []
   [left_v]
     type = PenaltyDirichletBC
