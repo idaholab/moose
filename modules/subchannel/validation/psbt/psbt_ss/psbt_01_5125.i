@@ -1,17 +1,18 @@
 # M. Avramova et al., 2012,
 # OECD/NRC Benchmark Based on NUPEC PWR
 # Sub-channel and Bundle Tests (PSBT). Volume III: Departure from Nucleate Boiling
-# Case:01-5237
-T_in = 502.35
+# Case:01-5125
+T_in = 562.35
+Power = 1.5e6
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 16.95 / 3600.}
-P_out = 14.72e6 # Pa
+mass_flux_in = ${fparse 1e+6 * 10.94 / 3600.}
+P_out = 14.74e6 # Pa
 [QuadSubChannelMesh]
   [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 20
+    n_cells = 40
     pitch = 0.0126
     pin_diameter = 0.00950
     gap = 0.00095
@@ -25,7 +26,7 @@ P_out = 14.72e6 # Pa
     input = sub_channel
     nx = 6
     ny = 6
-    n_cells = 20
+    n_cells = 40
     pitch = 0.0126
     heated_length = 3.658
   []
@@ -80,7 +81,7 @@ P_out = 14.72e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
+  beta = 0.08
   CT = 2.6
   compute_density = true
   compute_viscosity = true
@@ -88,10 +89,11 @@ P_out = 14.72e6 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
-  # interpolation_scheme = 'upwind'
   staggered_pressure = false
   monolithic_thermal = true
+  # interpolation_scheme = 'upwind'
   verbose_subchannel = true
+
 []
 
 [ICs]
@@ -108,7 +110,7 @@ P_out = 14.72e6 # Pa
   [q_prime_IC]
     type = SCMQuadPowerIC
     variable = q_prime
-    power = 3.23e6 # W
+    power = ${Power} # W
     filename = "power_profile.txt"
   []
 
