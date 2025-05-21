@@ -340,7 +340,8 @@ CommonOutputAction::act()
   }
   else if (_current_task == "add_reporter")
   {
-    if (getParam<bool>("perf_graph_json") || isParamValid("perf_graph_json_file"))
+    if (!_app.getParam<bool>("no_timing") &&
+        (getParam<bool>("perf_graph_json") || isParamValid("perf_graph_json_file")))
     {
       auto params = _factory.getValidParams("PerfGraphReporter");
       params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
