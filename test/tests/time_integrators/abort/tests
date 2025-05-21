@@ -6,6 +6,7 @@
     input = 'abort.i'
     exodiff = 'out.e'
     recover = false
+    restep = false # Explicitly needs to abort on solve failed
 
     requirement = "The system shall include an option that aborts the solve immediately if a solve fails."
   [../]

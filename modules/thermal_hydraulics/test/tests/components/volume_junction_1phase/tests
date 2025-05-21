@@ -10,6 +10,7 @@
       # The gold file was actually produced with equal_area_no_junction.i and
       # then renamed to equal_area_with_junction_out.csv.
       csvdiff = 'equal_area_with_junction_out.csv'
+      restep = false # Test is prescribed to abort on failed timestep
       detail = '2 pipes of equal area in the x direction,'
     []
     [equal_area_not_x_direction]
@@ -37,6 +38,7 @@
       abs_zero = 5e-5
       rel_err = 0
       recover = false
+      restep = false # Test is prescribed to abort on failed timestep
       detail = '2 pipes of unequal area,'
     []
 
@@ -46,6 +48,7 @@
       csvdiff = 'phy.deadend_out.csv'
       abs_zero = 1e-5
       rel_err = 0
+      restep = false # Test is prescribed to abort on failed timestep
       detail = '3 pipes, 1 of which going to a dead-end,'
     []
 
@@ -73,6 +76,7 @@
       csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
       abs_zero = 5e-5
       rel_err = 1e-4
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'pipes with the calorically imperfect gas fluid properties,'
     []
   []
@@ -85,6 +89,7 @@
       cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
       rel_err = 2e-4
       recover = false
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'by specifying a constant loss coefficient and using the area of the first connected pipe, '
     []
     [phy.form_loss_Aref]
@@ -94,6 +99,7 @@
       cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
       rel_err = 2e-4
       recover = false
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'by specifying a constant loss coefficient and a reference flow area, and'
     []
 
@@ -104,6 +110,7 @@
       cli_args = 'Components/junction/K=1 ControlLogic/active=K_crtl Outputs/execute_on=TIMESTEP_END Outputs/file_base=phy.form_loss_crtl'
       rel_err = 2e-4
       recover = false
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'by specifying the loss coefficient through the control system.'
     []
   []
@@ -114,6 +121,7 @@
     input = 't_junction_1phase.i'
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall conserve mass and energy when a VolumJunction1Phase component is used'
   []
   # error checking
