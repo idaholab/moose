@@ -14,7 +14,7 @@ Raviart-Thomas elements, in which case the $H(\mathrm{div})$ FE space should be 
 `mfem::HypreADS` solver during construction.
 
 A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter 
-[!param](/Solvers/MFEMHypreADS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial 
+[!param](/Solver/MFEMHypreADS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial 
 order systems.
 
 ## Example Input File Syntax
