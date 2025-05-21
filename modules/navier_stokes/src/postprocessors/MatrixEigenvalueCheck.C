@@ -121,7 +121,7 @@ MatrixEigenvalueCheck::execute()
           LibmeshPetscCallA(
               _communicator.get(),
               PetscPrintf(
-                  PETSC_COMM_WORLD, " %9f%+9fi %12g\n", (double)re, (double)im, (double)error));
+                  PETSC_COMM_WORLD, " %9f+%9fi %12g\n", (double)re, (double)im, (double)error));
         else
           LibmeshPetscCallA(
               _communicator.get(),

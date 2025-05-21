@@ -16,7 +16,7 @@
 class NonlinearSystem;
 
 /**
- * A problem that handles Schur complement preconditioning of the incompressible Navier-Stokes
+ * A problem that solves and prints matrices used when solving the incompressible Navier-Stokes
  * equations
  */
 class PrintMatricesNSProblem : public FEProblem
@@ -35,5 +35,5 @@ private:
   /// The tag name of the velocity mass matrix
   const TagName & _velocity_mass_matrix;
   /// The tag name of the jump matrix
-  const std::vector<TagName> & _jump_matrices;
+  const std::vector<TagName> & _augmented_lagrange_matrices;
 };

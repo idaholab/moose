@@ -22,7 +22,8 @@ MassFluxPenaltyBC::validParams()
                                           "The velocity component this object is being applied to");
   params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
   params.addClassDescription("Adds the exterior boundary contribution of penalized jumps.");
-  params.addParam<FunctionName>("dirichlet_value", "The velocity Dirichlet value on the boundary");
+  params.addRequiredParam<FunctionName>("dirichlet_value",
+                                        "The velocity Dirichlet value on the boundary");
   return params;
 }
 
