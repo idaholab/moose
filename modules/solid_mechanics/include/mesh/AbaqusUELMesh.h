@@ -63,6 +63,9 @@ public:
   const auto & getElementSets() const { return _model->_elsets; }
   const auto & getNodeSets() const { return _model->_nsets; }
 
+  const auto & getSteps() const { return _model->_step; }
+  const auto & getModel() const { return *_model; }
+
   /// initial condition getters
   const auto & getFieldICs() const { return _model->_field_ics; }
 
