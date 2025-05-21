@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IsMatrixSymmetric.h"
+#include "MatrixSymmetryCheck.h"
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
@@ -18,10 +18,10 @@
 
 #include <petscmat.h>
 
-registerMooseObject("MooseApp", IsMatrixSymmetric);
+registerMooseObject("MooseApp", MatrixSymmetryCheck);
 
 InputParameters
-IsMatrixSymmetric::validParams()
+MatrixSymmetryCheck::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report whether a matrix is symmetric or not.");
@@ -33,7 +33,7 @@ IsMatrixSymmetric::validParams()
   return params;
 }
 
-IsMatrixSymmetric::IsMatrixSymmetric(const InputParameters & parameters)
+MatrixSymmetryCheck::MatrixSymmetryCheck(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mat_from_file(isParamValid("mat")),
     _mat_file_name(_mat_from_file ? getParam<std::string>("mat") : ""),
@@ -43,7 +43,7 @@ IsMatrixSymmetric::IsMatrixSymmetric(const InputParameters & parameters)
 }
 
 void
-IsMatrixSymmetric::execute()
+MatrixSymmetryCheck::execute()
 {
   _equiv = true;
   // Pointer to the matrix we are analyzing for symmetry
@@ -86,7 +86,7 @@ endDoubleLoop:
 }
 
 Real
-IsMatrixSymmetric::getValue() const
+MatrixSymmetryCheck::getValue() const
 {
   return _equiv;
 }

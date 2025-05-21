@@ -206,7 +206,7 @@ n = 8
     expression = '${rho} * ${U} * ${l} / ${mu}'
   []
   [symmetric]
-    type = IsMatrixSymmetric
+    type = MatrixSymmetryCheck
     mat = binaryoutput
   []
   [pressure_integral]

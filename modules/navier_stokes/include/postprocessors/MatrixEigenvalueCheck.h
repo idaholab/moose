@@ -18,25 +18,24 @@ class PetscMatrix;
 }
 
 /**
- * Checks if two matrices are the same by comparing their coefficients
+ * Returns the number of zero eigenvalues in a PETSc matrix
  */
-class AreMatricesTheSame : public GeneralPostprocessor
+class MatrixEigenvalueCheck : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  AreMatricesTheSame(const InputParameters & parameters);
+  MatrixEigenvalueCheck(const InputParameters & parameters);
 
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
   virtual Real getValue() const override;
 
 protected:
-  const Real _equiv_tol;
-  const std::string & _mat1_name;
-  const std::string & _mat2_name;
-  Mat _petsc_mat1 = nullptr;
-  Mat _petsc_mat2 = nullptr;
-  bool _equiv = true;
+  const Real _zero_tol;
+  const std::string & _mat_name;
+  const bool _print;
+  Mat _petsc_mat = nullptr;
+  Real _num_zero_eigenvalues = 0;
 };
