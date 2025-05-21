@@ -285,6 +285,8 @@ CommonOutputAction::act()
         params.set<ExecFlagEnum>("execute_system_information_on") = {EXEC_NONE};
         params.set<std::string>(set_param_name) = set_param_value;
         params.set<bool>("distributed") = false;
+        if (set_param_name == "file_base")
+          params.set<bool>("append_date") = false;
         create("JSON", from_param_name, &parameters(), &params, from_param_name);
       };
 
