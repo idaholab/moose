@@ -20,4 +20,6 @@ public:
   static InputParameters validParams();
 
   MooseStaticCondensationPreconditioner(const InputParameters & params);
+
+  virtual void initialSetup() override;
 };

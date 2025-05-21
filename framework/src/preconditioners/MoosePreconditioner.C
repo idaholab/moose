@@ -89,10 +89,6 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
     paramError("off_diag_column",
                "If off-diagonal columns are specified, matching off-diagonal "
                "rows must be specified as well");
-
-  Moose::PetscSupport::processSingletonMooseWrappedOptions(_fe_problem, params);
-
-  Moose::PetscSupport::storePetscOptions(_fe_problem, _nl.prefix(), *this);
 }
 
 void
@@ -141,4 +137,10 @@ void
 MoosePreconditioner::setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm)
 {
   _fe_problem.setCouplingMatrix(std::move(cm), _nl_sys_num);
+}
+
+void
+MoosePreconditioner::initialSetup()
+{
+  Moose::PetscSupport::storePetscOptions(_fe_problem, _nl.prefix(), *this);
 }
