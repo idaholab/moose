@@ -191,7 +191,7 @@ n = 8
 [Outputs]
   [out]
     type = Exodus
-    hide = 'lambda pressure_integral symmetric'
+    hide = 'lambda pressure_integral symmetric vel_bar_x vel_bar_y pressure_bar'
   []
   [csv]
     type = CSV

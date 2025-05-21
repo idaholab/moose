@@ -275,7 +275,7 @@ gamma = 1e5
   active = ''
   [out]
     type = Exodus
-    hide = 'pressure_average'
+    hide = 'pressure_average vel_bar_x vel_bar_y pressure_bar'
   []
 []
 

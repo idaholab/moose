@@ -186,7 +186,7 @@ n = 8
 [Outputs]
   [out]
     type = Exodus
-    hide = 'lambda pressure_integral'
+    hide = 'lambda pressure_integral vel_bar_x vel_bar_y pressure_bar'
   []
 []
 
