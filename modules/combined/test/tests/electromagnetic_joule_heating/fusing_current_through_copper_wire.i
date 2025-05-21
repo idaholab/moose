@@ -72,8 +72,8 @@
   [conduction_real]
     type = ADConductionCurrent
     variable = A_real
-    E_imag = A_imag
-    E_real = A_real
+    field_imag =  A_imag
+    field_real =  A_real
     conductivity_real = electrical_conductivity
     conductivity_imag = 0.0
     ang_freq_real = omega_real
@@ -99,8 +99,8 @@
   [conduction_imag]
     type = ADConductionCurrent
     variable = A_imag
-    E_imag = A_imag
-    E_real = A_real
+    field_imag =  A_imag
+    field_real =  A_real
     conductivity_real = electrical_conductivity
     conductivity_imag = 0.0
     ang_freq_real = omega_real
