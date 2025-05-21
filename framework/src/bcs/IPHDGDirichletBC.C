@@ -14,7 +14,8 @@ InputParameters
 IPHDGDirichletBC::validParams()
 {
   auto params = IPHDGBC::validParams();
-  params.addRequiredParam<MooseFunctorName>("functor", "The Dirichlet value for the primal variable");
+  params.addRequiredParam<MooseFunctorName>("functor",
+                                            "The Dirichlet value for the primal variable");
   return params;
 }
 

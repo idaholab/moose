@@ -18,7 +18,8 @@ DiffusionLHDGDirichletBC::validParams()
   auto params = IntegratedBC::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
                              "hybridized discretization of a diffusion equation");
-  params.addRequiredParam<MooseFunctorName>("functor", "The Dirichlet value for the diffusing specie");
+  params.addRequiredParam<MooseFunctorName>("functor",
+                                            "The Dirichlet value for the diffusing specie");
   params += DiffusionLHDGAssemblyHelper::validParams();
   params.setDocString("variable", "The diffusing specie concentration");
   return params;
