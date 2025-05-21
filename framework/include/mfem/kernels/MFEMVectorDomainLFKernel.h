@@ -16,7 +16,7 @@ public:
   virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
 protected:
-  const std::string _vec_coef_name;
+  const MFEMVectorCoefficientName & _vec_coef_name;
   mfem::VectorCoefficient & _vec_coef;
 };
 
