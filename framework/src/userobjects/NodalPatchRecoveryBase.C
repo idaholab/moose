@@ -145,51 +145,51 @@ NodalPatchRecoveryBase::threadJoin(const UserObject & uo)
   _be.insert(npr._be.begin(), npr._be.end());
 }
 
-void
-NodalPatchRecoveryBase::finalize()
-{
-  // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
-  // elements. However, this userobject is only run on local elements, so we need to query those
-  // information from other processors in this finalize() method.
+// void
+// NodalPatchRecoveryBase::finalize()
+// {
+//   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
+//   // elements. However, this userobject is only run on local elements, so we need to query those
+//   // information from other processors in this finalize() method.
 
-  // Populate algebraically ghosted elements to query
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
-  const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
-  for (auto elem : evaluable_elem_range)
-    if (elem->processor_id() != processor_id())
-      query_ids[elem->processor_id()].push_back(elem->id());
+//   // Populate algebraically ghosted elements to query
+//   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
+//   const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
+//   for (auto elem : evaluable_elem_range)
+//     if (elem->processor_id() != processor_id())
+//       query_ids[elem->processor_id()].push_back(elem->id());
 
-  typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
+//   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
 
-  // Answer queries received from other processors
-  auto gather_data = [this](const processor_id_type /*pid*/,
-                            const std::vector<dof_id_type> & elem_ids,
-                            std::vector<AbPair> & ab_pairs)
-  {
-    for (const auto i : index_range(elem_ids))
-    {
-      const auto elem_id = elem_ids[i];
-      ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
-    }
-  };
+//   // Answer queries received from other processors
+//   auto gather_data = [this](const processor_id_type /*pid*/,
+//                             const std::vector<dof_id_type> & elem_ids,
+//                             std::vector<AbPair> & ab_pairs)
+//   {
+//     for (const auto i : index_range(elem_ids))
+//     {
+//       const auto elem_id = elem_ids[i];
+//       ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
+//     }
+//   };
 
-  // Gather answers received from other processors
-  auto act_on_data = [this](const processor_id_type /*pid*/,
-                            const std::vector<dof_id_type> & elem_ids,
-                            const std::vector<AbPair> & ab_pairs)
-  {
-    for (const auto i : index_range(elem_ids))
-    {
-      const auto elem_id = elem_ids[i];
-      const auto & [Ae, be] = ab_pairs[i];
-      _Ae[elem_id] = Ae;
-      _be[elem_id] = be;
-    }
-  };
+//   // Gather answers received from other processors
+//   auto act_on_data = [this](const processor_id_type /*pid*/,
+//                             const std::vector<dof_id_type> & elem_ids,
+//                             const std::vector<AbPair> & ab_pairs)
+//   {
+//     for (const auto i : index_range(elem_ids))
+//     {
+//       const auto elem_id = elem_ids[i];
+//       const auto & [Ae, be] = ab_pairs[i];
+//       _Ae[elem_id] = Ae;
+//       _be[elem_id] = be;
+//     }
+//   };
 
-  libMesh::Parallel::pull_parallel_vector_data<AbPair>(
-      _communicator, query_ids, gather_data, act_on_data, 0);
-}
+//   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
+//       _communicator, query_ids, gather_data, act_on_data, 0);
+// }
 
 // void
 // NodalPatchRecoveryBase::finalize()
@@ -233,50 +233,50 @@ NodalPatchRecoveryBase::finalize()
 //   }
 // }
 
-// void
-// NodalPatchRecoveryBase::finalize()
-// {
-//   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
-//   // elements. However, this userobject is only run on local elements, so we need to query those
-//   // information from other processors in this finalize() method.
+void
+NodalPatchRecoveryBase::finalize()
+{
+  // When calling nodalPatchRecovery, we may need to know _Ae and _be the whole set of mesh
+  // elements. However, this userobject is only run on local elements, so we need to query those
+  // information from other processors in this finalize() method.
 
-//   // Gather elements from other processors
-//   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
-//   for (processor_id_type pid = 0; pid < _communicator.size(); ++pid)
-//   {
-//     if (pid == processor_id())
-//       continue;
+  // Gather elements from other processors
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
+  for (processor_id_type pid = 0; pid < _communicator.size(); ++pid)
+  {
+    if (pid == processor_id())
+      continue;
 
-//     // Ask this processor for everything it owns
-//     for (const auto & entry : _Ae)
-//       query_ids[pid].push_back(entry.first);
-//   }
+    // Ask this processor for everything it owns
+    for (const auto & entry : _Ae)
+      query_ids[pid].push_back(entry.first);
+  }
 
-//   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
+  typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
 
-//   // Answer queries received from other processors
-//   auto gather_data = [this](const processor_id_type /*pid*/,
-//                             const std::vector<dof_id_type> & elem_ids,
-//                             std::vector<AbPair> & ab_pairs)
-//   {
-//     for (const auto & elem_id : elem_ids)
-//       ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
-//   };
+  // Answer queries received from other processors
+  auto gather_data = [this](const processor_id_type /*pid*/,
+                            const std::vector<dof_id_type> & elem_ids,
+                            std::vector<AbPair> & ab_pairs)
+  {
+    for (const auto & elem_id : elem_ids)
+      ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
+  };
 
-//   // Gather answers received from other processors
-//   auto act_on_data = [this](const processor_id_type /*pid*/,
-//                             const std::vector<dof_id_type> & elem_ids,
-//                             const std::vector<AbPair> & ab_pairs)
-//   {
-//     for (const auto i : index_range(elem_ids))
-//     {
-//       const auto elem_id = elem_ids[i];
-//       const auto & [Ae, be] = ab_pairs[i];
-//       _Ae[elem_id] = Ae;
-//       _be[elem_id] = be;
-//     }
-//   };
+  // Gather answers received from other processors
+  auto act_on_data = [this](const processor_id_type /*pid*/,
+                            const std::vector<dof_id_type> & elem_ids,
+                            const std::vector<AbPair> & ab_pairs)
+  {
+    for (const auto i : index_range(elem_ids))
+    {
+      const auto elem_id = elem_ids[i];
+      const auto & [Ae, be] = ab_pairs[i];
+      _Ae[elem_id] = Ae;
+      _be[elem_id] = be;
+    }
+  };
 
-//   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
-//       _communicator, query_ids, gather_data, act_on_data, 0);
-// }
+  libMesh::Parallel::pull_parallel_vector_data<AbPair>(
+      _communicator, query_ids, gather_data, act_on_data, 0);
+}

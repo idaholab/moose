@@ -39,7 +39,7 @@
 
     # --- new for setting IC --- #
     inactive_subdomain_ID = 2
-    ic_strategy = "IC_POLYNOMIAL"
+    ic_strategy = "IC_EXTRAPOLATE_FIRST_LAYER"
   []
 []
 

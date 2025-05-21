@@ -105,16 +105,22 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _old_subdomain_reinitialized(getParam<bool>("old_subdomain_reinitialized")),
     _ic_strategy_string(getParam<std::string>("ic_strategy")),
     _ic_strategy(parseString2ICStrategy(_ic_strategy_string)),
-    _inactive_subdomain_ID(getParam<int>("inactive_subdomain_ID"))
+    _inactive_subdomain_ID(getParam<int>("inactive_subdomain_ID")),
+    _npr_names(getParam<std::vector<UserObjectName>>("nodal_patch_recovery_uo")),
+    _npr_vec(_npr_names.size())
 {
   if (_ic_strategy != ICStrategyForNewlyActivated::IC_DEFAULT and _inactive_subdomain_ID == -1)
     mooseError("The inactive subdomain ID must be set to use the extrapolation strategy.");
   if (_ic_strategy == ICStrategyForNewlyActivated::IC_DEFAULT and _inactive_subdomain_ID != -1)
     mooseError("The inactive subdomain ID should not be set to use the default strategy.");
+  if (_ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL and
+      (_inactive_subdomain_ID == -1 or _npr_vec.empty()))
+    mooseError(
+        "The inactive subdomain ID and the NodalPatchRecovery UserObject must be set to use the "
+        "polynomial strategy.");
 
-  const auto & uo_names = getParam<std::vector<UserObjectName>>("nodal_patch_recovery_uo");
-  for (const auto & name : uo_names)
-    _npr_vec.push_back(&getUserObjectByName<NodalPatchRecoveryBase>(name));
+  for (const auto & i : index_range(_npr_names))
+    _npr_vec[i] = &getUserObjectByName<NodalPatchRecoveryBase>(_npr_names[i]);
 
   if (isParamSetByUser("moving_boundary_name") ||
       isParamSetByUser("complement_moving_boundary_name"))
@@ -1209,8 +1215,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
       continue; // Not necessarily local; skip if nullptr
 
     for (unsigned n = 0; n < e->n_nodes(); ++n)
-      if (!reinit_node_set.count(e->node_id(n)))
-        reinit_node_set.insert(e->node_id(n));
+      reinit_node_set.insert(e->node_id(n)); // already prevented duplicates
   }
 
   // Pass 1: Traverse local active elements to find neighbors sharing nodes with reinit elements
