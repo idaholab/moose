@@ -37,7 +37,8 @@ MassMatrixDGKernel::MassMatrixDGKernel(const InputParameters & parameters)
 Real
 MassMatrixDGKernel::computeQpResidual(Moose::DGResidualType)
 {
-  mooseError("should never be called");
+  mooseAssert(false, "should never be called");
+  return 0;
 }
 
 Real

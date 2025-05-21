@@ -10,7 +10,6 @@
 #include "NavierStokesLHDGKernel.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
-#include "Function.h"
 #include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", NavierStokesLHDGKernel);
@@ -50,6 +49,9 @@ NavierStokesLHDGKernel::NavierStokesLHDGKernel(const InputParameters & parameter
     _normals(_assembly.normals()),
     _current_side(_assembly.side())
 {
+  if (_mesh.dimension() > 2)
+    mooseError("This class only supports 2D simulations at this time");
+
   _body_forces.push_back(&_body_force_x);
   _body_forces.push_back(&_body_force_y);
   _body_forces.push_back(&_body_force_z);
