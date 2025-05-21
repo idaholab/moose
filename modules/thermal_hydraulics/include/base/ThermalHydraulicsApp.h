@@ -39,6 +39,7 @@ extern FlowModelID FM_INVALID;
 extern FlowModelID FM_SINGLE_PHASE;
 extern FlowModelID FM_TWO_PHASE;
 extern FlowModelID FM_TWO_PHASE_NCG;
+extern FlowModelID FM_GAS_MIX;
 
 // This is the upper limit on variable length given by exodusII
 static const size_t MAX_VARIABLE_LENGTH = 31;

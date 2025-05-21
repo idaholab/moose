@@ -195,6 +195,7 @@ FlowModel1PhaseBase::addMooseObjects()
   FlowModel::addCommonMooseObjects();
 
   addKernels();
+  addDGKernels();
   addAuxKernels();
   addFluidPropertiesMaterials();
   addNumericalFluxUserObject();
@@ -286,6 +287,11 @@ FlowModel1PhaseBase::addEnergyGravityKernel()
   params.set<MaterialPropertyName>("vel") = THM::VELOCITY;
   params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
   _sim.addKernel(class_name, genName(_comp_name, "energy_gravity"), params);
+}
+
+void
+FlowModel1PhaseBase::addDGKernels()
+{
 }
 
 void
