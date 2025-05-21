@@ -217,9 +217,13 @@ LIBTORCH_OPTIONS = {
 }
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
-def runCommand(cmd, cwd=None):
+def runCommand(cmd, cwd=None, force_mpi_command=False):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
+    if force_mpi_command:
+        mpi_command = os.environ.get('MOOSE_MPI_COMMAND')
+        if mpi_command is not None:
+            cmd = f'{mpi_command} -n 1 {cmd}'
     p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
     output = p.communicate()[0].decode('utf-8')
     if (p.returncode != 0):
@@ -528,7 +532,7 @@ def getCapabilities(exe):
     Get capabilities JSON and compare it to the required capabilities
     """
     assert exe
-    output = runCommand("%s --show-capabilities" % exe)
+    output = runCommand(f"{exe} --show-capabilities", force_mpi_command=True)
     return parseMOOSEJSON(output, '--show-capabilities')
 
 def getCapability(exe, name):
@@ -723,7 +727,7 @@ def getExeJSON(exe: str) -> str:
     """
     Calls --json on the given executable
     """
-    return runCommand("%s --json" % exe)
+    return runCommand(f"{exe} --json", force_mpi_command=True)
 
 def getExeObjects(json: dict) -> set[str]:
     """
