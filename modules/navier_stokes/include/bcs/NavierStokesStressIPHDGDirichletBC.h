@@ -14,7 +14,7 @@
 
 /**
  * Weakly imposes Dirichlet boundary conditions for a hybridized discretization of a Navier-Stokes
- * equation stress term"
+ * equation stress term
  */
 class NavierStokesStressIPHDGDirichletBC : public IPHDGDirichletBC
 {
