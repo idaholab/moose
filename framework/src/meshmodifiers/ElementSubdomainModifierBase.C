@@ -1173,55 +1173,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
                      id) == _first_pass_global_activated_nodes.end();
   };
 
-  // Pass 1: finding the neighboring element
-  // for (auto new_id : _newactivated_nodes)
-  // {
-
-  //   // print node position
-  //   Point node_pos = *_mesh.nodePtr(new_id);
-
-  //   std::ofstream fout2("newly_activated_nodes.txt", std::ios::app);
-  //   if (fout2.is_open())
-  //   {
-  //     fout2 << node_pos(0) << ", " << node_pos(1) << "\n";
-  //     fout2.close();
-  //   }
-  //   else
-  //   {
-  //     std::cerr << "Error: Unable to open newly_activated_nodes.txt for writing!" << std::endl;
-  //   }
-
-  //   const auto & elem_ids = _mesh.nodeToElemMap().at(new_id);
-  //   for (auto eid : elem_ids)
-  //   {
-  //     const Elem * elem = _mesh.elemPtr(eid);
-
-  //     if (elem->subdomain_id() != _inactive_subdomain_ID &&
-  //         std::find(patch_elem_ids.begin(), patch_elem_ids.end(), eid) == patch_elem_ids.end())
-  //     {
-  //       patch_elem_ids.push_back(eid);
-
-  //       for (unsigned i = 0; i < elem->n_nodes(); ++i)
-  //       {
-  //         const Node * node_ptr = elem->node_ptr(i);
-
-  //         // print node position
-  //         Point node_pos = *node_ptr;
-
-  //         std::ofstream fout1("boundary_nodes.txt", std::ios::app);
-  //         if (fout1.is_open())
-  //         {
-  //           fout1 << node_pos(0) << ", " << node_pos(1) << "\n";
-  //           fout1.close();
-  //         }
-  //         else
-  //         {
-  //           std::cerr << "Error: Unable to open boundary_nodes.txt for writing!" << std::endl;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  std::cout << "Number of newly activated nodes: " << _newactivated_nodes.size() << "\n";
 
   for (auto new_id : _newactivated_nodes)
   {
@@ -1257,7 +1209,8 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
       continue; // Not necessarily local; skip if nullptr
 
     for (unsigned n = 0; n < e->n_nodes(); ++n)
-      reinit_node_set.insert(e->node_id(n));
+      if (!reinit_node_set.count(e->node_id(n)))
+        reinit_node_set.insert(e->node_id(n));
   }
 
   // Pass 1: Traverse local active elements to find neighbors sharing nodes with reinit elements
@@ -1266,7 +1219,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
   if (!fout.is_open())
     mooseError("Unable to open boundary_nodes.txt for writing!");
 
-  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+  for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
   {
     const dof_id_type eid = elem->id();
 
@@ -1313,6 +1266,12 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
 
   fout.close();
 
+  std::cout << "Number of elements in the patch: " << patch_elem_set.size() << "\n";
+  // for (const auto & id : patch_elem_ids)
+  // {
+  //   std::cout << "id = " << id << "\n";
+  // }
+
   // Pass 2: setting IC for newly activated nodes
 
   NumericVector<Number> & vec = sys.solution();
@@ -1326,6 +1285,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
     // Recovery
     std::vector<Real> recovered_vals;
     int num_components = _npr_vec.size();
+    std::cout << "num_components = " << num_components << "\n";
     for (unsigned comp = 0; comp < num_components; ++comp)
       recovered_vals.push_back(_npr_vec[comp]->nodalPatchRecovery(x, patch_elem_ids));
 
@@ -1333,7 +1293,10 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
     dof_map.dof_indices(node, dofs);
 
     for (unsigned i = 0; i < dofs.size(); ++i)
+    {
+      std::cout << "recovered_vals[i] = " << recovered_vals[i] << "\n";
       vec.set(dofs[i], recovered_vals[i]);
+    }
   }
 
   vec.close();
