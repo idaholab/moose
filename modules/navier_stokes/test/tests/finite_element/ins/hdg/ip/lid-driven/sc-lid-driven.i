@@ -186,6 +186,8 @@ n = 8
 [Executioner]
   type = Steady
   nl_rel_tol = 1e-12
+  petsc_options_iname = '-ksp_type'
+  petsc_options_value = 'preonly'
 []
 
 [Outputs]
@@ -208,6 +210,7 @@ n = 8
   [symmetric]
     type = MatrixSymmetryCheck
     mat = binaryoutput
+    mat_number_to_load = 2
   []
   [pressure_integral]
     type = ElementIntegralVariablePostprocessor

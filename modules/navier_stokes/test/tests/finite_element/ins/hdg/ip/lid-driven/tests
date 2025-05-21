@@ -19,12 +19,22 @@
       max_threads = 1
     []
   []
-  [condensed_symmetric]
-    requirement = "The condensed matrix shall be symmetric, although I don't understand why. Where did the advection go?"
+  [condensed_ns_asymmetric]
+    requirement = "The condensed matrix shall be asymmetric due to the presence of advection"
     type = CSVDiff
     input = 'sc-lid-driven.i'
     csvdiff = 'sc-lid-driven_csv.csv'
     max_threads = 1
+    prereq = 'lid-driven/condensed'
+  []
+  [condensed_stokes_symmetric]
+    requirement = "The condensed matrix shall be symmetric when the nonlinear advection term in the momentum equation is not taken into consideration."
+    type = CSVDiff
+    input = 'sc-lid-driven.i'
+    csvdiff = 'stokes-symmetric.csv'
+    max_threads = 1
+    prereq = 'condensed_ns_asymmetric'
+    cli_args = 'Outputs/csv/file_base=stokes-symmetric Outputs/csv/hide="lambda pressure_integral Re" Postprocessors/symmetric/mat_number_to_load=1'
   []
   [lid-mms]
     type = PythonUnitTest
