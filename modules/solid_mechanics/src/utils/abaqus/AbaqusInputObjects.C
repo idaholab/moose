@@ -13,6 +13,7 @@
 #include "libmesh/libmesh_common.h"
 
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 
@@ -373,12 +374,17 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
 void
 Step::parse(const BlockNode & block)
 {
+  _dt = -1.0;
+
   auto option_func = [this](const std::string & key, const OptionNode & option)
   {
     if (!Step::optionFunc(key, option))
       mooseError("Unsupported option ", key);
   };
   block.forAll(option_func, nullptr);
+
+  if (_dt <= 0.0)
+    mooseError("invalid or missing time step in *Step block");
 }
 
 bool
@@ -387,6 +393,17 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   // User element definitions
   if (key == "boundary")
   {
+    // copy over BC data from previous step (unless this is a model level BC or OP=NEW)
+    const auto op = option._header.get<std::string>("op", "mod");
+    if (op != "mod" && op != "new")
+      mooseError("Unknown value for *Boundary OP=", op);
+    if (&_model != this && op == "mod")
+    {
+      const auto & previous_step =
+          _model._step.size() > 0 ? _model._step[_model._step.size() - 1] : _model;
+      _bc_var_node_value_map = previous_step._bc_var_node_value_map;
+    }
+
     // loop over data lines
     for (const auto & data : option._data)
     {
@@ -426,7 +443,27 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   }
   else if (key == "static")
   {
-    // TODO
+    if (option._data.size() != 1)
+      mooseError("Expected 1 data line for *Static option");
+    const auto col = vecTo<Real>(option._data[0]);
+
+    if (col.size() > 0)
+      _dt = col[0];
+
+    if (col.size() > 1)
+      _duration = col[1];
+    else
+      _duration = 1.0;
+
+    if (col.size() > 2)
+      _dt_min = col[2];
+    else
+      _dt_min = 1e-5 * _duration;
+
+    if (col.size() >= 3)
+      _dt_max = col[3];
+    else
+      _dt_max = std::numeric_limits<Real>::max();
   }
   else if (key == "dload")
   {
