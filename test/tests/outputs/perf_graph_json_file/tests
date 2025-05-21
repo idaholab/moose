@@ -1,5 +1,6 @@
 [Tests]
   issues = '#30552'
+  design = 'CommonOutputAction.md'
   [test]
     type = JSONDiff
     input = perf_graph_json_file.i
