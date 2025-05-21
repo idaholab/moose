@@ -60,6 +60,21 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMGradDivLOR]
+    type = XMLDiff
+    input = graddiv.i
+    xmldiff = 'OutputData/GradDivLOR/Run0/Run0.pvd
+                OutputData/GradDivLOR/Run0/Cycle000001/proc000000.vtu'
+    cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
+               'Solver/type=MFEMCGSolver Solver/l_tol=1e-14 Solver/preconditioner=ADS '
+               'Preconditioner/ADS/low_order_refined=true '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR '
+    requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
+    mfem = true
+    max_parallel = 1
+    recover = false
+    abs_zero = 1e-6
+  []
   [MFEMHeatConduction]
     type = XMLDiff
     input = heattransfer.i
