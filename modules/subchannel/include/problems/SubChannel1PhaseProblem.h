@@ -52,51 +52,51 @@ protected:
   /// Returns friction factor
   virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
   /// Computes diversion crossflow per gap for block iblock
-  virtual void computeWijFromSolve(int iblock);
+  void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
-  virtual void computeSumWij(int iblock);
+  void computeSumWij(int iblock);
   /// Computes mass flow per channel for block iblock
-  virtual void computeMdot(int iblock);
+  void computeMdot(int iblock);
   /// Computes turbulent crossflow per gap for block iblock
-  virtual void computeWijPrime(int iblock);
+  void computeWijPrime(int iblock);
   /// Computes turbulent mixing coefficient
   virtual Real computeBeta(unsigned int i_gap, unsigned int iz) = 0;
   /// Computes Pressure Drop per channel for block iblock
-  virtual void computeDP(int iblock);
+  void computeDP(int iblock);
   /// Computes Pressure per channel for block iblock
-  virtual void computeP(int iblock);
+  void computeP(int iblock);
   /// Computes Enthalpy per channel for block iblock
   virtual void computeh(int iblock) = 0;
   /// Computes Temperature per channel for block iblock
-  virtual void computeT(int iblock);
+  void computeT(int iblock);
   /// Computes Density per channel for block iblock
-  virtual void computeRho(int iblock);
+  void computeRho(int iblock);
   /// Computes Viscosity per channel for block iblock
-  virtual void computeMu(int iblock);
+  void computeMu(int iblock);
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
-  virtual void computeWijResidual(int iblock);
+  void computeWijResidual(int iblock);
   /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat flux added by the duct
-  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
+  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
-  virtual libMesh::DenseVector<Real> residualFunction(int iblock,
-                                                      libMesh::DenseVector<Real> solution);
+  libMesh::DenseVector<Real> residualFunction(int iblock, libMesh::DenseVector<Real> solution);
   /// Computes solution of nonlinear equation using snes and provided a residual in a formFunction
-  virtual PetscErrorCode petscSnesSolver(int iblock,
-                                         const libMesh::DenseVector<Real> & solution,
-                                         libMesh::DenseVector<Real> & root);
+  PetscErrorCode petscSnesSolver(int iblock,
+                                 const libMesh::DenseVector<Real> & solution,
+                                 libMesh::DenseVector<Real> & root);
   /// This is the residual Vector function in a form compatible with the SNES PETC solvers
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
   /// Computes implicit solve using PetSc
-  virtual PetscErrorCode implicitPetscSolve(int iblock);
+  PetscErrorCode implicitPetscSolve(int iblock);
+
   /// Function to initialize the solution & geometry fields
   virtual void initializeSolution() = 0;
 
   /// Functions that computes the interpolation scheme given the Peclet number
-  virtual PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
-  virtual PetscScalar
+  PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
+  PetscScalar
   computeInterpolatedValue(PetscScalar topValue, PetscScalar botValue, PetscScalar Peclet = 0.0);
 
   PetscErrorCode cleanUp();
@@ -243,7 +243,6 @@ protected:
                                      const unsigned int cross_dimension);
 
   //// Matrices and vectors to be used in implicit assembly
-
   /// Mass conservation
   /// Mass conservation - sum of cross fluxes
   Mat _mc_sumWij_mat;

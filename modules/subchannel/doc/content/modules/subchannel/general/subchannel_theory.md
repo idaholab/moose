@@ -128,7 +128,7 @@ where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient 
 
 ### Calibrated parameter values
 
-For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$. [!cite](kyriakopoulos2022development)
+For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoulos2022development).
 
 
 ## Discretization
