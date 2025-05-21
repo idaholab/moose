@@ -5,27 +5,25 @@
     type = 'CSVDiff'
     input = 'laromance_interpolate.i'
     csvdiff = 'laromance_interpolate_out.csv'
-    required_submodule = 'contrib/neml2'
-    capabilities = 'libtorch'
-    requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 to "
-                  "sample cell and wall dislocation density rate and inelastic strain rate from the the 6D input grid."
+    capabilities = 'neml2'
+    requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 to sample cell and "
+                  "wall dislocation density rate and inelastic strain rate from the the 6D input "
+                  "grid."
   []
   [radialReturn]
     type = 'CSVDiff'
     input = 'laromance_return_mapping.i'
     csvdiff = 'laromance_return_mapping_out.csv'
-    required_submodule = 'contrib/neml2'
-    capabilities = 'libtorch'
+    capabilities = 'neml2'
     rel_err = 2e-4
-    requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 to "
-                  "solve for the nonlinear material response in NEML2 using the radial return mapping."
+    requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 to solve for the "
+                  "nonlinear material response in NEML2 using the radial return mapping."
   []
   [json_vec_size_error]
     type = 'RunException'
     input = 'laromance_interpolate.i'
     cli_args = 'NEML2/input=models/laromance_matl_interp_bad.i'
-    required_submodule = 'contrib/neml2'
-    capabilities = 'libtorch'
+    capabilities = 'neml2'
     expect_err = 'Incorrect JSON interpolation grid size for \'out_ep\'\.'
     requirement = "The system shall throw a neml2 exception if the json file is an incorrect size."
   []

@@ -1,3 +1,11 @@
+[Schedulers]
+  [simple]
+    type = SimpleScheduler
+    batch_size = 5
+    device = 'cpu'
+  []
+[]
+
 [Tensors]
   [a]
     type = Scalar
