@@ -36,6 +36,9 @@ MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
+    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
+      mooseError("LOR HypreADS Solver only supports hex meshes.");
+      
     auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(a, tdofs);
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     _solver.reset(lor_solver);
