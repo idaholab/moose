@@ -36,11 +36,23 @@
   []
 []
 
+[Preconditioning]
+  [sc]
+    type = StaticCondensation
+    petsc_options_iname = '-ksp_norm_type'
+    petsc_options_value = 'preconditioned'
+    petsc_options = '-ksp_monitor'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
+  petsc_options_iname = '-ksp_type'
+  petsc_options_value = 'preonly'
 []
 
 [Outputs]
   exodus = true
+  print_linear_residuals = false
 []
