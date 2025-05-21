@@ -481,18 +481,20 @@ LinearAssemblySegregatedSolve::solve()
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + 1] = solveAdvectedSystem(_energy_sys_number,
-                                                                       *_energy_system,
-                                                                       _energy_equation_relaxation,
-                                                                       _energy_linear_control,
-                                                                       _energy_l_abs_tol);
+      ns_residuals[momentum_residual.size() + _has_energy_system] =
+          solveAdvectedSystem(_energy_sys_number,
+                              *_energy_system,
+                              _energy_equation_relaxation,
+                              _energy_linear_control,
+                              _energy_l_abs_tol);
     }
     if (_has_solid_energy_system)
     {
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + 2] = solveSolidEnergy();
+      ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
+          solveSolidEnergy();
     }
     _problem.execute(EXEC_NONLINEAR);
 

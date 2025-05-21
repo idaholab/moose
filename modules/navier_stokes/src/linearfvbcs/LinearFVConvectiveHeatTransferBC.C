@@ -89,18 +89,17 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryNormalGradient() const
 Real
 LinearFVConvectiveHeatTransferBC::computeBoundaryValueMatrixContribution() const
 {
-  // There should be no cross flow over this surface, but just in case
-  // we add this here.
+  // We approximate the face value with the cell value here.
+  // TODO: we can extend this to a 2-term expansion at some point when the need arises.
   return 1.0;
 }
 
 Real
 LinearFVConvectiveHeatTransferBC::computeBoundaryValueRHSContribution() const
 {
-  // First approach: normally, we should not expect any cross flow through
-  // these boundaries. Just in case someone comes up with something here,
-  // we approximate the face value with the cell value, we
+  // We approximate the face value with the cell value, we
   // don't need to add anything to the right hand side.
+  // TODO: we can extend this to a 2-term expansion at some point when the need arises.
   return 0.0;
 }
 
@@ -111,7 +110,7 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientMatrixContribution() co
   const auto state = determineState();
 
   // We just put the heat transfer coefficient on the diagonal (multiplication with the
-  // surface area is take care of in the kernel).
+  // surface area is taken care of in the kernel).
   return _htc(face, state);
 }
 

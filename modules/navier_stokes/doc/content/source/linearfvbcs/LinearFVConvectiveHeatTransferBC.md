@@ -12,13 +12,12 @@ q^{''} = h (T_{solid}-T_{fluid}),
 where $h$ is the user supplied heat transfer coefficient. The variables
 can be supplied though [!param](/LinearFVBCs/LinearFVConvectiveHeatTransferBC/T_fluid)
 and [!param](/LinearFVBCs/LinearFVConvectiveHeatTransferBC/T_solid) parameters.
-This object will outomatically detect which variable matches the
+This object will automatically detect which variable matches the
 object's and acts accordingly. To account for the heat flux on both sides of the interface,
 the boundary condition should be used by both variables as
 shown in:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/cht/flow-around-square-linear.i block=LinearFVBCs
-
 
 !syntax parameters /LinearFVBCs/LinearFVConvectiveHeatTransferBC
 
