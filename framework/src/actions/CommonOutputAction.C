@@ -15,6 +15,7 @@
 #include "ActionFactory.h"
 #include "Output.h"
 #include "OutputWarehouse.h"
+#include "MooseUtils.h"
 
 // Extrnal includes
 #include "tinydir.h"
@@ -131,7 +132,8 @@ CommonOutputAction::validParams()
       "perf_graph_live_time_limit", 5.0, "Time (in seconds) to wait before printing a message.");
   params.addParam<unsigned int>(
       "perf_graph_live_mem_limit", 100, "Memory (in MB) to cause a message to be printed.");
-  params.addParam<bool>("perf_graph_json", false, "Enable and output the perf graph in JSON");
+  params.addParam<bool>("perf_graph_json", false, "Output the perf graph in JSON");
+  params.addParam<FileName>("perf_graph_json_file", "Path to a .json file to store the perf graph");
 
   params.addParam<bool>("print_mesh_changed_info",
                         false,
@@ -238,67 +240,65 @@ CommonOutputAction::act()
     if (getParam<bool>("dofmap"))
       create("DOFMap", "dofmap");
 
+    // Helper for looking through a pair of [parameters, param name]
+    // to find a true boolean parameter, returning the pair that was found
+    const auto find_param =
+        [](const std::vector<std::pair<const InputParameters *, std::string>> & options)
     {
       std::optional<std::string> from_param_name;
       const InputParameters * from_params = nullptr;
-      if (getParam<bool>("controls"))
-      {
-        from_param_name = "controls";
-        from_params = &parameters();
-      }
-      else if (_app.getParam<bool>("show_controls"))
-      {
-        from_param_name = "show_controls";
-        from_params = &_app.parameters();
-      }
+      for (const auto & [params, param_name] : options)
+        if (params->template get<bool>(param_name))
+        {
+          from_param_name = param_name;
+          from_params = params;
+          break;
+        }
+      return std::make_pair(from_param_name, from_params);
+    };
+
+    {
+      const auto [from_param_name, from_params] =
+          find_param({{&parameters(), "controls"}, {&_app.parameters(), "show_controls"}});
       if (from_param_name)
         create("ControlOutput", *from_param_name, from_params);
     }
 
     if (!_app.getParam<bool>("no_timing"))
     {
-      std::optional<std::string> from_param_name;
-      const InputParameters * from_params = nullptr;
-      if (getParam<bool>("perf_graph"))
-      {
-        from_param_name = "perf_graph";
-        from_params = &parameters();
-      }
-      else if (getParam<bool>("print_perf_log"))
-      {
-        from_param_name = "print_perf_log";
-        from_params = &parameters();
-      }
-      else if (_app.getParam<bool>("timing"))
-      {
-        from_param_name = "timing";
-        from_params = &_app.parameters();
-      }
-      else if (getParam<bool>("perf_graph_json"))
-      {
-        from_param_name = "perf_graph_json";
-        from_params = &parameters();
-      }
+      auto [from_param_name, from_params] = find_param({{&parameters(), "perf_graph"},
+                                                        {&parameters(), "print_perf_log"},
+                                                        {&_app.parameters(), "timing"}});
       if (from_param_name)
         create("PerfGraphOutput", *from_param_name, from_params);
 
-      if (getParam<bool>("perf_graph_json"))
+      const auto add_perf_graph_json = [this](const std::string & from_param_name,
+                                              const std::string & set_param_name,
+                                              const std::string & set_param_value)
       {
         // To avoid this reporter value appearing in all other JSON output
         _common_reporter_names.push_back(perf_graph_json_reporter);
 
         auto params = _factory.getValidParams("JSON");
         params.set<std::vector<ReporterName>>("reporters") = {perf_graph_json_reporter};
-        params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
-        params.set<ExecFlagEnum>("execute_system_information_on") = EXEC_NONE;
-        params.set<std::string>("file_base_suffix") = "perf_graph";
+        params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
+        params.set<ExecFlagEnum>("execute_system_information_on") = {EXEC_NONE};
+        params.set<std::string>(set_param_name) = set_param_value;
         params.set<bool>("distributed") = false;
-        create("JSON",
-               *from_param_name,
-               from_params,
-               &params,
-               perf_graph_json_reporter.getObjectName());
+        create("JSON", from_param_name, &parameters(), &params, from_param_name);
+      };
+
+      if (getParam<bool>("perf_graph_json"))
+        add_perf_graph_json("perf_graph_json", "file_base_suffix", "perf_graph");
+      if (isParamValid("perf_graph_json_file"))
+      {
+        const auto & file = getParam<FileName>("perf_graph_json_file");
+        if (MooseUtils::getExtension(file) != "json")
+          paramError("perf_graph_json_file", "File must end with .json");
+        const auto file_stripped = MooseUtils::stripExtension(file);
+        add_perf_graph_json("perf_graph_json_file", "file_base", file_stripped);
       }
+
       if (!getParam<bool>("perf_graph_live"))
       {
         if (!from_param_name)
@@ -338,7 +338,7 @@ CommonOutputAction::act()
   }
   else if (_current_task == "add_reporter")
   {
-    if (getParam<bool>("perf_graph_json"))
+    if (getParam<bool>("perf_graph_json") || isParamValid("perf_graph_json_file"))
     {
       auto params = _factory.getValidParams("PerfGraphReporter");
       params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
