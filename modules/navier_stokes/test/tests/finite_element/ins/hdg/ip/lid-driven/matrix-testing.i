@@ -290,7 +290,7 @@ l = 1
 
 [Postprocessors]
   [symmetric]
-    type = IsMatrixSymmetric
+    type = MatrixSymmetryCheck
     execute_on = 'timestep_end'
   []
   [pressure_integral]
@@ -299,42 +299,42 @@ l = 1
     execute_on = linear
   []
   [fe_jump_and_upb_equiv]
-    type = AreMatricesTheSame
+    type = MatrixEqualityCheck
     mat1 = 'vel_pb_grad_div.mat'
     mat2 = 'jump.mat'
   []
   [fe_grad_div_and_up_equiv]
-    type = AreMatricesTheSame
+    type = MatrixEqualityCheck
     mat1 = 'vel_p_grad_div.mat'
     mat2 = 'grad_div.mat'
   []
   [fe_combined_and_upall_equiv]
-    type = AreMatricesTheSame
+    type = MatrixEqualityCheck
     mat1 = 'vel_all_p_grad_div.mat'
     mat2 = 'combined.mat'
   []
   [upb_grad_div_num_zero_eig]
-    type = NumZeroEigenvalues
+    type = MatrixEigenvalueCheck
     mat = vel_pb_grad_div.mat
   []
   [upb_div_grad_num_zero_eig]
-    type = NumZeroEigenvalues
+    type = MatrixEigenvalueCheck
     mat = vel_pb_div_grad.mat
   []
   [up_grad_div_num_zero_eig]
-    type = NumZeroEigenvalues
+    type = MatrixEigenvalueCheck
     mat = vel_p_grad_div.mat
   []
   [up_div_grad_num_zero_eig]
-    type = NumZeroEigenvalues
+    type = MatrixEigenvalueCheck
     mat = vel_p_div_grad.mat
   []
   [upall_grad_div_num_zero_eig]
-    type = NumZeroEigenvalues
+    type = MatrixEigenvalueCheck
     mat = vel_all_p_grad_div.mat
   []
   [upall_div_grad_num_zero_eig]
-    type = NumZeroEigenvalues
+    type = MatrixEigenvalueCheck
     mat = vel_all_p_div_grad.mat
   []
 []

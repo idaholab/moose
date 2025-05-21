@@ -92,7 +92,7 @@
     variable = u
   []
   [symmetric]
-    type = IsMatrixSymmetric
+    type = MatrixSymmetryCheck
   []
 []
 

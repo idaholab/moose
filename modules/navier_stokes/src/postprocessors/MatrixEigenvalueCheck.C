@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NumZeroEigenvalues.h"
+#include "MatrixEigenvalueCheck.h"
 
 #include <petscmat.h>
 #include <slepceps.h>
 
-registerMooseObject("NavierStokesApp", NumZeroEigenvalues);
+registerMooseObject("NavierStokesApp", MatrixEigenvalueCheck);
 
 InputParameters
-NumZeroEigenvalues::validParams()
+MatrixEigenvalueCheck::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report the number of zero eigenvalues of a matrix.");
@@ -25,7 +25,7 @@ NumZeroEigenvalues::validParams()
   return params;
 }
 
-NumZeroEigenvalues::NumZeroEigenvalues(const InputParameters & parameters)
+MatrixEigenvalueCheck::MatrixEigenvalueCheck(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _zero_tol(getParam<Real>("zero_tol")),
     _mat_name(getParam<std::string>("mat")),
@@ -34,7 +34,7 @@ NumZeroEigenvalues::NumZeroEigenvalues(const InputParameters & parameters)
 }
 
 void
-NumZeroEigenvalues::initialize()
+MatrixEigenvalueCheck::initialize()
 {
   PetscViewer matviewer;
 
@@ -49,7 +49,7 @@ NumZeroEigenvalues::initialize()
 }
 
 void
-NumZeroEigenvalues::execute()
+MatrixEigenvalueCheck::execute()
 {
   if (_print)
     _console << std::endl << "Conducting eigen-solve for " << _mat_name << std::endl;
@@ -139,12 +139,12 @@ NumZeroEigenvalues::execute()
 }
 
 void
-NumZeroEigenvalues::finalize()
+MatrixEigenvalueCheck::finalize()
 {
 }
 
 Real
-NumZeroEigenvalues::getValue() const
+MatrixEigenvalueCheck::getValue() const
 {
   return _num_zero_eigenvalues;
 }

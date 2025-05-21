@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AreMatricesTheSame.h"
+#include "MatrixEqualityCheck.h"
 
 #include "MooseUtils.h"
 #include "libmesh/petsc_matrix.h"
 
-registerMooseObject("NavierStokesApp", AreMatricesTheSame);
+registerMooseObject("NavierStokesApp", MatrixEqualityCheck);
 
 InputParameters
-AreMatricesTheSame::validParams()
+MatrixEqualityCheck::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report whether two matrices are the same or not.");
@@ -26,7 +26,7 @@ AreMatricesTheSame::validParams()
   return params;
 }
 
-AreMatricesTheSame::AreMatricesTheSame(const InputParameters & parameters)
+MatrixEqualityCheck::MatrixEqualityCheck(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _equiv_tol(getParam<Real>("equivalence_tol")),
     _mat1_name(getParam<std::string>("mat1")),
@@ -35,7 +35,7 @@ AreMatricesTheSame::AreMatricesTheSame(const InputParameters & parameters)
 }
 
 void
-AreMatricesTheSame::execute()
+MatrixEqualityCheck::execute()
 {
   _equiv = true;
 
@@ -64,7 +64,7 @@ AreMatricesTheSame::execute()
 }
 
 void
-AreMatricesTheSame::finalize()
+MatrixEqualityCheck::finalize()
 {
   _communicator.min(_equiv);
 
@@ -75,7 +75,7 @@ AreMatricesTheSame::finalize()
 }
 
 Real
-AreMatricesTheSame::getValue() const
+MatrixEqualityCheck::getValue() const
 {
   return _equiv;
 }

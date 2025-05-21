@@ -57,7 +57,7 @@
 
 [Postprocessors]
   [symmetric]
-    type = IsMatrixSymmetric
+    type = MatrixSymmetryCheck
   []
   [avg_u]
     type = ElementAverageValue

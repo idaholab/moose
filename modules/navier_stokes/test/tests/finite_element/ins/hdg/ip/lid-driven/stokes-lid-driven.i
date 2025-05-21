@@ -181,7 +181,7 @@ n = 4
 
 [Postprocessors]
   [symmetric]
-    type = IsMatrixSymmetric
+    type = MatrixSymmetryCheck
     execute_on = 'timestep_end'
   []
   [pressure_integral]
