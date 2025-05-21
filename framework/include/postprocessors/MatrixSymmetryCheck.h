@@ -32,6 +32,9 @@ protected:
   const std::string _mat_file_name;
   /// Tolerance for the comparison between coefficients and transpose counterparts
   const Real _symm_tol;
-  /// Whether the matrix is symmetric
+  /// A binary file may contain multiple writes of a matrix. This member can be used to load a
+  /// particular matrix from the binary file
+  const unsigned int _mat_number_to_load;
+  ///  Whether the matrix is symmetric
   bool _equiv;
 };

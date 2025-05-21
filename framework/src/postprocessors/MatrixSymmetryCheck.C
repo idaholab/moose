@@ -30,6 +30,11 @@ MatrixSymmetryCheck::validParams()
                                "parameter is not provided, then the system matrix is used");
   params.addParam<Real>(
       "symmetry_tol", 1e-8, "The tolerance (both relative and absolute) for comparing symmetry");
+  params.addParam<unsigned int>(
+      "mat_number_to_load",
+      1,
+      "A binary file may contain multiple writes of a matrix. This parameter can be used to load a "
+      "particular matrix from the binary file. By default we load the first written matrix");
   return params;
 }
 
@@ -38,8 +43,12 @@ MatrixSymmetryCheck::MatrixSymmetryCheck(const InputParameters & parameters)
     _mat_from_file(isParamValid("mat")),
     _mat_file_name(_mat_from_file ? getParam<std::string>("mat") : ""),
     _symm_tol(getParam<Real>("symmetry_tol")),
+    _mat_number_to_load(getParam<unsigned int>("mat_number_to_load")),
     _equiv(true)
 {
+  if (!_mat_from_file && isParamSetByUser("mat_number_to_load"))
+    paramError("mat_number_to_load",
+               "This parameter should only be set in conjunction with the 'mat' parameter");
 }
 
 void
@@ -54,8 +63,8 @@ MatrixSymmetryCheck::execute()
   std::unique_ptr<SparseMatrix<Number>> file_mat_wrapper;
   if (_mat_from_file)
   {
-    file_mat_wrapper =
-        Moose::PetscSupport::createMatrixFromFile(_communicator, file_mat, _mat_file_name);
+    file_mat_wrapper = Moose::PetscSupport::createMatrixFromFile(
+        _communicator, file_mat, _mat_file_name, _mat_number_to_load);
     mat = file_mat_wrapper.get();
   }
   else
