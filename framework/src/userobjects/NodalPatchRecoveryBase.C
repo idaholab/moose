@@ -133,6 +133,8 @@ NodalPatchRecoveryBase::execute()
   }
   _Ae[elem_id] = Ae;
   _be[elem_id] = be;
+
+  std::cout << "[Rank " << processor_id() << "] assembled elem " << elem_id << std::endl;
 }
 
 void
@@ -188,3 +190,93 @@ NodalPatchRecoveryBase::finalize()
   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
       _communicator, query_ids, gather_data, act_on_data, 0);
 }
+
+// void
+// NodalPatchRecoveryBase::finalize()
+// {
+//   // Type alias for (Ae, be) pair
+//   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
+
+//   // Each entry: element ID to (Ae, be)
+//   typedef std::pair<dof_id_type, AbPair> ElementEntry;
+
+//   // (a) Package local Ae and be into a list
+//   std::vector<ElementEntry> ab_pairs;
+//   ab_pairs.reserve(_Ae.size());
+
+//   for (const auto & entry : _Ae)
+//   {
+//     const dof_id_type elem_id = entry.first;
+//     const RealEigenMatrix & Ae = entry.second;
+
+//     // Look up the corresponding be vector
+//     const RealEigenVector & be = _be.at(elem_id);
+
+//     // Create the pair and add it to the list
+//     ab_pairs.emplace_back(elem_id, AbPair(Ae, be));
+//   }
+
+//   // (b) Gather ab_pairs from all processors
+//   std::vector<ElementEntry> gathered_ab_pairs;
+//   _communicator.allgather(ab_pairs, gathered_ab_pairs); // cannot work
+
+//   // (c) Merge all gathered data into local _Ae and _be
+//   for (const auto & entry : gathered_ab_pairs)
+//   {
+//     const dof_id_type elem_id = entry.first;
+//     const RealEigenMatrix & Ae = entry.second.first;
+//     const RealEigenVector & be = entry.second.second;
+
+//     // Store into local maps
+//     _Ae[elem_id] = Ae;
+//     _be[elem_id] = be;
+//   }
+// }
+
+// void
+// NodalPatchRecoveryBase::finalize()
+// {
+//   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
+//   // elements. However, this userobject is only run on local elements, so we need to query those
+//   // information from other processors in this finalize() method.
+
+//   // Gather elements from other processors
+//   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
+//   for (processor_id_type pid = 0; pid < _communicator.size(); ++pid)
+//   {
+//     if (pid == processor_id())
+//       continue;
+
+//     // Ask this processor for everything it owns
+//     for (const auto & entry : _Ae)
+//       query_ids[pid].push_back(entry.first);
+//   }
+
+//   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
+
+//   // Answer queries received from other processors
+//   auto gather_data = [this](const processor_id_type /*pid*/,
+//                             const std::vector<dof_id_type> & elem_ids,
+//                             std::vector<AbPair> & ab_pairs)
+//   {
+//     for (const auto & elem_id : elem_ids)
+//       ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
+//   };
+
+//   // Gather answers received from other processors
+//   auto act_on_data = [this](const processor_id_type /*pid*/,
+//                             const std::vector<dof_id_type> & elem_ids,
+//                             const std::vector<AbPair> & ab_pairs)
+//   {
+//     for (const auto i : index_range(elem_ids))
+//     {
+//       const auto elem_id = elem_ids[i];
+//       const auto & [Ae, be] = ab_pairs[i];
+//       _Ae[elem_id] = Ae;
+//       _be[elem_id] = be;
+//     }
+//   };
+
+//   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
+//       _communicator, query_ids, gather_data, act_on_data, 0);
+// }
