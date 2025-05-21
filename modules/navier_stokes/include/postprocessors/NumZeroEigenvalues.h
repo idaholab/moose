@@ -17,6 +17,9 @@ template <typename>
 class PetscMatrix;
 }
 
+/**
+ * Returns the number of zero eigenvalues in a PETSc matrix
+ */
 class NumZeroEigenvalues : public GeneralPostprocessor
 {
 public:
