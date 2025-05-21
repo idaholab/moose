@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <limits>
 #include <string>
 #include <map>
 #include <memory>
@@ -29,6 +30,10 @@ using AbaqusID = int;
 
 // Any index into a std::vector should use this type
 using Index = std::size_t;
+
+// maps from variable_id and node index to a value (used for BCs)
+template <typename T>
+using VariableValueMap = std::unordered_map<AbaqusID, std::unordered_map<Index, T>>;
 
 /**
  * Store objects of type T accessible under a name and a contiguous id.
@@ -193,7 +198,14 @@ struct FieldIC
  */
 struct Step
 {
-  Step(const Model & model) : _model(model) {}
+  Step(const Model & model)
+    : _model(model),
+      _dt(-1.0),
+      _duration(1.0),
+      _dt_min(0.0),
+      _dt_max(std::numeric_limits<Real>::max())
+  {
+  }
   Step(const BlockNode & block, const Model & model) : _model(model) { parse(block); }
   void parse(const BlockNode & block);
 
@@ -201,10 +213,16 @@ struct Step
 
   /// essential boundary conditions as list of nodes this BC applies to
   /// (mapping from Abaqus variable ID to a (node index, value) map)
-  std::unordered_map<AbaqusID, std::unordered_map<Index, Real>> _bc_var_node_value_map;
+  VariableValueMap<Real> _bc_var_node_value_map;
 
   /// Model acces to get node sets
   const Model & _model;
+
+  /// Step time data
+  Real _dt;
+  Real _duration;
+  Real _dt_min;
+  Real _dt_max;
 };
 
 /**
