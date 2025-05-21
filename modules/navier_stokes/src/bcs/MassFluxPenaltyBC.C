@@ -32,6 +32,8 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _matrix_only(getParam<bool>("matrix_only")),
     _gamma(getParam<Real>("gamma"))
 {
+  if (_mesh.dimension() > 2)
+    mooseError("This class only supports 2D simulations at this time");
 }
 
 void
