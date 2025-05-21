@@ -76,9 +76,6 @@ outputFrameworkInformation(const MooseApp & app)
   if (input_args_oss.str().size())
     oss << "Command Line Input Argument(s):\n" << input_args_oss.str() << "\n";
 
-  oss << "Output File Base:\n  " << std::filesystem::absolute(app.getOutputFileBase()).c_str()
-      << "\n\n";
-
   const auto checkpoints = app.getOutputWarehouse().getOutputs<Checkpoint>();
   if (checkpoints.size())
   {
