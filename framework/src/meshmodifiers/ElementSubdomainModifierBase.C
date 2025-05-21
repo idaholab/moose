@@ -88,9 +88,10 @@ ElementSubdomainModifierBase::validParams()
       "If the region has the inative element, you should set this parameter to turn on the "
       "extrapolation of the solution to the newly activated elements. ");
 
-  params.addRequiredParam<UserObjectName>(
+  params.addParam<std::vector<UserObjectName>>(
       "nodal_patch_recovery_uo",
-      "The name of the userobject that sets up the least squares problem of the nodal patch.");
+      {},
+      "List of NodalPatchRecovery UserObjects for each component (e.g., u, v)");
 
   params.registerBase("MeshModifier");
 
@@ -104,13 +105,16 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _old_subdomain_reinitialized(getParam<bool>("old_subdomain_reinitialized")),
     _ic_strategy_string(getParam<std::string>("ic_strategy")),
     _ic_strategy(parseString2ICStrategy(_ic_strategy_string)),
-    _inactive_subdomain_ID(getParam<int>("inactive_subdomain_ID")),
-    _npr(&getUserObject<NodalPatchRecoveryBase>("nodal_patch_recovery_uo"))
+    _inactive_subdomain_ID(getParam<int>("inactive_subdomain_ID"))
 {
   if (_ic_strategy != ICStrategyForNewlyActivated::IC_DEFAULT and _inactive_subdomain_ID == -1)
     mooseError("The inactive subdomain ID must be set to use the extrapolation strategy.");
   if (_ic_strategy == ICStrategyForNewlyActivated::IC_DEFAULT and _inactive_subdomain_ID != -1)
     mooseError("The inactive subdomain ID should not be set to use the default strategy.");
+
+  const auto & uo_names = getParam<std::vector<UserObjectName>>("nodal_patch_recovery_uo");
+  for (const auto & name : uo_names)
+    _npr_vec.push_back(&getUserObjectByName<NodalPatchRecoveryBase>(name));
 
   if (isParamSetByUser("moving_boundary_name") ||
       isParamSetByUser("complement_moving_boundary_name"))
@@ -1320,12 +1324,16 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
     const auto & x = *node;
 
     // Recovery
-    Real recovered_val = _npr->nodalPatchRecovery(x, patch_elem_ids);
+    std::vector<Real> recovered_vals;
+    int num_components = _npr_vec.size();
+    for (unsigned comp = 0; comp < num_components; ++comp)
+      recovered_vals.push_back(_npr_vec[comp]->nodalPatchRecovery(x, patch_elem_ids));
 
     std::vector<dof_id_type> dofs;
     dof_map.dof_indices(node, dofs);
-    for (auto dof : dofs)
-      vec.set(dof, recovered_val);
+
+    for (unsigned i = 0; i < dofs.size(); ++i)
+      vec.set(dofs[i], recovered_vals[i]);
   }
 
   vec.close();

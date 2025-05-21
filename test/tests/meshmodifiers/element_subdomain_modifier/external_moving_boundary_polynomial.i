@@ -50,7 +50,7 @@
     inactive_subdomain_ID = 2
     ic_strategy = "IC_POLYNOMIAL"
 
-    nodal_patch_recovery_uo = extrapolation_patch
+    nodal_patch_recovery_uo = 'extrapolation_patch'
   []
 []
 
