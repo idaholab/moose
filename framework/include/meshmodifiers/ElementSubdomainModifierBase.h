@@ -12,6 +12,7 @@
 #include "ElementUserObject.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
+#include "NodalPatchRecoveryBase.h"
 
 struct NeighborInfo
 {
@@ -25,7 +26,8 @@ enum Type
 {
   IC_DEFAULT,
   IC_EXTRAPOLATE_FIRST_LAYER,
-  IC_EXTRAPOLATE_SECOND_LAYER
+  IC_EXTRAPOLATE_SECOND_LAYER,
+  IC_POLYNOMIAL
 };
 }
 
@@ -194,7 +196,7 @@ private:
 
   ///
   std::unordered_set<dof_id_type> _newactivated_nodes;
-  std::unordered_set<dof_id_type> _newactivated_nodes_first_pass;
+  std::unordered_set<dof_id_type> _first_pass_local_activated_nodes;
 
   std::string _ic_strategy_string;
   ICStrategyForNewlyActivated::Type _ic_strategy;
@@ -220,7 +222,7 @@ private:
   /// @details This function gathers all nodes associated with moved elements that are newly
   /// activated, regardless of processor ownership. This is typically the first pass in
   /// a parallel algorithm and is followed by synchronization to build a global view.
-  void gatherGlobalNewlyActivatedNodes(
+  void identifyFirstPassActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
   /// @brief Identify newly activated nodes that are locally owned by the current processor
@@ -229,7 +231,7 @@ private:
   /// the locally owned subset of newly activated nodes. This step is typically performed
   /// after the global gather step to ensure that only owned nodes are used for further
   /// operations such as mesh updates or DoF assignments.
-  void findNewlyActivatedNodes(
+  void identifyLocallyOwnedActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
   inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
@@ -240,6 +242,8 @@ private:
       return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_SECOND_LAYER;
     else if (input == "default_value")
       return ICStrategyForNewlyActivated::IC_DEFAULT;
+    else if (input == "IC_POLYNOMIAL")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
     else
       throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
   }
@@ -247,18 +251,44 @@ private:
   /// Using weighted averaging to obtain the solution on the newly-activated nodes
   void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
 
+  /// Elements that have been reinitialized due to subdomain changes,
+  /// gathered across all processors using MPI
   std::vector<dof_id_type> _global_reinitialized_elems;
-  std::vector<dof_id_type> _global_newactivated_nodes;
-  std::vector<dof_id_type> _global_newactivated_nodes_temp;
-  std::vector<dof_id_type> _global_newactivated_nodes_diff;
-  /// Node ID to whether the node has been set IC
+
+  /// First-pass global collection of all newly activated node IDs from every processor.
+  /// This is the authoritative set, as it does not rely on node ownership.
+  /// Includes all nodes connected to reinitialized elements, regardless of processor.
+  /// Used as a reference for correctness in parallel settings.
+  std::vector<dof_id_type> _first_pass_global_activated_nodes;
+
+  /// Final (second-pass) collection of newly activated node IDs,
+  /// filtered to include only those locally owned by this processor.
+  /// May miss some nodes in parallel runs due to ownership mismatch.
+  /// Used for applying ICs but validated against `_first_pass_global_activated_nodes`.
+  std::vector<dof_id_type> _final_global_activated_nodes;
+
+  /// Difference between `_first_pass_global_activated_nodes` and `_final_global_activated_nodes`.
+  /// Helps identify missing nodes that should have been activated but were skipped due to
+  /// processor ownership constraints. Useful for debugging MPI consistency issues.
+  std::vector<dof_id_type> _final_global_activated_nodes_diff;
+
+  /// Indicates whether each node has had its initial condition (IC) applied.
+  /// true = IC already set; false = IC not yet set.
   std::unordered_map<dof_id_type, bool> _node2IC_set;
 
-  /// Let every processor know what are the reinitialized elements (save to _global_reinitialized_elems)
+  /// Perform a global MPI gather of reinitialized element IDs across all processors.
+  /// Results are stored in `_global_reinitialized_elems`.
   void synchronizeReinitializedElems();
-  /// Let every processor know what are the newly activated nodes (save to _global_newactivated_nodes)
-  void synchronizeNewActivatedNodes();
-  void synchronizeNewActivatedNodes2TempGlobal();
+
+  /// First-pass: Perform a global MPI gather of newly activated node IDs from all processors.
+  /// This does **not** check for local ownership and is considered the complete and correct set.
+  /// Stores result in `_first_pass_global_activated_nodes`.
+  void gatherFirstPassActivatedNodesGlobally();
+
+  /// Second-pass: Gather newly activated nodes that are **locally owned** by this processor only.
+  /// This subset may be incomplete in MPI runs, and should be validated against the first pass.
+  /// Stores result in `_final_global_activated_nodes`.
+  void gatherFinalActivatedNodesGlobally();
 
   /// @brief  An additional check ensures that the number of globally activated nodes
   /// in the second pass is not less than that of the first pass.
@@ -275,6 +305,14 @@ private:
   /// @param nid The ID of the node
   /// @return A vector of pointers to the neighboring nodes
   std::vector<const Node *> firstLayerNeighbours(dof_id_type nid) const;
+
+  /// @brief Apply initial conditions for a list of nodes
   void applyICForNodeList(SystemBase & sys, const std::vector<dof_id_type> & nodes);
-  void computeFirstLayerNeighborInfo(SystemBase & sys);
+
+  /// @brief Compute the first layer neighbor information for a given system
+  void propagateICFromNeighborsLayerByLayer(SystemBase & sys);
+
+  const NodalPatchRecoveryBase * _npr;
+
+  void applyIC_Polynomial(SystemBase & sys);
 };
