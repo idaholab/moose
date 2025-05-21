@@ -9,6 +9,7 @@
       input = test.i
       cli_args = "Preconditioning/active='' -ksp_type gmres -ksp_norm_type preconditioned"
       detail = 'using an iterative preconditioner applied to all the degrees of freedom, and'
+      absent_out = '[Oo]ption left'
     []
     [sc]
       type = Exodiff
@@ -17,7 +18,17 @@
       prereq = 'test/regular'
       detail = 'using an iterative preconditioner applied to only degrees of freedom remaining after static condensation.'
       max_threads = 1
+      absent_out = '[Oo]ption left'
     []
+  []
+  [test_option_left]
+    type = RunApp
+    expect_out = '[Oo]ption left'
+    input = test.i
+    prereq = 'test/sc'
+    max_threads = 1
+    cli_args = '-nl0_condensed_snes_type anderson'
+    requirement = 'The system shall warn of solver options not used.'
   []
   [mms]
     requirement = 'The system shall show the expected cubic rate of convergence in the L2 norm for a quadratic Lagrange basis when using static condensation preconditioning.'
