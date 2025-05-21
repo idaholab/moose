@@ -62,11 +62,14 @@
   [walls]
     type = NavierStokesLHDGVelocityDirichletBC
     boundary = 'left right bottom'
+    dirichlet_u = 0
+    dirichlet_v = 0
   []
   [lid]
     type = NavierStokesLHDGVelocityDirichletBC
     boundary = 'top'
-    dirichlet_u = '1'
+    dirichlet_u = 1
+    dirichlet_v = 0
   []
 []
 
