@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Action.h"
+#include "ReporterName.h"
 
 #include <optional>
 
