@@ -26,7 +26,6 @@ enum Type
 {
   IC_DEFAULT,
   IC_EXTRAPOLATE_FIRST_LAYER,
-  IC_EXTRAPOLATE_SECOND_LAYER,
   IC_POLYNOMIAL
 };
 }
@@ -192,7 +191,7 @@ private:
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
 
-  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_to_second_neighbors;
+  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_to_first_neighbors;
 
   ///
   std::unordered_set<dof_id_type> _newactivated_nodes;
@@ -204,10 +203,10 @@ private:
   /// Inactive subdomain ID
   int _inactive_subdomain_ID;
 
-  /// @brief find the second/first layer of neighbors for each element
+  /// @brief find the first layer of neighbors for each element
   /// @param sys
   /// @param displaced
-  void computeSecondNeighborInfo(SystemBase & sys, bool displaced);
+  void computeFirstLayerNeighborInfo(SystemBase & sys, bool displaced);
   void verifySecondNeighborInfo();
 
   /**
@@ -238,8 +237,6 @@ private:
   {
     if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
       return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
-    else if (input == "IC_EXTRAPOLATE_SECOND_LAYER")
-      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_SECOND_LAYER;
     else if (input == "default_value")
       return ICStrategyForNewlyActivated::IC_DEFAULT;
     else if (input == "IC_POLYNOMIAL")
@@ -259,18 +256,18 @@ private:
   /// This is the authoritative set, as it does not rely on node ownership.
   /// Includes all nodes connected to reinitialized elements, regardless of processor.
   /// Used as a reference for correctness in parallel settings.
-  std::vector<dof_id_type> _first_pass_global_activated_nodes;
+  std::vector<dof_id_type> _complete_global_activated_nodes;
 
   /// Final (second-pass) collection of newly activated node IDs,
   /// filtered to include only those locally owned by this processor.
   /// May miss some nodes in parallel runs due to ownership mismatch.
-  /// Used for applying ICs but validated against `_first_pass_global_activated_nodes`.
-  std::vector<dof_id_type> _final_global_activated_nodes;
+  /// Used for applying ICs but validated against `_complete_global_activated_nodes`.
+  std::vector<dof_id_type> _local_own_gather_global_activated_nodes;
 
-  /// Difference between `_first_pass_global_activated_nodes` and `_final_global_activated_nodes`.
+  /// Difference between `_complete_global_activated_nodes` and `_local_own_gather_global_activated_nodes`.
   /// Helps identify missing nodes that should have been activated but were skipped due to
   /// processor ownership constraints. Useful for debugging MPI consistency issues.
-  std::vector<dof_id_type> _final_global_activated_nodes_diff;
+  std::vector<dof_id_type> _local_own_gather_global_and_complete_activated_nodes_diff;
 
   /// Indicates whether each node has had its initial condition (IC) applied.
   /// true = IC already set; false = IC not yet set.
@@ -282,13 +279,13 @@ private:
 
   /// First-pass: Perform a global MPI gather of newly activated node IDs from all processors.
   /// This does **not** check for local ownership and is considered the complete and correct set.
-  /// Stores result in `_first_pass_global_activated_nodes`.
-  void gatherFirstPassActivatedNodesGlobally();
+  /// Stores result in `_complete_global_activated_nodes`.
+  void gatherCompleteActivatedNodesGlobally();
 
   /// Second-pass: Gather newly activated nodes that are **locally owned** by this processor only.
   /// This subset may be incomplete in MPI runs, and should be validated against the first pass.
-  /// Stores result in `_final_global_activated_nodes`.
-  void gatherFinalActivatedNodesGlobally();
+  /// Stores result in `_local_own_gather_global_activated_nodes`.
+  void gatherLocalActivatedNodesGlobally();
 
   /// @brief  An additional check ensures that the number of globally activated nodes
   /// in the second pass is not less than that of the first pass.
@@ -309,14 +306,14 @@ private:
   /// @brief Apply initial conditions for a list of nodes
   void applyICForNodeList(SystemBase & sys, const std::vector<dof_id_type> & nodes);
 
-  /// @brief Compute the first layer neighbor information for a given system
-  void propagateICFromNeighborsLayerByLayer(SystemBase & sys);
-
   /// @brief Names of the NodalPatchRecoveryBase user objects
   const std::vector<UserObjectName> _npr_names;
 
   /// @brief Apply initial conditions using polynomial extrapolation
   std::vector<const NodalPatchRecoveryBase *> _npr_vec;
 
+  std::vector<dof_id_type> _neighbor_solved_elem_ids;
+
   void applyIC_Polynomial(SystemBase & sys);
+  void gatherNeighborElementsForActivatedNodes();
 };

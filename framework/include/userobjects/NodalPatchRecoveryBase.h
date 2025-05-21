@@ -34,6 +34,24 @@ public:
   virtual void threadJoin(const UserObject &) override;
   virtual void finalize() override;
 
+  void cacheAdditionalElements(const std::vector<dof_id_type> & additional_elems) const
+  {
+    _additional_elems = additional_elems;
+  }
+
+  void cleanQueryIDsAndAdditionalElements() const
+  {
+    _query_ids.clear();
+    _additional_elems.clear();
+  }
+
+  void identifyAdditionalElementsFromOtherProcs() const;
+
+  /// @brief Synchronizes local matrices and vectors (_Ae, _be) across processors
+  /// by gathering and distributing data for specified element IDs (_query_ids)
+  /// in a parallel computing environment.
+  void synchronizeAebe() const;
+
 protected:
   /// Compute the quantity to recover using nodal patch recovery
   virtual Real computeValue() = 0;
@@ -65,8 +83,21 @@ private:
   const unsigned int _q;
 
   /// The element-level A matrix
-  std::map<dof_id_type, RealEigenMatrix> _Ae;
+  mutable std::map<dof_id_type, RealEigenMatrix> _Ae;
 
   /// The element-level b vector
-  std::map<dof_id_type, RealEigenVector> _be;
+  mutable std::map<dof_id_type, RealEigenVector> _be;
+
+  // Map to track which elements are needed from each processor
+  mutable std::unordered_map<processor_id_type, std::vector<dof_id_type>> _query_ids;
+
+  /// Additional elements to query
+  mutable std::vector<dof_id_type> _additional_elems;
+
+  /// Iterates over all evaluable elements and records their IDs in a query map
+  /// if they belong to a different processor.
+  void identifyGhostElementsFromOtherProcs() const;
+
+  /// @brief Whether we want to specify the elements for the patch recovery
+  bool _use_specific_elements;
 };

@@ -29,6 +29,7 @@
   [extrapolation_patch]
     type = NodalPatchRecoveryVariable
     patch_polynomial_order = FIRST
+    use_specific_elements = true
     var = 'diff'
     execute_on = 'INITIAL TIMESTEP_END'
   []
@@ -58,6 +59,9 @@
   [phi]
     block = '1 2'
   []
+  [proc]
+    block = '1 2'
+  []
 []
 
 [Functions]
@@ -74,6 +78,12 @@
     function = moving_circle_func
     block = '1 2'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+  [proc]
+    type = ProcessorIDAux
+    variable = proc
+    execute_on = initial
+    block = '1 2'
   []
 []
 
