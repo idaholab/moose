@@ -10,11 +10,9 @@
 #include "NavierStokesLHDGAssemblyHelper.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
-#include "Function.h"
 #include "SystemBase.h"
 #include "MooseMesh.h"
 #include "MooseObject.h"
-#include "MaterialPropertyInterface.h"
 #include "NS.h"
 
 #include "libmesh/point.h"

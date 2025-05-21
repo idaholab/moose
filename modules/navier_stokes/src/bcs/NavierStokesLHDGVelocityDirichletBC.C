@@ -8,10 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NavierStokesLHDGVelocityDirichletBC.h"
-#include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
-#include "Function.h"
-#include "NavierStokesLHDGKernel.h"
 
 registerMooseObject("NavierStokesApp", NavierStokesLHDGVelocityDirichletBC);
 

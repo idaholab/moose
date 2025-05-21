@@ -31,9 +31,13 @@ PrintMatricesNSProblem::validParams()
   params.addRequiredParam<TagName>(
       "velocity_mass_matrix", "The matrix tag name corresponding to the velocity mass matrix.");
   params.addParam<std::vector<TagName>>(
-      "jump_matrices",
+      "augmented_lagrange_matrices",
       {},
-      "The matrices corresponding to different (superpositions) of finite element weak forms");
+      "Matrices corresponding to finite element weak forms used to create augmented Lagrange "
+      "perturbations. Example weak forms include volumetric grad-div and face jumps for "
+      "discontinuous Galerkin discretizations. This is a vector because, for example, a user may "
+      "pass one matrix that corresponds just to grad-div, another corresponding to face jumps, and "
+      "yet another corresponding to the sum of the two.");
   params.addRequiredParam<NonlinearVariableName>("u", "The interior x-velocity variable");
   params.addRequiredParam<NonlinearVariableName>("v", "The interior y-velocity variable");
   params.addParam<NonlinearVariableName>(NS::pressure, "The pressure in the volume");
@@ -46,7 +50,7 @@ PrintMatricesNSProblem::PrintMatricesNSProblem(const InputParameters & parameter
   : FEProblem(parameters),
     _pressure_mass_matrix(getParam<TagName>("pressure_mass_matrix")),
     _velocity_mass_matrix(getParam<TagName>("velocity_mass_matrix")),
-    _jump_matrices(getParam<std::vector<TagName>>("jump_matrices"))
+    _augmented_lagrange_matrices(getParam<std::vector<TagName>>("augmented_lagrange_matrices"))
 {
   if (_communicator.size() > 1)
     mooseError("This problem can only be used in serial");
@@ -75,6 +79,7 @@ PrintMatricesNSProblem::onTimestepEnd()
   if (has_pbar)
     pb_var = &nl.getVariable(0, getParam<NonlinearVariableName>(NS::pressure + "_bar"));
 
+  // Retrieve DOF indices for each variable
   std::vector<dof_id_type> u_indices, v_indices, p_vol_indices, pb_indices, vel_indices, p_indices;
   dof_map.local_variable_indices(u_indices, lm_mesh, u_var.number());
   dof_map.local_variable_indices(v_indices, lm_mesh, v_var.number());
@@ -88,6 +93,7 @@ PrintMatricesNSProblem::onTimestepEnd()
   if (has_pbar)
     p_indices.insert(p_indices.end(), pb_indices.begin(), pb_indices.end());
 
+  // Retrieve mass matrices and system matrix
   PetscMatrix<Number> vel_p_mat(_communicator), p_vel_mat(_communicator), p_mass_mat(_communicator),
       vel_mass_mat(_communicator);
   const auto pressure_mass_matrix_tag_id = getMatrixTagID(_pressure_mass_matrix);
@@ -121,30 +127,31 @@ PrintMatricesNSProblem::onTimestepEnd()
        &p_mass_mat,
        &vel_mass_mat](const auto & pressure_indices, const std::string & outer_matrix_name)
   {
+    // Computes and writes to file the product LHS * M^-1 * RHS
     auto compute_triple_product_matrix =
         [this, print, write_matrix](PetscMatrix<Number> & lhs,
                                     PetscMatrix<Number> & mass_matrix,
                                     PetscMatrix<Number> & rhs,
                                     const std::string & inner_matrix_name)
     {
-      Mat B, M, Minv;
+      Mat I, M, Minv;
 
-      // Create B
+      // Create the identity matrix
       LibmeshPetscCall(MatCreateDense(_communicator.get(),
                                       mass_matrix.local_m(),
                                       mass_matrix.local_n(),
                                       mass_matrix.m(),
                                       mass_matrix.n(),
                                       nullptr,
-                                      &B));
+                                      &I));
       const PetscScalar one = 1.0;
       for (const auto i : make_range(mass_matrix.row_start(), mass_matrix.row_stop()))
       {
         const auto petsc_i = cast_int<PetscInt>(i);
-        LibmeshPetscCall(MatSetValues(B, 1, &petsc_i, 1, &petsc_i, &one, INSERT_VALUES));
+        LibmeshPetscCall(MatSetValues(I, 1, &petsc_i, 1, &petsc_i, &one, INSERT_VALUES));
       }
-      LibmeshPetscCall(MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY));
-      LibmeshPetscCall(MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY));
+      LibmeshPetscCall(MatAssemblyBegin(I, MAT_FINAL_ASSEMBLY));
+      LibmeshPetscCall(MatAssemblyEnd(I, MAT_FINAL_ASSEMBLY));
 
       // Create Minv
       LibmeshPetscCall(MatCreateDense(_communicator.get(),
@@ -160,7 +167,7 @@ PrintMatricesNSProblem::onTimestepEnd()
       LibmeshPetscCall(MatLUFactor(M, nullptr, nullptr, nullptr));
 
       // Solve for Minv
-      LibmeshPetscCall(MatMatSolve(M, B, Minv));
+      LibmeshPetscCall(MatMatSolve(M, I, Minv));
 
       //
       // Compute triple product and write the result
@@ -179,11 +186,12 @@ PrintMatricesNSProblem::onTimestepEnd()
       write_matrix(triple_product.mat(), inner_matrix_name + std::string(".mat"));
 
       LibmeshPetscCall(MatDestroy(&triple_product_mat));
-      LibmeshPetscCall(MatDestroy(&B));
+      LibmeshPetscCall(MatDestroy(&I));
       LibmeshPetscCall(MatDestroy(&M));
       LibmeshPetscCall(MatDestroy(&Minv));
     };
 
+    // Select blocks we care about (coupling between variables)
     system_size_pressure_mass_matrix.create_submatrix(
         p_mass_mat, pressure_indices, pressure_indices);
     system_size_velocity_mass_matrix.create_submatrix(vel_mass_mat, vel_indices, vel_indices);
@@ -202,17 +210,19 @@ PrintMatricesNSProblem::onTimestepEnd()
     do_vel_p(pb_indices, "vel_pb");
   do_vel_p(p_indices, "vel_all_p");
 
-  for (const auto & jump_name : _jump_matrices)
+  // Print / write velocity block for each augmented Lagrange matrix
+  for (const auto & augmented_lagrange_name : _augmented_lagrange_matrices)
   {
     PetscMatrix<Number> jump_mat(_communicator);
-    const auto jump_matrix_tag_id = getMatrixTagID(jump_name);
+    const auto jump_matrix_tag_id = getMatrixTagID(augmented_lagrange_name);
     auto & system_size_jump_matrix = nl.getMatrix(jump_matrix_tag_id);
     system_size_jump_matrix.create_submatrix(jump_mat, vel_indices, vel_indices);
     if (print)
     {
-      _console << std::endl << "Printing the jump matrix '" << jump_name << "'" << std::endl;
+      _console << std::endl
+               << "Printing the jump matrix '" << augmented_lagrange_name << "'" << std::endl;
       jump_mat.print();
     }
-    write_matrix(jump_mat.mat(), jump_name + std::string(".mat"));
+    write_matrix(jump_mat.mat(), augmented_lagrange_name + std::string(".mat"));
   }
 }
