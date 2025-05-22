@@ -54,10 +54,11 @@ CSGUniverseList::addUniverse(const std::string name, std::vector<std::shared_ptr
 }
 
 void
-CSGUniverseList::addUniverse(const std::pair<std::string, std::shared_ptr<CSGUniverse>> universe)
+CSGUniverseList::addUniverse(const std::shared_ptr<CSGUniverse> universe)
 {
-  checkUniverseName(universe.first);
-  _universes.insert(universe);
+  auto name = universe->getName();
+  checkUniverseName(name);
+  _universes.insert(std::make_pair(name, universe));
 }
 
 void
