@@ -130,6 +130,9 @@ packages:
       - scripts/configure_neml2.sh
       - scripts/update_and_rebuild_neml2.sh
       - framework/contrib/neml2
+      # mfem
+      - framework/contrib/conduit
+      - framework/contrib/mfem
   # dependers: none
   pprof:
     version: 2025.04.17
