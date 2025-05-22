@@ -37,7 +37,7 @@ p_outlet = 0
 
         outlet_boundaries = 'comp1:right comp2:right'
         momentum_outlet_types = 'fixed-pressure fixed-pressure'
-        pressure_function = '${p_outlet} ${p_outlet}'
+        pressure_functors = '${p_outlet} ${p_outlet}'
       []
     []
   []
