@@ -37,9 +37,11 @@ PhysicsBase::validParams()
       {"nl0"},
       "Name of the solver system(s) for the variables. If a single name is specified, "
       "that system is used for all solver variables.");
-  MooseEnum pc_options("default none no_additional", "no_additional");
-  params.addParam<MooseEnum>(
-      "preconditioning", pc_options, "Which preconditioning to use/add for this Physics");
+  MooseEnum pc_options("default defer", "defer");
+  params.addParam<MooseEnum>("preconditioning",
+                             pc_options,
+                             "Which preconditioning to use/add for this Physics, or whether to "
+                             "defer to the Preconditioning block, or another Physics");
 
   // Restart parameters
   params.addParam<bool>("initialize_variables_from_mesh_file",
