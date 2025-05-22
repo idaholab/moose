@@ -23,6 +23,13 @@ namespace CSG
 class CSGSphere : public CSGSurface
 {
 public:
+  /**
+   * @brief Construct a new CSGSphere surface
+   *
+   * @param name unique name for the sphere surface
+   * @param center center point of sphere
+   * @param r radius of sphere
+   */
   CSGSphere(const std::string name, const Point center, const Real r);
 
   /**
@@ -32,16 +39,17 @@ public:
 
   /**
    * @brief Get the coefficients (x0, y0, z0, r) for the equation of a sphere
+   * (x - x0)^2 + (y - y0)^2 + (z - z0)^2 = r^2
    *
-   * @return std::map<std::string, Real>
+   * @return std::map<std::string, Real> map of coefficients (x0, y0, z0, and r) and their values
    */
   virtual std::map<std::string, Real> getCoeffs() override;
 
   /**
    * @brief get direction from point to sphere surface
    *
-   * @param p
-   * @return CSGSurface::Direction
+   * @param p point
+   * @return CSGSurface::Direction direction from point
    */
   virtual CSGSurface::Direction directionFromPoint(const Point p) override;
 

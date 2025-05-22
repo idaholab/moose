@@ -23,8 +23,26 @@ namespace CSG
 class CSGPlane : public CSGSurface
 {
 public:
+  /**
+   * @brief Construct a new CSGPlane surface from three non co-linear points
+   *
+   * @param name unique name of plane
+   * @param p1 point 1
+   * @param p2 point 2
+   * @param p3 point 3
+   */
   CSGPlane(const std::string name, const Point p1, const Point p2, const Point p3);
 
+  /**
+   * @brief Construct a new CSGPlane surface from coefficients (a, b, c, d) for the
+   * equation of a plane: aX + bY + cZ = d
+   *
+   * @param name unique name of plane
+   * @param a coefficient a
+   * @param b coefficient b
+   * @param c coefficient c
+   * @param d coefficient d
+   */
   CSGPlane(const std::string name, const Real a, const Real b, const Real c, const Real d);
 
   /**
@@ -35,14 +53,14 @@ public:
   /**
    * @brief get coefficients (a, b, c, d) of the Plane aX + bY + cZ = d
    *
-   * @return std::map<std::string, Real>
+   * @return std::map<std::string, Real> map of coefficients (a, b, c, and d) and their values
    */
   virtual std::map<std::string, Real> getCoeffs() override;
 
   /**
    * @brief get direction from point p to plane
    *
-   * @param p
+   * @param p point
    * @return CSGSurface::Direction
    */
   virtual CSGSurface::Direction directionFromPoint(const Point p) override;

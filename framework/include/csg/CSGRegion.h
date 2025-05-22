@@ -62,14 +62,14 @@ public:
   /**
    * @brief gets the string representation of the region
    *
-   * @return std::string
+   * @return std::string string
    */
   std::string toString() const { return _region_str; }
 
   /**
    * @brief Get the Region Type as a string
    *
-   * @return const std::string
+   * @return const std::string string representation of the region type
    */
   const std::string getRegionTypeString();
 
@@ -83,14 +83,14 @@ public:
   /**
    * @brief Get the list of surfaces associated with the region
    *
-   * @return std::vector<std::shared_ptr<CSGSurface>>
+   * @return std::vector<std::shared_ptr<CSGSurface>> list of surfaces that define the region
    */
   std::vector<std::shared_ptr<CSGSurface>> getSurfaces() const { return _surfaces; };
 
-  /// Operator overload for &=
+  /// Operator overload for &= add an intersection to the current region
   CSGRegion & operator&=(const CSGRegion & other_region);
 
-  /// Operator overload for |=
+  /// Operator overload for |= add a union to the current region
   CSGRegion & operator|=(const CSGRegion & other_region);
 
 protected:
@@ -108,27 +108,27 @@ protected:
  * @brief strip the leading and trailing parentheses fromt the string
  * if only the specified operator is present in the string
  *
- * @param region_str
- * @param op
+ * @param region_str region string representation to simplify
+ * @param op operator to consider
  * @return std::string region string with () removed if applicable
  */
 std::string stripRegionString(std::string region_str, std::string op);
 
 /// Operation overloads for operation based region construction
 
-// positve halfspace
+// positve halfspace (+)
 const CSGRegion operator+(std::shared_ptr<CSGSurface> surf);
 
-// negative halfspace
+// negative halfspace (-)
 const CSGRegion operator-(std::shared_ptr<CSGSurface> surf);
 
-// intersection
+// intersection (&)
 const CSGRegion operator&(const CSGRegion & region_a, const CSGRegion & region_b);
 
-// union
+// union (|)
 const CSGRegion operator|(const CSGRegion & region_a, const CSGRegion & region_b);
 
-// complement
+// complement (~)
 const CSGRegion operator~(const CSGRegion & region);
 
 } // namespace CSG
