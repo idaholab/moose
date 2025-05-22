@@ -89,6 +89,9 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
     paramError("off_diag_column",
                "If off-diagonal columns are specified, matching off-diagonal "
                "rows must be specified as well");
+
+  // This must be set early because the solve type is queried by later actions
+  Moose::PetscSupport::setSolveTypeFromParams(_fe_problem, params);
 }
 
 void
