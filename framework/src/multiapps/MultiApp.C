@@ -125,6 +125,12 @@ MultiApp::validParams()
 
   // Set the default execution time
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
+  // Add the POST_ADAPTIVITY execution flag.
+#ifdef LIBMESH_ENABLE_AMR
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on");
+  exec_enum.addAvailableFlags(EXEC_POST_ADAPTIVITY);
+  params.setDocString("execute_on", exec_enum.getDocString());
+#endif
 
   params.addParam<processor_id_type>("max_procs_per_app",
                                      std::numeric_limits<processor_id_type>::max(),

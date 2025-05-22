@@ -7939,6 +7939,9 @@ FEProblemBase::adaptMesh()
   if (mesh_changed)
     es().reinit_systems();
 
+  // Execute multi-apps that need to run after adaptivity, but before the next timestep.
+  execMultiApps(EXEC_POST_ADAPTIVITY);
+
   return mesh_changed;
 }
 #endif // LIBMESH_ENABLE_AMR
