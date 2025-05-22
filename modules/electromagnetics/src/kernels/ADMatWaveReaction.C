@@ -23,7 +23,11 @@ ADMatWaveReaction::validParams()
       "Calculates the current source term in the Helmholtz wave equation using "
       "the dielectric formulation of the current.");
   params.addRequiredCoupledVar("E_real", "The real component of the electric field.");
+  params.deprecateParam("E_real", "field_real", "10/01/2025");
+  params.addRequiredCoupledVar("field_real", "The real component of the electric field.");
   params.addRequiredCoupledVar("E_imag", "The imaginary component of the electric field.");
+  params.deprecateParam("E_imag", "field_imag", "10/01/2025");
+  params.addRequiredCoupledVar("field_imag", "The imaginary component of the electric field.");
 
   params.addParam<MaterialPropertyName>(
       "wave_coef_real",
@@ -41,8 +45,8 @@ ADMatWaveReaction::validParams()
 
 ADMatWaveReaction::ADMatWaveReaction(const InputParameters & parameters)
   : ADVectorKernel(parameters),
-    _E_real(adCoupledVectorValue("E_real")),
-    _E_imag(adCoupledVectorValue("E_imag")),
+    _field_real(adCoupledVectorValue("field_real")),
+    _field_imag(adCoupledVectorValue("field_imag")),
 
     _coef_real(getADMaterialProperty<Real>("wave_coef_real")),
     _coef_imag(getADMaterialProperty<Real>("wave_coef_imag")),
@@ -56,7 +60,9 @@ ADMatWaveReaction::computeQpResidual()
 {
   // TODO: In the future, need to add an AD capability to std::complex
   if (_component == EM::REAL)
-    return -_test[_i][_qp] * (_coef_real[_qp] * _E_real[_qp] - _coef_imag[_qp] * _E_imag[_qp]);
+    return -_test[_i][_qp] *
+           (_coef_real[_qp] * _field_real[_qp] - _coef_imag[_qp] * _field_imag[_qp]);
   else
-    return -_test[_i][_qp] * (_coef_imag[_qp] * _E_real[_qp] + _coef_real[_qp] * _E_imag[_qp]);
+    return -_test[_i][_qp] *
+           (_coef_imag[_qp] * _field_real[_qp] + _coef_real[_qp] * _field_imag[_qp]);
 }

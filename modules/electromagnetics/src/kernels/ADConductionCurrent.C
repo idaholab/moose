@@ -22,7 +22,11 @@ ADConductionCurrent::validParams()
       "Calculates the current source term in the Helmholtz wave equation using "
       "the conduction formulation of the current.");
   params.addRequiredCoupledVar("E_real", "The real component of the electric field.");
+  params.deprecateParam("E_real", "field_real", "10/01/2025");
+  params.addRequiredCoupledVar("field_real", "The real component of the electric field.");
   params.addRequiredCoupledVar("E_imag", "The imaginary component of the electric field.");
+  params.deprecateParam("E_imag", "field_imag", "10/01/2025");
+  params.addRequiredCoupledVar("field_imag", "The imaginary component of the electric field.");
 
   params.addParam<MaterialPropertyName>(
       "conductivity_real", 1.0, "The real component of the material conductivity.");
@@ -46,8 +50,8 @@ ADConductionCurrent::validParams()
 
 ADConductionCurrent::ADConductionCurrent(const InputParameters & parameters)
   : ADVectorKernel(parameters),
-    _E_real(adCoupledVectorValue("E_real")),
-    _E_imag(adCoupledVectorValue("E_imag")),
+    _field_real(adCoupledVectorValue("field_real")),
+    _field_imag(adCoupledVectorValue("field_imag")),
 
     _cond_real(getADMaterialProperty<Real>("conductivity_real")),
     _cond_imag(getADMaterialProperty<Real>("conductivity_imag")),
@@ -69,15 +73,18 @@ ADConductionCurrent::computeQpResidual()
   ADReal mu_omega_real = _mu_real[_qp] * _omega_real[_qp] - _mu_imag[_qp] * _omega_imag[_qp];
   ADReal mu_omega_imag = _mu_real[_qp] * _omega_imag[_qp] + _mu_imag[_qp] * _omega_real[_qp];
 
-  ADRealVectorValue sigma_E_real = _cond_real[_qp] * _E_real[_qp] - _cond_imag[_qp] * _E_imag[_qp];
-  ADRealVectorValue sigma_E_imag = _cond_imag[_qp] * _E_real[_qp] + _cond_real[_qp] * _E_imag[_qp];
+  ADRealVectorValue sigma_field_real =
+      _cond_real[_qp] * _field_real[_qp] - _cond_imag[_qp] * _field_imag[_qp];
+  ADRealVectorValue sigma_field_imag =
+      _cond_imag[_qp] * _field_real[_qp] + _cond_real[_qp] * _field_imag[_qp];
 
   if (_component == EM::REAL)
   {
-    return _test[_i][_qp] * -1.0 * (mu_omega_imag * sigma_E_real + mu_omega_real * sigma_E_imag);
+    return _test[_i][_qp] * -1.0 *
+           (mu_omega_imag * sigma_field_real + mu_omega_real * sigma_field_imag);
   }
   else
   {
-    return _test[_i][_qp] * (mu_omega_real * sigma_E_real - mu_omega_imag * sigma_E_imag);
+    return _test[_i][_qp] * (mu_omega_real * sigma_field_real - mu_omega_imag * sigma_field_imag);
   }
 }
