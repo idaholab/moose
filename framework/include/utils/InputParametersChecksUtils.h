@@ -48,6 +48,11 @@ protected:
   /// @param param2 second parameter to check, that should be set if first one is set
   void checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
                                             const std::string & param2) const;
+  /// Check that a parameter is not set if the first one is set
+  /// @param param1 first parameter to check, check that the second is not if this one is set
+  /// @param param2 second parameter to check, that should not be set if first one is set
+  void checkSecondParamNotSetIfFirstOneSet(const std::string & param1,
+                                           const std::string & param2) const;
   /// Check that the two vector parameters are of the same length
   /// @param param1 first vector parameter to compare the size of
   /// @param param2 second vector parameter to compare the size of
@@ -135,7 +140,7 @@ protected:
   /// Error messages for parameters that should depend on another parameter but with a different error message
   /// @param param1 the parameter has not been set to the desired value (for logging purposes)
   /// @param value_set the value it has been set to and which is not appropriate (for logging purposes)
-  /// @param dependent_params all the parameters that should not have been since 'param1' was not set to 'value_not_set'
+  /// @param dependent_params all the parameters that should not have been set since 'param1' was set to 'value_set'
   void errorInconsistentDependentParameter(const std::string & param1,
                                            const std::string & value_set,
                                            const std::vector<std::string> & dependent_params) const;
@@ -617,4 +622,15 @@ InputParametersChecksUtils<C>::checkSecondParamSetOnlyIfFirstOneSet(
     forwardParamError(param2,
                       "Parameter '" + param2 + "' should not be set if parameter '" + param1 +
                           "' is not specified.");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::checkSecondParamNotSetIfFirstOneSet(const std::string & param1,
+                                                                   const std::string & param2) const
+{
+  if (forwardIsParamSetByUser(param1) && forwardIsParamSetByUser(param2))
+    forwardParamError(param2,
+                      "Parameter '" + param2 + "' should not be specified if parameter '" + param1 +
+                          "' is specified.");
 }
