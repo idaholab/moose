@@ -65,8 +65,6 @@ CSGCell::getFillTypeString()
 {
   switch (_fill_type)
   {
-    case FillType::VOID:
-      return "VOID";
     case FillType::MATERIAL:
       return "MATERIAL";
     case FillType::UNIVERSE:
