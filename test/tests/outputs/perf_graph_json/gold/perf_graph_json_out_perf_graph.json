@@ -1,0 +1,19 @@
+{
+    "reporters": {
+        "perf_graph_json": {
+            "type": "PerfGraphReporter",
+            "values": {
+                "graph": {
+                    "type": "PerfGraph const*"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "perf_graph_json": {},
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

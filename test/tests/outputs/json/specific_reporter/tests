@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#30552'
+  design = 'JSONOutput.md'
+  [test]
+    type = JSONDiff
+    input = specific_reporter.i
+    jsondiff = 'specific_reporter_out.json specific_reporter_specific.json'
+    requirement = "The system shall support the filtering of output JSON data by reporter"
+  []
+  [missing]
+    type = RunException
+    input = specific_reporter.i
+    expect_err = "Reporter value 'no/exist' was not found"
+    cli_args = 'Outputs/file_base=missing Outputs/json=false Outputs/specific/reporters=no/exist'
+    requirement = 'The system shall report a reasonable error when filtering JSON data by reporter when the reporter does not exist'
+  []
+[]

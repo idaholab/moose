@@ -19,6 +19,7 @@ public:
   JSONOutput(const InputParameters & parameters);
 
 protected:
+  virtual void initialSetup() override;
   virtual void output() override;
   virtual void outputReporters() override;
   virtual void outputSystemInformation() override;
@@ -29,6 +30,9 @@ protected:
 private:
   /// Flag to create a file for each time step
   const bool _one_file_per_timestep;
+
+  /// The names of the specific reporters to output (if any)
+  const std::vector<ReporterName> * const _reporters;
 
   /// The root JSON node for output
   nlohmann::json & _json;

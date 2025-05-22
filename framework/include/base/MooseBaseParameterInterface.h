@@ -78,6 +78,17 @@ public:
   const T & getParam(const std::string & name) const;
 
   /**
+   * Query a parameter for the object
+   *
+   * If the parameter is not valid, nullptr will be returned
+   *
+   * @param name The name of the parameter
+   * @return A pointer to the parameter value, if it exists
+   */
+  template <typename T>
+  const T * queryParam(const std::string & name) const;
+
+  /**
    * Retrieve a renamed parameter for the object. This helper makes sure we
    * check both names before erroring, and that only one parameter is passed to avoid
    * silent errors
@@ -204,6 +215,13 @@ const T &
 MooseBaseParameterInterface::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), &_moose_base);
+}
+
+template <typename T>
+const T *
+MooseBaseParameterInterface::queryParam(const std::string & name) const
+{
+  return isParamValid(name) ? &getParam<T>(name) : nullptr;
 }
 
 template <typename T>

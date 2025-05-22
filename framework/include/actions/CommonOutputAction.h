@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Action.h"
+#include "ReporterName.h"
 
 #include <optional>
 
@@ -30,15 +31,35 @@ public:
 
   virtual void act() override;
 
+  /**
+   * Get the specific reporter names that we do not want to include
+   * in general JSON output
+   *
+   * Whenever we create an additional JSON output for a specific reporter
+   * value (the perf graph output for example), we do not want to output
+   * those values in the standard JSON output
+   */
+  const std::vector<ReporterName> & getCommonReporterNames() const
+  {
+    return _common_reporter_names;
+  }
+
+  static const ReporterName perf_graph_json_reporter;
+
 private:
   /**
    * Helper method for creating the short-cut actions
    * @param object_type String of the object type, i.e., the value of 'type=' in the input file
    * @param param_name The name of the input parameter that is responsible for creating, if any
+   * @param from_params The parameters that are responsible for creating, if any
+   * @param apply_params Additional parameters to apply, if any
+   * @param object_name Override for the object name, if any (defaults to object type lowercased)
    */
-  void create(std::string object_type,
+  void create(const std::string & object_type,
               const std::optional<std::string> & param_name,
-              const InputParameters * const from_params = nullptr);
+              const InputParameters * const from_params = nullptr,
+              const InputParameters * const apply_params = nullptr,
+              const std::optional<std::string> & object_name = {});
 
   /**
    * Check if a Console object that outputs to the screen has been defined
@@ -48,4 +69,7 @@ private:
 
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
+
+  /// The reporter names that we do not want to include in general JSON output
+  std::vector<ReporterName> _common_reporter_names;
 };
