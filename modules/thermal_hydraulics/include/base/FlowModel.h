@@ -30,18 +30,12 @@ public:
   FlowModel(const InputParameters & params);
 
   /**
-   * Gets a vector of the solution variables
-   */
-  std::vector<VariableName> getSolutionVariables() const { return _solution_vars; }
-
-  /**
    * Initialize the model
    */
-  virtual void init() = 0;
+  virtual void init() {}
 
   /**
    * Add variables the model uses
-   *
    */
   virtual void addVariables() = 0;
 
@@ -77,9 +71,6 @@ protected:
   const RealVectorValue & _gravity_vector;
   /// Gravitational acceleration magnitude
   const Real _gravity_magnitude;
-
-  /// Lump the mass matrix
-  const bool _lump_mass_matrix;
 
   // Solution variable names
   std::vector<VariableName> _solution_vars;

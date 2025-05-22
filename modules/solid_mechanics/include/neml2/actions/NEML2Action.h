@@ -122,9 +122,6 @@ protected:
   std::vector<ParameterDerivativeMapping> _param_derivs;
 
 #endif
-  /// Whether to print additional information about the model
-  bool _verbose;
-
   /// Name of the NEML2Executor user object
   const UserObjectName _executor_name;
 

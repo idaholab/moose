@@ -52,6 +52,12 @@
       # Needs to be able to find the element containing the origin
       mesh_mode = replicated
     []
+    [functor_extrema]
+      type = 'JSONDiff'
+      input = 'functor_extrema_positions.i'
+      jsondiff = 'functor_extrema_positions_out.json'
+      detail = 'the element extrema of a functor on a mesh,'
+    []
     [multiapps]
       type = 'JSONDiff'
       input = 'multiapp_positions.i'

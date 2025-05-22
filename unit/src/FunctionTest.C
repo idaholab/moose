@@ -25,11 +25,11 @@ TEST_F(FunctionTest, GetScalarFunctionCoefficient)
   func_params1.set<std::string>("expression") = "1.";
   _mfem_problem->addFunction("ParsedFunction", "coef1", func_params1);
   _mfem_problem->getFunction("coef1").initialSetup();
-  std::shared_ptr<mfem::Coefficient> coef = _mfem_problem->getScalarFunctionCoefficient("coef1");
-  EXPECT_EQ(coef->Eval(fe_transform, point), 1);
+  mfem::Coefficient & coef(_mfem_problem->getCoefficients().getScalarCoefficient("coef1"));
+  EXPECT_EQ(coef.Eval(fe_transform, point), 1);
 
-  EXPECT_THROW(_mfem_problem->getVectorFunctionCoefficient("coef1"), std::runtime_error);
-  EXPECT_THROW(_mfem_problem->getScalarFunctionCoefficient("coef2"), std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("coef1"), std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("coef2"), std::runtime_error);
 }
 
 /**
@@ -44,16 +44,18 @@ TEST_F(FunctionTest, GetVectorFunctionCoefficient)
   func_params1.set<std::string>("expression_z") = "3.";
   _mfem_problem->addFunction("ParsedVectorFunction", "vec_coef1", func_params1);
   _mfem_problem->getFunction("vec_coef1").initialSetup();
-  std::shared_ptr<mfem::VectorCoefficient> coef =
-      _mfem_problem->getVectorFunctionCoefficient("vec_coef1");
+  mfem::VectorCoefficient & coef(
+      _mfem_problem->getCoefficients().getVectorCoefficient("vec_coef1"));
   mfem::Vector vec;
-  coef->Eval(vec, fe_transform, point);
+  coef.Eval(vec, fe_transform, point);
   EXPECT_EQ(vec[0], 1.);
   EXPECT_EQ(vec[1], 2.);
   EXPECT_EQ(vec[2], 3.);
 
-  EXPECT_THROW(_mfem_problem->getVectorFunctionCoefficient("vec_coef2"), std::runtime_error);
-  EXPECT_THROW(_mfem_problem->getScalarFunctionCoefficient("vec_coef1"), std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("vec_coef2"),
+               std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("vec_coef1"),
+               std::runtime_error);
 }
 
 /**
@@ -67,10 +69,10 @@ TEST_F(FunctionTest, GetVectorFunctionCoefficient2D)
   func_params1.set<std::string>("expression_y") = "2.";
   _mfem_problem->addFunction("ParsedVectorFunction", "vec_coef1", func_params1);
   _mfem_problem->getFunction("vec_coef1").initialSetup();
-  std::shared_ptr<mfem::VectorCoefficient> coef =
-      _mfem_problem->getVectorFunctionCoefficient("vec_coef1");
+  mfem::VectorCoefficient & coef =
+      _mfem_problem->getCoefficients().getVectorCoefficient("vec_coef1");
   mfem::Vector vec;
-  coef->Eval(vec, fe_transform, point);
+  coef.Eval(vec, fe_transform, point);
   EXPECT_EQ(vec.Size(), 2);
   EXPECT_EQ(vec[0], 1.);
   EXPECT_EQ(vec[1], 2.);
@@ -86,10 +88,10 @@ TEST_F(FunctionTest, GetVectorFunctionCoefficient1D)
   func_params1.set<std::string>("expression_x") = "1.";
   _mfem_problem->addFunction("ParsedVectorFunction", "vec_coef1", func_params1);
   _mfem_problem->getFunction("vec_coef1").initialSetup();
-  std::shared_ptr<mfem::VectorCoefficient> coef =
-      _mfem_problem->getVectorFunctionCoefficient("vec_coef1");
+  mfem::VectorCoefficient & coef =
+      _mfem_problem->getCoefficients().getVectorCoefficient("vec_coef1");
   mfem::Vector vec;
-  coef->Eval(vec, fe_transform, point);
+  coef.Eval(vec, fe_transform, point);
   EXPECT_EQ(vec.Size(), 1);
   EXPECT_EQ(vec[0], 1.);
 }
@@ -112,6 +114,10 @@ TEST_F(FunctionTest, AddUnknownFunction)
                std::runtime_error);
   _mfem_problem->getFunction("coef1").initialSetup();
   _mfem_problem->getFunction("coef2").initialSetup();
+  _mfem_problem->getFunction("coef3").initialSetup();
+
+  EXPECT_THROW(_mfem_problem->getCoefficients().getScalarCoefficient("coef3"), std::runtime_error);
+  EXPECT_THROW(_mfem_problem->getCoefficients().getVectorCoefficient("coef3"), std::runtime_error);
 }
 
 #endif

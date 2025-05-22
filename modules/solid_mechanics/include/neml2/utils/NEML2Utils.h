@@ -11,9 +11,12 @@
 
 #ifdef NEML2_ENABLED
 
-#include "neml2/misc/parser_utils.h"
+#include <optional>
+
 #include "neml2/tensors/tensors.h"
-#include "neml2/models/LabeledAxisAccessor.h"
+#include "neml2/base/LabeledAxisAccessor.h"
+#include "neml2/base/Parser.h"
+#include "neml2/models/Model.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
@@ -30,8 +33,19 @@ class SubProblem;
 
 namespace NEML2Utils
 {
-
 #ifdef NEML2_ENABLED
+
+/**
+ * @brief Get the NEML2 Model
+ *
+ * This is mostly the same as the plain neml2::get_model() method, but it also guards the default
+ * dtype and sends the model to the target device.
+ * @return neml2::Model&
+ */
+neml2::Model & getModel(const std::string & name,
+                        std::optional<neml2::Device> device = std::nullopt,
+                        neml2::Dtype dtype = neml2::kFloat64);
+
 /// Assert that the NEML2 variable name sits on either the forces or the state subaxis
 void assertVariable(const neml2::VariableName &);
 
@@ -90,7 +104,7 @@ struct Layout<SymmetricRankFourTensor>
  * can potentially be used as NEML2 input variables.
  *
  * For this method to work, the underlying data in \p data must be reinterpretable as Real
- * (torch::kFloat64). The data class T must also be aligned and follow the striding implied by
+ * (neml2::kFloat64). The data class T must also be aligned and follow the striding implied by
  * Layout<T>::shape. The data class T must also have no padding or overhead.
  */
 template <typename T>
@@ -99,42 +113,41 @@ fromBlob(const std::vector<T> & data)
 {
   // The const_cast is fine because torch works with non-const ptr so that it can optionally handle
   // deallocation. But we are not going to let torch do that.
-  const auto torch_tensor =
-      torch::from_blob(const_cast<T *>(data.data()),
-                       neml2::utils::add_shapes(data.size(), Layout<T>::shape),
-                       torch::TensorOptions().dtype(torch::kFloat64));
+  const auto torch_tensor = at::from_blob(const_cast<T *>(data.data()),
+                                          neml2::utils::add_shapes(data.size(), Layout<T>::shape),
+                                          at::TensorOptions().dtype(neml2::kFloat64));
   return neml2::Tensor(torch_tensor, 1);
 }
 
 /**
- * @brief Directly copy a contiguous chunk of memory of a torch::Tensor to a MOOSE data of type T
+ * @brief Directly copy a contiguous chunk of memory of a at::Tensor to a MOOSE data of type T
  *
- * This assumes the torch::Tensor and T have the same layout, for example both row-major
+ * This assumes the at::Tensor and T have the same layout, for example both row-major
  * with T = RankTwoTensor. If the layouts are different, we may need to reshape/reorder/transpose
- * the torch::Tensor before copying.
+ * the at::Tensor before copying.
  *
  * For this method to work,
  * 1. the address of \p dest must align with the first element of the data,
  * 2. the number of elements in \p dest must match the number of elements in \p src,
- * 3. the \p src tensor must be of type torch::kFloat64, and
+ * 3. the \p src tensor must be of type neml2::kFloat64, and
  * 4. data in \p dest must be reinterpretable as Real.
  */
 template <typename T>
 void
-copyTensorToMOOSEData(const torch::Tensor & src, T & dest)
+copyTensorToMOOSEData(const at::Tensor & src, T & dest)
 {
-  if (src.dtype() != torch::kFloat64)
+  if (src.dtype() != neml2::kFloat64)
     mooseError(
-        "Cannot copy torch::Tensor with dtype ", src.dtype(), " into ", demangle(typeid(T).name()));
+        "Cannot copy at::Tensor with dtype ", src.dtype(), " into ", demangle(typeid(T).name()));
   if (src.numel() != Layout<T>::strides[0])
-    mooseError("Cannot copy torch::Tensor with shape ",
+    mooseError("Cannot copy at::Tensor with shape ",
                src.sizes(),
                " into ",
                demangle(typeid(T).name()),
                " with different number of elements.");
-  auto dest_tensor = torch::from_blob(reinterpret_cast<Real *>(&dest),
-                                      Layout<T>::shape,
-                                      torch::TensorOptions().dtype(torch::kFloat64));
+  auto dest_tensor = at::from_blob(reinterpret_cast<Real *>(&dest),
+                                   Layout<T>::shape,
+                                   at::TensorOptions().dtype(neml2::kFloat64));
   dest_tensor.copy_(src.reshape(Layout<T>::shape));
 }
 

@@ -54,6 +54,13 @@
                   Outputs/file_base=test_fv_functor_hs_out"
       detail = 'with a heat source defined using a functor,'
     []
+    [functors_props]
+      type = Exodiff
+      input = 'test_fv_functor.i'
+      exodiff = 'test_fv_functor_all_out.e'
+      cli_args = "Outputs/file_base=test_fv_functor_all_out"
+      detail = 'with all properties defined using functors,'
+    []
     [convective_bc]
       type = Exodiff
       input = 'test_fv_convective_bc.i'

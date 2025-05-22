@@ -162,8 +162,8 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   }
   UJi[THMVACE3D::AREA] = _A[0];
 
-  const auto flux_3d = _numerical_flux_uo[c]->getFlux3D(
-      _current_side, _current_elem->id(), true, UJi, Ui, nJi, t1, t2);
+  const auto flux_3d =
+      _numerical_flux_uo[c]->getFlux3D(_current_side, _current_elem->id(), UJi, Ui, nJi, t1, t2);
 
   _flux[c].resize(THMVACE1D::N_FLUX_OUTPUTS);
   _flux[c][THMVACE1D::MASS] = flux_3d[THMVACE3D::MASS] * nJi_dot_di;

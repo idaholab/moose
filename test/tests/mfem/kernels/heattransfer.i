@@ -70,9 +70,9 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = 'thermal_conductivity volumetric_heat_capacity'
     prop_values = '1.0 1.0'
   []

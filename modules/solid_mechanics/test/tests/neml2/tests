@@ -173,4 +173,38 @@
       valgrind = heavy
     []
   []
+  [neml2_libtorch_model]
+    issues = '#30461'
+    type = Exodiff
+    input = 'heat_conduction.i'
+    exodiff = 'heat_conduction_out.e'
+    capabilities = 'neml2'
+    libtorch_devices = 'cpu cuda'
+    requirement = 'To solve a heat conduction probelem using a neural network to compute temperature dependent thermal conductivity.'
+  []
+  [scheduler]
+    issues = '#27493'
+    collections = 'SYSTEM'
+    requirement = 'The system shall be capable of evaluating NEML2 models in heterogeneous computing environments'
+    [simple_scheduler]
+      detail = 'with NEML2 SimpleScheduler which dispatches to a single device'
+      type = Exodiff
+      prereq = 'neml2_modular/crystal_plasticity'
+      input = 'crystal_plasticity_simple_scheduler.i'
+      exodiff = 'crystal_plasticity.e'
+      capabilities = 'neml2'
+      recover = false
+      valgrind = heavy
+    []
+    [simple_scheduler_async]
+      detail = 'with NEML2 SimpleScheduler which asynchronously dispatches to a single device'
+      type = Exodiff
+      prereq = 'scheduler/simple_scheduler'
+      input = 'crystal_plasticity_simple_scheduler_async.i'
+      exodiff = 'crystal_plasticity.e'
+      capabilities = 'neml2'
+      recover = false
+      valgrind = heavy
+    []
+  []
 []

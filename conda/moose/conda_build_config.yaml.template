@@ -1,6 +1,5 @@
 mpi:
   - mpich
-  - openmpi
 
 moose_dev:
   - moose-dev __VERSIONER_MOOSE_DEV_VERSION__

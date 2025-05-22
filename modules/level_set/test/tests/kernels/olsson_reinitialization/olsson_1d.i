@@ -109,8 +109,8 @@
   nl_abs_tol = 1e-13
   scheme = implicit-euler
   dt = 0.05
-  petsc_options_iname = '-pc_type -pc_sub_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre    boomeramg    300'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre    boomeramg      300'
 []
 
 [Outputs]

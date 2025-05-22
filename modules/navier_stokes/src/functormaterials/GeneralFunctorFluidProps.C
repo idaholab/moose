@@ -57,6 +57,18 @@ GeneralFunctorFluidPropsTempl<is_ad>::validParams()
       "solving_for_dynamic_pressure reference_pressure_point reference_pressure",
       "Dynamic pressure");
 
+  // Property names
+  params.addParam<MooseFunctorName>(
+      "density_name", NS::density, "Name to give to the density functor");
+  params.addParam<MooseFunctorName>(
+      "dynamic_viscosity_name", NS::mu, "Name to give to the dynamic viscosity functor");
+  params.addParam<MooseFunctorName>(
+      "specific_heat_name", NS::cp, "Name to give to the specific heat (cp) functor");
+  params.addParam<MooseFunctorName>(
+      "thermal_conductivity_name", NS::k, "Name to give to the thermal conductivity functor");
+  params.addParamNamesToGroup(
+      "density_name dynamic_viscosity_name specific_heat_name thermal_conductivity_name",
+      "Functor property names");
   return params;
 }
 
@@ -80,7 +92,12 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     _rho(getFunctor<GenericReal<is_ad>>(NS::density)),
     _mu_rampdown(getFunction("mu_rampdown")),
     _neglect_derivatives_of_density_time_derivative(
-        getParam<bool>("neglect_derivatives_of_density_time_derivative"))
+        getParam<bool>("neglect_derivatives_of_density_time_derivative")),
+
+    _density_name(getParam<MooseFunctorName>("density_name")),
+    _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity_name")),
+    _specific_heat_name(getParam<MooseFunctorName>("specific_heat_name")),
+    _thermal_conductivity_name(getParam<MooseFunctorName>("thermal_conductivity_name"))
 {
   // Check parameters
   if (!_pressure_is_dynamic &&
@@ -103,7 +120,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
   {
     if (!isParamValid(NS::density) || _force_define_density)
       addFunctorProperty<GenericReal<is_ad>>(
-          NS::density,
+          _density_name,
           [this](const auto & r, const auto & t) -> GenericReal<is_ad>
           { return _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
@@ -113,17 +130,17 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         { return _fluid.cv_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
     const auto & cp = addFunctorProperty<GenericReal<is_ad>>(
-        NS::cp,
+        _specific_heat_name,
         [this](const auto & r, const auto & t) -> GenericReal<is_ad>
         { return _fluid.cp_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
     const auto & mu = addFunctorProperty<GenericReal<is_ad>>(
-        NS::mu,
+        _dynamic_viscosity_name,
         [this](const auto & r, const auto & t) -> GenericReal<is_ad>
         { return _mu_rampdown(r, t) * _fluid.mu_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
     const auto & k = addFunctorProperty<GenericReal<is_ad>>(
-        NS::k,
+        _thermal_conductivity_name,
         [this](const auto & r, const auto & t) -> GenericReal<is_ad>
         { return _fluid.k_from_p_T(_pressure(r, t), _T_fluid(r, t)); });
 
@@ -133,7 +150,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     if (_neglect_derivatives_of_density_time_derivative)
     {
       addFunctorProperty<GenericReal<is_ad>>(
-          NS::time_deriv(NS::density),
+          NS::time_deriv(_density_name),
           [this](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             Real rho, drho_dp, drho_dT;
@@ -148,7 +165,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     else
     {
       addFunctorProperty<GenericReal<is_ad>>(
-          NS::time_deriv(NS::density),
+          NS::time_deriv(_density_name),
           [this](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             GenericReal<is_ad> rho, drho_dp, drho_dT;
@@ -158,7 +175,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     }
 
     addFunctorProperty<GenericReal<is_ad>>(
-        NS::time_deriv(NS::cp),
+        NS::time_deriv(_specific_heat_name),
         [this](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           Real dcp_dp, dcp_dT, dummy;
@@ -174,7 +191,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     //
 
     const auto & drho_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::density, NS::pressure),
+        derivativePropertyNameFirst(_density_name, NS::pressure),
         [this](const auto & r, const auto & t) -> Real
         {
           Real drho_dp, drho_dT, dummy;
@@ -186,7 +203,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & drho_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::density, NS::T_fluid),
+        derivativePropertyNameFirst(_density_name, NS::T_fluid),
         [this](const auto & r, const auto & t) -> Real
         {
           Real drho_dp, drho_dT, dummy;
@@ -198,7 +215,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dcp_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::cp, NS::pressure),
+        derivativePropertyNameFirst(_specific_heat_name, NS::pressure),
         [this](const auto & r, const auto & t) -> Real
         {
           Real dcp_dp, dcp_dT, dummy;
@@ -210,7 +227,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dcp_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::cp, NS::T_fluid),
+        derivativePropertyNameFirst(_specific_heat_name, NS::T_fluid),
         [this](const auto & r, const auto & t) -> Real
         {
           Real dcp_dp, dcp_dT, dummy;
@@ -222,7 +239,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dmu_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::mu, NS::pressure),
+        derivativePropertyNameFirst(_dynamic_viscosity_name, NS::pressure),
         [this](const auto & r, const auto & t) -> Real
         {
           Real dmu_dp, dmu_dT, dummy;
@@ -234,7 +251,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dmu_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::mu, NS::T_fluid),
+        derivativePropertyNameFirst(_dynamic_viscosity_name, NS::T_fluid),
         [this](const auto & r, const auto & t) -> Real
         {
           Real dmu_dp, dmu_dT, dummy;
@@ -246,7 +263,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dk_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::k, NS::pressure),
+        derivativePropertyNameFirst(_thermal_conductivity_name, NS::pressure),
         [this](const auto & r, const auto & t) -> Real
         {
           Real dk_dp, dk_dT, dummy;
@@ -258,7 +275,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dk_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::k, NS::T_fluid),
+        derivativePropertyNameFirst(_thermal_conductivity_name, NS::T_fluid),
         [this](const auto & r, const auto & t) -> Real
         {
           Real dk_dp, dk_dT, dummy;
@@ -367,7 +384,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     const auto & rho =
         (!isParamValid(NS::density) || _force_define_density)
             ? addFunctorProperty<GenericReal<is_ad>>(
-                  NS::density,
+                  _density_name,
                   [this](const auto & r, const auto & t) -> GenericReal<is_ad>
                   {
                     auto total_pressure = _pressure(r, t) + _reference_pressure_value;
@@ -377,7 +394,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
                         rho_approx * _gravity_vec * (r.getPoint() - _reference_pressure_point);
                     return _fluid.rho_from_p_T(total_pressure, _T_fluid(r, t));
                   })
-            : getFunctor<GenericReal<is_ad>>(NS::density);
+            : getFunctor<GenericReal<is_ad>>(_density_name);
 
     addFunctorProperty<GenericReal<is_ad>>(
         NS::cv,
@@ -390,7 +407,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & cp = addFunctorProperty<GenericReal<is_ad>>(
-        NS::cp,
+        _specific_heat_name,
         [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
@@ -400,7 +417,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & mu = addFunctorProperty<GenericReal<is_ad>>(
-        NS::mu,
+        _dynamic_viscosity_name,
         [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
@@ -410,7 +427,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & k = addFunctorProperty<GenericReal<is_ad>>(
-        NS::k,
+        _thermal_conductivity_name,
         [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
@@ -425,7 +442,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     if (_neglect_derivatives_of_density_time_derivative)
     {
       addFunctorProperty<GenericReal<is_ad>>(
-          NS::time_deriv(NS::density),
+          NS::time_deriv(_density_name),
           [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             const auto total_pressure =
@@ -443,7 +460,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     else
     {
       addFunctorProperty<GenericReal<is_ad>>(
-          NS::time_deriv(NS::density),
+          NS::time_deriv(_density_name),
           [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
           {
             const auto total_pressure =
@@ -456,7 +473,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     }
 
     addFunctorProperty<GenericReal<is_ad>>(
-        NS::time_deriv(NS::cp),
+        NS::time_deriv(_specific_heat_name),
         [this, &rho](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           const auto total_pressure =
@@ -475,7 +492,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
     //
 
     const auto & drho_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::density, NS::pressure),
+        derivativePropertyNameFirst(_density_name, NS::pressure),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -490,7 +507,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & drho_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::density, NS::T_fluid),
+        derivativePropertyNameFirst(_density_name, NS::T_fluid),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -505,7 +522,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dcp_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::cp, NS::pressure),
+        derivativePropertyNameFirst(_specific_heat_name, NS::pressure),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -520,7 +537,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dcp_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::cp, NS::T_fluid),
+        derivativePropertyNameFirst(_specific_heat_name, NS::T_fluid),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -535,7 +552,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dmu_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::mu, NS::pressure),
+        derivativePropertyNameFirst(_dynamic_viscosity_name, NS::pressure),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -550,7 +567,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dmu_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::mu, NS::T_fluid),
+        derivativePropertyNameFirst(_dynamic_viscosity_name, NS::T_fluid),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -565,7 +582,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dk_dp = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::k, NS::pressure),
+        derivativePropertyNameFirst(_thermal_conductivity_name, NS::pressure),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =
@@ -580,7 +597,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         });
 
     const auto & dk_dT = addFunctorProperty<Real>(
-        derivativePropertyNameFirst(NS::k, NS::T_fluid),
+        derivativePropertyNameFirst(_thermal_conductivity_name, NS::T_fluid),
         [this, &rho](const auto & r, const auto & t) -> Real
         {
           const auto total_pressure =

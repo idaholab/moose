@@ -62,11 +62,11 @@ LibtorchNeuralNetControl::validParams()
 
 LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & parameters)
   : Control(parameters),
+    _old_responses(declareRestartableData<std::vector<std::vector<Real>>>("old_responses")),
     _control_names(getParam<std::vector<std::string>>("parameters")),
     _current_control_signals(std::vector<Real>(_control_names.size(), 0.0)),
     _response_names(getParam<std::vector<PostprocessorName>>("responses")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
-    _initialized(false),
     _response_shift_factors(isParamValid("response_shift_factors")
                                 ? getParam<std::vector<Real>>("response_shift_factors")
                                 : std::vector<Real>(_response_names.size(), 0.0)),
@@ -152,11 +152,8 @@ LibtorchNeuralNetControl::execute()
     updateCurrentResponse();
 
     // If this is the first timestep, we fill up the old values with the initial value
-    if (!_initialized)
-    {
+    if (_old_responses.empty())
       _old_responses.assign(num_old_timesteps, _current_response);
-      _initialized = true;
-    }
 
     // Organize the old an current solution into a tensor so we can evaluate the neural net
     torch::Tensor input_tensor = prepareInputTensor();

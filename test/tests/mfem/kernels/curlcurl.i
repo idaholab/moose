@@ -72,15 +72,15 @@
 
 [BCs]
   [tangential_E_bdr]
-    type = MFEMVectorFunctionTangentialDirichletBC
+    type = MFEMVectorFunctorTangentialDirichletBC
     variable = e_field
-    function = exact_e_field
+    vector_coefficient = exact_e_field
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = one
     prop_values = 1.0
   []
@@ -100,7 +100,7 @@
   [source]
     type = MFEMVectorFEDomainLFKernel
     variable = e_field
-    function = forcing_field
+    vector_coefficient = forcing_field
   []
 []
 

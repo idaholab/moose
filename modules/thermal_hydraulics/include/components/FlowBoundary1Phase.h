@@ -9,29 +9,23 @@
 
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1PhaseBase.h"
 
 /**
- * Base class for boundary components connected to 1-phase flow channels
+ * Base class for boundary components connected to FlowChannel1Phase components
  */
-class FlowBoundary1Phase : public FlowBoundary
+class FlowBoundary1Phase : public FlowBoundary1PhaseBase
 {
 public:
   FlowBoundary1Phase(const InputParameters & params);
 
 protected:
-  virtual void init() override;
   virtual void check() const override;
 
   /**
    * Creates the boundary condition objects for 1-phase flow
    */
-  void addWeakBC3Eqn();
-
-  /// Numerical flux user object name
-  UserObjectName _numerical_flux_name;
-  /// Name of boundary user object name
-  const UserObjectName _boundary_uo_name;
+  virtual void addWeakBCs();
 
 public:
   static InputParameters validParams();

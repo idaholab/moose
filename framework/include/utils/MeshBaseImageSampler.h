@@ -26,22 +26,20 @@
 // If VTK is built without an external nlohmann, then it assumes it
 // will never be compiled against another nlohmann, and it includes
 // its own copy but modified with macro tricks.  We have probably
-// already included nlohman nheaders, which we didn't tamper with
+// already included nlohmann headers, which we didn't tamper with
 // because OF COURSE NOT, but now we need to take care not to let the
 // include guards prevent them from including their copy with their
 // different namespace.
 #ifndef MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
 // Detect if VTK built with external nlohmann
 #ifdef __has_include
 #if __has_include("vtk_nlohmannjson.h")
 #include "vtk_nlohmannjson.h"
-#if (VTK_MODULE_USE_EXTERNAL_vtknlohmannjson == 1)
-#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
-#else
+#if !VTK_MODULE_USE_EXTERNAL_vtknlohmannjson
+#undef MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
 #define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 1
-#endif // (VTK_MODULE_USE_EXTERNAL_vtknlohmannjson == 1)
-#else  // __has_include("vtk_nlohmannjson.h")
-#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
+#endif // !VTK_MODULE_USE_EXTERNAL_vtknlohmannjson
 #endif // __has_include("vtk_nlohmannjson.h")
 #else  // __has_include
 #error "Could not auto-detect whether VTK built with external nlohmann json. \
@@ -50,18 +48,9 @@ Define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=1 if built with vendored nlohm
 #endif // __has_include
 #endif // MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
 
-#if (MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS == 1)
-#ifndef MOOSE_VTK_NLOHMANN_INCLUDED
-#ifdef INCLUDE_NLOHMANN_JSON_HPP_
-#define MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_HPP_
-#undef INCLUDE_NLOHMANN_JSON_HPP_
-#endif
-#ifdef INCLUDE_NLOHMANN_JSON_FWD_HPP_
-#define MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_FWD_HPP_
+#if MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS && !defined(MOOSE_VTK_NLOHMANN_INCLUDED)
 #undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
-#endif
 #define MOOSE_VTK_NLOHMANN_INCLUDED
-#endif
 #endif
 
 #include "vtkSmartPointer.h"
@@ -76,20 +65,11 @@ Define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=1 if built with vendored nlohm
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
 
-#ifdef MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_HPP_
-#define INCLUDE_NLOHMANN_JSON_HPP_
-#endif
-#ifdef MOOSE_ALREADY_INCLUDED_NLOHMANN_JSON_FWD_HPP_
-#define INCLUDE_NLOHMANN_JSON_FWD_HPP_
-#endif
-
 // If VTK is built without an external nlohmann, then it assumes it
 // will never be compiled against another nlohmann, and it defines an
-// nlohmann macro to point to its vtknlohmann alternative.  In MOOSE
-// their assumption is wrong.
-#ifdef nlohmann
+// nlohmann macro to point to its vtknlohmann copy.  In MOOSE their
+// assumption is wrong.
 #undef nlohmann
-#endif
 
 #include "libmesh/restore_warnings.h"
 

@@ -13,6 +13,19 @@
 namespace NEML2Utils
 {
 #ifdef NEML2_ENABLED
+
+neml2::Model &
+getModel(const std::string & name, std::optional<neml2::Device> device, neml2::Dtype dtype)
+{
+  const auto prev_dtype = neml2::get_default_dtype();
+  neml2::set_default_dtype(dtype);
+  auto & model = neml2::get_model(name);
+  if (device.has_value())
+    model.to(device.value());
+  neml2::set_default_dtype(prev_dtype);
+  return model;
+}
+
 void
 assertVariable(const neml2::VariableName & v)
 {

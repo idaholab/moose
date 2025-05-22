@@ -16,7 +16,7 @@ SalineMoltenSaltFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   const std::string description = "Molten salt fluid properties using Saline";
-#ifdef THERMOCHIMICA_ENABLED
+#ifdef SALINE_ENABLED
   params.addClassDescription(description);
 #else
   params.addClassDescription(

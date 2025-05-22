@@ -12,21 +12,23 @@ MFEMVectorFEDomainLFKernel::validParams()
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
                              "$(\\vec f, \\vec v)_\\Omega$ "
                              "arising from the weak form of the forcing term $\\vec f$.");
-  params.addParam<FunctionName>("function", 0, "The name of the function f");
+  params.addParam<MFEMVectorCoefficientName>("vector_coefficient",
+                                             "The name of the vector coefficient f");
 
   return params;
 }
 
 MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _vec_coef(getMFEMProblem().getVectorFunctionCoefficient(getParam<FunctionName>("function")))
+    _vec_coef_name(getParam<MFEMVectorCoefficientName>("vector_coefficient")),
+    _vec_coef(getVectorCoefficient(_vec_coef_name))
 {
 }
 
 mfem::LinearFormIntegrator *
 MFEMVectorFEDomainLFKernel::createLFIntegrator()
 {
-  return new mfem::VectorFEDomainLFIntegrator(*_vec_coef);
+  return new mfem::VectorFEDomainLFIntegrator(_vec_coef);
 }
 
 #endif

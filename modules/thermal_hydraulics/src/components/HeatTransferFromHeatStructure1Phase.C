@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatTransferFromHeatStructure1Phase.h"
-#include "FlowChannel1Phase.h"
+#include "FlowChannel1PhaseBase.h"
 #include "HeatStructureBase.h"
 #include "HeatStructureCylindricalBase.h"
 #include "FlowModelSinglePhase.h"
@@ -48,11 +48,11 @@ void
 HeatTransferFromHeatStructure1Phase::setupMesh()
 {
   if (hasComponentByName<HeatStructureBase>(_hs_name) && _hs_side_valid &&
-      hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
+      hasComponentByName<FlowChannel1PhaseBase>(_flow_channel_name))
   {
     const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-    const FlowChannel1Phase & flow_channel =
-        getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+    const FlowChannel1PhaseBase & flow_channel =
+        getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name);
 
     _mesh_alignment.initialize(flow_channel.getElementIDs(), hs.getBoundaryInfo(_hs_side));
 
@@ -71,11 +71,11 @@ HeatTransferFromHeatStructure1Phase::check() const
   HSBoundaryInterface::check(this);
 
   if (hasComponentByName<HeatStructureBase>(_hs_name) &&
-      hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
+      hasComponentByName<FlowChannel1PhaseBase>(_flow_channel_name))
   {
     const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-    const FlowChannel1Phase & flow_channel =
-        getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+    const FlowChannel1PhaseBase & flow_channel =
+        getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name);
 
     if (hs.getNumElems() != flow_channel.getNumElems())
       logError("The number of elements in component '",
@@ -132,8 +132,8 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
 
   const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
   const bool is_cylindrical = dynamic_cast<const HeatStructureCylindricalBase *>(&hs) != nullptr;
-  const FlowChannel1Phase & flow_channel =
-      getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+  const FlowChannel1PhaseBase & flow_channel =
+      getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name);
 
   const UserObjectName heat_flux_uo_name = genName(name(), "heat_flux_uo");
   {
@@ -204,7 +204,7 @@ HeatTransferFromHeatStructure1Phase::getHeatStructureSideName() const
 const BoundaryName &
 HeatTransferFromHeatStructure1Phase::getChannelSideName() const
 {
-  const FlowChannel1Phase & flow_channel =
-      getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+  const FlowChannel1PhaseBase & flow_channel =
+      getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name);
   return flow_channel.getNodesetName();
 }

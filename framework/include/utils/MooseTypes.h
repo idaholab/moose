@@ -1171,6 +1171,16 @@ DerivativeStringClass(SolverSystemName);
 /// Command line argument, specialized to handle quotes in vector arguments
 DerivativeStringClass(CLIArgString);
 
+#ifdef MFEM_ENABLED
+/**
+ * Coefficients used in input for MFEM residual objects
+ */
+///@{
+DerivativeStringClass(MFEMScalarCoefficientName);
+DerivativeStringClass(MFEMVectorCoefficientName);
+DerivativeStringClass(MFEMMatrixCoefficientName);
+///@}
+#endif
 /**
  * additional MOOSE typedefs
  */

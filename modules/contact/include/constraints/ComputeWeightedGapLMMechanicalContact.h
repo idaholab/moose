@@ -89,7 +89,7 @@ protected:
   Real _qp_factor;
 
   /// Whether to normalize weighted gap by weighting function norm
-  bool _normalize_c;
+  const bool _normalize_c;
 
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;
@@ -103,9 +103,6 @@ protected:
 
   /// Vector for computation of weighted gap with nodal normals
   ADRealVectorValue _qp_gap_nodal;
-
-  /// A map from node to weighted gap and normalization (if requested)
-  std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

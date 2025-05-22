@@ -204,11 +204,12 @@ class Tester(MooseObject, OutputInterface):
     # in the previous results
     def previousTesterStatus(self, options):
         test_dir_entry, test_entry = self.getResultsEntry(options, False, True)
+        status_entry = test_entry['status']
         status = (self.test_status.createStatus(), '', '')
         if test_entry:
-            status = (self.test_status.createStatus(str(test_entry['status'])),
-                      str(test_entry['status_message']),
-                      test_entry['caveats'])
+            status = (self.test_status.createStatus(str(status_entry['status'])),
+                      str(status_entry['status_message']),
+                      status_entry['caveats'])
         return (status)
 
     def getResults(self, options) -> dict:

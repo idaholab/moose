@@ -83,7 +83,7 @@
   start_time = 0
   end_time = 1
   scheme = crank-nicolson
-  petsc_options_iname = '-pc_type -pc_sub_type'
+  petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm      ilu'
   [./TimeStepper]
     type = PostprocessorDT

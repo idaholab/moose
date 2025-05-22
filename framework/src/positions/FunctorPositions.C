@@ -27,7 +27,7 @@ FunctorPositions::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_TIMESTEP_BEGIN};
 
   params.addClassDescription(
-      "Import positions from one or more reporters, for example other Positions");
+      "Computes positions from groups of three functors specified by the user");
   return params;
 }
 
