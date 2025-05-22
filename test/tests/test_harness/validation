@@ -1,0 +1,28 @@
+[Tests]
+  [ok]
+    type = RunCommand
+    command = 'echo 100 > validation_ok.csv'
+    use_shell = true
+    validation_test = validation_ok.py
+  []
+  [fail]
+    type = RunCommand
+    command = 'echo foo'
+    validation_test = validation_fail.py
+  []
+  [exception]
+    type = RunCommand
+    command = 'echo foo'
+    validation_test = validation_exception.py
+  []
+  [badpython]
+    type = RunCommand
+    command = 'echo foo'
+    validation_test = validation_badpython.py
+  []
+  [multiple_same_key]
+    type = RunCommand
+    command = 'echo foo'
+    validation_test = 'validation_ok.py validation_ok_duplicate.py'
+  []
+[]
