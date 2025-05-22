@@ -48,9 +48,17 @@ public:
 
   /**
    * Default constructor
+   *
+   * @param name unique name of surface
    */
   CSGSurface(const std::string name);
 
+  /**
+   * @brief Construct a new CSGSurface
+   *
+   * @param name unique name of surface
+   * @param surf_type surface type
+   */
   CSGSurface(const std::string name, SurfaceType surf_type);
 
   /**
@@ -59,51 +67,51 @@ public:
   virtual ~CSGSurface() = default;
 
   /**
-   * @brief Get the Surface Type
+   * @brief Get the Surface Type (i.e. PLANE, SPHERE, XCYLINDER, YCYLINDER, ZCYLINDER)
    *
-   * @return SurfaceType
+   * @return SurfaceType type of surface
    */
   SurfaceType getSurfaceType() const { return _surface_type; }
 
   /**
    * @brief Get the string representation of surface type
    *
-   * @return const std::string
+   * @return const std::string string representation of surface type
    */
   const std::string getSurfaceTypeString();
 
   /**
-   * @brief Set the Boundary Type
+   * @brief Set the Boundary Type (i.e. transmission or vacuum)
    *
-   * @param boundary_type
+   * @param boundary_type type of boundary
    */
   void setBoundaryType(const BoundaryType boundary_type) { _boundary_type = boundary_type; }
 
   /**
-   * @brief Get the Boundary Type
+   * @brief Get the Boundary Type (i.e. transmission or vacuum)
    *
-   * @return BoundaryType
+   * @return BoundaryType type of boundary
    */
   BoundaryType getBoundaryType() const { return _boundary_type; }
 
   /**
    * @brief Get the string representation of Boundary Type
    *
-   * @return const std::string
+   * @return const std::string string representation of the boundary type
    */
   const std::string getBoundaryTypeString();
 
   /**
    * @brief Get the coefficients that define the surface
    *
-   * @return std::map<std::string, Real>
+   * @return std::map<std::string, Real> map of coefficients and their values
    */
   virtual std::map<std::string, Real> getCoeffs() = 0; // Pure virtual function
 
   /**
    * @brief get direction from point to surface
    *
-   * @param p
+   * @param p point
    * @return CSGSurface::Direction
    */
   virtual CSGSurface::Direction directionFromPoint(const Point p) = 0; // Pure virtual function
@@ -111,7 +119,7 @@ public:
   /**
    * @brief Get the name of surface
    *
-   * @return std::string
+   * @return std::string name of surface
    */
   std::string getName() const { return _name; }
 

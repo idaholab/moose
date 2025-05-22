@@ -24,7 +24,7 @@ class CSGCell
 {
 public:
   /// An enum for type of fill for cell region
-  // TODO add support for universe and lattice fill
+  // TODO: add support for lattice fill
   enum class FillType
   {
     VOID,
@@ -34,22 +34,37 @@ public:
 
   /**
    * Default constructor
+   *
+   * @param name name of cell
+   * @param fill_type fill type of the cell
+   * @param region cell region
    */
   CSGCell(const std::string name, const FillType fill_type, const CSGRegion & region);
 
   /**
    * Constructor for void cell
+   *
+   * @param name name of cell
+   * @param region cell region
    */
   CSGCell(const std::string name, const CSGRegion & region);
 
   /**
-   * Constructor for Material Cell; TODO: mat_name will be replaced with material object when
-   * available
+   * Constructor for Material Cell
+   * TODO: mat_name will be replaced with material object when available
+   *
+   * @param name name of cell
+   * @param mat_name name of material to use as the cell fill
+   * @param region cell region
    */
   CSGCell(const std::string name, const std::string mat_name, const CSGRegion & region);
 
   /**
    * Constructor for Universe Cell
+   *
+   * @param name name of cell
+   * @param univ universe to be the fill
+   * @param region cell region
    */
   CSGCell(const std::string name,
           const std::shared_ptr<CSGUniverse> univ,
@@ -70,7 +85,7 @@ public:
   /**
    * @brief Get the string representation of the fill type
    *
-   * @return const std::string
+   * @return const std::string fill type
    */
   const std::string getFillTypeString();
 
@@ -83,7 +98,7 @@ public:
 
   /**
    * @brief Get the cell fill material name if FillType is MATERIAL
-   * //TODO: update to return material object when materials are implemented
+   * TODO: update to return material object when materials are implemented
    *
    * @return const std::string
    */
@@ -92,14 +107,14 @@ public:
   /**
    * @brief Get the name of the fill
    *
-   * @return std::string
+   * @return std::string fill name
    */
   std::string getFillName() const { return _fill_name; }
 
   /**
    * @brief Get the cell name
    *
-   * @return const std::string
+   * @return const std::string cell name
    */
   const std::string getName() const { return _name; }
 
@@ -113,14 +128,14 @@ public:
   /**
    * @brief Get the cell region
    *
-   * @return const CSGRegion&
+   * @return const CSGRegion& region of the cell
    */
   const CSGRegion & getRegion() const { return _region; }
 
   /**
    * @brief Get the string representation of the cell region
    *
-   * @return std::string
+   * @return std::string string representation of the cell region
    */
   std::string getRegionAsString() const { return _region.toString(); }
 

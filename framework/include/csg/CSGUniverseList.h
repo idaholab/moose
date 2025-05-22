@@ -33,17 +33,17 @@ public:
   /**
    * @brief create an empty universe
    *
-   * @param name
-   * @return std::shared_ptr<CSGUniverse>
+   * @param name unique name of universe
+   * @return std::shared_ptr<CSGUniverse> pointer to empty universe that is created
    */
   std::shared_ptr<CSGUniverse> addUniverse(const std::string name);
 
   /**
    * @brief create a universe from list of cells
    *
-   * @param name
-   * @param cells
-   * @return std::shared_ptr<CSGUniverse>
+   * @param name unique name of universe
+   * @param cells list of cell pointers to add to the universe upon creation
+   * @return std::shared_ptr<CSGUniverse> pointer to universe that is created
    */
   std::shared_ptr<CSGUniverse> addUniverse(const std::string name,
                                            std::vector<std::shared_ptr<CSGCell>> cells);
@@ -51,7 +51,8 @@ public:
   /**
    * @brief Get the all universes
    *
-   * @return const std::map<std::string, std::shared_ptr<CSGUniverse>>&
+   * @return const std::map<std::string, std::shared_ptr<CSGUniverse>>& map of all names to
+   * universes
    */
   const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
   {
@@ -61,15 +62,15 @@ public:
   /**
    * @brief Get the Universe by name
    *
-   * @param name
-   * @return const std::shared_ptr<CSGUniverse>&
+   * @param name name of universe
+   * @return const std::shared_ptr<CSGUniverse>& pointer to CSGUniverse of the specified name
    */
   const std::shared_ptr<CSGUniverse> & getUniverse(const std::string name);
 
   /**
    * @brief Get the root universe
    *
-   * @return const std::shared_ptr<CSGUniverse>&
+   * @return const std::shared_ptr<CSGUniverse>& pointer to the root universe
    */
   const std::shared_ptr<CSGUniverse> & getRoot() const { return _root_universe; };
 
