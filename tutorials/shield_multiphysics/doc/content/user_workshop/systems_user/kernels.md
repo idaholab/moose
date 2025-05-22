@@ -33,4 +33,5 @@ where $\psi_i$ are the test functions and $u_h$ is the finite element solution.
 
 This integral is approximated by the kernel using the specified quadrature.
 
+!equation
 \left(\nabla \psi_i, \nabla u_h\right) = \sum_{qp} w_{qp} \nabla \psi_i(qp)  \nabla u_h(qp)

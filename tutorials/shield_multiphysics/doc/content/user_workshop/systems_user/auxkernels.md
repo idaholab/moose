@@ -75,6 +75,8 @@ other nodal auxiliary variables
 
 The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MONOMIAL_VEC or NEDELEC_VEC).
 
+!style! fontsize=70%
+
 ```text
 [AuxVariables]
   [aux]
@@ -91,3 +93,5 @@ The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MO
   []
 []
 ```
+
+!style-end!
