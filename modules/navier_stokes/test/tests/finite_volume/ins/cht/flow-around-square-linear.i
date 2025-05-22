@@ -262,6 +262,7 @@ advected_interp_method = 'upwind'
     vel_y = vel_y
     rhie_chow_user_object = rc
     advected_quantity = 'rhocpT'
+    subtract_mesh_velocity = false
   []
   [h_out]
     type = VolumetricFlowRate
@@ -271,6 +272,7 @@ advected_interp_method = 'upwind'
     rhie_chow_user_object = rc
     advected_quantity = 'rhocpT'
     advected_interp_method = upwind
+    subtract_mesh_velocity = false
   []
   [power]
     type = ElementIntegralFunctorPostprocessor

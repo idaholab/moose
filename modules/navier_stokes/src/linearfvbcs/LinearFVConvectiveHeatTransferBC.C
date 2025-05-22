@@ -107,11 +107,15 @@ LinearFVConvectiveHeatTransferBC::computeBoundaryGradientMatrixContribution() co
 Real
 LinearFVConvectiveHeatTransferBC::computeBoundaryGradientRHSContribution() const
 {
-  const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
+  auto face = singleSidedFaceArg(_current_face_info);
 
-  // We evaluate on the face, it should be element value if a variable is used
-  // for the functor with this boundary condition. For functions/pps/etc it will
-  // use the face value.
+  // We check where the functor contributing to the right hand side lives. We do this
+  // because this functor lives on the domain where the variable of this kernel doesn't.
+  if (_rhs_temperature->hasFaceSide(*_current_face_info, true))
+    face.face_side = _current_face_info->elemPtr();
+  else
+    face.face_side = _current_face_info->neighborPtr();
+
   return _htc(face, state) * (*_rhs_temperature)(face, state);
 }
