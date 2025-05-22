@@ -886,7 +886,7 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   const auto * nec = dynamic_cast<const NodeElemConstraintBase *>(this);
 
   if (!aux && !euo && !nuo && !nfc && !nec)
-    mooseError("writeableVariable() can only be called from AuxKernels, ElementUserObjects, "
+    mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
                "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraint. '",
                _obj->name(),
                "' is none of those.");
