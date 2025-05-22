@@ -293,4 +293,10 @@
     requirement = "The system shall test the functionality of the TestHarness.getExecutable method."
     issues = '#30200'
   []
+  [test_capture_perf_graph]
+    type = PythonUnitTest
+    input = test_CapturePerfGraph.py
+    requirement = "The system shall support systematically capturing performance statistics from the execution of MOOSE application tests."
+    issues = '#30569'
+  []
 []
