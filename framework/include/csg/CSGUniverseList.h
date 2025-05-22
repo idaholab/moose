@@ -79,7 +79,7 @@ public:
    *
    * @param universe
    */
-  void addUniverse(const std::pair<std::string, std::shared_ptr<CSGUniverse>> universe);
+  void addUniverse(const std::shared_ptr<CSGUniverse> universe);
 
   /**
    * @brief rename the specified universe
