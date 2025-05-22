@@ -131,8 +131,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
   auto root = getRootUniverse();
   auto root_cells = root->getAllCells();
   auto new_existing_univ = createUniverse(new_root_name_base, root_cells);
-  for (auto c : root_cells)
-    root->removeCell(c);
+  root->removeAllCells();
 
   // add incoming universes to current Base
   auto all_univs = univ_list.getAllUniverses();
