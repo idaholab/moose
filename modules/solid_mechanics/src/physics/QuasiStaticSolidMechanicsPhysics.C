@@ -26,7 +26,9 @@
 
 registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "meta_action");
 
-registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp",
+                    QuasiStaticSolidMechanicsPhysics,
+                    "create_problem_complete");
 
 registerMooseAction("SolidMechanicsApp",
                     QuasiStaticSolidMechanicsPhysics,
@@ -516,8 +518,12 @@ QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
 {
   // Do the coordinate system check only once the problem is created
 
-  auto set_subdomain_ids = [&]()
+  if (_current_task == "create_problem_complete")
   {
+    if (_subdomain_names.empty() && _problem->isParamSetByUser("default_block"))
+      for (auto & name : _problem->getDefaultBlocks())
+        _subdomain_names.push_back(name);
+
     for (auto & name : _subdomain_names)
     {
       auto id = _mesh->getSubdomainID(name);
@@ -526,25 +532,10 @@ QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
       else
         _subdomain_ids.insert(id);
     }
-  };
-
-  if (_current_task == "setup_mesh_complete")
-  {
-    set_subdomain_ids();
   }
 
   if (_current_task == "validate_coordinate_systems")
   {
-    if (_subdomain_ids.empty() && _problem->isParamSetByUser("default_block"))
-    {
-      for (auto & name : _problem->getDefaultBlocks())
-      {
-        _subdomain_names.push_back(name);
-      }
-
-      set_subdomain_ids();
-    }
-
     // use either block restriction list or list of all subdomains in the mesh
     const auto & check_subdomains =
         _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
