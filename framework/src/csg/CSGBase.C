@@ -72,7 +72,7 @@ CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
   // region definitions.
   auto all_surfs = surf_list.getAllSurfaces();
   for (auto s : all_surfs)
-    _surface_list.addSurface(s);
+    _surface_list.addSurface(s.second);
 }
 
 void
@@ -80,7 +80,7 @@ CSGBase::joinCellList(CSGCellList & cell_list)
 {
   auto all_cells = cell_list.getAllCells();
   for (auto c : all_cells)
-    _cell_list.addCell(c);
+    _cell_list.addCell(c.second);
 }
 
 void
@@ -99,7 +99,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
         root->addCell(cell);
     }
     else // unique non-root universe to add to list
-      _universe_list.addUniverse(u);
+      _universe_list.addUniverse(u.second);
   }
 }
 
@@ -119,7 +119,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name
       auto new_incoming_univ = createUniverse(new_root_name_incoming, all_cells);
     }
     else // unique non-root universe to add to list
-      _universe_list.addUniverse(u);
+      _universe_list.addUniverse(u.second);
   }
 }
 
@@ -147,7 +147,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
       auto new_incoming_univ = createUniverse(new_root_name_incoming, all_cells);
     }
     else // unique non-root universe to add to list
-      _universe_list.addUniverse(u);
+      _universe_list.addUniverse(u.second);
   }
 }
 

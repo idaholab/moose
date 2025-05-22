@@ -87,7 +87,7 @@ public:
    *
    * @param cell cell to add to the CellList
    */
-  void addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell);
+  void addCell(const std::shared_ptr<CSGCell> cell);
 
   /**
    * @brief rename the specified cell

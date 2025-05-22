@@ -80,10 +80,11 @@ CSGSurfaceList::addCylinder(
 }
 
 void
-CSGSurfaceList::addSurface(const std::pair<std::string, std::shared_ptr<CSGSurface>> surf)
+CSGSurfaceList::addSurface(const std::shared_ptr<CSGSurface> surf)
 {
-  checkSurfaceName(surf.first);
-  _surfaces.insert(surf);
+  auto name = surf->getName();
+  checkSurfaceName(name);
+  _surfaces.insert(std::make_pair(name, surf));
 }
 
 void
