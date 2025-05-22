@@ -2,10 +2,7 @@ mu = 0.01
 rho = 1.1
 k = 0.0005
 cp = 10
-k_s = 3.0
 h_conv = 5
-
-power_density = 10000
 
 advected_interp_method = 'upwind'
 
@@ -35,10 +32,15 @@ advected_interp_method = 'upwind'
     paired_block = 1
     new_boundary = interface
   []
+  [delete]
+    type = BlockDeletionGenerator
+    input = interface
+    block = 1
+  []
 []
 
 [Problem]
-  linear_sys_names = 'u_system v_system pressure_system energy_system solid_energy_system'
+  linear_sys_names = 'u_system v_system pressure_system energy_system'
   previous_nl_solution_required = true
 []
 
@@ -78,12 +80,6 @@ advected_interp_method = 'upwind'
     solver_sys = energy_system
     initial_condition = 300
     block = 0
-  []
-  [T_solid]
-    type = MooseLinearVariableFVReal
-    solver_sys = solid_energy_system
-    initial_condition = 500
-    block = 1
   []
 []
 
@@ -149,18 +145,6 @@ advected_interp_method = 'upwind'
     variable = T_fluid
     diffusion_coeff = ${k}
     use_nonorthogonal_correction = true
-  []
-
-  [solid-conduction]
-    type = LinearFVDiffusion
-    variable = T_solid
-    diffusion_coeff = ${k_s}
-    use_nonorthogonal_correction = true
-  []
-  [solid-source]
-    type = LinearFVSource
-    variable = T_solid
-    source_density = ${power_density}
   []
 []
 
@@ -230,15 +214,7 @@ advected_interp_method = 'upwind'
   [fluid_solid]
     type = LinearFVConvectiveHeatTransferBC
     variable = T_fluid
-    T_solid = T_solid
-    T_fluid = T_fluid
-    boundary = interface
-    h = ${h_conv}
-  []
-  [solid_fluid]
-    type = LinearFVConvectiveHeatTransferBC
-    variable = T_solid
-    T_solid = T_solid
+    T_solid = boundary_value
     T_fluid = T_fluid
     boundary = interface
     h = ${h_conv}
@@ -254,28 +230,10 @@ advected_interp_method = 'upwind'
   []
 []
 
-[Postprocessors]
-  [h_in]
-    type = VolumetricFlowRate
-    boundary = left
-    vel_x = vel_x
-    vel_y = vel_y
-    rhie_chow_user_object = rc
-    advected_quantity = 'rhocpT'
-  []
-  [h_out]
-    type = VolumetricFlowRate
-    boundary = right
-    vel_x = vel_x
-    vel_y = vel_y
-    rhie_chow_user_object = rc
-    advected_quantity = 'rhocpT'
-    advected_interp_method = upwind
-  []
-  [power]
-    type = ElementIntegralFunctorPostprocessor
-    functor = ${power_density}
-    block = 1
+[Functions]
+  [boundary_value]
+    type = ConstantFunction
+    value = 350
   []
 []
 
@@ -284,16 +242,13 @@ advected_interp_method = 'upwind'
   momentum_l_abs_tol = 1e-13
   pressure_l_abs_tol = 1e-13
   energy_l_abs_tol = 1e-13
-  solid_energy_l_abs_tol = 1e-13
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
-  solid_energy_l_tol = 0
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  solid_energy_system = 'solid_energy_system'
   momentum_equation_relaxation = 0.8
   energy_equation_relaxation = 1.0
   pressure_variable_relaxation = 0.3
@@ -301,15 +256,12 @@ advected_interp_method = 'upwind'
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10
-  solid_energy_absolute_tolerance = 1e-10
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
-  solid_energy_petsc_options_iname = '-pc_type -pc_hypre_type'
-  solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
 []
