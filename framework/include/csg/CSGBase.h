@@ -139,7 +139,7 @@ public:
   /**
    * @brief rename the specified surface
    *
-   * @param surface
+   * @param surface CSGSurface to rename
    * @param name new name
    */
   void renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name)
@@ -156,7 +156,7 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return std::shared_ptr<CSGCell>
+   * @return std::shared_ptr<CSGCell> pointer to CSGCell that is created
    */
   std::shared_ptr<CSGCell> createCell(const std::string name,
                                       const std::string mat_name,
@@ -170,7 +170,7 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return std::shared_ptr<CSGCell>
+   * @return std::shared_ptr<CSGCell> pointer to CSGCell that is created
    */
   std::shared_ptr<CSGCell> createCell(const std::string name,
                                       const CSGRegion & region,
@@ -184,7 +184,7 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return std::shared_ptr<CSGCell>
+   * @return std::shared_ptr<CSGCell> pointer to cell that is created
    */
   std::shared_ptr<CSGCell> createCell(const std::string name,
                                       const std::shared_ptr<CSGUniverse> fill_univ,
@@ -194,7 +194,7 @@ public:
   /**
    * @brief Get all cell objects
    *
-   * @return map of names to CSGCell objects
+   * @return map of all names to CSGCell objects in this CSGBase instance
    */
   const std::map<std::string, std::shared_ptr<CSGCell>> & getAllCells() const
   {
@@ -215,7 +215,7 @@ public:
   /**
    * @brief rename the specified cell
    *
-   * @param cell
+   * @param cell pointer to CSGCell to rename
    * @param name new name
    */
   void renameCell(const std::shared_ptr<CSGCell> cell, const std::string name)
@@ -233,7 +233,7 @@ public:
   /**
    * @brief rename the root universe for this instance (default is ROOT_UNIVERSE)
    *
-   * @param name
+   * @param name new name for the root universe
    */
   void renameRootUniverse(const std::string name)
   {
@@ -243,7 +243,7 @@ public:
   /**
    * @brief rename the specified universe
    *
-   * @param universe
+   * @param universe pointer to CSGUniverse to rename
    * @param name new name
    */
   void renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name)
@@ -255,7 +255,7 @@ public:
    * @brief Create an empty Universe object
    *
    * @param name unique universe name
-   * @return std::shared_ptr<CSGUniverse>
+   * @return std::shared_ptr<CSGUniverse> pointer CSGUniverse that is created
    */
   std::shared_ptr<CSGUniverse> createUniverse(const std::string name)
   {
@@ -267,7 +267,7 @@ public:
    *
    * @param name unique universe name
    * @param cells list of cells to add to universe
-   * @return std::shared_ptr<CSGUniverse>
+   * @return std::shared_ptr<CSGUniverse> pointer CSGUniverse that is created
    */
   std::shared_ptr<CSGUniverse> createUniverse(const std::string name,
                                               std::vector<std::shared_ptr<CSGCell>> cells)
@@ -278,7 +278,7 @@ public:
   /**
    * @brief Get all universe objects
    *
-   * @return map of names to CSGUniverse objects
+   * @return map of all names to CSGUniverse objects in this CSGBase instance
    */
   const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
   {
@@ -297,8 +297,8 @@ public:
   }
 
   /**
-   * @brief join another CSGBase object to this one. The root universe of the
-   * incoming CSGBase will be combined with the existing root universe.
+   * @brief join another CSGBase object to this one. The cells of the root universe
+   * of the incoming CSGBase will be combined with the existing root universe of this CSGBase.
    *
    * @param base pointer to a different CSGBase object
    */
@@ -325,7 +325,7 @@ public:
   }
 
   /**
-   * @brief join another CSGBase object to this one. For each base, create
+   * @brief join another CSGBase object to this one. For each CSGbase, create
    * a new universe from the existing root universes in both with the new names
    * provided.
    *
@@ -382,14 +382,14 @@ private:
   /**
    * @brief join a separate CSGSurfaceList object to this one
    *
-   * @param surf_list
+   * @param surf_list CSGSurfaceList from a separate CSGBase object
    */
   void joinSurfaceList(CSGSurfaceList & surf_list);
 
   /**
    * @brief join a separate CSGCellList object to this one
    *
-   * @param cell_list
+   * @param cell_list CSGCellList from a separate CSGBase object
    */
   void joinCellList(CSGCellList & cell_list);
 
@@ -397,7 +397,7 @@ private:
    * @brief join a separate CSGUniverseList object to this one;
    * root universes from univ_list will be combined into this root universe
    *
-   * @param univ_list incoming CSGUniverseList to join to this base
+   * @param univ_list CSGUniverseList from a separate CSGBase object
    */
   void joinUniverseList(CSGUniverseList & univ_list);
 
@@ -406,7 +406,7 @@ private:
    * the incoming root universe will be moved to a new universe of the new
    * name specified.
    *
-   * @param univ_list incoming CSGUniverseList to join to this base
+   * @param univ_list CSGUniverseList from a separate CSGBase object
    * @param new_root_name_incoming new name for the universe generated from the incoming root
    * universe
    */
@@ -417,7 +417,7 @@ private:
    * both this root universe and the incoming root universe will be
    * maintained as separate universes of the specified names.
    *
-   * @param univ_list incoming CSGUniverseList to join to this base
+   * @param univ_list CSGUniverseList from a separate CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
    * @param new_root_name_incoming new name for the universe generated from the incoming root
    * universe

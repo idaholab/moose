@@ -23,6 +23,14 @@ namespace CSG
 class CSGYCylinder : public CSGSurface
 {
 public:
+  /**
+   * @brief Construct a cylinder surface aligned with the y axis
+   *
+   * @param name unique name of surface
+   * @param x0 x coordinate of center
+   * @param z0 z coordinate of center
+   * @param r radius
+   */
   CSGYCylinder(const std::string name, const Real x0, const Real z0, const Real r);
 
   /**
@@ -30,8 +38,20 @@ public:
    */
   virtual ~CSGYCylinder() = default;
 
+  /**
+   * @brief Get the coefficients (x0, z0, and r) that define the cylindrical surface
+   * with the equation: (x - x0)^2 + (z - z0)^2 = r^2
+   *
+   * @return std::map<std::string, Real> map of coefficients to their value
+   */
   virtual std::map<std::string, Real> getCoeffs() override;
 
+  /**
+   * @brief get direction from point to surface
+   *
+   * @param p point
+   * @return CSGSurface::Direction
+   */
   virtual CSGSurface::Direction directionFromPoint(const Point p) override;
 
 protected:

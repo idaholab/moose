@@ -49,7 +49,7 @@ public:
   /**
    * @brief add cell to universe
    *
-   * @param cell
+   * @param cell pointer to cell to add
    */
   void addCell(const std::shared_ptr<CSGCell> cell);
 
@@ -57,7 +57,7 @@ public:
    * @brief Get the Cell object by name
    *
    * @param name name of cell
-   * @return std::shared_ptr<CSGCell>
+   * @return std::shared_ptr<CSGCell> pointer to the cell of the specified name in this universe
    */
   std::shared_ptr<CSGCell> getCell(const std::string name);
 
@@ -65,12 +65,12 @@ public:
    * @brief check if cell of provided name is present in universe
    *
    * @param name name of cell
-   * @return true / false
+   * @return true if cell of name is in universe, otherwise false
    */
   bool hasCell(const std::string name) const;
 
   /**
-   * @brief remove a cell from the universe by its name
+   * @brief remove a cell of the specified name from the universe
    *
    * @param name name of cell to remove
    */
@@ -84,14 +84,14 @@ public:
   /**
    * @brief Get list of the all cells in the universe
    *
-   * @return std::vector<std::shared_ptr<CSGCell>>
+   * @return std::vector<std::shared_ptr<CSGCell>> list of pointers to cells in universe
    */
   std::vector<std::shared_ptr<CSGCell>> getAllCells() const { return _cells; }
 
   /**
    * @brief Get the name of the universe
    *
-   * @return const std::string
+   * @return const std::string name of universe
    */
   const std::string getName() const { return _name; }
 
