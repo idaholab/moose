@@ -20,7 +20,7 @@
     input = simple.i
     csvdiff = simple_out.csv
     design = SidesetAroundSubdomainUpdater.md
-    requirement = 'The system shall be able to map sidesets as the subdomain of elements are changed.'
+    requirement = 'The system shall be able to update sidesets defined by their location between two subdomains as the subdomain of elements are changed.'
   []
   [sideset_warning]
     type = RunException

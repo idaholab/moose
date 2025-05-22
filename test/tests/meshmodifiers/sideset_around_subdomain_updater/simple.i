@@ -5,6 +5,9 @@
   add_sideset_ids = '4001 4002'
   add_sideset_names = 'right top'
 
+  add_nodeset_ids = '4001 4002'
+  add_nodeset_names = 'right top'
+
   construct_node_list_from_side_list = true
 
   [block]
