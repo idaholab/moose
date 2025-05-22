@@ -54,7 +54,7 @@ SetupMeshCompleteAction::act()
       return;
 
     // uniform refinement has been done on master, so skip
-    if (_app.masterMesh())
+    if (_app.useMasterMesh())
       return;
 
     /**
