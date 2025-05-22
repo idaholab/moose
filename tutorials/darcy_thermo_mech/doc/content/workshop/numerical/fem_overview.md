@@ -5,13 +5,13 @@
 ## Function Approximation
 
 To introduce the concept of FEM, consider a polynomial regression exercise. We can
-determine a polynomial function in a:
+search for a polynomial function that solves the following problems:
 
-- +Discrete sense+: Using sampled locations with associated values, we want our polynomial function to be as close to the given data as possible.
-- +Continuous sense+: Using a complicated function, we want to have our polynomial function as close to the given function as possible.
+- +Discrete example+: Given sampled locations with associated values, we want our polynomial function to be as close to the input data as possible.
+- +Continuous example+: Given a complicated function, we want to have our polynomial function as close to the input function as possible.
 
 
-Let us take the polynomial in the following form:
+Let us write the polynomial in the following form:
 
 !equation
 f(x) = \sum_{i=0}^d c_i x^i
@@ -42,15 +42,13 @@ Substitute $(x_i, y_i)$ data into the polynomial model:
 !equation
 c_0 + c_1 x_i + c_2 x_i^2 = y_i,\quad i=1,..,4.
 
-This leads to the following linear system for $c_i$:
+This results 4 equations for 3 unknowns ($c_i$) that can be expressed as the following linear system:
 
 !equation
 \mathbf{A}
 \vec{c}
 =
-\vec{y}
-
-where
+\vec{y}~,
 
 !style fontsize=80%
 !equation
@@ -64,12 +62,12 @@ A_{*0} | A_{*1} | A_{*2}
   1 & 0.50 & 0.50^2 \\
   1 & 0.75 & 0.75^2 \\
   1 & 1.00 & 1.00^2
-\end{bmatrix}, ~~
+\end{bmatrix}, ~
 \vec{c} = \begin{bmatrix}
   c_0 \\
   c_1 \\
   c_2
-\end{bmatrix}, ~~
+\end{bmatrix}, ~
 \vec{y} =
 \begin{bmatrix}
   0.247 \\
@@ -175,7 +173,7 @@ $\quad$
 We can move the derivative with respect to $c_i$ into the integral:
 
 !equation
-\frac{\partial}{\partial c_i} = \int\limits_{0.25}^{1.0} 2 \textcolor{red}{x^i} \left(\sum_{0}^2 c_i x^i - sin(x)\right) dx,
+\frac{\partial R}{\partial c_i} = \int\limits_{0.25}^{1.0} 2 \textcolor{red}{x^i} \left(\sum_{0}^2 c_i x^i - sin(x)\right) dx,
 
 which results in the following system (dropping the factor 2):
 
@@ -233,7 +231,7 @@ The function $f(x)$ *is defined everywhere in the domain*.
 $f(x)$ can be evaluated at the point $x=0.8$, for example, by computing:
 
 !equation
-f(2) = \sum_{i=0}^2 c_i 2^i = \sum_{i=0}^2 c_i g_i(0.8),
+f(2) = \sum_{i=0}^2 c_i 0.8^i = \sum_{i=0}^2 c_i g_i(0.8),
 
 where the $c_i$ correspond to the coefficients in the solution vector, and the $g_i$ are the
 respective functions.
