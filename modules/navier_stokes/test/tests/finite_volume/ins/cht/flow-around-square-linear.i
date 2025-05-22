@@ -1,9 +1,11 @@
 mu = 0.01
 rho = 1.1
-k = 0.2
+k = 0.0005
 cp = 10
-k_s = 2.0
-h_conv = 50
+k_s = 3.0
+h_conv = 5
+
+power_density = 10000
 
 advected_interp_method = 'upwind'
 
@@ -95,7 +97,7 @@ advected_interp_method = 'upwind'
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -106,7 +108,7 @@ advected_interp_method = 'upwind'
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -125,7 +127,7 @@ advected_interp_method = 'upwind'
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -146,18 +148,19 @@ advected_interp_method = 'upwind'
     type = LinearFVDiffusion
     variable = T_fluid
     diffusion_coeff = ${k}
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
 
   [solid-conduction]
     type = LinearFVDiffusion
     variable = T_solid
     diffusion_coeff = ${k_s}
+    use_nonorthogonal_correction = true
   []
   [solid-source]
     type = LinearFVSource
     variable = T_solid
-    source_density = 50000
+    source_density = ${power_density}
   []
 []
 
@@ -205,11 +208,17 @@ advected_interp_method = 'upwind'
     boundary = right
   []
 
-  [inlet_wall_T]
+  [inlet_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T_fluid
     functor = 300
-    boundary = 'left top bottom'
+    boundary = 'left'
+  []
+  [walls_T]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = T_fluid
+    functor = 0.0
+    boundary = 'top bottom'
   []
   [outlet_T]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -236,6 +245,40 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FunctorMaterials]
+  [rhocpT]
+    property_name = 'rhocpT'
+    type = ParsedFunctorMaterial
+    functor_names = 'T_fluid'
+    expression = '${rho}*${cp}*T_fluid'
+  []
+[]
+
+[Postprocessors]
+  [h_in]
+    type = VolumetricFlowRate
+    boundary = left
+    vel_x = vel_x
+    vel_y = vel_y
+    rhie_chow_user_object = rc
+    advected_quantity = 'rhocpT'
+  []
+  [h_out]
+    type = VolumetricFlowRate
+    boundary = right
+    vel_x = vel_x
+    vel_y = vel_y
+    rhie_chow_user_object = rc
+    advected_quantity = 'rhocpT'
+    advected_interp_method = upwind
+  []
+  [power]
+    type = ElementIntegralFunctorPostprocessor
+    functor = ${power_density}
+    block = 1
+  []
+[]
+
 [Executioner]
   type = SIMPLE
   momentum_l_abs_tol = 1e-13
@@ -254,7 +297,7 @@ advected_interp_method = 'upwind'
   momentum_equation_relaxation = 0.8
   energy_equation_relaxation = 1.0
   pressure_variable_relaxation = 0.3
-  num_iterations = 200
+  num_iterations = 1000
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10

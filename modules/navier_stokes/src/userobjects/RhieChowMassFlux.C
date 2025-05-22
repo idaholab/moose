@@ -205,7 +205,6 @@ RhieChowMassFlux::initFaceMassFlux()
   // initial conditions for velocity
   for (auto & fi : _flow_face_info)
   {
-
     RealVectorValue density_times_velocity;
 
     // On internal face we do a regular interpolation with geometric weights

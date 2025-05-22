@@ -50,7 +50,7 @@ protected:
   /// The solid/wall temperature variable
   const MooseLinearVariableFV<Real> * _temp_solid;
 
-  /// The convective heat transfer coefficient in the local element
+  /// The convective heat transfer coefficient
   const Moose::Functor<Real> & _htc;
 
   /// Helper boolean to see if the variable we have is the fluid variable
