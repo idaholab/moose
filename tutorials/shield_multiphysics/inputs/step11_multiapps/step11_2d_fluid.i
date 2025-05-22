@@ -301,7 +301,7 @@ power = '${fparse 5e4 / 144 * 0.5}'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu NONZERO superlu_dist'
 
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 3e-7
   nl_max_its = 10
   l_max_its = 3
 
