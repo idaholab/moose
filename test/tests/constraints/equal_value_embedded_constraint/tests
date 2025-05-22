@@ -191,14 +191,15 @@
     input = 'two_var_embedded_constraint.i'
     mesh_mode = REPLICATED
   []
-  [error_two_var_AD]
+  [two_var_nonAD]
     design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
-    requirement = "The system shall error when the equal value constraint that does not use automatic differentiation is used for coupling two variables."
+    requirement = "The system shall couple two different variables using a hand-coded "
+                  "Jacobian and penalty constraint and it will produce the same "
+                  "results as a single variable simulation."
     issues = '#30499 #30530'
-    type = RunException
+    type = RunApp
     input = 'two_var_embedded_constraint.i'
     cli_args = 'Constraints/equal_phi1_phi2/type=EqualValueEmbeddedConstraint'
-    expect_err = "The primary_variable and variable must be the same."
     mesh_mode = REPLICATED
   []
 []
