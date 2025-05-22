@@ -44,11 +44,13 @@ public:
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
 protected:
-  /// The fluid temperature variable
-  const MooseLinearVariableFV<Real> * _temp_fluid;
+  /// The fluid temperature, we use the functor form to enable situations when
+  /// the user wants to supply a solution-independent form for this.
+  const Moose::Functor<Real> & _temp_fluid;
 
-  /// The solid/wall temperature variable
-  const MooseLinearVariableFV<Real> * _temp_solid;
+  /// The solid/wall temperature, we use the functor form to enable situations when
+  /// the user wants to supply a solution-independent form for this.
+  const Moose::Functor<Real> & _temp_solid;
 
   /// The convective heat transfer coefficient
   const Moose::Functor<Real> & _htc;
@@ -60,5 +62,5 @@ protected:
   /// When this is the fluid domain, the solid temperature will go to the
   /// right hand side. When it is the solid domain, the fluid temperature
   /// will contribute to the right hand side.
-  const MooseLinearVariableFV<Real> * _rhs_temperature;
+  const Moose::Functor<Real> * _rhs_temperature;
 };
