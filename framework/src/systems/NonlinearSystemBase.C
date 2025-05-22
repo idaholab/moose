@@ -1534,7 +1534,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  // go over NodeELemConstraints
+  // go over NodeElemConstraints
   std::set<dof_id_type> unique_secondary_node_ids;
 
   constraints_applied = false;
@@ -2542,7 +2542,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
   }
 
-  // go over NodeELemConstraints
+  // go over NodeElemConstraints
   std::set<dof_id_type> unique_secondary_node_ids;
   constraints_applied = false;
   for (const auto & secondary_id : _mesh.meshSubdomains())

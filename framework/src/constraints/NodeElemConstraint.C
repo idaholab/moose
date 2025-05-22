@@ -28,8 +28,6 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     _grad_test_primary(_var.gradPhiNeighbor()),
     _grad_u_primary(_primary_var.gradSlnNeighbor())
 {
-  if (_primary_var.number() != _var.number())
-    paramError("primary_variable", "The primary_variable and variable must be the same.");
 }
 
 void
@@ -61,7 +59,7 @@ NodeElemConstraint::computeJacobian()
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpJacobian(Moose::SecondarySecondary);
 
-  prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), Moose::ElementNeighbor);
+  prepareMatrixTagNeighbor(_assembly, _var.number(), _primary_var.number(), Moose::ElementNeighbor);
   if (_local_ke.m() && _local_ke.n())
     for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
@@ -74,7 +72,7 @@ NodeElemConstraint::computeJacobian()
       _Kne(_i, _j) += computeQpJacobian(Moose::PrimarySecondary);
 
   prepareMatrixTagNeighbor(
-      _assembly, _primary_var.number(), _var.number(), Moose::NeighborNeighbor);
+      _assembly, _primary_var.number(), _primary_var.number(), Moose::NeighborNeighbor);
   if (_local_ke.m() && _local_ke.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
