@@ -85,7 +85,8 @@ CSGBase::joinCellList(CSGCellList & cell_list)
 
 void
 CSGBase::joinUniverseList(CSGUniverseList & univ_list)
-{ // case 1: incoming root is joined into existing root; no new universes are created
+{
+  // case 1: incoming root is joined into existing root; no new universes are created
   auto all_univs = univ_list.getAllUniverses();
   auto root = getRootUniverse(); // this root universe
   for (auto u : all_univs)
@@ -104,7 +105,8 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
 
 void
 CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name_incoming)
-{ // case 2: incoming root is turned into new universe and existing root remains root
+{
+  // case 2: incoming root is turned into new universe and existing root remains root
 
   // add incoming universes to current Base
   auto all_univs = univ_list.getAllUniverses();
@@ -125,7 +127,8 @@ void
 CSGBase::joinUniverseList(CSGUniverseList & univ_list,
                           std::string new_root_name_base,
                           std::string new_root_name_incoming)
-{ // case 3: each root universe becomes a new universe and a new root is created
+{
+  // case 3: each root universe becomes a new universe and a new root is created
 
   // make a new universe from the existing root universe
   auto root = getRootUniverse();
