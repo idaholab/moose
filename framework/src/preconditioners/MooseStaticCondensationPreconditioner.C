@@ -39,6 +39,26 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
     const InputParameters & params)
   : SingleMatrixPreconditioner(params)
 {
+  auto check_param = [this](const auto & param_name)
+  {
+    if (isParamValid(param_name))
+      paramError(param_name,
+                 "This class prefixes every PETSc option so that it applies to the condensed "
+                 "system. Given that, there are multiple issues with setting '",
+                 param_name,
+                 "': 1) it applies to the nonlinear solver algorithm whereas the prefix this class "
+                 "applies makes PETSc options conceptually applicable only to the linear solve of "
+                 "the statically condensed system 2) these are singleton MOOSE-wrapped PETSc "
+                 "options. Consequently even if having multiple prefixes for a system's nonlinear "
+                 "solver options made sense, we don't support it. E.g. if you specify '",
+                 param_name,
+                 "' in both this object's block and the Executioner block, then there will be a "
+                 "logical conflict");
+  };
+  check_param("mffd_type");
+  check_param("solve_type");
+
+  // Now check the solve type set in the Executioner
   if (_fe_problem.solverParams(_nl.number())._type != Moose::ST_PJFNK)
     mooseError(
         "Static condensation preconditioning should use a PJFNK solve type. This is because it "
@@ -63,25 +83,5 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
 void
 MooseStaticCondensationPreconditioner::initialSetup()
 {
-  auto check_param = [this](const auto & param_name)
-  {
-    if (isParamValid(param_name))
-      paramError(param_name,
-                 "This class prefixes every PETSc option so that it applies to the condensed "
-                 "system. Given that, there are multiple issues with setting '",
-                 param_name,
-                 "': 1) it applies to the nonlinear solver algorithm whereas the prefix this class "
-                 "applies makes PETSc options conceptually applicable only to the linear solve of "
-                 "the statically condensed system 2) these are singleton MOOSE-wrapped PETSc "
-                 "options. Consequently even if having multiple prefixes for a system's nonlinear "
-                 "solver options made sense, we don't support it. E.g. if you specify '",
-                 param_name,
-                 "' in both this object's block and the Executioner block, then there will be a "
-                 "logical conflict");
-  };
-
-  check_param("mffd_type");
-  check_param("solve_type");
-
   Moose::PetscSupport::storePetscOptions(_fe_problem, "-" + _nl.name() + "_condensed_", *this);
 }
