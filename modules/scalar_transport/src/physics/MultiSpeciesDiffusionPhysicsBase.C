@@ -169,14 +169,20 @@ MultiSpeciesDiffusionPhysicsBase::addInitialConditions()
 
   // always obey the user specification of initial conditions
   // There are no default values, so no need to consider whether the app is restarting
-  if (isParamValid("initial_conditions_species"))
-    for (const auto i : index_range(_species_names))
+  for (const auto i : index_range(_species_names))
+  {
+    const auto & var_name = _species_names[i];
+    if (isParamValid("initial_conditions_species") &&
+        shouldCreateIC(var_name,
+                       _blocks,
+                       /*whether IC is a default*/ false,
+                       /*error if already an IC*/ true))
     {
-      const auto & var_name = _species_names[i];
       params.set<VariableName>("variable") = var_name;
       params.set<FunctionName>("function") =
           getParam<std::vector<FunctionName>>("initial_conditions_species")[i];
 
       getProblem().addInitialCondition("FunctionIC", prefix() + var_name + "_ic", params);
     }
+  }
 }
