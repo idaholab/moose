@@ -45,7 +45,6 @@
     position = '1 1 1'
     connections = 'fch1:out fch2:out'
     volume = 0.1
-    use_scalar_variables = false
   []
 
   [fch2]

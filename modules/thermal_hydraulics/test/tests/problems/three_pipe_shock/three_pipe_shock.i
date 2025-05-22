@@ -116,7 +116,6 @@ initial_vel3 = 0.769
     initial_vel_z = 0
     scaling_factor_rhoEV = 1e-5
     apply_velocity_scaling = true
-    use_scalar_variables = false
   []
 
   [outlet1]

@@ -45,7 +45,6 @@ dt = 1.e-3
     D_wheel = 0.4
     head_coefficient = head
     power_coefficient = power
-    use_scalar_variables = false
   []
   [pipe]
     type = FlowChannel1Phase

@@ -62,7 +62,6 @@
     position = '1 0 0'
     volume = 1e-2
     K = 0
-    use_scalar_variables = false
   []
 
   [pipe2]
@@ -79,7 +78,6 @@
     connections = 'pipe2:out pipe1:in'
     position = '1 0 0'
     volume = 1e-2
-    use_scalar_variables = false
   []
 []
 

@@ -52,7 +52,6 @@ dt = 1.e-2
     head = head_fcn
     torque_hydraulic = torque_fcn
     density_rated = 124.2046
-    use_scalar_variables = false
   []
 
   [pipe]

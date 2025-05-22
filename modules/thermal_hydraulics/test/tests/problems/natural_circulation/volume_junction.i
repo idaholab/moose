@@ -18,7 +18,6 @@ volume = ${fparse 4/3 * pi * radius^3}
   scaling_factor_rhoEV = 1e-5
 
   apply_velocity_scaling = false
-  use_scalar_variables = false
 []
 
 [Components]

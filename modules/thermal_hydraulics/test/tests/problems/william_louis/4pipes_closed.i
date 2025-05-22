@@ -102,7 +102,6 @@ cfl = 0.95
     volume = ${V_junction}
     scaling_factor_rhoEV = 1e-5
     apply_velocity_scaling = true
-    use_scalar_variables = false
   []
 
   [pipe2]
