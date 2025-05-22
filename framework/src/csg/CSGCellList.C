@@ -71,8 +71,14 @@ CSGCellList::addCell(const std::shared_ptr<CSGCell> cell)
 void
 CSGCellList::renameCell(const std::shared_ptr<CSGCell> cell, const std::string name)
 {
-  checkCellName(name);
+  // check that this cell passed in is actually in the same cell that is in the cell list
   auto prev_name = cell->getName();
+  auto exisiting_cell = _cells.find(prev_name)->second;
+  if (exisiting_cell != cell)
+    mooseError("Cell " + prev_name + " cannot be renamed to " + name +
+               " as it does not exist in this CSGBase instance.");
+
+  checkCellName(name);
   cell->setName(name);
   _cells.erase(prev_name);
   _cells.insert(std::make_pair(name, cell));

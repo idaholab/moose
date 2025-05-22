@@ -64,8 +64,15 @@ CSGUniverseList::addUniverse(const std::shared_ptr<CSGUniverse> universe)
 void
 CSGUniverseList::renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name)
 {
-  checkUniverseName(name);
+  // check that this universe passed in is actually in the same universe that is in the universe
+  // list
   auto prev_name = universe->getName();
+  auto exisiting_univ = _universes.find(prev_name)->second;
+  if (exisiting_univ != universe)
+    mooseError("Universe " + prev_name + " cannot be renamed to " + name +
+               " as it does not exist in this CSGBase instance.");
+
+  checkUniverseName(name);
   universe->setName(name);
   _universes.erase(prev_name);
   _universes.insert(std::make_pair(name, universe));
