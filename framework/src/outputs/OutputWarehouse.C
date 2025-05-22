@@ -413,16 +413,20 @@ OutputWarehouse::resetFileBase()
 {
   // Set the file base from the application to FileOutputs and add associated filenames
   for (const auto & obj : _all_objects)
-  {
-    FileOutput * file_output = dynamic_cast<FileOutput *>(obj);
-    if (file_output)
+    if (FileOutput * file_output = dynamic_cast<FileOutput *>(obj))
     {
-      const std::string file_base = obj->parameters().get<bool>("_built_by_moose")
-                                        ? _app.getOutputFileBase()
-                                        : (_app.getOutputFileBase(true) + "_" + obj->name());
-      file_output->setFileBase(file_base);
+      std::string file_base;
+      if (obj->parameters().get<bool>("_built_by_moose"))
+      {
+        if (obj->isParamValid("file_base"))
+          file_base = obj->getParam<std::string>("file_base");
+        else
+          file_base = _app.getOutputFileBase();
+      }
+      else
+        file_base = _app.getOutputFileBase(true) + "_" + obj->name();
 
+      file_output->setFileBase(file_base);
       addOutputFilename(obj->name(), file_output->filename());
     }
-  }
 }

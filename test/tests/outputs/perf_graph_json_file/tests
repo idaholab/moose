@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#30552'
+  design = 'CommonOutputAction.md'
+  [test]
+    type = JSONDiff
+    input = perf_graph_json_file.i
+    jsondiff = 'perf_graph_json_file_out.json pg.json'
+    skip_keys = "root['time_steps'][0]['perf_graph_json']['graph']"
+    requirement = 'The system shall support the file output of timing and memory usage data to a specific file using an output parameter'
+  []
+  [bad_file]
+    type = RunException
+    input = perf_graph_json_file.i
+    cli_args = 'Outputs/perf_graph_json_file=badfile'
+    expect_err = 'File must end with .json'
+    requirement = 'The system shall report a reasonable error when outputting timing and memory usage data to a specific file with an output parameter when the file path is not a JSON file'
+  []
+[]

@@ -33,6 +33,10 @@ MultiAppTransfer::validParams()
   // added by FEProblemBase when the transfer is added.
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_SAME_AS_MULTIAPP);
+  // Add the POST_ADAPTIVITY execution flag.
+#ifdef LIBMESH_ENABLE_AMR
+  exec_enum.addAvailableFlags(EXEC_POST_ADAPTIVITY);
+#endif
   exec_enum = EXEC_SAME_AS_MULTIAPP;
   params.setDocString("execute_on", exec_enum.getDocString());
 

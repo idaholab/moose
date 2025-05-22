@@ -47,6 +47,9 @@ const ExecFlagType EXEC_SAME_AS_MULTIAPP = registerExecFlag("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP = registerExecFlag("PRE_MULTIAPP_SETUP");
 const ExecFlagType EXEC_TRANSFER = registerExecFlag("TRANSFER");
 const ExecFlagType EXEC_PRE_KERNELS = registerExecFlag("PRE_KERNELS");
+#ifdef LIBMESH_ENABLE_AMR
+const ExecFlagType EXEC_POST_ADAPTIVITY = registerExecFlag("POST_ADAPTIVITY");
+#endif
 
 namespace Moose
 {

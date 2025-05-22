@@ -65,6 +65,15 @@ protected:
   /// Whether to neglect the contributions to the Jacobian of the density time derivative
   const bool _neglect_derivatives_of_density_time_derivative;
 
+  /// Name to use for density functor
+  const MooseFunctorName & _density_name;
+  /// Name to use for the dynamic viscosity functor
+  const MooseFunctorName & _dynamic_viscosity_name;
+  /// Name to use for the specific heat functor
+  const MooseFunctorName & _specific_heat_name;
+  /// Name to use for the thermal conductivity functor
+  const MooseFunctorName & _thermal_conductivity_name;
+
   using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;
   using UserObjectInterface::getUserObject;
 };

@@ -21,6 +21,8 @@ The default (and thus most common) flags are listed below:
 `NONLINEAR_CONVERGENCE` | Prior to each nonlinear convergence check. Note that `NONLINEAR` is not appropriate for this purpose since that only executes if it has already been determined that another nonlinear step is to be taken.
 `TIMESTEP_END` | After the solve for each time step.
 `TIMESTEP_BEGIN` | Prior to the solve for each time step.
+`POST_ADAPTIVITY` | Once all adaptivity steps have been performed on a timestep (after `TIMESTEP_END` and before progressing to the next step). Note that `POST_ADAPTIVITY` is not executed on initial adaptivity, the final timestep, or during multi-app Picard iterations. `POST_ADAPTIVITY` will be executed even
+if the mesh is not changed by adaptivity.
 `FINAL` | At the end of the entire simulation.
 `CUSTOM` | At user specified instants.
 `ALWAYS` | Union of all the above flags.

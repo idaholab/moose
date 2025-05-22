@@ -26,11 +26,14 @@ HeatConductionFV::validParams()
 
   // Material properties
   params.addRequiredParam<MooseFunctorName>("thermal_conductivity_functor",
-                                            "Thermal conductivity functor (material property)");
-  params.addParam<MaterialPropertyName>("specific_heat", "cp", "Specific heat  material property");
-  params.addParam<MaterialPropertyName>("density", "density", "Density material property");
-  params.addParamNamesToGroup("thermal_conductivity_functor specific_heat density",
-                              "Thermal properties");
+                                            "Thermal conductivity functor material property");
+  params.addParam<MaterialPropertyName>("specific_heat", "Specific heat material property");
+  params.addParam<MooseFunctorName>("specific_heat_functor", "Specific heat functor");
+  params.addParam<MaterialPropertyName>("density", "Density material property");
+  params.addParam<MooseFunctorName>("density_functor", "Density functor");
+  params.addParamNamesToGroup(
+      "thermal_conductivity_functor specific_heat specific_heat_functor density density_functor",
+      "Thermal properties");
 
   params.addRangeCheckedParam<Real>("temperature_scaling",
                                     1,
@@ -43,6 +46,14 @@ HeatConductionFV::validParams()
 HeatConductionFV::HeatConductionFV(const InputParameters & parameters)
   : HeatConductionPhysicsBase(parameters)
 {
+  // Not compatible
+  // TODO: we could bake this into a single call
+  checkParamsBothSetOrNotSet("specific_heat_functor", "density_functor");
+  checkParamsBothSetOrNotSet("specific_heat", "density");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat", "density_functor");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat", "specific_heat_functor");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat_functor", "specific_heat");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat_functor", "density");
 }
 
 void
@@ -92,11 +103,23 @@ HeatConductionFV::addFVKernels()
   }
   if (isTransient())
   {
-    const std::string kernel_type = "FVHeatConductionTimeDerivative";
+    const bool use_functors =
+        isParamValid("density_functor") || isParamValid("specific_heat_functor");
+    const std::string kernel_type =
+        use_functors ? "FVFunctorHeatConductionTimeDerivative" : "FVHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(parameters(), "specific_heat");
-    params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
+    if (use_functors)
+    {
+      params.set<MooseFunctorName>("specific_heat") =
+          getParam<MooseFunctorName>("specific_heat_functor");
+      params.set<MooseFunctorName>("density") = getParam<MooseFunctorName>("density_functor");
+    }
+    else
+    {
+      params.applyParameter(parameters(), "specific_heat");
+      params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
+    }
     getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_time", params);
   }
 }
