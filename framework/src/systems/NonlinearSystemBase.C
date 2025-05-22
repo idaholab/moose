@@ -1539,6 +1539,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
   constraints_applied = false;
   residual_has_inserted_values = false;
+  bool has_writable_variables = false;
   for (const auto & secondary_id : _mesh.meshSubdomains())
   {
     for (const auto & primary_id : _mesh.meshSubdomains())
@@ -1587,6 +1588,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                   _fe_problem.cacheResidual(0);
                 _fe_problem.cacheResidualNeighbor(0);
               }
+              if (nec->hasWritableCoupledVariables())
+              {
+                Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                has_writable_variables = true;
+                for (auto * var : nec->getWritableCoupledVariables())
+                {
+                  if (var->isNodalDefined())
+                    var->insert(_fe_problem.getAuxiliarySystem().solution());
+                }
+              }
             }
             _fe_problem.addCachedResidual(0);
           }
@@ -1609,6 +1620,17 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
     if (_need_residual_ghosted)
       *_residual_ghosted = residual;
+  }
+  _communicator.max(has_writable_variables);
+
+  if (has_writable_variables)
+  {
+    // Explicit contact dynamic constraints write to auxiliary variables and update the old
+    // displacement solution on the constraint boundaries. Close solutions and update system
+    // accordingly.
+    _fe_problem.getAuxiliarySystem().solution().close();
+    _fe_problem.getAuxiliarySystem().system().update();
+    solutionOld().close();
   }
 
   // We may have additional tagged vectors that also need to be accumulated
