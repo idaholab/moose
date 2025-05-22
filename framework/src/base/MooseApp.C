@@ -1843,6 +1843,7 @@ MooseApp::disableCheckUnusedFlag()
 FEProblemBase &
 MooseApp::feProblem() const
 {
+  mooseAssert(_executor.get() || _executioner.get(), "No executioner yet, calling too early!");
   return _executor.get() ? _executor->feProblem() : _executioner->feProblem();
 }
 
