@@ -129,7 +129,8 @@ ifeq ($(ENABLE_LIBTORCH),true)
     libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
 
   else
-		ifneq ($(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS)),)
+    filtered_goals := $(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS))
+    ifeq ($(words $(filtered_goals)), $(words $(MAKECMDGOALS)))
       $(info Skipping libtorch error check for targets that don't involve compilation!)
     else
       $(error ERROR! MOOSE was configured with libtorch but we cannot locate any dynamic libraries of libtorch. Make sure to install libtorch using the instructions provided here: https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html !)
@@ -162,8 +163,9 @@ ifeq ($(ENABLE_MFEM),true)
     libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
 
   else
-	  ifneq ($(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS)),)
-      $(info Skipping libfem error check for targets that don't involve compilation!)
+    filtered_goals := $(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS))
+    ifeq ($(words $(filtered_goals)), $(words $(MAKECMDGOALS)))
+      $(info Skipping libmfem error check for targets that don't involve compilation!)
     else
       $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem before compiling MOOSE!)
     endif
