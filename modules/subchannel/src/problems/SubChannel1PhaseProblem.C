@@ -369,98 +369,6 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
   return alpha * botValue + (1.0 - alpha) * topValue;
 }
 
-PetscErrorCode
-SubChannel1PhaseProblem::createPetscVector(Vec & v, PetscInt n)
-{
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &v));
-  LibmeshPetscCall(PetscObjectSetName((PetscObject)v, "Solution"));
-  LibmeshPetscCall(VecSetSizes(v, PETSC_DECIDE, n));
-  LibmeshPetscCall(VecSetFromOptions(v));
-  LibmeshPetscCall(VecZeroEntries(v));
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-PetscErrorCode
-SubChannel1PhaseProblem::createPetscMatrix(Mat & M, PetscInt n, PetscInt m)
-{
-  PetscFunctionBegin;
-  LibmeshPetscCall(MatCreate(PETSC_COMM_WORLD, &M));
-  LibmeshPetscCall(MatSetSizes(M, PETSC_DECIDE, PETSC_DECIDE, n, m));
-  LibmeshPetscCall(MatSetFromOptions(M));
-  LibmeshPetscCall(MatSetUp(M));
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-template <class T>
-PetscErrorCode
-SubChannel1PhaseProblem::populateVectorFromDense(Vec & x,
-                                                 const T & loc_solution,
-                                                 const unsigned int first_axial_level,
-                                                 const unsigned int last_axial_level,
-                                                 const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int iz = first_axial_level; iz < last_axial_level; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      xx[iz_ind * cross_dimension + i_l] = loc_solution(i_l, iz);
-    }
-  }
-  LibmeshPetscCall(VecRestoreArray(x, &xx));
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-template <class T>
-PetscErrorCode
-SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
-                                              T & loc_solution,
-                                              const unsigned int first_axial_level,
-                                              const unsigned int last_axial_level,
-                                              const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  Node * loc_node;
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
-      loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
-    }
-  }
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-template <class T>
-
-PetscErrorCode
-SubChannel1PhaseProblem::populateSolutionGap(const Vec & x,
-                                             T & loc_solution,
-                                             const unsigned int first_axial_level,
-                                             const unsigned int last_axial_level,
-                                             const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      loc_solution(iz * cross_dimension + i_l) = xx[iz_ind * cross_dimension + i_l];
-    }
-  }
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
 void
 SubChannel1PhaseProblem::computeWijFromSolve(int iblock)
 {
@@ -737,9 +645,14 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
         auto fi = computeFrictionFactor(_friction_args);
-        auto ki = k_grid[i_ch][iz - 1];
+        /// Upwind local form loss
+        auto ki = 0.0;
+        if ((*_mdot_soln)(node_out) >= 0)
+          ki = k_grid[i_ch][iz - 1];
+        else
+          ki = k_grid[i_ch][iz];
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
-                             (std::pow((*_mdot_soln)(node_out), 2.0)) /
+                             (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
         auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
         auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
@@ -796,7 +709,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
           auto fi = computeFrictionFactor(_friction_args);
-          auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], 0.5);
+          /// Upwind local form loss
+          auto ki = 0.0;
+          if ((*_mdot_soln)(node_out) >= 0)
+            ki = k_grid[i_ch][iz - 1];
+          else
+            ki = k_grid[i_ch][iz];
           Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
@@ -1029,7 +947,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
         auto fi = computeFrictionFactor(_friction_args);
-        auto ki = computeInterpolatedValue(k_grid[i_ch][iz], k_grid[i_ch][iz - 1], Pe);
+        /// Upwind local form loss
+        auto ki = 0.0;
+        if ((*_mdot_soln)(node_out) >= 0)
+          ki = k_grid[i_ch][iz - 1];
+        else
+          ki = k_grid[i_ch][iz];
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
@@ -1483,7 +1406,7 @@ SubChannel1PhaseProblem::computeMu(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeWij(int iblock)
+SubChannel1PhaseProblem::computeWijResidual(int iblock)
 {
   // Cross flow residual
   if (!_implicit_bool)
@@ -1933,8 +1856,8 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
   computeDP(iblock);
   // Solving for pressure
   computeP(iblock);
-  // Solving cross fluxes
-  computeWij(iblock);
+  // Populating lateral crossflow residual matrix
+  computeWijResidual(iblock);
 
   // Turn the residual matrix into a residual vector
   for (unsigned int iz = 0; iz < _block_size; iz++)
@@ -2036,7 +1959,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Assembling pressure matrix
   computeP(iblock);
   // Assembling cross fluxes matrix
-  computeWij(iblock);
+  computeWijResidual(iblock);
   // If monolithic solve - Assembling enthalpy matrix
   if (_monolithic_thermal_bool)
     computeh(iblock);
