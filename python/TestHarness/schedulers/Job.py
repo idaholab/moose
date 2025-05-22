@@ -784,6 +784,10 @@ class Job(OutputInterface):
         else:
             job_data['output'] = self.getAllOutput()
 
+        unique_test_id = self.getTester().getUniqueTestID()
+        if unique_test_id is not None:
+            job_data['unique_test_id'] = unique_test_id
+
         # Extend with data from the scheduler, if any
         job_data.update(scheduler.appendResultFileJob(self))
 
