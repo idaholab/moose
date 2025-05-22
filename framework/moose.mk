@@ -105,6 +105,7 @@ include $(FRAMEWORK_DIR)/contrib/neml2.mk
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
+SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS := clean clobber cleanall clobberall echo_include echo_library install_make_dir libmesh_submodule_status
 ifeq ($(ENABLE_LIBTORCH),true)
 	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
@@ -128,7 +129,11 @@ ifeq ($(ENABLE_LIBTORCH),true)
     libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
 
   else
-    $(error ERROR! Cannot locate any dynamic libraries of libtorch. Make sure to install libtorch (manually or using scripts/setup_libtorch.sh) and to run the configure --with-libtorch before compiling moose!)
+		ifneq ($(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS)),)
+      $(info Skipping libtorch error check for targets that don't involve compilation!)
+    else
+      $(error ERROR! MOOSE was configured with libtorch but we cannot locate any dynamic libraries of libtorch. Make sure to install libtorch using the instructions provided here: https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html !)
+    endif
   endif
 endif
 
@@ -157,8 +162,12 @@ ifeq ($(ENABLE_MFEM),true)
     libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
 
   else
-    $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem and to run the configure --with-mfem before compiling moose!)
-  endif
+	  ifneq ($(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS)),)
+      $(info Skipping libfem error check for targets that don't involve compilation!)
+    else
+      $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem before compiling MOOSE!)
+    endif
+	endif
 endif
 
 #
