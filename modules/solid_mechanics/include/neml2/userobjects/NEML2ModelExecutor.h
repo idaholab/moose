@@ -80,6 +80,9 @@ protected:
   /// Extract output derivatives with respect to input variables and model parameters
   virtual void extractOutputs();
 
+  /// Expand tensor shapes if necessary to conformal sizes
+  virtual void expandInputs();
+
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
 

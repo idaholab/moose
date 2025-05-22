@@ -9,15 +9,24 @@
 
 #pragma once
 
-#include "neml2/models/Model.h"
+#ifdef NEML2_ENABLED
+
+// libtorch headers
 #include <torch/script.h>
+
+// neml2 headers
+#include "neml2/models/Model.h"
+
+// moose headers
 #include "DataFileUtils.h"
+
 namespace neml2
 {
 
 /**
  * Evaluate a pretrained libtorch model in `.pt` format, such as a neural network.
- * Evaluates models with an arbitrary number of inputs and maps them to an arbitrary number of outputs.
+ * Evaluates models with an arbitrary number of inputs and maps them to an arbitrary number of
+ * outputs.
  */
 class LibtorchModel : public Model
 {
@@ -47,3 +56,5 @@ protected:
 };
 
 }
+
+#endif

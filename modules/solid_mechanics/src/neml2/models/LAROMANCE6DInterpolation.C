@@ -8,9 +8,19 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LAROMANCE6DInterpolation.h"
+
+#ifdef NEML2_ENABLED
+
 #include <fstream>
 #include <initializer_list>
-#include "neml2/misc/math.h"
+#include <torch/torch.h>
+
+#include "neml2/tensors/functions/sign.h"
+#include "neml2/tensors/functions/abs.h"
+#include "neml2/tensors/functions/pow.h"
+#include "neml2/tensors/functions/log10.h"
+#include "neml2/tensors/functions/clamp.h"
+#include "neml2/tensors/functions/stack.h"
 
 namespace neml2
 {
@@ -152,16 +162,17 @@ LAROMANCE6DInterpolation::findLeftIndexAndFraction(const Scalar & grid,
 {
   // idx is for the left grid point.
   // searchsorted returns the right idx so -1 makes it the left
-  auto left_idx = torch::searchsorted(grid, interp_points) - 1;
+  auto left_idx = Scalar(torch::searchsorted(grid, interp_points) - 1);
 
   // this allows us to extrapolate
-  left_idx = torch::clamp(left_idx, 0, grid.sizes()[0] - 2);
+  left_idx = Scalar(torch::clamp(left_idx, 0, grid.sizes()[0] - 2));
 
-  Scalar left_coord = grid.index({left_idx});
-  Scalar right_coord = grid.index({left_idx + torch::tensor(1, default_integer_tensor_options())});
-  Scalar left_fraction = (right_coord - interp_points) / (right_coord - left_coord);
+  auto left_coord = grid.batch_index({left_idx});
+  auto right_coord =
+      grid.batch_index({left_idx + torch::tensor(1, default_integer_tensor_options())});
+  auto left_fraction = (right_coord - interp_points) / (right_coord - left_coord);
 
-  return {left_idx, torch::stack({left_fraction, 1 - left_fraction}, -1)};
+  return {left_idx, neml2::batch_stack({left_fraction, 1 - left_fraction}, -1)};
 }
 
 Scalar
@@ -234,8 +245,8 @@ LAROMANCE6DInterpolation::interpolate_and_transform() const
 
 Scalar
 LAROMANCE6DInterpolation::transform_data(const Scalar & data,
-                                                const std::vector<Real> & param,
-                                                TransformEnum transform_type) const
+                                         const std::vector<Real> & param,
+                                         TransformEnum transform_type) const
 {
   switch (transform_type)
   {
@@ -253,36 +264,39 @@ LAROMANCE6DInterpolation::transform_data(const Scalar & data,
 
     case TransformEnum::MINMAX:
       return transform_min_max(data, param);
+
+    default:
+      return data;
   }
 }
 
 Scalar
 LAROMANCE6DInterpolation::transform_compress(const Scalar & data,
-                                                    const std::vector<Real> & param) const
+                                             const std::vector<Real> & param) const
 {
   Real factor = param[0];
   Real compressor = param[1];
   Real original_min = param[2];
-  auto d1 = math::sign(data) * math::pow(math::abs(data * factor), compressor);
-  auto transformed_data = math::log10(1.0 + d1 - original_min);
+  auto d1 = neml2::sign(data) * neml2::pow(neml2::abs(data * factor), compressor);
+  auto transformed_data = neml2::log10(1.0 + d1 - original_min);
   return transformed_data;
 }
 
 Scalar
 LAROMANCE6DInterpolation::transform_decompress(const Scalar & data,
-                                                      const std::vector<Real> & param) const
+                                               const std::vector<Real> & param) const
 {
   Real factor = param[0];
   Real compressor = param[1];
   Real original_min = param[2];
-  auto d1 = math::pow(10.0, data) - 1.0 + original_min;
-  auto transformed_data = math::sign(d1) * math::pow(math::abs(d1), 1.0 / compressor) / factor;
+  auto d1 = neml2::pow(10.0, data) - 1.0 + original_min;
+  auto transformed_data = neml2::sign(d1) * neml2::pow(neml2::abs(d1), 1.0 / compressor) / factor;
   return transformed_data;
 }
 
 Scalar
 LAROMANCE6DInterpolation::transform_log10_bounded(const Scalar & data,
-                                                         const std::vector<Real> & param) const
+                                                  const std::vector<Real> & param) const
 
 {
   Real factor = param[0];
@@ -292,13 +306,13 @@ LAROMANCE6DInterpolation::transform_log10_bounded(const Scalar & data,
   Real logmax = param[4];
   Real range = upperbound - lowerbound;
   auto transformed_data =
-      range * (math::log10(data + factor) - logmin) / (logmax - logmin) + lowerbound;
+      range * (neml2::log10(data + factor) - logmin) / (logmax - logmin) + lowerbound;
   return transformed_data;
 }
 
 Scalar
 LAROMANCE6DInterpolation::transform_exp10_bounded(const Scalar & data,
-                                                         const std::vector<Real> & param) const
+                                                  const std::vector<Real> & param) const
 {
   Real factor = param[0];
   Real lowerbound = param[1];
@@ -307,13 +321,13 @@ LAROMANCE6DInterpolation::transform_exp10_bounded(const Scalar & data,
   Real logmax = param[4];
   Real range = upperbound - lowerbound;
   auto transformed_data =
-      (math::pow(10.0, ((data - lowerbound) * (logmax - logmin) / range) + logmin) - factor);
+      (neml2::pow(10.0, ((data - lowerbound) * (logmax - logmin) / range) + logmin) - factor);
   return transformed_data;
 }
 
 Scalar
 LAROMANCE6DInterpolation::transform_min_max(const Scalar & data,
-                                                   const std::vector<Real> & param) const
+                                            const std::vector<Real> & param) const
 {
   Real data_min = param[0];
   Real data_max = param[1];
@@ -330,7 +344,7 @@ LAROMANCE6DInterpolation::json_to_string(const std::string & key) const
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  std::string name = _json[key].template get<std::string>();
+  std::string name = _json[key].get<std::string>();
   return name;
 }
 
@@ -340,7 +354,7 @@ LAROMANCE6DInterpolation::json_to_vector(const std::string & key) const
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  std::vector<Real> data_vec = _json[key].template get<std::vector<Real>>();
+  std::vector<Real> data_vec = _json[key].get<std::vector<Real>>();
   return data_vec;
 }
 
@@ -350,9 +364,8 @@ LAROMANCE6DInterpolation::json_vector_to_torch(const std::string & key) const
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  std::vector<Real> in_data = _json[key].template get<std::vector<Real>>();
-  const int64_t data_dim = in_data.size();
-  return Scalar(torch::from_blob(in_data.data(), {data_dim}).clone());
+  std::vector<Real> in_data = _json[key].get<std::vector<Real>>();
+  return Scalar::create(in_data).clone();
 }
 
 Scalar
@@ -363,7 +376,7 @@ LAROMANCE6DInterpolation::json_6Dvector_to_torch(const std::string & key) const
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
   vector<vector<vector<vector<vector<vector<Real>>>>>> out_data =
-      _json[key].template get<vector<vector<vector<vector<vector<vector<Real>>>>>>>();
+      _json[key].get<vector<vector<vector<vector<vector<vector<Real>>>>>>>();
 
   const int64_t sz_l0 = out_data.size();
   const int64_t sz_l1 = out_data[0].size();
@@ -404,9 +417,11 @@ LAROMANCE6DInterpolation::json_6Dvector_to_torch(const std::string & key) const
     }
   }
 
-  return Scalar(
-      torch::from_blob(linearize_values.data(), {sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
-          .clone());
+  return Scalar::create(linearize_values)
+      .batch_reshape({sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
+      .clone();
 }
 
 } // namespace neml2
+
+#endif
