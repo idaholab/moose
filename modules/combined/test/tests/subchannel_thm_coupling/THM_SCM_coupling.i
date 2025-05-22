@@ -46,6 +46,7 @@ m_dot_sec_in = 1. # kg/s
   scaling_factor_rhoEV = 1e-4
   closures = thm_closures
   fp = sodium_eos
+  use_scalar_variables = false
 []
 
 [Functions]

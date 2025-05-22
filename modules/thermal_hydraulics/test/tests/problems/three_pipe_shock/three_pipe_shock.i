@@ -116,6 +116,7 @@ initial_vel3 = 0.769
     initial_vel_z = 0
     scaling_factor_rhoEV = 1e-5
     apply_velocity_scaling = true
+    use_scalar_variables = false
   []
 
   [outlet1]
@@ -144,6 +145,7 @@ initial_vel3 = 0.769
 [Postprocessors]
   [dt_cfl]
     type = ADCFLTimeStepSize
+    block = 'pipe1 pipe2 pipe3'
     CFL = ${CFL}
     vel_names = 'vel'
     c_names = 'c'

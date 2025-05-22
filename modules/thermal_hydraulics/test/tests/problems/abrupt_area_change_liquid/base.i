@@ -59,6 +59,7 @@
 [Postprocessors]
   [dt_cfl]
     type = ADCFLTimeStepSize
+    # block defined in children inputs
     CFL = ${CFL}
     vel_names = 'vel'
     c_names = 'c'

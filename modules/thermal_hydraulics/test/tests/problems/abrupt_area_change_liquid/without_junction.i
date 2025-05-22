@@ -33,6 +33,12 @@
   []
 []
 
+[Postprocessors]
+  [dt_cfl]
+    block = 'pipe'
+  []
+[]
+
 [VectorPostprocessors]
   [vpp]
     type = ADSampler1DReal

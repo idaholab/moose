@@ -102,6 +102,7 @@ cfl = 0.95
     volume = ${V_junction}
     scaling_factor_rhoEV = 1e-5
     apply_velocity_scaling = true
+    use_scalar_variables = false
   []
 
   [pipe2]
@@ -147,6 +148,7 @@ cfl = 0.95
 [Postprocessors]
   [cfl_dt]
     type = ADCFLTimeStepSize
+    block = 'pipe1 pipe2 pipe3 pipe4'
     CFL = ${cfl}
     c_names = 'c'
     vel_names = 'vel'

@@ -45,6 +45,7 @@ VJ = ${fparse 4/3 * pi * RJ^3}
     initial_vel_z = 0
     scaling_factor_rhoEV = 1e-5
     apply_velocity_scaling = true
+    use_scalar_variables = false
   []
 
   [left_boundary]
@@ -55,6 +56,12 @@ VJ = ${fparse 4/3 * pi * RJ^3}
   [right_boundary]
     type = FreeBoundary1Phase
     input = 'pipeR:out'
+  []
+[]
+
+[Postprocessors]
+  [dt_cfl]
+    block = 'pipeL pipeR'
   []
 []
 
