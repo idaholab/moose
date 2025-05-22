@@ -31,7 +31,8 @@ CSGUniverse::addCell(const std::shared_ptr<CSGCell> cell)
   if (!hasCell(cell_name))
     _cells.push_back(cell);
   else
-    mooseWarning("Universe " + getName() + " already contains a cell by name " + cell_name + ".");
+    mooseWarning("Universe " + getName() + " already contains a cell by name " + cell_name + ". " +
+                 "Skipping cell insertion for cell with duplicate name.");
 }
 
 std::shared_ptr<CSGCell>
@@ -44,7 +45,7 @@ CSGUniverse::getCell(const std::string name)
     if (cell->getName() == name)
       return cell;
   }
-  return nullptr;
+  mooseError("Cell with name " + name + " was not found in universe " + _name + ".");
 }
 
 bool
