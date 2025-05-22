@@ -131,5 +131,3 @@ This time we have to select a different object:
 ```
 
 !style-end!
-
-!---

@@ -121,8 +121,16 @@ Calculations can take place in either the initial mesh configuration or, when re
 To enable displacements, provide a vector of displacement variable names for each spatial dimension
 in the Mesh block.
 
+!style! fontsize=75%
+
 !listing /displaced/child.i block=Mesh
+
+!style-end!
 
 Objects can enforce the use of the displaced mesh within the validParams function.
 
+!style! fontsize=75%
+
 !listing PenetrationAux.C line=use_displaced_mesh
+
+!style-end!

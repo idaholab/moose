@@ -143,5 +143,3 @@ command-line flag, but it +requires a checkpoint file+.
 
 When running a multiapp simulation you do +not+ need to enable checkpoint output in each sub app
 input file. The parent app stores the restart data for all sub apps in its file.
-
-!---
