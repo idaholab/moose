@@ -100,7 +100,7 @@ public:
    *
    * @return true / false
    */
-  bool isRoot() {return _is_root;}
+  bool isRoot() { return _is_root; }
 
 protected:
   /// Name of universe
