@@ -1111,3 +1111,34 @@ b4125d5128c9d6c274393d2ea9a6099598cbea7b: #30190; Add NEML2 to moose-dev contain
   wasp:
     full_version: 2025.05.13_0
     hash: 43d14da
+2a62fd959a6ff1b45ffba3500ffc8818d1ee41fa: #30497; Remove VTK patch
+  libmesh:
+    full_version: 2025.04.22_1
+    hash: 25d7550
+  libmesh-vtk:
+    full_version: 9.4.2_2
+    hash: 042bd0b
+  moose-dev:
+    full_version: 2025.05.22
+    hash: 587e282
+  mpi:
+    full_version: 2025.04.17
+    hash: a9161d1
+  peacock:
+    full_version: 2025.04.17
+    hash: a231b10
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_1
+    hash: ff9a7ec
+  pprof:
+    full_version: 2025.04.17_0
+    hash: f8fd1e3
+  seacas:
+    full_version: 2025.02.27_1
+    hash: 5d0701b
+  tools:
+    full_version: 2025.04.17
+    hash: 827cc6f
+  wasp:
+    full_version: 2025.05.13_0
+    hash: 43d14da
