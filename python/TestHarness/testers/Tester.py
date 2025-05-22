@@ -825,7 +825,8 @@ class Tester(MooseObject, OutputInterface):
 
     def run(self, options, exit_code, runner_output):
         output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
-        output = output.rstrip() + '\n\n'
+        if output:
+            output = output.rstrip() + '\n\n'
 
         # Check existance of metadata
         if not self.isSkip() and self.json_metadata:
