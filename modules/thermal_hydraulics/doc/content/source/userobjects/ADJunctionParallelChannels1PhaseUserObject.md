@@ -6,7 +6,7 @@ This user object is used with the [/JunctionParallelChannels1Phase.md] component
 computes the fluxes that are used in [/ADVolumeJunction1PhaseBC.md] for each of
 the connected flow channels and the residuals that are used in
 [/ADVolumeJunctionAdvectionScalarKernel.md] for each of the junction's
-scalar degrees of freedom.
+degrees of freedom.
 
 !syntax parameters /UserObjects/ADJunctionParallelChannels1PhaseUserObject
 

@@ -10,20 +10,18 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "AuxScalarKernel.h"
 
-class ADShaftConnectedPump1PhaseUserObject;
+class ADShaftConnectedCompressor1PhaseUserObject;
 
 /**
- * Computes various quantities for a ShaftConnectedPump1Phase.
+ * Computes various quantities for a ShaftConnectedCompressor1Phase.
  */
-template <typename T>
-class ShaftConnectedPump1PhaseAuxTempl : public T
+class ShaftConnectedCompressor1PhaseAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  ShaftConnectedPump1PhaseAuxTempl(const InputParameters & parameters);
+  ShaftConnectedCompressor1PhaseAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -31,17 +29,15 @@ protected:
   /// Quantity type
   enum class Quantity
   {
-    PUMP_HEAD,
-    HYDRAULIC_TORQUE,
+    DELTA_P,
+    ISENTROPIC_TORQUE,
+    DISSIPATION_TORQUE,
     FRICTION_TORQUE,
     MOMENT_OF_INERTIA
   };
   /// Which quantity to compute
   const Quantity _quantity;
 
-  /// 1-phase shaft-connected pump user object
-  const ADShaftConnectedPump1PhaseUserObject & _pump_uo;
+  /// 1-phase shaft-connected compressor user object
+  const ADShaftConnectedCompressor1PhaseUserObject & _compressor_uo;
 };
-
-typedef ShaftConnectedPump1PhaseAuxTempl<AuxKernel> ShaftConnectedPump1PhaseAux;
-typedef ShaftConnectedPump1PhaseAuxTempl<AuxScalarKernel> ShaftConnectedPump1PhaseScalarAux;

@@ -17,7 +17,7 @@ Before, these components all created *scalar* solution variables for various
 quantities. However, it was found that this was extremely costly due to the
 sparsity pattern requirements, thus making simulations involving large numbers
 of these components to be very slow to initialize. A new option,
-[!param](/Components/VolumeJunction1Phase/use_scalar_variables), has been added
+`use_scalar_variables`, has been added
 to these components, with a default value of `true`, resulting in the old behavior.
 The new behavior, enabled by setting this parameter to `false`, is to create
 *field* variables instead of scalar variables, with a single node and node-element added to the
@@ -37,8 +37,7 @@ made more visible using the "point size" parameter.
 ## Instructions
 
 The old behavior is now deprecated and will be removed in the near
-future. To switch to the new behavior, set
-[!param](/Components/VolumeJunction1Phase/use_scalar_variables)
+future. To switch to the new behavior, set `use_scalar_variables`
 to `false` and note the following additional changes that may be necessary:
 
 - If references to junction variable names were made in the input file,

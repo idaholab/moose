@@ -10,20 +10,18 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "AuxScalarKernel.h"
 
 class ADShaftConnectedTurbine1PhaseUserObject;
 
 /**
  * Computes various quantities for a ShaftConnectedTurbine1Phase.
  */
-template <typename T>
-class ShaftConnectedTurbine1PhaseAuxTempl : public T
+class ShaftConnectedTurbine1PhaseAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  ShaftConnectedTurbine1PhaseAuxTempl(const InputParameters & parameters);
+  ShaftConnectedTurbine1PhaseAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -44,6 +42,3 @@ protected:
   /// 1-phase shaft-connected turbine user object
   const ADShaftConnectedTurbine1PhaseUserObject & _turbine_uo;
 };
-
-typedef ShaftConnectedTurbine1PhaseAuxTempl<AuxKernel> ShaftConnectedTurbine1PhaseAux;
-typedef ShaftConnectedTurbine1PhaseAuxTempl<AuxScalarKernel> ShaftConnectedTurbine1PhaseScalarAux;

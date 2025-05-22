@@ -11,13 +11,11 @@
 #include "ADShaftConnectedTurbine1PhaseUserObject.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedTurbine1PhaseAux);
-registerMooseObject("ThermalHydraulicsApp", ShaftConnectedTurbine1PhaseScalarAux);
 
-template <typename T>
 InputParameters
-ShaftConnectedTurbine1PhaseAuxTempl<T>::validParams()
+ShaftConnectedTurbine1PhaseAux::validParams()
 {
-  InputParameters params = T::validParams();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Computes various quantities for a ShaftConnectedTurbine1Phase.");
 
@@ -29,18 +27,15 @@ ShaftConnectedTurbine1PhaseAuxTempl<T>::validParams()
   return params;
 }
 
-template <typename T>
-ShaftConnectedTurbine1PhaseAuxTempl<T>::ShaftConnectedTurbine1PhaseAuxTempl(
-    const InputParameters & parameters)
-  : T(parameters),
+ShaftConnectedTurbine1PhaseAux::ShaftConnectedTurbine1PhaseAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _quantity(this->template getParam<MooseEnum>("quantity").template getEnum<Quantity>()),
     _turbine_uo(this->template getUserObject<ADShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
 {
 }
 
-template <typename T>
 Real
-ShaftConnectedTurbine1PhaseAuxTempl<T>::computeValue()
+ShaftConnectedTurbine1PhaseAux::computeValue()
 {
   switch (_quantity)
   {
@@ -66,6 +61,3 @@ ShaftConnectedTurbine1PhaseAuxTempl<T>::computeValue()
       mooseError("Invalid 'quantity' parameter.");
   }
 }
-
-template class ShaftConnectedTurbine1PhaseAuxTempl<AuxKernel>;
-template class ShaftConnectedTurbine1PhaseAuxTempl<AuxScalarKernel>;
