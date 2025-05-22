@@ -4,7 +4,7 @@
   [prereq]
     type = CheckFiles
     input = 'mesh.i diffusion.i'
-    cli_args = '--split-mesh=2 --split-file foo.cpr'
+    cli_args = '--split-mesh 2 --split-file foo.cpr'
     requirement = "The system shall be able to generate a split mesh for finite volume problems with the correct ghosting setup."
     mesh_mode = 'REPLICATED'
     check_files = 'foo.cpr/2/header.cpr foo.cpr/2/split-2-0.cpr foo.cpr/2/split-2-1.cpr'

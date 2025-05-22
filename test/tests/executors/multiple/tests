@@ -8,6 +8,7 @@
     # Need to disable perf graph live here because we rely on line breaks
     cli_args = "--executor --disable-perf-graph-live"
     expect_out = "BinaryTestExecutor my_first_executor BEGIN\nBinaryTestExecutor i1 BEGIN\nBinaryTestExecutor i1 END\nBinaryTestExecutor i2 BEGIN\nBinaryTestExecutor i2 END\nBinaryTestExecutor my_first_executor END"
+    capture_perf_graph = false
     requirement = "The system shall be able to utilize a modular/nested system of execution"
   []
 

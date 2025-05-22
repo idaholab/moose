@@ -261,6 +261,7 @@
     valgrind = NONE
     # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
     cli_args = '--disable-perflog Outputs/perf_graph=true --no-timing'
+    capture_perf_graph = false
 
     requirement = 'The system shall override Performance Log output when conflicting values appear on the command line and input file.'
     issues = '#4497'

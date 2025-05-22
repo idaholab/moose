@@ -147,7 +147,7 @@
   [grid_from_generated]
     type = 'CheckFiles'
     input = 'grid_from_generated.i'
-    cli_args = '--split-mesh=4 --split-file=grid_from_generated'
+    cli_args = '--split-mesh 4 --split-file=grid_from_generated'
     check_files = 'grid_from_generated.cpa.gz/4/header.gz grid_from_generated.cpa.gz/4/split-4-0.gz grid_from_generated.cpa.gz/4/split-4-1.gz grid_from_generated.cpa.gz/4/split-4-2.gz grid_from_generated.cpa.gz/4/split-4-3.gz'
     recover = false
     min_parallel = 2
