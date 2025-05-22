@@ -105,7 +105,7 @@ public:
    *
    * @param surf CSGSurface to add
    */
-  void addSurface(const std::pair<std::string, std::shared_ptr<CSGSurface>> surf);
+  void addSurface(const std::shared_ptr<CSGSurface> surf);
 
   /**
    * @brief rename the specified cell

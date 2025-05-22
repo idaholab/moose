@@ -61,10 +61,11 @@ CSGCellList::addUniverseCell(const std::string name,
 }
 
 void
-CSGCellList::addCell(const std::pair<std::string, std::shared_ptr<CSGCell>> cell)
+CSGCellList::addCell(const std::shared_ptr<CSGCell> cell)
 {
-  checkCellName(cell.first);
-  _cells.insert(cell);
+  auto name = cell->getName();
+  checkCellName(name);
+  _cells.insert(std::make_pair(name, cell));
 }
 
 void
