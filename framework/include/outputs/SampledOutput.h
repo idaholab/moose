@@ -34,14 +34,14 @@ class MeshFunction;
  *
  * @see Exodus
  */
-class OversampleOutput : public AdvancedOutput
+class SampledOutput : public AdvancedOutput
 {
 public:
   static InputParameters validParams();
 
-  OversampleOutput(const InputParameters & parameters);
+  SampledOutput(const InputParameters & parameters);
 
-  virtual ~OversampleOutput();
+  virtual ~SampledOutput();
 
   virtual void initialSetup() override;
   virtual void meshChanged() override;
@@ -51,7 +51,7 @@ protected:
   /**
    * Performs the update of the solution vector for the oversample/re-positioned mesh
    */
-  virtual void updateOversample();
+  virtual void updateSample();
 
   /// Appends the base class's file base string
   virtual void setFileBaseInternal(const std::string & file_base) override;
@@ -59,11 +59,14 @@ protected:
   /// The number of oversampling refinements
   const unsigned int _refinements;
 
-  /// Flag indicating that oversampling is enabled
-  bool _oversample;
+  /// Flag indicating another file is being used for the sampling
+  const bool _using_external_sampling_file;
 
   /// Flag for re-positioning
-  bool _change_position;
+  const bool _change_position;
+
+  /// Flag indicating that the sampled output should be used to re-sample the underlying EquationSystem of the output
+  bool _use_sampled_output;
 
 private:
   /**
@@ -72,7 +75,7 @@ private:
    * upon. This function is called by the creating action (addOutputAction) and should not be called
    * by the user as it will create a memory leak if called multiple times.
    */
-  void initOversample();
+  void initSample();
 
   /**
    * Clone mesh in preperation for re-positioning or oversampling.
@@ -81,12 +84,20 @@ private:
    */
   void cloneMesh();
 
+  /// Used to decide which variable is output as a nodal variable for oversampling purposes
+  bool isSampledAsNodal(const FEType & fe_type) const;
+
   /**
-   * A vector of pointers to the mesh functions
+   * A vector of pointers to the mesh functions on the oversampled mesh
    * This is only populated when the oversample() function is called, it must
    * be cleaned up by the destructor.
+   * Outer-indexing by system
+   * Inner-indexing for each variable in a system
    */
   std::vector<std::vector<std::unique_ptr<libMesh::MeshFunction>>> _mesh_functions;
+
+  /// A vector of vector that keeps track of the variable numbers in each system for each mesh function
+  std::vector<std::vector<unsigned int>> _variable_numbers_in_system;
 
   /// When oversampling, the output is shift by this amount
   Point _position;
@@ -94,10 +105,16 @@ private:
   /// A flag indicating that the mesh has changed and the oversampled mesh needs to be re-initialized
   bool _oversample_mesh_changed;
 
+  /// A flag tracking whether the sampling and source meshes match in terms of subdomains
+  bool _mesh_subdomains_match;
+
+  /// Flag indicating whether we are outputting in serial or parallel
+  bool _serialize;
+
   std::unique_ptr<EquationSystems> _oversample_es;
   std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
 
-  /// Oversample solution vector
+  /// Sample solution vector
   /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the
    * current system
    * and variable before the MeshFunction is applied. This allows for the same MeshFunction object

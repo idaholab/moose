@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "SampledOutput.h"
 
 /**
  * Class for output data to the GMVOutputII format
  */
-class GMVOutput : public OversampleOutput
+class GMVOutput : public SampledOutput
 {
 public:
   static InputParameters validParams();

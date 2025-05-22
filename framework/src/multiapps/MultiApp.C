@@ -1135,12 +1135,13 @@ MultiApp::createApp(unsigned int i, Real start_time)
              << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
+  app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
   if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {
     if (_fe_problem.verboseMultiApps())
       _console << COLOR_CYAN << "Cloned parent app mesh will be used for MultiApp " << name()
                << COLOR_DEFAULT << std::endl;
-    app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+    app_params.set<bool>("_use_master_mesh") = true;
     auto displaced_problem = _fe_problem.getDisplacedProblem();
     if (displaced_problem)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();

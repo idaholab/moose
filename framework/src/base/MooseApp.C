@@ -395,6 +395,7 @@ MooseApp::validParams()
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
   params.addPrivateParam<unsigned int>("_multiapp_level");
   params.addPrivateParam<unsigned int>("_multiapp_number");
+  params.addPrivateParam<bool>("_use_master_mesh", false);
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
@@ -476,6 +477,7 @@ MooseApp::MooseApp(InputParameters parameters)
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
     _multiapp_number(
         isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
+    _use_master_mesh(parameters.get<bool>("_use_master_mesh")),
     _master_mesh(isParamValid("_master_mesh") ? parameters.get<const MooseMesh *>("_master_mesh")
                                               : nullptr),
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
