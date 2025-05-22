@@ -327,7 +327,8 @@ public:
   /**
    * @brief join another CSGBase object to this one. For each CSGbase, create
    * a new universe from the existing root universes in both with the new names
-   * provided.
+   * provided. Note, that upon completion of this join method, the root universe
+   * will be empty.
    *
    * @param base pointer to a different CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
@@ -415,7 +416,8 @@ private:
   /**
    * @brief join a separate CSGUniverseList object to this one;
    * both this root universe and the incoming root universe will be
-   * maintained as separate universes of the specified names.
+   * maintained as separate universes of the specified names. Note, that
+   * upon completion of this join method, the root universe will be empty.
    *
    * @param univ_list CSGUniverseList from a separate CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
