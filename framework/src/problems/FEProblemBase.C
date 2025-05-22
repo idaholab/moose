@@ -1233,7 +1233,11 @@ FEProblemBase::initialSetup()
   // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
   // know which dofs we need ghosted when we call EquationSystems::reinit
   if (_displaced_problem && _mortar_data.hasDisplacedObjects())
+  {
     _displaced_problem->updateMesh();
+    // if displacements were applied to the mesh, the mortar mesh should be updated too
+    updateMortarMesh();
+  }
 
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();

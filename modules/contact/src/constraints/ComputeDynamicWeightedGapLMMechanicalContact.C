@@ -182,7 +182,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
 
-ADReal ComputeDynamicWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
+ADReal
+ComputeDynamicWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
   mooseError(
       "We should never call computeQpResidual for ComputeDynamicWeightedGapLMMechanicalContact");
@@ -215,6 +216,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 void
 ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
 {
+  // These dof maps are not recoverable as they are maps of pointers, and recovering old pointers
+  // would be wrong. We would need to create a custom dataStore() and dataLoad()
+  if (_app.isRecovering())
+    mooseError("This object does not support recovering");
+
   _dof_to_old_weighted_gap.clear();
   _dof_to_old_velocity.clear();
   _dof_to_nodal_old_wear_depth.clear();

@@ -13,6 +13,8 @@
     capabilities = 'ad_size>=50'
     requirement = 'The contact module shall be able to compute nodal weighted gap distance velocity values via a '
                   'mortar auxiliary kernel.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-aux-wear]
     type = 'Exodiff'
@@ -26,6 +28,8 @@
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-aux-wear-vel]
     type = 'Exodiff'
@@ -41,7 +45,6 @@
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels in the same '
                   'input file.'
-
   []
   [frictional-mortar-3d-status]
     type = 'Exodiff'
@@ -81,6 +84,8 @@
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation.'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-aux-fretting-wear-test-quick-multiple-projections]
     type = 'Exodiff'
@@ -100,6 +105,8 @@
                   'asymmetric problem for a short simulation where secondary elements/nodes may '
                   'project in an oblique manner and where sidesets only span the possible contact '
                   'patch area. '
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-aux-fretting-wear-test-quick-multiple-projections-lowerd]
     type = 'Exodiff'
@@ -136,6 +143,8 @@
                   'default minimum projection angle and the fact that wrapping around the lowerd '
                   'mesh modifies contact geometry (normals, e.g.) and this has an impact on the '
                   'contact force direction at the geometry discontinuity.'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-aux-fretting-wear-test-action-quick]
     type = 'Exodiff'
@@ -154,6 +163,8 @@
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation using the contact action.'
+    # ComputeDynamicFrictionalForceLMMechanicalContact created by action does not support recover
+    recover = false
   []
   [block-dynamics-aux-fretting-wear-test-projection_angle]
     type = 'Exodiff'
@@ -165,6 +176,8 @@
     capabilities = 'ad_size>=50'
     map = False
     partial = True
+    # Only mesh output, no transient steps taken
+    recover = false
     requirement = 'The system shall allow for a user controllable input such that the mortar segment '
                   'mesh does not contain segments built from oblique projections. Therefore, the '
                   'system shall generate many segments from oblique projections if a very small '
