@@ -90,9 +90,15 @@ CSGSurfaceList::addSurface(const std::shared_ptr<CSGSurface> surf)
 void
 CSGSurfaceList::renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name)
 {
-  checkSurfaceName(name);
-
+  // check that this surface passed in is actually in the same surface that is in the surface
+  // list
   auto prev_name = surface->getName();
+  auto existing_surface = _surfaces.find(prev_name)->second;
+  if (existing_surface != surface)
+    mooseError("Surface " + prev_name + " cannot be renamed to " + name +
+               " as it does not exist in this CSGBase instance.");
+
+  checkSurfaceName(name);
   surface->setName(name);
   _surfaces.erase(prev_name);
   _surfaces.insert(std::make_pair(name, surface));
