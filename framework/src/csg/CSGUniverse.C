@@ -73,15 +73,4 @@ CSGUniverse::removeCell(const std::string name)
     }
   }
 }
-
-void
-CSGUniverse::removeCell(const std::shared_ptr<CSGCell> cell)
-{
-  auto name = cell->getName();
-  if (!hasCell(name))
-    mooseError("Cannot remove cell. Cell with name " + name + " does not exist in universe " +
-               _name + ".");
-  _cells.erase(std::remove(_cells.begin(), _cells.end(), cell), _cells.end());
-}
-
 } // namespace CSG

@@ -77,11 +77,9 @@ public:
   void removeCell(const std::string name);
 
   /**
-   * @brief remove a cell from the universe
-   *
-   * @param cell cell to remove
+   * @brief remove all cells from the universe
    */
-  void removeCell(const std::shared_ptr<CSGCell> cell);
+  void removeAllCells() { _cells.clear(); }
 
   /**
    * @brief Get list of the all cells in the universe
