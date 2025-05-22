@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,10 +22,10 @@ namespace StochasticTools
  * Gaussian Processes. It can be used to standardize parameters, manipulate
  * covariance data and compute additional stored matrices.
  */
-class GaussianProcess
+class TwoLayerGaussianProcess
 {
 public:
-  GaussianProcess();
+  TwoLayerGaussianProcess();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -44,28 +44,26 @@ public:
 
   /// Structure containing the optimization options for
   /// hyperparameter-tuning
-  struct GPOptimizerOptions
+  struct TGPOptimizerOptions
   {
     /// Default constructor
-    GPOptimizerOptions();
+    TGPOptimizerOptions();
     /**
-     * Construct a new GPOptimizerOptions object using
+     * Construct a new TGPOptimizerOptions object using
      * input parameters that will control the optimization
      * @param show_every_nth_iteration To show the loss value at every n-th iteration, if set to 0,
      * nothing is displayed
-     * @param num_iter The number of iterations we want in the optimization of the GP
+     * @param num_iter The number of iterations we want in the optimization of the TGP
      * @param batch_size The number of samples in each batch
      * @param learning_rate The learning rate for parameter updates
      * @param b1 Tuning constant for the Adam algorithm
      * @param b2 Tuning constant for the Adam algorithm
      * @param eps Tuning constant for the Adam algorithm
      * @param lambda Tuning constant for the Adam algorithm
-     * @param tune_method Method for tuning hyperparameters
      */
-    GPOptimizerOptions(const bool show_every_nth_iteration = 1,
+    TGPOptimizerOptions(const bool show_every_nth_iteration = 1,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
-                       const unsigned int tune_method = 1,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
@@ -78,8 +76,6 @@ public:
     const unsigned int num_iter = 1000;
     /// The batch isize for Adam optimizer
     const unsigned int batch_size = 0;
-    /// Method for tuning hyperparameters
-    const unsigned int tune_method = 0;
     /// The learning rate for Adam optimizer
     const Real learning_rate = 1e-3;
     /// Tuning parameter from the paper
@@ -101,7 +97,7 @@ public:
    */
   void setupCovarianceMatrix(const RealEigenMatrix & training_params,
                              const RealEigenMatrix & training_data,
-                             const GPOptimizerOptions & opts);
+                             const TGPOptimizerOptions & opts);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -148,7 +144,8 @@ public:
    * @param l Constant parameter from the paper.
    * @param u Constant parameter from the paper.
    * @param noise Noise level.
-   * @param lengthscale Lengthscale.
+   * @param lengthscale_w Lengthscale for inner layer.
+   * @param lengthscale_y Lengthscale for outer layer.
    * @param alpha Parameter for gamma distribution.
    * @param beta Parameter for gamma distribution.
    */
@@ -157,18 +154,23 @@ public:
     Real u;
     struct {
       Real noise;
-      Real lengthscale;
+      Real lengthscale_w;
+      Real lengthscale_y;
     } alpha, beta;
   };
 
   /**
-   * Initialzed value for GP hyperparameters.
-   * @param lengthscale Lengthscale.
+   * Initialzed value for two layer GP hyperparameters.
+   * @param w Hidden node.
+   * @param lengthscale_w Lengthscale for inner layer.
+   * @param lengthscale_y Lengthscale for outer layer.
    * @param noise Noise level.
    * @param scale Scale.
    */
   struct Initial {
-    RealEigenMatrix lengthscale;
+    RealEigenMatrix w;
+    RealEigenMatrix lengthscale_y;
+    RealEigenMatrix lengthscale_w;
     Real noise;
     Real scale;
   };
@@ -185,7 +187,7 @@ public:
 
   /**
    * Return value computed in the sampleLengthscale function.
-   * @param lengthscale Sampled lengthscale.
+   * @param noise Sampled noise level.
    * @param ll Log likelihood.
    * @param scale Sampled scale.
    */
@@ -193,6 +195,16 @@ public:
     Real lengthscale;
     Real ll;
     Real scale;
+  };
+
+  /**
+   * Return value computed in the sampleW function.
+   * @param w Sampled hidden node.
+   * @param ll Log likelihood.
+   */
+  struct SampleWResult {
+    RealEigenMatrix w;
+    Real ll;
   };
 
   /**
@@ -209,40 +221,109 @@ public:
    * Computes multivariate normal marginal log likelihood and scale.
    * @param outvec Observed outputs (response values).
    * @param x1 Input data 1.
+   * @param x2 Input data 2.
    * @param noise Noise level.
    * @param lengthscale Lengthscale.
    * @param result Return value.
    * @param outer If the function is called for computing outermost layer.
    * @param scale If scale is needed to be computed.
    */
-  void logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale, 
-          LogLResult & result, bool scale=false);
+  void logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real noise, const RealEigenMatrix & lengthscale, 
+          LogLResult & result, bool outer=true, bool scale=false);
 
   /**
-   * Samples noise level using MH algorithm.
+   * Samples noise level noise using MH algorithm.
    * @param outvec Observed outputs (response values).
    * @param x1 Input data 1.
-   * @param noise_t Noise level.
+   * @param x2 Input data 2.
+   * @param g_t Noise level.
    * @param lengthscale Lengthscale.
    * @param settings parameter setting
    * @param ll_prev Log likelihood from the previous MCMC round.
    * @param result Return value.
    */
-  void sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, Real noise_t, const RealEigenMatrix lengthscale, 
+  void sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real g_t, const RealEigenMatrix lengthscale, 
               Settings & settings, Real ll_prev, SampleNoiseResult & result);
 
   /**
-   * Samples lengthscale theta using MH algorithm.
+   * Samples lengthscale lengthscale using MH algorithm.
    * @param outvec Observed outputs (response values).
    * @param x1 Input data 1.
+   * @param x2 Input data 2.
+   * @param noise Noise level.
    * @param lengthscale_t Lengthscale.
    * @param i index for input data dimension.
    * @param settings parameter setting
    * @param ll_prev Log likelihood from the previous MCMC round.
    * @param result Return value.
    */
-  void sampleLengthscale(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale_t,
-              unsigned int i, Settings & settings, SampleLengthscaleResult & result, Real ll_prev);
+  void sampleLengthscale(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real noise, const RealEigenMatrix & lengthscale_t,
+               unsigned int i, Real alpha, Real beta, Real l, Real u, SampleLengthscaleResult & result, Real ll_prev);
+
+  /**
+   * Samples from multivariate normal distribution.
+   * @param mean Mean value.
+   * @param cov Covariance matrix.
+   * @param n_dim Dimension of data.
+   * @param n_draw Number of draws from the distribution.
+   * @param final_sample_matrix Sampled value.
+   */
+  void multiVariateNormalSampling(const RealEigenMatrix & mean,const RealEigenMatrix & cov, unsigned int n_dim, unsigned int n_draw, RealEigenMatrix & final_sample_matrix);
+
+  /**
+   * Samples lengthscale lengthscale using MH algorithm.
+   * @param outvec Observed outputs (response values).
+   * @param w_t Current values of the hidden nodes.
+   * @param w1 Hidden node 1.
+   * @param w2 Hidden node 2.
+   * @param x1 Input data 1.
+   * @param x2 Input data 2.
+   * @param noise Noise level.
+   * @param lengthscale_y Lengthscale for outer layer.
+   * @param lengthscale_w Lengthscale for inner layer.
+   * @param result Return value.
+   * @param ll_prev Log likelihood from the previous MCMC round.
+   * @param prior_mean Prior mean.
+   */
+  void sampleW(const RealEigenMatrix & out_vec, RealEigenMatrix & w_t, const RealEigenMatrix & w1, const RealEigenMatrix & w2, 
+              const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real noise, const RealEigenMatrix & lengthscale_y, const RealEigenMatrix & lengthscale_w,
+              SampleWResult & result, Real ll_prev, const RealEigenMatrix & prior_mean);
+
+  /**
+   * Kernel function.
+   * @param x1 Input data 1.
+   * @param x2 Input data 2.
+   * @param scale Scale.
+   * @param lengthscale Lengthscale.
+   * @param noise Noise level.
+   * @param k Return value.
+   */
+  void squared_exponential_covariance(const RealEigenMatrix &x1, 
+                  const RealEigenMatrix &x2, 
+                  Real scale, 
+                  const RealEigenMatrix &lengthscale, 
+                  Real noise, 
+                  RealEigenMatrix &k);
+
+  /**
+   * Predicts mean and covariance using Kriging interpolation.
+   * @param y Observed outputs (response values).
+   * @param x Input data.
+   * @param x_new New input data.
+   * @param lengthscale Lengthscale.
+   * @param noise Noise level.
+   * @param scale Scale.
+   * @param cal_sigma If covariance needs to be computed.
+   * @param prior_mean Prior mean for the observed input data.
+   * @param prior_mean_new Prior mean for the new data points.
+   * @param krig_mean Return mean.
+   * @param krig_sigma Return covariance.
+   */
+  void krig(const RealEigenMatrix & y, const RealEigenMatrix & x, const RealEigenMatrix & x_new,
+                                   const RealEigenMatrix & lengthscale, Real noise, Real scale, bool cal_sigma,
+                                   const RealEigenMatrix & prior_mean, const RealEigenMatrix & prior_mean_new, 
+                                   RealEigenMatrix & krig_mean, RealEigenMatrix & krig_sigma);
+
 
   /**
    * Sets up constant parameter.
@@ -257,7 +338,7 @@ public:
   // Tune hyperparameters using Adam
   void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
                            const RealEigenMatrix & training_data,
-                           const GPOptimizerOptions & opts);
+                           const TGPOptimizerOptions & opts);
 
   // Computes the loss function
   Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
@@ -310,6 +391,14 @@ public:
   {
     return _hyperparam_vec_map;
   }
+  RealEigenMatrix & getNoise() { return _noise; }
+  RealEigenMatrix & getLengthscaleY() { return _lengthscale_y; }
+  RealEigenMatrix & getLengthscaleW() { return _lengthscale_w; }
+  RealEigenMatrix & getScale() { return _scale; }
+  std::vector<RealEigenMatrix> & getW() { return _w; }
+  Real & getNmcmc() {return _nmcmc;}
+  RealEigenMatrix & getX() { return _x; }
+  RealEigenMatrix & getY() { return _y; }
   ///@}
 
   /// @{
@@ -350,10 +439,10 @@ protected:
   /// Number of tunable hyperparameters
   unsigned int _num_tunable;
 
-  /// Type of covariance function used for this GP
+  /// Type of covariance function used for this TGP
   std::string _covar_type;
 
-  /// The name of the covariance function used in this GP
+  /// The name of the covariance function used in this TGP
   std::string _covar_name;
 
   /// The names of the covariance functions the used covariance function depends on
@@ -362,7 +451,7 @@ protected:
   /// The types of the covariance functions the used covariance function depends on
   std::map<UserObjectName, std::string> _dependent_covar_types;
 
-  /// The number of outputs of the GP
+  /// The number of outputs of the TGP
   unsigned int _num_outputs;
 
   /// Scalar hyperparameters. Stored for use in surrogate
@@ -394,16 +483,32 @@ protected:
 
   /// The batch size for Adam optimization
   unsigned int _batch_size;
+
+  RealEigenMatrix _noise;
+
+  RealEigenMatrix _lengthscale_y;
+
+  RealEigenMatrix _lengthscale_w;
+
+  RealEigenMatrix _scale;
+
+  std::vector<RealEigenMatrix> _w;
+
+  Real _nmcmc;
+
+  RealEigenMatrix _x;
+
+  RealEigenMatrix _y;
 };
 
 } // StochasticTools namespac
 
-template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+// template <>
+// void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+// template <>
+// void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
-void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+void dataStore(std::ostream & stream, StochasticTools::TwoLayerGaussianProcess & tgp_utils, void * context);
 template <>
-void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+void dataLoad(std::istream & stream, StochasticTools::TwoLayerGaussianProcess & tgp_utils, void * context);

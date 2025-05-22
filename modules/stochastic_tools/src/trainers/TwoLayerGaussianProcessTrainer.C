@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianProcessTrainer.h"
+#include "TwoLayerGaussianProcessTrainer.h"
 #include "Sampler.h"
 #include "CartesianProduct.h"
 
@@ -19,10 +19,10 @@
 
 #include <cmath>
 
-registerMooseObject("StochasticToolsApp", GaussianProcessTrainer);
+registerMooseObject("StochasticToolsApp", TwoLayerGaussianProcessTrainer);
 
 InputParameters
-GaussianProcessTrainer::validParams()
+TwoLayerGaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
   params.addClassDescription("Provides data preperation and training for a single- or multi-output "
@@ -36,10 +36,6 @@ GaussianProcessTrainer::validParams()
   // Already preparing to use Adam here
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
-  params.addParam<unsigned int>(
-      "tune_method",
-      0,
-      "Select method for tuning hyperparameters");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
   params.addParam<unsigned int>(
       "show_every_nth_iteration",
@@ -52,20 +48,19 @@ GaussianProcessTrainer::validParams()
   return params;
 }
 
-GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
+TwoLayerGaussianProcessTrainer::TwoLayerGaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
+    _tgp(declareModelData<StochasticTools::TwoLayerGaussianProcess>("_tgp")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
-    _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
+    _optimization_opts(StochasticTools::TwoLayerGaussianProcess::TGPOptimizerOptions(
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        getParam<unsigned int>("tune_method"),
         getParam<Real>("learning_rate"))),
     _sampler_row(getSamplerData())
 {
@@ -91,16 +86,16 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   if (isParamValid("tuning_max"))
     upper_bounds = getParam<std::vector<Real>>("tuning_max");
 
-  _gp.initialize(getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+  _tgp.initialize(getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
                  tune_parameters,
                  lower_bounds,
                  upper_bounds);
 
-  _n_outputs = _gp.getCovarFunction().numOutputs();
+  _n_outputs = _tgp.getCovarFunction().numOutputs();
 }
 
 void
-GaussianProcessTrainer::preTrain()
+TwoLayerGaussianProcessTrainer::preTrain()
 {
   _params_buffer.clear();
   _data_buffer.clear();
@@ -109,7 +104,7 @@ GaussianProcessTrainer::preTrain()
 }
 
 void
-GaussianProcessTrainer::train()
+TwoLayerGaussianProcessTrainer::train()
 {
   _params_buffer.push_back(_predictor_row);
 
@@ -124,7 +119,7 @@ GaussianProcessTrainer::train()
 }
 
 void
-GaussianProcessTrainer::postTrain()
+TwoLayerGaussianProcessTrainer::postTrain()
 {
   // Instead of gatherSum, we have to allgather.
   _communicator.allgather(_params_buffer);
@@ -141,20 +136,22 @@ GaussianProcessTrainer::postTrain()
       _training_data(ii, jj) = _data_buffer[ii][jj];
   }
 
+
+
   // Standardize (center and scale) training params
   if (_standardize_params)
-    _gp.standardizeParameters(_training_params);
+    _tgp.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp.paramStandardizer().set(0, 1, _n_dims);
+    _tgp.paramStandardizer().set(0, 1, _n_dims);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
-    _gp.standardizeData(_training_data);
+    _tgp.standardizeData(_training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp.dataStandardizer().set(0, 1, _n_outputs);
+    _tgp.dataStandardizer().set(0, 1, _n_outputs);
 
   // Setup the covariance
-  _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  _tgp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
