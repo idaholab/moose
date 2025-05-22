@@ -6,6 +6,7 @@
     dy = '0.5 0.3 0.025 3.6 0.025 0.3 0.5'
     ix = '5 8 20'
     iy = '5 3 1 36 1 3 5'
+    # bottom subdomain ids
     subdomain_id = '
       0 0 0
       0 2 1
@@ -15,6 +16,7 @@
       0 1 1
       0 0 0
     '
+    # top subdomain ids
   []
   [hollow_concrete]
     type = BlockDeletionGenerator

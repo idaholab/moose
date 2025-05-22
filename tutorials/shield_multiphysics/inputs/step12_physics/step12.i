@@ -20,6 +20,7 @@ h_water = 600
     type = FileMeshGenerator
     file = '../step11_multiapps/mesh2d_coarse_in.e'
   []
+  uniform_refine = 1
 []
 
 [Problem]
@@ -148,6 +149,12 @@ h_water = 600
     boundary = ground
     value = 0
   []
+  [symmetry_center]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 'symmetry'
+    value = 0
+  []
 []
 
 [FunctorMaterials]
@@ -269,7 +276,8 @@ h_water = 600
 
   # Tolerances
   # Navier Stokes natural circulation will only converge so far
-  nl_abs_tol = 6e-7
+  # TODO: use multiple convergence objects for each system
+  nl_abs_tol = 1.5e-6
   nl_max_its = 15
 []
 
@@ -291,6 +299,10 @@ h_water = 600
 [Outputs]
   csv = true
   exodus = true
+  [displaced]
+    type = Exodus
+    use_displaced = true
+  []
 []
 
 [Postprocessors]
