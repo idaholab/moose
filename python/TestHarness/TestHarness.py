@@ -930,7 +930,8 @@ class TestHarness:
         # Version history:
         # 1 - Initial tracking of version
         # 2 - Added 'unique_test_id' (tests/*/tests/*/unique_test_id) to Job output if set
-        testharness = {'version': 2,
+        # 3 - Added 'json_metadata' (tests/*/tests/*/tester/json_metadata) to Tester output
+        testharness = {'version': 3,
                        'start_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                        'end_time': None,
                        'args': sys.argv[1:],
