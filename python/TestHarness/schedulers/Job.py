@@ -543,6 +543,7 @@ class Job(OutputInterface):
             self.setStatus(self.error, 'VALIDATION TEST ERROR')
 
         self.validation_cases = []
+        init_kwargs = {'tester_outputs': self.getOutputFiles(self.options)}
         for i in range(len(scripts)):
             script = scripts[i]
             if '..' in script:
@@ -560,7 +561,7 @@ class Job(OutputInterface):
             spec.loader.exec_module(module)
             subclasses = module.ValidationCase._subclasses.copy()
             module.ValidationCase._subclasses = []
-            self.validation_cases += [(path, subclass()) for subclass in subclasses]
+            self.validation_cases += [(path, subclass(**init_kwargs)) for subclass in subclasses]
 
     def runValidation(self):
         """

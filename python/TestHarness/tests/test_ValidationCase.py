@@ -152,5 +152,11 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaises(test.TestRunException):
             test.run()
 
+    def testGetTesterOutputs(self):
+        outputs = ['foo.csv', 'bar.e']
+        test = ValidationCase(tester_outputs = outputs)
+        self.assertEqual(outputs, test.getTesterOutputs())
+        self.assertEqual(['bar.e'], test.getTesterOutputs(extension='.e'))
+
 if __name__ == '__main__':
     unittest.main()
