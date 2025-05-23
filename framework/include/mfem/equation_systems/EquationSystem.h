@@ -20,7 +20,11 @@ mixed and nonlinear forms) and build methods
 */
 class EquationSystem : public mfem::Operator
 {
+
 public:
+  friend class EquationSystemProblemOperator;
+  friend class TimeDomainEquationSystemProblemOperator;
+
   EquationSystem() = default;
   ~EquationSystem() override;
 

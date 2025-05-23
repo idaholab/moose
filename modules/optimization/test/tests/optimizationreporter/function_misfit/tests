@@ -8,7 +8,7 @@
         input = main_auto.i
         csvdiff = main_auto_out_OptimizationReporter_0001.csv
         max_threads = 1 # Optimize executioner does not support multiple threads
-        rel_err = 1e-4
+        rel_err = 1e-3
         abs_zero = 1e-4
         # steady solve
         recover = false

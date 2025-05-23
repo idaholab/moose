@@ -16,6 +16,7 @@ MFEMHypreAMS::validParams()
                         "Declare that the system is singular; use when solving curl-curl problem "
                         "if mass term is zero");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
+
   return params;
 }
 
@@ -28,12 +29,32 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 void
 MFEMHypreAMS::constructSolver(const InputParameters &)
 {
-  _preconditioner = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  auto solver = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
+    solver->SetSingularProblem();
+
+  solver->SetPrintLevel(getParam<int>("print_level"));
+
+  _solver = solver;
+}
+
+void
+MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+
+  if (_lor)
   {
-    _preconditioner->SetSingularProblem();
+    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
+        mfem::Geometry::Type::CUBE)
+      mooseError("LOR HypreAMS Solver only supports hex meshes.");
+
+    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(a, tdofs);
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+    if (getParam<bool>("singular"))
+      lor_solver->GetSolver().SetSingularProblem();
+
+    _solver.reset(lor_solver);
   }
-  _preconditioner->SetPrintLevel(getParam<int>("print_level"));
 }
 
 #endif
