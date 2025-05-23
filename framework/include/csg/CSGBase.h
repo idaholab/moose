@@ -305,8 +305,9 @@ public:
   }
 
   /**
-   * @brief join another CSGBase object to this one. The cells of the root universe
-   * of the incoming CSGBase will be combined with the existing root universe of this CSGBase.
+   * @brief Join another CSGBase object to this one. The cells of the root universe
+   * of the incoming CSGBase will be added to the existing root universe of this
+   * CSGBase.
    *
    * @param base pointer to a different CSGBase object
    */
@@ -318,9 +319,10 @@ public:
   }
 
   /**
-   * @brief join another CSGBase object to this one. For the incoming CSGbase,
-   * create a new universe from the existing root universe with the new name
-   * provided.
+   * @brief Join another CSGBase object to this one. For the incoming CSGBase object,
+   * the root universe is added to this CSGBase object as a new non-root universe with
+   * the specified new name. Note: this newly created universe will not be
+   * connected to the root universe of this CSGBase object by default.
    *
    * @param base pointer to a different CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
@@ -333,10 +335,11 @@ public:
   }
 
   /**
-   * @brief join another CSGBase object to this one. For each CSGbase, create
-   * a new universe from the existing root universes in both with the new names
-   * provided. Note, that upon completion of this join method, the root universe
-   * will be empty.
+   * @brief Join another CSGBase object to this one. The root universe for the incoming CSGBase
+   * object is added to this CSGBase object as a non-root universe with a new name. The root
+   * universe of this CSGBase object will be renamed and designated as non-root. Note: upon
+   * completion of this join method, the root universe of this CSGBase object will be empty.
+   * Neither of the new non-root universes will be connected to the new root universe by default.
    *
    * @param base pointer to a different CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
