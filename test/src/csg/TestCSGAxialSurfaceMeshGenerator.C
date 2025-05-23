@@ -65,7 +65,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
     cell_region &= halfspace;
   }
 
-  cell_ptr->updateRegion(cell_region);
+  input_mesh->updateCellRegion(cell_ptr, cell_region);
 
   return input_mesh;
 }

@@ -224,6 +224,14 @@ public:
   }
 
   /**
+   * @brief change the region of the specified cell
+   *
+   * @param cell cell to update the region for
+   * @param region new region to assign to cell
+   */
+  void updateCellRegion(const std::shared_ptr<CSGCell> cell, const CSGRegion & region);
+
+  /**
    * @brief Get the Root Universe object
    *
    * @return  shared pointer to CSGUniverse
@@ -427,5 +435,8 @@ private:
   void joinUniverseList(CSGUniverseList & univ_list,
                         std::string new_root_name_base,
                         std::string new_root_name_incoming);
+
+  // check that surfaces used in this region are a part of this CSGBase instance
+  void checkRegionSurfaces(const CSGRegion & region);
 };
 } // namespace CSG
