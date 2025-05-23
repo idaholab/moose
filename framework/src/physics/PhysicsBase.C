@@ -29,17 +29,19 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
+  params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
+
+  // Numerical solve parameters
   params.addParam<std::vector<SolverSystemName>>(
       "system_names",
       {"nl0"},
       "Name of the solver system(s) for the variables. If a single name is specified, "
       "that system is used for all solver variables.");
-
-  MooseEnum pc_options("default none", "none");
-  params.addParam<MooseEnum>(
-      "preconditioning", pc_options, "Which preconditioning to use for this Physics");
-
-  params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
+  MooseEnum pc_options("default defer", "defer");
+  params.addParam<MooseEnum>("preconditioning",
+                             pc_options,
+                             "Which preconditioning to use/add for this Physics, or whether to "
+                             "defer to the Preconditioning block, or another Physics");
 
   // Restart parameters
   params.addParam<bool>("initialize_variables_from_mesh_file",
@@ -52,6 +54,43 @@ PhysicsBase::validParams()
       "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
                               "Restart from Exodus");
+
+  // Options to turn off tasks
+  params.addParam<bool>(
+      "dont_create_solver_variables", false, "Whether to skip the 'add_variable' task");
+  params.addParam<bool>("dont_create_ics", false, "Whether to skip the 'add_ic' task");
+  params.addParam<bool>(
+      "dont_create_kernels", false, "Whether to skip the 'add_kernel' task for each kernel type");
+  params.addParam<bool>("dont_create_bcs",
+                        false,
+                        "Whether to skip the 'add_bc' task for each boundary condition type");
+  params.addParam<bool>("dont_create_functions", false, "Whether to skip the 'add_function' task");
+  params.addParam<bool>(
+      "dont_create_aux_variables", false, "Whether to skip the 'add_aux_variable' task");
+  params.addParam<bool>(
+      "dont_create_aux_kernels", false, "Whether to skip the 'add_aux_kernel' task");
+  params.addParam<bool>("dont_create_materials",
+                        false,
+                        "Whether to skip the 'add_material' task for each material type");
+  params.addParam<bool>(
+      "dont_create_user_objects",
+      false,
+      "Whether to skip the 'add_user_object' task. This does not apply to UserObject derived "
+      "classes being created on a different task (for example: postprocessors, VPPs, correctors)");
+  params.addParam<bool>(
+      "dont_create_correctors", false, "Whether to skip the 'add_correctors' task");
+  params.addParam<bool>(
+      "dont_create_postprocessors", false, "Whether to skip the 'add_postprocessors' task");
+  params.addParam<bool>("dont_create_vectorpostprocessors",
+                        false,
+                        "Whether to skip the 'add_vectorpostprocessors' task");
+  params.addParamNamesToGroup(
+      "dont_create_solver_variables dont_create_ics dont_create_kernels dont_create_bcs "
+      "dont_create_functions dont_create_aux_variables dont_create_aux_kernels "
+      "dont_create_materials dont_create_user_objects dont_create_correctors "
+      "dont_create_postprocessors dont_create_vectorpostprocessors",
+      "Reduce Physics object creation");
+
   params.addParamNamesToGroup("active inactive", "Advanced");
   return params;
 }
@@ -81,73 +120,86 @@ PhysicsBase::act()
   // Lets a derived Physics class implement additional tasks
   actOnAdditionalTasks();
 
+  // Initialization and variables
   if (_current_task == "init_physics")
     initializePhysics();
-  else if (_current_task == "add_variable")
+  else if (_current_task == "add_variable" && !getParam<bool>("dont_create_solver_variables"))
     addSolverVariables();
-  else if (_current_task == "add_ic")
+  else if (_current_task == "add_ic" && !getParam<bool>("dont_create_ics"))
     addInitialConditions();
 
-  else if (_current_task == "add_kernel")
+  // Kernels
+  else if (_current_task == "add_kernel" && !getParam<bool>("dont_create_kernels"))
     addFEKernels();
-  else if (_current_task == "add_nodal_kernel")
+  else if (_current_task == "add_nodal_kernel" && !getParam<bool>("dont_create_kernels"))
     addNodalKernels();
-  else if (_current_task == "add_fv_kernel" || _current_task == "add_linear_fv_kernel")
+  else if ((_current_task == "add_fv_kernel" || _current_task == "add_linear_fv_kernel") &&
+           !getParam<bool>("dont_create_kernels"))
     addFVKernels();
-  else if (_current_task == "add_dirac_kernel")
+  else if (_current_task == "add_dirac_kernel" && !getParam<bool>("dont_create_kernels"))
     addDiracKernels();
-  else if (_current_task == "add_dg_kernel")
+  else if (_current_task == "add_dg_kernel" && !getParam<bool>("dont_create_kernels"))
     addDGKernels();
-  else if (_current_task == "add_scalar_kernel")
+  else if (_current_task == "add_scalar_kernel" && !getParam<bool>("dont_create_kernels"))
     addScalarKernels();
-  else if (_current_task == "add_interface_kernel")
+  else if (_current_task == "add_interface_kernel" && !getParam<bool>("dont_create_kernels"))
     addInterfaceKernels();
-  else if (_current_task == "add_fv_ik")
+  else if (_current_task == "add_fv_ik" && !getParam<bool>("dont_create_kernels"))
     addFVInterfaceKernels();
 
-  else if (_current_task == "add_bc")
+  // Boundary conditions
+  else if (_current_task == "add_bc" && !getParam<bool>("dont_create_bcs"))
     addFEBCs();
-  else if (_current_task == "add_nodal_bc")
+  else if (_current_task == "add_nodal_bc" && !getParam<bool>("dont_create_bcs"))
     addNodalBCs();
-  else if (_current_task == "add_fv_bc" || _current_task == "add_linear_fv_bc")
+  else if ((_current_task == "add_fv_bc" || _current_task == "add_linear_fv_bc") &&
+           !getParam<bool>("dont_create_bcs"))
     addFVBCs();
-  else if (_current_task == "add_periodic_bc")
+  else if (_current_task == "add_periodic_bc" && !getParam<bool>("dont_create_bcs"))
     addPeriodicBCs();
-  else if (_current_task == "add_function")
-    addFunctions();
-  else if (_current_task == "add_user_object")
-    addUserObjects();
-  else if (_current_task == "add_corrector")
-    addCorrectors();
 
-  else if (_current_task == "add_aux_variable")
+  // Auxiliary quantities
+  else if (_current_task == "add_function" && !getParam<bool>("dont_create_functions"))
+    addFunctions();
+  else if (_current_task == "add_aux_variable" && !getParam<bool>("dont_create_aux_variables"))
     addAuxiliaryVariables();
-  else if (_current_task == "add_aux_kernel")
+  else if (_current_task == "add_aux_kernel" && !getParam<bool>("dont_create_aux_kernels"))
     addAuxiliaryKernels();
-  else if (_current_task == "add_material")
+  else if (_current_task == "add_material" && !getParam<bool>("dont_create_materials"))
     addMaterials();
-  else if (_current_task == "add_functor_material")
+  else if (_current_task == "add_functor_material" && !getParam<bool>("dont_create_materials"))
     addFunctorMaterials();
 
+  // Multiapp
   else if (_current_task == "add_multi_app")
     addMultiApps();
   else if (_current_task == "add_transfer")
     addTransfers();
 
-  else if (_current_task == "add_postprocessor")
+  // User objects and output
+  else if (_current_task == "add_user_object" && !getParam<bool>("dont_create_user_objects"))
+    addUserObjects();
+  else if (_current_task == "add_corrector" && !getParam<bool>("dont_create_correctors"))
+    addCorrectors();
+  else if (_current_task == "add_postprocessor" && !getParam<bool>("dont_create_postprocessors"))
     addPostprocessors();
-  else if (_current_task == "add_vector_postprocessor")
+  else if (_current_task == "add_vector_postprocessor" &&
+           !getParam<bool>("dont_create_vectorpostprocessors"))
     addVectorPostprocessors();
   else if (_current_task == "add_reporter")
     addReporters();
   else if (_current_task == "add_output")
     addOutputs();
+
+  // Equation solver-related tasks
   else if (_current_task == "add_preconditioning")
     addPreconditioning();
   else if (_current_task == "add_executioner")
     addExecutioner();
   else if (_current_task == "add_executor")
     addExecutors();
+
+  // Checks
   else if (_current_task == "check_integrity_early_physics")
     checkIntegrityEarly();
   else if (_current_task == "check_integrity")
