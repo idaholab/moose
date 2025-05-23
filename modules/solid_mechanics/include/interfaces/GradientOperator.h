@@ -17,13 +17,13 @@
 template <class C>
 class GradientOperator : public C
 {
-protected:
+public:
   /// Returns the gradient operator in a given direction
-  RankTwoTensor
+  static RankTwoTensor
   gradOp(unsigned int component, const RealVectorValue & g, const Real & v, const Point & p)
   {
     RankTwoTensor G;
-    this->addGradOp(G, component, g, v, p);
+    C::addGradOp(G, component, g, v, p);
     return G;
   }
 };
@@ -34,11 +34,11 @@ class Cartesian
 {
 protected:
   /// Accumulate the contribution of the gradient operator in a given direction for a given tensor
-  void addGradOp(RankTwoTensor & G,
-                 unsigned int component,
-                 const RealVectorValue & g,
-                 const Real & /*v*/,
-                 const Point & /*p*/)
+  static void addGradOp(RankTwoTensor & G,
+                        unsigned int component,
+                        const RealVectorValue & g,
+                        const Real & /*v*/,
+                        const Point & /*p*/)
   {
     for (auto j : make_range(3))
       G(component, j) += g(j);
@@ -49,11 +49,11 @@ class AxisymmetricCylindrical
 {
 protected:
   /// Accumulate the contribution of the gradient operator in a given direction for a given tensor
-  void addGradOp(RankTwoTensor & G,
-                 unsigned int component,
-                 const RealVectorValue & g,
-                 const Real & v,
-                 const Point & p)
+  static void addGradOp(RankTwoTensor & G,
+                        unsigned int component,
+                        const RealVectorValue & g,
+                        const Real & v,
+                        const Point & p)
   {
     for (auto j : make_range(2))
       G(component, j) += g(j);
@@ -68,11 +68,11 @@ class CentrosymmetricSpherical
 {
 protected:
   /// Accumulate the contribution of the gradient operator in a given direction for a given tensor
-  void addGradOp(RankTwoTensor & G,
-                 unsigned int /*component*/,
-                 const RealVectorValue & g,
-                 const Real & v,
-                 const Point & p)
+  static void addGradOp(RankTwoTensor & G,
+                        unsigned int /*component*/,
+                        const RealVectorValue & g,
+                        const Real & v,
+                        const Point & p)
   {
     G(0, 0) += g(0);
     G(1, 1) += v / p(0);
