@@ -67,6 +67,14 @@ protected:
    */
   void addJunctionIC(const VariableName & var, Real value);
 
+  /**
+   * Adds a VolumeJunctionIC to the problem
+   *
+   * @param[in] var  Variable name
+   * @param[in] quantity  Quantity to compute
+   */
+  void addVolumeJunctionIC(const VariableName & var, const std::string & quantity);
+
   /// Volume of the junction
   const Real _volume;
 
