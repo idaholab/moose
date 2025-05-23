@@ -25,12 +25,22 @@ SidesetAroundSubdomainUpdater::validParams()
                                               "Subdomains that own the boundary");
   params.addParam<std::vector<SubdomainName>>("outer_subdomains",
                                               "Subdomains on the outside of the boundary");
+  params.addParam<BoundaryName>("mask_side",
+                                "If specified, only add sides where this sideset exists.");
   params.addParam<bool>("assign_outer_surface_sides",
                         true,
                         "Assign sides of elements im `inner_subdomains` that have no neighbor.");
   params.addRequiredParam<BoundaryName>("update_sideset_name",
                                         "The name of the sideset to be updated. If the boundary "
                                         "does not exist it will be added to the system.");
+  params.renameParam(
+      "update_sideset_name", "update_boundary_name", "The boundary name which is updated.");
+  params.addParam<BoundaryID>("update_sideset_id",
+                              Moose::INVALID_BOUNDARY_ID,
+                              "The ID of the sideset to be updated. If the boundary "
+                              "does not exist it will be added to the system.");
+  params.renameParam(
+      "update_sideset_id", "update_boundary_id", "The boundary id which is updated.");
   params.registerBase("MeshModifier");
   return params;
 }
@@ -41,8 +51,10 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
     _neighbor_side(_assembly.neighborSide()),
     _assign_outer_surface_sides(getParam<bool>("assign_outer_surface_sides")),
-    _boundary_name(getParam<BoundaryName>("update_sideset_name")),
+    _boundary_name(getParam<BoundaryName>("update_boundary_name")),
     _boundary_id(_mesh.getBoundaryID(_boundary_name)),
+    _mask_side(isParamValid("mask_side") ? _mesh.getBoundaryID(getParam<BoundaryName>("mask_side"))
+                                         : Moose::INVALID_BOUNDARY_ID),
     _boundary_info(_mesh.getMesh().get_boundary_info()),
     _displaced_boundary_info(
         _displaced_problem ? &_displaced_problem->mesh().getMesh().get_boundary_info() : nullptr)
@@ -71,6 +83,10 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
     _displaced_boundary_info->sideset_name(_boundary_id) = _boundary_name;
     _displaced_boundary_info->nodeset_name(_boundary_id) = _boundary_name;
   }
+  if (!_mesh.getConstructNodeListFromSideList())
+    mooseDoOnce(
+        mooseWarning("The user has selected 'construct_node_list_from_side_list' as false, but "
+                     "SidesetAroundSubdomainUpdate is building node lists from the side lists."));
 }
 
 void
@@ -80,7 +96,9 @@ SidesetAroundSubdomainUpdater::executeOnExternalSide(const Elem * elem, unsigned
   // assign_surface_sides
   if (_inner_ids.count(elem->subdomain_id()))
   {
-    if (_assign_outer_surface_sides && !_boundary_info.has_boundary_id(elem, side, _boundary_id))
+    if (_assign_outer_surface_sides && !_boundary_info.has_boundary_id(elem, side, _boundary_id) &&
+        (_mask_side == Moose::INVALID_BOUNDARY_ID ||
+         _boundary_info.has_boundary_id(elem, side, _mask_side)))
       _add[_pid].emplace_back(elem->id(), side);
   }
   else
@@ -106,8 +124,11 @@ SidesetAroundSubdomainUpdater::processSide(const Elem * primary_elem,
   if (_inner_ids.count(primary_elem->subdomain_id()) &&
       _outer_ids.count(secondary_elem->subdomain_id()))
   {
-    // we are on an inner element facing an outer element -> add boundary
-    if (!_boundary_info.has_boundary_id(primary_elem, primary_side, _boundary_id))
+
+    // we are on an inner element facing an outer element->add boundary
+    if ((!_boundary_info.has_boundary_id(primary_elem, primary_side, _boundary_id)) &&
+        (_mask_side == Moose::INVALID_BOUNDARY_ID ||
+         _boundary_info.has_boundary_id(primary_elem, primary_side, _mask_side)))
       _add[primary_elem->processor_id()].emplace_back(primary_elem->id(), primary_side);
   }
   else
@@ -160,10 +181,18 @@ SidesetAroundSubdomainUpdater::finalize()
   {
     for (const auto & [elem_id, side] : sent_data)
     {
-      _boundary_info.remove_side(mesh.elem_ptr(elem_id), side, _boundary_id);
+      const auto elem = mesh.elem_ptr(elem_id);
+      _boundary_info.remove_side(elem, side, _boundary_id);
+      for (const auto local_node_id : elem->nodes_on_side(side))
+        _boundary_info.remove_node(elem->node_ptr(local_node_id), _boundary_id);
       if (_displaced_boundary_info)
-        _displaced_boundary_info->remove_side(
-            displaced_mesh->elem_ptr(elem_id), side, _boundary_id);
+      {
+        const auto displaced_elem = displaced_mesh->elem_ptr(elem_id);
+        _displaced_boundary_info->remove_side(displaced_elem, side, _boundary_id);
+        for (const auto local_node_id : displaced_elem->nodes_on_side(side))
+          _displaced_boundary_info->remove_node(displaced_elem->node_ptr(local_node_id),
+                                                _boundary_id);
+      }
     }
   };
 
@@ -175,6 +204,7 @@ SidesetAroundSubdomainUpdater::finalize()
   {
     mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
     mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
+    mesh.getMesh().get_boundary_info().build_node_list_from_side_list();
     mesh.update();
   };
   sync(_mesh);

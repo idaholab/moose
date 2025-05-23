@@ -61,6 +61,9 @@ protected:
   BoundaryID _boundary_id;
   ///@}
 
+  /// If specified, only sides also on this boundary will be updated
+  const BoundaryID _mask_side;
+
   BoundaryInfo & _boundary_info;
   BoundaryInfo * _displaced_boundary_info;
 
