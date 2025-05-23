@@ -583,7 +583,8 @@ class Job(OutputInterface):
             run_exception = False
             def wrapped_print(*args, **kwargs):
                 end = kwargs.get('end', '\n')
-                output.appendOutput(" ".join(args) + end)
+                values = [f'{v}' for v in args]
+                output.appendOutput(" ".join(values) + end)
             with patch("builtins.print", wraps=wrapped_print):
                 try:
                     test_case.run()
