@@ -306,7 +306,7 @@ class Tester(MooseObject, OutputInterface):
 
     def getUniqueTestID(self):
         """ return unique hash for test """
-        return self.specs['unique_test_id']
+        return self.specs['unique_test_id'] if self.specs.isValid('unique_test_id') else None
 
     def getRunnable(self, options):
         """ return bool and cache results, if this test can run """
