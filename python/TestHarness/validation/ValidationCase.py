@@ -129,11 +129,17 @@ class ValidationCase():
         """
         ValidationCase._subclasses.append(cls)
 
-    def __init__(self):
+    def __init__(self, tester_outputs: Optional[list] = None):
+        # Result storage
         self._results: list[ValidationCase.Result] = []
+        # Data storage
         self._data: dict[str, ValidationCase.Data] = {}
+        # The current test method that is being executed
         self._current_test: str = None
-        self._current_not_validation = None
+        # Whether or not the current execution is not a validation case
+        self._current_not_validation: Optional[bool] = None
+        # The current outputs from the test run, if any
+        self._tester_outputs: Optional[list] = tester_outputs
 
     def addResult(self, status: Status, message: str, **kwargs) -> None:
         """
@@ -310,3 +316,18 @@ class ValidationCase():
 
         if run_exceptions:
             raise self.TestRunException()
+
+    def getTesterOutputs(self, extension: str = None) -> list[str]:
+        """
+        Gets the output files that were tested by the Tester
+        executing this validation case.
+
+        Keyword arguments:
+            extension: Extension to filter the files with
+        """
+        assert self._tester_outputs is not None
+        files = self._tester_outputs
+        if extension is not None:
+            assert isinstance(extension, str)
+            files = [v for v in files if v.endswith(extension)]
+        return files
