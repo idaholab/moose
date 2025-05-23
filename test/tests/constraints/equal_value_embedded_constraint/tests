@@ -202,4 +202,14 @@
     cli_args = 'Constraints/equal_phi1_phi2/type=EqualValueEmbeddedConstraint'
     mesh_mode = REPLICATED
   []
+  [writeble_var]
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
+    requirement = "The system shall couple allow the node element constraints to write out to a variable."
+    issues = '#30582'
+    allow_test_objects = true
+    type = 'CSVDiff'
+    input = 'writeable_var.i'
+    csvdiff = 'writeable_var_out_output_var_0002.csv'
+    mesh_mode = REPLICATED
+  []
 []
