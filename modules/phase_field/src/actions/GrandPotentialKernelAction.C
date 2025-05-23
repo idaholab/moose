@@ -297,7 +297,7 @@ GrandPotentialKernelAction::act()
       kernel_name = "MatDif_" + w_names[i];
       if (aniso.get(i))
       {
-        params.set<std::vector<VariableName>>("args") = v1;
+        params.set<std::vector<VariableName>>("args") = v0;
         _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
       }
       else
@@ -367,13 +367,11 @@ GrandPotentialKernelAction::act()
       params.set<bool>("use_displaced_mesh") = displaced_mesh;
       params.set<MaterialPropertyName>("diffusivity") = M[i];
       kernel_name = "MatDif_" + w_names[i];
+      params.set<std::vector<VariableName>>("args") = v0;
       if (aniso.get(i))
         _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
       else
-      {
-        params.set<std::vector<VariableName>>("args") = v0;
         _problem->addKernel("MatDiffusion", kernel_name, params);
-      }
 
       // CoupledSwitchingTimeDerivative
       for (unsigned int j = 0; j < n_hj; ++j)
