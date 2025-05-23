@@ -15,34 +15,54 @@ namespace StochasticToolsTorched
 void
 StandardizerTorched::set(const Real & n)
 {
-  _mean.clear();
-  _stdev.clear();
+  std::vector<Real> mean;
+  std::vector<Real> stdev;
+  //_mean.clear();
+  //_stdev.clear();
   for (unsigned int ii = 0; ii < n; ++ii)
   {
-    _mean.push_back(0);
-    _stdev.push_back(1);
+    mean.push_back(0);
+    stdev.push_back(1);
   }
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  unsigned int num_samples = n;
+  unsigned int num_inputs = 1;
+  _mean = torch::from_blob(mean.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+  //_mean = torch::from_blob(mean_vector);
+  _stdev = torch::from_blob(stdev.data(), {num_samples, num_inputs}, options).to(at::kDouble);
 }
 
 void
 StandardizerTorched::set(const Real & mean, const Real & stdev)
 {
-  _mean.clear();
-  _stdev.clear();
-  _mean.push_back(mean);
-  _stdev.push_back(stdev);
+  //_mean.clear();
+  //_stdev.clear();
+  //_mean.push_back(mean);
+  //_stdev.push_back(stdev);
+
+  std::vector<Real> mean_vec;
+  std::vector<Real> stdev_vec;
+  mean_vec.push_back(mean);
+  stdev_vec.push_back(stdev);
+
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  _mean = torch::from_blob(mean_vec.data(), {1, 1}, options).to(at::kDouble);
+  _stdev = torch::from_blob(stdev_vec.data(), {1, 1}, options).to(at::kDouble);
 }
 
 void
 StandardizerTorched::set(const Real & mean, const Real & stdev, const Real & n)
 {
-  _mean.clear();
-  _stdev.clear();
+  std::vector<Real> mean_vec;
+  std::vector<Real> stdev_vec;
   for (unsigned int ii = 0; ii < n; ++ii)
   {
-    _mean.push_back(mean);
-    _stdev.push_back(stdev);
+    mean_vec.push_back(mean);
+    stdev_vec.push_back(stdev);
   }
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  _mean = torch::from_blob(mean_vec.data(), {n, 1}, options).to(at::kDouble);
+  _stdev = torch::from_blob(stdev_vec.data(), {n, 1}, options).to(at::kDouble);
 }
 
 void
@@ -50,24 +70,27 @@ StandardizerTorched::set(const std::vector<Real> & mean, const std::vector<Real>
 {
   mooseAssert(mean.size() == stdev.size(),
               "Provided mean and standard deviation vectors are of differing size.");
-  _mean = mean;
-  _stdev = stdev;
+  auto mean_copy = mean;
+  auto stdev_copy = stdev;
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  _mean = torch::from_blob(mean_copy.data(), {mean.size(), 1}, options).to(at::kDouble);
+  _stdev = torch::from_blob(stdev_copy.data(), {stdev.size(), 1}, options).to(at::kDouble);
 }
 
 void
 StandardizerTorched::computeSet(const torch::Tensor & input)
 {
-  _mean.clear();
-  _stdev.clear();
-  unsigned int num_samples = input.sizes()[0];
-  unsigned int n = input.sizes()[1];
+  //_mean.clear();
+  //_stdev.clear();
+  // unsigned int num_samples = input.sizes()[0];
+  // unsigned int n = input.sizes()[1];
 
   // TODO: mean and stdev can be calculated using libtorch std and std_mean if torch tensor is
   // provided
 
   // comptue mean
   // RealEigenVector mean = input.colwise().mean();
-  auto mean = torch::mean(input, 1, true);
+  auto mean = torch::mean(input, 0, false);
   // Compute standard deviation
   /*
   RealEigenVector stdev =
@@ -78,8 +101,11 @@ StandardizerTorched::computeSet(const torch::Tensor & input)
   */
   // Store in std:vector format
   auto stdev = torch::std(input, 1, true);
-  _mean.resize(n);
-  _stdev.resize(n);
+  //_mean.resize(n);
+  //_stdev.resize(n);
+  _mean = mean;
+  _stdev = stdev;
+
   // RealEigenVector::Map(&_mean[0], n) = mean;
   // RealEigenVector::Map(&_stdev[0], n) = stdev;
 }
@@ -116,12 +142,14 @@ StandardizerTorched::getDescaled(torch::Tensor & input) const
 void
 StandardizerTorched::storeHelper(std::ostream & stream, void * context) const
 {
-  unsigned int n = _mean.size();
+  Real * temp_mean = _mean.data<Real>();
+  Real * temp_stdev = _stdev.data<Real>();
+  unsigned int n = _mean.size(0);
   dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _mean[ii], context);
+    dataStore(stream, temp_mean[ii], context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _stdev[ii], context);
+    dataStore(stream, temp_stdev[ii], context);
 }
 
 } // StochasticTools namespace
