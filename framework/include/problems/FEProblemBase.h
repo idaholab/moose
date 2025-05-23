@@ -2399,6 +2399,11 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
+  /**
+   * @returns the default blocks (for block restriction)
+   */
+  const std::vector<SubdomainName> & getDefaultBlocks() const { return _default_blocks; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2735,6 +2740,9 @@ protected:
   std::vector<unsigned char> _has_active_material_properties;
 
   std::vector<SolverParams> _solver_params;
+
+  /// Default blocks for block restriction
+  std::vector<SubdomainName> _default_blocks;
 
   /// Determines whether and which subdomains are to be checked to ensure that they have an active kernel
   CoverageCheckMode _kernel_coverage_check;

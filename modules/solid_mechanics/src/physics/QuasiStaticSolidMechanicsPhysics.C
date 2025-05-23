@@ -26,7 +26,9 @@
 
 registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "meta_action");
 
-registerMooseAction("SolidMechanicsApp", QuasiStaticSolidMechanicsPhysics, "setup_mesh_complete");
+registerMooseAction("SolidMechanicsApp",
+                    QuasiStaticSolidMechanicsPhysics,
+                    "create_problem_complete");
 
 registerMooseAction("SolidMechanicsApp",
                     QuasiStaticSolidMechanicsPhysics,
@@ -515,9 +517,13 @@ void
 QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
 {
   // Do the coordinate system check only once the problem is created
-  if (_current_task == "setup_mesh_complete")
+
+  if (_current_task == "create_problem_complete")
   {
-    // get subdomain IDs
+    if (_subdomain_names.empty() && _problem->isParamSetByUser("default_block"))
+      for (auto & name : _problem->getDefaultBlocks())
+        _subdomain_names.push_back(name);
+
     for (auto & name : _subdomain_names)
     {
       auto id = _mesh->getSubdomainID(name);
