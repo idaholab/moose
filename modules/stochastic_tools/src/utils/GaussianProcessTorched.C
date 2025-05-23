@@ -86,19 +86,30 @@ GaussianProcessTorched::setupCovarianceMatrix(const RealEigenMatrix & training_p
       training_data.reshaped(training_params.rows() * training_data.cols(), 1);
 
   // Compute the Cholesky decomposition and inverse action of the covariance matrix
-  setupStoredMatrices(flattened_data);
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  unsigned int num_samples = flattened_data.size();
+  unsigned int num_inputs = 1;
+  torch::Tensor flattened_tensor =
+      torch::from_blob(flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+
+  setupStoredMatrices(flattened_tensor);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
 
 void
-GaussianProcessTorched::setupStoredMatrices(const RealEigenMatrix & input)
+GaussianProcessTorched::setupStoredMatrices(const torch::Tensor & input)
 {
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  unsigned int num_samples = _K.size();
+  unsigned int num_inputs = 1;
+  torch::Tensor _K_tensor =
+      torch::from_blob(_K.data(), {num_samples, num_inputs}, options).to(at::kDouble);
   // llt does the llt decomposition as part of the Cholesky module
   // If _K is replaced with a torch tensor this can be replaced with _K.cholesky()
-  _K_cho_decomp = _K.llt();
+  auto _K_cho_decomp_copy = torch::linalg_cholesky(_K_tensor);
   // Replace with cholesky_solve()
-  _K_results_solve = _K_cho_decomp.solve(input);
+  auto _K_results_solve_copy = _K_cho_decomp_copy.cholesky_solve(input);
 }
 
 void
@@ -240,7 +251,13 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
 
   RealEigenMatrix flattened_data = outputs.reshaped(outputs.rows() * outputs.cols(), 1);
 
-  setupStoredMatrices(flattened_data);
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  unsigned int num_samples = flattened_data.size();
+  unsigned int num_inputs = 1;
+  torch::Tensor flattened_tensor =
+      torch::from_blob(flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+
+  setupStoredMatrices(flattened_tensor);
 
   Real log_likelihood = 0;
   log_likelihood += -(flattened_data.transpose() * _K_results_solve)(0, 0);
