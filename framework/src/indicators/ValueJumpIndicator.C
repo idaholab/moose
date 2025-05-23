@@ -10,24 +10,42 @@
 #include "ValueJumpIndicator.h"
 
 registerMooseObject("MooseApp", ValueJumpIndicator);
+registerMooseObject("MooseApp", VectorValueJumpIndicator);
 
+template <typename ComputeValueType>
 InputParameters
-ValueJumpIndicator::validParams()
+ValueJumpIndicatorTempl<ComputeValueType>::validParams()
 {
-  InputParameters params = InternalSideIndicator::validParams();
+  InputParameters params = InternalSideIndicatorTempl<ComputeValueType>::validParams();
   params.addClassDescription("Compute the jump of the solution across element bondaries.");
   return params;
 }
 
-ValueJumpIndicator::ValueJumpIndicator(const InputParameters & parameters)
-  : InternalSideIndicator(parameters)
+template <typename ComputeValueType>
+ValueJumpIndicatorTempl<ComputeValueType>::ValueJumpIndicatorTempl(
+    const InputParameters & parameters)
+  : InternalSideIndicatorTempl<ComputeValueType>(parameters)
 {
 }
 
+template <>
 Real
-ValueJumpIndicator::computeQpIntegral()
+ValueJumpIndicatorTempl<Real>::computeQpIntegral()
 {
   Real jump = _u[_qp] - _u_neighbor[_qp];
 
   return jump * jump;
 }
+
+template <>
+Real
+ValueJumpIndicatorTempl<RealVectorValue>::computeQpIntegral()
+{
+  Real jump = _normals[_qp] * (_u[_qp] - _u_neighbor[_qp]);
+
+  return jump * jump;
+}
+
+// Explicitly instantiate two versions of the ValueJumpIndicatorTempl class
+template class ValueJumpIndicatorTempl<Real>;
+template class ValueJumpIndicatorTempl<RealVectorValue>;
