@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment for spacing
 
 This IC creates an initial field for the subchannel wetted perimeter ([!param](/ICs/MarvelTriWettedPerimIC/variable) = `w_perim`), for a MARVEL-type reactor core.
 
