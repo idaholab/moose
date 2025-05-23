@@ -34,7 +34,7 @@ class ImageDiff(FileTester):
             self.specs['required_python_packages'] += ' skimage'
 
     def getOutputFiles(self, options):
-        return self.specs['imagediff']
+        return super().getOutputFiles(options) + self.specs['imagediff']
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         """

@@ -86,6 +86,7 @@
 | a/vector    | Reporter | NO        |
 --------------------------------------'
     match_literal = true
+    capture_perf_graph = false
 
     issues = '#30394'
     requirement = 'The system shall restore non-postprocessor reporter values to their old state when a timestep is repeated if and only if an old value is requested.'

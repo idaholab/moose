@@ -42,7 +42,7 @@ class Exodiff(FileTester):
             raise Exception("For the Exodiff tester, you cannot specify both 'map' and 'partial' as True")
 
     def getOutputFiles(self, options):
-        return self.specs['exodiff']
+        return super().getOutputFiles(options) + self.specs['exodiff']
 
     def processResultsCommand(self, moose_dir, options):
         commands = []

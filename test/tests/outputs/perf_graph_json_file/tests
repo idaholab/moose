@@ -6,6 +6,7 @@
     input = perf_graph_json_file.i
     jsondiff = 'perf_graph_json_file_out.json pg.json'
     skip_keys = "root['time_steps'][0]['perf_graph_json']['graph']"
+    capture_perf_graph = false
     requirement = 'The system shall support the file output of timing and memory usage data to a specific file using an output parameter'
   []
   [bad_file]

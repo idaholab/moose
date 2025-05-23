@@ -23,6 +23,8 @@ class AnalyzeJacobian(FileTester):
         params.addParam('off_diagonal', True, "Also test the off-diagonal Jacobian entries")
         params.addParam('mesh_size',   1, "Resize the input mesh")
 
+        params['capture_perf_graph'] = False
+
         return params
 
     def __init__(self, name, params):
@@ -30,7 +32,7 @@ class AnalyzeJacobian(FileTester):
 
     def getOutputFiles(self, options):
         # analyzejacobian.py outputs files prefixed with the input file name
-        return [self.specs['input']]
+        return super().getOutputFiles(options) + [self.specs['input']]
 
     def prepare(self, options):
         # We do not know what file(s) analyzejacobian.py produces
