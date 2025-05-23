@@ -380,9 +380,9 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
     mesh.delete_elem(elem_0);
     // Create the new TRI element
     Elem * elem_Tri3 = mesh.add_elem(new Tri3);
-    elem_Tri3->set_node(0) = pt0;
-    elem_Tri3->set_node(1) = pt1;
-    elem_Tri3->set_node(2) = pt2;
+    elem_Tri3->set_node(0, pt0);
+    elem_Tri3->set_node(1, pt1);
+    elem_Tri3->set_node(2, pt2);
     // Retain the boundary information
     for (auto bdry_id : elem_bdry_container_0)
       boundary_info.add_side(elem_Tri3, 0, bdry_id);
@@ -498,19 +498,19 @@ triElemSplitter(ReplicatedMesh & mesh,
     exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
 
   Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
-  elem_Tri3_0->set_node(0) = mesh.node_ptr(nid_0);
-  elem_Tri3_0->set_node(1) = mesh.node_ptr(nid_m1);
-  elem_Tri3_0->set_node(2) = mesh.node_ptr(nid_m2);
+  elem_Tri3_0->set_node(0, mesh.node_ptr(nid_0));
+  elem_Tri3_0->set_node(1, mesh.node_ptr(nid_m1));
+  elem_Tri3_0->set_node(2, mesh.node_ptr(nid_m2));
   elem_Tri3_0->subdomain_id() = single_elem_side_id;
   Elem * elem_Tri3_1 = mesh.add_elem(new Tri3);
-  elem_Tri3_1->set_node(0) = mesh.node_ptr(nid_1);
-  elem_Tri3_1->set_node(1) = mesh.node_ptr(nid_m2);
-  elem_Tri3_1->set_node(2) = mesh.node_ptr(nid_m1);
+  elem_Tri3_1->set_node(0, mesh.node_ptr(nid_1));
+  elem_Tri3_1->set_node(1, mesh.node_ptr(nid_m2));
+  elem_Tri3_1->set_node(2, mesh.node_ptr(nid_m1));
   elem_Tri3_1->subdomain_id() = double_elem_side_id;
   Elem * elem_Tri3_2 = mesh.add_elem(new Tri3);
-  elem_Tri3_2->set_node(0) = mesh.node_ptr(nid_2);
-  elem_Tri3_2->set_node(1) = mesh.node_ptr(nid_m2);
-  elem_Tri3_2->set_node(2) = mesh.node_ptr(nid_1);
+  elem_Tri3_2->set_node(0, mesh.node_ptr(nid_2));
+  elem_Tri3_2->set_node(1, mesh.node_ptr(nid_m2));
+  elem_Tri3_2->set_node(2, mesh.node_ptr(nid_1));
   elem_Tri3_2->subdomain_id() = double_elem_side_id;
   // Retain element extra integers
   for (unsigned int j = 0; j < n_elem_extra_ids; j++)
@@ -573,14 +573,14 @@ triElemSplitter(ReplicatedMesh & mesh,
     exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
 
   Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
-  elem_Tri3_0->set_node(0) = mesh.node_ptr(nid_0);
-  elem_Tri3_0->set_node(1) = mesh.node_ptr(nid_1);
-  elem_Tri3_0->set_node(2) = mesh.node_ptr(nid_m);
+  elem_Tri3_0->set_node(0, mesh.node_ptr(nid_0));
+  elem_Tri3_0->set_node(1, mesh.node_ptr(nid_1));
+  elem_Tri3_0->set_node(2, mesh.node_ptr(nid_m));
   elem_Tri3_0->subdomain_id() = first_elem_side_id;
   Elem * elem_Tri3_1 = mesh.add_elem(new Tri3);
-  elem_Tri3_1->set_node(0) = mesh.node_ptr(nid_0);
-  elem_Tri3_1->set_node(1) = mesh.node_ptr(nid_m);
-  elem_Tri3_1->set_node(2) = mesh.node_ptr(nid_2);
+  elem_Tri3_1->set_node(0, mesh.node_ptr(nid_0));
+  elem_Tri3_1->set_node(1, mesh.node_ptr(nid_m));
+  elem_Tri3_1->set_node(2, mesh.node_ptr(nid_2));
   elem_Tri3_1->subdomain_id() = second_elem_side_id;
   // Retain element extra integers
   for (unsigned int j = 0; j < n_elem_extra_ids; j++)
@@ -643,14 +643,14 @@ quadElemSplitter(ReplicatedMesh & mesh,
                (*node_0 - *node_3).cross(*node_2 - *node_3).norm()))
   {
     Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
-    elem_Tri3_0->set_node(0) = node_0;
-    elem_Tri3_0->set_node(1) = node_1;
-    elem_Tri3_0->set_node(2) = node_2;
+    elem_Tri3_0->set_node(0, node_0);
+    elem_Tri3_0->set_node(1, node_1);
+    elem_Tri3_0->set_node(2, node_2);
     elem_Tri3_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
     Elem * elem_Tri3_1 = mesh.add_elem(new Tri3);
-    elem_Tri3_1->set_node(0) = node_0;
-    elem_Tri3_1->set_node(1) = node_2;
-    elem_Tri3_1->set_node(2) = node_3;
+    elem_Tri3_1->set_node(0, node_0);
+    elem_Tri3_1->set_node(1, node_2);
+    elem_Tri3_1->set_node(2, node_3);
     elem_Tri3_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
     // Retain element extra integers
     for (unsigned int j = 0; j < n_elem_extra_ids; j++)
@@ -672,14 +672,14 @@ quadElemSplitter(ReplicatedMesh & mesh,
   else
   {
     Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
-    elem_Tri3_0->set_node(0) = node_0;
-    elem_Tri3_0->set_node(1) = node_1;
-    elem_Tri3_0->set_node(2) = node_3;
+    elem_Tri3_0->set_node(0, node_0);
+    elem_Tri3_0->set_node(1, node_1);
+    elem_Tri3_0->set_node(2, node_3);
     elem_Tri3_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
     Elem * elem_Tri3_1 = mesh.add_elem(new Tri3);
-    elem_Tri3_1->set_node(0) = node_1;
-    elem_Tri3_1->set_node(1) = node_2;
-    elem_Tri3_1->set_node(2) = node_3;
+    elem_Tri3_1->set_node(0, node_1);
+    elem_Tri3_1->set_node(1, node_2);
+    elem_Tri3_1->set_node(2, node_3);
     elem_Tri3_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
     // Retain element extra integers
     for (unsigned int j = 0; j < n_elem_extra_ids; j++)
@@ -1186,9 +1186,9 @@ makeImprovedTriElement(ReplicatedMesh & mesh,
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   Elem * elem_Tri3_new = mesh.add_elem(new Tri3);
-  elem_Tri3_new->set_node(0) = mesh.node_ptr(node_id_0);
-  elem_Tri3_new->set_node(1) = mesh.node_ptr(node_id_1);
-  elem_Tri3_new->set_node(2) = mesh.node_ptr(node_id_2);
+  elem_Tri3_new->set_node(0, mesh.node_ptr(node_id_0));
+  elem_Tri3_new->set_node(1, mesh.node_ptr(node_id_1));
+  elem_Tri3_new->set_node(2, mesh.node_ptr(node_id_2));
   for (const auto & boundary_id_for_side_0 : boundary_ids_for_side_0)
     boundary_info.add_side(elem_Tri3_new, 0, boundary_id_for_side_0);
   for (const auto & boundary_id_for_side_1 : boundary_ids_for_side_1)

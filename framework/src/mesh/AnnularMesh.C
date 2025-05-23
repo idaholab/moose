@@ -208,10 +208,10 @@ AnnularMesh::buildMesh()
       const Real y = current_r * std::sin(angle * M_PI / 180.0);
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
       Elem * elem = mesh.add_elem(new libMesh::Quad4);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
-      elem->set_node(3) = nodes[node_id - num_angular_nodes];
+      elem->set_node(0, nodes[node_id]);
+      elem->set_node(1, nodes[node_id - 1]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes - 1]);
+      elem->set_node(3, nodes[node_id - num_angular_nodes]);
       elem->subdomain_id() = _quad_subdomain_id;
       node_id++;
 
@@ -232,10 +232,10 @@ AnnularMesh::buildMesh()
     {
       // add element connecting to node at angle=0
       Elem * elem = mesh.add_elem(new libMesh::Quad4);
-      elem->set_node(0) = nodes[node_id - num_angular_nodes];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
-      elem->set_node(3) = nodes[node_id - 2 * num_angular_nodes];
+      elem->set_node(0, nodes[node_id - num_angular_nodes]);
+      elem->set_node(1, nodes[node_id - 1]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes - 1]);
+      elem->set_node(3, nodes[node_id - 2 * num_angular_nodes]);
       elem->subdomain_id() = _quad_subdomain_id;
 
       if (layer_num == _nr)
@@ -255,17 +255,17 @@ AnnularMesh::buildMesh()
     for (unsigned angle_num = 0; angle_num < num_angular_nodes - 1; ++angle_num)
     {
       Elem * elem = mesh.add_elem(new libMesh::Tri3);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - num_angular_nodes + angle_num];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes + angle_num + 1];
+      elem->set_node(0, nodes[node_id]);
+      elem->set_node(1, nodes[node_id - num_angular_nodes + angle_num]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes + angle_num + 1]);
       elem->subdomain_id() = _tri_subdomain_id;
     }
     if (_full_annulus)
     {
       Elem * elem = mesh.add_elem(new libMesh::Tri3);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes];
+      elem->set_node(0, nodes[node_id]);
+      elem->set_node(1, nodes[node_id - 1]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes]);
       elem->subdomain_id() = _tri_subdomain_id;
     }
   }

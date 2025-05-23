@@ -6,6 +6,7 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     mfem = true
     max_parallel = 1
@@ -18,6 +19,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     mfem = true
     max_parallel = 1
@@ -30,6 +32,7 @@
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     mfem = true
     max_parallel = 1
@@ -40,6 +43,7 @@
     input = graddiv.i
     xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
                 OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     mfem = true
     max_parallel = 1
@@ -54,6 +58,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     mfem = true
     max_parallel = 1
@@ -70,6 +75,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=element'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     mfem = true
     max_parallel = 1
@@ -80,6 +86,7 @@
     input = heattransfer.i
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
                 OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     mfem = true
     max_parallel = 1
@@ -90,6 +97,7 @@
     input = linearelasticity.i
     xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
     mfem = true
     max_parallel = 1
@@ -100,6 +108,7 @@
     input = gravity.i
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
     mfem = true
     max_parallel = 1

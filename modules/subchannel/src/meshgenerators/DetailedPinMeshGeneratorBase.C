@@ -85,12 +85,12 @@ DetailedPinMeshGeneratorBase::generatePin(std::unique_ptr<MeshBase> & mesh_base,
       const unsigned int ctr_idx = 0;
       const unsigned int idx1 = (i % _num_radial_parts) + 1;
       const unsigned int idx2 = ((i + 1) % _num_radial_parts) + 1;
-      elem->set_node(0) = nodes[k][ctr_idx];
-      elem->set_node(1) = nodes[k][idx1];
-      elem->set_node(2) = nodes[k][idx2];
-      elem->set_node(3) = nodes[k + 1][ctr_idx];
-      elem->set_node(4) = nodes[k + 1][idx1];
-      elem->set_node(5) = nodes[k + 1][idx2];
+      elem->set_node(0, nodes[k][ctr_idx]);
+      elem->set_node(1, nodes[k][idx1]);
+      elem->set_node(2, nodes[k][idx2]);
+      elem->set_node(3, nodes[k + 1][ctr_idx]);
+      elem->set_node(4, nodes[k + 1][idx1]);
+      elem->set_node(5, nodes[k + 1][idx2]);
     }
   }
 }

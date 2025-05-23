@@ -875,10 +875,10 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
       if (quad_elem_type == QUAD_ELEM_TYPE::QUAD4)
       {
         new_elem = std::make_unique<Quad4>();
-        new_elem->set_node(0) = nodes[id_x][id_y];
-        new_elem->set_node(3) = nodes[id_x][id_y + 1];
-        new_elem->set_node(2) = nodes[id_x + 1][id_y + 1];
-        new_elem->set_node(1) = nodes[id_x + 1][id_y];
+        new_elem->set_node(0, nodes[id_x][id_y]);
+        new_elem->set_node(3, nodes[id_x][id_y + 1]);
+        new_elem->set_node(2, nodes[id_x + 1][id_y + 1]);
+        new_elem->set_node(1, nodes[id_x + 1][id_y]);
         new_elem->subdomain_id() = 1 + block_id_shift;
       }
       else // QUAD8/QUAD9
@@ -887,16 +887,16 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
         if (quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
         {
           new_elem = std::make_unique<Quad9>();
-          new_elem->set_node(8) = nodes[id_x * 2 + 1][id_y * 2 + 1];
+          new_elem->set_node(8, nodes[id_x * 2 + 1][id_y * 2 + 1]);
         }
-        new_elem->set_node(0) = nodes[id_x * 2][id_y * 2];
-        new_elem->set_node(3) = nodes[id_x * 2][id_y * 2 + 2];
-        new_elem->set_node(2) = nodes[id_x * 2 + 2][id_y * 2 + 2];
-        new_elem->set_node(1) = nodes[id_x * 2 + 2][id_y * 2];
-        new_elem->set_node(4) = nodes[id_x * 2 + 1][id_y * 2];
-        new_elem->set_node(5) = nodes[id_x * 2 + 2][id_y * 2 + 1];
-        new_elem->set_node(6) = nodes[id_x * 2 + 1][id_y * 2 + 2];
-        new_elem->set_node(7) = nodes[id_x * 2][id_y * 2 + 1];
+        new_elem->set_node(0, nodes[id_x * 2][id_y * 2]);
+        new_elem->set_node(3, nodes[id_x * 2][id_y * 2 + 2]);
+        new_elem->set_node(2, nodes[id_x * 2 + 2][id_y * 2 + 2]);
+        new_elem->set_node(1, nodes[id_x * 2 + 2][id_y * 2]);
+        new_elem->set_node(4, nodes[id_x * 2 + 1][id_y * 2]);
+        new_elem->set_node(5, nodes[id_x * 2 + 2][id_y * 2 + 1]);
+        new_elem->set_node(6, nodes[id_x * 2 + 1][id_y * 2 + 2]);
+        new_elem->set_node(7, nodes[id_x * 2][id_y * 2 + 1]);
         new_elem->subdomain_id() = 1 + block_id_shift;
       }
       Elem * elem_Quad = mesh.add_elem(std::move(new_elem));
@@ -918,10 +918,10 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
     if (quad_elem_type == QUAD_ELEM_TYPE::QUAD4)
     {
       new_elem = std::make_unique<Quad4>();
-      new_elem->set_node(0) = mesh.node_ptr(i);
-      new_elem->set_node(3) = mesh.node_ptr(i + 2 * div_num - 1);
-      new_elem->set_node(2) = mesh.node_ptr(i + 2 * div_num);
-      new_elem->set_node(1) = mesh.node_ptr(i + 1);
+      new_elem->set_node(0, mesh.node_ptr(i));
+      new_elem->set_node(3, mesh.node_ptr(i + 2 * div_num - 1));
+      new_elem->set_node(2, mesh.node_ptr(i + 2 * div_num));
+      new_elem->set_node(1, mesh.node_ptr(i + 1));
     }
     else // QUAD8/QUAD9
     {
@@ -929,31 +929,40 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
       if (quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
       {
         new_elem = std::make_unique<Quad9>();
-        new_elem->set_node(8) =
-            mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                          (i - (div_num - 1) * (div_num - 1)) * 2 + 1 + ((div_num - 1) * 4 + 1));
+        new_elem->set_node(8,
+                           mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                         (i - (div_num - 1) * (div_num - 1)) * 2 + 1 +
+                                         ((div_num - 1) * 4 + 1)));
       }
-      new_elem->set_node(0) = mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                                            (i - (div_num - 1) * (div_num - 1)) * 2);
-      new_elem->set_node(3) =
-          mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                        (i - (div_num - 1) * (div_num - 1)) * 2 + ((div_num - 1) * 4 + 1) * 2);
-      new_elem->set_node(2) =
-          mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                        (i - (div_num - 1) * (div_num - 1)) * 2 + 2 + ((div_num - 1) * 4 + 1) * 2);
-      new_elem->set_node(1) = mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                                            (i - (div_num - 1) * (div_num - 1)) * 2 + 2);
-      new_elem->set_node(4) = mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                                            (i - (div_num - 1) * (div_num - 1)) * 2 + 1);
-      new_elem->set_node(5) =
-          mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                        (i - (div_num - 1) * (div_num - 1)) * 2 + 2 + ((div_num - 1) * 4 + 1));
-      new_elem->set_node(6) =
-          mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                        (i - (div_num - 1) * (div_num - 1)) * 2 + 1 + ((div_num - 1) * 4 + 1) * 2);
-      new_elem->set_node(7) =
-          mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
-                        (i - (div_num - 1) * (div_num - 1)) * 2 + ((div_num - 1) * 4 + 1));
+      new_elem->set_node(0,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2));
+      new_elem->set_node(3,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 +
+                                       ((div_num - 1) * 4 + 1) * 2));
+      new_elem->set_node(2,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 + 2 +
+                                       ((div_num - 1) * 4 + 1) * 2));
+      new_elem->set_node(1,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 + 2));
+      new_elem->set_node(4,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 + 1));
+      new_elem->set_node(5,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 + 2 +
+                                       ((div_num - 1) * 4 + 1)));
+      new_elem->set_node(6,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 + 1 +
+                                       ((div_num - 1) * 4 + 1) * 2));
+      new_elem->set_node(7,
+                         mesh.node_ptr((div_num - 1) * (div_num - 1) * 4 +
+                                       (i - (div_num - 1) * (div_num - 1)) * 2 +
+                                       ((div_num - 1) * 4 + 1)));
     }
 
     Elem * elem_Quad = mesh.add_elem(std::move(new_elem));
@@ -1000,9 +1009,9 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
     if (tri_elem_type == TRI_ELEM_TYPE::TRI3)
     {
       new_elem = std::make_unique<Tri3>();
-      new_elem->set_node(0) = mesh.node_ptr(0);
-      new_elem->set_node(2) = mesh.node_ptr(i);
-      new_elem->set_node(1) = mesh.node_ptr(i + 1);
+      new_elem->set_node(0, mesh.node_ptr(0));
+      new_elem->set_node(2, mesh.node_ptr(i));
+      new_elem->set_node(1, mesh.node_ptr(i + 1));
     }
     else // TRI6/TRI7
     {
@@ -1010,14 +1019,14 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
       if (tri_elem_type == TRI_ELEM_TYPE::TRI7)
       {
         new_elem = std::make_unique<Tri7>();
-        new_elem->set_node(6) = mesh.node_ptr(i * 2);
+        new_elem->set_node(6, mesh.node_ptr(i * 2));
       }
-      new_elem->set_node(0) = mesh.node_ptr(0);
-      new_elem->set_node(2) = mesh.node_ptr(i * 2 + angle_number * order);
-      new_elem->set_node(1) = mesh.node_ptr((i + 1) * 2 + angle_number * order);
-      new_elem->set_node(3) = mesh.node_ptr(i * 2 + 1);
-      new_elem->set_node(5) = mesh.node_ptr(i * 2 - 1);
-      new_elem->set_node(4) = mesh.node_ptr(i * 2 + 1 + angle_number * order);
+      new_elem->set_node(0, mesh.node_ptr(0));
+      new_elem->set_node(2, mesh.node_ptr(i * 2 + angle_number * order));
+      new_elem->set_node(1, mesh.node_ptr((i + 1) * 2 + angle_number * order));
+      new_elem->set_node(3, mesh.node_ptr(i * 2 + 1));
+      new_elem->set_node(5, mesh.node_ptr(i * 2 - 1));
+      new_elem->set_node(4, mesh.node_ptr(i * 2 + 1 + angle_number * order));
     }
 
     Elem * elem = mesh.add_elem(std::move(new_elem));
@@ -1071,11 +1080,10 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
         if (quad_elem_type == QUAD_ELEM_TYPE::QUAD4)
         {
           new_elem = std::make_unique<Quad4>();
-          new_elem->set_node(0) = mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * j);
-          new_elem->set_node(1) = mesh.node_ptr(nodeid_shift + i + 1 + (angle_number + 1) * j);
-          new_elem->set_node(2) =
-              mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1) + 1);
-          new_elem->set_node(3) = mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1));
+          new_elem->set_node(0, mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * j));
+          new_elem->set_node(1, mesh.node_ptr(nodeid_shift + i + 1 + (angle_number + 1) * j));
+          new_elem->set_node(2, mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1) + 1));
+          new_elem->set_node(3, mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1)));
         }
         else // QUAD8/QUAD9
         {
@@ -1083,25 +1091,28 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
           if (quad_elem_type == QUAD_ELEM_TYPE::QUAD9)
           {
             new_elem = std::make_unique<Quad9>();
-            new_elem->set_node(8) =
-                mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 2));
+            new_elem->set_node(
+                8, mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 2)));
           }
-          new_elem->set_node(0) =
-              mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 1));
-          new_elem->set_node(1) =
-              mesh.node_ptr(nodeid_shift + i * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 1));
-          new_elem->set_node(2) =
-              mesh.node_ptr(nodeid_shift + i * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 3));
-          new_elem->set_node(3) =
-              mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 3));
-          new_elem->set_node(4) =
-              mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 1));
-          new_elem->set_node(5) =
-              mesh.node_ptr(nodeid_shift + i * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 2));
-          new_elem->set_node(6) =
-              mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 3));
-          new_elem->set_node(7) =
-              mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 2));
+          new_elem->set_node(
+              0,
+              mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 1)));
+          new_elem->set_node(
+              1, mesh.node_ptr(nodeid_shift + i * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 1)));
+          new_elem->set_node(
+              2, mesh.node_ptr(nodeid_shift + i * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 3)));
+          new_elem->set_node(
+              3,
+              mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 3)));
+          new_elem->set_node(
+              4, mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 1)));
+          new_elem->set_node(
+              5, mesh.node_ptr(nodeid_shift + i * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 2)));
+          new_elem->set_node(
+              6, mesh.node_ptr(nodeid_shift + i * 2 + (angle_number * 2 + 1) * (j * 2 + 3)));
+          new_elem->set_node(
+              7,
+              mesh.node_ptr(nodeid_shift + (i - 1) * 2 + 1 + (angle_number * 2 + 1) * (j * 2 + 2)));
         }
         Elem * elem = mesh.add_elem(std::move(new_elem));
         if (i == 1)
@@ -1199,10 +1210,10 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
       std::unique_ptr<Elem> new_elem;
 
       new_elem = std::make_unique<Quad4>();
-      new_elem->set_node(0) = mesh->node_ptr(j + (num_sectors_per_side + 1) * (i));
-      new_elem->set_node(1) = mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i));
-      new_elem->set_node(2) = mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i + 1));
-      new_elem->set_node(3) = mesh->node_ptr(j + (num_sectors_per_side + 1) * (i + 1));
+      new_elem->set_node(0, mesh->node_ptr(j + (num_sectors_per_side + 1) * (i)));
+      new_elem->set_node(1, mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i)));
+      new_elem->set_node(2, mesh->node_ptr(j + 1 + (num_sectors_per_side + 1) * (i + 1)));
+      new_elem->set_node(3, mesh->node_ptr(j + (num_sectors_per_side + 1) * (i + 1)));
 
       Elem * elem = mesh->add_elem(std::move(new_elem));
 

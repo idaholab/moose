@@ -10,7 +10,10 @@
                   'OutputData/ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu '
                   'OutputData/VisItDataCollection/Run0_000000/mesh.000000 '
                   'OutputData/VisItDataCollection/Run0_000001/concentration.000000 '
-                  'OutputData/VisItDataCollection/Run0_000001.mfem_root'
+                  'OutputData/VisItDataCollection/Run0_000001.mfem_root '
+                  'OutputData/ConduitDataCollection/Run_000001/domain_000000.conduit_bin '
+                  'OutputData/ConduitDataCollection/Run_000001/domain_000000.conduit_bin_json '
+                  'OutputData/ConduitDataCollection/Run_000001.root'
     requirement = 'The system shall have the ability to write out MFEM solutions to '
                   'ParaView, VisIt and Conduit data collections.'
     mfem = true

@@ -71,7 +71,7 @@
                                                                                                    \
     elem = _debug_mesh->add_elem(elem);                                                            \
                                                                                                    \
-    elem->set_node(0) = _debug_mesh->node_ptr((_debug_node_count - 2));                            \
-    elem->set_node(1) = _debug_mesh->node_ptr((_debug_node_count - 2) + 1);                        \
+    elem->set_node(0, _debug_mesh->node_ptr((_debug_node_count - 2)));                             \
+    elem->set_node(1, _debug_mesh->node_ptr((_debug_node_count - 2) + 1));                         \
   }
 #endif
