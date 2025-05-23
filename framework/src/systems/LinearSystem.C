@@ -172,8 +172,8 @@ LinearSystem::computeGradients()
 
   for (const auto i : index_range(_raw_grad_container))
   {
+    _new_gradient[i]->close();
     _raw_grad_container[i] = std::move(_new_gradient[i]);
-    _raw_grad_container[i]->close();
   }
 }
 
