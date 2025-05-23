@@ -2,7 +2,7 @@
 
 !---
 
-The Method of Manufactured Solutions (MMS) is a useful tool for code verification
+The Method of Manufactured Solutions (MMS) is a useful tool for code  *verification*
 (making sure that a mathematical model is properly solved)
 
 MMS works by assuming a solution, substituting it into the PDE, and obtaining a forcing term

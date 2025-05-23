@@ -75,14 +75,6 @@ coefficients correspond to the values of the functions at the nodes.
 
 !---
 
-## Setting Shape Functions in a MOOSE input file
-
-Shape functions can be set for each variable in the `Variables` block:
-
-!listing test/tests/variables/second_derivative/interface_kernels.i block=Variables
-
-!---
-
 ## Example 1D Shape Functions
 
 !media darcy_thermo_mech/fem_linear_lagrange.png style=width:49%;margin-left:auto;margin-right:1%;display:inline;background:white;
@@ -99,25 +91,35 @@ Shape functions can be set for each variable in the `Variables` block:
 
 ## 2D Lagrange Shape Functions
 
-Example bi-quadratic basis functions defined on the Quad9 element:
+!style! fontsize=90%
 
-$\psi_0$ is associated to a "corner" node, it is zero on the opposite edges.\\
-$\psi_4$ is associated to a "mid-edge" node, it is zero on all other edges.\\
-$\psi_8$ is associated to the "center" node, it is symmetric and $\geq 0$ on the element.
+Example bi-quadratic basis functions defined on the (square) Quad9 element:
+
+$\psi_0$ (left) is associated to a "corner" node, it is zero on the opposite edges.\\
+$\psi_4$ (middle) is associated to a "mid-edge" node, it is zero on all other edges.\\
+$\psi_8$ (right) is associated to the "center" node, it is symmetric and $\geq 0$ on the element.
+
+!style-end!
 
 !row!
 !col! width=33%
-!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100% caption=    $\psi_0$ prefix='            '
+!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100%
 !col-end!
 
 !col! width=33%
-!col width=33%
-!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%; caption=    $\psi_4$ prefix='           '
+!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%
 !col-end!
 
 !col! width=33%
-!col width=33%
-!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%; caption=    $\psi_8$ prefix='           '
+!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%
 !col-end!
 
 !row-end!
+
+!---
+
+## Setting Shape Functions in a MOOSE input file
+
+Shape functions can be set for each variable in the `Variables` block:
+
+!listing test/tests/variables/second_derivative/interface_kernels.i block=Variables
