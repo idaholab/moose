@@ -67,9 +67,6 @@ protected:
    */
   void addJunctionIC(const VariableName & var, Real value);
 
-  /// True if the junction variables are scalar variables
-  const bool _use_scalar_variables;
-
   /// Volume of the junction
   const Real _volume;
 

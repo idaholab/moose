@@ -89,7 +89,6 @@
     connections = 'inlet_pipe:out deadend_pipe:in outlet_pipe:in'
     position = '1 0 0'
     volume = 1e-8
-    use_scalar_variables = false
   []
 
   [outlet_pipe]

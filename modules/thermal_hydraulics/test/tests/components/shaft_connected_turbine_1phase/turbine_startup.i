@@ -67,7 +67,6 @@ p_out = 1e6
     D_wheel = 0.4
     head_coefficient = head
     power_coefficient = power
-    use_scalar_variables = false
   []
   [ch_out]
     type = FlowChannel1Phase

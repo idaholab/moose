@@ -102,9 +102,8 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADShaftConnectedTurbine1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<bool>("use_scalar_variables") = _use_scalar_variables;
-    if (!_use_scalar_variables)
-      params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
+    params.set<bool>("use_scalar_variables") = false;
+    params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
     params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
@@ -180,19 +179,13 @@ ShaftConnectedTurbine1Phase::addMooseObjects()
       {"power", _power_var_name}};
   for (const auto & quantity_and_name : quantities_aux)
   {
-    const std::string class_name = _use_scalar_variables ? "ShaftConnectedTurbine1PhaseScalarAux"
-                                                         : "ShaftConnectedTurbine1PhaseAux";
+    const std::string class_name = "ShaftConnectedTurbine1PhaseAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = quantity_and_name.second;
     params.set<MooseEnum>("quantity") = quantity_and_name.first;
     params.set<UserObjectName>("turbine_uo") = getShaftConnectedUserObjectName();
     const std::string obj_name = genName(name(), quantity_and_name.first + "_aux");
-    if (_use_scalar_variables)
-      getTHMProblem().addAuxScalarKernel(class_name, obj_name, params);
-    else
-    {
-      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      getTHMProblem().addAuxKernel(class_name, obj_name, params);
-    }
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    getTHMProblem().addAuxKernel(class_name, obj_name, params);
   }
 }

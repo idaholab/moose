@@ -53,7 +53,6 @@ pout = 7e6
     initial_vel_z = 1
     connections = 'inlet:out bypass:in core_top:in'
     volume = 1
-    use_scalar_variables = false
   []
 
   [bypass]
@@ -104,7 +103,6 @@ pout = 7e6
     initial_vel_z = 1
     connections = 'bypass:out core_bottom:out outlet:in'
     volume = 1
-    use_scalar_variables = false
   []
 
   [outlet]

@@ -11,13 +11,11 @@
 #include "ADShaftConnectedCompressor1PhaseUserObject.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedCompressor1PhaseAux);
-registerMooseObject("ThermalHydraulicsApp", ShaftConnectedCompressor1PhaseScalarAux);
 
-template <typename T>
 InputParameters
-ShaftConnectedCompressor1PhaseAuxTempl<T>::validParams()
+ShaftConnectedCompressor1PhaseAux::validParams()
 {
-  InputParameters params = T::validParams();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Computes various quantities for a ShaftConnectedCompressor1Phase.");
 
@@ -29,19 +27,17 @@ ShaftConnectedCompressor1PhaseAuxTempl<T>::validParams()
   return params;
 }
 
-template <typename T>
-ShaftConnectedCompressor1PhaseAuxTempl<T>::ShaftConnectedCompressor1PhaseAuxTempl(
+ShaftConnectedCompressor1PhaseAux::ShaftConnectedCompressor1PhaseAux(
     const InputParameters & parameters)
-  : T(parameters),
+  : AuxKernel(parameters),
     _quantity(this->template getParam<MooseEnum>("quantity").template getEnum<Quantity>()),
     _compressor_uo(
         this->template getUserObject<ADShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
 {
 }
 
-template <typename T>
 Real
-ShaftConnectedCompressor1PhaseAuxTempl<T>::computeValue()
+ShaftConnectedCompressor1PhaseAux::computeValue()
 {
   switch (_quantity)
   {
@@ -64,6 +60,3 @@ ShaftConnectedCompressor1PhaseAuxTempl<T>::computeValue()
       mooseError("Invalid 'quantity' parameter.");
   }
 }
-
-template class ShaftConnectedCompressor1PhaseAuxTempl<AuxKernel>;
-template class ShaftConnectedCompressor1PhaseAuxTempl<AuxScalarKernel>;

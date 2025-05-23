@@ -58,6 +58,12 @@ VJ = ${fparse 4/3 * pi * RJ^3}
   []
 []
 
+[Postprocessors]
+  [dt_cfl]
+    block = 'pipeL pipeR'
+  []
+[]
+
 [VectorPostprocessors]
   [vpp]
     type = ADSampler1DReal

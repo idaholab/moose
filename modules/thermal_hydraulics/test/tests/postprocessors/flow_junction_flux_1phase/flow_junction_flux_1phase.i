@@ -52,7 +52,6 @@ p_out = 7e6
     connections = 'inlet:out channel1:in channel2:in'
     volume = 1
     scaling_factor_rhoEV = '1e-5'
-    use_scalar_variables = false
   []
   [channel1]
     type = FlowChannel1Phase
@@ -86,7 +85,6 @@ p_out = 7e6
     connections = 'channel1:out channel2:out outlet:in'
     volume = 1
     scaling_factor_rhoEV = '1e-5'
-    use_scalar_variables = false
   []
   [outlet]
     type = FlowChannel1Phase

@@ -51,7 +51,6 @@
     head = 8
     volume = 0.567
     A_ref = 0.567
-    use_scalar_variables = false
   []
 []
 

@@ -30,6 +30,13 @@ are taken from the *first* connection.
 
 !template load file=volume_junction_1phase_usage.md.template name=VolumeJunction1Phase
 
+!alert tip title=Visualizing junction solutions
+Since junction variables are located on the mesh, they can visualized alongside the other field variables, such as from pipes. In Paraview, the junction can be made more visible using the "point size" parameter.
+
+## Implementation Notes
+
+The junction variables are technically field variables that live on a block consisting of a single `NodeElem`. Originally, junction variables were scalar variables, but it was found that this was extremely costly due to the sparsity pattern requirements, thus making simulations involving large numbers of these components to be very slow to initialize.
+
 !syntax parameters /Components/VolumeJunction1Phase
 
 !syntax inputs /Components/VolumeJunction1Phase
