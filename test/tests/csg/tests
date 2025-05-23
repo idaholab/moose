@@ -69,6 +69,13 @@
       cli_args = '--csg-only'
       expect_err = "The CSG mesh from input TestCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
     []
+    [region_surfaces_error]
+      type = 'RunException'
+      input = 'csg_region_surfs_error.i'
+      detail = ' a cell region is updated with surfaces not present in the CSGBase instance'
+      cli_args = '--csg-only'
+      expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the base instance."
+    []
     [distributed_mesh]
       type = RunException
       input = 'csg_only_inf_planes.i'
