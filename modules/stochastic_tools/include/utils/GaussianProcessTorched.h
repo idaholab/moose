@@ -105,7 +105,7 @@ public:
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
    * @param input The vector/matrix which right multiples the inverse of the covariance matrix.
    */
-  void setupStoredMatrices(const RealEigenMatrix & input);
+  void setupStoredMatrices(const torch::Tensor & input);
 
   /**
    * Finds and links the covariance function to this object. Used mainly in the
