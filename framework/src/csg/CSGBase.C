@@ -67,7 +67,8 @@ CSGBase::createCell(const std::string name,
   return cell;
 }
 
-void CSGBase::updateCellRegion(const std::shared_ptr<CSGCell> cell, const CSGRegion & region)
+void
+CSGBase::updateCellRegion(const std::shared_ptr<CSGCell> cell, const CSGRegion & region)
 {
   checkRegionSurfaces(region);
   cell->updateRegion(region);
@@ -160,7 +161,8 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
   }
 }
 
-void CSGBase::checkRegionSurfaces(const CSGRegion & region)
+void
+CSGBase::checkRegionSurfaces(const CSGRegion & region)
 {
   auto surfs = region.getSurfaces();
   for (auto s : surfs)
@@ -171,7 +173,8 @@ void CSGBase::checkRegionSurfaces(const CSGRegion & region)
     // if there is a surface by the same name, check that it is actually the surface being used
     // (ie same surface points to same location in memory)
     if (s != list_surf)
-      mooseError("Region is being set with a surface named " + sname + " that is different from the surface of the same name in the base instance.");
+      mooseError("Region is being set with a surface named " + sname +
+                 " that is different from the surface of the same name in the base instance.");
   }
 }
 
