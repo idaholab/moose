@@ -119,13 +119,6 @@ public:
   const std::string getName() const { return _name; }
 
   /**
-   * @brief upate the region of the cell
-   *
-   * @param region
-   */
-  void updateRegion(const CSGRegion & region) { _region = region; }
-
-  /**
    * @brief Get the cell region
    *
    * @return const CSGRegion& region of the cell
@@ -159,7 +152,11 @@ protected:
   // name needs to be managed at the CSGCellList level
   void setName(const std::string name) { _name = name; }
 
-  // CSGCellList needs to be friend to access setName()
-  friend class CSGCellList;
+  // update the region of the cell to a new region - not public because
+  // it needs to be called from CSGBase so that the surfaces can be checked first.
+  void updateRegion(const CSGRegion & region) { _region = region; }
+
+  friend class CSGCellList; // needed for setName() access
+  friend class CSGBase; // needed for updateRegion() access
 };
 } // namespace CSG
