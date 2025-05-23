@@ -25,6 +25,7 @@ CSGBase::createCell(const std::string name,
                     const CSGRegion & region,
                     std::shared_ptr<CSGUniverse> add_to_univ)
 {
+  checkRegionSurfaces(region);
   auto cell = _cell_list.addMaterialCell(name, mat_name, region);
   if (add_to_univ)
     add_to_univ->addCell(cell);
@@ -38,6 +39,7 @@ CSGBase::createCell(const std::string name,
                     const CSGRegion & region,
                     const std::shared_ptr<CSGUniverse> add_to_univ)
 {
+  checkRegionSurfaces(region);
   auto cell = _cell_list.addVoidCell(name, region);
   if (add_to_univ)
     add_to_univ->addCell(cell);
@@ -52,6 +54,7 @@ CSGBase::createCell(const std::string name,
                     const CSGRegion & region,
                     const std::shared_ptr<CSGUniverse> add_to_univ)
 {
+  checkRegionSurfaces(region);
   if (fill_univ == add_to_univ)
     mooseError("Cell " + name +
                " cannot be filled with the same universe to which it is being added.");
@@ -62,6 +65,12 @@ CSGBase::createCell(const std::string name,
   else
     getRootUniverse()->addCell(cell);
   return cell;
+}
+
+void CSGBase::updateCellRegion(const std::shared_ptr<CSGCell> cell, const CSGRegion & region)
+{
+  checkRegionSurfaces(region);
+  cell->updateRegion(region);
 }
 
 void
@@ -148,6 +157,21 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
     }
     else // unique non-root universe to add to list
       _universe_list.addUniverse(u.second);
+  }
+}
+
+void CSGBase::checkRegionSurfaces(const CSGRegion & region)
+{
+  auto surfs = region.getSurfaces();
+  for (auto s : surfs)
+  {
+    auto sname = s->getName();
+    // if there is no surface by this name at all, there will be an error from getSurface
+    auto list_surf = _surface_list.getSurface(s->getName());
+    // if there is a surface by the same name, check that it is actually the surface being used
+    // (ie same surface points to same location in memory)
+    if (s != list_surf)
+      mooseError("Region is being set with a surface named " + sname + " that is different from the surface of the same name in the base instance.");
   }
 }
 
