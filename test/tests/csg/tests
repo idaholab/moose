@@ -76,6 +76,27 @@
       cli_args = '--csg-only'
       expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the base instance."
     []
+    [rename_surface_error]
+      type = 'RunException'
+      input = 'csg_rename_surf_error.i'
+      detail = ' a surface is renamed but the surface object does not match that of the same current name in the base.'
+      cli_args = '--csg-only'
+      expect_err = "Surface surf_plus_x cannot be renamed to test_new_surf_name as it does not exist in this CSGBase instance."
+    []
+    [rename_cell_error]
+      type = 'RunException'
+      input = 'csg_rename_cell_error.i'
+      detail = ' a cell is renamed but the cell object does not match that of the same current name in the base.'
+      cli_args = '--csg-only'
+      expect_err = "Cell square_cell cannot be renamed to test_new_cell_name as it does not exist in this CSGBase instance."
+    []
+    [rename_universe_error]
+      type = 'RunException'
+      input = 'csg_rename_univ_error.i'
+      detail = ' a universe is renamed but the universe object does not match that of the same current name in the base.'
+      cli_args = '--csg-only'
+      expect_err = "Universe ROOT_UNIVERSE cannot be renamed to test_new_univ_name as it does not exist in this CSGBase instance."
+    []
     [distributed_mesh]
       type = RunException
       input = 'csg_only_inf_planes.i'
