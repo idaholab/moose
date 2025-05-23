@@ -2732,13 +2732,13 @@ SubChannel1PhaseProblem::externalSolve()
     {
       for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
       {
-        auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+        const auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
         Real sumTemp = 0.0;
         Real rod_counter = 0.0;
         // Calculate sum of pin surface temperatures that the channels around the pin see
         for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
         {
-          auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+          const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
           auto mu = (*_mu_soln)(node);
           auto S = (*_S_flow_soln)(node);
           auto w_perim = (*_w_perim_soln)(node);
@@ -2749,11 +2749,17 @@ SubChannel1PhaseProblem::externalSolve()
           auto Pr = (*_mu_soln)(node)*cp / k;
           auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
           auto hw = Nu * k / Dh_i;
+          if ((*_Dpin_soln)(pin_node) <= 0)
+            mooseError("Dpin should not be null or negative when computing pin powers: ",
+                       (*_Dpin_soln)(pin_node));
           sumTemp +=
               (*_q_prime_soln)(pin_node) / ((*_Dpin_soln)(pin_node)*M_PI * hw) + (*_T_soln)(node);
           rod_counter += 1.0;
         }
-        _Tpin_soln->set(pin_node, sumTemp / rod_counter);
+        if (rod_counter > 0)
+          _Tpin_soln->set(pin_node, sumTemp / rod_counter);
+        else
+          mooseError("Pin was not found for pin index:  " + std::to_string(i_pin));
       }
     }
   }
