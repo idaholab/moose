@@ -29,7 +29,7 @@ class TestHarnessTester(TestHarnessTestCase):
         number = data['number']
         self.assertEqual(100.0, number['value'])
         self.assertEqual('Number', number['description'])
-        self.assertEqual('K', number['units'])
+        self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(106.0, number['bounds'][1])
         self.assertTrue(number['script'].endswith('validation_ok.py'))
