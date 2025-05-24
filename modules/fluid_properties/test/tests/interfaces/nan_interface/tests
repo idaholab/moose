@@ -38,6 +38,7 @@
   [signaling_nan_opt]
     type = 'RunApp'
     input = 'nan_interface.i'
+    should_crash = true
     allow_test_objects = True
     capabilities = 'method=opt'
     threading = '!pthreads'
@@ -55,6 +56,8 @@
     type = 'RunApp'
     input = 'nan_interface.i'
     cli_args = 'FluidProperties/fp/emit_on_nan=warning'
+    # Nonlinear solve did not converge due to DIVERGED_FNORM_NAN iterations 0
+    should_crash = true
     allow_test_objects = True
     allow_warnings = true
     expect_out = 'fp: A NaN was produced.'

@@ -17,6 +17,7 @@
       detail = 'with the incoming flow direction spanning an angle with the normal surface of the inlet;'
       type = 'CSVDiff'
       input = flux_bcs-direction-action.i
+      should_crash = true
       csvdiff = mass-angle-30.csv
       cli_args = "Outputs/file_base='mass-angle-30' "
                  "Modules/NavierStokesFV/flux_inlet_directions='0.86602540378 -0.5 0.0'"

@@ -17,6 +17,7 @@
     design = 'Problem/index.md'
     issues = '#27084'
     capabilities = 'slepc>=3.13.0'
+    should_crash = true
   []
   [eigen_problem_skip_solve]
     type = 'RunApp'
