@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
+#include "EigenADReal.h"
 #include "EqualValueEmbeddedConstraint.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
@@ -15,19 +16,20 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
-#include "Executioner.h"
 #include "AddVariableAction.h"
+#include "MooseEnum.h"
 
-#include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
+registerMooseObject("MooseApp", ADEqualValueEmbeddedConstraint);
 
+template <bool is_ad>
 InputParameters
-EqualValueEmbeddedConstraint::validParams()
+EqualValueEmbeddedConstraintTempl<is_ad>::validParams()
 {
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  InputParameters params = NodeElemConstraint::validParams();
+  InputParameters params = GenericNodeElemConstraint<is_ad>::validParams();
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
@@ -41,20 +43,28 @@ EqualValueEmbeddedConstraint::validParams()
   return params;
 }
 
-EqualValueEmbeddedConstraint::EqualValueEmbeddedConstraint(const InputParameters & parameters)
-  : NodeElemConstraint(parameters),
+template <bool is_ad>
+EqualValueEmbeddedConstraintTempl<is_ad>::EqualValueEmbeddedConstraintTempl(
+    const InputParameters & parameters)
+  : GenericNodeElemConstraint<is_ad>(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _formulation(getParam<MooseEnum>("formulation").getEnum<Formulation>()),
-    _penalty(getParam<Real>("penalty")),
+    _formulation(this->template getParam<MooseEnum>("formulation").template getEnum<Formulation>()),
+    _penalty(this->template getParam<Real>("penalty")),
     _residual_copy(_sys.residualGhosted())
 {
   _overwrite_secondary_residual = false;
   prepareSecondaryToPrimaryMap();
+  if constexpr (is_ad)
+  {
+    if (_formulation == Formulation::KINEMATIC)
+      this->paramError("formulation", "AD constraints cannot be used with KINEMATIC formulation.");
+  }
 }
 
+template <bool is_ad>
 void
-EqualValueEmbeddedConstraint::prepareSecondaryToPrimaryMap()
+EqualValueEmbeddedConstraintTempl<is_ad>::prepareSecondaryToPrimaryMap()
 {
   // get mesh pointLocator
   std::unique_ptr<libMesh::PointLocatorBase> pointLocator = _mesh.getPointLocator();
@@ -88,8 +98,9 @@ EqualValueEmbeddedConstraint::prepareSecondaryToPrimaryMap()
   }
 }
 
+template <bool is_ad>
 bool
-EqualValueEmbeddedConstraint::shouldApply()
+EqualValueEmbeddedConstraintTempl<is_ad>::shouldApply()
 {
   // primary element
   auto it = _secondary_to_primary_map.find(_current_node->id());
@@ -110,8 +121,9 @@ EqualValueEmbeddedConstraint::shouldApply()
   return false;
 }
 
+template <bool is_ad>
 void
-EqualValueEmbeddedConstraint::reinitConstraint()
+EqualValueEmbeddedConstraintTempl<is_ad>::reinitConstraint()
 {
   const Node * node = _current_node;
   unsigned int sys_num = _sys.number();
@@ -133,16 +145,18 @@ EqualValueEmbeddedConstraint::reinitConstraint()
   }
 }
 
+template <bool is_ad>
 Real
-EqualValueEmbeddedConstraint::computeQpSecondaryValue()
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpSecondaryValue()
 {
-  return _u_secondary[_qp];
+  return MetaPhysicL::raw_value(_u_secondary[_qp]);
 }
 
-Real
-EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
+template <bool is_ad>
+GenericReal<is_ad>
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpResidual(Moose::ConstraintType type)
 {
-  Real resid = _constraint_residual;
+  GenericReal<is_ad> resid = _constraint_residual;
 
   switch (type)
   {
@@ -150,7 +164,7 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
     {
       if (_formulation == Formulation::KINEMATIC)
       {
-        Real pen_force = _penalty * (_u_secondary[_qp] - _u_primary[_qp]);
+        GenericReal<is_ad> pen_force = _penalty * (_u_secondary[_qp] - _u_primary[_qp]);
         resid += pen_force;
       }
       return _test_secondary[_i][_qp] * resid;
@@ -163,11 +177,16 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
   return 0.0;
 }
 
+template <bool is_ad>
 Real
-EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
+  mooseAssert(!is_ad,
+              "In ADEqualValueEmbeddedConstraint, computeQpJacobian should not be called. "
+              "Check computeJacobian implementation.");
+
   unsigned int sys_num = _sys.number();
-  const Real penalty = _penalty;
+  const Real penalty = MetaPhysicL::raw_value(_penalty);
   Real curr_jac, secondary_jac;
 
   switch (type)
@@ -227,10 +246,15 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
   return 0.0;
 }
 
+template <bool is_ad>
 Real
-EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                       unsigned int /*jvar*/)
+EqualValueEmbeddedConstraintTempl<is_ad>::computeQpOffDiagJacobian(
+    Moose::ConstraintJacobianType type, unsigned int /*jvar*/)
 {
+  mooseAssert(!is_ad,
+              "In ADEqualValueEmbeddedConstraint, computeQpOffDiagJacobian should not be called. "
+              "Check computeJacobian implementation.");
+
   Real curr_jac, secondary_jac;
   unsigned int sys_num = _sys.number();
 
@@ -267,3 +291,6 @@ EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobian
 
   return 0.0;
 }
+
+template class EqualValueEmbeddedConstraintTempl<false>;
+template class EqualValueEmbeddedConstraintTempl<true>;
