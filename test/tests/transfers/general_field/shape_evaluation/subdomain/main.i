@@ -84,6 +84,8 @@
     from_blocks = 1
     to_blocks = 1
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [to_sub_elem]
@@ -94,6 +96,8 @@
     from_blocks = 1
     to_blocks = 1
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub]
@@ -104,6 +108,8 @@
     from_blocks = 1
     to_blocks = 1
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub_elem]
@@ -114,5 +120,7 @@
     from_blocks = 1
     to_blocks = 1
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []

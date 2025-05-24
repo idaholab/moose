@@ -134,6 +134,8 @@
     to_mesh_division_usage = 'matching_division'
     greedy_search = true
     use_bounding_boxes = false
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub_elem]
@@ -147,6 +149,8 @@
     to_mesh_division_usage = 'matching_division'
     greedy_search = true
     use_bounding_boxes = false
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 
