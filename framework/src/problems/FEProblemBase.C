@@ -75,7 +75,7 @@
 #include "InterfaceUserObject.h"
 #include "GeneralUserObject.h"
 #include "ThreadedGeneralUserObject.h"
-#include "InternalSideIndicator.h"
+#include "InternalSideIndicatorBase.h"
 #include "Transfer.h"
 #include "MultiAppTransfer.h"
 #include "MultiMooseEnum.h"
@@ -5152,8 +5152,8 @@ FEProblemBase::addIndicator(const std::string & indicator_name,
     std::shared_ptr<Indicator> indicator =
         _factory.create<Indicator>(indicator_name, name, parameters, tid);
     logAdd("Indicator", name, indicator_name, parameters);
-    std::shared_ptr<InternalSideIndicator> isi =
-        std::dynamic_pointer_cast<InternalSideIndicator>(indicator);
+    std::shared_ptr<InternalSideIndicatorBase> isi =
+        std::dynamic_pointer_cast<InternalSideIndicatorBase>(indicator);
     if (isi)
       _internal_side_indicators.addObject(isi, tid);
     else

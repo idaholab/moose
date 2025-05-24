@@ -13,7 +13,7 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "Indicator.h"
-#include "InternalSideIndicator.h"
+#include "InternalSideIndicatorBase.h"
 #include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SwapBackSentinel.h"
@@ -116,7 +116,7 @@ ComputeIndicatorThread::onElement(const Elem * elem)
 
     if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<std::shared_ptr<InternalSideIndicator>> & internal_indicators =
+      const std::vector<std::shared_ptr<InternalSideIndicatorBase>> & internal_indicators =
           _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & internal_indicator : internal_indicators)
         internal_indicator->finalize();
@@ -165,7 +165,7 @@ ComputeIndicatorThread::onInternalSide(const Elem * elem, unsigned int side)
         _fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
     _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-    const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
+    const std::vector<std::shared_ptr<InternalSideIndicatorBase>> & indicators =
         _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
     for (const auto & indicator : indicators)
       indicator->computeIndicator();
@@ -222,7 +222,7 @@ ComputeIndicatorThread::printBlockExecutionInformation() const
     const auto & indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
     console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain
             << std::endl;
-    printExecutionOrdering<InternalSideIndicator>(indicators, false);
+    printExecutionOrdering<InternalSideIndicatorBase>(indicators, false);
   }
   _blocks_exec_printed.insert(_subdomain);
 }
