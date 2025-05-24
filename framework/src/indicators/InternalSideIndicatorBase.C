@@ -39,8 +39,7 @@ InternalSideIndicatorBase::validParams()
                         "not penalize elements on boundaries for "
                         "having less neighbors.");
 
-  params.addPrivateParam<BoundaryID>("_boundary_id",
-                                     InternalSideIndicatorBase::InternalBndId);
+  params.addPrivateParam<BoundaryID>("_boundary_id", InternalSideIndicatorBase::InternalBndId);
   return params;
 }
 
