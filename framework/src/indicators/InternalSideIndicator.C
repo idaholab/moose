@@ -57,4 +57,3 @@ InternalSideIndicatorTempl<ComputeValueType>::InternalSideIndicatorTempl(
 // Explicitly instantiate three versions of the InternalSideIndicatorTempl class
 template class InternalSideIndicatorTempl<Real>;
 template class InternalSideIndicatorTempl<RealVectorValue>;
-template class InternalSideIndicatorTempl<RealEigenVector>;

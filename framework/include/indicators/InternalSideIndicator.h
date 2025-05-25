@@ -19,7 +19,6 @@ class InternalSideIndicatorTempl;
 
 typedef InternalSideIndicatorTempl<Real> InternalSideIndicator;
 typedef InternalSideIndicatorTempl<RealVectorValue> VectorInternalSideIndicator;
-typedef InternalSideIndicatorTempl<RealEigenVector> ArrayInternalSideIndicator;
 
 /**
  * The InternalSideIndicator class is responsible for calculating the residuals for various
@@ -60,4 +59,3 @@ protected:
 // Prevent implicit instantiation in other translation units where these classes are used
 extern template class InternalSideIndicatorTempl<Real>;
 extern template class InternalSideIndicatorTempl<RealVectorValue>;
-extern template class InternalSideIndicatorTempl<RealEigenVector>;

@@ -13,17 +13,12 @@
 #include "Indicator.h"
 #include "NeighborCoupleable.h"
 #include "ScalarCoupleable.h"
-#include "NeighborMooseVariableInterface.h"
 
 class InternalSideIndicatorBase : public Indicator,
                                   public NeighborCoupleable,
                                   public ScalarCoupleable
 {
 public:
-  /**
-   * Factory constructor initializes all internal references needed for indicator computation.
-   *
-   */
   static InputParameters validParams();
 
   InternalSideIndicatorBase(const InputParameters & parameters);
@@ -43,8 +38,9 @@ protected:
 
   MooseVariableFE<Real> & _field_var;
 
+  /// Current element under consideration
   const Elem * const & _current_elem;
-  /// The neighboring element
+  /// The neighbor element across from the current side
   const Elem * const & _neighbor_elem;
 
   /// Current side
@@ -54,14 +50,22 @@ protected:
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
+  /// The current quadrature point
   unsigned int _qp;
-  const MooseArray<Point> & _q_point;
+  /// The quadrature rule being used
   const QBase * const & _qrule;
+  /// The spatial location of the current quadrature point
+  const MooseArray<Point> & _q_point;
+  /// The quadrature weight multiplied by the element Jacobian
   const MooseArray<Real> & _JxW;
+  /// The coordinate transformation
   const MooseArray<Real> & _coord;
 
+  /// The bounday (if any) that this indicator is operating on
   BoundaryID _boundary_id;
 
+  /// Whether to scale the indicator value by the number of flux
+  /// faces in an attempt to avoid penalizing internal faces
   bool _scale_by_flux_faces;
 
   /// Normal vectors at the quadrature points
