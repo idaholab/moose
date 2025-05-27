@@ -19,6 +19,7 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurlLOR/Run0/Run0.pvd
                 OutputData/CurlCurlLOR/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD Solver/type=MFEMGMRESSolver '
                'Solver/l_tol=1e-14 Solver/preconditioner=ams Preconditioner/ams/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR '
@@ -35,6 +36,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     mfem = true
@@ -59,6 +61,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd '
               'OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'FESpaces/H1FESpace/fec_order=SECOND Solver/type=MFEMCGSolver Solver/l_tol=1e-16 '
                'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR '
@@ -84,6 +87,7 @@
     input = graddiv.i
     xmldiff = 'OutputData/GradDivLOR/Run0/Run0.pvd
                 OutputData/GradDivLOR/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
                'Solver/type=MFEMCGSolver Solver/l_tol=1e-14 Solver/preconditioner=ADS '
                'Preconditioner/ADS/low_order_refined=true '
@@ -134,6 +138,7 @@
     xmldiff = 'OutputData/HeatConductionLOR/Run0/Run0.pvd
                 OutputData/HeatConductionLOR/Run0/Cycle000001/proc000000.vtu
                 OutputData/HeatConductionLOR/Run0/Cycle000004/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'FESpaces/H1FESpace/fec_order=SECOND Solver/type=MFEMCGSolver Solver/l_tol=1e-22 '
