@@ -53,7 +53,7 @@ BoundingBoxIntersectionHelper::BoundingBoxIntersectionHelper(const BoundingBox &
   elem->processor_id(0);
   elem->set_id() = 0;
   for (unsigned int n = 0; n < _mesh->n_nodes(); ++n)
-    elem->set_node(n) = _mesh->node_ptr(n);
+    elem->set_node(n, _mesh->node_ptr(n));
 
   // All done with the mesh
   _mesh->skip_partitioning(true);

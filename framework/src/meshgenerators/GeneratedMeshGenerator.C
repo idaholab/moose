@@ -51,7 +51,7 @@ GeneratedMeshGenerator::validParams()
   params.addParam<std::vector<SubdomainID>>(
       "subdomain_ids",
       "Subdomain IDs for each element, default to all zero. If a single number is specified, that "
-      "subdomain id is used for all element.");
+      "subdomain id is used for all elements.");
   params.addParam<SubdomainName>("subdomain_name",
                                  "If specified, single subdomain name for all elements");
 

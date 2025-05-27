@@ -18,7 +18,7 @@ where $\vec u, \vec v \in H(\mathrm{curl})$ and $k$ is a scalar coefficient.
 This term arises from the weak form of the curl curl operator
 
 !equation
--\vec\nabla \times \left(k \vec\nabla \times \vec u\right)
+\vec\nabla \times \left(k \vec\nabla \times \vec u\right)
 
 ## Example Input File Syntax
 

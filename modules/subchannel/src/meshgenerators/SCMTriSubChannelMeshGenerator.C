@@ -290,7 +290,7 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
           l0 = l;
           dist0 = dist;
         } // if
-      }   // l
+      } // l
 
       _gap_to_pin_map[kgap].first = _pins_in_rings[i][j];
       _gap_to_pin_map[kgap].second = _pins_in_rings[i - 1][l0];
@@ -369,7 +369,7 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
             dist0 = dist;
             l0 = l;
           } // if
-        }   // l
+        } // l
 
         _gap_to_pin_map[kgap].first = _pins_in_rings[i][j];
         _gap_to_pin_map[kgap].second = _pins_in_rings[i + 1][l0];
@@ -378,8 +378,8 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
         _subch_type[k] = EChannelType::CENTER;
         k = k + 1;
       } // if
-    }   // for j
-  }     // for i
+    } // for j
+  } // for i
 
   // Constructing pins to channels mao
   for (unsigned int loc_rod = 0; loc_rod < _npins; loc_rod++)
@@ -461,7 +461,7 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
           icorner = 1;
           break;
         } // if
-      }   // for
+      } // for
 
       for (unsigned int k = 0; k < _n_channels; k++)
       {
@@ -527,7 +527,7 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
         }
       }
     } // i
-  }   // j
+  } // j
 
   for (unsigned int k = 0; k < _n_channels; k++)
   {
@@ -630,7 +630,7 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
             }
           }
         } // j
-      }   // k
+      } // k
     }
     else if (_subch_type[i] == EChannelType::CORNER)
     {
@@ -661,9 +661,9 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
             }
           }
         } // j
-      }   // k
-    }     // subch_type =2
-  }       // i
+      } // k
+    } // subch_type =2
+  } // i
 
   // set the subchannel positions
   for (unsigned int i = 0; i < _n_channels; i++)
@@ -789,8 +789,8 @@ SCMTriSubChannelMeshGenerator::generate()
       elem = mesh_base->add_elem(elem);
       const int indx1 = (_n_cells + 1) * i + iz;
       const int indx2 = (_n_cells + 1) * i + (iz + 1);
-      elem->set_node(0) = mesh_base->node_ptr(indx1);
-      elem->set_node(1) = mesh_base->node_ptr(indx2);
+      elem->set_node(0, mesh_base->node_ptr(indx1));
+      elem->set_node(1, mesh_base->node_ptr(indx2));
 
       if (iz == 0)
         boundary_info.add_side(elem, 0, 0);

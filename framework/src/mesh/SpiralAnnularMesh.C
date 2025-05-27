@@ -167,9 +167,9 @@ SpiralAnnularMesh::buildMesh()
         // Wrap around
         unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
         Elem * elem = mesh.add_elem(new Tri3);
-        elem->set_node(0) = ring_nodes[r][n];
-        elem->set_node(1) = ring_nodes[r + 1][n];
-        elem->set_node(2) = ring_nodes[r][np1];
+        elem->set_node(0, ring_nodes[r][n]);
+        elem->set_node(1, ring_nodes[r + 1][n]);
+        elem->set_node(2, ring_nodes[r][np1]);
 
         // Add interior faces to 'cylinder' sideset if we are on ring 0.
         if (r == 0)
@@ -182,9 +182,9 @@ SpiralAnnularMesh::buildMesh()
         // Wrap around
         unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
         Elem * elem = mesh.add_elem(new Tri3);
-        elem->set_node(0) = ring_nodes[r + 1][n];
-        elem->set_node(1) = ring_nodes[r + 1][np1];
-        elem->set_node(2) = ring_nodes[r][np1];
+        elem->set_node(0, ring_nodes[r + 1][n]);
+        elem->set_node(1, ring_nodes[r + 1][np1]);
+        elem->set_node(2, ring_nodes[r][np1]);
 
         // Add exterior faces to 'exterior' sideset if we're on the last ring.
         // Note: this code appears in two places since we could end on either an even or odd ring.
@@ -201,9 +201,9 @@ SpiralAnnularMesh::buildMesh()
         // Wrap around
         unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
         Elem * elem = mesh.add_elem(new Tri3);
-        elem->set_node(0) = ring_nodes[r][n];
-        elem->set_node(1) = ring_nodes[r + 1][np1];
-        elem->set_node(2) = ring_nodes[r][np1];
+        elem->set_node(0, ring_nodes[r][n]);
+        elem->set_node(1, ring_nodes[r + 1][np1]);
+        elem->set_node(2, ring_nodes[r][np1]);
       }
 
       // Outer ring (n*, n+1*, n)
@@ -212,9 +212,9 @@ SpiralAnnularMesh::buildMesh()
         // Wrap around
         unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
         Elem * elem = mesh.add_elem(new Tri3);
-        elem->set_node(0) = ring_nodes[r + 1][n];
-        elem->set_node(1) = ring_nodes[r + 1][np1];
-        elem->set_node(2) = ring_nodes[r][n];
+        elem->set_node(0, ring_nodes[r + 1][n]);
+        elem->set_node(1, ring_nodes[r + 1][np1]);
+        elem->set_node(2, ring_nodes[r][n]);
 
         // Add exterior faces to 'exterior' sideset if we're on the last ring.
         if (r == _num_rings - 2)

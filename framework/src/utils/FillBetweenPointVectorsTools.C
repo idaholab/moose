@@ -759,18 +759,18 @@ buildQuadElement(Elem * elem,
   elem->subdomain_id() = transition_layer_id;
   if (((*nd_1 - *nd_0).cross((*nd_2 - *nd_0)).unit())(2) > 0)
   {
-    elem->set_node(0) = nd_0;
-    elem->set_node(1) = nd_1;
-    elem->set_node(2) = nd_2;
-    elem->set_node(3) = nd_3;
+    elem->set_node(0, nd_0);
+    elem->set_node(1, nd_1);
+    elem->set_node(2, nd_2);
+    elem->set_node(3, nd_3);
     return false;
   }
   else
   {
-    elem->set_node(0) = nd_0;
-    elem->set_node(3) = nd_1;
-    elem->set_node(2) = nd_2;
-    elem->set_node(1) = nd_3;
+    elem->set_node(0, nd_0);
+    elem->set_node(3, nd_1);
+    elem->set_node(2, nd_2);
+    elem->set_node(1, nd_3);
     return true;
   }
 }
@@ -784,16 +784,16 @@ buildTriElement(
   elem->subdomain_id() = transition_layer_id;
   if (((*nd_1 - *nd_0).cross((*nd_2 - *nd_0)).unit())(2) > 0)
   {
-    elem->set_node(0) = nd_0;
-    elem->set_node(1) = nd_1;
-    elem->set_node(2) = nd_2;
+    elem->set_node(0, nd_0);
+    elem->set_node(1, nd_1);
+    elem->set_node(2, nd_2);
     return false;
   }
   else
   {
-    elem->set_node(0) = nd_0;
-    elem->set_node(2) = nd_1;
-    elem->set_node(1) = nd_2;
+    elem->set_node(0, nd_0);
+    elem->set_node(2, nd_1);
+    elem->set_node(1, nd_2);
     return true;
   }
 }

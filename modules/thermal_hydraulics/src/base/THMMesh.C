@@ -108,7 +108,7 @@ THMMesh::addElement(libMesh::ElemType elem_type, const std::vector<dof_id_type> 
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
   for (std::size_t i = 0; i < node_ids.size(); i++)
-    elem->set_node(i) = _mesh->node_ptr(node_ids[i]);
+    elem->set_node(i, _mesh->node_ptr(node_ids[i]));
   return elem;
 }
 
@@ -120,7 +120,7 @@ THMMesh::addNodeElement(dof_id_type node)
   Elem * elem = new NodeElem;
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
-  elem->set_node(0) = _mesh->node_ptr(node);
+  elem->set_node(0, _mesh->node_ptr(node));
   return elem;
 }
 
@@ -132,8 +132,8 @@ THMMesh::addElementEdge2(dof_id_type node0, dof_id_type node1)
   Elem * elem = new Edge2;
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
-  elem->set_node(0) = _mesh->node_ptr(node0);
-  elem->set_node(1) = _mesh->node_ptr(node1);
+  elem->set_node(0, _mesh->node_ptr(node0));
+  elem->set_node(1, _mesh->node_ptr(node1));
   return elem;
 }
 
@@ -145,9 +145,9 @@ THMMesh::addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2
   Elem * elem = new Edge3;
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
-  elem->set_node(0) = _mesh->node_ptr(node0);
-  elem->set_node(1) = _mesh->node_ptr(node1);
-  elem->set_node(2) = _mesh->node_ptr(node2);
+  elem->set_node(0, _mesh->node_ptr(node0));
+  elem->set_node(1, _mesh->node_ptr(node1));
+  elem->set_node(2, _mesh->node_ptr(node2));
   return elem;
 }
 
@@ -159,10 +159,10 @@ THMMesh::addElementQuad4(dof_id_type node0, dof_id_type node1, dof_id_type node2
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
-  elem->set_node(0) = _mesh->node_ptr(node0);
-  elem->set_node(1) = _mesh->node_ptr(node1);
-  elem->set_node(2) = _mesh->node_ptr(node2);
-  elem->set_node(3) = _mesh->node_ptr(node3);
+  elem->set_node(0, _mesh->node_ptr(node0));
+  elem->set_node(1, _mesh->node_ptr(node1));
+  elem->set_node(2, _mesh->node_ptr(node2));
+  elem->set_node(3, _mesh->node_ptr(node3));
   return elem;
 }
 
@@ -183,17 +183,17 @@ THMMesh::addElementQuad9(dof_id_type node0,
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
   // vertices
-  elem->set_node(0) = _mesh->node_ptr(node0);
-  elem->set_node(1) = _mesh->node_ptr(node1);
-  elem->set_node(2) = _mesh->node_ptr(node2);
-  elem->set_node(3) = _mesh->node_ptr(node3);
+  elem->set_node(0, _mesh->node_ptr(node0));
+  elem->set_node(1, _mesh->node_ptr(node1));
+  elem->set_node(2, _mesh->node_ptr(node2));
+  elem->set_node(3, _mesh->node_ptr(node3));
   // mid-edges
-  elem->set_node(4) = _mesh->node_ptr(node4);
-  elem->set_node(5) = _mesh->node_ptr(node5);
-  elem->set_node(6) = _mesh->node_ptr(node6);
-  elem->set_node(7) = _mesh->node_ptr(node7);
+  elem->set_node(4, _mesh->node_ptr(node4));
+  elem->set_node(5, _mesh->node_ptr(node5));
+  elem->set_node(6, _mesh->node_ptr(node6));
+  elem->set_node(7, _mesh->node_ptr(node7));
   // center
-  elem->set_node(8) = _mesh->node_ptr(node8);
+  elem->set_node(8, _mesh->node_ptr(node8));
 
   return elem;
 }

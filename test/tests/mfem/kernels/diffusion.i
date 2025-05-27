@@ -109,7 +109,7 @@
   []
   [ConduitDataCollection]
     type = MFEMConduitDataCollection
-    file_base = OutputData/ConduitDataCollection
+    file_base = OutputData/ConduitDataCollection/Run
     protocol = conduit_bin
   []
 []

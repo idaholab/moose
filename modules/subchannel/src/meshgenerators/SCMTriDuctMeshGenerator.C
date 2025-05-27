@@ -180,6 +180,6 @@ SCMTriDuctMeshGenerator::buildDuct(std::unique_ptr<MeshBase> & mesh,
     auto elem = mesh->add_elem(new Quad4());
     elem->subdomain_id() = block;
     for (size_t i = 0; i < elem_indices.size(); i++)
-      elem->set_node(i) = duct_nodes[elem_indices[i]];
+      elem->set_node(i, duct_nodes[elem_indices[i]]);
   }
 }

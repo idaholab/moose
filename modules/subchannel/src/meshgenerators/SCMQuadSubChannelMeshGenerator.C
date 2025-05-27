@@ -429,8 +429,8 @@ SCMQuadSubChannelMeshGenerator::generate()
         elem = mesh_base->add_elem(elem);
         const int indx1 = ((_n_cells + 1) * _nx) * iy + (_n_cells + 1) * ix + iz;
         const int indx2 = ((_n_cells + 1) * _nx) * iy + (_n_cells + 1) * ix + (iz + 1);
-        elem->set_node(0) = mesh_base->node_ptr(indx1);
-        elem->set_node(1) = mesh_base->node_ptr(indx2);
+        elem->set_node(0, mesh_base->node_ptr(indx1));
+        elem->set_node(1, mesh_base->node_ptr(indx2));
 
         if (iz == 0)
           boundary_info.add_side(elem, 0, 0);
