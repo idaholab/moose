@@ -344,6 +344,18 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
     }
     else if (_energy_wall_types[bc_ind] == "heatflux")
     {
+      const std::string bc_type = "LinearFVAdvectionDiffusionFunctorNeumannBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      const auto var_name = _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+      params.set<LinearVariableName>("variable") = var_name;
+      params.set<MooseFunctorName>("functor") = _energy_wall_functors[bc_ind];
+      params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
+
+      getProblem().addLinearFVBC(
+          bc_type, var_name + "_heatflux_" + wall_boundaries[bc_ind], params);
+    }
+    else if (_energy_wall_types[bc_ind] == "convection")
+    {
       const std::string bc_type = "LinearFVConvectiveHeatTransferBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<LinearVariableName>("variable") =
