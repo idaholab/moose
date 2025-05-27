@@ -61,12 +61,11 @@ protected:
    * intellegent starting point can provide enhanced robustness in the Newton
    * iterations. This is also an opportunity for classes that derive from this
    * to perform initialization tasks.
-   * @param effective_trial_stress Effective trial stress
+   * @param effective_trial_stress Effective trial stress or strain
+   * @param effective_strain_increment Effective strain increment
    */
-  virtual GenericReal<is_ad> initialGuess(const GenericReal<is_ad> & /*effective_trial_stress*/)
-  {
-    return 0.0;
-  }
+  virtual GenericReal<is_ad> initialGuess(const GenericReal<is_ad> & effective_trial_stress,
+                                          const GenericReal<is_ad> & effective_strain_increment);
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -163,6 +162,12 @@ protected:
    * @return Whether the model converged
    */
   bool converged(const GenericReal<is_ad> & residual, const Real reference);
+
+  /// Return nonlinear iterations
+  unsigned int getIterations() { return _iteration; }
+
+  /// Return final converged residual
+  Real getResidual() { return MetaPhysicL::raw_value(_residual); }
 
 private:
   /// Helper function to compute and set the _residual and _derivative
