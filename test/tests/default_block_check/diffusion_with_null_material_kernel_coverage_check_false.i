@@ -1,6 +1,9 @@
 [Problem]
-  default_block = '0 1 3'
   kernel_coverage_check = FALSE
+[]
+
+[GlobalParams]
+  block = '0 1 3'
 []
 
 [Mesh]

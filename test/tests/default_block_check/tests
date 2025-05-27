@@ -9,12 +9,6 @@
       exodiff = 'diffusion_with_null_material_out.e'
       detail = 'Verify that defining a default set of blocks correctly limits kernel and material coverage checks, and automatically applies block restrictions to kernels and variables.'
     []
-    [block_empty_test]
-      type = 'Exodiff'
-      input = 'diffusion_with_null_material_empty_blocks_check.i'
-      exodiff = 'diffusion_with_null_material_empty_blocks_check_out.e'
-      detail = 'Verify that if block is empty in UserObjects (e.g., block = ''), the system correctly handles it without producing invalid results. This issue rarely occurs due to user input, but may occasionally arise from dynamic object creation via Actions, where block is considered valid but ends up being empty.'
-    []
     [different_kernel_different_blocks]
       type = 'Exodiff'
       input = 'diffusion_with_null_material_different_kernel_differnt_blocks.i'
@@ -33,8 +27,14 @@
     [error]
       type = RunException
       input = 'diffusion_with_null_material_kernel_coverage_override.i'
-      expect_err = "Cannot set both 'kernel_coverage_check' as 'ONLY_LIST' or 'SKIP_LIST' and 'default_block'. Please set only one."
+      expect_err = "Cannot set both 'kernel_coverage_check' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one."
       detail = 'Verify that an error is thrown when users enable kernel or material coverage checking within a list while also defining a default set of blocks.'
+    []
+    [block_only_in_problem]
+      type = RunException
+      input = 'diffusion_with_null_material_block_only_in_problem.i'
+      expect_err = "The block parameter is valid in the Problem block, but this has no effect on the block restrictions of kernels, BCs, or other block-restrictable objects. If your intent was to apply this setting globally, please use GlobalParams instead."
+      detail = 'Verify that an warning is issued when users only set block in the Problem, which actually have no effect of block restrictions.'
     []
   []
 []

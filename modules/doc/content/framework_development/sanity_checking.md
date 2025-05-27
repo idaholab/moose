@@ -89,9 +89,9 @@ to skip the material coverage check outside the computational domain.
 
 This manual setup is not only repetitive but also error-prone, especially when the same block list needs to be specified in multiple places.
 
-To simplify this process, MOOSE provides a convenient parameter called `default_block` under the \[`Problem`\] block. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
+To simplify this process, MOOSE provides a convenient parameter called `block` under the \[`Problem`\] block. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
 
-Setting `default_block` will automatically:
+Setting `block` will automatically:
 
 - Enable kernel coverage check with `ONLY_LIST` mode and assign the specified blocks to `kernel_coverage_block_list`
 
@@ -99,16 +99,16 @@ Setting `default_block` will automatically:
 
 This provides a more user-friendly and centralized way to handle simulations with a preferred, non-default computational domain.
 
-Example Usage for  `default_block`:
+Example Usage for  `block`:
 
 ```
 # Perform kernel and material coverage checks only for block 0, 1, and 3,
 # while excluding block 2 as an inactive region.
 
 [Problem]
-  default_block = '0 1 3'
+  block = '0 1 3'
 []
 ```
 
-Note: If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `default_block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
-This restriction is necessary to prevent unintended behavior. However, there are situations where the user may want to completely disable `kernel_coverage_check` while still using `default_block`. In such cases, the system will not throw any error.
+Note: If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
+This restriction is necessary to prevent unintended behavior. However, there are situations where the user may want to completely disable `kernel_coverage_check` while still using `block`. In such cases, the system will not throw any error.
