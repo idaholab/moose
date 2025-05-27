@@ -126,7 +126,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name
     {
       // create new universe from incoming root universe
       auto all_cells = u.second->getAllCells();
-      auto new_incoming_univ = createUniverse(new_root_name_incoming, all_cells);
+      createUniverse(new_root_name_incoming, all_cells);
     }
     else // unique non-root universe to add to list
       _universe_list.addUniverse(u.second);
@@ -154,7 +154,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
     {
       // create new universe from incoming root universe
       auto all_cells = u.second->getAllCells();
-      auto new_incoming_univ = createUniverse(new_root_name_incoming, all_cells);
+      createUniverse(new_root_name_incoming, all_cells);
     }
     else // unique non-root universe to add to list
       _universe_list.addUniverse(u.second);

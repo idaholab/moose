@@ -321,8 +321,9 @@ public:
   /**
    * @brief Join another CSGBase object to this one. For the incoming CSGBase object,
    * the root universe is added to this CSGBase object as a new non-root universe with
-   * the specified new name. Note: this newly created universe will not be
-   * connected to the root universe of this CSGBase object by default.
+   * the specified new name.
+   * Note: this newly created universe will not be connected to the root universe
+   * of this CSGBase object by default.
    *
    * @param base pointer to a different CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
@@ -337,9 +338,10 @@ public:
   /**
    * @brief Join another CSGBase object to this one. The root universe for the incoming CSGBase
    * object is added to this CSGBase object as a non-root universe with a new name. The root
-   * universe of this CSGBase object will be renamed and designated as non-root. Note: upon
-   * completion of this join method, the root universe of this CSGBase object will be empty.
-   * Neither of the new non-root universes will be connected to the new root universe by default.
+   * universe of this CSGBase object will be renamed and designated as non-root.
+   * Note: upon completion of this join method, the root universe of this CSGBase
+   * object will be empty. Neither of the new non-root universes will be connected to the
+   * new root universe by default.
    *
    * @param base pointer to a different CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
@@ -427,8 +429,8 @@ private:
   /**
    * @brief join a separate CSGUniverseList object to this one;
    * both this root universe and the incoming root universe will be
-   * maintained as separate universes of the specified names. Note, that
-   * upon completion of this join method, the root universe will be empty.
+   * maintained as separate universes of the specified names.
+   * Note: upon completion of this join method, the root universe will be empty.
    *
    * @param univ_list CSGUniverseList from a separate CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
