@@ -6,6 +6,7 @@ l = 2
 U = 1
 dp = 0.01
 inlet_phase_2 = 0.1
+# 'average' leads to slight oscillations, upwind may be preferred
 advected_interp_method = 'average'
 
 # TODO remove need for those
