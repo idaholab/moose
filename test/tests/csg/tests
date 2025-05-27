@@ -23,20 +23,20 @@
         mesh_mode = REPLICATED
         detail = 'passes a single CSGBase object between MeshGenerators to be updated by updating the region of an existing cell and constructing planes from coefficients.'
     []
-    [csg_only_cylinders_universes]
+    [csg_only_cylinders_join_new_universes]
         type = 'JSONDiff'
-        input = 'csg_cylinders_universes.i'
+        input = 'csg_cylinders_join_new_universes.i'
         cli_args = '--csg-only'
-        jsondiff = 'csg_cylinders_universes_out_csg.json'
+        jsondiff = 'csg_cylinders_join_new_universes_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
         detail = 'joins multiple CSGBase objects into a new CSGBase to create one object with multiple universes and constructing cylinder surfaces aligned with each axis.'
     []
-    [csg_only_spheres_join_roots]
+    [csg_only_spheres_join_single_root]
         type = 'JSONDiff'
-        input = 'csg_spheres_joinroot.i'
+        input = 'csg_spheres_join_single_root.i'
         cli_args = '--csg-only'
-        jsondiff = 'csg_spheres_joinroot_out_csg.json'
+        jsondiff = 'csg_spheres_join_single_root_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
         detail = 'joins multiple CSGBase objects from various MeshGenerator types together into one universe and constructs sphere surfaces with and without a center point specified.'
