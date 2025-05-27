@@ -102,6 +102,8 @@ protected:
   template <typename VarType>
   void checkBlocks(const VarType & var) const;
 
+  virtual bool supportMeshVelocity() const override { return false; }
+
   /// The \p MooseMesh that this user object operates on
   const MooseMesh & _moose_mesh;
 

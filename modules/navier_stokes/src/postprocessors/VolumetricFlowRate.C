@@ -38,8 +38,9 @@ VolumetricFlowRate::validParams()
                                     "set the advected quantity when finite volume is being used.");
   params += Moose::FV::interpolationParameters();
   params.addParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
-  params.addParam<bool>(
-      "subtract_mesh_velocity", true, "To subract the velocity of the potentially moving mesh.");
+  params.addParam<bool>("subtract_mesh_velocity",
+                        "To subtract the velocity of the potentially moving mesh. Defaults to true "
+                        "if a displaced problem exists, else false.");
   return params;
 }
 
@@ -57,7 +58,9 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _rc_uo(isParamValid("rhie_chow_user_object")
                ? &getUserObject<RhieChowFaceFluxProvider>("rhie_chow_user_object")
                : nullptr),
-    _subtract_mesh_velocity(getParam<bool>("subtract_mesh_velocity"))
+    _subtract_mesh_velocity(isParamValid("subtract_mesh_velocity")
+                                ? getParam<bool>("subtract_mesh_velocity")
+                                : _fe_problem.haveDisplaced())
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -87,6 +90,10 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
 
     Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   }
+
+  if (_subtract_mesh_velocity && _rc_uo && !_rc_uo->supportMeshVelocity())
+    paramError("subtract_mesh_velocity",
+               "Rhie Chow user object does not support subtracting the mesh velocity");
 }
 
 void
