@@ -60,7 +60,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
   std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(_input_mgs[1]));
   std::string new_join_name = _input_mgs[1] + "_univ";
 
-  // joining via this method will move both roots into new universes
+  // joining via this method will move both roots into new universes;
+  // subsequent input CSGBases will be joined uisng a different method (below)
   csg_mesh->joinOtherBase(inp_csg_mesh, new_base_name, new_join_name);
 
   // new universe to collect all others into a main one
@@ -68,9 +69,10 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // for all input meshes, create a containment cell, but only join CSGBases
   // for ones that were not joined above (i > 1)
-  int i = 0;
-  for (auto img : _input_mgs)
+  for (unsigned int i = 0; i < _input_mgs.size(); ++i)
   {
+    auto img = _input_mgs[i];
+
     if (i > 1)
     {
       // join this incoming base at the same level as the other bases that already
@@ -94,7 +96,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
     auto cell_surfs = tmp_cell_reg.getSurfaces();
     Real x = 0, y = 0, z = 0;
     for (auto cs : cell_surfs)
-    { // find first non-plane surf to get the origin
+    {
+      // find first non-plane surf to get the origin
       if (cs->getSurfaceType() == CSG::CSGSurface::SurfaceType::PLANE)
         continue;
       else
@@ -130,7 +133,6 @@ TestCSGUniverseMeshGenerator::generateCSG()
     auto univ_ptr = csg_mesh->getUniverseByName(current_univ_name);
     std::string new_cell_name = img + "_cell";
     auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region, new_univ);
-    i++;
   }
 
   // make cell with surfaces from bounding_box input and fill cell with new universe containing the
