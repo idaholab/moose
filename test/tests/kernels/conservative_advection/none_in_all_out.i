@@ -10,38 +10,38 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u]
+  [u]
     type = FunctionIC
     variable = u
     function = 'if(x<5,x,10-x)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = MassLumpedTimeDerivative
     variable = u
-  [../]
-  [./advection]
+  []
+  [advection]
     type = ConservativeAdvection
     variable = u
     upwinding_type = full
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [BCs]
-  [./allow_mass_out]
+  [allow_mass_out]
     type = OutflowBC
     boundary = right
     variable = u
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [Executioner]
