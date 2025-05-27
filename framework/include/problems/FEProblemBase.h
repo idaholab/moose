@@ -66,7 +66,7 @@ class MultiApp;
 class TransientMultiApp;
 class ScalarInitialCondition;
 class Indicator;
-class InternalSideIndicator;
+class InternalSideIndicatorBase;
 class Marker;
 class Material;
 class Transfer;
@@ -1659,7 +1659,7 @@ public:
    */
   ///@{
   const MooseObjectWarehouse<Indicator> & getIndicatorWarehouse() { return _indicators; }
-  const MooseObjectWarehouse<InternalSideIndicator> & getInternalSideIndicatorWarehouse()
+  const MooseObjectWarehouse<InternalSideIndicatorBase> & getInternalSideIndicatorWarehouse()
   {
     return _internal_side_indicators;
   }
@@ -2574,7 +2574,7 @@ protected:
   ///@{
   // Indicator Warehouses
   MooseObjectWarehouse<Indicator> _indicators;
-  MooseObjectWarehouse<InternalSideIndicator> _internal_side_indicators;
+  MooseObjectWarehouse<InternalSideIndicatorBase> _internal_side_indicators;
   ///@}
 
   // Marker Warehouse

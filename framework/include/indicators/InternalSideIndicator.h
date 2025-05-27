@@ -10,25 +10,24 @@
 #pragma once
 
 // local includes
-#include "Indicator.h"
-#include "NeighborCoupleable.h"
-#include "ScalarCoupleable.h"
+#include "InternalSideIndicatorBase.h"
 #include "NeighborMooseVariableInterface.h"
 
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
+// forward declarations
+template <typename ComputeValueType>
+class InternalSideIndicatorTempl;
+
+typedef InternalSideIndicatorTempl<Real> InternalSideIndicator;
+typedef InternalSideIndicatorTempl<RealVectorValue> VectorInternalSideIndicator;
 
 /**
  * The InternalSideIndicator class is responsible for calculating the residuals for various
  * physics on internal sides (edges/faces).
  *
  */
-class InternalSideIndicator : public Indicator,
-                              public NeighborCoupleable,
-                              public ScalarCoupleable,
-                              public NeighborMooseVariableInterface<Real>
+template <typename ComputeValueType>
+class InternalSideIndicatorTempl : public InternalSideIndicatorBase,
+                                   public NeighborMooseVariableInterface<ComputeValueType>
 {
 public:
   /**
@@ -37,66 +36,26 @@ public:
    */
   static InputParameters validParams();
 
-  InternalSideIndicator(const InputParameters & parameters);
-
-  /**
-   * Computes the indicator for the current side.
-   */
-  virtual void computeIndicator() override;
-
-  virtual void finalize() override;
+  InternalSideIndicatorTempl(const InputParameters & parameters);
 
 protected:
-  MooseVariable & _field_var;
+  virtual bool isVarFV() const override { return _var.isFV(); }
 
-  const Elem * const & _current_elem;
-  /// The neighboring element
-  const Elem * const & _neighbor_elem;
-
-  /// Current side
-  const unsigned int & _current_side;
-  /// Current side element
-  const Elem * const & _current_side_elem;
-
-  /// Coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
-  unsigned int _qp;
-  const MooseArray<Point> & _q_point;
-  const QBase * const & _qrule;
-  const MooseArray<Real> & _JxW;
-  const MooseArray<Real> & _coord;
-
-  BoundaryID _boundary_id;
-
-  MooseVariableField<Real> & _var;
-
-  bool _scale_by_flux_faces;
+  MooseVariableField<ComputeValueType> & _var;
 
   /// Holds the current solution at the current quadrature point on the face.
-  const VariableValue & _u;
+  const typename OutputTools<ComputeValueType>::VariableValue & _u;
 
   /// Holds the current solution gradient at the current quadrature point on the face.
-  const VariableGradient & _grad_u;
-
-  /// Normal vectors at the quadrature points
-  const MooseArray<Point> & _normals;
+  const typename OutputTools<ComputeValueType>::VariableGradient & _grad_u;
 
   /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_neighbor;
+  const typename OutputTools<ComputeValueType>::VariableValue & _u_neighbor;
 
   /// Holds the current solution gradient at the current quadrature point
-  const VariableGradient & _grad_u_neighbor;
-
-  /**
-   * The virtual function you will want to override to compute error contributions.
-   * This is called once per quadrature point on each interior side of every element.
-   *
-   * You should return the error^2
-   */
-  virtual Real computeQpIntegral() = 0;
-
-public:
-  // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up
-  // number)
-  static const BoundaryID InternalBndId;
+  const typename OutputTools<ComputeValueType>::VariableGradient & _grad_u_neighbor;
 };
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class InternalSideIndicatorTempl<Real>;
+extern template class InternalSideIndicatorTempl<RealVectorValue>;
