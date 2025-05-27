@@ -17,7 +17,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         self.setUp()
 
-    def checkFilesExist(self, output_dir, tests, output_object_names, spec_file):
+    def checkFilesExist(self, output_dir, tests, output_object_names, spec_file, unique_test_id=None):
         # The directories within the test directory where these tests reside
         test_folder = os.path.join('tests', 'test_harness')
         # The complete path to the directory where the tests reside
@@ -41,6 +41,9 @@ class TestHarnessTester(TestHarnessTestCase):
             test_results = test_spec_results['tests'][test]
             # Get the output files from the test spec
             result_output_files = test_results['output_files']
+            # Unique test id if specified
+            if unique_test_id:
+                self.assertEqual(test_results['unique_test_id'], unique_test_id)
             # Make sure each output file exists and is set in the results file
             for name in output_object_names:
                 output_path = f'{output_base_path}/{test}.{name}_out.txt'
@@ -60,4 +63,4 @@ class TestHarnessTester(TestHarnessTestCase):
 
         with tempfile.TemporaryDirectory() as output_dir:
             self.runTests('--no-color', '-i', 'always_ok', '--sep-files', '-o', output_dir, tmp_output=False)
-            self.checkFilesExist(output_dir, ['always_ok'], ['runner_run'], 'always_ok')
+            self.checkFilesExist(output_dir, ['always_ok'], ['runner_run'], 'always_ok', unique_test_id='foo')

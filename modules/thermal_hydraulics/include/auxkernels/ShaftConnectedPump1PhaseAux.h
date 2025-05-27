@@ -11,17 +11,17 @@
 
 #include "AuxKernel.h"
 
-class VaporMixtureFluidProperties;
+class ADShaftConnectedPump1PhaseUserObject;
 
 /**
- * Computes various quantities for FlowModelGasMix.
+ * Computes various quantities for a ShaftConnectedPump1Phase.
  */
-class FlowModelGasMixAux : public AuxKernel
+class ShaftConnectedPump1PhaseAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  FlowModelGasMixAux(const InputParameters & parameters);
+  ShaftConnectedPump1PhaseAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -29,18 +29,14 @@ protected:
   /// Quantity type
   enum class Quantity
   {
-    PRESSURE,
-    TEMPERATURE
+    PUMP_HEAD,
+    HYDRAULIC_TORQUE,
+    FRICTION_TORQUE,
+    MOMENT_OF_INERTIA
   };
   /// Which quantity to compute
   const Quantity _quantity;
 
-  const VariableValue & _xirhoA;
-  const VariableValue & _rhoA;
-  const VariableValue & _rhouA;
-  const VariableValue & _rhoEA;
-  const VariableValue & _area;
-
-  /// Fluid properties
-  const VaporMixtureFluidProperties & _fp;
+  /// 1-phase shaft-connected pump user object
+  const ADShaftConnectedPump1PhaseUserObject & _pump_uo;
 };

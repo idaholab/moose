@@ -68,7 +68,6 @@
     scaling_factor_rhoV  = 1
     scaling_factor_rhouV = 1
     scaling_factor_rhoEV = 1e-5
-    use_scalar_variables = false
   []
 
   [pipe2]

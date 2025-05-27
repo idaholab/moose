@@ -12,13 +12,11 @@
 #include "Numerics.h"
 
 registerMooseObject("ThermalHydraulicsApp", VolumeJunction1PhaseAux);
-registerMooseObject("ThermalHydraulicsApp", VolumeJunction1PhaseScalarAux);
 
-template <typename T>
 InputParameters
-VolumeJunction1PhaseAuxTempl<T>::validParams()
+VolumeJunction1PhaseAux::validParams()
 {
-  InputParameters params = T::validParams();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Computes various quantities for a VolumeJunction1Phase.");
 
@@ -35,9 +33,7 @@ VolumeJunction1PhaseAuxTempl<T>::validParams()
   return params;
 }
 
-template <>
-VolumeJunction1PhaseAuxTempl<AuxKernel>::VolumeJunction1PhaseAuxTempl(
-    const InputParameters & parameters)
+VolumeJunction1PhaseAux::VolumeJunction1PhaseAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _quantity(getParam<MooseEnum>("quantity").getEnum<Quantity>()),
     _volume(getParam<Real>("volume")),
@@ -50,24 +46,8 @@ VolumeJunction1PhaseAuxTempl<AuxKernel>::VolumeJunction1PhaseAuxTempl(
 {
 }
 
-template <>
-VolumeJunction1PhaseAuxTempl<AuxScalarKernel>::VolumeJunction1PhaseAuxTempl(
-    const InputParameters & parameters)
-  : AuxScalarKernel(parameters),
-    _quantity(getParam<MooseEnum>("quantity").getEnum<Quantity>()),
-    _volume(getParam<Real>("volume")),
-    _rhoV(coupledScalarValue("rhoV")),
-    _rhouV(coupledScalarValue("rhouV")),
-    _rhovV(coupledScalarValue("rhovV")),
-    _rhowV(coupledScalarValue("rhowV")),
-    _rhoEV(coupledScalarValue("rhoEV")),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
-{
-}
-
-template <typename T>
 Real
-VolumeJunction1PhaseAuxTempl<T>::computeValue()
+VolumeJunction1PhaseAux::computeValue()
 {
   Real vJ, dvJ_drhoV;
   THM::v_from_rhoA_A(_rhoV[0], _volume, vJ, dvJ_drhoV);
@@ -90,6 +70,3 @@ VolumeJunction1PhaseAuxTempl<T>::computeValue()
       mooseError("Invalid 'quantity' parameter.");
   }
 }
-
-template class VolumeJunction1PhaseAuxTempl<AuxKernel>;
-template class VolumeJunction1PhaseAuxTempl<AuxScalarKernel>;

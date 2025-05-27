@@ -36,7 +36,7 @@
     type = SidesetAroundSubdomainUpdater
     inner_subdomains = 1
     outer_subdomains = 9999
-    update_sideset_name = 'right'
+    update_boundary_name = 'right'
     execute_on = TIMESTEP_END
     execution_order_group = 9
   []
@@ -44,7 +44,7 @@
     type = SidesetAroundSubdomainUpdater
     inner_subdomains = 1
     outer_subdomains = 9999
-    update_sideset_name = 'left'
+    update_boundary_name = 'left'
     execute_on = TIMESTEP_END
     execution_order_group = 8
   []
@@ -52,7 +52,7 @@
     type = SidesetAroundSubdomainUpdater
     inner_subdomains = 1
     outer_subdomains = 9999
-    update_sideset_name = 'top'
+    update_boundary_name = 'top'
     execute_on = TIMESTEP_END
     execution_order_group = 7
   []
@@ -95,7 +95,7 @@
 
 [Kernels]
   [diff]
-   type = Diffusion
+    type = Diffusion
     variable = u
     block = '1'
   []
@@ -120,7 +120,6 @@
     value = 1
   []
 []
-
 
 [Executioner]
   type = Transient

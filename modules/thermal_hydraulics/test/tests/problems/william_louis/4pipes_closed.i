@@ -147,6 +147,7 @@ cfl = 0.95
 [Postprocessors]
   [cfl_dt]
     type = ADCFLTimeStepSize
+    block = 'pipe1 pipe2 pipe3 pipe4'
     CFL = ${cfl}
     c_names = 'c'
     vel_names = 'vel'

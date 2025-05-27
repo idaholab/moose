@@ -114,7 +114,6 @@
     position = '0.5 0 0'
     volume = 0.785398163e-3
     A_ref = 0.785398163e-4
-    use_scalar_variables = false
   []
 
   [junction1]
@@ -122,7 +121,6 @@
     connections = 'pipe1b:out pipe2:in'
     volume = 0.785398163e-3
     position = '1 0 0'
-    use_scalar_variables = false
   []
 
   [junction2]
@@ -130,7 +128,6 @@
     connections = 'pipe2:out pipe3:in pipe5:in'
     volume = 0.785398163e-3
     position = '1 1 0'
-    use_scalar_variables = false
   []
 
   [junction3]
@@ -138,7 +135,6 @@
     connections = 'pipe3:out pipe4:in'
     volume = 0.785398163e-3
     position = '0 1 0'
-    use_scalar_variables = false
   []
 
   [junction4]
@@ -146,7 +142,6 @@
     connections = 'pipe4:out pipe1a:in'
     volume = 0.785398163e-3
     position = '0 0 0'
-    use_scalar_variables = false
   []
 
   [outlet]

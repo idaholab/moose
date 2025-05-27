@@ -69,7 +69,6 @@
     K = 0
     on = true
     power = 0
-    use_scalar_variables = false
   []
 
   [pipe2]

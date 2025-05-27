@@ -60,7 +60,6 @@
     head = head_fcn
     torque_hydraulic = torque_fcn
     density_rated = 1
-    use_scalar_variables = false
   []
 
   [fch2]
