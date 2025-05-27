@@ -1,7 +1,7 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
 {% set build = "__VERSIONER_SEACAS_BUILD_NUMBER__" %}
 {% set seacas_version = "__VERSIONER_SEACAS_VERSION__" %}
-{% set seacas_git_rev = "v2025-02-27" %}
+{% set seacas_git_rev = "v2025-05-22" %}
 {% set strbuild = "build_" + build|string %}
 
 package:
@@ -11,16 +11,20 @@ package:
 source:
   - git_url: https://github.com/sandialabs/seacas
   - git_rev: {{ seacas_git_rev }}
+  - git_depth: 1
   - path: ../functions/retry_build.sh
   - patches:
-    - sequoia15.4_curl.patch
+      - sequoia-15.4.patch
 
 build:
   number: {{ build }}
   string: {{ strbuild }}
   script_env:
     - MOOSE_JOBS
-
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
 requirements:
   build:
     - {{ moose_cc }}

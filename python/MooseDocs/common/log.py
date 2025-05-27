@@ -11,7 +11,7 @@
 import logging
 import traceback
 import multiprocessing
-import collections
+from logging import LogRecord  # for Type Hinting
 import mooseutils
 import moosesqa
 import MooseDocs
@@ -21,16 +21,16 @@ class MooseDocsFormatter(logging.Formatter):
     A formatter that is aware of the class hierarchy of the MooseDocs library.
     Call the init_logging function to initialize the use of this custom formatter.
     """
-    COLOR = dict(DEBUG='CYAN',
-                 INFO='RESET',
-                 WARNING='LIGHT_YELLOW',
-                 ERROR='LIGHT_RED',
-                 CRITICAL='MAGENTA')
+    COLOR = {'DEBUG'    : 'CYAN',
+             'INFO'     : 'RESET',
+             'WARNING'  : 'LIGHT_YELLOW',
+             'ERROR'    : 'LIGHT_RED',
+             'CRITICAL' : 'MAGENTA'}
 
-    def format(self, record):
+    def format(self, record: LogRecord)->str:
         """Format the supplied logging record and count the occurrences."""
         tid = multiprocessing.current_process().name
-        msg = '{} ({}): {}'.format(record.name, tid, logging.Formatter.format(self, record))
+        msg = f'{record.name} ({tid}): {logging.Formatter.format(self, record)}'
         return mooseutils.colorText(msg, self.COLOR[record.levelname])
 
 class MultiprocessingHandler(logging.StreamHandler):
@@ -42,36 +42,38 @@ class MultiprocessingHandler(logging.StreamHandler):
               logging.INFO:multiprocessing.Value('I', 0, lock=True),
               logging.DEBUG:multiprocessing.Value('I', 0, lock=True)}
 
-    def getCount(self, level):
+    # Initialize StreamHandler locks (Python 3.13 requirement)
+    stream_handler = logging.StreamHandler()
+
+    def get_count(self, level: int)->int:
+        """ return error counts for supplied level """
         return MultiprocessingHandler.COUNTS[level].value
 
-    def handle(self, record):
+    def handle(self, record: LogRecord)->None:
         super().handle(record)
         with MultiprocessingHandler.COUNTS[record.levelno].get_lock():
             MultiprocessingHandler.COUNTS[record.levelno].value += 1
 
-    def flush(self):
+    def flush(self)->None:
         """Lock when flushing logging messages."""
         if self._lock:
             with self._lock:
-                super(MultiprocessingHandler, self).flush()
+                super().flush()
         else:
-            super(MultiprocessingHandler, self).flush()
+            super().flush()
 
-    def createLock(self):
+    def createLock(self)->None:
         """logging by default uses threading, use a multiprocessing lock instead."""
-        self.lock = None
+        self.lock = self.stream_handler.lock
         self._lock = multiprocessing.Lock()
 
-    def aquire(self):
+    def aquire(self)->None:
         """Disable."""
-        pass
 
-    def release(self):
+    def release(self)->None:
         """Disable."""
-        pass
 
-def init_logging(level=logging.INFO, silent=False):
+def init_logging(level: int=logging.INFO, silent: bool=False)->None:
     """
     Call this function to initialize the MooseDocs logging formatter.
     """
@@ -92,8 +94,8 @@ def init_logging(level=logging.INFO, silent=False):
 
     MooseDocs.LOG_LEVEL = level
 
-def report_exception(msg, *args):
+def report_exception(msg: str, *args)->str:
     """Helper to output exceptions in logs."""
     msg = msg.format(*args)
-    msg += '\n{}\n'.format(mooseutils.colorText(traceback.format_exc(), 'GREY'))
+    msg += f'\n{mooseutils.colorText(traceback.format_exc(), "GREY")}\n'
     return msg

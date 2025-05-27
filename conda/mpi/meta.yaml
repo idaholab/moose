@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2025.04.17" %}
+{% set version = "2025.06.10" %}
 
 package:
   name: moose-mpi
@@ -32,6 +32,7 @@ outputs:
         - REQUESTS_CA_BUNDLE
         - SSL_CERT_FILE
         - CURL_CA_BUNDLE
+        - NODE_EXTRA_CA_CERTS
     requirements:
       build:
         - {{ mpi }} {{ mpi_version }}
@@ -95,7 +96,7 @@ outputs:
         - zlib
         - m4
       run_constrained:
-        - python >=3.9,<3.13
+        - python >=3.10,<3.14
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -108,7 +109,7 @@ outputs:
   - name: moose-python
     requirements:
       run:
-        - python >=3.9,<3.13
+        - python >=3.10,<3.14
         - packaging
         - paramiko
         - requests

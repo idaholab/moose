@@ -28,6 +28,7 @@ build:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
 
 requirements:
   build:
