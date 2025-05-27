@@ -426,6 +426,20 @@ WCNSLinearFVFlowPhysics::addInletBC()
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + inlet_bdy, params);
       }
       ++velocity_pressure_counter;
+
+      // Add the two term BC expansion for pressure if requested
+      if (getParam<bool>("pressure_two_term_bc_expansion"))
+      {
+        const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+        InputParameters params = getFactory().getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {inlet_bdy};
+        params.set<LinearVariableName>("variable") = _pressure_name;
+        params.set<bool>("use_two_term_expansion") = true;
+        getProblem().addLinearFVBC(bc_type,
+                                   _pressure_name + "_extrapolation_inlet_" +
+                                       Moose::stringify(inlet_bdy),
+                                   params);
+      }
     }
     else if (momentum_inlet_type == "fixed-pressure")
     {
