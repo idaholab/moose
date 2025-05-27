@@ -17,7 +17,7 @@
 {#- The system GCC version based on ALTERNATE_FROM clang or clang_min                         -#}
 {#- Note: harmless if not set                                                                 -#}
 {%- if ALTERNATE_FROM == "clang" %}
-{%- set CLANG_GCC_VERSION = '13' -%}
+{%- set CLANG_GCC_VERSION = '14' -%}
 {%- elif ALTERNATE_FROM == "clang_min" %}
 {%- set CLANG_GCC_VERSION = '10' -%}
 {%- else %}
@@ -38,11 +38,11 @@
 
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-0
+From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-3
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.4-0
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.4-1
 {%- else %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-0
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-2
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
@@ -122,7 +122,7 @@ EOF
 {%- if ALTERNATE_FROM == "clang" %}
     # Installing system Clang, and its GCC GNU dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
-                   git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
+                   git-clang-format.x86_64 python3.12-clang.x86_64 clang-analyzer.noarch \
                    libomp.x86_64 lldb
 
     # Clang will install a newer gcc, and we need to make sure that the version
