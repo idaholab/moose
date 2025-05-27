@@ -44,4 +44,7 @@ public:
                                      bool subtract_mesh_velocity) const = 0;
 
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+
+  /// Returns whether the UO can support mesh velocity advection
+  virtual bool supportMeshVelocity() const { return true; }
 };
