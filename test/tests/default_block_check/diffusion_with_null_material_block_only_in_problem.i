@@ -1,9 +1,4 @@
 [Problem]
-  kernel_coverage_check = ONLY_LIST
-  kernel_coverage_block_list = '0 1'
-[]
-
-[GlobalParams]
   block = '0 1 3'
 []
 
