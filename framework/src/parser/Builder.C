@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -1155,6 +1155,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(SolverSystemName, string);
 
         // map types
+        setmap(string, unsigned int);
         setmap(string, Real);
         setmap(string, string);
         setmap(unsigned int, unsigned int);
