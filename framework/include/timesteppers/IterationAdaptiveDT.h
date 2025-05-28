@@ -102,6 +102,8 @@ protected:
 
   /// Number of solver iterations in previous solve. Linear systems contribute both to _l_its and _solver_its
   unsigned int & _solver_its;
+  // Compatibility with SAM
+  unsigned int & _nl_its;
   /// Number of linear iterations in previous solve
   unsigned int & _l_its;
 

@@ -122,6 +122,7 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _growth_factor(getParam<Real>("growth_factor")),
     _cutback_factor(getParam<Real>("cutback_factor")),
     _solver_its(declareRestartableData<unsigned int>("nl_its", 0)),
+    _nl_its(_solver_its),
     _l_its(declareRestartableData<unsigned int>("l_its", 0)),
     _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
     _at_function_point(false),
