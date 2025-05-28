@@ -1,9 +1,14 @@
 # M. Fontana, et All,
 # "Temperature distribution in the duct wall and at the exit of a 19-pin simulated lmfbr fuel assembly (ffm bundle 2a),
 # "Nuclear Technology, vol. 24, no. 2, pp. 176-200, 1974.
-T_in = 588.5
-flow_area = 0.0004980799633447909 #m2
-mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
+T_in = 588.71 #600F
+A12 = 1.00423e3
+A13 = -0.21390
+A14 = -1.1046e-5
+rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
+flow_area = 0.000467906 #m2
+vol_flow = 3.47E-03 #m^3/sec
+mass_flux_in = '${fparse rho *  vol_flow / flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -62,18 +67,17 @@ P_out = 2.0e5 # Pa
   n_blocks = 1
   P_out = 2.0e5
   CT = 2.6
-  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_tol = 1.0e-4
   T_tol = 1.0e-4
-  implicit = false
-  segregated = true
+  implicit = true
+  segregated = false
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
-  verbose_subchannel = false
+  verbose_subchannel = true
   interpolation_scheme = 'upwind'
 []
 
@@ -91,7 +95,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 16975 #${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
+    power = 322525.0 #W
     filename = "pin_power_profile19.txt"
   []
 
@@ -172,40 +176,63 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  [T]
+  [T1]
+    type = SubChannelPointValue
+    variable = T
+    index = 37
+    execute_on = "timestep_end"
+    height = 0.9144
+  []
+  [T2]
     type = SubChannelPointValue
     variable = T
     index = 36
     execute_on = "timestep_end"
-    height = 0.7
+    height = 0.9144
   []
-
-  [Pin_Planar_Mean]
-    type = SCMPlanarMean
-    variable = P
-    execute_on = 'TIMESTEP_END'
-    height = 0.0
+  [T3]
+    type = SubChannelPointValue
+    variable = T
+    index = 20
+    execute_on = "timestep_end"
+    height = 0.9144
   []
-
-  [Pout_Planar_Mean]
-    type = SCMPlanarMean
-    variable = P
-    execute_on = 'TIMESTEP_END'
-    height = 1.2
+  [T4]
+    type = SubChannelPointValue
+    variable = T
+    index = 10
+    execute_on = "timestep_end"
+    height = 0.9144
   []
-
-  [Pout_user_provided]
-    type = Receiver
-    default = ${P_out}
-    execute_on = 'TIMESTEP_END'
+  [T5]
+    type = SubChannelPointValue
+    variable = T
+    index = 4
+    execute_on = "timestep_end"
+    height = 0.9144
   []
-
+  [T6]
+    type = SubChannelPointValue
+    variable = T
+    index = 1
+    execute_on = "timestep_end"
+    height = 0.9144
+  []
+  [T7]
+    type = SubChannelPointValue
+    variable = T
+    index = 14
+    execute_on = "timestep_end"
+    height = 0.9144
+  []
+  [T8]
+    type = SubChannelPointValue
+    variable = T
+    index = 28
+    execute_on = "timestep_end"
+    height = 0.9144
+  []
   ####### Assembly pressure drop
-  [DP_Planar_mean]
-    type = ParsedPostprocessor
-    pp_names = 'Pin_Planar_Mean Pout_Planar_Mean'
-    function = 'Pin_Planar_Mean - Pout_Planar_Mean'
-  []
   [DP_SubchannelDelta]
     type = SubChannelDelta
     variable = P
