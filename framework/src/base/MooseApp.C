@@ -1678,6 +1678,10 @@ MooseApp::executeExecutioner()
     _executioner->init();
     errorCheck();
     _executioner->execute();
+    if (_executioner->lastSolveConverged())
+      setExitCode(0);
+    else
+      setExitCode(1);
   }
   else
     mooseError("No executioner was specified (go fix your input file)");

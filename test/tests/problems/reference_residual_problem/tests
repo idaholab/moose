@@ -12,6 +12,7 @@
     type = 'RunApp'
     input = 'reference_residual.i'
     expect_out = 'Solve Did NOT Converge'
+    should_crash = true
     cli_args = 'coef=1e17 Outputs/exodus=false -pc_type svd -pc_svd_monitor -ksp_max_it 10'
     requirement = 'The system shall fail to find a converged solution when basing convergence on '
                   'individual variable reference quantities with poor scaling.'

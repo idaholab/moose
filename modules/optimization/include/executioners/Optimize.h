@@ -29,8 +29,13 @@ public:
 
   virtual void execute() override;
 
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+
   OptimizeSolve & getOptimizeSolve() { return _optim_solve; }
 
 protected:
   OptimizeSolve _optim_solve;
+
+private:
+  bool _last_solve_converged;
 };

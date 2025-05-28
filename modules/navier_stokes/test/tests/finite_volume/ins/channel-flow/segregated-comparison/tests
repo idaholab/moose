@@ -4,6 +4,7 @@
   [nonlinear]
     type = 'Exodiff'
     input = segregated-nonlinear.i
+    cli_args = 'Executioner/continue_on_max_its=true'
     exodiff = segregated-nonlinear_out.e
     requirement = "The system shall give back the correct results for a channel flow with the SIMPLE algorithm using nonlinear system assembly."
     recover = false # we don't support recovery for SIMPLE yet
@@ -13,6 +14,7 @@
     type = 'Exodiff'
     prereq = nonlinear
     input = segregated-linear.i
+    cli_args = 'Executioner/continue_on_max_its=true'
     exodiff = segregated-linear_out.e
     requirement = "The system shall give back the correct results for a channel flow with the SIMPLE algorithm using linear system assembly."
     recover = false # we don't support recovery for SIMPLE yet
@@ -22,6 +24,7 @@
     type = 'Exodiff'
     prereq = nonlinear
     input = segregated-linear-physics.i
+    cli_args = 'Executioner/continue_on_max_its=true'
     exodiff = segregated-linear-physics_out.e
     requirement = "The system shall give back the correct results for a channel flow with the SIMPLE algorithm using linear system assembly and the Physics shorthand syntax."
     recover = false # we don't support recovery for SIMPLE yet

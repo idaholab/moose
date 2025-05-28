@@ -86,7 +86,7 @@
     csvdiff = 2d-segregated-scalar_csv.csv
     requirement = "The system shall conserve of a passive scalar while solving using the SIMPLE "
                   "algorithm."
-    cli_args = "FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
+    cli_args = "Executioner/continue_on_max_its=true FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
                "scalar_2_coupled_source' Postprocessors/inactive=''"
     recover = false # we don't support recovery for SIMPLE yet
   []
