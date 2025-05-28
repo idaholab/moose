@@ -887,7 +887,7 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
 
   if (!aux && !euo && !nuo && !nfc && !nec)
     mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
-               "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraint. '",
+               "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraints. '",
                _obj->name(),
                "' is none of those.");
 
