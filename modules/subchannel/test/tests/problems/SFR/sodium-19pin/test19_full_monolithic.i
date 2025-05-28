@@ -1,128 +1,119 @@
-T_in = 359.15
-# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
-P_out = 4.923e6 # Pa
+T_in = 660
+mass_flux_in = '${fparse 1e+6 * 300.00 / 36000.*0.5}'
+P_out = 2.0e5 # Pa
 
-[QuadSubChannelMesh]
-  [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
-    nx = 6
-    ny = 6
-    n_cells = 5
-    pitch = 0.0126
-    pin_diameter = 0.00950
-    gap = 0.00095 # the half gap between sub-channel assemblies
-    heated_length = 1.0
-    spacer_z = '0.0'
-    spacer_k = '0.0'
+[GlobalParams]
+  nrings = 3
+  n_cells = 5
+  flat_to_flat = 0.056
+  heated_length = 0.5
+  pitch = 0.012
+[]
+
+[TriSubChannelMesh]
+  [subchannel]
+    type = SCMTriSubChannelMeshGenerator
+    pin_diameter = 0.01
+    dwire = 0.002
+    hwire = 0.0833
+    spacer_z = '0'
+    spacer_k = '5.0'
   []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 6
-    ny = 6
-    n_cells = 5
-    pitch = 0.0126
-    heated_length = 1.0
+  [duct]
+    type = SCMTriDuctMeshGenerator
+    input = subchannel
   []
 []
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
+    block = subchannel
   []
   [SumWij]
-    block = sub_channel
+    block = subchannel
   []
   [P]
-    block = sub_channel
+    block = subchannel
   []
   [DP]
-    block = sub_channel
+    block = subchannel
   []
   [h]
-    block = sub_channel
+    block = subchannel
   []
   [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
+    block = subchannel
   []
   [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
+    block = subchannel
   []
   [S]
-    block = sub_channel
+    block = subchannel
   []
   [w_perim]
-    block = sub_channel
+    block = subchannel
+  []
+  [mu]
+    block = subchannel
   []
   [q_prime]
-    block = fuel_pins
+    block = subchannel
+  []
+  [displacement]
+    block = subchannel
+  []
+  [q_prime_duct]
+    block = duct
+  []
+  [Tduct]
+    block = duct
   []
 []
 
 [FluidProperties]
-  [water]
-    type = Water97FluidProperties
+  [sodium]
+    type = PBSodiumFluidProperties
   []
 []
 
-[SubChannel]
-  type = QuadSubChannel1PhaseProblem
-  fp = water
+[Problem]
+  type = TriSubChannel1PhaseProblem
+  fp = sodium
   n_blocks = 1
-  beta = 0.006
-  CT = 2.6
+  P_out = 2.0e5
+  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_out = ${P_out}
+  T_tol = 1.0e-6
+  P_tol = 1.0e-6
   implicit = true
   segregated = false
-  monolithic_thermal = false
-  staggered_pressure = false
-  interpolation_scheme = 'central_difference'
-  P_tol = 1e-04
-  T_tol = 1e-04
+  monolithic_thermal = true
 []
 
 [ICs]
   [S_IC]
-    type = SCMQuadFlowAreaIC
+    type = SCMTriFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = SCMQuadWettedPerimIC
+    type = SCMTriWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_IC]
-    type = SCMQuadPowerIC
+    type = SCMTriPowerIC
     variable = q_prime
-    power = 1.0e6 # W
-    filename = "power_profile.txt" #type in name of file that describes radial power profile
+    power = 1000.0 # W
+    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
     type = ConstantIC
     variable = T
     value = ${T_in}
-  []
-
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.00950
   []
 
   [P_ic]
@@ -142,7 +133,7 @@ P_out = 4.923e6 # Pa
     variable = mu
     p = ${P_out}
     T = T
-    fp = water
+    fp = sodium
   []
 
   [rho_ic]
@@ -150,7 +141,7 @@ P_out = 4.923e6 # Pa
     variable = rho
     p = ${P_out}
     T = T
-    fp = water
+    fp = sodium
   []
 
   [h_ic]
@@ -158,7 +149,7 @@ P_out = 4.923e6 # Pa
     variable = h
     p = ${P_out}
     T = T
-    fp = water
+    fp = sodium
   []
 
   [mdot_ic]
