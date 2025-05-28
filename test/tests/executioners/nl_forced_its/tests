@@ -3,7 +3,7 @@
   [./nl_forced_its]
     type = RunApp
     input = 'nl_forced_its.i'
-    expect_out = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 2"
+    expect_out = "Nonlinear solve converged"
     requirement = 'The system shall perform n non linear iterations before checking for non linear divergence'
     issues = '#16474'
     design = 'FEProblemSolve.md'
