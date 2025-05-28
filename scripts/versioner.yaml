@@ -76,7 +76,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.05.13
-    build_number: 2
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -125,7 +125,6 @@ packages:
   # dependers: none
   pprof:
     version: 2025.05.28
-    build_number: 0
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml

@@ -13,7 +13,7 @@ source:
   - git_rev: {{ seacas_git_rev }}
   - git_depth: 1
   - path: ../functions/retry_build.sh
-  - patch:
+  - patches:
       - sequoia-15.4.patch
 
 build:
