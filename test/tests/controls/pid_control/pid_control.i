@@ -62,17 +62,15 @@ c = 0
   []
 []
 
-[Controls]
-  [integral_value]
-    type = PIDTransientControl
-    postprocessor = integral
-    target = 1.5
-    parameter = 'BCs/left/value'
-    K_integral = -1
-    K_proportional = -1
-    K_derivative = -0.1
-    execute_on = 'initial timestep_begin'
-  []
+[Controls/integral_value]
+  type = PIDTransientControl
+  postprocessor = integral
+  target = 1.5
+  parameter = 'BCs/left/value'
+  K_integral = -1
+  K_proportional = -1
+  K_derivative = -0.1
+  execute_on = 'initial timestep_begin'
 []
 
 [Outputs]

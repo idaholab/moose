@@ -45,19 +45,19 @@ cd problems
 
 ## PackedColumn.h
 
-!listing step10_multiapps/include/materials/PackedColumn.h
+!listing step10_multiapps/include/materials/PackedColumn.h diff=step09_mechanics/include/materials/PackedColumn.h
 
 !---
 
 ## PackedColumn.C
 
-!listing step10_multiapps/src/materials/PackedColumn.C
+!listing step10_multiapps/src/materials/PackedColumn.C diff=step09_mechanics/src/materials/PackedColumn.C
 
 !---
 
 ## Step 10: Multi-scale Input File
 
-!listing step10_multiapps/problems/step10.i
+!listing step10_multiapps/problems/step10.i diff=step09_mechanics/problems/step9.i
 
 !---
 

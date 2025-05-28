@@ -35,7 +35,9 @@ more variables.
 
 !---
 
-```text
+## Variable Initialization Example
+
+```moose
 [Mesh]
   # MOOSE supports reading field data from ExodusII, XDA/XDR, and mesh checkpoint files (.e, .xda, .xdr, .cp)
   file = previous.e
@@ -65,7 +67,8 @@ more variables.
 Advanced restart and recovery in MOOSE require checkpoint files
 
 Checkpoints are automatically enabled by default and are output every 1 hour of wall time (customizable interval), but can be disabled with:
-```text
+
+```moose
 [Outputs]
   wall_time_checkpoint = false
 []
@@ -73,7 +76,7 @@ Checkpoints are automatically enabled by default and are output every 1 hour of 
 
 Checkpoints can be output at every time step with the following shortcut syntax:
 
-```text
+```moose
 [Outputs]
   checkpoint = true
 []
@@ -99,7 +102,7 @@ simulation match and the variables and stateful data should be loaded from the p
   will automatically use the last values found in the checkpoint files
 - Only N to N restarts are supported using this method
 
-```text
+```moose
 [Mesh]
   # Serial number should match corresponding Executioner parameter
   file = out_cp/0010-mesh.cpr

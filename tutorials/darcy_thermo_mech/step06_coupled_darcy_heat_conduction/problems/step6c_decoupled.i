@@ -17,18 +17,14 @@
   []
 []
 
-[AuxVariables]
-  [pressure]
-  []
+[AuxVariables/pressure]
 []
 
-[AuxKernels]
-  [pressure]
-    type = FunctionAux
-    variable = pressure
-    function = '4000 - 3000 * x - 3000 * t*x*x*y'
-    execute_on = timestep_end
-  []
+[AuxKernels/pressure]
+  type = FunctionAux
+  variable = pressure
+  function = '4000 - 3000 * x - 3000 * t*x*x*y'
+  execute_on = timestep_end
 []
 
 [Kernels]
@@ -61,12 +57,10 @@
   []
 []
 
-[Materials]
-  [column]
-    type = PackedColumn
-    radius = 1
-    temperature = 293.15 # 20C
-  []
+[Materials/column]
+  type = PackedColumn
+  temperature = 293.15 # 20C
+  radius = 1
 []
 
 [Problem]
@@ -77,6 +71,7 @@
   type = Transient
   num_steps = 300
   dt = 0.1
+
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'

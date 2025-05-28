@@ -26,19 +26,19 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 
 ## PackedColumn.h
 
-!listing step09_mechanics/include/materials/PackedColumn.h
+!listing step09_mechanics/include/materials/PackedColumn.h diff=step08_postprocessors/include/materials/PackedColumn.h
 
 !---
 
 ## PackedColumn.C
 
-!listing step09_mechanics/src/materials/PackedColumn.C
+!listing step09_mechanics/src/materials/PackedColumn.C diff=step08_postprocessors/src/materials/PackedColumn.C
 
 !---
 
 ## Step 9: Input File
 
-!listing step09_mechanics/problems/step9.i
+!listing step09_mechanics/problems/step9.i diff=step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
 
 !---
 

@@ -86,8 +86,10 @@ Names can be assigned to IDs for existing meshes to ease input file maintenance.
 When running in parallel the default mode for operation is to use a replicated mesh, which
 creates a complete copy of the mesh for each processor.
 
-```text
-parallel_type = replicated
+```moose
+[Mesh]
+    parallel_type = replicated
+[]
 ```
 
 !---
@@ -97,8 +99,10 @@ parallel_type = replicated
 Changing the type to distributed when running in parallel operates such that only the portion of the
 mesh owned by a processor is stored on that processor.
 
-```text
-parallel_type = distributed
+```moose
+[Mesh]
+    parallel_type = distributed
+[]
 ```
 
 If the mesh is too large to read in on a single processor, it can be split prior to the simulation.

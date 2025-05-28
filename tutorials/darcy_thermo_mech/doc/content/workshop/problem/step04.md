@@ -42,7 +42,7 @@ occurs in the element interiors.
 
 ## Step 4: Input File
 
-!listing step04_velocity_aux/problems/step4.i
+!listing step04_velocity_aux/problems/step4.i diff=step03_darcy_material/problems/step3.i
 
 !---
 

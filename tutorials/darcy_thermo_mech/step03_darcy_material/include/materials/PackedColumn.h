@@ -29,7 +29,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// The radius of the spheres in the column
-  const Function & _radius;
+  const Function & _input_radius;
 
   /// Value of viscosity from the input file
   const Real & _input_viscosity;

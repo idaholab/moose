@@ -43,9 +43,12 @@ GenericConstantMaterial is a simple way to define constant material properties.
 
 Two input parameters are provided using "list" syntax common to MOOSE:
 
-```text
-prop_names  = 'conductivity density'
-prop_values = '0.01         200'
+```moose
+[Materials/material]
+  type = GenericConstantMaterial
+  prop_names  = 'conductivity density'
+  prop_values = '0.01         200'
+[]
 ```
 
 !---
@@ -97,7 +100,7 @@ only an update to the input file is required to run the transient case.
 
 ## Step 5b: Time-dependent Input File
 
-!listing step05_heat_conduction/problems/step5b_transient.i
+!listing step05_heat_conduction/problems/step5b_transient.i diff=step05_heat_conduction/problems/step5a_steady.i
 
 !---
 
@@ -141,7 +144,7 @@ rather than being replaced with a known flux, as is done in a `NeumannBC`.
 
 ## Step5c: Outflow Input File
 
-!listing step05_heat_conduction/problems/step5c_outflow.i
+!listing step05_heat_conduction/problems/step5c_outflow.i diff=step05_heat_conduction/problems/step5b_transient.i
 
 !---
 

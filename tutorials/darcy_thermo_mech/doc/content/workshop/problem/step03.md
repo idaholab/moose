@@ -50,19 +50,19 @@ it must be updated to consume the newly created material properties.
 
 ## DarcyPressure.h
 
-!listing step03_darcy_material/include/kernels/DarcyPressure.h
+!listing step03_darcy_material/include/kernels/DarcyPressure.h diff=step02_darcy_pressure/include/kernels/DarcyPressure.h
 
 !---
 
 ## DarcyPressure.C
 
-!listing step03_darcy_material/src/kernels/DarcyPressure.C
+!listing step03_darcy_material/src/kernels/DarcyPressure.C diff=step02_darcy_pressure/src/kernels/DarcyPressure.C
 
 !---
 
 ## Step 3: Input File
 
-!listing step03_darcy_material/problems/step3.i
+!listing step03_darcy_material/problems/step3.i diff=step02_darcy_pressure/problems/step2.i
 
 !---
 
@@ -91,7 +91,7 @@ Update the input file to vary the sphere size from 1 to 3 along the length of th
 
 ## Step 3b: Input File
 
-!listing step03_darcy_material/problems/step3b.i
+!listing step03_darcy_material/problems/step3b.i diff=step03_darcy_material/problems/step3.i
 
 !---
 
