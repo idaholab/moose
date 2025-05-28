@@ -7,12 +7,13 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil
+import re, os, sys, shutil, json
 import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
 from pathlib import Path
+from dataclasses import dataclass
 
 class Tester(MooseObject, OutputInterface):
     """
@@ -119,6 +120,10 @@ class Tester(MooseObject, OutputInterface):
     # This is what will be checked for when we look for valid testers
     IS_TESTER = True
 
+    @dataclass
+    class JSONMetadata:
+        path: os.PathLike
+
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
         OutputInterface.__init__(self)
@@ -164,6 +169,9 @@ class Tester(MooseObject, OutputInterface):
         # The command that we actually ended up running; this may change
         # depending on the runner which might inject something
         self.command_ran = None
+
+        # Paths to additional JSON metadata that can be collected
+        self.json_metadata: dict[str, Tester.JSONMetadata] = {}
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -214,13 +222,13 @@ class Tester(MooseObject, OutputInterface):
 
     def getResults(self, options) -> dict:
         """Get the results dict for this Tester"""
-        output_files = []
-        for file in self.getOutputFiles(options):
-            output_files.append(os.path.join(self.getTestDir(), file))
+        output_files = [os.path.join(self.getTestDir(), file) for file in self.getOutputFiles(options)]
+        json_metadata = {k: os.path.join(self.getTestDir(), v.path) if v else None for k, v in self.json_metadata.items()}
         return {'name': self.__class__.__name__,
                 'command': self.getCommand(options),
                 'input_file': self.getInputFile(),
-                'output_files': output_files}
+                'output_files': output_files,
+                'json_metadata': json_metadata}
 
     def getStatusMessage(self):
         return self.__tester_message
@@ -252,6 +260,10 @@ class Tester(MooseObject, OutputInterface):
     def getTestNameShort(self):
         """ return test short name (not including the path) """
         return self.specs['test_name_short']
+
+    def getTestNameForFile(self):
+        """ return test short name for file creation ('/' to '.')"""
+        return self.getTestNameShort().replace(os.sep, '.')
 
     def appendTestName(self, value):
         """
@@ -324,7 +336,7 @@ class Tester(MooseObject, OutputInterface):
 
     def getOutputFiles(self, options):
         """ return the output files if applicable to this Tester """
-        return []
+        return [v.path for v in self.json_metadata.values()]
 
     def getCheckInput(self):
         return self.check_input
@@ -813,6 +825,32 @@ class Tester(MooseObject, OutputInterface):
 
     def run(self, options, exit_code, runner_output):
         output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
+        if output:
+            output = output.rstrip() + '\n\n'
+
+        # Check existance of metadata
+        if not self.isSkip() and self.json_metadata:
+            output += 'Checking JSON metadata...\n'
+            if exit_code == 0:
+                for key, entry in self.json_metadata.items():
+                    path = os.path.join(self.getTestDir(), entry.path)
+                    prefix = f'  {key} ({path}): '
+                    if os.path.isfile(path):
+                        try:
+                            with open(path, 'r') as f:
+                                result = json.load(f)
+                                del result
+                        except:
+                            output += f'{prefix}cannot be loaded\n'
+                            self.setStatus(self.fail, 'BAD METADATA')
+                        else:
+                            output += f'{prefix}exists and is valid\n'
+                    else:
+                        output += f'{prefix}does not exist\n'
+                        self.setStatus(self.fail, 'MISSING METADATA')
+            else:
+                output += '  Not checking due to non-zero exit code\n'
+            output += '\n'
 
         # If the tester requested to be skipped at the last minute, report that.
         if self.isSkip():

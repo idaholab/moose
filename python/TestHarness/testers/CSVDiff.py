@@ -30,7 +30,7 @@ class CSVDiff(FileTester):
         FileTester.__init__(self, name, params)
 
     def getOutputFiles(self, options):
-        return self.specs['csvdiff']
+        return super().getOutputFiles(options) + self.specs['csvdiff']
 
     # Check that override parameter lists are the same length
     def checkRunnable(self, options):

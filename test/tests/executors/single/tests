@@ -7,5 +7,6 @@
     expect_out = "BinaryTestExecutor my_first_executor END"
     requirement = "The system shall be able to experimentally use the executor system instead of an executioner."
     issues = '#5229 #18180'
+    capture_perf_graph = false
   []
 []
