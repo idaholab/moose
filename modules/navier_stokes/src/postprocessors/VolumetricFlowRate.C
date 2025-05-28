@@ -94,6 +94,10 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
   if (_subtract_mesh_velocity && _rc_uo && !_rc_uo->supportMeshVelocity())
     paramError("subtract_mesh_velocity",
                "Rhie Chow user object does not support subtracting the mesh velocity");
+  if (_subtract_mesh_velocity && !_fe_problem.haveDisplaced())
+    paramError(
+        "subtract_mesh_velocity",
+        "No displaced problem, thus the mesh velocity is 0 and does not need to be subtracted");
 }
 
 void

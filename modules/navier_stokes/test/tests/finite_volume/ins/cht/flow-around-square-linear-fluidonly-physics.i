@@ -90,7 +90,7 @@ advected_interp_method = 'upwind'
         energy_inlet_types = 'fixed-temperature'
         energy_inlet_functors = '${inlet_temp}'
         energy_wall_types = 'heatflux heatflux convection'
-        energy_wall_functors = '0 0 boundary_value'
+        energy_wall_functors = '0 0 boundary_value:htc'
 
         energy_advection_interpolation = ${advected_interp_method}
         energy_two_term_bc_expansion = false
@@ -106,17 +106,10 @@ advected_interp_method = 'upwind'
     functor_names = 'T_fluid'
     expression = '${rho}*${cp}*T_fluid'
   []
-  [h]
+  [conv_data]
     type = GenericFunctorMaterial
-    prop_names = 'htc'
-    prop_values = '${h_conv}'
-  []
-[]
-
-[Functions]
-  [boundary_value]
-    type = ConstantFunction
-    value = 350
+    prop_names = 'htc        boundary_value'
+    prop_values = '${h_conv} 350'
   []
 []
 
