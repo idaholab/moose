@@ -48,11 +48,11 @@ VolumeJunction1PhaseIC::VolumeJunction1PhaseIC(const InputParameters & parameter
 Real
 VolumeJunction1PhaseIC::value(const Point & /*p*/)
 {
-  const Real p = _p_fn.value(0, _position);
-  const Real T = _T_fn.value(0, _position);
-  const Real vel_x = _vel_x_fn.value(0, _position);
-  const Real vel_y = _vel_y_fn.value(0, _position);
-  const Real vel_z = _vel_z_fn.value(0, _position);
+  const Real p = _p_fn.value(_t, _position);
+  const Real T = _T_fn.value(_t, _position);
+  const Real vel_x = _vel_x_fn.value(_t, _position);
+  const Real vel_y = _vel_y_fn.value(_t, _position);
+  const Real vel_z = _vel_z_fn.value(_t, _position);
 
   const Real rho = _fp.rho_from_p_T(p, T);
   const RealVectorValue vel(vel_x, vel_y, vel_z);
