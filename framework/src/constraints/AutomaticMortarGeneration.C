@@ -176,7 +176,7 @@ public:
         }
 
       } // end loop over nodes
-    }   // end loop over elems
+    } // end loop over elems
 
     // Finish assembly.
     _nodal_normals_system->solution->close();
@@ -495,7 +495,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem->set_unique_id(new_elem->id());
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
-      new_elem->set_node(n) = new_nodes[n];
+      new_elem->set_node(n, new_nodes[n]);
 
     Elem * new_elem_ptr = _mortar_segment_mesh->add_elem(new_elem.release());
 
@@ -711,8 +711,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_left->subdomain_id() = current_mortar_segment->subdomain_id();
     new_elem_left->set_id(local_id_index++);
     new_elem_left->set_unique_id(new_elem_left->id());
-    new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
-    new_elem_left->set_node(1) = new_node;
+    new_elem_left->set_node(0, current_mortar_segment->node_ptr(0));
+    new_elem_left->set_node(1, new_node);
 
     // Make an Elem on the right
     std::unique_ptr<Elem> new_elem_right;
@@ -725,8 +725,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_right->subdomain_id() = current_mortar_segment->subdomain_id();
     new_elem_right->set_id(local_id_index++);
     new_elem_right->set_unique_id(new_elem_right->id());
-    new_elem_right->set_node(0) = new_node;
-    new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
+    new_elem_right->set_node(0, new_node);
+    new_elem_right->set_node(1, current_mortar_segment->node_ptr(1));
 
     if (order == SECOND)
     {
@@ -749,7 +749,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                   "new_id must be the same on all processes");
       Node * const new_interior_node_left = _mortar_segment_mesh->add_point(
           left_interior_point, new_interior_left_id, new_elem_left->processor_id());
-      new_elem_left->set_node(2) = new_interior_node_left;
+      new_elem_left->set_node(2, new_interior_node_left);
       new_interior_node_left->set_unique_id(new_interior_left_id + node_unique_id_offset);
 
       // right
@@ -770,7 +770,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                   "new_id must be the same on all processes");
       Node * const new_interior_node_right = _mortar_segment_mesh->add_point(
           right_interior_point, new_interior_id_right, new_elem_right->processor_id());
-      new_elem_right->set_node(2) = new_interior_node_right;
+      new_elem_right->set_node(2, new_interior_node_right);
       new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
     }
 
@@ -1266,7 +1266,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // Attach newly created nodes
             for (auto i : index_range(elem_to_node_map[el]))
-              new_elem->set_node(i) = new_nodes[elem_to_node_map[el][i]];
+              new_elem->set_node(i, new_nodes[elem_to_node_map[el][i]]);
 
             // If element is smaller than tolerance, don't add to msm
             if (new_elem->volume() / secondary_volume < TOLERANCE)
@@ -1312,7 +1312,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       if (secondary_to_msm_element_set.empty())
         _secondary_elems_to_mortar_segments.erase(secondary_elem_to_msm_map_it);
     } // End loop through secondary elements
-  }   // End loop through mortar constraint pairs
+  } // End loop through mortar constraint pairs
 
   _mortar_segment_mesh->cache_elem_data();
 
@@ -2153,14 +2153,14 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 
         if (projection_succeeded)
           break; // out of r-loop
-      }          // r-loop
+      } // r-loop
 
       if (!projection_succeeded && _debug)
         _console << "Failed to find primary Elem into which secondary node "
                  << static_cast<const Point &>(*secondary_node) << " was projected." << std::endl
                  << std::endl;
     } // loop over side nodes
-  }   // end loop over lower-dimensional elements
+  } // end loop over lower-dimensional elements
 }
 
 // Inverse map primary nodes onto their corresponding secondary elements for each primary/secondary
@@ -2366,7 +2366,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
         if (projection_succeeded)
           break; // out of r-loop
-      }          // r-loop
+      } // r-loop
 
       if (!projection_succeeded && _debug)
       {
@@ -2375,7 +2375,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
                  << std::endl;
       }
     } // loop over side nodes
-  }   // end loop over elements for finding where primary points would have projected from.
+  } // end loop over elements for finding where primary points would have projected from.
 }
 
 std::vector<AutomaticMortarGeneration::MortarFilterIter>

@@ -8,7 +8,7 @@ InputParameters
 MFEMScalarFunctorBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
-  params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
+  params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
                              "$(f, v)_\\Omega$ "
                              "arising from the weak form of the forcing term $f$.");
   params.addRequiredParam<MFEMScalarCoefficientName>(

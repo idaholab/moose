@@ -347,7 +347,7 @@ MeshCut2DUserObjectBase::growFront()
       for (unsigned int i = 0; i < new_elem->n_nodes(); ++i)
       {
         mooseAssert(_cutter_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
-        new_elem->set_node(i) = _cutter_mesh->node_ptr(elem[i]);
+        new_elem->set_node(i, _cutter_mesh->node_ptr(elem[i]));
       }
       _cutter_mesh->add_elem(new_elem);
       // now push to the end of _original_and_current_front_node_ids for tracking and fracture
@@ -391,7 +391,7 @@ MeshCut2DUserObjectBase::addNucleatedCracksToMesh()
       for (unsigned int i = 0; i < new_elem->n_nodes(); ++i)
       {
         mooseAssert(_cutter_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
-        new_elem->set_node(i) = _cutter_mesh->node_ptr(elem[i]);
+        new_elem->set_node(i, _cutter_mesh->node_ptr(elem[i]));
       }
       _cutter_mesh->add_elem(new_elem);
       // now add the nucleated nodes to the crack id data struct

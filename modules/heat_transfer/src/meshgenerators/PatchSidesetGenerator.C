@@ -175,7 +175,7 @@ PatchSidesetGenerator::generate()
             mesh_node_id_to_boundary_node_id.end())
           mooseError("Node id", old_node_id, " not linked to new node id.");
         dof_id_type new_node_id = mesh_node_id_to_boundary_node_id.find(old_node_id)->second;
-        new_bnd_elem->set_node(j) = boundary_nodes[new_node_id];
+        new_bnd_elem->set_node(j, boundary_nodes[new_node_id]);
       }
     }
   }

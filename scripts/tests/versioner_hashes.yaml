@@ -1111,3 +1111,34 @@ b4125d5128c9d6c274393d2ea9a6099598cbea7b: #30190; Add NEML2 to moose-dev contain
   wasp:
     full_version: 2025.05.13_0
     hash: 43d14da
+bda476600e034d573d0bf2632f617a2d49794a42: #30485; Update mfem, libmesh, nlohmann json; remove need for vtk patch
+  libmesh:
+    full_version: 2025.05.23_0
+    hash: 982ea19
+  libmesh-vtk:
+    full_version: 9.4.2_2
+    hash: 042bd0b
+  moose-dev:
+    full_version: 2025.05.23
+    hash: 92d3c2e
+  mpi:
+    full_version: 2025.04.17
+    hash: a9161d1
+  peacock:
+    full_version: 2025.04.17
+    hash: a231b10
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_1
+    hash: ff9a7ec
+  pprof:
+    full_version: 2025.04.17_0
+    hash: f8fd1e3
+  seacas:
+    full_version: 2025.02.27_1
+    hash: 5d0701b
+  tools:
+    full_version: 2025.04.17
+    hash: 827cc6f
+  wasp:
+    full_version: 2025.05.13_0
+    hash: 43d14da

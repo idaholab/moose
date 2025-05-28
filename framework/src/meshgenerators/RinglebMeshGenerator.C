@@ -176,10 +176,10 @@ RinglebMeshGenerator::generate()
       if (j != _num_q_pts + _n_extra_q_pts - 1 and j != _num_q_pts + _n_extra_q_pts - 2)
       {
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = stream_nodes[i][j];
-        elem->set_node(1) = stream_nodes[i][j + 1];
-        elem->set_node(2) = stream_nodes[i + 1][j + 1];
-        elem->set_node(3) = stream_nodes[i + 1][j];
+        elem->set_node(0, stream_nodes[i][j]);
+        elem->set_node(1, stream_nodes[i][j + 1]);
+        elem->set_node(2, stream_nodes[i + 1][j + 1]);
+        elem->set_node(3, stream_nodes[i + 1][j]);
 
         if (i == 0)
           boundary_info.add_side(elem->id(), /*side=*/0, _outer_wall_bid);
@@ -193,10 +193,10 @@ RinglebMeshGenerator::generate()
       else if (j == _num_q_pts + _n_extra_q_pts - 2)
       {
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = stream_nodes[i][j];
-        elem->set_node(1) = stream_nodes[i][j + 2];
-        elem->set_node(2) = stream_nodes[i + 1][j + 2];
-        elem->set_node(3) = stream_nodes[i + 1][j];
+        elem->set_node(0, stream_nodes[i][j]);
+        elem->set_node(1, stream_nodes[i][j + 2]);
+        elem->set_node(2, stream_nodes[i + 1][j + 2]);
+        elem->set_node(3, stream_nodes[i + 1][j]);
 
         if (i == 0)
           boundary_info.add_side(elem->id(), /*side=*/0, _outer_wall_bid);

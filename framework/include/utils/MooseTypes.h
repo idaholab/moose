@@ -50,7 +50,11 @@
 #include <type_traits>
 #include <functional>
 
+#if !defined(INCLUDE_NLOHMANN_JSON_HPP_) && !defined(MOOSE_NLOHMANN_INCLUDED)
+#undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
 #include "nlohmann/json_fwd.h"
+#define MOOSE_NLOHMANN_INCLUDED
+#endif
 
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr

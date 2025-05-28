@@ -274,10 +274,10 @@ ConcentricCircleMesh::buildMesh()
   while (index <= limit)
   {
     Elem * elem = mesh.add_elem(new Quad4);
-    elem->set_node(0) = nodes[index];
-    elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
-    elem->set_node(2) = nodes[index + _num_sectors / 2 + 2];
-    elem->set_node(3) = nodes[index + 1];
+    elem->set_node(0, nodes[index]);
+    elem->set_node(1, nodes[index + _num_sectors / 2 + 1]);
+    elem->set_node(2, nodes[index + _num_sectors / 2 + 2]);
+    elem->set_node(3, nodes[index + 1]);
     elem->subdomain_id() = subdomainIDs[0];
 
     if (index < standard / 2)
@@ -297,10 +297,10 @@ ConcentricCircleMesh::buildMesh()
   while (index < limit)
   {
     Elem * elem = mesh.add_elem(new Quad4);
-    elem->set_node(0) = nodes[index];
-    elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
-    elem->set_node(2) = nodes[index + _num_sectors / 2 + 2];
-    elem->set_node(3) = nodes[index + 1];
+    elem->set_node(0, nodes[index]);
+    elem->set_node(1, nodes[index + _num_sectors / 2 + 1]);
+    elem->set_node(2, nodes[index + _num_sectors / 2 + 2]);
+    elem->set_node(3, nodes[index + 1]);
     elem->subdomain_id() = subdomainIDs[0];
 
     if (index == (standard / 2 + 1) * (standard / 2))
@@ -314,11 +314,10 @@ ConcentricCircleMesh::buildMesh()
   while (index != standard / 2)
   {
     Elem * elem = mesh.add_elem(new Quad4);
-    elem->set_node(0) = nodes[index];
-    elem->set_node(1) = nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2)];
-    elem->set_node(2) =
-        nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2) + 1];
-    elem->set_node(3) = nodes[index - _num_sectors / 2 - 1];
+    elem->set_node(0, nodes[index]);
+    elem->set_node(1, nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2)]);
+    elem->set_node(2, nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2) + 1]);
+    elem->set_node(3, nodes[index - _num_sectors / 2 - 1]);
     elem->subdomain_id() = subdomainIDs[0];
 
     if (index == standard + 1)
@@ -338,10 +337,10 @@ ConcentricCircleMesh::buildMesh()
   {
 
     Elem * elem = mesh.add_elem(new Quad4);
-    elem->set_node(0) = nodes[index];
-    elem->set_node(1) = nodes[index + _num_sectors + 1];
-    elem->set_node(2) = nodes[index + _num_sectors + 2];
-    elem->set_node(3) = nodes[index + 1];
+    elem->set_node(0, nodes[index]);
+    elem->set_node(1, nodes[index + _num_sectors + 1]);
+    elem->set_node(2, nodes[index + _num_sectors + 2]);
+    elem->set_node(3, nodes[index + 1]);
 
     for (int i = 0; i < static_cast<int>(subdomainIDs.size()) - 1; ++i)
       if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))

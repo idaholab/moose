@@ -535,8 +535,8 @@ void
 swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2)
 {
   Node * n_temp = elem.node_ptr(nd1);
-  elem.set_node(nd1) = elem.node_ptr(nd2);
-  elem.set_node(nd2) = n_temp;
+  elem.set_node(nd1, elem.node_ptr(nd2));
+  elem.set_node(nd2, n_temp);
 }
 
 void
@@ -594,11 +594,11 @@ buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boun
       auto & n = side_elem->node_ref(i);
 
       if (old_new_node_map.count(n.id()))
-        copy->set_node(i) = poly_mesh->node_ptr(old_new_node_map[n.id()]);
+        copy->set_node(i, poly_mesh->node_ptr(old_new_node_map[n.id()]));
       else
       {
         Node * node = poly_mesh->add_point(side_elem->point(i));
-        copy->set_node(i) = node;
+        copy->set_node(i, node);
         old_new_node_map[n.id()] = node->id();
       }
     }

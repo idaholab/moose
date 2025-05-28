@@ -121,7 +121,7 @@ BreakMeshByElementGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
   for (const auto j : elem->node_index_range())
     if (elem->node_id(j) == node->id())
     {
-      elem->set_node(j) = added_node;
+      elem->set_node(j, added_node);
       break;
     }
 

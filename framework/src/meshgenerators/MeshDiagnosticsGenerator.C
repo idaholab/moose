@@ -1260,7 +1260,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
 
     // Set the nodes to the coarse element
     for (auto i : index_range(tentative_coarse_nodes))
-      parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
+      parent_ptr->set_node(i, mesh_copy->node_ptr(tentative_coarse_nodes[i]->id()));
 
     // Refine this parent
     parent_ptr->set_refinement_flag(Elem::REFINE);

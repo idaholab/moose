@@ -93,7 +93,7 @@ BlockToMeshConverterGenerator::generate()
           // case where we have already inserted this particular point before
           // then we need to find the already-inserted one and hook it up right
           // to it's respective element
-          copy->set_node(copy_n_index++) = new_mesh->node_ptr(old_new_node_map[n.id()]);
+          copy->set_node(copy_n_index++, new_mesh->node_ptr(old_new_node_map[n.id()]));
         }
         else
         {
@@ -106,7 +106,7 @@ BlockToMeshConverterGenerator::generate()
           Node * node = new_mesh->add_point(elem->point(i));
 
           // Add to element copy (manually)
-          copy->set_node(copy_n_index++) = node;
+          copy->set_node(copy_n_index++, node);
 
           // remember the (old) ID
           old_new_node_map[n.id()] = node->id();
