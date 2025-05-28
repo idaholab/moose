@@ -395,34 +395,6 @@ def getMachine():
     machine.add(platform.machine().upper())
     return machine
 
-def runExecutable(libmesh_dir, location, bin, args):
-    # Installed location of libmesh executable
-    libmesh_installed   = libmesh_dir + '/' + location + '/' + bin
-
-    # Uninstalled location of libmesh executable
-    libmesh_uninstalled = libmesh_dir + '/' + bin
-
-    # Uninstalled location of libmesh executable
-    libmesh_uninstalled2 = libmesh_dir + '/contrib/bin/' + bin
-
-    # The eventual variable we will use to refer to libmesh's executable
-    libmesh_exe = ''
-
-    if os.path.exists(libmesh_installed):
-        libmesh_exe = libmesh_installed
-
-    elif os.path.exists(libmesh_uninstalled):
-        libmesh_exe = libmesh_uninstalled
-
-    elif os.path.exists(libmesh_uninstalled2):
-        libmesh_exe = libmesh_uninstalled2
-
-    else:
-        print(("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"))
-        exit(1)
-
-    return runCommand(libmesh_exe + " " + args).rstrip()
-
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
@@ -610,45 +582,6 @@ def checkCapabilities(supported: dict, requested: str, certain):
     success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
     return success, message
 
-def getConfigOption(config_files, option, options):
-    # Some tests work differently with parallel mesh enabled
-    # We need to detect this condition
-    option_set = set(['ALL'])
-
-    success = 0
-    for config_file in config_files:
-        if success == 1:
-            break
-
-        try:
-            f = open(config_file)
-            contents = f.read()
-            f.close()
-
-            info = options[option]
-            m = re.search(info['re_option'], contents)
-            if m != None:
-                if 'options' in info:
-                    for value, option in info['options'].items():
-                        if m.group(1) == option:
-                            option_set.add(value)
-                else:
-                    option_set.clear()
-                    option_set.add(m.group(1))
-            else:
-                option_set.add(info['default'])
-
-            success = 1
-
-        except IOError:
-            pass
-
-    if success == 0:
-        print("Error! Could not find libmesh_config.h in any of the usual locations!")
-        exit(1)
-
-    return option_set
-
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
     # We need to detect this condition
@@ -710,32 +643,6 @@ def checkInstalled(executable, app_name):
     option_set.add(resource_content.get('installation_type', 'ALL').upper())
     return option_set
 
-def addObjectsFromBlock(objs, node, block_name):
-    """
-    Utility function that iterates over a dictionary and adds keys
-    to the executable object name set.
-    """
-    data = node.get(block_name, {})
-    if data: # could be None so we can't just iterate over items
-        for name, block in data.items():
-            objs.add(name)
-            addObjectNames(objs, block)
-
-def addObjectNames(objs, node):
-    """
-    Add object names that reside in this node.
-    """
-    if not node:
-        return
-
-    addObjectsFromBlock(objs, node, "subblocks")
-    addObjectsFromBlock(objs, node, "subblock_types")
-    addObjectsFromBlock(objs, node, "types")
-
-    star = node.get("star")
-    if star:
-        addObjectNames(objs, star)
-
 def parseMOOSEJSON(output: str, context: str) -> dict:
     try:
         output = output.split('**START JSON DATA**\n')[1]
@@ -745,14 +652,6 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
         raise Exception(f'Failed to find JSON header and footer from {context}')
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
-
-def getExeObjects(json: dict) -> set[str]:
-    """
-    Gets a set of object names that are in the executable JSON dump.
-    """
-    obj_names = set()
-    addObjectsFromBlock(obj_names, json, "blocks")
-    return obj_names
 
 def readResourceFile(exe, app_name):
     resource_path = os.path.join(os.path.dirname(os.path.abspath(exe)),
